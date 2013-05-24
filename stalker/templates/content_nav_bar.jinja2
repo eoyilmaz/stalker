@@ -3,7 +3,7 @@
     <div style='height: 20px; position: absolute;
                   left: 10px; top: 5px;'>
         <a href="javascript:redirectLink('central_content','view/project/{{ entity.project.id }}');">{{ entity.project.name }} </a> /
-        <a href="javascript:redirectLinkInParent('{{ entity.entity_type.lower() }}s_content_pane','list/{{ entity.entity_type.lower() }}s/{{ entity.project.id }}');">{{ entity.entity_type }}s </a>/ {{ entity.name }}({{ entity.code }})
+        <a href="javascript:redirectLinkInParent('{{ entity.entity_type.lower() }}s_content_pane','list/{{ entity.plural_class_name.lower() }}/{{ entity.project.id }}');">{{ entity.plural_class_name }} </a>/ {{ entity.name }}({{ entity.code }})
 
 
     </div>

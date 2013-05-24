@@ -25,7 +25,7 @@ from pyramid.view import view_config
 
 from stalker.db import DBSession
 from stalker import log, Studio, WorkingHours
-from stalker.views import get_time
+from stalker.views import get_time, PermissionChecker
 
 logger = logging.getLogger(__name__)
 log.logging_level = logging.DEBUG
@@ -40,7 +40,8 @@ def create_studio_dialog(request):
     """creates the content of the create_studio_dialog
     """
     return {
-        'mode': 'CREATE'
+        'mode': 'CREATE',
+        'has_permission': PermissionChecker(request)
     }
 
 
@@ -53,6 +54,7 @@ def update_studio_dialog(request):
     """
     return {
         'mode': 'UPDATE',
+        'has_permission': PermissionChecker(request),
         'studio': Studio.query.first()
     }
 

@@ -65,7 +65,7 @@
           href='{{ request.static_url("stalker:static/dojox/form/resources/UploaderFileList.css") }}'/>
     <link rel='stylesheet'
           href='{{ request.static_url("stalker:static/dojox/form/resources/FileInput.css") }}'/>
-    
+
     {# DOJO MODIFIED CSS #}
     <link rel='stylesheet' type='text/css' media='screen' charset='utf-8'
           href='{{ request.static_url("stalker:static/stalker/css/dojo_modified.css") }}'/>
@@ -106,7 +106,7 @@
         <div id='footer' class='edgePanel'>
             {% block footer %}
                 <div class='footer'>&copy; Copyright 2009-2013, Erkan Ozgur
-                                           Yilmaz. <span
+                    Yilmaz. <span
                             style='font-size: 12px;'>Stalker v{{ stalker.__version__ }}</span>
                 </div>
             {% endblock %}
@@ -116,290 +116,290 @@
 
     <script type='text/javascript'>
 
-        var redirectLinkInParent = function (targetPane, address) {
+    var redirectLinkInParent = function (targetPane, address) {
 
-            var tab_container = dijit.byId('data_tab_container');
-            var contentPane = dijit.byId(targetPane);
+        var tab_container = dijit.byId('data_tab_container');
+        var contentPane = dijit.byId(targetPane);
 
-            if (contentPane) {
-                if (contentPane != tab_container.selectedChildWidget) {
-                    tab_container.selectChild(contentPane); //Show the selected Tab
-                }
+        if (contentPane) {
+            if (contentPane != tab_container.selectedChildWidget) {
+                tab_container.selectChild(contentPane); //Show the selected Tab
             }
-            else {
-                contentPane = tab_container.selectedChildWidget;
+        }
+        else {
+            contentPane = tab_container.selectedChildWidget;
+        }
+
+        contentPane.set('href', address);
+        contentPane.refresh();
+
+    };
+
+    var redirectLink = function (targetPane, address) {
+        var contentPane = dijit.byId(targetPane);
+        contentPane.set('href', address);
+        contentPane.refresh();
+    };
+
+    require([
+        'dijit/layout/BorderContainer',
+        'dojox/layout/ContentPane',
+
+        'dijit/MenuBar',
+        'dijit/MenuBarItem',
+        'dijit/MenuSeparator',
+        'dijit/PopupMenuBarItem',
+        'dijit/PopupMenuItem',
+        'dijit/MenuItem',
+        'dijit/DropDownMenu',
+        'dijit/form/DropDownButton',
+        'dijit/TooltipDialog',
+        'dijit/popup',
+
+        'dojo/on',
+
+
+        'dojo/store/JsonRest',
+        'dojo/store/Memory',
+        'dojo/_base/fx',
+
+        'stalker/dialogs',
+        'stalker/dialogCaller',
+        'stalker/dialogCreator',
+        'stalker/teamMenuCreator',
+
+        'dojo/domReady!'
+    ], function (BorderContainer, ContentPane, MenuBar, MenuBarItem,
+                 MenuSeparator, PopupMenuBarItem, PopupMenuItem, MenuItem,
+                 DropDownMenu, DropDownButton, TooltipDialog, popup, on,
+                 JsonRest, Memory, fx, dialogs, dialogCaller, dialogCreator,
+                 teamMenuCreator) {
+
+        // ******************************************************************
+        // create the BorderContainer and attach it to our appLayout div
+        var appLayout = new BorderContainer({
+            design: 'headline',
+            style: 'padding: 0px',
+            splitter: true,
+            gutters: false
+        }, 'appLayout');
+
+
+        // ******************************************************************
+        // Header
+        var header_pane = new ContentPane({
+            name: 'header_pane',
+            region: 'top',
+            style: 'height: 24px; padding: 0px;',
+            executeScripts: true
+        }, 'header');
+        appLayout.addChild(header_pane);
+
+        // ******************************************************************
+        // Main Content
+        var central_content_pane = new ContentPane({
+            name: 'central_content_pane',
+            region: 'center',
+            style: 'padding: 0px',
+            href: 'view/user/{{ logged_in_user.id }}',
+            executeScripts: true
+        }, 'central_content');
+        appLayout.addChild(central_content_pane);
+
+
+        // ******************************************************************
+        // Footer
+        var footer_content_pane = new ContentPane({
+            name: 'footer_pane',
+            region: 'bottom',
+            style: 'height: 14px; padding: 0px'
+        }, 'footer');
+        footer_content_pane.startup();
+        appLayout.addChild(footer_content_pane);
+
+
+        // ******************************************************************
+        // MenuBar
+        var stalker_MenuBar = new MenuBar({
+
+        }, 'stalkerMenuBar');
+
+
+        // ******************************************************************
+        // HOME
+
+        stalker_MenuBar.addChild(new MenuBarItem({
+            label: "HOME ",
+            onClick: function () {
+                central_content_pane.set(
+                        'href',
+                        'view/user/{{ logged_in_user.id }}'
+                );
+                central_content_pane.refresh();
             }
-
-            contentPane.set('href', address);
-            contentPane.refresh();
-
-        };
-
-        var redirectLink = function (targetPane, address) {
-            var contentPane = dijit.byId(targetPane);
-            contentPane.set('href', address);
-            contentPane.refresh();
-        };
-
-        require([
-            'dijit/layout/BorderContainer',
-            'dojox/layout/ContentPane',
-
-            'dijit/MenuBar',
-            'dijit/MenuBarItem',
-            'dijit/MenuSeparator',
-            'dijit/PopupMenuBarItem',
-            'dijit/PopupMenuItem',
-            'dijit/MenuItem',
-            'dijit/DropDownMenu',
-            'dijit/form/DropDownButton',
-            'dijit/TooltipDialog',
-            'dijit/popup',
-
-            'dojo/on',
+        }));
 
 
-            'dojo/store/JsonRest',
-            'dojo/store/Memory',
-            'dojo/_base/fx',
+        // ******************************************************************
+        // STUDIO
 
-            'stalker/dialogs',
-            'stalker/dialogCaller',
-            'stalker/dialogCreator',
-            'stalker/teamMenuCreator',
+        var studio_DropDownMenu = new DropDownMenu({
 
-            'dojo/domReady!'
-        ], function (BorderContainer, ContentPane, MenuBar, MenuBarItem,
-                     MenuSeparator, PopupMenuBarItem, PopupMenuItem, MenuItem,
-                     DropDownMenu, DropDownButton, TooltipDialog, popup, on,
-                     JsonRest, Memory, fx, dialogs, dialogCaller,
-                     dialogCreator, teamMenuCreator) {
+        });
 
-
-            // ******************************************************************
-            // create the BorderContainer and attach it to our appLayout div
-            var appLayout = new BorderContainer({
-                design: 'headline',
-                style: 'padding: 0px',
-                splitter: true,
-                gutters: false
-            }, 'appLayout');
-
-
-            // ******************************************************************
-            // Header
-            var header_pane = new ContentPane({
-                name: 'header_pane',
-                region: 'top',
-                style: 'height: 24px; padding: 0px;',
-                executeScripts: true
-            }, 'header');
-            appLayout.addChild(header_pane);
-
-            // ******************************************************************
-            // Main Content
-            var central_content_pane = new ContentPane({
-                name: 'central_content_pane',
-                region: 'center',
-                style: 'padding: 0px',
-                href: 'view/user/{{ user.id }}',
-                executeScripts: true
-            }, 'central_content');
-            appLayout.addChild(central_content_pane);
-
-
-            // ******************************************************************
-            // Footer
-            var footer_content_pane = new ContentPane({
-                name: 'footer_pane',
-                region: 'bottom',
-                style: 'height: 14px; padding: 0px'
-            }, 'footer');
-            footer_content_pane.startup();
-            appLayout.addChild(footer_content_pane);
-
-
-            // ******************************************************************
-            // MenuBar
-            var stalker_MenuBar = new MenuBar({
-
-            }, 'stalkerMenuBar');
-
-
-            // ******************************************************************
-            // HOME
-
-            stalker_MenuBar.addChild(new MenuBarItem({
-                label: "HOME ",
-                onClick: function () {
-                    central_content_pane.set(
-                            'href',
-                            'view/user/{{ user.id }}'
-                    );
-                    central_content_pane.refresh();
-                }
-            }));
-
-
-            // ******************************************************************
-            // STUDIO
-
-            var studio_DropDownMenu = new DropDownMenu({
-
-            });
-
-            {% if not studio %}
-                studio_DropDownMenu.addChild(
-                        dialogCaller({
-                            label: 'Create Studio',
-                            dialog_id: 'studio_dialog',
-                            content_creator: dialogs.create_studio_dialog,
-                            widget_type: 'MenuItem'
-                        })
-                );
-            {% else %}
-                studio_DropDownMenu.addChild(
-                        new MenuItem({
-                            label: '{{ studio.name }}',
-                            style: 'font-weight: bold'
-                        })
-                );
-            {% endif %}
-
-
-
-            studio_DropDownMenu.addChild(new MenuItem({
-                label: "Overview Projects"
-            }));
-
-            studio_DropDownMenu.addChild(new MenuItem({
-                label: "Overview Crew"
-            }));
-
+        {% if not studio %}
             studio_DropDownMenu.addChild(
-                    new MenuSeparator({})
+                    dialogCaller({
+                        label: 'Create Studio',
+                        dialog_id: 'studio_dialog',
+                        content_creator: dialogs.create_studio_dialog,
+                        widget_type: 'MenuItem'
+                    })
             );
+        {% else %}
+            studio_DropDownMenu.addChild(
+                    new MenuItem({
+                        label: '{{ studio.name }}',
+                        style: 'font-weight: bold'
+                    })
+            );
+        {% endif %}
 
-            //------------
-            // SETTINGS
-            var settings_DropDownMenu = new DropDownMenu({
-                style: 'display: none;'
+
+
+        studio_DropDownMenu.addChild(new MenuItem({
+            label: "Overview Projects"
+        }));
+
+        studio_DropDownMenu.addChild(new MenuItem({
+            label: "Overview Crew"
+        }));
+
+        studio_DropDownMenu.addChild(
+                new MenuSeparator({})
+        );
+
+        //------------
+        // SETTINGS
+        var settings_DropDownMenu = new DropDownMenu({
+            style: 'display: none;'
+        });
+
+        // ------------
+        // Filename Template
+        settings_DropDownMenu.addChild(
+                dialogCaller({
+                    label: 'Filename Template',
+                    dialog_id: 'filename_template_dialog',
+                    content_creator: dialogs.create_filename_template_dialog,
+                    widget_type: 'MenuItem'
+                })
+        );
+
+        // ------------
+        // Image Format
+        settings_DropDownMenu.addChild(
+                dialogCaller({
+                    label: 'Image Format',
+                    dialog_id: 'image_format_dialog',
+                    content_creator: dialogs.create_image_format_dialog,
+                    widget_type: 'MenuItem'
+                })
+        );
+
+        // -------
+        // Repository
+        settings_DropDownMenu.addChild(
+                dialogCaller({
+                    label: 'Repository',
+                    dialog_id: 'repository_dialog',
+                    content_creator: dialogs.create_repository_dialog,
+                    widget_type: 'MenuItem'
+                })
+        );
+
+        // -------
+        // Status
+        settings_DropDownMenu.addChild(
+                dialogCaller({
+                    label: 'Status',
+                    dialog_id: 'status_dialog',
+                    content_creator: dialogs.create_status_dialog,
+                    widget_type: 'MenuItem'
+                })
+        );
+
+        // -------
+        // Status List
+        settings_DropDownMenu.addChild(
+                dialogCaller({
+                    label: 'Status List',
+                    dialog_id: 'status_list_dialog',
+                    content_creator: dialogs.create_status_list_dialog,
+                    widget_type: 'MenuItem'
+                })
+        );
+
+        // -------
+        // Structure
+        settings_DropDownMenu.addChild(
+                dialogCaller({
+                    label: 'Structure',
+                    dialog_id: 'structure_dialog',
+                    content_creator: dialogs.create_structure_dialog,
+                    widget_type: 'MenuItem'
+                })
+        );
+
+        studio_DropDownMenu.addChild(new PopupMenuItem({
+            label: "New",
+            popup: settings_DropDownMenu
+        })
+        );
+
+        stalker_MenuBar.addChild(new PopupMenuBarItem({
+            label: "STUDIO",
+            popup: studio_DropDownMenu
+        }));
+
+
+        // ******************************************************************
+        // PROJECTS
+
+        var projects_DropDownMenu = new DropDownMenu({
+
+        });
+
+        stalker_MenuBar.addChild(new PopupMenuBarItem({
+            label: "PROJECTS",
+            popup: projects_DropDownMenu
+        }));
+
+        // Project Menu
+        var create_project_setting_DropDownMenu = function (pID) {
+
+            var project_setting_DropDownMenu = new DropDownMenu({
+
             });
 
-            // ------------
-            // Filename Template
-            settings_DropDownMenu.addChild(
-                    dialogCaller({
-                        label: 'Filename Tamplate',
-                        dialog_id: 'filename_template_dialog',
-                        content_creator: dialogs.create_filename_template_dialog,
-                        widget_type: 'MenuItem'
+            // --------
+            // View Project
+            project_setting_DropDownMenu.addChild(
+                    new MenuItem({
+                        label: 'View',
+                        dataId: pID,
+                        onClick: function () {
+                            central_content_pane.set(
+                                    'href',
+                                    'view/project/' + this.get('dataId')
+                            );
+                            central_content_pane.refresh();
+                        }
                     })
             );
 
-            // ------------
-            // Image Format
-            settings_DropDownMenu.addChild(
-                    dialogCaller({
-                        label: 'Image Format',
-                        dialog_id: 'image_format_dialog',
-                        content_creator: dialogs.create_image_format_dialog,
-                        widget_type: 'MenuItem'
-                    })
-            );
-
-            // -------
-            // Repository
-            settings_DropDownMenu.addChild(
-                    dialogCaller({
-                        label: 'Repository',
-                        dialog_id: 'repository_dialog',
-                        content_creator: dialogs.create_repository_dialog,
-                        widget_type: 'MenuItem'
-                    })
-            );
-
-            // -------
-            // Status
-            settings_DropDownMenu.addChild(
-                    dialogCaller({
-                        label: 'Status',
-                        dialog_id: 'status_dialog',
-                        content_creator: dialogs.create_status_dialog,
-                        widget_type: 'MenuItem'
-                    })
-            );
-
-            // -------
-            // Status List
-            settings_DropDownMenu.addChild(
-                    dialogCaller({
-                        label: 'Status List',
-                        dialog_id: 'status_list_dialog',
-                        content_creator: dialogs.create_status_list_dialog,
-                        widget_type: 'MenuItem'
-                    })
-            );
-
-            // -------
-            // Structure
-            settings_DropDownMenu.addChild(
-                    dialogCaller({
-                        label: 'Structure',
-                        dialog_id: 'structure_dialog',
-                        content_creator: dialogs.create_structure_dialog,
-                        widget_type: 'MenuItem'
-                    })
-            );
-
-            studio_DropDownMenu.addChild(new PopupMenuItem({
-                label: "New",
-                popup: settings_DropDownMenu
-            })
-            );
-
-            stalker_MenuBar.addChild(new PopupMenuBarItem({
-                label: "STUDIO",
-                popup: studio_DropDownMenu
-            }));
-
-
-            // ******************************************************************
-            // PROJECTS
-
-            var projects_DropDownMenu = new DropDownMenu({
-
-            });
-
-            stalker_MenuBar.addChild(new PopupMenuBarItem({
-                label: "PROJECTS",
-                popup: projects_DropDownMenu
-            }));
-
-            // Project Menu
-            var create_project_setting_DropDownMenu = function (pID) {
-
-                var project_setting_DropDownMenu = new DropDownMenu({
-
-                });
-
-                // --------
-                // View Project
-                project_setting_DropDownMenu.addChild(
-                        new MenuItem({
-                            label: 'View',
-                            dataId: pID,
-                            onClick: function () {
-                                central_content_pane.set(
-                                        'href',
-                                        'view/project/' + this.get('dataId')
-                                );
-                                central_content_pane.refresh();
-                            }
-                        })
-                );
-
-                // --------
+            // --------
+            {% if has_permission('Update_Project') %}
                 // Update Project
                 project_setting_DropDownMenu.addChild(
                         dialogCaller({
@@ -411,12 +411,14 @@
 
                         })
                 );
+            {% endif %}
 
-                project_setting_DropDownMenu.addChild(
-                        new MenuSeparator({})
-                );
+            project_setting_DropDownMenu.addChild(
+                    new MenuSeparator({})
+            );
 
-                // --------
+            // --------
+            {% if has_permission('Create_Asset') %}
                 // Asset
                 project_setting_DropDownMenu.addChild(
                         dialogCaller({
@@ -428,8 +430,10 @@
 
                         })
                 );
+            {% endif %}
 
-                // --------
+            // --------
+            {% if has_permission('Create_Sequence') %}
                 // Sequence
                 project_setting_DropDownMenu.addChild(
                         dialogCaller({
@@ -440,8 +444,10 @@
                             data_id: pID
                         })
                 );
+            {% endif %}
 
-                // ----
+            // ----
+            {% if has_permission('Create_Shot') %}
                 // Shot
                 project_setting_DropDownMenu.addChild(
                         dialogCaller({
@@ -452,55 +458,68 @@
                             data_id: pID
                         })
                 );
+            {% endif %}
 
+            {% if has_permission('Update_User') %}
                 project_setting_DropDownMenu.addChild(
                         new MenuSeparator({})
                 );
 
                 project_setting_DropDownMenu.addChild(
                         dialogCaller({
-                            label: 'Add User',
-                            dialog_id: 'user_dialog',
-                            content_creator: dialogs.create_user_dialog,
+                            label: 'Append User',
+                            dialog_id: 'append_user_dialog',
+                            content_creator: dialogs.append_user_dialog,
                             widget_type: 'MenuItem',
                             data_id: pID
                         })
                 );
+            {% endif %}
 
-                return project_setting_DropDownMenu;
+            return project_setting_DropDownMenu;
 
-            };
+        };
 
-            // Project Memory
-            var projects_memory = new JsonRest({
-                target: '/get/projects'
-            });
 
-            // Projects Updater
-            var projects_DropDownMenu_updater = function () {
-                // delete the current items
-                var items = projects_DropDownMenu.getChildren();
-                for (var i = 0; i < items.length; i++) {
-                    items[i].destroyRecursive();
+        var target = '/get/projects_byEntity/{{ logged_in_user.id }}';
+
+        {% if has_permission('List_Project') %}
+
+            target = 'get/projects'
+
+        {% endif %}
+
+        // Project Memory
+        var projects_memory = new JsonRest({
+            target: target
+        });
+
+        // Projects Updater
+        var projects_DropDownMenu_updater = function () {
+            // delete the current items
+            var items = projects_DropDownMenu.getChildren();
+            for (var i = 0; i < items.length; i++) {
+                items[i].destroyRecursive();
+            }
+
+            // query new items
+            var result = projects_memory.query().then(function (data) {
+                for (var i = 0; i < data.length; i++) {
+                    projects_DropDownMenu.addChild(
+                            new PopupMenuItem({
+                                label: data[i].name,
+                                dataId: data[i].id,
+                                popup: create_project_setting_DropDownMenu(data[i].id)
+                            })
+                    );
                 }
-
-                // query new items
-                var result = projects_memory.query().then(function (data) {
-                    for (var i = 0; i < data.length; i++) {
-                        projects_DropDownMenu.addChild(
-                                new PopupMenuItem({
-                                    label: data[i].name,
-                                    dataId: data[i].id,
-                                    popup: create_project_setting_DropDownMenu(data[i].id)
-
-                                })
-                        );
-                    }
-
+                if (i > 0) {
                     projects_DropDownMenu.addChild(
                             new MenuSeparator({})
                     );
+                }
 
+                {% if has_permission('Create_Project') %}
                     projects_DropDownMenu.addChild(
                             dialogCaller({
                                 label: 'New Project',
@@ -514,8 +533,12 @@
                     projects_DropDownMenu.addChild(
                             new MenuSeparator({})
                     );
+                {% endif %}
 
-                    // -----
+
+
+                // -----
+                {% if has_permission('Create_Asset') %}
                     // Asset
                     projects_DropDownMenu.addChild(
                             dialogCaller({
@@ -526,8 +549,10 @@
 
                             })
                     );
+                {% endif %}
 
-                    // --------
+                // --------
+                {% if has_permission('Create_Sequence') %}
                     // Sequence
                     projects_DropDownMenu.addChild(
                             dialogCaller({
@@ -537,8 +562,10 @@
                                 widget_type: 'MenuItem'
                             })
                     );
+                {% endif %}
 
-                    // ----
+                // ----
+                {% if has_permission('Create_Shot') %}
                     // Shot
                     projects_DropDownMenu.addChild(
                             dialogCaller({
@@ -548,97 +575,110 @@
                                 widget_type: 'MenuItem'
                             })
                     );
+                {% endif %}
 
 
-                });
-            };
-            projects_DropDownMenu_updater();
-
-
-            // ******************************************************************
-            // CREW - Users / Departments / Groups
-            var crew_DropDownMenu = new DropDownMenu();
-
-            stalker_MenuBar.addChild(new PopupMenuBarItem({
-                label: 'CREW',
-                popup: crew_DropDownMenu
-            }));
-
-            {% if has_permission('List_User') %}
-                teamMenuCreator({
-                    team_is_singular: true,
-                    menu_to_attach: crew_DropDownMenu,
-                    entity_type_name: 'user',
-                    view_entity_url: 'view/user/',
-                    query_entity_url: 'get/users',
-                    content_pane_to_update: central_content_pane,
-                    new_team_dialog_id: 'user_dialog',
-                    new_team_dialog_content_creator: dialogs.create_user_dialog,
-                    allow_create_new: {%  if has_permission('Create_User') %} true {% else %} false {% endif %}
-                });
-            {% endif %}
-
-            {% if has_permission('List_Department') %}
-                teamMenuCreator({
-                    menu_to_attach: crew_DropDownMenu,
-                    entity_type_name: 'department',
-                    view_entity_url: 'view/department/',
-                    query_entity_url: 'get/departments',
-                    content_pane_to_update: central_content_pane,
-                    new_team_dialog_id: 'department_dialog',
-                    new_team_dialog_content_creator: dialogs.create_department_dialog,
-                    allow_create_new: {%  if has_permission('Create_Department') %} true {% else %} false {% endif %}
-                });
-            {% endif %}
-
-            {% if has_permission('List_Group') %}
-                teamMenuCreator({
-                    menu_to_attach: crew_DropDownMenu,
-                    entity_type_name: 'group',
-                    view_entity_url: 'view/group/',
-                    query_entity_url: 'get/groups',
-                    content_pane_to_update: central_content_pane,
-                    new_team_dialog_id: 'group_dialog',
-                    new_team_dialog_content_creator: dialogs.create_group_dialog,
-                    allow_create_new: {%  if has_permission('Create_Group') %} true {% else %} false {% endif %}
-                });
-            {% endif %}
-
-            stalker_MenuBar.startup();
-
-
-            // ******************************************************************
-            // ME BAR
-            var mebar_tooltipDialog = new TooltipDialog({
-                id: 'mebar_tooltipDialog',
-                style: 'width: 250px; height: 100%',
-                href: '/me_menu',
-                onMouseLeave: function () {
-                    mebar_tooltipDialog.set('visible', false);
-                    popup.close(mebar_tooltipDialog);
-                }
             });
-            mebar_tooltipDialog.startup();
+        };
+        projects_DropDownMenu_updater();
 
-            // 
-            var mebar_dropDownButton = DropDownButton({
-                label: '{{ user.name }}',
-                dropDown: mebar_tooltipDialog,
-                style: 'margin-top: 0px; margin-bottom: 0px; color: #000000'
-            }, 'mebutton');
-            mebar_dropDownButton.startup();
 
-            // ******************************************************************
-            // startup app layout
-            appLayout.startup();
+        // ******************************************************************
+        // CREW - Users / Departments / Groups
+        var crew_DropDownMenu = new DropDownMenu();
 
-            // load user home by default
-            central_content_pane.set(
-                    'href',
-                    'view/user/{{ user.id }}'
-            );
-            central_content_pane.refresh();
+        stalker_MenuBar.addChild(new PopupMenuBarItem({
+            label: 'CREW',
+            popup: crew_DropDownMenu
+        }));
+
+        {% if has_permission('List_User') %}
+            teamMenuCreator({
+                team_is_singular: true,
+                menu_to_attach: crew_DropDownMenu,
+                entity_type_name: 'user',
+                view_entity_url: 'view/user/',
+                query_entity_url: 'get/users',
+                content_pane_to_update: central_content_pane,
+                new_team_dialog_id: 'user_dialog',
+                new_team_dialog_content_creator: dialogs.create_user_dialog,
+                allow_create_new: {%  if has_permission('Create_User') %}
+                    true {% else %} false {% endif %}
+            });
+        {% endif %}
+
+        {% if has_permission('List_Department') %}
+            teamMenuCreator({
+                menu_to_attach: crew_DropDownMenu,
+                entity_type_name: 'department',
+                view_entity_url: 'view/department/',
+                query_entity_url: 'get/departments',
+                content_pane_to_update: central_content_pane,
+                new_team_dialog_id: 'department_dialog',
+                new_team_dialog_content_creator: dialogs.create_department_dialog,
+                allow_create_new: {%  if has_permission('Create_Department') %}
+                    true {% else %} false {% endif %}
+            });
+        {% endif %}
+
+        {% if has_permission('List_Group') %}
+            teamMenuCreator({
+                menu_to_attach: crew_DropDownMenu,
+                entity_type_name: 'group',
+                view_entity_url: 'view/group/',
+                query_entity_url: 'get/groups',
+                content_pane_to_update: central_content_pane,
+                new_team_dialog_id: 'group_dialog',
+                new_team_dialog_content_creator: dialogs.create_group_dialog,
+                allow_create_new: {%  if has_permission('Create_Group') %}
+                    true {% else %} false {% endif %}
+            });
+        {% endif %}
+
+        stalker_MenuBar.startup();
+
+        // ******************************************************************
+        // ME BAR
+        var mebar_tooltipDialog = new TooltipDialog({
+            id: 'mebar_tooltipDialog',
+            style: 'width: 250px; height: 100%',
+            href: '/me_menu',
+            onMouseLeave: function () {
+                mebar_tooltipDialog.set('visible', false);
+                popup.close(mebar_tooltipDialog);
+            }
         });
+        mebar_tooltipDialog.startup();
+
+        var settings_button = dialogCaller({
+            label: 'Update',
+            dialog_id: 'update_user_dialog',
+            content_creator: dialogs.update_user_dialog,
+            attach_to: 'settings_button',
+            data_id: {{ logged_in_user.id }}
+        });
+        settings_button.startup();
+
+
+        //
+        var mebar_dropDownButton = DropDownButton({
+            label: '{{ logged_in_user.name }}',
+            dropDown: mebar_tooltipDialog,
+            style: 'margin-top: 0px; margin-bottom: 0px; color: #000000'
+        }, 'mebutton');
+        mebar_dropDownButton.startup();
+
+        // ******************************************************************
+        // startup app layout
+        appLayout.startup();
+
+        // load user home by default
+        central_content_pane.set(
+                'href',
+                'view/user/{{ logged_in_user.id }}'
+        );
+        central_content_pane.refresh();
+    });
     </script>
 {% endblock %}
 </body>

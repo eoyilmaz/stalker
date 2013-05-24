@@ -26,7 +26,7 @@ from pyramid.view import view_config
 
 from stalker.db import DBSession
 from stalker import User, ImageFormat
-from stalker.views import PermissionChecker
+from stalker.views import PermissionChecker, get_logged_in_user
 
 import logging
 from stalker import log
@@ -71,8 +71,7 @@ def dialog_update_image_format(request):
 def create_image_format(request):
     """creates an image format
     """
-    login = authenticated_userid(request)
-    logged_in_user = User.query.filter_by(login=login).first()
+    logged_in_user = get_logged_in_user(request)
     
     name = request.params.get('name')
     width = int(request.params.get('width', -1))
@@ -99,9 +98,8 @@ def create_image_format(request):
 def update_image_format(request):
     """updates an image format
     """
-    login = authenticated_userid(request)
-    logged_in_user = User.query.filter_by(login=login).first()
-    
+    logged_in_user = get_logged_in_user(request)
+
     # get params
     imf_id = request.params.get('imf_id', -1)
     imf = ImageFormat.query.filter_by(id=imf_id).first()
@@ -125,8 +123,7 @@ def update_image_format(request):
 
 @view_config(
     route_name='get_image_formats',
-    renderer='json',
-    permission='Read_ImageFormat'
+    renderer='json'
 )
 def get_image_formats(request):
     """returns all the image formats in the database

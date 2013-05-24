@@ -18,30 +18,58 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 {% block me_menu %}
-  <div class='dijitDialogPaneContentArea'>
-    <table style='width: 100%'>
-      <tr>
-        <td rowspan='2'>
-          <div id='avatar'>
-            <img src='{{ request.static_url("stalker:static/stalker/images/NoPicture.gif") }}' alt=''>
-          </div>
-        </td>
-        <td>
-          <strong>{{ user.name }}</strong><br>
-          {{ user.email }}
-        </td>
-      </tr>
-    </table>
-  </div>
-  <div class='dijitDialogPaneActionBar'>
-  <button id='settings_button'
-            dojoType='dijit.form.Button'
-            type='button'
-            >Settings</button>
-    <button id='logout_button'
-            dojoType='dijit.form.Button'
-            type='button'
-            onclick='window.location = "/logout"'
-            >Logout</button>
-  </div> 
+    <div class='dijitDialogPaneContentArea'>
+        <table style='width: 100%'>
+            <tr>
+                <td rowspan='2'>
+                    <div id='avatar'>
+                        {% if not logged_in_user.thumbnail %}
+                            <img src='{{ request.static_url("stalker:static/stalker/images/Placeholder_0.png") }}'
+                                 alt=''
+                                 style='width:90px; height: auto;'>
+                        {% else %}
+                            <img src='{{ logged_in_user.thumbnail.path }}'
+                                 alt=''
+                                 style='width:90px; height: auto;'>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>
+                    <strong>{{ logged_in_user.name }}</strong><br>
+                    {{ logged_in_user.email }}
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class='dijitDialogPaneActionBar'>
+        <button id='settings_button'
+                dojoType='dijit.form.Button'
+                type='button'
+                onClick="
+                    require([
+                        'stalker/dialogs',
+                        'stalker/dialogCreator',
+
+                        'dojo/domReady!'
+                    ], function (dialogs, dialogCreator) {
+
+                        var myDialog = dialogCreator({
+                            dialog_id: 'user_dialog',
+                            data_id: '{{ logged_in_user.id }}',
+                            content_creator: dialogs.update_user_dialog
+                        });
+                        myDialog.show();
+
+                    });
+                "
+                >Settings
+        </button>
+        <button id='logout_button'
+                dojoType='dijit.form.Button'
+                type='button'
+                onclick='window.location = "/logout"'
+                >Logout
+        </button>
+    </div>
 {% endblock %}
+

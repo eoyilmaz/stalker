@@ -244,8 +244,7 @@ def update_status_list(request):
 
 @view_config(
     route_name='get_statuses',
-    renderer='json',
-    permission='Read_Status'
+    renderer='json'
 )
 def get_statuses(request):
     """returns all the Statuses in the database
@@ -262,8 +261,7 @@ def get_statuses(request):
 
 @view_config(
     route_name='get_statuses_of',
-    renderer='json',
-    permission='Read_Status'
+    renderer='json'
 )
 def get_statuses_of(request):
     """returns the Statuses of given StatusList
@@ -280,8 +278,7 @@ def get_statuses_of(request):
 
 @view_config(
     route_name='get_statuses_for',
-    renderer='json',
-    permission='Read_Status'
+    renderer='json'
 )
 def get_statuses_for(request):
     """returns the Statuses of given StatusList
@@ -299,8 +296,7 @@ def get_statuses_for(request):
 
 @view_config(
     route_name='get_status_lists',
-    renderer='json',
-    permission='Read_StatusList'
+    renderer='json'
 )
 def get_status_lists(request):
     """returns all the StatusList instances in the databases
@@ -316,8 +312,7 @@ def get_status_lists(request):
 
 @view_config(
     route_name='get_status_lists_for',
-    renderer='json',
-    permission='Read_StatusList'
+    renderer='json'
 )
 def get_status_lists_for(request):
     """returns all the StatusList for a specific target_entity_type

@@ -64,10 +64,10 @@ def update_asset_dialog(request):
     
     return {
         'mode': 'UPDATE',
-        'asset': asset,
+        'has_permission': PermissionChecker(request),
         'project': asset.project,
         'types': asset_types,
-        'has_permission': PermissionChecker(request)
+        'asset': asset
     }
 
 
@@ -149,8 +149,7 @@ def create_asset(request):
 def update_asset(request):
     """updates an Asset
     """
-    login = authenticated_userid(request)
-    logged_in_user = User.query.filter_by(login=login).first()
+    logged_in_user = get_logged_in_user(request)
     
     # get params
     asset_id = request.params.get('asset_id')
@@ -181,8 +180,6 @@ def update_asset(request):
         # update the asset
         asset.name = name
         asset.description = description
-        logger.debug('request.description: %s' % description)
-        logger.debug('asset.description  : %s' % asset.description)
         asset.type = type_
         asset.status = status
         asset.updated_by = logged_in_user
@@ -200,14 +197,14 @@ def update_asset(request):
 def view_asset(request):
     """runs when viewing an asset
     """
-    login = authenticated_userid(request)
-    logged_in_user = User.query.filter_by(login=login).first()
+    logged_in_user = get_logged_in_user(request)
 
     asset_id = request.matchdict['asset_id']
     asset = Asset.query.filter_by(id=asset_id).first()
 
     return {
         'user': logged_in_user,
+        'has_permission': PermissionChecker(request),
         'asset': asset
     }
 
@@ -226,20 +223,19 @@ def summarize_asset(request):
 
     return {
         'user': logged_in_user,
-        'asset': asset,
-        'has_permission': PermissionChecker(request)
+        'has_permission': PermissionChecker(request),
+        'asset': asset
     }
 
 
 @view_config(
     route_name='get_assets',
-    renderer='json',
-    permission='Read_Asset'
+    renderer='json'
 )
 def get_assets(request):
     """returns all the Assets of a given Project
     """
-    proj_id = request.matchdict['project_id']
+    project_id = request.matchdict['project_id']
     return [
         {
             'id': asset.id,
@@ -252,5 +248,5 @@ def get_assets(request):
             'user_name': asset.created_by.name,
             'description': asset.description
         }
-        for asset in Asset.query.filter_by(project_id=proj_id).all()
+        for asset in Asset.query.filter_by(project_id=project_id).all()
     ]

@@ -297,8 +297,7 @@ def update_task_dialog(request):
     }
 
 @view_config(
-    route_name='update_task',
-    permission='Update_Task'
+    route_name='update_task'
 )
 def update_task(request):
     """Updates the given task with the data coming from the request
@@ -422,8 +421,7 @@ def get_root_tasks(request):
 
 @view_config(
     route_name='get_gantt_tasks',
-    renderer='json',
-    permission='List_Task'
+    renderer='json'
 )
 def get_gantt_tasks(request):
     """returns all the tasks in the database related to the given entity in
@@ -490,8 +488,7 @@ def get_gantt_tasks(request):
 
 @view_config(
     route_name='get_project_tasks',
-    renderer='json',
-    permission='List_Task'
+    renderer='json'
 )
 def get_project_tasks(request):
     """returns all the tasks in the database related to the given entity in
@@ -511,8 +508,7 @@ def get_project_tasks(request):
 
 @view_config(
     route_name='list_tasks',
-    renderer='templates/task/content_list_tasks.jinja2',
-    permission='Read_Task'
+    renderer='templates/task/content_list_tasks.jinja2'
 )
 def list_tasks(request):
     """runs when viewing tasks of a TaskableEntity
@@ -531,8 +527,7 @@ def list_tasks(request):
 
 @view_config(
     route_name='dialog_create_task',
-    renderer='templates/task/dialog_create_task.jinja2',
-    permission='Create_Task'
+    renderer='templates/task/dialog_create_task.jinja2'
 )
 def create_task_dialog(request):
     """only project information is present
@@ -561,8 +556,7 @@ def create_task_dialog(request):
 
 @view_config(
     route_name='dialog_create_child_task',
-    renderer='templates/task/dialog_create_task.jinja2',
-    permission='Create_Task'
+    renderer='templates/task/dialog_create_task.jinja2'
 )
 def create_child_task_dialog(request):
     """generates the info from the given parent task
@@ -583,8 +577,7 @@ def create_child_task_dialog(request):
 
 @view_config(
     route_name='dialog_create_dependent_task',
-    renderer='templates/task/dialog_create_task.jinja2',
-    permission='Create_Task'
+    renderer='templates/task/dialog_create_task.jinja2'
 )
 def create_dependent_task_dialog(request):
     """runs when adding a dependent task
@@ -605,8 +598,7 @@ def create_dependent_task_dialog(request):
 
 
 @view_config(
-    route_name='create_task',
-    permission='Create_Task'
+    route_name='create_task'
 )
 def create_task(request):
     """runs when adding a new task

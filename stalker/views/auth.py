@@ -254,8 +254,8 @@ def summarize_user(request):
     """runs when getting general User info
     """
     # get logged in user
-    login = authenticated_userid(request)
-    logged_in_user = User.query.filter_by(login=login).first()
+
+    logged_in_user = get_logged_in_user(request)
 
     # get the user id
     user_id = request.matchdict['user_id']
@@ -272,8 +272,7 @@ def summarize_user(request):
 
 @view_config(
     route_name='get_users',
-    renderer='json',
-    permission='Read_User'
+    renderer='json'
 )
 def get_users(request):
     """returns all the users in database
@@ -286,8 +285,7 @@ def get_users(request):
 
 @view_config(
     route_name='get_users_byEntity',
-    renderer='json',
-    permission='Read_User'
+    renderer='json'
 )
 def get_users_byEntity(request):
     """returns all the Users of a given Entity
@@ -324,8 +322,7 @@ def get_users_byEntity(request):
 
 @view_config(
     route_name='get_users_not_in_entity',
-    renderer='json',
-    permission='Read_User'
+    renderer='json'
 )
 def get_users_not_in_entity(request):
     """returns all the Users which are not related with the given Entity
@@ -526,20 +523,20 @@ def forbidden(request):
 @view_config(route_name='me_menu',
              renderer='templates/auth/me_menu.jinja2')
 def home(request):
-    user = get_logged_in_user(request)
+    logged_in_user = get_logged_in_user(request)
     studio = Studio.query.first()
     projects = Project.query.all()
     
-    logger.debug('user     : %s' % user)
+    logger.debug('logged_in_user     : %s' % logged_in_user)
     logger.debug('studio   : %s' % studio)
     logger.debug('projects : %s' % projects)
     
-    if not user:
+    if not logged_in_user:
         return logout(request)
     
     return {
         'stalker': stalker,
-        'user': user,
+        'logged_in_user': logged_in_user,
         'projects': projects,
         'studio': studio,
         'has_permission': PermissionChecker(request)
@@ -708,8 +705,7 @@ def update_group(request):
 
 @view_config(
     route_name='list_groups',
-    renderer='templates/auth/content_list_groups.jinja2',
-    permission='Read_Group'
+    renderer='templates/auth/content_list_groups.jinja2'
 )
 def list_groups(request):
     """

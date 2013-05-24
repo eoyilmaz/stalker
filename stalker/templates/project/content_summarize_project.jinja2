@@ -25,8 +25,8 @@
 {#</div>#}
 
 <div id='project_details'>
-<div style="background-color: #8ecfb0;" class="page_title"></div>
-    
+    <div style="background-color: #8ecfb0;" class="page_title"></div>
+
     {# Thumbnail #}
     <div id='project_thumbnail' class='thumbnail'>
         {% if not project.thumbnail %}
@@ -35,8 +35,8 @@
                  style='width:192px; height: auto;'>
         {% else %}
             <img src='{{ project.thumbnail.path }}'
-                alt=''
-                style='width:192px; height: auto;'>
+                 alt=''
+                 style='width:192px; height: auto;'>
         {% endif %}
         <div class='thumbnail_menu'>&nbsp</div>
     </div>
@@ -84,10 +84,17 @@
                 <td>&nbsp;</td>
                 <td>{{ project.end }}</td>
             </tr>
+            <tr>
+                <td style='text-align: right'></td>
+                <td>&nbsp;</td>
+                <td>
+                    {% if has_permission('Update_Project') %}
+                        <button id='update_project_button'>Update</button>
+                    {% endif %}
+                </td>
+            </tr>
         </table>
-        {% if has_permission('Update_Project') %}
-            <button id='update_project_button'>Update</button>
-        {% endif %}
+
     </div>
     {#  Charts  #}
     <div>
@@ -113,8 +120,8 @@
         'stalker/thumbnailMenu',
 
         'dojo/domReady!'
-    ], function (Chart, theme, PiePlot, MoveSlice, Button,
-                 dialogs, dialogCaller, thumbnailMenu) {
+    ], function (Chart, theme, PiePlot, MoveSlice, Button, dialogs,
+                 dialogCaller, thumbnailMenu) {
 
         // Create the chart within it's "holding" node
         var pieChart = new Chart('project_summary_chart1');
@@ -150,7 +157,7 @@
             // refresh the pane
             content_pane.refresh();
         };
-        
+
         {% if has_permission('Update_Project') %}
             var update_project_button = dialogCaller({
                 label: 'Update',
@@ -161,7 +168,7 @@
                 data_id: {{ project.id }}
             });
             update_project_button.startup();
-            
+
             // thumbnail menu
             thumbnailMenu({
                 targetNodeIds: ['project_thumbnail'],

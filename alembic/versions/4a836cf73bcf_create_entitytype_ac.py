@@ -15,8 +15,18 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    op.add_column('EntityTypes', sa.Column('accepts_references', sa.Boolean))
-    op.add_column('Links', sa.Column('original_filename', sa.String(256)))
+    try:
+        op.add_column('EntityTypes', sa.Column('accepts_references', sa.Boolean))
+    except sa.exc.OperationalError:
+        # the column already exists
+        pass
+
+    try:
+        op.add_column('Links', sa.Column('original_filename', sa.String(256)))
+    except sa.exc.OperationalError:
+        # the column already exists
+        pass
+
 
 def downgrade():
     # no drop column in SQLite so this will not work for SQLite databases

@@ -48,6 +48,7 @@ def create_sequence_dialog(request):
 
     return {
         'mode': 'CREATE',
+        'has_permission': PermissionChecker(request),
         'project': project
     }
 
@@ -65,6 +66,7 @@ def update_sequence_dialog(request):
     return {
         'mode': 'UPDATE',
         'sequence': sequence,
+        'has_permission': PermissionChecker(request),
         'project': sequence.project
     }
 
@@ -208,8 +210,7 @@ def summarize_sequence(request):
 
 @view_config(
     route_name='get_sequences',
-    renderer='json',
-    permission='Read_Sequence'
+    renderer='json'
 )
 def get_sequences(request):
     """returns the related sequences of the given project as a json data

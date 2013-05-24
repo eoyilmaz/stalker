@@ -43,8 +43,7 @@ def dialog_create_structure(request):
     """
     return {
         'mode': 'CREATE',
-        'has_permission': PermissionChecker(request),
-        'filename_templates': FilenameTemplate.query.all() # TODO: remove this
+        'has_permission': PermissionChecker(request)
     }
 
 
@@ -61,8 +60,7 @@ def dialog_update_structure(request):
     return {
         'mode': 'UPDATE',
         'has_permission': PermissionChecker(request),
-        'structure': structure,
-        'filename_templates': FilenameTemplate.query.all() # TODO: remove this
+        'structure': structure
     }
 
 
@@ -78,7 +76,7 @@ def create_structure(request):
     name = request.params.get('name')
     custom_template = request.params.get('custom_template')
     ft_ids = get_multi_integer(request, 'filename_templates')
-    fts = FilenameTemplate.query.filter(FilenameTemplate.id.in_(ft_ids).all())
+    fts = FilenameTemplate.query.filter(FilenameTemplate.id.in_(ft_ids)).all()
     
     if name and custom_template:
         # create a new structure
@@ -128,8 +126,7 @@ def update_structure(request):
 
 @view_config(
     route_name='get_structures',
-    renderer='json',
-    permission='List_Structure' # TODO: do we need this permission, can it be done inside template, where it is asked
+    renderer='json'
 )
 def get_structures(request):
     """returns all the structures in the database

@@ -39,6 +39,10 @@ Stalker Changes
   * Add: Permissions page is added to Group Page.
   * Fix: dgrid object is declared from [Grid, Selection, Keyboard]. So it's
     posible to select a row and navigate by Keyboard.
+  * Update: Added restrictions on main stalker menu based on logg_in_user
+    permissions.
+  * Add: User setting menu button function is created.
+
 
 0.2.0.b3
 --------

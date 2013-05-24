@@ -26,6 +26,7 @@
         <div id='projects_content_pane'></div>
         <div id='tickets_content_pane'></div>
         <div id='departments_content_pane'></div>
+        <div id='time_logs_content_pane'></div>
     </div>
 </div>
 
@@ -37,6 +38,7 @@
 
         'dojo/domReady!'
     ], function (BorderContainer, TabContainer, ContentPane) {
+
         var user_BorderContainer = new BorderContainer({
             id: 'user_border_container',
             region: 'center',
@@ -64,7 +66,7 @@
             region: 'center',
             style: 'width: 100%; height: 100%; background-color: #45b8cc;'
 
-        },'data_tab_container');
+        }, 'data_tab_container');
 
 
         var tasks_content_pane = new ContentPane({
@@ -72,7 +74,7 @@
             href: 'list/tasks/{{ user.id }}',
             default_href: 'list/tasks/{{ user.id }}',
             style: ' padding: 0; margin:0;'
-        },'tasks_content_pane');
+        }, 'tasks_content_pane');
 
 
         var projects_content_pane = new ContentPane({
@@ -103,12 +105,18 @@
             style: ' padding: 0; margin:0;'
         });
 
+        var time_logs_content_pane = new ContentPane({
+            title: 'Time Logs',
+            href: 'list/time_logs/{{ user.id }}',
+            style: 'padding: 0; margin:0;'
+        });
 
         user_related_data_tab_container.addChild(tasks_content_pane);
         user_related_data_tab_container.addChild(tickets_content_pane);
+        user_related_data_tab_container.addChild(time_logs_content_pane);
+        user_related_data_tab_container.addChild(departments_content_pane);
         user_related_data_tab_container.addChild(projects_content_pane);
         user_related_data_tab_container.addChild(groups_content_pane);
-        user_related_data_tab_container.addChild(departments_content_pane);
 
         user_BorderContainer.addChild(user_related_data_tab_container);
 

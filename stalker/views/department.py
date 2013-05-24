@@ -158,8 +158,7 @@ def update_department(request):
 
 @view_config(
     route_name='get_departments',
-    renderer='json',
-    permission='Read_Department'
+    renderer='json'
 )
 def get_departments(request):
     """returns all the departments in the database
@@ -174,8 +173,7 @@ def get_departments(request):
 
 @view_config(
     route_name='view_department',
-    renderer='templates/department/page_view_department.jinja2',
-    permission='Read_Department'
+    renderer='templates/department/page_view_department.jinja2'
 )
 def view_department(request):
     """runs when viewing a department
@@ -212,8 +210,7 @@ def summarize_department(request):
 
 @view_config(
     route_name='list_departments',
-    renderer='templates/department/content_list_departments.jinja2',
-    permission='Read_Department'
+    renderer='templates/department/content_list_departments.jinja2'
 )
 def list_departments(request):
     """
@@ -228,8 +225,7 @@ def list_departments(request):
 
 @view_config(
     route_name='get_departments_byEntity',
-    renderer='json',
-    permission='Read_Department'
+    renderer='json'
 )
 def get_departments_byEntity(request):
     """
