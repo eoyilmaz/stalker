@@ -246,7 +246,7 @@ def upload_file_to_server(request, file_param_name):
     
     # create a Link instance and return it
     new_link = Link(
-        path = file_full_path,
+        full_path= file_full_path,
         original_filename=filename,
         created_by=get_logged_in_user(request)
     )
@@ -293,7 +293,7 @@ def upload_thumbnail(request):
         DBSession.add(new_link)
         
         return {
-            'file': new_link.path,
+            'file': new_link.full_path,
             'name': new_link.original_filename,
             'width': 320,
             'height': 240,

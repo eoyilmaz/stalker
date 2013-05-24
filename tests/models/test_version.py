@@ -175,36 +175,35 @@ class VersionTester(unittest2.TestCase):
         # a Link for the input file
         self.test_input_link1 = Link(
             name='Input Link 1',
-            path='/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/Outputs/' \
-                 'SH001_beauty_v001.###.exr'
+            full_path='/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/'
+                      'Outputs/SH001_beauty_v001.###.exr'
         )
 
         self.test_input_link2 = Link(
             name='Input Link 2',
-            path='/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/Outputs/' \
-                 'SH001_occ_v001.###.exr'
+            full_path='/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/'
+                      'Outputs/SH001_occ_v001.###.exr'
         )
 
-
-        # a Link for the ouput file
+        # a Link for the output file
         self.test_output_link1 = Link(
             name='Output Link 1',
-            path='/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/Outputs/' \
-                 'SH001_beauty_v001.###.exr'
+            full_path='/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/'
+                      'Outputs/SH001_beauty_v001.###.exr'
         )
 
         self.test_output_link2 = Link(
             name='Output Link 2',
-            path='/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/Outputs/' \
-                 'SH001_occ_v001.###.exr'
+            full_path='/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/'
+                      'Outputs/SH001_occ_v001.###.exr'
         )
-
 
         # now create a version for the Task
         self.kwargs = {
             'name': 'Version1',
             'take_name': 'TestTake',
-            'path': '/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/v001.ma',
+            'full_path': '/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/'
+                         'v001.ma',
             'inputs': [self.test_input_link1,
                        self.test_input_link2],
             'outputs': [self.test_output_link1,
@@ -442,7 +441,7 @@ class VersionTester(unittest2.TestCase):
     # def test_source_file_argument_is_working_properly(self):
     #     """testing if the source_file argument is working properly
     #     """
-    #     new_source_file = Link(name='Test Link', path='none')
+    #     new_source_file = Link(name='Test Link', full_path='none')
     #     self.kwargs['source_file'] = new_source_file
     #     new_version = Version(**self.kwargs)
     #     self.assertEqual(new_version.source_file, new_source_file)
@@ -450,7 +449,7 @@ class VersionTester(unittest2.TestCase):
     # def test_source_file_attribute_is_working_properly(self):
     #     """testing if the source_file attribute is working properly
     #     """
-    #     new_source_file = Link(name='Test Link', path='empty string')
+    #     new_source_file = Link(name='Test Link', full_path='empty string')
     #     self.assertNotEqual(self.test_version.source_file, new_source_file)
     #     self.test_version.source_file = new_source_file
     #     self.assertEqual(self.test_version.source_file, new_source_file)

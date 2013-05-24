@@ -176,10 +176,10 @@ class Version(Link, StatusMixin):
                  inputs=None,
                  outputs=None,
                  parent=None,
-                 path=None,
+                 full_path=None,
                  **kwargs):
         # call supers __init__
-        kwargs['path'] = path
+        kwargs['full_path'] = full_path
         super(Version, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)
         

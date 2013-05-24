@@ -313,7 +313,7 @@ def get_users_byEntity(request):
             'groups': groupStr,
             'tasksCount': len(user.tasks) ,
             'ticketsCount': len(user.open_tickets),
-            'thumbnail_path': user.thumbnail.path if user.thumbnail else None
+            'thumbnail_path': user.thumbnail.full_path if user.thumbnail else None
         })
 
     # works for Departments and Projects or any entity that has users attribute

@@ -34,9 +34,9 @@
                  alt=''
                  style='width:192px; height: auto;'>
         {% else %}
-            <img src='{{ project.thumbnail.path }}'
-                 alt=''
-                 style='width:192px; height: auto;'>
+            <img src='{{ project.thumbnail.full_path }}'
+                alt=''
+                style='width:192px; height: auto;'>
         {% endif %}
         <div class='thumbnail_menu'>&nbsp</div>
     </div>
@@ -120,8 +120,8 @@
         'stalker/thumbnailMenu',
 
         'dojo/domReady!'
-    ], function (Chart, theme, PiePlot, MoveSlice, Button, dialogs,
-                 dialogCaller, thumbnailMenu) {
+    ], function (Chart, theme, PiePlot, MoveSlice, Button,
+                 dialogs, dialogCaller, thumbnailMenu) {
 
         // Create the chart within it's "holding" node
         var pieChart = new Chart('project_summary_chart1');

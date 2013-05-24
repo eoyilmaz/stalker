@@ -77,7 +77,7 @@ def create_structure(request):
     custom_template = request.params.get('custom_template')
     ft_ids = get_multi_integer(request, 'filename_templates')
     fts = FilenameTemplate.query.filter(FilenameTemplate.id.in_(ft_ids)).all()
-    
+
     if name and custom_template:
         # create a new structure
         new_structure = Structure(

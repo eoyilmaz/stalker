@@ -58,28 +58,28 @@ class ReferenceMixinTester(unittest2.TestCase):
         self.test_link1 = Link(
             name="Test Link 1",
             type=self.test_link_type,
-            path="test_path",
+            full_path="test_path",
             filename="test_filename",
         )
 
         self.test_link2 = Link(
             name="Test Link 2",
             type=self.test_link_type,
-            path="test_path",
+            full_path="test_path",
             filename="test_filename",
         )
 
         self.test_link3 = Link(
             name="Test Link 3",
             type=self.test_link_type,
-            path="test_path",
+            full_path="test_path",
             filename="test_filename",
         )
 
         self.test_link4 = Link(
             name="Test Link 4",
             type=self.test_link_type,
-            path="test_path",
+            full_path="test_path",
             filename="test_filename",
         )
 
@@ -181,7 +181,7 @@ class ReferenceMixinTester(unittest2.TestCase):
             code='image',
             target_entity_type="Link"
         )
-        new_link = Link(name="NewTestLink", path="nopath",
+        new_link = Link(name="NewTestLink", full_path="nopath",
                         filename="nofilename", type=image_link_type)
 
         test_value = [new_link]

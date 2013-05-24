@@ -982,10 +982,10 @@ class ShotTester(unittest2.TestCase):
             target_entity_type="Link"
         )
 
-        link1 = Link(name="Artwork 1", path="/mnt/M/JOBs/TEST_PROJECT",
+        link1 = Link(name="Artwork 1", full_path="/mnt/M/JOBs/TEST_PROJECT",
                      filename="a.jpg", type=link_type_1)
 
-        link2 = Link(name="Artwork 2", path="/mnt/M/JOBs/TEST_PROJECT",
+        link2 = Link(name="Artwork 2", full_path="/mnt/M/JOBs/TEST_PROJECT",
                      filename="b.jbg", type=link_type_1)
 
         references = [link1, link2]

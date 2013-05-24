@@ -31,28 +31,28 @@ view_config(
 def upload_reference(request):
     """called when uploading a reference
     """
-    
+
     entity_id = request.matchdict.get('entity_id')
     entity = Entity.query.filter_by(id=entity_id).first()
-    
+
     # check if entity accepts references
     try:
         if not entity.accepts_references:
             raise HTTPServerError()
     except AttributeError as e:
         raise HTTPServerError(msg=e.message)
-    
+
     filename, file_path = upload_file_to_server(request, 'link')
-    
+
     # create a Link and assign it to the given Referencable Entity
     new_link = Link(
-        path = file_path,
+        full_path= file_path,
         original_filename=filename
     )
-    
+
     # assign it as a reference
     entity.references.append(new_link)
-    
+
     DBSession.add(new_link)
-    
+
     return HTTPOk()

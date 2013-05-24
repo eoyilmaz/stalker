@@ -17,25 +17,21 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
-import datetime
-from pyramid.httpexceptions import HTTPOk
-
-from pyramid.security import authenticated_userid
-from pyramid.view import view_config
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm.exc import DetachedInstanceError
-import transaction
-
-from stalker.db import DBSession
-from stalker import User, FilenameTemplate, Type, EntityType
 
 import logging
+import datetime
+
+from pyramid.httpexceptions import HTTPOk
+from pyramid.view import view_config
+
+from stalker.db import DBSession
+from stalker import FilenameTemplate
+
 from stalker import log
 from stalker.views import PermissionChecker, get_logged_in_user
 
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
-
 
 @view_config(
     route_name='dialog_create_filename_template',
@@ -46,7 +42,7 @@ def dialog_create_filename_template(request):
     """
     # for now prepare the data by hand
     entity_types = ['Asset', 'Shot', 'Sequence', 'Project', 'Task']
-    
+
     return {
         'mode': 'CREATE',
         'has_permission': PermissionChecker(request),
@@ -64,10 +60,10 @@ def dialog_update_filename_template(request):
     # get the filename template
     ft_id = request.matchdict['ft_id']
     ft = FilenameTemplate.query.filter_by(id=ft_id).first()
-    
+
     # for now prepare the data by hand
     entity_types = ['Asset', 'Shot', 'Sequence', 'Project', 'Task']
-    
+
     return {
         'mode': 'UPDATE',
         'has_permission': PermissionChecker(request),
@@ -82,7 +78,7 @@ def create_filename_template(request):
     """creates a new FilenameTemplate
     """
     logged_in_user = get_logged_in_user(request)
-    
+
     # get parameters
     name = request.params.get('name')
     target_entity_type = request.params.get('target_entity_type')
@@ -98,7 +94,7 @@ def create_filename_template(request):
             created_by=logged_in_user
         )
         DBSession.add(new_ft)
-    
+
     return HTTPOk()
 
 
@@ -109,7 +105,7 @@ def update_filename_template(request):
     """updates a FilenameTemplate instance
     """
     logged_in_user = get_logged_in_user(request)
-    
+
     name = request.params.get('name')
     path = request.params.get('path')
     filename = request.params.get('filename')
@@ -120,10 +116,10 @@ def update_filename_template(request):
         ft.name = name
         ft.path = path
         ft.filename = filename
-        
+
         ft.updated_by = logged_in_user
         ft.date_updated = datetime.datetime.now()
-        
+
         DBSession.add(ft)
 
     return HTTPOk()
