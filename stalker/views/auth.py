@@ -521,19 +521,23 @@ def forbidden(request):
     return {}
 
 
-@view_config(route_name='home',
-            renderer='templates/base.jinja2')
-@view_config(route_name='me_menu',
-             renderer='templates/auth/me_menu.jinja2')
+@view_config(
+    route_name='home',
+    renderer='templates/base.jinja2'
+)
+@view_config(
+    route_name='me_menu',
+    renderer='templates/auth/me_menu.jinja2'
+)
 def home(request):
     user = get_logged_in_user(request)
     studio = Studio.query.first()
     projects = Project.query.all()
-    
+
     logger.debug('user     : %s' % user)
     logger.debug('studio   : %s' % studio)
     logger.debug('projects : %s' % projects)
-    
+
     if not user:
         return logout(request)
     

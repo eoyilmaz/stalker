@@ -581,7 +581,7 @@ to::
   shot_version_template.filename_code = filename_code
   
   # now assign this template to our project structure
-  # do you remember the "structure1" we have created before
+  # do you save the "structure1" we have created before
   commercial_project_structure.templates.append(shot_version_template)
 
 Now Stalker knows "Kung-Fu". It can place any version related file to the
