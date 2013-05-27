@@ -200,12 +200,16 @@ def update_project(request):
 def view_projects(request):
     """runs when viewing all projects
     """
+
+    logged_in_user = get_logged_in_user(request)
+
     entity_id = request.matchdict['entity_id']
     entity = Entity.query.filter_by(id=entity_id).first()
 
     # just return all the projects
     return {
         'entity': entity,
+        'logged_in_user': logged_in_user,
         'has_permission': PermissionChecker(request)
     }
 

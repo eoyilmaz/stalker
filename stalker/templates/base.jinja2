@@ -167,13 +167,14 @@
         'stalker/dialogCaller',
         'stalker/dialogCreator',
         'stalker/teamMenuCreator',
+        'stalker/projectMenuItemCreator',
 
         'dojo/domReady!'
     ], function (BorderContainer, ContentPane, MenuBar, MenuBarItem,
                  MenuSeparator, PopupMenuBarItem, PopupMenuItem, MenuItem,
                  DropDownMenu, DropDownButton, TooltipDialog, popup, on,
                  JsonRest, Memory, fx, dialogs, dialogCaller, dialogCreator,
-                 teamMenuCreator) {
+                 teamMenuCreator, projectMenuItemCreator) {
 
         // ******************************************************************
         // create the BorderContainer and attach it to our appLayout div
@@ -370,10 +371,12 @@
 
         });
 
-        stalker_MenuBar.addChild(new PopupMenuBarItem({
-            label: "PROJECTS",
-            popup: projects_DropDownMenu
-        }));
+        stalker_MenuBar.addChild(
+                new PopupMenuBarItem({
+                    label: "PROJECTS",
+                    popup: projects_DropDownMenu
+                })
+        );
 
         // Project Menu
         var create_project_setting_DropDownMenu = function (pID) {
@@ -382,8 +385,10 @@
 
             });
 
+
             // --------
             // View Project
+
             project_setting_DropDownMenu.addChild(
                     new MenuItem({
                         label: 'View',
@@ -397,6 +402,8 @@
                         }
                     })
             );
+            var needSeparator1 = false;
+            var needSeparator2 = false;
 
             // --------
             {% if has_permission('Update_Project') %}
@@ -411,15 +418,25 @@
 
                         })
                 );
+                needSeparator1 = true;
+                needSeparator2 = true;
+
             {% endif %}
 
-            project_setting_DropDownMenu.addChild(
-                    new MenuSeparator({})
-            );
+
 
             // --------
             {% if has_permission('Create_Asset') %}
+
                 // Asset
+
+                if (needSeparator1) {
+                    project_setting_DropDownMenu.addChild(
+                            new MenuSeparator({})
+                    );
+                    needSeparator1 = false;
+                }
+
                 project_setting_DropDownMenu.addChild(
                         dialogCaller({
                             label: 'New Asset',
@@ -430,11 +447,19 @@
 
                         })
                 );
+
+                needSeparator2 = true;
             {% endif %}
 
             // --------
             {% if has_permission('Create_Sequence') %}
                 // Sequence
+                if (needSeparator1) {
+                    project_setting_DropDownMenu.addChild(
+                            new MenuSeparator({})
+                    );
+                    needSeparator1 = false;
+                }
                 project_setting_DropDownMenu.addChild(
                         dialogCaller({
                             label: 'New Sequence',
@@ -444,11 +469,20 @@
                             data_id: pID
                         })
                 );
+
+                needSeparator2 = true;
             {% endif %}
 
             // ----
             {% if has_permission('Create_Shot') %}
                 // Shot
+                if (needSeparator1) {
+                    project_setting_DropDownMenu.addChild(
+                            new MenuSeparator({})
+                    );
+                    needSeparator1 = false;
+
+                }
                 project_setting_DropDownMenu.addChild(
                         dialogCaller({
                             label: 'New Shot',
@@ -458,12 +492,16 @@
                             data_id: pID
                         })
                 );
+
+                needSeparator2 = true;
             {% endif %}
 
             {% if has_permission('Update_User') %}
-                project_setting_DropDownMenu.addChild(
-                        new MenuSeparator({})
-                );
+                if (needSeparator2) {
+                    project_setting_DropDownMenu.addChild(
+                            new MenuSeparator({})
+                    );
+                }
 
                 project_setting_DropDownMenu.addChild(
                         dialogCaller({
@@ -480,8 +518,70 @@
 
         };
 
+        var projectPopupMenuItem = function (mItem, dLabel, dId) {
 
-        var target = '/get/projects_byEntity/{{ logged_in_user.id }}';
+            if (mItem.classname != 'PopupMenuItem') {
+
+                return new PopupMenuItem({
+                    label: dLabel,
+                    dataId: dId,
+                    popup: create_project_setting_DropDownMenu(dId)
+                });
+
+            }
+            else {
+
+                return mItem;
+            }
+
+        }
+
+
+        var projectMenuItemCreator = function (dLabel, dId) {
+
+            var projectMenuItem = new MenuItem({
+                label: dLabel,
+                dataId: dId,
+                onClick: function () {
+                    central_content_pane.set(
+                            'href',
+                            'view/project/' + this.get('dataId')
+                    );
+                    central_content_pane.refresh();
+                }
+            })
+
+
+            {% if has_permission('Update_Project') %}
+                projectMenuItem = projectPopupMenuItem(projectMenuItem, dLabel, dId);
+            {% endif %}
+
+
+            // -----
+            {% if has_permission('Create_Asset') %}
+                // Asset
+                projectMenuItem = projectPopupMenuItem(projectMenuItem, dLabel, dId);
+            {% endif %}
+
+            // --------
+            {% if has_permission('Create_Sequence') %}
+                // Sequence
+                projectMenuItem = projectPopupMenuItem(projectMenuItem, dLabel, dId);
+            {% endif %}
+
+            // ----
+            {% if has_permission('Create_Shot') %}
+                // Shot
+                projectMenuItem = projectPopupMenuItem(projectMenuItem, dLabel, dId);
+
+            {% endif %}
+
+            return projectMenuItem;
+
+        }
+
+
+        var target = 'get/projects_byEntity/{{ logged_in_user.id }}';
 
         {% if has_permission('List_Project') %}
 
@@ -505,21 +605,20 @@
             // query new items
             var result = projects_memory.query().then(function (data) {
                 for (var i = 0; i < data.length; i++) {
-                    projects_DropDownMenu.addChild(
-                            new PopupMenuItem({
-                                label: data[i].name,
-                                dataId: data[i].id,
-                                popup: create_project_setting_DropDownMenu(data[i].id)
-                            })
-                    );
+                    projects_DropDownMenu.addChild(projectMenuItemCreator(data[i].name, data[i].id));
                 }
+                var needSeparator = false;
                 if (i > 0) {
-                    projects_DropDownMenu.addChild(
-                            new MenuSeparator({})
-                    );
+                    needSeparator = true;
+
                 }
 
                 {% if has_permission('Create_Project') %}
+                    if (needSeparator) {
+                        projects_DropDownMenu.addChild(
+                                new MenuSeparator({})
+                        );
+                    }
                     projects_DropDownMenu.addChild(
                             dialogCaller({
                                 label: 'New Project',
@@ -529,16 +628,18 @@
                                 related_field_updater: projects_DropDownMenu_updater
                             })
                     );
-
-                    projects_DropDownMenu.addChild(
-                            new MenuSeparator({})
-                    );
                 {% endif %}
 
 
 
                 // -----
                 {% if has_permission('Create_Asset') %}
+                    if (needSeparator) {
+                        projects_DropDownMenu.addChild(
+                                new MenuSeparator({})
+                        );
+                        needSeparator = false;
+                    }
                     // Asset
                     projects_DropDownMenu.addChild(
                             dialogCaller({
@@ -554,6 +655,13 @@
                 // --------
                 {% if has_permission('Create_Sequence') %}
                     // Sequence
+                    if (needSeparator) {
+                        projects_DropDownMenu.addChild(
+                                new MenuSeparator({})
+                        );
+                        needSeparator = false;
+                    }
+
                     projects_DropDownMenu.addChild(
                             dialogCaller({
                                 label: 'New Sequence',
@@ -567,6 +675,14 @@
                 // ----
                 {% if has_permission('Create_Shot') %}
                     // Shot
+
+                    if (needSeparator) {
+                        projects_DropDownMenu.addChild(
+                                new MenuSeparator({})
+                        );
+                        needSeparator = false;
+                    }
+
                     projects_DropDownMenu.addChild(
                             dialogCaller({
                                 label: 'New Shot',
@@ -637,6 +753,7 @@
 
         stalker_MenuBar.startup();
 
+
         // ******************************************************************
         // ME BAR
         var mebar_tooltipDialog = new TooltipDialog({
@@ -655,7 +772,7 @@
             dialog_id: 'update_user_dialog',
             content_creator: dialogs.update_user_dialog,
             attach_to: 'settings_button',
-            data_id: {{ logged_in_user.id }}
+            data_id: '{{ logged_in_user.id }}'
         });
         settings_button.startup();
 

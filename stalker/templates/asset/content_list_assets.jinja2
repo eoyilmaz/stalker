@@ -42,10 +42,10 @@
         'stalker/dialogCaller',
         'dojo/domReady!'
     ], function (registry, ObjectStore, List, Grid, Selection, Keyboard,
-                 declare, editor, Memory, Select, JsonRest, dialogs, fieldUpdater,
-                 dialogCaller) {
+                 declare, editor, Memory, Select, JsonRest, dialogs,
+                 fieldUpdater, dialogCaller) {
 
-         var StandardGrid = declare([Grid, Selection, Keyboard]);
+        var StandardGrid = declare([Grid, Selection, Keyboard]);
         var asset_data_grid = new StandardGrid({
             id: 'assets_data_grid',
             width: '100%',
@@ -86,17 +86,17 @@
 
                 var columns = [
 
-                            {
-                                label: "Thumbnail",
-                                field: 'thumbnail',
-                                sortable: false,
-                                get: function (object) {
-                                    return object; // return entire item for formatter to use
-                                },
-                                formatter: function (value) {
-                                    return '<img width= "100px"; src="{{ request.static_url("stalker:static/stalker/images/Placeholder_shot.png") }}">';
-                                }
-                            },
+                    {
+                        label: "Thumbnail",
+                        field: 'thumbnail',
+                        sortable: false,
+                        get: function (object) {
+                            return object; // return entire item for formatter to use
+                        },
+                        formatter: function (value) {
+                            return '<img width= "100px"; src="{{ request.static_url("stalker:static/stalker/images/Placeholder_shot.png") }}">';
+                        }
+                    },
 
                     {
                         field: 'status',
@@ -122,9 +122,18 @@
                         },
                         formatter: function (value) {
 
-                            var targetPane = "'assets_content_pane'";
-                            var address = "'view/asset/" + value.id + "'";
-                            return '<a href="javascript:redirectLinkInParent(' + targetPane + ',' + address + ');">' + value.name + '</a>';
+                            {% if has_permission('Read_Asset')%}
+
+                                var targetPane = "'assets_content_pane'";
+                                var address = "'view/asset/" + value.id + "'";
+                                return '<a href="javascript:redirectLinkInParent(' + targetPane + ',' + address + ');">' + value.name + '</a>';
+
+                            {% else %}
+
+                                return  value.name;
+
+                            {% endif %}
+
                         }
                     },
                     {
@@ -139,10 +148,19 @@
                         },
                         formatter: function (value) {
 
-                            var targetPane = "'central_content'";
-                            var address = "'view/user/" + value.user_id + "'";
+                            {% if has_permission('Read_User')%}
 
-                            return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.user_name + '</a>';
+
+                                var targetPane = "'central_content'";
+                                var address = "'view/user/" + value.user_id + "'";
+
+                                return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.user_name + '</a>';
+                            {% else %}
+
+                                return  value.user_name;
+
+                            {% endif %}
+
                         }
 
                     },

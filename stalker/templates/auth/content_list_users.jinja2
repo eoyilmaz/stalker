@@ -50,7 +50,7 @@
             autoHeight: true
         }, 'users_data_grid');
 
-        {% if has_permission('Update_User') %}
+        {% if has_permission('Update_'+entity.entity_type ) and has_permission('Update_User') %}
             var append_user_button = dialogCaller({
                 label: 'Append User',
                 dialog_id: 'append_user_dialog',
@@ -94,10 +94,15 @@
                         },
                         formatter: function (value) {
 
-                            var targetPane = "'central_content'";
-                            var address = "'view/user/" + value.id + "'";
+                            {% if has_permission('Read_User') %}
 
-                            return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.name + '</a><br/>(' + value.login + ')';
+                                var targetPane = "'central_content'";
+                                var address = "'view/user/" + value.id + "'";
+
+                                return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.name + '</a><br/>(' + value.login + ')';
+                            {% else %}
+                                return '<span>' + value.name + '</span><br/>(' + value.login + ')';
+                            {% endif %}
                         }
                     },
                     {

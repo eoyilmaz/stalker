@@ -37,21 +37,6 @@
                     style: 'padding: 0; margin:0;'
                 }, 'sequence_related_data_tab_container');
 
-                var tasks_content_pane = new ContentPane({
-                    title: 'Tasks',
-                    href: 'list/tasks/{{ sequence.id }}'
-                });
-
-                var tickets_content_pane = new ContentPane({
-                    title: 'Tickets',
-                    content: 'list/tickets/{{ sequence.id }}'
-                });
-
-                var versions_content_pane = new ContentPane({
-                    title: 'Versions',
-                    href: 'list/versions/{{ sequence.id }}'
-                });
-
                 var summary_content_pane = new ContentPane({
                     title: 'Overview',
                     href: 'summarize/sequence/{{ sequence.id }}',
@@ -60,9 +45,31 @@
 
 
                 sequence_related_data_tab_container.addChild(summary_content_pane);
-                sequence_related_data_tab_container.addChild(tasks_content_pane);
-                sequence_related_data_tab_container.addChild(tickets_content_pane);
-                sequence_related_data_tab_container.addChild(versions_content_pane);
+
+                {% if has_permission('List_Task') %}
+                    var tasks_content_pane = new ContentPane({
+                        title: 'Tasks',
+                        href: 'list/tasks/{{ sequence.id }}'
+                    });
+                    sequence_related_data_tab_container.addChild(tasks_content_pane);
+                {% endif %}
+
+                {% if has_permission('List_Ticket') %}
+                    var tickets_content_pane = new ContentPane({
+                        title: 'Tickets',
+                        content: 'list/tickets/{{ sequence.id }}'
+                    });
+                    sequence_related_data_tab_container.addChild(tickets_content_pane);
+                {% endif %}
+
+                {% if has_permission('List_Version') %}
+                    var versions_content_pane = new ContentPane({
+                        title: 'Versions',
+                        href: 'list/versions/{{ sequence.id }}'
+                    });
+                    sequence_related_data_tab_container.addChild(versions_content_pane);
+                {% endif %}
+
                 sequence_related_data_tab_container.startup();
 
                 sequence_BorderContainer.addChild(nav_bar_content_pane);

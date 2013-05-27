@@ -117,11 +117,18 @@
                                     return object; // return entire item for formatter to use
                                 },
                                 formatter: function (value) {
+                                    {% if has_permission('Read_Shot')%}
 
-                                    var targetPane = "'shots_content_pane'";
-                                    var address = "'view/shot/" + value.id + "'";
+                                        var targetPane = "'shots_content_pane'";
+                                        var address = "'view/shot/" + value.id + "'";
 
-                                    return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.name + '</a>';
+                                        return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.name + '</a>';
+                                    {% else %}
+
+                                        return  value.user_name;
+
+                                    {% endif %}
+
                                 }
                             },
                             {
@@ -132,10 +139,17 @@
                                 },
                                 formatter: function (value) {
 
-                                    var targetPane = "'central_content'";
-                                    var address = "'view/user/" + value.user_id + "'";
+                                    {% if has_permission('Read_User')%}
 
-                                    return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.user_name + '</a>';
+                                        var targetPane = "'central_content'";
+                                        var address = "'view/user/" + value.user_id + "'";
+
+                                        return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.user_name + '</a>';
+                                    {% else %}
+
+                                        return  value.user_name;
+
+                                    {% endif %}
                                 }
                             },
                             {

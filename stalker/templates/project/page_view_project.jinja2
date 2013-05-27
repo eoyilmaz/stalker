@@ -45,7 +45,8 @@
         'dojox/layout/ContentPane',
 
         'dojo/domReady!'],
-            function (registry, on, BorderContainer, TabContainer, ContentPane) {
+            function (registry, on, BorderContainer, TabContainer,
+                      ContentPane) {
 
 
                 // **********************************************************************
@@ -61,21 +62,21 @@
                 }, 'project_border_container');
 
 
-                var title_content_pane = new ContentPane({
-                    title: 'Title',
-                    content: '<div style="background-color: #eeeeee; text-align: center"><h3><strong>{{ project.name }} ({{ project.code }})</strong></h3></div>',
-                    region: 'top',
-                    splitter: true,
-                    resizable: false,
-                    style: 'width:100%; height:30px; padding: 0; background-color: #eeeeee;'
-                }, 'project_title');
+{#                var title_content_pane = new ContentPane({#}
+{#                    title: 'Title',#}
+{#                    content: '<div style="background-color: #eeeeee; text-align: center"><h3><strong>{{ project.name }} ({{ project.code }})</strong></h3></div>',#}
+{#                    region: 'top',#}
+{#                    splitter: true,#}
+{#                    resizable: false,#}
+{#                    style: 'width:100%; height:30px; padding: 0; background-color: #eeeeee;'#}
+{#                }, 'project_title');#}
 
                 var summary_content_pane = new ContentPane({
                     title: 'Summarize',
                     href: 'summarize/project/{{ project.id }}',
                     region: 'top',
                     splitter: true,
-                    style: 'width:100%; height:200px; padding: 0; background-color: #eeeeee;'
+                    style: 'width:100%; height:225px; padding: 0; background-color: #eeeeee;'
                 }, 'project_summary');
 
 
@@ -86,113 +87,131 @@
                     style: 'width:100%; background-color: #8ecfb0; padding: 0; margin:0;'
                 }, 'data_tab_container');
 
+                {% if has_permission('List_Task') %}
+                    var tasks_content_pane = new ContentPane({
+                        id: 'tasks_content_pane',
+                        title: 'Tasks',
+                        default_href: 'list/tasks/{{ project.id }}',
+                        href: 'list/tasks/{{ project.id }}',
+                        style: ' padding: 0; margin:0;'
+                    }, 'tasks_content_pane');
 
-                var tasks_content_pane = new ContentPane({
-                    id: 'tasks_content_pane',
-                    title: 'Tasks',
-                    default_href: 'list/tasks/{{ project.id }}',
-                    href: 'list/tasks/{{ project.id }}',
-                    style: ' padding: 0; margin:0;'
-                }, 'tasks_content_pane');
+                    project_related_data_tab_container.addChild(tasks_content_pane);
+                {% endif %}
 
-                var assets_content_pane = new ContentPane({
-                    id: 'assets_content_pane',
-                    title: 'Assets',
-                    default_href: 'list/assets/{{ project.id }}',
-                    href: 'list/assets/{{ project.id }}',
-                    style: ' padding: 0; margin:0;'
-                }, 'assets_content_pane');
 
-                var shots_content_pane = new ContentPane({
-                    id: 'shots_content_pane',
-                    title: 'Shots',
-                    default_href: 'list/shots/{{ project.id }}',
-                    href: 'list/shots/{{ project.id }}',
-                    style: ' padding: 0; margin:0;'
-                }, 'shots_content_pane');
+                {% if has_permission('List_Asset') %}
+                    var assets_content_pane = new ContentPane({
+                        id: 'assets_content_pane',
+                        title: 'Assets',
+                        default_href: 'list/assets/{{ project.id }}',
+                        href: 'list/assets/{{ project.id }}',
+                        style: ' padding: 0; margin:0;'
+                    }, 'assets_content_pane');
+                    project_related_data_tab_container.addChild(assets_content_pane);
+                {% endif %}
+                {% if has_permission('List_Shot') %}
+                    var shots_content_pane = new ContentPane({
+                        id: 'shots_content_pane',
+                        title: 'Shots',
+                        default_href: 'list/shots/{{ project.id }}',
+                        href: 'list/shots/{{ project.id }}',
+                        style: ' padding: 0; margin:0;'
+                    }, 'shots_content_pane');
 
-                var sequences_content_pane = new ContentPane({
-                    id: 'sequences_content_pane',
-                    title: 'Sequences',
-                    default_href: 'list/sequences/{{ project.id }}',
-                    href: 'list/sequences/{{ project.id }}',
-                    style: ' padding: 0; margin:0;'
-                }, 'sequences_content_pane');
+                    project_related_data_tab_container.addChild(shots_content_pane);
+                {% endif %}
+                {% if has_permission('List_Sequence') %}
+                    var sequences_content_pane = new ContentPane({
+                        id: 'sequences_content_pane',
+                        title: 'Sequences',
+                        default_href: 'list/sequences/{{ project.id }}',
+                        href: 'list/sequences/{{ project.id }}',
+                        style: ' padding: 0; margin:0;'
+                    }, 'sequences_content_pane');
 
-                var users_content_pane = new ContentPane({
-                    id: 'users_content_pane',
-                    title: 'Users',
-                    default_href: 'list/users/{{ project.id }}',
-                    href: 'list/users/{{ project.id }}',
-                    style: ' padding: 0; margin:0;'
-                });
+                    project_related_data_tab_container.addChild(sequences_content_pane);
+                {% endif %}
+                {% if has_permission('List_User') %}
+                    var users_content_pane = new ContentPane({
+                        id: 'users_content_pane',
+                        title: 'Users',
+                        default_href: 'list/users/{{ project.id }}',
+                        href: 'list/users/{{ project.id }}',
+                        style: ' padding: 0; margin:0;'
+                    });
 
-                var tickets_content_pane = new ContentPane({
-                    id: 'tickets_content_pane',
-                    title: 'Tickets',
-                    default_href: 'list/tickets/{{ project.id }}',
-                    content: 'list/tickets/{{ project.id }}',
-                    style: ' padding: 0; margin:0;'
-                });
+                    project_related_data_tab_container.addChild(users_content_pane);
 
-                var references_content_pane = new ContentPane({
-                    id: 'references_content_pane',
-                    title: 'References',
-                    default_href: 'list/sequences/{{ project.id }}',
-                    content: 'list/sequences/{{ project.id }}',
-                    style: ' padding: 0; margin:0;'
-                });
+                {% endif %}
+                {% if has_permission('List_Ticket') %}
+                    var tickets_content_pane = new ContentPane({
+                        id: 'tickets_content_pane',
+                        title: 'Tickets',
+                        default_href: 'list/tickets/{{ project.id }}',
+                        content: 'list/tickets/{{ project.id }}',
+                        style: ' padding: 0; margin:0;'
+                    });
 
-                project_related_data_tab_container.addChild(tasks_content_pane);
-                project_related_data_tab_container.addChild(assets_content_pane);
-                project_related_data_tab_container.addChild(shots_content_pane);
-                project_related_data_tab_container.addChild(sequences_content_pane);
-                project_related_data_tab_container.addChild(users_content_pane);
-                project_related_data_tab_container.addChild(tickets_content_pane);
-                project_related_data_tab_container.addChild(references_content_pane);
+                    project_related_data_tab_container.addChild(tickets_content_pane);
+                {% endif %}
+                {% if has_permission('List_Reference') %}
+                    var references_content_pane = new ContentPane({
+                        id: 'references_content_pane',
+                        title: 'References',
+                        default_href: 'list/sequences/{{ project.id }}',
+                        content: 'list/sequences/{{ project.id }}',
+                        style: ' padding: 0; margin:0;'
+                    });
+
+                    project_related_data_tab_container.addChild(references_content_pane);
+                {% endif %}
+
                 project_related_data_tab_container.startup();
 
 
-                project_content_BorderContainer.addChild(title_content_pane);
+                //project_content_BorderContainer.addChild(title_content_pane);
                 project_content_BorderContainer.addChild(summary_content_pane);
                 project_content_BorderContainer.addChild(project_related_data_tab_container);
                 project_content_BorderContainer.startup();
 
                 //var currentPane = tasks_content_pane;
 
-                var lSplitter_title = registry.byId("project_title")._splitterWidget;
-                on(lSplitter_title.domNode, 'click', function(){});
-                on(lSplitter_title.domNode, 'onmouseup', testFunction);
-
-                function testFunction(){
-
-                    alert('testFunction');
-
-                }
-
-                var lSplitter_summary = registry.byId("project_summary")._splitterWidget;
-                on(lSplitter_summary.domNode, 'click', hideSummary);
-
-                var summary_on = true;
-
-                function hideSummary() {
-
-                    project_content_BorderContainer.removeChild(summary_content_pane);
-
-                    on(lSplitter_title.domNode, 'click', showSummary);
-
-                }
-
-                function showSummary() {
-
-                    project_content_BorderContainer.addChild(summary_content_pane);
-
-                    on(lSplitter_title.domNode, 'click', function(){});
-
-                    lSplitter_summary = registry.byId("project_summary")._splitterWidget;
-                    on(lSplitter_summary.domNode, 'click', hideSummary);
-
-                }
+{#                var lSplitter_title = registry.byId("project_title")._splitterWidget;#}
+{#                on(lSplitter_title.domNode, 'click', function () {#}
+{#                });#}
+{#                on(lSplitter_title.domNode, 'click', testFunction);#}
+{##}
+{#                function testFunction() {#}
+{##}
+{#                    alert('testFunction');#}
+{##}
+{#                }#}
+{##}
+{#                var lSplitter_summary = registry.byId("project_summary")._splitterWidget;#}
+{#                on(lSplitter_summary.domNode, 'click', hideSummary);#}
+{##}
+{#                var summary_on = true;#}
+{##}
+{#                function hideSummary() {#}
+{##}
+{#                    project_content_BorderContainer.removeChild(summary_content_pane);#}
+{##}
+{#                    on(lSplitter_title.domNode, 'click', showSummary);#}
+{##}
+{#                }#}
+{##}
+{#                function showSummary() {#}
+{##}
+{#                    project_content_BorderContainer.addChild(summary_content_pane);#}
+{##}
+{#                    on(lSplitter_title.domNode, 'click', function () {#}
+{#                    });#}
+{##}
+{#                    lSplitter_summary = registry.byId("project_summary")._splitterWidget;#}
+{#                    on(lSplitter_summary.domNode, 'click', hideSummary);#}
+{##}
+{#                }#}
 
 
                 project_related_data_tab_container.watch("selectedChildWidget", function (name,

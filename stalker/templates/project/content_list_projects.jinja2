@@ -78,10 +78,18 @@
                         },
                         formatter: function (value) {
 
-                            var targetPane = "'central_content'";
-                            var address = "'view/project/" + value.id + "'";
+                            {% if has_permission('Read_Project') or  entity==logged_in_user%}
 
-                            return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.name + '</a>';
+                                var targetPane = "'central_content'";
+                                var address = "'view/project/" + value.id + "'";
+
+                                return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.name + '</a>';
+
+                            {% else %}
+
+                                return  value.name;
+
+                            {% endif %}
                         }
                     }
                 ];

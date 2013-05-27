@@ -100,10 +100,19 @@
                         },
                         formatter: function (value) {
 
-                            var targetPane = "'sequences_content_pane'";
-                            var address = "'view/sequence/" + value.id + "'";
 
-                            return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.name + '</a>';
+                            {% if has_permission('Read_Sequence')%}
+
+                                var targetPane = "'sequences_content_pane'";
+                                var address = "'view/sequence/" + value.id + "'";
+
+                                return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.name + '</a>';
+                            {% else %}
+
+                                return  value.name;
+
+                            {% endif %}
+
                         }
                     },
                     {
@@ -113,11 +122,17 @@
                             return object; // return entire item for formatter to use
                         },
                         formatter: function (value) {
+                            {% if has_permission('Read_User')%}
 
-                            var targetPane = "'central_content'";
-                            var address = "'view/user/" + value.user_id + "'";
+                                var targetPane = "'central_content'";
+                                var address = "'view/user/" + value.user_id + "'";
 
-                            return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.user_name + '</a>';
+                                return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.user_name + '</a>';
+                            {% else %}
+
+                                return  value.user_name;
+
+                            {% endif %}
                         }
                     }
                 ];

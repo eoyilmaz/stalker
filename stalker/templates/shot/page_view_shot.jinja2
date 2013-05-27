@@ -37,21 +37,6 @@
                     style: 'padding: 0; margin:0;'
                 }, 'shot_related_data_tab_container');
 
-                var tasks_content_pane = new ContentPane({
-                    title: 'Tasks',
-                    href: 'list/tasks/{{ shot.id }}'
-                });
-
-                var tickets_content_pane = new ContentPane({
-                    title: 'Tickets',
-                    content: 'list/tickets/{{ shot.id }}'
-                });
-
-                var versions_content_pane = new ContentPane({
-                    title: 'Versions',
-                    href: 'list/versions/{{ shot.id }}'
-                });
-
                 var summary_content_pane = new ContentPane({
                     title: 'Overview',
                     href: 'summarize/shot/{{ shot.id }}',
@@ -60,9 +45,34 @@
 
 
                 shot_related_data_tab_container.addChild(summary_content_pane);
-                shot_related_data_tab_container.addChild(tasks_content_pane);
-                shot_related_data_tab_container.addChild(tickets_content_pane);
-                shot_related_data_tab_container.addChild(versions_content_pane);
+
+                {% if has_permission('List_Task') %}
+                    var tasks_content_pane = new ContentPane({
+                        title: 'Tasks',
+                        href: 'list/tasks/{{ shot.id }}'
+                    });
+                    shot_related_data_tab_container.addChild(tasks_content_pane);
+
+                {% endif %}
+                {% if has_permission('List_Ticket') %}
+
+                    var tickets_content_pane = new ContentPane({
+                        title: 'Tickets',
+                        content: 'list/tickets/{{ shot.id }}'
+                    });
+                    shot_related_data_tab_container.addChild(tickets_content_pane);
+
+                {% endif %}
+                {% if has_permission('List_Version') %}
+
+                    var versions_content_pane = new ContentPane({
+                        title: 'Versions',
+                        href: 'list/versions/{{ shot.id }}'
+                    });
+                    shot_related_data_tab_container.addChild(versions_content_pane);
+
+                {% endif %}
+
                 shot_related_data_tab_container.startup();
 
                 shot_BorderContainer.addChild(nav_bar_content_pane);

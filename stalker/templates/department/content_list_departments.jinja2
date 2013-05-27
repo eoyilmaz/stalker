@@ -19,7 +19,9 @@
 #}
 <div id='view_departments'>
     {% if has_permission('Update_User') and has_permission('Update_Department') %}
-        <button id='view_departments_append_department_button'>Append Department</button>
+        <button id='view_departments_append_department_button'>Append
+            Department
+        </button>
     {% endif %}
     <div id='departments_data_grid'></div>
 </div>
@@ -41,8 +43,8 @@
         'stalker/dialogCaller',
 
         'dojo/domReady!'
-    ], function (Memory, JsonRest, ObjectStore, List, Grid, Selection, Keyboard, declare, dialogs,
-                 fieldUpdater, dialogCaller) {
+    ], function (Memory, JsonRest, ObjectStore, List, Grid, Selection,
+                 Keyboard, declare, dialogs, fieldUpdater, dialogCaller) {
 
         var StandardGrid = declare([Grid, Selection, Keyboard]);
         var departments_DataGrid = new StandardGrid({
@@ -92,10 +94,16 @@
                         },
                         formatter: function (value) {
 
-                            var targetPane = "'central_content'";
-                            var address = "'view/department/" + value.id + "'";
+                            {% if has_permission('Read_Department') %}
+                                var targetPane = "'central_content'";
+                                var address = "'view/department/" + value.id + "'";
 
-                            return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.name + '</a>';
+                                return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.name + '</a>';
+
+                            {% else %}
+                                return  value.name;
+
+                            {% endif %}
                         }
                     }
                 ];

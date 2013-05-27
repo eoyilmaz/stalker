@@ -69,75 +69,80 @@
         }, 'data_tab_container');
 
 
-        var tasks_content_pane = new ContentPane({
-            title: 'Tasks',
-            href: 'list/tasks/{{ user.id }}',
-            default_href: 'list/tasks/{{ user.id }}',
-            style: ' padding: 0; margin:0;'
-        }, 'tasks_content_pane');
+        {% if has_permission('List_Ticket') %}
+            var tasks_content_pane = new ContentPane({
+                title: 'Tasks',
+                href: 'list/tasks/{{ user.id }}',
+                default_href: 'list/tasks/{{ user.id }}',
+                style: ' padding: 0; margin:0;'
+            }, 'tasks_content_pane');
+            user_related_data_tab_container.addChild(tasks_content_pane);
+
+        {% endif %}
+
+        {% if has_permission('List_Ticket') %}
+
+            var projects_content_pane = new ContentPane({
+                title: 'Projects',
+                href: 'list/projects/{{ user.id }}',
+                default_href: 'list/projects/{{ user.id }}',
+                style: ' padding: 0; margin:0;'
+            });
+            user_related_data_tab_container.addChild(projects_content_pane);
+        {% endif %}
+
+        {% if has_permission('List_Ticket') %}
+            var departments_content_pane = new ContentPane({
+                title: 'Departments',
+                href: 'list/departments/{{ user.id }}',
+                default_href: 'list/departments/{{ user.id }}',
+                style: ' padding: 0; margin:0;'
+            });
+
+            user_related_data_tab_container.addChild(departments_content_pane);
+
+        {% endif %}
+
+        {% if has_permission('List_Ticket') %}
+            var groups_content_pane = new ContentPane({
+                title: 'Permissions',
+                href: 'list/groups/{{ user.id }}',
+                default_href: 'list/groups/{{ user.id }}',
+                style: ' padding: 0; margin:0;'
+            });
+
+            user_related_data_tab_container.addChild(groups_content_pane);
+
+        {% endif %}
+
+        {% if has_permission('List_Ticket') %}
+            var tickets_content_pane = new ContentPane({
+                title: 'Tickets',
+                href: 'list/tickets/{{ user.id }}',
+                default_href: 'list/tickets/{{ user.id }}',
+                style: ' padding: 0; margin:0;'
+            });
+            user_related_data_tab_container.addChild(tickets_content_pane);
 
 
-        var projects_content_pane = new ContentPane({
-            title: 'Projects',
-            href: 'list/projects/{{ user.id }}',
-            default_href: 'list/projects/{{ user.id }}',
-            style: ' padding: 0; margin:0;'
-        });
+        {% endif %}
 
-        var departments_content_pane = new ContentPane({
-            title: 'Departments',
-            href: 'list/departments/{{ user.id }}',
-            default_href: 'list/departments/{{ user.id }}',
-            style: ' padding: 0; margin:0;'
-        });
+        {% if has_permission('List_Ticket') %}
+            var time_logs_content_pane = new ContentPane({
+                title: 'Time Logs',
+                href: 'list/time_logs/{{ user.id }}',
+                style: 'padding: 0; margin:0;'
+            });
+            user_related_data_tab_container.addChild(time_logs_content_pane);
 
-        var groups_content_pane = new ContentPane({
-            title: 'Permissions',
-            href: 'list/groups/{{ user.id }}',
-            default_href: 'list/groups/{{ user.id }}',
-            style: ' padding: 0; margin:0;'
-        });
+        {% endif %}
 
-        var tickets_content_pane = new ContentPane({
-            title: 'Tickets',
-            href: 'list/tickets/{{ user.id }}',
-            default_href: 'list/tickets/{{ user.id }}',
-            style: ' padding: 0; margin:0;'
-        });
-
-        var time_logs_content_pane = new ContentPane({
-            title: 'Time Logs',
-            href: 'list/time_logs/{{ user.id }}',
-            style: 'padding: 0; margin:0;'
-        });
-
-        user_related_data_tab_container.addChild(tasks_content_pane);
-        user_related_data_tab_container.addChild(tickets_content_pane);
-        user_related_data_tab_container.addChild(time_logs_content_pane);
-        user_related_data_tab_container.addChild(departments_content_pane);
-        user_related_data_tab_container.addChild(projects_content_pane);
-        user_related_data_tab_container.addChild(groups_content_pane);
 
         user_BorderContainer.addChild(user_related_data_tab_container);
 
         user_related_data_tab_container.startup();
         user_BorderContainer.startup();
 
-        {##}
-        {#        function refreshCurrentPane() {#}
-        {##}
-        {#            currentPane.refresh();#}
-        {##}
-        {#        }#}
-        {##}
-        {#        function init() {#}
-        {#            var lSplitter = registry.byId("user_border_container").getSplitter("top");#}
-        {#            on(lSplitter.domNode, 'mouseup', refreshCurrentPane);#}
-        {#        }#}
-        {##}
-        {#        init();#}
-        {##}
-        {#        var currentPane;#}
 
         user_related_data_tab_container.watch("selectedChildWidget", function (name,
                                                                                oval,
@@ -149,7 +154,6 @@
             nval.set('href', nval.default_href);
             nval.refresh();
 
-            //currentPane = nval;
         });
     });
 </script>

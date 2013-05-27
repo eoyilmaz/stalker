@@ -49,7 +49,6 @@
                 }, 'asset_nav_bar_content_pane');
 
 
-
                 // **********************************************************************
                 // Bottom Part - Complex Data View
                 var asset_related_data_tab_container = new TabContainer({
@@ -59,24 +58,6 @@
                     style: 'padding: 0; margin:0;'
                 }, 'asset_related_data_tab_container');
 
-                var tasks_content_pane = new ContentPane({
-                    title: 'Tasks',
-                    href: 'list/tasks/{{ asset.id  }}',
-                    style: 'width: 100%;'
-                });
-
-                var tickets_content_pane = new ContentPane({
-                    title: 'Tickets',
-                    content: 'list/tickets/{{ asset.id }}',
-                    style: 'width: 100%;'
-                });
-
-                var versions_content_pane = new ContentPane({
-                    title: 'Versions',
-                    href: 'list/versions/{{ asset.id }}',
-                    style: 'width: 100%;'
-                });
-
                 var summary_content_pane = new ContentPane({
                     title: 'Overview',
                     href: 'summarize/asset/{{ asset.id }}',
@@ -85,9 +66,34 @@
                 });
 
                 asset_related_data_tab_container.addChild(summary_content_pane);
-                asset_related_data_tab_container.addChild(tasks_content_pane);
-                asset_related_data_tab_container.addChild(tickets_content_pane);
-                asset_related_data_tab_container.addChild(versions_content_pane);
+
+                {% if has_permission('List_Task') %}
+                    var tasks_content_pane = new ContentPane({
+                        title: 'Tasks',
+                        href: 'list/tasks/{{ asset.id  }}',
+                        style: 'width: 100%;'
+                    });
+                    asset_related_data_tab_container.addChild(tasks_content_pane);
+                {% endif %}
+                {% if has_permission('List_Ticket') %}
+                    var tickets_content_pane = new ContentPane({
+                        title: 'Tickets',
+                        content: 'list/tickets/{{ asset.id }}',
+                        style: 'width: 100%;'
+                    });
+
+                    asset_related_data_tab_container.addChild(tickets_content_pane);
+                {% endif %}
+                {% if has_permission('List_Version') %}
+                    var versions_content_pane = new ContentPane({
+                        title: 'Versions',
+                        href: 'list/versions/{{ asset.id }}',
+                        style: 'width: 100%;'
+                    });
+
+                    asset_related_data_tab_container.addChild(versions_content_pane);
+                {% endif %}
+
 
 
                 asset_related_data_tab_container.startup();
@@ -95,8 +101,6 @@
                 asset_BorderContainer.addChild(nav_bar_content_pane);
                 asset_BorderContainer.addChild(asset_related_data_tab_container);
                 asset_BorderContainer.startup();
-
-
 
 
             });

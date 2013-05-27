@@ -65,22 +65,29 @@
 
         });
 
-        var permissions_content_pane = new ContentPane({
-            id: 'permission_content_pane',
-            title: 'Permissions',
-            href: 'list/permissions/{{ group.id }}',
-            style: 'padding: 0; margin:0;'
-        });
+        {% if has_permission('List_Permission') %}
+            var permissions_content_pane = new ContentPane({
+                id: 'permission_content_pane',
+                title: 'Permissions',
+                href: 'list/permissions/{{ group.id }}',
+                style: 'padding: 0; margin:0;'
+            });
 
-        var users_content_pane = new ContentPane({
-            title: 'Users',
-            href: 'list/users/{{ group.id }}',
-            style: 'padding: 0; margin:0;'
-        });
+            group_related_data_tab_container.addChild(permissions_content_pane);
+        {% endif %}
+
+        {% if has_permission('List_User') %}
+
+            var users_content_pane = new ContentPane({
+                title: 'Users',
+                href: 'list/users/{{ group.id }}',
+                style: 'padding: 0; margin:0;'
+            });
+
+            group_related_data_tab_container.addChild(users_content_pane);
+        {% endif %}
 
 
-        group_related_data_tab_container.addChild(users_content_pane);
-        group_related_data_tab_container.addChild(permissions_content_pane);
 
         group_BorderContainer.addChild(group_related_data_tab_container);
 
