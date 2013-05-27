@@ -35,9 +35,9 @@ from stalker.db.session import DBSession
 
 from stalker.log import logging_level
 import logging
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
-
 
 
 def setup(settings=None, callback=None):
@@ -58,28 +58,29 @@ def setup(settings=None, callback=None):
     if settings is None:
         settings = defaults.database_engine_settings
         logger.debug('no settings given, using the default: %s' % settings)
-    
+
     logger.debug("settings: %s" % settings)
     # create engine
     engine = engine_from_config(settings, 'sqlalchemy.')
-    
+
     logger.debug('engine: %s' % engine)
-    
+
     # create the Session class
     DBSession.remove()
     DBSession.configure(bind=engine)
-    
+
     # create the database
     logger.debug("creating the tables")
     Base.metadata.create_all(engine)
     #Base.metadata.bind = engine
-    
+
     # init database
     __init_db__()
-    
+
     # call callback function
     if callback:
         callback()
+
 
 def __init_db__():
     """fills the database with default values
@@ -93,7 +94,7 @@ def __init_db__():
         'Project', 'Repository', 'Scene', 'Sequence', 'Shot', 'SimpleEntity',
         'Status', 'StatusList', 'Structure', 'Studio', 'Tag', 'Task', 'Ticket',
         'TicketLog', 'Type', 'User', 'Version']
-    
+
     for class_name in class_names:
         _temp = __import__(
             'stalker',
@@ -104,99 +105,102 @@ def __init_db__():
         )
         class_ = eval("_temp." + class_name)
         register(class_)
-    
+
     # create the admin if needed
     if defaults.auto_create_admin:
         __create_admin__()
-    
+
     # create Ticket statuses
     __create_ticket_statuses()
-    
+
     # create FilenameTemplate Types
     # __create_filename_template_types()
-    
+
     ## create TimeLog Types
     #__create_time_log_types()
-    
+
     logger.debug('finished initializing the database')
+
 
 def __create_admin__():
     """creates the admin
     """
-    
+
     from stalker.models.auth import User
     from stalker.models.department import Department
-    
+
     # check if there is already an admin in the database
     if len(User.query
-        .filter_by(name=defaults.admin_name)
-        .all()) > 0:
+    .filter_by(name=defaults.admin_name)
+    .all()) > 0:
         #there should be an admin user do nothing
         logger.debug("there is an admin already")
         return
 
     logger.debug("creating the default administrator user")
-    
+
     # create the admin department
     admin_department = Department.query.filter_by(
         name=defaults.admin_department_name
     ).first()
-    
+
     if not admin_department:
         admin_department = Department(name=defaults.admin_department_name)
         DBSession.add(admin_department)
-    # create the admins group
-    
+        # create the admins group
+
     from stalker.models.auth import Group
-    
-    admins_group = Group.query\
-        .filter_by(name=defaults.admin_group_name)\
+
+    admins_group = Group.query \
+        .filter_by(name=defaults.admin_group_name) \
         .first()
-    
+
     if not admins_group:
         admins_group = Group(name=defaults.admin_group_name)
         DBSession.add(admins_group)
-    
+
     # create the admin user
-    admin = User.query\
-        .filter_by(name=defaults.admin_name)\
+    admin = User.query \
+        .filter_by(name=defaults.admin_name) \
         .first()
-    
+
     if not admin:
         admin = User(
             name=defaults.admin_name,
             code=defaults.admin_code,
             login=defaults.admin_login,
             password=defaults.admin_password,
-            email=defaults.admin_email,   
+            email=defaults.admin_email,
             departments=[admin_department],
             groups=[admins_group]
         )
-        
+
         admin.created_by = admin
         admin.updated_by = admin
-    
+
     # update the department as created and updated by admin user
     admin_department.created_by = admin
     admin_department.updated_by = admin
-    
+
     admins_group.created_by = admin
     admins_group.updated_by = admin
-    
+
     DBSession.add(admin)
     transaction.commit()
+
 
 def __create_ticket_statuses():
     """creates the default ticket statuses
     """
     from stalker import User
-    
-    admin = User.query.filter(User.login==defaults.admin_name).first()
-    
+
+    admin = User.query.filter(User.login == defaults.admin_name).first()
+
     # create statuses for Tickets
     from stalker import Status, StatusList
+
     logger.debug("Creating Ticket Statuses")
-    
+
     ticket_statuses = [
         Status(
             name=status_name.title(),
@@ -204,7 +208,7 @@ def __create_ticket_statuses():
             created_by=admin,
             updated_by=admin
         ) for status_name in defaults.ticket_status_order]
-    
+
     ticket_status_list = StatusList(
         name='Ticket Statuses',
         target_entity_type='Ticket',
@@ -212,7 +216,7 @@ def __create_ticket_statuses():
         created_by=admin,
         updated_by=admin
     )
-    
+
     DBSession.add(ticket_status_list)
     try:
         transaction.commit()
@@ -222,14 +226,15 @@ def __create_ticket_statuses():
     else:
         logger.debug("Created Ticket Statuses successfully")
         DBSession.flush()
-    
+
     # Again I hate doing this in this way
     from stalker import Type
-    types = Type.query\
-        .filter_by(target_entity_type="Ticket")\
+
+    types = Type.query \
+        .filter_by(target_entity_type="Ticket") \
         .all()
     t_names = [t.name for t in types]
-    
+
     # create Ticket Types
     logger.debug("Creating Ticket Types")
     if 'Defect' not in t_names:
@@ -241,7 +246,7 @@ def __create_ticket_statuses():
             updated_by=admin
         )
         DBSession.add(ticket_type_1)
-    
+
     if 'Enhancement' not in t_names:
         ticket_type_2 = Type(
             name='Enhancement',
@@ -260,6 +265,7 @@ def __create_ticket_statuses():
         DBSession.flush()
         logger.debug("Ticket Types are created successfully")
 
+
 def __create_time_log_types():
     """Creates two default :class:`~stalker.models.type.Type`\ s for
     :class:`~stalker.models.task.TimeLog` objects.
@@ -267,9 +273,9 @@ def __create_time_log_types():
     TODO: still evaluating if this is needed
     """
     from stalker import TimeLog, Type, User
-    
+
     admin = User.query.filter_by(login=defaults.admin_name).first()
-    
+
     # Normal
     logger.debug('Creating TimeLog.type "Normal"')
     normal_type = Type(
@@ -279,7 +285,7 @@ def __create_time_log_types():
         created_by=admin
     )
     DBSession.add(normal_type)
-    
+
     logger.debug('Creating TimeLog.type "Extra"')
     extra_type = Type(
         name='Extra',
@@ -396,18 +402,18 @@ def register(class_):
     """
     from pyramid.security import Allow, Deny
     from stalker.models.auth import Permission
-    
+
     # create the Permissions
     permissions_db = Permission.query.all()
-    
+
     if not isinstance(class_, type):
         raise TypeError('To register a class please supply the class itself ')
-    
+
     # register the class name to entity_types table
     from stalker import EntityType, StatusMixin, ScheduleMixin, ReferenceMixin
-    
+
     class_name = class_.__name__
-    
+
     if not EntityType.query.filter_by(name=class_name).first():
         new_entity_type = EntityType(class_name)
         # update attributes
@@ -417,15 +423,15 @@ def register(class_):
             new_entity_type.schedulable = True
         if issubclass(class_, ReferenceMixin):
             new_entity_type.accepts_references = True
-        
+
         DBSession.add(new_entity_type)
-    
+
     for action in defaults.actions:
-        for access in  [Allow, Deny]:
+        for access in [Allow, Deny]:
             permission_obj = Permission(access, action, class_name)
             if permission_obj not in permissions_db:
                 DBSession.add(permission_obj)
-    
+
     try:
         transaction.commit()
     except IntegrityError:

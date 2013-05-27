@@ -19,6 +19,8 @@ Stalker Changes
   * New: Added a new class called LocalSession to store session data in users
     local filesystem. Though it is going to be replaced with some other system
     like Beaker.
+  * Fix: Database part of Stalker can now be imported without depending to
+    Pyramid.
 
 0.2.0.b4
 --------

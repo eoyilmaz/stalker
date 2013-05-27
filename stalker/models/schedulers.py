@@ -24,9 +24,6 @@ import tempfile
 import datetime
 import csv
 
-from jinja2 import Template
-import transaction
-
 import stalker
 from stalker import log, Entity
 from stalker import defaults
@@ -114,6 +111,7 @@ class TaskJugglerScheduler(SchedulerBase):
     def _create_tjp_file_content(self):
         """creates the tjp file content
         """
+        from jinja2 import Template
         template = Template(defaults.tjp_main_template)
         
         self.tjp_content = template.render({
@@ -156,6 +154,8 @@ class TaskJugglerScheduler(SchedulerBase):
         computed end values
         """
         logger.debug('csv_file_full_path : %s' % self.csv_file_full_path)
+        
+        import transaction
         
         with open(self.csv_file_full_path, 'r') as self.csv_file:
             csv_content = csv.reader(self.csv_file, delimiter=';')
