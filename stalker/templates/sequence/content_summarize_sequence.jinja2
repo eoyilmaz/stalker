@@ -3,10 +3,10 @@
     {# Avatar #}
     <div id='sequence_thumbnail' class='thumbnail'>
         {% if not sequence.thumbnail %}
-        <img src='{{ request.static_url("stalker:static/stalker/images/Placeholder_shot.png") }}'
-             alt=''
-             style='width:120px;'>
-    {% endif %}
+            <img src='{{ request.static_url("stalker:static/stalker/images/Placeholder_shot.png") }}'
+                 alt=''
+                 style='width:120px;'>
+        {% endif %}
     </div>
 
     <div id='sequence_summary_chart1'
@@ -24,7 +24,15 @@
                 <td style='text-align: right'><strong>Project</strong></td>
                 <td>&nbsp;</td>
                 <td>
-                    <a href="javascript:redirectLink('central_content','view/project/{{ sequence.project.id }}');">{{ sequence.project.name }}</a>
+                    {% if has_permission('Read_Project') %}
+                        <a href="javascript:redirectLink('central_content',
+                      'view/project/{{ sequence.project.id }}');">
+                            {{ sequence.project.name }}
+                        </a>
+                    {% else %}
+                        {{ sequence.project.name }}
+                    {% endif %}
+
                 </td>
             </tr>
             <tr>
@@ -41,17 +49,24 @@
                 <td style='text-align: right'><strong>Created By</strong></td>
                 <td>&nbsp;</td>
                 <td>
-                    <a href="javascript:redirectLink('central_content','view/user/{{ sequence.created_by.id }}');">{{ sequence.created_by.name }}</a>
+                    {% if has_permission('Read_User') %}
+                        <a href="javascript:redirectLink('central_content',
+                        'view/user/{{ sequence.created_by.id }}');">
+                            {{ sequence.created_by.name }}
+                        </a>
+                    {% else %}
+                        {{ sequence.created_by.name }}
+                    {% endif %}
                 </td>
             </tr>
             <tr>
                 <td style='text-align: right'></td>
                 <td>&nbsp;</td>
                 <td>
-					{% if has_permission('Update_Sequence') %}
-                     <button id='update_sequence_button'>Update</button>
-					{% endif %}                
-				</td>
+                    {% if has_permission('Update_Sequence') %}
+                        <button id='update_sequence_button'>Update</button>
+                    {% endif %}
+                </td>
             </tr>
         </table>
     </div>
@@ -112,7 +127,7 @@
                 dialog_id: 'update_sequence_dialog',
                 content_creator: dialogs.update_sequence_dialog,
                 attach_to: 'update_sequence_button',
-				related_field_updater: sequence_summary_updater,
+                related_field_updater: sequence_summary_updater,
                 data_id: {{ sequence.id }}
             });
             update_sequence_button.startup();

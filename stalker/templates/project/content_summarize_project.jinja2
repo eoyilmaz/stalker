@@ -20,7 +20,7 @@
 
 <div style="background-color: #eeeeee; text-align: center">
     <h3>
-      <strong>{{ project.name }} ({{ project.code }})</strong>
+        <strong>{{ project.name }} ({{ project.code }})</strong>
     </h3>
 </div>
 
@@ -35,8 +35,8 @@
                  style='width:192px; height: auto;'>
         {% else %}
             <img src='{{ project.thumbnail.full_path }}'
-                alt=''
-                style='width:192px; height: auto;'>
+                 alt=''
+                 style='width:192px; height: auto;'>
         {% endif %}
         <div class='thumbnail_menu'>&nbsp</div>
     </div>
@@ -50,7 +50,14 @@
                 <td style='text-align: right'><strong>Lead</strong></td>
                 <td>&nbsp;</td>
                 <td>
-                    <a href="javascript:redirectLink('central_content', 'view/user/{{ project.lead.id }}');">{{ project.lead.name }}</a>
+                    {% if has_permission('Read_User') %}
+                        <a href="javascript:redirectLink('central_content',
+                        'view/user/{{ project.lead.id }}');">
+                            {{ project.lead.name }}
+                        </a>
+                    {% else %}
+                        {{ project.lead.name }}
+                    {% endif %}
                     ({{ project.lead.login }})
                 </td>
             </tr>
@@ -120,8 +127,8 @@
         'stalker/thumbnailMenu',
 
         'dojo/domReady!'
-    ], function (Chart, theme, PiePlot, MoveSlice, Button,
-                 dialogs, dialogCaller, thumbnailMenu) {
+    ], function (Chart, theme, PiePlot, MoveSlice, Button, dialogs,
+                 dialogCaller, thumbnailMenu) {
 
         // Create the chart within it's "holding" node
         var pieChart = new Chart('project_summary_chart1');

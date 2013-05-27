@@ -314,6 +314,11 @@ require([
             status_field_updater({animate: true});
 
 
+            {% if not has_permission('Create_Status') %}
+                sequence_add_status_button.set('disabled', true);
+            {% endif %}
+
+
             // **********************************************************************
             // Submit Button
             var submit_button = new Button({

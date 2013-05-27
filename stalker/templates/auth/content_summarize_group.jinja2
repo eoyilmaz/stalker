@@ -46,7 +46,14 @@
                 </td>
                 <td>&nbsp;</td>
                 <td>
-                    <a href="javascript:redirectLink('central_content','view/user/{{ group.created_by.id }}');">{{ group.created_by.name }}</a>
+                    {% if has_permission('Read_User') %}
+                        <a href="javascript:redirectLink('central_content',
+                        'view/user/{{ group.created_by.id }}');">
+                            {{ group.created_by.name }}
+                        </a>
+                    {% else %}
+                        {{ group.created_by.name }}
+                    {% endif %}
                 </td>
             </tr>
             <tr>
@@ -83,7 +90,7 @@
 
             // Refresh the Permission Tab if it is visible
             var permission_tab = registry.byId('permission_content_pane');
-             permission_tab.refresh();
+            permission_tab.refresh();
         };
 
         {% if has_permission('Update_Group') %}

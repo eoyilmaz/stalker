@@ -31,7 +31,14 @@
                 <td style='text-align: right'><strong>Project</strong></td>
                 <td>&nbsp;</td>
                 <td>
-                    <a href="javascript:redirectLink('central_content','view/project/{{ shot.project.id }}');">{{ shot.project.name }}</a>
+                    {% if has_permission('Read_Project') %}
+                        <a href="javascript:redirectLink('central_content',
+                        'view/project/{{ shot.project.id }}');">
+                            {{ shot.project.name }}
+                        </a>
+                    {% else %}
+                        {{ shot.project.name }}
+                    {% endif %}
                 </td>
             </tr>
             <tr>
@@ -43,7 +50,14 @@
                 <td style='text-align: right'><strong>Created By</strong></td>
                 <td>&nbsp;</td>
                 <td>
-                    <a href="javascript:redirectLink('central_content','view/user/{{ shot.created_by.id }}');">{{ shot.created_by.name }}</a>
+                    {% if has_permission('Read_User') %}
+                        <a href="javascript:redirectLink('central_content',
+                        'view/user/{{ shot.created_by.id }}');">
+                            {{ shot.created_by.name }}
+                        </a>
+                    {% else %}
+                        {{ shot.created_by.name }}
+                    {% endif %}
                 </td>
             </tr>
             <tr>
