@@ -3,9 +3,10 @@ Stalker Changes
 ===============
 
 0.2.0.b5
---------
+========
 
 * SOM:
+
   * New: Version class now has two new attributes called ``parent`` and
     ``children`` which will be used in tracking of the history of Version
     instances and track which Versions are derived from which Version.
@@ -21,11 +22,13 @@ Stalker Changes
     like Beaker.
   * Fix: Database part of Stalker can now be imported without depending to
     Pyramid.
+  * Fix: Fixed documentation errors that Sphinx complained about.
 
 0.2.0.b4
---------
+========
 
 * WebUI:
+
   * Fix: Fixed the error in rendering of the **home** occurred when there is no
     user login information found in the request.
   * New: User thumbnails now can be changed.
@@ -52,9 +55,10 @@ Stalker Changes
   * Add: Permission controls are added to 'Dialog' and 'Summary' files.
 
 0.2.0.b3
---------
+========
 
 * SOM:
+
   * Update: FilenameTemplate's are not ``strictly typed`` anymore.
   * Update: Removed the FilenameTemplate type initialization, FilenameTemplates
     do not depend on Types anymore.
@@ -67,7 +71,9 @@ Stalker Changes
   * New: Added **alembic** to the project requirements.
   * New: Added alembic migrations which adds the ``accepts_references`` column
     to ``EntityTypes`` table and ``original_name`` to the ``Links`` table.
+
 * WebUI:
+
   * Update: Updated to Dojo 1.9
   * Update: stalker.js is renamed to dialogs.js and it is now fully compatible
     with Dojo AMD.
@@ -100,26 +106,34 @@ Stalker Changes
   * Update: Description field is added to Department dialog.
 
 0.2.0.b2
---------
+========
 
 * Stalker is now compatible with Python 2.6.
 * SOM:
+
   * Task:
+  
     * Update: Tasks now have a new attribute called ``watchers`` which holds a
       list of User instances watching the particular Task.
     * Update: Users now have a new attribute called ``watching`` which is a
       list of Task instances that this user is watching.
+
   * TimeLog:
+
     * Update: TimeLog instances will expand Task.schedule_timing value
       automatically if the total amount of logged time is more than the
       schedule_timing value.
     * Update: TimeLogs are now considered while scheduling the task.
     * Fix: TimeLogs raises OverBookedError when appending the same TimeLog
       instance to the same resource.
+
   * Auth:
+
     * Fix: The default ACLs for determining the permissions are now working
       properly.
+
 * WebUI:
+
   * Fix: ``user_create_dialog`` now shows and updates groups.
   * Fix: Updating a project now correctly refreshes the ``project_summary``
     content pane.
@@ -129,7 +143,8 @@ Stalker Changes
   * Fix: The working hours were not correctly passed to the studio instance
     in Studio creation.
   * Fix: "Append User Dialog" is now working properly.
-* Fix: Links between pages is created with redirectLink function which is
+
+  * Fix: Links between pages is created with redirectLink function which is
     written in base.jinja2. goToLink.js is deprecated, but still there are some
     codes that uses gotolink.js, they must be changed for next update.
   * Update: Combined ``user_create_dialog`` and ``user_update_dialog`` into
@@ -155,7 +170,9 @@ Stalker Changes
   * Add: Append department and append group pages has connected to database.
   * Add: Timelog List page added.
   * Add: New placeholders added for different type of object.
+
 * jQueryGantt:
+
   * Update: Replaced the ``duration`` column with ``timing`` which correctly
     shows the schedule timing info of the related task.
   * Fix: The ``depends`` column shows the dependent task names correctly.
@@ -168,7 +185,7 @@ Stalker Changes
     the Task class.
 
 0.2.0.b1
---------
+========
 
 * WorkingHours.is_working_hour() is working now.
 * WorkingHours class is moved from stalker.models.project to
@@ -187,6 +204,7 @@ Stalker Changes
 * It is now possible to use any characters in SimpleEntity.name and the derived
   classes.
 * jQueryGantt:
+
   * Fix; t is now possible to correctly move a TaskBar without getting in to
     an infinite loop which was freezing the browser.
   * The timing resolution of jQueryGantt is now 1 hour.
@@ -202,14 +220,16 @@ Stalker Changes
   * Fixed vertical overflow in gantt chart.
   * It is now possible to not to align a tasks start to its dependent tasks
     end.  
+
 * The Shot, Asset, Sequence detail pages under the Project Overview now opens
   inside the related tab on the Project Page.
 * Booking class is renamed to TimeLog.
 
 0.2.0.a10
----------
+=========
 
 * jQueryGantt:
+
   * jQueryGantt is now using the Task ids coming from Stalker instead of the
     ridiculous rowId.
   * Fixed a lot of issues related with the new data structure, it seems
@@ -220,6 +240,7 @@ Stalker Changes
     tasks of the user.
   * Now there are two different context menus for container/parent tasks and
     leaf tasks.
+
 * Added new attribute to WorkingHours class called ``weekly_working_hours``,
   which calculates the weekly working hours based on the working hours defined
   in the instance.
@@ -241,7 +262,7 @@ Stalker Changes
   variable names.
 
 0.2.0.a9
---------
+========
 
 * A new property called ``to_tjp`` added to the SimpleEntity class which needs
   to be implemented in the child and is going to be used in TaskJuggler
@@ -252,15 +273,19 @@ Stalker Changes
 * Changed the ``resolution`` attribute name to ``timing_resolution`` to comply
   with TaskJuggler.
 * ScheduleMixin:
+
   * Updated ScheduleMixin class documentation.
   * There are two new read-only attributes called ``computed_start`` and
     ``computed_end``. These attributes will be used in storing of the values
     calculated by TaskJuggler, and will be used in Gantt Charts if available.
   * Added ``computed_duration``.
+
 * Task:
+
   * Arranged the TaskJuggler workflow.
   * The task will use the effort > length > duration attributes in `to_tjp`
     property.
+
 * Changed the license of Stalker from BSD-2 to LGPL 2.1. Any version previous
   to 0.2.0.a9 will be still BSD-2 and any version from and including 0.2.0.a9
   will be distributed under LGPL 2.1 license.
@@ -270,7 +295,7 @@ Stalker Changes
   tasks.
 
 0.2.0.a8
---------
+========
 
 * TagSelect now can be filled by setting its ``value`` attribute (Ex:
   TagSelect.set('value', data))
@@ -281,11 +306,13 @@ Stalker Changes
 * Added a new attribute called ``users`` to the Department class which is a
   synonym for the ``members`` attribute.
 * Task:
+
   * Task class is now preventing one of the dependents to be set as the parent
     of a task.
   * Task class is now preventing one of the parents to be set as the one of the
     dependents of a task.
   * Fixed ``autoflush`` bugs in Task class.
+
 * Fixed `admin` users department initialization.
 * Added ``thumbnail`` attribute to the SimpleEntity class which is a reference
   to a Link instance, showing the path of the thumbnail.
@@ -297,9 +324,10 @@ Stalker Changes
   so they fit to the children.
 
 0.2.0.a7
---------
+========
 
 * Changed these default setting value names to corresponding new names:
+
   * ``DEFAULT_TASK_DURATION`` -> ``TASK_DURATION``
   * ``DEFAULT_TASK_PRIORITY`` -> ``TASK_PRIORITY``
   * ``DEFAULT_VERSION_TAKE_NAME`` -> ``VERSION_TAKE_NAME``
@@ -307,12 +335,16 @@ Stalker Changes
   * ``DEFAULT_ACTIONS`` -> ``ACTIONS``
   * ``DEFAULT_BG_COLOR`` -> ``BG_COLOR``
   * ``DEFAULT_FG_COLOR`` -> ``FG_COLOR``
+
 * stalker.conf.defaults:
+
   * Added default settings for project working hours (``WORKING_HOURS``,
     ``DAY_ORDER``, ``DAILY_WORKING_HOURS``)
   * Added a new variable for setting the task time resolution called
     ``TIME_RESOLUTION``.
+
 * stalker.models.project.Project:
+
   * Removed Project.project_tasks attribute, use Project.tasks directly to get
     all the Tasks in that project. For root task you can do a quick query::
       
@@ -328,7 +360,9 @@ Stalker Changes
   * Added a new attribute to Project class called ``working_hours`` which holds
     stalker.models.project.WorkingHours instances to manage the Project working
     hours. It will directly be passed to TaskJuggler.
+
 * stalker.models.task.Task:
+
   * Removed the Task.task_of attribute, use Task.parent to get the owner of
     this Task.
   * Task now has two new attributes called Task.parent and Task.children which
@@ -339,7 +373,9 @@ Stalker Changes
     is the name of the attribute to be investigated for circular relationship.
     It is done in that way to be able to use the same function in searching for
     circular relations both in parent/child and depender/dependee relations.
+
 * ScheduleMixin:
+
   * Added a new attribute to ScheduleMixin for time resolution adjustment.
     Default value is 1 hour and can be set with
     stalker.conf.defaults.TIME_RESOLUTION. Any finer time than the resolution
@@ -349,12 +385,14 @@ Stalker Changes
   * ScheduleMixin now uses datetime.datetime for the start and end attributes.
   * Renamed the ``start_date`` attribute to ``start``.
   * Renamed the ``end_date`` attribute to ``end``
+
 * Removed the TaskableEntity.
 * Asset, Sequence and Shot classes are now derived from Task class allowing
   more complex Task relation combined with the new parent/child relation of
   Tasks. Use Asset.children or Asset.tasks to reach the child tasks of that
   asset (same with Sequence and Shot classes).
 * stalker.models.shot.Shot:
+
   * Removed the sequence and introduced sequences attribute in Shot class. Now
     one shot can be in more than one Sequence. Allowing more complex
     Shot/Sequence relations..
@@ -362,8 +400,10 @@ Stalker Changes
     attribute is just used to group the Shots.
   * Shots now have a new attribute called ``scenes``, holding Scene instances.
     It is created to group same shots occurring in the same scenes.
+
 * In tests all the Warnings are now properly handled as Warnings.
 * stalker.models.ticket.Ticket:
+
   * Ticket instances are now tied to Projects and it is now possible to create
     Tickets without supplying a Version. They are free now.
   * It is now possible to link any SimpleEntity to a Ticket.
@@ -371,6 +411,7 @@ Stalker Changes
     stalker.conf.defaults.TICKET_WORKFLOW dictionary to define the workflow and
     stalker.conf.defaults.TICKET_STATUS_ORDER for the order of the ticket
     statuses.
+
 * Added a new class called ``Scene`` to manage Shots with another property.
 * Removed the ``output_path`` attribute in FilenameTemplate class.
 * Grouped the templates for each entity under a directory with the entity name.
@@ -378,7 +419,7 @@ Stalker Changes
   entity to its own python file.
 
 0.2.0.a6
---------
+========
 
 * Added a new Dojo Widget called Tag to help the creation of the tags in the
   TagSelect.
@@ -394,20 +435,24 @@ Stalker Changes
 * Added 'StartDate', 'EndDate' and 'Duration' field to add_project page.
   'StartDate', 'EndDate' properties are written on database.
 * jQueryGannt:
+
   * Gannt view is now communicating with Stalker correctly. The only left issue
     is the end date value is not properly shown in the gannt view.
   * Updated the jQueryGannt css's to work with Stalker and Dojo.
-*  Project page is redesigned. SplitContainer is removed. All contents are
-   displayed in TabContainer. New Contents in TabContainer are:
+
+* Project page is redesigned. SplitContainer is removed. All contents are
+  displayed in TabContainer. New Contents in TabContainer are:
+
     * ProjectName (Disabled Field - Used for displaying projectname.)
     * Overview  (It has InlineEditable fields. Although they are not connected
       to DB.)
+
 * Shot and Asset creation dialogs now automatically updated with the given
   Project instance info.
 * User overview page is now reflection the new design.
 
 0.2.0.a5
---------
+========
 
 * The ``code`` attribute of the SimpleEntity is now introduced as a separate
   mixin. To let it be used by the classes it is really needed.
@@ -437,7 +482,7 @@ Stalker Changes
   adding Tag style widgets.
 
 0.2.0.a4
---------
+========
 
 * Added a new class called EntityType to hold all the available class names and
   capabilities.
@@ -500,71 +545,55 @@ Stalker Changes
   ``code`` attribute is doing what was ``initials`` doing previously.
 
 0.2.0.a3
---------
+========
 
-* :class:`~stalker.models.status.Status` class now has two new attributes
-  :attr:`~stalker.models.status.Status.bg_color` and
-  :attr:`~stalker.models.status.Status.fg_color` to hold the UI colors of the
-  :class:`~stalker.models.status.Status` instance. The colors are
-  :class:`~stalker.models.status.Color` instances.
+* Status class now has two new attributes ``bg_color`` and ``fg_color`` to hold
+  the UI colors of the Status instance. The colors are Color instances.
 
 0.2.0.a2
---------
+========
 
-* :class:`~stalker.models.entity.SimpleEntity` now has an attribute called
-  :attr:`~stalker.models.entity.SimpleEntity.generic_data` which can hold any
+* SimpleEntity now has an attribute called ``generic_data`` which can hold any
   kind of ``SOM`` object inside and it is a list.
-* Changed the formatting rules for the
-  :attr:`~stalker.models.entity.SimpleEntity.name` in
-  :class:`~stalker.models.entity.SimpleEntity`, now it can start with a number,
-  and it is not allowed to have multiple whitespace characters following each
-  other.
-* The ``source`` attribute in :class:`~stalker.models.version.Version` is
-  renamed to :attr:`~stalker.models.version.Version.source_file`\ .
-* The ``version`` attribute in :class:`~stalker.models.version.Version` is
-  renamed to :attr:`~stalker.models.version.Version.version_number`\ .
-* The ``take`` attribute in :class:`~stalker.models.version.Version` is renamed
-  to :attr:`~stalker.models.version.Version.take_name`\ .
-* The :attr:`~stalker.models.version.Version.version_number` in
-  :class:`~stalker.models.version.Version` is now generated automatically if it
-  is skipped or given as None or it is too low where there is already a version
-  number for the same Version series (means attached to the same
-  :class:`~stalker.models.task.Task` and has the same
-  :attr:`~stalker.models.version.Version.take_name`).
-* Moved the :class:`~stalker.models.auth.User` class to
-  :mod:`~stalker.models.auth` module.
+* Changed the formatting rules for the ``name`` in SimpleEntity class, now it
+  can start with a number, and it is not allowed to have multiple whitespace
+  characters following each other.
+* The ``source`` attribute in Version is renamed to ``source_file``.
+* The ``version`` attribute in Version is renamed to ``version_number``.
+* The ``take`` attribute in Version is renamed to ``take_name``.
+* The ``version_number`` in Version is now generated automatically if it is
+  skipped or given as None or it is too low where there is already a version
+  number for the same Version series (means attached to the same Task and has
+  the same ``take_name``.
+* Moved the User class to ``stalker.models.auth module``.
 * Removed the ``stalker.ext.auth`` module because it is not necessary anymore.
-  Thus the :class:`~stalker.models.auth.User` now handles all the
-  :attr:`~stalker.models.auth.User.password` conversions by itself.
-* ``PermissionGroup`` is renamed back to :class:`~stalker.models.auth.Group`
+  Thus the User now handles all the password conversions by itself.
+* ``PermissionGroup`` is renamed back to Group
   again to match with the general naming of the authorization concept.
 * Created two new classes for the Authorization system, first one is called
-  :class:`~stalker.models.auth.Permission` and the second one is a Mixin which
-  is called :class;`~stalker.models.mixins.ACLMixin` which adds ACLs to the
-  mixed in class. For now, only the :class;`~stalker.models.auth.User` and
-  :class;`~stalker.models.auth.Group` classes are mixed with this mixin by
-  default.
+  Permission and the second one is a Mixin which is called ACLMixin which adds
+  ACLs to the mixed in class. For now, only the User and Group classes are
+  mixed with this mixin by default.
 * The declarative Base class of SQLAlchemy is now created by binding it to a
   ORMClass (a random name) which lets all the derived class to have a method
   called ``query`` which will bypass the need of calling
   ``DBSession.query(class_)`` but instead just call ``class_.query()``::
     
     from stalker.models.auth import User
-    
     user_1 = User.query().filter_by(name='a user name').first()
 
 
 0.2.0.a1
---------
+========
+
 * Converted the whole system to a Pyramid Web application. If the previous
   implementations investigated, it will be understood that it was only the
   database model of a Web Application.
-* Changed the :meth:`~stalker.db.setup` arguments. It is now accepting a
-  dictionary instead of just a string to comply with the SQLAlchemy scaffold
-  and this dictionary should contain keys for the SQLAlchemy engine setup.
-  There is another utility that comes with Pyramid to setup the database under
-  the `scripts` folder, it is also working without any problem with
-  :mod:`~stalker.db`\ .
+* Changed the ``db.setup`` arguments. It is now accepting a dictionary instead
+  of just a string to comply with the SQLAlchemy scaffold and this dictionary
+  should contain keys for the SQLAlchemy engine setup. There is another utility
+  that comes with Pyramid to setup the database under the `scripts` folder, it
+  is also working without any problem with stalker.db.
 * The ``session`` variable is renamed to ``DBSession`` and is now a scopped
   session, so there is no need to use ``DBSession.commit`` it will be handled
   by the system it self.
@@ -579,25 +608,18 @@ Stalker Changes
   
   By using this kind of organization, both development and usage will be eased
   out.
-* :attr:`~stalker.models.task.Task.task_of` now only accepts
-  :attr:`~stalker.models.entity.TaskableEntity` instances.
+  
+* ``task_of`` now only accepts TaskableEntity instances.
 * Updated the examples. It is now showing how to extend SOM correctly. 
 * Updated the references to the SOM classes in docstrings and rst files.
-* Removed the ``Review`` class. And introduced the much handier
-  :class:`~stalker.models.ticket.Ticket` class. Now reviewing a data is the
-  process of creating Ticket's to that data.
-* The database is now initialized with a
-  :class:`~stalker.models.status.StatusList` and a couple of
-  :class:`~stalker.models.status.Status`\ es appropriate for
-  :class:`~stalker.models.ticket.Ticket` instances.
-* The database is now initialized with two :class:`~stalker.models.type.Type`
-  instances ('Enhancement' and 'Defect') suitable for
-  :class:`~stalker.models.ticket.Ticket` instances.
-* :class:`~stalker.models.mixins.StatusMixin` now stores the
-  :attr:`~stalker.models.mixins.StatusMixin.status` attribute as an Integer
-  showing the index of the :class:`~stalker.models.status.Status` in the
-  :attr:`~stalker.models.mixins.StatusMixin.status_list` attribute but when
-  asked for the value of :attr:`~stalker.models.mixins.StatusMixin.status`
-  attribute it will return a proper :class:`~stalker.models.status.Status`
-  instance and the attribute can be set with an integer or with a proper
-  :class:`~stalker.models.status.Status` instance.
+* Removed the ``Review`` class. And introduced the much handier Ticket class.
+  Now reviewing a data is the process of creating Ticket's to that data.
+* The database is now initialized with a StatusList and a couple of Statuses
+  appropriate for Ticket instances.
+* The database is now initialized with two Type instances ('Enhancement' and
+  'Defect') suitable for Ticket instances.
+* StatusMixin now stores the status attribute as an Integer showing the index
+  of the Status in the ``status_list`` attribute but when asked for the value
+  of ``StatusMixin.status`` attribute it will return a proper Status instance
+  and the attribute can be set with an integer or with a proper Status
+  instance.

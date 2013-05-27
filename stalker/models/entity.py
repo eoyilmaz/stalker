@@ -71,7 +71,7 @@ class SimpleEntity(Base):
     
     :param string name: A string or unicode value that holds the name of this
       entity.  It should not contain any white space at the beginning and at
-      the end of the string. Valid characters are [a-zA-Z0-9_/S].
+      the end of the string. Valid characters are [a-zA-Z0-9\_/S].
       
       Advanced::
       

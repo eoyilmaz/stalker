@@ -254,7 +254,7 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
             resource User_18 "User5"
             resource User_19 "User6"
         }
-        
+
         # tasks
         
             task Project_28 "Test Project 1" {
@@ -274,7 +274,7 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
         }
         
         
-        
+
         # reports
         taskreport breakdown "{{csv_path}}"{
             formats csv
@@ -343,3 +343,6 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
         self.assertEqual(
             self.test_task2.computed_end,
             datetime.datetime(2013, 4, 19, 12, 0)
+        )
+
+

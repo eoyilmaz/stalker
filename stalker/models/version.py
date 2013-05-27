@@ -65,7 +65,7 @@ class Version(Link, StatusMixin):
     :param outputs: A list of :class:`~stalker.models.link.Link` instances,
       holding the outputs of the current version. It could be the rendered
       image sequences out of Maya or Nuke, or it can be a Targa file which is
-      the output of a Photoshop file (*.psd), or anything that you can think
+      the output of a Photoshop file (\*.psd), or anything that you can think
       as the output which is created out of this Version.
 
     :type outputs: list of :class:`~stalker.models.link.Link` instances

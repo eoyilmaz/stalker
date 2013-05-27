@@ -249,8 +249,7 @@ def update_task_dates(func):
 class Task(Entity, StatusMixin, ScheduleMixin):
     """Manages Task related data.
     
-    Introduction
-    ------------
+    **Introduction**
     
     Tasks are the unit of work that should be accomplished to complete a
     :class:`~stalker.models.project.Project`.
@@ -264,8 +263,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
       Tasks can now have child Tasks. So you can create complex relations of
       Tasks to comply with your project needs.
     
-    Initialization
-    --------------
+    **Initialization**
     
     A Task needs to be created with a Project instance. It is also valid if no
     project is supplied but there should be a parent Task passed to the parent
@@ -305,8 +303,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     unscheduled task. The final date values will be calculated by TaskJuggler
     in the `auto scheduling` phase.
     
-    Auto Scheduling
-    ---------------
+    **Auto Scheduling**
     
     Stalker uses TaskJuggler for task scheduling. After defining all the tasks,
     Stalker will convert them to a single tjp file along with the recorded
@@ -337,8 +334,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     the Task by using the resources, schedule_model, schedule_timing and
     schedule_constraint attributes.
     
-    Task/Task Relation
-    --------------------
+    **Task/Task Relation**
     
     A Task is called a ``container task`` if it has at least one child Task.
     And it is called a ``leaf task`` if it doesn't have any children Tasks.
