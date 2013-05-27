@@ -16,6 +16,9 @@ Stalker Changes
     attributes called ``path``, ``filename`` and ``extension``.
   * Update: Added new revisions to alembic to reflect the change in ``Links``
     table.
+  * New: Added a new class called LocalSession to store session data in users
+    local filesystem. Though it is going to be replaced with some other system
+    like Beaker.
 
 0.2.0.b4
 --------

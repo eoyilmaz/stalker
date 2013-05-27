@@ -60,6 +60,9 @@ class Config(object):
         },
 
         database_session_settings = {},
+        # Local storage path
+        local_storage_path = os.path.expanduser('~/.strc'),
+        local_session_data_file_name = 'stalker_session_data',
 
         # Storage for uploaded files
         server_side_storage_path = os.path.expanduser('~/Stalker_Storage'),

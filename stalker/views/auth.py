@@ -518,10 +518,14 @@ def forbidden(request):
     return {}
 
 
-@view_config(route_name='home',
-            renderer='templates/base.jinja2')
-@view_config(route_name='me_menu',
-             renderer='templates/auth/me_menu.jinja2')
+@view_config(
+    route_name='home',
+    renderer='templates/base.jinja2'
+)
+@view_config(
+    route_name='me_menu',
+    renderer='templates/auth/me_menu.jinja2'
+)
 def home(request):
     logged_in_user = get_logged_in_user(request)
     studio = Studio.query.first()
