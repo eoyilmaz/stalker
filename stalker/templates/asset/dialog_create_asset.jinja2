@@ -322,6 +322,10 @@ require([
             asset_add_status_button.startup();
             status_field_updater({animate: true});
 
+            {% if not has_permission('Create_Status') %}
+                asset_add_status_button.set('disabled', true);
+            {% endif %}
+
 
             // ****************************************************************
             // Ok Button

@@ -49,6 +49,7 @@ Stalker Changes
   * Fix: dgrid object is declared from [Grid, Selection, Keyboard]. So it's
     possible to select a row and navigate by Keyboard.
   * Add: Permission controls are added to 'Page' and 'List' files.
+  * Add: Permission controls are added to 'Dialog' and 'Summary' files.
 
 0.2.0.b3
 --------

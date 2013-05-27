@@ -273,6 +273,10 @@ require([
             });
             create_sequence_button.startup();
 
+            {% if not has_permission('Create_Sequence') %}
+                create_sequence_button.set('disabled', true);
+            {% endif %}
+
             // Update Sequence Button
             var update_sequence_button = dialogCaller({
                 label: 'Update',
@@ -286,6 +290,10 @@ require([
 
             });
             update_sequence_button.startup();
+
+            {% if not has_permission('Update_Sequence') %}
+                update_sequence_button.set('disabled', true);
+            {% endif %}
 
 
             // **********************************************************************
@@ -341,6 +349,10 @@ require([
 
             shot_add_status_button.startup();
             status_field_updater({animate: true});
+
+             {% if not has_permission('Create_Status') %}
+                shot_add_status_button.set('disabled', true);
+            {% endif %}
 
 
             // **********************************************************************

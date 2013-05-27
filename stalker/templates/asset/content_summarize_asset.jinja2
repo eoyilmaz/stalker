@@ -22,10 +22,10 @@
     {# Avatar #}
     <div id='asset_thumbnail' class='thumbnail'>
         {% if not asset.thumbnail %}
-        <img src='{{ request.static_url("stalker:static/stalker/images/Placeholder_shot.png") }}'
-             alt=''
-             style='width:120px;'>
-    {% endif %}
+            <img src='{{ request.static_url("stalker:static/stalker/images/Placeholder_shot.png") }}'
+                 alt=''
+                 style='width:120px;'>
+        {% endif %}
     </div>
     <div id='asset_summary_chart1'
          style='width: 100px;
@@ -47,7 +47,14 @@
                 <td style='text-align: right'><b>Project</b></td>
                 <td>&nbsp;</td>
                 <td>
-                    <a href="javascript:redirectLink('central_content','view/project/{{ asset.project.id }}');">{{ asset.project.name }}</a>
+                    {% if has_permission('Read_Project') %}
+                        <a href="javascript:redirectLink('central_content',
+                        'view/project/{{ asset.project.id }}');">
+                            {{ asset.project.name }}
+                        </a>
+                    {% else %}
+                        {{ asset.project.name }}
+                    {% endif %}
                 </td>
             </tr>
             <tr>
@@ -64,17 +71,24 @@
                 <td style='text-align: right'><strong>Created By</strong></td>
                 <td>&nbsp;</td>
                 <td>
-                    <a href="javascript:redirectLink('central_content','view/user/{{ asset.created_by.id }}');">{{ asset.created_by.name }}</a>
+                    {% if has_permission('Read_User') %}
+                        <a href="javascript:redirectLink('central_content',
+                        'view/user/{{ asset.created_by.id }}');">
+                            {{ asset.created_by.name }}
+                        </a>
+                    {% else %}
+                        {{ asset.created_by.name }}
+                    {% endif %}
                 </td>
             </tr>
             <tr>
                 <td style='text-align: right'></td>
                 <td>&nbsp;</td>
                 <td>
-				{% if has_permission('Update_Asset') %}
-					<button id='update_asset_button'>Update</button></td>
-            	{% endif %}
-			</tr>
+                    {% if has_permission('Update_Asset') %}
+                        <button id='update_asset_button'>Update</button></td>
+                    {% endif %}
+            </tr>
         </table>
     </div>
     {#  Charts  #}
@@ -134,7 +148,7 @@
             // refresh the pane
             content_pane.refresh();
         };
-        
+
         {% if has_permission('Update_Asset') %}
             var update_asset_button = dialogCaller({
                 label: 'Update',

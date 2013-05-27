@@ -334,9 +334,9 @@ require([
         }
     };
     update_dates(
-        start_dateTextBox.getValue(),
-        end_dateTextBox.getValue(),
-        null
+            start_dateTextBox.getValue(),
+            end_dateTextBox.getValue(),
+            null
     );
 
 
@@ -398,6 +398,10 @@ require([
     });
     create_image_format_button.startup();
 
+    {% if not has_permission('Create_ImageFormat') %}
+        create_image_format_button.set('disabled', true);
+    {% endif %}
+
     // Update Image Format Button
     var update_image_format_button = dialogCaller({
         label: 'Update',
@@ -412,6 +416,10 @@ require([
     });
     update_image_format_button.startup();
 
+
+    {% if not has_permission('Update_ImageFormat') %}
+        update_image_format_button.set('disabled', true);
+    {% endif %}
 
     // ********************************************************************
     // FPS
@@ -471,6 +479,11 @@ require([
     });
     create_repository_button.startup();
 
+
+    {% if not has_permission('Create_Repository') %}
+        create_repository_button.set('disabled', true);
+    {% endif %}
+
     // Update Repository Button
     var update_repository_button = dialogCaller({
         label: 'Update',
@@ -484,6 +497,11 @@ require([
         }
     });
     update_repository_button.startup();
+
+
+    {% if not has_permission('Update_Repository') %}
+        update_repository_button.set('disabled', true);
+    {% endif %}
 
 
     // ********************************************************************
@@ -533,6 +551,9 @@ require([
     });
     create_structure_button.startup();
 
+    {% if not has_permission('Create_Structure') %}
+        create_structure_button.set('disabled', true);
+    {% endif %}
 
     // UPDATE STRUCTURE BUTTON
     var update_structure_button = dialogCaller({
@@ -547,6 +568,11 @@ require([
         }
     });
     update_structure_button.startup();
+
+
+    {% if not has_permission('Update_Structure') %}
+        update_structure_button.set('disabled', true);
+    {% endif %}
 
 
     // ********************************************************************
@@ -591,6 +617,11 @@ require([
     });
     create_lead_button.startup();
 
+
+    {% if not has_permission('Create_User') %}
+        create_lead_button.set('disabled', true);
+    {% endif %}
+
     // Update Lead Button
     var update_lead_button = dialogCaller({
         label: 'Update',
@@ -604,6 +635,10 @@ require([
         }
     });
     update_lead_button.startup();
+
+    {% if not has_permission('Update_User') %}
+        update_lead_button.set('disabled', true);
+    {% endif %}
 
     // ********************************************************************
     // Status List
@@ -638,9 +673,11 @@ require([
                     content_creator: dialogs.update_status_list_dialog,
                     related_field_updater: status_field_updater
                 });
-                console.debug(myDialog);
                 myDialog.show();
             });
+             {% if not has_permission('Update_StatusList') %}
+                    add_status_button.set('disabled', true);
+                {% endif %}
         } else { // No Status
             add_status_button.set('onClick', function () {
                 var myDialog = dialogCreator({
@@ -651,6 +688,9 @@ require([
                 });
                 myDialog.show();
             });
+            {% if not has_permission('Create_StatusList') %}
+                add_status_button.set('disabled', true);
+            {% endif %}
         }
     };
 
