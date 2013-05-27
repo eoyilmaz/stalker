@@ -27,11 +27,6 @@ and vfx studios. See docs for more information.
 
 __version__ = '0.2.0.b5'
 
-# TODO: if run in standalone mode do not import any of the Pyramid modules.
-
-from pyramid.config import Configurator
-from pyramid.authentication import AuthTktAuthenticationPolicy
-from pyramid.authorization import ACLAuthorizationPolicy
 
 # before anything about stalker create the defaults
 from stalker import config as st_config
@@ -76,6 +71,10 @@ logger.setLevel(logging.DEBUG)
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
+    
+    from pyramid.config import Configurator
+    from pyramid.authentication import AuthTktAuthenticationPolicy
+    from pyramid.authorization import ACLAuthorizationPolicy
 
     # setup the database to the given settings
     from stalker import db

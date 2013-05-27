@@ -29,7 +29,7 @@ from sqlalchemy import (Table, Column, Integer, ForeignKey, String, DateTime,
 from sqlalchemy.orm import relationship, synonym, reconstructor, validates
 from sqlalchemy.schema import UniqueConstraint
 
-from pyramid.security import Allow
+
 
 from stalker import defaults
 
@@ -84,6 +84,8 @@ class RootFactory(object):
         )
 
         # start with default ACLs
+        from pyramid.security import Allow
+        
         ACLs = [
             (Allow, 'Group:' + defaults.admin_department_name, all_permissions),
             (Allow, 'User:' + defaults.admin_name, all_permissions)
