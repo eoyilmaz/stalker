@@ -893,6 +893,14 @@ class LocalSession(object):
         logger.debug('dumped session data : %s' % dumped_data)
         self._write_data(dumped_data)
 
+    def delete(self):
+        """removes the cache file
+        """
+        try:
+            os.remove(self.session_file_full_path())
+        except OSError:
+            pass
+
     @classmethod
     def session_file_full_path(cls):
         """
@@ -909,9 +917,18 @@ class LocalSession(object):
         :param data: the data to be written (generally serialized LocalSession
           class itself)
         """
-        file_path = self.session_file_full_path()
-        with open(file_path, 'w') as data_file:
-            data_file.writelines(data)
+        file_full_path = self.session_file_full_path()
+
+        # create the path first
+        file_path = os.path.dirname(file_full_path)
+        try:
+            os.makedirs(file_path)
+        except OSError:
+            # dir exists
+            pass
+        finally:
+            with open(file_full_path, 'w') as data_file:
+                data_file.writelines(data)
 
 
 # USER_PERMISSIONGROUPS

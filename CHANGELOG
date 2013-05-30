@@ -2,108 +2,123 @@
 Stalker Changes
 ===============
 
+0.2.0.b6
+========
+
+* **SOM**:
+  
+  * **Fix:** Fixed **LocalSession._write_data()**, previously it was not
+    creating the local session folder.
+  * **New:** Added a new method called **LocalSession.delete()** to remove the
+    local session file.
+  * **Update:** **Link.full_path** can now be set to an empty string. This is
+    updated in this way for **Version** class.
+  * **Update:** Updated the formatting of **SimpleEntity.nice_name**, it is now
+    possible to have uppercase letters and camel case format will be preserved.
+
 0.2.0.b5
 ========
 
-* SOM:
+* **SOM**:
 
-  * New: Version class now has two new attributes called ``parent`` and
+  * **New:** **Version** class now has two new attributes called ``parent`` and
     ``children`` which will be used in tracking of the history of Version
     instances and track which Versions are derived from which Version.
-  * New: Versions instances are now derived from Link class and not Entity.
-  * Update: Added new revisions to alembic to reflect the change in
-    ``Versions`` table.
-  * Update: Links.path is renamed to Links.full_path and added three new
-    attributes called ``path``, ``filename`` and ``extension``.
-  * Update: Added new revisions to alembic to reflect the change in ``Links``
-    table.
-  * New: Added a new class called LocalSession to store session data in users
-    local filesystem. Though it is going to be replaced with some other system
-    like Beaker.
-  * Fix: Database part of Stalker can now be imported without depending to
-    Pyramid.
-  * Fix: Fixed documentation errors that Sphinx complained about.
+  * **New:** **Versions** instances are now derived from **Link** class and not
+    **Entity**.
+  * **Update:** Added new revisions to **alembic** to reflect the change in
+    **Versions** table.
+  * **Update:** **Links.path** is renamed to **Links.full_path** and added
+    three new attributes called **path**, **filename** and **extension**.
+  * **Update:** Added new revisions to alembic to reflect the change in
+    **Links** table.
+  * **New:** Added a new class called **LocalSession** to store session data in
+    users local filesystem. It is going to be replaced with some other system
+    like **Beaker**.
+  * **Fix:** Database part of Stalker can now be imported without depending to
+    **Pyramid**.
+  * **Fix:** Fixed documentation errors that **Sphinx** complained about.
 
 0.2.0.b4
 ========
 
-* WebUI:
+* **WebUI**:
 
-  * Fix: Fixed the error in rendering of the **home** occurred when there is no
+  * **Fix:** Fixed the error in rendering of the **home** occurred when there is no
     user login information found in the request.
-  * New: User thumbnails now can be changed.
-  * New: Project thumbnails now can be changed.
-  * New: ``content_list_projects`` now shows the project thumbnails.
-  * New: ``content_list_users`` now shows the user thumbnails.
-  * New: ``submitForm.js`` now enables all the disabled fields of the given
+  * **New:** User thumbnails now can be changed.
+  * **New:** Project thumbnails now can be changed.
+  * **New:** ``content_list_projects`` now shows the project thumbnails.
+  * **New:** ``content_list_users`` now shows the user thumbnails.
+  * **New:** ``submitForm.js`` now enables all the disabled fields of the given
     form, and disables them back again upon error.
-  * Fix: ``TagSelect.js`` will now correctly disable the child widgets if the
+  * **Fix:** ``TagSelect.js`` will now correctly disable the child widgets if the
     ``disabled`` attribute is set to **true**.
-  * New: Added ``fields`` javascript library which are a special group of input
+  * **New:** Added ``fields`` javascript library which are a special group of input
     fields designed to be used with Stalker.
-  * New: Added the first input field to stalker/fields, called ``tagField``. It
+  * **New:** Added the first input field to stalker/fields, called ``tagField``. It
     is now possible to add a TagSelect field which is correctly updated by only
     two lines of code.
-  * New: Added ``get_tags()`` to stalker.views.__init__ module. Because all the
+  * **New:** Added ``get_tags()`` to stalker.views.__init__ module. Because all the
     tags now should be created with the ``tagField`` the way to retrieve tags
     is the same, so this helper function will let you retrieve tags from the
     given request instance.
-  * Add: Permissions page is added to Group Page.
-  * Fix: dgrid object is declared from [Grid, Selection, Keyboard]. So it's
+  * **New:** Permissions page is added to Group Page.
+  * **Fix:** dgrid object is declared from [Grid, Selection, Keyboard]. So it's
     possible to select a row and navigate by Keyboard.
-  * Add: Permission controls are added to 'Page' and 'List' files.
-  * Add: Permission controls are added to 'Dialog' and 'Summary' files.
+  * **New:** Permission controls are added to 'Page' and 'List' files.
+  * **New:** Permission controls are added to 'Dialog' and 'Summary' files.
 
 0.2.0.b3
 ========
 
-* SOM:
+* **SOM**:
 
-  * Update: FilenameTemplate's are not ``strictly typed`` anymore.
-  * Update: Removed the FilenameTemplate type initialization, FilenameTemplates
+  * **Update:** FilenameTemplate's are not ``strictly typed`` anymore.
+  * **Update:** Removed the FilenameTemplate type initialization, FilenameTemplates
     do not depend on Types anymore.
-  * Update: Added back the ``plural_class_name`` (previously ``plural_name``)
+  * **Update:** Added back the ``plural_class_name`` (previously ``plural_name``)
     property to the ORMClass class, so all the classes in SOM now have this new
     property. 
-  * Update: Added ``accepts_references`` attribute to the EntityType class.
-  * New: The Link class has a new attribute called ``original_filename`` to
+  * **Update:** Added ``accepts_references`` attribute to the EntityType class.
+  * **New:** The Link class has a new attribute called ``original_filename`` to
     store the original file names of link files.
-  * New: Added **alembic** to the project requirements.
-  * New: Added alembic migrations which adds the ``accepts_references`` column
+  * **New:** Added **alembic** to the project requirements.
+  * **New:** Added alembic migrations which adds the ``accepts_references`` column
     to ``EntityTypes`` table and ``original_name`` to the ``Links`` table.
 
-* WebUI:
+* **WebUI**:
 
-  * Update: Updated to Dojo 1.9
-  * Update: stalker.js is renamed to dialogs.js and it is now fully compatible
+  * **Update:** Updated to Dojo 1.9
+  * **Update:** stalker.js is renamed to dialogs.js and it is now fully compatible
     with Dojo AMD.
-  * Update: Merged StatusList create and update dialogs in to one.
-  * Update: Content List - Task now checks user permissions to disable part of
+  * **Update:** Merged StatusList create and update dialogs in to one.
+  * **Update:** Content List - Task now checks user permissions to disable part of
     the UI.
-  * Update: Added description field to the Summarize Task view.
-  * Update: Added permission checks to several views.
-  * Fix: Fixed fieldUpdater.js to work properly with Dojo 1.9 especially for
+  * **Update:** Added description field to the Summarize Task view.
+  * **Update:** Added permission checks to several views.
+  * **Fix:** Fixed fieldUpdater.js to work properly with Dojo 1.9 especially for
     MultiSelect widgets.
-  * Fix: Separated the dialog and action routes for Structure.
-  * Fix: Fixed unnecessary module imports in stalker.js.
-  * Fix: Schedule button is now working properly.
-  * Fix: Fixed Image Format creation.
-  * Fix: Fixed Filename Template create dialog routine.
-  * Fix: Fixed Filename Template update dialog routine.
-  * Fix: Fixed entity_types in Filename Template creation UI.
-  * Fix: Fixed Group update dialog, the permissions were not displayed and the
+  * **Fix:** Separated the dialog and action routes for Structure.
+  * **Fix:** Fixed unnecessary module imports in stalker.js.
+  * **Fix:** Schedule button is now working properly.
+  * **Fix:** Fixed Image Format creation.
+  * **Fix:** Fixed Filename Template create dialog routine.
+  * **Fix:** Fixed Filename Template update dialog routine.
+  * **Fix:** Fixed entity_types in Filename Template creation UI.
+  * **Fix:** Fixed Group update dialog, the permissions were not displayed and the
     name was not updated on the server side.
-  * Fix: Fixed TaskBox CSS template
-  * New: GanttChart now displays the finished/unfinished tasks with a green/red
+  * **Fix:** Fixed TaskBox CSS template
+  * **New:** GanttChart now displays the finished/unfinished tasks with a green/red
     'id' column.
-  * Fix: Status color attribute converted from unicode to integer.
-  * Fix: To destroy previous open dialog, same dialog id is given for create
+  * **Fix:** Status color attribute converted from unicode to integer.
+  * **Fix:** To destroy previous open dialog, same dialog id is given for create
     and update dialogs.
-  * Update: In create/update_group dialog, to check all rows new checkboxes are
+  * **Update:** In create/update_group dialog, to check all rows new checkboxes are
     added to head of each column.
-  * Update: ``ComboBox`` is added to TagSelect widget as a new input widget
+  * **Update:** ``ComboBox`` is added to TagSelect widget as a new input widget
     type.
-  * Update: Description field is added to Department dialog.
+  * **Update:** Description field is added to Department dialog.
 
 0.2.0.b2
 ========
@@ -113,75 +128,75 @@ Stalker Changes
 
   * Task:
   
-    * Update: Tasks now have a new attribute called ``watchers`` which holds a
+    * **Update:** Tasks now have a new attribute called ``watchers`` which holds a
       list of User instances watching the particular Task.
-    * Update: Users now have a new attribute called ``watching`` which is a
+    * **Update:** Users now have a new attribute called ``watching`` which is a
       list of Task instances that this user is watching.
 
   * TimeLog:
 
-    * Update: TimeLog instances will expand Task.schedule_timing value
+    * **Update:** TimeLog instances will expand Task.schedule_timing value
       automatically if the total amount of logged time is more than the
       schedule_timing value.
-    * Update: TimeLogs are now considered while scheduling the task.
-    * Fix: TimeLogs raises OverBookedError when appending the same TimeLog
+    * **Update:** TimeLogs are now considered while scheduling the task.
+    * **Fix:** TimeLogs raises OverBookedError when appending the same TimeLog
       instance to the same resource.
 
   * Auth:
 
-    * Fix: The default ACLs for determining the permissions are now working
+    * **Fix:** The default ACLs for determining the permissions are now working
       properly.
 
 * WebUI:
 
-  * Fix: ``user_create_dialog`` now shows and updates groups.
-  * Fix: Updating a project now correctly refreshes the ``project_summary``
+  * **Fix:** ``user_create_dialog`` now shows and updates groups.
+  * **Fix:** Updating a project now correctly refreshes the ``project_summary``
     content pane.
-  * Fix: Separated the dialog and action routes for ImageFormat.
-  * Fix: Separated the dialog and action routes for Asset.
-  * Fix: Separated the dialog and action routes for Repository.
-  * Fix: The working hours were not correctly passed to the studio instance
+  * **Fix:** Separated the dialog and action routes for ImageFormat.
+  * **Fix:** Separated the dialog and action routes for Asset.
+  * **Fix:** Separated the dialog and action routes for Repository.
+  * **Fix:** The working hours were not correctly passed to the studio instance
     in Studio creation.
-  * Fix: "Append User Dialog" is now working properly.
+  * **Fix:** "Append User Dialog" is now working properly.
 
-  * Fix: Links between pages is created with redirectLink function which is
+  * **Fix:** Links between pages is created with redirectLink function which is
     written in base.jinja2. goToLink.js is deprecated, but still there are some
     codes that uses gotolink.js, they must be changed for next update.
-  * Update: Combined ``user_create_dialog`` and ``user_update_dialog`` into
+  * **Update:** Combined ``user_create_dialog`` and ``user_update_dialog`` into
     one.
-  * Update: Logged in work times will now be visible in gantt charts as a green
+  * **Update:** Logged in work times will now be visible in gantt charts as a green
     bar in the TaskBar div.
-  * Update: Department menus under 'Crew' menu are now showing the department
+  * **Update:** Department menus under 'Crew' menu are now showing the department
     users.
-  * Update: Color choosers in "Create Status Dialog" now have colors picked by
+  * **Update:** Color choosers in "Create Status Dialog" now have colors picked by
     default for BG and FG colors.
-  * Update: Replaced DataGrid objects with dgrid.
-  * Update: Added navigation bar for assets, shots, sequences.
-  * Update: Combined ``project_create_dialog`` and ``project_update_dialog``
+  * **Update:** Replaced DataGrid objects with dgrid.
+  * **Update:** Added navigation bar for assets, shots, sequences.
+  * **Update:** Combined ``project_create_dialog`` and ``project_update_dialog``
     into one.
-  * Update: Merged the 'Crew' menu creation code in to one single
+  * **Update:** Merged the 'Crew' menu creation code in to one single
     teamMenuCreator.js, which is able to create menus for any groups and faux
     groups.
-  * Update: All DataGrid field updated with dgrid class.
-  * Add: Placeholder images added for user and department.
-  * Add: Added update group dialog.
-  * Change: Colors for the layouts are changed with MiamiNice PieChart's color.
-  * Add: Added update group dialog.
-  * Add: Append department and append group pages has connected to database.
-  * Add: Timelog List page added.
-  * Add: New placeholders added for different type of object.
+  * **Update:** All DataGrid field updated with dgrid class.
+  * **New:** Placeholder images added for user and department.
+  * **New:** Added update group dialog.
+  * **Update:** Colors for the layouts are changed with MiamiNice PieChart's color.
+  * **New:** Added update group dialog.
+  * **New:** Append department and append group pages has connected to database.
+  * **New:** Timelog List page added.
+  * **New:** New placeholders added for different type of object.
 
 * jQueryGantt:
 
-  * Update: Replaced the ``duration`` column with ``timing`` which correctly
+  * **Update:** Replaced the ``duration`` column with ``timing`` which correctly
     shows the schedule timing info of the related task.
-  * Fix: The ``depends`` column shows the dependent task names correctly.
-  * Update: jQueryGantt displays the owner Project of the Tasks as a container
+  * **Fix:** The ``depends`` column shows the dependent task names correctly.
+  * **Update:** jQueryGantt displays the owner Project of the Tasks as a container
     task.
-  * Update: Added content link (this will be updated to support proper links,
+  * **Update:** Added content link (this will be updated to support proper links,
     hardcoded links to be removed).
-  * Update: Disabled drag and resize of TaskBar elements.
-  * Update: Moved the resource link code to the JST template code instead of
+  * **Update:** Disabled drag and resize of TaskBar elements.
+  * **Update:** Moved the resource link code to the JST template code instead of
     the Task class.
 
 0.2.0.b1

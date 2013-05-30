@@ -65,7 +65,8 @@ class Link(Entity):
     :param full_path: The full path to the link, it can be a path to a folder
       or a file in the file system, or a web page. For file sequences use
       "%h%p%t %R" format, for more information see `PySeq Documentation`_.
-      Setting the full_path to None or an empty string is not accepted.
+      It can be set to empty string (or None which will be converted to an
+      empty string automatically).
     
     .. _PySeq: http://packages.python.org/pyseq/
     .. _PySeq Documentation: http://packages.python.org/pyseq/
@@ -86,11 +87,7 @@ class Link(Entity):
 
     full_path = Column(
         String,
-        doc="""The full path of the url to the link.
-
-        It can not be None or an empty string, it should be a string or
-        unicode.
-        """
+        doc="""The full path of the url to the link."""
     )
 
     def __init__(self, full_path='', original_filename='', **kwargs):
@@ -103,18 +100,13 @@ class Link(Entity):
         """validates the given full_path value
         """
         if full_path is None:
-            raise TypeError("%s.full_path can not be None" %
-                            self.__class__.__name__)
+            full_path = ''
 
         if not isinstance(full_path, (str, unicode)):
             raise TypeError("%s.full_path should be an instance of string or "
                             "unicode not %s" %
                             (self.__class__.__name__,
                              full_path.__class__.__name__))
-
-        if full_path == "":
-            raise ValueError("%s.full_path can not be an empty string" %
-                             self.__class__.__name__)
 
         return self._format_path(full_path)
 
@@ -159,10 +151,10 @@ class Link(Entity):
             raise TypeError('%s.path can not be set to None' %
                             self.__class__.__name__)
 
-        if not isinstance(path, str):
-            raise TypeError('%s.path should be an instance of str, not %s' %
-                            (self.__class__.__name__,
-                             path.__class__.__name__))
+        if not isinstance(path, (str, unicode)):
+            raise TypeError('%s.path should be an instance of str or unicode, '
+                            'not %s' % (self.__class__.__name__,
+                                        path.__class__.__name__))
 
         if path == '':
             raise ValueError('%s.path can not be an empty string')
@@ -186,10 +178,10 @@ class Link(Entity):
         if filename is None:
             filename = ''
 
-        if not isinstance(filename, str):
-            raise TypeError('%s.filename should be an instance of str, not '
-                            '%s' % (self.__class__.__name__,
-                                    filename.__class__.__name__))
+        if not isinstance(filename, (str, unicode)):
+            raise TypeError('%s.filename should be an instance of str or '
+                            'unicode, not %s' % (self.__class__.__name__,
+                                                 filename.__class__.__name__))
 
         self.full_path = self._format_path(
             os.path.join(self.path, filename)

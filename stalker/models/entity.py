@@ -35,39 +35,37 @@ logger.setLevel(logging_level)
 class SimpleEntity(Base):
     """The base class of all the others
     
-    The :class:`~stalker.models.entity.SimpleEntity` is the starting point of
-    the Stalker Object Model, it starts by adding the basic information about
-    an entity which are :attr:`~stalker.models.entity.SimpleEntity.name`,
-    :attr:`~stalker.models.entity.SimpleEntity.description`, the audit
-    information like :attr:`~stalker.models.entity.SimpleEntity.created_by`,
-    :attr:`~stalker.models.entity.SimpleEntity.updated_by`,
-    :attr:`~stalker.models.entity.SimpleEntity.date_created`,
-    :attr:`~stalker.models.entity.SimpleEntity.date_updated` and a couple of
-    naming attributes like
-    :attr:`~stalker.models.entity.SimpleEntity.nice_name` and last but not
-    least the :attr:`~stalker.models.entity.SimpleEntity.type` attribute which
+    The ``SimpleEntity`` is the starting point of the Stalker Object Model, it
+    starts by adding the basic information about an entity which are
+    :attr:`.name`, :attr:`.description`, the audit information like
+    :attr:`.created_by`, :attr:`.updated_by`, :attr:`.date_created`,
+    :attr:`.date_updated` and a couple of naming attributes like
+    :attr:`.nice_name` and last but not least the :attr:`.type` attribute which
     is very important for entities that needs a type.
-    
-    For derived classes if the :attr:`~stalker.models.entity.SimpleEntity.type`
-    needed to be specifically specified, that is it can not be None or nothing
-    else then a :class:`~stalker.models.type.Type` instance, set the
-    ``strictly_typed`` class attribute to True::
+
+    .. note::
       
-        class NewClass(SimpleEntity):
-            __strictly_typed__ = True
-    
-    This will ensure that the derived class always have a proper
-    :attr:`~stalker.models.entity.SimpleEntity.type` attribute and can not
-    initialize without one.
-    
-    Two SimpleEntities considered to be equal if they have the same name, the
+       For derived classes if the
+       :attr:`~stalker.models.entity.SimpleEntity.type` needed to be
+       specifically specified, that is it can not be None or nothing else then
+       a :class:`~stalker.models.type.Type` instance, set the
+       ``strictly_typed`` class attribute to True::
+         
+           class NewClass(SimpleEntity):
+               __strictly_typed__ = True
+
+       This will ensure that the derived class always have a proper
+       :attr:`~stalker.models.entity.SimpleEntity.type` attribute and can not
+       be initialized without one.
+
+    Two SimpleEntities considered to be equal if they have the same
+    :attr:`.name`, the
     other attributes doesn't matter.
-    
-    .. versionadded: 0.2.0: Name attribute can be skipped.
-    
-      Starting from version 0.2.0 the ``name`` attribute can be skipped. For
-      derived classes use the ``__auto_name__`` class attribute to control
-      auto naming behaviour.
+
+    .. versionadded:: 0.2.0
+       Name attribute can be skipped. Starting from version 0.2.0 the ``name``
+       attribute can be skipped. For derived classes use the ``__auto_name__``
+       class attribute to control auto naming behaviour.
     
     :param string name: A string or unicode value that holds the name of this
       entity.  It should not contain any white space at the beginning and at
@@ -140,7 +138,9 @@ class SimpleEntity(Base):
     created_by_id = Column(
         "created_by_id",
         Integer,
-        ForeignKey("Users.id", use_alter=True, name="x")
+        ForeignKey("Users.id", use_alter=True, name="x"),
+        doc="""The id of the :class:`~stalker.models.auth.User` who has created
+        this entity."""
     )
     
     created_by = relationship(
@@ -154,7 +154,9 @@ class SimpleEntity(Base):
     updated_by_id = Column(
         "updated_by_id",
         Integer,
-        ForeignKey("Users.id", use_alter=True, name="x")
+        ForeignKey("Users.id", use_alter=True, name="x"),
+        doc="""The id of the :class:`~stalker.models.auth.User` who has updated
+        this entity."""
     )
     
     updated_by = relationship(
@@ -181,7 +183,11 @@ class SimpleEntity(Base):
     type_id = Column(
         "type_id",
         Integer,
-        ForeignKey("Types.id", use_alter=True, name="y")
+        ForeignKey("Types.id", use_alter=True, name="y"),
+        doc="""The id of the :class:`~stalker.models.type.Type` of this entity.
+        Mainly used by SQLAlchemy to create a Many-to-One relates between
+        SimpleEntities and Types.
+        """
     )
     
     type = relationship(
@@ -348,8 +354,8 @@ class SimpleEntity(Base):
         # remove multiple spaces
         nice_name_in = re.sub(r'[\s]+', ' ', nice_name_in)
         
-        # replace camel case letters
-        nice_name_in = re.sub(r"(.+?[a-z]+)([A-Z])", r"\1_\2", nice_name_in)
+        ## replace camel case letters
+        # nice_name_in = re.sub(r"(.+?[a-z]+)([A-Z])", r"\1_\2", nice_name_in)
 
         # replace white spaces with under score
         nice_name_in = re.sub("([\s\-])+", r"_", nice_name_in)
@@ -358,7 +364,7 @@ class SimpleEntity(Base):
         nice_name_in = re.sub(r"([_]+)", r"_", nice_name_in)
 
         # turn it to lower case
-        nice_name_in = nice_name_in.lower()
+        #nice_name_in = nice_name_in.lower()
 
         return nice_name_in
 

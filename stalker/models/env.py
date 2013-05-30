@@ -35,14 +35,21 @@ class EnvironmentBase(object):
     Generally a GUI for the end user is given an environment which helps the
     QtGui to be able to open, save, import or export a Version without
     knowing the details of the environment.
+    
+    The environment object supplies **methods** like ``open``, ``save``,
+    ``export``,  ``import`` or ``reference``. The main duty of the Environment
+    object is to introduce the host application (Maya, Houdini, Nuke, etc.) to
+    Stalker and let it to open, save, export, import or reference a file.
+    
+    It is the pipeline developers duty to create the environment classes for
+    the programs used in the studio by instantiating this class and overriding
+    the methods as necessary. You can find good examples in `Anima Tools`_
+    which is a Python package developed in `Anima Istanbul`_.
 
-    To create a new environment for you own program, just instantiate this
-    class and override the methods as necessary. And call the UI with by giving
-    an environment instance to it, so the interface can call the correct
-    methods as needed.
+    .. _Anima Tools:: https://pypi.python.org/pypi/anima
+    .. _Anima Istanbul:: http;//www.animaistanbul.com
 
-    Here is an example how to create an environment for a program and use the
-    GUI::
+    Here is a brief example for creating an environment for a generic program::
 
         from Stalker import EnvironmentBase
 
@@ -70,14 +77,9 @@ class EnvironmentBase(object):
 
     and that is it.
 
-    The environment class by default has a property called ``version``.
-    Holding the current open version. It is None for a new scene and a
-    :class:`~stalker.models.version.Version` instance in any other
-    case.
-
-    :param name: To initialize the class the name of the environment should be
-        given in the name argument. It can not be skipped or None or an empty
-        string.
+    The environment class by default has a property called ``version``. Holding
+    the current open Version. It is None for a new scene and a
+    :class:`~stalker.models.version.Version` instance in any other case.
     """
 
     name = "EnvironmentBase"

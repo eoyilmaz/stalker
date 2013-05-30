@@ -20,18 +20,17 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 """
-Stalker is a Production Asset Management System (ProdAM) designed for animation
-and vfx studios. See docs for more information.
+Stalker is a Production Asset Management System (ProdAM) designed for Animation
+and VFX Studios. See docs for more information.
 """
 
-
-__version__ = '0.2.0.b5'
+__version__ = '0.2.0.b6'
 
 
 # before anything about stalker create the defaults
 from stalker import config as st_config
-defaults = st_config.Config()
 
+defaults = st_config.Config()
 
 from stalker.models.auth import Group, Permission, User
 from stalker.models.asset import Asset
@@ -61,23 +60,23 @@ from stalker.models.type import Type, EntityType
 from stalker.models.version import Version
 from stalker.models.auth import group_finder
 
-
 import logging
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-
 
 
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
-    
+
     from pyramid.config import Configurator
     from pyramid.authentication import AuthTktAuthenticationPolicy
     from pyramid.authorization import ACLAuthorizationPolicy
 
     # setup the database to the given settings
     from stalker import db
+
     db.setup(settings)
 
     # setup authorization and authentication
@@ -93,7 +92,7 @@ def main(global_config, **settings):
         root_factory='stalker.models.auth.RootFactory'
     )
     config.set_authentication_policy(authn_policy)
-    config.set_authorization_policy(authz_policy) 
+    config.set_authorization_policy(authz_policy)
 
     config.include('pyramid_jinja2')
     config.add_static_view('static', 'static', cache_max_age=3600)
@@ -141,13 +140,13 @@ def main(global_config, **settings):
     config.add_route('create_project', 'create/project')
     config.add_route('update_project', 'update/project')
 
-    config.add_route('view_project',          'view/project/{project_id}')
-    config.add_route('overview_project',      'overview/project/{project_id}')
-    config.add_route('list_projects',         'list/projects/{entity_id}')
-    config.add_route('get_projects',          'get/projects')
+    config.add_route('view_project', 'view/project/{project_id}')
+    config.add_route('overview_project', 'overview/project/{project_id}')
+    config.add_route('list_projects', 'list/projects/{entity_id}')
+    config.add_route('get_projects', 'get/projects')
     config.add_route('get_projects_byEntity',
                      'get/projects_byEntity/{entity_id}')
-    config.add_route('summarize_project',     'summarize/project/{project_id}')
+    config.add_route('summarize_project', 'summarize/project/{project_id}')
 
     config.add_route('view_entity_nav_bar', 'view/entity_nav_bar/{entity_id}')
 
@@ -163,7 +162,7 @@ def main(global_config, **settings):
 
     config.add_route('list_image_formats', 'list/image_formats')
     config.add_route('get_image_formats', 'get/image_formats')
-    
+
     # *************************************************************************
     # Repository
     config.add_route('dialog_create_repository', 'dialog/create/repository')
@@ -174,7 +173,7 @@ def main(global_config, **settings):
     config.add_route('update_repository', 'update/repository')
 
     config.add_route('list_repositories', 'list/repositories')
-    config.add_route('get_repositories',  'get/repositories')
+    config.add_route('get_repositories', 'get/repositories')
 
     # ************************************************************************* 
     # Structure
@@ -185,33 +184,33 @@ def main(global_config, **settings):
 
     config.add_route('create_structure', 'create/structure')
     config.add_route('update_structure', 'update/structure')
-    config.add_route('get_structures',   'get/structures')
+    config.add_route('get_structures', 'get/structures')
 
     # ************************************************************************* 
     # User
 
     # dialogs
-    config.add_route('dialog_create_user',  'dialog/create/user/{entity_id}')
-    config.add_route('dialog_update_user',  'dialog/update/user/{user_id}')
+    config.add_route('dialog_create_user', 'dialog/create/user/{entity_id}')
+    config.add_route('dialog_update_user', 'dialog/update/user/{user_id}')
     config.add_route('dialog_append_users', 'dialog/append/users/{entity_id}')
 
     config.add_route('create_user', 'create/user')
     config.add_route('update_user', 'update/user')
-    config.add_route('view_user',   'view/user/{user_id}')
+    config.add_route('view_user', 'view/user/{user_id}')
 
-    config.add_route('list_users',         'list/users/{entity_id}')
-    config.add_route('get_users',          'get/users')
+    config.add_route('list_users', 'list/users/{entity_id}')
+    config.add_route('get_users', 'get/users')
     config.add_route('get_users_byEntity', 'get/users_byEntity/{entity_id}')
     config.add_route('get_users_not_in_entity',
                      'get/users_not_in_entity/{entity_id}')
 
-    config.add_route('append_user',  'append/user')
+    config.add_route('append_user', 'append/user')
     config.add_route('append_users', 'append/users')
 
-    config.add_route('summarize_user',     'summarize/user/{user_id}')
-    config.add_route('view_user_tasks',    'view/user/tasks/{user_id}')
+    config.add_route('summarize_user', 'summarize/user/{user_id}')
+    config.add_route('view_user_tasks', 'view/user/tasks/{user_id}')
     config.add_route('view_user_versions', 'view/user/versions/{user_id}')
-    config.add_route('view_user_tickets',  'view/user/tickets/{user_id}')
+    config.add_route('view_user_tickets', 'view/user/tickets/{user_id}')
 
     config.add_route('check_login_availability',
                      'check/login_availability/{login}')
@@ -228,7 +227,7 @@ def main(global_config, **settings):
     config.add_route('create_filename_template', 'create/filename_template')
     config.add_route('update_filename_template', 'update/filename_template')
 
-    config.add_route('get_filename_templates',   'get/filename_templates')
+    config.add_route('get_filename_templates', 'get/filename_templates')
 
     # ************************************************************************* 
     # StatusList
@@ -252,39 +251,39 @@ def main(global_config, **settings):
     config.add_route('dialog_create_status', 'dialog/create/status')
     config.add_route('dialog_update_status', 'dialog/update/status/{status_id')
 
-    config.add_route('create_status',    'create/status')
-    config.add_route('update_status',    'update/status')
+    config.add_route('create_status', 'create/status')
+    config.add_route('update_status', 'update/status')
 
-    config.add_route('get_statuses',     'get/statuses')
+    config.add_route('get_statuses', 'get/statuses')
     config.add_route('get_statuses_for',
                      'get/statuses_for/{target_entity_type}')
-    config.add_route('get_statuses_of',  'get/statuses_of/{status_list_id}')
+    config.add_route('get_statuses_of', 'get/statuses_of/{status_list_id}')
 
     # *************************************************************************
     # Assets
     config.add_route('dialog_create_asset', 'dialog/create/asset/{project_id}')
     config.add_route('dialog_update_asset', 'dialog/update/asset/{asset_id}')
 
-    config.add_route('create_asset',    'create/asset')
-    config.add_route('update_asset',    'update/asset')
+    config.add_route('create_asset', 'create/asset')
+    config.add_route('update_asset', 'update/asset')
 
-    config.add_route('view_asset',      'view/asset/{asset_id}')
+    config.add_route('view_asset', 'view/asset/{asset_id}')
     config.add_route('summarize_asset', 'summarize/asset/{asset_id}')
-    config.add_route('list_assets',     'list/assets/{project_id}')
-    config.add_route('get_assets',      'get/assets/{project_id}')
+    config.add_route('list_assets', 'list/assets/{project_id}')
+    config.add_route('get_assets', 'get/assets/{project_id}')
 
     # *************************************************************************
     # Shots
     config.add_route('dialog_create_shot', 'dialog/create/shot/{project_id}')
     config.add_route('dialog_update_shot', 'dialog/update/shot/{shot_id}')
 
-    config.add_route('create_shot',    'create/shot')
-    config.add_route('update_shot',    'update/shot')
+    config.add_route('create_shot', 'create/shot')
+    config.add_route('update_shot', 'update/shot')
 
-    config.add_route('view_shot',      'view/shot/{shot_id}')
+    config.add_route('view_shot', 'view/shot/{shot_id}')
     config.add_route('summarize_shot', 'summarize/shot/{shot_id}')
-    config.add_route('list_shots',     'list/shots/{project_id}')
-    config.add_route('get_shots',      'get/shots/{project_id}')
+    config.add_route('list_shots', 'list/shots/{project_id}')
+    config.add_route('get_shots', 'get/shots/{project_id}')
 
     # *************************************************************************
     # Sequence
@@ -294,13 +293,13 @@ def main(global_config, **settings):
     config.add_route('dialog_update_sequence',
                      'dialog/update/sequence/{sequence_id}')
 
-    config.add_route('create_sequence',    'create/sequence')
-    config.add_route('update_sequence',    'update/sequence')
+    config.add_route('create_sequence', 'create/sequence')
+    config.add_route('update_sequence', 'update/sequence')
 
-    config.add_route('view_sequence',      'view/sequence/{sequence_id}')
+    config.add_route('view_sequence', 'view/sequence/{sequence_id}')
     config.add_route('summarize_sequence', 'summarize/sequence/{sequence_id}')
-    config.add_route('list_sequences',     'list/sequences/{project_id}')
-    config.add_route('get_sequences',      'get/sequences/{project_id}')
+    config.add_route('list_sequences', 'list/sequences/{project_id}')
+    config.add_route('get_sequences', 'get/sequences/{project_id}')
 
     # *************************************************************************
     # Task
@@ -328,15 +327,18 @@ def main(global_config, **settings):
     config.add_route('list_tasks',
                      'list/tasks/{entity_id}')
 
-    config.add_route('get_entity_tasks',  'get/entity/tasks/{entity_id}')
-    config.add_route('get_user_tasks',    'get/user/tasks/{user_id}')
+    config.add_route('get_entity_tasks', 'get/entity/tasks/{entity_id}')
+    config.add_route('get_user_tasks', 'get/user/tasks/{user_id}')
     config.add_route('get_project_tasks', 'get/project/tasks/{project_id}')
-    config.add_route('get_root_tasks',    'get/root/tasks/{project_id}') # TODO: fix this
+    config.add_route('get_root_tasks',
+                     'get/root/tasks/{project_id}') # TODO: fix this
 
-    config.add_route('get_gantt_tasks',     'get/gantt/tasks/{entity_id}')
-    config.add_route('update_gantt_tasks',  'update/gantt/tasks') # TODO: is this still required
+    config.add_route('get_gantt_tasks', 'get/gantt/tasks/{entity_id}')
+    config.add_route('update_gantt_tasks',
+                     'update/gantt/tasks') # TODO: is this still required
     config.add_route('auto_schedule_tasks', 'auto_schedule_tasks')
-    config.add_route('view_task_nav_bar','view/task_nav_bar/{entity_id}')# TODO: this same with view_entity_nav_bar find a solution to merge them.
+    config.add_route('view_task_nav_bar',
+                     'view/task_nav_bar/{entity_id}')# TODO: this same with view_entity_nav_bar find a solution to merge them.
 
     # *************************************************************************
     # TimeLog
@@ -349,7 +351,8 @@ def main(global_config, **settings):
     config.add_route('update_time_log', 'update/time_log/{task_id}')
 
     config.add_route('get_time_logs', 'get/time_logs/{task_id}') # returns json
-    config.add_route('list_time_logs', 'list/time_logs/{task_id}') # returns response
+    config.add_route('list_time_logs',
+                     'list/time_logs/{task_id}') # returns response
 
     # *************************************************************************
     # Department
