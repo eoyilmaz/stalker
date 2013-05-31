@@ -204,7 +204,7 @@ def get_time_logs(request):
             'task_name': time_log.task.name,
             'resource_id': time_log.resource_id,
             'resource_name': time_log.resource.name,
-            'duration': time_log.total_second,
+            'duration': time_log.total_seconds,
             'start_date' : time_log.start.strftime('%s'),
             'end_date':time_log.end.strftime('%s')
 
