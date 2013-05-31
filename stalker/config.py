@@ -56,7 +56,7 @@ class Config(object):
         # 
         database_engine_settings = {
             "sqlalchemy.url": "sqlite:///:memory:",
-            "sqlalchemy.echo": True,
+            "sqlalchemy.echo": False,
         },
 
         database_session_settings = {},

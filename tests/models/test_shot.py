@@ -901,17 +901,17 @@ class ShotTester(unittest2.TestCase):
         self.assertEqual(self.test_shot.image_format,
                          self.test_shot.project.image_format)
     
-    def test_image_format_argument_is_not_a_ImageFormat_instance_or_None(self):
+    def test_image_format_argument_is_not_a_ImageFormat_instance_and_not_None(self):
         """testing if a TypeError will be raised when the image_format argument
-        is not a ImageFormat instance
+        is not a ImageFormat instance and not None
         """
         self.kwargs['code'] = 'newshot'
         self.kwargs['image_format'] = 'not an image format instance'
         self.assertRaises(TypeError, Shot, **self.kwargs)
     
-    def test_image_format_attribute_is_not_a_ImageFormat_instance(self):
+    def test_image_format_attribute_is_not_a_ImageFormat_instance_and_not_None(self):
         """testing if a TypeError will be raised when the image_format
-        attribute is not a ImageFormat instance
+        attribute is not a ImageFormat instance and not None
         """
         self.assertRaises(TypeError, setattr, self.test_shot, 'not an image f')
     

@@ -15,6 +15,12 @@ Stalker Changes
     updated in this way for **Version** class.
   * **Update:** Updated the formatting of **SimpleEntity.nice_name**, it is now
     possible to have uppercase letters and camel case format will be preserved.
+  * **Update**: **Version.take_name** formatting is enhanced.
+  * **New**: **Task** class is now mixed in with **ReferenceMixin** making it
+    unnecessary to have **Asset**, **Shot** and **Sequence** classes all mixed
+    in individually. Thus removed the **ReferenceMixin** from **Asset**,
+    **Shot** and **Sequence** classes.
+  * **Update**: Added **Task.schedule_model** validation and its tests.
 
 0.2.0.b5
 ========

@@ -28,7 +28,7 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
-class Asset(Task, ReferenceMixin, CodeMixin):
+class Asset(Task, CodeMixin):
     """The Asset class is the whole idea behind Stalker.
     
     *Assets* are containers of :class:`~stalker.models.task.Task`\ s. And

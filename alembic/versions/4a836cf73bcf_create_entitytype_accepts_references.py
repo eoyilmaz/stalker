@@ -17,13 +17,13 @@ import sqlalchemy as sa
 def upgrade():
     try:
         op.add_column('EntityTypes', sa.Column('accepts_references', sa.Boolean))
-    except sa.exc.OperationalError:
+    except (sa.exc.OperationalError, sa.exc.ProgrammingError):
         # the column already exists
         pass
 
     try:
         op.add_column('Links', sa.Column('original_filename', sa.String(256)))
-    except sa.exc.OperationalError:
+    except (sa.exc.OperationalError, sa.exc.ProgrammingError, sa.exc.InternalError):
         # the column already exists
         pass
 

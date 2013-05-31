@@ -33,37 +33,47 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
 
-class Shot(Task, ReferenceMixin, CodeMixin):
+class Shot(Task, CodeMixin):
     """Manages Shot related data.
-        
-    .. deprecated:: 0.1.2
-        
-       Because most of the shots in different projects are going to have the
-       same name, which is a kind of a code like SH001, SH012A etc., and in
-       Stalker you can not have two entities with the same name if their types
-       are also matching, to guarantee all the shots are going to have
-       different names the :attr:`~stalker.models.shot.Shot.name` attribute of
-       the Shot instances are automatically set to a randomly generated
+
+    .. warning::
+
+       .. deprecated:: 0.1.2
+
+       Because most of the shots in different projects are going to have
+       the same name, which is a kind of a code like SH001, SH012A etc., and
+       in Stalker you can not have two entities with the same name if their
+       types are also matching, to guarantee all the shots are going to have
+       different names the :attr:`~stalker.models.shot.Shot.name` attribute
+       of the Shot instances are automatically set to a randomly generated
        **uuid4** sequence.
-        
-    .. versionadded:: 0.1.2
-        
-       The name of the shot can be freely set without worrying about clashing
-       names.
-        
-    .. versionadded:: 0.2.0
-        
-       Shot instances now have their own image format. So you can set up
+
+    .. note::
+
+       .. versionadded:: 0.1.2
+
+       The name of the shot can be freely set without worrying about
+       clashing names.
+
+    .. note::
+
+       .. versionadded:: 0.2.0
+
+       Shot instances now can have their own image format. So you can set up
        different resolutions per shot.
-    
-    .. versionadded:: 0.2.0
-       
+
+    .. note::
+
+       .. versionadded:: 0.2.0
+
        Shot instances can now be created with a Project instance only, without
        needing a Sequence instance. Sequences are now a kind of a grouping
        attribute for the Shots. And Shots can have more than one Sequence.
-    
-    .. versionadded:: 0.2.0
-       
+
+    .. note::
+
+       .. versionadded:: 0.2.0
+
        Shots now have a new attribute called ``scenes``, holding
        :class:`~stalker.models.scene.Scene` instances which is another grouping
        attribute like ``sequences``. Where Sequences are grouping the Shots
@@ -71,7 +81,7 @@ class Shot(Task, ReferenceMixin, CodeMixin):
        the Shots according to their view to the world, that is shots taking
        place in the same set configuration can be grouped together by using
        Scenes.
-    
+
     Two shots with the same :attr:`~stalker.models.shot.Shot.code` can not be
     assigned to the same :class:`~stalker.models.sequence.Sequence`.
     
@@ -144,10 +154,10 @@ class Shot(Task, ReferenceMixin, CodeMixin):
     __auto_name__ = True
     __tablename__ = 'Shots'
     __mapper_args__ = {'polymorphic_identity': 'Shot'}
-    
+
     shot_id = Column('id', Integer, ForeignKey('Tasks.id'),
                      primary_key=True)
-    
+
     sequences = relationship(
         'Sequence',
         secondary='Shot_Sequences',
@@ -155,7 +165,7 @@ class Shot(Task, ReferenceMixin, CodeMixin):
         secondaryjoin='Shot_Sequences.c.sequence_id==Sequences.c.id',
         back_populates='shots'
     )
-    
+
     scenes = relationship(
         'Scene',
         secondary='Shot_Scenes',
@@ -163,7 +173,7 @@ class Shot(Task, ReferenceMixin, CodeMixin):
         secondaryjoin='Shot_Scenes.c.scene_id==Scenes.c.id',
         back_populates='shots'
     )
-    
+
     image_format_id = Column(Integer, ForeignKey("ImageFormats.id"))
     image_format = relationship(
         "ImageFormat",
@@ -174,7 +184,7 @@ class Shot(Task, ReferenceMixin, CodeMixin):
         instance of :class:`~stalker.models.format.ImageFormat`.
         """
     )
-    
+
     # the cut_duration attribute is not going to be stored in the database,
     # only the cut_in and cut_out will be enough to calculate the cut_duration
     _cut_in = Column(Integer)
@@ -190,35 +200,35 @@ class Shot(Task, ReferenceMixin, CodeMixin):
                  cut_duration=None,
                  image_format=None,
                  **kwargs):
-        
+
         # initialize TaskableMixin
         kwargs['project'] = project
         kwargs['code'] = code
-        
+
         # check for the code and project before ProjectMixin
         self._check_code_availability(code, project)
-        
+
         super(Shot, self).__init__(**kwargs)
         ReferenceMixin.__init__(self, **kwargs)
         StatusMixin.__init__(self, **kwargs)
         CodeMixin.__init__(self, **kwargs)
-        
+
         if sequences is None:
             sequences = []
         self.sequences = sequences
-        
+
         if scenes is None:
             scenes = []
         self.scenes = scenes
-        
+
         self.image_format = image_format
-        
+
         self._cut_in = cut_in
         self._cut_duration = cut_duration
         self._cut_out = cut_out
-        
+
         self._update_cut_info(cut_in, cut_duration, cut_out)
-    
+
     @reconstructor
     def __init_on_load__(self):
         """initialized the instance variables when the instance created with
@@ -226,21 +236,21 @@ class Shot(Task, ReferenceMixin, CodeMixin):
         """
         self._cut_duration = None
         self._update_cut_info(self._cut_in, self._cut_duration, self._cut_out)
-        
+
         # call supers __init_on_load__
         super(Shot, self).__init_on_load__()
-    
+
     def __repr__(self):
         """the representation of the Shot
         """
         return "<%s (%s, %s)>" % (self.entity_type, self.name, self.code)
-    
+
     def __eq__(self, other):
         """equality operator
         """
         return isinstance(other, Shot) and self.code == other.code and \
-            self.project == other.project
-    
+               self.project == other.project
+
     def _check_code_availability(self, code, project):
         """checks if the given code is available in the given project
         
@@ -258,7 +268,7 @@ class Shot(Task, ReferenceMixin, CodeMixin):
                         raise ValueError("The given project already has a "
                                          "Shot with a code of %s" % self.code)
         return True
-    
+
     def _update_cut_info(self, cut_in, cut_duration, cut_out):
         """updates the cut_in, cut_duration and cut_out attributes
         """
@@ -266,93 +276,98 @@ class Shot(Task, ReferenceMixin, CodeMixin):
         self._cut_in = self._validate_cut_in(cut_in)
         self._cut_duration = self._validate_cut_duration(cut_duration)
         self._cut_out = self._validate_cut_out(cut_out)
-        
+
         if self._cut_in is None:
             self._cut_in = 1
-        
+
         if self._cut_out is not None:
             if self._cut_in > self._cut_out:
                 # just update cut_duration
                 self._cut_duration = 1
                 #else:
                 #self._cut_o
-        
+
         if self._cut_duration is None or self._cut_duration <= 0:
             self._cut_duration = 1
 
         self._cut_out = self._cut_in + self._cut_duration - 1
-    
+
     def _validate_cut_duration(self, cut_duration_in):
         """validates the given cut_duration value
         """
         if cut_duration_in is not None and \
                 not isinstance(cut_duration_in, int):
             raise TypeError("cut_duration should be an instance of int")
-        
+
         return cut_duration_in
-    
+
     def _validate_cut_in(self, cut_in_in):
         """validates the given cut_in_in value
         """
         if cut_in_in is not None:
             if not isinstance(cut_in_in, int):
                 raise TypeError("cut_in should be an instance of int")
-        
+
         return cut_in_in
-    
+
     def _validate_cut_out(self, cut_out_in):
         """validates the given cut_out_in value
         """
         if cut_out_in is not None:
             if not isinstance(cut_out_in, int):
                 raise TypeError("cut_out should be an instance of int")
-        
+
         return cut_out_in
-    
+
     @validates('sequences')
     def _validate_sequence(self, key, sequence):
         """validates the given sequence value
         """
         from stalker.models.sequence import Sequence
+
         if not isinstance(sequence, Sequence):
             raise TypeError("%s.sequences should all be "
                             "stalker.models.sequence.Sequence instances, not "
                             "%s" % (self.__class__.__name__,
                                     sequence.__class__.__name__))
         return sequence
-    
+
 
     @validates('scenes')
     def _validate_scenes(self, key, scene):
         """validates the given scene value
         """
         from stalker.models.scene import Scene
+
         if not isinstance(scene, Scene):
             raise TypeError("%s.scenes should all be "
                             "stalker.models.scene.Scene instances, not "
                             "%s" % (self.__class__.__name__,
                                     scene.__class__.__name__))
         return scene
-    
+
     @validates('image_format')
     def _validate_image_format(self, key, imf):
         """validates the given imf value
         """
         if imf is None:
             # use the projects image format
-            return self.project.image_format
-        
-        if not isinstance(imf, ImageFormat):
-            raise TypeError('%s.image_format should be an instance of '
-                            'stalker.models.format.ImageFormat, not %s' %
-                            (self.__class__.__name__, imf.__class__.__name__))
+            imf = self.project.image_format
+
+        if imf is not None:
+            if not isinstance(imf, ImageFormat):
+                raise TypeError('%s.image_format should be an instance of '
+                                'stalker.models.format.ImageFormat, not %s' %
+                                (self.__class__.__name__, imf.__class__.__name__))
+
         return imf
-    
+
     def _cut_duration_getter(self):
         return self._cut_duration
 
     def _cut_duration_setter(self, cut_duration_in):
         self._update_cut_info(self._cut_in, cut_duration_in, self._cut_out)
+
     cut_duration = synonym(
         "_cut_duration",
         descriptor=property(_cut_duration_getter, _cut_duration_setter),
@@ -400,6 +415,7 @@ class Shot(Task, ReferenceMixin, CodeMixin):
         :attr:`~stalker.models.shot.Shot.cut_in` +
         :attr:`~stalker.models.shot.Shot.cut_duration`."""
     )
+
 
 Shot_Sequences = Table(
     'Shot_Sequences', Base.metadata,

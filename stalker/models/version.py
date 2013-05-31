@@ -219,12 +219,29 @@ class Version(Link, StatusMixin):
     def _format_take_name(self, take_name):
         """formats the given take_name value
         """
+        logger.debug("-------------------------------------")
+
+        logger.debug("take_name : %s" % take_name)
+
         # remove unnecessary characters
         take_name = re.sub(
             r"([^a-zA-Z0-9\s_\-]+)", r"", take_name
-        ).strip().replace(" ", "")
+        ).strip()
+        logger.debug("take_name : %s" % take_name)
+        
+        # replace empty spaces with underscores
+        take_name = re.sub(r'[\s]+', '_', take_name)
+        logger.debug("take_name : %s" % take_name)
 
-        return re.sub(r"(.+?[^a-zA-Z]+)([a-zA-Z0-9\s_\-]+)", r"\2", take_name)
+        # replace multiple underscores with only one
+        take_name = re.sub(r'([_]+)', r'_', take_name)
+        logger.debug("take_name : %s" % take_name)
+
+        # take_name = re.sub(r"(.+?[^a-zA-Z]+)([a-zA-Z0-9\s_\-]+)", r"\2", take_name)
+        take_name = re.sub(r"^[^a-zA-Z0-9]+", r"", take_name)
+        logger.debug("take_name : %s" % take_name)
+
+        return take_name
 
     @validates("take_name")
     def _validate_take_name(self, key, take_name):
@@ -363,8 +380,9 @@ class Version(Link, StatusMixin):
         return child
 
     def _template_variables(self):
-
-        from stalker import Shot, Asset, Sequence
+        """variables used in rendering the filename template
+        """
+        from stalker import Shot
 
         sequences = []
         scenes = []
@@ -372,14 +390,11 @@ class Version(Link, StatusMixin):
             sequences = self.version_of.sequences
             scenes = self.version_of.scenes
             shot = self.version_of
-        
+
         # get the parent tasks
         task = self.version_of
-        parent_tasks = []
-        while task:
-            parent_tasks.append(task)
-            task = task.parent
-        parent_tasks.reverse()
+        parent_tasks = task.parents
+        parent_tasks.append(task)
 
         kwargs = {
             'project': self.version_of.project,

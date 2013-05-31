@@ -24,7 +24,7 @@ logger.setLevel(logging.DEBUG)
 def upgrade():
     try:
         op.drop_column('Versions', u'source_file_id')
-    except sa.exc.OperationalError:
+    except (sa.exc.OperationalError, sa.exc.InternalError):
         # SQLite doesnt support it
         pass
 

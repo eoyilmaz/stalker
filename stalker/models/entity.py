@@ -108,11 +108,13 @@ class SimpleEntity(Base):
     :type type: :class:`~stalker.models.type.Type`
     """
     
-    # TODO: Allow the user to specify the formatting of the name attribute as a Regular Expression
     
     # auto generate name values
     __auto_name__ = True
     __strictly_typed__ = False
+    
+    # TODO: Allow the user to specify the formatting of the name attribute as a Regular Expression (name_formatter)
+    __name_formatter__ = None
     
     __tablename__ = "SimpleEntities"
     id = Column("id", Integer, primary_key=True)
@@ -138,7 +140,7 @@ class SimpleEntity(Base):
     created_by_id = Column(
         "created_by_id",
         Integer,
-        ForeignKey("Users.id", use_alter=True, name="x"),
+        ForeignKey("Users.id", use_alter=True, name="xc"),
         doc="""The id of the :class:`~stalker.models.auth.User` who has created
         this entity."""
     )
@@ -154,7 +156,7 @@ class SimpleEntity(Base):
     updated_by_id = Column(
         "updated_by_id",
         Integer,
-        ForeignKey("Users.id", use_alter=True, name="x"),
+        ForeignKey("Users.id", use_alter=True, name="xu"),
         doc="""The id of the :class:`~stalker.models.auth.User` who has updated
         this entity."""
     )
@@ -192,7 +194,7 @@ class SimpleEntity(Base):
     
     type = relationship(
         "Type",
-        primaryjoin="SimpleEntity.type_id==Type.type_id_local",
+        primaryjoin="SimpleEntities.c.type_id==Types.c.id",
         post_update=True,
         doc="""The type of the object.
         
@@ -204,8 +206,8 @@ class SimpleEntity(Base):
     generic_data = relationship(
         'SimpleEntity',
         secondary='SimpleEntity_GenericData',
-        primaryjoin='SimpleEntity.id==SimpleEntity_GenericData.c.simple_entity_id',
-        secondaryjoin='SimpleEntity_GenericData.c.other_simple_entity_id==SimpleEntity.id',
+        primaryjoin='SimpleEntities.c.id==SimpleEntity_GenericData.c.simple_entity_id',
+        secondaryjoin='SimpleEntity_GenericData.c.other_simple_entity_id==SimpleEntities.c.id',
         post_update=True,
         doc='''This attribute can hold any kind of data which exists in SOM.
         '''
@@ -219,7 +221,7 @@ class SimpleEntity(Base):
     
     thumbnail = relationship(
         'Link',
-        primaryjoin='SimpleEntity.thumbnail_id==Link.link_id',
+        primaryjoin='SimpleEntities.c.thumbnail_id==Links.c.id',
         post_update=True
     )
     
@@ -357,7 +359,7 @@ class SimpleEntity(Base):
         ## replace camel case letters
         # nice_name_in = re.sub(r"(.+?[a-z]+)([A-Z])", r"\1_\2", nice_name_in)
 
-        # replace white spaces with under score
+        # replace white spaces and dashes with under score
         nice_name_in = re.sub("([\s\-])+", r"_", nice_name_in)
 
         # remove multiple underscores

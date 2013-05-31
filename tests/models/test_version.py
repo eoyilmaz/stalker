@@ -168,6 +168,7 @@ class VersionTester(unittest2.TestCase):
 
         # create a shot
         self.test_shot1 = Shot(
+            name='SH001',
             code='SH001',
             project=self.test_project,
             sequences=[self.test_sequence],
@@ -220,6 +221,16 @@ class VersionTester(unittest2.TestCase):
             'version_of': self.test_task1,
             'status_list': self.test_version_status_list,
         }
+        
+        self.take_name_test_values = [
+            ('Take Name', 'Take_Name'),
+            ('TakeName', 'TakeName'),
+            ('take name', 'take_name'),
+            ('  take_name', 'take_name'),
+            ('take_name   ', 'take_name'),
+            ('   take   name   ', 'take_name'),
+            ('TakeName', 'TakeName')
+        ]
 
         # and the Version
         self.test_version = Version(**self.kwargs)
@@ -283,8 +294,8 @@ class VersionTester(unittest2.TestCase):
         test_values = [
             (1, '1'),
             (1.2, '12'),
-            (['a list'], 'alist'),
-            ({'a': 'dict'}, 'adict')]
+            (['a list'], 'a_list'),
+            ({'a': 'dict'}, 'a_dict')]
 
         for test_value in test_values:
             self.kwargs['take_name'] = test_value[0]
@@ -300,8 +311,8 @@ class VersionTester(unittest2.TestCase):
         test_values = [
             (1, '1'),
             (1.2, '12'),
-            (['a list'], 'alist'),
-            ({'a': 'dict'}, 'adict')]
+            (['a list'], 'a_list'),
+            ({'a': 'dict'}, 'a_dict')]
 
         for test_value in test_values:
             self.test_version.take_name = test_value[0]
@@ -320,6 +331,27 @@ class VersionTester(unittest2.TestCase):
         """
         self.assertRaises(ValueError, setattr, self.test_version, 'take_name',
                           '##$½#$')
+
+    def test_take_name_argument_is_formatted_correctly(self):
+        """testing if the take_name argument value is formatted correctly
+        """
+        for test_value in self.take_name_test_values:
+            self.kwargs['take_name'] = test_value[0]
+            new_version = Version(**self.kwargs)
+            self.assertEqual(
+                new_version.take_name,
+                test_value[1]
+            )
+
+    def test_take_name_attribute_is_formatted_correctly(self):
+        """testing if the take_name attribute value is formatted correctly
+        """
+        for test_value in self.take_name_test_values:
+            self.test_version.take_name = test_value[0]
+            self.assertEqual(
+                self.test_version.take_name,
+                test_value[1]
+            )
 
     def test_version_of_argument_is_skipped(self):
         """testing if a TypeError will be raised when the version_of argument
@@ -822,13 +854,13 @@ class VersionTester(unittest2.TestCase):
         
         self.assertEqual(
             new_version1.path,
-            'test_project/shot_8/task1'
+            'Test_Project/SH001/Task1'
         )
         
         new_version1.extension = '.ma'
         self.assertEqual(
             new_version1.filename,
-            'task1_TestTake_v001.ma'
+            'Task1_TestTake_v001.ma'
         )
         
 
@@ -845,50 +877,94 @@ class VersionTester(unittest2.TestCase):
     def test_template_variables_project(self):
         """testing if the project in template variables is correct
         """
-        self.fail('test is not implemented yet')
+        kwargs = self.test_version._template_variables()
+        self.assertEqual(
+            kwargs['project'],
+            self.test_version.version_of.project
+        )
 
     def test_template_variables_sequences(self):
         """testing if the sequences in template variables is correct
         """
-        self.fail('test is not implemented yet')
+        kwargs = self.test_version._template_variables()
+        self.assertEqual(
+            kwargs['sequences'],
+            []
+        )
 
     def test_template_variables_scenes(self):
         """testing if the scenes in template variables is correct
         """
-        self.fail('test is not implemented yet')
+        kwargs = self.test_version._template_variables()
+        self.assertEqual(
+            kwargs['scenes'],
+            []
+        )
 
     def test_template_variables_shot(self):
         """testing if the shot in template variables is correct
         """
-        self.fail('test is not implemented yet')
+        kwargs = self.test_version._template_variables()
+        self.assertEqual(
+            kwargs['shot'],
+            self.test_version.version_of
+        )
 
     def test_template_variables_asset(self):
         """testing if the asset in template variables is correct
         """
-        self.fail('test is not implemented yet')
+        kwargs = self.test_version._template_variables()
+        self.assertEqual(
+            kwargs['asset'],
+            self.test_version.version_of
+        )
 
     def test_template_variables_task(self):
         """testing if the task in template variables is correct
         """
-        self.fail('test is not implemented yet')
+        kwargs = self.test_version._template_variables()
+        self.assertEqual(
+            kwargs['task'],
+            self.test_version.version_of
+        )
 
     def test_template_variables_parent_tasks(self):
         """testing if the parent_tasks in template variables is correct
         """
-        self.fail('test is not implemented yet')
+        kwargs = self.test_version._template_variables()
+        parents = self.test_version.version_of.parents
+        parents.append(self.test_version.version_of)
+        self.assertEqual(
+            kwargs['parent_tasks'],
+            parents
+        )
 
     def test_template_variables_version(self):
         """testing if the version in template variables is correct
         """
-        self.fail('test is not implemented yet')
+        kwargs = self.test_version._template_variables()
+        self.assertEqual(
+            kwargs['version'],
+            self.test_version
+        )
 
     def test_template_variables_version_of(self):
         """testing if the version_of in template variables is correct
         """
-        self.fail('test is not implemented yet')
+        kwargs = self.test_version._template_variables()
+        self.assertEqual(
+            kwargs['version_of'],
+            self.test_version.version_of
+        )
+
 
     def test_template_variables_type(self):
         """testing if the type in template variables is correct
         """
-        self.fail('test is not implemented yet')
+        kwargs = self.test_version._template_variables()
+        self.assertEqual(
+            kwargs['type'],
+            self.test_version.type
+        )
+
 

@@ -29,7 +29,7 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
-class Sequence(Task, ReferenceMixin, CodeMixin):
+class Sequence(Task, CodeMixin):
     """Stores data about Sequences.
     
     Sequences are a way of grouping the Shots according to their temporal
