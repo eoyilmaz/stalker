@@ -672,38 +672,10 @@ attribute value."""
     def computed_start(cls):
         return Column('computed_start', DateTime)
 
-    #def _computed_start_getter(self):
-    #    return self._computed_start
-    #
-    #@declared_attr
-    #def computed_start(cls):
-    #    return synonym(
-    #        '_computed_start',
-    #        descriptor=property(
-    #            cls._computed_start_getter,
-    #            doc="""The TaskJuggler computed start datetime instance.
-    #            """
-    #        )
-    #    )
-
     @declared_attr
     def computed_end(cls):
         return Column('computed_end', DateTime)
 
-
-    #def _computed_end_getter(self):
-    #    return self._computed_end
-    #
-    #@declared_attr
-    #def computed_end(cls):
-    #    return synonym(
-    #        '_computed_end',
-    #        descriptor=property(
-    #            cls._computed_end_getter,
-    #            doc="""The TaskJuggler computed end datetime instance.
-    #            """
-    #        )
-    #    )
 
     @property
     def computed_duration(self):
@@ -733,6 +705,21 @@ attribute value."""
         return datetime.datetime.fromtimestamp(
             (int(dt.strftime('%s')) + ts * 0.5) // ts * ts
         )
+
+    @property
+    def total_seconds(self):
+        """returns the duration as seconds
+        """
+        return self.duration.days * 86400 + self.duration.seconds
+
+    @property
+    def computed_total_seconds(self):
+        """returns the duration as seconds
+        """
+        return self.computed_duration.days * 86400 + \
+               self.computed_duration.seconds
+
+
 
 
 class ProjectMixin(object):

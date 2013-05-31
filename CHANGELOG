@@ -21,6 +21,8 @@ Stalker Changes
     in individually. Thus removed the **ReferenceMixin** from **Asset**,
     **Shot** and **Sequence** classes.
   * **Update**: Added **Task.schedule_model** validation and its tests.
+  * **New**: Added **ScheduleMixin.total_seconds** and
+    **ScheduleMixin.computed_total_seconds**.
 
 0.2.0.b5
 ========
