@@ -272,20 +272,16 @@ class StatusMixin(object):
             # StatusList from the database
 
             # disable autoflush to prevent premature class initialization
-            autoflush = DBSession.autoflush
-            DBSession.autoflush = False
-            try:
-                # try to get a StatusList with the target_entity_type is 
-                # matching the class name
-                status_list = DBSession.query(StatusList) \
-                    .filter_by(target_entity_type=self.__class__.__name__) \
-                    .first()
-            except UnboundExecutionError:
-                # it is not mapped just skip it
-                pass
-            finally:
-                # restore autoflush
-                DBSession.autoflush = autoflush
+            with DBSession.no_autoflush:
+                try:
+                    # try to get a StatusList with the target_entity_type is 
+                    # matching the class name
+                    status_list = DBSession.query(StatusList) \
+                        .filter_by(target_entity_type=self.__class__.__name__) \
+                        .first()
+                except UnboundExecutionError:
+                    # it is not mapped just skip it
+                    pass
 
         # if it is still None
         if status_list is None:
@@ -330,7 +326,8 @@ class StatusMixin(object):
 
         # it is set to None
         if status is None:
-            status = self.status_list.statuses[0]
+            with DBSession.no_autoflush:
+                status = self.status_list.statuses[0]
 
         # it is not an instance of status or int
         if not isinstance(status, (Status, int)):

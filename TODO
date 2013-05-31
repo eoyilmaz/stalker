@@ -7,30 +7,10 @@ TODO
   are checked against being a string should now be checked against being
   unicode.
 
-* datetime instead of date
-
-  In the Task class all the time calculation should be done over the
-  datetime.datetime class instead of datetime.date object. This will let us
-  to increase the granularity of the scheduling.
-
 * SCM Integration:
 
   The repository can be a local path, and the project can be managed with an
   SCM, preferably with Mercurial.
-
-* ``project`` or ``projects`` field:
-
-  Most of the data is related with a Project. It is possible to add the
-  ``project`` field to a higher level in the hierarchy than the TaskableEntity.
-  A TaskableEntity needs to have a project but not all of them needs a tasks 
-  field. So creating a project field in the super will be nice.
-
-* don't forget to add tests for:
-
-  * Project.users
-  * Project.assets
-  * Project.sequences
-  * Project.shots
 
 * Per user settings file:
 
@@ -49,8 +29,7 @@ TODO
   very common to any class in the SOM. It can be gathered in a mixin and the
   :class:`~stalker.core.models.SimpleEntity` can be mixed with this class and
   the rest will have their table name and polymorphic identity by default. 
-  The plural name attribute also needs to be reintroduced.
-  
+
 * use pyseq for file sequence handling:
 
   PySeq is a great, simple library which handles all the file sequence actions.
@@ -82,6 +61,16 @@ TODO
 
 DONE:
 =====
+
+* Plural name:
+
+  The plural name attribute needs to be reintroduced.
+  
+* datetime instead of date
+
+  In the Task class all the time calculation should be done over the
+  datetime.datetime class instead of datetime.date object. This will let us
+  to increase the granularity of the scheduling.
 
 * ``end_date`` attribute in ScheduleMixin:
   

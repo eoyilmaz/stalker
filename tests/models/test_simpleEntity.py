@@ -86,17 +86,17 @@ class SimpleEntityTester(unittest2.TestCase):
         ]
         
         self.nice_name_test_values = [
-            ("testName", "test_name"),
-            ("1testName", "1test_name"),
-            ("_testName", "test_name"),
-            ("2423$+^^+^'%+%%&_testName", "2423_test_name"),
-            ("2423$+^^+^'%+%%&_testName_35", "2423_test_name_35"),
-            ("2423$ +^^+^ '%+%%&_ testName_ 35", "2423_test_name_35"),
-            ("SH001", "sh001"),
-            ("My name is Ozgur", "my_name_is_ozgur"),
+            ("testName", "testName"),
+            ("1testName", "1testName"),
+            ("_testName", "testName"),
+            ("2423$+^^+^'%+%%&_testName", "2423_testName"),
+            ("2423$+^^+^'%+%%&_testName_35", "2423_testName_35"),
+            ("2423$ +^^+^ '%+%%&_ testName_ 35", "2423_testName_35"),
+            ("SH001", "SH001"),
+            ("My name is Ozgur", "My_name_is_Ozgur"),
             (" this is another name for an asset",
              "this_is_another_name_for_an_asset"),
-            ("Ozgur    Yilmaz\n\n\n", "ozgur_yilmaz"),
+            ("Ozgur    Yilmaz\n\n\n", "Ozgur_Yilmaz"),
         ]
     
     def test___auto_name__attribute_is_True(self):

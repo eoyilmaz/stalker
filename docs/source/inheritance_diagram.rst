@@ -4,23 +4,30 @@ Inheritance Diagram
 ===================
 
 .. inheritance-diagram::
-   stalker.errors.LoginError
-   stalker.errors.DBError
+   stalker.exceptions.CircularDependencyError
+   stalker.exceptions.DBError
+   stalker.exceptions.LoginError
+   stalker.models.asset.Asset
+   stalker.models.auth.Group
+   stalker.models.auth.LocalSession
+   stalker.models.auth.Permission
+   stalker.models.auth.RootFactory
+   stalker.models.auth.User
+   stalker.models.department.Department
+   stalker.models.entity.Entity
+   stalker.models.entity.SimpleEntity
+   stalker.models.env.EnvironmentBase
+   stalker.models.format.ImageFormat
+   stalker.models.link.Link
+   stalker.models.message.Message
+   stalker.models.mixins.ACLMixin
+   stalker.models.mixins.CodeMixin
    stalker.models.mixins.ProjectMixin
    stalker.models.mixins.ReferenceMixin
    stalker.models.mixins.ScheduleMixin
    stalker.models.mixins.StatusMixin
    stalker.models.mixins.TargetEntityTypeMixin
-   stalker.models.asset.Asset
-   stalker.models.auth.Group
-   stalker.models.auth.User
-   stalker.models.department.Department
-   stalker.models.entity.Entity
-   stalker.models.entity.SimpleEntity
-   stalker.models.entity.TaskableEntity
-   stalker.models.format.ImageFormat
-   stalker.models.link.Link
-   stalker.models.message.Message
+   stalker.models.mixins.WorkingHoursMixin
    stalker.models.note.Note
    stalker.models.project.Project
    stalker.models.repository.Repository
@@ -35,11 +42,12 @@ Inheritance Diagram
    stalker.models.studio.Studio
    stalker.models.studio.WorkingHours
    stalker.models.tag.Tag
-   stalker.models.task.TimeLog
    stalker.models.task.Task
+   stalker.models.task.TimeLog
    stalker.models.template.FilenameTemplate
    stalker.models.ticket.Ticket
    stalker.models.ticket.TicketLog
+   stalker.models.type.EntityType
    stalker.models.type.Type
    stalker.models.version.Version
    :parts: 1

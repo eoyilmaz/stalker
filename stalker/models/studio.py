@@ -55,18 +55,17 @@ class Studio(Entity, ScheduleMixin, WorkingHoursMixin):
       studio.to_tjp          # a tjp representation of the studio with all
                              # its projects, departments and resources etc.
       
-      studio.schedule() # schedules all the active projects at
-                                        # once
-    Working Hours
-    -------------
+      studio.schedule() # schedules all the active projects at once
+    
+    **Working Hours**
     
     In Stalker, Studio class also manages the working hours of the studio.
     Allowing project tasks to be scheduled to be scheduled in those hours.
     
     :param int daily_working_hours: An integer specifying the daily working
-    hours for the studio. It is another critical value attribute which
-    TaskJuggler uses mainly converting working day values to working hours
-    (1d = 10h kind of thing).
+      hours for the studio. It is another critical value attribute which
+      TaskJuggler uses mainly converting working day values to working hours
+      (1d = 10h kind of thing).
     
     :param now: The now attribute overrides the TaskJugglers ``now`` attribute
       allowing the user to schedule the projects as if the scheduling is done

@@ -57,7 +57,36 @@ class LinkTester(unittest2.TestCase):
         """
         self.assertTrue(Link.__auto_name__)
 
-    def test_full_path_argument_accepts_string_or_unicode_only(self):
+    def test_full_path_argument_is_None(self):
+        """testing if setting the full_path argument to None will set the
+        full_path attribute to an empty string
+        """
+        self.kwargs['full_path'] = None
+        new_link = Link(**self.kwargs)
+        self.assertEqual(new_link.full_path, '')
+
+    def test_full_path_attribute_is_set_to_None(self):
+        """testing if setting the full_path attribute to None will set its
+        value to an empty string
+        """
+        self.test_link.full_path = ''
+
+    def test_full_path_argument_is_empty_an_empty_string(self):
+        """testing if setting the full_path attribute will be an empty string
+        if full_path argument is an empty string
+        """
+        self.kwargs['full_path'] = ''
+        new_link = Link(**self.kwargs)
+        self.assertEqual(new_link.full_path, '')
+
+    def test_full_path_attribute_is_set_to_empty_string(self):
+        """testing if setting the full_path attribute value will be an empty
+        string if it is set to an empty string
+        """
+        self.test_link.full_path = ''
+        self.assertEqual(self.test_link.full_path, '')
+
+    def test_full_path_argument_is_not_a_string(self):
         """testing if a TypeError will be raised when the full_path argument is
         not a string or unicode instance
         """
@@ -67,7 +96,7 @@ class LinkTester(unittest2.TestCase):
             self.kwargs["full_path"] = test_value
             self.assertRaises(TypeError, Link, **self.kwargs)
 
-    def test_full_path_attribute_accepts_string_or_unicode_only(self):
+    def test_full_path_attribute_is_not_a_string(self):
         """testing if a TypeError will be raised when the full_path attribute
         is not a string or unicode instance
         """
@@ -81,44 +110,6 @@ class LinkTester(unittest2.TestCase):
                 'full_path',
                 test_value
             )
-
-    def test_full_path_argument_being_empty(self):
-        """testing if setting the full_path argument to an empty string raises
-        a ValueError
-        """
-        self.kwargs['full_path'] = ''
-        self.assertRaises(ValueError, Link, **self.kwargs)
-
-    def test_full_path_attribute_being_empty(self):
-        """testing if setting the full_path attribute to an empty string raises
-        a ValueError
-        """
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.test_link,
-            'full_path',
-            ''
-        )
-
-    def test_full_path_argument_being_None(self):
-        """testing if setting the full_path argument to None raises a TypeError
-        """
-        self.kwargs['full_path'] = None
-        self.assertRaises(TypeError, Link, **self.kwargs)
-
-    def test_full_path_attribute_being_None(self):
-        """testing if setting the full_path attribute to None raises a
-        TypeError
-        """
-
-        self.assertRaises(
-            TypeError,
-            setattr,
-            self.test_link,
-            'full_path',
-            None
-        )
 
     def test_full_path_windows_to_other_conversion(self):
         """testing if the full_path is stored in internal format

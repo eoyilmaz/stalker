@@ -3267,12 +3267,82 @@ class TaskTester(unittest2.TestCase):
         self.test_task.computed_end = None
         self.assertFalse(self.test_task.is_scheduled)
 
-    def test_schedule_model_is_effort_by_default(self):
+    def test_schedule_model_attribute_is_effort_by_default(self):
         """testing if the schedule_model is effort by default
         """
         self.assertEqual(self.test_task.schedule_model, 'effort')
     
-    # TODO: add schedule_model validation tests
+    def test_schedule_model_argument_is_None(self):
+        """testing if the schedule model attribute will be 'effort' if the
+        schedule_model argument is set to None
+        """
+        self.kwargs['schedule_model'] = None
+        new_task = Task(**self.kwargs)
+        self.assertEqual(
+            new_task.schedule_model,
+            'effort'
+        )
+
+    def test_schedule_model_attribute_is_set_to_None(self):
+        """testing if the schedule_model will be 'effort' if it is set to None
+        """
+        self.test_task.schedule_model = None
+        self.assertEqual(
+            self.test_task.schedule_model,
+            'effort'
+        )
+
+    def test_schedule_model_argument_is_not_a_string(self):
+        """testing if a TypeError will be raised when the schedule_model
+        argument is not a string
+        """
+        self.kwargs['schedule_model'] = 234
+        self.assertRaises(TypeError, Task, **self.kwargs)
+
+    def test_schedule_model_attribute_is_not_a_string(self):
+        """testing if a TypeError will be raised when the schedule_model
+        attribute is set to a value other than a string
+        """
+        self.assertRaises(
+            TypeError, setattr, self.test_task, 'schedule_model', 2343
+        )
+
+    def test_schedule_model_argument_is_not_in_correct_value(self):
+        """testing if a ValueError will be raised when the schedule_model
+        argument is not in correct value
+        """
+        self.kwargs['schedule_model'] = 'not in the list'
+        self.assertRaises(ValueError, Task, **self.kwargs)
+
+    def test_schedule_model_attribute_is_not_in_correct_value(self):
+        """testing if a ValueError will be raised when the schedule_model
+        attribute is not set to a correct value
+        """
+        self.assertRaises(
+            ValueError, setattr, self.test_task, 'schedule_model',
+            'not in the list'
+        )
+
+    def test_schedule_model_argument_is_working_properly(self):
+        """testing if the schedule_model argument value is correctly passed to
+        the schedule_model attribute
+        """
+        test_value = 'duration'
+        self.kwargs['schedule_model'] = test_value
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.schedule_model, test_value)
+
+    def test_schedule_model_attribute_is_working_properly(self):
+        """testing if the schedule_model attribute is working properly
+        """
+        test_value = 'duration'
+        self.assertNotEqual(
+            self.test_task.schedule_model, test_value
+        )
+        self.test_task.schedule_model = test_value
+        self.assertEqual(
+            self.test_task.schedule_model, test_value
+        )
     
     def test_schedule_constraint_is_0_by_default(self):
         """testing if the schedule_constraint attribute is None by default
@@ -3280,3 +3350,32 @@ class TaskTester(unittest2.TestCase):
         self.assertEqual(self.test_task.schedule_constraint, 0)
     
     # TODO: add schedule_constraint validation tests
+
+    def test_parents_attribute_is_read_only(self):
+        """testing if the parents attribute is read only
+        """
+        self.assertRaises(
+            AttributeError,
+            setattr,
+            self.test_task,
+            'parents',
+            self.test_dependent_task1
+        )
+
+    def test_parents_attribute_is_working_properly(self):
+        """testing if the parents attribute is working properly
+        """
+        self.kwargs['parent'] = None
+        
+        t1 = Task(**self.kwargs)
+        t2 = Task(**self.kwargs)
+        t3 = Task(**self.kwargs)
+        
+        t2.parent = t1
+        t3.parent = t2
+        
+        self.assertEqual(
+            t3.parents,
+            [t1, t2]
+        )
+    

@@ -55,7 +55,7 @@ class LocalSessionTester(unittest2.TestCase):
         """
         DBSession.remove()
         db.setup()
-        defaults.local_storage_path = tempfile.mkdtemp()
+        defaults.local_storage_path = tempfile.mktemp()
 
     def tearDown(self):
         """cleans the test environment
@@ -70,6 +70,7 @@ class LocalSessionTester(unittest2.TestCase):
         """
         new_local_session = LocalSession()
         new_local_session.save()
+        
         # check if a file is created in the users local storage
         self.assertTrue(
             os.path.exists(
@@ -180,5 +181,53 @@ class LocalSessionTester(unittest2.TestCase):
         )
 
         self.assertIsNone(local_session2.logged_in_user)
-        
 
+    def test_delete_will_delete_the_session_cache(self):
+        """testing if the LocalSession.delete() will delete the currect cache
+        file
+        """
+        # create a new user
+        new_user = User(
+            name='Test User',
+            login='test_user',
+            email='test_user@users.com',
+            password='secret'
+        )
+
+        # save it to the Database
+        DBSession.add(new_user)
+        DBSession.commit()
+        
+        self.assertIsNotNone(new_user.id)
+
+        # save it to the local storage
+        local_session = LocalSession()
+        local_session.store_user(new_user)
+
+        # save the session
+        local_session.save()
+        
+        # check if the file is created
+        # check if a file is created in the users local storage
+        self.assertTrue(
+            os.path.exists(
+                os.path.join(
+                    defaults.local_storage_path,
+                    defaults.local_session_data_file_name
+                )
+            )
+        )
+        
+        # now delete the session by calling delete()
+        local_session.delete()
+        
+        # check if the file is gone
+        # check if a file is created in the users local storage
+        self.assertFalse(
+            os.path.exists(
+                os.path.join(
+                    defaults.local_storage_path,
+                    defaults.local_session_data_file_name
+                )
+            )
+        )

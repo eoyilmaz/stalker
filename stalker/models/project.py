@@ -49,15 +49,13 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
     schedule and code attribute. Please read the individual documentation of
     each of the mixins.
     
-    Project Users
-    -------------
+    **Project Users**
     
     The :attr:`~stalker.models.project.Project.users` attribute lists the users
     in this project. UIs like task creation for example will only list these
     users as available resources for this project.
     
-    TaskJuggler Integration
-    -----------------------
+    **TaskJuggler Integration**
     
     Stalker uses TaskJuggler for scheduling the project tasks. The
     :attr:`~stalker.models.project.Project.to_tjp` attribute generates a tjp

@@ -20,7 +20,7 @@
 
 import unittest2
 from stalker import (Link, Project, Repository, Sequence, Shot, Status,
-                     StatusList, Task, Type, Version)
+                     StatusList, Task, Type, Version, FilenameTemplate, Structure)
 from stalker import db
 from stalker.db.session import DBSession, ZopeTransactionExtension
 
@@ -140,6 +140,12 @@ class VersionTester(unittest2.TestCase):
             target_entity_type=Project,
         )
 
+        
+        # create a structure
+        self.test_structure = Structure(
+            name='Test Project Structure'
+        )
+
         # create a project
         self.test_project = Project(
             name='Test Project',
@@ -147,7 +153,10 @@ class VersionTester(unittest2.TestCase):
             type=self.test_project_type,
             status_list=self.test_project_status_list,
             repository=self.test_repo,
+            structure=self.test_structure
         )
+        
+        
 
         # create a sequence
         self.test_sequence = Sequence(
@@ -159,6 +168,7 @@ class VersionTester(unittest2.TestCase):
 
         # create a shot
         self.test_shot1 = Shot(
+            name='SH001',
             code='SH001',
             project=self.test_project,
             sequences=[self.test_sequence],
@@ -211,6 +221,16 @@ class VersionTester(unittest2.TestCase):
             'version_of': self.test_task1,
             'status_list': self.test_version_status_list,
         }
+        
+        self.take_name_test_values = [
+            ('Take Name', 'Take_Name'),
+            ('TakeName', 'TakeName'),
+            ('take name', 'take_name'),
+            ('  take_name', 'take_name'),
+            ('take_name   ', 'take_name'),
+            ('   take   name   ', 'take_name'),
+            ('TakeName', 'TakeName')
+        ]
 
         # and the Version
         self.test_version = Version(**self.kwargs)
@@ -274,8 +294,8 @@ class VersionTester(unittest2.TestCase):
         test_values = [
             (1, '1'),
             (1.2, '12'),
-            (['a list'], 'alist'),
-            ({'a': 'dict'}, 'adict')]
+            (['a list'], 'a_list'),
+            ({'a': 'dict'}, 'a_dict')]
 
         for test_value in test_values:
             self.kwargs['take_name'] = test_value[0]
@@ -283,15 +303,16 @@ class VersionTester(unittest2.TestCase):
 
             self.assertEqual(new_version.take_name, test_value[1])
 
-    def test_take_name_attribute_is_not_a_string_will_be_converted_to_one(self):
+    def test_take_name_attribute_is_not_a_string_will_be_converted_to_one(
+            self):
         """testing if the given take_name attribute is not a string will be
         converted to a proper string
         """
         test_values = [
             (1, '1'),
             (1.2, '12'),
-            (['a list'], 'alist'),
-            ({'a': 'dict'}, 'adict')]
+            (['a list'], 'a_list'),
+            ({'a': 'dict'}, 'a_dict')]
 
         for test_value in test_values:
             self.test_version.take_name = test_value[0]
@@ -310,6 +331,27 @@ class VersionTester(unittest2.TestCase):
         """
         self.assertRaises(ValueError, setattr, self.test_version, 'take_name',
                           '##$½#$')
+
+    def test_take_name_argument_is_formatted_correctly(self):
+        """testing if the take_name argument value is formatted correctly
+        """
+        for test_value in self.take_name_test_values:
+            self.kwargs['take_name'] = test_value[0]
+            new_version = Version(**self.kwargs)
+            self.assertEqual(
+                new_version.take_name,
+                test_value[1]
+            )
+
+    def test_take_name_attribute_is_formatted_correctly(self):
+        """testing if the take_name attribute value is formatted correctly
+        """
+        for test_value in self.take_name_test_values:
+            self.test_version.take_name = test_value[0]
+            self.assertEqual(
+                self.test_version.take_name,
+                test_value[1]
+            )
 
     def test_version_of_argument_is_skipped(self):
         """testing if a TypeError will be raised when the version_of argument
@@ -647,7 +689,7 @@ class VersionTester(unittest2.TestCase):
         self.assertNotEqual(new_version.parent, self.test_version)
         new_version.parent = self.test_version
         self.assertIn(new_version, self.test_version.children)
-    
+
     def test_parent_attribute_will_not_allow_circular_dependencies(self):
         """testing if a CircularDependency will be raised when the given
         Version to the parent attribute is a children of the current Version
@@ -656,21 +698,22 @@ class VersionTester(unittest2.TestCase):
         version1 = Version(**self.kwargs)
         self.assertRaises(CircularDependencyError, setattr, self.test_version,
                           'parent', version1)
-    
-    def test_parent_attribute_will_not_allow_deeper_circular_dependencies(self):
+
+    def test_parent_attribute_will_not_allow_deeper_circular_dependencies(
+            self):
         """testing if a CircularDependency will be raised when the given
         Version is a parent of the current parent
         """
         self.kwargs['parent'] = self.test_version
         version1 = Version(**self.kwargs)
-        
+
         self.kwargs['parent'] = version1
         version2 = Version(**self.kwargs)
-        
+
         # now create circular dependency
         self.assertRaises(CircularDependencyError, setattr, self.test_version,
                           'parent', version2)
-        
+
     def test_children_attribute_is_set_to_None(self):
         """testing if a TypeError will be raised when the children attribute is
         set to None
@@ -685,7 +728,8 @@ class VersionTester(unittest2.TestCase):
         self.assertRaises(TypeError, setattr, self.test_version, 'children',
                           'not a list of Version instances')
 
-    def test_children_attribute_is_not_set_to_a_list_of_Version_instances(self):
+    def test_children_attribute_is_not_set_to_a_list_of_Version_instances(
+            self):
         """testing if a TypeError will be raised when the children attribute is
         not set to a list of Version instances
         """
@@ -699,7 +743,7 @@ class VersionTester(unittest2.TestCase):
         new_version1 = Version(**self.kwargs)
         self.test_version.children = [new_version1]
         self.assertIn(new_version1, self.test_version.children)
-        
+
         new_version2 = Version(**self.kwargs)
         self.test_version.children.append(new_version2)
         self.assertIn(new_version2, self.test_version.children)
@@ -712,7 +756,7 @@ class VersionTester(unittest2.TestCase):
         new_version1 = Version(**self.kwargs)
         self.test_version.children = [new_version1]
         self.assertEqual(new_version1.parent, self.test_version)
-        
+
         new_version2 = Version(**self.kwargs)
         self.test_version.children.append(new_version2)
         self.assertEqual(new_version2.parent, self.test_version)
@@ -724,12 +768,13 @@ class VersionTester(unittest2.TestCase):
         self.kwargs['parent'] = None
         new_version1 = Version(**self.kwargs)
         new_version2 = Version(**self.kwargs)
-        
+
         new_version1.parent = new_version2
         self.assertRaises(CircularDependencyError,
                           new_version1.children.append, new_version2)
-    
-    def test_children_attribute_will_not_allow_deeper_circular_dependencies(self):
+
+    def test_children_attribute_will_not_allow_deeper_circular_dependencies(
+            self):
         """testing if a CircularDependency error will be raised when the a
         parent Version of a parent Version is set as a children to its grand
         child
@@ -738,10 +783,188 @@ class VersionTester(unittest2.TestCase):
         new_version1 = Version(**self.kwargs)
         new_version2 = Version(**self.kwargs)
         new_version3 = Version(**self.kwargs)
-        
+
         new_version1.parent = new_version2
         new_version2.parent = new_version3
-        
+
         self.assertRaises(CircularDependencyError,
                           new_version1.children.append, new_version3)
-    
+
+    def test_update_paths_will_render_the_appropriate_template_from_the_related_project(
+            self):
+        """testing if update_paths method will update the Version.full_path by
+        rendering the related Project FilenameTemplate.
+        """
+        # create a FilenameTemplate for Task instances
+
+        # A Template for Assets
+        # ......../Assets/{{asset.type.name}}/{{asset.nice_name}}/{{version_of.type.name}}/
+        # 
+        # Project1/Assets/Character/Sero/Modeling/Sero_Modeling_Main_v001.ma
+        #
+        # + Project1
+        # |
+        # +-+ Assets (Task)
+        # | |
+        # | +-+ Characters
+        # |   |
+        # |   +-+ Sero (Asset)
+        # |     |
+        # |     +-> Version 1
+        # |     |
+        # |     +-+ Modeling (Task)
+        # |       |
+        # |       +-+ Body Modeling (Task)
+        # |         |
+        # |         +-+ Coarse Modeling (Task)
+        # |         | |
+        # |         | +-> Version 1 (Version)
+        # |         |
+        # |         +-+ Fine Modeling (Task)
+        # |           |
+        # |           +-> Version 1 (Version): Fine_Modeling_Main_v001.ma
+        # |                                  Assets/Sero/Modeling/Body_Modeling/Fine_Modeling/Fine_Modeling_Main_v001.ma
+        # |
+        # +-+ Shots (Task)
+        #   |
+        #   +-+ Shot 10 (Shot)
+        #   | |
+        #   | +-+ Layout (Task)
+        #   |   |
+        #   |   +-> Version 1 (Version): Layout_v001.ma
+        #   |                            Shots/Shot_1/Layout/Layout_Main_v001.ma
+        #   |
+        #   +-+ Shot 2 (Shot)
+        #     |
+        #     +-+ FX (Task)
+        #       |
+        #       +-> Version 1 (Version)
+
+        ft = FilenameTemplate(
+            name='Task Filename Template',
+            target_entity_type='Task',
+            path='{{project.nice_name}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}',
+            filename='{{version_of.nice_name}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}',
+        )
+        self.test_project.structure.templates.append(ft)
+        new_version1 = Version(**self.kwargs)
+        DBSession.add(new_version1)
+        DBSession.commit()
+        new_version1.update_paths()
+        
+        self.assertEqual(
+            new_version1.path,
+            'Test_Project/SH001/Task1'
+        )
+        
+        new_version1.extension = '.ma'
+        self.assertEqual(
+            new_version1.filename,
+            'Task1_TestTake_v001.ma'
+        )
+        
+
+
+    def test_update_paths_will_raise_a_RuntimeError_if_there_is_no_suitable_FilenameTemplate(
+            self):
+        """testing if update_paths method will raise a RuntimeError if there is
+        no suitable FilenameTemplate instance found
+        """
+        self.kwargs['parent'] = None
+        new_version1 = Version(**self.kwargs)
+        self.assertRaises(RuntimeError, new_version1.update_paths)
+
+    def test_template_variables_project(self):
+        """testing if the project in template variables is correct
+        """
+        kwargs = self.test_version._template_variables()
+        self.assertEqual(
+            kwargs['project'],
+            self.test_version.version_of.project
+        )
+
+    def test_template_variables_sequences(self):
+        """testing if the sequences in template variables is correct
+        """
+        kwargs = self.test_version._template_variables()
+        self.assertEqual(
+            kwargs['sequences'],
+            []
+        )
+
+    def test_template_variables_scenes(self):
+        """testing if the scenes in template variables is correct
+        """
+        kwargs = self.test_version._template_variables()
+        self.assertEqual(
+            kwargs['scenes'],
+            []
+        )
+
+    def test_template_variables_shot(self):
+        """testing if the shot in template variables is correct
+        """
+        kwargs = self.test_version._template_variables()
+        self.assertEqual(
+            kwargs['shot'],
+            self.test_version.version_of
+        )
+
+    def test_template_variables_asset(self):
+        """testing if the asset in template variables is correct
+        """
+        kwargs = self.test_version._template_variables()
+        self.assertEqual(
+            kwargs['asset'],
+            self.test_version.version_of
+        )
+
+    def test_template_variables_task(self):
+        """testing if the task in template variables is correct
+        """
+        kwargs = self.test_version._template_variables()
+        self.assertEqual(
+            kwargs['task'],
+            self.test_version.version_of
+        )
+
+    def test_template_variables_parent_tasks(self):
+        """testing if the parent_tasks in template variables is correct
+        """
+        kwargs = self.test_version._template_variables()
+        parents = self.test_version.version_of.parents
+        parents.append(self.test_version.version_of)
+        self.assertEqual(
+            kwargs['parent_tasks'],
+            parents
+        )
+
+    def test_template_variables_version(self):
+        """testing if the version in template variables is correct
+        """
+        kwargs = self.test_version._template_variables()
+        self.assertEqual(
+            kwargs['version'],
+            self.test_version
+        )
+
+    def test_template_variables_version_of(self):
+        """testing if the version_of in template variables is correct
+        """
+        kwargs = self.test_version._template_variables()
+        self.assertEqual(
+            kwargs['version_of'],
+            self.test_version.version_of
+        )
+
+
+    def test_template_variables_type(self):
+        """testing if the type in template variables is correct
+        """
+        kwargs = self.test_version._template_variables()
+        self.assertEqual(
+            kwargs['type'],
+            self.test_version.type
+        )
+
+

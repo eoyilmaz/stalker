@@ -3,52 +3,42 @@ About
 =====
 
 Stalker is an Open Source Production Asset Management (ProdAM) System designed 
-specifically for Animation and VFX Studios and licensed under LGPL v2.1.
+specifically for Animation and VFX Studios but can be used for any kind of
+projects. Stalker is licensed under LGPL v2.1.
 
 Features:
- * Designed for animation and vfx studios
- 
- * Platform independent
- 
- * Flexible design
- 
+ * Designed for animation and VFX Studios.
+ * It is a Pyramid Web Application and also SOM (Stalker Object Model) API can
+   be used as a Python library.
+ * Platform independent.
  * Default installation handles nearly all the asset and project management 
-   needs of an animation and vfx studio
-
- * Customizable with configuration scripts
- 
- * Customizable object model (Stalker Object Model - SOM)
-
- * Integrated production planing and tracking tools
- 
- * Integrated messaging system
- * Web
- * PySide user interfaces
- * Can be used with any kind of databases supported by SQLAlchemy
+   needs of an animation and vfx studio.
+ * Customizable with configuration scripts.
+ * Customizable object model (Stalker Object Model - SOM).
+ * Uses TaskJuggler as the project planing and tracking backend.
+ * Can be used with any kind of databases supported by SQLAlchemy.
  * Can be connected to all the major 3d animation packages like Maya, Houdini,
-   Nuke, XSI, Vue, Blender etc. and any application that has a Python API
- * Can work as a stand-alone application
+   Nuke, XSI, Vue, Blender etc. and any application that has a Python API.
+ * Can work as a stand-alone application.
 
 Stalker is build over these other OpenSource projects:
  * Python
- * SQLAlchemy
- * Jinja2
- * Beaker
- * PySide
  * Pyramid
-
-Getting Started
-===============
-
-- cd <directory containing this file>
-
-- $venv/bin/python setup.py develop
-
-- $venv/bin/populate_stalker development.ini
-
-- $venv/bin/pserve development.ini
+ * SQLAlchemy and Alembic
+ * Jinja2
+ * TaskJuggler
 
 
+.. Getting Started
+   ===============
+   
+   - cd <directory containing this file>
+   
+   - $venv/bin/python setup.py develop
+   
+   - $venv/bin/populate_stalker development.ini
+   
+   - $venv/bin/pserve development.ini
 
 
 Source

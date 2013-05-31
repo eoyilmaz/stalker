@@ -60,7 +60,7 @@ Stalker by using the Python prompt like this::
   
   >>> import stalker
   >>> stalker.__version__
-  0.1.1.a5
+  0.2.0.b5
 
 For developers
 ==============
@@ -70,13 +70,12 @@ Code. Use the following command to clone::
 
   hg clone https://stalker.googlecode.com/hg/ stalker 
 
-Developers also need to install these Ptyhon packages:
+Developers also need to install these Python packages:
 
 1. Nose
 2. Coverage
-3. Mocker
-4. Sphinx
-5. Pygments
+3. Sphinx
+4. Pygments
 
 The following command will install them all::
   

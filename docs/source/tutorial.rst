@@ -1,14 +1,14 @@
 .. _tutorial_toplevel:
 
-========
-Tutorial
-========
+============
+API Tutorial
+============
 
 Introduction
 ============
 
 Using Stalker along with Python is all about interacting with a database by
-using the Stalker Object Model (SOM). Stalker uses the powerfull `SQLAlchemy
+using the Stalker Object Model (SOM). Stalker uses the powerful `SQLAlchemy
 ORM`_.
 
 .. _SQLAlchemy ORM: http://www.sqlalchemy.org/docs/orm/tutorial.html
@@ -38,11 +38,11 @@ testing purposes. To be able to get more out of Stalker we should give a proper
 database information. The most basic setup is to use a file based SQLite3
 database::
 
-  db.setup("sqlite:///C:\\studio.db") # assumed Windows
+  db.setup({"sqlalchemy.url": "sqlite:///C:\\studio.db"}) # assumed Windows
 
 or::
 
-  db.setup("sqlite:////home/ozgur/studio.db") # under linux or osx
+  db.setup({"sqlalchemy.url": "sqlite:////home/ozgur/studio.db"}) # under linux or osx
 
 .. ::
    This command will do the following:
@@ -64,9 +64,8 @@ the database. The first thing we need to do is to import the
 then create the :class:`~stalker.models.user.User` object::
 
   myUser = User(
-      first_name="Erkan Ozgur",
-      last_name="Yilmaz",
-      login_name="eoyilmaz",
+      name="Erkan Ozgur Yilmaz",
+      login="eoyilmaz",
       email="eoyilmaz@gmail.com",
       password="secret",
       description="This is me"
@@ -91,8 +90,8 @@ or::
   myUser.department = tds_department
 
 We have created successfully a :class:`~stalker.models.user.User` and a
-:class:`~stalker.models.department.Department` and we assigned the user as one of the
-member of the **TDs Department**.
+:class:`~stalker.models.department.Department` and we assigned the user as one
+of the member of the **TDs Department**.
 
 For now, because we didn't tell Stalker to commit the changes, no data has been
 saved to the database yet. So lets send it the data to the database::
@@ -105,11 +104,11 @@ These information are in the database right now. Lets show this by querying all
 the departments, then getting the second one (the first department is always
 the "admins" which is created by default) and getting its first members name::
 
-  all_departments = db.query(Department).all()
+  all_departments = Department.query.all()
   all_members = all_departments[1].members
-  print all_members[0].first_name
+  print all_members[0].name
 
-this should print out "Erkan Ozgur".
+this should print out "Erkan Ozgur Yilmaz".
 
 Part II/A - Creating Simple Data
 ================================
@@ -118,8 +117,10 @@ Lets say that we have this new commercial project coming and you want to start
 using Stalker with it. So we need to create a
 :class:`~stalker.models.project.Project` object to hold data about it.
 
-A project instance needs to have a suitable status list and it needs to be
-attached to a :class:`~stalker.models.repository.Repository` instance::
+A project instance needs to have a suitable
+:class:`~stalker.models.status.StatusList`
+(see :ref:`status_and_status_lists_toplevel`) and it needs to be attached to a
+:class:`~stalker.models.repository.Repository` instance::
 
   # lets create a couple of generic Statuses
   from stalker import Status
@@ -185,7 +186,7 @@ which is visible to all the workstations/render farmers::
   )
 
 :class:`~stalker.models.repository.Repository` class will be explained in
-detail in upcomming sections.
+detail in upcoming sections.
 
 So::
 
@@ -220,9 +221,10 @@ Lets save all the new data to the database::
   db.session.add(new_project)
   db.session.commit()
 
-As you see, even though we have created multiple objects (new_project, satuses,
-status lists etc.) we've just added the ``new_project`` object to the database,
-but don't worry all the related objects will be added to the database.
+As you see, even though we have created multiple objects (new_project,
+statuses, status lists etc.) we've just added the ``new_project`` object to the
+database, but don't worry all the related objects will be added to the
+database.
 
 A Project generally contains :class:`~stalker.models.sequence.Sequence`\ s, so
 lets create one, again we need to create a status list suitable for sequences
@@ -368,7 +370,7 @@ Now create the dependecies::
   lighting.depends = [anim]
   anim.depends = [previs, matchmove]
 
-For now the dependencies are only usefull to have an information about the
+For now the dependencies are only useful to have an information about the
 relation of the tasks, but in the future releases of Stalker it is also going
 to be used in the planned Project Scheduler.
 

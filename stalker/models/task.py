@@ -31,12 +31,11 @@ from stalker import defaults
 from stalker.models import check_circular_dependency
 from stalker.models.entity import Entity
 from stalker.models.auth import User
-from stalker.models.mixins import ScheduleMixin, StatusMixin
+from stalker.models.mixins import ScheduleMixin, StatusMixin, ReferenceMixin
 from stalker.db import DBSession
 from stalker.db.declarative import Base
 from stalker.exceptions import OverBookedError, CircularDependencyError
 from stalker.log import logging_level
-
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
@@ -246,11 +245,10 @@ def update_task_dates(func):
     return wrap
 
 
-class Task(Entity, StatusMixin, ScheduleMixin):
+class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
     """Manages Task related data.
     
-    Introduction
-    ------------
+    **Introduction**
     
     Tasks are the unit of work that should be accomplished to complete a
     :class:`~stalker.models.project.Project`.
@@ -259,13 +257,20 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     
     .. _TaskJuggler : http://www.taskjuggler.org/
     
-    .. versionadded: 0.2.0: Parent-child relation in Tasks
-      
-      Tasks can now have child Tasks. So you can create complex relations of
-      Tasks to comply with your project needs.
+    .. note::
+       .. versionadded:: 0.2.0:
+       Parent-child relation in Tasks
+
+       Tasks can now have child Tasks. So you can create complex relations of
+       Tasks to comply with your project needs.
     
-    Initialization
-    --------------
+    .. note::
+       .. versionadded:: 0.2.0:
+          References in Tasks
+       
+       Tasks can now have References.
+    
+    **Initialization**
     
     A Task needs to be created with a Project instance. It is also valid if no
     project is supplied but there should be a parent Task passed to the parent
@@ -305,8 +310,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     unscheduled task. The final date values will be calculated by TaskJuggler
     in the `auto scheduling` phase.
     
-    Auto Scheduling
-    ---------------
+    **Auto Scheduling**
     
     Stalker uses TaskJuggler for task scheduling. After defining all the tasks,
     Stalker will convert them to a single tjp file along with the recorded
@@ -337,8 +341,7 @@ class Task(Entity, StatusMixin, ScheduleMixin):
     the Task by using the resources, schedule_model, schedule_timing and
     schedule_constraint attributes.
     
-    Task/Task Relation
-    --------------------
+    **Task/Task Relation**
     
     A Task is called a ``container task`` if it has at least one child Task.
     And it is called a ``leaf task`` if it doesn't have any children Tasks.
@@ -619,8 +622,6 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         self.schedule_unit = schedule_unit
         self.schedule_timing = schedule_timing
 
-        if not schedule_model:
-            schedule_model = defaults.task_schedule_models[0]
         self.schedule_model = schedule_model
 
         if bid_timing is None:
@@ -740,6 +741,28 @@ class Task(Entity, StatusMixin, ScheduleMixin):
             self._reschedule(self.schedule_timing, schedule_unit)
 
         return schedule_unit
+    
+    @validates('schedule_model')
+    def _validate_schedule_model(self, key, schedule_model):
+        """validates the given schedule_model value
+        """
+
+        if not schedule_model:
+            schedule_model = defaults.task_schedule_models[0]
+        
+        
+        error_message = '%s.schedule_model should be one of %s, not %s' % (
+            self.__class__.__name__, defaults.task_schedule_models,
+            schedule_model.__class__.__name__
+        )
+        
+        if not isinstance(schedule_model, (str, unicode)):
+            raise TypeError(error_message)
+        
+        if schedule_model not in defaults.task_schedule_models:
+            raise ValueError(error_message)
+
+        return schedule_model
 
     def _reschedule(self, schedule_timing, schedule_unit):
         """Updates the start and end date values by using the schedule_timing
@@ -1079,6 +1102,18 @@ class Task(Entity, StatusMixin, ScheduleMixin):
         """Returns True if the Task has no children Tasks
         """
         return not bool(len(self.children))
+
+    @property
+    def parents(self):
+        """Returns all of the parents of this Task starting from the root
+        """
+        parents = []
+        task = self.parent
+        while task:
+            parents.append(task)
+            task = task.parent
+        parents.reverse()
+        return parents
 
     @property
     def tjp_abs_id(self):
