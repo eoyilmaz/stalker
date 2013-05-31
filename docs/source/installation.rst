@@ -9,13 +9,13 @@ How to Install Stalker
 ======================
 
 
-This document will let you install and run Stalker.
+This document will help you install and run Stalker.
 
 Install Python
 ==============
 
 Stalker is completely written with Python, so it requires Python. It currently
-works with Python version 2.5 to 2.7. So you first need to have Python
+works with Python version 2.6 and 2.7. So you first need to have Python
 installed in your system. On Linux and OSX there is a system wide Python
 already installed. For Windows, you need to download the Python installer
 suitable for your Windows operating system (32 or 64 bit) from `Python.org`_
@@ -46,6 +46,9 @@ this part.
 
 .. _ez_setup.py: http://peak.telecommunity.com/dist/ez_setup.py
 
+Installing Stalker (All OSes):
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 After installing the `setuptools` you can run the following command::
 
   easy_install -U stalker
@@ -60,34 +63,38 @@ Stalker by using the Python prompt like this::
   
   >>> import stalker
   >>> stalker.__version__
-  0.2.0.b5
+  0.2.0.b6
 
 For developers
 ==============
 
-Developers can clone the latest development version of Stalker from Google
-Code. Use the following command to clone::
+It is highly recommended to create a VirtualEnv specific for Stalker
+development. So to setup a virtualenv for Stalker::
 
+  cd ~/Documents/development
+  virtualenv --no-site-packages stalker
+
+Then clone the repository (you need mercurial to do that)::
+
+  cd stalker
   hg clone https://stalker.googlecode.com/hg/ stalker 
 
-Developers also need to install these Python packages:
+And then to setup the virtual environment for development::
 
-1. Nose
-2. Coverage
-3. Sphinx
-4. Pygments
+  cd stalker
+  ../bin/python setup.py develop
 
-The following command will install them all::
-  
-  easy_install nose coverage mocker sphinx pygments
+This command should install any dependent package to the virtual environment.
 
 Installing a Database
 =====================
 
-Stalker uses a database to store all the values in to. The only database
-backend that doesn't require any extra installation is SQLite3. You can setup
-Stalker to run with an SQLite3 database. But it is much suitable to have a
-dedicated database server in your studio.
+Stalker uses a database to store all the data. The only database backend that
+doesn't require any extra installation is SQLite3. You can setup Stalker to run
+with an SQLite3 database. But it is much suitable to have a dedicated database
+server in your studio. And it is recommended to use the same kind of database
+backend both in development and production to reduce any compatibility problems
+and any migration headaches.
 
 See the `SQLAlchemy documentation`_ for supported databases.
 

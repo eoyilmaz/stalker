@@ -6,26 +6,21 @@ Design
 
 The design of Stalker is mentioned in the following sections.
 
-Mission
-=======
-
-The project is about creating an Open Source Production Asset Management
-(ProdAM) System called Stalker which is designed for Vfx/Animation Studios.
-Stalker will be consisting of a framework and the interface those has been
-build over that framework. Stalker will have a very flexible object model
-design that lets the pipeline TDs to customise it in a wide variety of
-perspectives. The out of the package installation will meet the basic needs of
-majority of studios without too much effort.
-
 Introduction
 ============
+
+As you probably have got by now Stalker is an Open Source Production Asset
+Management System. Although it is designed VFX and Animation studios in mind,
+its flexible Project Management muscles will allow it to be used in a wide
+variety of fields.
 
 An Asset Management Systems' duty is to hold the data which are created by the
 users of the system in an organised manner, and let them quickly reach and find
 their files. A Production Asset Management Systems' duty is, in addition to the
-asset management systems', also handle the production steps and collaboration
-of the users. If more information about this subject is needed, there are great
-books about Digital Asset Management (DAM) Systems.
+asset management systems', also handle the production steps or tasks and
+allow the users of the system to collaborate. If more information about this
+subject is needed, there are great books about Digital Asset Management (DAM)
+Systems.
 
 The usage of an asset management system in an animation/vfx studio is an
 obligatory duty for the sake of the studio itself. Even the benefits of the
@@ -46,12 +41,12 @@ further explanation of Stalker.
 Stalker Object Model (SOM)
 --------------------------
 
-Stalker has a very robust object model, which is called **Stalker Object
-Model** or **SOM**. The idea behind SOM is to create a simple class hierarchy
-which is both usable right out of the box and also expandable by the studios'
-pipeline TDs. SOM is actually a little bit more complex than the basic possible
-model, it is designed in this way just to be able to create a simple pipeline
-to be able to build the system on it.
+Stalker has a very robust object model, which is called
+**Stalker Object Model** or **SOM**. The idea behind SOM is to create a simple
+class hierarchy which is both usable right out of the box and also expandable
+by the studios' pipeline TDs. SOM is actually a little bit more complex than
+the basic possible model, it is designed in this way just to be able to create
+a simple pipeline to be able to build the system on it.
 
 Lets look at how a simple studio works and try to create our asset management
 concepts around it.
@@ -60,9 +55,9 @@ An animation/vfx studios duty is to complete a
 :class:`~stalker.models.project.Project`. A project, generally is about to
 create a :class:`~stalker.models.sequence.Sequence` of
 :class:`~stalker.models.shot.Shot`\ s which are a series of images those at the
-end converts to a movie. So a sequence in general contains Shots. Shots can
-contain :class:`~stalker.models.asset.Asset`\ s. So basically to complete a
-project the studio should complete the sequences thus the shots and assets.
+end converts to a movie. So a sequence in general contains Shots. And Shots can
+use :class:`~stalker.models.asset.Asset`\ s. So basically to complete a
+project the studio should complete the shots and assets needed by those shots.
 
 Furthermore all the Projects, Sequences, Shots or Assets are splitted in to
 different :class:`~stalker.models.task.Task`\ s those need to be done
@@ -71,16 +66,18 @@ sequentially or in parallel to complete that project.
 A Task relates to a work, a work is a quantity of time spend or going to be
 spend for that specific task. The time spend on the course of completion of a
 Task can be recorded with :class:`~stalker.models.task.TimeLog`\ s. TimeLogs
-shows the time of an artist is booked for a certain Task. It can be showing a
-past work or a future work. So it holds information about how much time has
-been spent to complete a Task.
+shows the time of an artist has spent for a certain Task. So it holds
+information about how much **effort** has been spent to complete a Task.
 
-At the end of the work a **User** creates **Versions** for a task. Versions are
-list of files showing the different incarnations or the progress of a subject
-in the fileserver or in Stalkers term the **Repository**.
+During the completion of the Task or at the end of the work a **User** creates
+:class:`~stalker.models.version.Versions` for that particular Task. Versions
+are the different incarnations or the progress of the resultant product, and it
+is connected to files in the fileserver or in Stalkers term the
+:class:`~stalker.models.repository.Repository`.
 
 All the names those shown in bold fonts are a class in SOM. and there are a
-series of other classes to accommodate the needs of a studio.
+series of other classes to accommodate the needs of a
+:class:`~stalker.models.studio.Studio`.
 
 The inheritance diagram of the classes in the SOM is shown below:
 
