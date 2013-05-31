@@ -167,10 +167,12 @@ def update_time_log(request):
 def list_time_logs(request):
     """lists the time logs of the given task
     """
+
+    logger.debug('list_time_logs is running')
+
     entity_id = request.matchdict['entity_id']
     entity = Entity.query.filter_by(id=entity_id).first()
 
-    logger.debug('list_time_logs is running')
     logger.debug('entity_id : %s' % entity_id)
     return {
         'entity': entity,
@@ -184,6 +186,7 @@ def list_time_logs(request):
 def get_time_logs(request):
     """returns all the Shots of the given Project
     """
+    logger.debug('get_time_logs is running')
     entity_id = request.matchdict['entity_id']
     entity = Entity.query.filter_by(id=entity_id).first()
 
@@ -193,12 +196,18 @@ def get_time_logs(request):
 
     # if entity.time_logs:
     for time_log in entity.time_logs:
+        logger.debug('time_log.task.id : %s' % time_log.task.id)
+        assert isinstance(time_log, TimeLog)
         time_log_data.append({
             'id': time_log.id,
+            'task_id': time_log.task.id,
+            'task_name': time_log.task.name,
             'resource_id': time_log.resource_id,
             'resource_name': time_log.resource.name,
+            'duration': time_log.total_second,
             'start_date' : time_log.start.strftime('%s'),
             'end_date':time_log.end.strftime('%s')
+
             # 'hours_to_complete': time_log.hours_to_complete,
             # 'notes': time_log.notes
         })

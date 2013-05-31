@@ -409,7 +409,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
             return new DialogSimple({
                 id: 'time_log_dialog',
                 title: 'New TimeLog',
-                href: 'dialog/create/time_log/' + task_id,
+                href: '/dialog/create/time_log/' + task_id,
                 resize: true,
                 style: style,
                 executeScripts: true
@@ -420,7 +420,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
             return new DialogSimple({
                 id: 'time_log_dialog',
                 title: 'Update TimeLog',
-                href: 'dialog/update/time_log/' + time_log_id,
+                href: '/dialog/update/time_log/' + time_log_id,
                 resize: true,
                 style: style,
                 executeScripts: true

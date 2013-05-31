@@ -69,7 +69,8 @@
         }, 'data_tab_container');
 
 
-        {% if has_permission('List_Ticket') %}
+        {% if has_permission('List_Task') %}
+
             var tasks_content_pane = new ContentPane({
                 title: 'Tasks',
                 href: 'list/tasks/{{ user.id }}',
@@ -80,7 +81,7 @@
 
         {% endif %}
 
-        {% if has_permission('List_Ticket') %}
+        {% if has_permission('List_Project') %}
 
             var projects_content_pane = new ContentPane({
                 title: 'Projects',
@@ -89,9 +90,11 @@
                 style: ' padding: 0; margin:0;'
             });
             user_related_data_tab_container.addChild(projects_content_pane);
+
         {% endif %}
 
-        {% if has_permission('List_Ticket') %}
+        {% if has_permission('List_Department') %}
+
             var departments_content_pane = new ContentPane({
                 title: 'Departments',
                 href: 'list/departments/{{ user.id }}',
@@ -104,6 +107,7 @@
         {% endif %}
 
         {% if has_permission('List_Ticket') %}
+
             var groups_content_pane = new ContentPane({
                 title: 'Permissions',
                 href: 'list/groups/{{ user.id }}',
@@ -116,6 +120,7 @@
         {% endif %}
 
         {% if has_permission('List_Ticket') %}
+
             var tickets_content_pane = new ContentPane({
                 title: 'Tickets',
                 href: 'list/tickets/{{ user.id }}',
@@ -124,13 +129,14 @@
             });
             user_related_data_tab_container.addChild(tickets_content_pane);
 
-
         {% endif %}
 
-        {% if has_permission('List_Ticket') %}
+        {% if has_permission('List_TimeLog') %}
+
             var time_logs_content_pane = new ContentPane({
                 title: 'Time Logs',
                 href: 'list/time_logs/{{ user.id }}',
+                default_href: 'list/time_logs/{{ user.id }}',
                 style: 'padding: 0; margin:0;'
             });
             user_related_data_tab_container.addChild(time_logs_content_pane);
@@ -143,18 +149,18 @@
         user_related_data_tab_container.startup();
         user_BorderContainer.startup();
 
-
-        user_related_data_tab_container.watch("selectedChildWidget", function (name,
-                                                                               oval,
-                                                                               nval) {
-            console.debug("selected child changed from ", nval.title, " to ", nval.href);
-            oval.set('href', '');
-            oval.refresh();
-
-            nval.set('href', nval.default_href);
-            nval.refresh();
-
-        });
+{##}
+{#        user_related_data_tab_container.watch("selectedChildWidget", function (name,#}
+{#                                                                               oval,#}
+{#                                                                               nval) {#}
+{#            console.debug("selected child changed from ", nval.title, " to ", nval.href);#}
+{#            oval.set('href', '');#}
+{#            oval.refresh();#}
+{##}
+{#            nval.set('href', nval.default_href);#}
+{#            nval.refresh();#}
+{##}
+{#        });#}
     });
 </script>
 

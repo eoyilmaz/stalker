@@ -214,7 +214,7 @@ class TaskJugglerScheduler(SchedulerBase):
         self._fill_tjp_file()
         
         logger.debug('tjp_file_full_path: %s' % self.tjp_file_full_path)
-        
+
         # pass it to tj3
         proc = subprocess.Popen(
             [defaults.tj_command,
@@ -233,6 +233,6 @@ class TaskJugglerScheduler(SchedulerBase):
         self._parse_csv_file()
         
         # remove the tjp file
-        self._clean_up()
+        #self._clean_up()
 
 
