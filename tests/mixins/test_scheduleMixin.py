@@ -568,4 +568,49 @@ class ScheduleMixinTester(unittest2.TestCase):
         new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
         self.assertRaises(AttributeError, setattr, new_foo_obj,
                           'computed_duration', datetime.timedelta(10))
-    
+
+    def test_total_seconds_attribute_is_read_only(self):
+        """testing if the total_seconds is read only
+        """
+        new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
+        self.assertRaises(
+            AttributeError,
+            setattr,
+            new_foo_obj,
+            'total_seconds',
+            234234
+        )
+
+    def test_total_seconds_attribute_is_working_properly(self):
+        """testing is the total_seconds is read only
+        """
+        new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
+        new_foo_obj.start = datetime.datetime(2013, 5, 31, 10, 0)
+        new_foo_obj.end = datetime.datetime(2013, 5, 31, 18, 0)
+        self.assertEqual(
+            new_foo_obj.total_seconds,
+            8 * 60 * 60
+        )
+
+    def test_computed_total_seconds_attribute_is_read_only(self):
+        """testing if the computed_total_seconds is read only
+        """
+        new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
+        self.assertRaises(
+            AttributeError,
+            setattr,
+            new_foo_obj,
+            'computed_total_seconds',
+            234234
+        )
+
+    def test_computed_total_seconds_attribute_is_working_properly(self):
+        """testing is the computed_total_seconds is read only
+        """
+        new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
+        new_foo_obj.computed_start = datetime.datetime(2013, 5, 31, 10, 0)
+        new_foo_obj.computed_end = datetime.datetime(2013, 5, 31, 18, 0)
+        self.assertEqual(
+            new_foo_obj.computed_total_seconds,
+            8 * 60 * 60
+        )

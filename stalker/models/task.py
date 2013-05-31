@@ -1160,14 +1160,13 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
     def total_logged_seconds(self):
         """The total effort spent for this Task. It is the sum of all the
         TimeLogs recorded for this task as seconds.
-        
+
         :returns int: An integer showing the total seconds spent.
         """
         seconds = 0
         with DBSession.no_autoflush:
             for time_log in self.time_logs:
-                seconds += (time_log.duration.days * 86400 +
-                            time_log.duration.seconds)
+                seconds += time_log.total_seconds
         return seconds
 
     @property
