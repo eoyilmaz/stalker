@@ -9,6 +9,9 @@ Stalker Changes
 
   * **Update:** **Task.schedule_constraint** is now reflected to the tjp file
     correctly.
+
+* **WebUI:**
+
   * **Fix:** GanttChart view of Assets, Shots,Sequences or Tasks now displays
     only the children and parents of that Task derivative.
 
