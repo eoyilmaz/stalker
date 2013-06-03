@@ -252,6 +252,14 @@ class Config(object):
             {%- endfor %}
         {%- else %}
             {% if task.resources|length -%}
+            {% if task.schedule_constraint %}
+                {%- if task.schedule_constraint == 1 or task.schedule_constraint == 3 -%}
+                    start {{ task.start.strftime('%Y-%m-%d-%H:%M') }}
+                {%- endif %}
+                {%- if task.schedule_constraint == 2 or task.schedule_constraint == 3 %}
+                    end {{ task.end.strftime('%Y-%m-%d-%H:%M') }}
+                {%- endif -%}
+            {% endif %}
             {{task.schedule_model}} {{task.schedule_timing}}{{task.schedule_unit}}
             allocate {% for resource in task.resources -%}
                 {%-if loop.index != 1 %}, {% endif %}{{resource.tjp_id}}{% endfor %}

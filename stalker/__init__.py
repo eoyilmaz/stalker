@@ -4,8 +4,6 @@
 # 
 # This file is part of Stalker.
 # 
-# This file is part of Stalker.
-# 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation;
@@ -24,7 +22,7 @@ Stalker is a Production Asset Management System (ProdAM) designed for Animation
 and VFX Studios. See docs for more information.
 """
 
-__version__ = '0.2.0.b6'
+__version__ = '0.2.0.b7'
 
 
 # before anything about stalker create the defaults
@@ -350,8 +348,10 @@ def main(global_config, **settings):
     config.add_route('create_time_log', 'create/time_log')
     config.add_route('update_time_log', 'update/time_log')
 
-    config.add_route('get_time_logs', 'get/time_logs/{entity_id}') # returns json
-    config.add_route('list_time_logs', 'list/time_logs/{entity_id}') # returns response
+    config.add_route('get_time_logs',
+                     'get/time_logs/{entity_id}') # returns json
+    config.add_route('list_time_logs',
+                     'list/time_logs/{entity_id}') # returns response
 
     # *************************************************************************
     # Department

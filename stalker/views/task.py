@@ -465,13 +465,10 @@ def get_gantt_tasks(request):
                 # logger.debug('tasks                 : %s' % tasks)
                 tasks = list(set(user_tasks_with_parents))
         else: # Asset, Shot, Sequence
-            project = entity.project
-            start_from_task = entity
-            # find the root task
-            while start_from_task.parent:
-                start_from_task = start_from_task.parent
-            root_task = start_from_task
-            tasks.extend(depth_first_flatten(root_task))
+            tasks.append(entity)
+            tasks.extend(entity.parents)
+            tasks.extend(depth_first_flatten(entity))
+            tasks = list(set(tasks))
     
     tasks.sort(key=lambda x: x.start)
     
