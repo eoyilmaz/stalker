@@ -570,6 +570,10 @@ attribute value."""
     def _validate_dates(self, start, end, duration):
         """updates the date values
         """
+        logger.debug('start    : %s' % start)
+        logger.debug('end      : %s' % end)
+        logger.debug('duration : %s' % duration)
+
         if not isinstance(start, datetime.datetime):
             start = None
 
@@ -606,7 +610,7 @@ attribute value."""
 
         if end < start:
             # check duration
-            if duration < datetime.timedelta(1):
+            if duration is None or duration < datetime.timedelta(1):
                 duration = datetime.timedelta(1)
 
             end = start + duration
