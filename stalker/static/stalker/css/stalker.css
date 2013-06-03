@@ -347,13 +347,13 @@ a:hover {
 
 }
 
-/*.dgrid {*/
-    /*height: auto;*/
-    /*background: #efefef;*/
-    /*position: absolute;*/
-    /*left: 0;*/
-    /*right: 0;*/
-/*}*/
+.dgrid {
+    height: auto;
+    background: #efefef;
+    position: absolute;
+    left: 0;
+    right: 0;
+}
 
 /*.dgrid .dgrid-column-name {*/
    /*width: auto;*/
