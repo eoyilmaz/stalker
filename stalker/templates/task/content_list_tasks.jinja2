@@ -52,6 +52,19 @@
   </tr>
 --></div>
 
+    <div class="__template__" type="PARENTTASKROW"><!--
+  <tr taskId="(#=obj.id#)" class="parentTaskEditRow">
+    <th class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></th>
+    <td class="gdfCell" align="right" style="background-color: (#=obj.progress >= 100 ? 'rgb(153, 255, 51)' : 'red'#)"><span>(#=obj.id#)</span></td>
+    <td class="gdfCell indentCell" style="padding-left:(#=obj.getParents().length*10#)px; (#=obj.getChildren().length>0?'font-weight: bold':''#)">(#=obj.link()#)</td>
+    <td class="gdfCell"><input type="text" name="start"  value="" class="date"></td>
+    <td class="gdfCell"><input type="text" name="end" value="" class="date"></td>
+    <td class="gdfCell"><input type="text" name="timing" value="(#=obj.schedule_model.toUpperCase()[0]#): (#=obj.schedule_timing#)(#=obj.schedule_unit#)"></td>
+    <td class="gdfCell">(#=obj.getDependsLinks()#)</td>
+    <td class="gdfCell">(#=obj.getResourcesLinks()#)</td>
+  </tr>
+--></div>
+
     <div class="__template__" type="TASKROW"><!--
   <tr taskId="(#=obj.id#)" class="taskEditRow">
     <th class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></th>
@@ -262,16 +275,26 @@
 
 
                     {# PARENT TASK MENU #}
-                    var parent_task_menu = new Menu({
+                    var parent_taskbar_menu = new Menu({
                         targetNodeIds: ['workSpace'],
                         selector: '.parentTaskContextMenu'
+                    });
+                    
+                    var parent_taskrow_menu = new Menu({
+                        targetNodeIds: ['workSpace'],
+                        selector: '.parentTaskEditRow'
                     });
 
 
                     {# LEAF TASK MENU #}
-                    var leaf_task_menu = new Menu({
+                    var leaf_taskbar_menu = new Menu({
                         targetNodeIds: ['workSpace'],
                         selector: '.leafTaskContextMenu'
+                    });
+                    
+                    var leaf_taskrow_menu = new Menu({
+                        targetNodeIds: ['workSpace'],
+                        selector: '.taskEditRow'
                     });
 
 
@@ -296,13 +319,17 @@
                         });
                     };
 
-                    leaf_task_menu.addChild(view_task_summary_menuItem_creator());
-                    parent_task_menu.addChild(view_task_summary_menuItem_creator());
+                    leaf_taskbar_menu.addChild(view_task_summary_menuItem_creator());
+                    parent_taskbar_menu.addChild(view_task_summary_menuItem_creator());
+                    leaf_taskrow_menu.addChild(view_task_summary_menuItem_creator());
+                    parent_taskrow_menu.addChild(view_task_summary_menuItem_creator());
 
                     {% if has_permission('Update_Task') %}
 
-                        parent_task_menu.addChild(new MenuSeparator());
-                        leaf_task_menu.addChild(new MenuSeparator());
+                        parent_taskbar_menu.addChild(new MenuSeparator());
+                        leaf_taskbar_menu.addChild(new MenuSeparator());
+                        parent_taskrow_menu.addChild(new MenuSeparator());
+                        leaf_taskrow_menu.addChild(new MenuSeparator());
 
                         var update_task_menuItem_creator = function () {
                             return new MenuItem({
@@ -327,8 +354,10 @@
                             });
                         };
 
-                        parent_task_menu.addChild(update_task_menuItem_creator());
-                        leaf_task_menu.addChild(update_task_menuItem_creator());
+                        parent_taskbar_menu.addChild(update_task_menuItem_creator());
+                        leaf_taskbar_menu.addChild(update_task_menuItem_creator());
+                        parent_taskrow_menu.addChild(update_task_menuItem_creator());
+                        leaf_taskrow_menu.addChild(update_task_menuItem_creator());
                         {% endif %}
 
                     {% if has_permission('Create_Task') %}
@@ -353,8 +382,10 @@
                             });
                         };
 
-                        parent_task_menu.addChild(create_child_task_menuItem_creator());
-                        leaf_task_menu.addChild(create_child_task_menuItem_creator());
+                        parent_taskbar_menu.addChild(create_child_task_menuItem_creator());
+                        leaf_taskbar_menu.addChild(create_child_task_menuItem_creator());
+                        parent_taskrow_menu.addChild(create_child_task_menuItem_creator());
+                        leaf_taskrow_menu.addChild(create_child_task_menuItem_creator());
 
 
                         var create_dependent_task_menuItem_creator = function () {
@@ -378,8 +409,10 @@
                             });
                         };
 
-                        parent_task_menu.addChild(create_dependent_task_menuItem_creator());
-                        leaf_task_menu.addChild(create_dependent_task_menuItem_creator());
+                        parent_taskbar_menu.addChild(create_dependent_task_menuItem_creator());
+                        leaf_taskbar_menu.addChild(create_dependent_task_menuItem_creator());
+                        parent_taskrow_menu.addChild(create_dependent_task_menuItem_creator());
+                        leaf_taskrow_menu.addChild(create_dependent_task_menuItem_creator());
 
                     {% endif %}
                     
@@ -416,13 +449,16 @@
                             })
                         };
     
-                        leaf_task_menu.addChild(create_time_log_menuItem_creator());
+                        leaf_taskbar_menu.addChild(create_time_log_menuItem_creator());
+                        leaf_taskrow_menu.addChild(create_time_log_menuItem_creator());
                     {% endif %}
 
                     {% if has_permission('Delete_Task') %}
 
-                        parent_task_menu.addChild(new MenuSeparator());
-                        leaf_task_menu.addChild(new MenuSeparator());
+                        parent_taskbar_menu.addChild(new MenuSeparator());
+                        leaf_taskbar_menu.addChild(new MenuSeparator());
+                        parent_taskrow_menu.addChild(new MenuSeparator());
+                        leaf_taskrow_menu.addChild(new MenuSeparator());
 
 
                         var delete_task_menuItem_creator = function () {
@@ -431,14 +467,18 @@
                             });
                         };
 
-                        parent_task_menu.addChild(delete_task_menuItem_creator());
-                        leaf_task_menu.addChild(delete_task_menuItem_creator());
+                        parent_taskbar_menu.addChild(delete_task_menuItem_creator());
+                        leaf_taskbar_menu.addChild(delete_task_menuItem_creator());
+                        parent_taskrow_menu.addChild(delete_task_menuItem_creator());
+                        leaf_taskrow_menu.addChild(delete_task_menuItem_creator());
 
 
                     {% endif %}
 
-                    leaf_task_menu.startup();
-                    parent_task_menu.startup();
+                    leaf_taskbar_menu.startup();
+                    parent_taskbar_menu.startup();
+                    leaf_taskrow_menu.startup();
+                    parent_taskrow_menu.startup();
 
 
                 });

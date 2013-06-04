@@ -20,6 +20,9 @@ Stalker Changes
     correctly when creating a new TimeLog.
   * **Fix:** TimeLog create/update view callables are now checking if there
     will be any OverBookedError raised.
+  * **JQueryGantt:**
+  
+    * **Update:** Context menu is now visible in ``taskRow`` (grid editor).
 
 0.2.0.b6
 ========

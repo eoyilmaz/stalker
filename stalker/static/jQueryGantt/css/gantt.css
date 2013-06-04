@@ -515,6 +515,29 @@
 }
 
 
+.parentTaskEditRow,.emptyRow {
+    height:19px;
+}
+
+/*.taskEditRow,.complete {*/
+    /*text-decoration: line-through;*/
+/*}*/
+
+.parentTaskEditRow input{
+    border: 0 none;
+    font-size: 12px;
+    height: 14px;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    font-family: Arial, sans-serif
+}
+
+.parentTaskEditRow.rowSelected td,.taskEditRow.rowSelected input{
+    background-color:#FFFF99;
+}
+
+
 .taskEditRow,.emptyRow {
     height:19px;
 }

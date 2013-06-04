@@ -1,102 +1,117 @@
 /*
-  Copyright (c) 2012-2013 Open Lab
-  Written by Roberto Bicchierai and Silvia Chelazzi http://roberto.open-lab.com
-  Permission is hereby granted, free of charge, to any person obtaining
-  a copy of this software and associated documentation files (the
-  "Software"), to deal in the Software without restriction, including
-  without limitation the rights to use, copy, modify, merge, publish,
-  distribute, sublicense, and/or sell copies of the Software, and to
-  permit persons to whom the Software is furnished to do so, subject to
-  the following conditions:
+ Copyright (c) 2012-2013 Open Lab
+ Written by Roberto Bicchierai and Silvia Chelazzi http://roberto.open-lab.com
+ Permission is hereby granted, free of charge, to any person obtaining
+ a copy of this software and associated documentation files (the
+ "Software"), to deal in the Software without restriction, including
+ without limitation the rights to use, copy, modify, merge, publish,
+ distribute, sublicense, and/or sell copies of the Software, and to
+ permit persons to whom the Software is furnished to do so, subject to
+ the following conditions:
 
-  The above copyright notice and this permission notice shall be
-  included in all copies or substantial portions of the Software.
+ The above copyright notice and this permission notice shall be
+ included in all copies or substantial portions of the Software.
 
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-  LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 function GridEditor(master) {
-  this.master = master; // is the a GanttEditor instance
-  var gridEditor = $.JST.createFromTemplate({}, "TASKSEDITHEAD");
-  gridEditor.gridify();
-  this.element = gridEditor;
+    this.master = master; // is the a GanttEditor instance
+    var gridEditor = $.JST.createFromTemplate({}, "TASKSEDITHEAD");
+    gridEditor.gridify();
+    this.element = gridEditor;
 }
 
 
-GridEditor.prototype.fillEmptyLines = function() {
-  var factory = new TaskFactory();
+GridEditor.prototype.fillEmptyLines = function () {
+    var factory = new TaskFactory();
 
-  //console.debug("GridEditor.fillEmptyLines");
-  var rowsToAdd = 30 - this.element.find(".taskEditRow").size();
-  
-  //fill with empty lines
-  for (var i = 0; i < rowsToAdd; i++) {
-    var emptyRow = $.JST.createFromTemplate({}, "TASKEMPTYROW");
-    //click on empty row create a task and fill above
-    this.element.append(emptyRow);
-  }
-};
+    //console.debug("GridEditor.fillEmptyLines");
 
+    var rowsToAdd = 30 - this.element.find(".taskEditRow").size();
 
-GridEditor.prototype.addTask = function(task, row) {
-  //console.debug("GridEditor.addTask",task,row);
-  //var prof = new Profiler("editorAddTaskHtml");
-
-  //remove extisting row
-  this.element.find("[taskId=" + task.id + "]").remove();
-
-  var taskRow = $.JST.createFromTemplate(task, "TASKROW");
-  //save row element on task
-  task.rowElement = taskRow;
-
-  this.bindRowEvents(task, taskRow);
-
-  if (typeof(row) != "number") {
-    var emptyRow = this.element.find(".emptyRow:first"); //tries to fill an empty row
-    if (emptyRow.size() > 0)
-      emptyRow.replaceWith(taskRow);
-    else
-      this.element.append(taskRow);
-  } else {
-    var tr = this.element.find("tr.taskEditRow").eq(row);
-    if (tr.size() > 0) {
-      tr.before(taskRow); taskAssigs
-    } else {
-      this.element.append(taskRow);
+    //fill with empty lines
+    for (var i = 0; i < rowsToAdd; i++) {
+        var emptyRow = $.JST.createFromTemplate({}, "TASKEMPTYROW");
+        //click on empty row create a task and fill above
+        this.element.append(emptyRow);
     }
-
-  }
-  this.element.find(".taskRowIndex").each(function(i, el) {
-    $(el).html(i + 1);
-  });
-  //prof.stop();
-
-  return taskRow;
 };
 
 
-GridEditor.prototype.refreshTaskRow = function(task) {
+GridEditor.prototype.addTask = function (task, row) {
+    //console.debug("GridEditor.addTask",task,row);
+    //var prof = new Profiler("editorAddTaskHtml");
+
+    //remove extisting row
+    this.element.find("[taskId=" + task.id + "]").remove();
+
+    var taskRow;
+    if (!task.isParent()) {
+        taskRow = $.JST.createFromTemplate(task, "TASKROW");
+    } else {
+        taskRow = $.JST.createFromTemplate(task, "PARENTTASKROW");
+    }
+    //save row element on task
+    task.rowElement = taskRow;
+
+    this.bindRowEvents(task, taskRow);
+
+    if (typeof(row) != "number") {
+        var emptyRow = this.element.find(".emptyRow:first"); //tries to fill an empty row
+        if (emptyRow.size() > 0)
+            emptyRow.replaceWith(taskRow);
+        else
+            this.element.append(taskRow);
+    } else {
+
+        var tr;
+        if (!task.isParent()) {
+            // if it is a leaf task draw a TaskEditRow
+            tr = this.element.find("tr.taskEditRow").eq(row);
+        } else {
+            // draw a PARENTTASKEDITROW
+            tr = this.element.find("tr.parentTaskEditRow").eq(row);
+        }
+
+        if (tr.size() > 0) {
+            tr.before(taskRow);
+        } else {
+            this.element.append(taskRow);
+        }
+
+    }
+    this.element.find(".taskRowIndex").each(function (i, el) {
+        $(el).html(i + 1);
+    });
+    //prof.stop();
+
+    return taskRow;
+};
+
+
+GridEditor.prototype.refreshTaskRow = function (task) {
     //console.debug("refreshTaskRow")
     //var profiler = new Profiler("editorRefreshTaskRow");
     var row = task.rowElement;
-    
+
     row.find(".taskRowIndex").html(task.getRow() + 1);
     row.find(".indentCell").css("padding-left", task.getParents().length * 10);
     row.find("[name=name]").val(task.name);
     row.find("[name=code]").val(task.code);
     row.find("[status]").attr("status", task.status);
-    
+
     row.find("[name=timing]").val(task.schedule_model.toUpperCase()[0] + ":" + task.schedule_timing + task.schedule_unit);
     row.find("[name=start]").val(new Date(task.start).format()).updateOldValue(); // called on dates only because for other field is called on focus event
     row.find("[name=end]").val(new Date(task.end).format()).updateOldValue();
-    
+
     var dep_string = '';
-    for (var i = 0 ; i < task.getDepends().length ; i++){
+    for (var i = 0; i < task.getDepends().length; i++) {
         dep_string = '' + task.depends[i].name + ', ';
     }
 //    row.find("[name=depends]").val(dep_string);
@@ -105,20 +120,20 @@ GridEditor.prototype.refreshTaskRow = function(task) {
     //profiler.stop();
 };
 
-GridEditor.prototype.redraw = function() {
-  for (var i = 0; i < this.master.tasks.length; i++) {
-    this.refreshTaskRow(this.master.tasks[i]);
-  }
+GridEditor.prototype.redraw = function () {
+    for (var i = 0; i < this.master.tasks.length; i++) {
+        this.refreshTaskRow(this.master.tasks[i]);
+    }
 };
 
-GridEditor.prototype.reset = function() {
-  this.element.find("[taskId]").remove();
+GridEditor.prototype.reset = function () {
+    this.element.find("[taskId]").remove();
 };
 
 
 GridEditor.prototype.bindRowEvents = function (task, taskRow) {
-  var self = this;
-  //console.debug("bindRowEvents",this,this.master,this.master.canWrite);
+    var self = this;
+    //console.debug("bindRowEvents",this,this.master,this.master.canWrite);
 //  if (this.master.canWrite) {
 //    self.bindRowInputEvents(task,taskRow);
 
@@ -126,15 +141,15 @@ GridEditor.prototype.bindRowEvents = function (task, taskRow) {
     taskRow.find("input").attr("readonly", true);
 //  }
 
-  //taskRow.find(".edit").click(function() {self.openFullEditor(task,taskRow)});
+    //taskRow.find(".edit").click(function() {self.openFullEditor(task,taskRow)});
 
 };
 
 
 GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
-  var self = this;
+    var self = this;
 
-  //bind dateField on dates
+    //bind dateField on dates
 //  taskRow.find(".date").each(function () {
 //    var el = $(this);
 //    
@@ -268,42 +283,42 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
 //  });
 
 
-  ////expand collapse todo to be completed
-  //taskRow.find(".expcoll").click(function(){
-  //  //expand?
-  //  var el=$(this);
-  //  var taskId=el.closest("[taskId]").attr("taskId");
-  //  var task=self.master.getTask(taskId);
-  //  var descs=task.getDescendant();
-  //  if (el.is(".exp")){
-  //    for (var i=0;i<descs.length;i++)
-  //      descs[i].rowElement.show();
-  //  } else {
-  //    for (var i=0;i<descs.length;i++)
-  //      descs[i].rowElement.hide();
-  //  }
-  //});
+    ////expand collapse todo to be completed
+    //taskRow.find(".expcoll").click(function(){
+    //  //expand?
+    //  var el=$(this);
+    //  var taskId=el.closest("[taskId]").attr("taskId");
+    //  var task=self.master.getTask(taskId);
+    //  var descs=task.getDescendant();
+    //  if (el.is(".exp")){
+    //    for (var i=0;i<descs.length;i++)
+    //      descs[i].rowElement.show();
+    //  } else {
+    //    for (var i=0;i<descs.length;i++)
+    //      descs[i].rowElement.hide();
+    //  }
+    //});
 
-  //bind row selection
-  taskRow.click(function () {
-    var row = $(this);
-    //var isSel = row.hasClass("rowSelected");
-    row.closest("table").find(".rowSelected").removeClass("rowSelected");
-    row.addClass("rowSelected");
-    
-    //set current task
-    self.master.currentTask = self.master.getTask(row.attr("taskId"));
-    
-    //move highlighter
-    if (self.master.currentTask.ganttElement)
-      self.master.gantt.highlightBar.css("top", self.master.currentTask.ganttElement.position().top);
-    
-    //if offscreen scroll to element
-    var top = row.position().top;
-    if (row.position().top > self.element.parent().height()) {
-      self.master.gantt.element.parent().scrollTop(row.position().top - self.element.parent().height() + 100);
-    }
-  });
+    //bind row selection
+    taskRow.click(function () {
+        var row = $(this);
+        //var isSel = row.hasClass("rowSelected");
+        row.closest("table").find(".rowSelected").removeClass("rowSelected");
+        row.addClass("rowSelected");
+
+        //set current task
+        self.master.currentTask = self.master.getTask(row.attr("taskId"));
+
+        //move highlighter
+        if (self.master.currentTask.ganttElement)
+            self.master.gantt.highlightBar.css("top", self.master.currentTask.ganttElement.position().top);
+
+        //if offscreen scroll to element
+        var top = row.position().top;
+        if (row.position().top > self.element.parent().height()) {
+            self.master.gantt.element.parent().scrollTop(row.position().top - self.element.parent().height() + 100);
+        }
+    });
 
 };
 
