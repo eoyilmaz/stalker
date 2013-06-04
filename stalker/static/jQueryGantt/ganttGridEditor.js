@@ -52,10 +52,14 @@ GridEditor.prototype.addTask = function (task, row) {
     this.element.find("[taskId=" + task.id + "]").remove();
 
     var taskRow;
-    if (!task.isParent()) {
-        taskRow = $.JST.createFromTemplate(task, "TASKROW");
+    if (task.type != 'Project'){
+        if (!task.isParent()) {
+            taskRow = $.JST.createFromTemplate(task, "TASKROW");
+        } else {
+            taskRow = $.JST.createFromTemplate(task, "PARENTTASKROW");
+        }
     } else {
-        taskRow = $.JST.createFromTemplate(task, "PARENTTASKROW");
+        taskRow = $.JST.createFromTemplate(task, "PROJECTROW");
     }
     //save row element on task
     task.rowElement = taskRow;
@@ -71,14 +75,18 @@ GridEditor.prototype.addTask = function (task, row) {
     } else {
 
         var tr;
-        if (!task.isParent()) {
-            // if it is a leaf task draw a TaskEditRow
-            tr = this.element.find("tr.taskEditRow").eq(row);
+        if (task.type != 'Project'){
+            if (!task.isParent()) {
+                // if it is a leaf task draw a TaskEditRow
+                tr = this.element.find("tr.taskEditRow").eq(row);
+            } else {
+                // draw a PARENTTASKEDITROW
+                tr = this.element.find("tr.parentTaskEditRow").eq(row);
+            }
         } else {
-            // draw a PARENTTASKEDITROW
-            tr = this.element.find("tr.parentTaskEditRow").eq(row);
+            tr = this.element.find("tr.projectEditRow").eq(row);
         }
-
+    
         if (tr.size() > 0) {
             tr.before(taskRow);
         } else {

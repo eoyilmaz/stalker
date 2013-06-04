@@ -39,103 +39,104 @@
       </thead>
     </table>
     --></div>
+    
     <div class="__template__" type="PROJECTROW"><!--
-  <tr projectId="(#=obj.id#)" class="projectEditRow" >
-    <th class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></th>
-    <td class="gdfCell" align="right"><span>(#=obj.id#)</span></td>
-    <td class="gdfCell indentCell" style="font-weight: bold">(#=obj.name#)</td>
-    <td class="gdfCell"><input type="text" name="start"  value="" class="date"></td>
-    <td class="gdfCell"><input type="text" name="end" value="" class="date"></td>
-    <td class="gdfCell"></td>
-    <td class="gdfCell"></td>
-    <td class="gdfCell taskAssigs"></td>
-  </tr>
---></div>
+        <tr projectId="(#=obj.id#)" class="projectEditRow" >
+        <th class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></th>
+        <td class="gdfCell" align="right"><span>(#=obj.id#)</span></td>
+        <td class="gdfCell indentCell" style="font-weight: bold">(#=obj.link()#)</td>
+        <td class="gdfCell"><input type="text" name="start"  value="" class="date"></td>
+        <td class="gdfCell"><input type="text" name="end" value="" class="date"></td>
+        <td class="gdfCell"></td>
+        <td class="gdfCell"></td>
+        <td class="gdfCell taskAssigs"></td>
+        </tr>
+    --></div>
 
     <div class="__template__" type="PARENTTASKROW"><!--
-  <tr taskId="(#=obj.id#)" class="parentTaskEditRow">
-    <th class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></th>
-    <td class="gdfCell" align="right" style="background-color: (#=obj.progress >= 100 ? 'rgb(153, 255, 51)' : 'red'#)"><span>(#=obj.id#)</span></td>
-    <td class="gdfCell indentCell" style="padding-left:(#=obj.getParents().length*10#)px; (#=obj.getChildren().length>0?'font-weight: bold':''#)">(#=obj.link()#)</td>
-    <td class="gdfCell"><input type="text" name="start"  value="" class="date"></td>
-    <td class="gdfCell"><input type="text" name="end" value="" class="date"></td>
-    <td class="gdfCell"><input type="text" name="timing" value="(#=obj.schedule_model.toUpperCase()[0]#): (#=obj.schedule_timing#)(#=obj.schedule_unit#)"></td>
-    <td class="gdfCell">(#=obj.getDependsLinks()#)</td>
-    <td class="gdfCell">(#=obj.getResourcesLinks()#)</td>
-  </tr>
---></div>
+        <tr taskId="(#=obj.id#)" class="parentTaskEditRow">
+        <th class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></th>
+        <td class="gdfCell" align="right" style="background-color: (#=obj.progress >= 100 ? 'rgb(153, 255, 51)' : 'red'#)"><span>(#=obj.id#)</span></td>
+        <td class="gdfCell indentCell" style="padding-left:(#=obj.getParents().length*10#)px; (#=obj.getChildren().length>0?'font-weight: bold':''#)">(#=obj.link()#)</td>
+        <td class="gdfCell"><input type="text" name="start"  value="" class="date"></td>
+        <td class="gdfCell"><input type="text" name="end" value="" class="date"></td>
+        <td class="gdfCell"><input type="text" name="timing" value="(#=obj.schedule_model.toUpperCase()[0]#): (#=obj.schedule_timing#)(#=obj.schedule_unit#)"></td>
+        <td class="gdfCell">(#=obj.getDependsLinks()#)</td>
+        <td class="gdfCell">(#=obj.getResourcesLinks()#)</td>
+        </tr>
+    --></div>
 
     <div class="__template__" type="TASKROW"><!--
-  <tr taskId="(#=obj.id#)" class="taskEditRow">
-    <th class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></th>
-    <td class="gdfCell" align="right" style="background-color: (#=obj.progress >= 100 ? 'rgb(153, 255, 51)' : 'red'#)"><span>(#=obj.id#)</span></td>
-    <td class="gdfCell indentCell" style="padding-left:(#=obj.getParents().length*10#)px; (#=obj.getChildren().length>0?'font-weight: bold':''#)">(#=obj.link()#)</td>
-    <td class="gdfCell"><input type="text" name="start"  value="" class="date"></td>
-    <td class="gdfCell"><input type="text" name="end" value="" class="date"></td>
-    <td class="gdfCell"><input type="text" name="timing" value="(#=obj.schedule_model.toUpperCase()[0]#): (#=obj.schedule_timing#)(#=obj.schedule_unit#)"></td>
-    <td class="gdfCell">(#=obj.getDependsLinks()#)</td>
-    <td class="gdfCell">(#=obj.getResourcesLinks()#)</td>
-  </tr>
---></div>
+        <tr taskId="(#=obj.id#)" class="taskEditRow">
+        <th class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></th>
+        <td class="gdfCell" align="right" style="background-color: (#=obj.progress >= 100 ? 'rgb(153, 255, 51)' : 'red'#)"><span>(#=obj.id#)</span></td>
+        <td class="gdfCell indentCell" style="padding-left:(#=obj.getParents().length*10#)px; (#=obj.getChildren().length>0?'font-weight: bold':''#)">(#=obj.link()#)</td>
+        <td class="gdfCell"><input type="text" name="start"  value="" class="date"></td>
+        <td class="gdfCell"><input type="text" name="end" value="" class="date"></td>
+        <td class="gdfCell"><input type="text" name="timing" value="(#=obj.schedule_model.toUpperCase()[0]#): (#=obj.schedule_timing#)(#=obj.schedule_unit#)"></td>
+        <td class="gdfCell">(#=obj.getDependsLinks()#)</td>
+        <td class="gdfCell">(#=obj.getResourcesLinks()#)</td>
+        </tr>
+    --></div>
 
 
     <div class="__template__" type="TASKEMPTYROW"><!--
-  <tr class="taskEditRow emptyRow" >
-    <th class="gdfCell" align="right"></th>
-    <td class="gdfCell"></td>
-    <td class="gdfCell"></td>
-    <td class="gdfCell"></td>
-    <td class="gdfCell"></td>
-    <td class="gdfCell"></td>
-    <td class="gdfCell"></td>
-    <td class="gdfCell" align="left"></td>
-    <td class="gdfCell"></td>
-  </tr>
---></div>
+        <tr class="taskEditRow emptyRow" >
+        <th class="gdfCell" align="right"></th>
+        <td class="gdfCell"></td>
+        <td class="gdfCell"></td>
+        <td class="gdfCell"></td>
+        <td class="gdfCell"></td>
+        <td class="gdfCell"></td>
+        <td class="gdfCell"></td>
+        <td class="gdfCell" align="left"></td>
+        <td class="gdfCell"></td>
+        </tr>
+    --></div>
 
 
     <div class="__template__" type="PROJECTBAR"><!--
-  <div class="projectBox" projectId="(#=obj.id#)" >
-    <div class="layout">
-      <div class="projectLabel">(#=obj.link()#)</div>
-    </div>
-  </div>
-  --></div>
+        <div class="projectBox" projectId="(#=obj.id#)" >
+            <div class="layout">
+                <div class="projectLabel">(#=obj.link()#)</div>
+            </div>
+        </div>
+    --></div>
 
 
     <div class="__template__" type="TASKBAR"><!--
-  <div class="taskBox" taskId="(#=obj.id#)" >
-    <div class="layout (#=obj.hasExternalDep?'extDep':''#)">
-      <div class="taskProgress" style="width:(#=obj.progress>100?100:obj.progress#)%;"></div>
-      <div class="taskExtraTiming" style="width:(#=(obj.schedule_timing - obj.bid_timing)/obj.schedule_timing*100#)%;;"></div>
-      <div class="taskScheduleModel"
-           style="position: absolute; text-align: center; width: 100%;">
-           (#=obj.schedule_model.toUpperCase()[0]#): (#=obj.schedule_timing#)(#=obj.schedule_unit#)
-      </div>
-      <div class="leafTaskContextMenu" taskId="(#=obj.id#)"></div>
-      
-      <div class="milestone (#=obj.startIsMilestone?'active':''#)" ></div>
-      <div class="taskLabel">(#=obj.link()#)</div>
-      <div class="milestone end (#=obj.endIsMilestone?'active':''#)"></div>
-      <div class="taskResourceLabel">(#=obj.getResourcesLinks()#)</div>
-    </div>
-  </div>
-  --></div>
+        <div class="taskBox" taskId="(#=obj.id#)" >
+        <div class="layout (#=obj.hasExternalDep?'extDep':''#)">
+            <div class="taskProgress" style="width:(#=obj.progress>100?100:obj.progress#)%;"></div>
+            <div class="taskExtraTiming" style="width:(#=(obj.schedule_timing - obj.bid_timing)/obj.schedule_timing*100#)%;;"></div>
+            <div class="taskScheduleModel"
+               style="position: absolute; text-align: center; width: 100%;">
+               (#=obj.schedule_model.toUpperCase()[0]#): (#=obj.schedule_timing#)(#=obj.schedule_unit#)
+            </div>
+            <div class="leafTaskContextMenu" taskId="(#=obj.id#)"></div>
+            
+            <div class="milestone (#=obj.startIsMilestone?'active':''#)" ></div>
+            <div class="taskLabel">(#=obj.link()#)</div>
+            <div class="milestone end (#=obj.endIsMilestone?'active':''#)"></div>
+            <div class="taskResourceLabel">(#=obj.getResourcesLinks()#)</div>
+        </div>
+        </div>
+    --></div>
 
     <div class="__template__" type="PARENTTASKBAR"><!--
-  <div class="parentTaskBox" taskId="(#=obj.id#)">
-    <div class="layout (#=obj.hasExternalDep?'extDep':''#)">
-      <div class="parentTaskContextMenu" taskId="(#=obj.id#)"></div>
-      <div class="leftPin"></div>
-      <div class="rightPin"></div>
-      <div class="taskProgress" style="width:(#=obj.progress>100?100:obj.progress#)%;"></div>
-      <div class="taskBid" style="width:(#=obj.bid/obj.effort*100#)%; background-color:red;"></div>
-      <div class="milestone (#=obj.startIsMilestone?'active':''#)" ></div>
-      <div class="taskLabel">(#=obj.link()#)</div>
-      <div class="milestone end (#=obj.endIsMilestone?'active':''#)"></div>
-    </div>
-  </div>
-  --></div>
+        <div class="parentTaskBox" taskId="(#=obj.id#)">
+            <div class="layout (#=obj.hasExternalDep?'extDep':''#)">
+                <div class="parentTaskContextMenu" taskId="(#=obj.id#)"></div>
+                <div class="leftPin"></div>
+                <div class="rightPin"></div>
+                <div class="taskProgress" style="width:(#=obj.progress>100?100:obj.progress#)%;"></div>
+                <div class="taskBid" style="width:(#=obj.bid/obj.effort*100#)%; background-color:red;"></div>
+                <div class="milestone (#=obj.startIsMilestone?'active':''#)" ></div>
+                <div class="taskLabel">(#=obj.link()#)</div>
+                <div class="milestone end (#=obj.endIsMilestone?'active':''#)"></div>
+            </div>
+        </div>
+    --></div>
 
     <div class="__template__" type='TASKLINK'><!--
       <a href="javascript:redirectLinkInParent('(#=obj.type.toLowerCase()#)s_content_pane','view/(#=obj.type.toLowerCase()#)/(#=obj.id#)');">(#=obj.name#) ((#=obj.type#))</a>
