@@ -41,6 +41,13 @@ def check_circular_dependency(entity, other_entity, attr_name):
     """Checks the circular dependency in entity if it has other_entity in its
     dependency attr which is specified with attr_name
     """
+    # check itself
+    if entity is other_entity:
+        raise CircularDependencyError(
+            '%s %s and %s creates a circular dependency' %
+            (entity.__class__.__name__, entity, other_entity)
+        )
+
     for dependent_entity in getattr(entity, attr_name):
         if dependent_entity is other_entity:
             raise CircularDependencyError(

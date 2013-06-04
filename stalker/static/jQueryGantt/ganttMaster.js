@@ -353,7 +353,7 @@ GanttMaster.prototype.loadTasks = function (tasks) {
 
 
     var sorted_task_list = [];
-    // now go from root to shild
+    // now go from root to child
     for (var i = 0; i < root_tasks.length; i++) {
         sorted_task_list = loop_through_child(root_tasks[i], sorted_task_list);
     }
@@ -596,7 +596,7 @@ GanttMaster.prototype.updateLinks = function (task) {
 GanttMaster.prototype.beginTransaction = function () {
     if (!this.__currentTransaction) {
         this.__currentTransaction = {
-            snapshot: JSON.stringify(this.saveGantt(true)),
+//            snapshot: JSON.stringify(this.saveGantt(true)),
             errors: []
         };
     } else {

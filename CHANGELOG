@@ -9,6 +9,8 @@ Stalker Changes
 
   * **Update:** **Task.schedule_constraint** is now reflected to the tjp file
     correctly.
+  * **Fix:** **check_circular_dependency()** now checks if the **entity** and
+    the **other_entity** are the same.
 
 * **WebUI:**
 

@@ -134,7 +134,7 @@ GridEditor.prototype.redraw = function () {
     }
 };
 
-GridEditor.prototype.reset = function () {
+GridEditor.prototype.reset = function () {  
     this.element.find("[taskId]").remove();
 };
 

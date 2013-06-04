@@ -2942,6 +2942,22 @@ class TaskTester(unittest2.TestCase):
         task4.depends = [task2]
         DBSession.commit()
 
+    def test_parent_attribute_checks_cycle_on_self(self):
+        """Bug ID: None
+        
+        Check if a CircularDependency Error will be raised if the parent
+        attribute is pointing itself
+        """
+        task1 = Task(
+            project=self.test_project1,
+            name='Cekimler',
+            start=datetime.datetime(2013, 4, 1),
+            end=datetime.datetime(2013, 5, 6),
+            status_list=self.test_task_status_list
+        )
+        self.assertRaises(CircularDependencyError, setattr, task1, 'parent',
+                          task1)
+
     def test_bid_timing_argument_is_skipped(self):
         """testing if the bid_timing attribute value will be equal to
         schedule_timing attribute value if the bid_timing argument is skipped
@@ -3153,6 +3169,7 @@ class TaskTester(unittest2.TestCase):
         t1.id = 10221
 
         expected_tjp = """task Task_10221 "Modeling" {
+            
             effort 10d
             allocate User_5648, User_7999
             depends Project_14875.Task_6484, Project_14875.Task_6485
@@ -3195,7 +3212,9 @@ class TaskTester(unittest2.TestCase):
 
         new_task = Task(**self.kwargs)
         new_task.id = 234234
+        self.maxDiff = None
         expected_tjp = """task Task_234234 "Modeling" {
+            
             effort 1003h
             allocate User_1231, User_1232
             depends Project_8898.Task_987879.Task_23423, Project_8898.Task_987879.Task_23424
@@ -3245,16 +3264,19 @@ class TaskTester(unittest2.TestCase):
 
         expected_tjp = '''task Task_5648 "Modeling" {
                 task Task_23423 "Modeling" {
+            
             effort 1d
             allocate User_1231, User_1232
         }
         
                 task Task_23424 "Modeling" {
+            
             effort 1d
             allocate User_1231, User_1232
         }
         
                 task Task_5679 "Modeling" {
+            
             effort 1d
             allocate User_1231, User_1232
             depends Project_87987.Task_5648.Task_23423, Project_87987.Task_5648.Task_23424

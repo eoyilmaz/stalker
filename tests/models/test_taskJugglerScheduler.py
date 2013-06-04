@@ -260,12 +260,14 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
             task Project_28 "Test Project 1" {
             
                 task Task_29 "Task1" {
+            
             effort 50.0h
             allocate User_12, User_14
         }
         
             
                 task Task_30 "Task2" {
+            
             effort 60.0h
             allocate User_12, User_14
         }
