@@ -498,9 +498,13 @@ def get_project_tasks(request):
     return [
         {
             'id': task.id,
-            'name': '%s (%s)' % (task.name,
-                                       task.entity_type),
-        } for task in Task.query.filter(Task._project==project).all()]
+            'name': '%s (%s) (%s)' % (
+                    task.name,
+                    task.entity_type,
+                    ' | '.join([parent.name for parent in task.parents])
+            )
+        } for task in Task.query.filter(Task._project==project).all()
+    ]
 
 
 @view_config(

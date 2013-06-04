@@ -154,10 +154,20 @@
             <button id='list_tasks_zoom_in_button'>Zoom In</button>
         </div>
         {% if has_permission('Update_Task') %}
-            <div style='float: right;'>
+            <div style='float: left;'>
                 <button id="list_tasks_schedule_tasks_button">Schedule Tasks</button>
             </div>
         {% endif %}
+        <div style='float: left;'> {# gantt boundries #}
+            <div style="float: left">
+                <div style='float: left;'>Start :</div>
+                <div id='gantt_start_date' style='float: left;'></div>
+            </div>
+            <div style="float: left">
+                <div style='float: left;'>End</div>
+                <div id='gantt_end_date' style='float: left;'></div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -189,14 +199,16 @@
         'dojo/Deferred',
         'dojo/when',
 
+        'dijit/form/DateTextBox',
+
         'stalker/dialogs',
         'stalker/dialogCaller',
         'stalker/dialogCreator',
 
         'dojo/domReady!'
     ], function (registry, Button, Menu, MenuItem, MenuSeparator, query,
-                 JsonRest, xhr, lang, Deferred, when, dialogs, dialogCaller,
-                 dialogCreator) {
+                 JsonRest, xhr, lang, Deferred, when, DateTextBox,
+                 dialogs, dialogCaller, dialogCreator) {
 
         $('#gantttemplates').loadTemplates();
 
@@ -213,9 +225,13 @@
 
         function loadGanttFromServer() {
             tasks_memory.query().then(function (data) {
-                {% if entity.entity_type != 'User' %}
-                    data = lang.mixin(data, {'canWrite': 1, 'canWriteOnParent': 1});
-                {% endif %}
+{#                {% if entity.entity_type != 'User' %}#}
+{#                    data = lang.mixin(data, {'canWrite': 1, 'canWriteOnParent': 1});#}
+{#                {% endif %}#}
+
+                // set start and end dates for the gantt
+                data.start = start_dateTextBox.getValue().getTime();
+                data.end = end_dateTextBox.getValue().getTime();
 
                 var promise = ge.loadGanttData(data, Deferred);
                 promise.then(function () {
@@ -537,7 +553,34 @@
             }, 'list_tasks_schedule_tasks_button');
             schedule_tasks_button.startup();
         {% endif %}
-
+    
+        var start_dateTextBox = new DateTextBox({
+            name: 'start',
+            label: 'Start Date',
+            value: new Date( new Date().getTime() - 1296000000),// 15 * 24 * 60 * 60 * 1000, set it today + 15 by default
+            required: true,
+            datePattern: 'dd-mm-yyyy',
+            onChange: function(){
+                alert('start is changed');
+                loadGanttFromServer();
+            }
+        }, 'gantt_start_date');
+        start_dateTextBox.startup();
+    
+        var end_dateTextBox = new DateTextBox({
+            name: 'end',
+            label: 'End Date',
+            value: new Date( new Date().getTime() + 1296000000), // set it today + 15 by default
+            required: true,
+            datePattern: 'dd-mm-yyyy',
+            onChange: function(){
+                alert('end is changed');
+                loadGanttFromServer();
+            }
+        }, 'gantt_end_date');
+        end_dateTextBox.startup();
+        
+{#        loadGanttFromServer();#}
 
 
     });

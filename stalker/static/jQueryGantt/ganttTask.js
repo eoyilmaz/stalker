@@ -40,35 +40,31 @@ function Task(kwargs) {
     this.id = kwargs['id'] || null;
     this.name = kwargs['name'] || null;
     this.code = kwargs['code'] || null;
-    
+
     this.type = kwargs['type'] || null;
-    
+
     this.status = "STATUS_UNDEFINED";
-    
+
     this.project_id = null;
-    
+
     this.children = [];
     this.child_ids = [];
     this.parent_id = kwargs['parent_id'] || null;
     this.parent = kwargs['parent'] || null;
     this.depend_ids = kwargs['depend_ids'] || [];
     this.depends = null;
-      
+
     this.start = kwargs['start'] || null;
     this.duration = kwargs['duration'] || null;
     this.end = kwargs['end'] || null;
-    
+
     this.is_scheduled = kwargs['is_scheduled'] || false;
-    // schedule model:
-    //   0: Effort
-    //   1: Length
-    //   2: Duration
-    
+
     this.schedule_model = kwargs['schedule_model'];
     this.schedule_timing = kwargs['schedule_timing'] || 10;
     this.schedule_unit = kwargs['schedule_unit'] || 'h';
     this.schedule_constraint = kwargs['schedule_constraint'] || 0;
-    
+
     this.schedule_seconds = kwargs['schedule_seconds'] || 0;
     this.total_logged_seconds = kwargs['total_logged_seconds'] || 0;
 

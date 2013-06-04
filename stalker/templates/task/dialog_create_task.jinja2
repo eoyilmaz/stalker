@@ -229,8 +229,7 @@ require([
         target: '{{ request.route_url('get_project_tasks', project_id=project.id) }}'
     });
 
-    var parent_widget;
-    parent_widget = new FilteringSelect({
+    var parent_widget = new FilteringSelect({
         name: 'parent_id',
         label: 'Parent',
         required: false
@@ -285,7 +284,7 @@ require([
     var tasks_result = tasks_jsonRest.query().then(function (data) {
         var memory = new Memory({data: data});
         depends_tagSelect.set('store', new Memory({data: data}));
-
+        
         {% if mode == 'UPDATE' %}
             depends_tagSelect.set('value', [
                 {% for depend_task in task.depends %}

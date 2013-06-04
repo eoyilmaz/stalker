@@ -309,6 +309,9 @@ class Config(object):
 
         tj_command = '/usr/local/bin/tj3',
 
+        path_template = '{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}',
+        filename_template = '{{version_of.nice_name}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}',
+
         # --------------------------------------------
         # the following settings came from oyProjectManager 
         sequence_format = "%h%p%t %R",

@@ -30,6 +30,9 @@ function Ganttalendar(zoom, startmillis, endMillis, master, minGanttSize) {
 
     this.zoomLevels = ['h', "d", "w", "m", "q", "s", "y"];
     //this.zoomLevels = ["w","m","q","s","y"];
+    
+//    console.debug('Ganttalendar.startmillis : ', startmillis);
+//    console.debug('Ganttalendar.endMillis   : ', endMillis);
 
     this.element = this.create(zoom, startmillis, endMillis);
 
@@ -59,11 +62,20 @@ Ganttalendar.prototype.zoomGantt = function (isPlus) {
 };
 
 
-Ganttalendar.prototype.create = function (zoom, originalStartmillis,
-                                          originalEndMillis) {
-    //console.debug("Gantt.create " + new Date(originalStartmillis) + " - " + new Date(originalEndMillis));
+Ganttalendar.prototype.create = function (zoom, originalStartMillis, originalEndMillis) {
+    //console.debug("Gantt.create " + new Date(originalStartMillis) + " - " + new Date(originalEndMillis));
 
     var self = this;
+    
+    // reset time
+    var temp_start = new Date(originalStartMillis);
+    var temp_end = new Date(originalEndMillis);
+    temp_start.setHours(0, 0, 0, 0);
+    temp_end.setHours(23, 59, 59, 999);
+
+    originalStartMillis = temp_start.getTime();
+    originalEndMillis = temp_end.getTime();
+
 
     function getPeriod(zoomLevel, stMil, endMillis) {
         var start = new Date(stMil);
@@ -129,6 +141,8 @@ Ganttalendar.prototype.create = function (zoom, originalStartmillis,
     }
 
     function createGantt(zoom, startPeriod, endPeriod) {
+//        console.debug('startPeriod : ', startPeriod);
+//        console.debug('endPeriod   : ', endPeriod);
         var tr1 = $("<tr>").addClass("ganttHead1");
         var tr2 = $("<tr>").addClass("ganttHead2");
         var trBody = $("<tr>").addClass("ganttBody");
@@ -286,8 +300,9 @@ Ganttalendar.prototype.create = function (zoom, originalStartmillis,
         self.fx = computedTableWidth / (endPeriod - startPeriod);
 
         // drawTodayLine
-        if (new Date().getTime() > self.startMillis && new Date().getTime() < self.endMillis) {
-            var x = Math.round(((new Date().getTime()) - self.startMillis) * self.fx);
+        var today_as_millis = new Date().getTime();
+        if (today_as_millis > self.startMillis && today_as_millis < self.endMillis) {
+            var x = Math.round((today_as_millis - self.startMillis) * self.fx);
             var today = $("<div>").addClass("ganttToday").css("left", x);
             box.append(today);
         }
@@ -296,23 +311,28 @@ Ganttalendar.prototype.create = function (zoom, originalStartmillis,
     }
 
     //if include today synch extremes
-    if (this.includeToday) {
-        var today = new Date().getTime();
-        originalStartmillis = originalStartmillis > today ? today : originalStartmillis;
-        originalEndMillis = originalEndMillis < today ? today : originalEndMillis;
-    }
+//    if (this.includeToday) {
+//        var today = new Date().getTime();
+//        originalStartMillis = originalStartMillis > today ? today : originalStartMillis;
+//        originalEndMillis = originalEndMillis < today ? today : originalEndMillis;
+//    }
 
 
-    //get best dimension fo gantt
-    var period = getPeriod(zoom, originalStartmillis, originalEndMillis); //this is enlarged to match complete periods basing on zoom level
+    //get best dimension for gantt
+//    console.debug('originalStartMillis : ', originalStartMillis);
+//    console.debug('originalEndMillis   : ', originalEndMillis);
+//    var period = getPeriod(zoom, originalStartMillis, originalEndMillis); //this is enlarged to match complete periods based on zoom level
 
     //console.debug(new Date(period.start) + "   " + new Date(period.end));
-    self.startMillis = period.start; //real dimension of gantt
-    self.endMillis = period.end;
-    self.originalStartMillis = originalStartmillis; //minimal dimension required by user or by task duration
+//    self.startMillis = period.start; //real dimension of gantt
+//    self.endMillis = period.end;
+    self.startMillis = originalStartMillis; //real dimension of gantt
+    self.endMillis = originalEndMillis;
+    self.originalStartMillis = originalStartMillis; //minimal dimension required by user or by task duration
     self.originalEndMillis = originalEndMillis;
 
-    var table = createGantt(zoom, period.start, period.end);
+//    var table = createGantt(zoom, period.start, period.end);
+    var table = createGantt(zoom, originalStartMillis, originalEndMillis);
 
     return table;
 };
@@ -341,8 +361,6 @@ Ganttalendar.prototype.drawTask = function (task) {
         taskBox = $.JST.createFromTemplate(task, "PROJECTBAR");
     }
     
-    
-    
     //save row element on task
     task.ganttElement = taskBox;
 
@@ -353,73 +371,8 @@ Ganttalendar.prototype.drawTask = function (task) {
 
     taskBox.css({top: top, left: x, width: Math.round((task.end - task.start) * self.fx)});
 
-//    if (this.master.canWrite) {
-//        taskBox.resizable({
-//            handles: 'e,w', //( task.depends ? "" : ",w"), //if depends cannot move start
-//            //helper: "ui-resizable-helper",
-//            //grid:[oneDaySize,oneDaySize],
-//
-//            resize: function (event, ui) {
-//                //console.debug(ui)
-//                $(".taskLabel[taskId=" + ui.helper.attr("taskId") + "]").css("width", ui.position.left);
-//                event.stopImmediatePropagation();
-//                event.stopPropagation();
-//            },
-//            stop: function (event, ui) {
-//                //console.debug(ui)
-//                var task = self.master.getTask(ui.element.attr("taskId"));
-//                var s = Math.round((ui.position.left / self.fx) + self.startMillis);
-//                var e = Math.round(((ui.position.left + ui.size.width) / self.fx) + self.startMillis);
-//
-//                self.master.beginTransaction();
-//                self.master.changeTaskDates(task, new Date(s), new Date(e));
-//                self.master.endTransaction();
-//            }
-//
-//        });
-//
-//    }
-
-    //taskBox.dblclick(function() {
-    //  self.master.showTaskEditor($(this).closest("[taskId]").attr("taskId"));
-
-    //}).mousedown(function() {
-    //  var task_id = $(this).attr("taskId");
-    //  //console.debug('task_id: ', task_id);
-    //  var task = self.master.getTask(task_id{);
-    //  //console.debug('task: ', task);
-    //  task.rowElement.click();
-    //});
-
-    //panning only in no depends
-//    if (task.depends.length == 0 && this.master.canWrite) {
-//        taskBox.css("position", "absolute").draggable({
-//            axis: 'x',
-//            drag: function (event, ui) {
-//                $(".taskLabel[taskId=" + $(this).attr("taskId") + "]").css("width", ui.position.left);
-//            },
-//            stop: function (event, ui) {
-//                //console.debug(ui,$(this))
-//                var task = self.master.getTask($(this).attr("taskId"));
-//                var s = Math.round((ui.position.left / self.fx) + self.startMillis);
-//
-//                self.master.beginTransaction();
-//                self.master.moveTask(task, new Date(s));
-//                self.master.endTransaction();
-//            }/*,
-//             start:function(event, ui) {
-//             var task = self.master.getTask($(this).attr("taskId"));
-//             var s = Math.round((ui.position.left / self.fx) + self.startMillis);
-//             console.debug("start",new Date(s));
-//             }*/
-//        });
-//    }
-
-
     var taskBoxSeparator = $("<div class='ganttLines'></div>");
     taskBoxSeparator.css({top: top + taskBoxSeparator.height()});
-//  taskBoxSeparator.css({top:top+18});
-
 
     self.element.append(taskBox);
     self.element.append(taskBoxSeparator);
@@ -433,8 +386,8 @@ Ganttalendar.prototype.drawTask = function (task) {
 
 Ganttalendar.prototype.addTask = function (task) {
     //set new boundaries for gantt
-    this.originalEndMillis = this.originalEndMillis > task.end ? this.originalEndMillis : task.end;
-    this.originalStartMillis = this.originalStartMillis < task.start ? this.originalStartMillis : task.start;
+//    this.originalEndMillis = this.originalEndMillis > task.end ? this.originalEndMillis : task.end;
+//    this.originalStartMillis = this.originalStartMillis < task.start ? this.originalStartMillis : task.start;
 };
 
 
@@ -737,10 +690,10 @@ Ganttalendar.prototype.refreshGantt = function () {
 
     this.element.remove();
     //guess the zoom level in base of period
-    if (!this.zoom) {
+//    if (!this.zoom) {
         var days = (this.originalEndMillis - this.originalStartMillis) / (3600000 * 24);
         this.zoom = this.zoomLevels[days < 2 ? 0 : (days < 15 ? 1 : (days < 60 ? 2 : (days < 150 ? 3 : (days < 400 ? 4 : 5 ) ) ) )];
-    }
+//    }
     var domEl = this.create(this.zoom, this.originalStartMillis, this.originalEndMillis);
     this.element = domEl;
     par.append(domEl);

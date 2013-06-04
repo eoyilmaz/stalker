@@ -133,8 +133,8 @@ require([
 
         start_date_value = new Date();// set it today by default
         end_date_value = new Date();// set it today by default
-        start_time_value = 'T0:09:00:00';
-        end_time_value = 'T0:18:00:00';
+        start_time_value = 'T10:00:00';
+        end_time_value = 'T19:00:00';
 
     {% elif mode == 'UPDATE' %}
         url = '{{ request.route_url("update_time_log") }}';
