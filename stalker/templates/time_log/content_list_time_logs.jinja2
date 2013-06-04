@@ -29,10 +29,11 @@
         'dojo/data/ObjectStore',
         'dojo/store/Memory',
         'dojo/store/JsonRest',
+        'dojo/aspect',
 
         "dgrid/selector",
         "dgrid/List",
-        "dgrid/Grid",
+        "dgrid/OnDemandGrid",
         "dgrid/Selection",
         "dgrid/Keyboard",
         "dojo/_base/declare",
@@ -49,7 +50,7 @@
         'stalker/dialogCreator',
 
         'dojo/domReady!'
-    ], function (ObjectStore, Memory, JsonRest, selector, List, Grid,
+    ], function (ObjectStore, Memory, JsonRest, aspect, selector, List, Grid,
                  Selection, Keyboard, declare, editor, Menu, MenuItem,
                  MenuSeparator, Button, dialogs, dialogCaller, dialogCreator) {
 
@@ -59,7 +60,7 @@
         var time_logs_DataGrid = new StandardGrid({
             id: 'time_logs_data_grid',
             width: '100%',
-            autoHeight: true,
+{#            autoHeight: true,#}
             selectionMode: 'single',
             cellNavigation: false,
             allowSelectAll: true
@@ -85,7 +86,7 @@
 
 
         function time_logs_DataGrid_updater() {
-            ;
+
 
             var time_log_memory = new JsonRest({
                 target: '/get/time_logs/{{ entity.id }}'
@@ -136,7 +137,7 @@
                         label: "Duration",
                         formatter: function (value) {
 
-                            return value/3600;
+                            return value/3600 + ' h';
 
                         }
                     },
@@ -200,9 +201,20 @@
 
             });
 
+            time_logs_DataGrid.resize();
+
         }
 
         time_logs_DataGrid_updater();
+
+
+
+
+        aspect.after(this, "resize", function() {
+               console.log('time_logs_DataGrid.resize();');
+               time_logs_DataGrid.resize();
+        });
+
 
     });
 </script>

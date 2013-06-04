@@ -41,6 +41,10 @@ Stalker Changes
   * **New**: Added **ScheduleMixin.total_seconds** and
     **ScheduleMixin.computed_total_seconds**.
 
+  **WebUI**:
+
+  * **New**: Added 'duration' field to TimeLog's List dgrid.
+
 0.2.0.b5
 ========
 
