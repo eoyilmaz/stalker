@@ -283,7 +283,11 @@ require([
 
     var tasks_result = tasks_jsonRest.query().then(function (data) {
         var memory = new Memory({data: data});
-        depends_tagSelect.set('store', new Memory({data: data}));
+        {# remove self from lists #}
+        {% if task %}
+            memory.remove({{ task.id }});
+        {% endif %}
+        depends_tagSelect.set('store', memory);
         
         {% if mode == 'UPDATE' %}
             depends_tagSelect.set('value', [
