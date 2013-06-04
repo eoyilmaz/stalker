@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
-from pyramid.httpexceptions import HTTPOk
+from pyramid.httpexceptions import HTTPOk, HTTPServerError
 from pyramid.security import authenticated_userid, has_permission
 from pyramid.view import view_config
 from stalker import Task, User, Studio, TimeLog, Entity
@@ -27,6 +27,7 @@ from stalker import defaults
 import logging
 from stalker import log
 from stalker.db import DBSession
+from stalker.exceptions import OverBookedError
 from stalker.views import get_datetime, get_logged_in_user, PermissionChecker
 
 logger = logging.getLogger(__name__)
@@ -115,13 +116,17 @@ def create_time_log(request):
     if task and resource and start_date and end_date:
         # we are ready to create the time log
         # TimeLog should handle the extension of the effort
-        time_log = TimeLog(
-            task=task,
-            resource=resource,
-            start=start_date,
-            end=end_date
-        )
-        DBSession.add(time_log)
+        try:
+            time_log = TimeLog(
+                task=task,
+                resource=resource,
+                start=start_date,
+                end=end_date
+            )
+        except OverBookedError:
+            return HTTPServerError()
+        else:
+            DBSession.add(time_log)
     
     return HTTPOk()
 
@@ -152,11 +157,14 @@ def update_time_log(request):
         # we are ready to create the time log
         # TimeLog should handle the extension of the effort
 
-        time_log.resource = resource
-        time_log.start = start_date
-        time_log.end = end_date
-
-        DBSession.add(time_log)
+        try:
+            time_log.resource = resource
+            time_log.start = start_date
+            time_log.end = end_date
+        except OverBookedError:
+            return HTTPServerError()
+        else:
+            DBSession.add(time_log)
 
     return HTTPOk()
 

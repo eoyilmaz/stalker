@@ -18,6 +18,8 @@ Stalker Changes
     parent/dependent task listings.
   * **Fix:** TimeLog create/update dialog now displays the default times
     correctly when creating a new TimeLog.
+  * **Fix:** TimeLog create/update view callables are now checking if there
+    will be any OverBookedError raised.
 
 0.2.0.b6
 ========
