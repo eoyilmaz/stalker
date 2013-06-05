@@ -168,7 +168,7 @@ def get_departments(request):
             'id': dep.id,
             'name': dep.name
         }
-        for dep in Department.query.all()
+        for dep in Department.query.order_by(Department.name.asc()).all()
     ]
 
 @view_config(

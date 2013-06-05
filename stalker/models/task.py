@@ -770,7 +770,7 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
     def _reschedule(self, schedule_timing, schedule_unit):
         """Updates the start and end date values by using the schedule_timing
         and schedule_unit values.
-        
+
         :param schedule_timing: An integer or float value showing the value of
           the schedule timing.
         :type schedule_timing: int, float
@@ -1023,21 +1023,6 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
 
             # logger.debug('Task.start_setter afterV: %s' % self.start)
 
-    @declared_attr
-    def start(self):
-        return synonym(
-            '_start',
-            descriptor=property(
-                self._start_getter,
-                self._start_setter,
-                doc="""The overridden start property.
-                
-                The start of the Task can not be changed if it is a container task.
-                Works normally in other case.
-                """
-            )
-        )
-
     def _end_getter(self):
         """overridden end getter
         """
@@ -1057,21 +1042,6 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         # update the end only if this is not a container task
         if self.is_leaf:
             self._validate_dates(self.start, end_in, self.duration)
-
-    @declared_attr
-    def end(self):
-        return synonym(
-            '_end',
-            descriptor=property(
-                self._end_getter,
-                self._end_setter,
-                doc="""The overridden end property.
-                
-                The end of the Task can not be changed if it is a container task.
-                Works normally in other cases.
-                """
-            )
-        )
 
     def _project_getter(self):
         return self._project
@@ -1218,14 +1188,6 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         """
         # for effort based tasks use the time_logs
         return self.schedule_seconds - self.total_logged_seconds
-
-    @property
-    def computed_duration(self):
-        """it is the direct difference of computed_start and computed_end
-        """
-        return self.computed_end - self.computed_start \
-            if self.computed_end and self.computed_start else None
-
 
 # TASK_DEPENDENCIES
 Task_Dependencies = Table(

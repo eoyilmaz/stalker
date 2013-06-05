@@ -279,7 +279,7 @@ def get_users(request):
     """
     return [
         {'id': user.id, 'name': user.name}
-        for user in User.query.all()
+        for user in User.query.order_by(User.name.asc()).all()
     ]
 
 
@@ -295,7 +295,7 @@ def get_users_byEntity(request):
 
     users = []
 
-    for user in entity.users:
+    for user in sorted(entity.users, key=lambda x: x.name.lower()):
         departmentStr = ''
         groupStr = ''
         for department in user.departments:
@@ -767,7 +767,7 @@ def get_groups(request):
     """
     return [
         {'id': group.id, 'name': group.name}
-        for group in Group.query.all()
+        for group in Group.query.order_by(Group.name.asc()).all()
     ]
 
 @view_config(
@@ -787,7 +787,7 @@ def get_groups_byEntity(request):
              'id': group.id
 
             }
-            for group in entity.groups
+            for group in sorted(entity.groups, key=lambda x: x.name.lower())
         ]
 
 @view_config(

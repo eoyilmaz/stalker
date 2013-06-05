@@ -28,95 +28,71 @@ function GridEditor(master) {
 }
 
 
-GridEditor.prototype.fillEmptyLines = function () {
-    var factory = new TaskFactory();
+//GridEditor.prototype.fillEmptyLines = function () {
+////    var factory = new TaskFactory();
+//
+//    //console.debug("GridEditor.fillEmptyLines");
+//
+//    var rowsToAdd = 30 - this.element.find(".taskEditRow").size();
+//
+//    //fill with empty lines
+//    for (var i = 0; i < rowsToAdd; i++) {
+//        var emptyRow = $.JST.createFromTemplate({}, "TASKEMPTYROW");
+//        //click on empty row create a task and fill above
+//        this.element.append(emptyRow);
+//    }
+//};
 
-    //console.debug("GridEditor.fillEmptyLines");
 
-    var rowsToAdd = 30 - this.element.find(".taskEditRow").size();
-
-    //fill with empty lines
-    for (var i = 0; i < rowsToAdd; i++) {
-        var emptyRow = $.JST.createFromTemplate({}, "TASKEMPTYROW");
-        //click on empty row create a task and fill above
-        this.element.append(emptyRow);
-    }
-};
-
-
-GridEditor.prototype.addTask = function (task, row) {
-    //console.debug("GridEditor.addTask",task,row);
+GridEditor.prototype.addTask = function (task) {
+//    console.debug("GridEditor.addTask Start ",task);
     //var prof = new Profiler("editorAddTaskHtml");
 
-    //remove extisting row
-    this.element.find("[taskId=" + task.id + "]").remove();
-
     var taskRow;
-    if (task.type != 'Project'){
+    if (task.type == 'Task' || task.type == 'Asset' || task.type == 'Shot' ||
+        task.type == 'Sequence'){
         if (!task.isParent()) {
             taskRow = $.JST.createFromTemplate(task, "TASKROW");
         } else {
             taskRow = $.JST.createFromTemplate(task, "PARENTTASKROW");
         }
-    } else {
+    } else if (task.type == 'Project') {
         taskRow = $.JST.createFromTemplate(task, "PROJECTROW");
     }
+
     //save row element on task
     task.rowElement = taskRow;
 
-    this.bindRowEvents(task, taskRow);
-
-    if (typeof(row) != "number") {
-        var emptyRow = this.element.find(".emptyRow:first"); //tries to fill an empty row
-        if (emptyRow.size() > 0)
-            emptyRow.replaceWith(taskRow);
-        else
-            this.element.append(taskRow);
-    } else {
-
-        var tr;
-        if (task.type != 'Project'){
-            if (!task.isParent()) {
-                // if it is a leaf task draw a TaskEditRow
-                tr = this.element.find("tr.taskEditRow").eq(row);
-            } else {
-                // draw a PARENTTASKEDITROW
-                tr = this.element.find("tr.parentTaskEditRow").eq(row);
-            }
-        } else {
-            tr = this.element.find("tr.projectEditRow").eq(row);
-        }
+//    this.bindRowEvents(task, taskRow);
+    this.element.append(taskRow);
     
-        if (tr.size() > 0) {
-            tr.before(taskRow);
-        } else {
-            this.element.append(taskRow);
-        }
+//    console.debug('GridEditor.addTask End ', task);
+    return taskRow;
+};
 
-    }
+GridEditor.prototype.refreshRowIndices = function(){
     this.element.find(".taskRowIndex").each(function (i, el) {
         $(el).html(i + 1);
     });
-    //prof.stop();
-
-    return taskRow;
 };
+
 
 
 GridEditor.prototype.refreshTaskRow = function (task) {
     //console.debug("refreshTaskRow")
     //var profiler = new Profiler("editorRefreshTaskRow");
     var row = task.rowElement;
+//    console.debug('GridEditor.refreshTaskRow, row:', task, row);
 
     row.find(".taskRowIndex").html(task.getRow() + 1);
     row.find(".indentCell").css("padding-left", task.getParents().length * 10);
-    row.find("[name=name]").val(task.name);
-    row.find("[name=code]").val(task.code);
-    row.find("[status]").attr("status", task.status);
+    row.find(".name").html(task.name);
+    row.find(".code").html(task.code);
+//    row.find("[status]").attr("status", task.status);
 
-    row.find("[name=timing]").val(task.schedule_model.toUpperCase()[0] + ":" + task.schedule_timing + task.schedule_unit);
-    row.find("[name=start]").val(new Date(task.start).format()).updateOldValue(); // called on dates only because for other field is called on focus event
-    row.find("[name=end]").val(new Date(task.end).format()).updateOldValue();
+    row.find(".timing").html(task.schedule_model.toUpperCase()[0] + ":" + task.schedule_timing + task.schedule_unit);
+    row.find(".start").html(new Date(task.start).format()).updateOldValue(); // called on dates only because for other field is called on focus event
+    row.find(".end").html(new Date(task.end).format()).updateOldValue();
 
     var dep_string = '';
     for (var i = 0; i < task.getDepends().length; i++) {
@@ -146,7 +122,7 @@ GridEditor.prototype.bindRowEvents = function (task, taskRow) {
 //    self.bindRowInputEvents(task,taskRow);
 
 //  } else { //cannot write: disable input
-    taskRow.find("input").attr("readonly", true);
+//    taskRow.find("input").attr("readonly", true);
 //  }
 
     //taskRow.find(".edit").click(function() {self.openFullEditor(task,taskRow)});

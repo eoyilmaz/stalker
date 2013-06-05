@@ -29,9 +29,13 @@ Stalker Changes
   * **Fix:** Task create/update dialog now will not list the task itself in
     parent and dependent task lists, if the UI is called with a Task instance
     ({{task}} is not None).
+  * **Update:** List of Users, Departments and Groups are now sorted by using
+    the name of the entity.
   * **JQueryGantt:**
   
-    * **Update:** Context menu is now visible in ``taskRow`` (grid editor).
+    * **Update:** Context menu can now be opened in task names in grid editor.
+    * **Update:** Optimized the creation of task rows.
+    * **Update:** Replaced the ``input`` elements with ``div`` in the task row.
 
 0.2.0.b6
 ========

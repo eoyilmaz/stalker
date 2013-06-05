@@ -167,43 +167,43 @@ GanttMaster.prototype.updateDepends = function () {
 };
 
 //------------------------------------  ADD TASK --------------------------------------------
-GanttMaster.prototype.addTask = function (task, parent) {
-    //console.debug("master.addTask",task,row,this);
-    task.master = this; // in order to access controller from task
-
-    //add task in collection
-    this.tasks.push(task);
-    this.task_ids.push(task.id);
-
-    //recompute depends string
-    this.updateDepends();
-
-    //add Link collection in memory
-    var linkLoops = !this.updateLinks(task);
-
-    //set the status according to parent
-    if (task.getParent())
-        task.status = task.getParent().status;
-    else
-        task.status = "STATUS_ACTIVE";
-
-    var ret = task;
-    if (linkLoops || !task.setPeriod(task.start, task.end)) {
-        //remove task from in-memory collection
-        //console.debug("removing task from memory",task);
-        var task_index = this.task_ids.indexOf(task.id);
-        this.tasks.splice(task_index, 1);
-        this.task_ids.splice(task_index, 1);
-        ret = undefined;
-    } else {
-        // TODO: don't update the editor yet, we need to have all the tasks
-        //append task to editor
-        this.editor.addTask(task, row);
-        //append task to gantt
-        this.gantt.addTask(task);
-    }
-    return ret;
-};
+//GanttMaster.prototype.addTask = function (task, parent) {
+//    //console.debug("master.addTask",task,row,this);
+//    task.master = this; // in order to access controller from task
+//
+//    //add task in collection
+//    this.tasks.push(task);
+//    this.task_ids.push(task.id);
+//
+//    //recompute depends string
+//    this.updateDepends();
+//
+//    //add Link collection in memory
+//    var linkLoops = !this.updateLinks(task);
+//
+//    //set the status according to parent
+//    if (task.getParent())
+//        task.status = task.getParent().status;
+//    else
+//        task.status = "STATUS_ACTIVE";
+//
+//    var ret = task;
+//    if (linkLoops || !task.setPeriod(task.start, task.end)) {
+//        //remove task from in-memory collection
+//        //console.debug("removing task from memory",task);
+//        var task_index = this.task_ids.indexOf(task.id);
+//        this.tasks.splice(task_index, 1);
+//        this.task_ids.splice(task_index, 1);
+//        ret = undefined;
+//    } else {
+//        // TODO: don't update the editor yet, we need to have all the tasks
+//        //append task to editor
+//        this.editor.addTask(task, row);
+//        //append task to gantt
+////        this.gantt.addTask(task);
+//    }
+//    return ret;
+//};
 
 
 /**
@@ -387,11 +387,11 @@ GanttMaster.prototype.loadTasks = function (tasks) {
             //append task to editor
             this.editor.addTask(task);
             //append task to gantt
-            this.gantt.addTask(task);
+//            this.gantt.addTask(task);
         }
     }
 
-    this.editor.fillEmptyLines();
+//    this.editor.fillEmptyLines();
     //prof.stop();
 };
 

@@ -384,11 +384,11 @@ Ganttalendar.prototype.drawTask = function (task) {
 };
 
 
-Ganttalendar.prototype.addTask = function (task) {
+//Ganttalendar.prototype.addTask = function (task) {
     //set new boundaries for gantt
 //    this.originalEndMillis = this.originalEndMillis > task.end ? this.originalEndMillis : task.end;
 //    this.originalStartMillis = this.originalStartMillis < task.start ? this.originalStartMillis : task.start;
-};
+//};
 
 
 //<%-------------------------------------- GANT DRAW LINK ELEMENT --------------------------------------%>
