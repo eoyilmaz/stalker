@@ -28,29 +28,10 @@ function GridEditor(master) {
 }
 
 
-//GridEditor.prototype.fillEmptyLines = function () {
-////    var factory = new TaskFactory();
-//
-//    //console.debug("GridEditor.fillEmptyLines");
-//
-//    var rowsToAdd = 30 - this.element.find(".taskEditRow").size();
-//
-//    //fill with empty lines
-//    for (var i = 0; i < rowsToAdd; i++) {
-//        var emptyRow = $.JST.createFromTemplate({}, "TASKEMPTYROW");
-//        //click on empty row create a task and fill above
-//        this.element.append(emptyRow);
-//    }
-//};
-
-
 GridEditor.prototype.addTask = function (task) {
-//    console.debug("GridEditor.addTask Start ",task);
-    //var prof = new Profiler("editorAddTaskHtml");
-
     var taskRow;
     if (task.type == 'Task' || task.type == 'Asset' || task.type == 'Shot' ||
-        task.type == 'Sequence'){
+        task.type == 'Sequence') {
         if (!task.isParent()) {
             taskRow = $.JST.createFromTemplate(task, "TASKROW");
         } else {
@@ -63,19 +44,17 @@ GridEditor.prototype.addTask = function (task) {
     //save row element on task
     task.rowElement = taskRow;
 
-//    this.bindRowEvents(task, taskRow);
     this.element.append(taskRow);
-    
-//    console.debug('GridEditor.addTask End ', task);
+
     return taskRow;
 };
 
-GridEditor.prototype.refreshRowIndices = function(){
+
+GridEditor.prototype.refreshRowIndices = function () {
     this.element.find(".taskRowIndex").each(function (i, el) {
         $(el).html(i + 1);
     });
 };
-
 
 
 GridEditor.prototype.refreshTaskRow = function (task) {
@@ -104,206 +83,14 @@ GridEditor.prototype.refreshTaskRow = function (task) {
     //profiler.stop();
 };
 
+
 GridEditor.prototype.redraw = function () {
     for (var i = 0; i < this.master.tasks.length; i++) {
         this.refreshTaskRow(this.master.tasks[i]);
     }
 };
 
-GridEditor.prototype.reset = function () {  
+
+GridEditor.prototype.reset = function () {
     this.element.find("[taskId]").remove();
 };
-
-
-GridEditor.prototype.bindRowEvents = function (task, taskRow) {
-    var self = this;
-    //console.debug("bindRowEvents",this,this.master,this.master.canWrite);
-//  if (this.master.canWrite) {
-//    self.bindRowInputEvents(task,taskRow);
-
-//  } else { //cannot write: disable input
-//    taskRow.find("input").attr("readonly", true);
-//  }
-
-    //taskRow.find(".edit").click(function() {self.openFullEditor(task,taskRow)});
-
-};
-
-
-GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
-    var self = this;
-
-    //bind dateField on dates
-//  taskRow.find(".date").each(function () {
-//    var el = $(this);
-//    
-//    el.click(function () {
-//      var inp = $(this);
-//      inp.dateField({
-//        inputField:el
-//      });
-//    });
-//
-//    el.blur(function (date) {
-//      var inp = $(this);
-//      if (inp.isValueChanged()) {
-//        if (!Date.isValid(inp.val())) {
-//          alert(GanttMaster.messages["INVALID_DATE_FORMAT"]);
-//          inp.val(inp.getOldValue());
-//
-//        } else {
-//          var date = Date.parseString(inp.val());
-//          var row = inp.closest("tr");
-//          var taskId = row.attr("taskId");
-//          var task = self.master.getTask(taskId);
-//          var lstart = task.start;
-//          var lend = task.end;
-//
-//          if (inp.attr("name") == "start") {
-//            lstart = date.getTime();
-//            if (lstart >= lend) {
-//              var end_as_date = new Date(lstart);
-//              lend = end_as_date.add('d', task.duration).getTime();
-//            }
-//
-//            //update task from editor
-//            self.master.beginTransaction();
-//            self.master.moveTask(task, lstart);
-//            self.master.endTransaction();
-//
-//          } else {
-//            var end_as_date = new Date(date.getTime());
-//            lend = end_as_date.getTime();
-//            if (lstart >= lend) {
-//              end_as_date.add('d', -1 * task.duration);
-//              lstart = end_as_date.getTime();
-//            }
-//
-//            //update task from editor
-//            self.master.beginTransaction();
-//            self.master.changeTaskDates(task, lstart, lend);
-//            self.master.endTransaction();
-//          }
-//
-//
-//          inp.updateOldValue(); //in order to avoid multiple call if nothing changed
-//        }
-//      }
-//    });
-//  });
-
-
-//  //binding on blur for task update (date exluded as click on calendar blur and then focus, so will always return false, its called refreshing the task row)
-//  taskRow.find("input:not(.date)").focus(function () {
-//    $(this).updateOldValue();
-//
-//  }).blur(function () {
-//    var el = $(this);
-//    if (el.isValueChanged()) {
-//      var row = el.closest("tr");
-//      var taskId = row.attr("taskId");
-//
-//      var task = self.master.getTask(taskId);
-//
-//      //update task from editor
-//      var field = el.attr("name");
-//
-//      self.master.beginTransaction();
-//
-//      if (field == "depends") {
-//        task.setDepends(el.val()); // set the depends with the depends_string
-//        // update links
-//        var linkOK = self.master.updateLinks(task);
-//        if (linkOK) {
-//          //synchronize status fro superiors states
-//          var sups = task.getSuperiors();
-//          for (var i = 0; i < sups.length; i++) {
-//            if (!sups[i].from.synchronizeStatus())
-//              break;
-//          }
-//
-//          self.master.changeTaskDates(task, task.start, task.end);
-//        }
-//
-//      } else if (field == "duration") {
-//        var dur = task.duration;
-//        dur = parseInt(el.val()) || 1;
-//        el.val(dur);
-//        var newEnd = computeEndByDuration(task.start, dur);
-//        self.master.changeTaskDates(task, task.start, newEnd);
-//
-//      } else {
-//        task[field] = el.val();
-//      }
-//      self.master.endTransaction();
-//    }
-//  });
-
-
-//  //change status
-//  taskRow.find(".taskStatus").click(function () {
-//    var el = $(this);
-//    var tr = el.closest("[taskId]");
-//    var taskId = tr.attr("taskId");
-//    var task = self.master.getTask(taskId);
-//
-//    var changer = $.JST.createFromTemplate({}, "CHANGE_STATUS");
-//    changer.css("top", tr.position().top + self.element.parent().scrollTop());
-//    changer.find("[status=" + task.status + "]").addClass("selected");
-//    changer.find(".taskStatus").click(function () {
-//      self.master.beginTransaction();
-//      task.changeStatus($(this).attr("status"));
-//      self.master.endTransaction();
-//      el.attr("status", task.status);
-//      changer.remove();
-//      el.show();
-//
-//    });
-//    el.hide().oneTime(3000, "hideChanger", function () {
-//      changer.remove();
-//      $(this).show();
-//    });
-//    el.after(changer);
-//  });
-
-
-    ////expand collapse todo to be completed
-    //taskRow.find(".expcoll").click(function(){
-    //  //expand?
-    //  var el=$(this);
-    //  var taskId=el.closest("[taskId]").attr("taskId");
-    //  var task=self.master.getTask(taskId);
-    //  var descs=task.getDescendant();
-    //  if (el.is(".exp")){
-    //    for (var i=0;i<descs.length;i++)
-    //      descs[i].rowElement.show();
-    //  } else {
-    //    for (var i=0;i<descs.length;i++)
-    //      descs[i].rowElement.hide();
-    //  }
-    //});
-
-    //bind row selection
-    taskRow.click(function () {
-        var row = $(this);
-        //var isSel = row.hasClass("rowSelected");
-        row.closest("table").find(".rowSelected").removeClass("rowSelected");
-        row.addClass("rowSelected");
-
-        //set current task
-        self.master.currentTask = self.master.getTask(row.attr("taskId"));
-
-        //move highlighter
-        if (self.master.currentTask.ganttElement)
-            self.master.gantt.highlightBar.css("top", self.master.currentTask.ganttElement.position().top);
-
-        //if offscreen scroll to element
-        var top = row.position().top;
-        if (row.position().top > self.element.parent().height()) {
-            self.master.gantt.element.parent().scrollTop(row.position().top - self.element.parent().height() + 100);
-        }
-    });
-
-};
-
-

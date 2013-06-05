@@ -17,38 +17,39 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-define(['exports', 'dojox/widget/DialogSimple', 'dojo/domReady!'],
-    function (exports, DialogSimple) {
-        // module:                                                                  
+define(['exports', 'dojox/widget/DialogSimple', 'dijit/registry', 'dojo/domReady!'],
+    function (exports, DialogSimple, registry) {
+        // module:
         //      stalker/dialogs
-        // summary:                                                                 
-        //      This module defines the core dojo DOM construction API.             
-
-        // TODOC: summary not showing up in output, see https://github.com/csnover/js-doc-parse/issues/42
+        // summary:
+        //      creates the default dialogs
 
         var style = 'width: auto; height: auto; padding: 0px;';
-        
-        var dialog_killer = function(id){
-            // TODO: kill the given dialog
+
+        var dialog_killer = function (id) {
+            var old_dialog = registry.byId(id);
+            if (old_dialog) {
+                old_dialog.destroyRecursive();
+            }
         };
 
         // ********************************************************************
         exports.busy_dialog = function busy_dialog(kwargs) {
             var id = kwargs['id'] || 'busy_dialog';
             var title = kwargs['title'] || 'Stalker is busy...';
+            var href = kwargs['href'] || 'dialog/busy';
+            var style = kwargs['style'] || 'width: 350px; height: 70px;';
+
+            dialog_killer(id);
             return new DialogSimple({
-                id: id,
-                title: title,
-                href: 'dialog/busy',
-                resize: true,
-                style: 'width: 350px; height: 70px;',
+                id: id, title: title, href: href, resize: true, style: style,
                 executeScripts: true
             });
         };
-        
+
         // ********************************************************************
         exports.upload_thumbnail_dialog = function upload_thumbnail_dialog(entity_id) {
-            // TODO: use dialog_killer
+            dialog_killer('upload_thumbnail_dialog');
             return new DialogSimple({
                 id: 'upload_thumbnail_dialog',
                 title: 'Upload Thumbnail Dialog',

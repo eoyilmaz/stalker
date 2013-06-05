@@ -31,7 +31,6 @@ Stalker Changes
   * **Fix:** Task create/update dialog now will not list the task itself in
     parent and dependent task lists, if the UI is called with a Task instance
     ({{task}} is not None).
-  * **Update:** dgrid height is updated to 80em in dgrid.css.
   * **Update:** For Asset Page and Task Page tab order is changed.
   * **New:** Starts and Ends attributes are added to Task Summary Page.
   * **Update:** List of Users, Departments and Groups are now sorted by using
@@ -43,6 +42,11 @@ Stalker Changes
     * **Update:** Context menu can now be opened in task names in grid editor.
     * **Update:** Optimized the creation of task rows.
     * **Update:** Replaced the ``input`` elements with ``div`` in the task row.
+    * **New:** Holding the mouse on Task bar elements will now show a popup
+      window for more info.
+    * **Update:** Gantt Chart zoom levels are now fully controlled by the start
+      and end date DateTextBoxes.
+    * **New:** Added a new button which will center the gantt chart on today.
 
 0.2.0.b6
 ========

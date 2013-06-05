@@ -51,8 +51,7 @@
                 <td>&nbsp;</td>
                 <td>
                     {% if has_permission('Read_User') %}
-                        <a href="javascript:redirectLink('central_content',
-                        'view/user/{{ project.lead.id }}');">
+                        <a href="javascript:redirectLink('central_content', 'view/user/{{ project.lead.id }}');">
                             {{ project.lead.name }}
                         </a>
                     {% else %}

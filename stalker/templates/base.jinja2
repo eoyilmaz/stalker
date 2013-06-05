@@ -29,7 +29,7 @@
           href='{{ request.static_url("stalker:static/stalker/images/favicon.ico") }}'/>
     <link rel='stylesheet' type='text/css' media='screen' charset='utf-8'
           href='{{ request.static_url("stalker:static/stalker/css/stalker.css") }}'/>
-
+    
     {# load jQuery and jQuery Gantt first#}
     <link rel=stylesheet
           href='{{ request.static_url("stalker:static/jQueryGantt/libs/dateField/jquery.dateField.css") }}'
@@ -38,6 +38,10 @@
           href='{{ request.static_url("stalker:static/jQueryGantt/css/gantt.css") }}'
           type="text/css">
 
+        {# load date.format #}
+    <script src='{{ request.static_url("stalker:static/stalker/date.format.js") }}'></script>
+
+    
     <script src='{{ request.static_url("stalker:static/jquery/1.7/jquery.min.js") }}'></script>
     <script src='{{ request.static_url("stalker:static/jqueryui/1.8/jquery-ui.min.js") }}'></script>
 

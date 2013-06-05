@@ -680,7 +680,15 @@ Ganttalendar.prototype.redrawTasks = function () {
 };
 
 
-Ganttalendar.prototype.refreshGantt = function () {
+Ganttalendar.prototype.refreshGantt = function (kwargs) {
+    if (kwargs){
+        var start = kwargs['start'] || null;
+        var end = kwargs['end'] || null;
+        if (start && end){
+            this.originalStartMillis = start;
+            this.originalEndMillis = end;
+        }
+    }    
     //console.debug("refreshGantt");
     var par = this.element.parent();
 
@@ -690,10 +698,9 @@ Ganttalendar.prototype.refreshGantt = function () {
 
     this.element.remove();
     //guess the zoom level in base of period
-//    if (!this.zoom) {
-        var days = (this.originalEndMillis - this.originalStartMillis) / (3600000 * 24);
-        this.zoom = this.zoomLevels[days < 2 ? 0 : (days < 15 ? 1 : (days < 60 ? 2 : (days < 150 ? 3 : (days < 400 ? 4 : 5 ) ) ) )];
-//    }
+    var days = (this.originalEndMillis - this.originalStartMillis) / (3600000 * 24);
+    this.zoom = this.zoomLevels[days < 2 ? 0 : (days < 15 ? 1 : (days < 60 ? 2 : (days < 150 ? 3 : (days < 400 ? 4 : 5 ) ) ) )];
+
     var domEl = this.create(this.zoom, this.originalStartMillis, this.originalEndMillis);
     this.element = domEl;
     par.append(domEl);
@@ -711,6 +718,27 @@ Ganttalendar.prototype.refreshGantt = function () {
 //    if (this.master.currentTask) {
 //        this.highlightBar.css("top", this.master.currentTask.ganttElement.position().top);
 //    }
+    this.bindEvents();
+};
+
+Ganttalendar.prototype.bindEvents = function() {
+    // Drag event for zoom range
+    var isDragging = false;
+    this.element.mousedown(function(){
+        console.log('drag start!');
+        $(window).mousemove(function() {
+            isDragging = true;
+            $(window).unbind("mousemove");
+        });
+    }).mouseup(function(){
+        console.log('drag end');
+        var wasDragging = isDragging;
+        isDragging = false;
+        $(window).unbind("mousemove");
+        if (!wasDragging) {
+//            $("#throbble").toggle();
+        }
+    });
 };
 
 

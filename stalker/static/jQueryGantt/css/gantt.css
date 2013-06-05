@@ -238,7 +238,7 @@
     position: absolute;
     width: 10px;
     height: 10px;
-    background: url('../images/parentTaskBoxLeftPin.png') no-repeat;
+    /*background: url('../images/parentTaskBoxLeftPin.png') no-repeat;*/
 }
 
 .projectBox .layout .rightPin {
@@ -247,7 +247,7 @@
     position: absolute;
     width: 10px;
     height: 10px;
-    background: url('../images/parentTaskBoxRightPin.png') no-repeat;
+    /*background: url('../images/parentTaskBoxRightPin.png') no-repeat;*/
 }
 
 .projectBox .taskStatus {
@@ -398,7 +398,7 @@
 
 .parentTaskBox .layout {
     height: 5px;
-    background: black;
+    background: lightgray;
     border-radius: 3px 3px 0 0;
 }
 

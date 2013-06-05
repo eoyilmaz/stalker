@@ -39,7 +39,7 @@
       </thead>
     </table>
     --></div>
-    
+
     <div class="__template__" type="PROJECTROW"><!--
         <tr taskId="(#=obj.id#)" class="projectEditRow" >
         <th class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></th>
@@ -105,7 +105,7 @@
 
 
     <div class="__template__" type="TASKBAR"><!--
-        <div class="taskBox" taskId="(#=obj.id#)" >
+        <div class="taskBox" taskId="(#=obj.id#)">
         <div class="layout (#=obj.hasExternalDep?'extDep':''#)">
             <div class="taskProgress" style="width:(#=obj.progress>100?100:obj.progress#)%;"></div>
             <div class="taskExtraTiming" style="width:(#=(obj.schedule_timing - obj.bid_timing)/obj.schedule_timing*100#)%;;"></div>
@@ -113,7 +113,17 @@
                style="position: absolute; text-align: center; width: 100%;">
                (#=obj.schedule_model.toUpperCase()[0]#): (#=obj.schedule_timing#)(#=obj.schedule_unit#)
             </div>
-            <div class="leafTaskContextMenu" taskId="(#=obj.id#)"></div>
+            <div class="leafTaskContextMenu"
+                taskId="(#=obj.id#)"
+                name="(#=obj.name#)"
+                start=(#=obj.start#)
+                end=(#=obj.end#)
+                type="(#=obj.type#)"
+                schedule_model=(#=obj.schedule_model#)
+                schedule_timing=(#=obj.schedule_timing#)
+                schedule_unit=(#=obj.schedule_unit#)
+                description="(#=obj.description#)"
+                ></div>
             
             <div class="milestone (#=obj.startIsMilestone?'active':''#)" ></div>
             <div class="taskLabel">(#=obj.link()#)</div>
@@ -145,7 +155,7 @@
     <div class="__template__" type='RESOURCELINK'><!--
     <a href="javascript:redirectLink('central_content','view/user/(#=obj.id#)');">(#=obj.name#)</a>
     --></div>
-    
+
     <div class="__template__" type='PROJECTLINK'><!--
     <a href="javascript:redirectLink('central_content','view/project/(#=obj.id#)');">(#=obj.name#) ((#=obj.type#))</a>
     --></div>
@@ -156,20 +166,17 @@
 {# BUTTONS #}
 <div style="float: left;">
     <div style="float: left;">
-            <div style="float: left;">
-                {% if has_permission('Create_Task') %}
-                    <button id='list_tasks_create_task_button'>Create Task</button>
-                {% endif %}
-                <button id='list_tasks_gantt_reload_button'>Reload</button>
-            </div>
-            <div style="width: 100px; float: left"></div>
         <div style="float: left;">
-            <button id='list_tasks_zoom_out_button'>Zoom Out</button>
-            <button id='list_tasks_zoom_in_button'>Zoom In</button>
+            {% if has_permission('Create_Task') %}
+                <button id='list_tasks_create_task_button'>Create Task</button>
+            {% endif %}
+            <button id='list_tasks_gantt_reload_button'>Reload</button>
         </div>
+        <div style="width: 100px; float: left"></div>
         {% if has_permission('Update_Task') %}
             <div style='float: left;'>
-                <button id="list_tasks_schedule_tasks_button">Schedule Tasks</button>
+                <button id="list_tasks_schedule_tasks_button">Schedule Tasks
+                </button>
             </div>
         {% endif %}
         <div style='float: left;'> {# gantt boundries #}
@@ -180,6 +187,10 @@
             <div style="float: left">
                 <div style='float: left;'>End</div>
                 <div id='gantt_end_date' style='float: left;'></div>
+            </div>
+            <div style="float: left;">
+                <button id='list_tasks_refresh_button'>Refresh</button>
+                <button id='list_tasks_go_to_today_button'>Go To Today</button>
             </div>
         </div>
     </div>
@@ -205,6 +216,8 @@
         'dijit/Menu',
         'dijit/MenuItem',
         'dijit/MenuSeparator',
+        'dijit/form/DateTextBox',
+        'dijit/Tooltip',
 
         'dojo/query',
         'dojo/store/JsonRest',
@@ -213,16 +226,14 @@
         'dojo/Deferred',
         'dojo/when',
 
-        'dijit/form/DateTextBox',
-
         'stalker/dialogs',
         'stalker/dialogCaller',
         'stalker/dialogCreator',
 
         'dojo/domReady!'
-    ], function (registry, Button, Menu, MenuItem, MenuSeparator, query,
-                 JsonRest, xhr, lang, Deferred, when, DateTextBox,
-                 dialogs, dialogCaller, dialogCreator) {
+    ], function (registry, Button, Menu, MenuItem, MenuSeparator, DateTextBox,
+                 Tooltip, query, JsonRest, xhr, lang, Deferred, when, dialogs,
+                 dialogCaller, dialogCreator) {
 
         $('#gantttemplates').loadTemplates();
 
@@ -239,16 +250,67 @@
 
         function loadGanttFromServer() {
             tasks_memory.query().then(function (data) {
-{#                {% if entity.entity_type != 'User' %}#}
-{#                    data = lang.mixin(data, {'canWrite': 1, 'canWriteOnParent': 1});#}
-{#                {% endif %}#}
 
                 // set start and end dates for the gantt
-                data.start = start_dateTextBox.getValue().getTime();
-                data.end = end_dateTextBox.getValue().getTime();
+
+                var dateInterval = ge.getDateInterval();
+                data.start = dateInterval.start;
+                data.end = dateInterval.end;
+
+                // update dateTextBoxes
+                start_dateTextBox.setValue(new Date(dateInterval.start));
+                end_dateTextBox.setValue(new Date(dateInterval.end));
 
                 var promise = ge.loadGanttData(data, Deferred);
                 promise.then(function () {
+
+                    // create tool tip dialogs for task info
+                    new Tooltip({
+                        connectId: ['workSpace'],
+                        selector: '.leafTaskContextMenu',
+                        getContent: function (node) {
+                            var taskId = node.getAttribute('taskid');
+                            var name = node.getAttribute('name');
+                            var type = node.getAttribute('type');
+                            var start = new Date(parseInt(node.getAttribute('start')));
+                            var end = new Date(parseInt(node.getAttribute('end')));
+                            var schedule_model = node.getAttribute('schedule_model');
+                            schedule_model = schedule_model.charAt(0).toUpperCase() + schedule_model.substr(1).toLowerCase();
+
+                            var schedule_timing = node.getAttribute('schedule_timing');
+                            var schedule_unit = node.getAttribute('schedule_unit');
+                            
+                            var description = node.getAttribute('description');
+
+                            return '<table>' +
+                                    '<thead style="text-align: center"><h4>' + name + ' (' + type + ')</h4></thead>' +
+                                    '<tbody>' +
+                                    '<tr>' +
+                                        '<td class="label_column">Id</td>' +
+                                        '<td class="input_column">' + taskId + '</td>' +
+                                    '</tr>' +
+                                    '<tr>' +
+                                        '<td class="label_column">' + schedule_model + '</td>' +
+                                        '<td class="input_column">' + schedule_timing + ' ' + schedule_unit + '</td>' +
+                                    '</tr>' +
+                                    '<tr>' +
+                                        '<td class="label_column">Start</td>' +
+                                        '<td class="input_column">' + start.format("yyyy-MM-dd HH:00") + '</td>' +
+                                    '</tr>' +
+                                    '<tr>' +
+                                        '<td class="label_column">End</td>' +
+                                        '<td class="input_column">' + end.format("yyyy-MM-dd HH:00") + '</td>' +
+                                    '</tr>' +
+                                    '<tr>' +
+                                        '<td class="label_column">Description</td>' +
+                                        '<td class="input_column">' + description + '</td>' +
+                                    '</tr>' +
+                                    '</tbody>' +
+                                    '</table>';
+                        }
+                    });
+
+
                     // now add the context menu to tasks
 
                     // Standard menu items for Parent Tasks
@@ -280,7 +342,7 @@
                         targetNodeIds: ['workSpace'],
                         selector: '.parentTaskContextMenu'
                     });
-                    
+
                     var parent_taskrow_menu = new Menu({
                         targetNodeIds: ['workSpace'],
                         selector: '.parentTaskEditRow'
@@ -292,7 +354,7 @@
                         targetNodeIds: ['workSpace'],
                         selector: '.leafTaskContextMenu'
                     });
-                    
+
                     var leaf_taskrow_menu = new Menu({
                         targetNodeIds: ['workSpace'],
                         selector: '.taskEditRow'
@@ -359,7 +421,7 @@
                         leaf_taskbar_menu.addChild(update_task_menuItem_creator());
                         parent_taskrow_menu.addChild(update_task_menuItem_creator());
                         leaf_taskrow_menu.addChild(update_task_menuItem_creator());
-                        {% endif %}
+                    {% endif %}
 
                     {% if has_permission('Create_Task') %}
                         var create_child_task_menuItem_creator = function () {
@@ -416,7 +478,7 @@
                         leaf_taskrow_menu.addChild(create_dependent_task_menuItem_creator());
 
                     {% endif %}
-                    
+
                     {% if has_permission('Create_TimeLog') %}
                         var create_time_log_menuItem_creator = function () {
                             return new MenuItem({
@@ -424,11 +486,11 @@
                                 onClick: function () {
                                     var node = this.getParent().currentTarget;
                                     var taskId = node.getAttribute('taskId');
-    
+
                                     // check if it is a leaf task
                                     var task = ge.getTask(taskId);
                                     //console.debug(task);
-    
+
                                     if (task.isParent()) {
                                         // warn the user and return
                                         alert('This is a container Task,\n' +
@@ -436,7 +498,7 @@
                                                 'container Tasks!');
                                         return;
                                     }
-    
+
                                     {#                                    saveGanttOnServer().then(function(){#}
                                     var dialog = dialogCreator({
                                         dialog_id: 'time_log_dialog',
@@ -449,7 +511,7 @@
                                 }
                             })
                         };
-    
+
                         leaf_taskbar_menu.addChild(create_time_log_menuItem_creator());
                         leaf_taskrow_menu.addChild(create_time_log_menuItem_creator());
                     {% endif %}
@@ -530,7 +592,7 @@
             });
             create_task_button.startup();
         {% endif %}
-        
+
         // RELOAD
         var reload_gantt_button = new Button({
             label: 'Reload',
@@ -541,30 +603,30 @@
         reload_gantt_button.startup();
 
         // ZOOM OUT
-        var zoom_out_button = new Button({
-            label: 'Zoom Out',
-            onClick: function () {
-                ge.gantt.zoomGantt(false);
-            }
-        }, 'list_tasks_zoom_out_button');
-        zoom_out_button.startup();
+        {#        var zoom_out_button = new Button({#}
+        {#            label: 'Zoom Out',#}
+        {#            onClick: function () {#}
+        {#                ge.gantt.zoomGantt(false);#}
+        {#            }#}
+        {#        }, 'list_tasks_zoom_out_button');#}
+        {#        zoom_out_button.startup();#}
 
         // ZOOM IN
-        var zoom_in_button = new Button({
-            label: 'Zoom In',
-            onClick: function () {
-                ge.gantt.zoomGantt(true);
-            }
-        }, 'list_tasks_zoom_in_button');
-        zoom_in_button.startup();
+        {#        var zoom_in_button = new Button({#}
+        {#            label: 'Zoom In',#}
+        {#            onClick: function () {#}
+        {#                ge.gantt.zoomGantt(true);#}
+        {#            }#}
+        {#        }, 'list_tasks_zoom_in_button');#}
+        {#        zoom_in_button.startup();#}
 
         // SCHEDULE
         {% if has_permission('Update_Task') %}
             var schedule_tasks_button = new Button({
                 label: 'Schedule Tasks',
                 onClick: function () {
-                    
-                    
+
+
                     var do_schedule = function () {
                         // xhr.post returns a `promise` use it if needed
                         // show the busy dialog
@@ -573,13 +635,13 @@
                         });
                         busy_dialog.show();
                         return xhr.post(
-                            '{{ request.route_url('auto_schedule_tasks') }}',
-                            {
-                                method: 'POST'
-                            }
+                                '{{ request.route_url('auto_schedule_tasks') }}',
+                                {
+                                    method: 'POST'
+                                }
                         );
                     };
-                    
+
                     var do_load = function () {
                         // reload scheduled tasks
                         loadGanttFromServer();
@@ -587,39 +649,56 @@
                         var busy_dialog = dijit.byId('schedule_tasks_busy_dialog');
                         busy_dialog.destroyRecursive();
                     };
-                    
+
                     when(do_schedule(), do_load);
-            
+
                 }
             }, 'list_tasks_schedule_tasks_button');
             schedule_tasks_button.startup();
         {% endif %}
-    
+
         var start_dateTextBox = new DateTextBox({
             name: 'start',
             label: 'Start Date',
-            value: new Date( new Date().getTime() - 1296000000),// 15 * 24 * 60 * 60 * 1000, set it today + 15 by default
+            {#            value: new Date(new Date().getTime() - 1296000000),// 15 * 24 * 60 * 60 * 1000, set it today + 15 by default#}
             required: true,
             datePattern: 'dd-mm-yyyy',
-            onChange: function(){
-                loadGanttFromServer();
-            }
+            {#            onChange: function () {#}
+            {#                loadGanttFromServer();#}
+            {#            }#}
         }, 'gantt_start_date');
         start_dateTextBox.startup();
-    
+
         var end_dateTextBox = new DateTextBox({
             name: 'end',
             label: 'End Date',
-            value: new Date( new Date().getTime() + 1296000000), // set it today + 15 by default
+            {#            value: new Date(new Date().getTime() + 1296000000), // set it today + 15 by default#}
             required: true,
             datePattern: 'dd-mm-yyyy',
-            onChange: function(){
-                loadGanttFromServer();
-            }
+            {#            onChange: function () {#}
+            {#                loadGanttFromServer();#}
+            {#            }#}
         }, 'gantt_end_date');
         end_dateTextBox.startup();
-        
-{#        loadGanttFromServer();#}
+
+        var refresh_button = new Button({
+            label: 'Refresh',
+            onClick: function () {
+                ge.gantt.refreshGantt({
+                    start: start_dateTextBox.getValue().getTime(),
+                    end: end_dateTextBox.getValue().getTime()
+                });
+            }
+        }, 'list_tasks_refresh_button');
+        refresh_button.startup();
+
+        var go_to_today_button = new Button({
+            label: 'Go To Today',
+            onClick: function () {
+                ge.gantt.centerOnToday();
+            }
+        }, 'list_tasks_go_to_today_button');
+        go_to_today_button.startup();
 
 
     });

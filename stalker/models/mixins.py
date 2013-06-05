@@ -570,9 +570,9 @@ attribute value."""
     def _validate_dates(self, start, end, duration):
         """updates the date values
         """
-        logger.debug('start    : %s' % start)
-        logger.debug('end      : %s' % end)
-        logger.debug('duration : %s' % duration)
+        # logger.debug('start    : %s' % start)
+        # logger.debug('end      : %s' % end)
+        # logger.debug('duration : %s' % duration)
 
         if not isinstance(start, datetime.datetime):
             start = None
