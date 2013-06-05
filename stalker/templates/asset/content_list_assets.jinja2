@@ -28,6 +28,7 @@
     require([
         'dijit/registry',
         'dojo/data/ObjectStore',
+        'dojo/aspect',
         "dgrid/List",
         "dgrid/Grid",
         "dgrid/Selection",
@@ -41,7 +42,7 @@
         'stalker/fieldUpdater',
         'stalker/dialogCaller',
         'dojo/domReady!'
-    ], function (registry, ObjectStore, List, Grid, Selection, Keyboard,
+    ], function (registry, ObjectStore, aspect, List, Grid, Selection, Keyboard,
                  declare, editor, Memory, Select, JsonRest, dialogs,
                  fieldUpdater, dialogCaller) {
 
@@ -175,5 +176,18 @@
 
             });
         }
+
+
+        var content_pane = registry.byId('assets_content_pane');
+
+
+
+        aspect.after(content_pane, "resize", function() {
+
+          console.log('asset_data_grid.resize();');
+          asset_data_grid.resize();
+
+        });
+
     });
 </script>
