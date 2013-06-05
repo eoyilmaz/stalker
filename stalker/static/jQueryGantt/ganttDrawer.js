@@ -338,7 +338,7 @@ Ganttalendar.prototype.create = function (zoom, originalStartMillis, originalEnd
 };
 
 
-//<%-------------------------------------- GANT TASK GRAPHIC ELEMENT --------------------------------------%>
+//<%-------------------------------------- GANTT TASK GRAPHIC ELEMENT --------------------------------------%>
 Ganttalendar.prototype.drawTask = function (task) {
     //console.debug("drawTask", task.name,new Date(task.start));
     var self = this;
@@ -378,7 +378,7 @@ Ganttalendar.prototype.drawTask = function (task) {
     self.element.append(taskBoxSeparator);
 
     //ask for redraw link
-    self.redrawLinks();
+    //self.redrawLinks();
 
     //prof.stop();
 };
@@ -703,11 +703,14 @@ Ganttalendar.prototype.refreshGantt = function () {
     //console.debug("old scroll:",scrollX,scrollY)
     par.scrollTop(scrollY);
     par.scrollLeft(scrollX);
+    
+    // redraw links
+    this.redrawLinks();
 
     //set current task
-    if (this.master.currentTask) {
-        this.highlightBar.css("top", this.master.currentTask.ganttElement.position().top);
-    }
+//    if (this.master.currentTask) {
+//        this.highlightBar.css("top", this.master.currentTask.ganttElement.position().top);
+//    }
 };
 
 

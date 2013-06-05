@@ -154,6 +154,16 @@
                 </td>
             </tr>
 
+            {# PRIORITY #}
+            <tr>
+                <td class='label_column'>
+                    <label for='task_priority'>Priority</label>
+                </td>
+                <td class='input_column'>
+                    <input id="task_priority" value=500>
+                </td>
+            </tr>
+
             {# STATUS #}
             <tr>
                 <td class='label_column'>
@@ -207,6 +217,67 @@ require([
              JsonRest, date, stamp, locale, dialogs, Tag, TagSelect,
              submitForm, fieldUpdater, dialogCaller) {
 
+    // generate default values
+    var priority = 500;
+    var name = '';
+    var description = '';
+    var depends_to = [];
+    var parent_id = null;
+    var schedule_model = '{{ schedule_models[0] }}';
+    var schedule_timing = 1;
+    var schedule_unit = 'h';
+    var url = '{{ request.route_url('create_task')}}';
+    var start_date = new Date();
+    var start_time = 'T10:00:00'; // TODO: use the Studio start time for monday
+    var end_date = new Date();
+    var end_time = 'T19:00:00'; // TODO: use the Studio end time for monday
+    var is_milestone = false;
+    var selected_resources = [];
+    var entity_type = 'Task';
+
+    {% if mode=='CREATE' %}
+        {% if depends_to %}
+            // set the depends value
+            depends_to = [{{ depends_to.id }}];
+        {% endif %}
+        {% if parent %}
+            parent_id = {{ parent.id }};
+        {% endif %}
+    {% elif mode=='UPDATE' %}
+        priority = {{ task.priority }}
+        name = '{{ task.name }}';
+        description = '{{ task.description }}';
+        depends_to = [
+                {% for depend_task in task.depends %}
+                    {{ depend_task.id }},
+                {% endfor %}
+            ];
+        {% if task.parent %}
+            parent_id = {{ task.parent.id }};
+        {% endif %}
+        schedule_model = '{{ task.schedule_model }}';
+        schedule_timing = {{ task.schedule_timing }};
+        schedule_unit = '{{ task.schedule_unit }}';
+        url = '{{ request.route_url('update_task', task_id=task.id) }}';
+        start_date = new Date({{ task.start.strftime('%s') }}000);
+        start_time = 'T{{ '%02d'|format(task.start.hour) }}:{{'%02d'|format(task.start.minute) }}:00';
+        end_date = new Date({{ task.end.strftime('%s') }}000);
+        end_time = 'T{{ '%02d'|format(task.end.hour) }}:00:00';
+        {% if task.is_milestone %}
+            is_milestone = true;
+        {% else %}
+            is_milestone = false;
+        {% endif %}
+        selected_resources = [
+                {% for resource in task.resources %}
+                    {{ resource.id }},
+                {% endfor %}
+            ];
+        entity_type = '{{ task.entity_type }}';
+    {% endif %}
+
+
+
     // ********************************************************************
     // Form
     var task_form = new Form({}, 'task_form');
@@ -244,11 +315,7 @@ require([
         label: 'Name',
         placeHolder: 'Enter a name',
         required: true,
-        value: {% if mode == 'CREATE' %}
-            '',
-        {% elif mode == 'UPDATE' %}
-            '{{ task.name }}'
-        {% endif %}
+        value: name
         {#          style: 'width: 100%'#}
     }, 'task_name');
     name_textBox.startup();
@@ -260,12 +327,7 @@ require([
         name: 'description',
         label: 'Description',
         placeHolder: 'Enter description',
-        value: {% if mode == 'CREATE' %}
-            '',
-        {% elif mode == 'UPDATE' %}
-            '{{ task.description }}'
-        {% endif %}
-        {#          style: 'width: 100%'#}
+        value: description
     }, 'task_description');
     description_textBox.startup();
 
@@ -287,37 +349,20 @@ require([
         {% if task %}
             memory.remove({{ task.id }});
         {% endif %}
+
         depends_tagSelect.set('store', memory);
-        
-        {% if mode == 'UPDATE' %}
-            depends_tagSelect.set('value', [
-                {% for depend_task in task.depends %}
-                    {{ depend_task.id }},
-                {% endfor %}
-            ]);
-        {% else %}
-            {% if depends_to %}
-                // set the depends value
-                depends_tagSelect.set('value', [{{ depends_to.id }}]);
-            {% endif %}
-        {% endif %}
+        depends_tagSelect.set('value', depends_to);
 
         parent_widget.set('store', memory);
 
-        {% if mode=='CREATE' %}
-            {% if parent %}
-                parent_widget.set('value', {{ parent.id }});
-            {% endif %}
-        {% elif mode=='UPDATE' %}
-            {% if task.parent %}
-                parent_widget.set('value', {{ task.parent.id }});
-            {% endif %}
-        {% endif %}
+        if (parent_id){
+            parent_widget.set('value', parent_id);
+        }
     });
 
     // ********************************************************************
     // Schedule Model : EFFORT / LENGTH / DURATION
-    var schedule_model = new FilteringSelect({
+    var schedule_model_filteringSelect = new FilteringSelect({
         name: 'schedule_model',
         label: 'Schedule Model',
         store: new Memory({
@@ -334,21 +379,13 @@ require([
         style: 'float: left;'
     }, 'task_schedule_model');
     // select the first one
-    {% if mode == 'CREATE' %}
-        schedule_model.set('value', '{{ schedule_models[0] }}');
-    {% elif mode == 'UPDATE' %}
-        {#          {% for model in schedule_models %}#}
-        {#            {% if model == task.schedule_model %}#}
-        schedule_model.set('value', '{{ task.schedule_model }}');
-        {#            {% endif %}#}
-        {#          {% endfor %}#}
-    {% endif %}
+    schedule_model_filteringSelect.set('value', schedule_model);
 
     // ********************************************************************
     // Schedule Timing
     var schedule_timing_numberSpinner = new NumberSpinner({
         name: 'schedule_timing',
-        value: {% if mode=='CREATE' %}1{% elif mode=='UPDATE' %}{{ task.schedule_timing }}{% endif %},
+        value: schedule_timing,
         constraints: { min: 0.1 },
         style: 'width: 65px; text-align: right; float: left; margin-right: 3px;'
     }, 'task_schedule_timing');
@@ -381,14 +418,10 @@ require([
                 }
             ]
         }),
-        value: 'h',
+        value: schedule_unit,
         style: 'width: 75px; text-align: right; float: left;'
     }, 'task_schedule_unit');
     schedule_unit_filteringSelect.startup();
-
-    {% if mode=='UPDATE' %}
-        schedule_unit_filteringSelect.set('value', '{{ task.schedule_unit }}');
-    {% endif %}
 
     // ********************************************************************
     // Update Bid ?
@@ -401,6 +434,13 @@ require([
         }, 'task_update_bid');
         update_bid_checkBox.startup();
     {% endif %}
+
+
+{#    var constrain_schedule_timing = function(){#}
+{#        var new_schedule_model = '{{ schedule_models[2] }}';#}
+{#        var start_date;#}
+{#        var new_schedule_timing = 0;#}
+{#    };#}
 
     // ********************************************************************
     // Start Date
@@ -415,6 +455,9 @@ require([
             if (new_value) {
                 start_dateTextBox.set('disabled', false);
                 start_time_timeTextBox.set('disabled', false);
+{#                if (end_constraint_checkBox.getValue() == 'checked'){#}
+{#                    constrain_schedule_timing();#}
+{#                }#}
             } else {
                 start_dateTextBox.set('disabled', true);
                 start_time_timeTextBox.set('disabled', true);
@@ -439,20 +482,11 @@ require([
     var start_dateTextBox = new DateTextBox({
         name: 'start',
         label: 'Constrain Start Date',
-        value: new Date({% if mode=='UPDATE' %}{{ task.start.strftime('%s') }}000{% endif %}),// set it today by default
+        value: start_date,
         required: true,
         disabled: true,
         datePattern: 'dd-mm-yyyy',
         style: 'width: 90px;'
-        //onChange: function(){
-        //  if (this.focused){
-        //    update_dates(
-        //      start_dateTextBox.getValue(),
-        //      end_dateTextBox.getValue(),
-        //      null
-        //    );
-        //  }
-        //}
     }, 'task_start_date');
     start_dateTextBox.startup();
 
@@ -468,11 +502,7 @@ require([
             visibleIncrement: 'T01:00:00',
             visibleRange: 'T01:00:00'
         },
-        value: {% if mode == 'CREATE' %}
-            'T09:00:00',
-        {% else %}
-            'T{{ '%02d'|format(task.start.hour) }}:{{'%02d'|format(task.start.minute) }}:00'
-        {% endif %}
+        value: start_time
     }, 'task_start_time');
     start_time_timeTextBox.startup();
 
@@ -517,27 +547,14 @@ require([
         disabled: true,
         datePattern: 'dd-mm-yyyy',
         style: 'width: 90px;',
-        value: new Date({% if mode=='UPDATE' %}{{ task.end.strftime('%s') }}000{% endif %})
-        //onChange: function(){
-        //  if (this.focused){
-        //    update_dates(
-        //      start_dateTextBox.getValue(),
-        //      end_dateTextBox.getValue(),
-        //      null
-        //    );
-        //  }
-        //}
+        value: end_date
     }, 'task_end_date');
     end_dateTextBox.startup();
 
     // Time
     var end_time_timeTextBox = new TimeTextBox({
         name: 'end_time',
-        value: {% if mode == 'CREATE' -%}
-            'T18:00:00',
-        {% elif mode == 'UPDATE' %}
-            'T{{ '%02d'|format(task.end.hour) }}:00:00',
-        {% endif %}
+        value: end_time,
         disabled: true,
         style: 'width: 75px;',
         constraints: {
@@ -577,15 +594,7 @@ require([
         name: 'is_milestone',
         label: 'Is Milestone',
         value: 'checked',
-        {% if mode=='CREATE'%}
-            checked: false,
-        {% elif mode=='UPDATE' %}
-            {% if task.is_milestone %}
-                checked: true,
-            {% else %}
-                checked: false,
-            {% endif %}
-        {% endif %}
+        checked: is_milestone,
         onChange: function (new_value) {
             // disable the resources field if checked
             if (new_value) {
@@ -596,6 +605,19 @@ require([
         }
     }, 'task_is_milestone');
     is_milestone_checkBox.startup();
+
+    // ************************************************************************
+    // Priority
+    var priority_numberSpinner = new NumberSpinner({
+        name: 'priority',
+        value: priority,
+        required: true,
+        constraints: {
+            min: 0,
+            max: 1000
+        }
+    }, 'task_priority');
+    priority_numberSpinner.startup();
 
 
     // ********************************************************************
@@ -615,29 +637,13 @@ require([
     var result = users_jsonRest.query().then(function (data) {
         var user_memory = new Memory({data: data});
         resources_tagSelect.set('store', user_memory);
-
-        {% if mode == 'UPDATE' %}
-            // set the selection
-            var selected_resources = [
-                {% for resource in task.resources %}
-                    {{ resource.id }},
-                {% endfor %}
-            ];
-            resources_tagSelect.set('value', selected_resources);
-        {% endif %}
+        resources_tagSelect.set('value', selected_resources);
     });
 
     // ********************************************************************
     // Status
     //
     // The Memory
-    var entity_type;
-    {% if mode=='CREATE' %}
-        entity_type = 'Task';
-    {% elif mode=='UPDATE' %}
-        entity_type = '{{ task.entity_type }}';
-    {% endif %}
-
     var status_memory = new JsonRest({
         target: 'get/statuses_for/' + entity_type
     });
@@ -707,17 +713,6 @@ require([
             var schedule_timing = schedule_timing_numberSpinner.value;
             var schedule_unit = schedule_unit_filteringSelect.value;
 
-            var dialog_id;
-            var url;
-
-            {% if mode=='CREATE' %}
-                dialog_id = 'task_dialog';
-                url = '{{ request.route_url('create_task')}}';
-            {% elif mode=='UPDATE' %}
-                dialog_id = 'task_dialog';
-                url = '{{ request.route_url('update_task', task_id=task.id) }}';
-            {% endif %}
-
             submitForm({
                 dialog: dialog,
                 form: task_form,
@@ -736,7 +731,6 @@ require([
                 url: url,
                 method: 'POST'
             });
-
 
         }
     }, 'task_ok_button');

@@ -330,6 +330,8 @@ def update_task(request):
     resource_ids = get_multi_integer(request, 'resource_ids')
     resources = User.query.filter(User.id.in_(resource_ids)).all()
     
+    priority = request.params.get('priority', 500)
+    
     logger.debug('parent_id       : %s' % parent_id)
     logger.debug('parent          : %s' % parent)
     logger.debug('depend_ids      : %s' % depend_ids)
@@ -347,6 +349,7 @@ def update_task(request):
     logger.debug('start           : %s' % start)
     logger.debug('end             : %s' % end)
     logger.debug('update_bid      : %s' % update_bid)
+    logger.debug('priority        : %s' % priority)
     
     # get task
     task_id = request.matchdict['task_id']
@@ -358,8 +361,14 @@ def update_task(request):
     
     task.name = name
     task.description = description
-    task.parent = parent
-    task.depends = depends
+    
+    try:
+        task.parent = parent
+        task.depends = depends
+    except CircularDependencyError:
+        transaction.abort()
+        return HTTPServerError()
+    
     task.start = start
     task.end = end
     task.is_milestone = is_milestone
@@ -368,6 +377,7 @@ def update_task(request):
     task.schedule_unit = schedule_unit
     task.schedule_timing = schedule_timing
     task.resources = resources
+    task.priority = priority
     task._reschedule(task.schedule_timing, task.schedule_unit)
     if update_bid:
         task.bid_timing = task.schedule_timing
@@ -628,6 +638,8 @@ def create_task(request):
         resource_ids = get_multi_integer(request, 'resource_ids')
         resources = User.query.filter(User.id.in_(resource_ids)).all()
     
+    priority = request.params.get('priority', 500)
+    
     logger.debug('project_id      : %s' % project_id)
     logger.debug('parent_id       : %s' % parent_id)
     logger.debug('name            : %s' % name)
@@ -639,6 +651,7 @@ def create_task(request):
     logger.debug('schedule_unit   : %s' % schedule_unit)
     logger.debug('resource_ids    : %s' % resource_ids)
     logger.debug('resources       : %s' % resources)
+    logger.debug('priority        : %s' % priority)
     
     kwargs = {}
     
@@ -699,6 +712,8 @@ def create_task(request):
         
         kwargs['resources'] = resources
         kwargs['depends'] = depends
+        
+        kwargs['priority'] = priority
         
         try:
             new_task = Task(**kwargs)

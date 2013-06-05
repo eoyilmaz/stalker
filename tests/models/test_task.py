@@ -3220,7 +3220,8 @@ class TaskTester(unittest2.TestCase):
         t1.id = 10221
 
         expected_tjp = """task Task_10221 "Modeling" {
-        depends Project_14875.Task_6484, Project_14875.Task_6485
+        
+            depends Project_14875.Task_6484, Project_14875.Task_6485
             
             effort 10d
             allocate User_5648, User_7999
@@ -3265,7 +3266,8 @@ class TaskTester(unittest2.TestCase):
         new_task.id = 234234
         # self.maxDiff = None
         expected_tjp = """task Task_234234 "Modeling" {
-        depends Project_8898.Task_987879.Task_23423, Project_8898.Task_987879.Task_23424
+        
+            depends Project_8898.Task_987879.Task_23423, Project_8898.Task_987879.Task_23424
             
             effort 1003h
             allocate User_1231, User_1232
@@ -3314,20 +3316,24 @@ class TaskTester(unittest2.TestCase):
         t2.id = 5679
 
         expected_tjp = '''task Task_5648 "Modeling" {
+        
                 task Task_23423 "Modeling" {
+        
             
             effort 1d
             allocate User_1231, User_1232
         }
         
                 task Task_23424 "Modeling" {
+        
             
             effort 1d
             allocate User_1231, User_1232
         }
         
                 task Task_5679 "Modeling" {
-        depends Project_87987.Task_5648.Task_23423, Project_87987.Task_5648.Task_23424
+        
+            depends Project_87987.Task_5648.Task_23423, Project_87987.Task_5648.Task_23424
             
             effort 1d
             allocate User_1231, User_1232
@@ -3335,7 +3341,7 @@ class TaskTester(unittest2.TestCase):
         
         }
         '''
-        # self.maxDiff = None
+        self.maxDiff = None
         self.assertMultiLineEqual(t1.to_tjp, expected_tjp)
 
     def test_to_tjp_attribute_is_working_properly_for_a_container_task_with_dependency(self):
@@ -3356,6 +3362,7 @@ class TaskTester(unittest2.TestCase):
 
         t1 = Task(**self.kwargs)
         t1.id = 5648
+        t1.priority = 888
 
         self.kwargs['parent'] = t1
         self.kwargs['depends'] = []
@@ -3388,21 +3395,25 @@ class TaskTester(unittest2.TestCase):
         t2.id = 5679
 
         expected_tjp = '''task Task_5648 "Modeling" {
-        depends Project_87987.Task_35546
+        priority 888
+            depends Project_87987.Task_35546
                 task Task_23423 "Modeling" {
+        
             
             effort 1d
             allocate User_1231, User_1232
         }
         
                 task Task_23424 "Modeling" {
+        
             
             effort 1d
             allocate User_1231, User_1232
         }
         
                 task Task_5679 "Modeling" {
-        depends Project_87987.Task_5648.Task_23423, Project_87987.Task_5648.Task_23424
+        
+            depends Project_87987.Task_5648.Task_23423, Project_87987.Task_5648.Task_23424
             
             effort 1d
             allocate User_1231, User_1232
@@ -3456,20 +3467,24 @@ class TaskTester(unittest2.TestCase):
         t2.id = 5679
 
         expected_tjp = '''task Task_5648 "Modeling" {
+        
                 task Task_23423 "Modeling" {
+        
             
             effort 1d
             allocate User_1231, User_1232
         }
         
                 task Task_23424 "Modeling" {
+        
             
             effort 1d
             allocate User_1231, User_1232
         }
         
                 task Task_5679 "Modeling" {
-        depends Project_87987.Task_5648.Task_23423, Project_87987.Task_5648.Task_23424
+        
+            depends Project_87987.Task_5648.Task_23423, Project_87987.Task_5648.Task_23424
             start 2013-05-03-14:00
                     end 2013-05-04-14:00
             effort 1d
@@ -3478,7 +3493,7 @@ class TaskTester(unittest2.TestCase):
         
         }
         '''
-        # self.maxDiff = None
+        self.maxDiff = None
         #print t1.to_tjp
         #print '-----------------------'
         #print expected_tjp

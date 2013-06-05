@@ -249,6 +249,8 @@ GanttMaster.prototype.loadGanttData = function (ganttData, Deferred) {
     this.deletedTaskIds = [];
     this.endTransaction();
     var self = this;
+    
+    // TODO: this is ridiculous, it should start when something is finished, not after a certain time
     this.gantt.element.oneTime(200, function () {
         self.gantt.centerOnToday();
         deferred.resolve('success');

@@ -246,8 +246,9 @@ class Config(object):
         """,
 
         tjp_task_template = """task {{task.tjp_id}} "{{task.name}}" {
+        {% if task.priority != 500 -%}priority {{task.priority}}{%- endif %}
         {%- if task.depends %}
-        depends {% for depends in task.depends %}
+            depends {% for depends in task.depends %}
             {%- if loop.index != 1 %}, {% endif %}{{depends.tjp_abs_id}}
         {%- endfor -%}
         {%- endif -%}

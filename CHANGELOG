@@ -15,6 +15,8 @@ Stalker Changes
     container task.
   * **Fix:** **Task.__eq__()** now correctly considers the parent, depends and
     children Tasks.
+  * **Update:** **Task.priority** is now reflected in tjp file if it is
+    different than the default value (500).
 
 * **WebUI:**
 
@@ -34,6 +36,8 @@ Stalker Changes
   * **New:** Starts and Ends attributes are added to Task Summary Page.
   * **Update:** List of Users, Departments and Groups are now sorted by using
     the name of the entity.
+  * **Update:** Task create/update dialog now has a new field called
+    ``priority``.
   * **JQueryGantt:**
   
     * **Update:** Context menu can now be opened in task names in grid editor.
