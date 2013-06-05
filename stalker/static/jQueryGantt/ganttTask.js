@@ -174,139 +174,144 @@ Task.prototype.setPeriod = function (start, end) {
     //console.debug("setPeriod ",this.name,new Date(start),new Date(end));
     //var profilerSetPer = new Profiler("gt_setPeriodJS");
     
-    if (start instanceof Date) {
-        start = start.getTime();
-    }
-
-    if (end instanceof Date) {
-        end = end.getTime();
-    }
+//    if (start instanceof Date) {
+//        start = start.getTime();
+//    }
+//
+//    if (end instanceof Date) {
+//        end = end.getTime();
+//    }
     
-    var originalPeriod = {
-        start: this.start,
-        end:  this.end,
-        duration: this.duration,
-        schedule_timing: this.schedule_timing
-    };
-    
-    //console.debug("setStart",date,date instanceof Date);
-    
-    // round the values
-    start = computeStart(start);
-    end = computeEnd(end);
-    
-    var wantedStartMillis = start;
-    
-    //set a legal start
-    //start = computeStart(start);
-
-    //cannot start after end
-    if (start > end) {
-        start = end;
-    }
-    
-    // update the schedule_timing
-    // TODO: we need to consider the timing_resolution while doing this
-    if (this.schedule_unit == 'h'){
-        this.schedule_timing = (this.schedule_timing * (end - start) / (this.end - this.start)  >> 0);
-    } else {
-        this.schedule_timing = ((this.schedule_timing * (end - start) / (this.end - this.start) * 10) >> 0) / 10;
-    }
-    
-    //if depends -> start is set to max end + lag of superior
-    var sups = this.getSuperiors();
-    if (sups && sups.length > 0){
-        var supEnd = 0;
-        var supTask;
-        for (var i=0 ; i < sups.length ; i++) {
-            supTask = sups[i];
-            supEnd = Math.max(supEnd, supTask.end);
-        }
-        
-        //if changed by depends move it
-        if (computeStart(supEnd) > start) {
-            return this.moveTo(supEnd + 1, false);
-        }
-    }
-    
-    var somethingChanged = false;
-    
-    if (this.start != start || this.start != wantedStartMillis) {
-        this.start = start;
-        somethingChanged = true;
-    }
-    
-    //set end
-    var wantedEndMillis = end;
-    
-    end = computeEnd(end);
-//    end = start + originalPeriod.end - originalPeriod.start
-    
-    if (this.end != end || this.end != wantedEndMillis) {
-        this.end = end;
-        somethingChanged = true;
-    }
-    
-    this.duration = recomputeDuration(this.start, this.end);
-    
-    //external dependencies: exit with error
-    if (this.hasExternalDep) {
-        this.master.setErrorOnTransaction(GanttMaster.messages["TASK_HAS_EXTERNAL_DEPS"] + "\n" + this.name, this);
-        return false;
-    }
-    
-    var todoOk = true;
-    
-    // if it has any children then set the start and end from children
-    //loops children to get boundaries
-    var children = this.getChildren();
-    
-    if (children.length > 0){
-        var bs = Infinity;
-        var be = 0;
-        var child;
-        for (var i = 0; i < children.length; i++) {
-            child = children[i];
-            be = Math.max(be, child.end);
-            bs = Math.min(bs, child.start);
-        }
-        
-        this.end = be;
-        this.start = bs;
-        
-        this.duration = recomputeDuration(this.start, this.end);
-    } else {
-        //nothing changed exit
-        if (!somethingChanged){
-            return true;
-        }
-    }
-    
-    //check global boundaries
-    if (this.start < this.master.minEditableDate || this.end > this.master.maxEditableDate) {
-        this.master.setErrorOnTransaction(GanttMaster.messages["CHANGE_OUT_OF_SCOPE"], this);
-        todoOk = false;
-    }
-    
-    //console.debug("set period: somethingChanged",this);
-    if (todoOk && !updateTree(this)) {
-        todoOk = false;
-    }
-    
-    if (todoOk) {
-        //and now propagate to inferiors
-        var infs = this.getInferiors();
-        if (infs && infs.length > 0) {
-            var link;
-            for (var i=0 ; i<infs.length ; i++) {
-                link = infs[i];
-                todoOk = link.to.moveTo(end, false); //this is not the right date but moveTo checks start
-                if (!todoOk)
-                    break;
-            }
-        }
-    }
-    return todoOk;
+//    var originalPeriod = {
+//        start: this.start,
+//        end:  this.end,
+//        duration: this.duration,
+//        schedule_timing: this.schedule_timing
+//    };
+//    
+//    //console.debug("setStart",date,date instanceof Date);
+//    
+//    // round the values
+//    start = computeStart(start);
+//    end = computeEnd(end);
+//    
+//    var wantedStartMillis = start;
+//    
+//    //set a legal start
+//    //start = computeStart(start);
+//
+//    //cannot start after end
+//    if (start > end) {
+//        start = end;
+//    }
+//    
+//    // update the schedule_timing
+//    // TODO: we need to consider the timing_resolution while doing this
+//    if (this.schedule_unit == 'h'){
+//        this.schedule_timing = (this.schedule_timing * (end - start) / (this.end - this.start)  >> 0);
+//    } else {
+//        this.schedule_timing = ((this.schedule_timing * (end - start) / (this.end - this.start) * 10) >> 0) / 10;
+//    }
+//    
+//    //if depends -> start is set to max end + lag of superior
+//    var sups = this.getSuperiors();
+//    if (sups && sups.length > 0){
+//        var supEnd = 0;
+//        var supTask;
+//        for (var i=0 ; i < sups.length ; i++) {
+//            supTask = sups[i];
+//            supEnd = Math.max(supEnd, supTask.end);
+//        }
+//        
+//        //if changed by depends move it
+//        if (computeEnd(supEnd) > start) {
+//            return this.moveTo(supEnd + 1, false);
+//        }
+//    }
+//    
+//    var somethingChanged = false;
+//    
+//    if (this.start != start || this.start != wantedStartMillis) {
+//        this.start = start;
+//        somethingChanged = true;
+//    }
+//    
+//    //set end
+//    var wantedEndMillis = end;
+//    
+//    end = computeEnd(end);
+////    end = start + originalPeriod.end - originalPeriod.start
+//    
+//    if (this.end != end || this.end != wantedEndMillis) {
+//        this.end = end;
+//        somethingChanged = true;
+//    }
+//    
+//    this.duration = recomputeDuration(this.start, this.end);
+//    
+//    //external dependencies: exit with error
+//    if (this.hasExternalDep) {
+//        this.master.setErrorOnTransaction(GanttMaster.messages["TASK_HAS_EXTERNAL_DEPS"] + "\n" + this.name, this);
+//        return false;
+//    }
+//    
+//    var todoOk = true;
+//    
+//    // if it has any children then set the start and end from children
+//    //loops children to get boundaries
+//    var children = this.getChildren();
+//    
+//    if (children.length > 0){
+//        var bs = Infinity;
+//        var be = 0;
+//        var child;
+//        for (var i = 0; i < children.length; i++) {
+//            child = children[i];
+//            be = Math.max(be, child.end);
+//            bs = Math.min(bs, child.start);
+//        }
+//        
+//        if (this.end < be){
+//            this.end = be;
+//        }
+//        if (this.start > bs){
+//            this.start = bs;
+//        }
+//        
+//        this.duration = recomputeDuration(this.start, this.end);
+//    } else {
+//        //nothing changed exit
+//        if (!somethingChanged){
+//            return true;
+//        }
+//    }
+//    
+//    //check global boundaries
+//    if (this.start < this.master.minEditableDate || this.end > this.master.maxEditableDate) {
+//        this.master.setErrorOnTransaction(GanttMaster.messages["CHANGE_OUT_OF_SCOPE"], this);
+//        todoOk = false;
+//    }
+//    
+//    //console.debug("set period: somethingChanged",this);
+//    if (todoOk && !updateTree(this)) {
+//        todoOk = false;
+//    }
+//    
+//    if (todoOk) {
+//        //and now propagate to inferiors
+//        var infs = this.getInferiors();
+//        if (infs && infs.length > 0) {
+//            var link;
+//            for (var i=0 ; i<infs.length ; i++) {
+//                link = infs[i];
+//                todoOk = link.to.moveTo(end, false); //this is not the right date but moveTo checks start
+//                if (!todoOk)
+//                    break;
+//            }
+//        }
+//    }
+//    return todoOk;
+    return true;
 };
 
 

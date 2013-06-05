@@ -246,6 +246,11 @@ class Config(object):
         """,
 
         tjp_task_template = """task {{task.tjp_id}} "{{task.name}}" {
+        {%- if task.depends %}
+        depends {% for depends in task.depends %}
+            {%- if loop.index != 1 %}, {% endif %}{{depends.tjp_abs_id}}
+        {%- endfor -%}
+        {%- endif -%}
         {%- if task.is_container -%}
             {%- for child_task in task.children %}
                 {{ child_task.to_tjp }}
@@ -266,12 +271,7 @@ class Config(object):
             {%- endif -%}
             {% for time_log in task.time_logs %}
             booking {{time_log.resource.tjp_id}} {{time_log.start.strftime('%Y-%m-%d-%H:%M:%S')}} +{{'%i'|format(time_log.duration.days*24 + time_log.duration.seconds/3600)}}h { overtime 2 }
-            {%- endfor %}
-            {%- if task.depends %}
-            depends {% for depends in task.depends %}
-                {%- if loop.index != 1 %}, {% endif %}{{depends.tjp_abs_id}}
             {%- endfor -%}
-            {%- endif -%}
         {% endif %}
         }
         """,

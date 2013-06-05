@@ -2340,10 +2340,34 @@ class TaskTester(unittest2.TestCase):
         """testing the equality operator
         """
         entity1 = Entity(**self.kwargs)
+        task0 = Task(**self.kwargs)
         task1 = Task(**self.kwargs)
+        task2 = Task(**self.kwargs)
+        task3 = Task(**self.kwargs)
+        task4 = Task(**self.kwargs)
+        task5 = Task(**self.kwargs)
+        task6 = Task(**self.kwargs)
+        
+        task1.depends = [task2]
+        task2.parent = task3
+        task3.parent = task4
+        task5.children = [task6]
 
         self.assertFalse(self.test_task == entity1)
-        self.assertTrue(self.test_task == task1)
+        self.assertTrue(self.test_task == task0)
+        self.assertFalse(self.test_task == task1)
+        self.assertFalse(self.test_task == task5)
+        
+        self.assertFalse(task1 == task2)
+        self.assertFalse(task1 == task3)
+        self.assertFalse(task1 == task4)
+
+        self.assertFalse(task2 == task3)
+        self.assertFalse(task2 == task4)
+
+        self.assertFalse(task3 == task4)
+        
+        self.assertFalse(task5 == task6)
 
     def test_inequality(self):
         """testing the inequality operator
@@ -2351,8 +2375,35 @@ class TaskTester(unittest2.TestCase):
         entity1 = Entity(**self.kwargs)
         task1 = Task(**self.kwargs)
 
+        entity1 = Entity(**self.kwargs)
+        task0 = Task(**self.kwargs)
+        task1 = Task(**self.kwargs)
+        task2 = Task(**self.kwargs)
+        task3 = Task(**self.kwargs)
+        task4 = Task(**self.kwargs)
+        task5 = Task(**self.kwargs)
+        task6 = Task(**self.kwargs)
+        
+        task1.depends = [task2]
+        task2.parent = task3
+        task3.parent = task4
+        task5.children = [task6]
+
         self.assertTrue(self.test_task != entity1)
-        self.assertFalse(self.test_task != task1)
+        self.assertFalse(self.test_task != task0)
+        self.assertTrue(self.test_task != task1)
+        self.assertTrue(self.test_task != task5)
+        
+        self.assertTrue(task1 != task2)
+        self.assertTrue(task1 != task3)
+        self.assertTrue(task1 != task4)
+
+        self.assertTrue(task2 != task3)
+        self.assertTrue(task2 != task4)
+
+        self.assertTrue(task3 != task4)
+        
+        self.assertTrue(task5 != task6)
 
     def test_parent_argument_is_skipped_there_is_a_project_arg(self):
         """testing if the Task is still be able to be created without a parent
@@ -3169,10 +3220,10 @@ class TaskTester(unittest2.TestCase):
         t1.id = 10221
 
         expected_tjp = """task Task_10221 "Modeling" {
+        depends Project_14875.Task_6484, Project_14875.Task_6485
             
             effort 10d
             allocate User_5648, User_7999
-            depends Project_14875.Task_6484, Project_14875.Task_6485
         }
         """
         self.assertEqual(t1.to_tjp, expected_tjp)
@@ -3212,12 +3263,12 @@ class TaskTester(unittest2.TestCase):
 
         new_task = Task(**self.kwargs)
         new_task.id = 234234
-        self.maxDiff = None
+        # self.maxDiff = None
         expected_tjp = """task Task_234234 "Modeling" {
+        depends Project_8898.Task_987879.Task_23423, Project_8898.Task_987879.Task_23424
             
             effort 1003h
             allocate User_1231, User_1232
-            depends Project_8898.Task_987879.Task_23423, Project_8898.Task_987879.Task_23424
         }
         """
         self.assertEqual(new_task.to_tjp, expected_tjp)
@@ -3276,14 +3327,90 @@ class TaskTester(unittest2.TestCase):
         }
         
                 task Task_5679 "Modeling" {
+        depends Project_87987.Task_5648.Task_23423, Project_87987.Task_5648.Task_23424
             
             effort 1d
             allocate User_1231, User_1232
-            depends Project_87987.Task_5648.Task_23423, Project_87987.Task_5648.Task_23424
         }
         
         }
         '''
+        # self.maxDiff = None
+        self.assertMultiLineEqual(t1.to_tjp, expected_tjp)
+
+    def test_to_tjp_attribute_is_working_properly_for_a_container_task_with_dependency(self):
+        """testing if the to_tjp attribute is working properly for a container
+        task which has dependency
+        """
+        
+        self.kwargs['project'].id = 87987
+        self.kwargs['parent'] = None
+        self.kwargs['depends'] = []
+        self.kwargs['name'] = 'Random Task Name 1'
+        
+        t0 = Task(**self.kwargs)
+        t0.id = 35546
+        
+        self.kwargs['depends'] = [t0]
+        self.kwargs['name'] = 'Modeling'
+
+        t1 = Task(**self.kwargs)
+        t1.id = 5648
+
+        self.kwargs['parent'] = t1
+        self.kwargs['depends'] = []
+
+        dep_task1 = Task(**self.kwargs)
+        dep_task1.id = 23423
+        dep_task1.depends = []
+
+        dep_task2 = Task(**self.kwargs)
+        dep_task2.id = 23424
+        dep_task1.depends = []
+
+        self.kwargs['name'] = 'Modeling'
+        self.kwargs['schedule_timing'] = 1
+        self.kwargs['schedule_unit'] = 'd'
+        self.kwargs['schedule_model'] = 'effort'
+        self.kwargs['depends'] = [dep_task1, dep_task2]
+
+        self.test_user1.name = 'Test User 1'
+        self.test_user1.login = 'testuser1'
+        self.test_user1.id = 1231
+
+        self.test_user2.name = 'Test User 2'
+        self.test_user2.login = 'testuser2'
+        self.test_user2.id = 1232
+
+        self.kwargs['resources'] = [self.test_user1, self.test_user2]
+
+        t2 = Task(**self.kwargs)
+        t2.id = 5679
+
+        expected_tjp = '''task Task_5648 "Modeling" {
+        depends Project_87987.Task_35546
+                task Task_23423 "Modeling" {
+            
+            effort 1d
+            allocate User_1231, User_1232
+        }
+        
+                task Task_23424 "Modeling" {
+            
+            effort 1d
+            allocate User_1231, User_1232
+        }
+        
+                task Task_5679 "Modeling" {
+        depends Project_87987.Task_5648.Task_23423, Project_87987.Task_5648.Task_23424
+            
+            effort 1d
+            allocate User_1231, User_1232
+        }
+        
+        }
+        '''
+        # self.maxDiff = None
         self.assertMultiLineEqual(t1.to_tjp, expected_tjp)
 
     def test_to_tjp_schedule_constraint_is_reflected_in_tjp_file(self):
@@ -3342,16 +3469,16 @@ class TaskTester(unittest2.TestCase):
         }
         
                 task Task_5679 "Modeling" {
+        depends Project_87987.Task_5648.Task_23423, Project_87987.Task_5648.Task_23424
             start 2013-05-03-14:00
                     end 2013-05-04-14:00
             effort 1d
             allocate User_1231, User_1232
-            depends Project_87987.Task_5648.Task_23423, Project_87987.Task_5648.Task_23424
         }
         
         }
         '''
-        self.maxDiff = None
+        # self.maxDiff = None
         #print t1.to_tjp
         #print '-----------------------'
         #print expected_tjp

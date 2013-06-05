@@ -11,6 +11,10 @@ Stalker Changes
     correctly.
   * **Fix:** **check_circular_dependency()** now checks if the **entity** and
     the **other_entity** are the same.
+  * **Fix:** **Task.to_tjp()** now correctly add the dependent tasks of a
+    container task.
+  * **Fix:** **Task.__eq__()** now correctly considers the parent, depends and
+    children Tasks.
 
 * **WebUI:**
 
