@@ -90,6 +90,8 @@ def convert_to_jquery_gantt_task_format(tasks):
             'name': project.name,
             'start': int(project.start.strftime('%s')) * 1000,
             'end': int(project.end.strftime('%s')) * 1000,
+            'computed_start': int(project.computed_start.strftime('%s')) * 1000 if project.computed_start else None,
+            'computed_end': int(project.computed_end.strftime('%s')) * 1000 if project.computed_end else None,
             'schedule_model': 'duration',
             'schedule_timing': project.duration.days,
             'schedule_unit': 'd',
