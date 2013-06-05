@@ -37,14 +37,7 @@
                     style: 'padding: 0; margin:0;'
                 }, 'task_related_data_tab_container');
 
-                var summary_content_pane = new ContentPane({
-                    title: 'Overview',
-                    href: 'summarize/task/{{ task.id }}',
-                    style: 'padding: 0; margin:0;'
 
-                });
-
-                task_related_data_tab_container.addChild(summary_content_pane);
 
 
                 {% if has_permission('List_TimeLog') %}
@@ -57,6 +50,15 @@
 
                     task_related_data_tab_container.addChild(time_logs_content_pane);
                 {% endif %}
+
+                 var summary_content_pane = new ContentPane({
+                    title: 'Overview',
+                    href: 'summarize/task/{{ task.id }}',
+                    style: 'padding: 0; margin:0;'
+
+                });
+
+                task_related_data_tab_container.addChild(summary_content_pane);
 
                 {% if has_permission('List_Version') %}
 

@@ -32,6 +32,9 @@ Stalker Changes
   * **JQueryGantt:**
   
     * **Update:** Context menu is now visible in ``taskRow`` (grid editor).
+    * **Update:** dgrid height is updated to 80em in dgrid.css.
+    * **Update:** For Asset Page and Task Page tab order is changed.
+    * **New:** Starts and Ends attributes are added to Task Summary Page.
 
 0.2.0.b6
 ========

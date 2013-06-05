@@ -50,6 +50,16 @@
                 <td>&nbsp;</td>
                 <td>{{ task.description }}</td>
             </tr>
+            <tr>
+                <td style='text-align: right'><b>Starts</b></td>
+                <td>&nbsp;</td>
+                <td>{{ task.start }}</td>
+            </tr>
+            <tr>
+                <td style='text-align: right'><b>Ends</b></td>
+                <td>&nbsp;</td>
+                <td>{{ task.end }}</td>
+            </tr>
 
         </table>
         {% if has_permission('Update_Task') %}
