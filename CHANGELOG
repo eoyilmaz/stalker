@@ -37,6 +37,8 @@ Stalker Changes
     the name of the entity.
   * **Update:** Task create/update dialog now has a new field called
     ``priority``.
+  * **Update:** **Task.schedule_constraint** is now filled with correct
+    information when creating/updating a Task.
   * **JQueryGantt:**
   
     * **Update:** Context menu can now be opened in task names in grid editor.

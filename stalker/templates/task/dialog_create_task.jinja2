@@ -713,6 +713,10 @@ require([
             var schedule_timing = schedule_timing_numberSpinner.value;
             var schedule_unit = schedule_unit_filteringSelect.value;
 
+            var start_constraint = eval(start_constraint_checkBox.get('checked')) ? 1 : 0;
+            var end_constraint = eval(end_constraint_checkBox.get('checked')) ? 2 : 0;
+            var schedule_constraint = start_constraint + end_constraint;
+
             submitForm({
                 dialog: dialog,
                 form: task_form,
@@ -726,7 +730,8 @@ require([
                     start_date: stamp.toISOString(start_dateTextBox.value),
                     end_date: stamp.toISOString(end_dateTextBox.value),
                     start_time: stamp.toISOString(start_time_timeTextBox.value),
-                    end_time: stamp.toISOString(end_time_timeTextBox.value)
+                    end_time: stamp.toISOString(end_time_timeTextBox.value),
+                    schedule_constraint: schedule_constraint
                 },
                 url: url,
                 method: 'POST'
