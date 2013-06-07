@@ -146,3 +146,18 @@ class VacationTestCase(unittest2.TestCase):
 
         self.test_vacation.user = new_user
         self.assertIn(self.test_vacation, new_user.vacations)
+
+    def test_to_tjp_attribute_is_a_read_only_property(self):
+        """testing if the to_tjp is a read-only attribute
+        """
+        self.assertRaises(AttributeError, setattr, self.test_vacation,
+                          'to_tjp', 'some value')
+
+    def test_to_tjp_attribute_is_working_properly(self):
+        """testing if the to_tjp attribute is working properly
+        """
+        expected_tjp = "vacation 2013-06-06-10:00, 2013-06-10-19:00"
+        self.assertEqual(
+            self.test_vacation.to_tjp,
+            expected_tjp
+        )

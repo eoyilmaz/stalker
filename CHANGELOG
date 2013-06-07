@@ -41,7 +41,7 @@ Stalker Changes
   * **Update:** **Task.schedule_constraint** is now filled with correct
     information when creating/updating a Task.
   * **JQueryGantt:**
-  
+
     * **Update:** Context menu can now be opened in task names in grid editor.
     * **Update:** Optimized the creation of task rows.
     * **Update:** Replaced the ``input`` elements with ``div`` in the task row.

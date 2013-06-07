@@ -533,3 +533,11 @@ class Vacation(SimpleEntity, ScheduleMixin):
                             'stalker.models.auth.User, not %s' % 
                             (self.__class__.__name__, user.__class__.__name__))
         return user
+    
+    @property
+    def to_tjp(self):
+        """overridden to_tjp method
+        """
+        from jinja2 import Template
+        template = Template(defaults.tjp_vacation_template)
+        return template.render({'vacation': self})

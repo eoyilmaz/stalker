@@ -30,7 +30,7 @@ from stalker import (db, defaults, Asset, Department, SimpleEntity, Entity,
                      ImageFormat, Link, Note, Project, Repository, Sequence,
                      Shot, Status, StatusList, Structure, Tag, Task, Type,
                      FilenameTemplate, User, Version, Permission, Group,
-                     TimeLog, Ticket, Scene, WorkingHours, Studio)
+                     TimeLog, Ticket, Scene, WorkingHours, Studio, Vacation)
 import logging
 from stalker import log
 
@@ -452,7 +452,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         """
         DBSession.remove()
 
-    def test_persistence_Asset(self):
+    def test_persistence_of_Asset(self):
         """testing the persistence of Asset
         """
         asset_type = Type(
@@ -596,7 +596,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(type, test_asset_DB.type)
         self.assertEqual(updated_by, test_asset_DB.updated_by)
 
-    def test_persistence_TimeLog(self):
+    def test_persistence_of_TimeLog(self):
         """testing the persistence of TimeLog
         """
         logger.setLevel(log.logging_level)
@@ -698,7 +698,7 @@ class DatabaseModelsTester(unittest2.TestCase):
     #        self.assertEqual(user1, test_time_log_DB.user1)
 
 
-    def test_persistence_Department(self):
+    def test_persistence_of_Department(self):
         """testing the persistence of Department
         """
         logger.setLevel(log.logging_level)
@@ -813,7 +813,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(tags, test_dep_db.tags)
         self.assertEqual(updated_by, test_dep_db.updated_by)
 
-    def test_persistence_Entity(self):
+    def test_persistence_of_Entity(self):
         """testing the persistence of Entity
         """
 
@@ -905,7 +905,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(tags, test_entity_DB.tags)
         self.assertEqual(updated_by, test_entity_DB.updated_by)
 
-    def test_persistence_FilenameTemplate(self):
+    def test_persistence_of_FilenameTemplate(self):
         """testing the persistence of FilenameTemplate
         """
 
@@ -969,7 +969,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(updated_by, new_type_template_DB.updated_by)
         self.assertEqual(type_, new_type_template_DB.type)
 
-    def test_persistence_ImageFormat(self):
+    def test_persistence_of_ImageFormat(self):
         """testing the persistence of ImageFormat
         """
         # create a new ImageFormat object and try to read it back
@@ -1032,7 +1032,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(updated_by, im_format_DB.updated_by)
         self.assertEqual(width, im_format_DB.width)
 
-    def test_persistence_Link(self):
+    def test_persistence_of_Link(self):
         """testing the persistence of Link
         """
         # create a link Type
@@ -1089,7 +1089,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(type_, new_link_DB.type)
         self.assertEqual(updated_by, new_link_DB.updated_by)
 
-    def test_persistence_Note(self):
+    def test_persistence_of_Note(self):
         """testing the persistence of Note
         """
 
@@ -1150,7 +1150,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(nice_name, test_note_DB.nice_name)
         self.assertEqual(updated_by, test_note_DB.updated_by)
 
-    def test_persistence_Group(self):
+    def test_persistence_of_Group(self):
         """testing the persistence of Group
         """
 
@@ -1185,7 +1185,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(name, group_DB.name)
         self.assertEqual(users, group_DB.users)
 
-    def test_persistence_Project(self):
+    def test_persistence_of_Project(self):
         """testing the persistence of Project
         """
         # create mock objects
@@ -1439,7 +1439,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(updated_by, new_project_DB.updated_by)
         self.assertEqual(users, new_project_DB.users)
 
-    def test_persistence_Repository(self):
+    def test_persistence_of_Repository(self):
         """testing the persistence of Repository
         """
         # create a new Repository object and try to read it back
@@ -1499,7 +1499,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(updated_by, repo_db.updated_by)
         self.assertEqual(windows_path, repo_db.windows_path)
 
-    def test_persistence_Scene(self):
+    def test_persistence_of_Scene(self):
         """testing the persistence of Scene
         """
         status1 = Status(name="On Hold", code="OH")
@@ -1601,7 +1601,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(tags, test_scene_DB.tags)
         self.assertEqual(updated_by, test_scene_DB.updated_by)
 
-    def test_persistence_Sequence(self):
+    def test_persistence_of_Sequence(self):
         """testing the persistence of Sequence
         """
 
@@ -1747,7 +1747,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(schedule_unit,
                          test_sequence_DB.schedule_unit)
 
-    def test_persistence_Shot(self):
+    def test_persistence_of_Shot(self):
         """testing the persistence of Shot
         """
 
@@ -1888,7 +1888,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(tasks, test_shot_DB.tasks)
         self.assertEqual(updated_by, test_shot_DB.updated_by)
 
-    def test_persistence_SimpleEntity(self):
+    def test_persistence_of_SimpleEntity(self):
         """testing the persistence of SimpleEntity
         """
 
@@ -1931,7 +1931,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(__stalker_version__,
                          test_simple_entity_DB.__stalker_version__)
 
-    def test_persistence_Status(self):
+    def test_persistence_of_Status(self):
         """testing the persistence of Status
         """
 
@@ -1989,7 +1989,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(bg_color, test_status_DB.bg_color)
         self.assertEqual(fg_color, test_status_DB.fg_color)
 
-    def test_persistence_StatusList(self):
+    def test_persistence_of_StatusList(self):
         """testing the persistence of StatusList
         """
 
@@ -2059,7 +2059,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertTrue(new_sequence_list in DBSession)
         self.assertRaises(IntegrityError, DBSession.commit)
 
-    def test_persistence_Structure(self):
+    def test_persistence_of_Structure(self):
         """testing the persistence of Structure
         """
         # create pipeline steps for character
@@ -2190,7 +2190,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(tags, new_structure_DB.tags)
         self.assertEqual(updated_by, new_structure_DB.updated_by)
 
-    def test_persistence_Studio(self):
+    def test_persistence_of_Studio(self):
         """testing the persistence of Studio
         """
         test_studio = Studio(name='Test Studio')
@@ -2224,7 +2224,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(working_hours, test_studio_DB.working_hours)
 
 
-    def test_persistence_Tag(self):
+    def test_persistence_of_Tag(self):
         """testing the persistence of Tag
         """
         name = "Tag_test_creating_a_Tag"
@@ -2268,7 +2268,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(date_updated, aTag_DB.date_updated)
 
 
-    def test_persistence_Task(self):
+    def test_persistence_of_Task(self):
         """testing the persistence of Task
         """
         # create a task
@@ -2422,7 +2422,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(schedule_timing, test_task_DB.schedule_timing)
         self.assertEqual(schedule_unit, test_task_DB.schedule_unit)
 
-    def test_persistence_Ticket(self):
+    def test_persistence_of_Ticket(self):
         """testing the persistence of Ticket
         """
 
@@ -2542,7 +2542,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(type_, test_ticket_DB.type)
         self.assertEqual(updated_by, test_ticket_DB.updated_by)
 
-    def test_persistence_User(self):
+    def test_persistence_of_User(self):
         """testing the persistence of User
         """
 
@@ -2633,9 +2633,52 @@ class DatabaseModelsTester(unittest2.TestCase):
 
         self.assertEqual(new_user_DB, department_db.members[0])
 
+    def test_persistence_of_Vacation(self):
+        """testing the persistence of Vacation instances
+        """
+        # create a User
+        new_user = User(
+            name='Test User',
+            login='testuser',
+            email='test@user.com',
+            password='secret'
+        )
 
-    def test_persistence_Version(self):
-        """testing the persistence of Version
+        # personal vacation type
+        personal_vacation = Type(
+            name='Personal',
+            code='PERS',
+            target_entity_type='Vacation'
+        )
+
+        start = datetime.datetime(2013, 6, 7, 15, 0)
+        end = datetime.datetime(2013, 6, 21, 0, 0)
+
+        vacation = Vacation(
+            user=new_user,
+            type=personal_vacation,
+            start=start,
+            end=end
+        )
+
+        DBSession.add(vacation)
+        DBSession.commit()
+
+        name = vacation.name
+
+        del vacation
+
+        # get it back
+        vacation_DB = Vacation.query.filter_by(name=name).first()
+
+        assert isinstance(vacation_DB, Vacation)
+        self.assertEqual(new_user, vacation_DB.user)
+        self.assertEqual(start, vacation_DB.start)
+        self.assertEqual(end, vacation_DB.end)
+        self.assertEqual(personal_vacation, vacation_DB.type)
+
+    def test_persistence_of_Version(self):
+        """testing the persistence of Version instances
         """
 
         # create a project

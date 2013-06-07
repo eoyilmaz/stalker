@@ -1434,6 +1434,42 @@ class UserTest(unittest2.TestCase):
         expected_tjp = 'resource User_69 "Erkan Ozgur Yilmaz"'
         self.assertEqual(self.test_user.to_tjp, expected_tjp)
 
+    def test_to_tjp_is_working_properly_for_a_user_with_vacations(self):
+        """testing if the to_tjp property is working properly for a user with
+        vacations
+        """
+        personal_vacation = Type(
+            name='Personal',
+            code='PERS',
+            target_entity_type='Vacation'
+        )
+
+        vac1 = Vacation(
+            user=self.test_user,
+            type=personal_vacation,
+            start=datetime.datetime(2013, 6, 7, 0, 0),
+            end=datetime.datetime(2013, 6, 21, 0, 0)
+        )
+
+        vac2 = Vacation(
+            user=self.test_user,
+            type=personal_vacation,
+            start=datetime.datetime(2013, 7, 1, 0, 0),
+            end=datetime.datetime(2013, 7, 15, 0, 0)
+        )
+
+        expected_tjp = """resource User_69 "Erkan Ozgur Yilmaz" {
+            vacation 2013-06-07-00:00, 2013-06-21-00:00
+            vacation 2013-07-01-00:00, 2013-07-15-00:00
+            }"""
+        print expected_tjp
+        print '---------------'
+        print self.test_user.to_tjp
+        self.assertEqual(
+            self.test_user.to_tjp,
+            expected_tjp
+        )
+
     def test_vacations_attribute_is_set_to_None(self):
         """testing if a TypeError will be raised when the vacations attribute
         is set to None
