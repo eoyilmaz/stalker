@@ -62,7 +62,11 @@ class Studio(Entity, ScheduleMixin, WorkingHoursMixin):
     
     In Stalker, Studio class also manages the working hours of the studio.
     Allowing project tasks to be scheduled to be scheduled in those hours.
+
+    **Vacations**
     
+    You can define
+
     :param int daily_working_hours: An integer specifying the daily working
       hours for the studio. It is another critical value attribute which
       TaskJuggler uses mainly converting working day values to working hours
@@ -493,7 +497,9 @@ class Vacation(SimpleEntity, ScheduleMixin):
     __auto_name__ = True
     __tablename__ = 'Vacations'
     __mapper_args__ = {'polymorphic_identity': 'Vacation'}
-    
+
+    __strictly_typed__ = True
+
     vacation_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
                          primary_key=True)
 
@@ -502,7 +508,7 @@ class Vacation(SimpleEntity, ScheduleMixin):
 
     user = relationship(
         'User',
-        secondary='User_Vacations',
+        primaryjoin='Vacations.c.user_id==Users.c.id',
         back_populates='vacations',
         doc="""The User of this Vacation.
 
@@ -515,10 +521,15 @@ class Vacation(SimpleEntity, ScheduleMixin):
         kwargs['end'] = end
         super(Vacation, self).__init__(**kwargs)
         ScheduleMixin.__init__(self, **kwargs)
+        self.user = user
 
-# User Vacations
-User_Vacations = Table(
-    'User_Vacations', Base.metadata,
-    Column('user_id', Integer, ForeignKey('Users.id'), primary_key=True),
-    Column('vacation_id', Integer, ForeignKey('Vacations.id'), primary_key=True)
-)
+    @validates('user')
+    def _validate_user(self, key, user):
+        """validates the given user instance
+        """
+        from stalker import User
+        if not isinstance(user, User):
+            raise TypeError('%s.user should be an instance of '
+                            'stalker.models.auth.User, not %s' % 
+                            (self.__class__.__name__, user.__class__.__name__))
+        return user

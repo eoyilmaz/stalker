@@ -803,7 +803,22 @@ class User(Entity, ACLMixin):
                             '%s' % (self.__class__.__name__,
                                     project.__class__.__name__))
         return project
-    
+
+    @validates('vacations')
+    def _validate_vacations(self, key, vacation):
+        """validates the given vacation value
+        """
+        from stalker.models.studio import Vacation
+
+        if not isinstance(vacation, Vacation):
+            raise TypeError("Every member of %s.vacations should be an "
+                            "instance of stalker.models.studio.Vacation, "
+                            "not %s" %
+                            (self.__class__.__name__,
+                             vacation.__class__.__name__))
+
+        return vacation
+
     @property
     def tickets(self):
         """The list of :class:`~stalker.models.ticket.Ticket`\ s that this user has.
@@ -848,6 +863,7 @@ class User(Entity, ACLMixin):
         from jinja2 import Template
         temp = Template(defaults.tjp_user_template)
         return temp.render({'user': self})
+
 
 class LocalSession(object):
     """A simple temporary session object which simple stores session data.

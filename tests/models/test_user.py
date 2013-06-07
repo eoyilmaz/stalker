@@ -28,7 +28,8 @@ defaults = config.Config()
 
 from stalker.db.session import DBSession, ZopeTransactionExtension
 from stalker import (Group, Department, Project, Repository,
-                     Sequence, Status, StatusList, Task, Type, User, Version, Ticket)
+                     Sequence, Status, StatusList, Task, Type, User, Version,
+                     Ticket, Vacation)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -1432,3 +1433,59 @@ class UserTest(unittest2.TestCase):
         """
         expected_tjp = 'resource User_69 "Erkan Ozgur Yilmaz"'
         self.assertEqual(self.test_user.to_tjp, expected_tjp)
+
+    def test_vacations_attribute_is_set_to_None(self):
+        """testing if a TypeError will be raised when the vacations attribute
+        is set to None
+        """
+        self.assertRaises(TypeError, setattr, self.test_user, 'vacations',
+                          None)
+
+    def test_vacations_attribute_is_not_a_list(self):
+        """testing if a TypeError will be raised when the vacations attribute
+        is set to a value other than a list
+        """
+        self.assertRaises(TypeError, setattr, self.test_user, 'vacations',
+                          'not a list of Vacation instances')
+
+    def test_vacations_attribute_is_not_a_list_of_Vacation_instances(self):
+        """testing if a TypeError will be raised when the vacations attribute
+        is set to a list of other objects than Vacation instances
+        """
+        self.assertRaises(TypeError, setattr, self.test_user, 'vacations',
+                          ['list of', 'other', 'instances', 1])
+
+    def test_vacations_attribute_is_working_properly(self):
+        """testing if the vacations attribute is working properly
+        """
+        some_other_user = User(
+            name='Some Other User',
+            login='sou',
+            email='some@other.user.com',
+            password='my password'
+        )
+
+        personal_vac_type = Type(
+            name='Personal Vacation',
+            code='PERS',
+            target_entity_type='Vacation'
+        )
+
+        vac1 = Vacation(
+            user=some_other_user,
+            type=personal_vac_type,
+            start=datetime.datetime(2013, 6, 7),
+            end=datetime.datetime(2013, 6, 10)
+        )
+
+        self.assertNotIn(
+            vac1,
+            self.test_user.vacations
+        )
+
+        self.test_user.vacations.append(vac1)
+
+        self.assertIn(
+            vac1,
+            self.test_user.vacations
+        )
