@@ -345,3 +345,26 @@ def serve_files(request):
     
     return FileResponse(file_full_path)
     
+
+
+def seconds_since_epoch(dt):
+    """converts the given datetime.datetime instance to an integer showing the
+    seconds from epoch, and does it without using the strftime('%s') which
+    uses the time zone info of the system.
+    
+    :param dt: datetime.datetime instance to be converted
+    :returns int: showing the seconds since epoch
+    """
+    dts = dt - datetime.datetime(1970, 1, 1)
+    return dts.days * 86400 + dts.seconds
+
+def microseconds_since_epoch(dt):
+    """converts the given datetime.datetime instance to an integer showing the
+    microseconds from epoch, and does it without using the strftime('%s') which
+    uses the time zone info of the system.
+    
+    :param dt: datetime.datetime instance to be converted
+    :returns int: showing the microseconds since epoch
+    """
+    dts = dt - datetime.datetime(1970, 1, 1)
+    return (dts.days * 86400 + dts.seconds) * 1000 + dts.microseconds

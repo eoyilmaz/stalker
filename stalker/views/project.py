@@ -20,11 +20,10 @@
 
 import datetime
 from pyramid.httpexceptions import HTTPOk, HTTPServerError
-from pyramid.security import authenticated_userid
 from pyramid.view import view_config
 
 from stalker.db import DBSession
-from stalker.views import get_date, get_logged_in_user, PermissionChecker
+from stalker.views import get_date, get_logged_in_user, PermissionChecker, microseconds_since_epoch
 from stalker import (User, ImageFormat, Repository, Structure, Status,
                      StatusList, Project, Entity)
 
@@ -46,7 +45,8 @@ def create_project_dialog(request):
     return {
         'mode': 'CREATE',
         'has_permission': PermissionChecker(request),
-        'logged_in_user': logged_in_user
+        'logged_in_user': logged_in_user,
+        'microseconds_since_epoch': microseconds_since_epoch
     }
 
 
@@ -66,7 +66,8 @@ def update_project_dialog(request):
         'mode': 'UPDATE',
         'has_permission': PermissionChecker(request),
         'project': project,
-        'logged_in_user': logged_in_user
+        'logged_in_user': logged_in_user,
+        'microseconds_since_epoch': microseconds_since_epoch
     }
 
 

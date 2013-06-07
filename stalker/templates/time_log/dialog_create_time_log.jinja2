@@ -139,8 +139,8 @@ require([
     {% elif mode == 'UPDATE' %}
         url = '{{ request.route_url("update_time_log") }}';
 
-        start_date_value = new Date(parseInt({{ time_log.start.strftime('%s') }}) * 1000);
-        end_date_value = new Date(parseInt({{ time_log.end.strftime('%s') }}) * 1000);
+        start_date_value = new Date(parseInt({{ microseconds_since_epoch(time_log.start) }}));
+        end_date_value = new Date(parseInt({{ microseconds_since_epoch(time_log.end) }}));
 
         start_time_value = util.extract_from_time({date:start_date_value});
         end_time_value = util.extract_from_time({date:end_date_value});
