@@ -704,10 +704,16 @@ attribute value."""
         """
         # to be compatible with python 2.6 use the following instead of
         # total_seconds()
-        ts = self.timing_resolution.days * 86400 + \
+        trs = self.timing_resolution.days * 86400 + \
              self.timing_resolution.seconds
+
+        # convert to seconds
+        # FIX: using strftime(%s) is dangerous, it uses system time zone
+        epoch = datetime.datetime(1970, 1, 1)
+        dts = dt - epoch
+
         return datetime.datetime.fromtimestamp(
-            (int(dt.strftime('%s')) + ts * 0.5) // ts * ts
+            ((dts.days * 86400 + dts.seconds) + trs * 0.5) // trs * trs
         )
 
     @property

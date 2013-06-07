@@ -35,7 +35,7 @@ from stalker import (User, Task, Entity, Project, StatusList, Status,
 from stalker.models.task import CircularDependencyError
 from stalker import defaults
 from stalker import log
-from stalker.views import get_datetime, PermissionChecker, get_logged_in_user, get_multi_integer
+from stalker.views import get_datetime, PermissionChecker, get_logged_in_user, get_multi_integer, microseconds_since_epoch
 
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
@@ -88,12 +88,10 @@ def convert_to_jquery_gantt_task_format(tasks):
              'id': project.id,
              'code': project.code,
              'name': project.name,
-             'start': int(project.start.strftime('%s')) * 1000,
-             'end': int(project.end.strftime('%s')) * 1000,
-             'computed_start': int(project.computed_start.strftime(
-                 '%s')) * 1000 if project.computed_start else None,
-             'computed_end': int(project.computed_end.strftime(
-                 '%s')) * 1000 if project.computed_end else None,
+             'start': microseconds_since_epoch(project.start),
+             'end': microseconds_since_epoch(project.end),
+             'computed_start': microseconds_since_epoch(project.computed_start) if project.computed_start else None,
+             'computed_end': microseconds_since_epoch(project.computed_end) if project.computed_end else None,
              'schedule_model': 'duration',
              'schedule_timing': project.duration.days,
              'schedule_unit': 'd',
@@ -120,8 +118,8 @@ def convert_to_jquery_gantt_task_format(tasks):
                     'id': resource.id,
                 } for resource in task.resources
             ],
-            'start': int(task.start.strftime('%s')) * 1000,
-            'end': int(task.end.strftime('%s')) * 1000,
+            'start': microseconds_since_epoch(task.start),
+            'end': microseconds_since_epoch(task.end),
             'is_scheduled': task.is_scheduled,
             'schedule_timing': task.schedule_timing,
             'schedule_unit': task.schedule_unit,
@@ -131,10 +129,8 @@ def convert_to_jquery_gantt_task_format(tasks):
             'schedule_constraint': task.schedule_constraint,
             'schedule_seconds': task.schedule_seconds,
             'total_logged_seconds': task.total_logged_seconds,
-            'computed_start': int(task.computed_start.strftime(
-                '%s')) * 1000 if task.computed_start else None,
-            'computed_end': int(task.computed_end.strftime(
-                '%s')) * 1000 if task.computed_end else None,
+            'computed_start': microseconds_since_epoch(task.computed_start) if task.computed_start else None,
+            'computed_end': microseconds_since_epoch(task.computed_end) if task.computed_end else None,
         }
         for task in tasks
     ])
@@ -300,7 +296,8 @@ def update_task_dialog(request):
         'project': task.project,
         'task': task,
         'parent': task.parent,
-        'schedule_models': defaults.task_schedule_models
+        'schedule_models': defaults.task_schedule_models,
+        'microseconds_since_epoch': microseconds_since_epoch
     }
 
 
@@ -575,7 +572,8 @@ def create_task_dialog(request):
         'has_permission': PermissionChecker(request),
         'project': project,
         'parent': parent,
-        'schedule_models': defaults.task_schedule_models
+        'schedule_models': defaults.task_schedule_models,
+        'microseconds_since_epoch': microseconds_since_epoch
     }
 
 
