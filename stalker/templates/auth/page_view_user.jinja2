@@ -142,6 +142,17 @@
             user_related_data_tab_container.addChild(time_logs_content_pane);
 
         {% endif %}
+{#        {% if has_permission('List_Vacation') %}#}
+
+            var vacations_content_pane = new ContentPane({
+                title: 'Vacations',
+                href: 'list/vacations/{{ user.id }}',
+                default_href: 'list/vacations/{{ user.id }}',
+                style: 'padding: 0; margin:0;'
+            });
+            user_related_data_tab_container.addChild(vacations_content_pane);
+
+{#        {% endif %}#}
 
 
         user_BorderContainer.addChild(user_related_data_tab_container);

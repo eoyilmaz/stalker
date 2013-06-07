@@ -18,9 +18,9 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 <div id='view_vacations'>
-    {% if has_permission('Create_Vacation') %}
+{#    {% if has_permission('Create_Vacation') %}#}
         <button id='create_vacation_button'>Create Vacation</button>
-    {% endif %}
+{#    {% endif %}#}
     <div id='vacations_data_grid'></div>
 </div>
 
@@ -67,7 +67,7 @@
         }, 'vacations_data_grid');
 
 
-        {% if has_permission('Create_Vacation')%}
+{#        {% if has_permission('Create_Vacation')%}#}
 
             var create_vacation_button = dialogCaller({
                 label: 'Create Vacation',
@@ -78,7 +78,7 @@
                 data_id: '{{ user.id }}'
             });
             create_vacation_button.startup();
-        {% endif %}
+{#        {% endif %}#}
 
 
 
@@ -118,6 +118,23 @@
                         formatter: function (value) {
 
                             return new Date(parseInt(value) * 1000);
+
+                        }
+                    },
+                    {
+                        field: 'created_by_name',
+                        label: "Created By",
+                        get: function (object) {
+
+                            return object; // return entire item for formatter to use
+
+                        },
+                        formatter: function (value) {
+
+                            var targetPane = "'central_content'";
+                            var address = "'view/user/" + value.created_by_id + "'";
+
+                            return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.created_by_name + '</a>';
 
                         }
                     }

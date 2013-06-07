@@ -44,6 +44,7 @@ Stalker Changes
       set when dialog is open.
   * **New:** Version List Page and Create/Update Dialogs added.
   * **New:** Vacation List Page and Create/Update Dialogs added.
+  * **Fix:** Merge tested, and vacation adding is finished.
 
   * **JQueryGantt:**
 

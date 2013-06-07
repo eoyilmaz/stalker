@@ -109,7 +109,8 @@ def create_vacation(request):
     #**************************************************************************
     # collect data
     logged_in_user = get_logged_in_user(request)
-    
+
+    type_name = request.params.get('type_name')
     start_date = get_datetime(request, 'start_date', 'start_time')
     end_date = get_datetime(request, 'end_date', 'end_time')
     
@@ -122,9 +123,24 @@ def create_vacation(request):
         # we are ready to create the time log
         # Vacation should handle the extension of the effort
 
+        type_ = Type.query\
+            .filter_by(target_entity_type='Vacation')\
+            .filter_by(name=type_name)\
+            .first()
+
+        if type_ is None:
+            # create a new Type
+            # TODO: should we check for permission here or will it be already done in the UI (ex. filteringSelect instead of comboBox)
+            type_ = Type(
+                name=type_name,
+                code=type_name,
+                target_entity_type='Vacation'
+            )
+
         vacation = Vacation(
             user=user,
             created_by=logged_in_user,
+            type = type_,
             start=start_date,
             end=end_date
         )
@@ -149,6 +165,7 @@ def update_vacation(request):
     # collect data
     logged_in_user = get_logged_in_user(request)
 
+    type_name = request.params.get('type_name')
     start_date = get_datetime(request, 'start_date', 'start_time')
     end_date = get_datetime(request, 'end_date', 'end_time')
 
@@ -158,8 +175,22 @@ def update_vacation(request):
     if vacation and start_date and end_date:
         # we are ready to create the time log
         # Vacation should handle the extension of the effort
+        type_ = Type.query\
+            .filter_by(target_entity_type='Vacation')\
+            .filter_by(name=type_name)\
+            .first()
+
+        if type_ is None:
+            # create a new Type
+            # TODO: should we check for permission here or will it be already done in the UI (ex. filteringSelect instead of comboBox)
+            type_ = Type(
+                name=type_name,
+                code=type_name,
+                target_entity_type='Vacation'
+            )
 
         vacation.updated_by = logged_in_user
+        vacation.type = type_
         vacation.start = start_date
         vacation.end = end_date
 
@@ -209,7 +240,7 @@ def get_vacations(request):
         assert isinstance(vacation, Vacation)
         vacation_data.append({
             'id': vacation.id,
-            'type': vacation.type,
+            'type': vacation.type.name,
             'created_by_id': vacation.created_by_id,
             'created_by_name': vacation.created_by.name,
             'start_date' : vacation.start.strftime('%s'),
