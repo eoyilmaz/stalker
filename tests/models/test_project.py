@@ -1235,34 +1235,41 @@ class ProjectTester(unittest2.TestCase):
         expected_tjp_temp = Template("""task Project_39 "Test Project" {
             
                 task Sequence_40 "Seq1" {
+        
             
         }
         
             
                 task Sequence_41 "Seq2" {
+        
             
         }
         
             
                 task Sequence_42 "Seq3" {
+        
             
         }
         
             
                 task Sequence_43 "Seq4" {
+        
                 task Task_59 "Test Task 4" {
+        
             
             effort 1.0h
             allocate User_26
         }
         
                 task Task_60 "Test Task 5" {
+        
             
             effort 1.0h
             allocate User_27
         }
         
                 task Task_61 "Test Task 6" {
+        
             
             effort 1.0h
             allocate User_28
@@ -1272,19 +1279,23 @@ class ProjectTester(unittest2.TestCase):
         
             
                 task Sequence_44 "Seq5" {
+        
                 task Task_62 "Test Task 7" {
+        
             
             effort 1.0h
             allocate User_29
         }
         
                 task Task_63 "Test Task 8" {
+        
             
             effort 1.0h
             allocate User_30
         }
         
                 task Task_64 "Test Task 9" {
+        
             
             effort 1.0h
             allocate User_31
@@ -1294,29 +1305,35 @@ class ProjectTester(unittest2.TestCase):
         
             
                 task Sequence_45 "Seq6" {
+        
             
         }
         
             
                 task Sequence_46 "Seq7" {
+        
             
         }
         
             
                 task Shot_47 "{{shot1.name}}" {
+        
                 task Task_65 "Test Task 10" {
+        
             
             effort 1.0h
             allocate User_32
         }
         
                 task Task_66 "Test Task 11" {
+        
             
             effort 1.0h
             allocate User_22, User_24
         }
         
                 task Task_67 "Test Task 12" {
+        
             
             effort 1.0h
             allocate User_25, User_26
@@ -1326,19 +1343,23 @@ class ProjectTester(unittest2.TestCase):
         
             
                 task Shot_48 "{{shot2.name}}" {
+        
                 task Task_68 "Test Task 13" {
+        
             
             effort 1.0h
             allocate User_27, User_28
         }
         
                 task Task_69 "Test Task 14" {
+        
             
             effort 1.0h
             allocate User_29, User_30
         }
         
                 task Task_70 "Test Task 15" {
+        
             
             effort 1.0h
             allocate User_31, User_32
@@ -1348,19 +1369,23 @@ class ProjectTester(unittest2.TestCase):
         
             
                 task Shot_49 "{{shot3.name}}" {
+        
                 task Task_71 "Test Task 16" {
+        
             
             effort 1.0h
             allocate User_22, User_24, User_25
         }
         
                 task Task_72 "Test Task 17" {
+        
             
             effort 1.0h
             allocate User_26, User_27, User_28
         }
         
                 task Task_73 "Test Task 18" {
+        
             
             effort 1.0h
             allocate User_29, User_30, User_31
@@ -1370,19 +1395,23 @@ class ProjectTester(unittest2.TestCase):
         
             
                 task Shot_50 "{{shot4.name}}" {
+        
                 task Task_74 "Test Task 19" {
+        
             
             effort 1.0h
             allocate User_22, User_24, User_32
         }
         
                 task Task_75 "Test Task 20" {
+        
             
             effort 1.0h
             allocate User_25, User_26, User_27
         }
         
                 task Task_76 "Test Task 21" {
+        
             
             effort 1.0h
             allocate User_28, User_29, User_30
@@ -1392,34 +1421,41 @@ class ProjectTester(unittest2.TestCase):
         
             
                 task Asset_51 "Test Asset 1" {
+        
             
         }
         
             
                 task Asset_52 "Test Asset 2" {
+        
             
         }
         
             
                 task Asset_53 "Test Asset 3" {
+        
             
         }
         
             
                 task Asset_54 "Test Asset 4" {
+        
                 task Task_77 "Test Task 22" {
+        
             
             effort 1.0h
             allocate User_22, User_31, User_32
         }
         
                 task Task_78 "Test Task 23" {
+        
             
             effort 1.0h
             allocate User_24, User_25
         }
         
                 task Task_79 "Test Task 24" {
+        
             
             effort 1.0h
             allocate User_26, User_27
@@ -1429,19 +1465,23 @@ class ProjectTester(unittest2.TestCase):
         
             
                 task Asset_55 "Test Asset 5" {
+        
                 task Task_80 "Test Task 25" {
+        
             
             effort 1.0h
             allocate User_28, User_29
         }
         
                 task Task_81 "Test Task 26" {
+        
             
             effort 1.0h
             allocate User_30, User_31
         }
         
                 task Task_82 "Test Task 27" {
+        
             
             effort 1.0h
             allocate User_22, User_32
@@ -1451,6 +1491,7 @@ class ProjectTester(unittest2.TestCase):
         
             
                 task Task_56 "Test Task 1" {
+        
             
             effort 1.0h
             allocate User_22
@@ -1458,6 +1499,7 @@ class ProjectTester(unittest2.TestCase):
         
             
                 task Task_57 "Test Task 2" {
+        
             
             effort 1.0h
             allocate User_24
@@ -1465,6 +1507,7 @@ class ProjectTester(unittest2.TestCase):
         
             
                 task Task_58 "Test Task 3" {
+        
             
             effort 1.0h
             allocate User_25

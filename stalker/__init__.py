@@ -49,7 +49,7 @@ from stalker.models.sequence import Sequence
 from stalker.models.shot import Shot
 from stalker.models.status import Status, StatusList
 from stalker.models.structure import Structure
-from stalker.models.studio import Studio, WorkingHours
+from stalker.models.studio import Studio, WorkingHours, Vacation
 from stalker.models.tag import Tag
 from stalker.models.task import TimeLog, Task
 from stalker.models.template import FilenameTemplate

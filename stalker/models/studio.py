@@ -22,11 +22,12 @@ import copy
 import logging
 import datetime
 
-from sqlalchemy import Column, Integer, ForeignKey
-from sqlalchemy.orm import validates, reconstructor
+from sqlalchemy import Column, Integer, ForeignKey, Table
+from sqlalchemy.orm import validates, reconstructor, relationship
 
 from stalker import (defaults, log, Entity, ScheduleMixin, WorkingHoursMixin,
-                     SchedulerBase)
+                     SchedulerBase, SimpleEntity)
+from stalker.db import Base
 
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
@@ -61,7 +62,11 @@ class Studio(Entity, ScheduleMixin, WorkingHoursMixin):
     
     In Stalker, Studio class also manages the working hours of the studio.
     Allowing project tasks to be scheduled to be scheduled in those hours.
+
+    **Vacations**
     
+    You can define
+
     :param int daily_working_hours: An integer specifying the daily working
       hours for the studio. It is another critical value attribute which
       TaskJuggler uses mainly converting working day values to working hours
@@ -475,4 +480,64 @@ class WorkingHours(object):
         return self.weekly_working_days * 52.1428
 
 
+class Vacation(SimpleEntity, ScheduleMixin):
+    """Vacation is the way to manage the User vacations.
 
+    :param user: The user of this vacation. Should be an instance of
+      :class:`~stalker.models.auth.User` and can not be skipped or can not be
+      None.
+
+    :param start: The start datetime of the vacation. Is is an
+      datetime.datetime instance. When skipped it will be set to the rounded
+      value of 
+
+    :param end: The end datetime of the vacation. It is an datetime.datetime
+      instance.
+    """
+    __auto_name__ = True
+    __tablename__ = 'Vacations'
+    __mapper_args__ = {'polymorphic_identity': 'Vacation'}
+
+    __strictly_typed__ = True
+
+    vacation_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
+                         primary_key=True)
+
+    user_id = Column('user_id', Integer, ForeignKey('Users.id'),
+                         nullable=False)
+
+    user = relationship(
+        'User',
+        primaryjoin='Vacations.c.user_id==Users.c.id',
+        back_populates='vacations',
+        doc="""The User of this Vacation.
+
+        Accepts:class:`~stalker.models.auth.User` instance.
+        """
+    )
+
+    def __init__(self, user=None, start=None, end=None, **kwargs):
+        kwargs['start'] = start
+        kwargs['end'] = end
+        super(Vacation, self).__init__(**kwargs)
+        ScheduleMixin.__init__(self, **kwargs)
+        self.user = user
+
+    @validates('user')
+    def _validate_user(self, key, user):
+        """validates the given user instance
+        """
+        from stalker import User
+        if not isinstance(user, User):
+            raise TypeError('%s.user should be an instance of '
+                            'stalker.models.auth.User, not %s' % 
+                            (self.__class__.__name__, user.__class__.__name__))
+        return user
+    
+    @property
+    def to_tjp(self):
+        """overridden to_tjp method
+        """
+        from jinja2 import Template
+        template = Template(defaults.tjp_vacation_template)
+        return template.render({'vacation': self})

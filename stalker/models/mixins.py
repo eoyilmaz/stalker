@@ -993,5 +993,3 @@ class WorkingHoursMixin(object):
 
             wh = WorkingHours()
         return wh
-
-    

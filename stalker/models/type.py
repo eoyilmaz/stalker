@@ -76,8 +76,9 @@ class Type(Entity, TargetEntityTypeMixin, CodeMixin):
     type_id_local = Column("id", Integer, ForeignKey("Entities.id"),
                            primary_key=True)
     
-    def __init__(self, name=None, code=None, **kwargs):
+    def __init__(self, name=None, code=None, target_entity_type=None, **kwargs):
         kwargs['name'] = name
+        kwargs['target_entity_type'] = target_entity_type
         super(Type, self).__init__(**kwargs)
         TargetEntityTypeMixin.__init__(self, **kwargs)
         #CodeMixin.__init__(self, **kwargs)
