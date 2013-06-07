@@ -29,6 +29,7 @@ from stalker.models.entity import SimpleEntity
 from stalker import config
 defaults = config.Config()
 
+
 class SchedMixFooMixedInClass(SimpleEntity, ScheduleMixin):
     """a class which derives from another which has and __init__ already
     """
@@ -42,10 +43,11 @@ class SchedMixFooMixedInClass(SimpleEntity, ScheduleMixin):
         super(SchedMixFooMixedInClass, self).__init__(**kwargs)
         ScheduleMixin.__init__(self, **kwargs)
 
+
 class ScheduleMixinTester(unittest2.TestCase):
     """Tests the ScheduleMixin
     """
-    
+
     def setUp(self):
         """setup the test
         """
@@ -65,18 +67,18 @@ class ScheduleMixinTester(unittest2.TestCase):
         }
 
         self.mock_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
-    
+
     def tearDown(self):
         """clean up the test
         """
         DBSession.remove()
-    
+
     def test_start_argument_is_not_a_date_object(self):
         """testing if defaults will be used for the start attribute when
         the start is given as something other than a datetime.datetime object
         """
         test_values = [1, 1.2, "str", ["a", "date"]]
-        
+
         for test_value in test_values:
             self.kwargs["start"] = test_value
 

@@ -242,6 +242,7 @@ GanttMaster.prototype.loadTasks = function (tasks) {
                 name: task.name,
                 code: task.code,
                 description: task.description,
+                priority: task.priorty,
                 type: task.type,
                 status: task.status,
                 parent_id: task.parent_id,

@@ -22,11 +22,12 @@ import copy
 import logging
 import datetime
 
-from sqlalchemy import Column, Integer, ForeignKey
-from sqlalchemy.orm import validates, reconstructor
+from sqlalchemy import Column, Integer, ForeignKey, Table
+from sqlalchemy.orm import validates, reconstructor, relationship
 
 from stalker import (defaults, log, Entity, ScheduleMixin, WorkingHoursMixin,
-                     SchedulerBase)
+                     SchedulerBase, SimpleEntity)
+from stalker.db import Base
 
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
@@ -475,4 +476,49 @@ class WorkingHours(object):
         return self.weekly_working_days * 52.1428
 
 
+class Vacation(SimpleEntity, ScheduleMixin):
+    """Vacation is the way to manage the User vacations.
 
+    :param user: The user of this vacation. Should be an instance of
+      :class:`~stalker.models.auth.User` and can not be skipped or can not be
+      None.
+
+    :param start: The start datetime of the vacation. Is is an
+      datetime.datetime instance. When skipped it will be set to the rounded
+      value of 
+
+    :param end: The end datetime of the vacation. It is an datetime.datetime
+      instance.
+    """
+    __auto_name__ = True
+    __tablename__ = 'Vacations'
+    __mapper_args__ = {'polymorphic_identity': 'Vacation'}
+    
+    vacation_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
+                         primary_key=True)
+
+    user_id = Column('user_id', Integer, ForeignKey('Users.id'),
+                         nullable=False)
+
+    user = relationship(
+        'User',
+        secondary='User_Vacations',
+        back_populates='vacations',
+        doc="""The User of this Vacation.
+
+        Accepts:class:`~stalker.models.auth.User` instance.
+        """
+    )
+
+    def __init__(self, user=None, start=None, end=None, **kwargs):
+        kwargs['start'] = start
+        kwargs['end'] = end
+        super(Vacation, self).__init__(**kwargs)
+        ScheduleMixin.__init__(self, **kwargs)
+
+# User Vacations
+User_Vacations = Table(
+    'User_Vacations', Base.metadata,
+    Column('user_id', Integer, ForeignKey('Users.id'), primary_key=True),
+    Column('vacation_id', Integer, ForeignKey('Vacations.id'), primary_key=True)
+)

@@ -110,6 +110,7 @@ def convert_to_jquery_gantt_task_format(tasks):
             'name': task.name,
             'code': task.id,
             'description': task.description,
+            'priority': task.priority,
             'status': 'STATUS_UNDEFINED',
             'project_id': task.project.id,
             'parent_id': task.parent.id if task.parent else task.project.id,

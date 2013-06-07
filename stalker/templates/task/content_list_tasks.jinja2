@@ -119,6 +119,7 @@
                 start=(#=obj.start#)
                 end=(#=obj.end#)
                 type="(#=obj.type#)"
+                priority=(#=obj.priority#)
                 schedule_model=(#=obj.schedule_model#)
                 schedule_timing=(#=obj.schedule_timing#)
                 schedule_unit=(#=obj.schedule_unit#)
@@ -275,12 +276,17 @@
                             var start = new Date(parseInt(node.getAttribute('start')));
                             var end = new Date(parseInt(node.getAttribute('end')));
                             var schedule_model = node.getAttribute('schedule_model');
-                            schedule_model = schedule_model.charAt(0).toUpperCase() + schedule_model.substr(1).toLowerCase();
+
+                            if (schedule_model){
+                                schedule_model = schedule_model.charAt(0).toUpperCase() + schedule_model.substr(1).toLowerCase();
+                            }
 
                             var schedule_timing = node.getAttribute('schedule_timing');
                             var schedule_unit = node.getAttribute('schedule_unit');
-                            
+
                             var description = node.getAttribute('description');
+
+                            var priority = node.getAttribute('priority');
 
                             return '<table>' +
                                     '<thead style="text-align: center"><h4>' + name + ' (' + type + ')</h4></thead>' +
@@ -288,6 +294,10 @@
                                     '<tr>' +
                                         '<td class="label_column">Id</td>' +
                                         '<td class="input_column">' + taskId + '</td>' +
+                                    '</tr>' +
+                                    '<tr>' +
+                                        '<td class="label_column">Priority</td>' +
+                                        '<td class="input_column">' + priority + '</td>' +
                                     '</tr>' +
                                     '<tr>' +
                                         '<td class="label_column">' + schedule_model + '</td>' +

@@ -262,20 +262,19 @@ class Permission(Base):
 class Group(Entity, ACLMixin):
     """Creates groups for users to be used in authorization system.
 
-    A Group instance is nothing more than a list of
-    :class:`~stalker.models.auth.User`\ s created to be able to assign
-    permissions in a group level.
+    A Group instance is nothing more than a list of :class:`.User`\ s created
+    to be able to assign permissions in a group level.
 
-    The Group class, as with the :class:`~stalker.models.auth.User` class, is
-    mixed with the :class:`~stalker.models.mixins.ACLMixin` which adds ability
-    to hold :class:`~stalker.models.mixin.Permission` instances and serve ACLs
-    to Pyramid.
+    The Group class, as with the :class:`.User` class, is mixed with the
+    :class:`~stalker.models.mixins.ACLMixin` which adds ability to hold
+    :class:`~stalker.models.mixin.Permission` instances and serve ACLs to
+    Pyramid.
     """
 
     # TODO: Update Group class documentation
     __auto_name__ = False
-    __tablename__ = "Groups"
-    __mapper_args__ = {"polymorphic_identity": "Group"}
+    __tablename__ = 'Groups'
+    __mapper_args__ = {'polymorphic_identity': 'Group'}
 
     gid = Column("id", Integer, ForeignKey("Entities.id"),
                  primary_key=True)
@@ -286,7 +285,7 @@ class Group(Entity, ACLMixin):
         back_populates="groups",
         doc="""Users in this group.
 
-        Accepts:class:`~stalker.models.auth.User` instance.
+        Accepts:class:`.User` instance.
         """
     )
 
@@ -315,32 +314,33 @@ class User(Entity, ACLMixin):
 
     There are a couple of points to take your attention to:
 
-    * The :attr:`~stalker.models.auth.User.code` attribute is derived from
-      the :attr:`~stalker.models.auth.User.nice_name` as it is in a
-      :class:`~stalker.models.entity.SimpleEntity`, but the
-      :attr:`~stalker.models.auth.User.nice_name` is derived from the
-      :attr:`~stalker.models.auth.User.login` instead of the
-      :attr:`~stalker.models.auth.User.name` attribute, so the
-      :attr:`~stalker.models.auth.User.code` of a
-      :class:`~stalker.models.auth.User` and a
+    * The :attr:`.code` attribute is derived from the :attr:`.nice_name` as it
+      is in a :class:`~stalker.models.entity.SimpleEntity`, but the
+      :attr:`.nice_name` is derived from the :attr:`.login` instead of the
+      :attr:`.name` attribute, so the :attr:`.code` of a :class:`.User` and a
       :class:`~stalker.models.entity.SimpleEntity` will be different then each
-      other. The formatting of the :attr:`~stalker.models.auth.User.code`
-      attribute is as follows:
+      other. The formatting of the :attr:`.code` attribute is as follows:
 
       * no underscore character is allowed, so while in the
         :class:`~stalker.models.entity.SimpleEntity` class the code could have
-        underscores, in :class:`~stalker.models.auth.User` class it is not
+        underscores, in :class:`.User` class it is not
         allowed.
       * all the letters in the code will be converted to lower case.
 
       Other than these two new rules all the previous formatting rules from the
       :class:`~stalker.models.entity.SimpleEntity` are valid.
 
-    .. versionadded 0.2.0: Task Watchers
+    .. note::
+       .. versionadded 0.2.0: Task Watchers
 
        New to version 0.2.0 users can be assigned to a
        :class:`~stalker.models.task.Task` as a **Watcher**. Which can be used
        to inform the users in watchers list about the updates of certain Tasks.
+    
+    .. note::
+       .. versionadded 0.2.0: Vacations
+       
+       It is now possible to define Vacations per user.
 
     :param email: holds the e-mail of the user, should be in [part1]@[part2]
       format
@@ -362,17 +362,15 @@ class User(Entity, ACLMixin):
 
     :param password: it is the password of the user, can contain any character.
       Stalker doesn't store the raw passwords of the users. To check a stored
-      password with a raw password use
-      :meth:`~stalker.models.auth.User.check_password` and to set the password
-      you can use the :attr:`~stalker.models.auth.User.password` property
-      directly.
+      password with a raw password use :meth:`.check_password` and to set the
+      password you can use the :attr:`.password` property directly.
 
     :type password: str, unicode
 
-    :param groups: It is a list of :class:`~stalker.models.auth.Group`
-      instances that this user belongs to.
+    :param groups: It is a list of :class:`.Group` instances that this user
+      belongs to.
 
-    :type groups: list of :class:`~stalker.models.auth.Group`
+    :type groups: list of :class:`.Group`
 
     :param tasks: it is a list of Task objects which holds the tasks that this
       user has been assigned to
@@ -447,7 +445,7 @@ class User(Entity, ACLMixin):
         back_populates='users',
         doc="""Permission groups that this users is a member of.
 
-        Accepts :class:`~stalker.models.auth.Group` object.
+        Accepts :class:`.Group` object.
         """
     )
 
@@ -505,7 +503,16 @@ class User(Entity, ACLMixin):
         primaryjoin="TimeLogs.c.resource_id==Users.c.id",
         back_populates="resource",
         doc="""A list of :class:`~stalker.models.task.TimeLog` instances which
-        holds the time logs created for this :class:`~stalker.models.auth.User`.
+        holds the time logs created for this :class:`.User`.
+        """
+    )
+
+    vacations = relationship(
+        'Vacation',
+        primaryjoin='Vacations.c.user_id==Users.c.id',
+        back_populates='user',
+        doc="""A list of :class:`~stalker.models.studio.Vacation` instances
+        which holds the vacations created for this :class:`.User`
         """
     )
 
@@ -520,7 +527,7 @@ class User(Entity, ACLMixin):
         projects_lead=None,
         sequences_lead=None,
         tasks=None,
-        watching=None,
+        watching=None, # TODO: Watchlist should be a list of lists `WatchLists` so one can create task lists (playlists) for different tasks
         last_login=None,
         **kwargs
     ):

@@ -994,4 +994,33 @@ class WorkingHoursMixin(object):
             wh = WorkingHours()
         return wh
 
-    
+
+class VacationMixin(object):
+    """Adds necessary attributes and tables to the Mixed in class to let it
+    hold :class:`~stalker.models.vacation.Vacation` instances.
+    """
+
+    @declared_attr
+    def vacations(cls):
+        """creates the vacations attribute
+        """
+        # get the secondary table
+        secondary_table = create_secondary_table(
+            cls.__name__, 'Vacation', cls.__tablename__, 'Vacations'
+        )
+        return relationship('Vacation', secondary=secondary_table)
+
+    @validates('vacations')
+    def _validate_vacations(self, key, vacation):
+        """validates the given vacation value
+        """
+        from stalker.models.studio import Vacation
+
+        if not isinstance(vacation, Vacation):
+            raise TypeError("Every member of %s.vacations should be an "
+                            "instance of stalker.models.studio.Vacation, "
+                            "not %s" %
+                            (self.__class__.__name__,
+                             vacation.__class__.__name__))
+        return vacation
+
