@@ -37,6 +37,11 @@ Stalker Changes
     the name of the entity.
   * **Update:** Task create/update dialog now has a new field called
     ``priority``.
+  * **Fix:** Selected 'Status' attribute for 'Task Dialog' in 'Update' mode is
+      set when dialog is open.
+  * **New:** Version List Page and Create/Update Dialogs added.
+  * **New:** Vacation List Page and Create/Update Dialogs added.
+
   * **JQueryGantt:**
   
     * **Update:** Context menu can now be opened in task names in grid editor.

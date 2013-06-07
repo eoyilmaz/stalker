@@ -354,6 +354,37 @@ def main(global_config, **settings):
                      'list/time_logs/{entity_id}') # returns response
 
     # *************************************************************************
+    # Vacation
+    config.add_route('dialog_create_vacation',
+                     'dialog/create/vacation/{user_id}')
+    config.add_route('dialog_update_vacation',
+                     'dialog/update/vacation/{vacation_id}')
+
+    config.add_route('create_vacation', 'create/vacation')
+    config.add_route('update_vacation', 'update/vacation')
+
+    config.add_route('get_vacations',
+                     'get/vacations/{user_id}') # returns json
+    config.add_route('list_vacations',
+                     'list/vacations/{user_id}') # returns response
+
+
+     # *************************************************************************
+    # Version
+    config.add_route('dialog_create_version',
+                     'dialog/create/version/{task_id}')
+    config.add_route('dialog_update_version',
+                     'dialog/update/version/{version_id}')
+
+    config.add_route('create_version', 'create/version')
+    config.add_route('update_version', 'update/version')
+
+    config.add_route('get_versions',
+                     'get/versions/{task_id}') # returns json
+    config.add_route('list_versions',
+                     'list/versions/{task_id}') # returns response
+
+    # *************************************************************************
     # Department
 
     config.add_route('dialog_create_department', 'dialog/create/department')

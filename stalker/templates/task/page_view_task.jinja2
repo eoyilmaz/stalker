@@ -37,7 +37,14 @@
                     style: 'padding: 0; margin:0;'
                 }, 'task_related_data_tab_container');
 
-
+                {% if has_permission('List_Task') %}
+                    var tasks_content_pane = new ContentPane({
+                        title: 'Tasks',
+                        href: 'list/tasks/{{ task.id  }}',
+                        style: 'width: 100%;'
+                    });
+                    task_related_data_tab_container.addChild(tasks_content_pane);
+                {% endif %}
 
 
                 {% if has_permission('List_TimeLog') %}
@@ -51,20 +58,11 @@
                     task_related_data_tab_container.addChild(time_logs_content_pane);
                 {% endif %}
 
-                 var summary_content_pane = new ContentPane({
-                    title: 'Overview',
-                    href: 'summarize/task/{{ task.id }}',
-                    style: 'padding: 0; margin:0;'
-
-                });
-
-                task_related_data_tab_container.addChild(summary_content_pane);
-
                 {% if has_permission('List_Version') %}
 
                     var versions_content_pane = new ContentPane({
                         title: 'Versions',
-                        content: 'list/versions/{{ task.id }}'
+                        href: 'list/versions/{{ task.id }}'
                     });
 
                     task_related_data_tab_container.addChild(versions_content_pane);
@@ -80,6 +78,16 @@
                     task_related_data_tab_container.addChild(tickets_content_pane);
 
                 {% endif %}
+
+                 var summary_content_pane = new ContentPane({
+                    title: 'Overview',
+                    //href: 'summarize/{{ task.entity_type.lower() }}/{{ task.id }}',
+                    href: 'summarize/task/{{ task.id }}',
+                    style: 'padding: 0; margin:0;'
+
+                });
+
+                task_related_data_tab_container.addChild(summary_content_pane);
 
                 task_related_data_tab_container.startup();
 

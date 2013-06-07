@@ -126,7 +126,7 @@
                             {% if has_permission('Read_Asset')%}
 
                                 var targetPane = "'assets_content_pane'";
-                                var address = "'view/asset/" + value.id + "'";
+                                var address = "'view/task/" + value.id + "'";
                                 return '<a href="javascript:redirectLinkInParent(' + targetPane + ',' + address + ');">' + value.name + '</a>';
 
                             {% else %}

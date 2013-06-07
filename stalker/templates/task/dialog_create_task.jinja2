@@ -652,7 +652,8 @@ require([
     var status_filtering_select = new FilteringSelect({
         name: 'status_id',
         required: true,
-        store: status_memory
+        label: 'Status'
+       // store: status_memory
     }, 'task_status');
     status_filtering_select.startup();
 
@@ -676,7 +677,10 @@ require([
     var status_field_updater = fieldUpdater({
         'memory': status_memory,
         'widget': status_filtering_select,
-        'callBack': update_status_button_function
+        'callBack': update_status_button_function,
+         {% if mode=='UPDATE' %}
+             'selected': '{{ task.status.id }}'
+         {% endif %}
     });
 
     var add_status_button = dialogCaller({
@@ -689,14 +693,15 @@ require([
     });
     add_status_button.startup();
 
-    {% if mode == 'CREATE' %}
-        status_field_updater({animate: true});
-    {% elif mode == 'UPDATE' %}
-        status_field_updater({
-            animate: true,
-            selected: {{ task.status.id }}
-        });
-    {% endif %}
+    status_field_updater({animate: true});
+{#    {% if mode == 'CREATE' %}#}
+{#        status_field_updater({animate: true});#}
+{#    {% elif mode == 'UPDATE' %}#}
+{#        status_field_updater({#}
+{#            animate: true,#}
+{#            selected: {{ task.status.id }}#}
+{#        });#}
+{#    {% endif %}#}
 
 
     // ********************************************************************

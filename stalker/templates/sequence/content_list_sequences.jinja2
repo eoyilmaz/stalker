@@ -104,7 +104,7 @@
                             {% if has_permission('Read_Sequence')%}
 
                                 var targetPane = "'sequences_content_pane'";
-                                var address = "'view/sequence/" + value.id + "'";
+                                var address = "'view/task/" + value.id + "'";
 
                                 return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.name + '</a>';
                             {% else %}
