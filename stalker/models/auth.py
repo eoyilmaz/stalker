@@ -84,11 +84,10 @@ class RootFactory(object):
         )
 
         # start with default ACLs
-        from pyramid.security import Allow
         
         ACLs = [
-            (Allow, 'Group:' + defaults.admin_department_name, all_permissions),
-            (Allow, 'User:' + defaults.admin_name, all_permissions)
+            ('Allow', 'Group:' + defaults.admin_department_name, all_permissions),
+            ('Allow', 'User:' + defaults.admin_name, all_permissions)
         ]
 
         # get all users and their ACLs

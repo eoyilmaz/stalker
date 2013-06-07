@@ -21,20 +21,9 @@
 import os
 import datetime
 import logging
-import tempfile
 
 
 logger = logging.getLogger(__name__)
-
-
-def work_time_to_seconds(time, unit):
-    """Converts the given work time to seconds
-    
-    :param time: the work time
-    :param unit: the time unit
-    :return:
-    """
-    pass
 
 
 class Config(object):
@@ -445,3 +434,7 @@ class Config(object):
 
     def __contains__(self, name):
         return name in self.config_values
+
+
+# use this instance
+defaults = Config()

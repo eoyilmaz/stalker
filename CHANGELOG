@@ -18,6 +18,9 @@ Stalker Changes
   * **Update:** **Task.priority** is now reflected in tjp file if it is
     different than the default value (500).
   * **New::** Added a new class called **Vacation** to hold user vacations.
+  * **Update:** Removed dependencies to ``pyramid.security.Allow`` and
+    ``pyramid.security.Deny`` in couple of packages.
+  * **Update:** Changed the way the ``stalker.defaults`` is created.
 
 * **WebUI:**
 

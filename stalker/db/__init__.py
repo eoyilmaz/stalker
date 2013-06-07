@@ -400,7 +400,6 @@ def register(class_):
     
     :param class_: The class itself that needs to be registered.
     """
-    from pyramid.security import Allow, Deny
     from stalker.models.auth import Permission
 
     # create the Permissions
@@ -427,7 +426,7 @@ def register(class_):
         DBSession.add(new_entity_type)
 
     for action in defaults.actions:
-        for access in [Allow, Deny]:
+        for access in ['Allow', 'Deny']:
             permission_obj = Permission(access, action, class_name)
             if permission_obj not in permissions_db:
                 DBSession.add(permission_obj)

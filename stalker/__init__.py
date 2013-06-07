@@ -26,9 +26,7 @@ __version__ = '0.2.0.b7'
 
 
 # before anything about stalker create the defaults
-from stalker import config as st_config
-
-defaults = st_config.Config()
+from stalker.config import defaults
 
 from stalker.models.auth import Group, Permission, User
 from stalker.models.asset import Asset
@@ -74,7 +72,7 @@ def main(global_config, **settings):
 
     # setup the database to the given settings
     from stalker import db
-
+    
     db.setup(settings)
 
     # setup authorization and authentication
