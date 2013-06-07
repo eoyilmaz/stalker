@@ -911,7 +911,7 @@ class LocalSession(object):
         """
         self.valid_to = datetime.datetime.now() + datetime.timedelta(10)
         # serialize self
-        dumped_data = pickle.dumps(self, -1)
+        dumped_data = pickle.dumps(self)
         logger.debug('dumped session data : %s' % dumped_data)
         self._write_data(dumped_data)
 
@@ -928,10 +928,10 @@ class LocalSession(object):
         """
         :return str: the session file full path
         """
-        return os.path.join(
+        return os.path.normpath(os.path.join(
             defaults.local_storage_path,
             defaults.local_session_data_file_name
-        )
+        ))
 
     def _write_data(self, data):
         """Writes the given data to the local session file
