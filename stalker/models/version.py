@@ -457,7 +457,6 @@ class Version(Link, StatusMixin):
         project = self.version_of.project
         repo = project.repository
 
-        self.update_paths()
         return os.path.join(
             repo.path,
             self.full_path
@@ -473,7 +472,6 @@ class Version(Link, StatusMixin):
         project = self.version_of.project
         repo = project.repository
 
-        self.update_paths()
         return os.path.join(
             repo.path,
             self.path
