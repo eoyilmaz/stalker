@@ -710,10 +710,10 @@ attribute value."""
         # convert to seconds
         # FIX: using strftime(%s) is dangerous, it uses system time zone
         epoch = datetime.datetime(1970, 1, 1)
-        dts = dt - epoch
-
-        return datetime.datetime.fromtimestamp(
-            ((dts.days * 86400 + dts.seconds) + trs * 0.5) // trs * trs
+        diff = dt - epoch
+        diff_in_seconds = diff.days * 86400 + diff.seconds
+        return epoch + datetime.timedelta(
+            seconds=(diff_in_seconds + trs * 0.5) // trs * trs
         )
 
     @property
@@ -728,8 +728,6 @@ attribute value."""
         """
         return self.computed_duration.days * 86400 + \
                self.computed_duration.seconds
-
-
 
 
 class ProjectMixin(object):

@@ -567,7 +567,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         start = test_asset.start
         tags = test_asset.tags
         children = test_asset.children
-        type = test_asset.type
+        type_ = test_asset.type
         updated_by = test_asset.updated_by
 
         del test_asset
@@ -593,7 +593,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(status_list, test_asset_DB.status_list)
         self.assertEqual(tags, test_asset_DB.tags)
         self.assertEqual(children, test_asset_DB.children)
-        self.assertEqual(type, test_asset_DB.type)
+        self.assertEqual(type_, test_asset_DB.type)
         self.assertEqual(updated_by, test_asset_DB.updated_by)
 
     def test_persistence_of_TimeLog(self):
