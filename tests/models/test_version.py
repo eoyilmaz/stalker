@@ -851,19 +851,17 @@ class VersionTester(unittest2.TestCase):
         DBSession.add(new_version1)
         DBSession.commit()
         new_version1.update_paths()
-        
+
         self.assertEqual(
             new_version1.path,
             'tp/SH001/Task1'
         )
-        
+
         new_version1.extension = '.ma'
         self.assertEqual(
             new_version1.filename,
             'Task1_TestTake_v001.ma'
         )
-        
-
 
     def test_update_paths_will_raise_a_RuntimeError_if_there_is_no_suitable_FilenameTemplate(
             self):

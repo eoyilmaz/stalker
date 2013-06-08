@@ -223,6 +223,17 @@ class EnvironmentBaseTestCase(unittest2.TestCase):
         )
         self.assertEqual(version2_found, version2)
 
+    def test_get_versions_from_path_handles_empty_and_None_path(self):
+        """testing if no errors will be raised for a path which is None or an
+        empty string
+        """
+        env = EnvironmentBase()
+        versions = env.get_versions_from_path('')
+        self.assertEqual(versions, [])
+
+        versions = env.get_versions_from_path(None)
+        self.assertEqual(versions, [])
+
     def test_get_versions_from_path_with_multiple_repositories(self):
         """testing if the get versions_from_path is working fine with multiple
         repositories and with same version names

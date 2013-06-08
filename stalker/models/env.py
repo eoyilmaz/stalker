@@ -211,6 +211,9 @@ class EnvironmentBase(object):
 
         :return: A list of :class:`~stalker.models.version.Version` instances.
         """
+        if not path:
+            return []
+
         # convert '\\' to '/'
         path = os.path.normpath(path).replace('\\', '/')
         path_trimmed = self.trim_repo_path(path)
