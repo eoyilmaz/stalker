@@ -131,6 +131,9 @@ class VersionTester(unittest2.TestCase):
         # repository
         self.test_repo = Repository(
             name='Test Repository',
+            linux_path='/mnt/T/',
+            windows_path='T:/',
+            osx_path='/Volumes/T/'
         )
 
         # a project type
@@ -139,7 +142,6 @@ class VersionTester(unittest2.TestCase):
             code='test',
             target_entity_type=Project,
         )
-
         
         # create a structure
         self.test_structure = Structure(
@@ -155,8 +157,6 @@ class VersionTester(unittest2.TestCase):
             repository=self.test_repo,
             structure=self.test_structure
         )
-        
-        
 
         # create a sequence
         self.test_sequence = Sequence(
@@ -212,8 +212,6 @@ class VersionTester(unittest2.TestCase):
         self.kwargs = {
             'name': 'Version1',
             'take_name': 'TestTake',
-            'full_path': '/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/'
-                         'v001.ma',
             'inputs': [self.test_input_link1,
                        self.test_input_link2],
             'outputs': [self.test_output_link1,
@@ -844,7 +842,7 @@ class VersionTester(unittest2.TestCase):
             name='Task Filename Template',
             target_entity_type='Task',
             path='{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}',
-            filename='{{version_of.nice_name}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}',
+            filename='{{version_of.nice_name}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}{{extension}}',
         )
         self.test_project.structure.templates.append(ft)
         new_version1 = Version(**self.kwargs)
@@ -965,4 +963,25 @@ class VersionTester(unittest2.TestCase):
             self.test_version.type
         )
 
+    def test_absolute_full_path_works_properly(self):
+        """testing if the absolute_full_path attribute works properly
+        """
+        ft = FilenameTemplate(
+            name='Task Filename Template',
+            target_entity_type='Task',
+            path='{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}',
+            filename='{{version_of.nice_name}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}{{extension}}',
+        )
+        self.test_project.structure.templates.append(ft)
+        new_version1 = Version(**self.kwargs)
+        DBSession.add(new_version1)
+        DBSession.commit()
 
+        new_version1.update_paths()
+        new_version1.extension = '.ma'
+        self.assertEqual(new_version1.extension, '.ma')
+
+        self.assertEqual(
+            new_version1.absolute_full_path,
+            '/mnt/T/tp/SH001/Task1/Task1_TestTake_v001.ma'
+        )

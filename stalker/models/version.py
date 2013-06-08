@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+import os
 
 import re
 import jinja2
@@ -408,6 +409,7 @@ class Version(Link, StatusMixin):
             'version': self,
             'version_of': self.version_of,
             'type': self.type,
+            'extension': self.extension
         }
         return kwargs
 
@@ -444,6 +446,22 @@ class Version(Link, StatusMixin):
         self.filename = jinja2.Template(vers_template.filename) \
             .render(**kwargs)
         self.path = jinja2.Template(vers_template.path).render(**kwargs)
+
+    @property
+    def absolute_full_path(self):
+        """Returns the absolute full path of this version including the
+        repository path of the related project
+
+        :return: str
+        """
+        project = self.version_of.project
+        repo = project.repository
+
+        self.update_paths()
+        return os.path.join(
+            repo.path,
+            self.full_path
+        ).replace('\\', '/')
 
 # VERSION INPUTS
 Version_Inputs = Table(
