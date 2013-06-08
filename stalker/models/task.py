@@ -649,9 +649,9 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         """the equality operator
         """
         return super(Task, self).__eq__(other) and isinstance(other, Task) \
-        and self.parent == other.parent and self.depends == other.depends \
-        and self.children == other.children
-    
+        and self.project == other.project and self.parent == other.parent \
+        and self.depends == other.depends and self.start == other.start \
+        and self.end == other.end and self.resources == other.resources
 
     @validates("time_logs")
     def _validate_time_logs(self, key, time_log):

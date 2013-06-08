@@ -2352,6 +2352,7 @@ class TaskTester(unittest2.TestCase):
         task2.parent = task3
         task3.parent = task4
         task5.children = [task6]
+        task6.depends = [task2]
 
         self.assertFalse(self.test_task == entity1)
         self.assertTrue(self.test_task == task0)

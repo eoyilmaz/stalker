@@ -843,7 +843,7 @@ class VersionTester(unittest2.TestCase):
         ft = FilenameTemplate(
             name='Task Filename Template',
             target_entity_type='Task',
-            path='{{project.nice_name}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}',
+            path='{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}',
             filename='{{version_of.nice_name}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}',
         )
         self.test_project.structure.templates.append(ft)

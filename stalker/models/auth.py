@@ -721,8 +721,8 @@ class User(Entity, ACLMixin):
         Checks the given raw_password with the current Users objects encrypted
         password.
 
-        Checks the given raw password with the given encrypted password. Handles
-        the encryption process behind the scene.
+        Checks the given raw password with the given encrypted password.
+        Handles the encryption process behind the scene.
         """
         return self.password == base64.encodestring(str(raw_password))
     

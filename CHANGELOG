@@ -13,8 +13,8 @@ Stalker Changes
     the **other_entity** are the same.
   * **Fix:** **Task.to_tjp()** now correctly add the dependent tasks of a
     container task.
-  * **Fix:** **Task.__eq__()** now correctly considers the parent, depends and
-    children Tasks.
+  * **Fix:** **Task.__eq__()** now correctly considers the parent, depends,
+    resources, start and end dates.
   * **Update:** **Task.priority** is now reflected in tjp file if it is
     different than the default value (500).
   * **New::** Added a new class called **Vacation** to hold user vacations.
