@@ -463,6 +463,23 @@ class Version(Link, StatusMixin):
             self.full_path
         ).replace('\\', '/')
 
+    @property
+    def absolute_path(self):
+        """Returns the absolute path of this version including the repository
+        path of the related project
+
+        :return: str
+        """
+        project = self.version_of.project
+        repo = project.repository
+
+        self.update_paths()
+        return os.path.join(
+            repo.path,
+            self.path
+        ).replace('\\', '/')
+
+
 # VERSION INPUTS
 Version_Inputs = Table(
     "Version_Inputs", Base.metadata,

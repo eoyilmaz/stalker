@@ -985,3 +985,26 @@ class VersionTester(unittest2.TestCase):
             new_version1.absolute_full_path,
             '/mnt/T/tp/SH001/Task1/Task1_TestTake_v001.ma'
         )
+
+    def test_absolute_full_path_works_properly(self):
+        """testing if the absolute_full_path attribute works properly
+        """
+        ft = FilenameTemplate(
+            name='Task Filename Template',
+            target_entity_type='Task',
+            path='{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}',
+            filename='{{version_of.nice_name}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}{{extension}}',
+        )
+        self.test_project.structure.templates.append(ft)
+        new_version1 = Version(**self.kwargs)
+        DBSession.add(new_version1)
+        DBSession.commit()
+
+        new_version1.update_paths()
+        new_version1.extension = '.ma'
+        self.assertEqual(new_version1.extension, '.ma')
+
+        self.assertEqual(
+            new_version1.absolute_path,
+            '/mnt/T/tp/SH001/Task1'
+        )

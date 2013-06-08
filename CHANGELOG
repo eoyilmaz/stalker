@@ -27,6 +27,8 @@ Stalker Changes
     are now working properly.
   * **Update:** Added **Version.absolute_full_path** property which renders the
     absolute full path which also includes the repository path.
+  * **Update:** Added **Version.absolute_path** property which renders the
+    absolute path which also includes the repository path.
 
 * **WebUI:**
 
