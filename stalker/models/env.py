@@ -23,6 +23,7 @@ import logging
 
 from stalker import Version
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -147,20 +148,49 @@ class EnvironmentBase(object):
         """
         raise NotImplementedError
     
-    def trim_server_path(self, path_in):
-        """Trims the server_path value from the given path_in
+    def trim_repo_path(self, path):
+        """Trims the repository path value from the given path
 
-        :param path_in: The path that wanted to be trimmed
+        :param path: The path that wanted to be trimmed
         :return: str
         """
-        server_path = os.environ['REPO'].replace('\\', '/')
-        if path_in.startswith(server_path):
-            length = len(server_path)
-            if not server_path.endswith('/'):
-                length += 1
-            path_in = path_in[length:]
-        return path_in
-    
+        # get the repo first
+        repo = self.find_repo(path)
+
+        if not repo:
+            return path
+
+        # then try to trim the path
+        if path.startswith(repo.path):
+            return path[len(repo.path):]
+        elif path.startswith(repo.windows_path):
+            return path[len(repo.windows_path):]
+        elif path.startswith(repo.linux_path):
+            return path[len(repo.linux_path):]
+        elif path.startswith(repo.osx_path):
+            return path[len(repo.osx_path):]
+        return path
+
+    def find_repo(self, path):
+        """returns the repository from the given path
+        
+        :param str path: path in a repository
+        :return: stalker.models.repository.Repository
+        """
+        # first find the repository
+        from stalker import Repository
+
+        repos = Repository.query.all()
+        found_repo = None
+        for repo in repos:
+            if path.startswith(repo.path) \
+                or path.startswith(repo.windows_path) \
+                or path.startswith(repo.linux_path) \
+                or path.startswith(repo.osx_path):
+                found_repo = repo
+                break
+        return found_repo
+
     def get_versions_from_path(self, path):
         """Finds Version instances from the given path value.
 
@@ -179,20 +209,19 @@ class EnvironmentBase(object):
         :param path: A path which has possible
             :class:`~oyProjectManager.models.version.Version` instances.
 
-        :return: A list of :class:`~satlker.models.version.Version` instances.
+        :return: A list of :class:`~stalker.models.version.Version` instances.
         """
-        if path is None or path=="":
-            return None
+        # convert '\\' to '/'
+        path = os.path.normpath(path).replace('\\', '/')
+        path_trimmed = self.trim_repo_path(path)
+        logger.debug('path_trimmed: %s' % path_trimmed)
 
-        # get the path by trimming the server_path
-        path = path.replace('\\', '/')
-        path = self.trim_server_path(path)
+        # try to get all versions with that info
+        versions = Version.query.\
+            filter(Version.full_path.startswith(path_trimmed)).all()
 
-        # get all the version instance at that path
-        return Version.query\
-            .filter(Version.path.startswith(path))\
-            .order_by(Version.id.desc())\
-            .all()
+        return versions
+
 
     def get_version_from_full_path(self, full_path):
         """Finds the Version instance from the given full_path value.
@@ -207,18 +236,15 @@ class EnvironmentBase(object):
 
         :return: :class:`~stalker.models.version.Version`
         """
+        # convert '\\' to '/'
+        full_path = os.path.normpath(full_path).replace('\\', '/')
 
-        path, filename = os.path.split(full_path)
-        path = self.trim_server_path(path)
-
-        logger.debug('path: %s' % path)
+        # trim repo path
+        full_path_trimmed = self.trim_repo_path(full_path)
 
         # try to get a version with that info
-        version = Version.query()\
-            .filter(Version.path==path)\
-            .filter(Version.filename==filename)\
-            .first()
-
+        version = Version.query\
+            .filter(Version.full_path==full_path_trimmed).first()
         return version
     
     def get_current_version(self):

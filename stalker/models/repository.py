@@ -53,9 +53,9 @@ class Repository(Entity):
     :param windows_path: shows the windows path of the repository root, should
       be a string
     """
-    
+
     # TODO: Add OpenLDAP support, or at least learn how those stuff works.
-    
+
     __auto_name__ = False
     __tablename__ = 'Repositories'
     __mapper_args__ = {'polymorphic_identity': 'Repository'}
@@ -84,7 +84,6 @@ class Repository(Entity):
     def _validate_linux_path(self, key, linux_path_in):
         """validates the given linux path
         """
-
         if not isinstance(linux_path_in, (str, unicode)):
             raise TypeError("%s.linux_path should be an instance of string "
                             "or unicode not %s" %
@@ -99,7 +98,6 @@ class Repository(Entity):
     def _validate_osx_path(self, key, osx_path_in):
         """validates the given osx path
         """
-
         if not isinstance(osx_path_in, (str, unicode)):
             raise TypeError("%s.osx_path should be an instance of string or "
                             "unicode not %s" %
@@ -114,7 +112,6 @@ class Repository(Entity):
     def _validate_windows_path(self, key, windows_path_in):
         """validates the given windows path
         """
-
         if not isinstance(windows_path_in, (str, unicode)):
             raise TypeError("%s.windows_path should be an instance of string "
                             "or unicode not %s" %
@@ -128,7 +125,6 @@ class Repository(Entity):
     @property
     def path(self):
         """The path for the current os"""
-
         # return the proper value according to the current os
         platform_system = platform.system()
 
@@ -142,7 +138,6 @@ class Repository(Entity):
     def __eq__(self, other):
         """the equality operator
         """
-
         return super(Repository, self).__eq__(other) and\
                isinstance(other, Repository) and\
                self.linux_path == other.linux_path and\

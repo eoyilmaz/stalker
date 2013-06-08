@@ -111,7 +111,6 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
     """
     
     __auto_name__ = False
-    #__strictly_typed__ = True
     __tablename__ = "Projects"
     project_id_local = Column("id", Integer, ForeignKey("Entities.id"),
                               primary_key=True)

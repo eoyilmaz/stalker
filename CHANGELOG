@@ -21,6 +21,10 @@ Stalker Changes
   * **Update:** Removed dependencies to ``pyramid.security.Allow`` and
     ``pyramid.security.Deny`` in couple of packages.
   * **Update:** Changed the way the ``stalker.defaults`` is created.
+  * **Fix:** **EnvironmentBase.get_version_from_full_path()**,
+    **EnvironmentBase.get_versions_from_path()**,
+    **EnvironmentBase.trim_repo_path()**, **EnvironmentBase.find_repo** methods
+    are now working properly.
 
 * **WebUI:**
 
