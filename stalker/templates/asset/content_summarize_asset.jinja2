@@ -22,10 +22,15 @@
     {# Avatar #}
     <div id='asset_thumbnail' class='thumbnail'>
         {% if not asset.thumbnail %}
-            <img src='{{ request.static_url("stalker:static/stalker/images/Placeholder_shot.png") }}'
+            <img src='{{ request.static_url("stalker:static/stalker/images/Placeholder_0.png") }}'
                  alt=''
-                 style='width:120px;'>
+                 style='width:120px; height: auto;'>
+        {% else %}
+            <img src='{{ asset.thumbnail.full_path }}'
+                 alt=''
+                 style='width:120px; height: auto;'>
         {% endif %}
+        <div class='thumbnail_menu'>&nbsp</div>
     </div>
     <div id='asset_summary_chart1'
          style='width: 100px;
@@ -108,11 +113,12 @@
         'dojox/charting/plot2d/Pie',
         'dojox/charting/action2d/MoveSlice',
         'dijit/form/Button',
+        'stalker/thumbnailMenu',
         'stalker/dialogs',
         'stalker/dialogCaller',
         'dojo/domReady!'
     ], function (Chart, theme, PiePlot, MoveSlice, Button, dialogs,
-                 dialogCaller) {
+                 dialogCaller, thumbnailMenu) {
 
 
         // Create the chart within it's "holding" node
@@ -159,8 +165,25 @@
                 data_id: {{ asset.id }}
             });
             update_asset_button.startup();
+
+            thumbnailMenu({
+                targetNodeIds: ['asset_avatar'],
+                selector: '.thumbnail_menu',
+                entity_id: {{ user.id }},
+                related_field_updater: function () {
+                    var content_pane = update_user_button.getParent();
+                    if (content_pane != null) {
+                        content_pane.refresh();
+                    }
+                }
+            });
         {% endif %}
+
+
+
 
     });
 
 </script>
+
+

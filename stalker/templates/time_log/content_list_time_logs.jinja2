@@ -97,6 +97,26 @@
                 timeLogData = data;
 
                 var columns = [
+
+
+                    {
+                        field: 'parent_name',
+                        label: 'Parent Name'
+{#                        get: function (object) {#}
+{##}
+{#                            return object; // return entire item for formatter to use#}
+{##}
+{#                        },#}
+{#                        formatter: function (value) {#}
+{##}
+{#                            var targetPane = "'tasks_content_pane'";#}
+{#                            var address = "'view/task/" + value.task_id + "'";#}
+{##}
+{#                            return '<a href="javascript:redirectLinkInParent(' + targetPane + ',' + address + ');">' + value.task_name + '</a>';#}
+{##}
+{#                        }#}
+
+                    },
                     {
                         field: 'task_name',
                         label: 'Task Name',

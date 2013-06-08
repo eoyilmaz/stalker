@@ -26,11 +26,11 @@
     {% if not user.thumbnail %}
         <img src='{{ request.static_url("stalker:static/stalker/images/Placeholder_0.png") }}'
              alt=''
-             style='width:192px; height: auto;'>
+             style='width:auto; height:150px;'>
     {% else %}
         <img src='{{ user.thumbnail.full_path }}'
              alt=''
-             style='width:192px; height: auto;'>
+             style='width:auto; height:150px;'>
     {% endif %}
     <div class='thumbnail_menu'>&nbsp</div>
 </div>

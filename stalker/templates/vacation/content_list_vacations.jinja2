@@ -1,0 +1,194 @@
+{# Stalker a Production Asset Management System
+ Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
+
+ This file is part of Stalker.
+
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation;
+ version 2.1 of the License.
+
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+#}
+<div id='view_vacations'>
+{#    {% if has_permission('Create_Vacation') %}#}
+        <button id='create_vacation_button'>Create Vacation</button>
+{#    {% endif %}#}
+    <div id='vacations_data_grid'></div>
+</div>
+
+<script type='text/javascript'>
+    require([
+        'dojo/data/ObjectStore',
+        'dojo/store/Memory',
+        'dojo/store/JsonRest',
+        'dojo/aspect',
+
+        "dgrid/selector",
+        "dgrid/List",
+        "dgrid/OnDemandGrid",
+        "dgrid/Selection",
+        "dgrid/Keyboard",
+        "dojo/_base/declare",
+        "dgrid/editor",
+
+        'dijit/Menu',
+        'dijit/MenuItem',
+        'dijit/MenuSeparator',
+
+        'dijit/form/Button',
+
+        'stalker/dialogs',
+        'stalker/dialogCaller',
+        'stalker/dialogCreator',
+
+        'dojo/domReady!'
+    ], function (ObjectStore, Memory, JsonRest, aspect, selector, List, Grid,
+                 Selection, Keyboard, declare, editor, Menu, MenuItem,
+                 MenuSeparator, Button, dialogs, dialogCaller, dialogCreator) {
+
+
+        var StandardGrid = declare([Grid, Selection, Keyboard]);
+
+        var vacations_DataGrid = new StandardGrid({
+            id: 'vacations_data_grid',
+            width: '100%',
+{#            autoHeight: true,#}
+            selectionMode: 'single',
+            cellNavigation: false,
+            allowSelectAll: true
+        }, 'vacations_data_grid');
+
+
+{#        {% if has_permission('Create_Vacation')%}#}
+
+            var create_vacation_button = dialogCaller({
+                label: 'Create Vacation',
+                dialog_id: 'vacation_dialog',
+                content_creator: dialogs.create_vacation_dialog,
+                attach_to: 'create_vacation_button',
+                related_field_updater: vacations_DataGrid_updater,
+                data_id: '{{ user.id }}'
+            });
+            create_vacation_button.startup();
+{#        {% endif %}#}
+
+
+
+        var timeLogData;
+
+
+        function vacations_DataGrid_updater() {
+
+
+            var vacation_memory = new JsonRest({
+                target: '/get/vacations/{{ user.id }}'
+            });
+
+            vacation_memory.query().then(function (data) {
+
+                timeLogData = data;
+
+                var columns = [
+
+                    {
+                        field: 'type',
+                        label: 'Vacation Type'
+                    },
+                    {
+                        field: 'start_date',
+                        label: "Start Date",
+
+                        formatter: function (value) {
+
+                            return new Date(parseInt(value) * 1000);
+
+                        }
+                    },
+                    {
+                        field: 'end_date',
+                        label: "End Date",
+                        formatter: function (value) {
+
+                            return new Date(parseInt(value) * 1000);
+
+                        }
+                    },
+                    {
+                        field: 'created_by_name',
+                        label: "Created By",
+                        get: function (object) {
+
+                            return object; // return entire item for formatter to use
+
+                        },
+                        formatter: function (value) {
+
+                            var targetPane = "'central_content'";
+                            var address = "'view/user/" + value.created_by_id + "'";
+
+                            return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.created_by_name + '</a>';
+
+                        }
+                    }
+                ];
+
+                vacations_DataGrid.renderArray(data);
+                vacations_DataGrid.set('columns', columns);
+
+
+                var right_click_menu = new Menu({
+                    targetNodeIds: ['vacations_data_grid'],
+                    selector: '.dgrid-row'
+                });
+
+                var create_update_timelog_menuItem_creator = function () {
+                    return new MenuItem({
+                        label: 'Update Vacation',
+                        onClick: function () {
+                            var node = this.getParent().currentTarget;
+                            var nodeId = node.getAttribute('id');
+                            var rowId = vacations_DataGrid.id + '-row-';
+                            var timeLogId = timeLogData[parseInt(nodeId.substring(rowId.length, nodeId.length))].id;
+
+
+                            var dialog = dialogCreator({
+                                dialog_id: 'vacation_dialog',
+                                content_creator: dialogs.update_vacation_dialog,
+                                related_field_updater: vacations_DataGrid_updater,
+                                data_id: timeLogId
+                            });
+                            dialog.show();
+
+
+                        }
+                    });
+                };
+
+                right_click_menu.addChild(create_update_timelog_menuItem_creator());
+
+                right_click_menu.startup();
+
+
+            });
+
+            vacations_DataGrid.resize();
+
+        }
+
+        vacations_DataGrid_updater();
+
+
+
+
+
+    });
+</script>
+

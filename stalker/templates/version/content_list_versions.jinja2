@@ -1,0 +1,226 @@
+{# Stalker a Production Asset Management System
+ Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
+
+ This file is part of Stalker.
+
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation;
+ version 2.1 of the License.
+
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+#}
+<div id='view_versions'>
+    {% if has_permission('Create_Version') %}
+        <button id='create_version_button'>Create Version</button>
+    {% endif %}
+    <div id='versions_data_grid'></div>
+</div>
+
+<script type='text/javascript'>
+    require([
+        'dojo/data/ObjectStore',
+        'dojo/store/Memory',
+        'dojo/store/JsonRest',
+        'dojo/aspect',
+
+        "dgrid/selector",
+        "dgrid/List",
+        "dgrid/OnDemandGrid",
+        "dgrid/Selection",
+        "dgrid/Keyboard",
+        "dojo/_base/declare",
+        "dgrid/editor",
+
+        'dijit/Menu',
+        'dijit/MenuItem',
+        'dijit/MenuSeparator',
+
+        'dijit/form/Button',
+
+        'stalker/dialogs',
+        'stalker/dialogCaller',
+        'stalker/dialogCreator',
+
+        'dojo/domReady!'
+    ], function (ObjectStore, Memory, JsonRest, aspect, selector, List, Grid,
+                 Selection, Keyboard, declare, editor, Menu, MenuItem,
+                 MenuSeparator, Button, dialogs, dialogCaller, dialogCreator) {
+
+
+        var StandardGrid = declare([Grid, Selection, Keyboard]);
+
+        var versions_DataGrid = new StandardGrid({
+            id: 'versions_data_grid',
+            width: '100%',
+{#            autoHeight: true,#}
+            selectionMode: 'single',
+            cellNavigation: false,
+            allowSelectAll: true
+        }, 'versions_data_grid');
+
+
+        {% if has_permission('Create_Version') %}
+
+            var create_version_button = dialogCaller({
+                label: 'Create Version',
+                dialog_id: 'version_dialog',
+                content_creator: dialogs.create_version_dialog,
+                attach_to: 'create_version_button',
+                related_field_updater: versions_DataGrid_updater,
+                data_id: '{{ task.id }}'
+            });
+            create_version_button.startup();
+        {% endif %}
+
+
+
+        var timeLogData;
+
+
+        function versions_DataGrid_updater() {
+
+
+            var version_memory = new JsonRest({
+                target: '/get/versions/{{ task.id }}'
+            });
+
+            version_memory.query().then(function (data) {
+
+                timeLogData = data;
+
+                var columns = [
+
+
+                    {
+                        field: 'parent_name',
+                        label: 'Parent Name'
+
+                    },
+                    {
+                        field: 'task_name',
+                        label: 'Task Name',
+                        get: function (object) {
+
+                            return object; // return entire item for formatter to use
+
+                        },
+                        formatter: function (value) {
+
+                            var targetPane = "'tasks_content_pane'";
+                            var address = "'view/task/" + value.task_id + "'";
+
+                            return '<a href="javascript:redirectLinkInParent(' + targetPane + ',' + address + ');">' + value.task_name + '</a>';
+
+                        }
+
+                    },
+                    {
+                        field: 'name',
+                        label: 'Name',
+                        get: function (object) {
+
+                            return object; // return entire item for formatter to use
+
+                        },
+                        formatter: function (value) {
+
+                            var targetPane = "'tasks_content_pane'";
+                            var address = "'view/task/" + value.id + "'";
+
+                            return '<a href="javascript:redirectLinkInParent(' + targetPane + ',' + address + ');">' + value.name + '</a>';
+
+                        }
+
+                    },
+                    {
+                        field: 'path',
+                        label: 'Path',
+                        get: function (object) {
+
+                            return object; // return entire item for formatter to use
+
+                        },
+                        formatter: function (value) {
+
+                            return '<a href="' + value.path + '">' + value.path + '</a>';
+
+                        }
+
+                    },
+                    {
+                        field: 'created_by_name',
+                        label: "Created By",
+                        get: function (object) {
+
+                            return object; // return entire item for formatter to use
+
+                        },
+                        formatter: function (value) {
+
+                            var targetPane = "'central_content'";
+                            var address = "'view/user/" + value.created_by_id + "'";
+
+                            return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.created_by_name + '</a>';
+
+                        }
+                    }
+                ];
+
+                versions_DataGrid.renderArray(data);
+                versions_DataGrid.set('columns', columns);
+
+
+{#                var right_click_menu = new Menu({#}
+{#                    targetNodeIds: ['versions_data_grid'],#}
+{#                    selector: '.dgrid-row'#}
+{#                });#}
+{##}
+{#                var create_update_version_menuItem_creator = function () {#}
+{#                    return new MenuItem({#}
+{#                        label: 'Update Version',#}
+{#                        onClick: function () {#}
+{#                            var node = this.getParent().currentTarget;#}
+{#                            var nodeId = node.getAttribute('id');#}
+{#                            var rowId = versions_DataGrid.id + '-row-';#}
+{#                            var timeLogId = timeLogData[parseInt(nodeId.substring(rowId.length, nodeId.length))].id;#}
+{##}
+{##}
+{#                            var dialog = dialogCreator({#}
+{#                                dialog_id: 'version_dialog',#}
+{#                                content_creator: dialogs.update_version_dialog,#}
+{#                                related_field_updater: versions_DataGrid_updater,#}
+{#                                data_id: timeLogId#}
+{#                            });#}
+{#                            dialog.show();#}
+{##}
+{##}
+{#                        }#}
+{#                    });#}
+{#                };#}
+{##}
+{#                right_click_menu.addChild(create_update_timelog_menuItem_creator());#}
+{##}
+{#                right_click_menu.startup();#}
+
+
+            });
+
+
+        }
+
+        versions_DataGrid_updater();
+
+
+
+
+    });
+</script>
+

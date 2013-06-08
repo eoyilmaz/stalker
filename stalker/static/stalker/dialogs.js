@@ -427,6 +427,54 @@ define(['exports', 'dojox/widget/DialogSimple', 'dijit/registry', 'dojo/domReady
                 executeScripts: true
             })
         };
+         // ********************************************************************
+        // VACATION
+        exports.create_vacation_dialog = function create_vacation_dialog(uesr_id) {
+            return new DialogSimple({
+                id: 'vacation_dialog',
+                title: 'New TimeLog',
+                href: '/dialog/create/vacation/' + uesr_id,
+                resize: true,
+                style: style,
+                executeScripts: true
+            });
+        };
+
+        exports.update_vacation_dialog = function update_vacation_dialog(vacation_id) {
+            return new DialogSimple({
+                id: 'vacation_dialog',
+                title: 'Update TimeLog',
+                href: '/dialog/update/vacation/' + vacation_id,
+                resize: true,
+                style: style,
+                executeScripts: true
+            })
+        };
+
+        // ********************************************************************
+        // VERSION
+        exports.create_version_dialog = function create_version_dialog(task_id) {
+            return new DialogSimple({
+                id: 'version_dialog',
+                title: 'New Version',
+                href: '/dialog/create/version/' + task_id,
+                resize: true,
+                style: style,
+                executeScripts: true
+            });
+        };
+
+        exports.update_version_dialog = function update_version_dialog(version_id) {
+            return new DialogSimple({
+                id: 'time_log_dialog',
+                title: 'Update Version',
+                href: '/dialog/update/version/' + version_id,
+                resize: true,
+                style: style,
+                executeScripts: true
+            })
+        };
+
 
         // ********************************************************************
         // DEPARTMENT

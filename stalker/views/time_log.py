@@ -212,6 +212,7 @@ def get_time_logs(request):
             'id': time_log.id,
             'task_id': time_log.task.id,
             'task_name': time_log.task.name,
+            'parent_name': ' | '.join([parent.name for parent in time_log.task.parents]),
             'resource_id': time_log.resource_id,
             'resource_name': time_log.resource.name,
             'duration': time_log.total_seconds,
