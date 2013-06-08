@@ -854,7 +854,7 @@ class VersionTester(unittest2.TestCase):
         
         self.assertEqual(
             new_version1.path,
-            'Test_Project/SH001/Task1'
+            'tp/SH001/Task1'
         )
         
         new_version1.extension = '.ma'
