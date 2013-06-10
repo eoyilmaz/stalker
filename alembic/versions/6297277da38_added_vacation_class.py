@@ -15,7 +15,10 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    op.drop_table(u'User_Vacations')
+    try:
+        op.drop_table(u'User_Vacations')
+    except sa.exc.OperationalError:
+        pass
 
 
 def downgrade():

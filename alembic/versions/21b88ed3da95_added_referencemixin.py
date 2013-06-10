@@ -15,14 +15,18 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    op.create_table(
-        'Task_References',
-        sa.Column('task_id', sa.Integer(), nullable=False),
-        sa.Column('link_id', sa.Integer(), nullable=False),
-        sa.ForeignKeyConstraint(['link_id'], ['Links.id'], ),
-        sa.ForeignKeyConstraint(['task_id'], ['Tasks.id'], ),
-        sa.PrimaryKeyConstraint('task_id', 'link_id')
-    )
+    try:
+        op.create_table(
+            'Task_References',
+            sa.Column('task_id', sa.Integer(), nullable=False),
+            sa.Column('link_id', sa.Integer(), nullable=False),
+            sa.ForeignKeyConstraint(['link_id'], ['Links.id'], ),
+            sa.ForeignKeyConstraint(['task_id'], ['Tasks.id'], ),
+            sa.PrimaryKeyConstraint('task_id', 'link_id')
+        )
+    except sa.exc.OperationalError:
+        pass
+
     op.drop_table(u'Asset_References')
     op.drop_table(u'Shot_References')
     op.drop_table(u'Sequence_References')
