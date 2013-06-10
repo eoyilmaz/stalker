@@ -116,19 +116,6 @@ class Version(Link, StatusMixin):
         """
     )
 
-    # source_file_id = Column(Integer, ForeignKey("Links.id"))
-    # source_file = relationship(
-    #     "Link",
-    #     primaryjoin="Versions.c.source_file_id==Links.c.id",
-    #     uselist=False,
-    #     doc="""This is the source file of this Version instance.
-    #     
-    #     It holds a :class:`~stalker.models.link.Link` instance which is showing
-    #     a source file for this version. It is let say the scene file for Maya
-    #     or a psd file for Photoshop etc.
-    #     """
-    # )
-
     parent_id = Column('parent_id', Integer, ForeignKey('Versions.id'))
     parent = relationship(
         'Version',
@@ -186,7 +173,6 @@ class Version(Link, StatusMixin):
         StatusMixin.__init__(self, **kwargs)
 
         self.take_name = take_name
-        # self.source_file = source_file
         self.task = task
         self.version_number = None
         if inputs is None:
@@ -198,24 +184,9 @@ class Version(Link, StatusMixin):
         self.inputs = inputs
         self.outputs = outputs
 
-        # set published to False by default
         self.is_published = False
 
         self.parent = parent
-
-    # @validates("source_file")
-    # def _validate_source_file(self, key, source_file):
-    #     """validates the given source_file value
-    #     """
-    #     from stalker.models.link import Link
-    #     
-    #     if source_file is not None:
-    #         if not isinstance(source_file, Link):
-    #             raise TypeError("Version.source_file attribute should be a "
-    #                             "stalker.models.link.Link instance, not %s"\
-    #                             % source_file.__class__.__name__)
-    #     
-    #     return source_file
 
     def _format_take_name(self, take_name):
         """formats the given take_name value
@@ -270,7 +241,7 @@ class Version(Link, StatusMixin):
             all_versions = Version.query \
                 .filter(Version.task == self.task) \
                 .filter(Version.take_name == self.take_name) \
-                .order_by(Version.version_number.desc()) \
+                .order_by(Version.version_number.asc()) \
                 .all()
         except UnboundExecutionError:
             all_versions = []

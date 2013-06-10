@@ -415,6 +415,24 @@ class VersionTester(unittest2.TestCase):
 
         self.assertEqual(new_version.version_number, 2)
 
+        new_version = Version(**self.kwargs)
+        DBSession.add(new_version)
+        DBSession.commit()
+
+        self.assertEqual(self.test_version.task, new_version.task)
+        self.assertEqual(self.test_version.take_name, new_version.take_name)
+
+        self.assertEqual(new_version.version_number, 3)
+
+        new_version = Version(**self.kwargs)
+        DBSession.add(new_version)
+        DBSession.commit()
+
+        self.assertEqual(self.test_version.task, new_version.task)
+        self.assertEqual(self.test_version.take_name, new_version.take_name)
+
+        self.assertEqual(new_version.version_number, 4)
+
     def test_version_number_attribute_is_starting_from_1(self):
         """testing if the version_number attribute is starting from 1
         """

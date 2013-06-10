@@ -8,6 +8,8 @@ Stalker Changes
 * **SOM:**
 
   * **Update:** Renamed **Version.version_of** attribute to **Version.task**.
+  * **Fix:** Fixed **Version.version_number** where it was not possible to have
+    a version number bigger than 2.
 
 0.2.0.b7
 ========
