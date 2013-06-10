@@ -60,9 +60,13 @@ Stalker Changes
     information when creating/updating a Task.
   * **Fix:** Selected 'Status' attribute for 'Task Dialog' in 'Update' mode is
       set when dialog is open.
-  * **New:** Version List Page and Create/Update Dialogs added.
-  * **New:** Vacation List Page and Create/Update Dialogs added.
+  * **New:** Version List Page and Create/Update Dialogs are added.
+  * **New:** Vacation List Page and Create/Update Dialogs are added.
   * **Fix:** Merge tested, and vacation adding is finished.
+  * **New:** Version Page is created. It has Outputs,Inputs and Children as Tabs.
+  * **New:** Studio Page is created.It has Tasks and Resources as Tabs.
+  * **New:** Update Studio function id added.
+
 
   * **JQueryGantt:**
 

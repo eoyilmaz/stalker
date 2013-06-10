@@ -25,7 +25,7 @@ from pyramid.view import view_config
 
 from stalker.db import DBSession
 from stalker import log, Studio, WorkingHours
-from stalker.views import get_time, PermissionChecker
+from stalker.views import get_time, PermissionChecker, get_logged_in_user
 
 logger = logging.getLogger(__name__)
 log.logging_level = logging.DEBUG
@@ -110,4 +110,104 @@ def create_studio(request):
         # Commit will be handled by the zope transaction extension
         
     return HTTPOk()
+
+
+@view_config(
+    route_name='update_studio'
+)
+def update_studio(request):
+    """updates the studio
+    """
+
+    studio_id = request.params.get('studio_id')
+    studio = Studio.query.filter_by(id=studio_id).first()
+
+
+    name = request.params.get('name', None)
+    dwh = request.params.get('dwh', None)
+    wh_mon_start = get_time(request, 'mon_start')
+    wh_mon_end   = get_time(request, 'mon_end')
+    wh_tue_start = get_time(request, 'tue_start')
+    wh_tue_end   = get_time(request, 'tue_end')
+    wh_wed_start = get_time(request, 'wed_start')
+    wh_wed_end   = get_time(request, 'wed_end')
+    wh_thu_start = get_time(request, 'thu_start')
+    wh_thu_end   = get_time(request, 'thu_end')
+    wh_fri_start = get_time(request, 'fri_start')
+    wh_fri_end   = get_time(request, 'fri_end')
+    wh_sat_start = get_time(request, 'sat_start')
+    wh_sat_end   = get_time(request, 'sat_end')
+    wh_sun_start = get_time(request, 'sun_start')
+    wh_sun_end   = get_time(request, 'sun_end')
+
+    if studio and name and dwh:
+        # update new studio
+
+        studio.name=name
+        studio.daily_working_hours=int(dwh)
+
+        wh = WorkingHours()
+
+        def set_wh_for_day(day, start, end):
+            if start != end:
+                wh[day] = [[start.seconds/60, end.seconds/60]]
+            else:
+                wh[day] = []
+
+        set_wh_for_day('mon', wh_mon_start, wh_mon_end)
+        set_wh_for_day('tue', wh_tue_start, wh_tue_end)
+        set_wh_for_day('wed', wh_wed_start, wh_wed_end)
+        set_wh_for_day('thu', wh_thu_start, wh_thu_end)
+        set_wh_for_day('fri', wh_fri_start, wh_fri_end)
+        set_wh_for_day('sat', wh_sat_start, wh_sat_end)
+        set_wh_for_day('sun', wh_sun_start, wh_sun_end)
+
+        studio.working_hours = wh
+
+        DBSession.add(studio)
+        # Commit will be handled by the zope transaction extension
+
+    return HTTPOk()
+
+
+
+
+@view_config(
+    route_name='view_studio',
+    renderer='templates/studio/page_view_studio.jinja2'
+)
+def view_studio(request):
+    """runs when viewing a studio
+    """
+    logged_in_user = get_logged_in_user(request)
+
+    studio_id = request.matchdict['studio_id']
+    studio = Studio.query.filter_by(id=studio_id).first()
+
+    return {
+        'user': logged_in_user,
+        'has_permission': PermissionChecker(request),
+        'studio': studio
+    }
+
+
+
+@view_config(
+    route_name='summarize_studio',
+    renderer='templates/studio/content_summarize_studio.jinja2'
+)
+def summarize_studio(request):
+    """runs when viewing a studio
+    """
+    logged_in_user = get_logged_in_user(request)
+
+    studio_id = request.matchdict['studio_id']
+    studio = Studio.query.filter_by(id=studio_id).first()
+
+    return {
+        'user': logged_in_user,
+        'has_permission': PermissionChecker(request),
+        'studio': studio
+    }
+
 
