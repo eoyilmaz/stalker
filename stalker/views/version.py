@@ -135,7 +135,7 @@ def update_version(request):
     renderer='templates/version/content_list_versions.jinja2'
 )
 def list_versions(request):
-    """lists the time logs of the given task
+    """lists the versions of the given task
     """
 
     logger.debug('list_versions is running')
@@ -183,4 +183,101 @@ def get_versions(request):
         })
 
     return version_data
+
+@view_config(
+    route_name='view_version',
+    renderer='templates/version/page_view_version.jinja2'
+)
+def view_version(request):
+    """lists the versions of the given task
+    """
+
+    logger.debug('view_version is running')
+
+    version_id = request.matchdict['version_id']
+    version = Version.query.filter_by(id=version_id).first()
+
+    logger.debug('version_id : %s' % version_id)
+    return {
+        'version': version,
+        'has_permission': PermissionChecker(request)
+    }
+
+
+@view_config(
+    route_name='summarize_version',
+    renderer='templates/version/content_summarize_version.jinja2'
+)
+def summarize_version(request):
+    """lists the versions of the given task
+    """
+
+    logger.debug('view_version is running')
+
+    version_id = request.matchdict['version_id']
+    version = Version.query.filter_by(id=version_id).first()
+
+    logger.debug('version_id : %s' % version_id)
+    return {
+        'version': version,
+        'has_permission': PermissionChecker(request)
+    }
+
+
+@view_config(
+    route_name='list_version_outputs',
+    renderer='templates/version/content_list_version_outputs.jinja2'
+)
+def list_version_outputs(request):
+    """lists the versions of the given task
+    """
+
+    logger.debug('list_version_outputs is running')
+
+    version_id = request.matchdict['version_id']
+    version = Version.query.filter_by(id=version_id).first()
+
+    logger.debug('entity_id : %s' % version_id)
+    return {
+        'version': version,
+        'has_permission': PermissionChecker(request)
+    }
+
+@view_config(
+    route_name='list_version_inputs',
+    renderer='templates/version/content_list_version_inputs.jinja2'
+)
+def list_version_inputs(request):
+    """lists the versions of the given task
+    """
+
+    logger.debug('list_version_inputs is running')
+
+    version_id = request.matchdict['version_id']
+    version = Version.query.filter_by(id=version_id).first()
+
+    logger.debug('entity_id : %s' % version_id)
+    return {
+        'version': version,
+        'has_permission': PermissionChecker(request)
+    }
+
+@view_config(
+    route_name='list_version_children',
+    renderer='templates/version/content_list_versions_children.jinja2'
+)
+def list_version_children(request):
+    """lists the versions of the given task
+    """
+
+    logger.debug('list_version_children is running')
+
+    version_id = request.matchdict['version_id']
+    version = Version.query.filter_by(id=version_id).first()
+
+    logger.debug('entity_id : %s' % version_id)
+    return {
+        'version': version,
+        'has_permission': PermissionChecker(request)
+    }
 

@@ -486,6 +486,14 @@ def get_gantt_tasks(request):
                 # logger.debug('user_task_with_parents: %s' % user_tasks_with_parents)
                 # logger.debug('tasks                 : %s' % tasks)
                 tasks = list(set(user_tasks_with_parents))
+        elif entity.entity_type == 'Studio':
+            studio = entity
+
+            # sort the tasks with the project.id
+            # if studio is not None:
+            #     # tasks = sorted(studio.tasks, key=lambda task: task.project.id)
+
+
         else: # Asset, Shot, Sequence
             tasks.append(entity)
             tasks.extend(entity.parents)

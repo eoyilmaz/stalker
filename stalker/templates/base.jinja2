@@ -262,22 +262,24 @@
             );
         {% else %}
             studio_DropDownMenu.addChild(
-                    new MenuItem({
+                     new MenuItem({
                         label: '{{ studio.name }}',
-                        style: 'font-weight: bold'
+                        style: 'font-weight: bold',
+                        dataId: '{{ studio.id }}',
+                        onClick: function () {
+                            central_content_pane.set(
+                                    'href',
+                                    'view/studio/' + this.get('dataId')
+                            );
+                            central_content_pane.refresh();
+                        }
                     })
             );
         {% endif %}
 
 
 
-        studio_DropDownMenu.addChild(new MenuItem({
-            label: "Overview Projects"
-        }));
 
-        studio_DropDownMenu.addChild(new MenuItem({
-            label: "Overview Crew"
-        }));
 
         studio_DropDownMenu.addChild(
                 new MenuSeparator({})

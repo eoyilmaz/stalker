@@ -1,0 +1,96 @@
+{# Stalker a Production Asset Management System
+ Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
+
+ This file is part of Stalker.
+
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation;
+ version 2.1 of the License.
+
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+#}
+<div style="margin: 0" id='version_border_container'>
+    <div id='version_nav_bar_content_pane'>
+        {# Summary View #}
+    </div>
+    <div id='version_related_data_tab_container'>
+        {# Tab View #}
+
+    </div>
+</div>
+
+<script type='text/javascript'>
+    require(['dijit/registry', 'dijit/layout/BorderContainer',
+        'dijit/layout/TabContainer', 'dojox/layout/ContentPane', 'dojo/domReady!'],
+            function (registry, BorderContainer, TabContainer, ContentPane) {
+
+                var version_BorderContainer = new BorderContainer({
+                    id: 'version_border_container',
+                    region: 'center',
+                    orientation: 'horizontal',
+                    splitter: true,
+                    resizable: false,
+                    style: 'width:100%; height:100%; margin:0; padding: 0;'
+
+                }, 'version_border_container');
+
+                var nav_bar_content_pane = new ContentPane({
+                    title: 'NavBar',
+                    href: 'view/entity_nav_bar/{{ version.id }}',
+                    region: 'top',
+                    style: 'padding: 0; margin:0;'
+                }, 'version_nav_bar_content_pane');
+
+
+                // **********************************************************************
+                // Bottom Part - Complex Data View
+                var version_related_data_tab_container = new TabContainer({
+
+                    region: 'center',
+                    style: 'width: 100%; background-color: #eeeeee;',
+                    style: 'padding: 0; margin:0;'
+                }, 'version_related_data_tab_container');
+
+                 var summary_content_pane = new ContentPane({
+                    title: 'Overview',
+                    href: 'summarize/version/{{ version.id }}',
+                    style: 'padding: 0; margin:0;'
+
+                });
+
+                version_related_data_tab_container.addChild(summary_content_pane);
+
+
+                var outputs_content_pane = new ContentPane({
+                    title: 'Tasks',
+                    href: 'list/version/outputs/{{ version.id  }}',
+                    style: 'width: 100%;'
+                });
+                version_related_data_tab_container.addChild(outputs_content_pane);
+
+                var inputs_content_pane = new ContentPane({
+                    title: 'Tasks',
+                    href: 'list/version/inputs/{{ version.id  }}',
+                    style: 'width: 100%;'
+                });
+                version_related_data_tab_container.addChild(inputs_content_pane);
+
+
+
+                version_related_data_tab_container.startup();
+
+                version_BorderContainer.addChild(nav_bar_content_pane);
+                version_BorderContainer.addChild(version_related_data_tab_container);
+                version_BorderContainer.startup();
+
+
+            });
+</script>
