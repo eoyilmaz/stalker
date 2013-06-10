@@ -515,8 +515,8 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
 
     versions = relationship(
         "Version",
-        primaryjoin="Versions.c.version_of_id==Tasks.c.id",
-        back_populates="version_of",
+        primaryjoin="Versions.c.task_id==Tasks.c.id",
+        back_populates="task",
         doc="""A list of :class:`~stalker.models.version.Version` instances showing the files created for this task.
         """
     )

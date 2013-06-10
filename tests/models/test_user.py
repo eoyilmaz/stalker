@@ -228,21 +228,21 @@ class UserTest(unittest2.TestCase):
         
         # for task1
         self.test_version1 = Version(
-            version_of=self.test_task1,
+            task=self.test_task1,
             status_list=self.version_status_list,
             full_path='some/path'
         )
         DBSession.add(self.test_version1)
         
         self.test_version2 = Version(
-            version_of=self.test_task1,
+            task=self.test_task1,
             status_list=self.version_status_list,
             full_path='some/path'
         )
         DBSession.add(self.test_version2)
         
         self.test_version3 = Version(
-            version_of=self.test_task1,
+            task=self.test_task1,
             status_list=self.version_status_list,
             full_path='some/path'
         )
@@ -250,21 +250,21 @@ class UserTest(unittest2.TestCase):
         
         # for task2
         self.test_version4 = Version(
-            version_of=self.test_task2,
+            task=self.test_task2,
             status_list=self.version_status_list,
             full_path='some/path'
         )
         DBSession.add(self.test_version4)
         
         self.test_version5 = Version(
-            version_of=self.test_task2,
+            task=self.test_task2,
             status_list=self.version_status_list,
             full_path='some/path'
         )
         DBSession.add(self.test_version5)
         
         self.test_version6 = Version(
-            version_of=self.test_task2,
+            task=self.test_task2,
             status_list=self.version_status_list,
             full_path='some/path'
         )
@@ -272,21 +272,21 @@ class UserTest(unittest2.TestCase):
         
         # for task3
         self.test_version7 = Version(
-            version_of=self.test_task3,
+            task=self.test_task3,
             status_list=self.version_status_list,
             full_path='some/path'
         )
         DBSession.add(self.test_version7)
         
         self.test_version8 = Version(
-            version_of=self.test_task3,
+            task=self.test_task3,
             status_list=self.version_status_list,
             full_path='some/path'
         )
         DBSession.add(self.test_version8)
         
         self.test_version9 = Version(
-            version_of=self.test_task3,
+            task=self.test_task3,
             status_list=self.version_status_list,
             full_path='some/path'
         )
@@ -294,21 +294,21 @@ class UserTest(unittest2.TestCase):
         
         # for task4
         self.test_version10 = Version(
-            version_of=self.test_task4,
+            task=self.test_task4,
             status_list=self.version_status_list,
             full_path='some/path'
         )
         DBSession.add(self.test_version10)
         
         self.test_version11 = Version(
-            version_of=self.test_task4,
+            task=self.test_task4,
             status_list=self.version_status_list,
             full_path='some/path'
         )
         DBSession.add(self.test_version11)
         
         self.test_version12 = Version(
-            version_of=self.test_task4,
+            task=self.test_task4,
             status_list=self.version_status_list,
             full_path='some/path'
         )

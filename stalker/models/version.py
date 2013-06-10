@@ -72,10 +72,10 @@ class Version(Link, StatusMixin):
 
     :type outputs: list of :class:`~stalker.models.link.Link` instances
 
-    :param version_of: A :class:`~stalker.models.task.Task` instance showing
-      the owner of this Version.
+    :param task: A :class:`~stalker.models.task.Task` instance showing the
+      owner of this Version.
 
-    :type version_of: :class:`~stalker.models.task.Task`
+    :type task: :class:`~stalker.models.task.Task`
 
     :param parent: A :class:`~stalker.models.version.Version` instance which is
       the parent of this Version. It is mainly used to see which Version is
@@ -90,10 +90,10 @@ class Version(Link, StatusMixin):
 
     version_id = Column("id", Integer, ForeignKey("Links.id"),
                         primary_key=True)
-    version_of_id = Column(Integer, ForeignKey("Tasks.id"), nullable=False)
-    version_of = relationship(
+    task_id = Column(Integer, ForeignKey("Tasks.id"), nullable=False)
+    task = relationship(
         "Task",
-        primaryjoin="Versions.c.version_of_id==Tasks.c.id",
+        primaryjoin="Versions.c.task_id==Tasks.c.id",
         doc="""The :class:`~stalker.models.task.Task` instance that this Version is created for.
         """,
         uselist=False,
@@ -173,7 +173,7 @@ class Version(Link, StatusMixin):
     is_published = Column(Boolean, default=False)
 
     def __init__(self,
-                 version_of=None,
+                 task=None,
                  take_name=defaults.version_take_name,
                  inputs=None,
                  outputs=None,
@@ -187,7 +187,7 @@ class Version(Link, StatusMixin):
 
         self.take_name = take_name
         # self.source_file = source_file
-        self.version_of = version_of
+        self.task = task
         self.version_number = None
         if inputs is None:
             inputs = []
@@ -268,7 +268,7 @@ class Version(Link, StatusMixin):
 
         try:
             all_versions = Version.query \
-                .filter(Version.version_of == self.version_of) \
+                .filter(Version.task == self.task) \
                 .filter(Version.take_name == self.take_name) \
                 .order_by(Version.version_number.desc()) \
                 .all()
@@ -304,24 +304,23 @@ class Version(Link, StatusMixin):
 
         return version_number
 
-    @validates("version_of")
-    def _validate_version_of(self, key, version_of):
-        """validates the given version_of value
+    @validates("task")
+    def _validate_task(self, key, task):
+        """validates the given task value
         """
-
-        if version_of is None:
-            raise TypeError("%s.version_of can not be None" %
+        if task is None:
+            raise TypeError("%s.task can not be None" %
                             self.__class__.__name__)
 
         from stalker.models.task import Task
 
-        if not isinstance(version_of, Task):
-            raise TypeError("%s.version_of should be a "
+        if not isinstance(task, Task):
+            raise TypeError("%s.task should be a "
                             "stalker.models.task.Task instance not %s" %
                             (self.__class__.__name__,
-                             version_of.__class__.__name__))
+                             task.__class__.__name__))
 
-        return version_of
+        return task
 
     @validates("inputs")
     def _validate_inputs(self, key, input):
@@ -387,27 +386,26 @@ class Version(Link, StatusMixin):
 
         sequences = []
         scenes = []
-        if isinstance(self.version_of, Shot):
-            sequences = self.version_of.sequences
-            scenes = self.version_of.scenes
-            shot = self.version_of
+        if isinstance(self.task, Shot):
+            sequences = self.task.sequences
+            scenes = self.task.scenes
+            shot = self.task
 
         # get the parent tasks
-        task = self.version_of
+        task = self.task
         parent_tasks = task.parents
         parent_tasks.append(task)
 
         kwargs = {
-            'project': self.version_of.project,
+            'project': self.task.project,
             'sequences': sequences,
             'scenes': scenes,
-            'sequence': self.version_of,
-            'shot': self.version_of,
-            'asset': self.version_of,
-            'task': self.version_of,
+            'sequence': self.task,
+            'shot': self.task,
+            'asset': self.task,
+            'task': self.task,
             'parent_tasks': parent_tasks,
             'version': self,
-            'version_of': self.version_of,
             'type': self.type,
             'extension': self.extension
         }
@@ -419,7 +417,7 @@ class Version(Link, StatusMixin):
         kwargs = self._template_variables()
 
         # get a suitable FilenameTemplate
-        structure = self.version_of.project.structure
+        structure = self.task.project.structure
 
         from stalker import FilenameTemplate
 
@@ -427,7 +425,7 @@ class Version(Link, StatusMixin):
         if structure:
             for template in structure.templates:
                 assert isinstance(template, FilenameTemplate)
-                if template._target_entity_type == self.version_of.entity_type:
+                if template._target_entity_type == self.task.entity_type:
                     vers_template = template
                     break
 
@@ -439,8 +437,8 @@ class Version(Link, StatusMixin):
                 "`stalker.models.template.FilenameTemplate` instance with its "
                 "'target_entity_type' attribute is set to '%s' and assign it "
                 "to the `templates` attribute of the structure of the "
-                "project" % (self.version_of.entity_type,
-                             self.version_of.entity_type)
+                "project" % (self.task.entity_type,
+                             self.task.entity_type)
             )
 
         self.filename = jinja2.Template(vers_template.filename) \
@@ -454,7 +452,7 @@ class Version(Link, StatusMixin):
 
         :return: str
         """
-        project = self.version_of.project
+        project = self.task.project
         repo = project.repository
 
         return os.path.join(
@@ -469,9 +467,9 @@ class Version(Link, StatusMixin):
 
         :return: str
         """
-        project = self.version_of.project
+        project = self.task.project
         repo = project.repository
-
+    
         return os.path.join(
             repo.path,
             self.path

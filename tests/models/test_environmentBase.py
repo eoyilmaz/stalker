@@ -79,7 +79,7 @@ class EnvironmentBaseTestCase(unittest2.TestCase):
             name='Task Filename Template',
             target_entity_type='Task',
             path='{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}',
-            filename='{{version_of.nice_name}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}',
+            filename='{{task.nice_name}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}',
         )
         DBSession.add(task_ft)
 
@@ -153,7 +153,7 @@ class EnvironmentBaseTestCase(unittest2.TestCase):
 
         # now create versions
         version1 = Version(
-            version_of=task1,
+            task=task1,
             status_list=version_status_list
         )
         DBSession.add(version1)
@@ -161,7 +161,7 @@ class EnvironmentBaseTestCase(unittest2.TestCase):
         version1.update_paths()
 
         version2 = Version(
-            version_of=task2,
+            task=task2,
             status_list=version_status_list
         )
         DBSession.add(version2)
@@ -266,7 +266,7 @@ class EnvironmentBaseTestCase(unittest2.TestCase):
             name='Task Filename Template',
             target_entity_type='Task',
             path='{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}',
-            filename='{{version_of.nice_name}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}',
+            filename='{{task.nice_name}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}',
         )
         DBSession.add(task_ft)
 
@@ -340,7 +340,7 @@ class EnvironmentBaseTestCase(unittest2.TestCase):
 
         # now create versions
         version1 = Version(
-            version_of=task1,
+            task=task1,
             status_list=version_status_list
         )
         DBSession.add(version1)
@@ -348,7 +348,7 @@ class EnvironmentBaseTestCase(unittest2.TestCase):
         version1.update_paths()
 
         version2 = Version(
-            version_of=task1,
+            task=task1,
             status_list=version_status_list
         )
         DBSession.add(version2)
@@ -356,7 +356,7 @@ class EnvironmentBaseTestCase(unittest2.TestCase):
         version2.update_paths()
 
         version3 = Version(
-            version_of=task2,
+            task=task2,
             status_list=version_status_list
         )
         DBSession.add(version3)
@@ -364,7 +364,7 @@ class EnvironmentBaseTestCase(unittest2.TestCase):
         version3.update_paths()
 
         version4 = Version(
-            version_of=task2,
+            task=task2,
             status_list=version_status_list
         )
         DBSession.add(version4)
@@ -460,7 +460,7 @@ class EnvironmentBaseTestCase(unittest2.TestCase):
             name='Task Filename Template',
             target_entity_type='Task',
             path='{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}',
-            filename='{{version_of.nice_name}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}',
+            filename='{{task.nice_name}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}',
         )
         DBSession.add(task_ft)
 
@@ -534,7 +534,7 @@ class EnvironmentBaseTestCase(unittest2.TestCase):
 
         # now create versions
         version1 = Version(
-            version_of=task1,
+            task=task1,
             status_list=version_status_list
         )
         DBSession.add(version1)
@@ -542,7 +542,7 @@ class EnvironmentBaseTestCase(unittest2.TestCase):
         version1.update_paths()
 
         version2 = Version(
-            version_of=task1,
+            task=task1,
             status_list=version_status_list
         )
         DBSession.add(version2)
@@ -550,7 +550,7 @@ class EnvironmentBaseTestCase(unittest2.TestCase):
         version2.update_paths()
 
         version3 = Version(
-            version_of=task2,
+            task=task2,
             status_list=version_status_list
         )
         DBSession.add(version3)
@@ -558,7 +558,7 @@ class EnvironmentBaseTestCase(unittest2.TestCase):
         version3.update_paths()
 
         version4 = Version(
-            version_of=task2,
+            task=task2,
             status_list=version_status_list
         )
         DBSession.add(version4)

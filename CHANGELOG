@@ -2,6 +2,13 @@
 Stalker Changes
 ===============
 
+0.2.0.b8
+========
+
+* **SOM:**
+
+  * **Update:** Renamed **Version.version_of** attribute to **Version.task**.
+
 0.2.0.b7
 ========
 

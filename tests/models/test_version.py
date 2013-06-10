@@ -216,7 +216,7 @@ class VersionTester(unittest2.TestCase):
                        self.test_input_link2],
             'outputs': [self.test_output_link1,
                         self.test_output_link2],
-            'version_of': self.test_task1,
+            'task': self.test_task1,
             'status_list': self.test_version_status_list,
         }
         
@@ -351,43 +351,43 @@ class VersionTester(unittest2.TestCase):
                 test_value[1]
             )
 
-    def test_version_of_argument_is_skipped(self):
-        """testing if a TypeError will be raised when the version_of argument
+    def test_task_argument_is_skipped(self):
+        """testing if a TypeError will be raised when the task argument
         is skipped
         """
-        self.kwargs.pop('version_of')
+        self.kwargs.pop('task')
         self.assertRaises(TypeError, Version, **self.kwargs)
 
-    def test_version_of_argument_is_None(self):
-        """testing if a TypeError will be raised when the version_of argument
+    def test_task_argument_is_None(self):
+        """testing if a TypeError will be raised when the task argument
         is None
         """
-        self.kwargs['version_of'] = None
+        self.kwargs['task'] = None
         self.assertRaises(TypeError, Version, **self.kwargs)
 
-    def test_version_of_attribute_is_None(self):
-        """testing if a TypeError will be raised when the version_of attribute
+    def test_task_attribute_is_None(self):
+        """testing if a TypeError will be raised when the task attribute
         is None
         """
         self.assertRaises(TypeError, setattr, self.test_version,
-                          'version_of', None)
+                          'task', None)
 
-    def test_version_of_argument_is_not_a_Task(self):
-        """testing if a TypeError will be raised when the version_of argumment
+    def test_task_argument_is_not_a_Task(self):
+        """testing if a TypeError will be raised when the task argument
         is not a Task instance
         """
-        self.kwargs['version_of'] = 'a task'
+        self.kwargs['task'] = 'a task'
         self.assertRaises(TypeError, Version, **self.kwargs)
 
-    def test_version_of_attribute_is_not_a_Task(self):
-        """testing if a TypeError will be raised when the version_of attribute
+    def test_task_attribute_is_not_a_Task(self):
+        """testing if a TypeError will be raised when the task attribute
         is not a Task instance
         """
-        self.assertRaises(TypeError, setattr, self.test_version, 'version_of',
+        self.assertRaises(TypeError, setattr, self.test_version, 'task',
                           'a task')
 
-    def test_version_of_attribute_is_working_properly(self):
-        """testing if the version_of attribute is working properly
+    def test_task_attribute_is_working_properly(self):
+        """testing if the task attribute is working properly
         """
         new_task = Task(
             name='New Test Task',
@@ -395,9 +395,9 @@ class VersionTester(unittest2.TestCase):
             status_list=self.test_task_status_list,
         )
 
-        self.assertIsNot(self.test_version.version_of, new_task)
-        self.test_version.version_of = new_task
-        self.assertIs(self.test_version.version_of, new_task)
+        self.assertIsNot(self.test_version.task, new_task)
+        self.test_version.task = new_task
+        self.assertIs(self.test_version.task, new_task)
 
     def test_version_number_attribute_is_automatically_generated(self):
         """testing if the version_number attribute is automatically generated
@@ -410,7 +410,7 @@ class VersionTester(unittest2.TestCase):
         DBSession.add(new_version)
         DBSession.commit()
 
-        self.assertEqual(self.test_version.version_of, new_version.version_of)
+        self.assertEqual(self.test_version.task, new_version.task)
         self.assertEqual(self.test_version.take_name, new_version.take_name)
 
         self.assertEqual(new_version.version_number, 2)
@@ -796,7 +796,7 @@ class VersionTester(unittest2.TestCase):
         # create a FilenameTemplate for Task instances
 
         # A Template for Assets
-        # ......../Assets/{{asset.type.name}}/{{asset.nice_name}}/{{version_of.type.name}}/
+        # ......../Assets/{{asset.type.name}}/{{asset.nice_name}}/{{task.type.name}}/
         # 
         # Project1/Assets/Character/Sero/Modeling/Sero_Modeling_Main_v001.ma
         #
@@ -842,7 +842,7 @@ class VersionTester(unittest2.TestCase):
             name='Task Filename Template',
             target_entity_type='Task',
             path='{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}',
-            filename='{{version_of.nice_name}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}{{extension}}',
+            filename='{{task.nice_name}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}{{extension}}',
         )
         self.test_project.structure.templates.append(ft)
         new_version1 = Version(**self.kwargs)
@@ -876,7 +876,7 @@ class VersionTester(unittest2.TestCase):
         kwargs = self.test_version._template_variables()
         self.assertEqual(
             kwargs['project'],
-            self.test_version.version_of.project
+            self.test_version.task.project
         )
 
     def test_template_variables_sequences(self):
@@ -903,7 +903,7 @@ class VersionTester(unittest2.TestCase):
         kwargs = self.test_version._template_variables()
         self.assertEqual(
             kwargs['shot'],
-            self.test_version.version_of
+            self.test_version.task
         )
 
     def test_template_variables_asset(self):
@@ -912,7 +912,7 @@ class VersionTester(unittest2.TestCase):
         kwargs = self.test_version._template_variables()
         self.assertEqual(
             kwargs['asset'],
-            self.test_version.version_of
+            self.test_version.task
         )
 
     def test_template_variables_task(self):
@@ -921,15 +921,15 @@ class VersionTester(unittest2.TestCase):
         kwargs = self.test_version._template_variables()
         self.assertEqual(
             kwargs['task'],
-            self.test_version.version_of
+            self.test_version.task
         )
 
     def test_template_variables_parent_tasks(self):
         """testing if the parent_tasks in template variables is correct
         """
         kwargs = self.test_version._template_variables()
-        parents = self.test_version.version_of.parents
-        parents.append(self.test_version.version_of)
+        parents = self.test_version.task.parents
+        parents.append(self.test_version.task)
         self.assertEqual(
             kwargs['parent_tasks'],
             parents
@@ -943,16 +943,6 @@ class VersionTester(unittest2.TestCase):
             kwargs['version'],
             self.test_version
         )
-
-    def test_template_variables_version_of(self):
-        """testing if the version_of in template variables is correct
-        """
-        kwargs = self.test_version._template_variables()
-        self.assertEqual(
-            kwargs['version_of'],
-            self.test_version.version_of
-        )
-
 
     def test_template_variables_type(self):
         """testing if the type in template variables is correct
@@ -970,7 +960,7 @@ class VersionTester(unittest2.TestCase):
             name='Task Filename Template',
             target_entity_type='Task',
             path='{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}',
-            filename='{{version_of.nice_name}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}{{extension}}',
+            filename='{{task.nice_name}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}{{extension}}',
         )
         self.test_project.structure.templates.append(ft)
         new_version1 = Version(**self.kwargs)
@@ -993,7 +983,7 @@ class VersionTester(unittest2.TestCase):
             name='Task Filename Template',
             target_entity_type='Task',
             path='{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}',
-            filename='{{version_of.nice_name}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}{{extension}}',
+            filename='{{task.nice_name}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}{{extension}}',
         )
         self.test_project.structure.templates.append(ft)
         new_version1 = Version(**self.kwargs)

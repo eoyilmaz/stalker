@@ -583,7 +583,7 @@ class SimpleEntityTester(unittest2.TestCase):
             self.kwargs["type"] = test_value
             self.assertRaises(TypeError, newClass, **self.kwargs)
 
-    def test___stalker_version__attribute_is_automatically_set_to_the_current_version_of_Stalker(self):
+    def test___stalker_version__attribute_is_automatically_set_to_the_current_task_Stalker(self):
         """testing if the __stalker_version__ is automatically set to the
         current version for the newly created SimpleEntities
         """

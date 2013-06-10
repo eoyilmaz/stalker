@@ -2730,7 +2730,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         # create a new version
         test_version = Version(
             name='version for task modeling',
-            version_of=test_task,
+            task=test_task,
             version=10,
             take='MAIN',
             full_path='M:/Shows/Proj1/Seq1/Shots/SH001/Ligting' + \
@@ -2776,7 +2776,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         type = test_version.type
         updated_by = test_version.updated_by
         version_number = test_version.version_number
-        version_of = test_version.version_of
+        task = test_version.task
 
         del test_version
 
@@ -2801,5 +2801,5 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(type, test_version_DB.type)
         self.assertEqual(updated_by, test_version_DB.updated_by)
         self.assertEqual(version_number, test_version_DB.version_number)
-        self.assertEqual(version_of, test_version_DB.version_of)
+        self.assertEqual(task, test_version_DB.task)
    
