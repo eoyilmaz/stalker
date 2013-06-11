@@ -23,18 +23,16 @@ Whenever stalker.db or something under it imported, the
 :func:`stalker.db.setup` becomes available to let one setup the database.
 """
 
-from sqlalchemy.exc import IntegrityError
+import logging
 
 import transaction
 from sqlalchemy import engine_from_config
+from sqlalchemy.exc import IntegrityError
 
 from stalker import defaults
-
 from stalker.db.declarative import Base
 from stalker.db.session import DBSession
-
 from stalker.log import logging_level
-import logging
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
@@ -200,32 +198,45 @@ def __create_ticket_statuses():
     from stalker import Status, StatusList
 
     logger.debug("Creating Ticket Statuses")
-
-    ticket_statuses = [
+    
+    # Update: check before adding
+    ticket_names = map(str.title, defaults.ticket_status_order)
+    ticket_statuses = Status.query.filter(Status.name.in_(ticket_names)).all()
+    if not ticket_statuses:
+        logger.debug('No Ticket Statuses found, creating new!')
+        ticket_statuses = [
         Status(
             name=status_name.title(),
             code=status_name.upper(),
             created_by=admin,
             updated_by=admin
         ) for status_name in defaults.ticket_status_order]
-
-    ticket_status_list = StatusList(
-        name='Ticket Statuses',
-        target_entity_type='Ticket',
-        statuses=ticket_statuses,
-        created_by=admin,
-        updated_by=admin
-    )
-
-    DBSession.add(ticket_status_list)
-    try:
-        transaction.commit()
-    except IntegrityError:
-        transaction.abort()
-        pass
     else:
-        logger.debug("Created Ticket Statuses successfully")
-        DBSession.flush()
+        logger.debug('Ticket Statuses are already created')
+
+    ticket_status_list = StatusList.query\
+        .filter(StatusList._target_entity_type=='Ticket')\
+        .first()
+
+    if not ticket_status_list:
+        logger.debug('No Ticket Status List found, creating new!')
+        ticket_status_list = StatusList(
+            name='Ticket Statuses',
+            target_entity_type='Ticket',
+            statuses=ticket_statuses,
+            created_by=admin,
+            updated_by=admin
+        )
+        DBSession.add(ticket_status_list)
+        try:
+            transaction.commit()
+        except IntegrityError:
+            transaction.abort()
+        else:
+            logger.debug("Created Ticket Statuses successfully")
+            DBSession.flush()
+    else:
+        logger.debug("Ticket Status List already created")
 
     # Again I hate doing this in this way
     from stalker import Type

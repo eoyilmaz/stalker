@@ -21,8 +21,6 @@
 import os
 import logging
 
-from stalker import Version
-
 
 logger = logging.getLogger(__name__)
 
@@ -219,6 +217,8 @@ class EnvironmentBase(object):
         path_trimmed = self.trim_repo_path(path)
         logger.debug('path_trimmed: %s' % path_trimmed)
 
+        from stalker import Version
+
         # try to get all versions with that info
         versions = Version.query.\
             filter(Version.full_path.startswith(path_trimmed)).all()
@@ -244,6 +244,8 @@ class EnvironmentBase(object):
 
         # trim repo path
         full_path_trimmed = self.trim_repo_path(full_path)
+
+        from stalker import Version
 
         # try to get a version with that info
         version = Version.query\

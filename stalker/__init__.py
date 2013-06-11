@@ -28,10 +28,11 @@ __version__ = '0.2.0.b8'
 # before anything about stalker create the defaults
 from stalker.config import defaults
 
-from stalker.models.auth import Group, Permission, User
+from stalker.models.auth import Group, Permission, User, LocalSession
 from stalker.models.asset import Asset
 from stalker.models.department import Department
 from stalker.models.entity import SimpleEntity, Entity
+from stalker.models.env import EnvironmentBase
 from stalker.models.format import ImageFormat
 from stalker.models.link import Link
 from stalker.models.message import Message
