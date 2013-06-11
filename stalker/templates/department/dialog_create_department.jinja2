@@ -108,7 +108,7 @@
                    'department_id': '{{ department.id }}'
             };
             {% if department.lead %}
-              lead_id = {{ department.lead.id }};
+              lead_id = '{{ department.lead.id }}';
             {% endif %}
             selected_tags = [
                 {% for tag in department.tags %}
@@ -172,9 +172,9 @@
 
         // Updater
         var lead_updater = fieldUpdater({
-            'memory': lead_memory,
-            'widget': lead_filteringSelect,
-            'selected': lead_id
+            memory: lead_memory,
+            widget: lead_filteringSelect,
+            selected: lead_id
         });
 
         // fill the field by calling the updater
