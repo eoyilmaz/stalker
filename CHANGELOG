@@ -168,6 +168,7 @@ Stalker Changes
     possible to select a row and navigate by Keyboard.
   * **New:** Permission controls are added to 'Page' and 'List' files.
   * **New:** Permission controls are added to 'Dialog' and 'Summary' files.
+  * **Fix:** Minor bug is fixed in Update Department dialog.
 
 0.2.0.b3
 ========
