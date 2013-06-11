@@ -222,7 +222,8 @@ def get_shots(request):
             'status_fg_color': shot.status.fg_color,
             'user_id': shot.created_by.id,
             'user_name': shot.created_by.name,
-            'description': shot.description
+            'description': shot.description,
+            'thumbnail_path': shot.thumbnail.full_path if shot.thumbnail else None
         })
 
 

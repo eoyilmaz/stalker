@@ -90,8 +90,14 @@
                                 get: function (object) {
                                     return object; // return entire item for formatter to use
                                 },
-                                formatter: function (value) {
-                                    return '<img width= "100px"; src="{{ request.static_url("stalker:static/stalker/images/Placeholder_shot.png") }}">';
+                                formatter: function (object) {
+
+                                    var path = '{{ request.static_url("stalker:static/stalker/images/Placeholder_shot.png") }}';
+                                    if (object.thumbnail_path) {
+                                        path = object.thumbnail_path;
+                                    }
+                                    return '<img width= "60px"; src="' + path + '">';
+
                                 }
                             },
                             {
