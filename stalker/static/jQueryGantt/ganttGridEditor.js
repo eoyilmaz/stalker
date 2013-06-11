@@ -92,5 +92,5 @@ GridEditor.prototype.redraw = function () {
 
 
 GridEditor.prototype.reset = function () {
-    this.element.find("[taskId]").remove();
+    this.element.find("[dataId]").remove();
 };

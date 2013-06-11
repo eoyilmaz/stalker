@@ -343,7 +343,7 @@ Ganttalendar.prototype.drawTask = function (task) {
     //console.debug("drawTask", task.name,new Date(task.start));
     var self = this;
     //var prof = new Profiler("ganttDrawTask");
-    //var editorRow = self.master.editor.element.find("tr[taskId=" + task.id + "]");
+    //var editorRow = self.master.editor.element.find("tr[dataId=" + task.id + "]");
     editorRow = task.rowElement;
     var top = editorRow.position().top + self.master.editor.element.parent().scrollTop();
     var x = Math.round((task.start - self.startMillis) * self.fx);
@@ -668,7 +668,7 @@ Ganttalendar.prototype.redrawLinks = function () {
 
 Ganttalendar.prototype.reset = function () {
     this.element.find(".ganttLinks").empty();
-    this.element.find("[taskId]").remove();
+    this.element.find("[dataId]").remove();
 };
 
 

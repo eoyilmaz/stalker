@@ -212,7 +212,7 @@ GanttMaster.prototype.loadGanttData = function (ganttData, Deferred) {
 
     this.loadTasks(ganttData.tasks);
 
-    this.loadTimeLogs(ganttData.timeLogs);
+    this.loadTimeLogs(ganttData.time_logs);
 
     this.endTransaction();
     var self = this;
@@ -245,7 +245,7 @@ GanttMaster.prototype.loadTasks = function (tasks) {
                 name: task.name,
                 code: task.code,
                 description: task.description,
-                priority: task.priorty,
+                priority: task.priority,
                 type: task.type,
                 status: task.status,
                 parent_id: task.parent_id,
@@ -266,7 +266,8 @@ GanttMaster.prototype.loadTasks = function (tasks) {
                 schedule_timing: task.schedule_timing,
                 schedule_unit: task.schedule_unit,
                 schedule_seconds: task.schedule_seconds,
-                total_logged_seconds: task.total_logged_seconds
+                total_logged_seconds: task.total_logged_seconds,
+                master: this
             });
 
             // TODO: do it properly
@@ -276,7 +277,7 @@ GanttMaster.prototype.loadTasks = function (tasks) {
             }
             task = t;
         }
-        task.master = this; // in order to access controller from task
+//        task.master = this; // in order to access controller from task
 
         task.depends = null;
         this.tasks.push(task);  //append task at the end
@@ -353,17 +354,16 @@ GanttMaster.prototype.loadTasks = function (tasks) {
         }
     }
 
-
 };
 
 
-GanttMaster.prototype.loadTimeLogs = function (timeLogs) {
-    var timeLog;
+GanttMaster.prototype.loadTimeLogs = function (time_logs) {
+    var time_log;
     var data;
-    for (var i = 0 ; i < timeLogs.length; i++){
-        data = timeLogs[i];
-        if (!(timeLog instanceof TimeLog)) {
-            timeLog = new TimeLog({
+    for (var i = 0 ; i < time_logs.length; i++){
+        data = time_logs[i];
+        if (!(data instanceof TimeLog)) {
+            time_log = new TimeLog({
                 id: data.id,
                 task_id: data.task_id,
                 resource_id: data.resource_id,
@@ -371,14 +371,14 @@ GanttMaster.prototype.loadTimeLogs = function (timeLogs) {
                 end: data.end
             });
         } else {
-            timeLog = data;
+            time_log = data;
         }
 
-        timeLog.master = this;
-        this.timeLogs.push(timeLog);
-        this.timeLog_ids.push(timeLog.id);
+        time_log.master = this;
+        this.timeLogs.push(time_log);
+        this.timeLog_ids.push(time_log.id);
         // to update the task relation
-        timeLog.getTask();
+        time_log.getTask();
     }
 };
 

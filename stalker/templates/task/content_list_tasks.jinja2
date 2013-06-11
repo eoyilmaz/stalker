@@ -41,7 +41,7 @@
     --></div>
 
     <div class="__template__" type="PROJECTROW"><!--
-        <tr taskId="(#=obj.id#)" class="projectEditRow" >
+        <tr dataId="(#=obj.id#)" class="projectEditRow" >
         <th class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></th>
         <td class="gdfCell" align="right"><span>(#=obj.id#)</span></td>
         <td class="gdfCell indentCell" style="font-weight: bold">(#=obj.link()#)</td>
@@ -54,7 +54,7 @@
     --></div>
 
     <div class="__template__" type="PARENTTASKROW"><!--
-        <tr taskId="(#=obj.id#)" class="parentTaskEditRow">
+        <tr dataId="(#=obj.id#)" class="parentTaskEditRow">
         <th class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></th>
         <td class="gdfCell" align="right" style="background-color: (#=obj.progress >= 100 ? 'rgb(153, 255, 51)' : 'red'#)"><span>(#=obj.id#)</span></td>
         <td class="gdfCell indentCell" style="padding-left:(#=obj.getParents().length*10#)px; (#=obj.getChildren().length>0?'font-weight: bold':''#)">(#=obj.link()#)</td>
@@ -67,7 +67,7 @@
     --></div>
 
     <div class="__template__" type="TASKROW"><!--
-        <tr taskId="(#=obj.id#)" class="taskEditRow">
+        <tr dataId="(#=obj.id#)" class="taskEditRow">
         <th class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></th>
         <td class="gdfCell" align="right" style="background-color: (#=obj.progress >= 100 ? 'rgb(153, 255, 51)' : 'red'#)"><span>(#=obj.id#)</span></td>
         <td class="gdfCell indentCell" style="padding-left:(#=obj.getParents().length*10#)px; (#=obj.getChildren().length>0?'font-weight: bold':''#)">(#=obj.link()#)</td>
@@ -78,6 +78,20 @@
         <td class="gdfCell">(#=obj.getResourcesLinks()#)</td>
         </tr>
     --></div>
+
+    <div class="__template__" type="RESOURCEROW"><!--
+        <tr resourceId="(#=obj.id#)" class="taskEditRow">
+        <th class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></th>
+        <td class="gdfCell" align="right" style="background-color: (#=obj.progress >= 100 ? 'rgb(153, 255, 51)' : 'red'#)"><span>(#=obj.id#)</span></td>
+        <td class="gdfCell indentCell" style="padding-left:(#=obj.getParents().length*10#)px; (#=obj.getChildren().length>0?'font-weight: bold':''#)">(#=obj.link()#)</td>
+        <td class="gdfCell"><div class="date start"></div></td>
+        <td class="gdfCell"><div class="date end"></div></td>
+        <td class="gdfCell"><div name="timing">(#=obj.schedule_model.toUpperCase()[0]#): (#=obj.schedule_timing#)(#=obj.schedule_unit#)</div></td>
+        <td class="gdfCell">(#=obj.getDependsLinks()#)</td>
+        <td class="gdfCell">(#=obj.getResourcesLinks()#)</td>
+        </tr>
+    --></div>
+
 
 
     <div class="__template__" type="TASKEMPTYROW"><!--
@@ -105,7 +119,7 @@
 
 
     <div class="__template__" type="TASKBAR"><!--
-        <div class="taskBox" taskId="(#=obj.id#)">
+        <div class="taskBox" dataId="(#=obj.id#)">
         <div class="layout (#=obj.hasExternalDep?'extDep':''#)">
             <div class="taskProgress" style="width:(#=obj.progress>100?100:obj.progress#)%;"></div>
             <div class="taskExtraTiming" style="width:(#=(obj.schedule_timing - obj.bid_timing)/obj.schedule_timing*100#)%;;"></div>
@@ -114,7 +128,7 @@
                (#=obj.schedule_model.toUpperCase()[0]#): (#=obj.schedule_timing#)(#=obj.schedule_unit#)
             </div>
             <div class="leafTaskContextMenu"
-                taskId="(#=obj.id#)"
+                dataId="(#=obj.id#)"
                 name="(#=obj.name#)"
                 start=(#=obj.start#)
                 end=(#=obj.end#)
@@ -135,9 +149,9 @@
     --></div>
 
     <div class="__template__" type="PARENTTASKBAR"><!--
-        <div class="parentTaskBox" taskId="(#=obj.id#)">
+        <div class="parentTaskBox" dataId="(#=obj.id#)">
             <div class="layout (#=obj.hasExternalDep?'extDep':''#)">
-                <div class="parentTaskContextMenu" taskId="(#=obj.id#)"></div>
+                <div class="parentTaskContextMenu" dataId="(#=obj.id#)"></div>
                 <div class="leftPin"></div>
                 <div class="rightPin"></div>
                 <div class="taskProgress" style="width:(#=obj.progress>100?100:obj.progress#)%;"></div>
@@ -270,7 +284,7 @@
                         connectId: ['workSpace'],
                         selector: '.leafTaskContextMenu',
                         getContent: function (node) {
-                            var taskId = node.getAttribute('taskid');
+                            var dataId = node.getAttribute('taskid');
                             var name = node.getAttribute('name');
                             var type = node.getAttribute('type');
                             var start = new Date(parseInt(node.getAttribute('start')));
@@ -293,7 +307,7 @@
                                     '<tbody>' +
                                     '<tr>' +
                                         '<td class="label_column">Id</td>' +
-                                        '<td class="input_column">' + taskId + '</td>' +
+                                        '<td class="input_column">' + dataId + '</td>' +
                                     '</tr>' +
                                     '<tr>' +
                                         '<td class="label_column">Priority</td>' +
@@ -380,12 +394,12 @@
                             onClick: function () {
                                 var node = this.getParent().currentTarget;
                                 // get task id
-                                var taskId = node.getAttribute('taskid');
+                                var dataId = node.getAttribute('taskid');
 
                                 var contentPane = registry.byId('tasks_content_pane');
                                 contentPane.set(
                                         'href',
-                                        'view/task/' + taskId
+                                        'view/task/' + dataId
                                 );
                                 contentPane.refresh();
                             }
@@ -410,13 +424,13 @@
                                 onClick: function () {
 
                                     var node = this.getParent().currentTarget;
-                                    var taskId = node.getAttribute('taskId');
+                                    var dataId = node.getAttribute('dataId');
 
                                     {#                                        saveGanttOnServer().then(function(){#}
                                     // create and call update_task dialog
                                     var dialog = dialogCreator({
                                         dialog_id: 'task_dialog',
-                                        data_id: taskId,
+                                        data_id: dataId,
                                         content_creator: dialogs.update_task_dialog,
                                         related_field_updater: loadGanttFromServer
                                     });
@@ -439,12 +453,12 @@
                                 label: 'Create Child Task',
                                 onClick: function () {
                                     var node = this.getParent().currentTarget;
-                                    var taskId = node.getAttribute('taskId');
+                                    var dataId = node.getAttribute('dataId');
 
                                     {#                                        saveGanttOnServer().then(function(){#}
                                     var dialog = dialogCreator({
                                         dialog_id: 'task_dialog',
-                                        data_id: taskId,
+                                        data_id: dataId,
                                         content_creator: dialogs.create_child_task_dialog,
                                         related_field_updater: loadGanttFromServer
                                     });
@@ -466,12 +480,12 @@
                                 label: 'Create Dependent Task',
                                 onClick: function () {
                                     var node = this.getParent().currentTarget;
-                                    var taskId = node.getAttribute('taskId');
+                                    var dataId = node.getAttribute('dataId');
 
                                     {#                                        saveGanttOnServer().then(function(){#}
                                     var dialog = dialogCreator({
                                         dialog_id: 'task_dialog',
-                                        data_id: taskId,
+                                        data_id: dataId,
                                         content_creator: dialogs.create_dependent_task_dialog,
                                         related_field_updater: loadGanttFromServer
                                     });
@@ -495,10 +509,10 @@
                                 label: 'Create TimeLog',
                                 onClick: function () {
                                     var node = this.getParent().currentTarget;
-                                    var taskId = node.getAttribute('taskId');
+                                    var dataId = node.getAttribute('dataId');
 
                                     // check if it is a leaf task
-                                    var task = ge.getTask(taskId);
+                                    var task = ge.getTask(dataId);
                                     //console.debug(task);
 
                                     if (task.isParent()) {
@@ -512,7 +526,7 @@
                                     {#                                    saveGanttOnServer().then(function(){#}
                                     var dialog = dialogCreator({
                                         dialog_id: 'time_log_dialog',
-                                        data_id: taskId,
+                                        data_id: dataId,
                                         content_creator: dialogs.create_time_log_dialog,
                                         related_field_updater: loadGanttFromServer
                                     });

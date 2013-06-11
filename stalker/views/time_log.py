@@ -28,7 +28,7 @@ import logging
 from stalker import log
 from stalker.db import DBSession
 from stalker.exceptions import OverBookedError
-from stalker.views import get_datetime, get_logged_in_user, PermissionChecker, seconds_since_epoch, microseconds_since_epoch
+from stalker.views import get_datetime, get_logged_in_user, PermissionChecker, seconds_since_epoch, milliseconds_since_epoch
 
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
@@ -59,7 +59,7 @@ def create_time_log_dialog(request):
         'studio': studio,
         'logged_in_user': logged_in_user,
         'task': task,
-        'microseconds_since_epoch': microseconds_since_epoch
+        'milliseconds_since_epoch': milliseconds_since_epoch
     }
 
 @view_config(
@@ -88,7 +88,7 @@ def update_time_log_dialog(request):
         'logged_in_user': logged_in_user,
         'task': time_log.task,
         'time_log': time_log,
-        'microseconds_since_epoch': microseconds_since_epoch
+        'milliseconds_since_epoch': milliseconds_since_epoch
     }
 
 
@@ -216,8 +216,8 @@ def get_time_logs(request):
             'resource_id': time_log.resource_id,
             'resource_name': time_log.resource.name,
             'duration': time_log.total_seconds,
-            'start_date' : seconds_since_epoch(time_log.start),
-            'end_date': seconds_since_epoch(time_log.end)
+            'start_date' : milliseconds_since_epoch(time_log.start),
+            'end_date': milliseconds_since_epoch(time_log.end)
 
             # 'hours_to_complete': time_log.hours_to_complete,
             # 'notes': time_log.notes

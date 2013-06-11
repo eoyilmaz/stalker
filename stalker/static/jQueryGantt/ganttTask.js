@@ -87,7 +87,6 @@ function Task(kwargs) {
 //    console.debug('bid_timing          : ', this.bid_timing);
 //    console.debug('bid_unit            : ', this.bid_unit);
 
-
     this.is_milestone = false;
     this.startIsMilestone = false;
     this.endIsMilestone = false;
@@ -96,12 +95,22 @@ function Task(kwargs) {
 
     this.rowElement; //row editor html element
     this.ganttElement; //gantt html element
-    this.master;
+    this.master = kwargs['master'] || null;
 
     this.resources = kwargs['resources'] || [];
-    this.resource_ids = [];
-    for (var i = 0; i < this.resources.length; i++) {
-        this.resource_ids.push(this.resources[i].id);
+    this.resource_ids = kwargs['resource_ids'] || [];
+    
+    if (this.resource_ids.length == 0){
+        // no problem if there are no resources
+        for (var i = 0; i < this.resources.length; i++) {
+            this.resource_ids.push(this.resources[i].id);
+        }
+    } else {
+        if (this.master != null){
+            for (var i = 0; i < this.resource_ids.length; i++){
+                this.resources.push(this.master.getResource(this.resource_ids[i]));
+            }
+        }
     }
 
     this.timeLogs = [];

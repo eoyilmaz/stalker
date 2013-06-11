@@ -21,7 +21,9 @@
     {% if has_permission('Update_User') %}
         <button id='view_users_append_user_button'>Append User</button>
     {% endif %}
-    <div id='users_data_grid'></div>
+    <div style="width: 100%; height: 100%; position: absolute;">
+        <div id='users_data_grid'></div>
+    </div>
 </div>
 
 <script type='text/javascript'>

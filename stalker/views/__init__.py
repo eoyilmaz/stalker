@@ -358,13 +358,27 @@ def seconds_since_epoch(dt):
     dts = dt - datetime.datetime(1970, 1, 1)
     return dts.days * 86400 + dts.seconds
 
-def microseconds_since_epoch(dt):
+def milliseconds_since_epoch(dt):
     """converts the given datetime.datetime instance to an integer showing the
-    microseconds from epoch, and does it without using the strftime('%s') which
+    milliseconds from epoch, and does it without using the strftime('%s') which
     uses the time zone info of the system.
     
     :param dt: datetime.datetime instance to be converted
-    :returns int: showing the microseconds since epoch
+    :returns int: showing the milliseconds since epoch
     """
     dts = dt - datetime.datetime(1970, 1, 1)
-    return (dts.days * 86400 + dts.seconds) * 1000 + dts.microseconds
+    return (dts.days * 86400 + dts.seconds) * 1000 + int(dts.microseconds / 1000)
+
+def from_microseconds(t):
+    """converts the given microseconds showing the time since epoch to datetime
+    instance
+    """
+    epoch = datetime.datetime(1970, 1, 1)
+    delta = datetime.timedelta(microseconds=t)
+    return epoch + delta
+
+def from_milliseconds(t):
+    """converts the given milliseconds showing the time since epoch to datetime
+    instance
+    """
+    return from_microseconds(t*1000)

@@ -314,7 +314,7 @@ a:hover {
 }
 
 .dgrid {
-    position: absolute;
+    position: static;
     top: 0;
     bottom: 0;
     left: 0;

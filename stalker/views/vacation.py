@@ -28,7 +28,7 @@ import logging
 from stalker import log
 from stalker.db import DBSession
 from stalker.exceptions import OverBookedError
-from stalker.views import get_datetime, get_logged_in_user, PermissionChecker
+from stalker.views import get_datetime, get_logged_in_user, PermissionChecker, milliseconds_since_epoch
 
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
@@ -243,8 +243,8 @@ def get_vacations(request):
             'type': vacation.type.name,
             'created_by_id': vacation.created_by_id,
             'created_by_name': vacation.created_by.name,
-            'start_date' : vacation.start.strftime('%s'),
-            'end_date':vacation.end.strftime('%s')
+            'start_date' : milliseconds_since_epoch(vacation.start),
+            'end_date':milliseconds_since_epoch(vacation.end)
 
             # 'hours_to_complete': vacation.hours_to_complete,
             # 'notes': vacation.notes
