@@ -17,6 +17,9 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+@import '../../dgrid/css/dgrid.css';
+
+
 html, body {
     font: 12px Myriad, Helvetica, Tahoma, Arial, clean, sans-serif;
     *font-size: 75%;
@@ -310,7 +313,17 @@ a:hover {
     left: 204px;
 }
 
+.dgrid {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: auto;
+}
+
 .dgrid-no-data,
+
 .dgrid-loading {
     color: #aaa;
     font-size: 3px;
@@ -346,34 +359,3 @@ a:hover {
     left: 10px;
 
 }
-
-
-
-/*.dgrid {*/
-    /*position: absolute;*/
-    /*left: 0;*/
-    /*right: 0;*/
-    /*height: auto;*/
-
-/*}*/
-
-/*.dgrid .dgrid-column-name {*/
-   /*width: auto;*/
-   /*background: #FF0000;*/
-   /*font-weight: bold;*/
-/*}*/
-
-/*.dgrid .dgrid-header-scroll {*/
-    /*display: none;*/
-/*}*/
-
-/*.dgrid .dgrid-header {*/
-    /*right: 0;*/
-    /*background: #dddddd;*/
-/*}*/
-
-/*.dgrid .dgrid-scroller {*/
-    /*position: relative;*/
-    /*overflow-y: hidden;*/
-    /*margin-top: 0;*/
-/*}*/
