@@ -128,6 +128,8 @@ def main(global_config, **settings):
     config.add_route('create_studio', 'create/studio')
     config.add_route('update_studio', 'update/studio')
 
+    config.add_route('view_studio', 'view/studio/{studio_id}')
+    config.add_route('summarize_studio', 'summarize/studio/{studio_id}')
     # *************************************************************************
     # Project
     config.add_route('dialog_create_project', 'dialog/create/project')
@@ -378,10 +380,18 @@ def main(global_config, **settings):
     config.add_route('create_version', 'create/version')
     config.add_route('update_version', 'update/version')
 
+    config.add_route('view_version', 'view/version/{version_id}')
+    config.add_route('summarize_version', 'summarize/version/{version_id}')
     config.add_route('get_versions',
                      'get/versions/{task_id}') # returns json
     config.add_route('list_versions',
                      'list/versions/{task_id}') # returns response
+    config.add_route('list_version_outputs',
+                     'list/version/outputs/{version_id}') # returns response
+    config.add_route('list_version_inputs',
+                     'list/version/inputs/{version_id}') # returns response
+    config.add_route('list_version_children',
+                     'list/version/children/{version_id}') # returns response
 
     # *************************************************************************
     # Department

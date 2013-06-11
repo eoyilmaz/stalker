@@ -345,8 +345,9 @@ def get_users_not_in_entity(request):
             'id': user.id,
             'name': user.name,
             'login': user.login,
-            'tasksCount': '2',
-            'ticketsCount': '2'
+            'tasksCount': len(user.tasks),
+            'ticketsCount': len(user.open_tickets),
+            'thumbnail_path': user.thumbnail.full_path if user.thumbnail else None
         }
         for user in entity.users
     ]
@@ -766,7 +767,11 @@ def get_groups(request):
     """returns all the groups in database
     """
     return [
-        {'id': group.id, 'name': group.name}
+        {
+            'id': group.id,
+            'name': group.name,
+            'thumbnail_path': group.thumbnail.full_path if group.thumbnail else None
+        }
         for group in Group.query.order_by(Group.name.asc()).all()
     ]
 
@@ -782,13 +787,13 @@ def get_groups_byEntity(request):
     entity = Entity.query.filter_by(id=entity_id).first()
 
     return [
-            {
+        {
+             'id': group.id,
              'name': group.name,
-             'id': group.id
-
-            }
-            for group in sorted(entity.groups, key=lambda x: x.name.lower())
-        ]
+             'thumbnail_path': group.thumbnail.full_path if group.thumbnail else None
+        }
+        for group in sorted(entity.groups, key=lambda x: x.name.lower())
+    ]
 
 @view_config(
     route_name='dialog_append_groups',

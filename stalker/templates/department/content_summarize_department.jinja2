@@ -20,12 +20,18 @@
 <div id='department_details_content_pane'>
     <div style="background-color: #7f9599 " class="page_title"></div>
     {# Avatar #}
-    {# Avatar #}
-    <div id='user_avatar'
+    <div id='department_avatar'
          class='thumbnail'>
         {% if not department.thumbnail %}
-            <img src='{{ request.static_url("stalker:static/stalker/images/Placeholder_Team.jpg") }}'>
+            <img src='{{ request.static_url("stalker:static/stalker/images/Placeholder_Team.jpg") }}'
+                 alt=''
+                 style='width:auto; height:150px;'>
+        {% else %}
+            <img src='{{ department.thumbnail.full_path }}'
+                 alt=''
+                 style='width:auto; height:150px;'>
         {% endif %}
+        <div class='thumbnail_menu'>&nbsp</div>
     </div>
 
     {# Basic Info #}
@@ -89,10 +95,11 @@
 <script type='text/javascript'>
     require([
         'dijit/form/Button',
+        'stalker/thumbnailMenu',
         'stalker/dialogs',
         'stalker/dialogCaller',
         'dojo/domReady!'
-    ], function (Button, dialogs, dialogCaller) {
+    ], function (Button, thumbnailMenu, dialogs, dialogCaller) {
 
         // ********************************************************************
         // Update Department Button
@@ -104,15 +111,31 @@
             content_pane.refresh();
         };
 
-        var update_department_button = dialogCaller({
-            label: 'Update',
-            dialog_id: 'department_dialog',
-            content_creator: dialogs.update_department_dialog,
-            attach_to: 'update_department_button',
-            related_field_updater: department_summary_updater,
-            data_id: '{{ department.id }}'
-        });
-        update_department_button.startup();
+
+        {% if has_permission('Update_Department') %}
+
+            var update_department_button = dialogCaller({
+                label: 'Update',
+                dialog_id: 'department_dialog',
+                content_creator: dialogs.update_department_dialog,
+                attach_to: 'update_department_button',
+                related_field_updater: department_summary_updater,
+                data_id: '{{ department.id }}'
+            });
+            update_department_button.startup();
+
+            thumbnailMenu({
+                targetNodeIds: ['department_avatar'],
+                selector: '.thumbnail_menu',
+                entity_id: {{ department.id }},
+                related_field_updater: function () {
+                    var content_pane = update_department_button.getParent();
+                    if (content_pane != null) {
+                        content_pane.refresh();
+                    }
+                }
+            });
+        {% endif %}
 
     });
 </script>

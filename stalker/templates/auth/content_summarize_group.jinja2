@@ -21,12 +21,19 @@
 <div id='group_details_content_pane'>
     <div style="background-color: #f8acac;" class="page_title"></div>
 
-    {# Avatar #}
+     {# Avatar #}
     <div id='group_avatar'
          class='thumbnail'>
         {% if not group.thumbnail %}
-            <img src='{{ request.static_url("stalker:static/stalker/images/Placeholder_Team.jpg") }}'>
+            <img src='{{ request.static_url("stalker:static/stalker/images/Placeholder_Team.jpg") }}'
+                 alt=''
+                 style='width:auto; height:150px;'>
+        {% else %}
+            <img src='{{ group.thumbnail.full_path }}'
+                 alt=''
+                 style='width:auto; height:150px;'>
         {% endif %}
+        <div class='thumbnail_menu'>&nbsp</div>
     </div>
 
     {# Basic Info #}
@@ -75,9 +82,10 @@
         'dijit/registry',
         'dijit/form/Button',
         'stalker/dialogs',
+        'stalker/thumbnailMenu',
         'stalker/dialogCaller',
         'dojo/domReady!'
-    ], function (registry, Button, dialogs, dialogCaller) {
+    ], function (registry, Button, dialogs, thumbnailMenu, dialogCaller) {
 
         // ********************************************************************
         // Update Group Button
@@ -103,6 +111,18 @@
                 data_id: {{ group.id }}
             });
             update_group_button.startup();
+
+             thumbnailMenu({
+                targetNodeIds: ['group_avatar'],
+                selector: '.thumbnail_menu',
+                entity_id: {{ group.id }},
+                related_field_updater: function () {
+                    var content_pane = update_group_button.getParent();
+                    if (content_pane != null) {
+                        content_pane.refresh();
+                    }
+                }
+            });
         {% endif %}
 
     });

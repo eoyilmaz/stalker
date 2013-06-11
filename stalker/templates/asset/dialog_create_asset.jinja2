@@ -132,7 +132,7 @@ require([
                 {% endif %}
             {% elif mode == 'UPDATE' %}
                 url = '{{ request.route_url("update_asset") }}';
-                asset_id = {{ asset.id }};
+                asset_id = '{{ asset.id }}';
                 name = '{{ asset.name }}';
                 code = '{{ asset.code }}';
                 description = '{{ asset.description }}';

@@ -237,7 +237,8 @@ def get_departments_byEntity(request):
     return [
             {
              'name': department.name,
-             'id': department.id
+             'id': department.id,
+            'thumbnail_path': department.thumbnail.full_path if department.thumbnail else None
 
             }
             for department in entity.departments

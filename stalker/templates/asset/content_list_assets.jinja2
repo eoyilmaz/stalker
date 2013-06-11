@@ -42,8 +42,8 @@
         'stalker/fieldUpdater',
         'stalker/dialogCaller',
         'dojo/domReady!'
-    ], function (registry, ObjectStore, aspect, List, Grid, Selection, Keyboard,
-                 declare, editor, Memory, Select, JsonRest, dialogs,
+    ], function (registry, ObjectStore, aspect, List, Grid, Selection,
+                 Keyboard, declare, editor, Memory, Select, JsonRest, dialogs,
                  fieldUpdater, dialogCaller) {
 
         var StandardGrid = declare([Grid, Selection, Keyboard]);
@@ -94,8 +94,14 @@
                         get: function (object) {
                             return object; // return entire item for formatter to use
                         },
-                        formatter: function (value) {
-                            return '<img width= "100px"; src="{{ request.static_url("stalker:static/stalker/images/Placeholder_shot.png") }}">';
+                        formatter: function (object) {
+
+                            var path = '{{ request.static_url("stalker:static/stalker/images/Placeholder_shot.png") }}';
+                            if (object.thumbnail_path) {
+                                path = object.thumbnail_path;
+                            }
+                            return '<img width= "60px"; src="' + path + '">';
+
                         }
                     },
 
@@ -181,11 +187,10 @@
         var content_pane = registry.byId('assets_content_pane');
 
 
+        aspect.after(content_pane, "resize", function () {
 
-        aspect.after(content_pane, "resize", function() {
-
-          console.log('asset_data_grid.resize();');
-          asset_data_grid.resize();
+            console.log('asset_data_grid.resize();');
+            asset_data_grid.resize();
 
         });
 

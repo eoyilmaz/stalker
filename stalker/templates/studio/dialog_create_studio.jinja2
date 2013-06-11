@@ -46,7 +46,7 @@
             <tr>
                 <td class='label_column'>
                     <label for='studio_daily_working_hours'>Daily Working
-                                                            Hours</label>
+                        Hours</label>
                 </td>
                 <td class='input_column'>
                     <input id='studio_daily_working_hours'>
@@ -174,224 +174,247 @@
 </div>
 
 <script type='text/javascript'>
-    require([
-        'dijit/form/Form',
-        'dijit/form/ValidationTextBox',
-        'dijit/form/TextBox',
-        'dijit/form/NumberSpinner',
-        'dijit/form/FilteringSelect',
-        'dijit/form/Button',
-        'dijit/form/DateTextBox',
-        'dijit/form/TimeTextBox',
+require([
+    'dijit/form/Form',
+    'dijit/form/ValidationTextBox',
+    'dijit/form/TextBox',
+    'dijit/form/NumberSpinner',
+    'dijit/form/FilteringSelect',
+    'dijit/form/Button',
+    'dijit/form/DateTextBox',
+    'dijit/form/TimeTextBox',
 
-        'dojox/form/Uploader',
-        'dojox/form/uploader/FileList',
+    'dojox/form/Uploader',
+    'dojox/form/uploader/FileList',
 
-        'dojo/store/JsonRest',
+    'dojo/store/JsonRest',
 
-        'dojo/date',
-        'dojo/date/stamp',
-        'dojo/date/locale',
-
-
-        'stalker/submitForm',
-
-        'dojo/domReady!'
-    ], function (Form, ValidationTextBox, TextBox, NumberSpinner,
-                 FilteringSelect, Button, DateTextBox, TimeTextBox, Uploader,
-                 FileList, JsonRest, date, stamp, locale, submitForm) {
+    'dojo/date',
+    'dojo/date/stamp',
+    'dojo/date/locale',
 
 
-        // ********************************************************************
-        // Form
-        var create_studio_form = new Form({
-            id: 'create_studio_form'
-        }, 'create_studio_form');
+    'stalker/submitForm',
 
-        var dialog = create_studio_form.getParent();
+    'dojo/domReady!'
+], function (Form, ValidationTextBox, TextBox, NumberSpinner, FilteringSelect,
+             Button, DateTextBox, TimeTextBox, Uploader, FileList, JsonRest,
+             date, stamp, locale, submitForm) {
 
-
-        // ********************************************************************
-        // Name
-        var name_textBox = new ValidationTextBox({
-            name: 'name',
-            label: 'Name',
-            required: true,
-            placeHolder: 'Enter a name'
-        }, 'studio_name');
-        name_textBox.startup();
-
-        // ********************************************************************
-        // Thumbnail
-        var thumbnail_uploader = new dojox.form.Uploader({
-            label: 'Browse...',
-            multiple: false,
-            uploadOnSelect: true,
-            url: 'upload_thumbnail'
-        }, 'studio_thumbnail');
-        thumbnail_uploader.startup();
-
-        var thumbnail_list = new dojox.form.uploader.FileList({
-            uploader: thumbnail_uploader
-        }, 'studio_thumbnail_list');
-        thumbnail_list.startup();
+    var url;
+    var name;
+    var daily_working_hours;
+    var studio_id;
 
 
-        // ********************************************************************
-        // Daily Working Hours
-        var daily_working_hours_numberSpinner = NumberSpinner({
-            name: 'dwh',
-            value: 8,
-            constraints: {min: 0, max: 24}
-        }, 'studio_daily_working_hours');
-        daily_working_hours_numberSpinner.startup();
+    {# fill values based on the dialog mode #}
+    {% if mode == 'CREATE' %}
+        url = '{{ request.route_url("create_studio") }}';
+
+    {% elif mode == 'UPDATE' %}
+        url = '{{ request.route_url("update_studio") }}';
+        studio_id = '{{ studio.id }}';
+        name = '{{ studio.name }}';
+        daily_working_hours = '{{ studio.daily_working_hours }}';
+    {% endif %}
 
 
-        // **************
-        // Hours
+    // ********************************************************************
+    // Form
+    var create_studio_form = new Form({
+        id: 'create_studio_form'
+    }, 'create_studio_form');
 
-        time_text_box_creator = function (kwargs) {
-            var name = kwargs['name'];
-            var value = kwargs['value'] || 'T09:00:00';
-            var attach_to = kwargs['attach_to'];
-
-            var temp_timeTextBox = TimeTextBox({
-                name: name,
-                value: value,
-                style: 'width: 75px;',
-                constraints: {
-                    timePattern: 'HH:mm:ss',
-                    clickableIncrement: 'T01:00:00',
-                    visibleIncrement: 'T01:00:00',
-                    visibleRange: 'T01:00:00'
-                }
-            }, attach_to);
-            temp_timeTextBox.startup();
-            return temp_timeTextBox;
-        };
-
-        // Monday
-        var mon_start = time_text_box_creator({
-            attach_to: 'studio_working_hours_mon_start'
-        });
-
-        var mon_end = time_text_box_creator({
-            value: 'T18:00:00',
-            attach_to: 'studio_working_hours_mon_end'
-        });
+    var dialog = create_studio_form.getParent();
 
 
-        // Tuesday
-        var tue_start = time_text_box_creator({
-            attach_to: 'studio_working_hours_tue_start'
-        });
-
-        var tue_end = time_text_box_creator({
-            value: 'T18:00:00',
-            attach_to: 'studio_working_hours_tue_end'
-        });
-
-
-        // Wednesday
-        var wed_start = time_text_box_creator({
-            attach_to: 'studio_working_hours_wed_start'
-        });
-
-        var wed_end = time_text_box_creator({
-            value: 'T18:00:00',
-            attach_to: 'studio_working_hours_wed_end'
-        });
+    // ********************************************************************
+    // Name
+    var name_textBox = new ValidationTextBox({
+        name: 'name',
+        label: 'Name',
+        required: true,
+        value: name,
+        placeHolder: 'Enter a name'
+    }, 'studio_name');
+    name_textBox.startup();
 
 
-        // Thursday
-        var thu_start = time_text_box_creator({
-            attach_to: 'studio_working_hours_thu_start'
-        });
 
-        var thu_end = time_text_box_creator({
-            value: 'T18:00:00',
-            attach_to: 'studio_working_hours_thu_end'
-        });
+    // ********************************************************************
+    // Thumbnail
+    var thumbnail_uploader = new dojox.form.Uploader({
+        label: 'Browse...',
+        multiple: false,
+        uploadOnSelect: true,
+        url: 'upload_thumbnail'
+    }, 'studio_thumbnail');
+    thumbnail_uploader.startup();
 
-
-        // Friday
-        var fri_start = time_text_box_creator({
-            attach_to: 'studio_working_hours_fri_start'
-        });
-
-        var fri_end = time_text_box_creator({
-            value: 'T18:00:00',
-            attach_to: 'studio_working_hours_fri_end'
-        });
+    var thumbnail_list = new dojox.form.uploader.FileList({
+        uploader: thumbnail_uploader
+    }, 'studio_thumbnail_list');
+    thumbnail_list.startup();
 
 
-        // Saturday
-        var sat_start = time_text_box_creator({
-            attach_to: 'studio_working_hours_sat_start'
-        });
-
-        var sat_end = time_text_box_creator({
-            value: 'T18:00:00',
-            attach_to: 'studio_working_hours_sat_end'
-        });
-
-
-        // Sunday
-        var sun_start = time_text_box_creator({
-            attach_to: 'studio_working_hours_sun_start'
-        });
-
-        var sun_end = time_text_box_creator({
-            value: 'T18:00:00',
-            attach_to: 'studio_working_hours_sun_end'
-        });
+    // ********************************************************************
+    // Daily Working Hours
+    var daily_working_hours_numberSpinner = NumberSpinner({
+        name: 'dwh',
+        value: daily_working_hours,
+        constraints: {min: 0, max: 24}
+    }, 'studio_daily_working_hours');
+    daily_working_hours_numberSpinner.startup();
 
 
-        // ********************************************************************
-        // Ok Button
-        var ok_button = new Button({
-            label: 'OK',
-            type: 'button',
-            onClick: function () {
-                submitForm({
-                    dialog: dialog,
-                    form: create_studio_form,
-                    additional_data: {
-                        mon_start: stamp.toISOString(mon_start.value),
-                        mon_end: stamp.toISOString(mon_end.value),
-                        tue_start: stamp.toISOString(tue_start.value),
-                        tue_end: stamp.toISOString(tue_end.value),
-                        wed_start: stamp.toISOString(wed_start.value),
-                        wed_end: stamp.toISOString(wed_end.value),
-                        thu_start: stamp.toISOString(thu_start.value),
-                        thu_end: stamp.toISOString(thu_end.value),
-                        fri_start: stamp.toISOString(fri_start.value),
-                        fri_end: stamp.toISOString(fri_end.value),
-                        sat_start: stamp.toISOString(sat_start.value),
-                        sat_end: stamp.toISOString(sat_end.value),
-                        sun_start: stamp.toISOString(sun_start.value),
-                        sun_end: stamp.toISOString(sun_end.value)
-                    },
-                    url: '{{ request.route_url("create_studio") }}',
-                    method: 'POST'
-                });
+    // **************
+    // Hours
+
+    var time_text_box_creator = function (kwargs) {
+        var name = kwargs['name'];
+        var value = kwargs['value'] || 'T09:00:00';
+        var attach_to = kwargs['attach_to'];
+
+        var temp_timeTextBox = TimeTextBox({
+            name: name,
+            value: value,
+            style: 'width: 75px;',
+            constraints: {
+                timePattern: 'HH:mm:ss',
+                clickableIncrement: 'T01:00:00',
+                visibleIncrement: 'T01:00:00',
+                visibleRange: 'T01:00:00'
             }
-        }, 'studio_ok_button');
-        ok_button.startup();
+        }, attach_to);
+        temp_timeTextBox.startup();
+        return temp_timeTextBox;
+    };
 
-        // ********************************************************************
-        // Cancel Button
-        var cancel_button = new Button({
-            label: 'Cancel',
-            type: 'button',
-            onClick: function () {
-                dialog.destroyRecursive();
-            }
-        }, 'studio_cancel_button');
-        cancel_button.startup();
-
-        create_studio_form.startup();
-
+    // Monday
+    var mon_start = time_text_box_creator({
+        attach_to: 'studio_working_hours_mon_start'
     });
+
+    var mon_end = time_text_box_creator({
+        value: 'T18:00:00',
+        attach_to: 'studio_working_hours_mon_end'
+    });
+
+
+    // Tuesday
+    var tue_start = time_text_box_creator({
+        attach_to: 'studio_working_hours_tue_start'
+    });
+
+    var tue_end = time_text_box_creator({
+        value: 'T18:00:00',
+        attach_to: 'studio_working_hours_tue_end'
+    });
+
+
+    // Wednesday
+    var wed_start = time_text_box_creator({
+        attach_to: 'studio_working_hours_wed_start'
+    });
+
+    var wed_end = time_text_box_creator({
+        value: 'T18:00:00',
+        attach_to: 'studio_working_hours_wed_end'
+    });
+
+
+    // Thursday
+    var thu_start = time_text_box_creator({
+        attach_to: 'studio_working_hours_thu_start'
+    });
+
+    var thu_end = time_text_box_creator({
+        value: 'T18:00:00',
+        attach_to: 'studio_working_hours_thu_end'
+    });
+
+
+    // Friday
+    var fri_start = time_text_box_creator({
+        attach_to: 'studio_working_hours_fri_start'
+    });
+
+    var fri_end = time_text_box_creator({
+        value: 'T18:00:00',
+        attach_to: 'studio_working_hours_fri_end'
+    });
+
+
+    // Saturday
+    var sat_start = time_text_box_creator({
+        attach_to: 'studio_working_hours_sat_start'
+    });
+
+    var sat_end = time_text_box_creator({
+        value: 'T18:00:00',
+        attach_to: 'studio_working_hours_sat_end'
+    });
+
+
+    // Sunday
+    var sun_start = time_text_box_creator({
+        attach_to: 'studio_working_hours_sun_start'
+    });
+
+    var sun_end = time_text_box_creator({
+        value: 'T18:00:00',
+        attach_to: 'studio_working_hours_sun_end'
+    });
+
+
+    // ********************************************************************
+    // Ok Button
+    var ok_button = new Button({
+        label: 'OK',
+        type: 'button',
+        onClick: function () {
+            submitForm({
+                dialog: dialog,
+                form: create_studio_form,
+                additional_data: {
+                    {% if mode=='UPDATE' %}
+                         studio_id: studio_id,
+                    {% endif %}
+                    mon_start: stamp.toISOString(mon_start.value),
+                    mon_end: stamp.toISOString(mon_end.value),
+                    tue_start: stamp.toISOString(tue_start.value),
+                    tue_end: stamp.toISOString(tue_end.value),
+                    wed_start: stamp.toISOString(wed_start.value),
+                    wed_end: stamp.toISOString(wed_end.value),
+                    thu_start: stamp.toISOString(thu_start.value),
+                    thu_end: stamp.toISOString(thu_end.value),
+                    fri_start: stamp.toISOString(fri_start.value),
+                    fri_end: stamp.toISOString(fri_end.value),
+                    sat_start: stamp.toISOString(sat_start.value),
+                    sat_end: stamp.toISOString(sat_end.value),
+                    sun_start: stamp.toISOString(sun_start.value),
+                    sun_end: stamp.toISOString(sun_end.value)
+                },
+                url: url,
+                method: 'POST'
+            });
+        }
+    }, 'studio_ok_button');
+    ok_button.startup();
+
+    // ********************************************************************
+    // Cancel Button
+    var cancel_button = new Button({
+        label: 'Cancel',
+        type: 'button',
+        onClick: function () {
+            dialog.destroyRecursive();
+        }
+    }, 'studio_cancel_button');
+    cancel_button.startup();
+
+    create_studio_form.startup();
+
+});
 </script>
 

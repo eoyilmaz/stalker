@@ -246,7 +246,8 @@ def get_assets(request):
             'status_fg_color': asset.status.fg_color,
             'user_id': asset.created_by.id,
             'user_name': asset.created_by.name,
-            'description': asset.description
+            'description': asset.description,
+            'thumbnail_path': asset.thumbnail.full_path if asset.thumbnail else None
         }
         for asset in Asset.query.filter_by(project_id=project_id).all()
     ]

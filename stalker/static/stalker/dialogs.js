@@ -73,6 +73,19 @@ define(['exports', 'dojox/widget/DialogSimple', 'dijit/registry', 'dojo/domReady
             });
         };
 
+        exports.update_studio_dialog = function update_studio_dialog() {
+            return new DialogSimple({
+                id: 'studio_dialog',
+                title: 'Update Studio',
+                href: 'dialog/update/studio',
+                resize: true,
+                style: style,
+                executeScripts: true
+            });
+        };
+
+
+
         // ********************************************************************
         // PROJECT
         exports.create_project_dialog = function create_project_dialog() {

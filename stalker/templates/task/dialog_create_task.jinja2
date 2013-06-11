@@ -623,7 +623,7 @@ require([
     // ********************************************************************
     // Resources
     var users_jsonRest = new JsonRest({
-        target: 'get/users'
+        target: '/get/users_byEntity/{{ project.id }}'
     });
 
     var resources_tagSelect = new TagSelect({

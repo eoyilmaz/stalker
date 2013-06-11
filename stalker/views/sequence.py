@@ -225,7 +225,8 @@ def get_sequences(request):
             'status_bg_color': sequence.status.bg_color,
             'status_fg_color': sequence.status.fg_color,
             'user_id': sequence.created_by.id,
-            'user_name': sequence.created_by.name
+            'user_name': sequence.created_by.name,
+            'thumbnail_path': sequence.thumbnail.full_path if sequence.thumbnail else None
         }
         for sequence in project.sequences
     ]

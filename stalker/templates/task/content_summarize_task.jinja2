@@ -1,11 +1,26 @@
 <div id='task_details_content_pane'>
     <div style="background-color: #9d9d9d" class="page_title"></div>
+    {# Avatar #}
+    <div id='task_avatar'
+         class='thumbnail'>
+        {% if not task.thumbnail %}
+            <img src='{{ request.static_url("stalker:static/stalker/images/Placeholder_shot.png") }}'
+                 alt=''
+                 style='width:auto; height:150px;'>
+        {% else %}
+            <img src='{{ task.thumbnail.full_path }}'
+                 alt=''
+                 style='width:auto; height:150px;'>
+        {% endif %}
+        <div class='thumbnail_menu'>&nbsp</div>
+    </div>
+
     <div id='task_summary_chart1'
          style='width: 200px;
                 height: 200px;
                 position: absolute;
                 top: 10px;
-                left: 0;'></div>
+                right: 0;'></div>
 
     {# Basic Info #}
     <div id='task_info' class='summary_info'>
@@ -77,13 +92,14 @@
         'dojox/charting/plot2d/Pie',
         'dojox/charting/action2d/MoveSlice',
         'dijit/form/Button',
+        'stalker/thumbnailMenu',
 
         'stalker/dialogs',
         'stalker/dialogCaller',
 
         'dojo/domReady!'
-    ], function (Chart, theme, PiePlot, MoveSlice, Button, dialogs,
-                 dialogCaller) {
+    ], function (Chart, theme, PiePlot, MoveSlice, Button, thumbnailMenu,
+                 dialogs, dialogCaller) {
 
         // Create the chart within it's "holding" node
         var pieChart = new Chart('task_summary_chart1');
@@ -135,6 +151,18 @@
                 related_field_updater: task_summary_updater
             });
             update_task_button.startup();
+
+            thumbnailMenu({
+                targetNodeIds: ['task_avatar'],
+                selector: '.thumbnail_menu',
+                entity_id: {{ task.id }},
+                related_field_updater: function () {
+                    var content_pane = update_task_button.getParent();
+                    if (content_pane != null) {
+                        content_pane.refresh();
+                    }
+                }
+            });
         {% endif %}
 
 
