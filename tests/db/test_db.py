@@ -406,6 +406,40 @@ class DatabaseTester(unittest2.TestCase):
         # clean the test
         shutil.rmtree(temp_db_path)
 
+    def test_ticket_statuses_are_not_created_over_and_over_again(self):
+        """testing if the Ticket Statuses are created only once and trying to
+        call __init_db__ will not raise any error
+        """
+        # create the environment variable and point it to a temp directory
+        temp_db_path = tempfile.mkdtemp()
+        temp_db_filename = 'stalker.db'
+        temp_db_full_path = os.path.join(temp_db_path, temp_db_filename)
+
+        temp_db_url = 'sqlite:///' + temp_db_full_path
+
+        DBSession.remove()
+        db.setup(settings={'sqlalchemy.url': temp_db_url})
+
+        # this should not give any error
+        # DBSession.remove()
+        db.setup(settings={'sqlalchemy.url': temp_db_url})
+
+        # this should not give any error
+        # DBSession.remove()
+        db.setup(settings={'sqlalchemy.url': temp_db_url})
+
+        # and we still have correct amount of Permissions
+        statuses = Status.query.all()
+        self.assertEqual(len(statuses), 5)
+
+        status_list = StatusList.query.all()
+        self.assertEqual(len(status_list), 1)
+        self.assertEqual(status_list[0].name, 'Ticket Statuses')
+        # self.fail(temp_db_url)
+
+        # clean the test
+        shutil.rmtree(temp_db_path)
+
 
 class DatabaseModelsTester(unittest2.TestCase):
     """tests the database model
