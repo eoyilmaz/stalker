@@ -104,6 +104,9 @@ function Task(kwargs) {
         this.resource_ids.push(this.resources[i].id);
     }
 
+    this.timeLogs = [];
+    this.timeLog_ids = [];
+
     // update the duration according to the schedule_timing value
     //this.update_duration_from_schedule_timing();
 }
@@ -310,6 +313,25 @@ Task.prototype.update_duration_from_schedule_timing = function () {
 Task.prototype.getProgress = function () {
     this.progress = this.schedule_seconds > 0 ? this.total_logged_seconds / this.schedule_seconds * 100 : 0;
     return this.progress;
+};
+
+Task.prototype.addTimeLog = function(timeLog) {
+    timeLog_id = timeLog.id;
+    var index = this.timeLog_ids.indexOf(timeLog_id);
+    if (index == -1){
+        // it is not in the list
+        // update the timeLog
+        timeLog.task_id = this.id;
+        timeLog.task = this;
+        // update self
+        this.timeLogs.push(timeLog);
+        this.timeLog_ids.push(timeLog_id);
+    } // if it is in the list do nothing
+};
+
+Task.prototype.addTimeLog_with_id = function(timeLog_id){
+    var timeLog = this.master.getTimeLog(timeLog_id);
+    this.addTimeLog(timeLog);
 };
 
 

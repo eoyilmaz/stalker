@@ -13,6 +13,10 @@ Stalker Changes
   * **Fix:** In **db.setup()** Ticket statuses are only created if there aren't
     any.
 
+* **WebUI:**
+
+  * **Fix:** Fixed DGrid auto height problem.
+
 0.2.0.b7
 ========
 
@@ -74,7 +78,6 @@ Stalker Changes
   * **New:** Thumbnail Add function is added to several objects' Summarize Pages.
       (Task, Asset, Shot, Sequence,Department, Group). List Page is also updated
       by new thumbnail information.
-
 
   * **JQueryGantt:**
 

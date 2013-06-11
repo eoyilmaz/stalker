@@ -113,10 +113,15 @@ def convert_to_jquery_gantt_task_format(tasks):
             'project_id': task.project.id,
             'parent_id': task.parent.id if task.parent else task.project.id,
             'depend_ids': [dep.id for dep in task.depends],
-            'resources': [
+            'resource_ids': [
                 {
                     'id': resource.id,
                 } for resource in task.resources
+            ],
+            'time_log_ids': [
+                {
+                    'id': time_log.id,
+                } for time_log in task.time_logs
             ],
             'start': microseconds_since_epoch(task.start),
             'end': microseconds_since_epoch(task.end),
@@ -135,12 +140,25 @@ def convert_to_jquery_gantt_task_format(tasks):
         for task in tasks
     ])
 
+    # prepare time logs
+    all_time_logs = []
+    for task in tasks:
+            for time_log in task.time_logs:
+                all_time_logs.append(time_log)
+
     data = {
         'tasks': faux_tasks,
         'resources': [{
                           'id': resource.id,
                           'name': resource.name
                       } for resource in User.query.all()],
+        'time_logs': [{
+                          'id': time_log.id,
+                          'task_id': time_log.task.id,
+                          'resource_id': time_log.resource.id,
+                          'start': microseconds_since_epoch(time_log.start),
+                          'end': microseconds_since_epoch(time_log.end)
+                      } for time_log in all_time_logs],
         'timing_resolution': (timing_resolution.days * 86400 +
                               timing_resolution.seconds) * 1000,
         'working_hours': working_hours,

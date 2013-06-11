@@ -49,6 +49,7 @@
             width: '100%',
             autoHeight: true
         }, 'users_data_grid');
+        console.debug(users_DataGrid);
 
         {% if has_permission('Update_'+entity.entity_type ) and has_permission('Update_User') %}
             var append_user_button = dialogCaller({
