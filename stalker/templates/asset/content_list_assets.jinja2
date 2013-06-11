@@ -21,7 +21,10 @@
     {% if has_permission('Create_Asset') %}
         <button id='list_assets_create_asset_button'>New Asset</button>
     {% endif %}
-    <div id='assets_data_grid'></div>
+    <div style='width:100%; height: 100%; position: absolute;'>
+      <div id='assets_data_grid'></div>
+    </div>
+
 </div>
 
 <script type='text/javascript'>

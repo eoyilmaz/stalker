@@ -21,7 +21,9 @@
     {% if has_permission('Update_Group') and has_permission('Update_User') %}
         <button id='view_groups_append_group_button'>Append Group</button>
     {% endif %}
-    <div id='groups_data_grid'></div>
+    <div style='width:100%; height: 100%; position: absolute;'>
+        <div id='groups_data_grid'></div>
+    </div>
 </div>
 
 <script type='text/javascript'>

@@ -21,7 +21,9 @@
     {% if has_permission('Create_Shot') %}
         <button id='list_shots_create_shot_button'>New Shot</button>
     {% endif %}
-    <div id='shots_data_grid'></div>
+    <div style='width:100%; height: 100%; position: absolute;'>
+        <div id='shots_data_grid'></div>
+    </div>
 </div>
 <script type='text/javascript'>
     require([

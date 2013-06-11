@@ -18,10 +18,12 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 <div id='view_vacations'>
-{#    {% if has_permission('Create_Vacation') %}#}
-        <button id='create_vacation_button'>Create Vacation</button>
-{#    {% endif %}#}
-    <div id='vacations_data_grid'></div>
+    {#    {% if has_permission('Create_Vacation') %}#}
+    <button id='create_vacation_button'>Create Vacation</button>
+    {#    {% endif %}#}
+    <div style='width:100%; height: 100%; position: absolute;'>
+        <div id='vacations_data_grid'></div>
+    </div>
 </div>
 
 <script type='text/javascript'>
@@ -60,26 +62,25 @@
         var vacations_DataGrid = new StandardGrid({
             id: 'vacations_data_grid',
             width: '100%',
-{#            autoHeight: true,#}
+            {#            autoHeight: true,#}
             selectionMode: 'single',
             cellNavigation: false,
             allowSelectAll: true
         }, 'vacations_data_grid');
 
 
-{#        {% if has_permission('Create_Vacation')%}#}
+        {#        {% if has_permission('Create_Vacation')%}#}
 
-            var create_vacation_button = dialogCaller({
-                label: 'Create Vacation',
-                dialog_id: 'vacation_dialog',
-                content_creator: dialogs.create_vacation_dialog,
-                attach_to: 'create_vacation_button',
-                related_field_updater: vacations_DataGrid_updater,
-                data_id: '{{ user.id }}'
-            });
-            create_vacation_button.startup();
-{#        {% endif %}#}
-
+        var create_vacation_button = dialogCaller({
+            label: 'Create Vacation',
+            dialog_id: 'vacation_dialog',
+            content_creator: dialogs.create_vacation_dialog,
+            attach_to: 'create_vacation_button',
+            related_field_updater: vacations_DataGrid_updater,
+            data_id: '{{ user.id }}'
+        });
+        create_vacation_button.startup();
+        {#        {% endif %}#}
 
 
         var timeLogData;
@@ -184,9 +185,6 @@
         }
 
         vacations_DataGrid_updater();
-
-
-
 
 
     });

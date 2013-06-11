@@ -23,7 +23,9 @@
             Department
         </button>
     {% endif %}
-    <div id='departments_data_grid'></div>
+    <div style='width:100%; height: 100%; position: absolute;'>
+        <div id='departments_data_grid'></div>
+    </div>
 </div>
 
 <script type='text/javascript'>
@@ -82,7 +84,7 @@
                         get: function (object) {
                             return object; // return entire item for formatter to use
                         },
-                       formatter: function (object) {
+                        formatter: function (object) {
 
                             var path = '{{ request.static_url("stalker:static/stalker/images/Placeholder_Team.png") }}';
                             if (object.thumbnail_path) {

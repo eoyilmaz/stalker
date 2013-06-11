@@ -21,7 +21,9 @@
     {% if has_permission('Create_Version') %}
         <button id='create_version_button'>Create Version</button>
     {% endif %}
-    <div id='versions_data_grid'></div>
+    <div style='width:100%; height: 100%; position: absolute;'>
+        <div id='versions_data_grid'></div>
+    </div>
 </div>
 
 <script type='text/javascript'>
@@ -60,7 +62,7 @@
         var versions_DataGrid = new StandardGrid({
             id: 'versions_data_grid',
             width: '100%',
-{#            autoHeight: true,#}
+            {#            autoHeight: true,#}
             selectionMode: 'single',
             cellNavigation: false,
             allowSelectAll: true
@@ -178,37 +180,37 @@
                 versions_DataGrid.set('columns', columns);
 
 
-{#                var right_click_menu = new Menu({#}
-{#                    targetNodeIds: ['versions_data_grid'],#}
-{#                    selector: '.dgrid-row'#}
-{#                });#}
-{##}
-{#                var create_update_version_menuItem_creator = function () {#}
-{#                    return new MenuItem({#}
-{#                        label: 'Update Version',#}
-{#                        onClick: function () {#}
-{#                            var node = this.getParent().currentTarget;#}
-{#                            var nodeId = node.getAttribute('id');#}
-{#                            var rowId = versions_DataGrid.id + '-row-';#}
-{#                            var timeLogId = timeLogData[parseInt(nodeId.substring(rowId.length, nodeId.length))].id;#}
-{##}
-{##}
-{#                            var dialog = dialogCreator({#}
-{#                                dialog_id: 'version_dialog',#}
-{#                                content_creator: dialogs.update_version_dialog,#}
-{#                                related_field_updater: versions_DataGrid_updater,#}
-{#                                data_id: timeLogId#}
-{#                            });#}
-{#                            dialog.show();#}
-{##}
-{##}
-{#                        }#}
-{#                    });#}
-{#                };#}
-{##}
-{#                right_click_menu.addChild(create_update_timelog_menuItem_creator());#}
-{##}
-{#                right_click_menu.startup();#}
+                {#                var right_click_menu = new Menu({#}
+                {#                    targetNodeIds: ['versions_data_grid'],#}
+                {#                    selector: '.dgrid-row'#}
+                {#                });#}
+                {##}
+                {#                var create_update_version_menuItem_creator = function () {#}
+                {#                    return new MenuItem({#}
+                {#                        label: 'Update Version',#}
+                {#                        onClick: function () {#}
+                {#                            var node = this.getParent().currentTarget;#}
+                {#                            var nodeId = node.getAttribute('id');#}
+                {#                            var rowId = versions_DataGrid.id + '-row-';#}
+                {#                            var timeLogId = timeLogData[parseInt(nodeId.substring(rowId.length, nodeId.length))].id;#}
+                {##}
+                {##}
+                {#                            var dialog = dialogCreator({#}
+                {#                                dialog_id: 'version_dialog',#}
+                {#                                content_creator: dialogs.update_version_dialog,#}
+                {#                                related_field_updater: versions_DataGrid_updater,#}
+                {#                                data_id: timeLogId#}
+                {#                            });#}
+                {#                            dialog.show();#}
+                {##}
+                {##}
+                {#                        }#}
+                {#                    });#}
+                {#                };#}
+                {##}
+                {#                right_click_menu.addChild(create_update_timelog_menuItem_creator());#}
+                {##}
+                {#                right_click_menu.startup();#}
 
 
             });
@@ -217,8 +219,6 @@
         }
 
         versions_DataGrid_updater();
-
-
 
 
     });
