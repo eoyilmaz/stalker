@@ -21,221 +21,221 @@
     {% if has_permission('Create_TimeLog') and entity.entity_type == 'Task' %}
         <button id='create_time_log_button'>Create TimeLog</button>
     {% endif %}
-    <div id='time_logs_data_grid'></div>
+    <div style='width:100%; height: 100%; position: absolute;'>
+        <div id='time_logs_data_grid'></div>
+    </div>
 </div>
 
 <script type='text/javascript'>
-    require([
-        'dojo/data/ObjectStore',
-        'dojo/store/Memory',
-        'dojo/store/JsonRest',
-        'dojo/aspect',
+require([
+    'dojo/data/ObjectStore',
+    'dojo/store/Memory',
+    'dojo/store/JsonRest',
+    'dojo/aspect',
 
-        "dgrid/selector",
-        "dgrid/List",
-        "dgrid/OnDemandGrid",
-        "dgrid/Selection",
-        "dgrid/Keyboard",
-        "dojo/_base/declare",
-        "dgrid/editor",
+    "dgrid/selector",
+    "dgrid/List",
+    "dgrid/OnDemandGrid",
+    "dgrid/Selection",
+    "dgrid/Keyboard",
+    "dojo/_base/declare",
+    "dgrid/editor",
 
-        'dijit/Menu',
-        'dijit/MenuItem',
-        'dijit/MenuSeparator',
+    'dijit/Menu',
+    'dijit/MenuItem',
+    'dijit/MenuSeparator',
 
-        'dijit/form/Button',
+    'dijit/form/Button',
 
-        'stalker/dialogs',
-        'stalker/dialogCaller',
-        'stalker/dialogCreator',
+    'stalker/dialogs',
+    'stalker/dialogCaller',
+    'stalker/dialogCreator',
 
-        'dojo/domReady!'
-    ], function (ObjectStore, Memory, JsonRest, aspect, selector, List, Grid,
-                 Selection, Keyboard, declare, editor, Menu, MenuItem,
-                 MenuSeparator, Button, dialogs, dialogCaller, dialogCreator) {
-
-
-        var StandardGrid = declare([Grid, Selection, Keyboard]);
-
-        var time_logs_DataGrid = new StandardGrid({
-            id: 'time_logs_data_grid',
-            width: '100%',
-{#            autoHeight: true,#}
-            selectionMode: 'single',
-            cellNavigation: false,
-            allowSelectAll: true
-        }, 'time_logs_data_grid');
+    'dojo/domReady!'
+], function (ObjectStore, Memory, JsonRest, aspect, selector, List, Grid,
+             Selection, Keyboard, declare, editor, Menu, MenuItem,
+             MenuSeparator, Button, dialogs, dialogCaller, dialogCreator) {
 
 
-        {% if has_permission('Create_TimeLog') and entity.entity_type == 'Task'%}
+    var StandardGrid = declare([Grid, Selection, Keyboard]);
 
-            var create_time_log_button = dialogCaller({
-                label: 'Create TimeLog',
-                dialog_id: 'time_log_dialog',
-                content_creator: dialogs.create_time_log_dialog,
-                attach_to: 'create_time_log_button',
-                related_field_updater: time_logs_DataGrid_updater,
-                data_id: '{{ entity.id }}'
-            });
-            create_time_log_button.startup();
-        {% endif %}
+    var time_logs_DataGrid = new StandardGrid({
+        id: 'time_logs_data_grid',
+        width: '100%',
+        {#            autoHeight: true,#}
+        selectionMode: 'single',
+        cellNavigation: false,
+        allowSelectAll: true
+    }, 'time_logs_data_grid');
 
 
+    {% if has_permission('Create_TimeLog') and entity.entity_type == 'Task'%}
 
-        var timeLogData;
-
-
-        function time_logs_DataGrid_updater() {
-
-
-            var time_log_memory = new JsonRest({
-                target: '/get/time_logs/{{ entity.id }}'
-            });
-
-            time_log_memory.query().then(function (data) {
-
-                timeLogData = data;
-
-                var columns = [
-
-
-                    {
-                        field: 'parent_name',
-                        label: 'Parent Name'
-{#                        get: function (object) {#}
-{##}
-{#                            return object; // return entire item for formatter to use#}
-{##}
-{#                        },#}
-{#                        formatter: function (value) {#}
-{##}
-{#                            var targetPane = "'tasks_content_pane'";#}
-{#                            var address = "'view/task/" + value.task_id + "'";#}
-{##}
-{#                            return '<a href="javascript:redirectLinkInParent(' + targetPane + ',' + address + ');">' + value.task_name + '</a>';#}
-{##}
-{#                        }#}
-
-                    },
-                    {
-                        field: 'task_name',
-                        label: 'Task Name',
-                        get: function (object) {
-
-                            return object; // return entire item for formatter to use
-
-                        },
-                        formatter: function (value) {
-
-                            var targetPane = "'tasks_content_pane'";
-                            var address = "'view/task/" + value.task_id + "'";
-
-                            return '<a href="javascript:redirectLinkInParent(' + targetPane + ',' + address + ');">' + value.task_name + '</a>';
-
-                        }
-
-                    },
-                    {
-                        field: 'resource_name',
-                        label: "Resource",
-                        get: function (object) {
-
-                            return object; // return entire item for formatter to use
-
-                        },
-                        formatter: function (value) {
-
-                            var targetPane = "'central_content'";
-                            var address = "'view/user/" + value.resource_id + "'";
-
-                            return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.resource_name + '</a>';
-
-                        }
-                    },
-                    {
-                        field: 'duration',
-                        label: "Duration",
-                        formatter: function (value) {
-
-                            return value/3600 + ' h';
-
-                        }
-                    },
-                    {
-                        field: 'start_date',
-                        label: "Start Date",
-
-                        formatter: function (value) {
-
-                            return new Date(parseInt(value));
-
-                        }
-                    },
-                    {
-                        field: 'end_date',
-                        label: "End Date",
-                        formatter: function (value) {
-
-                            return new Date(parseInt(value));
-
-                        }
-                    }
-                ];
-
-                time_logs_DataGrid.renderArray(data);
-                time_logs_DataGrid.set('columns', columns);
-
-
-                var right_click_menu = new Menu({
-                    targetNodeIds: ['time_logs_data_grid'],
-                    selector: '.dgrid-row'
-                });
-
-                var create_update_timelog_menuItem_creator = function () {
-                    return new MenuItem({
-                        label: 'Update TimeLog',
-                        onClick: function () {
-                            var node = this.getParent().currentTarget;
-                            var nodeId = node.getAttribute('id');
-                            var rowId = time_logs_DataGrid.id + '-row-';
-                            var timeLogId = timeLogData[parseInt(nodeId.substring(rowId.length, nodeId.length))].id;
-
-
-                            var dialog = dialogCreator({
-                                dialog_id: 'time_log_dialog',
-                                content_creator: dialogs.update_time_log_dialog,
-                                related_field_updater: time_logs_DataGrid_updater,
-                                data_id: timeLogId
-                            });
-                            dialog.show();
-
-
-                        }
-                    });
-                };
-
-                right_click_menu.addChild(create_update_timelog_menuItem_creator());
-
-                right_click_menu.startup();
-
-
-            });
-
-            time_logs_DataGrid.resize();
-
-        }
-
-        time_logs_DataGrid_updater();
+        var create_time_log_button = dialogCaller({
+            label: 'Create TimeLog',
+            dialog_id: 'time_log_dialog',
+            content_creator: dialogs.create_time_log_dialog,
+            attach_to: 'create_time_log_button',
+            related_field_updater: time_logs_DataGrid_updater,
+            data_id: '{{ entity.id }}'
+        });
+        create_time_log_button.startup();
+    {% endif %}
 
 
 
+    var timeLogData;
 
-        aspect.after(this, "resize", function() {
-               console.log('time_logs_DataGrid.resize();');
-               time_logs_DataGrid.resize();
+
+    function time_logs_DataGrid_updater() {
+
+
+        var time_log_memory = new JsonRest({
+            target: '/get/time_logs/{{ entity.id }}'
         });
 
+        time_log_memory.query().then(function (data) {
 
+            timeLogData = data;
+
+            var columns = [
+
+
+                {
+                    field: 'parent_name',
+                    label: 'Parent Name'
+                    {#                        get: function (object) {#}
+                    {##}
+                    {#                            return object; // return entire item for formatter to use#}
+                    {##}
+                    {#                        },#}
+                    {#                        formatter: function (value) {#}
+                    {##}
+                    {#                            var targetPane = "'tasks_content_pane'";#}
+                    {#                            var address = "'view/task/" + value.task_id + "'";#}
+                    {##}
+                    {#                            return '<a href="javascript:redirectLinkInParent(' + targetPane + ',' + address + ');">' + value.task_name + '</a>';#}
+                    {##}
+                    {#                        }#}
+
+                },
+                {
+                    field: 'task_name',
+                    label: 'Task Name',
+                    get: function (object) {
+
+                        return object; // return entire item for formatter to use
+
+                    },
+                    formatter: function (value) {
+
+                        var targetPane = "'tasks_content_pane'";
+                        var address = "'view/task/" + value.task_id + "'";
+
+                        return '<a href="javascript:redirectLinkInParent(' + targetPane + ',' + address + ');">' + value.task_name + '</a>';
+
+                    }
+
+                },
+                {
+                    field: 'resource_name',
+                    label: "Resource",
+                    get: function (object) {
+
+                        return object; // return entire item for formatter to use
+
+                    },
+                    formatter: function (value) {
+
+                        var targetPane = "'central_content'";
+                        var address = "'view/user/" + value.resource_id + "'";
+
+                        return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.resource_name + '</a>';
+
+                    }
+                },
+                {
+                    field: 'duration',
+                    label: "Duration",
+                    formatter: function (value) {
+
+                        return value / 3600 + ' h';
+
+                    }
+                },
+                {
+                    field: 'start_date',
+                    label: "Start Date",
+
+                    formatter: function (value) {
+
+                        return new Date(parseInt(value) * 1000);
+
+                    }
+                },
+                {
+                    field: 'end_date',
+                    label: "End Date",
+                    formatter: function (value) {
+
+                            return new Date(parseInt(value));
+
+                    }
+                }
+            ];
+
+            time_logs_DataGrid.renderArray(data);
+            time_logs_DataGrid.set('columns', columns);
+
+
+            var right_click_menu = new Menu({
+                targetNodeIds: ['time_logs_data_grid'],
+                selector: '.dgrid-row'
+            });
+
+            var create_update_timelog_menuItem_creator = function () {
+                return new MenuItem({
+                    label: 'Update TimeLog',
+                    onClick: function () {
+                        var node = this.getParent().currentTarget;
+                        var nodeId = node.getAttribute('id');
+                        var rowId = time_logs_DataGrid.id + '-row-';
+                        var timeLogId = timeLogData[parseInt(nodeId.substring(rowId.length, nodeId.length))].id;
+
+
+                        var dialog = dialogCreator({
+                            dialog_id: 'time_log_dialog',
+                            content_creator: dialogs.update_time_log_dialog,
+                            related_field_updater: time_logs_DataGrid_updater,
+                            data_id: timeLogId
+                        });
+                        dialog.show();
+
+
+                    }
+                });
+            };
+
+            right_click_menu.addChild(create_update_timelog_menuItem_creator());
+
+            right_click_menu.startup();
+
+
+        });
+
+        time_logs_DataGrid.resize();
+
+    }
+
+    time_logs_DataGrid_updater();
+
+
+    aspect.after(this, "resize", function () {
+        console.log('time_logs_DataGrid.resize();');
+        time_logs_DataGrid.resize();
     });
+
+
+});
 </script>
 

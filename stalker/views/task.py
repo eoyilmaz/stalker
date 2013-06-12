@@ -382,12 +382,17 @@ def get_gantt_tasks(request):
                 # logger.debug('tasks                 : %s' % tasks)
                 tasks = list(set(user_tasks_with_parents))
         elif entity.entity_type == 'Studio':
-            studio = entity
+            projects = Project.query.all()
+            for project in projects:
+                # get the tasks who is a root task
+                root_tasks = Task.query \
+                    .filter(Task._project == project) \
+                    .filter(Task.parent == None).all()
 
-            # sort the tasks with the project.id
-            # if studio is not None:
-            #     # tasks = sorted(studio.tasks, key=lambda task: task.project.id)
-
+                # do a depth first search for child tasks
+                for root_task in root_tasks:
+                    # logger.debug('root_task: %s, parent: %s' % (root_task, root_task.parent))
+                    tasks.extend(depth_first_flatten(root_task))
 
         else: # Asset, Shot, Sequence
             tasks.append(entity)

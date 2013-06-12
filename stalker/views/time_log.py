@@ -18,7 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 from pyramid.httpexceptions import HTTPOk, HTTPServerError
-from pyramid.security import authenticated_userid, has_permission
+
 from pyramid.view import view_config
 from stalker import Task, User, Studio, TimeLog, Entity
 

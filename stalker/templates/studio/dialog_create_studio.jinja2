@@ -195,16 +195,35 @@ require([
 
 
     'stalker/submitForm',
+    'stalker/util',
 
     'dojo/domReady!'
 ], function (Form, ValidationTextBox, TextBox, NumberSpinner, FilteringSelect,
              Button, DateTextBox, TimeTextBox, Uploader, FileList, JsonRest,
-             date, stamp, locale, submitForm) {
+             date, stamp, locale, submitForm, util) {
 
     var url;
     var name;
     var daily_working_hours;
     var studio_id;
+
+    var default_start_value = 'T10:00:00';
+    var default_end_value = 'T19:00:00';
+
+    var mon_start_value = default_start_value;
+    var mon_end_value = default_end_value;
+    var tue_start_value = default_start_value;
+    var tue_end_value = default_end_value;
+    var wed_start_value = default_start_value;
+    var wed_end_value = default_end_value;
+    var thu_start_value = default_start_value;
+    var thu_end_value = default_end_value;
+    var fri_start_value = default_start_value;
+    var fri_end_value = default_end_value;
+    var sat_start_value = default_start_value;
+    var sat_end_value = default_end_value;
+    var sun_start_value = default_start_value;
+    var sun_end_value = default_end_value;
 
 
     {# fill values based on the dialog mode #}
@@ -216,6 +235,22 @@ require([
         studio_id = '{{ studio.id }}';
         name = '{{ studio.name }}';
         daily_working_hours = '{{ studio.daily_working_hours }}';
+
+
+        mon_start_value = util.extract_from_minutes({minutes: {{ studio.working_hours[0][0][0]}}});
+        mon_end_value = util.extract_from_minutes({minutes: {{ studio.working_hours[0][0][1]}}});
+        tue_start_value = util.extract_from_minutes({minutes: {{ studio.working_hours[1][0][0]}}});
+        tue_end_value = util.extract_from_minutes({minutes: {{ studio.working_hours[1][0][1]}}});
+        wed_start_value = util.extract_from_minutes({minutes: {{ studio.working_hours[2][0][0]}}});
+        wed_end_value = util.extract_from_minutes({minutes: {{ studio.working_hours[2][0][1]}}});
+        thu_start_value = util.extract_from_minutes({minutes: {{ studio.working_hours[3][0][0]}}});
+        thu_end_value = util.extract_from_minutes({minutes: {{ studio.working_hours[3][0][1]}}});
+        fri_start_value = util.extract_from_minutes({minutes: {{ studio.working_hours[4][0][0]}}});
+        fri_end_value = util.extract_from_minutes({minutes: {{ studio.working_hours[4][0][1]}}});
+        sat_start_value = util.extract_from_minutes({minutes: {{ studio.working_hours[5][0][0]}}});
+        sat_end_value = util.extract_from_minutes({minutes: {{ studio.working_hours[5][0][1]}}});
+        sun_start_value = util.extract_from_minutes({minutes: {{ studio.working_hours[6][0][0]}}});
+        sun_end_value = util.extract_from_minutes({minutes: {{ studio.working_hours[6][0][1]}}});
     {% endif %}
 
 
@@ -238,7 +273,6 @@ require([
         placeHolder: 'Enter a name'
     }, 'studio_name');
     name_textBox.startup();
-
 
 
     // ********************************************************************
@@ -292,77 +326,84 @@ require([
 
     // Monday
     var mon_start = time_text_box_creator({
+        value: mon_start_value,
         attach_to: 'studio_working_hours_mon_start'
     });
 
     var mon_end = time_text_box_creator({
-        value: 'T18:00:00',
+        value: mon_end_value,
         attach_to: 'studio_working_hours_mon_end'
     });
 
 
     // Tuesday
     var tue_start = time_text_box_creator({
+        value: tue_start_value,
         attach_to: 'studio_working_hours_tue_start'
     });
 
     var tue_end = time_text_box_creator({
-        value: 'T18:00:00',
+        value: tue_end_value,
         attach_to: 'studio_working_hours_tue_end'
     });
 
 
     // Wednesday
     var wed_start = time_text_box_creator({
+        value: wed_start_value,
         attach_to: 'studio_working_hours_wed_start'
     });
 
     var wed_end = time_text_box_creator({
-        value: 'T18:00:00',
+        value: wed_end_value,
         attach_to: 'studio_working_hours_wed_end'
     });
 
 
     // Thursday
     var thu_start = time_text_box_creator({
+        value: thu_start_value,
         attach_to: 'studio_working_hours_thu_start'
     });
 
     var thu_end = time_text_box_creator({
-        value: 'T18:00:00',
+        value: thu_end_value,
         attach_to: 'studio_working_hours_thu_end'
     });
 
 
     // Friday
     var fri_start = time_text_box_creator({
+        value: fri_start_value,
         attach_to: 'studio_working_hours_fri_start'
     });
 
     var fri_end = time_text_box_creator({
-        value: 'T18:00:00',
+        value: fri_end_value,
         attach_to: 'studio_working_hours_fri_end'
     });
 
 
     // Saturday
     var sat_start = time_text_box_creator({
+        value: sat_start_value,
         attach_to: 'studio_working_hours_sat_start'
     });
 
     var sat_end = time_text_box_creator({
-        value: 'T18:00:00',
+        value: sat_end_value,
         attach_to: 'studio_working_hours_sat_end'
     });
 
 
     // Sunday
     var sun_start = time_text_box_creator({
+        value: sun_start_value,
         attach_to: 'studio_working_hours_sun_start'
     });
 
     var sun_end = time_text_box_creator({
-        value: 'T18:00:00',
+        value: sun_end_value,
         attach_to: 'studio_working_hours_sun_end'
     });
 
@@ -378,7 +419,7 @@ require([
                 form: create_studio_form,
                 additional_data: {
                     {% if mode=='UPDATE' %}
-                         studio_id: studio_id,
+                        studio_id: studio_id,
                     {% endif %}
                     mon_start: stamp.toISOString(mon_start.value),
                     mon_end: stamp.toISOString(mon_end.value),
