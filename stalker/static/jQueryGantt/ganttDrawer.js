@@ -344,7 +344,7 @@ Ganttalendar.prototype.drawTask = function (task) {
     var self = this;
     //var prof = new Profiler("ganttDrawTask");
     //var editorRow = self.master.editor.element.find("tr[dataId=" + task.id + "]");
-    editorRow = task.rowElement;
+    var editorRow = task.rowElement;
     var top = editorRow.position().top + self.master.editor.element.parent().scrollTop();
     var x = Math.round((task.start - self.startMillis) * self.fx);
 
@@ -381,6 +381,34 @@ Ganttalendar.prototype.drawTask = function (task) {
     //self.redrawLinks();
 
     //prof.stop();
+};
+
+//<%-------------------------------------- GANTT TIMELOG GRAPHIC ELEMENT --------------------------------------%>
+Ganttalendar.prototype.drawTimeLog = function (time_log) {
+    //console.debug("drawTimeLog", time_log.name,new Date(time_log.start));
+
+    // get the editor row of the resource
+    var resource = time_log.getResource();
+    var editorRow = resource.rowElement;
+//    console.log('Gantalendar.drawTimeLog: resource.rowElement:', editorRow);
+    var top = editorRow.position().top + this.master.editor.element.parent().scrollTop();
+    console.log('Gantalendar.drawTimeLog: top:', top);
+    var x = Math.round((time_log.start - this.startMillis) * this.fx);
+
+    var time_log_box;
+    time_log_box = $.JST.createFromTemplate(time_log, "TIMELOGBAR");
+    
+    //save row element on timeLog
+    time_log.ganttElement = time_log_box;
+
+    time_log_box.css({top: top, left: x, width: Math.round((time_log.end - time_log.start) * this.fx)});
+
+    var time_log_box_separator = $("<div class='ganttLines'></div>");
+    time_log_box_separator.css({top: top + time_log_box_separator.height()});
+
+    this.element.append(time_log_box);
+//    this.element.append(time_log_box_separator);
+
 };
 
 
@@ -679,6 +707,13 @@ Ganttalendar.prototype.redrawTasks = function () {
     }
 };
 
+Ganttalendar.prototype.redrawTimeLogs = function () {
+    for (var i = 0; i < this.master.time_logs.length; i++) {
+        var time_log = this.master.time_logs[i];
+        this.drawTimeLog(time_log);
+    }
+};
+
 
 Ganttalendar.prototype.refreshGantt = function (kwargs) {
     if (kwargs){
@@ -704,15 +739,23 @@ Ganttalendar.prototype.refreshGantt = function (kwargs) {
     var domEl = this.create(this.zoom, this.originalStartMillis, this.originalEndMillis);
     this.element = domEl;
     par.append(domEl);
-    this.redrawTasks();
-
+    
+    if (this.master.mode == 'Gantt'){
+        this.redrawTasks();
+    } else if (this.master.mode == 'Resource') {
+        this.redrawTimeLogs();
+    }
+    
     //set old scroll  
     //console.debug("old scroll:",scrollX,scrollY)
     par.scrollTop(scrollY);
     par.scrollLeft(scrollX);
     
     // redraw links
-    this.redrawLinks();
+    // TODO: check if this can be done in the previous 'if' statement
+    if (this.master.mode == 'Gantt') {
+        this.redrawLinks();
+    }
 
     //set current task
 //    if (this.master.currentTask) {

@@ -26,7 +26,7 @@
     <table class="gdfTable" cellspacing="0" cellpadding="0" style='width: 1000px'>
       <thead>
       <tr style="height:40px">
-        <th class="gdfColHeader gdfResizable" style="width:20px;"></th>
+        <th class="gdfColHeader gdfResizable" style="width:20px;">#</th>
         <th class="gdfColHeader gdfResizable" style="width:20px;">id</th>
         <th class="gdfColHeader gdfResizable" style="width:250px;">name</th>
         <th class="gdfColHeader gdfResizable" style="width:75px;">start</th>
@@ -40,16 +40,30 @@
     </table>
     --></div>
 
+    <div class="__template__" type="RESOURCESEDITHEAD"><!--
+    <table class="gdfTable" cellspacing="0" cellpadding="0" style='width: 1000px'>
+      <thead>
+      <tr style="height:40px">
+        <th class="gdfColHeader gdfResizable" style="width:20px;">#</th>
+        <th class="gdfColHeader gdfResizable" style="width:20px;">id</th>
+        <th class="gdfColHeader gdfResizable" style="width:250px;">name</th>
+        <th class="gdfColHeader gdfResizable" style="width:1430px;"></th>
+      </tr>
+      </thead>
+    </table>
+    --></div>
+
+
     <div class="__template__" type="PROJECTROW"><!--
         <tr dataId="(#=obj.id#)" class="projectEditRow" >
-        <th class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></th>
-        <td class="gdfCell" align="right"><span>(#=obj.id#)</span></td>
-        <td class="gdfCell indentCell" style="font-weight: bold">(#=obj.link()#)</td>
-        <td class="gdfCell"><div class="date start"></div></td>
-        <td class="gdfCell"><div class="date end"></div></td>
-        <td class="gdfCell"></td>
-        <td class="gdfCell"></td>
-        <td class="gdfCell taskAssigs"></td>
+            <th class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></th>
+            <td class="gdfCell" align="right"><span>(#=obj.id#)</span></td>
+            <td class="gdfCell indentCell" style="font-weight: bold">(#=obj.link()#)</td>
+            <td class="gdfCell"><div class="date start"></div></td>
+            <td class="gdfCell"><div class="date end"></div></td>
+            <td class="gdfCell"></td>
+            <td class="gdfCell"></td>
+            <td class="gdfCell taskAssigs"></td>
         </tr>
     --></div>
 
@@ -68,7 +82,7 @@
 
     <div class="__template__" type="TASKROW"><!--
         <tr dataId="(#=obj.id#)" class="taskEditRow">
-        <th class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></th>
+        <td class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></td>
         <td class="gdfCell" align="right" style="background-color: (#=obj.progress >= 100 ? 'rgb(153, 255, 51)' : 'red'#)"><span>(#=obj.id#)</span></td>
         <td class="gdfCell indentCell" style="padding-left:(#=obj.getParents().length*10#)px; (#=obj.getChildren().length>0?'font-weight: bold':''#)">(#=obj.link()#)</td>
         <td class="gdfCell"><div class="date start"></div></td>
@@ -76,38 +90,41 @@
         <td class="gdfCell"><div name="timing">(#=obj.schedule_model.toUpperCase()[0]#): (#=obj.schedule_timing#)(#=obj.schedule_unit#)</div></td>
         <td class="gdfCell">(#=obj.getDependsLinks()#)</td>
         <td class="gdfCell">(#=obj.getResourcesLinks()#)</td>
+        <td class="gdfCell"></td>
         </tr>
     --></div>
 
     <div class="__template__" type="RESOURCEROW"><!--
-        <tr resourceId="(#=obj.id#)" class="taskEditRow">
-        <th class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></th>
-        <td class="gdfCell" align="right" style="background-color: (#=obj.progress >= 100 ? 'rgb(153, 255, 51)' : 'red'#)"><span>(#=obj.id#)</span></td>
-        <td class="gdfCell indentCell" style="padding-left:(#=obj.getParents().length*10#)px; (#=obj.getChildren().length>0?'font-weight: bold':''#)">(#=obj.link()#)</td>
-        <td class="gdfCell"><div class="date start"></div></td>
-        <td class="gdfCell"><div class="date end"></div></td>
-        <td class="gdfCell"><div name="timing">(#=obj.schedule_model.toUpperCase()[0]#): (#=obj.schedule_timing#)(#=obj.schedule_unit#)</div></td>
-        <td class="gdfCell">(#=obj.getDependsLinks()#)</td>
-        <td class="gdfCell">(#=obj.getResourcesLinks()#)</td>
+        <tr dataId="(#=obj.id#)" class="resourceEditRow">
+            <td class="gdfCell" align="right"><span class="resourceRowIndex">(#=obj.getRow()+1#)</span></td>
+            <td class="gdfCell" align="right"><span>(#=obj.id#)</span></td>
+            <td class="gdfCell">(#=obj.link()#)</td>
+            <td class="gdfCell"></td>
         </tr>
     --></div>
-
-
 
     <div class="__template__" type="TASKEMPTYROW"><!--
         <tr class="taskEditRow emptyRow" >
-        <th class="gdfCell" align="right"></th>
-        <td class="gdfCell"></td>
-        <td class="gdfCell"></td>
-        <td class="gdfCell"></td>
-        <td class="gdfCell"></td>
-        <td class="gdfCell"></td>
-        <td class="gdfCell"></td>
-        <td class="gdfCell" align="left"></td>
-        <td class="gdfCell"></td>
+            <th class="gdfCell" align="right"></th>
+            <td class="gdfCell"></td>
+            <td class="gdfCell"></td>
+            <td class="gdfCell"></td>
+            <td class="gdfCell"></td>
+            <td class="gdfCell"></td>
+            <td class="gdfCell"></td>
+            <td class="gdfCell" align="left"></td>
+            <td class="gdfCell"></td>
         </tr>
     --></div>
 
+    <div class="__template__" type="RESOURCEEMPTYROW"><!--
+        <tr class="resourceEditRow emptyRow" >
+            <th class="gdfCell" align="right"></th>
+            <td class="gdfCell"></td>
+            <td class="gdfCell" align="left"></td>
+            <td class="gdfCell"></td>
+        </tr>
+    --></div>
 
     <div class="__template__" type="PROJECTBAR"><!--
         <div class="projectBox" projectId="(#=obj.id#)" >
@@ -162,6 +179,20 @@
             </div>
         </div>
     --></div>
+
+    <div class="__template__" type="TIMELOGBAR"><!--
+        <div class="timeLogBox" dataId="(#=obj.id#)">
+        <div class="layout">
+            <div class="leafTaskContextMenu"
+                dataId="(#=obj.id#)"
+                name="(#=obj.name#)"
+                start=(#=obj.start#)
+                end=(#=obj.end#)
+                ></div>
+        </div>
+        </div>
+    --></div>
+
 
     <div class="__template__" type='TASKLINK'><!--
       <a href="javascript:redirectLinkInParent('(#=obj.type.toLowerCase()#)s_content_pane','view/task/(#=obj.id#)');">(#=obj.name#) ((#=obj.type#))</a>
@@ -252,7 +283,9 @@
 
         $('#gantttemplates').loadTemplates();
 
-        var ge = new GanttMaster();
+        var ge = new GanttMaster({
+            mode: 'Resource'//'Gantt'
+        });
         ge.init($("#workSpace"));
         //console.debug(ge);
 

@@ -55,8 +55,8 @@ Project.prototype.link = function(){
 
 //<%---------- PROJECT STRUCTURE ---------------------- --%>
 Project.prototype.getRow = function() {
-  ret = -1;
+  var index = -1;
   if (this.master)
-    ret = this.master.projects.indexOf(this);
-  return ret;
+    index = this.master.projects.indexOf(this);
+  return index;
 };

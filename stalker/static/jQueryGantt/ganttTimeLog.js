@@ -27,13 +27,17 @@ function TimeLog(kwargs) {
     this.start = kwargs['start'] || null;
     this.end = kwargs['end'] || null;
 
+    this.rowElement = null; // row editor html element of the resource
+    this.ganttElement = null; // gantt html element
+
     this.master = null;
 }
 
 TimeLog.prototype.getResource = function(){
     // getter for the resource
     if (this.resource == null){
-        this.resouce = this.master.getResource(this.resource_id);
+        this.resource = this.master.getResource(this.resource_id);
+        this.rowElement = this.resource.rowElement;
     }
     return this.resource;
 };

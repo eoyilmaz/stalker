@@ -20,22 +20,25 @@
  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-function GanttMaster() {
+function GanttMaster(kwargs) {
     this.tasks = [];
     this.task_ids = []; // lookup table for quick task access
 
-    this.timeLogs = [];
-    this.timeLog_ids = [];
+    this.time_logs = [];
+    this.time_log_ids = [];
 
     this.links = [];
 
     this.editor; //element for editor
     this.gantt; //element for gantt
 
+    // Mode of View: Gantt or Resource
+    this.mode = kwargs['mode'] || 'Gantt'; // 'Resource'
+
     this.element;
 
-    this.resources; //list of resources
-    this.resource_ids; //lookup table for quick resource access
+    this.resources = []; //list of resources
+    this.resource_ids = []; //lookup table for quick resource access
 
     this.minEditableDate = 0;
     this.maxEditableDate = Infinity;
@@ -177,13 +180,9 @@ GanttMaster.prototype.updateDepends = function () {
  * @param Deferred
  */
 GanttMaster.prototype.loadGanttData = function (ganttData, Deferred) {
+//    console.debug('GanttMaster.loadGanttData start');
     var deferred = new Deferred;
     this.beginTransaction();
-    this.resources = ganttData.resources;
-    this.resource_ids = [];
-    for (var i = 0; i < this.resources.length; i++) {
-        this.resource_ids.push(this.resources[i].id);
-    }
 
     this.timing_resolution = ganttData.timing_resolution || this.timing_resolution;
     this.working_hours = ganttData.working_hours || this.working_hours;
@@ -209,8 +208,32 @@ GanttMaster.prototype.loadGanttData = function (ganttData, Deferred) {
     else
         this.maxEditableDate = Infinity;
 
+    console.debug('GanttMaster.loadGanttData 3');
 
+    // load resources
+    var resource;
+    var data;
+    for (var i = 0; i < ganttData.resources.length; i++) {
+        data = ganttData.resources[i];
+        console.debug('data: ', data);
+        resource = new Resource({
+            id: data.id,
+            name: data.name,
+            master: this
+        });
+        this.resources.push(resource);
+        this.resource_ids.push(resource.id);
+
+        if (this.mode == 'Resource'){
+            console.log('GanttMaster.loadGanttData: adding resource to editor');
+            this.editor.addResource(resource);
+        }
+    }
+    console.debug('GanttMaster.loadGanttData 2');
+
+//    if (mode == 'Gantt'){
     this.loadTasks(ganttData.tasks);
+//    }
 
     this.loadTimeLogs(ganttData.time_logs);
 
@@ -226,12 +249,14 @@ GanttMaster.prototype.loadGanttData = function (ganttData, Deferred) {
 //    console.debug('daily_working_hours : ', this.daily_working_hours);
 //    console.debug('timing_resolution   : ', this.timing_resolution);
 //    console.debug('working_hours       : ', this.working_hours);
+//    console.debug('GanttMaster.loadGanttData end');
 
     return deferred.promise;
 };
 
 
 GanttMaster.prototype.loadTasks = function (tasks) {
+    console.debug('GanttMaster.loadTasks start');
     var factory = new TaskFactory();
     //reset
     this.reset();
@@ -281,7 +306,13 @@ GanttMaster.prototype.loadTasks = function (tasks) {
 
         task.depends = null;
         this.tasks.push(task);  //append task at the end
-        this.task_ids.push(task.id); //lookup table for task ids
+//        this.task_ids.push(task.id); //lookup table for task ids
+    }
+
+    // sort tasks to their dates
+    this.tasks.sort(function(a, b){return a.start - b.start});
+    for (var i = 0; i < this.tasks.length; i++){
+        this.task_ids.push(this.tasks[i].id);
     }
 
 //    console.debug('this.tasks    : ', this.tasks);
@@ -348,12 +379,14 @@ GanttMaster.prototype.loadTasks = function (tasks) {
             this.task_ids.splice(task_index, 1);
         } else {
             //append task to editor
-            this.editor.addTask(task);
+            if (this.mode == 'Gantt'){
+                this.editor.addTask(task);
+            }
             //append task to gantt
 //            this.gantt.addTask(task);
         }
     }
-
+    console.debug('GanttMaster.loadTasks end');
 };
 
 
@@ -375,8 +408,8 @@ GanttMaster.prototype.loadTimeLogs = function (time_logs) {
         }
 
         time_log.master = this;
-        this.timeLogs.push(time_log);
-        this.timeLog_ids.push(time_log.id);
+        this.time_logs.push(time_log);
+        this.time_log_ids.push(time_log.id);
         // to update the task relation
         time_log.getTask();
     }
@@ -392,12 +425,12 @@ GanttMaster.prototype.getTask = function (taskId) {
 };
 
 
-GanttMaster.prototype.getTimeLog = function (timeLogId) {
-    if (typeof(timeLogId) == 'string') {
-        timeLogId = parseInt(timeLogId);
+GanttMaster.prototype.getTimeLog = function (time_log_id) {
+    if (typeof(time_log_id) == 'string') {
+        time_log_id = parseInt(time_log_id);
     }
-    var timeLog_index = this.timeLog_ids.indexOf(timeLogId);
-    return this.timeLogs[timeLog_index];
+    var time_log_index = this.time_log_ids.indexOf(time_log_id);
+    return this.time_logs[time_log_index];
 };
 
 
@@ -519,6 +552,7 @@ GanttMaster.prototype.updateLinks = function (task) {
 
 //<%----------------------------- TRANSACTION MANAGEMENT ---------------------------------%>
 GanttMaster.prototype.beginTransaction = function () {
+    console.debug('GanttMaster.beginTransaction start');
     if (!this.__currentTransaction) {
         this.__currentTransaction = {
 //            snapshot: JSON.stringify(this.saveGantt(true)),
@@ -527,6 +561,7 @@ GanttMaster.prototype.beginTransaction = function () {
     } else {
         console.error("Cannot open twice a transaction");
     }
+    console.debug('GanttMaster.beginTransaction end');
     return this.__currentTransaction;
 };
 
