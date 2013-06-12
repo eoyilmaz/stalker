@@ -25,6 +25,7 @@ Stalker Changes
       dgrid object.
   * **Fix:** Working hours for each day is taken from database in
       Studio Update Dialog.
+  * **New:** List Ticket page and Create/Update Ticket dialog are created.
 
 
 0.2.0.b7

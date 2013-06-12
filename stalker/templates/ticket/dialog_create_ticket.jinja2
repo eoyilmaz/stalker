@@ -1,0 +1,241 @@
+{# Stalker a Production Ticket Management System
+ Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
+ 
+ This file is part of Stalker.
+ 
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation;
+ version 2.1 of the License.
+
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+#}
+<div class='dijitDialogPaneContentArea'>
+    <form id='ticket_form'>
+        <table style='width: 100%;'>
+
+            {# NAME #}
+            <tr>
+                <td class='label_column'>
+                    <label for='ticket_name'>Name</label>
+                </td>
+                <td class='input_column'>
+                    <input id='ticket_name'>
+                </td>
+            </tr>
+
+            {# PROJECT #}
+            <tr>
+                <td class='label_column'>
+                    <label for='ticket_project'>Project</label>
+                </td>
+                <td class='input_column'>
+                    <input id='ticket_project'>
+                </td>
+            </tr>
+
+            {# OWNERS #}
+            <tr>
+                <td class='label_column'>
+                    <label for='ticket_owner'>Owner</label>
+                </td>
+                <td class='input_column'>
+                    <div id='ticket_owner'></div>
+                </td>
+            </tr>
+
+
+        </table>
+    </form>
+</div>
+
+<div class='dijitDialogPaneActionBar'>
+    <button id='ticket_ok_button'>OK</button>
+    <button id='ticket_cancel_button'>Cancel</button>
+</div>
+
+<script type='text/javascript'>
+require([
+    'dojo/store/Memory',
+    'dojo/store/JsonRest',
+    'dijit/form/Form',
+    'dijit/form/ValidationTextBox',
+    'dijit/form/TextBox',
+    'dijit/form/FilteringSelect',
+    'dijit/form/ComboBox',
+    'dijit/form/Button',
+    'stalker/dialogs',
+    'stalker/submitForm',
+    'stalker/fieldUpdater',
+    'stalker/dialogCreator',
+    'stalker/dialogCaller',
+    'dojo/domReady!'],
+        function (Memory, JsonRest, Form, ValidationTextBox, TextBox,
+                  FilteringSelect, ComboBox, Button, dialogs, submitForm,
+                  fieldUpdater, dialogCreator, dialogCaller) {
+
+            // ********************************************************************
+            // Generate default values
+            var url;
+            var name;
+            var ticket_id;
+            var project_id;
+            var owner_id;
+            var owner_memory_target;
+
+            {% if entity.entity_type == 'Project' %}
+                project_id = '{{ entity.id }}';
+                owner_memory_target = '/get/users_byEntity/{{ project.id }}';
+            {% elif entity.entity_type == 'User' %}
+                owner_id = '{{ entity.id }}';
+                owner_memory_target = '/get/users'
+            {% endif %}
+
+            {# fill values based on the dialog mode #}
+            {% if mode == 'CREATE' %}
+                url = '{{ request.route_url("create_ticket") }}';
+
+            {% elif mode == 'UPDATE' %}
+                url = '{{ request.route_url("update_ticket") }}';
+                ticket_id = '{{ ticket.id }}';
+                name = '{{ ticket.name }}';
+                owner_id = '{{ ticket.owner_id }}';
+                project_id = '{{ ticket.project_id }}';
+            {% endif %}
+
+
+
+            // ****************************************************************
+            // Form
+            var ticket_form = new Form({
+                id: 'ticket_form'
+            }, 'ticket_form');
+
+            var dialog = ticket_form.getParent();
+
+
+            // ****************************************************************
+            // Name
+            var name_textBox = new ValidationTextBox({
+                name: 'name',
+                label: 'Name',
+                placeHolder: 'Enter a name',
+                required: true,
+                value: name
+            }, 'ticket_name');
+            name_textBox.startup();
+
+            // ****************************************************************
+            // Project
+
+            // Memory
+            var project_memory = new JsonRest({
+                target: '{{ request.route_url("get_projects") }}'
+            });
+
+            // Field
+            var project_select = new FilteringSelect({
+                name: 'project_id',
+                required: true,
+                label: 'Project',
+                {% if entity.entity_type == 'Project'%}
+                    disabled: true
+                {% endif %}
+            }, 'ticket_project');
+            project_select.startup();
+
+            // Updater
+            var project_field_updater = fieldUpdater({
+                'memory': project_memory,
+                'widget': project_select,
+                {% if entity.entity_type == 'Project'%}
+                    'selected': project_id
+                {% endif %}
+            });
+
+            // Fill Widget
+            project_field_updater();
+
+
+
+            // ****************************************************************
+            // Owner
+
+            var owner_memory = new JsonRest({
+                target: owner_memory_target
+            });
+
+            // Field
+            var owner_select = new FilteringSelect({
+                name: 'owner_id',
+                required: true,
+                label: 'Owner',
+                {% if entity.entity_type == 'User'%}
+                    disabled: true
+                {% endif %}
+            }, 'ticket_owner');
+            owner_select.startup();
+
+            // Updater
+            var owner_field_updater = fieldUpdater({
+                'memory': owner_memory,
+                'widget': owner_select,
+                {% if entity.entity_type == 'User'%}
+                    'selected': owner_id
+                {% endif %}
+            });
+
+            // Fill Widget
+            owner_field_updater();
+
+
+
+
+            // ****************************************************************
+            // Ok Button
+            var ok_button = new Button({
+                label: 'OK',
+                type: 'button',
+                onClick: function () {
+                    project_select.set('disabled', false);
+                    owner_select.set('disabled', false);
+                    submitForm({
+                        dialog: dialog,
+                        form: ticket_form,
+                        additional_data: {
+                            {% if mode=='UPDATE' %}
+                                ticket_id: ticket_id
+                            {% endif %}
+                        },
+                        url: url,
+                        method: 'POST'
+                    });
+                }
+            }, 'ticket_ok_button');
+            ok_button.startup();
+
+
+            // ****************************************************************
+            // Cancel Button
+            var cancel_button = new Button({
+                label: 'Cancel',
+                type: 'button',
+                onClick: function () {
+                    dialog.destroyRecursive();
+                }
+            }, 'ticket_cancel_button');
+            cancel_button.startup();
+
+            ticket_form.startup();
+
+
+        });
+</script>
+

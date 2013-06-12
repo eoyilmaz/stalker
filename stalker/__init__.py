@@ -354,6 +354,21 @@ def main(global_config, **settings):
     config.add_route('list_time_logs',
                      'list/time_logs/{entity_id}') # returns response
 
+      # *************************************************************************
+    # Ticket
+    config.add_route('dialog_create_ticket',
+                     'dialog/create/ticket/{entity_id}')
+    config.add_route('dialog_update_ticket',
+                     'dialog/update/ticket/{ticket_id}')
+
+    config.add_route('create_ticket', 'create/ticket')
+    config.add_route('update_ticket', 'update/ticket')
+
+    config.add_route('get_tickets',
+                     'get/tickets/{entity_id}') # returns json
+    config.add_route('list_tickets',
+                     'list/tickets/{entity_id}') # returns response
+
     # *************************************************************************
     # Vacation
     config.add_route('dialog_create_vacation',

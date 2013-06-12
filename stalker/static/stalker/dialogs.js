@@ -440,6 +440,29 @@ define(['exports', 'dojox/widget/DialogSimple', 'dijit/registry', 'dojo/domReady
                 executeScripts: true
             })
         };
+        // ********************************************************************
+        // TICKET
+        exports.create_ticket_dialog = function create_ticket_dialog(entity_id) {
+            return new DialogSimple({
+                id: 'ticket_dialog',
+                title: 'New Ticket',
+                href: '/dialog/create/ticket/' + entity_id,
+                resize: true,
+                style: style,
+                executeScripts: true
+            });
+        };
+
+        exports.update_ticket_dialog = function update_ticket_dialog(ticket_id) {
+            return new DialogSimple({
+                id: 'ticket_dialog',
+                title: 'Update Ticket',
+                href: '/dialog/update/ticket/' + ticket_id,
+                resize: true,
+                style: style,
+                executeScripts: true
+            })
+        };
          // ********************************************************************
         // VACATION
         exports.create_vacation_dialog = function create_vacation_dialog(uesr_id) {
@@ -479,7 +502,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dijit/registry', 'dojo/domReady
 
         exports.update_version_dialog = function update_version_dialog(version_id) {
             return new DialogSimple({
-                id: 'time_log_dialog',
+                id: 'version_dialog',
                 title: 'Update Version',
                 href: '/dialog/update/version/' + version_id,
                 resize: true,
