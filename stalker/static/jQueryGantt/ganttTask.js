@@ -145,12 +145,7 @@ Task.prototype.getResourcesString = function () {
 Task.prototype.getResourcesLinks = function () {
     var ret = "";
     for (var i = 0; i < this.resources.length; i++) {
-        var resource = this.resources[i];
-        var res = this.master.getResource(resource.id);
-        if (res) {
-            var template = $.JST.createFromTemplate(res, 'RESOURCELINK');
-            ret = ret + (ret == "" ? "" : ", ") + template[0].outerHTML;
-        }
+        ret = ret + (ret == "" ? "" : ", ") + this.resources[i].link();
     }
     return ret;
 };
@@ -184,10 +179,10 @@ Task.prototype.createResource = function (kwargs) {
 
 //<%---------- TASK STRUCTURE ---------------------- --%>
 Task.prototype.getRow = function () {
-    ret = -1;
+    var index = -1;
     if (this.master)
-        ret = this.master.tasks.indexOf(this);
-    return ret;
+        index = this.master.tasks.indexOf(this);
+    return index;
 };
 
 
@@ -342,19 +337,3 @@ Task.prototype.addTimeLog_with_id = function(timeLog_id){
     var timeLog = this.master.getTimeLog(timeLog_id);
     this.addTimeLog(timeLog);
 };
-
-
-//<%------------------------------------------------------------------------  LINKS OBJECT ---------------------------------------------------------------%>
-function Link(taskFrom, taskTo, lagInWorkingDays) {
-    this.from = taskFrom;
-    this.to = taskTo;
-    this.lag = lagInWorkingDays;
-}
-
-
-//<%------------------------------------------------------------------------  RESOURCE ---------------------------------------------------------------%>
-function Resource(kwargs) {
-    this.id = kwargs['id'] || null;
-    this.name = kwargs['name'] || (this.id || '');
-}
-
