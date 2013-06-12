@@ -23,11 +23,11 @@
 function GridEditor(master) {
     this.master = master; // is the a GanttEditor instance
     var gridEditor;
-    if (this.master.mode == 'Gantt'){
-        console.debug('GridEditor.__init__: this.master.mode = Gantt');
+    if (this.master.grid_mode == 'Task'){
+        console.debug('GridEditor.__init__: this.master.grid_mode = Task');
         gridEditor = $.JST.createFromTemplate({}, "TASKSEDITHEAD");
-    } else if (this.master.mode == 'Resource') {
-        console.debug('GridEditor.__init__: this.master.mode = Resource');
+    } else if (this.master.grid_mode == 'Resource') {
+        console.debug('GridEditor.__init__: this.master.grid_mode = Resource');
         gridEditor = $.JST.createFromTemplate({}, "RESOURCESEDITHEAD");
     }
     gridEditor.gridify();
@@ -75,12 +75,12 @@ GridEditor.prototype.addResource = function (resource) {
 
 GridEditor.prototype.refreshRowIndices = function () {
     console.debug('GridEditor.refreshRowIndices start');
-    if (this.master.mode=='Gantt'){
-        console.debug('GridEditor.refreshRowIndices in Gantt mode');
+    if (this.master.grid_mode=='Task'){
+        console.debug('GridEditor.refreshRowIndices in Task mode');
         this.element.find(".taskRowIndex").each(function (i, el) {
             $(el).html(i + 1);
         });
-    } else if (this.master.mode == 'Resource'){
+    } else if (this.master.grid_mode == 'Resource'){
         console.debug('GridEditor.refreshRowIndices in Resource mode');
         this.element.find(".resourceRowIndex").each(function (i, el) {
             $(el).html(i + 1);
@@ -132,12 +132,12 @@ GridEditor.prototype.refreshResourceRow = function (resource) {
 
 GridEditor.prototype.redraw = function () {
     console.log('GridEditor.redraw start');
-    if (this.master.mode == 'Gantt'){
-        console.log('GridEditor.redraw in Gantt mode');
+    if (this.master.grid_mode == 'Task'){
+        console.log('GridEditor.redraw in Task mode');
         for (var i = 0; i < this.master.tasks.length; i++) {
             this.refreshTaskRow(this.master.tasks[i]);
         }
-    } else if (this.master.mode == 'Resource'){
+    } else if (this.master.grid_mode == 'Resource'){
         console.log('GridEditor.redraw in Resource mode');
         console.log('this.master.resources.length: ', this.master.resources.length);
         for (var i = 0; i < this.master.resources.length; i++) {

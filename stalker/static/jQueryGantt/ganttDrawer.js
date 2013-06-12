@@ -344,7 +344,16 @@ Ganttalendar.prototype.drawTask = function (task) {
     var self = this;
     //var prof = new Profiler("ganttDrawTask");
     //var editorRow = self.master.editor.element.find("tr[dataId=" + task.id + "]");
+
+//    var owner;
+//    if (this.master.grid_mode == 'Resource'){
+//        owner = task.getResource();
+//    } else if (this.master.grid_mode == 'Task') {
+//        owner = time_log.getTask();
+//    }
+
     var editorRow = task.rowElement;
+
     var top = editorRow.position().top + self.master.editor.element.parent().scrollTop();
     var x = Math.round((task.start - self.startMillis) * self.fx);
 
@@ -386,10 +395,16 @@ Ganttalendar.prototype.drawTask = function (task) {
 //<%-------------------------------------- GANTT TIMELOG GRAPHIC ELEMENT --------------------------------------%>
 Ganttalendar.prototype.drawTimeLog = function (time_log) {
     //console.debug("drawTimeLog", time_log.name,new Date(time_log.start));
-
     // get the editor row of the resource
-    var resource = time_log.getResource();
-    var editorRow = resource.rowElement;
+
+    var owner;
+    if (this.master.grid_mode == 'Resource'){
+        owner = time_log.getResource();
+    } else if (this.master.grid_mode == 'Task') {
+        owner = time_log.getTask();
+    }
+
+    var editorRow = owner.rowElement;
 //    console.log('Gantalendar.drawTimeLog: resource.rowElement:', editorRow);
     var top = editorRow.position().top + this.master.editor.element.parent().scrollTop();
     console.log('Gantalendar.drawTimeLog: top:', top);
@@ -740,9 +755,10 @@ Ganttalendar.prototype.refreshGantt = function (kwargs) {
     this.element = domEl;
     par.append(domEl);
     
-    if (this.master.mode == 'Gantt'){
+    if (this.master.gantt_mode == 'Task'){
         this.redrawTasks();
-    } else if (this.master.mode == 'Resource') {
+        this.redrawLinks();
+    } else if (this.master.gantt_mode == 'TimeLog') {
         this.redrawTimeLogs();
     }
     
@@ -752,10 +768,6 @@ Ganttalendar.prototype.refreshGantt = function (kwargs) {
     par.scrollLeft(scrollX);
     
     // redraw links
-    // TODO: check if this can be done in the previous 'if' statement
-    if (this.master.mode == 'Gantt') {
-        this.redrawLinks();
-    }
 
     //set current task
 //    if (this.master.currentTask) {

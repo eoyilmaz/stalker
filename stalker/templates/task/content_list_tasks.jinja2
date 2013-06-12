@@ -284,7 +284,8 @@
         $('#gantttemplates').loadTemplates();
 
         var ge = new GanttMaster({
-            mode: 'Resource'//'Gantt'
+            grid_mode: 'Task',
+            gantt_mode: 'Task'
         });
         ge.init($("#workSpace"));
         //console.debug(ge);

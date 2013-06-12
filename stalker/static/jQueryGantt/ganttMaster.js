@@ -32,8 +32,11 @@ function GanttMaster(kwargs) {
     this.editor; //element for editor
     this.gantt; //element for gantt
 
-    // Mode of View: Gantt or Resource
-    this.mode = kwargs['mode'] || 'Gantt'; // 'Resource'
+    // Mode of View:
+    // There are two modes for the grid Task or Resource
+    // and two modes for the gantt Task or TimeLog
+    this.grid_mode = kwargs['grid_mode'] || 'Task'; // 'Resource'
+    this.gantt_mode = kwargs['gantt_mode'] || 'Task'; // 'TimeLog'
 
     this.element;
 
@@ -209,6 +212,9 @@ GanttMaster.prototype.loadGanttData = function (ganttData, Deferred) {
         this.maxEditableDate = Infinity;
 
     console.debug('GanttMaster.loadGanttData 3');
+    
+    // reset
+    this.reset();
 
     // load resources
     var resource;
@@ -224,17 +230,14 @@ GanttMaster.prototype.loadGanttData = function (ganttData, Deferred) {
         this.resources.push(resource);
         this.resource_ids.push(resource.id);
 
-        if (this.mode == 'Resource'){
+        if (this.grid_mode == 'Resource'){
             console.log('GanttMaster.loadGanttData: adding resource to editor');
             this.editor.addResource(resource);
         }
     }
     console.debug('GanttMaster.loadGanttData 2');
 
-//    if (mode == 'Gantt'){
     this.loadTasks(ganttData.tasks);
-//    }
-
     this.loadTimeLogs(ganttData.time_logs);
 
     this.endTransaction();
@@ -258,8 +261,6 @@ GanttMaster.prototype.loadGanttData = function (ganttData, Deferred) {
 GanttMaster.prototype.loadTasks = function (tasks) {
     console.debug('GanttMaster.loadTasks start');
     var factory = new TaskFactory();
-    //reset
-    this.reset();
 
     var task;
     for (var i = 0; i < tasks.length; i++) {
@@ -379,7 +380,7 @@ GanttMaster.prototype.loadTasks = function (tasks) {
             this.task_ids.splice(task_index, 1);
         } else {
             //append task to editor
-            if (this.mode == 'Gantt'){
+            if (this.grid_mode == 'Task'){
                 this.editor.addTask(task);
             }
             //append task to gantt
