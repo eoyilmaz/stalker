@@ -105,7 +105,7 @@ def create_studio(request):
         set_wh_for_day('sun', wh_sun_start, wh_sun_end)
         
         studio.working_hours = wh
-        
+
         DBSession.add(studio)
         # Commit will be handled by the zope transaction extension
         

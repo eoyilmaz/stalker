@@ -27,8 +27,15 @@ define(['exports',  'dojo/domReady!'],
         // TODOC: summary not showing up in output, see https://github.com/csnover/js-doc-parse/issues/42
 
         // ********************************************************************
-        exports.extract_from_time = function extract_form_time(kwargs) {
+        exports.extract_from_time = function extract_from_time(kwargs) {
             var date = kwargs['date'] || new Date();
             return 'T' + ("00" + date.getHours()).slice(-2) + ':' + ("00" + date.getMinutes()).slice(-2) + ':00';
+        };
+
+        exports.extract_from_minutes = function extract_from_minutes(kwargs) {
+            var minutes = kwargs['minutes'] || 0;
+            var hour = parseInt(minutes/60);
+            var minute = parseInt(minutes%60);
+            return 'T' + ("00" + hour).slice(-2) + ':' + ("00" + minute).slice(-2) + ':00';
         };
     });

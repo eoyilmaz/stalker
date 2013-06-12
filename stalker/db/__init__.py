@@ -91,7 +91,7 @@ def __init_db__():
         'Group', 'ImageFormat', 'Link', 'Message', 'Note', 'Permission',
         'Project', 'Repository', 'Scene', 'Sequence', 'Shot', 'SimpleEntity',
         'Status', 'StatusList', 'Structure', 'Studio', 'Tag', 'Task', 'Ticket',
-        'TicketLog', 'Type', 'User', 'Version']
+        'TicketLog', 'Type', 'User', 'Vacation', 'Version']
 
     for class_name in class_names:
         _temp = __import__(
