@@ -318,7 +318,7 @@
                         connectId: ['workSpace'],
                         selector: '.leafTaskContextMenu',
                         getContent: function (node) {
-                            var dataId = node.getAttribute('taskid');
+                            var dataId = node.getAttribute('dataid');
                             var name = node.getAttribute('name');
                             var type = node.getAttribute('type');
                             var start = new Date(parseInt(node.getAttribute('start')));
@@ -428,7 +428,7 @@
                             onClick: function () {
                                 var node = this.getParent().currentTarget;
                                 // get task id
-                                var dataId = node.getAttribute('taskid');
+                                var dataId = node.getAttribute('dataid');
 
                                 var contentPane = registry.byId('tasks_content_pane');
                                 contentPane.set(
