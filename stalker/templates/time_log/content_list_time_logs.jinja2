@@ -141,12 +141,9 @@ require([
                     field: 'resource_name',
                     label: "Resource",
                     get: function (object) {
-
                         return object; // return entire item for formatter to use
-
                     },
                     formatter: function (value) {
-
                         var targetPane = "'central_content'";
                         var address = "'view/user/" + value.resource_id + "'";
 
@@ -158,9 +155,7 @@ require([
                     field: 'duration',
                     label: "Duration",
                     formatter: function (value) {
-
                         return value / 3600 + ' h';
-
                     }
                 },
                 {
@@ -168,18 +163,14 @@ require([
                     label: "Start Date",
 
                     formatter: function (value) {
-
-                        return new Date(parseInt(value) * 1000);
-
+                        return new Date(parseInt(value));
                     }
                 },
                 {
                     field: 'end_date',
                     label: "End Date",
                     formatter: function (value) {
-
                             return new Date(parseInt(value));
-
                     }
                 }
             ];

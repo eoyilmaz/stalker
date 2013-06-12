@@ -259,9 +259,9 @@ require([
         schedule_timing = {{ task.schedule_timing }};
         schedule_unit = '{{ task.schedule_unit }}';
         url = '{{ request.route_url('update_task', task_id=task.id) }}';
-        start_date = new Date({{ microseconds_since_epoch(task.start) }});
+        start_date = new Date({{ milliseconds_since_epoch(task.start) }});
         start_time = 'T{{ '%02d'|format(task.start.hour) }}:{{'%02d'|format(task.start.minute) }}:00';
-        end_date = new Date({{ microseconds_since_epoch(task.end) }});
+        end_date = new Date({{ milliseconds_since_epoch(task.end) }});
         end_time = 'T{{ '%02d'|format(task.end.hour) }}:00:00';
         {% if task.is_milestone %}
             is_milestone = true;

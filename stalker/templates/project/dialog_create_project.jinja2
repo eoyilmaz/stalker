@@ -208,8 +208,8 @@ require([
         url = '{{ request.route_url("update_project") }}';
         name = '{{ project.name }}';
         code = '{{ project.code }}';
-        start_date_value = new Date(parseInt({{ microseconds_since_epoch(project.start) }}));
-        end_date_value = new Date(parseInt({{ microseconds_since_epoch(project.end) }}));
+        start_date_value = new Date(parseInt({{ milliseconds_since_epoch(project.start) }}));
+        end_date_value = new Date(parseInt({{ milliseconds_since_epoch(project.end) }}));
         imf_filteringSelect_selected_value = '{{ project.image_format.id }}';
         fps = {{ project.fps }};
         repository_filteringSelect_selected_value = '{{ project.repository.id }}';
