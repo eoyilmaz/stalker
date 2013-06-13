@@ -35,7 +35,7 @@ from stalker import (User, Task, Entity, Project, StatusList, Status,
 from stalker.models.task import CircularDependencyError
 from stalker import defaults
 from stalker import log
-from stalker.views import get_datetime, PermissionChecker, get_logged_in_user, get_multi_integer, milliseconds_since_epoch, from_milliseconds
+from stalker.views import get_datetime, PermissionChecker, get_logged_in_user, get_multi_integer, milliseconds_since_epoch, from_milliseconds, get_date
 
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
@@ -227,8 +227,8 @@ def update_task(request):
     schedule_timing = float(request.params.get('schedule_timing'))
     schedule_unit = request.params.get('schedule_unit')
     schedule_constraint = request.params.get('schedule_constraint', 0)
-    start = get_datetime(request, 'start_date', 'start_time')
-    end = get_datetime(request, 'end_date', 'end_time')
+    start = get_date(request, 'start')
+    end = get_date(request, 'end')
     update_bid = request.params.get('update_bid')
 
     depend_ids = get_multi_integer(request, 'depend_ids')
@@ -612,8 +612,8 @@ def create_task(request):
         logger.debug('status: %s' % status)
 
         # get the dates
-        start = get_datetime(request, 'start_date', 'start_time')
-        end = get_datetime(request, 'end_date', 'end_time')
+        start = get_date(request, 'start')
+        end = get_date(request, 'end')
 
         logger.debug('start : %s' % start)
         logger.debug('end : %s' % end)

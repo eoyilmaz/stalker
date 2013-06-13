@@ -29,7 +29,7 @@ from stalker import log
 from stalker.db import DBSession
 from stalker.exceptions import OverBookedError
 from stalker.views import (get_datetime, get_logged_in_user, PermissionChecker,
-                           milliseconds_since_epoch)
+                           milliseconds_since_epoch, get_date)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
@@ -108,8 +108,8 @@ def create_time_log(request):
     resource_id = request.params.get('resource_id', None)
     resource = User.query.filter(User.id == resource_id).first()
 
-    start_date = get_datetime(request, 'start_date', 'start_time')
-    end_date = get_datetime(request, 'end_date', 'end_time')
+    start_date = get_date(request, 'start')
+    end_date = get_date(request, 'end')
 
     logger.debug('task_id     : %s' % task_id)
     logger.debug('task        : %s' % task)
@@ -150,8 +150,8 @@ def update_time_log(request):
     resource_id = request.params.get('resource_id', None)
     resource = User.query.filter(User.id == resource_id).first()
 
-    start_date = get_datetime(request, 'start_date', 'start_time')
-    end_date = get_datetime(request, 'end_date', 'end_time')
+    start_date = get_date(request, 'start')
+    end_date = get_date(request, 'end')
 
     logger.debug('resource_id : %s' % resource_id)
     logger.debug('start_date  : %s' % start_date)

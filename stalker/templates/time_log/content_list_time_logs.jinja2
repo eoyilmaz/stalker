@@ -163,14 +163,16 @@ require([
                     label: "Start Date",
 
                     formatter: function (value) {
-                        return new Date(parseInt(value));
+                        var start_date = new Date(parseInt(value));
+                        return start_date.format("yyyy-MM-dd HH:00");
                     }
                 },
                 {
                     field: 'end_date',
                     label: "End Date",
                     formatter: function (value) {
-                            return new Date(parseInt(value));
+                        var end_date = new Date(parseInt(value));
+                        return end_date.format("yyyy-MM-dd HH:00");
                     }
                 }
             ];

@@ -9,6 +9,13 @@ Stalker Changes
   
   * **Update:** All the date values are now returned as **UTC String** and
     stored in database as UTC datetime thus Stalker now supports Time Zones.
+  * **Fix:** Fixed all the dialogs with TimeTextBox inputs, where the
+    date portion was reset to epoch by the widget itself, causing a change in
+    Day Light Saving of the users locale and the dialog was reporting wrong
+    date time values. Now in those dialogs, on submit a new date object is
+    created or the DateTextBox widget value is used and the time portion of the
+    Date object is updated from the TimeTextBox. This way, it is guaranteed to
+    get correct date and time values.
 
   * **JQueryGantt:**
 
@@ -19,7 +26,7 @@ Stalker Changes
     * **Update:** Horizontal scrolling is disabled in gantt part of Gantt
       Chart. All the drawn tasks and links are now set in position with percent
       values, so they will stick and scale correctly when the split container
-      is resized.
+      resize.
     * **Update:** Any task out of range is culled in gantt chart.
 
 0.2.0.b8
