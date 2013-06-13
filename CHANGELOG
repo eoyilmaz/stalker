@@ -2,6 +2,26 @@
 Stalker Changes
 ===============
 
+0.2.0.b9
+========
+
+* **WebUI:**
+  
+  * **Update:** All the date values are now returned as **UTC String** and
+    stored in database as UTC datetime thus Stalker now supports Time Zones.
+
+  * **JQueryGantt:**
+
+    * **Update:** The gantt chart is now able to display much more info then
+      before. There are two new modes for each of the Grid and Gantt parts of
+      the Gantt Chart. Grid can be set to display *Task*s or *Resources* and
+      the Gantt can set to display *Task*s or *TimeLog*s.
+    * **Update:** Horizontal scrolling is disabled in gantt part of Gantt
+      Chart. All the drawn tasks and links are now set in position with percent
+      values, so they will stick and scale correctly when the split container
+      is resized.
+    * **Update:** Any task out of range is culled in gantt chart.
+
 0.2.0.b8
 ========
 

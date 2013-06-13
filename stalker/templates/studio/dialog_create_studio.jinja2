@@ -237,20 +237,25 @@ require([
         daily_working_hours = '{{ studio.daily_working_hours }}';
 
 
-        mon_start_value = util.extract_from_minutes({minutes: {{ studio.working_hours[0][0][0]}}});
-        mon_end_value = util.extract_from_minutes({minutes: {{ studio.working_hours[0][0][1]}}});
-        tue_start_value = util.extract_from_minutes({minutes: {{ studio.working_hours[1][0][0]}}});
-        tue_end_value = util.extract_from_minutes({minutes: {{ studio.working_hours[1][0][1]}}});
-        wed_start_value = util.extract_from_minutes({minutes: {{ studio.working_hours[2][0][0]}}});
-        wed_end_value = util.extract_from_minutes({minutes: {{ studio.working_hours[2][0][1]}}});
-        thu_start_value = util.extract_from_minutes({minutes: {{ studio.working_hours[3][0][0]}}});
-        thu_end_value = util.extract_from_minutes({minutes: {{ studio.working_hours[3][0][1]}}});
-        fri_start_value = util.extract_from_minutes({minutes: {{ studio.working_hours[4][0][0]}}});
-        fri_end_value = util.extract_from_minutes({minutes: {{ studio.working_hours[4][0][1]}}});
-        sat_start_value = util.extract_from_minutes({minutes: {{ studio.working_hours[5][0][0]}}});
-        sat_end_value = util.extract_from_minutes({minutes: {{ studio.working_hours[5][0][1]}}});
-        sun_start_value = util.extract_from_minutes({minutes: {{ studio.working_hours[6][0][0]}}});
-        sun_end_value = util.extract_from_minutes({minutes: {{ studio.working_hours[6][0][1]}}});
+        mon_start_value = new Date( {{ studio.working_hours[0][0][0]}} * 60000);
+        mon_end_value = new Date( {{ studio.working_hours[0][0][1]}} * 60000);
+        tue_start_value = new Date( {{ studio.working_hours[1][0][0]}} * 60000);
+        tue_end_value = new Date( {{ studio.working_hours[1][0][1]}} * 60000);
+        wed_start_value = new Date( {{ studio.working_hours[2][0][0]}} * 60000);
+        wed_end_value = new Date( {{ studio.working_hours[2][0][1]}} * 60000);
+        thu_start_value = new Date( {{ studio.working_hours[3][0][0]}} * 60000);
+        thu_end_value = new Date( {{ studio.working_hours[3][0][1]}} * 60000);
+        fri_start_value = new Date( {{ studio.working_hours[4][0][0]}} * 60000);
+        fri_end_value = new Date( {{ studio.working_hours[4][0][1]}} * 60000);
+        sat_start_value = new Date( {{ studio.working_hours[5][0][0]}} * 60000);
+        sat_end_value = new Date( {{ studio.working_hours[5][0][1]}} * 60000);
+        {% if studio.working_hours[6] %}
+            sun_start_value = new Date( {{ studio.working_hours[6][0][0]}} * 60000);
+            sun_end_value = new Date( {{ studio.working_hours[6][0][1]}} * 60000);
+        {% else %}
+            sun_start_value = default_start_value;
+            sun_end_value = default_start_value;
+        {% endif %}
     {% endif %}
 
 
@@ -421,20 +426,20 @@ require([
                     {% if mode=='UPDATE' %}
                         studio_id: studio_id,
                     {% endif %}
-                    mon_start: stamp.toISOString(mon_start.value),
-                    mon_end: stamp.toISOString(mon_end.value),
-                    tue_start: stamp.toISOString(tue_start.value),
-                    tue_end: stamp.toISOString(tue_end.value),
-                    wed_start: stamp.toISOString(wed_start.value),
-                    wed_end: stamp.toISOString(wed_end.value),
-                    thu_start: stamp.toISOString(thu_start.value),
-                    thu_end: stamp.toISOString(thu_end.value),
-                    fri_start: stamp.toISOString(fri_start.value),
-                    fri_end: stamp.toISOString(fri_end.value),
-                    sat_start: stamp.toISOString(sat_start.value),
-                    sat_end: stamp.toISOString(sat_end.value),
-                    sun_start: stamp.toISOString(sun_start.value),
-                    sun_end: stamp.toISOString(sun_end.value)
+                    mon_start: mon_start.value.toUTCString(),
+                    mon_end: mon_end.value.toUTCString(),
+                    tue_start: tue_start.value.toUTCString(),
+                    tue_end: tue_end.value.toUTCString(),
+                    wed_start: wed_start.value.toUTCString(),
+                    wed_end: wed_end.value.toUTCString(),
+                    thu_start: thu_start.value.toUTCString(),
+                    thu_end: thu_end.value.toUTCString(),
+                    fri_start: fri_start.value.toUTCString(),
+                    fri_end: fri_end.value.toUTCString(),
+                    sat_start: sat_start.value.toUTCString(),
+                    sat_end: sat_end.value.toUTCString(),
+                    sun_start: sun_start.value.toUTCString(),
+                    sun_end: sun_end.value.toUTCString()
                 },
                 url: url,
                 method: 'POST'

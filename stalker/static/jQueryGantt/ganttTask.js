@@ -94,7 +94,7 @@ function Task(kwargs) {
     this.collapsed = false;
 
     this.rowElement; //row editor html element
-    this.ganttElement; //gantt html element
+    this.ganttElements = []; //gantt html element
     this.master = kwargs['master'] || null;
 
     this.resources = kwargs['resources'] || [];
@@ -218,6 +218,10 @@ Task.prototype.getParent = function () {
 
 Task.prototype.isParent = function () {
     return this.children.length > 0;
+};
+
+Task.prototype.isLeaf = function () {
+    return this.children.length == 0;
 };
 
 

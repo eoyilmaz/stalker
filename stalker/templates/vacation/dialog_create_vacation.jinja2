@@ -128,11 +128,8 @@ require([
     {% elif mode == 'UPDATE' %}
         url = '{{ request.route_url("update_vacation") }}';
 
-        start_date_value = new Date(parseInt({{ vacation.start.strftime('%s') }}) * 1000);
-        end_date_value = new Date(parseInt({{ vacation.end.strftime('%s') }}) * 1000);
-
-        start_time_value = util.extract_from_time({date: start_date_value});
-        end_time_value = util.extract_from_time({date: end_date_value});
+        start_date_value = new Date(parseInt({{ milliseconds_since_epoch(vacation.start) }}));
+        end_date_value = new Date(parseInt({{ milliseconds_since_epoch(vacation.end) }}));
 
         type_id = '{{ vacation.type_id }}';
 
@@ -268,10 +265,10 @@ require([
                 dialog: dialog,
                 form: vacation_form,
                 additional_data: {
-                    start_date: stamp.toISOString(start_dateTextBox.value),
-                    end_date: stamp.toISOString(end_dateTextBox.value),
-                    start_time: stamp.toISOString(start_time_timeTextBox.value),
-                    end_time: stamp.toISOString(end_time_timeTextBox.value),
+                    start_date: start_dateTextBox.value.toUTCString(),
+                    end_date: end_dateTextBox.value.toUTCString(),
+                    start_time: start_time_timeTextBox.value.toUTCString(),
+                    end_time: end_time_timeTextBox.value.toUTCString(),
                     {% if mode == 'UPDATE' %}
                         vacation_id: '{{ vacation.id }}',
                     {% endif %}

@@ -90,15 +90,16 @@
     height: 100%;
 }
 
-.splitBox1, .splitBox2 {
-    overflow-x: scroll;
+.splitBox1{
+    overflow-x: hidden;
     overflow-y: hidden;
-
-    /*background-color: yellow;*/
+    background-color: rgb(240, 240, 240);;
 }
 
 .splitBox2 {
-    /*background-color: orange;*/
+    overflow-x: hidden;
+    overflow-y: hidden;
+    background-color: rgb(240, 240, 240);;
 }
 
 .unselectable {

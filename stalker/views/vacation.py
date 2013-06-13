@@ -244,7 +244,7 @@ def get_vacations(request):
             'created_by_id': vacation.created_by_id,
             'created_by_name': vacation.created_by.name,
             'start_date' : milliseconds_since_epoch(vacation.start),
-            'end_date':milliseconds_since_epoch(vacation.end)
+            'end_date': milliseconds_since_epoch(vacation.end)
 
             # 'hours_to_complete': vacation.hours_to_complete,
             # 'notes': vacation.notes

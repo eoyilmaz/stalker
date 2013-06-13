@@ -105,6 +105,7 @@ GanttMaster.prototype.init = function (place) {
 
     //load templates
     $("#gantEditorTemplates").loadTemplates().remove();  // TODO: Remove inline jquery, this should be injected
+    $("#gantEditorTemplates").loadTemplates().remove();  // TODO: Remove inline jquery, this should be injected
 
     //create editor
     this.editor = new GridEditor(this);
@@ -112,8 +113,8 @@ GanttMaster.prototype.init = function (place) {
     place.append(this.editor.element);
 
     //create gantt
-//    this.gantt = new Ganttalendar("m", new Date().getTime() - 3600000 * 24 * 2, new Date().getTime() + 3600000 * 24 * 15, this, place.width() * .6);
-    this.gantt = new Ganttalendar('m', this.start, this.end, this, place.width() * .6);
+//    this.gantt = new GanttDrawer("m", new Date().getTime() - 3600000 * 24 * 2, new Date().getTime() + 3600000 * 24 * 15, this, place.width() * .6);
+    this.gantt = new GanttDrawer('m', this.start, this.end, this, place.width() * .6);
 
     //setup splitter
     var splitter = $.splittify.init(place, this.editor.element, this.gantt.element, 50);
@@ -125,12 +126,12 @@ GanttMaster.prototype.init = function (place) {
     place.bind("refreshTasks.gantt",function () {
         self.redrawTasks();
     }).bind("refreshTask.gantt",function (e, task) {
-            self.drawTask(task);
-        }).bind("zoomPlus.gantt",function () {
-            self.gantt.zoomGantt(true);
-        }).bind("zoomMinus.gantt", function () {
-            self.gantt.zoomGantt(false);
-        });
+        self.drawTask(task);
+    }).bind("zoomPlus.gantt",function () {
+        self.gantt.zoomGantt(true);
+    }).bind("zoomMinus.gantt", function () {
+        self.gantt.zoomGantt(false);
+    });
 };
 
 GanttMaster.messages = {
@@ -211,7 +212,7 @@ GanttMaster.prototype.loadGanttData = function (ganttData, Deferred) {
     else
         this.maxEditableDate = Infinity;
 
-    console.debug('GanttMaster.loadGanttData 3');
+//    console.debug('GanttMaster.loadGanttData 3');
     
     // reset
     this.reset();
@@ -221,7 +222,7 @@ GanttMaster.prototype.loadGanttData = function (ganttData, Deferred) {
     var data;
     for (var i = 0; i < ganttData.resources.length; i++) {
         data = ganttData.resources[i];
-        console.debug('data: ', data);
+//        console.debug('data: ', data);
         resource = new Resource({
             id: data.id,
             name: data.name,
@@ -231,11 +232,11 @@ GanttMaster.prototype.loadGanttData = function (ganttData, Deferred) {
         this.resource_ids.push(resource.id);
 
         if (this.grid_mode == 'Resource'){
-            console.log('GanttMaster.loadGanttData: adding resource to editor');
+//            console.debug('GanttMaster.loadGanttData: adding resource to editor');
             this.editor.addResource(resource);
         }
     }
-    console.debug('GanttMaster.loadGanttData 2');
+//    console.debug('GanttMaster.loadGanttData 2');
 
     this.loadTasks(ganttData.tasks);
     this.loadTimeLogs(ganttData.time_logs);
@@ -259,7 +260,7 @@ GanttMaster.prototype.loadGanttData = function (ganttData, Deferred) {
 
 
 GanttMaster.prototype.loadTasks = function (tasks) {
-    console.debug('GanttMaster.loadTasks start');
+//    console.debug('GanttMaster.loadTasks start');
     var factory = new TaskFactory();
 
     var task;
@@ -368,26 +369,18 @@ GanttMaster.prototype.loadTasks = function (tasks) {
         task = this.tasks[i];
 
         //add Link collection in memory
-        var linkLoops = !this.updateLinks(task);
-
-        if (linkLoops) {
-            alert(GanttMaster.messages.GANNT_ERROR_LOADING_DATA_TASK_REMOVED + "\n" + task.name + "\n" +
-                (linkLoops ? GanttMaster.messages.CIRCULAR_REFERENCE : GanttMaster.messages.ERROR_SETTING_DATES));
-
-            //remove task from in-memory collection
-            var task_index = this.task_ids.indexOf(task.id);
-            this.tasks.splice(task_index, 1);
-            this.task_ids.splice(task_index, 1);
-        } else {
-            //append task to editor
-            if (this.grid_mode == 'Task'){
-                this.editor.addTask(task);
-            }
-            //append task to gantt
-//            this.gantt.addTask(task);
+        if (this.gantt_mode == 'Task'){
+            this.updateLinks(task);
         }
+
+        //append task to editor
+        if (this.grid_mode == 'Task'){
+            this.editor.addTask(task);
+        }
+        //append task to gantt
+//            this.gantt.addTask(task);
     }
-    console.debug('GanttMaster.loadTasks end');
+//    console.debug('GanttMaster.loadTasks end');
 };
 
 
@@ -489,7 +482,7 @@ GanttMaster.prototype.saveGantt = function (forTransaction) {
         var cloned = task.clone();
         delete cloned.master;
         delete cloned.rowElement;
-        delete cloned.ganttElement;
+        delete cloned.ganttElements;
 
         delete cloned.children;
         //delete cloned.resources;
@@ -514,13 +507,13 @@ GanttMaster.prototype.saveGantt = function (forTransaction) {
 
 GanttMaster.prototype.updateLinks = function (task) {
     //console.debug("updateLinks");
+    
+    // TODO: may be we need to check if the gantt_mode == 'Task'
 
     //remove my depends
     this.links = this.links.filter(function (link) {
         return link.to != task;
     });
-
-    var todoOk = true;
 
     // just update the depends list
     if (task.getDepends().length > 0) {
@@ -546,14 +539,12 @@ GanttMaster.prototype.updateLinks = function (task) {
         task.depends_string = newDepsString;
 
     }
-    //prof.stop();
-    return todoOk;
 };
 
 
 //<%----------------------------- TRANSACTION MANAGEMENT ---------------------------------%>
 GanttMaster.prototype.beginTransaction = function () {
-    console.debug('GanttMaster.beginTransaction start');
+//    console.debug('GanttMaster.beginTransaction start');
     if (!this.__currentTransaction) {
         this.__currentTransaction = {
 //            snapshot: JSON.stringify(this.saveGantt(true)),
@@ -562,7 +553,7 @@ GanttMaster.prototype.beginTransaction = function () {
     } else {
         console.error("Cannot open twice a transaction");
     }
-    console.debug('GanttMaster.beginTransaction end');
+//    console.debug('GanttMaster.beginTransaction end');
     return this.__currentTransaction;
 };
 
@@ -612,6 +603,7 @@ GanttMaster.prototype.getDateInterval = function () {
         if (end < task.end)
             end = task.end;
     }
+    // TODO: Update this, it is ugly, the zoom is not working nicely
     if (start == Infinity) {
         start = new Date(new Date().getTime() - 1296000000);
     }

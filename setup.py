@@ -20,7 +20,8 @@ requires = [
     'jinja2',
     'pyramid_jinja2',
     'unittest2',
-    'sphinx==1.1.3'
+    'sphinx==1.1.3',
+    'pytz'
 ]
 
 setup(name='stalker',

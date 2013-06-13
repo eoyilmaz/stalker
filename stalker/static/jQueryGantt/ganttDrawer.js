@@ -20,25 +20,27 @@
  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-function Ganttalendar(zoom, startmillis, endMillis, master, minGanttSize) {
+function GanttDrawer(zoom, startmillis, endMillis, master, minGanttSize) {
     this.master = master; // is the a GantEditor instance
     this.element; // is the jquery element containing gantt
     this.highlightBar;
     this.zoom = zoom;
     this.minGanttSize = minGanttSize;
     this.includeToday = true; //when true today is always visible. If false boundaries comes from tasks periods
+    
+    this.computedTableWidth = null;
 
     this.zoomLevels = ['h', "d", "w", "m", "q", "s", "y"];
     //this.zoomLevels = ["w","m","q","s","y"];
     
-//    console.debug('Ganttalendar.startmillis : ', startmillis);
-//    console.debug('Ganttalendar.endMillis   : ', endMillis);
+//    console.debug('GanttDrawer.startmillis : ', startmillis);
+//    console.debug('GanttDrawer.endMillis   : ', endMillis);
 
     this.element = this.create(zoom, startmillis, endMillis);
 
 }
 
-Ganttalendar.prototype.zoomGantt = function (isPlus) {
+GanttDrawer.prototype.zoomGantt = function (isPlus) {
     var curLevel = this.zoom;
     var pos = this.zoomLevels.indexOf(curLevel + "");
 
@@ -55,6 +57,7 @@ Ganttalendar.prototype.zoomGantt = function (isPlus) {
     }
 
     // refresh links
+    // TODO: do not use gotoLink, replace it with the new script
     require(['stalker/gotoLink'], function (gotoLink) {
         gotoLink();
     });
@@ -62,7 +65,7 @@ Ganttalendar.prototype.zoomGantt = function (isPlus) {
 };
 
 
-Ganttalendar.prototype.create = function (zoom, originalStartMillis, originalEndMillis) {
+GanttDrawer.prototype.create = function (zoom, originalStartMillis, originalEndMillis) {
     //console.debug("Gantt.create " + new Date(originalStartMillis) + " - " + new Date(originalEndMillis));
 
     var self = this;
@@ -279,31 +282,36 @@ Ganttalendar.prototype.create = function (zoom, originalStartMillis, originalEnd
         computedTableWidth = Math.max(computedTableWidth, self.minGanttSize);
 
         var table = $("<table cellspacing=0 cellpadding=0>");
-        table.append(tr1).append(tr2).append(trBody).addClass("ganttTable").css({width: computedTableWidth});
+//        table.append(tr1).append(tr2).append(trBody).addClass("ganttTable").css({width: computedTableWidth});
+        table.append(tr1).append(tr2).append(trBody).addClass("ganttTable").css({width: '100%'});
         table.height(self.master.editor.element.height());
 
         var box = $("<div>");
-        box.addClass("gantt unselectable").attr("unselectable", "true").css({position: "relative", width: computedTableWidth});
+//        box.addClass("gantt unselectable").attr("unselectable", "true").css({position: "relative", width: computedTableWidth});
+        box.addClass("gantt unselectable").attr("unselectable", "true").css({position: "relative", width: '100%', 'overflow': 'hidden'});
         box.append(table);
 
         //highlightBar
-        var hlb = $("<div>").addClass("ganttHighLight");
-        box.append(hlb);
-        self.highlightBar = hlb;
+//        var hlb = $("<div>").addClass("ganttHighLight");
+//        box.append(hlb);
+//        self.highlightBar = hlb;
 
         //create link container
         var links = $("<div>");
-        links.addClass("ganttLinks").css({position: "absolute", top: 0, width: computedTableWidth, height: "100%"});
+//        links.addClass("ganttLinks").css({position: "absolute", top: 0, width: computedTableWidth, height: "100%"});
+        links.addClass("ganttLinks").css({position: "absolute", top: 0, width: '100%', height: "100%"});
         box.append(links);
 
         //compute scalefactor fx
+        self.computedTableWidth = computedTableWidth;
         self.fx = computedTableWidth / (endPeriod - startPeriod);
 
         // drawTodayLine
         var today_as_millis = new Date().getTime();
         if (today_as_millis > self.startMillis && today_as_millis < self.endMillis) {
-            var x = Math.round((today_as_millis - self.startMillis) * self.fx);
-            var today = $("<div>").addClass("ganttToday").css("left", x);
+//            var x = Math.round((today_as_millis - self.startMillis) * self.fx);
+            var x = (today_as_millis - self.startMillis) / (originalEndMillis - originalStartMillis) * 100;
+            var today = $("<div>").addClass("ganttToday").css("left", x + '%');
             box.append(today);
         }
 
@@ -339,61 +347,73 @@ Ganttalendar.prototype.create = function (zoom, originalStartMillis, originalEnd
 
 
 //<%-------------------------------------- GANTT TASK GRAPHIC ELEMENT --------------------------------------%>
-Ganttalendar.prototype.drawTask = function (task) {
+GanttDrawer.prototype.drawTask = function (task) {
     //console.debug("drawTask", task.name,new Date(task.start));
-    var self = this;
-    //var prof = new Profiler("ganttDrawTask");
-    //var editorRow = self.master.editor.element.find("tr[dataId=" + task.id + "]");
+    
+    // skip if it is not in the range
+    if (task.start > this.originalEndMillis){
+        return;
+    }
 
-//    var owner;
-//    if (this.master.grid_mode == 'Resource'){
-//        owner = task.getResource();
-//    } else if (this.master.grid_mode == 'Task') {
-//        owner = time_log.getTask();
-//    }
-
-    var editorRow = task.rowElement;
-
-    var top = editorRow.position().top + self.master.editor.element.parent().scrollTop();
-    var x = Math.round((task.start - self.startMillis) * self.fx);
-
-    var taskBox;
-    if (task.type != 'Project'){
-        if (!task.isParent()) {
-            // if it is a leaf task draw a TASKBAR
-            taskBox = $.JST.createFromTemplate(task, "TASKBAR");
-        } else {
-            // draw a PARENTTASKBAR
-            taskBox = $.JST.createFromTemplate(task, "PARENTTASKBAR");
-        }
-    } else {
-        taskBox = $.JST.createFromTemplate(task, "PROJECTBAR");
+    if (task.end < this.originalStartMillis){
+        return;
     }
     
-    //save row element on task
-    task.ganttElement = taskBox;
+    var task_drawn_start = (task.start >= this.originalStartMillis) ? (task.start) : (this.originalStartMillis);
+    var task_drawn_end   = (task.end  <= this.originalEndMillis)    ? (task.end)   : (this.originalEndMillis);
 
-    //if I'm parent
-    //if (task.isParent())
-    //  taskBox.addClass("hasChild");
+    var owners = [];
+    if (this.master.grid_mode == 'Resource'){
+        owners = task.resources;
+    } else if (this.master.grid_mode == 'Task') {
+//        owners.push(time_log.getTask());
+        owners.push(task);
+    }
 
+    for (var i = 0; i < owners.length ; i++){
+        var editorRow = owners[i].rowElement;
 
-    taskBox.css({top: top, left: x, width: Math.round((task.end - task.start) * self.fx)});
+        var top = editorRow.position().top + this.master.editor.element.parent().scrollTop();
+//        var x = Math.round((task_drawn_start - this.startMillis) * this.fx);
+        var x = (task_drawn_start - this.startMillis) / (this.originalEndMillis - this.originalStartMillis) * 100;
 
-    var taskBoxSeparator = $("<div class='ganttLines'></div>");
-    taskBoxSeparator.css({top: top + taskBoxSeparator.height()});
+        var taskBox;
+        if (task.type != 'Project'){
+            if (!task.isParent()) {
+                // if it is a leaf task draw a TASKBAR
+                if (this.master.grid_mode == 'Task'){
+                    taskBox = $.JST.createFromTemplate(task, "TASKBAR");
+                } else if (this.master.grid_mode == 'Resource') {
+                    taskBox = $.JST.createFromTemplate(task, "TASKBAR_COMPACT");
+                }
+            } else {
+                // draw a PARENTTASKBAR
+                taskBox = $.JST.createFromTemplate(task, "PARENTTASKBAR");
+            }
+        } else {
+            taskBox = $.JST.createFromTemplate(task, "PROJECTBAR");
+        }
+        
+        //save row element on task
+        task.ganttElements.push(taskBox);
 
-    self.element.append(taskBox);
-    self.element.append(taskBoxSeparator);
+//        taskBox.css({top: top, left: x, width: Math.round((task_drawn_end - task_drawn_start) * this.fx)});
+        taskBox.css({
+            top: top,
+            left: x + '%',
+            width: (task_drawn_end - task_drawn_start) / (this.originalEndMillis - this.originalStartMillis) * 100 + '%' 
+        });
 
-    //ask for redraw link
-    //self.redrawLinks();
+        var taskBoxSeparator = $("<div class='ganttLines'></div>");
+        taskBoxSeparator.css({top: top + taskBoxSeparator.height()});
 
-    //prof.stop();
+        this.element.append(taskBox);
+        this.element.append(taskBoxSeparator);
+    }
 };
 
 //<%-------------------------------------- GANTT TIMELOG GRAPHIC ELEMENT --------------------------------------%>
-Ganttalendar.prototype.drawTimeLog = function (time_log) {
+GanttDrawer.prototype.drawTimeLog = function (time_log) {
     //console.debug("drawTimeLog", time_log.name,new Date(time_log.start));
     // get the editor row of the resource
 
@@ -405,9 +425,9 @@ Ganttalendar.prototype.drawTimeLog = function (time_log) {
     }
 
     var editorRow = owner.rowElement;
-//    console.log('Gantalendar.drawTimeLog: resource.rowElement:', editorRow);
+//    console.debug('Gantalendar.drawTimeLog: resource.rowElement:', editorRow);
     var top = editorRow.position().top + this.master.editor.element.parent().scrollTop();
-    console.log('Gantalendar.drawTimeLog: top:', top);
+//    console.debug('Gantalendar.drawTimeLog: top:', top);
     var x = Math.round((time_log.start - this.startMillis) * this.fx);
 
     var time_log_box;
@@ -427,7 +447,7 @@ Ganttalendar.prototype.drawTimeLog = function (time_log) {
 };
 
 
-//Ganttalendar.prototype.addTask = function (task) {
+//GanttDrawer.prototype.addTask = function (task) {
     //set new boundaries for gantt
 //    this.originalEndMillis = this.originalEndMillis > task.end ? this.originalEndMillis : task.end;
 //    this.originalStartMillis = this.originalStartMillis < task.start ? this.originalStartMillis : task.start;
@@ -436,19 +456,35 @@ Ganttalendar.prototype.drawTimeLog = function (time_log) {
 
 //<%-------------------------------------- GANT DRAW LINK ELEMENT --------------------------------------%>
 //'from' and 'to' are tasks already drawn
-Ganttalendar.prototype.drawLink = function (from, to, type) {
+GanttDrawer.prototype.drawLink = function (from, to, type) {
     var peduncolusSize = 10;
     var lineSize = 2;
+    var self = this;
+
+    // skip if from or to is not visible
+    if (from.start > this.originalEndMillis || 
+        from.end < this.originalStartMillis ||
+        to.start > this.originalEndMillis || 
+        to.end < this.originalStartMillis){
+        // either from or to is not visible
+        return;
+    }
+
+    var tableWidth = self.master.gantt.element.width();
 
     /**
      * A representation of a Horizontal line
      */
     HLine = function (width, top, left) {
+        console.debug('--- HLINE ---');
+        console.debug('width: ', width);
+        console.debug('top  : ', top);
+        console.debug('left : ', left);
         var hl = $("<div>").addClass("taskDepLine");
         hl.css({
             height: lineSize,
-            left: left,
-            width: width,
+            left: left / tableWidth * 100 + '%', //left,
+            width: width / tableWidth * 100 + '%',
             top: top - lineSize / 2
         });
         return hl;
@@ -458,10 +494,14 @@ Ganttalendar.prototype.drawLink = function (from, to, type) {
      * A representation of a Vertical line
      */
     VLine = function (height, top, left) {
+        console.debug('--- VLINE ---');
+        console.debug('height: ', height);
+        console.debug('top  : ', top);
+        console.debug('left : ', left);
         var vl = $("<div>").addClass("taskDepLine");
         vl.css({
             height: height,
-            left: left - lineSize / 2,
+            left: (left - lineSize / 2) / tableWidth * 100 + '%',
             width: lineSize,
             top: top
         });
@@ -473,10 +513,15 @@ Ganttalendar.prototype.drawLink = function (from, to, type) {
      * width and height into a structure.
      */
     function buildRect(item) {
-        var rect = item.ganttElement.position();
-        rect.width = item.ganttElement.width();
-        rect.height = item.ganttElement.height();
-
+        if (item instanceof Task){
+            var rect = item.ganttElements[0].position();
+            rect.width = item.ganttElements[0].width();
+            rect.height = item.ganttElements[0].height();
+        } else {
+            var rect = item.ganttElement.position();
+            rect.width = item.ganttElement.width();
+            rect.height = item.ganttElement.height();
+        }
         return rect;
     }
 
@@ -486,6 +531,10 @@ Ganttalendar.prototype.drawLink = function (from, to, type) {
      * @see buildRect
      */
     function drawStartToEnd(rectFrom, rectTo, peduncolusSize) {
+        
+        console.debug('drawStartToEnd.rectFrom : ', rectFrom);
+        console.debug('drawStartToEnd.rectTo : ', rectTo);
+        
         var left, top;
 
         var ndo = $("<div>").attr({
@@ -570,7 +619,7 @@ Ganttalendar.prototype.drawLink = function (from, to, type) {
         //arrow
         var arr = $("<div class='linkArrow'></div>").css({
             top: rectTo.top + rectTo.height / 2 - 5,
-            left: rectTo.left - 5
+            left: (rectTo.left - 5) / tableWidth * 100 + '%'
         });
 
         ndo.append(arr);
@@ -693,7 +742,7 @@ Ganttalendar.prototype.drawLink = function (from, to, type) {
 };
 
 
-Ganttalendar.prototype.redrawLinks = function () {
+GanttDrawer.prototype.redrawLinks = function () {
     //console.debug("redrawLinks ");
     var self = this;
     this.element.stopTime("ganttlnksredr");
@@ -709,20 +758,23 @@ Ganttalendar.prototype.redrawLinks = function () {
 };
 
 
-Ganttalendar.prototype.reset = function () {
+GanttDrawer.prototype.reset = function () {
     this.element.find(".ganttLinks").empty();
     this.element.find("[dataId]").remove();
 };
 
 
-Ganttalendar.prototype.redrawTasks = function () {
+GanttDrawer.prototype.redrawTasks = function () {
     for (var i = 0; i < this.master.tasks.length; i++) {
         var task = this.master.tasks[i];
+        if (this.master.grid_mode == 'Resource' && (task.type != 'Task' || !task.isLeaf())){
+            continue;
+        }
         this.drawTask(task);
     }
 };
 
-Ganttalendar.prototype.redrawTimeLogs = function () {
+GanttDrawer.prototype.redrawTimeLogs = function () {
     for (var i = 0; i < this.master.time_logs.length; i++) {
         var time_log = this.master.time_logs[i];
         this.drawTimeLog(time_log);
@@ -730,7 +782,7 @@ Ganttalendar.prototype.redrawTimeLogs = function () {
 };
 
 
-Ganttalendar.prototype.refreshGantt = function (kwargs) {
+GanttDrawer.prototype.refreshGantt = function (kwargs) {
     if (kwargs){
         var start = kwargs['start'] || null;
         var end = kwargs['end'] || null;
@@ -754,21 +806,23 @@ Ganttalendar.prototype.refreshGantt = function (kwargs) {
     var domEl = this.create(this.zoom, this.originalStartMillis, this.originalEndMillis);
     this.element = domEl;
     par.append(domEl);
-    
+
     if (this.master.gantt_mode == 'Task'){
         this.redrawTasks();
         this.redrawLinks();
     } else if (this.master.gantt_mode == 'TimeLog') {
         this.redrawTimeLogs();
     }
-    
+
     //set old scroll  
     //console.debug("old scroll:",scrollX,scrollY)
     par.scrollTop(scrollY);
     par.scrollLeft(scrollX);
-    
-    // redraw links
 
+    // redraw links
+//    if (this.master.gantt_mode == 'Task'){
+//        this.redrawLinks();
+//    } 
     //set current task
 //    if (this.master.currentTask) {
 //        this.highlightBar.css("top", this.master.currentTask.ganttElement.position().top);
@@ -776,17 +830,17 @@ Ganttalendar.prototype.refreshGantt = function (kwargs) {
     this.bindEvents();
 };
 
-Ganttalendar.prototype.bindEvents = function() {
+GanttDrawer.prototype.bindEvents = function() {
     // Drag event for zoom range
     var isDragging = false;
     this.element.mousedown(function(){
-        console.log('drag start!');
+//        console.debug('drag start!');
         $(window).mousemove(function() {
             isDragging = true;
             $(window).unbind("mousemove");
         });
     }).mouseup(function(){
-        console.log('drag end');
+//        console.debug('drag end');
         var wasDragging = isDragging;
         isDragging = false;
         $(window).unbind("mousemove");
@@ -796,13 +850,12 @@ Ganttalendar.prototype.bindEvents = function() {
     });
 };
 
-
-Ganttalendar.prototype.fitGantt = function () {
+GanttDrawer.prototype.fitGantt = function () {
     delete this.zoom;
     this.refreshGantt();
 };
 
-Ganttalendar.prototype.centerOnToday = function () {
+GanttDrawer.prototype.centerOnToday = function () {
     //console.debug("centerOnToday");
     var x = Math.round(((new Date().getTime()) - this.startMillis) * this.fx);
     this.element.parent().scrollLeft(x);

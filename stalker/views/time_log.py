@@ -28,10 +28,12 @@ import logging
 from stalker import log
 from stalker.db import DBSession
 from stalker.exceptions import OverBookedError
-from stalker.views import get_datetime, get_logged_in_user, PermissionChecker, seconds_since_epoch, milliseconds_since_epoch
+from stalker.views import (get_datetime, get_logged_in_user, PermissionChecker,
+                           milliseconds_since_epoch)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
+
 
 @view_config(
     route_name='dialog_create_time_log',
@@ -41,18 +43,17 @@ def create_time_log_dialog(request):
     """creates a create_time_log_dialog by using the given task
     """
     logger.debug('inside create_time_log_dialog')
-    
+
     # get logged in user
     logged_in_user = get_logged_in_user(request)
 
-    
     task_id = request.matchdict['task_id']
-    task = Task.query.filter(Task.task_id==task_id).first()
-    
+    task = Task.query.filter(Task.task_id == task_id).first()
+
     studio = Studio.query.first()
     if not studio:
         studio = defaults
-    
+
     return {
         'mode': 'CREATE',
         'has_permission': PermissionChecker(request),
@@ -61,6 +62,7 @@ def create_time_log_dialog(request):
         'task': task,
         'milliseconds_since_epoch': milliseconds_since_epoch
     }
+
 
 @view_config(
     route_name='dialog_update_time_log',
@@ -99,22 +101,22 @@ def create_time_log(request):
     """runs when creating a time_log
     """
     task_id = request.params.get('task_id')
-    task = Task.query.filter(Task.id==task_id).first()
-    
+    task = Task.query.filter(Task.id == task_id).first()
+
     #**************************************************************************
     # collect data
     resource_id = request.params.get('resource_id', None)
-    resource = User.query.filter(User.id==resource_id).first()
-    
+    resource = User.query.filter(User.id == resource_id).first()
+
     start_date = get_datetime(request, 'start_date', 'start_time')
     end_date = get_datetime(request, 'end_date', 'end_time')
-    
+
     logger.debug('task_id     : %s' % task_id)
     logger.debug('task        : %s' % task)
     logger.debug('resource_id : %s' % resource_id)
     logger.debug('start_date  : %s' % start_date)
     logger.debug('end_date    : %s' % end_date)
-    
+
     if task and resource and start_date and end_date:
         # we are ready to create the time log
         # TimeLog should handle the extension of the effort
@@ -129,7 +131,7 @@ def create_time_log(request):
             return HTTPServerError()
         else:
             DBSession.add(time_log)
-    
+
     return HTTPOk()
 
 
@@ -146,7 +148,7 @@ def update_time_log(request):
     #**************************************************************************
     # collect data
     resource_id = request.params.get('resource_id', None)
-    resource = User.query.filter(User.id==resource_id).first()
+    resource = User.query.filter(User.id == resource_id).first()
 
     start_date = get_datetime(request, 'start_date', 'start_time')
     end_date = get_datetime(request, 'end_date', 'end_time')
@@ -170,6 +172,7 @@ def update_time_log(request):
 
     return HTTPOk()
 
+
 @view_config(
     route_name='list_time_logs',
     renderer='templates/time_log/content_list_time_logs.jinja2'
@@ -188,6 +191,7 @@ def list_time_logs(request):
         'entity': entity,
         'has_permission': PermissionChecker(request)
     }
+
 
 @view_config(
     route_name='get_time_logs',
@@ -212,11 +216,12 @@ def get_time_logs(request):
             'id': time_log.id,
             'task_id': time_log.task.id,
             'task_name': time_log.task.name,
-            'parent_name': ' | '.join([parent.name for parent in time_log.task.parents]),
+            'parent_name': ' | '.join(
+                [parent.name for parent in time_log.task.parents]),
             'resource_id': time_log.resource_id,
             'resource_name': time_log.resource.name,
             'duration': time_log.total_seconds,
-            'start_date' : milliseconds_since_epoch(time_log.start),
+            'start_date': milliseconds_since_epoch(time_log.start),
             'end_date': milliseconds_since_epoch(time_log.end)
 
             # 'hours_to_complete': time_log.hours_to_complete,

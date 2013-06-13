@@ -719,8 +719,8 @@ require([
                 dialog: dialog,
                 form: project_form,
                 additional_data: {
-                    start: stamp.toISOString(start_dateTextBox.value),
-                    end: stamp.toISOString(end_dateTextBox.value),
+                    start: start_dateTextBox.value.toUTCString(),
+                    end: end_dateTextBox.value.toUTCString(),
                     {% if mode=='UPDATE' %}
                         'project_id': {{ project.id }}
                     {% endif %}

@@ -134,16 +134,22 @@ def convert_to_jquery_gantt_task_format(tasks):
 
     # prepare time logs
     all_time_logs = []
+    all_resources = []
     for task in tasks:
-            for time_log in task.time_logs:
-                all_time_logs.append(time_log)
+        for time_log in task.time_logs:
+            all_time_logs.append(time_log)
+        for resource in task.resources:
+            all_resources.append(resource)
+
+    # make it unique
+    all_resources = list(set(all_resources))
 
     data = {
         'tasks': faux_tasks,
         'resources': [{
                           'id': resource.id,
                           'name': resource.name
-                      } for resource in User.query.all()],
+                      } for resource in all_resources], #User.query.all()],
         'time_logs': [{
                           'id': time_log.id,
                           'task_id': time_log.task.id,

@@ -24,10 +24,10 @@ function GridEditor(master) {
     this.master = master; // is the a GanttEditor instance
     var gridEditor;
     if (this.master.grid_mode == 'Task'){
-        console.debug('GridEditor.__init__: this.master.grid_mode = Task');
+//        console.debug('GridEditor.__init__: this.master.grid_mode = Task');
         gridEditor = $.JST.createFromTemplate({}, "TASKSEDITHEAD");
     } else if (this.master.grid_mode == 'Resource') {
-        console.debug('GridEditor.__init__: this.master.grid_mode = Resource');
+//        console.debug('GridEditor.__init__: this.master.grid_mode = Resource');
         gridEditor = $.JST.createFromTemplate({}, "RESOURCESEDITHEAD");
     }
     gridEditor.gridify();
@@ -36,7 +36,7 @@ function GridEditor(master) {
 
 
 GridEditor.prototype.addTask = function (task) {
-    console.debug('GridEditor.addTask start');
+//    console.debug('GridEditor.addTask start');
     var taskRow;
     if (task.type == 'Task' || task.type == 'Asset' || task.type == 'Shot' ||
         task.type == 'Sequence') {
@@ -54,39 +54,39 @@ GridEditor.prototype.addTask = function (task) {
 
     this.element.append(taskRow);
 
-    console.debug('GridEditor.addTask end');
+//    console.debug('GridEditor.addTask end');
     return taskRow;
 };
 
 GridEditor.prototype.addResource = function (resource) {
-    console.debug('GridEditor.addResource start');
+//    console.debug('GridEditor.addResource start');
     var resourceRow = $.JST.createFromTemplate(resource, "RESOURCEROW");
 
     //save row element on resource
     resource.rowElement = resourceRow;
     this.element.append(resourceRow);
 
-//    console.log('GridEditor.addResource rowElement: ', resourceRow);
-    console.log('GridEditor.addResource end');
+//    console.debug('GridEditor.addResource rowElement: ', resourceRow);
+//    console.debug('GridEditor.addResource end');
     return resourceRow;
 };
 
 
 
 GridEditor.prototype.refreshRowIndices = function () {
-    console.debug('GridEditor.refreshRowIndices start');
+//    console.debug('GridEditor.refreshRowIndices start');
     if (this.master.grid_mode=='Task'){
-        console.debug('GridEditor.refreshRowIndices in Task mode');
+//        console.debug('GridEditor.refreshRowIndices in Task mode');
         this.element.find(".taskRowIndex").each(function (i, el) {
             $(el).html(i + 1);
         });
     } else if (this.master.grid_mode == 'Resource'){
-        console.debug('GridEditor.refreshRowIndices in Resource mode');
+//        console.debug('GridEditor.refreshRowIndices in Resource mode');
         this.element.find(".resourceRowIndex").each(function (i, el) {
             $(el).html(i + 1);
         });
     }
-    console.debug('GridEditor.refreshRowIndices end');
+//    console.debug('GridEditor.refreshRowIndices end');
 };
 
 
@@ -119,9 +119,9 @@ GridEditor.prototype.refreshTaskRow = function (task) {
 
 GridEditor.prototype.refreshResourceRow = function (resource) {
     var row = resource.rowElement;
-    console.log('GridEditor.refreshResourceRow: row:', row);
-    console.log('GridEditor.refreshResourceRow: row.find(".resourceRowIndex"):', row.find(".resourceRowIndex"));
-    console.log('GridEditor.refreshResourceRow: resource.getRow(): ', resource.getRow());
+//    console.debug('GridEditor.refreshResourceRow: row:', row);
+//    console.debug('GridEditor.refreshResourceRow: row.find(".resourceRowIndex"):', row.find(".resourceRowIndex"));
+//    console.debug('GridEditor.refreshResourceRow: resource.getRow(): ', resource.getRow());
     row.find(".resourceRowIndex").html(resource.getRow() + 1);
     row.find(".id").html(resource.id);
     row.find(".name").html(resource.name);
@@ -131,25 +131,25 @@ GridEditor.prototype.refreshResourceRow = function (resource) {
 
 
 GridEditor.prototype.redraw = function () {
-    console.log('GridEditor.redraw start');
+//    console.debug('GridEditor.redraw start');
     if (this.master.grid_mode == 'Task'){
-        console.log('GridEditor.redraw in Task mode');
+//        console.debug('GridEditor.redraw in Task mode');
         for (var i = 0; i < this.master.tasks.length; i++) {
             this.refreshTaskRow(this.master.tasks[i]);
         }
     } else if (this.master.grid_mode == 'Resource'){
-        console.log('GridEditor.redraw in Resource mode');
-        console.log('this.master.resources.length: ', this.master.resources.length);
+//        console.debug('GridEditor.redraw in Resource mode');
+//        console.debug('this.master.resources.length: ', this.master.resources.length);
         for (var i = 0; i < this.master.resources.length; i++) {
             this.refreshResourceRow(this.master.resources[i]);
         }
     }
-    console.log('GridEditor.redraw end');
+//    console.debug('GridEditor.redraw end');
 };
 
 
 GridEditor.prototype.reset = function () {
-    console.debug('GridEditor.reset start');
-//    this.element.find("[dataId]").remove();
-    console.debug('GridEditor.reset end');
+//    console.debug('GridEditor.reset start');
+    this.element.find("[dataId]").remove();
+//    console.debug('GridEditor.reset end');
 };

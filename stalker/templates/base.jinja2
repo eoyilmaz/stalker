@@ -85,6 +85,220 @@
 
 </head>
 <body class='claro'>
+
+{# TEMPLATES #}
+<div id="gantEditorTemplates" style="display:none;">
+    <div class="__template__" type="TASKSEDITHEAD"><!--
+    <table class="gdfTable" cellspacing="0" cellpadding="0" style='width: 1000px'>
+      <thead>
+      <tr style="height:40px">
+        <th class="gdfColHeader gdfResizable" style="width:20px;">#</th>
+        <th class="gdfColHeader gdfResizable" style="width:20px;">id</th>
+        <th class="gdfColHeader gdfResizable" style="width:250px;">name</th>
+        <th class="gdfColHeader gdfResizable" style="width:75px;">start</th>
+        <th class="gdfColHeader gdfResizable" style="width:75px;">end</th>
+        <th class="gdfColHeader gdfResizable" style="width:35px;">timing</th>
+        <th class="gdfColHeader gdfResizable" style="width:100px;">depends</th>
+        <th class="gdfColHeader gdfResizable" style="width:400px; text-align: left;">resources</th>
+        <th class="gdfColHeader gdfResizable" style="width:745px;"></th>
+      </tr>
+      </thead>
+    </table>
+    --></div>
+
+    <div class="__template__" type="RESOURCESEDITHEAD"><!--
+    <table class="gdfTable" cellspacing="0" cellpadding="0" style='width: 1000px'>
+      <thead>
+      <tr style="height:40px">
+        <th class="gdfColHeader gdfResizable" style="width:20px;">#</th>
+        <th class="gdfColHeader gdfResizable" style="width:20px;">id</th>
+        <th class="gdfColHeader gdfResizable" style="width:250px;">name</th>
+        <th class="gdfColHeader gdfResizable" style="width:1430px;"></th>
+      </tr>
+      </thead>
+    </table>
+    --></div>
+
+
+    <div class="__template__" type="PROJECTROW"><!--
+        <tr dataId="(#=obj.id#)" class="projectEditRow" >
+            <th class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></th>
+            <td class="gdfCell" align="right"><span>(#=obj.id#)</span></td>
+            <td class="gdfCell indentCell" style="font-weight: bold">(#=obj.link()#)</td>
+            <td class="gdfCell"><div class="date start"></div></td>
+            <td class="gdfCell"><div class="date end"></div></td>
+            <td class="gdfCell"></td>
+            <td class="gdfCell"></td>
+            <td class="gdfCell taskAssigs"></td>
+        </tr>
+    --></div>
+
+    <div class="__template__" type="PARENTTASKROW"><!--
+        <tr dataId="(#=obj.id#)" class="parentTaskEditRow">
+        <th class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></th>
+        <td class="gdfCell" align="right" style="background-color: (#=obj.progress >= 100 ? 'rgb(153, 255, 51)' : 'red'#)"><span>(#=obj.id#)</span></td>
+        <td class="gdfCell indentCell" style="padding-left:(#=obj.getParents().length*10#)px; (#=obj.getChildren().length>0?'font-weight: bold':''#)">(#=obj.link()#)</td>
+        <td class="gdfCell"><div class="date start"></div></td>
+        <td class="gdfCell"><div class="date end"></div></td>
+        <td class="gdfCell"><div class="timing">(#=obj.schedule_model.toUpperCase()[0]#): (#=obj.schedule_timing#)(#=obj.schedule_unit#)</div></td>
+        <td class="gdfCell">(#=obj.getDependsLinks()#)</td>
+        <td class="gdfCell">(#=obj.getResourcesLinks()#)</td>
+        </tr>
+    --></div>
+
+    <div class="__template__" type="TASKROW"><!--
+        <tr dataId="(#=obj.id#)" class="taskEditRow">
+        <td class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></td>
+        <td class="gdfCell" align="right" style="background-color: (#=obj.progress >= 100 ? 'rgb(153, 255, 51)' : 'red'#)"><span>(#=obj.id#)</span></td>
+        <td class="gdfCell indentCell" style="padding-left:(#=obj.getParents().length*10#)px; (#=obj.getChildren().length>0?'font-weight: bold':''#)">(#=obj.link()#)</td>
+        <td class="gdfCell"><div class="date start"></div></td>
+        <td class="gdfCell"><div class="date end"></div></td>
+        <td class="gdfCell"><div name="timing">(#=obj.schedule_model.toUpperCase()[0]#): (#=obj.schedule_timing#)(#=obj.schedule_unit#)</div></td>
+        <td class="gdfCell">(#=obj.getDependsLinks()#)</td>
+        <td class="gdfCell">(#=obj.getResourcesLinks()#)</td>
+        <td class="gdfCell"></td>
+        </tr>
+    --></div>
+
+    <div class="__template__" type="RESOURCEROW"><!--
+        <tr dataId="(#=obj.id#)" class="resourceEditRow">
+            <td class="gdfCell" align="right"><span class="resourceRowIndex">(#=obj.getRow()+1#)</span></td>
+            <td class="gdfCell" align="right"><span>(#=obj.id#)</span></td>
+            <td class="gdfCell">(#=obj.link()#)</td>
+            <td class="gdfCell"></td>
+        </tr>
+    --></div>
+
+    <div class="__template__" type="TASKEMPTYROW"><!--
+        <tr class="taskEditRow emptyRow" >
+            <th class="gdfCell" align="right"></th>
+            <td class="gdfCell"></td>
+            <td class="gdfCell"></td>
+            <td class="gdfCell"></td>
+            <td class="gdfCell"></td>
+            <td class="gdfCell"></td>
+            <td class="gdfCell"></td>
+            <td class="gdfCell" align="left"></td>
+            <td class="gdfCell"></td>
+        </tr>
+    --></div>
+
+    <div class="__template__" type="RESOURCEEMPTYROW"><!--
+        <tr class="resourceEditRow emptyRow" >
+            <th class="gdfCell" align="right"></th>
+            <td class="gdfCell"></td>
+            <td class="gdfCell" align="left"></td>
+            <td class="gdfCell"></td>
+        </tr>
+    --></div>
+
+    <div class="__template__" type="PROJECTBAR"><!--
+        <div class="projectBox" projectId="(#=obj.id#)" >
+            <div class="layout">
+                <div class="projectLabel">(#=obj.link()#)</div>
+            </div>
+        </div>
+    --></div>
+
+
+    <div class="__template__" type="TASKBAR"><!--
+        <div class="taskBox" dataId="(#=obj.id#)">
+        <div class="layout (#=obj.hasExternalDep?'extDep':''#)">
+            <div class="taskProgress" style="width:(#=obj.progress>100?100:obj.progress#)%;"></div>
+            <div class="taskExtraTiming" style="width:(#=(obj.schedule_timing - obj.bid_timing)/obj.schedule_timing*100#)%;;"></div>
+            <div class="taskScheduleModel"
+               style="position: absolute; text-align: center; width: 100%;">
+               (#=obj.schedule_model.toUpperCase()[0]#): (#=obj.schedule_timing#)(#=obj.schedule_unit#)
+            </div>
+            <div class="leafTaskContextMenu"
+                dataId="(#=obj.id#)"
+                name="(#=obj.name#)"
+                start=(#=obj.start#)
+                end=(#=obj.end#)
+                type="(#=obj.type#)"
+                priority=(#=obj.priority#)
+                schedule_model=(#=obj.schedule_model#)
+                schedule_timing=(#=obj.schedule_timing#)
+                schedule_unit=(#=obj.schedule_unit#)
+                description="(#=obj.description#)"
+                ></div>
+            
+            <div class="milestone (#=obj.startIsMilestone?'active':''#)" ></div>
+            <div class="taskLabel">(#=obj.link()#)</div>
+            <div class="milestone end (#=obj.endIsMilestone?'active':''#)"></div>
+            <div class="taskResourceLabel">(#=obj.getResourcesLinks()#)</div>
+        </div>
+        </div>
+    --></div>
+
+    <div class="__template__" type="TASKBAR_COMPACT"><!--
+        <div class="taskBox" dataId="(#=obj.id#)">
+        <div class="layout (#=obj.hasExternalDep?'extDep':''#)">
+            <div class="taskProgress" style="width:(#=obj.progress>100?100:obj.progress#)%;"></div>
+            <div class="taskExtraTiming" style="width:(#=(obj.schedule_timing - obj.bid_timing)/obj.schedule_timing*100#)%;;"></div>
+            <div class="taskScheduleModel"
+               style="position: absolute; text-align: center; width: 100%;">
+               (#=obj.link()#) (#=obj.schedule_model.toUpperCase()[0]#): (#=obj.schedule_timing#)(#=obj.schedule_unit#)
+            </div>
+            <div class="leafTaskContextMenu"
+                dataId="(#=obj.id#)"
+                name="(#=obj.name#)"
+                start=(#=obj.start#)
+                end=(#=obj.end#)
+                type="(#=obj.type#)"
+                priority=(#=obj.priority#)
+                schedule_model=(#=obj.schedule_model#)
+                schedule_timing=(#=obj.schedule_timing#)
+                schedule_unit=(#=obj.schedule_unit#)
+                description="(#=obj.description#)"
+                ></div>
+        </div>
+        </div>
+    --></div>
+
+    <div class="__template__" type="PARENTTASKBAR"><!--
+        <div class="parentTaskBox" dataId="(#=obj.id#)">
+            <div class="layout (#=obj.hasExternalDep?'extDep':''#)">
+                <div class="parentTaskContextMenu" dataId="(#=obj.id#)"></div>
+                <div class="leftPin"></div>
+                <div class="rightPin"></div>
+                <div class="taskProgress" style="width:(#=obj.progress>100?100:obj.progress#)%;"></div>
+                <div class="taskBid" style="width:(#=obj.bid/obj.effort*100#)%; background-color:red;"></div>
+                <div class="milestone (#=obj.startIsMilestone?'active':''#)" ></div>
+                <div class="taskLabel">(#=obj.link()#)</div>
+                <div class="milestone end (#=obj.endIsMilestone?'active':''#)"></div>
+            </div>
+        </div>
+    --></div>
+
+    <div class="__template__" type="TIMELOGBAR"><!--
+        <div class="timeLogBox" dataId="(#=obj.id#)">
+        <div class="layout">
+            <div class="leafTaskContextMenu"
+                dataId="(#=obj.id#)"
+                name="(#=obj.name#)"
+                start=(#=obj.start#)
+                end=(#=obj.end#)
+                ></div>
+        </div>
+        </div>
+    --></div>
+
+
+    <div class="__template__" type='TASKLINK'><!--
+      <a href="javascript:redirectLinkInParent('(#=obj.type.toLowerCase()#)s_content_pane','view/task/(#=obj.id#)');">(#=obj.name#) ((#=obj.type#))</a>
+    --></div>
+
+    <div class="__template__" type='RESOURCELINK'><!--
+    <a href="javascript:redirectLink('central_content','view/user/(#=obj.id#)');">(#=obj.name#)</a>
+    --></div>
+
+    <div class="__template__" type='PROJECTLINK'><!--
+    <a href="javascript:redirectLink('central_content','view/project/(#=obj.id#)');">(#=obj.name#) ((#=obj.type#))</a>
+    --></div>
+
+</div>
+
 {% block body %}
     <div id='appLayout' class='demoLayout'>
         <div id='header' class='edgePanel' style="overflow: hidden">
