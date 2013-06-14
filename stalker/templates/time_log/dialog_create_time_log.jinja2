@@ -357,16 +357,23 @@ require([
             // merge start_date and start_time
             var start_datetime_value = start_dateTextBox.value;
             start_datetime_value.clearTime();
-            start_datetime_value.setHours(start_time_timeTextBox.value.getHours());
-            start_datetime_value.setMinutes(start_time_timeTextBox.value.getMinutes());
-            start_datetime_value.setSeconds(start_time_timeTextBox.value.getSeconds());
+            start_datetime_value.setHours(
+                    start_time_timeTextBox.value.getHours(),
+                    start_time_timeTextBox.value.getMinutes(),
+                    start_time_timeTextBox.value.getSeconds()
+            );
 
             // merge end_date and end_time
             var end_datetime_value = end_dateTextBox.value;
             end_datetime_value.clearTime();
-            end_datetime_value.setHours(end_time_timeTextBox.value.getHours());
-            end_datetime_value.setMinutes(end_time_timeTextBox.value.getMinutes());
-            end_datetime_value.setSeconds(end_time_timeTextBox.value.getSeconds());
+            end_datetime_value.setHours(
+                    end_time_timeTextBox.value.getHours(),
+                    end_time_timeTextBox.value.getMinutes(),
+                    end_time_timeTextBox.value.getSeconds()
+            );
+            
+            console.debug('start_datetime_value :', start_datetime_value);
+            console.debug('end_datetime_value   :', end_datetime_value);
 
             submitForm({
                 dialog: dialog,
