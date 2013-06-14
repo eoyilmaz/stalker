@@ -224,7 +224,6 @@ require([
     var sun_start_value = default_start_value;
     var sun_end_value = default_end_value;
 
-
     {# fill values based on the dialog mode #}
     {% if mode == 'CREATE' %}
         url = '{{ request.route_url("create_studio") }}';
@@ -235,22 +234,51 @@ require([
         name = '{{ studio.name }}';
         daily_working_hours = '{{ studio.daily_working_hours }}';
 
-
-        mon_start_value = new Date( {{ studio.working_hours[0][0][0]}} * 60000);
-        mon_end_value = new Date( {{ studio.working_hours[0][0][1]}} * 60000);
-        tue_start_value = new Date( {{ studio.working_hours[1][0][0]}} * 60000);
-        tue_end_value = new Date( {{ studio.working_hours[1][0][1]}} * 60000);
-        wed_start_value = new Date( {{ studio.working_hours[2][0][0]}} * 60000);
-        wed_end_value = new Date( {{ studio.working_hours[2][0][1]}} * 60000);
-        thu_start_value = new Date( {{ studio.working_hours[3][0][0]}} * 60000);
-        thu_end_value = new Date( {{ studio.working_hours[3][0][1]}} * 60000);
-        fri_start_value = new Date( {{ studio.working_hours[4][0][0]}} * 60000);
-        fri_end_value = new Date( {{ studio.working_hours[4][0][1]}} * 60000);
-        sat_start_value = new Date( {{ studio.working_hours[5][0][0]}} * 60000);
-        sat_end_value = new Date( {{ studio.working_hours[5][0][1]}} * 60000);
+        {% if studio.working_hours[0] %}
+            mon_start_value = new Date( ({{ studio.working_hours[0][0][0]}}) * 60000 );
+            mon_end_value = new Date( ({{ studio.working_hours[0][0][1]}}) * 60000);
+        {% else %}
+            mon_start_value = default_start_value;
+            mon_end_value = default_start_value;
+        {% endif %}
+        {% if studio.working_hours[1] %}
+            tue_start_value = new Date( ({{ studio.working_hours[1][0][0]}}) * 60000);
+            tue_end_value = new Date( ({{ studio.working_hours[1][0][1]}}) * 60000);
+        {% else %}
+            tue_start_value = default_start_value;
+            tue_end_value = default_start_value;
+        {% endif %}
+        {% if studio.working_hours[2] %}
+            wed_start_value = new Date( ({{ studio.working_hours[2][0][0]}}) * 60000);
+            wed_end_value = new Date( ({{ studio.working_hours[2][0][1]}}) * 60000);
+        {% else %}
+            wed_start_value = default_start_value;
+            wed_end_value = default_start_value;
+        {% endif %}
+        {% if studio.working_hours[3] %}
+            thu_start_value = new Date( ({{ studio.working_hours[3][0][0]}}) * 60000);
+            thu_end_value = new Date( ({{ studio.working_hours[3][0][1]}}) * 60000);
+        {% else %}
+            thu_start_value = default_start_value;
+            thu_end_value = default_start_value;
+        {% endif %}
+        {% if studio.working_hours[4] %}
+            fri_start_value = new Date( ({{ studio.working_hours[4][0][0]}}) * 60000);
+            fri_end_value = new Date( ({{ studio.working_hours[4][0][1]}}) * 60000);
+        {% else %}
+            fri_start_value = default_start_value;
+            fri_end_value = default_start_value;
+        {% endif %}
+        {% if studio.working_hours[5] %}
+            sat_start_value = new Date( ({{ studio.working_hours[5][0][0]}}) * 60000);
+            sat_end_value = new Date( ({{ studio.working_hours[5][0][1]}}) * 60000);
+        {% else %}
+            sat_start_value = default_start_value;
+            sat_end_value = default_start_value;
+        {% endif %}
         {% if studio.working_hours[6] %}
-            sun_start_value = new Date( {{ studio.working_hours[6][0][0]}} * 60000);
-            sun_end_value = new Date( {{ studio.working_hours[6][0][1]}} * 60000);
+            sun_start_value = new Date( ({{ studio.working_hours[6][0][0]}}) * 60000);
+            sun_end_value = new Date( ({{ studio.working_hours[6][0][1]}}) * 60000);
         {% else %}
             sun_start_value = default_start_value;
             sun_end_value = default_start_value;

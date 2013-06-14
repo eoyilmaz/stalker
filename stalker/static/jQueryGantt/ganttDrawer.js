@@ -84,7 +84,6 @@ GanttDrawer.prototype.create = function (zoom, originalStartMillis, originalEndM
         var start = new Date(stMil);
         var end = new Date(endMillis);
 
-
         start.setHours(0, 0, 0, 0);
         end.setHours(23, 59, 59, 999);
         //reset hours
@@ -176,7 +175,6 @@ GanttDrawer.prototype.create = function (zoom, originalStartMillis, originalEndM
                 date.setFullYear(date.getFullYear() + 1);
             }, function (date) {
                 var sem = (Math.floor(date.getMonth() / 6) + 1);
-                //tr2.append(createHeadCell(GanttMaster.messages["GANTT_SEMESTER_SHORT"] + sem, 1));
                 tr2.append(createHeadCell('S' + sem, 1));
                 trBody.append(createBodyCell(1, sem == 2));
                 date.setMonth(date.getMonth() + 6);
@@ -189,11 +187,10 @@ GanttDrawer.prototype.create = function (zoom, originalStartMillis, originalEndM
                 var end = new Date(date.getTime());
                 end.setMonth(end.getMonth() + 6);
                 end.setDate(end.getDate() - 1);
-                tr1.append(createHeadCell(date.format("MMM") + " - " + end.format("MMM yyyy"), 2));
+                tr1.append(createHeadCell(date.format("mmm") + " - " + end.format("mmm yyyy"), 2));
                 date.setMonth(date.getMonth() + 6);
             }, function (date) {
                 var quarter = ( Math.floor(date.getMonth() / 3) + 1);
-                //tr2.append(createHeadCell(GanttMaster.messages["GANT_QUARTER_SHORT"] + quarter, 1));
                 tr2.append(createHeadCell('Q' + quarter, 1));
                 trBody.append(createBodyCell(1, quarter % 2 == 0));
                 date.setMonth(date.getMonth() + 3);
@@ -206,10 +203,10 @@ GanttDrawer.prototype.create = function (zoom, originalStartMillis, originalEndM
                 var end = new Date(date.getTime());
                 end.setMonth(end.getMonth() + 3);
                 end.setDate(end.getDate() - 1);
-                tr1.append(createHeadCell(date.format("MMM") + " - " + end.format("MMM yyyy"), 3));
+                tr1.append(createHeadCell(date.format("mmm") + " - " + end.format("mmm yyyy"), 3));
                 date.setMonth(date.getMonth() + 3);
             }, function (date) {
-                var lbl = date.format("MMM");
+                var lbl = date.format("mmm");
                 tr2.append(createHeadCell(lbl, 1));
                 trBody.append(createBodyCell(1, date.getMonth() % 3 == 2));
                 date.setMonth(date.getMonth() + 1);
@@ -221,7 +218,7 @@ GanttDrawer.prototype.create = function (zoom, originalStartMillis, originalEndM
                 var sm = date.getTime();
                 date.setMonth(date.getMonth() + 1);
                 var daysInMonth = parseInt((date.getTime() - sm) / (3600000 * 24));
-                tr1.append(createHeadCell(new Date(sm).format("MMMM yyyy"), daysInMonth)); //spans mumber of dayn in the month
+                tr1.append(createHeadCell(new Date(sm).format("mmmm yyyy"), daysInMonth)); //spans mumber of dayn in the month
             }, function (date) {
                 //tr2.append(createHeadCell(date.format("d"), 1, isHoliday(date) ? "holyH" : null));
                 tr2.append(createHeadCell(date.format("d"), 1, date.getDay() == 0 ? "holyH" : null));
@@ -237,12 +234,12 @@ GanttDrawer.prototype.create = function (zoom, originalStartMillis, originalEndM
             iterate(function (date) {
                 var end = new Date(date.getTime());
                 end.setDate(end.getDate() + 6);
-                tr1.append(createHeadCell(date.format("MMM d") + " - " + end.format("MMM d'yy"), 7));
+                tr1.append(createHeadCell(date.format("mmm d") + " - " + end.format("mmm d'yyyy"), 7));
                 date.setDate(date.getDate() + 7);
             }, function (date) {
                 //tr2.append(createHeadCell(date.format("EEEE").substr(0, 1), 1, isHoliday(date) ? "holyH" : null));
                 //trBody.append(createBodyCell(1, date.getDay() % 7 == (self.master.firstDayOfWeek + 6) % 7, isHoliday(date) ? "holy" : null));
-                tr2.append(createHeadCell(date.format("EEEE").substr(0, 1), 1, date.getDay() == 0 ? "holyH" : null));
+                tr2.append(createHeadCell(date.format("dddd").substr(0, 1), 1, date.getDay() == 0 ? "holyH" : null));
                 trBody.append(createBodyCell(1, date.getDay() % 7 == (self.master.firstDayOfWeek + 6) % 7, date.getDay() == 0 ? "holy" : null));
                 date.setDate(date.getDate() + 1);
             });
@@ -251,7 +248,7 @@ GanttDrawer.prototype.create = function (zoom, originalStartMillis, originalEndM
             computedTableWidth = Math.floor(((endPeriod - startPeriod) / (3600000 * 24)) * 200); //1 day= 200px
             iterate(function (date) {
                 //tr1.append(createHeadCell(date.format("EEEE d MMMM yyyy"), 4, isHoliday(date) ? "holyH" : null));
-                tr1.append(createHeadCell(date.format("EEEE d MMMM yyyy"), 4, date.getDay() == 0 ? "holyH" : null));
+                tr1.append(createHeadCell(date.format("ddd d mmm yyyy"), 4, date.getDay() == 0 ? "holyH" : null));
                 date.setDate(date.getDate() + 1);
             }, function (date) {
                 //tr2.append(createHeadCell(date.format("HH"), 1, isHoliday(date) ? "holyH" : null));
@@ -265,7 +262,7 @@ GanttDrawer.prototype.create = function (zoom, originalStartMillis, originalEndM
             computedTableWidth = Math.floor(((endPeriod - startPeriod ) / 3600000) * 40); // 1 hour= 50px
             iterate(function (date) {
                 //tr1.append(createHeadCell(date.format('EEE d MMMM yyyy'), 24, isHoliday(date) ? 'holyH': null));
-                tr1.append(createHeadCell(date.format('EEE d MMMM yyyy'), 24, date.getDay() == 0 ? 'holyH' : null));
+                tr1.append(createHeadCell(date.format('ddd d mmm yyyy'), 24, date.getDay() == 0 ? 'holyH' : null));
                 date.setDate(date.getDate() + 1);
             }, function (date) {
                 //tr2.append(createHeadCell(date.format('HH'), 1, isHoliday(date) ? 'holyH': null));

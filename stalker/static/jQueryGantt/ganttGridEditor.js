@@ -103,8 +103,8 @@ GridEditor.prototype.refreshTaskRow = function (task) {
 //    row.find("[status]").attr("status", task.status);
 
     row.find(".timing").html(task.schedule_model.toUpperCase()[0] + ":" + task.schedule_timing + task.schedule_unit);
-    row.find(".start").html(new Date(task.start).format()).updateOldValue(); // called on dates only because for other field is called on focus event
-    row.find(".end").html(new Date(task.end).format()).updateOldValue();
+    row.find(".start").html(new Date(task.start).format("yyyy-mm-dd HH:00")).updateOldValue(); // called on dates only because for other field is called on focus event
+    row.find(".end").html(new Date(task.end).format("yyyy-mm-dd HH:00")).updateOldValue();
 
 //    var dep_string = '';
 //    for (var i = 0; i < task.getDepends().length; i++) {

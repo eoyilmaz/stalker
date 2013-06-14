@@ -603,13 +603,7 @@ GanttMaster.prototype.getDateInterval = function () {
         if (end < task.end)
             end = task.end;
     }
-    // TODO: Update this, it is ugly, the zoom is not working nicely
-    if (start == Infinity) {
-        start = new Date(new Date().getTime() - 1296000000);
-    }
-    if (end == -Infinity) {
-        end = new Date(new Date().getTime() + 1296000000);
-    }
+
     this.minDate = start;
     this.maxDate = end;
     return {

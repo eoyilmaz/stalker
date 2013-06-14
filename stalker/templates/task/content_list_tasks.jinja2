@@ -53,7 +53,13 @@
             </div>
             <div style="float: left;">
                 <button id='list_tasks_refresh_button'>Refresh</button>
+                <button id='minus_1_month'>-1m</button>
+                <button id='minus_1_week'>-1w</button>
+                <button id='minus_1_day'>-1d</button>
                 <button id='list_tasks_go_to_today_button'>Go To Today</button>
+                <button id='plus_1_day'>+1d</button>
+                <button id='plus_1_week'>+1w</button>
+                <button id='plus_1_month'>+1m</button>
             </div>
         </div>
     </div>
@@ -90,6 +96,7 @@
         'dojo/_base/lang',
         'dojo/Deferred',
         'dojo/when',
+        'dojo/date',
 
         'stalker/dialogs',
         'stalker/dialogCaller',
@@ -98,7 +105,7 @@
         'dojo/domReady!'
     ], function (registry, Button, FilteringSelect, Menu, MenuItem,
                  MenuSeparator, DateTextBox, Tooltip, query, Memory, JsonRest,
-                 xhr, lang, Deferred, when, dialogs, dialogCaller,
+                 xhr, lang, Deferred, when, date, dialogs, dialogCaller,
                  dialogCreator) {
 
         $('#gantttemplates').loadTemplates();
@@ -120,19 +127,8 @@
         function loadGanttFromServer() {
             tasks_memory.query().then(function (data) {
 
-                // set start and end dates for the gantt
-
-                var dateInterval = ge.getDateInterval();
-                data.start = dateInterval.start;
-                data.end = dateInterval.end;
-
-                // update dateTextBoxes
-                start_dateTextBox.setValue(new Date(dateInterval.start));
-                end_dateTextBox.setValue(new Date(dateInterval.end));
-
                 var promise = ge.loadGanttData(data, Deferred);
                 promise.then(function () {
-
                     // create tool tip dialogs for task info
                     new Tooltip({
                         connectId: ['workSpace'],
@@ -173,11 +169,11 @@
                                     '</tr>' +
                                     '<tr>' +
                                         '<td class="label_column">Start</td>' +
-                                        '<td class="input_column">' + start.format("yyyy-MM-dd HH:00") + '</td>' +
+                                        '<td class="input_column">' + start.format("yyyy-mm-dd HH:00") + '</td>' +
                                     '</tr>' +
                                     '<tr>' +
                                         '<td class="label_column">End</td>' +
-                                        '<td class="input_column">' + end.format("yyyy-MM-dd HH:00") + '</td>' +
+                                        '<td class="input_column">' + end.format("yyyy-mm-dd HH:00") + '</td>' +
                                     '</tr>' +
                                     '<tr>' +
                                         '<td class="label_column">Description</td>' +
@@ -422,6 +418,19 @@
                     parent_taskrow_menu.startup();
 
 
+                }).then(function(){
+                    // set start and end dates for the gantt
+{#                    var dateInterval = ge.getDateInterval();#}
+                    // set the start date to the start of this week
+                    var today = new Date();
+                    today.clearTime();
+                    var start = new Date(today.getTime() - (today.getDay() - 1) * 86400000);
+                    // and the end date to the end of this week
+                    var end   = new Date(start.getTime() + 13* 86400000);
+                    end.setHours(23, 59, 59, 999);
+
+                    // update dateTextBoxes and refresh gantt
+                    refresh_gantt_and_calendar(start, end);
                 });
             });
         }
@@ -620,6 +629,83 @@
         }, 'list_tasks_go_to_today_button');
         go_to_today_button.startup();
 
+
+
+        // change range
+        var refresh_gantt_and_calendar = function(start, end){
+            start_dateTextBox.setValue(start);
+            end_dateTextBox.setValue(end);
+            ge.gantt.refreshGantt({
+                start: start.getTime(),
+                end: end.getTime()
+            });
+        };
+        
+        var minus_1_month = new Button({
+            onClick: function(){
+                var start = new Date(ge.gantt.originalStartMillis);
+                var end = new Date(ge.gantt.originalEndMillis);
+                start = date.add(start, 'month', -1);
+                end = date.add(end, 'month', -1);
+                refresh_gantt_and_calendar(start, end);
+            }
+        }, 'minus_1_month');
+        minus_1_month.startup();
+
+        var plus_1_month = new Button({
+            onClick: function(){
+                var start = new Date(ge.gantt.originalStartMillis);
+                var end = new Date(ge.gantt.originalEndMillis);
+                start = date.add(start, 'month', 1);
+                end = date.add(end, 'month', 1);
+                refresh_gantt_and_calendar(start, end);
+            }
+        }, 'plus_1_month');
+        plus_1_month.startup();
+
+        var minus_1_week = new Button({
+            onClick: function(){
+                var start = new Date(ge.gantt.originalStartMillis);
+                var end = new Date(ge.gantt.originalEndMillis);
+                start = date.add(start, 'week', -1);
+                end = date.add(end, 'week', -1);
+                refresh_gantt_and_calendar(start, end);
+            }
+        }, 'minus_1_week');
+        minus_1_week.startup();
+
+        var plus_1_week = new Button({
+            onClick: function(){
+                var start = new Date(ge.gantt.originalStartMillis);
+                var end = new Date(ge.gantt.originalEndMillis);
+                start = date.add(start, 'week', 1);
+                end = date.add(end, 'week', 1);
+                refresh_gantt_and_calendar(start, end);
+            }
+        }, 'plus_1_week');
+        plus_1_week.startup();
+
+        var minus_1_day = new Button({
+            onClick: function(){
+                var start = new Date(ge.gantt.originalStartMillis);
+                var end = new Date(ge.gantt.originalEndMillis);
+                start = date.add(start, 'day', -1);
+                end = date.add(end, 'day', -1);
+                refresh_gantt_and_calendar(start, end);
+            }
+        }, 'minus_1_day');
+        minus_1_week.startup();
+
+        var plus_1_day = new Button({
+            onClick: function(){
+                var start = new Date(ge.gantt.originalStartMillis);
+                var end = new Date(ge.gantt.originalEndMillis);
+                start = date.add(start, 'day', 1);
+                end = date.add(end, 'day', 1);
+                refresh_gantt_and_calendar(start, end);
+            }
+        }, 'plus_1_day');
+        plus_1_day.startup();
 
     });
 </script>

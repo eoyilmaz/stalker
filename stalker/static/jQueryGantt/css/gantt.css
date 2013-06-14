@@ -13,9 +13,6 @@
   /*padding:2px*/
 /*}*/
 
-
-
-
 .gdfTable {
     table-layout: fixed;
     border-collapse: separate;
@@ -131,8 +128,9 @@
 .holyH{
     background-color: #dedede;
 }
+
 .holy{
-    background-color: #FFF5E6;
+    background-color: rgb(224, 227, 230);
 }
 
 

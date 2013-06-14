@@ -68,7 +68,7 @@ define(['exports', 'dojox/widget/DialogSimple', 'dijit/registry', 'dojo/domReady
                 title: 'New Studio',
                 href: 'dialog/create/studio',
                 resize: true,
-                style: style,
+                style: 'width: 730px; height: auto; padding: 0px;',
                 executeScripts: true
             });
         };
@@ -83,8 +83,6 @@ define(['exports', 'dojox/widget/DialogSimple', 'dijit/registry', 'dojo/domReady
                 executeScripts: true
             });
         };
-
-
 
         // ********************************************************************
         // PROJECT
