@@ -150,15 +150,15 @@
 
     <div class="__template__" type="TASKROW"><!--
         <tr dataId="(#=obj.id#)" class="taskEditRow">
-        <td class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></td>
-        <td class="gdfCell" align="right" style="background-color: (#=obj.progress >= 100 ? 'rgb(153, 255, 51)' : 'red'#)"><span>(#=obj.id#)</span></td>
-        <td class="gdfCell indentCell" style="padding-left:(#=obj.getParents().length*10#)px; (#=obj.getChildren().length>0?'font-weight: bold':''#)">(#=obj.link()#)</td>
-        <td class="gdfCell"><div class="date start"></div></td>
-        <td class="gdfCell"><div class="date end"></div></td>
-        <td class="gdfCell"><div name="timing">(#=obj.schedule_model.toUpperCase()[0]#): (#=obj.schedule_timing#)(#=obj.schedule_unit#)</div></td>
-        <td class="gdfCell">(#=obj.getDependsLinks()#)</td>
-        <td class="gdfCell">(#=obj.getResourcesLinks()#)</td>
-        <td class="gdfCell"></td>
+            <td class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></td>
+            <td class="gdfCell" align="right" style="background-color: (#=obj.progress >= 100 ? 'rgb(153, 255, 51)' : 'red'#)"><span>(#=obj.id#)</span></td>
+            <td class="gdfCell indentCell" style="padding-left:(#=obj.getParents().length*10#)px; (#=obj.getChildren().length>0?'font-weight: bold':''#)">(#=obj.link()#)</td>
+            <td class="gdfCell"><div class="date start"></div></td>
+            <td class="gdfCell"><div class="date end"></div></td>
+            <td class="gdfCell"><div name="timing">(#=obj.schedule_model.toUpperCase()[0]#): (#=obj.schedule_timing#)(#=obj.schedule_unit#)</div></td>
+            <td class="gdfCell">(#=obj.getDependsLinks()#)</td>
+            <td class="gdfCell">(#=obj.getResourcesLinks()#)</td>
+            <td class="gdfCell"></td>
         </tr>
     --></div>
 
@@ -224,11 +224,12 @@
                 schedule_unit=(#=obj.schedule_unit#)
                 description="(#=obj.description#)"
                 ></div>
-            
             <div class="milestone (#=obj.startIsMilestone?'active':''#)" ></div>
             <div class="taskLabel">(#=obj.link()#)</div>
             <div class="milestone end (#=obj.endIsMilestone?'active':''#)"></div>
             <div class="taskResourceLabel">(#=obj.getResourcesLinks()#)</div>
+            (#=obj.clippedStart?'<div class="clippedStart">&nbsp</div>':''#)
+            (#=obj.clippedEnd?'<div class="clippedEnd">&nbsp</div>':''#)
         </div>
         </div>
     --></div>
@@ -942,8 +943,7 @@
                 content_pane_to_update: central_content_pane,
                 new_team_dialog_id: 'user_dialog',
                 new_team_dialog_content_creator: dialogs.create_user_dialog,
-                allow_create_new: {%  if has_permission('Create_User') %}
-                    true {% else %} false {% endif %}
+                allow_create_new: {%  if has_permission('Create_User') %} true {% else %} false {% endif %}
             });
         {% endif %}
 
@@ -956,8 +956,7 @@
                 content_pane_to_update: central_content_pane,
                 new_team_dialog_id: 'department_dialog',
                 new_team_dialog_content_creator: dialogs.create_department_dialog,
-                allow_create_new: {%  if has_permission('Create_Department') %}
-                    true {% else %} false {% endif %}
+                allow_create_new: {%  if has_permission('Create_Department') %} true {% else %} false {% endif %}
             });
         {% endif %}
 
@@ -970,8 +969,7 @@
                 content_pane_to_update: central_content_pane,
                 new_team_dialog_id: 'group_dialog',
                 new_team_dialog_content_creator: dialogs.create_group_dialog,
-                allow_create_new: {%  if has_permission('Create_Group') %}
-                    true {% else %} false {% endif %}
+                allow_create_new: {%  if has_permission('Create_Group') %} true {% else %} false {% endif %}
             });
         {% endif %}
 

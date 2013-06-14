@@ -34,7 +34,9 @@ Stalker Changes
       -1/+1 week, -1/+1 day.
     * **Update:** Replaced the **Date.format()** (originally replaced by
       jQueryGantt **date.js**) with **date.format.js** library.
-    * **Update**: Changed the background of the Grid and Gantt editors.
+    * **Update:** Changed the background of the Grid and Gantt editors.
+    * **Update:** If the displayed tasks is clipped to the current start end
+      range a double red border is displayed in the clipped start or end.
 
 0.2.0.b8
 ========

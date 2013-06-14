@@ -356,8 +356,24 @@ GanttDrawer.prototype.drawTask = function (task) {
         return;
     }
     
-    var task_drawn_start = (task.start >= this.originalStartMillis) ? (task.start) : (this.originalStartMillis);
-    var task_drawn_end   = (task.end  <= this.originalEndMillis)    ? (task.end)   : (this.originalEndMillis);
+    var task_drawn_start;
+    var task_drawn_end;
+    
+    if (task.start >= this.originalStartMillis){
+        task_drawn_start = task.start;
+        task.clippedStart = false;
+    }else {
+        task_drawn_start = this.originalStartMillis;
+        task.clippedStart = true;
+    }
+    
+    if (task.end  <= this.originalEndMillis) {
+        task_drawn_end = task.end;
+        task.clippedEnd = false;
+    } else {
+        task_drawn_end = this.originalEndMillis;
+        task.clippedEnd = true;
+    }
 
     var owners = [];
     if (this.master.grid_mode == 'Resource'){

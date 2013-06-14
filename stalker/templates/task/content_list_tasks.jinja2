@@ -424,9 +424,10 @@
                     // set the start date to the start of this week
                     var today = new Date();
                     today.clearTime();
-                    var start = new Date(today.getTime() - (today.getDay() - 1) * 86400000);
-                    // and the end date to the end of this week
-                    var end   = new Date(start.getTime() + 13* 86400000);
+                    // monday - 2 weeks
+                    var start = new Date(today.getTime() - (today.getDay() + 13) * 86400000);
+                    // sunday + 2 weeks
+                    var end   = new Date(start.getTime() + 27 * 86400000);
                     end.setHours(23, 59, 59, 999);
 
                     // update dateTextBoxes and refresh gantt

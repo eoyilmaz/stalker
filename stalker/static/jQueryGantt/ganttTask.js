@@ -92,6 +92,8 @@ function Task(kwargs) {
     this.endIsMilestone = false;
 
     this.collapsed = false;
+    this.clippedStart = false;
+    this.clippedEnd = false;
 
     this.rowElement; //row editor html element
     this.ganttElements = []; //gantt html element

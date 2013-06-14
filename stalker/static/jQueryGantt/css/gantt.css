@@ -727,3 +727,15 @@
     width: 5px;
     height: 10px;
 }
+
+.clippedStart {
+    left: 0;
+    border-left: 6px double red;
+    position: absolute;
+}
+
+.clippedEnd {
+    right: 0;
+    border-right: 6px double red;
+    position: absolute;
+}
