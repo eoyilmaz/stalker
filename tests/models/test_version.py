@@ -1016,3 +1016,157 @@ class VersionTester(unittest2.TestCase):
             new_version1.absolute_path,
             '/mnt/T/tp/SH001/Task1'
         )
+
+    def test_latest_published_version_is_read_only(self):
+        """testing if the latest_published_version is a read only attribute
+        """
+        self.assertRaises(AttributeError, setattr, self.test_version,
+                          'latest_published_version', True)
+
+    def test_latest_published_version_is_working_properly(self):
+        """testing if the is_latest_published_version is working properly
+        """
+        new_version1 = Version(**self.kwargs)
+        DBSession.add(new_version1)
+        DBSession.commit()
+
+        new_version2 = Version(**self.kwargs)
+        DBSession.add(new_version2)
+        DBSession.commit()
+
+        new_version3 = Version(**self.kwargs)
+        DBSession.add(new_version3)
+        DBSession.commit()
+
+        new_version4 = Version(**self.kwargs)
+        DBSession.add(new_version4)
+        DBSession.commit()
+
+        new_version5 = Version(**self.kwargs)
+        DBSession.add(new_version5)
+        DBSession.commit()
+
+        new_version1.is_published = True
+        new_version3.is_published = True
+        new_version4.is_published = True
+
+        self.assertEqual(new_version1.latest_published_version, new_version4)
+        self.assertEqual(new_version2.latest_published_version, new_version4)
+        self.assertEqual(new_version3.latest_published_version, new_version4)
+        self.assertEqual(new_version4.latest_published_version, new_version4)
+        self.assertEqual(new_version5.latest_published_version, new_version4)
+
+    def test_is_latest_published_version_is_working_properly(self):
+        """testing if the is_latest_published_version is working properly
+        """
+        new_version1 = Version(**self.kwargs)
+        DBSession.add(new_version1)
+        DBSession.commit()
+
+        new_version2 = Version(**self.kwargs)
+        DBSession.add(new_version2)
+        DBSession.commit()
+
+        new_version3 = Version(**self.kwargs)
+        DBSession.add(new_version3)
+        DBSession.commit()
+
+        new_version4 = Version(**self.kwargs)
+        DBSession.add(new_version4)
+        DBSession.commit()
+
+        new_version5 = Version(**self.kwargs)
+        DBSession.add(new_version5)
+        DBSession.commit()
+
+        new_version1.is_published = True
+        new_version3.is_published = True
+        new_version4.is_published = True
+
+        self.assertFalse(new_version1.is_latest_published_version())
+        self.assertFalse(new_version2.is_latest_published_version())
+        self.assertFalse(new_version3.is_latest_published_version())
+        self.assertTrue(new_version4.is_latest_published_version())
+        self.assertFalse(new_version5.is_latest_published_version())
+
+    def test_equality_operator(self):
+        """testing equality of two Version instances
+        """
+        new_version1 = Version(**self.kwargs)
+        DBSession.add(new_version1)
+        DBSession.commit()
+
+        new_version2 = Version(**self.kwargs)
+        DBSession.add(new_version2)
+        DBSession.commit()
+
+        new_version3 = Version(**self.kwargs)
+        DBSession.add(new_version3)
+        DBSession.commit()
+
+        new_version4 = Version(**self.kwargs)
+        DBSession.add(new_version4)
+        DBSession.commit()
+
+        new_version5 = Version(**self.kwargs)
+        DBSession.add(new_version5)
+        DBSession.commit()
+
+        new_version1.is_published = True
+        new_version3.is_published = True
+        new_version4.is_published = True
+
+        self.assertFalse(new_version1 == new_version2)
+        self.assertFalse(new_version1 == new_version3)
+        self.assertFalse(new_version1 == new_version4)
+        self.assertFalse(new_version1 == new_version5)
+
+        self.assertFalse(new_version2 == new_version3)
+        self.assertFalse(new_version2 == new_version4)
+        self.assertFalse(new_version2 == new_version5)
+
+        self.assertFalse(new_version3 == new_version4)
+        self.assertFalse(new_version3 == new_version5)
+
+        self.assertFalse(new_version4 == new_version5)
+
+    def test_inequality_operator(self):
+        """testing inequality of two Version instances
+        """
+        new_version1 = Version(**self.kwargs)
+        DBSession.add(new_version1)
+        DBSession.commit()
+
+        new_version2 = Version(**self.kwargs)
+        DBSession.add(new_version2)
+        DBSession.commit()
+
+        new_version3 = Version(**self.kwargs)
+        DBSession.add(new_version3)
+        DBSession.commit()
+
+        new_version4 = Version(**self.kwargs)
+        DBSession.add(new_version4)
+        DBSession.commit()
+
+        new_version5 = Version(**self.kwargs)
+        DBSession.add(new_version5)
+        DBSession.commit()
+
+        new_version1.is_published = True
+        new_version3.is_published = True
+        new_version4.is_published = True
+
+        self.assertTrue(new_version1 != new_version2)
+        self.assertTrue(new_version1 != new_version3)
+        self.assertTrue(new_version1 != new_version4)
+        self.assertTrue(new_version1 != new_version5)
+
+        self.assertTrue(new_version2 != new_version3)
+        self.assertTrue(new_version2 != new_version4)
+        self.assertTrue(new_version2 != new_version5)
+
+        self.assertTrue(new_version3 != new_version4)
+        self.assertTrue(new_version3 != new_version5)
+
+        self.assertTrue(new_version4 != new_version5)

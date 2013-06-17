@@ -5,6 +5,13 @@ Stalker Changes
 0.2.0.b9
 ========
 
+* **SOM:**
+
+  * **New:** Added **Version.latest_published_version** and
+    **Version.is_latest_published_version()**.
+  * **Fix:** Fixed **Version.__eq__()**, now Stalker correctly distinguishes
+    different Version instances.
+
 * **WebUI:**
   
   * **Update:** All the date values are now returned as **UTC String** and
