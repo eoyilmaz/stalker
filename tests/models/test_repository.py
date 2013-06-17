@@ -285,47 +285,76 @@ class RepositoryTester(unittest2.TestCase):
         self.assertNotIn("\\", self.test_repo.windows_path)
         self.assertEqual(self.test_repo.windows_path, "M:/Projects/")
 
-    def test_to_linux_path_returns_the_linux_version_of_the_given_path(self):
-        """testing if the to_linux_path returns the linux version of the
-        given path
+    def test_to_linux_path_returns_the_linux_version_of_the_given_windows_path(self):
+        """testing if the to_linux_path returns the linux version of the given
+        windows path
         """
         self.test_repo.windows_path = 'T:/Stalker_Projects'
         self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
-        self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
-
         test_windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
         test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
-        test_osx_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
-
-        test_windows_path_reverse = 'T:\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
-        test_linux_path_reverse = '\\mnt\\T\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
-        test_osx_path_reverse = '\\Volumes\\T\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
-
         self.assertEqual(
             self.test_repo.to_linux_path(test_windows_path),
             test_linux_path
         )
 
+    def test_to_linux_path_returns_the_linux_version_of_the_given_linux_path(self):
+        """testing if the to_linux_path returns the linux version of the given
+        linux path
+        """
+        self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
+        test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
         self.assertEqual(
             self.test_repo.to_linux_path(test_linux_path),
             test_linux_path
         )
 
+    def test_to_linux_path_returns_the_linux_version_of_the_given_osx_path(self):
+        """testing if the to_linux_path returns the linux version of the given
+        osx path
+        """
+        self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
+        self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
+        test_osx_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
         self.assertEqual(
             self.test_repo.to_linux_path(test_osx_path),
             test_linux_path
         )
 
+    def test_to_linux_path_returns_the_linux_version_of_the_given_reverse_windows_path(self):
+        """testing if the to_linux_path returns the linux version of the given
+        reverse windows path
+        """
+        self.test_repo.windows_path = 'T:/Stalker_Projects'
+        self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
+        test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        test_windows_path_reverse = 'T:\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
         self.assertEqual(
             self.test_repo.to_linux_path(test_windows_path_reverse),
             test_linux_path
         )
 
+    def test_to_linux_path_returns_the_linux_version_of_the_given_reverse_linux_path(self):
+        """testing if the to_linux_path returns the linux version of the given
+        reverse linux path
+        """
+        self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
+        test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        test_linux_path_reverse = '\\mnt\\T\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
         self.assertEqual(
             self.test_repo.to_linux_path(test_linux_path_reverse),
             test_linux_path
         )
 
+    def test_to_linux_path_returns_the_linux_version_of_the_given_reverse_osx_path(self):
+        """testing if the to_linux_path returns the linux version of the given
+        reverse osx path
+        """
+        self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
+        self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
+        test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        test_osx_path_reverse = '\\Volumes\\T\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
         self.assertEqual(
             self.test_repo.to_linux_path(test_osx_path_reverse),
             test_linux_path
@@ -341,52 +370,80 @@ class RepositoryTester(unittest2.TestCase):
         """
         self.assertRaises(TypeError, self.test_repo.to_linux_path, 123)
 
-    def test_to_windows_path_returns_the_windows_version_of_the_given_path(self):
+    def test_to_windows_path_returns_the_windows_version_of_the_given_windows_path(self):
         """testing if the to_windows_path returns the windows version of the
-        given path
+        given windows path
         """
         self.test_repo.windows_path = 'T:/Stalker_Projects'
-        self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
-        self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
-
         test_windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
-        test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
-        test_osx_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
-
-        test_windows_path_reverse = 'T:\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
-        test_linux_path_reverse = '\\mnt\\T\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
-        test_osx_path_reverse = '\\Volumes\\T\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
-
         self.assertEqual(
             self.test_repo.to_windows_path(test_windows_path),
             test_windows_path
         )
 
+    def test_to_windows_path_returns_the_windows_version_of_the_given_linux_path(self):
+        """testing if the to_windows_path returns the windows version of the
+        given linux path
+        """
+        self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
+        self.test_repo.windows_path = 'T:/Stalker_Projects'
+        test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        test_windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
         self.assertEqual(
             self.test_repo.to_windows_path(test_linux_path),
             test_windows_path
         )
 
+    def test_to_windows_path_returns_the_windows_version_of_the_given_osx_path(self):
+        """testing if the to_windows_path returns the windows version of the
+        given osx path
+        """
+        self.test_repo.windows_path = 'T:/Stalker_Projects'
+        self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
+        test_osx_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        test_windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
         self.assertEqual(
             self.test_repo.to_windows_path(test_osx_path),
             test_windows_path
         )
 
+    def test_to_windows_path_returns_the_windows_version_of_the_given_reverse_windows_path(self):
+        """testing if the to_windows_path returns the windows version of the
+        given reverse windows path
+        """
+        self.test_repo.windows_path = 'T:/Stalker_Projects'
+        test_windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        test_windows_path_reverse = 'T:\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
         self.assertEqual(
             self.test_repo.to_windows_path(test_windows_path_reverse),
             test_windows_path
         )
 
+    def test_to_windows_path_returns_the_windows_version_of_the_given_reverse_linux_path(self):
+        """testing if the to_windows_path returns the windows version of the
+        given reverse linux path
+        """
+        self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
+        self.test_repo.windows_path = 'T:/Stalker_Projects'
+        test_windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        test_linux_path_reverse = '\\mnt\\T\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
         self.assertEqual(
             self.test_repo.to_windows_path(test_linux_path_reverse),
             test_windows_path
         )
 
+    def test_to_windows_path_returns_the_windows_version_of_the_given_reverse_osx_path(self):
+        """testing if the to_windows_path returns the windows version of the
+        given reverse osx path
+        """
+        self.test_repo.windows_path = 'T:/Stalker_Projects'
+        self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
+        test_windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        test_osx_path_reverse = '\\Volumes\\T\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
         self.assertEqual(
             self.test_repo.to_windows_path(test_osx_path_reverse),
             test_windows_path
         )
-
 
     def test_to_windows_path_raises_TypeError_if_path_is_None(self):
         """testing if to_windows_path raises TypeError if path is None
@@ -397,6 +454,81 @@ class RepositoryTester(unittest2.TestCase):
         """testing if to_windows_path raises TypeError if path is None
         """
         self.assertRaises(TypeError, self.test_repo.to_windows_path, 123)
+
+    def test_to_osx_path_returns_the_osx_version_of_the_given_windows_path(self):
+        """testing if the to_osx_path returns the osx version of the given
+        windows path
+        """
+        self.test_repo.windows_path = 'T:/Stalker_Projects'
+        self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
+        test_windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        test_osx_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        self.assertEqual(
+            self.test_repo.to_osx_path(test_windows_path),
+            test_osx_path
+        )
+
+    def test_to_osx_path_returns_the_osx_version_of_the_given_linux_path(self):
+        """testing if the to_osx_path returns the osx version of the given
+        linux path
+        """
+        self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
+        self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
+        test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        test_osx_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        self.assertEqual(
+            self.test_repo.to_osx_path(test_linux_path),
+            test_osx_path
+        )
+
+    def test_to_osx_path_returns_the_osx_version_of_the_given_osx_path(self):
+        """testing if the to_osx_path returns the osx version of the given
+        osx path
+        """
+        self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
+        test_osx_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        self.assertEqual(
+            self.test_repo.to_osx_path(test_osx_path),
+            test_osx_path
+        )
+
+    def test_to_osx_path_returns_the_osx_version_of_the_given_reverse_windows_path(self):
+        """testing if the to_osx_path returns the osx version of the given
+        reverse windows path
+        """
+        self.test_repo.windows_path = 'T:/Stalker_Projects'
+        self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
+        test_osx_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        test_windows_path_reverse = 'T:\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
+        self.assertEqual(
+            self.test_repo.to_osx_path(test_windows_path_reverse),
+            test_osx_path
+        )
+
+    def test_to_osx_path_returns_the_osx_version_of_the_given_reverse_linux_path(self):
+        """testing if the to_osx_path returns the osx version of the given
+        reverse linux path
+        """
+        self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
+        self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
+        test_osx_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        test_linux_path_reverse = '\\mnt\\T\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
+        self.assertEqual(
+            self.test_repo.to_osx_path(test_linux_path_reverse),
+            test_osx_path
+        )
+
+    def test_to_osx_path_returns_the_osx_version_of_the_given_reverse_osx_path(self):
+        """testing if the to_osx_path returns the osx version of the given
+        reverse osx path
+        """
+        self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
+        test_osx_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        test_osx_path_reverse = '\\Volumes\\T\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
+        self.assertEqual(
+            self.test_repo.to_osx_path(test_osx_path_reverse),
+            test_osx_path
+        )
 
     def test_to_osx_path_returns_the_osx_version_of_the_given_path(self):
         """testing if the to_windows_path returns the osx version of the
@@ -444,19 +576,9 @@ class RepositoryTester(unittest2.TestCase):
             test_osx_path
         )
 
-    def test_to_osx_path_raises_TypeError_if_path_is_None(self):
-        """testing if to_osx_path raises TypeError if path is None
-        """
-        self.assertRaises(TypeError, self.test_repo.to_osx_path, None)
 
-    def test_to_osx_path_raises_TypeError_if_path_is_not_a_string(self):
-        """testing if to_osx_path raises TypeError if path is None
-        """
-        self.assertRaises(TypeError, self.test_repo.to_osx_path, 123)
-
-    @unittest2.skipUnless(platform.system() == "Linux", "requires Linux")
-    def test_to_native_path_returns_the_native_version_of_the_given_path(self):
-        """testing if the to_native_path returns the windows version of the
+    def test_to_osx_path_returns_the_osx_version_of_the_given_path(self):
+        """testing if the to_windows_path returns the osx version of the
         given path
         """
         self.test_repo.windows_path = 'T:/Stalker_Projects'
@@ -472,30 +594,133 @@ class RepositoryTester(unittest2.TestCase):
         test_osx_path_reverse = '\\Volumes\\T\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
 
         self.assertEqual(
-            self.test_repo.to_native_path(test_windows_path),
-            test_linux_path
+            self.test_repo.to_osx_path(test_windows_path),
+            test_osx_path
         )
+
+        self.assertEqual(
+            self.test_repo.to_osx_path(test_linux_path),
+            test_osx_path
+        )
+
+        self.assertEqual(
+            self.test_repo.to_osx_path(test_osx_path),
+            test_osx_path
+        )
+
+        self.assertEqual(
+            self.test_repo.to_osx_path(test_windows_path_reverse),
+            test_osx_path
+        )
+
+        self.assertEqual(
+            self.test_repo.to_osx_path(test_linux_path_reverse),
+            test_osx_path
+        )
+
+        self.assertEqual(
+            self.test_repo.to_osx_path(test_osx_path_reverse),
+            test_osx_path
+        )
+
+
+
+
+
+
+
+    def test_to_osx_path_raises_TypeError_if_path_is_None(self):
+        """testing if to_osx_path raises TypeError if path is None
+        """
+        self.assertRaises(TypeError, self.test_repo.to_osx_path, None)
+
+    def test_to_osx_path_raises_TypeError_if_path_is_not_a_string(self):
+        """testing if to_osx_path raises TypeError if path is None
+        """
+        self.assertRaises(TypeError, self.test_repo.to_osx_path, 123)
+
+    @unittest2.skipUnless(platform.system() == "Linux", "requires Linux")
+    def test_to_native_path_returns_the_native_version_of_the_given_linux_path(self):
+        """testing if the to_native_path returns the native version of the
+        given linux path
+        """
+        self.test_repo.windows_path = 'T:/Stalker_Projects'
+        self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
+        self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
+
+        test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
 
         self.assertEqual(
             self.test_repo.to_native_path(test_linux_path),
             test_linux_path
         )
 
+    @unittest2.skipUnless(platform.system() == "Linux", "requires Linux")
+    def test_to_native_path_returns_the_native_version_of_the_given_windows_path(self):
+        """testing if the to_native_path returns the native version of the
+        given windows path
+        """
+        self.test_repo.windows_path = 'T:/Stalker_Projects'
+        self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
+        self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
+
+        test_windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+
+        self.assertEqual(
+            self.test_repo.to_native_path(test_windows_path),
+            '/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        )
+
+    @unittest2.skipUnless(platform.system() == "Linux", "requires Linux")
+    def test_to_native_path_returns_the_native_version_of_the_given_osx_path(self):
+        """testing if the to_native_path returns the native version of the
+        given osx path
+        """
+        self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
+        self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
+        test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        test_osx_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
         self.assertEqual(
             self.test_repo.to_native_path(test_osx_path),
             test_linux_path
         )
 
+    @unittest2.skipUnless(platform.system() == "Linux", "requires Linux")
+    def test_to_native_path_returns_the_native_version_of_the_given_reverse_windows_path(self):
+        """testing if the to_native_path returns the native version of the
+        given reverse windows path
+        """
+        self.test_repo.windows_path = 'T:/Stalker_Projects'
+        self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
+        test_windows_path_reverse = 'T:\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
+        test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
         self.assertEqual(
             self.test_repo.to_native_path(test_windows_path_reverse),
             test_linux_path
         )
 
+    @unittest2.skipUnless(platform.system() == "Linux", "requires Linux")
+    def test_to_native_path_returns_the_native_version_of_the_given_reverse_linux_path(self):
+        """testing if the to_native_path returns the native version of the
+        given reverse linux path
+        """
+        self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
+        test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        test_linux_path_reverse = '\\mnt\\T\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
         self.assertEqual(
             self.test_repo.to_native_path(test_linux_path_reverse),
             test_linux_path
         )
 
+    @unittest2.skipUnless(platform.system() == "Linux", "requires Linux")
+    def test_to_native_path_returns_the_native_version_of_the_given_reverse_osx_path(self):
+        """testing if the to_native_path returns the native version of the
+        given reverse osx path
+        """
+        self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
+        self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
+        test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        test_osx_path_reverse = '\\Volumes\\T\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
         self.assertEqual(
             self.test_repo.to_native_path(test_osx_path_reverse),
             test_linux_path
@@ -510,3 +735,82 @@ class RepositoryTester(unittest2.TestCase):
         """testing if to_native_path raises TypeError if path is None
         """
         self.assertRaises(TypeError, self.test_repo.to_native_path, 123)
+
+    def test_is_in_repo_returns_True_if_the_given_linux_path_is_in_this_repo(self):
+        """testing if is_in_repo returns True if the given linux path is in
+        this repo or False otherwise
+        """
+        self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
+        test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        self.assertTrue(self.test_repo.is_in_repo(test_linux_path))
+
+    def test_is_in_repo_returns_True_if_the_given_linux_reverse_path_is_in_this_repo(self):
+        """testing if is_in_repo returns True if the given linux reverse path
+        is in this repo or False otherwise
+        """
+        self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
+        test_linux_path_reverse = '\\mnt\\T\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
+        self.assertTrue(self.test_repo.is_in_repo(test_linux_path_reverse))
+
+    def test_is_in_repo_returns_False_if_the_given_linux_path_is_not_in_this_repo(self):
+        """testing if is_in_repo returns False if the given linux path is not
+        in this repo or False otherwise
+        """
+        self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
+        test_not_in_path_linux_path = '/mnt/T/Other_Projects/Sero/Task1/Task2/Some_file.ma'
+        self.assertFalse(self.test_repo.is_in_repo(test_not_in_path_linux_path))
+
+    def test_is_in_repo_returns_True_if_the_given_windows_path_is_in_this_repo(self):
+        """testing if is_in_repo returns True if the given windows path is in
+        this repo or False otherwise
+        """
+        self.test_repo.windows_path = 'T:/Stalker_Projects'
+        test_windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        self.assertTrue(self.test_repo.is_in_repo(test_windows_path))
+
+    def test_is_in_repo_returns_True_if_the_given_windows_reverse_path_is_in_this_repo(self):
+        """testing if is_in_repo returns True if the given windows reverse path
+        is in this repo or False otherwise
+        """
+        self.test_repo.windows_path = 'T:/Stalker_Projects'
+        test_windows_path_reverse = 'T:\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
+        self.assertTrue(self.test_repo.is_in_repo(test_windows_path_reverse))
+
+    def test_is_in_repo_returns_False_if_the_given_windows_path_is_not_in_this_repo(self):
+        """testing if is_in_repo returns False if the given windows path is not
+        in this repo or False otherwise
+        """
+        self.test_repo.windows_path = 'T:/Stalker_Projects'
+        test_not_in_path_windows_path = 'T:/Other_Projects/Sero/Task1/Task2/Some_file.ma'
+        self.assertFalse(self.test_repo.is_in_repo(test_not_in_path_windows_path))
+
+    def test_is_in_repo_returns_True_if_the_given_osx_path_is_in_this_repo(self):
+        """testing if is_in_repo returns True if the given osx path is in
+        this repo or False otherwise
+        """
+        self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
+        test_osx_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        self.assertTrue(self.test_repo.is_in_repo(test_osx_path))
+
+    def test_is_in_repo_returns_True_if_the_given_osx_reverse_path_is_in_this_repo(self):
+        """testing if is_in_repo returns True if the given osx reverse path
+        is in this repo or False otherwise
+        """
+        self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
+        test_osx_path_reverse = '\\Volumes\\T\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
+        self.assertTrue(self.test_repo.is_in_repo(test_osx_path_reverse))
+
+    def test_is_in_repo_returns_False_if_the_given_osx_path_is_not_in_this_repo(self):
+        """testing if is_in_repo returns False if the given osx path is not
+        in this repo or False otherwise
+        """
+        self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
+        test_not_in_path_osx_path = '/Volumes/T/Other_Projects/Sero/Task1/Task2/Some_file.ma'
+        self.assertFalse(self.test_repo.is_in_repo(test_not_in_path_osx_path))
+
+
+
+
+
+
+

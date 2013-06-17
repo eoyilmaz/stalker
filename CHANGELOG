@@ -14,6 +14,8 @@ Stalker Changes
   * **New:** Added **Repository.to_linux_path()**,
     **Repository.to_windows_path()**, **Repository.to_osx_path()** and
     **Repository.to_native_path()** to the **Repository** class.
+  * **New:** Added **Repository.is_in_repo(path)** which checks if the given
+    path is in this repo.
 
 * **WebUI:**
   

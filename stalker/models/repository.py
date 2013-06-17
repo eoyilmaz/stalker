@@ -137,6 +137,17 @@ class Repository(Entity):
         elif platform_system == "Darwin":
             return self.osx_path
 
+    def is_in_repo(self, path):
+        """Returns True or False depending of the given is in this repo or not
+
+        :param path: The path to be investigated
+        :return:
+        """
+        path = path.replace('\\', '/')
+        return path.startswith(self.windows_path) or \
+            path.startswith(self.linux_path) or \
+            path.startswith(self.osx_path)
+
     def _to_path(self, path, replace_with):
         """Helper function fot to_*_path functions
         
