@@ -11,6 +11,9 @@ Stalker Changes
     **Version.is_latest_published_version()**.
   * **Fix:** Fixed **Version.__eq__()**, now Stalker correctly distinguishes
     different Version instances.
+  * **New:** Added **Repository.to_linux_path()**,
+    **Repository.to_windows_path()**, **Repository.to_osx_path()** and
+    **Repository.to_native_path()** to the **Repository** class.
 
 * **WebUI:**
   

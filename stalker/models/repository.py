@@ -26,8 +26,10 @@ from stalker.models.entity import Entity
 
 from stalker.log import logging_level
 import logging
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
+
 
 class Repository(Entity):
     """Manages fileserver/repository related data.
@@ -89,9 +91,9 @@ class Repository(Entity):
                             "or unicode not %s" %
                             (self.__class__.__name__,
                              linux_path_in.__class__.__name__))
-        
+
         linux_path_in = os.path.normpath(linux_path_in) + '/'
-        
+
         return linux_path_in.replace("\\", "/")
 
     @validates("osx_path")
@@ -103,7 +105,7 @@ class Repository(Entity):
                             "unicode not %s" %
                             (self.__class__.__name__,
                              osx_path_in.__class__.__name__))
-        
+
         osx_path_in = os.path.normpath(osx_path_in) + '/'
 
         return osx_path_in.replace("\\", "/")
@@ -117,11 +119,11 @@ class Repository(Entity):
                             "or unicode not %s" %
                             (self.__class__.__name__,
                              windows_path_in.__class__.__name__))
-        
+
         windows_path_in = os.path.normpath(windows_path_in) + '/'
-        
+
         return windows_path_in.replace("\\", "/")
-    
+
     @property
     def path(self):
         """The path for the current os"""
@@ -135,11 +137,61 @@ class Repository(Entity):
         elif platform_system == "Darwin":
             return self.osx_path
 
+    def _to_path(self, path, replace_with):
+        """Helper function fot to_*_path functions
+        
+        :param path: the input path
+        :param replace_with: replace_with path
+        :return:
+        """
+        if not path:
+            raise TypeError('path can not be None')
+
+        if path.startswith(self.windows_path):
+            return path.replace(self.windows_path, replace_with)
+        elif path.startswith(self.linux_path):
+            return path.replace(self.linux_path, replace_with)
+        elif path.startswith(self.osx_path):
+            return path.replace(self.osx_path, replace_with)
+        return path
+
+    def to_linux_path(self, path):
+        """Returns the linux version of the given path
+
+        :param path: The path that needs to be converted to linux path.
+        :return:
+        """
+        return self._to_path(path, self.linux_path)
+
+    def to_windows_path(self, path):
+        """Returns the windows version of the given path
+
+        :param path: The path that needs to be converted to windows path.
+        :return:
+        """
+        return self._to_path(path, self.windows_path)
+
+    def to_osx_path(self, path):
+        """Returns the osx version of the given path
+
+        :param path: The path that needs to be converted to osx path.
+        :return:
+        """
+        return self._to_path(path, self.osx_path)
+
+    def to_native_path(self, path):
+        """Returns the native version of the given path
+        
+        :param path: The path that needs to be converted to native path.
+        :return:
+        """
+        return self._to_path(path, self.path)
+
     def __eq__(self, other):
         """the equality operator
         """
-        return super(Repository, self).__eq__(other) and\
-               isinstance(other, Repository) and\
-               self.linux_path == other.linux_path and\
-               self.osx_path == other.osx_path and\
+        return super(Repository, self).__eq__(other) and \
+               isinstance(other, Repository) and \
+               self.linux_path == other.linux_path and \
+               self.osx_path == other.osx_path and \
                self.windows_path == other.windows_path

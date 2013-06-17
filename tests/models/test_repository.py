@@ -22,10 +22,11 @@ import platform
 import unittest2
 from stalker import Repository, Tag
 
+
 class RepositoryTester(unittest2.TestCase):
     """tests the Repository class
     """
-    
+
     def setUp(self):
         """setup the test
         """
@@ -43,13 +44,13 @@ class RepositoryTester(unittest2.TestCase):
         }
 
         self.test_repo = Repository(**self.kwargs)
-    
+
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for
         Repository class
         """
         self.assertFalse(Repository.__auto_name__)
-    
+
     def test_linux_path_argument_accepts_only_strings(self):
         """testing if linux_path argument accepts only string or unicode
         values
@@ -79,7 +80,7 @@ class RepositoryTester(unittest2.TestCase):
         test_value = "~/newRepoPath/Projects/"
         self.test_repo.linux_path = test_value
         self.assertEqual(self.test_repo.linux_path, test_value)
-    
+
     def test_linux_path_attribute_finishes_with_a_slash(self):
         """testing if the linux_path attribute will be finished with a slash
         even it is not supplied by default
@@ -88,7 +89,7 @@ class RepositoryTester(unittest2.TestCase):
         expected_value = '/mnt/T/'
         self.test_repo.linux_path = test_value
         self.assertEqual(self.test_repo.linux_path, expected_value)
-    
+
     def test_windows_path_argument_accepts_only_strings(self):
         """testing if windows_path argument accepts only string or unicode
         values
@@ -118,7 +119,7 @@ class RepositoryTester(unittest2.TestCase):
         test_value = "~/newRepoPath/Projects/"
         self.test_repo.windows_path = test_value
         self.assertEqual(self.test_repo.windows_path, test_value)
-    
+
 
     def test_windows_path_attribute_finishes_with_a_slash(self):
         """testing if the windows_path attribute will be finished with a slash
@@ -128,7 +129,7 @@ class RepositoryTester(unittest2.TestCase):
         expected_value = 'T:/'
         self.test_repo.windows_path = test_value
         self.assertEqual(self.test_repo.windows_path, expected_value)
-    
+
     def test_osx_path_argument_accepts_only_strings(self):
         """testing if osx_path argument accepts only string or unicode
         values
@@ -158,7 +159,7 @@ class RepositoryTester(unittest2.TestCase):
         test_value = "~/newRepoPath/Projects/"
         self.test_repo.osx_path = test_value
         self.assertEqual(self.test_repo.osx_path, test_value)
-    
+
 
     def test_osx_path_attribute_finishes_with_a_slash(self):
         """testing if the osx_path attribute will be finished with a slash
@@ -168,7 +169,7 @@ class RepositoryTester(unittest2.TestCase):
         expected_value = '/Volumes/T/'
         self.test_repo.osx_path = test_value
         self.assertEqual(self.test_repo.osx_path, expected_value)
-    
+
     @unittest2.skipUnless(platform.system() == "Windows", "requires Windows")
     def test_path_returns_properly_for_windows(self):
         """testing if path returns the correct value for the os
@@ -283,3 +284,132 @@ class RepositoryTester(unittest2.TestCase):
         self.test_repo.windows_path = r"M:\Projects"
         self.assertNotIn("\\", self.test_repo.windows_path)
         self.assertEqual(self.test_repo.windows_path, "M:/Projects/")
+
+    def test_to_linux_path_returns_the_linux_version_of_the_given_path(self):
+        """testing if the to_linux_path returns the linux version of the
+        given path
+        """
+        self.test_repo.windows_path = 'T:/Stalker_Projects'
+        self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
+        self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
+
+        test_windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        test_osx_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+
+        self.assertEqual(
+            self.test_repo.to_linux_path(test_windows_path),
+            test_linux_path
+        )
+
+        self.assertEqual(
+            self.test_repo.to_linux_path(test_linux_path),
+            test_linux_path
+        )
+
+        self.assertEqual(
+            self.test_repo.to_linux_path(test_osx_path),
+            test_linux_path
+        )
+
+    def test_to_linux_path_raises_TypeError_if_path_is_None(self):
+        """testing if to_linux_path raises TypeError if path is None
+        """
+        self.assertRaises(TypeError, self.test_repo.to_linux_path, None)
+
+    def test_to_windows_path_returns_the_windows_version_of_the_given_path(self):
+        """testing if the to_windows_path returns the windows version of the
+        given path
+        """
+        self.test_repo.windows_path = 'T:/Stalker_Projects'
+        self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
+        self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
+
+        test_windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        test_osx_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+
+        self.assertEqual(
+            self.test_repo.to_windows_path(test_windows_path),
+            test_windows_path
+        )
+
+        self.assertEqual(
+            self.test_repo.to_windows_path(test_linux_path),
+            test_windows_path
+        )
+
+        self.assertEqual(
+            self.test_repo.to_windows_path(test_osx_path),
+            test_windows_path
+        )
+
+    def test_to_windows_path_raises_TypeError_if_path_is_None(self):
+        """testing if to_windows_path raises TypeError if path is None
+        """
+        self.assertRaises(TypeError, self.test_repo.to_windows_path, None)
+
+    def test_to_osx_path_returns_the_osx_version_of_the_given_path(self):
+        """testing if the to_windows_path returns the osx version of the
+        given path
+        """
+        self.test_repo.windows_path = 'T:/Stalker_Projects'
+        self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
+        self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
+
+        test_windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        test_osx_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+
+        self.assertEqual(
+            self.test_repo.to_osx_path(test_windows_path),
+            test_osx_path
+        )
+
+        self.assertEqual(
+            self.test_repo.to_osx_path(test_linux_path),
+            test_osx_path
+        )
+
+        self.assertEqual(
+            self.test_repo.to_osx_path(test_osx_path),
+            test_osx_path
+        )
+
+    def test_to_osx_path_raises_TypeError_if_path_is_None(self):
+        """testing if to_osx_path raises TypeError if path is None
+        """
+        self.assertRaises(TypeError, self.test_repo.to_osx_path, None)
+
+    @unittest2.skipUnless(platform.system() == "Linux", "requires Linux")
+    def test_to_native_path_returns_the_native_version_of_the_given_path(self):
+        """testing if the to_native_path returns the windows version of the
+        given path
+        """
+        self.test_repo.windows_path = 'T:/Stalker_Projects'
+        self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
+        self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
+
+        test_windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        test_osx_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+
+        self.assertEqual(
+            self.test_repo.to_native_path(test_windows_path),
+            test_linux_path
+        )
+
+        self.assertEqual(
+            self.test_repo.to_native_path(test_linux_path),
+            test_linux_path
+        )
+
+        self.assertEqual(
+            self.test_repo.to_native_path(test_osx_path),
+            test_linux_path
+        )
+
+    def test_to_native_path_raises_TypeError_if_path_is_None(self):
+        """testing if to_native_path raises TypeError if path is None
+        """
+        self.assertRaises(TypeError, self.test_repo.to_native_path, None)
