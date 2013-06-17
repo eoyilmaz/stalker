@@ -297,6 +297,10 @@ class RepositoryTester(unittest2.TestCase):
         test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
         test_osx_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
 
+        test_windows_path_reverse = 'T:\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
+        test_linux_path_reverse = '\\mnt\\T\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
+        test_osx_path_reverse = '\\Volumes\\T\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
+
         self.assertEqual(
             self.test_repo.to_linux_path(test_windows_path),
             test_linux_path
@@ -312,10 +316,30 @@ class RepositoryTester(unittest2.TestCase):
             test_linux_path
         )
 
+        self.assertEqual(
+            self.test_repo.to_linux_path(test_windows_path_reverse),
+            test_linux_path
+        )
+
+        self.assertEqual(
+            self.test_repo.to_linux_path(test_linux_path_reverse),
+            test_linux_path
+        )
+
+        self.assertEqual(
+            self.test_repo.to_linux_path(test_osx_path_reverse),
+            test_linux_path
+        )
+
     def test_to_linux_path_raises_TypeError_if_path_is_None(self):
         """testing if to_linux_path raises TypeError if path is None
         """
         self.assertRaises(TypeError, self.test_repo.to_linux_path, None)
+
+    def test_to_linux_path_raises_TypeError_if_path_is_not_a_string(self):
+        """testing if to_linux_path raises TypeError if path is None
+        """
+        self.assertRaises(TypeError, self.test_repo.to_linux_path, 123)
 
     def test_to_windows_path_returns_the_windows_version_of_the_given_path(self):
         """testing if the to_windows_path returns the windows version of the
@@ -328,6 +352,10 @@ class RepositoryTester(unittest2.TestCase):
         test_windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
         test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
         test_osx_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+
+        test_windows_path_reverse = 'T:\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
+        test_linux_path_reverse = '\\mnt\\T\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
+        test_osx_path_reverse = '\\Volumes\\T\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
 
         self.assertEqual(
             self.test_repo.to_windows_path(test_windows_path),
@@ -344,10 +372,31 @@ class RepositoryTester(unittest2.TestCase):
             test_windows_path
         )
 
+        self.assertEqual(
+            self.test_repo.to_windows_path(test_windows_path_reverse),
+            test_windows_path
+        )
+
+        self.assertEqual(
+            self.test_repo.to_windows_path(test_linux_path_reverse),
+            test_windows_path
+        )
+
+        self.assertEqual(
+            self.test_repo.to_windows_path(test_osx_path_reverse),
+            test_windows_path
+        )
+
+
     def test_to_windows_path_raises_TypeError_if_path_is_None(self):
         """testing if to_windows_path raises TypeError if path is None
         """
         self.assertRaises(TypeError, self.test_repo.to_windows_path, None)
+
+    def test_to_windows_path_raises_TypeError_if_path_is_not_a_string(self):
+        """testing if to_windows_path raises TypeError if path is None
+        """
+        self.assertRaises(TypeError, self.test_repo.to_windows_path, 123)
 
     def test_to_osx_path_returns_the_osx_version_of_the_given_path(self):
         """testing if the to_windows_path returns the osx version of the
@@ -360,6 +409,10 @@ class RepositoryTester(unittest2.TestCase):
         test_windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
         test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
         test_osx_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+
+        test_windows_path_reverse = 'T:\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
+        test_linux_path_reverse = '\\mnt\\T\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
+        test_osx_path_reverse = '\\Volumes\\T\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
 
         self.assertEqual(
             self.test_repo.to_osx_path(test_windows_path),
@@ -376,10 +429,30 @@ class RepositoryTester(unittest2.TestCase):
             test_osx_path
         )
 
+        self.assertEqual(
+            self.test_repo.to_osx_path(test_windows_path_reverse),
+            test_osx_path
+        )
+
+        self.assertEqual(
+            self.test_repo.to_osx_path(test_linux_path_reverse),
+            test_osx_path
+        )
+
+        self.assertEqual(
+            self.test_repo.to_osx_path(test_osx_path_reverse),
+            test_osx_path
+        )
+
     def test_to_osx_path_raises_TypeError_if_path_is_None(self):
         """testing if to_osx_path raises TypeError if path is None
         """
         self.assertRaises(TypeError, self.test_repo.to_osx_path, None)
+
+    def test_to_osx_path_raises_TypeError_if_path_is_not_a_string(self):
+        """testing if to_osx_path raises TypeError if path is None
+        """
+        self.assertRaises(TypeError, self.test_repo.to_osx_path, 123)
 
     @unittest2.skipUnless(platform.system() == "Linux", "requires Linux")
     def test_to_native_path_returns_the_native_version_of_the_given_path(self):
@@ -393,6 +466,10 @@ class RepositoryTester(unittest2.TestCase):
         test_windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
         test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
         test_osx_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+
+        test_windows_path_reverse = 'T:\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
+        test_linux_path_reverse = '\\mnt\\T\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
+        test_osx_path_reverse = '\\Volumes\\T\\Stalker_Projects\\Sero\\Task1\\Task2\\Some_file.ma'
 
         self.assertEqual(
             self.test_repo.to_native_path(test_windows_path),
@@ -409,7 +486,27 @@ class RepositoryTester(unittest2.TestCase):
             test_linux_path
         )
 
+        self.assertEqual(
+            self.test_repo.to_native_path(test_windows_path_reverse),
+            test_linux_path
+        )
+
+        self.assertEqual(
+            self.test_repo.to_native_path(test_linux_path_reverse),
+            test_linux_path
+        )
+
+        self.assertEqual(
+            self.test_repo.to_native_path(test_osx_path_reverse),
+            test_linux_path
+        )
+
     def test_to_native_path_raises_TypeError_if_path_is_None(self):
         """testing if to_native_path raises TypeError if path is None
         """
         self.assertRaises(TypeError, self.test_repo.to_native_path, None)
+
+    def test_to_native_path_raises_TypeError_if_path_is_not_a_string(self):
+        """testing if to_native_path raises TypeError if path is None
+        """
+        self.assertRaises(TypeError, self.test_repo.to_native_path, 123)

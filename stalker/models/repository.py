@@ -144,8 +144,13 @@ class Repository(Entity):
         :param replace_with: replace_with path
         :return:
         """
-        if not path:
+        if path is None:
             raise TypeError('path can not be None')
+
+        if not isinstance(path, (str, unicode)):
+            raise TypeError('path should be a string or unicode')
+
+        path = path.replace('\\', '/')
 
         if path.startswith(self.windows_path):
             return path.replace(self.windows_path, replace_with)
