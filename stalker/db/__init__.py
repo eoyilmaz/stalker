@@ -28,6 +28,7 @@ import logging
 import transaction
 from sqlalchemy import engine_from_config
 from sqlalchemy.exc import IntegrityError
+from transaction.interfaces import TransactionFailedError
 
 from stalker import defaults
 from stalker.db.declarative import Base
@@ -65,7 +66,10 @@ def setup(settings=None, callback=None):
 
     # create the Session class
     DBSession.remove()
-    DBSession.configure(bind=engine)
+    DBSession.configure(
+        bind=engine,
+        extension=None
+    )
 
     # create the database
     logger.debug("creating the tables")
@@ -184,7 +188,7 @@ def __create_admin__():
     admins_group.updated_by = admin
 
     DBSession.add(admin)
-    transaction.commit()
+    DBSession.commit()
 
 
 def __create_ticket_statuses():
@@ -229,9 +233,9 @@ def __create_ticket_statuses():
         )
         DBSession.add(ticket_status_list)
         try:
-            transaction.commit()
+            DBSession.commit()
         except IntegrityError:
-            transaction.abort()
+            DBSession.rollback()
         else:
             logger.debug("Created Ticket Statuses successfully")
             DBSession.flush()
@@ -268,9 +272,9 @@ def __create_ticket_statuses():
         )
         DBSession.add(ticket_type_2)
     try:
-        transaction.commit()
+        DBSession.commit()
     except IntegrityError:
-        transaction.abort()
+        DBSession.rollback()
         logger.debug("Ticket Types are already in the database!")
     else:
         DBSession.flush()
@@ -306,10 +310,10 @@ def __create_time_log_types():
     )
     DBSession.add(extra_type)
     try:
-        transaction.commit()
+        DBSession.commit()
     except IntegrityError as e:
         logger.debug(e)
-        transaction.abort()
+        DBSession.rollback()
         logger.debug('TimeLog Types are already in database')
     else:
         DBSession.flush()
@@ -443,8 +447,8 @@ def register(class_):
                 DBSession.add(permission_obj)
 
     try:
-        transaction.commit()
-    except IntegrityError:
-        transaction.abort()
+        DBSession.commit()
+    except (IntegrityError, TransactionFailedError):
+        DBSession.rollback()
     else:
         DBSession.flush()
