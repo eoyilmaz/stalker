@@ -91,8 +91,9 @@
                 <td>&nbsp;</td>
                 <td>
                     {% if has_permission('Update_Asset') %}
-                        <button id='update_asset_button'>Update</button></td>
+                        <button id='update_asset_button'>Update</button>
                     {% endif %}
+                </td>
             </tr>
         </table>
     </div>
@@ -171,7 +172,7 @@
                 selector: '.thumbnail_menu',
                 entity_id: {{ user.id }},
                 related_field_updater: function () {
-                    var content_pane = update_user_button.getParent();
+                    var content_pane = update_asset_button.getParent();
                     if (content_pane != null) {
                         content_pane.refresh();
                     }

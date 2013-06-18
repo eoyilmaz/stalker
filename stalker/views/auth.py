@@ -230,6 +230,9 @@ def view_users(request):
     renderer='templates/auth/page_view_user.jinja2'
 )
 def view_user(request):
+
+    logged_in_user = get_logged_in_user(request)
+
     user_id = request.matchdict['user_id']
     user = User.query.filter_by(id=user_id).first()
     
@@ -238,6 +241,7 @@ def view_user(request):
      
     return {
         'user': user,
+        'logged_in_user': logged_in_user,
         'has_permission': PermissionChecker(request)
     }
 

@@ -18,7 +18,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #}
 <div id='view_ticket'>
-    {% if has_permission('Create_Ticket')%}
+    {% if has_permission('Create_Ticket') %}
         <button id='create_ticket_button'>Create Ticket</button>
     {% endif %}
     <div style='width:100%; height: 100%; position: absolute;'>
@@ -55,6 +55,9 @@ require([
 ], function (ObjectStore, Memory, JsonRest, aspect, selector, List, Grid,
              Selection, Keyboard, declare, editor, Menu, MenuItem,
              MenuSeparator, Button, dialogs, dialogCaller, dialogCreator) {
+
+
+
 
 
     var StandardGrid = declare([Grid, Selection, Keyboard]);
@@ -103,13 +106,7 @@ require([
 
                 {
                     field: 'id',
-                    label: 'ID'
-
-
-                },
-                {
-                    field: 'name',
-                    label: 'Name',
+                    label: 'Ticket',
                     get: function (object) {
 
                         return object; // return entire item for formatter to use
@@ -126,7 +123,24 @@ require([
 
                 },
                 {
-                    field: 'owner_name',
+                    field: 'project_name',
+                    label: "Project",
+                    get: function (object) {
+
+                        return object; // return entire item for formatter to use
+
+                    },
+                    formatter: function (value) {
+
+                        var targetPane = "'central_content'";
+                        var address = "'view/project/" + value.project_id + "'";
+
+                        return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.project_name + '</a>';
+
+                    }
+                },
+                {
+                    field: 'owner_id',
                     label: "Owner",
                     get: function (object) {
 
@@ -141,9 +155,10 @@ require([
                         return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.owner_name + '</a>';
 
                     }
-                },{
-                    field: 'project_name',
-                    label: "Project",
+                },
+                {
+                    field: 'created_by_id',
+                    label: "Created_By",
                     get: function (object) {
 
                         return object; // return entire item for formatter to use
@@ -152,9 +167,26 @@ require([
                     formatter: function (value) {
 
                         var targetPane = "'central_content'";
-                        var address = "'view/user/" + value.project_id + "'";
+                        var address = "'view/user/" + value.created_by_id + "'";
 
-                        return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.project_name + '</a>';
+                        return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.created_by_name + '</a>';
+
+                    }
+                },
+                {
+                    field: 'updated_by_id',
+                    label: "Updated_By",
+                    get: function (object) {
+
+                        return object; // return entire item for formatter to use
+
+                    },
+                    formatter: function (value) {
+
+                        var targetPane = "'central_content'";
+                        var address = "'view/user/" + value.updated_by_id + "'";
+
+                        return '<a href="javascript:redirectLink(' + targetPane + ',' + address + ');">' + value.updated_by_name + '</a>';
 
                     }
                 }

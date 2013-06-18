@@ -1,0 +1,85 @@
+{# Stalker a Production Asset Management System
+ Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
+
+ This file is part of Stalker.
+
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation;
+ version 2.1 of the License.
+
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+#}
+<div style="margin: 0" id='ticket_border_container'>
+    <div id='ticket_nav_bar_content_pane'>
+        {# Summary View #}
+    </div>
+    <div id='summary_content_pane'>
+        {# Tab View #}
+
+    </div>
+  <div id='history_content_pane'>
+        {# Tab View #}
+
+    </div>
+</div>
+
+<script type='text/javascript'>
+    require(['dijit/registry', 'dijit/layout/BorderContainer',
+        'dijit/layout/TabContainer', 'dojox/layout/ContentPane', 'dojo/domReady!'],
+            function (registry, BorderContainer, TabContainer, ContentPane) {
+
+                var ticket_BorderContainer = new BorderContainer({
+                    id: 'ticket_border_container',
+                    region: 'center',
+                    orientation: 'horizontal',
+                    splitter: true,
+                    resizable: false,
+                    style: 'width:100%; height:100%; margin:0; padding: 0;'
+
+                }, 'ticket_border_container');
+
+                var nav_bar_content_pane = new ContentPane({
+                    title: 'NavBar',
+                    href: 'view/entity_nav_bar/{{ ticket.id }}',
+                    region: 'top',
+                    style: 'padding: 0; margin:0;'
+                }, 'ticket_nav_bar_content_pane');
+
+                ticket_BorderContainer.addChild(nav_bar_content_pane);
+
+                // **********************************************************************
+                // Bottom Part - Complex Data View
+
+                var summary_content_pane = new ContentPane({
+                    title: 'Overview',
+                    href: 'summarize/ticket/{{ ticket.id }}',
+                    style: 'padding: 0; margin:0;',
+                    region: 'center'
+                },'summary_content_pane');
+
+                ticket_BorderContainer.addChild(summary_content_pane);
+
+
+                var history_content_pane = new ContentPane({
+                    title: 'History',
+                    content: 'history/ticket/{{ ticket.id }}',
+                    style: 'padding: 0; margin:0; width:1200px;',
+                    region: 'right'
+                },'history_content_pane');
+
+                ticket_BorderContainer.addChild(history_content_pane);
+
+
+                ticket_BorderContainer.startup();
+
+
+            });
+</script>

@@ -364,6 +364,9 @@ def main(global_config, **settings):
     config.add_route('create_ticket', 'create/ticket')
     config.add_route('update_ticket', 'update/ticket')
 
+
+    config.add_route('view_ticket', 'view/ticket/{ticket_id}')
+    config.add_route('summarize_ticket', 'summarize/ticket/{ticket_id}')
     config.add_route('get_tickets',
                      'get/tickets/{entity_id}') # returns json
     config.add_route('list_tickets',

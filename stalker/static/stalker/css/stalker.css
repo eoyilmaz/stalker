@@ -352,6 +352,12 @@ a:hover {
     left: 204px;
 }
 
+.summary_ticket_info {
+    position: absolute;
+    clear: both;
+    left: 20px;
+}
+
 .title_summary_info {
     position: absolute;
     clear: both;

@@ -20,7 +20,7 @@
 from pyramid.httpexceptions import HTTPOk, HTTPServerError
 from pyramid.security import authenticated_userid, has_permission
 from pyramid.view import view_config
-from stalker import Task, User, Studio, Ticket, Entity, Project
+from stalker import Task, User, Studio, Ticket, Entity, Project, Status
 
 from stalker import defaults
 
@@ -47,9 +47,9 @@ def create_ticket_dialog(request):
 
 
     entity_id = request.matchdict['entity_id']
-    entity = Entity.query.filter(Task.entity_id==entity_id).first()
+    entity = Entity.query.filter(Entity.entity_id==entity_id).first()
 
-
+    logger.debug('entity_type : %s' % entity.entity_type)
 
     return {
         'mode': 'CREATE',
@@ -80,6 +80,7 @@ def update_ticket_dialog(request):
         'has_permission': PermissionChecker(request),
         'logged_in_user': logged_in_user,
         'ticket': ticket,
+        'entity': ticket.project,
         'microseconds_since_epoch': microseconds_since_epoch
     }
 
@@ -93,7 +94,7 @@ def create_ticket(request):
     #**************************************************************************
     # collect data
 
-    name = request.params.get('name')
+    description = request.params.get('description')
 
     project_id = request.params.get('project_id', None)
     project = Project.query.filter(Project.id==project_id).first()
@@ -101,17 +102,29 @@ def create_ticket(request):
     owner_id = request.params.get('owner_id', None)
     owner = User.query.filter(User.id==owner_id).first()
 
+    status_id = request.params.get('status_id')
+    status = Status.query.filter_by(id=status_id).first()
+
+
+    logger.debug('*******************************')
+
+    logger.debug('create_ticket is running')
+
     logger.debug('project_id : %s' % project_id)
     logger.debug('owner_id : %s' % owner_id)
 
 
-    if name and project and  owner :
+    logger.debug('owner: %s' % owner)
+
+    if description and project and  owner :
         # we are ready to create the time log
         # Ticket should handle the extension of the effort
         ticket = Ticket(
-            name=name,
+            status = status,
+            description=description,
             owner=owner,
-            project=project
+            project=project,
+            created_by=get_logged_in_user(request)
         )
         DBSession.add(ticket)
 
@@ -130,7 +143,7 @@ def update_ticket(request):
 
     #**************************************************************************
     # collect data
-    name = request.params.get('name')
+    description = request.params.get('description')
 
     project_id = request.params.get('project_id', None)
     project = Project.query.filter(Project.id==project_id).first()
@@ -138,18 +151,71 @@ def update_ticket(request):
     owner_id = request.params.get('owner_id', None)
     owner = User.query.filter(User.id==owner_id).first()
 
+    status_id = request.params.get('status_id')
+    status = Status.query.filter_by(id=status_id).first()
 
-    if name and project and  owner :
+    logger.debug('*******************************')
+
+    logger.debug('update_ticket is running')
+
+    logger.debug('project_id : %s' % project_id)
+    logger.debug('owner_id : %s' % owner_id)
+
+
+    logger.debug('ticket: %s' % ticket)
+    logger.debug('owner: %s' % owner)
+    logger.debug('project: %s' % project)
+
+
+    if  ticket and description and project and  owner :
         # we are ready to create the time log
         # Ticket should handle the extension of the effort
-
-        ticket.name=name
+        ticket.status=status
+        ticket.description=description
         ticket.owner=owner
-        ticket.project=project
+        ticket.updated_by=get_logged_in_user(request)
 
         DBSession.add(ticket)
 
     return HTTPOk()
+
+@view_config(
+    route_name='view_ticket',
+    renderer='templates/ticket/page_view_ticket.jinja2'
+)
+def view_ticket(request):
+    """runs when viewing an ticket
+    """
+    logged_in_user = get_logged_in_user(request)
+
+    ticket_id = request.matchdict['ticket_id']
+    ticket = Ticket.query.filter_by(id=ticket_id).first()
+
+    return {
+        'user': logged_in_user,
+        'has_permission': PermissionChecker(request),
+        'ticket': ticket
+    }
+
+
+@view_config(
+    route_name='summarize_ticket',
+    renderer='templates/ticket/content_summarize_ticket.jinja2'
+)
+def summarize_ticket(request):
+    """runs when viewing an ticket
+    """
+    logged_in_user = get_logged_in_user(request)
+
+    ticket_id = request.matchdict['ticket_id']
+    ticket = Ticket.query.filter_by(id=ticket_id).first()
+
+    return {
+        'user': logged_in_user,
+        'has_permission': PermissionChecker(request),
+        'ticket': ticket
+    }
+
 
 @view_config(
     route_name='list_tickets',
@@ -159,12 +225,14 @@ def list_tickets(request):
     """lists the time logs of the given task
     """
 
-    logger.debug('list_tickets is running')
-
     entity_id = request.matchdict['entity_id']
     entity = Entity.query.filter_by(id=entity_id).first()
 
+    logger.debug('*******************************')
+    logger.debug('list_tickets is running')
+
     logger.debug('entity_id : %s' % entity_id)
+
     return {
         'entity': entity,
         'has_permission': PermissionChecker(request)
@@ -177,12 +245,17 @@ def list_tickets(request):
 def get_tickets(request):
     """returns all the Shots of the given Project
     """
-    logger.debug('get_tickets is running')
 
     entity_id = request.matchdict['entity_id']
     entity = Entity.query.filter_by(id=entity_id).first()
 
+    logger.debug('*******************************')
+    logger.debug('get_tickets is running')
+
     logger.debug('entity_id : %s' % entity_id)
+
+    logger.debug('entity : %s' % entity)
+    logger.debug('entity_tickets : %s' %  len(entity.tickets))
 
     ticket_data = []
 
@@ -196,7 +269,9 @@ def get_tickets(request):
             'project_id': ticket.project_id,
             'project_name': ticket.project.name,
             'owner_id': ticket.owner_id,
-            'owner_name': ticket.owner
+            'owner_name': 'owner',
+            'created_by_id': ticket.created_by_id,
+            'created_by_name': ticket.created_by.name
         })
 
     return ticket_data

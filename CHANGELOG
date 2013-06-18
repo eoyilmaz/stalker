@@ -26,6 +26,8 @@ Stalker Changes
   * **Fix:** Working hours for each day is taken from database in
       Studio Update Dialog.
   * **New:** List Ticket page and Create/Update Ticket dialog are created.
+  * **Fix:** Added logged_in_user object to user page to fix permission bug. So
+      default facilities of page is define based on logged_in_user.
 
 
 0.2.0.b7

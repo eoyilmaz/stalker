@@ -21,13 +21,13 @@
     <form id='ticket_form'>
         <table style='width: 100%;'>
 
-            {# NAME #}
+            {# DESCRIPTION #}
             <tr>
                 <td class='label_column'>
-                    <label for='ticket_name'>Name</label>
+                    <label for='ticket_description'>Description</label>
                 </td>
                 <td class='input_column'>
-                    <input id='ticket_name'>
+                    <input id='ticket_description'>
                 </td>
             </tr>
 
@@ -48,6 +48,19 @@
                 </td>
                 <td class='input_column'>
                     <div id='ticket_owner'></div>
+                </td>
+            </tr>
+
+            {# STATUS #}
+            <tr>
+                <td class='label_column'>
+                    <label for='ticket_status'>Status</label>
+                </td>
+                <td class='input_column'>
+                    <input id='ticket_status'>
+                </td>
+                <td class='button_column'>
+                    <button id='ticket_add_status_button'>Add Status</button>
                 </td>
             </tr>
 
@@ -84,15 +97,16 @@ require([
             // ********************************************************************
             // Generate default values
             var url;
-            var name;
+            var description;
             var ticket_id;
             var project_id;
             var owner_id;
             var owner_memory_target;
 
+
             {% if entity.entity_type == 'Project' %}
                 project_id = '{{ entity.id }}';
-                owner_memory_target = '/get/users_byEntity/{{ project.id }}';
+                owner_memory_target = '/get/users_byEntity/'+project_id;
             {% elif entity.entity_type == 'User' %}
                 owner_id = '{{ entity.id }}';
                 owner_memory_target = '/get/users'
@@ -101,11 +115,10 @@ require([
             {# fill values based on the dialog mode #}
             {% if mode == 'CREATE' %}
                 url = '{{ request.route_url("create_ticket") }}';
-
             {% elif mode == 'UPDATE' %}
                 url = '{{ request.route_url("update_ticket") }}';
                 ticket_id = '{{ ticket.id }}';
-                name = '{{ ticket.name }}';
+                description = '{{ ticket.description }}';
                 owner_id = '{{ ticket.owner_id }}';
                 project_id = '{{ ticket.project_id }}';
             {% endif %}
@@ -122,15 +135,15 @@ require([
 
 
             // ****************************************************************
-            // Name
-            var name_textBox = new ValidationTextBox({
-                name: 'name',
-                label: 'Name',
-                placeHolder: 'Enter a name',
+            // Description
+            var description_textBox = new ValidationTextBox({
+                name: 'description',
+                label: 'Description',
+                placeHolder: 'Enter a description',
                 required: true,
-                value: name
-            }, 'ticket_name');
-            name_textBox.startup();
+                value: description
+            }, 'ticket_description');
+            description_textBox.startup();
 
             // ****************************************************************
             // Project
@@ -194,6 +207,67 @@ require([
 
             // Fill Widget
             owner_field_updater();
+
+             // ****************************************************************
+            // Status
+            //
+            // The Memory
+            var status_memory = new JsonRest({
+                target: ' {{ request.route_url('get_statuses_for', target_entity_type="Ticket") }}'
+            });
+
+            // The Field
+            var status_filtering_select = new FilteringSelect({
+                name: 'status_id',
+                label: 'Status',
+                required: true
+            }, 'ticket_status');
+            status_filtering_select.startup();
+
+            // TODO: Check permission for StatusList creation
+            // TODO: Please make it more obvious what we are doing here, or just have two buttons, one hidden, and un-hide it and hide the other when we have got some StatusList
+            var update_button_callback_function = function (data) {
+                if (data.length > 0) {
+                    // replace ticket_add_status_button on click function
+                    // if we got some StatusList
+                    ticket_add_status_button.set('onClick', function () {
+                        var myDialog = dialogCreator({
+                            dialog_id: 'status_list_dialog',
+                            data_id: 'Ticket',
+                            content_creator: dialogs.update_status_list_dialog,
+                            related_field_updater: status_field_updater
+                        });
+                        myDialog.show();
+                    });
+                }
+            };
+
+            // The Updater
+            var status_field_updater = fieldUpdater({
+                'memory': status_memory,
+                'widget': status_filtering_select,
+                'callBack': update_button_callback_function,
+                {% if mode=='UPDATE' %}
+                    'selected': '{{ ticket.status.id }}'
+                {% endif %}
+            });
+
+
+            var ticket_add_status_button = dialogCaller({
+                label: 'Add Status',
+                dialog_id: 'status_list_dialog',
+                content_creator: dialogs.create_status_list_dialog,
+                attach_to: 'ticket_add_status_button',
+                related_field_updater: status_field_updater,
+                data_id: 'Ticket'
+            });
+
+            ticket_add_status_button.startup();
+            status_field_updater({animate: true});
+
+            {% if not has_permission('Create_Status') %}
+                ticket_add_status_button.set('disabled', true);
+            {% endif %}
 
 
 

@@ -110,6 +110,7 @@
                     }, 'assets_content_pane');
                     project_related_data_tab_container.addChild(assets_content_pane);
                 {% endif %}
+
                 {% if has_permission('List_Shot') %}
                     var shots_content_pane = new ContentPane({
                         id: 'shots_content_pane',
@@ -121,6 +122,7 @@
 
                     project_related_data_tab_container.addChild(shots_content_pane);
                 {% endif %}
+
                 {% if has_permission('List_Sequence') %}
                     var sequences_content_pane = new ContentPane({
                         id: 'sequences_content_pane',
@@ -132,6 +134,7 @@
 
                     project_related_data_tab_container.addChild(sequences_content_pane);
                 {% endif %}
+
                 {% if has_permission('List_User') %}
                     var users_content_pane = new ContentPane({
                         id: 'users_content_pane',
@@ -144,6 +147,7 @@
                     project_related_data_tab_container.addChild(users_content_pane);
 
                 {% endif %}
+
                 {% if has_permission('List_Ticket') %}
                     var tickets_content_pane = new ContentPane({
                         id: 'tickets_content_pane',
@@ -155,6 +159,7 @@
 
                     project_related_data_tab_container.addChild(tickets_content_pane);
                 {% endif %}
+
                 {% if has_permission('List_Reference') %}
                     var references_content_pane = new ContentPane({
                         id: 'references_content_pane',
