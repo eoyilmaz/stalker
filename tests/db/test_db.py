@@ -372,10 +372,8 @@ class DatabaseTester(unittest2.TestCase):
             len(class_names) * len(defaults.actions) * 2
         )
 
-        from pyramid.security import Allow, Deny
-
         for permission in permission_DB:
-            self.assertTrue(permission.access in [Allow, Deny])
+            self.assertTrue(permission.access in ['Allow', 'Deny'])
             self.assertTrue(permission.action in defaults.actions)
             self.assertTrue(permission.class_name in class_names)
             logger.debug('permission.access: %s' % permission.access)

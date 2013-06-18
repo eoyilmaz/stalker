@@ -21,8 +21,6 @@
 import unittest2
 import logging
 
-from zope.sqlalchemy import ZopeTransactionExtension
-
 from stalker import (db, Repository, Project, Structure, FilenameTemplate,
                      Status, StatusList, Task, Version)
 from stalker.db import DBSession
@@ -48,7 +46,7 @@ class EnvironmentBaseTestCase(unittest2.TestCase):
         """cleanup the test
         """
         DBSession.remove()
-        DBSession.configure(extension=ZopeTransactionExtension)
+        DBSession.configure(extension=None)
 
     def setUp(self):
         """set up the test

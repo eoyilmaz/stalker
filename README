@@ -16,8 +16,8 @@ Features:
  * Uses TaskJuggler as the project planing and tracking backend.
  * Can be used with any kind of databases supported by SQLAlchemy.
  * Can be connected to all the major 3d animation packages like Maya, Houdini,
-   Nuke, XSI, Vue, Blender etc. and any application that has a Python API.
- * Can work as a stand-alone application.
+   Nuke, Softimage, Vue, Blender etc. and any application that has a Python
+   API.
 
 Stalker is build over these other OpenSource projects:
  * Python

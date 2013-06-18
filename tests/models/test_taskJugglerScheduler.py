@@ -21,7 +21,6 @@
 import datetime
 import unittest2
 import os
-from zope.sqlalchemy import ZopeTransactionExtension
 
 from stalker import (db, Department, User, Repository, Status, StatusList,
                      Project, Task, TaskJugglerScheduler, Studio)
@@ -33,7 +32,7 @@ from stalker.db import DBSession
 class TaskJugglerSchedulerTester(unittest2.TestCase):
     """tests the stalker.models.scheduler.TaskJugglerScheduler class
     """
-    
+
     @classmethod
     def setUpClass(cls):
         if DBSession:
@@ -44,8 +43,8 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
     def tearDownClass(cls):
         """clean up the test
         """
-        DBSession.configure(extension=ZopeTransactionExtension())
-    
+        DBSession.configure(extension=None)
+
     def setUp(self):
         """set up the test
         """
@@ -54,13 +53,13 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
             'sqlalchemy.url': 'sqlite:///:memory:',
             'sqlalchemy.echo': False
         })
-        
+
         # replace datetime now function
-        
+
         # create departments
         self.test_dep1 = Department(name='Dep1')
         self.test_dep2 = Department(name='Dep2')
-        
+
         # create resources
         self.test_user1 = User(
             login='user1',
@@ -70,7 +69,7 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
             departments=[self.test_dep1]
         )
         DBSession.add(self.test_user1)
-        
+
         self.test_user2 = User(
             login='user2',
             name='User2',
@@ -79,7 +78,7 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
             departments=[self.test_dep1]
         )
         DBSession.add(self.test_user2)
-        
+
         self.test_user3 = User(
             login='user3',
             name='User3',
@@ -88,7 +87,7 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
             departments=[self.test_dep2]
         )
         DBSession.add(self.test_user3)
-        
+
         self.test_user4 = User(
             login='user4',
             name='User4',
@@ -97,7 +96,7 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
             departments=[self.test_dep2]
         )
         DBSession.add(self.test_user4)
-        
+
         # user with two departments
         self.test_user5 = User(
             login='user5',
@@ -107,7 +106,7 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
             departments=[self.test_dep1, self.test_dep2]
         )
         DBSession.add(self.test_user5)
-        
+
         # user with no departments
         self.test_user6 = User(
             login='user6',
@@ -116,7 +115,7 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
             password='1234'
         )
         DBSession.add(self.test_user6)
-        
+
         # repository
         self.test_repo = Repository(
             name='Test Repository',
@@ -125,7 +124,7 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
             osx_path='/Volumes/T/'
         )
         DBSession.add(self.test_repo)
-        
+
         # statuses
         self.test_status1 = Status(name='Status 1', code='STS1')
         self.test_status2 = Status(name='Status 2', code='STS2')
@@ -137,7 +136,7 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
                            self.test_status3,
                            self.test_status4,
                            self.test_status5])
-        
+
         # status lists
         self.test_proj_status_list = StatusList(
             name='Project Status List',
@@ -145,7 +144,7 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
             target_entity_type='Project'
         )
         DBSession.add(self.test_proj_status_list) 
-        
+
         # create one project
         self.test_proj1 = Project(
             name='Test Project 1',
@@ -157,7 +156,7 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
         )
         DBSession.add(self.test_proj1)
         self.test_proj1.now = datetime.datetime(2013, 4, 4)
-        
+
         # create task status list
         self.test_task_status_list = StatusList(
             name='Task Statuses',
@@ -165,7 +164,7 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
             target_entity_type='Task'
         )
         DBSession.add(self.test_task_status_list)
-        
+
         # create two tasks with the same resources
         self.test_task1 = Task(
             name='Task1',
@@ -177,7 +176,7 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
             status_list=self.test_task_status_list
         )
         DBSession.add(self.test_task1)
-        
+
         self.test_task2 = Task(
             name='Task2',
             project=self.test_proj1,
@@ -189,21 +188,21 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
         )
         DBSession.add(self.test_task2)
         DBSession.commit()
-    
+
     def test_tjp_file_is_created(self):
         """testing if the tjp file is correctly created
         """
         # create the scheduler
         tjp_sched = TaskJugglerScheduler()
         tjp_sched.projects = [self.test_proj1]
-        
+
         tjp_sched._create_tjp_file()
         tjp_sched._create_tjp_file_content()
         tjp_sched._fill_tjp_file()
-        
+
         # check
         self.assertTrue(os.path.exists(tjp_sched.tjp_file_full_path))
-        
+
         # clean up the test
         tjp_sched._clean_up()
 
@@ -293,11 +292,10 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
                 'csv_path': tjp_sched.temp_file_full_path
             }
         )
-        
+
         self.maxDiff = None
         tjp_sched._clean_up()
         self.assertEqual(tjp_sched.tjp_content, expected_tjp_content)
-    
 
     def test_schedule_will_not_work_when_the_studio_attribute_is_None(self):
         """testing if a TypeError will be raised when the studio attribute is
@@ -306,7 +304,7 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
         tjp_sched = TaskJugglerScheduler()
         tjp_sched.studio = None
         self.assertRaises(TypeError, tjp_sched.schedule)
-    
+
     def test_tasks_are_correctly_scheduled(self):
         """testing if the tasks are correctly scheduled
         """
@@ -315,21 +313,21 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
                              now=datetime.datetime(2013, 4, 16, 0, 0))
         test_studio.daily_working_hours = 9
         DBSession.add(test_studio)
-        
+
         tjp_sched.studio = test_studio
         tjp_sched.schedule()
-        
+
         # check if the task and project timings are all adjusted
         self.assertEqual(
             self.test_proj1.computed_start,
             datetime.datetime(2013, 4, 16, 9, 0)
         )
-        
+
         self.assertEqual(
             self.test_proj1.computed_end,
             datetime.datetime(2013, 4, 24, 10, 0)
         )
-        
+
         self.assertEqual(
             self.test_task1.computed_start,
             datetime.datetime(2013, 4, 19, 12, 0)
@@ -338,15 +336,13 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
             self.test_task1.computed_end,
             datetime.datetime(2013, 4, 24, 10, 0)
         )
-        
+
         self.assertEqual(
             self.test_task2.computed_start,
             datetime.datetime(2013, 4, 16, 9, 0)
         )
-        
+
         self.assertEqual(
             self.test_task2.computed_end,
             datetime.datetime(2013, 4, 19, 12, 0)
         )
-
-

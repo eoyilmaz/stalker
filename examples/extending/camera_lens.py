@@ -2,6 +2,8 @@
 # Stalker a Production Asset Management System
 # Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
 # 
+# This file is part of Stalker.
+# 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation;
@@ -23,7 +25,7 @@ new type of classes which are derived from the
 One of our new classes is going to hold information about Camera, or more
 specifically it will hold the information of the Camera used on the set for a
 shooting. The Camera class should hold these information:
- 
+
  * The make of the camera
  * The model of the camera
  * specifications like:
@@ -64,30 +66,30 @@ not using any properties we are mapping the tables directly to our classes
 without setting up any synonyms for our attributes.
 """
 
-from sqlalchemy import Table, Column, Integer, Float, ForeignKey, String
+from sqlalchemy import Column, Integer, Float, ForeignKey, String
 from stalker import Entity
 
 
 class Camera(Entity):
     """The Camera class holds basic information about the Camera used on the
     sets.
-    
+
     :param make: the make of the camera
-    
+
     :param model: the model of the camera
-    
+
     :param aperture_gate: the aperture gate opening distance
-    
-    :param horizontal_film_back: the horizantal length of the filmback
-    
-    :param vertical_film_back: the vertical length of the filmback
-    
+
+    :param horizontal_film_back: the horizontal length of the film back
+
+    :param vertical_film_back: the vertical length of the film back
+
     :param web_page: the web page of the camera    
     """
-    
+
     __tablename__ = 'Cameras'
     __mapper_args__ = {'polymorphic_identity': 'Camera'}
-    
+
     camera_id = Column('id', Integer, ForeignKey('Entities.id'),
                        primary_key=True)
     make = Column(String)
@@ -96,7 +98,7 @@ class Camera(Entity):
     horizontal_film_back = Column(Float(presicion=4), default=0)
     vertical_film_back = Column(Float(precision=4), default=0)
     web_page = Column(String)
-    
+
     def __init__(self,
                  make="",
                  model="",
@@ -107,7 +109,7 @@ class Camera(Entity):
                  **kwargs):
         # pass all the extra data to the super (which is Entity)
         super(Camera, self).__init__(**kwargs)
-        
+
         self.make = make
         self.model = model
         self.aperture_gate = aperture_gate
@@ -118,21 +120,21 @@ class Camera(Entity):
 
 class Lens(Entity):
     """The Lens class holds data about lenses used in shootings
-    
+
     :param make: the make of the lens
-    
+
     :param model: the model of the lens
-    
+
     :param min_focal_length: the min_focal_length
-    
+
     :param max_focal_length: the max_focal_length
-    
+
     :param web_page: the product web page
     """
-    
+
     __tablename__ = 'Lenses'
     __mapper_args__ = {'polymorphic_identity': 'Lens'}
-    
+
     lens_id = Column('id', Integer, ForeignKey('Entities.id'),
                      primary_key=True)
     make = Column(String)
@@ -140,7 +142,7 @@ class Lens(Entity):
     min_focal_length = Column(Float(precision=1))
     max_focal_length = Column(Float(precision=1))
     web_page = Column(String)
-    
+
     def __init__(self,
                  make="",
                  model="",

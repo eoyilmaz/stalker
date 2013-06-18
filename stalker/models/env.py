@@ -200,12 +200,12 @@ class EnvironmentBase(object):
         This method is different than
         :meth:`~stalker.env.EnvironmentBase.get_version_from_full_path`
         because it returns a list of
-        :class:`~oyProjectManager.models.version.Version` instances which are
+        :class:`~stalker.models.version.Version` instances which are
         residing in that path. The list is ordered by the ``id``\ s of the
         instances.
 
         :param path: A path which has possible
-            :class:`~oyProjectManager.models.version.Version` instances.
+            :class:`~stalker.models.version.Version` instances.
 
         :return: A list of :class:`~stalker.models.version.Version` instances.
         """

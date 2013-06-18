@@ -25,8 +25,6 @@ import tempfile
 import datetime
 import unittest2
 
-from zope.sqlalchemy import ZopeTransactionExtension
-
 from stalker import defaults, db, User
 from stalker.db import DBSession
 from stalker.models.auth import LocalSession
@@ -48,7 +46,7 @@ class LocalSessionTester(unittest2.TestCase):
         """clean up the test in class level
         """
         DBSession.remove()
-        DBSession.configure(extension=ZopeTransactionExtension)
+        DBSession.configure(extension=None)
 
     def setUp(self):
         """setup the test

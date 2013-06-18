@@ -1,7 +1,6 @@
 import os
 
 from setuptools import setup, find_packages
-import stalker
 
 here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README')).read()
@@ -10,14 +9,14 @@ CHANGES = open(os.path.join(here, 'CHANGELOG')).read()
 requires = [
     'sqlalchemy>=0.8',
     'alembic',
-    'pyseq',
+    #'pyseq',
     'jinja2',
     'unittest2',
-    'sphinx==1.1.3',
+    #'sphinx==1.1.3',
 ]
 
 setup(name='stalker',
-      version=stalker.__version__,
+      version='0.2.0.rc1',
       description='A Production Asset Management (ProdAM) System',
       long_description=README + '\n\n' +  CHANGES,
       classifiers=[
@@ -42,7 +41,7 @@ setup(name='stalker',
                 'vue'],
       packages=find_packages(),
       include_package_data=True,
-      zip_safe=False,
+      zip_safe=True,
       test_suite='stalker',
       install_requires=requires,
 )

@@ -2,6 +2,8 @@
 # Stalker a Production Asset Management System
 # Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
 # 
+# This file is part of Stalker.
+# 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation;
@@ -23,14 +25,15 @@ is also mixed in with :class:`stalker.models.mixins.StatusMixin`.
 from sqlalchemy import Column, Integer, ForeignKey
 from stalker import SimpleEntity, StatusMixin
 
+
 class NewStatusedEntity(SimpleEntity, StatusMixin):
     """The new statused entity class, which is a new simpleEntity with status
     abilities.
     """
-    
+
     __tablename__ = 'NewStatusedEntities'
     __mapper_args__ = {'polymorphic_identity': 'NewStatusedEntity'}
-    
+
     new_statused_entity_id = Column('id', Integer,
                                     ForeignKey('SimpleEntities.id'),
                                     primary_key=True)

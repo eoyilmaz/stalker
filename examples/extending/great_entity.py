@@ -2,6 +2,8 @@
 # Stalker a Production Asset Management System
 # Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
 # 
+# This file is part of Stalker.
+# 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation;
@@ -25,11 +27,12 @@ To create your own data type, just derive it from a suitable SOM class.
 from sqlalchemy import Column, Integer, ForeignKey
 from stalker import SimpleEntity, ReferenceMixin
 
+
 class GreatEntity(SimpleEntity, ReferenceMixin):
     """The new great entity class, which is a new simpleEntity with
     ReferenceMixin
     """
-    
-    __tablename__ = 'GreatEntities'    
+
+    __tablename__ = 'GreatEntities'
     great_entity_id = Column('id', Integer, ForeignKey('SimpleEntities.c.id'),
                              primary_key=True)

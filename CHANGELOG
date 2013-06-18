@@ -5,8 +5,10 @@ Stalker Changes
 0.2.0.rc1
 =========
 
-* Moved the Pyramid part of the system to another package called
+* **Update:** Moved the Pyramid part of the system to another package called
   **stalker_pyramid**.
+* **Fix:** Fixed ``setup.py`` where importing ``stalker`` to get the
+  ``__version__`` variable causing problems.
 
 0.2.0.b9
 ========
@@ -159,53 +161,16 @@ Stalker Changes
   standard.
 * Implementation of the Studio class is finished. The scheduling works like a
   charm.
-* Added dialogCreator.js which helps creating a dialog without having a widget
-  (Button or MenuItem) calling it and updated dialogCaller.js to use
-  dialogCreator while creating a dialog.
 * It is now possible to use any characters in SimpleEntity.name and the derived
   classes.
-* jQueryGantt:
-
-  * Fix; t is now possible to correctly move a TaskBar without getting in to
-    an infinite loop which was freezing the browser.
-  * The timing resolution of jQueryGantt is now 1 hour.
-  * Fix; GanttMaster.task_ids were not properly cleaned in GanttMaster.reset(),
-    resulting wrong links to be created.
-  * Added a new zoom level where it is possible to see the every 1 hour of 1
-    day.
-  * Colorized the Sunday column in suitable zoom levels. In upcoming releases
-    it will use the stalker.models.studio.Studio.working_hours attribute to
-    determine if the day/hour is an off day/hour.
-  * Disabled editing of date fields.
-  * Disabled undo/redo queue for performance test.
-  * Fixed vertical overflow in gantt chart.
-  * It is now possible to not to align a tasks start to its dependent tasks
-    end.  
-
-* The Shot, Asset, Sequence detail pages under the Project Overview now opens
-  inside the related tab on the Project Page.
 * Booking class is renamed to TimeLog.
 
 0.2.0.a10
 =========
 
-* jQueryGantt:
-
-  * jQueryGantt is now using the Task ids coming from Stalker instead of the
-    ridiculous rowId.
-  * Fixed a lot of issues related with the new data structure, it seems
-    everything is working properly right now.
-  * Parent Tasks displayed differently than the leaf tasks (on paar with the
-    other gantt charts).
-  * Gantt chart in User Detail page is now showing the parent tasks of the
-    tasks of the user.
-  * Now there are two different context menus for container/parent tasks and
-    leaf tasks.
-
 * Added new attribute to WorkingHours class called ``weekly_working_hours``,
   which calculates the weekly working hours based on the working hours defined
   in the instance.
-* Updated the Create Task Dialog to reflect the TaskJuggler integration.
 * Task class now has a new attribute called ``schedule_timing`` which is
   replacing the ``effort``, ``length`` and ``duration`` attributes. Together
   with the ``schedule_model`` attribute it will be used in scheduling the Task.
@@ -260,8 +225,6 @@ Stalker Changes
 
 * TagSelect now can be filled by setting its ``value`` attribute (Ex:
   TagSelect.set('value', data))
-* Fixed Projects menu in base.jinja2, the link is now updating correctly when a
-  new project is added.
 * Added a new method called ``is_root`` to Task class. It is true for tasks
   where there are no parents.
 * Added a new attribute called ``users`` to the Department class which is a
@@ -281,8 +244,6 @@ Stalker Changes
   created task is depending to another task which is set as the dependee for
   this newly created task (T1 -> T3 -> T2 -> T1 (parent relation) -> T3 -> T2
   etc.).
-* jQueryGantt: Moving any child task will adjust the parent start and end dates
-  so they fit to the children.
 
 0.2.0.a7
 ========
@@ -376,38 +337,14 @@ Stalker Changes
 * Added a new class called ``Scene`` to manage Shots with another property.
 * Removed the ``output_path`` attribute in FilenameTemplate class.
 * Grouped the templates for each entity under a directory with the entity name.
-* Converted the ``view.py`` to a python module and put the views for each
-  entity to its own python file.
 
 0.2.0.a6
 ========
 
-* Added a new Dojo Widget called Tag to help the creation of the tags in the
-  TagSelect.
 * Users now can have more than one Department.
-* Updated java scripts to be `required` in Dojo AMD way.
-* Updated setup.py to include "pyramid_jinja2"
 * User instances now have two new properties for getting the user tickets
   (User.tickets) and the open tickets (User.open_tickets).
 * New shortcut Task.project returns the Task.task_of.project value.
-* Added 'PlaceHolder' property for 'FilterSelect Widgets'. And 'Label' property
-  is used in construction of 'PlaceHolder' property.
-* Set disabled prerequisite fields, until their prerequisite is selected.
-* Added 'StartDate', 'EndDate' and 'Duration' field to add_project page.
-  'StartDate', 'EndDate' properties are written on database.
-* jQueryGannt:
-
-  * Gannt view is now communicating with Stalker correctly. The only left issue
-    is the end date value is not properly shown in the gannt view.
-  * Updated the jQueryGannt css's to work with Stalker and Dojo.
-
-* Project page is redesigned. SplitContainer is removed. All contents are
-  displayed in TabContainer. New Contents in TabContainer are:
-
-    * ProjectName (Disabled Field - Used for displaying projectname.)
-    * Overview  (It has InlineEditable fields. Although they are not connected
-      to DB.)
-
 * Shot and Asset creation dialogs now automatically updated with the given
   Project instance info.
 * User overview page is now reflection the new design.
@@ -438,9 +375,6 @@ Stalker Changes
 
 * Fixed an autoflush issue with SQLAlchemy in StatusList class. Now the status
   column is again not nullable in StatusMixin.
-* The WebUI form fields are now refreshed with newly added data.
-* Added a new Dojo widget called TagSelect. Which is basically a widget for
-  adding Tag style widgets.
 
 0.2.0.a4
 ========
@@ -547,9 +481,6 @@ Stalker Changes
 0.2.0.a1
 ========
 
-* Converted the whole system to a Pyramid Web application. If the previous
-  implementations investigated, it will be understood that it was only the
-  database model of a Web Application.
 * Changed the ``db.setup`` arguments. It is now accepting a dictionary instead
   of just a string to comply with the SQLAlchemy scaffold and this dictionary
   should contain keys for the SQLAlchemy engine setup. There is another utility

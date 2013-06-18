@@ -1,5 +1,4 @@
 include *.txt *.ini *.cfg *.rst
-recursive-include stalker *.ico *.png *.css *.gif *.jpg *.pt *.txt *.mak *.mako *.js *.html *.xml *.jinja2
 
 include CHANGELOG
 include TODO
