@@ -132,9 +132,8 @@ class Permission(Base):
     Example: Let say that you want to create a Permission specifying a Group of
     Users are allowed to create Projects::
 
-      import transaction
       from stalker import db
-      from stalker.db.session import DBSession, transaction
+      from stalker.db.session import DBSession
       from stalker.models.auth import User, Group, Permission
 
       # first setup the db with the default database
@@ -167,7 +166,7 @@ class Permission(Base):
 
       # and persist this information in the database
       DBSession.add(group)
-      transaction.commit()
+      DBSession.commit()
     """
     __tablename__ = 'Permissions'
     __table_args__  = (

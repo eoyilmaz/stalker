@@ -23,7 +23,7 @@ from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy import orm
 from stalker import db
 from stalker.models.mixins import StatusMixin
-from stalker.db.session import DBSession, ZopeTransactionExtension
+from stalker.db.session import DBSession
 from stalker.models.status import Status, StatusList
 from stalker.models.entity import SimpleEntity
 
@@ -40,7 +40,7 @@ class StatMixClass(SimpleEntity, StatusMixin):
 class StatusMixinTester(unittest2.TestCase):
     """tests the StatusMixin class
     """
-    
+
     def setUp(self):
         """setup the test
         """
@@ -49,12 +49,12 @@ class StatusMixinTester(unittest2.TestCase):
         self.test_status3 = Status(name="Status3", code="STS3")
         self.test_status4 = Status(name="Status4", code="STS4")
         self.test_status5 = Status(name="Status5", code="STS5")
-        
+
         # statuses which are not going to be used
         self.test_status6 = Status(name="Status6", code="STS6")
         self.test_status7 = Status(name="Status7", code="STS7")
         self.test_status8 = Status(name="Status8", code="STS8")
-        
+
         # a test StatusList object
         self.test_status_list1 = StatusList(
             name="Test Status List 1",
@@ -67,7 +67,7 @@ class StatusMixinTester(unittest2.TestCase):
                 ],
             target_entity_type="StatMixClass",
             )
-        
+
         # another test StatusList object
         self.test_status_list2 = StatusList(
             name="Test Status List 2",
@@ -80,7 +80,7 @@ class StatusMixinTester(unittest2.TestCase):
             ],
             target_entity_type="StatMixClass",
             )
-        
+
         self.kwargs = {
             "name": "Test Class",
             "status_list": self.test_status_list1,
@@ -92,7 +92,7 @@ class StatusMixinTester(unittest2.TestCase):
 
         # create another one without status_list set to something
         self.test_mixed_obj2 = StatMixClass(**self.kwargs)
-    
+
     #def tearDown(self):
     #    """clean up the test
     #    """
@@ -104,7 +104,7 @@ class StatusMixinTester(unittest2.TestCase):
         """
         self.kwargs["status_list"] = None
         self.assertRaises(TypeError, StatMixClass, **self.kwargs)
-    
+
     def test_status_list_argument_is_not_a_StatusList_instance(self):
         """testing if TypeError is going to be raised when trying to initialize
         status_list with something other than a StatusList
@@ -113,7 +113,7 @@ class StatusMixinTester(unittest2.TestCase):
         for testValue in testValues:
             self.kwargs["status_list"] = testValue
             self.assertRaises(TypeError, StatMixClass, **self.kwargs)
-    
+
     def test_status_list_attribute_set_to_something_other_than_StatusList(self):
         """testing if TypeError is going to be raised when trying to set the
         status_list to something else than a StatusList object
@@ -385,7 +385,7 @@ class StatusMixinDBTester(unittest2.TestCase):
         """clear test in class level
         """
         DBSession.remove()
-        DBSession.configure(extension=ZopeTransactionExtension)
+        DBSession.configure(extension=None)
     
     def setUp(self):
         """setup the test

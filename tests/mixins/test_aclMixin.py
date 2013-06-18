@@ -22,7 +22,7 @@
 import unittest2
 from sqlalchemy import Column, Integer
 from stalker import db
-from stalker.db.session import DBSession, ZopeTransactionExtension
+from stalker.db.session import DBSession
 
 from stalker.models.mixins import ACLMixin
 from stalker.db.declarative import Base
@@ -51,7 +51,7 @@ class ACLMixinTester(unittest2.TestCase):
         """cleanup the test in class level
         """
         DBSession.remove()
-        DBSession.configure(extension=ZopeTransactionExtension)
+        DBSession.configure(extension=None)
     
     def setUp(self):
         """setup the test

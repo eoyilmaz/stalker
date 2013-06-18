@@ -28,12 +28,12 @@ logger = logging.getLogger(__name__)
 
 class Config(object):
     """Config abstraction
-    
+
     Idea is coming from Sphinx config.
-    
+
     Holds system wide configuration variables. See
     `configuring stalker`_ for more detail.
-    
+
     .. _configuring stalker: ../configure.html
     """
 

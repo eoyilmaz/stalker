@@ -23,11 +23,9 @@ from sqlalchemy.orm import (
     sessionmaker,
 )
 
-from zope.sqlalchemy import ZopeTransactionExtension
-
 # SQLAlchemy session manager
 DBSession = scoped_session(
     sessionmaker(
-        extension=ZopeTransactionExtension()
+        extension=None
     )
 )

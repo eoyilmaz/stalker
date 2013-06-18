@@ -26,6 +26,7 @@ from stalker import Type, User
 # create a new class deriving from the SimpleEntity
 from stalker.models.entity import SimpleEntity
 
+
 class newClass(SimpleEntity):
     __strictly_typed__ = True
 
@@ -77,14 +78,15 @@ class SimpleEntityTester(unittest2.TestCase):
             ("_testName", "_testName"),
             ("2423$+^^+^'%+%%&_testName", "2423$+^^+^'%+%%&_testName"),
             ("2423$+^^+^'%+%%&_testName_35", "2423$+^^+^'%+%%&_testName_35"),
-            ("2423$ +^^+^ '%+%%&_ testName_ 35", "2423$ +^^+^ '%+%%&_ testName_ 35"),
+            ("2423$ +^^+^ '%+%%&_ testName_ 35",
+             "2423$ +^^+^ '%+%%&_ testName_ 35"),
             ("SH001", "SH001"),
             ("46-BJ-3A", "46-BJ-3A"),
             ('304-sb-0403-0040', '304-sb-0403-0040'),
             ("Ozgur    Yilmaz\n\n\n", "Ozgur Yilmaz"),
             ("     Ozgur Yilmaz    ", "Ozgur Yilmaz")
         ]
-        
+
         self.nice_name_test_values = [
             ("testName", "testName"),
             ("1testName", "1testName"),
@@ -98,12 +100,12 @@ class SimpleEntityTester(unittest2.TestCase):
              "this_is_another_name_for_an_asset"),
             ("Ozgur    Yilmaz\n\n\n", "Ozgur_Yilmaz"),
         ]
-    
+
     def test___auto_name__attribute_is_True(self):
         """testing if the __auto_name__ class attribute is set to True
         """
         self.assertTrue(SimpleEntity.__auto_name__)
-    
+
     def test_name_argument_is_None(self):
         """testing if the name attribute will be automatically generated if the
         name argument is None
@@ -111,14 +113,14 @@ class SimpleEntityTester(unittest2.TestCase):
         self.kwargs["name"] = None
         new_simple_entity = SimpleEntity(**self.kwargs)
         self.assertTrue(new_simple_entity.name)
-    
+
     def test_name_attribute_is_set_to_None(self):
         """testing if the name attribute will be set to an automatic value if
         it is set to None
         """
         self.test_simple_entity.name = ''
         self.assertTrue(self.test_simple_entity.name)
-    
+
     def test_name_argument_is_empty_string(self):
         """testing if the name attribute will be set to an automatic value if
         the name argument is an empty string
@@ -126,14 +128,14 @@ class SimpleEntityTester(unittest2.TestCase):
         self.kwargs["name"] = ""
         new_simple_entity = SimpleEntity(**self.kwargs)
         self.assertTrue(new_simple_entity.name)
-    
+
     def test_name_attribute_is_set_to_empty_string(self):
         """testing if the name attribute will be set to an automatic value if
         it is set to an automatic value
         """
         self.test_simple_entity.name = ''
         self.assertTrue(self.test_simple_entity)
-    
+
     def test_name_argument_is_not_a_string_or_unicode_instance_or_None(self):
         """testing if a TypeError will be raised when the name argument is not
         a string or unicode or None
@@ -141,13 +143,13 @@ class SimpleEntityTester(unittest2.TestCase):
         test_values = [
             12132,
             [1, "name"],
-                {"a": "name"}
+            {"a": "name"}
         ]
-        
+
         for test_value in test_values:
             self.kwargs["name"] = test_value
             self.assertRaises(TypeError, SimpleEntity, **self.kwargs)
-    
+
     def test_name_attribute_is_not_string_or_unicode_or_None(self):
         """testing if a TypeError will be raised when the name attribute is
         not a string or unicode or None
@@ -159,21 +161,22 @@ class SimpleEntityTester(unittest2.TestCase):
         for test_value in test_values:
             self.assertRaises(TypeError, setattr, self.test_simple_entity,
                               "name", test_value)
-    
+
     def test_name_attribute_is_formatted_correctly(self):
         """testing if name is formatted correctly
         """
         for test_value in self.name_test_values:
             # set the new name
             self.test_simple_entity.name = test_value[0]
-            
+
             self.assertEqual(
                 self.test_simple_entity.name,
                 test_value[1],
-                "\nfor     : %s\nexpected: %s\ngot     : %s" %\
-                (str(test_value[0]), test_value[1], self.test_simple_entity.name)
+                "\nfor     : %s\nexpected: %s\ngot     : %s" % \
+                (str(test_value[0]), test_value[1],
+                 self.test_simple_entity.name)
             )
-    
+
     def test_nice_name_attribute_is_formatted_correctly(self):
         """testing if nice name attribute is formatted correctly
         """
@@ -183,7 +186,7 @@ class SimpleEntityTester(unittest2.TestCase):
             self.assertEqual(
                 self.test_simple_entity.nice_name,
                 test_value[1],
-                "the nice name attribute is not correctly formatted for, " +\
+                "the nice name attribute is not correctly formatted for, " + \
                 test_value[0] + ", " + test_value[1]
             )
 
@@ -226,7 +229,7 @@ class SimpleEntityTester(unittest2.TestCase):
             new_simple_entity = SimpleEntity(**self.kwargs)
 
             self.assertIsInstance(new_simple_entity.description,
-                (str, unicode))
+                                  (str, unicode))
 
     def test_description_attribute_string_conversion(self):
         """testing if description attribute will be converted to string
@@ -237,7 +240,7 @@ class SimpleEntityTester(unittest2.TestCase):
         for test_value in test_values:
             self.test_simple_entity.description = test_value
             self.assertIsInstance(self.test_simple_entity.description,
-                (str, unicode))
+                                  (str, unicode))
 
     def test_equality(self):
         """testing the equality of two simple entities
@@ -606,18 +609,20 @@ class SimpleEntityTester(unittest2.TestCase):
 
         # restore the stalker.__version__
         stalker.__version__ = current_version
-    
+
     def test_generic_data_attribute_can_hold_a_wide_variety_of_object_types(self):
         """testing if the generic_data attribute can hold any kind of object as
         a list
         """
-        
+
         from stalker.db.session import DBSession
+
         DBSession.remove()
         DBSession.configure(extension=None)
         from stalker import db
+
         db.setup()
-        
+
         new_simpleEntity = SimpleEntity(**self.kwargs)
         test_user = User(
             name='email',
@@ -625,25 +630,27 @@ class SimpleEntityTester(unittest2.TestCase):
             email='email@email.com',
             password='email',
         )
-        
+
         from stalker import Department
-        
+
         test_department = Department(
             name='department1'
         )
-        
+
         from stalker import Repository
-        
+
         test_repo = Repository(
             name='Test Repository'
         )
-        
+
         from stalker import Structure
+
         test_struct = Structure(
             name='Test Project Structure'
         )
-        
+
         from stalker import Status, StatusList
+
         test_project_status_list = StatusList(
             name='Project Status List',
             target_entity_type='Project',
@@ -651,9 +658,9 @@ class SimpleEntityTester(unittest2.TestCase):
                 Status(name='Active', code='ACT')
             ]
         )
-        
+
         from stalker import Project
-        
+
         test_proj = Project(
             name='Test Project 1',
             code='tp1',
@@ -661,33 +668,33 @@ class SimpleEntityTester(unittest2.TestCase):
             structure=test_struct,
             status_list=test_project_status_list
         )
-        
+
         new_simpleEntity.generic_data.extend(
             [test_proj, test_project_status_list, test_struct, test_repo,
              test_department, test_user]
         )
-        
+
         DBSession.add(new_simpleEntity)
         DBSession.commit()
-        
+
         # now check if it is added to the database correctly
         del new_simpleEntity
-        
-        new_simpleEntity_DB = SimpleEntity.query\
-            .filter_by(name=self.kwargs['name'])\
+
+        new_simpleEntity_DB = SimpleEntity.query \
+            .filter_by(name=self.kwargs['name']) \
             .first()
-        
+
         self.assertTrue(test_proj in new_simpleEntity_DB.generic_data)
-        self.assertTrue(test_project_status_list in new_simpleEntity_DB.generic_data)
+        self.assertTrue(
+            test_project_status_list in new_simpleEntity_DB.generic_data)
         self.assertTrue(test_struct in new_simpleEntity_DB.generic_data)
         self.assertTrue(test_repo in new_simpleEntity_DB.generic_data)
         self.assertTrue(test_department in new_simpleEntity_DB.generic_data)
         self.assertTrue(test_user in new_simpleEntity_DB.generic_data)
-        
+
         DBSession.remove()
-        from stalker.db.session import ZopeTransactionExtension
-        DBSession.configure(extension=ZopeTransactionExtension)
-    
+        DBSession.configure(extension=None)
+
     def test_thumbnail_argument_is_skipped(self):
         """testing if the thumbnail attribute will be None when the thumbnail
         argument is skipped
@@ -696,51 +703,53 @@ class SimpleEntityTester(unittest2.TestCase):
             self.kwargs.pop('thumbnail')
         except KeyError:
             pass
-        
+
         new_simple_entity = SimpleEntity(**self.kwargs)
         self.assertIsNone(new_simple_entity.thumbnail)
-    
+
     def test_thumbnail_argument_is_None(self):
         """testing if the thumbnail argument can be None
         """
         self.kwargs['thumbnail'] = None
         new_simple_entity = SimpleEntity(**self.kwargs)
         self.assertIsNone(new_simple_entity.thumbnail)
-    
+
     def test_thumbnail_attribute_is_None(self):
         """testing if the thumbnail attribute can be set to None
         """
         self.test_simple_entity.thumbnail = None
         self.assertEqual(self.test_simple_entity.thumbnail, None)
-    
+
     def test_thumbnail_argument_is_not_a_Link_instance(self):
         """testing if a TypeError will be raised when the thumbnail argument is
         not a Link instance
         """
         self.kwargs['thumbnail'] = 'not a Link'
         self.assertRaises(TypeError, SimpleEntity, **self.kwargs)
-    
+
     def test_thumbnail_attribute_is_not_a_Link_instance(self):
         """testing if a TypeError will be raised when the thumbnail attribute
         is set to something other than a Link instance (and None)
         """
         self.assertRaises(TypeError, setattr, self.test_simple_entity,
                           'thumbnail', 'not a Link')
-    
+
     def test_thumbnail_argument_is_working_properly(self):
         """testing if the thumbnail argument value is passed to the thumbnail
         attribute correctly
         """
         from stalker import Link
+
         thumb = Link(full_path='some path')
         self.kwargs['thumbnail'] = thumb
         new_simple_entity = SimpleEntity(**self.kwargs)
         self.assertEqual(new_simple_entity.thumbnail, thumb)
-    
+
     def test_thumbnail_attribute_is_working_properly(self):
         """testing if the thumbnail attribute is working properly
         """
         from stalker import Link
+
         thumb = Link(full_path='some path')
         self.assertNotEqual(self.test_simple_entity.thumbnail, thumb)
         self.test_simple_entity.thumbnail = thumb

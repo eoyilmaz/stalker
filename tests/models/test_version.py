@@ -22,7 +22,7 @@ import unittest2
 from stalker import (Link, Project, Repository, Sequence, Shot, Status,
                      StatusList, Task, Type, Version, FilenameTemplate, Structure)
 from stalker import db
-from stalker.db.session import DBSession, ZopeTransactionExtension
+from stalker.db.session import DBSession
 
 from stalker import config
 from stalker.exceptions import CircularDependencyError
@@ -52,7 +52,7 @@ class VersionTester(unittest2.TestCase):
         """clean up the test in class level
         """
         DBSession.remove()
-        DBSession.configure(extension=ZopeTransactionExtension)
+        DBSession.configure(extension=None)
 
     def setUp(self):
         """setup the test

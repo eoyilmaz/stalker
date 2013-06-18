@@ -20,7 +20,7 @@
 
 import unittest2
 from stalker.models.auth import User, Group
-from stalker.db.session import DBSession, ZopeTransactionExtension
+from stalker.db.session import DBSession
 
 class GroupTester(unittest2.TestCase):
     """tests the stalker.models.auth.Group class
@@ -38,7 +38,7 @@ class GroupTester(unittest2.TestCase):
         """clear the test in class level
         """
         DBSession.remove()
-        DBSession.configure(extension=ZopeTransactionExtension)
+        DBSession.configure(extension=None)
     
     def setUp(self):
         """set up the test in method level

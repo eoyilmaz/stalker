@@ -28,7 +28,7 @@ from stalker import config
 
 defaults = config.Config()
 
-from stalker.db.session import DBSession, ZopeTransactionExtension
+from stalker.db.session import DBSession
 
 import logging
 from stalker import log
@@ -51,7 +51,7 @@ class ProjectTester(unittest2.TestCase):
     def tearDownClass(cls):
         """clean up the test
         """
-        DBSession.configure(extension=ZopeTransactionExtension())
+        DBSession.configure(extension=None)
     
     def tearDown(self):
         """tearDown the tests

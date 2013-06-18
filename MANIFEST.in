@@ -9,8 +9,6 @@ include MANIFEST.in
 include COPYING
 include COPYING.LESSER
 include doTests
-include development.ini
-include production.ini
 recursive-include alembic *
 recursive-include docs *
 recursive-include examples *

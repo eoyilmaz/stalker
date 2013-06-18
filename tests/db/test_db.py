@@ -25,7 +25,7 @@ import unittest2
 import tempfile
 from sqlalchemy.exc import IntegrityError
 
-from stalker.db.session import DBSession, ZopeTransactionExtension
+from stalker.db.session import DBSession
 from stalker import (db, defaults, Asset, Department, SimpleEntity, Entity,
                      ImageFormat, Link, Note, Project, Repository, Sequence,
                      Shot, Status, StatusList, Structure, Tag, Task, Type,
@@ -53,7 +53,7 @@ class DatabaseTester(unittest2.TestCase):
     def tearDownClass(cls):
         """clean up the test
         """
-        DBSession.configure(extension=ZopeTransactionExtension())
+        DBSession.configure(extension=None)
 
     def setUp(self):
         """setup the tests
@@ -471,7 +471,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         """
         # delete the default test database file
         #os.remove(cls.TEST_DATABASE_FILE)
-        DBSession.configure(extension=ZopeTransactionExtension())
+        DBSession.configure(extension=None)
 
     def setUp(self):
         """setup the test

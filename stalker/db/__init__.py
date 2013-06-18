@@ -25,10 +25,8 @@ Whenever stalker.db or something under it imported, the
 
 import logging
 
-import transaction
 from sqlalchemy import engine_from_config
 from sqlalchemy.exc import IntegrityError
-from transaction.interfaces import TransactionFailedError
 
 from stalker import defaults
 from stalker.db.declarative import Base
@@ -41,15 +39,15 @@ logger.setLevel(logging_level)
 
 def setup(settings=None, callback=None):
     """Utility function that helps to connect the system to the given database.
-    
+
     if the database is None then the it setups using the default database in
     the settings file.
-    
+
     :param settings: This is a dictionary which has keys prefixed with
         "sqlalchemy" and shows the settings. The most important one is the
         engine. The default is None, and in this case it uses the settings from
         stalker.config.Config.database_engine_settings
-    
+
     :param callback: A callback function which is called after database is
         initialized. It is a good place to register your own classes.
    """
@@ -448,7 +446,7 @@ def register(class_):
 
     try:
         DBSession.commit()
-    except (IntegrityError, TransactionFailedError):
+    except IntegrityError:
         DBSession.rollback()
     else:
         DBSession.flush()

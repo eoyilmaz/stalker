@@ -34,7 +34,7 @@ logger.setLevel(log.logging_level)
 
 class SchedulerBase(object):
     """This is the base class for schedulers.
-    
+
     All the schedulers should be derived from this class.
     """
     def __init__(self, studio=None):
@@ -155,8 +155,6 @@ class TaskJugglerScheduler(SchedulerBase):
         """
         logger.debug('csv_file_full_path : %s' % self.csv_file_full_path)
 
-        import transaction
-
         with open(self.csv_file_full_path, 'r') as self.csv_file:
             csv_content = csv.reader(self.csv_file, delimiter=';')
             lines = [line for line in csv_content]
@@ -176,8 +174,6 @@ class TaskJugglerScheduler(SchedulerBase):
                     entity.computed_start = start_date
                     entity.computed_end = end_date
 
-        transaction.commit()
-    
     def schedule(self):
         """does the scheduling
         """

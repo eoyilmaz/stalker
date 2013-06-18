@@ -8,8 +8,6 @@ projects. Stalker is licensed under LGPL v2.1.
 
 Features:
  * Designed for animation and VFX Studios.
- * It is a Pyramid Web Application and also SOM (Stalker Object Model) API can
-   be used as a Python library.
  * Platform independent.
  * Default installation handles nearly all the asset and project management 
    needs of an animation and vfx studio.
@@ -23,23 +21,9 @@ Features:
 
 Stalker is build over these other OpenSource projects:
  * Python
- * Pyramid
  * SQLAlchemy and Alembic
  * Jinja2
  * TaskJuggler
-
-
-.. Getting Started
-   ===============
-   
-   - cd <directory containing this file>
-   
-   - $venv/bin/python setup.py develop
-   
-   - $venv/bin/populate_stalker development.ini
-   
-   - $venv/bin/pserve development.ini
-
 
 Source
 ======
