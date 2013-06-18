@@ -28,6 +28,7 @@ import logging
 import transaction
 from sqlalchemy import engine_from_config
 from sqlalchemy.exc import IntegrityError
+from transaction.interfaces import TransactionFailedError
 
 from stalker import defaults
 from stalker.db.declarative import Base
@@ -444,7 +445,7 @@ def register(class_):
 
     try:
         transaction.commit()
-    except IntegrityError:
+    except IntegrityError, TransactionFailedError:
         transaction.abort()
     else:
         DBSession.flush()
