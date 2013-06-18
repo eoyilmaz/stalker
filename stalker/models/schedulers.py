@@ -154,9 +154,9 @@ class TaskJugglerScheduler(SchedulerBase):
         computed end values
         """
         logger.debug('csv_file_full_path : %s' % self.csv_file_full_path)
-        
+
         import transaction
-        
+
         with open(self.csv_file_full_path, 'r') as self.csv_file:
             csv_content = csv.reader(self.csv_file, delimiter=';')
             lines = [line for line in csv_content]
@@ -166,13 +166,16 @@ class TaskJugglerScheduler(SchedulerBase):
                 entity_id = int(id_line.split('.')[-1].split('_')[-1])
                 entity = Entity.query.filter(Entity.id==entity_id).first()
                 if entity:
-                    start_date = datetime.datetime.strptime(data[1],
-                                                            "%Y-%m-%d-%H:%M")
-                    end_date = datetime.datetime.strptime(data[2],
-                                                            "%Y-%m-%d-%H:%M")
+                    start_date = datetime.datetime.strptime(
+                        data[1], "%Y-%m-%d-%H:%M"
+                    )
+                    end_date = datetime.datetime.strptime(
+                        data[2],
+                        "%Y-%m-%d-%H:%M"
+                    )
                     entity.computed_start = start_date
                     entity.computed_end = end_date
-        
+
         transaction.commit()
     
     def schedule(self):

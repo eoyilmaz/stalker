@@ -133,17 +133,21 @@ require([
 
         start_date_value = new Date();// set it today by default
         end_date_value = new Date();// set it today by default
-        start_time_value = 'T10:00:00';
-        end_time_value = 'T19:00:00';
+        start_time_value = start_date_value.clearTime();
+        end_time_value = end_date_value.clearTime();
+        // now set the hour values
+        start_time_value.setHours(10);
+        end_time_value.setHours(19);
+        
 
     {% elif mode == 'UPDATE' %}
         url = '{{ request.route_url("update_time_log") }}';
 
-        start_date_value = new Date(parseInt({{ microseconds_since_epoch(time_log.start) }}));
-        end_date_value = new Date(parseInt({{ microseconds_since_epoch(time_log.end) }}));
+        start_date_value = new Date(parseInt({{ milliseconds_since_epoch(time_log.start) }}));
+        end_date_value = new Date(parseInt({{ milliseconds_since_epoch(time_log.end) }}));
 
-        start_time_value = util.extract_from_time({date:start_date_value});
-        end_time_value = util.extract_from_time({date:end_date_value});
+        start_time_value = start_date_value;
+        end_time_value = end_date_value;
 
     {% endif %}
 
@@ -201,11 +205,11 @@ require([
         required: true,
         datePattern: 'dd-mm-yyyy',
         style: 'width: 90px;',
-        onChange: function () {
-            if (this.focused) {
-                update_hours_to_complete();
-            }
-        }
+{#        onChange: function () {#}
+{#            if (this.focused) {#}
+{#                update_hours_to_complete();#}
+{#            }#}
+{#        }#}
     }, 'time_log_start_date');
     start_dateTextBox.startup();
 
@@ -235,11 +239,11 @@ require([
         required: true,
         datePattern: 'dd-mm-yyyy',
         style: 'width: 90px;',
-        onChange: function () {
-            if (this.focused) {
-                update_hours_to_complete();
-            }
-        }
+{#        onChange: function () {#}
+{#            if (this.focused) {#}
+{#                update_hours_to_complete();#}
+{#            }#}
+{#        }#}
     }, 'time_log_end_date');
     end_dateTextBox.startup();
 
@@ -350,14 +354,33 @@ require([
                 );
             }
 
+            // merge start_date and start_time
+            var start_datetime_value = start_dateTextBox.value;
+            start_datetime_value.clearTime();
+            start_datetime_value.setHours(
+                    start_time_timeTextBox.value.getHours(),
+                    start_time_timeTextBox.value.getMinutes(),
+                    start_time_timeTextBox.value.getSeconds()
+            );
+
+            // merge end_date and end_time
+            var end_datetime_value = end_dateTextBox.value;
+            end_datetime_value.clearTime();
+            end_datetime_value.setHours(
+                    end_time_timeTextBox.value.getHours(),
+                    end_time_timeTextBox.value.getMinutes(),
+                    end_time_timeTextBox.value.getSeconds()
+            );
+
+            console.debug('start_datetime_value :', start_datetime_value);
+            console.debug('end_datetime_value   :', end_datetime_value);
+
             submitForm({
                 dialog: dialog,
                 form: time_log_form,
                 additional_data: {
-                    start_date: stamp.toISOString(start_dateTextBox.value),
-                    end_date: stamp.toISOString(end_dateTextBox.value),
-                    start_time: stamp.toISOString(start_time_timeTextBox.value),
-                    end_time: stamp.toISOString(end_time_timeTextBox.value),
+                    start: start_datetime_value.toUTCString(),
+                    end: end_datetime_value.toUTCString(),
                     {% if mode == 'UPDATE' %}
                         time_log_id: '{{ time_log.id }}',
                     {% endif %}

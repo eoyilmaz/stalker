@@ -72,10 +72,10 @@ def get_time(request, time_attr):
     :return: datetime.timedelta
     """
     time_part = datetime.datetime.strptime(
-        request.params[time_attr][:-6],
-        "%Y-%m-%dT%H:%M:%S"
+        request.params[time_attr][:-4],
+        '%a, %d %b %Y %H:%M:%S'
     )
-    
+
     return datetime.timedelta(
         hours=time_part.hour,
         minutes=time_part.minute
@@ -83,34 +83,35 @@ def get_time(request, time_attr):
 
 
 def get_date(request, date_attr):
-    """Extracts a datetime object from the given request
+    """Extracts a UTC datetime object from the given request
     
     :param request: the request instance
     :param date_attr: the attribute name
     :return: datetime.datetime
     """
-    # TODO: no time zone info here, please add time zone
+    # Always work with UTC
     return datetime.datetime.strptime(
-        request.params[date_attr][:-6],
-        "%Y-%m-%dT%H:%M:%S"
+        request.params[date_attr][:-4],
+        '%a, %d %b %Y %H:%M:%S'
     )
 
 
 def get_datetime(request, date_attr, time_attr):
-    """Extracts a datetime object from the given request
+    """Extracts a UTC  datetime object from the given request
     :param request: the request object
     :param date_attr: the attribute name
     :return: datetime.datetime
     """
-    # TODO: no time zone info here, please add time zone
     date_part = datetime.datetime.strptime(
-        request.params[date_attr][:-6],
-        "%Y-%m-%dT%H:%M:%S"
+        request.params[date_attr][:-4],
+        '%a, %d %b %Y %H:%M:%S'
     )
+
     time_part = datetime.datetime.strptime(
-        request.params[time_attr][:-6],
-        "%Y-%m-%dT%H:%M:%S"
+        request.params[time_attr][:-4],
+        '%a, %d %b %Y %H:%M:%S'
     )
+
     # update the time values of date_part with time_part
     return date_part.replace(
         hour=time_part.hour,
@@ -358,13 +359,27 @@ def seconds_since_epoch(dt):
     dts = dt - datetime.datetime(1970, 1, 1)
     return dts.days * 86400 + dts.seconds
 
-def microseconds_since_epoch(dt):
+def milliseconds_since_epoch(dt):
     """converts the given datetime.datetime instance to an integer showing the
-    microseconds from epoch, and does it without using the strftime('%s') which
+    milliseconds from epoch, and does it without using the strftime('%s') which
     uses the time zone info of the system.
     
     :param dt: datetime.datetime instance to be converted
-    :returns int: showing the microseconds since epoch
+    :returns int: showing the milliseconds since epoch
     """
     dts = dt - datetime.datetime(1970, 1, 1)
-    return (dts.days * 86400 + dts.seconds) * 1000 + dts.microseconds
+    return (dts.days * 86400 + dts.seconds) * 1000 + int(dts.microseconds / 1000)
+
+def from_microseconds(t):
+    """converts the given microseconds showing the time since epoch to datetime
+    instance
+    """
+    epoch = datetime.datetime(1970, 1, 1)
+    delta = datetime.timedelta(microseconds=t)
+    return epoch + delta
+
+def from_milliseconds(t):
+    """converts the given milliseconds showing the time since epoch to datetime
+    instance
+    """
+    return from_microseconds(t*1000)

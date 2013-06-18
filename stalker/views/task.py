@@ -35,7 +35,7 @@ from stalker import (User, Task, Entity, Project, StatusList, Status,
 from stalker.models.task import CircularDependencyError
 from stalker import defaults
 from stalker import log
-from stalker.views import get_datetime, PermissionChecker, get_logged_in_user, get_multi_integer, microseconds_since_epoch
+from stalker.views import get_datetime, PermissionChecker, get_logged_in_user, get_multi_integer, milliseconds_since_epoch, from_milliseconds, get_date
 
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
@@ -88,10 +88,10 @@ def convert_to_jquery_gantt_task_format(tasks):
              'id': project.id,
              'code': project.code,
              'name': project.name,
-             'start': microseconds_since_epoch(project.start),
-             'end': microseconds_since_epoch(project.end),
-             'computed_start': microseconds_since_epoch(project.computed_start) if project.computed_start else None,
-             'computed_end': microseconds_since_epoch(project.computed_end) if project.computed_end else None,
+             'start': milliseconds_since_epoch(project.start),
+             'end': milliseconds_since_epoch(project.end),
+             'computed_start': milliseconds_since_epoch(project.computed_start) if project.computed_start else None,
+             'computed_end': milliseconds_since_epoch(project.computed_end) if project.computed_end else None,
              'schedule_model': 'duration',
              'schedule_timing': project.duration.days,
              'schedule_unit': 'd',
@@ -113,13 +113,10 @@ def convert_to_jquery_gantt_task_format(tasks):
             'project_id': task.project.id,
             'parent_id': task.parent.id if task.parent else task.project.id,
             'depend_ids': [dep.id for dep in task.depends],
-            'resources': [
-                {
-                    'id': resource.id,
-                } for resource in task.resources
-            ],
-            'start': microseconds_since_epoch(task.start),
-            'end': microseconds_since_epoch(task.end),
+            'resource_ids': [resource.id for resource in task.resources],
+            'time_log_ids': [time_log.id for time_log in task.time_logs],
+            'start': milliseconds_since_epoch(task.start),
+            'end': milliseconds_since_epoch(task.end),
             'is_scheduled': task.is_scheduled,
             'schedule_timing': task.schedule_timing,
             'schedule_unit': task.schedule_unit,
@@ -129,18 +126,37 @@ def convert_to_jquery_gantt_task_format(tasks):
             'schedule_constraint': task.schedule_constraint,
             'schedule_seconds': task.schedule_seconds,
             'total_logged_seconds': task.total_logged_seconds,
-            'computed_start': microseconds_since_epoch(task.computed_start) if task.computed_start else None,
-            'computed_end': microseconds_since_epoch(task.computed_end) if task.computed_end else None,
+            'computed_start': milliseconds_since_epoch(task.computed_start) if task.computed_start else None,
+            'computed_end': milliseconds_since_epoch(task.computed_end) if task.computed_end else None,
         }
         for task in tasks
     ])
+
+    # prepare time logs
+    all_time_logs = []
+    all_resources = []
+    for task in tasks:
+        for time_log in task.time_logs:
+            all_time_logs.append(time_log)
+        for resource in task.resources:
+            all_resources.append(resource)
+
+    # make it unique
+    all_resources = list(set(all_resources))
 
     data = {
         'tasks': faux_tasks,
         'resources': [{
                           'id': resource.id,
                           'name': resource.name
-                      } for resource in User.query.all()],
+                      } for resource in all_resources], #User.query.all()],
+        'time_logs': [{
+                          'id': time_log.id,
+                          'task_id': time_log.task.id,
+                          'resource_id': time_log.resource.id,
+                          'start': milliseconds_since_epoch(time_log.start),
+                          'end': milliseconds_since_epoch(time_log.end)
+                      } for time_log in all_time_logs],
         'timing_resolution': (timing_resolution.days * 86400 +
                               timing_resolution.seconds) * 1000,
         'working_hours': working_hours,
@@ -165,121 +181,6 @@ def convert_to_jquery_gantt_task_format(tasks):
     return data
 
 
-def update_with_jquery_gantt_task_data(json_data):
-    """updates the given tasks in database
-    
-    :param data: jQueryGantt produced json string
-    """
-    # TODO: remove this procedure
-
-    # logger.debug(json_data)
-    data = json.loads(json_data)
-
-    # logger.debug('updating tasks with gantt data:\n%s' % 
-    #              json.dumps(data,
-    #                         sort_keys=False,
-    #                         indent=4,
-    #                         separators=(',', ': ')
-    #              )
-    # )
-
-
-    task_name_replace_strs = [
-        ' (Task)', ' (Project)', ' (Asset)', ' (Sequence)', ' (Shot)'
-    ]
-
-    # Updated Tasks
-    for task_data in data['tasks']:
-        # logger.debug('*********************************************')
-        task_id = task_data['id']
-        task_name = task_data['name'] # just take the part without 
-        # the parenthesis
-        for rstr in task_name_replace_strs:
-            if task_name.endswith(rstr):
-                task_name = task_name[:-len(rstr)]
-
-        task_start = task_data['start']
-        task_end = task_data['end']
-        task_resource_ids = [resource_data['id']
-                             for resource_data in task_data['resources']]
-        task_description = task_data.get('description', '')
-
-        task_schedule_timing = float(task_data['schedule_timing'])
-
-        # no need to update parent, it will only be possible by using
-        # Stalker's own task edit UI
-        # 
-        #task_parent = task_data.get('parent_id', '')
-
-        # --------
-        # Updated:
-        # --------
-        # task depend_ids are now real Stalker task id, no need to convert it
-        # to something else
-        task_depend_ids = task_data.get('depend_ids', [])
-
-        # get the task itself
-        task = None
-        if not isinstance(task_id, basestring):
-        # update task
-            task = Task.query.filter(Task.id == task_id).first()
-            # The following will not happen anymore, no tasks are created out of
-        # Stalker
-        #elif task_id.startswith('tmp_'):
-        #    # create a new Task
-        #    task = Task()
-
-        # update it
-        if task:
-            # logger.debug('task %s' % task)
-            task.name = task_name
-            # logger.debug('task.start given (raw)  : %s' % task_start)
-            # logger.debug('task.start given (calc) : %s' % datetime.datetime.fromtimestamp(task_start/1000))
-            task.start = datetime.datetime.fromtimestamp(task_start / 1000)
-            # logger.debug('task.start after set    : %s' % task.start)
-            #task.duration = datetime.timedelta(task_duration)
-            task.end = datetime.datetime.fromtimestamp(task_end / 1000)
-
-            task.schedule_timing = task_schedule_timing
-
-            resources = User.query.filter(User.id.in_(task_resource_ids)).all()
-            task.resources = resources
-
-            task.description = task_description
-
-            task_depends = Task.query.filter(
-                Task.id.in_(task_depend_ids)).all()
-
-            # logger.debug('task.parent : %s' % task.parent)
-            # logger.debug('task_depends: %s' % task_depends)
-
-            task.depends = task_depends
-            DBSession.add(task)
-
-            # logger.debug('*********************************************')
-
-            # Deleted tasks
-            #deleted_tasks = Task.query.filter(Task.id.in_(data['deletedTaskIds'])).all()
-            #for task in deleted_tasks:
-            #    DBSession.delete(task)
-
-            # transaction will handle the commit don't bother doing anything
-
-
-@view_config(
-    route_name='update_gantt_tasks'
-)
-def update_gantt_tasks(request):
-    """updates the given tasks with the given JSON data
-    """
-    # TODO: remove this function, it is not possible to modify tasks with json anymore
-    # get the data
-    data = request.params['prj']
-    if data:
-        update_with_jquery_gantt_task_data(data)
-    return HTTPOk()
-
-
 @view_config(
     route_name='dialog_update_task',
     renderer='templates/task/dialog_create_task.jinja2'
@@ -297,7 +198,7 @@ def update_task_dialog(request):
         'task': task,
         'parent': task.parent,
         'schedule_models': defaults.task_schedule_models,
-        'microseconds_since_epoch': microseconds_since_epoch
+        'milliseconds_since_epoch': milliseconds_since_epoch
     }
 
 
@@ -326,8 +227,8 @@ def update_task(request):
     schedule_timing = float(request.params.get('schedule_timing'))
     schedule_unit = request.params.get('schedule_unit')
     schedule_constraint = request.params.get('schedule_constraint', 0)
-    start = get_datetime(request, 'start_date', 'start_time')
-    end = get_datetime(request, 'end_date', 'end_time')
+    start = get_date(request, 'start')
+    end = get_date(request, 'end')
     update_bid = request.params.get('update_bid')
 
     depend_ids = get_multi_integer(request, 'depend_ids')
@@ -586,7 +487,7 @@ def create_task_dialog(request):
         'project': project,
         'parent': parent,
         'schedule_models': defaults.task_schedule_models,
-        'microseconds_since_epoch': microseconds_since_epoch
+        'milliseconds_since_epoch': milliseconds_since_epoch
     }
 
 
@@ -711,8 +612,8 @@ def create_task(request):
         logger.debug('status: %s' % status)
 
         # get the dates
-        start = get_datetime(request, 'start_date', 'start_time')
-        end = get_datetime(request, 'end_date', 'end_time')
+        start = get_date(request, 'start')
+        end = get_date(request, 'end')
 
         logger.debug('start : %s' % start)
         logger.debug('end : %s' % end)

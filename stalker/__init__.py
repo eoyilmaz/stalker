@@ -22,7 +22,7 @@ Stalker is a Production Asset Management System (ProdAM) designed for Animation
 and VFX Studios. See docs for more information.
 """
 
-__version__ = '0.2.0.b8'
+__version__ = '0.2.0.b9'
 
 
 # before anything about stalker create the defaults
@@ -333,8 +333,7 @@ def main(global_config, **settings):
                      'get/root/tasks/{project_id}') # TODO: fix this
 
     config.add_route('get_gantt_tasks', 'get/gantt/tasks/{entity_id}')
-    config.add_route('update_gantt_tasks',
-                     'update/gantt/tasks') # TODO: is this still required
+
     config.add_route('auto_schedule_tasks', 'auto_schedule_tasks')
     config.add_route('view_task_nav_bar',
                      'view/task_nav_bar/{entity_id}')# TODO: this same with view_entity_nav_bar find a solution to merge them.

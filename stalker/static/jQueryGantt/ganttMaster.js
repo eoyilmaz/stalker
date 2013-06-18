@@ -20,24 +20,32 @@
  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-function GanttMaster() {
+function GanttMaster(kwargs) {
     this.tasks = [];
     this.task_ids = []; // lookup table for quick task access
 
-    this.deletedTaskIds = [];
+    this.time_logs = [];
+    this.time_log_ids = [];
+
     this.links = [];
 
     this.editor; //element for editor
     this.gantt; //element for gantt
 
+    // Mode of View:
+    // There are two modes for the grid Task or Resource
+    // and two modes for the gantt Task or TimeLog
+    this.grid_mode = kwargs['grid_mode'] || 'Task'; // 'Resource'
+    this.gantt_mode = kwargs['gantt_mode'] || 'Task'; // 'TimeLog'
+
     this.element;
 
-    this.resources; //list of resources
-    this.resource_ids; //lookup table for quick resource access
+    this.resources = []; //list of resources
+    this.resource_ids = []; //lookup table for quick resource access
 
     this.minEditableDate = 0;
     this.maxEditableDate = Infinity;
-    
+
     this.minDate = new Date();
     this.maxDate = new Date();
 
@@ -97,6 +105,7 @@ GanttMaster.prototype.init = function (place) {
 
     //load templates
     $("#gantEditorTemplates").loadTemplates().remove();  // TODO: Remove inline jquery, this should be injected
+    $("#gantEditorTemplates").loadTemplates().remove();  // TODO: Remove inline jquery, this should be injected
 
     //create editor
     this.editor = new GridEditor(this);
@@ -104,8 +113,8 @@ GanttMaster.prototype.init = function (place) {
     place.append(this.editor.element);
 
     //create gantt
-//    this.gantt = new Ganttalendar("m", new Date().getTime() - 3600000 * 24 * 2, new Date().getTime() + 3600000 * 24 * 15, this, place.width() * .6);
-    this.gantt = new Ganttalendar('m', this.start, this.end, this, place.width() * .6);
+//    this.gantt = new GanttDrawer("m", new Date().getTime() - 3600000 * 24 * 2, new Date().getTime() + 3600000 * 24 * 15, this, place.width() * .6);
+    this.gantt = new GanttDrawer('m', this.start, this.end, this, place.width() * .6);
 
     //setup splitter
     var splitter = $.splittify.init(place, this.editor.element, this.gantt.element, 50);
@@ -117,11 +126,11 @@ GanttMaster.prototype.init = function (place) {
     place.bind("refreshTasks.gantt",function () {
         self.redrawTasks();
     }).bind("refreshTask.gantt",function (e, task) {
-            self.drawTask(task);
+        self.drawTask(task);
     }).bind("zoomPlus.gantt",function () {
-            self.gantt.zoomGantt(true);
+        self.gantt.zoomGantt(true);
     }).bind("zoomMinus.gantt", function () {
-            self.gantt.zoomGantt(false);
+        self.gantt.zoomGantt(false);
     });
 };
 
@@ -169,27 +178,22 @@ GanttMaster.prototype.updateDepends = function () {
 };
 
 
-
 /**
  * a ganttData contains tasks, resources, roles
  * @param ganttData
  * @param Deferred
  */
 GanttMaster.prototype.loadGanttData = function (ganttData, Deferred) {
+//    console.debug('GanttMaster.loadGanttData start');
     var deferred = new Deferred;
     this.beginTransaction();
-    this.resources = ganttData.resources;
-    this.resource_ids = [];
-    for (var i = 0; i < this.resources.length; i++) {
-        this.resource_ids.push(this.resources[i].id);
-    }
 
     this.timing_resolution = ganttData.timing_resolution || this.timing_resolution;
     this.working_hours = ganttData.working_hours || this.working_hours;
     this.daily_working_hours = ganttData.daily_working_hours || this.daily_working_hours;
     this.weekly_working_hours = ganttData.weekly_working_hours || this.weekly_working_hours;
     this.weekly_working_days = ganttData.weekly_working_days || this.weekly_working_days;
-    
+
     this.start = ganttData.start || -1;
     this.end = ganttData.end || -1;
     this.gantt.originalStartMillis = ganttData.start;
@@ -208,12 +212,38 @@ GanttMaster.prototype.loadGanttData = function (ganttData, Deferred) {
     else
         this.maxEditableDate = Infinity;
 
+//    console.debug('GanttMaster.loadGanttData 3');
+    
+    // reset
+    this.reset();
+
+    // load resources
+    var resource;
+    var data;
+    for (var i = 0; i < ganttData.resources.length; i++) {
+        data = ganttData.resources[i];
+//        console.debug('data: ', data);
+        resource = new Resource({
+            id: data.id,
+            name: data.name,
+            master: this
+        });
+        this.resources.push(resource);
+        this.resource_ids.push(resource.id);
+
+        if (this.grid_mode == 'Resource'){
+//            console.debug('GanttMaster.loadGanttData: adding resource to editor');
+            this.editor.addResource(resource);
+        }
+    }
+//    console.debug('GanttMaster.loadGanttData 2');
 
     this.loadTasks(ganttData.tasks);
-    this.deletedTaskIds = [];
+    this.loadTimeLogs(ganttData.time_logs);
+
     this.endTransaction();
     var self = this;
-    
+
     // TODO: this is ridiculous, it should start when something is finished, not after a certain time
     this.gantt.element.oneTime(200, function () {
         self.gantt.centerOnToday();
@@ -223,15 +253,15 @@ GanttMaster.prototype.loadGanttData = function (ganttData, Deferred) {
 //    console.debug('daily_working_hours : ', this.daily_working_hours);
 //    console.debug('timing_resolution   : ', this.timing_resolution);
 //    console.debug('working_hours       : ', this.working_hours);
+//    console.debug('GanttMaster.loadGanttData end');
 
     return deferred.promise;
 };
 
 
 GanttMaster.prototype.loadTasks = function (tasks) {
+//    console.debug('GanttMaster.loadTasks start');
     var factory = new TaskFactory();
-    //reset
-    this.reset();
 
     var task;
     for (var i = 0; i < tasks.length; i++) {
@@ -242,13 +272,13 @@ GanttMaster.prototype.loadTasks = function (tasks) {
                 name: task.name,
                 code: task.code,
                 description: task.description,
-                priority: task.priorty,
+                priority: task.priority,
                 type: task.type,
                 status: task.status,
                 parent_id: task.parent_id,
                 depend_ids: task.depend_ids,
                 depends: null,
-                resources: task.resources,
+                resource_ids: task.resource_ids,
                 start: task.start,
                 duration: task.duration,
                 end: task.end,
@@ -263,7 +293,8 @@ GanttMaster.prototype.loadTasks = function (tasks) {
                 schedule_timing: task.schedule_timing,
                 schedule_unit: task.schedule_unit,
                 schedule_seconds: task.schedule_seconds,
-                total_logged_seconds: task.total_logged_seconds
+                total_logged_seconds: task.total_logged_seconds,
+                master: this
             });
 
             // TODO: do it properly
@@ -273,11 +304,17 @@ GanttMaster.prototype.loadTasks = function (tasks) {
             }
             task = t;
         }
-        task.master = this; // in order to access controller from task
+//        task.master = this; // in order to access controller from task
 
         task.depends = null;
         this.tasks.push(task);  //append task at the end
-        this.task_ids.push(task.id); //lookup table for task ids
+//        this.task_ids.push(task.id); //lookup table for task ids
+    }
+
+    // sort tasks to their dates
+    this.tasks.sort(function(a, b){return a.start - b.start});
+    for (var i = 0; i < this.tasks.length; i++){
+        this.task_ids.push(this.tasks[i].id);
     }
 
 //    console.debug('this.tasks    : ', this.tasks);
@@ -332,26 +369,44 @@ GanttMaster.prototype.loadTasks = function (tasks) {
         task = this.tasks[i];
 
         //add Link collection in memory
-        var linkLoops = !this.updateLinks(task);
-
-        if (linkLoops) {
-            alert(GanttMaster.messages.GANNT_ERROR_LOADING_DATA_TASK_REMOVED + "\n" + task.name + "\n" +
-                (linkLoops ? GanttMaster.messages.CIRCULAR_REFERENCE : GanttMaster.messages.ERROR_SETTING_DATES));
-
-            //remove task from in-memory collection
-            var task_index = this.task_ids.indexOf(task.id);
-            this.tasks.splice(task_index, 1);
-            this.task_ids.splice(task_index, 1);
-        } else {
-            //append task to editor
-            this.editor.addTask(task);
-            //append task to gantt
-//            this.gantt.addTask(task);
+        if (this.gantt_mode == 'Task'){
+            this.updateLinks(task);
         }
-    }
 
-//    this.editor.fillEmptyLines();
-    //prof.stop();
+        //append task to editor
+        if (this.grid_mode == 'Task'){
+            this.editor.addTask(task);
+        }
+        //append task to gantt
+//            this.gantt.addTask(task);
+    }
+//    console.debug('GanttMaster.loadTasks end');
+};
+
+
+GanttMaster.prototype.loadTimeLogs = function (time_logs) {
+    var time_log;
+    var data;
+    for (var i = 0 ; i < time_logs.length; i++){
+        data = time_logs[i];
+        if (!(data instanceof TimeLog)) {
+            time_log = new TimeLog({
+                id: data.id,
+                task_id: data.task_id,
+                resource_id: data.resource_id,
+                start: data.start,
+                end: data.end
+            });
+        } else {
+            time_log = data;
+        }
+
+        time_log.master = this;
+        this.time_logs.push(time_log);
+        this.time_log_ids.push(time_log.id);
+        // to update the task relation
+        time_log.getTask();
+    }
 };
 
 
@@ -361,6 +416,15 @@ GanttMaster.prototype.getTask = function (taskId) {
     }
     var task_index = this.task_ids.indexOf(taskId);
     return this.tasks[task_index];
+};
+
+
+GanttMaster.prototype.getTimeLog = function (time_log_id) {
+    if (typeof(time_log_id) == 'string') {
+        time_log_id = parseInt(time_log_id);
+    }
+    var time_log_index = this.time_log_ids.indexOf(time_log_id);
+    return this.time_logs[time_log_index];
 };
 
 
@@ -397,7 +461,6 @@ GanttMaster.prototype.reset = function () {
     this.tasks = [];
     this.task_ids = [];
     this.links = [];
-    this.deletedTaskIds = [];
     delete this.currentTask;
 
     this.editor.reset();
@@ -419,7 +482,7 @@ GanttMaster.prototype.saveGantt = function (forTransaction) {
         var cloned = task.clone();
         delete cloned.master;
         delete cloned.rowElement;
-        delete cloned.ganttElement;
+        delete cloned.ganttElements;
 
         delete cloned.children;
         //delete cloned.resources;
@@ -430,8 +493,6 @@ GanttMaster.prototype.saveGantt = function (forTransaction) {
     }
 
     var ret = {tasks: saved};
-
-    ret.deletedTaskIds = this.deletedTaskIds;  //this must be consistent with transactions and undo
 
     if (!forTransaction) {
         ret.resources = this.resources;
@@ -447,12 +508,12 @@ GanttMaster.prototype.saveGantt = function (forTransaction) {
 GanttMaster.prototype.updateLinks = function (task) {
     //console.debug("updateLinks");
     
+    // TODO: may be we need to check if the gantt_mode == 'Task'
+
     //remove my depends
     this.links = this.links.filter(function (link) {
         return link.to != task;
     });
-
-    var todoOk = true;
 
     // just update the depends list
     if (task.getDepends().length > 0) {
@@ -478,13 +539,12 @@ GanttMaster.prototype.updateLinks = function (task) {
         task.depends_string = newDepsString;
 
     }
-    //prof.stop();
-    return todoOk;
 };
 
 
 //<%----------------------------- TRANSACTION MANAGEMENT ---------------------------------%>
 GanttMaster.prototype.beginTransaction = function () {
+//    console.debug('GanttMaster.beginTransaction start');
     if (!this.__currentTransaction) {
         this.__currentTransaction = {
 //            snapshot: JSON.stringify(this.saveGantt(true)),
@@ -493,6 +553,7 @@ GanttMaster.prototype.beginTransaction = function () {
     } else {
         console.error("Cannot open twice a transaction");
     }
+//    console.debug('GanttMaster.beginTransaction end');
     return this.__currentTransaction;
 };
 
@@ -507,7 +568,7 @@ GanttMaster.prototype.endTransaction = function () {
 
     this.gantt.originalStartMillis = this.start;
     this.gantt.originalEndMillis = this.end;
-    
+
     this.taskIsChanged(); //enqueue for gantt refresh
     this.__currentTransaction = undefined;
 
@@ -529,12 +590,12 @@ GanttMaster.prototype.checkpoint = function () {
     this.__redoStack = [];
 };
 
-GanttMaster.prototype.getDateInterval = function(){
+GanttMaster.prototype.getDateInterval = function () {
     var start = Infinity;
     var end = -Infinity;
     for (var i = 0; i < this.tasks.length; i++) {
         var task = this.tasks[i];
-        if (task.type == 'Project'){
+        if (task.type == 'Project') {
             continue;
         }
         if (start > task.start)
@@ -542,12 +603,7 @@ GanttMaster.prototype.getDateInterval = function(){
         if (end < task.end)
             end = task.end;
     }
-    if (start == Infinity){
-        start = new Date(new Date().getTime() - 1296000000);
-    }
-    if (end == -Infinity){
-        end = new Date(new Date().getTime() + 1296000000);
-    }
+
     this.minDate = start;
     this.maxDate = end;
     return {

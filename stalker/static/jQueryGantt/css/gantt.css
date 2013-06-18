@@ -13,9 +13,6 @@
   /*padding:2px*/
 /*}*/
 
-
-
-
 .gdfTable {
     table-layout: fixed;
     border-collapse: separate;
@@ -90,15 +87,16 @@
     height: 100%;
 }
 
-.splitBox1, .splitBox2 {
-    overflow-x: scroll;
+.splitBox1{
+    overflow-x: hidden;
     overflow-y: hidden;
-
-    /*background-color: yellow;*/
+    background-color: rgb(240, 240, 240);;
 }
 
 .splitBox2 {
-    /*background-color: orange;*/
+    overflow-x: hidden;
+    overflow-y: hidden;
+    background-color: rgb(240, 240, 240);;
 }
 
 .unselectable {
@@ -130,8 +128,9 @@
 .holyH{
     background-color: #dedede;
 }
+
 .holy{
-    background-color: #FFF5E6;
+    background-color: rgb(224, 227, 230);
 }
 
 
@@ -463,6 +462,97 @@
 }
 
 
+/*TIME LOG BOX*/
+.timeLogBox{
+    position:absolute;
+    height:15px;
+    margin-top:2px;
+    z-index:100;
+    border-radius: 3px;
+    border:1px solid #AAAAAA;
+    
+    background-image: linear-gradient(bottom, #E0E0E0 0%, #FFFFFF 50%);
+    background-image: -o-linear-gradient(bottom, #E0E0E0 0%, #FFFFFF 50%);
+    background-image: -moz-linear-gradient(bottom, #E0E0E0 0%, #FFFFFF 50%);
+    background-image: -webkit-linear-gradient(bottom, #E0E0E0 0%, #FFFFFF 50%);
+    background-image: -ms-linear-gradient(bottom, #E0E0E0 0%, #FFFFFF 50%);
+    
+    background-image: -webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0, #E0E0E0),
+        color-stop(0.50, #FFFFFF)
+    );    
+
+}
+
+.timeLogBox .layout {
+    height:100%;
+}
+
+.timeLogBox .taskStatus {
+    left:5px;
+    top:4px;
+    position:absolute;
+    width:10px;
+    height:10px;
+}
+
+.timeLogBox .layout .milestone{
+    top: 0;
+    position:absolute;
+    width:16px;
+    background: url('../images/milestone.png') no-repeat;
+    height:16px;
+    display:none;
+}
+.timeLogBox .layout .milestone.end{
+    right:0;
+}
+
+.timeLogBox .layout .milestone.active{
+    display:block;
+}
+
+.timeLogBox.hasChild .layout{
+    border-top:2px solid black;
+}
+
+.timeLogBox .taskProgress{
+    /*height:3px;*/
+    height: 100%;
+    position:absolute;
+    
+    background-image: linear-gradient(bottom, #6DD900 0%, #99FF33 50%);
+    background-image: -o-linear-gradient(bottom, #6DD900 0%, #99FF33 50%);
+    background-image: -moz-linear-gradient(bottom, #6DD900 0%, #99FF33 50%);
+    background-image: -webkit-linear-gradient(bottom, #6DD900 0%, #99FF33 50%);
+    background-image: -ms-linear-gradient(bottom, #6DD900 0%, #99FF33 50%);
+    
+    background-image: -webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0, #6DD900),
+        color-stop(0.50, #99FF33)
+    );
+    border-radius: 2px;
+}
+
+.timeLogBox .taskExtraTiming{
+    height: 7px;
+    position: absolute;
+    border-radius: 2px;
+    top: 9px;
+    right: 0;
+    background-color: red;
+}
+
+.timeLogBox .layout.extDep{
+    background-image:url('../images/hasExternalDeps.png');
+}
+
 
 
 
@@ -570,6 +660,26 @@
     background-color:#FFFF99;
 }
 
+.resourceEditRow,.emptyRow {
+    height:19px;
+}
+
+.resourceEditRow input{
+    border: 0 none;
+    font-size: 12px;
+    height: 14px;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    font-family: Arial, sans-serif
+}
+
+.resourceEditRow.rowSelected td,.resourceEditRow.rowSelected input{
+    background-color:#FFFF99;
+}
+
+
+
 .taskStatusBox{
     position:absolute;
     width:100px;
@@ -616,4 +726,16 @@
     position: absolute;
     width: 5px;
     height: 10px;
+}
+
+.clippedStart {
+    left: 0;
+    border-left: 6px double red;
+    position: absolute;
+}
+
+.clippedEnd {
+    right: 0;
+    border-right: 6px double red;
+    position: absolute;
 }

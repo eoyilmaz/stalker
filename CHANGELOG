@@ -2,6 +2,54 @@
 Stalker Changes
 ===============
 
+0.2.0.b9
+========
+
+* **SOM:**
+
+  * **New:** Added **Version.latest_published_version** and
+    **Version.is_latest_published_version()**.
+  * **Fix:** Fixed **Version.__eq__()**, now Stalker correctly distinguishes
+    different Version instances.
+  * **New:** Added **Repository.to_linux_path()**,
+    **Repository.to_windows_path()**, **Repository.to_osx_path()** and
+    **Repository.to_native_path()** to the **Repository** class.
+  * **New:** Added **Repository.is_in_repo(path)** which checks if the given
+    path is in this repo.
+
+* **WebUI:**
+  
+  * **Update:** All the date values are now returned as **UTC String** and
+    stored in database as UTC datetime thus Stalker now supports Time Zones.
+  * **Fix:** Fixed all the dialogs with TimeTextBox inputs, where the
+    date portion was reset to epoch by the widget itself, causing a change in
+    Day Light Saving of the users locale and the dialog was reporting wrong
+    date time values. Now in those dialogs, on submit a new date object is
+    created or the DateTextBox widget value is used and the time portion of the
+    Date object is updated from the TimeTextBox. This way, it is guaranteed to
+    get correct date and time values.
+  * **Fix:** Fixed Studio create/update dialog, it is now correctly setting the
+    start and end hours of a non working day.
+
+  * **jQueryGantt:**
+
+    * **Update:** The gantt chart is now able to display much more info then
+      before. There are two new modes for each of the Grid and Gantt parts of
+      the Gantt Chart. Grid can be set to display *Task*s or *Resources* and
+      the Gantt can set to display *Task*s or *TimeLog*s.
+    * **Update:** Horizontal scrolling is disabled in gantt part of Gantt
+      Chart. All the drawn tasks and links are now set in position with percent
+      values, so they will stick and scale correctly when the split container
+      resize.
+    * **Update:** Any task out of range is culled in gantt chart.
+    * **Update:** Added new buttons to change the range in -1/+1 month,
+      -1/+1 week, -1/+1 day.
+    * **Update:** Replaced the **Date.format()** (originally replaced by
+      jQueryGantt **date.js**) with **date.format.js** library.
+    * **Update:** Changed the background of the Grid and Gantt editors.
+    * **Update:** If the displayed tasks is clipped to the current start end
+      range a double red border is displayed in the clipped start or end.
+
 0.2.0.b8
 ========
 
@@ -29,6 +77,10 @@ Stalker Changes
   * **Fix:** Added logged_in_user object to user page to fix permission bug. So
       default facilities of page is define based on logged_in_user.
 
+
+* **WebUI:**
+
+  * **Fix:** Fixed DGrid auto height problem.
 
 0.2.0.b7
 ========
@@ -86,7 +138,6 @@ Stalker Changes
   * **Fix:** Merge tested, and vacation adding is finished.
   * **New:** Version Page is created. It has Outputs,Inputs and Children as
       Tabs.
-
 
 
   * **JQueryGantt:**

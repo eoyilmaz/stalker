@@ -259,9 +259,9 @@ require([
         schedule_timing = {{ task.schedule_timing }};
         schedule_unit = '{{ task.schedule_unit }}';
         url = '{{ request.route_url('update_task', task_id=task.id) }}';
-        start_date = new Date({{ microseconds_since_epoch(task.start) }});
+        start_date = new Date({{ milliseconds_since_epoch(task.start) }});
         start_time = 'T{{ '%02d'|format(task.start.hour) }}:{{'%02d'|format(task.start.minute) }}:00';
-        end_date = new Date({{ microseconds_since_epoch(task.end) }});
+        end_date = new Date({{ milliseconds_since_epoch(task.end) }});
         end_time = 'T{{ '%02d'|format(task.end.hour) }}:00:00';
         {% if task.is_milestone %}
             is_milestone = true;
@@ -722,6 +722,20 @@ require([
             var end_constraint = eval(end_constraint_checkBox.get('checked')) ? 2 : 0;
             var schedule_constraint = start_constraint + end_constraint;
 
+            // merge start_date and start_time
+            var start_datetime_value = start_dateTextBox.value;
+            start_datetime_value.clearTime();
+            start_datetime_value.setHours(start_time_timeTextBox.value.getHours());
+            start_datetime_value.setMinutes(start_time_timeTextBox.value.getMinutes());
+            start_datetime_value.setSeconds(start_time_timeTextBox.value.getSeconds());
+
+            // merge end_date and end_time
+            var end_datetime_value = end_dateTextBox.value;
+            end_datetime_value.clearTime();
+            end_datetime_value.setHours(end_time_timeTextBox.value.getHours());
+            end_datetime_value.setMinutes(end_time_timeTextBox.value.getMinutes());
+            end_datetime_value.setSeconds(end_time_timeTextBox.value.getSeconds());
+
             submitForm({
                 dialog: dialog,
                 form: task_form,
@@ -732,10 +746,8 @@ require([
                     {% if mode=='UPDATE' %}
                         update_bid: eval(update_bid_checkBox.get('checked')) ? 1 : 0,
                     {% endif %}
-                    start_date: stamp.toISOString(start_dateTextBox.value),
-                    end_date: stamp.toISOString(end_dateTextBox.value),
-                    start_time: stamp.toISOString(start_time_timeTextBox.value),
-                    end_time: stamp.toISOString(end_time_timeTextBox.value),
+                    start: start_datetime_value.toUTCString(),
+                    end: end_datetime_value.toUTCString(),
                     schedule_constraint: schedule_constraint
                 },
                 url: url,

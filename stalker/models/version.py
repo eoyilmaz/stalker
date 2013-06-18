@@ -446,6 +446,37 @@ class Version(Link, StatusMixin):
             self.path
         ).replace('\\', '/')
 
+    def is_latest_published_version(self):
+        """returns True if this is the latest published Version False otherwise
+        """
+        if not self.is_published:
+            return False
+
+        return self == self.latest_published_version
+
+    @property
+    def latest_published_version(self):
+        """Returns the last published version.
+        
+        :return: :class:`~stalker.models.version.Version`
+        """
+        return Version.query\
+            .filter(Version.task==self.task)\
+            .filter(Version.take_name==self.take_name)\
+            .filter(Version.is_published==True)\
+            .order_by(Version.version_number.desc())\
+            .first()
+
+    def __eq__(self, other):
+        """checks equality of two version instances
+        """
+        return super(Version, self).__eq__(other) and \
+            isinstance(other, Version) and \
+            self.task == other.task and \
+            self.take_name == other.take_name and \
+            self.version_number == other.version_number
+
+
 
 # VERSION INPUTS
 Version_Inputs = Table(

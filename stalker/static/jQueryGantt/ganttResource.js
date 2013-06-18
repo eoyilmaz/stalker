@@ -1,8 +1,6 @@
 // Stalker a Production Asset Management System
 // Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
 //
-// This file is part of Stalker.
-//
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
 // License as published by the Free Software Foundation;
@@ -17,17 +15,25 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-define(['exports',  'dojo/domReady!'],
-    function (exports) {
-        // module:
-        //      stalker/dialogs
-        // summary:
-        //      Some useful utility functions
+function Resource(kwargs) {
+    this.id = kwargs['id'] || null;
+    this.name = kwargs['name'] || (this.id || '');
+    this.task_ids = kwargs['task_ids'] || [];
+    this.tasks = kwargs['tasks'] || [];
+    this.master = kwargs['master'] || null;
+    this.rowElement = null; // row editor html element
+}
 
-        // ********************************************************************
+Resource.prototype.getRow = function(){
+    var index = -1;
+    if (this.master)
+        index = this.master.resources.indexOf(this);
+    return index;
+};
 
-        exports.extract_from_minutes = function extract_from_minutes(kwargs) {
-            var minutes = parseInt(kwargs['minutes']) || 0;
-            var dateObj = new Date(minutes * 60000);
-        };
-    });
+Resource.prototype.link = function(){
+    var rendered = $.JST.createFromTemplate(this, 'RESOURCELINK');
+    return rendered[0].outerHTML;
+};
+
+
