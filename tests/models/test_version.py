@@ -218,8 +218,9 @@ class VersionTester(unittest2.TestCase):
                         self.test_output_link2],
             'task': self.test_task1,
             'status_list': self.test_version_status_list,
+            'created_with': 'Houdini'
         }
-        
+
         self.take_name_test_values = [
             ('Take Name', 'Take_Name'),
             ('TakeName', 'TakeName'),
@@ -1170,3 +1171,51 @@ class VersionTester(unittest2.TestCase):
         self.assertTrue(new_version3 != new_version5)
 
         self.assertTrue(new_version4 != new_version5)
+
+    def test_created_with_argument_can_be_skipped(self):
+        """testing if the created_with argument can be skipped
+        """
+        self.kwargs.pop('created_with')
+        test_version = Version(**self.kwargs)
+
+    def test_created_with_argument_can_be_None(self):
+        """testing if the created_with argument can be None
+        """
+        self.kwargs['created_with'] = None
+        test_version = Version(**self.kwargs)
+
+    def test_created_with_attribute_can_be_set_to_None(self):
+        """testing if the created with attribute can be set to None
+        """
+        self.test_version.created_with = None
+
+    def test_created_with_argument_accepts_only_string_or_None(self):
+        """testing if a TypeError will be raised if the created_with argument
+        is something other than a string or None
+        """
+        self.kwargs['created_with'] = 234
+        self.assertRaises(TypeError, Version, **self.kwargs)
+
+    def test_created_with_attribute_accepts_only_string_or_None(self):
+        """testing if a TypeError will be raised if the created_with attribute
+        is set to a value other than a string or None
+        """
+        self.assertRaises(TypeError, setattr, self.test_version,
+                          'created_with', 234)
+
+    def test_created_with_argument_is_working_properly(self):
+        """testing if the created_with argument value is passed to created_with
+        attribute properly
+        """
+        test_value = 'Maya'
+        self.kwargs['created_with'] = test_value
+        test_version = Version(**self.kwargs)
+        self.assertEqual(test_version.created_with, test_value)
+
+    def test_created_with_attribute_is_working_properly(self):
+        """testing if created_with attribute is working properly
+        """
+        test_value = 'Maya'
+        self.assertNotEqual(self.test_version.created_with, test_value)
+        self.test_version.created_with = test_value
+        self.assertEqual(self.test_version.created_with, test_value)

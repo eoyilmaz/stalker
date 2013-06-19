@@ -42,13 +42,13 @@ logger.setLevel(logging_level)
 
 class Version(Link, StatusMixin):
     """Holds information about the created versions (files) for a class:`~stalker.models.task.Task`
-    
+
     A :class:`~stalker.models.version.Version` holds information about the
     created files related to a class:`~stalker.models.task.Task`. So if one
     creates a new version for a file or a sequences of file for a
     :class:`~stalker.models.task.Task` then the information is hold in the
     :class:`~stalker.models.version.Version` instance.
-    
+
     :param str take_name: A short string holding the current take name. Takes
       in Stalker are used solely for grouping individual versions together.
       Versions with the same ``take_name`` (of the same Task) are numbered
@@ -56,12 +56,12 @@ class Version(Link, StatusMixin):
       the string "Main". When skipped or given as None or an empty string then
       it will use the default value. It can not start with a number. It can not
       have white spaces.
-    
+
     :param inputs: A list o :class:`~stalker.models.link.Link` instances,
       holding the inputs of the current version. It could be a texture for a
       Maya file or an image sequence for Nuke, or anything those you can think
       as the input for the current Version.
-    
+
     :type inputs: list of :class:`~stalker.models.link.Link`
 
     :param outputs: A list of :class:`~stalker.models.link.Link` instances,
@@ -141,7 +141,7 @@ class Version(Link, StatusMixin):
         primaryjoin="Versions.c.id==Version_Inputs.c.version_id",
         secondaryjoin="Version_Inputs.c.link_id==Links.c.id",
         doc="""The inputs of the current version.
-        
+
         It is a list of :class:`~stalker.models.link.Link` instances.
         """
     )
@@ -152,12 +152,14 @@ class Version(Link, StatusMixin):
         primaryjoin="Versions.c.id==Version_Outputs.c.version_id",
         secondaryjoin="Version_Outputs.c.link_id==Links.c.id",
         doc="""The outputs of the current version.
-        
+
         It is a list of :class:`~stalker.models.link.Link` instances.
         """
     )
 
     is_published = Column(Boolean, default=False)
+
+    created_with = Column(String(256))
 
     def __init__(self,
                  task=None,
@@ -166,6 +168,7 @@ class Version(Link, StatusMixin):
                  outputs=None,
                  parent=None,
                  full_path=None,
+                 created_with=None,
                  **kwargs):
         # call supers __init__
         kwargs['full_path'] = full_path
@@ -187,6 +190,7 @@ class Version(Link, StatusMixin):
         self.is_published = False
 
         self.parent = parent
+        self.created_with = created_with
 
     def _format_take_name(self, take_name):
         """formats the given take_name value
@@ -440,7 +444,7 @@ class Version(Link, StatusMixin):
         """
         project = self.task.project
         repo = project.repository
-    
+
         return os.path.join(
             repo.path,
             self.path
@@ -457,7 +461,7 @@ class Version(Link, StatusMixin):
     @property
     def latest_published_version(self):
         """Returns the last published version.
-        
+
         :return: :class:`~stalker.models.version.Version`
         """
         return Version.query\
@@ -466,6 +470,18 @@ class Version(Link, StatusMixin):
             .filter(Version.is_published==True)\
             .order_by(Version.version_number.desc())\
             .first()
+
+    @validates('created_with')
+    def _validate_created_with(self, key, created_with):
+        """validates the given created_with value
+        """
+        if created_with is not None:
+            if not isinstance(created_with, (str, unicode)):
+                raise TypeError('%s.created_with should be an instance of '
+                                'str or unicode, not %s' %
+                                (self.__class__.__name__,
+                                 created_with.__class__.__name__))
+        return created_with
 
     def __eq__(self, other):
         """checks equality of two version instances

@@ -2,6 +2,12 @@
 Stalker Changes
 ===============
 
+0.2.0.rc2
+=========
+
+* **New:** Added **Version.created_with** attribute to track the environment or
+  host program name that a particular Version instance is created with.
+
 0.2.0.rc1
 =========
 
