@@ -48,31 +48,31 @@ CANTFIX = 'cantfix'
 
 class Ticket(Entity, StatusMixin):
     """Tickets are the way of reporting errors or asking for changes in Stalker.
-    
+
     The Stalker Ticketing system is based on Trac Basic Workflow. For more
     information please visit `Trac Workflow`_
-    
+
     _`Trac Workflow`:: http://trac.edgewall.org/wiki/TracWorkflow
-    
+
     Stalker Ticket system is very flexible, to customize the workflow please
     update the :class:`~stalker.config.Config.ticket_workflow` dictionary.
-    
+
     In the default setup, there are four actions available; ``accept``,
     ``resolve``, ``reopen``, ``reassign``, and five statuses available ``New``,
     ``Assigned``, ``Accepted``, ``Reopened``, ``Closed``.
-    
+
     :param project: The Project that this Ticket is assigned to. A Ticket in
         Stalker must be assigned to a Project. ``project`` argument can not be
         skipped or can not be None.
-    
+
     :type project: :class:`~stalker.models.project.Project`
-    
+
     :param str summary: A string which contains the title or a short
         description of this Ticket.
-    
+
     :param enum priority: The priority of the Ticket which is an enum value.
         Possible values are:
-            
+
           +--------------+-------------------------------------------------+
           | 0 / TRIVIAL  | defect with little or no impact / cosmetic      |
           |              | enhancement                                     |
@@ -87,60 +87,60 @@ class Ticket(Entity, StatusMixin):
           | 4 / BLOCKER  | basic functionality is not available until this |
           |              | is fixed                                        |
           +--------------+-------------------------------------------------+
-    
+
     :param reported_by: An instance of :class:`~stalker.models.user.User` who
         created this Ticket. It is basically a synonym for the
         :attr:`~stalker.models.entity.SimpleEntity.created_by` attribute.
-    
+
     Changing the :class:`~stalker.models.ticket.Ticket`\ .\ 
     :attr`~stalker.models.ticket.Ticket.status` will create a new
     :class:`~stalker.models.Ticket.TicketLog` instance showing the previous
     operation.
-    
+
     Even though Tickets needs statuses they don't need to be supplied a
     :class:`~stalker.models.status.StatusList` nor
     :class:`~stalker.models.status.Status` for the Tickets. It will be
     automatically filled accordingly. For newly created Tickets the status of
     the ticket is ``NEW`` and can be changed to other statuses as follows:
-        
+
         Status -> Action -> New Status
-        
+
         NEW      -> resolve  -> CLOSED
         NEW      -> accept   -> ACCEPTED
         NEW      -> reassign -> ASSIGNED
-        
+
         ASSIGNED -> resolve  -> CLOSED
         ASSIGNED -> accept   -> ACCEPTED
         ASSIGNED -> reassign -> ASSIGNED
-        
+
         ACCEPTED -> resolve  -> CLOSED
         ACCEPTED -> accept   -> ACCEPTED
         ACCEPTED -> reassign -> ASSIGNED
-        
+
         REOPENED -> resolve  -> CLOSED
         REOPENED -> accept   -> ACCEPTED
         REOPENED -> reassign -> ASSIGNED
-        
+
         CLOSED   -> reopen   -> REOPENED
-        
+
         actions available:
         resolve
         reassign
         accept
         reopen
-    
+
     The :attr:`~stalker.models.ticket.Ticket.name` is automatically generated
     by using the ``stalker.config.Config.ticket_label`` attribute and
     :attr:`~stalker.models.ticket.Ticket.ticket_number`\ . So if defaults are
     used the first ticket name will be "Ticket#1" and the second "Ticket#2" and
     so on. For every project the number will restart from 1.
-    
+
     Use the :meth:`~stalker.models.ticket.Ticket.resolve`,
     :meth:`~stalker.models.ticket.Ticket.reassign`,
     :meth:`~stalker.models.ticket.Ticket.accept`,
     :meth:`~stalker.models.ticket.Ticket.reopen` methods to change the status
     of the current Ticket.
-    
+
     Changing the status of the Ticket will create
     :class:`~stalker.models.ticket.TicketLog` entries reflecting the change
     made.
@@ -215,7 +215,7 @@ class Ticket(Entity, StatusMixin):
         default='TRIVIAL',
         doc="""The priority of the Ticket which is an enum value.
         Possible values are:
-          
+
           +--------------+-------------------------------------------------+
           | 0 / TRIVIAL  | defect with little or no impact / cosmetic      |
           |              | enhancement                                     |

@@ -80,35 +80,35 @@ def create_secondary_table(
 
 class TargetEntityTypeMixin(object):
     """Adds target_entity_type attribute to mixed in class.
-    
+
     :param target_entity_type: The target entity type which this class is 
       designed for. Should be a class or a class name.
-      
+
       For example::
-        
+
         from stalker import SimpleEntity, TargetEntityTypeMixin, Project
-        
+
         class A(SimpleEntity, TargetEntityTypeMixin):
             __tablename__ = "As"
             __mapper_args__ = {"polymorphic_identity": "A"}
-            
+
             def __init__(self, **kwargs):
                 super(A, self).__init__(**kwargs)
                 TargetEntityTypeMixin.__init__(self, **kwargs)
-        
+
         a_obj = A(target_entity_type=Project)
-      
+
       The ``a_obj`` will only be accepted by
       :class:`~stalker.models.project.Project` instances. You can not assign it
       to any other class which accepts a :class:`~stalker.models.type.Type`
       instance.
-    
+
     To control the mixed-in class behaviour add these class variables to the 
     mixed in class:
-      
+
       __nullable_target__ : controls if the target_entity_type can be 
                             nullable or not. Default is False.
-      
+
       __unique_target__ : controls if the target_entity_type should be 
                           unique, so there is only one object for one type.
                           Default is False.
@@ -158,7 +158,7 @@ class TargetEntityTypeMixin(object):
             descriptor=property(
                 fget=cls._target_entity_type_getter,
                 doc="""The entity type which this object is valid for.
-                
+
                 Usually it is set to the TargetClass directly.
                 """
             )
@@ -167,28 +167,28 @@ class TargetEntityTypeMixin(object):
 
 class StatusMixin(object):
     """Makes the mixed in object statusable.
-    
+
     This mixin adds status and status_list attributes to the mixed in class.
     Any object that needs a status and a corresponding status list can include
     this mixin.
-    
+
     When mixed with a class which don't have an __init__ method, the mixin
     supplies one, and in this case the parameters below must be defined.
-    
+
     :param status_list: this attribute holds a status list object, which shows
       the possible statuses that this entity could be in. This attribute can
       not be empty or None. Giving a StatusList object, the
       StatusList.target_entity_type should match the current class.
-      
+
       .. versionadded:: 0.1.2.a4
-      
+
         The status_list argument now can be skipped or can be None if there
         is an active database connection (stalker.models.DBSession is not
         None) and there is a suitable
         :class:`~stalker.models.status.StatusList` instance in the database
         whom :attr:`~stalker.models.status.StatusList.target_entity_type`
         attribute is set to the current mixed-in class name.
-    
+
     :param status: It is a :class:`~stalker.models.status.Status` instance
       which shows the current status of the statusable object. Integer values
       are also accepted, which shows the index of the desired status in the
@@ -197,11 +197,11 @@ class StatusMixin(object):
       also be present in the ``status_list`` attribute. If set to None then the
       first :class:`~stalker.models.status.Status` instance in the
       ``status_list`` will be used.
-      
+
       .. versionadded:: 0.2.0
-        
+
         Status attribute as Status instance:
-        
+
         It is now possible to set the status of the instance by a
         :class:`~stalker.models.status.Status` instance directly. And the
         :attr:`~stalker.models.mixins.StatusMixin.status` will return a proper
@@ -236,7 +236,7 @@ class StatusMixin(object):
             primaryjoin= \
                 "%s.status_id==Status.status_id" % cls.__name__,
             doc="""The current status of the object.
-            
+
             It is a :class:`~stalker.models.status.Status` instance which
             is one of the Statuses stored in the ``status_list`` attribute
             of this object.
@@ -368,22 +368,22 @@ class StatusMixin(object):
 
 class ScheduleMixin(object):
     """Adds schedule info to the mixed in class.
-    
+
     Adds schedule information like ``start``, ``end`` and ``duration``. These
     attributes will be used in TaskJuggler. Because ``effort`` is only
     meaningful if there are some ``resources`` this attribute has been left
     special for :class:`~stalker.models.task.Task` class. The ``length`` has
     not been implemented because of its rare use.
-    
+
     The preceding order for the attributes is as follows::
-    
+
       start > end > duration
-    
+
     So if all of the parameters are given only the ``start`` and the ``end``
     will be used and the ``duration`` will be calculated accordingly. In any
     other conditions the missing parameter will be calculated from the
     following table:
-    
+
     +-------+-----+----------+----------------------------------------+
     | start | end | duration | DEFAULTS                               |
     +=======+=====+==========+========================================+
@@ -412,51 +412,51 @@ class ScheduleMixin(object):
     |       |     |    X     | start = datetime.datetime.now()        |
     |       |     |          |                                        |
     |       |     |          | end = start + duration                 |
-    +-------+-----+----------+----------------------------------------+    
-    
+    +-------+-----+----------+----------------------------------------+
+
     Only the ``start``, ``end`` will be stored. The ``duration`` attribute is
     the direct difference of the the ``start`` and ``end`` attributes, so there
     is no need to store it. But if will be used in calculation of the start and
     end values.
-    
+
     The start and end attributes have a ``computed`` companion. Which are the
     return values from TaskJuggler. so for start there is the
     ``computed_start`` and for end there is the ``computed_end`` attributes.
     These values are going to be used in Gantt Charts.
-    
+
     The date attributes can be managed with timezones. Follow the Python idioms
     shown in the `documentation of datetime`_
-    
+
     .. _documentation of datetime: http://docs.python.org/library/datetime.html
-    
+
     :param start: the start date of the entity, should be a datetime.datetime
       instance, the start is the pin point for the date calculation. In
       any condition if the start is available then the value will be
       preserved. If start passes the end the end is also changed
       to a date to keep the timedelta between dates. The default value is
       datetime.datetime.now()
-    
+
     :type start: :class:`datetime.datetime`
-    
+
     :param end: the end of the entity, should be a datetime.datetime instance,
       when the start is changed to a date passing the end, then the end is also
       changed to a later date so the timedelta between the dates is kept.
-    
+
     :type end: :class:`datetime.datetime` or :class:`datetime.timedelta`
-    
+
     :param duration: The duration of the entity. It is a
       :class:`datetime.timedelta` instance. The default value is read from
       the :class:`~stalker.config.Config` class. See the table above for the
       initialization rules.
-    
+
     :type duration: :class:`datetime.timedelta`
-    
+
     :param timing_resolution: The timing_resolution of the datetime.datetime
       object in datetime.timedelta. Uses ``timing_resolution`` settings in the
       :class:`stalker.config.Config` class which defaults to 1 hour. Setting
       the timing_resolution to less then 5 minutes is not suggested because it
       is a limit for TaskJuggler.
-    
+
     :type timing_resolution: datetime.timedelta
     """
 
@@ -478,7 +478,7 @@ class ScheduleMixin(object):
 
     def _end_getter(self):
         """The date that the entity should be delivered.
-        
+
         The end can be set to a datetime.timedelta and in this case it will be
         calculated as an offset from the start and converted to
         datetime.datetime again. Setting the start to a date passing the end
@@ -506,7 +506,7 @@ class ScheduleMixin(object):
 
     def _start_getter(self):
         """The date that this entity should start.
-        
+
         Also effects the
         :attr:`~stalker.models.mixins.ScheduleMixin.end` attribute value in
         certain conditions, if the
@@ -559,7 +559,7 @@ class ScheduleMixin(object):
                 self._duration_getter,
                 self._duration_setter,
                 doc="""Duration of the entity.
-                
+
 It is a datetime.timedelta instance. Showing the difference of the
 :attr:`.start` and the :attr:`.end`. If edited it changes the :attr:`.end`
 attribute value."""
@@ -650,7 +650,7 @@ attribute value."""
                 cls._timing_resolution_getter,
                 cls._timing_resolution_setter,
                 doc="""The timing_resolution of this object.
-                
+
                 Can be set to any value that is representable with
                 datetime.timedelta. The default value is 1 hour. Whenever it is
                 changed the start, end and duration values will be updated.
@@ -692,14 +692,14 @@ attribute value."""
 
     def round_time(self, dt):
         """Round a datetime object to any time laps in seconds.
-        
+
         Uses class property timing_resolution as the closest number of seconds
         to round to, defaults 1 hour.
-        
+
         :param dt: datetime.datetime object, defaults now.
-        
+
         Based on Thierry Husson's answer in `Stackoverflow`_
-        
+
         _`Stackoverflow` : http://stackoverflow.com/a/10854034/1431079
         """
         # to be compatible with python 2.6 use the following instead of
@@ -732,11 +732,11 @@ attribute value."""
 
 class ProjectMixin(object):
     """Gives the ability to connect to a :class:`~stalker.models.project.Project` to the mixed in object.
-    
+
     :param project: A :class:`~stalker.models.project.Project` instance holding
       the project which this object is related to. It can not be None, or
       anything other than a :class:`~stalker.models.project.Project` instance.
-    
+
     :type project: :class:`~stalker.models.project.Project`
     """
 
@@ -800,18 +800,16 @@ class ProjectMixin(object):
 
 class ReferenceMixin(object):
     """Adds reference capabilities to the mixed in class.
-    
-    References are :class:`stalker.models.entity.Entity` instances or anything
+
+    References are :class:`stalker.models.link.Link` instances or anything
     derived from it, which adds information to the attached objects. The aim of
     the References are generally to give more info to direct the evolution of
     the object.
-    
-    :param references: A list of :class:`~stalker.models.entity.Entity`
-      objects.
-    
-    :type references: list of :class:`~stalker.models.entity.Entity` objects.
-    """
 
+    :param references: A list of :class:`~stalker.models.link.Link` instances.
+
+    :type references: list of :class:`~stalker.models.link.Link` instances.
+    """
     # add this lines for Sphinx
     #    __tablename__ = "ReferenceMixins"
 
@@ -825,7 +823,6 @@ class ReferenceMixin(object):
 
     @declared_attr
     def references(cls):
-        # TODO: there is something wrong here, the documentation and the implementation is not telling the same story
         # get secondary table
         secondary_table = create_secondary_table(
             cls.__name__,
@@ -855,11 +852,11 @@ class ReferenceMixin(object):
 
 class ACLMixin(object):
     """A Mixin for adding ACLs to mixed in class.
-    
+
     Access control lists or ACLs are used to determine if the given resource
     has the permission to access the given data. It is based on Pyramids
     Authorization system but organized to fit in Stalker style.
-    
+
     The ACLMixin adds an attribute called ``permissions`` and a
     property called ``__acl__`` to be able to pass the permission data to
     Pyramid framework.
@@ -890,17 +887,17 @@ class ACLMixin(object):
     @property
     def __acl__(self):
         """Returns Pyramid friendly ACL list composed by the:
-        
+
           * Permission.access (Ex: 'Allow' or 'Deny')
           * The Mixed in class name and the object name (Ex: 'User:eoyilmaz')
           * The Action and the target class name (Ex: 'Create_Asset')
-          
+
         Thus a list of tuple is returned as follows::
 
           __acl__ = [
               ('Allow', 'User:eoyilmaz', 'Create_Asset'),
           ]
-        
+
         For the last example user eoyilmaz can grant access to views requiring
         'Add_Project' permission.
         """
@@ -912,19 +909,19 @@ class ACLMixin(object):
 
 class CodeMixin(object):
     """Adds code info to the mixed in class.
-    
+
     .. versionadded:: 0.2.0
-      
+
       The code attribute of the SimpleEntity is now introduced as a separate
       mixin. To let it be used by the classes it is really needed. 
-    
+
     The CodeMixin just adds a new field called ``code``. It is a very simple
     attribute and is used for simplifying long names (like Project.name etc.).
-    
+
     Contrary to previous implementations the code attribute is not formatted in
     anyway, so care needs to be taken if the code attribute is going to be used
     in filesystem as file and directory names.
-    
+
     :param str code: The code attribute is a string, can not be empty or can
       not be None.
     """
@@ -943,7 +940,7 @@ class CodeMixin(object):
             String(256),
             nullable=False,
             doc="""The code name of this object.
-                
+
                 It accepts strings. Can not be None."""
         )
 
@@ -970,9 +967,9 @@ class CodeMixin(object):
 
 class WorkingHoursMixin(object):
     """Sets working hours for the mixed in class.
-    
+
     Generally is meaningful for users, departments and studio.
-    
+
     :param working_hours: A :class:`~stalker.models.project.WorkingHours`
       instance showing the working hours settings for that project. This data
       is stored as a PickleType in the database.

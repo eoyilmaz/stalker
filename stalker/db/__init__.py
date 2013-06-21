@@ -125,7 +125,6 @@ def __init_db__():
 def __create_admin__():
     """creates the admin
     """
-
     from stalker.models.auth import User
     from stalker.models.department import Department
 
@@ -200,19 +199,20 @@ def __create_ticket_statuses():
     from stalker import Status, StatusList
 
     logger.debug("Creating Ticket Statuses")
-    
+
     # Update: check before adding
     ticket_names = map(str.title, defaults.ticket_status_order)
     ticket_statuses = Status.query.filter(Status.name.in_(ticket_names)).all()
     if not ticket_statuses:
         logger.debug('No Ticket Statuses found, creating new!')
         ticket_statuses = [
-        Status(
-            name=status_name.title(),
-            code=status_name.upper(),
-            created_by=admin,
-            updated_by=admin
-        ) for status_name in defaults.ticket_status_order]
+            Status(
+                name=status_name.title(),
+                code=status_name.upper(),
+                created_by=admin,
+                updated_by=admin
+            ) for status_name in defaults.ticket_status_order
+        ]
     else:
         logger.debug('Ticket Statuses are already created')
 
@@ -278,139 +278,88 @@ def __create_ticket_statuses():
         DBSession.flush()
         logger.debug("Ticket Types are created successfully")
 
-
-def __create_time_log_types():
-    """Creates two default :class:`~stalker.models.type.Type`\ s for
-    :class:`~stalker.models.task.TimeLog` objects.
-    
-    TODO: still evaluating if this is needed
-    """
-    from stalker import TimeLog, Type, User
-
-    admin = User.query.filter_by(login=defaults.admin_name).first()
-
-    # Normal
-    logger.debug('Creating TimeLog.type "Normal"')
-    normal_type = Type(
-        name='Normal',
-        code='Normal',
-        target_entity_type=TimeLog,
-        created_by=admin
-    )
-    DBSession.add(normal_type)
-
-    logger.debug('Creating TimeLog.type "Extra"')
-    extra_type = Type(
-        name='Extra',
-        code='Extra',
-        target_entity_type=TimeLog,
-        created_by=admin
-    )
-    DBSession.add(extra_type)
-    try:
-        DBSession.commit()
-    except IntegrityError as e:
-        logger.debug(e)
-        DBSession.rollback()
-        logger.debug('TimeLog Types are already in database')
-    else:
-        DBSession.flush()
-        logger.debug('TimeLog Types are created successfully')
-
-# def __create_filename_template_types():
+# def __create_time_log_types():
 #     """Creates two default :class:`~stalker.models.type.Type`\ s for
-#     :class:`~stalker.models.template.FilenameTemplate` objects. The first
-#     Type instance is for "Version"s and the other is for "References".
+#     :class:`~stalker.models.task.TimeLog` objects.
 #     """
-#     from stalker import User, Type
-#     
-#     # I hate doing it in this way but I cannot create UniqueConstraint
-#     # between derived and mixed-in attributes ("name" and "target_entity_type")
-#     # So I need to be sure that there are no "Version" and "Reference"
-#     # FilenameTemplate Types before creating them, cause I literally can.
-#     types = Type.query\
-#         .filter_by(target_entity_type="FilenameTemplate")\
-#         .all()
-#     type_names = [t.name for t in types]
-#     
-#     logger.debug("creating default Types for FilenameTemplates")
-#     
+#     from stalker import TimeLog, Type, User
+# 
 #     admin = User.query.filter_by(login=defaults.admin_name).first()
-#     
-#     if "Version" not in type_names:
-#         # mark them as created by admin
-#         vers_type = Type(
-#             name='Version',
-#             code='Vers',
-#             target_entity_type='FilenameTemplate',
-#             created_by=admin
-#         )
-#         DBSession.add(vers_type)
-#     
-#     if 'Reference' not in type_names:
-#         ref_type = Type(
-#             name='Reference',
-#             code='Ref',
-#             target_entity_type='FilenameTemplate',
-#             created_by=admin
-#         )
-#         DBSession.add(ref_type)
-#     
+# 
+#     # Normal
+#     logger.debug('Creating TimeLog.type "Normal"')
+#     normal_type = Type(
+#         name='Normal',
+#         code='Normal',
+#         target_entity_type=TimeLog,
+#         created_by=admin
+#     )
+#     DBSession.add(normal_type)
+# 
+#     logger.debug('Creating TimeLog.type "Extra"')
+#     extra_type = Type(
+#         name='Extra',
+#         code='Extra',
+#         target_entity_type=TimeLog,
+#         created_by=admin
+#     )
+#     DBSession.add(extra_type)
 #     try:
-#         transaction.commit()
+#         DBSession.commit()
 #     except IntegrityError as e:
 #         logger.debug(e)
-#         transaction.abort()
-#         logger.debug('FilenameTemplate Types are already in database')
+#         DBSession.rollback()
+#         logger.debug('TimeLog Types are already in database')
 #     else:
 #         DBSession.flush()
-#         logger.debug('FilenameTemplate Types are created successfully')
+#         logger.debug('TimeLog Types are created successfully')
+
 
 def register(class_):
     """Registers the given class to the database.
-    
+
     It is mainly used to create the :class:`~stalker.models.auth.Action`\ s
     needed for the :class:`~stalker.models.auth.User`\ s and
     :class:`~stalker.models.auth.Group`\ s to be able to interact with the
     given class. Whatever class you have created needs to be registered.
-    
+
     Example, lets say that you have a data class which is specific to your
     studio and it is not present in Stalker Object Model (SOM), so you need to
     extend SOM with a new data type. Here is a simple Data class inherited from
     the :class:`~stalker.models.entity.SimpleEntity` class (which is the
     simplest class you should inherit your classes from or use more complex
     classes down to the hierarchy)::
-    
+
       from sqlalchemy import Column, Integer, ForeignKey
       from stalker.models.entity import SimpleEntity
-      
+
       class MyDataClass(SimpleEntity):
         '''This is an example class holding a studio specific data which is not
         present in SOM.
         '''
-        
+
         __tablename__ = 'MyData'
         __mapper_arguments__ = {'polymorphic_identity': 'MyData'}
-        
+
         my_data_id = Column('id', Integer, ForeignKey('SimpleEntities.c.id'),
                             primary_key=True)
-    
+
     Now because Stalker is using Pyramid authorization mechanism it needs to be
     able to have an :class:`~stalker.models.auth.Permission` about your new
     class, so you can assign this :class;`~stalker.models.auth.Permission` to
     your :class:`~stalker.models.auth.User`\ s or
     :class:`~stalker.models.auth.Group`\ s. So you ned to register your new
     class with stalker.db.register like shown below::
-    
+
       from stalker import db
       db.register(MyDataClass)
-    
+
     This will create the necessary Actions in the 'Actions' table on your
     database, then you can create :class:`~stalker.models.auth.Permission`\ s
     and assign these to your :class:`~stalker.models.auth.User`\ s and
     :class:`~stalker.models.auth.Group`\ s so they are Allowed or Denied to do
     the specified Action.
-    
+
     :param class_: The class itself that needs to be registered.
     """
     from stalker.models.auth import Permission

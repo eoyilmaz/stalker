@@ -30,13 +30,13 @@ logger.setLevel(logging_level)
 
 class Type(Entity, TargetEntityTypeMixin, CodeMixin):
     """Everything can have a type.
-    
+
     .. versionadded:: 0.1.1
       Types
-    
+
     Type is a generalized version of the previous design that defines types for
     specific classes.
-    
+
     The purpose of the :class:`~stalker.models.type.Type` class is just to
     define a new type for a specific :class:`~stalker.models.entity.Entity`.
     For example, you can have a ``Character``
@@ -44,29 +44,29 @@ class Type(Entity, TargetEntityTypeMixin, CodeMixin):
     :class:`~stalker.models.project.Project` or you can define a
     :class:`~stalker.models.link.Link` as an ``Image`` etc.,
     to create a new :class:`~stalker.models.type.Type` for various classes::
-    
+
       Type(name="Character", target_entity_type="Asset")
       Type(name="Commercial", target_entity_type="Project")
       Type(name="Image", target_entity_type="Link")
-    
+
     or::
-      
+
       Type(name="Character", target_entity_type=Asset.entity_type)
       Type(name="Commercial", target_entity_type=Project.entity_type)
       Type(name="Image", target_entity_type=Link.entity_type)
-    
+
     or even better:
-      
+
       Type(name="Character", target_entity_type=Asset)
       Type(name="Commercial", target_entity_type=Project)
       Type(name="Image", target_entity_type=Link)
-    
+
     By using :class:`~stalker.models.type.Type`\ s, one can able to sort and
     group same type of entities.
-    
+
     :class:`~stalker.models.type.Type`\ s are generally used in
     :class:`~stalker.models.type.Structure`\ s.
-    
+
     :param string target_entity_type: The string defining the target type of
       this :class:`~stalker.models.type.Type`.
     """
@@ -75,7 +75,7 @@ class Type(Entity, TargetEntityTypeMixin, CodeMixin):
     __mapper_args__ = {"polymorphic_identity": "Type"}
     type_id_local = Column("id", Integer, ForeignKey("Entities.id"),
                            primary_key=True)
-    
+
     def __init__(self, name=None, code=None, target_entity_type=None, **kwargs):
         kwargs['name'] = name
         kwargs['target_entity_type'] = target_entity_type
@@ -83,7 +83,7 @@ class Type(Entity, TargetEntityTypeMixin, CodeMixin):
         TargetEntityTypeMixin.__init__(self, **kwargs)
         #CodeMixin.__init__(self, **kwargs)
         self.code = code
-    
+
     def __eq__(self, other):
         """the equality operator
         """
@@ -102,13 +102,13 @@ class EntityType(Base):
     """
     __tablename__ = 'EntityTypes'
     __table_args__ = ({"extend_existing": True})
-    
+
     id = Column("id", Integer, primary_key=True)
     name = Column(String(128), nullable=False, unique=True)
     statusable = Column(Boolean, default=False)
     schedulable = Column(Boolean, default=False)
     accepts_references = Column(Boolean, default=False)
-    
+
     def __init__(
             self,
             name,
@@ -119,6 +119,6 @@ class EntityType(Base):
         self.statusable = statusable
         self.schedulable = schedulable
         self.accepts_references = accepts_references
-    
+
     # TODO: add tests for the name attribute
 

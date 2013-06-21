@@ -21,19 +21,16 @@
 import datetime
 import logging
 
-from sqlalchemy.exc import UnboundExecutionError
-from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy import (Table, Column, Integer, ForeignKey, Boolean, Enum,
                         DateTime, Float)
+from sqlalchemy.exc import UnboundExecutionError
 from sqlalchemy.orm import relationship, validates, synonym, reconstructor
 
-from stalker import defaults
-from stalker.models import check_circular_dependency
-from stalker.models.entity import Entity
-from stalker.models.auth import User
-from stalker.models.mixins import ScheduleMixin, StatusMixin, ReferenceMixin
 from stalker.db import DBSession
 from stalker.db.declarative import Base
+from stalker import (defaults, Entity, User, ScheduleMixin, StatusMixin,
+                     ReferenceMixin)
+from stalker.models import check_circular_dependency
 from stalker.exceptions import OverBookedError, CircularDependencyError
 from stalker.log import logging_level
 
@@ -52,35 +49,35 @@ class TimeLog(Entity, ScheduleMixin):
     """Holds information about the uninterrupted time spend on a specific
     :class:`~stalker.models.task.Task` by a specific
     :class:`~stalker.models.auth.User`.
-    
+
     It is so important to note that the TimeLog reports the uninterrupted time
     that is spent for a Task. Thus it doesn't care about the working time
     attributes like daily working hours, weekly working days or anything else.
     Again it is the uninterrupted time which is spent for a task.
-    
+
     Entering a time log for 2 days will book the resource for 48 hours not,
     2 * daily working hours.
-    
+
     TimeLogs are created per resource. It means, you need to record all the 
     works separately for each resource. So there is only one resource in a 
     TimeLog instance.
-    
+
     A :class:`~stalker.models.task.TimeLog` instance needs to be initialized
     with a :class:`~stalker.models.task.Task` and a
     :class:`~stalker.models.auth.User` instances.
-    
+
     Adding overlapping time log for a :class:`~stalker.models.auth.User` will
     raise a :class:`~stalker.errors.OverBookedError`.
-    
+
     TimeLog instances automatically extends the
     :attr:`~stalker.models.task.Task.schedule_timing` of the assigned Task if
     the :attr:`~stalker.models.task.Task.total_logged_seconds` is getting
     bigger than the :attr:`~stalker.models.task.Task.schedule_timing` after
     this TimeLog.
-    
+
     :param task: The :class:`~stalker.models.task.Task` instance that this
       time log belongs to.
-    
+
     :param resource: The :class:`~stalker.models.auth.User` instance that this
       time log is created for.
     """
@@ -127,7 +124,7 @@ class TimeLog(Entity, ScheduleMixin):
 
     def _expand_task_schedule_timing(self, task):
         """Expands the task schedule timing if necessary
-        
+
         :param task: The task that is going to be adjusted
         """
         # do the schedule_timing expansion here
@@ -141,7 +138,7 @@ class TimeLog(Entity, ScheduleMixin):
                 studio = Studio.query.first()
         except UnboundExecutionError:
             pass
-        
+
         data_source = studio if studio else defaults
         conversion_ratio = 1
         if task.schedule_unit == 'min':
@@ -168,8 +165,7 @@ class TimeLog(Entity, ScheduleMixin):
 
             # do it normally
             task.schedule_timing = float(task.schedule_timing) + \
-                                   float(
-                                       total_seconds - remaining_seconds) / conversion_ratio
+                float(total_seconds - remaining_seconds) / conversion_ratio
 
     @validates("task")
     def _validate_task(self, key, task):
@@ -180,10 +176,10 @@ class TimeLog(Entity, ScheduleMixin):
                             "stalker.models.task.Task not %s" %
                             (self.__class__.__name__,
                              task.__class__.__name__))
-        
+
         # adjust task schedule
         self._expand_task_schedule_timing(task)
-        
+
         return task
 
     @validates("resource")
@@ -209,7 +205,7 @@ class TimeLog(Entity, ScheduleMixin):
             logger.debug('time_log.end   : %s' % time_log.end)
             logger.debug('self.start     : %s' % self.start)
             logger.debug('self.end       : %s' % self.end)
-            
+
             if time_log != self:
                 if time_log.start == self.start or \
                                 time_log.end == self.end or \
@@ -247,110 +243,110 @@ def update_task_dates(func):
 
 class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
     """Manages Task related data.
-    
+
     **Introduction**
-    
+
     Tasks are the unit of work that should be accomplished to complete a
     :class:`~stalker.models.project.Project`.
-    
+
     Stalker tries to follow the concepts stated in TaskJuggler_.
-    
+
     .. _TaskJuggler : http://www.taskjuggler.org/
-    
+
     .. note::
        .. versionadded:: 0.2.0:
        Parent-child relation in Tasks
 
        Tasks can now have child Tasks. So you can create complex relations of
        Tasks to comply with your project needs.
-    
+
     .. note::
        .. versionadded:: 0.2.0:
           References in Tasks
-       
+
        Tasks can now have References.
-    
+
     **Initialization**
-    
+
     A Task needs to be created with a Project instance. It is also valid if no
     project is supplied but there should be a parent Task passed to the parent
     argument. And it is also possible to pass both project and the parent task.
-    
+
     Because it will create an ambiguity, Stalker will raise a RuntimeWarning,
     if both project and task are given and the owner project of the given
     parent task is different then the supplied project instance. But again
     Stalker will warn the user but will continue to use the task as the parent
     and will correctly use the project of the given task as the project of the
     newly created task.
-    
+
     The following codes are a couple of examples for creating Task instances::
-      
+
       # with a project instance
       task1 = Task(name='Schedule', project=proj1)
-      
+
       # with a parent task
       task2 = Task(name='Documentation', parent=task1)
-      
+
       # or both
       task3 = Task(name='Test', project=proj1, parent=task1)
-      
+
       # this will create a RuntimeWarning
       task4 = Task(name='Test', project=proj2, parent=task1) # task1 is not a
                                                              # task of proj2
       assert task4.project == proj1 # Stalker uses the task1.project for task4
-      
+
       # this will also create a RuntimeError
       task3 = Task(name='Failure 2') # no project no parent, this is an orphan
                                      # task.
-    
+
     Also initially Stalker will pin point the :attr:`.start` value and then
     will calculate proper :attr:`.end` and :attr:`.duration` values by using
     the :attr:`.schedule_timing` and :attr:`.schedule_unit` attributes. But
     these values (start, end and duration) are temporary values for an
     unscheduled task. The final date values will be calculated by TaskJuggler
     in the `auto scheduling` phase.
-    
+
     **Auto Scheduling**
-    
+
     Stalker uses TaskJuggler for task scheduling. After defining all the tasks,
     Stalker will convert them to a single tjp file along with the recorded
     :class:`~stalker.models.task.TimeLog`\ s and let TaskJuggler to solve the
     scheduling problem.
-    
+
     During the auto scheduling (with TaskJuggler), the calculation of task
     duration, start and end dates are effected by the working hours setting of
     the :class:`~stalker.models.studio.Studio`, the effort that needs to spend
     for that task and the availability of the resources assigned to the task.
-    
+
     A good practice for creating a project plan is to supply the parent/child
     and dependency relation between tasks and the effort and resource
     information per task and leave the start and end date calculation to
     TaskJuggler. It is also possible to use the ``length`` or ``duration``
     values (set :attr:`.schedule_model` to 'effort', 'length' or 'duration' to
     get the desired scheduling model).
-    
+
     The default :attr:`.schedule_model` for Stalker tasks is 'effort`, the
     default :attr:`.schedule_unit` is ``hour`` and the default value of
     :attr:`.schedule_timing` is defined by the
     :attr:`stalker.config.Config.timing_resolution`. So for a
     config where the ``timing_resolution`` is set to 1 hour the schedule_timing
     is 1.
-    
+
     To convert a Task instance to a TaskJuggler compatible string use the
     :attr:`.to_tjp`` attribute. It will try to create a good representation of
     the Task by using the resources, schedule_model, schedule_timing and
     schedule_constraint attributes.
-    
+
     **Task/Task Relation**
-    
+
     A Task is called a ``container task`` if it has at least one child Task.
     And it is called a ``leaf task`` if it doesn't have any children Tasks.
     Task which doesn't have a parent called ``root_task``.
-    
+
     The resources in a container task is meaningless, cause the resources are
     defined by the child tasks (Dev Note: this can still be used to populate
     the resource information to the children tasks as in TaskJuggler).
-    
+
     Although the values are not very important after TaskJuggler schedules a
     task, the :attr:`~.start` and :attr:`~.end` values for a container
     task is gathered from the child tasks. The start is equal to the earliest
@@ -358,55 +354,55 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
     value of the children tasks. Of course, these values are going to be
     ignored by the TaskJuggler, but for interactive gantt charts these are good
     toy attributes to play with.
-    
+
     Stalker will check if there will be a cycle if one wants to parent a Task
     to a child Task of its own or the dependency relation creates a cycle.
-    
+
     In Gantt Charts the ``computed_start`` and ``computed_end`` attributes will
     be used if the task :attr:`.is_scheduled`.
-    
+
     :param parent: The parent Task or Project of this Task. Every Task in
       Stalker should be related with a :class:`~stalker.models.project.Project`
       instance. So if no parent task is desired, at least a Project instance
       should be passed as the parent of the created Task or the Task will be an
       orphan task and Stalker will raise a RuntimeError.
-    
+
     :param int priority: It is a number between 0 to 1000 which defines the
       priority of the :class:`~stalker.models.task.Task`. The higher the value
       the higher its priority. The default value is 500.
-    
+
     :param resources: The :class:`~stalker.models.auth.User`\ s assigned to
       this :class:`~stalker.models.task.Task`. A
       :class:`~stalker.models.task.Task` without any resource can not be
       scheduled.
-    
+
     :type resources: list of :class:`~stalker.User`
-    
+
     :param int bid_timing: The initial bid for this Task. It can be used in
       measuring how accurate the initial guess was. It will be compared against
       the total amount of effort spend doing this task. Can be set to None,
       which will be set to the schedule_timing_day argument value if there is
       one or 0.
-    
+
     :param str bid_unit: The unit of the bid value for this Task. Should be one
       of the 'min', 'h', 'd', 'w', 'm', 'y'.
-        
+
     :param depends: A list of :class:`~stalker.models.task.Task`\ s that this
       :class:`~stalker.models.task.Task` is depending on. A Task can not depend
       to itself or any other Task which are already depending to this one in
       anyway or a CircularDependency error will be raised.
-    
+
     :type depends: list of :class:`~stalker.models.task.Task`
-    
+
     :param int schedule_timing: The value of the schedule timing.
-    
+
     :param str schedule_unit: The unit value of the schedule timing. Should be
       one of 'min', 'h', 'd', 'w', 'm', 'y'.
-    
+
     :param int schedule_constraint: The schedule constraint. It is the index
       of the schedule constraints value in
       :class:`stalker.config.Config.task_schedule_constraints`.
-    
+
     :param bool milestone: A bool (True or False) value showing if this task is
       a milestone which doesn't need any resource and effort.
     """
@@ -447,7 +443,7 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
     is_milestone = Column(
         Boolean,
         doc="""Specifies if this Task is a milestone.
-        
+
         Milestones doesn't need any duration, any effort and any resources. It
         is used to create meaningful dependencies between the critical stages
         of the project.
@@ -459,10 +455,10 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
     is_complete = Column(
         Boolean,
         doc="""A bool value showing if this task is completed or not.
-        
+
         There is a good article_ about why not to use an attribute called
         ``percent_complete`` to measure how much the task is completed.
-        
+
         .. _article: http://www.pmhut.com/how-percent-complete-is-that-task-again
         """
     )
@@ -474,7 +470,7 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         secondaryjoin="Task_Dependencies.c.depends_to_task_id==Tasks.c.id",
         backref="dependent_of",
         doc="""A list of :class:`~stalker.models.task.Task`\ s that this one is depending on.
-        
+
         A CircularDependencyError will be raised when the task dependency
         creates a circular dependency which means it is not allowed to create
         a dependency for this Task which is depending on another one which in
@@ -492,7 +488,7 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         doc="""The list of :class:`~stalker.models.auth.User`\ s assigned to this Task.
         """
     )
-    
+
     watchers = relationship(
         'User',
         secondary='Task_Watchers',
@@ -520,9 +516,6 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         doc="""A list of :class:`~stalker.models.version.Version` instances showing the files created for this task.
         """
     )
-
-    #_start = Column('start', DateTime)
-    #_end = Column('end', DateTime)
 
     computed_start = Column(DateTime)
     computed_end = Column(DateTime)
@@ -1127,7 +1120,7 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         computed_start and computed_end values
         """
         return self.computed_start is not None and \
-               self.computed_end is not None
+            self.computed_end is not None
 
     @property
     def total_logged_seconds(self):
@@ -1178,8 +1171,8 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
 
             elif schedule_unit == 'y':
                 return schedule_timing * \
-                       data_source.yearly_working_days * \
-                       data_source.daily_working_hours * 3600
+                    data_source.yearly_working_days * \
+                    data_source.daily_working_hours * 3600
 
     @property
     def remaining_seconds(self):
@@ -1210,8 +1203,3 @@ Task_Watchers = Table(
     Column("task_id", Integer, ForeignKey("Tasks.id"), primary_key=True),
     Column("watcher_id", Integer, ForeignKey("Users.id"), primary_key=True)
 )
-
-
-# TODO: subscribe to task: Users should be able to subscribe to any task they
-#       want so they can be informed about the tickets as if they are a
-#       resource for that task.

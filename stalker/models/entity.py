@@ -29,12 +29,14 @@ from stalker.db import Base
 
 from stalker.log import logging_level
 import logging
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
+
 class SimpleEntity(Base):
     """The base class of all the others
-    
+
     The ``SimpleEntity`` is the starting point of the Stalker Object Model, it
     starts by adding the basic information about an entity which are
     :attr:`.name`, :attr:`.description`, the audit information like
@@ -44,13 +46,13 @@ class SimpleEntity(Base):
     is very important for entities that needs a type.
 
     .. note::
-      
+
        For derived classes if the
        :attr:`~stalker.models.entity.SimpleEntity.type` needed to be
        specifically specified, that is it can not be None or nothing else then
        a :class:`~stalker.models.type.Type` instance, set the
        ``strictly_typed`` class attribute to True::
-         
+
            class NewClass(SimpleEntity):
                __strictly_typed__ = True
 
@@ -66,77 +68,75 @@ class SimpleEntity(Base):
        Name attribute can be skipped. Starting from version 0.2.0 the ``name``
        attribute can be skipped. For derived classes use the ``__auto_name__``
        class attribute to control auto naming behaviour.
-    
+
     :param string name: A string or unicode value that holds the name of this
       entity.  It should not contain any white space at the beginning and at
       the end of the string. Valid characters are [a-zA-Z0-9\_/S].
-      
+
       Advanced::
-      
+
         For classes derived from the SimpleEntity, if an automatic name is
         desired, the ``__auto_name__`` class attribute can be set to True. Then
         Stalker will automatically generate a uuid4 sequence for the name
         attribute.
-    
+
     :param str description: A string or unicode attribute that holds the
       description of this entity object, it could be an empty string, and it
       could not again have white spaces at the beginning and at the end of the
       string, again any given objects will be converted to strings
-    
+
     :param created_by: The :class:`~stalker.models.auth.User` who has created
       this object
-    
+
     :type created_by: :class:`~stalker.models.auth.User`
-    
+
     :param updated_by: The :class:`~stalker.models.auth.User` who has updated
       this object lastly. The created_by and updated_by attributes point the
       same object if this object is just created.
-    
+
     :param date_created: The date that this object is created.
-    
+
     :type date_created: :class:`datetime.datetime`
-    
+
     :param date_updated: The date that this object is updated lastly. For newly
       created entities this is equal to date_created and the date_updated
       cannot point a date which is before date_created.
-    
+
     :type date_updated: :class:`datetime.datetime`
-    
+
     :param type: The type of the current SimpleEntity. Used across several
       places in Stalker. Can be None. The default value is None.
-    
+
     :type type: :class:`~stalker.models.type.Type`
     """
-    
-    
     # auto generate name values
     __auto_name__ = True
     __strictly_typed__ = False
-    
+
     # TODO: Allow the user to specify the formatting of the name attribute as a Regular Expression (name_formatter)
     __name_formatter__ = None
-    
+
     __tablename__ = "SimpleEntities"
     id = Column("id", Integer, primary_key=True)
-    
+
     entity_type = Column(String(128), nullable=False)
     __mapper_args__ = {
         "polymorphic_on": entity_type,
         "polymorphic_identity": "SimpleEntity"
     }
-   
+
     name = Column(
         String(256),
         nullable=False,
         doc="""Name of this object"""
     )
-    
+
     description = Column(
         "description",
         String,
         doc="""Description of this object."""
     )
-    
+
     created_by_id = Column(
         "created_by_id",
         Integer,
@@ -144,7 +144,7 @@ class SimpleEntity(Base):
         doc="""The id of the :class:`~stalker.models.auth.User` who has created
         this entity."""
     )
-    
+
     created_by = relationship(
         "User",
         backref="entities_created",
@@ -152,7 +152,7 @@ class SimpleEntity(Base):
         post_update=True,
         doc="""The :class:`~stalker.models.auth.User` who has created this object."""
     )
-    
+
     updated_by_id = Column(
         "updated_by_id",
         Integer,
@@ -160,7 +160,7 @@ class SimpleEntity(Base):
         doc="""The id of the :class:`~stalker.models.auth.User` who has updated
         this entity."""
     )
-    
+
     updated_by = relationship(
         "User",
         backref="entities_updated",
@@ -168,20 +168,20 @@ class SimpleEntity(Base):
         post_update=True,
         doc="""The :class:`~stalker.models.auth.User` who has updated this object."""
     )
-    
+
     date_created = Column(
         DateTime,
         default=datetime.datetime.now(),
         doc="""A :class:`datetime.datetime` instance showing the creation date and time of this object."""
     )
-    
+
     date_updated = Column(
         DateTime,
         default=datetime.datetime.now(),
         doc="""A :class:`datetime.datetime` instance showing the update date and time of this object."""
         ,
-        )
-    
+    )
+
     type_id = Column(
         "type_id",
         Integer,
@@ -191,18 +191,18 @@ class SimpleEntity(Base):
         SimpleEntities and Types.
         """
     )
-    
+
     type = relationship(
         "Type",
         primaryjoin="SimpleEntities.c.type_id==Types.c.id",
         post_update=True,
         doc="""The type of the object.
-        
+
         It is an instance of :class:`~stalker.models.type.Type` with a proper
         :attr:`~stalker.models.type.Type.target_entity_type`.
         """
     )
-    
+
     generic_data = relationship(
         'SimpleEntity',
         secondary='SimpleEntity_GenericData',
@@ -212,39 +212,39 @@ class SimpleEntity(Base):
         doc='''This attribute can hold any kind of data which exists in SOM.
         '''
     )
-    
+
     thumbnail_id = Column(
         'thumbnail_id',
         Integer,
         ForeignKey('Links.id', use_alter=True, name='z')
     )
-    
+
     thumbnail = relationship(
         'Link',
         primaryjoin='SimpleEntities.c.thumbnail_id==Links.c.id',
         post_update=True
     )
-    
+
     __stalker_version__ = Column("stalker_version", String(256))
-    
+
     def __init__(
-        self,
-        name=None,
-        description="",
-        type=None,
-        created_by=None,
-        updated_by=None,
-        date_created=None,
-        date_updated=None,
-        thumbnail=None,
-        **kwargs
+            self,
+            name=None,
+            description="",
+            type=None,
+            created_by=None,
+            updated_by=None,
+            date_created=None,
+            date_updated=None,
+            thumbnail=None,
+            **kwargs
     ): # pylint: disable=W0613
-        
+
         # name and nice_name
         self._nice_name = ""
-        
+
         self.name = name
-        
+
         self.description = description
         self.created_by = created_by
         self.updated_by = updated_by
@@ -254,7 +254,7 @@ class SimpleEntity(Base):
             date_created = datetime.datetime.now()
         if date_updated is None:
             date_updated = datetime.datetime.now()
-        
+
         self.date_created = date_created
         self.date_updated = date_updated
         self.type = type
@@ -272,18 +272,18 @@ class SimpleEntity(Base):
         """the representation of the SimpleEntity
         """
         return "<%s (%s)>" % (self.name, self.entity_type)
-    
+
     def __eq__(self, other):
         """the equality operator
         """
-        return isinstance(other, SimpleEntity) and\
-               self.name == other.name
+        return isinstance(other, SimpleEntity) and \
+            self.name == other.name
 
     def __ne__(self, other):
         """the inequality operator
         """
         return not self.__eq__(other)
-    
+
     @validates("description")
     def _validate_description(self, key, description_in):
         """validates the given description_in value
@@ -292,7 +292,7 @@ class SimpleEntity(Base):
             description_in = ""
 
         return str(description_in)
-    
+
     @validates("name")
     def _validate_name(self, key, name):
         """validates the given name_in value
@@ -302,60 +302,61 @@ class SimpleEntity(Base):
                 # generate a uuid4
                 name = self.__class__.__name__ + '_' + \
                        uuid.uuid4().urn.split(':')[2]
-        
+
         # it is None
         if name is None:
             raise TypeError("%s.name can not be None" %
                             self.__class__.__name__)
-        
+
         if not isinstance(name, (str, unicode)):
             raise TypeError("%s.name should be an instance of string or "
                             "unicode not %s" %
                             (self.__class__.__name__,
-                            name.__class__.__name__))
-        
+                             name.__class__.__name__))
+
         name = self._format_name(str(name))
-        
+
         # it is empty
         if name == "":
             raise ValueError("%s.name can not be an empty string" %
                              self.__class__.__name__)
-        
+
         # also set the nice_name
         self._nice_name = self._format_nice_name(name)
-        
+
         return name
-    
+
     def _format_name(self, name_in):
         """formats the name_in value
         """
         # remove unnecessary characters from the string
         name_in = name_in.strip()
         #name_in = re.sub(r'([^a-zA-Z0-9\s_\-#]+)', '', name_in).strip()
-        
+
         # remove all the characters which are not alphabetic from the start of
         # the string
         #name_in = re.sub(r"(^[^a-zA-Z0-9]+)", '', name_in)
-        
+
         # remove multiple spaces
         name_in = re.sub(r'[\s]+', ' ', name_in)
-        
+
         return name_in
-    
+
     def _format_nice_name(self, nice_name_in):
         """formats the given nice name
         """
         # remove unnecessary characters from the string
         nice_name_in = str(nice_name_in).strip()
-        nice_name_in = re.sub(r'([^a-zA-Z0-9\s_\-]+)', '', nice_name_in).strip()
+        nice_name_in = re.sub(r'([^a-zA-Z0-9\s_\-]+)', '',
+                              nice_name_in).strip()
 
         # remove all the characters which are not alphabetic from the start of
         # the string
         nice_name_in = re.sub(r"(^[^a-zA-Z0-9]+)", '', nice_name_in)
-        
+
         # remove multiple spaces
         nice_name_in = re.sub(r'[\s]+', ' ', nice_name_in)
-        
+
         ## replace camel case letters
         # nice_name_in = re.sub(r"(.+?[a-z]+)([A-Z])", r"\1_\2", nice_name_in)
 
@@ -373,7 +374,7 @@ class SimpleEntity(Base):
     @property
     def nice_name(self):
         """Nice name of this object.
-        
+
         It has the same value with the name (contextually) but with a different
         format like, all the white spaces replaced by underscores ("\_"), all
         the CamelCase form will be expanded by underscore (\_) characters and
@@ -383,13 +384,13 @@ class SimpleEntity(Base):
         if self._nice_name is None or self._nice_name == "":
             self._nice_name = self._format_nice_name(self.name)
         return self._nice_name
-    
+
     @validates("created_by")
     def _validate_created_by(self, key, created_by_in):
         """validates the given created_by_in attribute
         """
         from stalker.models.auth import User
-        
+
         if created_by_in is not None:
             if not isinstance(created_by_in, User):
                 raise TypeError("%s.created_by should be an instance of"
@@ -406,7 +407,7 @@ class SimpleEntity(Base):
         if updated_by_in is None:
             # set it to what created_by attribute has
             updated_by_in = self.created_by
-        
+
         if updated_by_in is not None:
             if not isinstance(updated_by_in, User):
                 raise TypeError("%s.updated_by should be an instance of"
@@ -448,7 +449,7 @@ class SimpleEntity(Base):
                              "before 'date_created', try setting the "
                              "'date_created' before" %
                              self.__class__.__name__)
-        # TODO: all the attribute check errors should use self.__class__.__name__ as used here
+            # TODO: all the attribute check errors should use self.__class__.__name__ as used here
         return date_updated_in
 
     @validates("type")
@@ -456,9 +457,9 @@ class SimpleEntity(Base):
         """validates the given type value
         """
         from stalker.models.type import Type
-        
+
         raise_error = False
-        
+
         if not self.__strictly_typed__:
             if type_in is not None:
                 if not isinstance(type_in, Type):
@@ -466,32 +467,33 @@ class SimpleEntity(Base):
         else:
             if not isinstance(type_in, Type):
                 raise_error = True
-        
+
         if raise_error:
             raise TypeError("%s.type must be an instance of "
                             "stalker.models.type.Type not %s" %
                             (self.__class__.__name__, type_in))
         return type_in
-    
+
     @validates('thumbnail')
     def _validate_thumbnail(self, key, thumb):
         """validates the given thumb value
         """
         if thumb is not None:
             from stalker import Link
+
             if not isinstance(thumb, Link):
                 raise TypeError('%s.thumbnail should be a '
                                 'stalker.models.link.Link instance, not %s' %
                                 (self.__class__.__name__,
                                  thumb.__class__.__name__))
         return thumb
-    
+
     @property
     def tjp_id(self):
         """returns TaskJuggler compatible id
         """
         return "%s_%s" % (self.__class__.__name__, self.id)
-    
+
     @property
     def to_tjp(self):
         """renders a TaskJuggler compliant string used for TaskJuggler
@@ -503,17 +505,17 @@ class SimpleEntity(Base):
 
 class Entity(SimpleEntity):
     """Another base data class that adds tags and notes to the attributes list.
-    
+
     This is the entity class which is derived from the SimpleEntity and adds
     only tags to the list of parameters.
-    
+
     Two Entities considered equal if they have the same name. It doesn't matter
     if they have different tags or notes.
-    
+
     :param list tags: A list of :class:`~stalker.models.tag.Tag` objects
       related to this entity. tags could be an empty list, or when omitted it
       will be set to an empty list.
-    
+
     :param list notes: A list of :class:`~stalker.models.note.Note` instances.
       Can be an empty list, or when omitted it will be set to an empty list,
       when set to None it will be converted to an empty list.
@@ -529,7 +531,7 @@ class Entity(SimpleEntity):
         secondary="Entity_Tags",
         backref="entities",
         doc="""A list of tags attached to this object.
-        
+
         It is a list of :class:`~stalker.models.tag.Tag` instances which shows
         the tags of this object"""
     )
@@ -539,7 +541,7 @@ class Entity(SimpleEntity):
         primaryjoin="Entities.c.id==Notes.c.entity_id",
         backref="entity",
         doc="""All the :class:`~stalker.models.note.Notes`\ s attached to this entity.
-        
+
         It is a list of :class:`~stalker.models.note.Note` instances or an
         empty list, setting it None will raise a TypeError.
         """
@@ -571,7 +573,7 @@ class Entity(SimpleEntity):
     def _validate_notes(self, key, note):
         """validates the given note value
         """
-        
+
         from stalker.models.note import Note
 
         if not isinstance(note, Note):
@@ -586,7 +588,7 @@ class Entity(SimpleEntity):
     def _validate_tags(self, key, tag):
         """validates the given tag
         """
-        
+
         from stalker.models.tag import Tag
 
         if not isinstance(tag, Tag):
@@ -596,7 +598,7 @@ class Entity(SimpleEntity):
                              tag.__class__.__name__))
 
         return tag
-    
+
     def __eq__(self, other):
         """the equality operator
         """
@@ -624,17 +626,17 @@ Entity_Tags = Table(
 
 # SIMPLEENTITY_GENERICDATA
 SimpleEntity_GenericData = Table(
-   'SimpleEntity_GenericData', Base.metadata,
-   Column(
+    'SimpleEntity_GenericData', Base.metadata,
+    Column(
         'simple_entity_id',
-       Integer,
-       ForeignKey('SimpleEntities.id'),
-       primary_key=True
-   ),
-   Column(
-       'other_simple_entity_id',
-       Integer,
-       ForeignKey('SimpleEntities.id'),
-       primary_key=True
-   )
+        Integer,
+        ForeignKey('SimpleEntities.id'),
+        primary_key=True
+    ),
+    Column(
+        'other_simple_entity_id',
+        Integer,
+        ForeignKey('SimpleEntities.id'),
+        primary_key=True
+    )
 )

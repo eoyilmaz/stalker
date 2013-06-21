@@ -84,7 +84,7 @@ class Shot(Task, CodeMixin):
 
     Two shots with the same :attr:`~stalker.models.shot.Shot.code` can not be
     assigned to the same :class:`~stalker.models.sequence.Sequence`.
-    
+
     The :attr:`~stalker.models.shot.Shot.cut_out` and
     :attr:`~stalker.models.shot.Shot.cut_duration` attributes effects each
     other. Setting the :attr:`~stalker.models.shot.Shot.cut_out` will change
@@ -101,54 +101,54 @@ class Shot(Task, CodeMixin):
     :attr:`~stalker.models.shot.Shot.cut_in` +
     :attr:`~stalker.models.shot.Shot.cut_duration`. So the priority of the
     attributes are as follows:
-    
+
       :attr:`~stalker.models.shot.Shot.cut_in` >
       :attr:`~stalker.models.shot.Shot.cut_duration` >
       :attr:`~stalker.models.shot.Shot.cut_out`
-    
+
     For still images (which can be also managed by shots) the
     :attr:`~stalker.models.shot.Shot.cut_in` and
     :attr:`~stalker.models.shot.Shot.cut_out` can be set to the same value
     so the :attr:`~stalker.models.shot.Shot.cut_duration` can be set to zero.
-    
+
     Because Shot is getting its relation to a
     :class:`~stalker.models.project.Project` from the
     passed :class:`~stalker.models.sequence.Sequence`, you can skip the
     ``project`` argument, and if you not the value of the ``project`` argument
     is not going to be used.
-    
+
     :param project: This is the :class:`~stalker.models.project.Project`
       instance that this shot belongs to. A Shot can not be created without a
       Project instance.
-    
+
     :type project: :class:`~stalker.models.project.Project`
-    
+
     :param sequences: This is a list of
       :class:`~stalker.models.sequence.Sequence`\ s that this shot is assigned
       to. A Shot can be created without having a Sequence instance.
-    
+
     :type sequences: list of :class:`~stalker.models.sequence.Sequence`
-    
+
     :param integer cut_in: The in frame number that this shot starts. The
       default value is 1. When the ``cut_in`` is bigger then
       ``cut_out``, the :attr:`~stalker.models.shot.Shot.cut_out` attribute is
       set to :attr:`~stalker.models.shot.Shot.cut_in` + 1.
-    
+
     :param integer cut_duration: The duration of this shot in frames. It should
       be zero or a positive integer value (natural number?) or . The default
       value is None.
-    
+
     :param integer cut_out: The out frame number that this shot ends. If it is
       given as a value lower then the ``cut_in`` parameter, then the
       :attr:`~stalker.models.shot.Shot.cut_out` will be set to the same value
       with :attr:`~stalker.models.shot.Shot.cut_in` and the
       :attr:`~stalker.models.shot.Shot.cut_duration` attribute will be set to
       1. Can be skipped. The default value is None.
-    
+
     :param image_format: The image format of this shot. This is an optional
       variable to differentiate the image format per shot. The default value is
       the same with the Project that this Shot belongs to.
-    
+
     :type image_format: :class:`~stalker.models.format.ImageFormat`
     """
     __auto_name__ = True
@@ -179,7 +179,7 @@ class Shot(Task, CodeMixin):
         "ImageFormat",
         primaryjoin="Shots.c.image_format_id==ImageFormats.c.id",
         doc="""The :class:`~stalker.models.format.ImageFormat` of this shot.
-        
+
         This value defines the output image format of this shot, should be an
         instance of :class:`~stalker.models.format.ImageFormat`.
         """
@@ -253,7 +253,7 @@ class Shot(Task, CodeMixin):
 
     def _check_code_availability(self, code, project):
         """checks if the given code is available in the given project
-        
+
         :param code: the code string
         :param project: the stalker.models.project.Project instance that this
           shot is a part of
@@ -331,7 +331,6 @@ class Shot(Task, CodeMixin):
                             "%s" % (self.__class__.__name__,
                                     sequence.__class__.__name__))
         return sequence
-
 
     @validates('scenes')
     def _validate_scenes(self, key, scene):
