@@ -1,24 +1,23 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
 # Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
-# 
+#
 # This file is part of Stalker.
-# 
+#
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation;
 # version 2.1 of the License.
-# 
+#
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 import os
-
 import pickle
 import re
 import base64
@@ -29,28 +28,26 @@ from sqlalchemy import (Table, Column, Integer, ForeignKey, String, DateTime,
 from sqlalchemy.orm import relationship, synonym, reconstructor, validates
 from sqlalchemy.schema import UniqueConstraint
 
-
-
 from stalker import defaults
-
 from stalker.db.declarative import Base
 from stalker.models.mixins import ACLMixin
 from stalker.models.entity import Entity
-
 from stalker.log import logging_level
+
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
+
 def group_finder(login, request):
     """Returns the group of the given login. The login name will be in
     'User:{login}' format.
-    
+
     :param login: The login of the user, both '{login}' and
       'User:{login}' format is accepted.
-    
+
     :param request: The Request object
-    
+
     :return: Will return the groups of the user in ['Group:{group_name}']
       format.
     """
@@ -65,9 +62,10 @@ def group_finder(login, request):
         # just return the groups names if there is any group
         groups = user_obj.groups
         if len(groups):
-            return map(lambda x:'Group:' + x.name, groups)
+            return map(lambda x: 'Group:' + x.name, groups)
 
     return []
+
 
 class RootFactory(object):
     """The main purpose of having a root factory is to generate the objects
@@ -84,9 +82,10 @@ class RootFactory(object):
         )
 
         # start with default ACLs
-        
+
         ACLs = [
-            ('Allow', 'Group:' + defaults.admin_department_name, all_permissions),
+            ('Allow', 'Group:' + defaults.admin_department_name,
+             all_permissions),
             ('Allow', 'User:' + defaults.admin_name, all_permissions)
         ]
 
@@ -101,9 +100,10 @@ class RootFactory(object):
             ACLs.extend(group.__acl__)
 
         return ACLs
-    
+
     def __init__(self, request):
         pass
+
 
 class Permission(Base):
     """A class to hold permissions.
@@ -169,15 +169,15 @@ class Permission(Base):
       DBSession.commit()
     """
     __tablename__ = 'Permissions'
-    __table_args__  = (
+    __table_args__ = (
         UniqueConstraint('access', 'action', 'class_name'),
-        {"extend_existing":True}
+        {"extend_existing": True}
     )
 
     id = Column(Integer, primary_key=True)
     _access = Column('access', Enum('Allow', 'Deny', name='AccessNames'))
     _action = Column('action',
-                     Enum(*defaults.actions,name='ActionNames'))
+                     Enum(*defaults.actions, name='ActionNames'))
     _class_name = Column('class_name', String)
 
     def __init__(self, access, action, class_name):
@@ -193,35 +193,36 @@ class Permission(Base):
                             'or unicode not %s' % access.__class__.__name__)
 
         if access not in ['Allow', 'Deny']:
-            raise ValueError('Permission.access should be "Allow" or "Deny"' 
+            raise ValueError('Permission.access should be "Allow" or "Deny"'
                              'not %s' % access)
 
         return access
-    
+
     def _access_getter(self):
         """returns the _access value
         """
         return self._access
 
     access = synonym('_access', descriptor=property(_access_getter))
-    
+
     def _validate_class_name(self, class_name):
         """validates the given class_name value
         """
         if not isinstance(class_name, (str, unicode)):
             raise TypeError('Permission.class_name should be an instance of '
-                            'str or unicode not %s' % 
+                            'str or unicode not %s' %
                             class_name.__class__.__name__)
 
         return class_name
-    
+
     def _class_name_getter(self):
         """returns the _class_name attribute value
         """
         return self._class_name
 
-    class_name = synonym('_class_name', descriptor=property(_class_name_getter))
-    
+    class_name = synonym('_class_name',
+                         descriptor=property(_class_name_getter))
+
     def _validate_action(self, action):
         """validates the given action value
         """
@@ -232,11 +233,11 @@ class Permission(Base):
 
         if action not in defaults.actions:
             raise ValueError('Permission.action should be one of the values '
-                             'of %s not %s' % 
+                             'of %s not %s' %
                              (defaults.actions, action))
 
         return action
-    
+
     def _action_getter(self):
         """returns the _action value
         """
@@ -248,14 +249,15 @@ class Permission(Base):
         """the equality of two Permissions
         """
         return isinstance(other, Permission) \
-            and other.access == self.access \
-            and other.action == self.action \
+                   and other.access == self.access \
+                   and other.action == self.action \
             and other.class_name == self.class_name
 
     def __ne__(self, other):
         """the inequality of two Permissions
         """
         return not self.__eq__(other)
+
 
 class Group(Entity, ACLMixin):
     """Creates groups for users to be used in authorization system.
@@ -307,6 +309,7 @@ class Group(Entity, ACLMixin):
 
         return user
 
+
 class User(Entity, ACLMixin):
     """The user class is designed to hold data about a User in the system.
 
@@ -334,11 +337,18 @@ class User(Entity, ACLMixin):
        New to version 0.2.0 users can be assigned to a
        :class:`~stalker.models.task.Task` as a **Watcher**. Which can be used
        to inform the users in watchers list about the updates of certain Tasks.
-    
+
     .. note::
        .. versionadded 0.2.0: Vacations
-       
+
        It is now possible to define Vacations per user.
+
+    .. note::
+        .. deprecated 0.2.0: User.sequences_lead
+
+        User.sequences_lead attribute has been deprecated. Use
+        :attr:`.responsible_of` to query all the
+        :class:`~stalker.models.task.Task`\ s and derivatives.
 
     :param email: holds the e-mail of the user, should be in [part1]@[part2]
       format
@@ -379,11 +389,6 @@ class User(Entity, ACLMixin):
       is the leader of, it is for back referencing purposes.
 
     :type projects_lead: list of :class:`~stalker.models.project.Project`\ s
-
-    :param sequences_lead: it is a list of Sequence objects that this
-      user is the leader of, it is for back referencing purposes
-
-    :type sequences_lead: list of :class:`~stalker.models.sequence.Sequence`
 
     :param last_login: it is a datetime.datetime object holds the last login
       date of the user (not implemented yet)
@@ -464,17 +469,6 @@ class User(Entity, ACLMixin):
         """
     )
 
-    sequences_lead = relationship(
-        "Sequence",
-        primaryjoin="Sequences.c.lead_id==Users.c.id",
-        uselist=True,
-        back_populates="lead",
-        doc=""":class:`~stalker.models.sequence.Sequence`\ s lead by this user.
-
-        It is a list of :class:`~stalker.models.sequence.Sequence` instances.
-        """
-    )
-
     tasks = relationship(
         "Task",
         secondary="Task_Resources",
@@ -493,6 +487,15 @@ class User(Entity, ACLMixin):
         assigned as a watcher.
 
         It is a list of :class:`~stalker.models.task.Task` instances.
+        '''
+    )
+
+    responsible_of = relationship(
+        'Task',
+        primaryjoin='Users.c.id==Tasks.c.responsible_id',
+        back_populates='_responsible',
+        uselist=True,
+        doc='''A list of :class:`~stalker.models.task.Task` instances that this user is responsible of.
         '''
     )
 
@@ -515,19 +518,19 @@ class User(Entity, ACLMixin):
     )
 
     def __init__(
-        self,
-        name=None,
-        login=None,
-        email=None,
-        password=None,
-        departments=None,
-        groups=None,
-        projects_lead=None,
-        sequences_lead=None,
-        tasks=None,
-        watching=None, # TODO: Watchlist should be a list of lists `WatchLists` so one can create task lists (playlists) for different tasks
-        last_login=None,
-        **kwargs
+            self,
+            name=None,
+            login=None,
+            email=None,
+            password=None,
+            departments=None,
+            groups=None,
+            projects_lead=None,
+            tasks=None,
+            watching=None,
+            # TODO: Watchlist should be a list of lists `WatchLists` so one can create task lists (playlists) for different tasks
+            last_login=None,
+            **kwargs
     ):
         kwargs['name'] = name
 
@@ -551,10 +554,6 @@ class User(Entity, ACLMixin):
         if projects_lead is None:
             projects_lead = []
         self.projects_lead = projects_lead
-
-        if sequences_lead is None:
-            sequences_lead = []
-        self.sequences_lead = sequences_lead
 
         if tasks is None:
             tasks = []
@@ -582,10 +581,10 @@ class User(Entity, ACLMixin):
     def __eq__(self, other):
         """the equality operator
         """
-        return super(User, self).__eq__(other) and\
-               isinstance(other, User) and\
-               self.email == other.email and\
-               self.login == other.login and\
+        return super(User, self).__eq__(other) and \
+               isinstance(other, User) and \
+               self.email == other.email and \
+               self.login == other.login and \
                self.name == other.name
 
     def __ne__(self, other):
@@ -611,7 +610,7 @@ class User(Entity, ACLMixin):
         logger.debug("name out: %s" % login)
 
         return login
-    
+
     @validates("departments")
     def _validate_department(self, key, department):
         """validates the given department value
@@ -669,8 +668,8 @@ class User(Entity, ACLMixin):
     def _validate_last_login(self, key, last_login_in):
         """validates the given last_login argument
         """
-        if not isinstance(last_login_in, datetime.datetime) and\
-           last_login_in is not None:
+        if not isinstance(last_login_in, datetime.datetime) and \
+                        last_login_in is not None:
             raise TypeError("%s.last_login should be an instance of "
                             "datetime.datetime or None not %s" %
                             (self.__class__.__name__,
@@ -713,7 +712,7 @@ class User(Entity, ACLMixin):
 
         # mangle the password
         return base64.encodestring(password_in)
-    
+
     def check_password(self, raw_password):
         """Checks the given raw_password.
 
@@ -724,7 +723,7 @@ class User(Entity, ACLMixin):
         Handles the encryption process behind the scene.
         """
         return self.password == base64.encodestring(str(raw_password))
-    
+
     @validates("groups")
     def _validate_groups(self, key, group):
         """check the given group
@@ -743,6 +742,7 @@ class User(Entity, ACLMixin):
         """validates the given projects_lead attribute
         """
         from stalker.models.project import Project
+
         if not isinstance(project, Project):
             raise TypeError(
                 "any element in %s.projects_lead should be a"
@@ -750,25 +750,13 @@ class User(Entity, ACLMixin):
                 (self.__class__.__name__, project.__class__.__name__)
             )
         return project
-    
-    @validates("sequences_lead")
-    def _validate_sequences_lead(self, key, sequence):
-        """validates the given sequences_lead attribute
-        """
-        from stalker.models.sequence import Sequence
-        if not isinstance(sequence, Sequence):
-            raise TypeError(
-                "any element in %s.sequences_lead should be an instance of "
-                "stalker.models.sequence.Sequence not %s " %
-                (self.__class__.__name__, sequence.__class__.__name__)
-            )
-        return sequence
 
     @validates("tasks")
     def _validate_tasks(self, key, task):
         """validates the given tasks attribute
         """
         from stalker.models.task import Task
+
         if not isinstance(task, Task):
             raise TypeError(
                 "any element in %s.tasks should be an instance of "
@@ -776,12 +764,13 @@ class User(Entity, ACLMixin):
                 (self.__class__.__name__, task.__class__.__name__)
             )
         return task
-    
+
     @validates("watching")
     def _validate_watching(self, key, task):
         """validates the given watching attribute
         """
         from stalker.models.task import Task
+
         if not isinstance(task, Task):
             raise TypeError(
                 "any element in %s.watching should be an instance of "
@@ -789,12 +778,13 @@ class User(Entity, ACLMixin):
                 (self.__class__.__name__, task.__class__.__name__)
             )
         return task
-    
+
     @validates('projects')
     def _validate_projects(self, key, project):
         """validates the given project instance
         """
         from stalker import Project
+
         if not isinstance(project, Project):
             raise TypeError('%s.projects should a list of '
                             'stalker.models.project.Project instances, not '
@@ -830,10 +820,11 @@ class User(Entity, ACLMixin):
         """
         # do it with sqlalchemy
         from stalker import Ticket
-        return Ticket.query\
-            .filter(Ticket.owner==self)\
+
+        return Ticket.query \
+            .filter(Ticket.owner == self) \
             .all()
-    
+
     @property
     def open_tickets(self):
         """The list of open :class:`~stalker.models.ticket.Ticket`\ s that this user has.
@@ -848,10 +839,10 @@ class User(Entity, ACLMixin):
         # do it with sqlalchemy
         from stalker import Ticket, Status
 
-        return Ticket.query\
-            .filter(Ticket.owner==self)\
-            .join(Ticket.status)\
-            .filter(Status.code != 'CLOSED')\
+        return Ticket.query \
+            .filter(Ticket.owner == self) \
+            .join(Ticket.status) \
+            .filter(Status.code != 'CLOSED') \
             .all()
 
     @property
@@ -859,6 +850,7 @@ class User(Entity, ACLMixin):
         """outputs a TaskJuggler formatted string
         """
         from jinja2 import Template
+
         temp = Template(defaults.tjp_user_template)
         return temp.render({'user': self})
 
@@ -896,7 +888,7 @@ class LocalSession(object):
         """returns the logged in user
         """
         return User.query.filter_by(id=self.logged_in_user_id).first()
-    
+
     def store_user(self, user):
         """stores the given user instance
 

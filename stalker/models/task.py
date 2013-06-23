@@ -1,22 +1,22 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
 # Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
-# 
+#
 # This file is part of Stalker.
-# 
+#
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation;
 # version 2.1 of the License.
-# 
+#
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import datetime
 import logging
@@ -28,9 +28,11 @@ from sqlalchemy.orm import relationship, validates, synonym, reconstructor
 
 from stalker.db import DBSession
 from stalker.db.declarative import Base
-from stalker import (defaults, Entity, User, ScheduleMixin, StatusMixin,
-                     ReferenceMixin)
+from stalker import defaults
 from stalker.models import check_circular_dependency
+from stalker.models.entity import Entity
+from stalker.models.auth import User
+from stalker.models.mixins import ScheduleMixin, StatusMixin, ReferenceMixin
 from stalker.exceptions import OverBookedError, CircularDependencyError
 from stalker.log import logging_level
 
@@ -39,10 +41,10 @@ logger.setLevel(logging_level)
 
 
 # schedule constraints
-CONSTRAINT_NONE = 0
-CONSTRAINT_START = 1
-CONSTRAINT_END = 2
-CONSTRAINT_BOTH = 3
+CONSTRAIN_NONE = 0
+CONSTRAIN_START = 1
+CONSTRAIN_END = 2
+CONSTRAIN_BOTH = 3
 
 
 class TimeLog(Entity, ScheduleMixin):
@@ -86,7 +88,12 @@ class TimeLog(Entity, ScheduleMixin):
     __mapper_args__ = {"polymorphic_identity": "TimeLog"}
     time_log_id = Column("id", Integer, ForeignKey("Entities.id"),
                          primary_key=True)
-    task_id = Column(Integer, ForeignKey("Tasks.id"), nullable=False)
+    task_id = Column(
+        Integer, ForeignKey("Tasks.id"), nullable=False,
+        doc="""The id of this task in the database. Used by SQLAlchemy to map
+        this task in relationships.
+        """
+    )
     task = relationship(
         "Task",
         primaryjoin="TimeLogs.c.task_id==Tasks.c.id",
@@ -246,22 +253,15 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
 
     **Introduction**
 
-    Tasks are the unit of work that should be accomplished to complete a
-    :class:`~stalker.models.project.Project`.
+    Tasks are the smallest unit of work that should be accomplished to complete
+    a :class:`~stalker.models.project.Project`.
 
     Stalker tries to follow the concepts stated in TaskJuggler_.
 
     .. _TaskJuggler : http://www.taskjuggler.org/
 
     .. note::
-       .. versionadded:: 0.2.0:
-       Parent-child relation in Tasks
-
-       Tasks can now have child Tasks. So you can create complex relations of
-       Tasks to comply with your project needs.
-
-    .. note::
-       .. versionadded:: 0.2.0:
+       .. versionadded:: 0.2.0
           References in Tasks
 
        Tasks can now have References.
@@ -339,13 +339,27 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
 
     **Task/Task Relation**
 
+    .. versionadded:: 0.2.0
+
+    Tasks can have child Tasks. So you can create complex relations of Tasks to
+    comply with your project needs.
+
     A Task is called a ``container task`` if it has at least one child Task.
     And it is called a ``leaf task`` if it doesn't have any children Tasks.
-    Task which doesn't have a parent called ``root_task``.
+    Tasks which doesn't have a parent called ``root_task``.
 
     The resources in a container task is meaningless, cause the resources are
-    defined by the child tasks (Dev Note: this can still be used to populate
-    the resource information to the children tasks as in TaskJuggler).
+    defined by the child tasks
+
+    .. note::
+
+      Although, the ``tjp_task_template`` variable is not coded in that way in
+      the default config, if you want to populate resource information through
+      children tasks as it is in TaskJuggler, you can change the
+      ``tjp_task_template`` variable with a local **config.py** file. See
+      `configuring stalker`_
+
+      .. _configuring stalker: ../configure.html
 
     Although the values are not very important after TaskJuggler schedules a
     task, the :attr:`~.start` and :attr:`~.end` values for a container
@@ -361,38 +375,71 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
     In Gantt Charts the ``computed_start`` and ``computed_end`` attributes will
     be used if the task :attr:`.is_scheduled`.
 
+    **Task Responsible**
+
+    .. versionadded:: 0.2.0
+
+    Tasks now have a **responsible** which is a
+    :class:`~stalker.models.auth.User` instance that is responsible of the
+    assigned task and all the hierarchy under it.
+
+    If a task doesn't have any body assigned to its responsible attribute,
+    then it will start to look to its parents until it can find a task with a
+    responsible or there are no parent left, meaning the responsible is the
+    :class:`~stalker.models.project.Project.lead` of the related
+    :class:`~stalker.models.project.Project`.
+
+    :param project: A Task which doesn't have a parent (a root task) should be
+      created with a :class:`~stalker.models.project.Project` instance. If it
+      is skipped an no :attr:`.parent` is given then Stalker will raise a
+      RuntimeError. If both the ``project`` and the :attr:`.parent` argument
+      contains data and the project of the Task instance given with parent
+      argument is different than the Project instance given with the
+      ``project`` argument then a RuntimeWarning will be raised and the project
+      of the parent task will be used.
+
+    :type project: :class:`~stalker.models.project.Project`
+
     :param parent: The parent Task or Project of this Task. Every Task in
       Stalker should be related with a :class:`~stalker.models.project.Project`
       instance. So if no parent task is desired, at least a Project instance
       should be passed as the parent of the created Task or the Task will be an
       orphan task and Stalker will raise a RuntimeError.
 
-    :param int priority: It is a number between 0 to 1000 which defines the
-      priority of the :class:`~stalker.models.task.Task`. The higher the value
-      the higher its priority. The default value is 500.
-
-    :param resources: The :class:`~stalker.models.auth.User`\ s assigned to
-      this :class:`~stalker.models.task.Task`. A
-      :class:`~stalker.models.task.Task` without any resource can not be
-      scheduled.
-
-    :type resources: list of :class:`~stalker.User`
-
-    :param int bid_timing: The initial bid for this Task. It can be used in
-      measuring how accurate the initial guess was. It will be compared against
-      the total amount of effort spend doing this task. Can be set to None,
-      which will be set to the schedule_timing_day argument value if there is
-      one or 0.
-
-    :param str bid_unit: The unit of the bid value for this Task. Should be one
-      of the 'min', 'h', 'd', 'w', 'm', 'y'.
+    :type parent: :class:`Task`
 
     :param depends: A list of :class:`~stalker.models.task.Task`\ s that this
       :class:`~stalker.models.task.Task` is depending on. A Task can not depend
       to itself or any other Task which are already depending to this one in
       anyway or a CircularDependency error will be raised.
 
-    :type depends: list of :class:`~stalker.models.task.Task`
+    :type depends: [:class:`Task`]
+
+    :param resources: The :class:`~stalker.models.auth.User`\ s assigned to
+      this :class:`~stalker.models.task.Task`. A
+      :class:`~stalker.models.task.Task` without any resource can not be
+      scheduled.
+
+    :type resources: [:class:`~stalker.models.auth.User`]
+
+    :param watchers: A list of :class:`~stalker.models.auth.User` those are
+      added this Task instance to their watchlist.
+
+    :type watchers: [:class:`~stalker.models.auth.User`]
+
+    :param start: The start date and time of this task instance. It is only
+      used if the :attr:`.schedule_constraint` attribute is set to
+      :attr:`.CONSTRAIN_START` or :attr:`.CONSTRAIN_BOTH`. The default value
+      is `datetime.datetime.now()`.
+
+    :type start: :class:`datetime.datetime`
+
+    :param end: The end date and time of this task instance. It is only used if
+      the :attr:`.schedule_constraint` attribute is set to
+      :attr:`.CONSTRAIN_END` or :attr:`.CONSTRAIN_BOTH`. The default value is
+      `datetime.datetime.now()`.
+
+    :type end: :class:`datetime.datetime`
 
     :param int schedule_timing: The value of the schedule timing.
 
@@ -403,17 +450,40 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
       of the schedule constraints value in
       :class:`stalker.config.Config.task_schedule_constraints`.
 
-    :param bool milestone: A bool (True or False) value showing if this task is
-      a milestone which doesn't need any resource and effort.
+    :param int bid_timing: The initial bid for this Task. It can be used in
+      measuring how accurate the initial guess was. It will be compared against
+      the total amount of effort spend doing this task. Can be set to None,
+      which will be set to the schedule_timing_day argument value if there is
+      one or 0.
+
+    :param str bid_unit: The unit of the bid value for this Task. Should be one
+      of the 'min', 'h', 'd', 'w', 'm', 'y'.
+
+    :param bool is_milestone: A bool (True or False) value showing if this task
+      is a milestone which doesn't need any resource and effort.
+
+    :param int priority: It is a number between 0 to 1000 which defines the
+      priority of the :class:`~stalker.models.task.Task`. The higher the value
+      the higher its priority. The default value is 500. Mainly used by
+      TaskJuggler.
     """
     __auto_name__ = False
     __tablename__ = "Tasks"
     __mapper_args__ = {'polymorphic_identity': "Task"}
-    task_id = Column("id", Integer, ForeignKey('Entities.id'),
-                     primary_key=True)
+    task_id = Column(
+        "id", Integer, ForeignKey('Entities.id'), primary_key=True,
+        doc="""The ``primary_key`` attribute for the ``Tasks`` table used by
+        SQLAlchemy to map this Task in relationships.
+        """
+    )
 
-    project_id = Column('project_id', Integer, ForeignKey('Projects.id'),
-                        nullable=True)
+    project_id = Column(
+        'project_id', Integer, ForeignKey('Projects.id'), nullable=True,
+        doc="""The id of the owner :class:`~stalker.models.project.Project`
+        of this Task. This attribute is mainly used by **SQLAlchemy** to map
+        a :class:`~stalker.models.project.Project` instance to a Task.
+        """
+    )
     _project = relationship(
         'Project',
         primaryjoin='Tasks.c.project_id==Projects.c.id',
@@ -422,23 +492,45 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         post_update=True,
     )
 
-    parent_id = Column('parent_id', Integer, ForeignKey('Tasks.id'))
+    parent_id = Column(
+        'parent_id', Integer, ForeignKey('Tasks.id'),
+        doc="""The id of the parent Task. Used by SQLAlchemy to map the
+        :attr:`.parent` attr.
+        """
+    )
     parent = relationship(
         'Task',
         remote_side=[task_id],
         primaryjoin='Tasks.c.parent_id==Tasks.c.id',
         back_populates='children',
-        post_update=True
+        post_update=True,
+        doc="""A :class:`Task` instance which is the parent of this task.
+
+        In Stalker it is possible to create a hierarchy of Tasks to comply
+        with the need of the studio pipeline.
+        """
     )
 
     children = relationship(
         'Task',
         primaryjoin='Tasks.c.parent_id==Tasks.c.id',
         back_populates='parent',
-        post_update=True
+        post_update=True,
+        doc="""Other :class:`Task` instances which are the children of this
+        Task instance. This attribute along with the :attr:`.parent` attribute
+        is used in creating a DAG hierarchy of tasks.
+        """
     )
 
-    tasks = synonym('children')
+    tasks = synonym(
+        'children',
+        doc="""A synonym for the :attr:`.children` attribute used by the
+        descendants of the :class:`Task` class (currently
+        :class:`~stalker.models.asset.Asset`,
+        :class:`~stalker.models.shot.Shot` and
+        :class:`~stalker.models.sequence.Sequence` classes).
+        """
+    )
 
     is_milestone = Column(
         Boolean,
@@ -450,8 +542,8 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         """
     )
 
-    # UPDATE THIS: is_complete should look to Task.status, but it is may be
-    # faster to query in this way, judge later
+    # TODO: is_complete should look to Task.status, but it is may be faster to
+    #       query in this way, judge later
     is_complete = Column(
         Boolean,
         doc="""A bool value showing if this task is completed or not.
@@ -495,17 +587,32 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         primaryjoin='Tasks.c.id==Task_Watchers.c.task_id',
         secondaryjoin='Task_Watchers.c.watcher_id==Users.c.id',
         back_populates='watching',
-        doc='''The list of :class:`~stalker.models.auth.User`\ s watching this Task.
-        '''
+        doc="""The list of :class:`~stalker.models.auth.User`\ s watching this
+        Task.
+        """
     )
 
-    priority = Column(Integer)
+    responsible_id = Column(Integer, ForeignKey('Users.id'), nullable=True)
+
+    _responsible = relationship(
+        'User',
+        primaryjoin='Tasks.c.responsible_id==Users.c.id',
+        back_populates='responsible_of',
+    )
+
+    priority = Column(
+        Integer,
+        doc="""An integer number between 0 and 1000 used by TaskJuggler to
+        determine the priority of this Task. The default value is 500.
+        """
+    )
 
     time_logs = relationship(
         "TimeLog",
         primaryjoin="TimeLogs.c.task_id==Tasks.c.id",
         back_populates="task",
-        doc="""A list of :class:`~stalker.models.task.TimeLog` instances showing who and when spent how much effort on this task.
+        doc="""A list of :class:`~stalker.models.task.TimeLog` instances
+        showing who and when has spent how much effort on this task.
         """
     )
 
@@ -513,12 +620,25 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         "Version",
         primaryjoin="Versions.c.task_id==Tasks.c.id",
         back_populates="task",
-        doc="""A list of :class:`~stalker.models.version.Version` instances showing the files created for this task.
+        doc="""A list of :class:`~stalker.models.version.Version` instances
+        showing the files created for this task.
         """
     )
 
-    computed_start = Column(DateTime)
-    computed_end = Column(DateTime)
+    computed_start = Column(
+        DateTime,
+        doc="""A :class:`~datetime.datetime` instance showing the start value
+        computed by **TaskJuggler**. It is None if this task is not scheduled
+        yet.
+        """
+    )
+    computed_end = Column(
+        DateTime,
+        doc="""A :class:`~datetime.datetime` instance showing the end value
+        computed by **TaskJuggler**. It is None if this task is not scheduled
+        yet.
+        """
+    )
 
     bid_timing = Column(
         Float, nullable=True, default=0,
@@ -551,20 +671,83 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
 
     schedule_model = Column(
         Enum(*defaults.task_schedule_models, name='TaskScheduleModels'),
-        default=defaults.task_schedule_models[0], nullable=False
+        default=defaults.task_schedule_models[0], nullable=False,
+        doc="""Defines the schedule model which is going to be used by
+        **TaskJuggler** while scheduling this Task. It has three possible
+        values; **effort**, **duration**, **length**. ``effort`` is the default
+        value. Each value causes this task to be scheduled in different ways:
+
+        ======== ==============================================================
+        effort   If the :attr:`.schedule_model` attribute is set to
+                 **"effort"** then the start and end date values are calculated
+                 so that a resource should spent this much of work time to
+                 complete a Task. For example, a task with
+                 :attr:`.schedule_timing` of 4 days, needs 4 working days. So
+                 it can take 4 working days to complete the Task, but it
+                 doesn't mean that the task duration will be 4 days. If the
+                 resource works overtime then the task will be finished before
+                 4 days or if the resource will not be available (due to a
+                 vacation) then the task duration can be much more.
+
+        duration The duration of the task will exactly be equal to
+                 :attr:`.schedule_timing` regardless of the resource
+                 availability. So the difference between :attr:`.start` and
+                 :attr:`.end` attribute values are equal to
+                 :attr:`.schedule_timing`. Essentially making the task duration
+                 in calendar days instead of working days.
+
+        length   In this model the duration of the task will exactly be equal
+                 to the given length value in working days regardless of the
+                 resource availability. So a task with the
+                 :attr:`.schedule_timing` is set to 4 days will be completed in
+                 4 working days. But again it will not be always 4 calendar
+                 days due to the weekends or non working days.
+        ======== ==============================================================
+        """
     )
 
-    schedule_constraint = Column(Integer, default=0, nullable=False)
+    schedule_constraint = Column(
+        Integer,
+        default=0,
+        nullable=False,
+        doc="""An integer number showing the constraint schema for this task.
+
+        Possible values are:
+
+         ===== ===============
+           0   Constrain None
+           1   Constrain Start
+           2   Constrain End
+           3   Constrain Both
+         ===== ===============
+
+        For convenience use **stalker.models.task.CONSTRAIN_NONE**,
+        **stalker.models.task.CONSTRAIN_START**,
+        **stalker.models.task.CONSTRAIN_END**,
+        **stalker.models.task.CONSTRAIN_BOTH**.
+
+        This value is going to be used to constrain the start and end date
+        values of this task. So if you want to pin the start of a task to a
+        certain date. Set its :attr:`.schedule_constraint` value to
+        **CONSTRAIN_START**. When the task is scheduled by **TaskJuggler** the
+        start date will be pinned to the :attr:`start` attribute of this task.
+
+        And if both of the date values (start and end) wanted to be pinned to
+        certain dates (making the task effectively a ``duration`` task) set the
+        desired :attr:`start` and :attr:`end` and then set the
+        :attr:`schedule_constraint` to **CONSTRAIN_BOTH**.
+        """
+    )
 
     def __init__(self,
                  project=None,
                  parent=None,
                  depends=None,
                  resources=None,
+                 responsible=None,
                  watchers=None,
                  start=None,
                  end=None,
-                 duration=None,
                  schedule_timing=None,
                  schedule_unit='h',
                  schedule_model=None,
@@ -578,7 +761,6 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         # update kwargs with extras
         kwargs['start'] = start
         kwargs['end'] = end
-        kwargs['duration'] = duration
 
         super(Task, self).__init__(**kwargs)
 
@@ -606,11 +788,11 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         if resources is None:
             resources = []
         self.resources = resources
-        
+
         if watchers is None:
             watchers = []
         self.watchers = watchers
-        
+
         self.schedule_constraint = schedule_constraint
         self.schedule_unit = schedule_unit
         self.schedule_timing = schedule_timing
@@ -626,6 +808,7 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         self.bid_timing = bid_timing
         self.bid_unit = bid_unit
         self.priority = priority
+        self.responsible = responsible
 
     @reconstructor
     def __init_on_load__(self):
@@ -742,23 +925,39 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
     def _validate_schedule_model(self, key, schedule_model):
         """validates the given schedule_model value
         """
-
         if not schedule_model:
             schedule_model = defaults.task_schedule_models[0]
-        
-        
+
         error_message = '%s.schedule_model should be one of %s, not %s' % (
             self.__class__.__name__, defaults.task_schedule_models,
             schedule_model.__class__.__name__
         )
-        
+
         if not isinstance(schedule_model, (str, unicode)):
             raise TypeError(error_message)
-        
+
         if schedule_model not in defaults.task_schedule_models:
             raise ValueError(error_message)
 
         return schedule_model
+
+    @validates('schedule_constraint')
+    def _validate_schedule_constraint(self, key, schedule_constraint):
+        """validates the given schedule_constraint value
+        """
+        if not schedule_constraint:
+            schedule_constraint = 0
+
+        if not isinstance(schedule_constraint, int):
+            raise TypeError('%s.schedule_constraint should be an integer '
+                            'between 0 and 3, not %s' % 
+                            (self.__class__.__name__,
+                             schedule_constraint.__class__.__name__))
+
+        schedule_constraint = max(schedule_constraint, 0)
+        schedule_constraint = min(schedule_constraint, 3)
+
+        return schedule_constraint
 
     def _reschedule(self, schedule_timing, schedule_unit):
         """Updates the start and end date values by using the schedule_timing
@@ -782,14 +981,14 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
                 unit['name']: schedule_timing * unit['multiplier']
             }
             calculated_duration = datetime.timedelta(**kwargs)
-            if self.schedule_constraint == CONSTRAINT_NONE or \
-                            self.schedule_constraint == CONSTRAINT_START:
+            if self.schedule_constraint == CONSTRAIN_NONE or \
+                            self.schedule_constraint == CONSTRAIN_START:
                 # get end
                 self._validate_dates(self.start, None, calculated_duration)
-            elif self.schedule_constraint == CONSTRAINT_END:
+            elif self.schedule_constraint == CONSTRAIN_END:
                 # get start
                 self._validate_dates(None, self.end, calculated_duration)
-            elif self.schedule_constraint == CONSTRAINT_BOTH:
+            elif self.schedule_constraint == CONSTRAIN_BOTH:
                 # restore duration
                 self._validate_dates(self.start, self.end, None)
 
@@ -1181,6 +1380,52 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         """
         # for effort based tasks use the time_logs
         return self.schedule_seconds - self.total_logged_seconds
+
+    def _responsible_getter(self):
+        """returns the current responsible of this task
+        """
+        if self._responsible:
+            return self._responsible
+        else:
+            for parent in self.parents:
+                if parent.responsible:
+                    return parent.responsible
+        return self.project.lead
+
+    def _responsible_setter(self, responsible):
+        """sets the responsible attribute
+
+        :param responsible: A :class:`~stalker.models.auth.User` instance
+        """
+        self._responsible = self._validate_responsible(responsible)
+
+    def _validate_responsible(self, responsible):
+        """validates the given responsible value
+        """
+        if responsible is not None:
+            from stalker.models.auth import User
+            if not isinstance(responsible, User):
+                raise TypeError('%s.responsible should be an instance of '
+                                'stalker.models.auth.User, not %s' % 
+                                (self.__class__.__name__,
+                                 responsible.__class__.__name__))
+        return responsible
+
+    responsible = synonym(
+        '_responsible',
+        descriptor=property(
+            _responsible_getter,
+            _responsible_setter,
+            doc="""The responsible of this task.
+
+            This attribute will return the responsible of this task which is a
+            :class:`~stalker.models.auth.User` instance. If there is no
+            responsible set for this task, then it will try to find a
+            responsible in its parents and will return the project.lead if it
+            can not find anybody.
+            """
+        )
+    )
 
 # TASK_DEPENDENCIES
 Task_Dependencies = Table(

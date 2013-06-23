@@ -1,22 +1,22 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
 # Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
-# 
+#
 # This file is part of Stalker.
-# 
+#
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation;
 # version 2.1 of the License.
-# 
+#
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 import os
 
 import re
@@ -204,7 +204,7 @@ class Version(Link, StatusMixin):
             r"([^a-zA-Z0-9\s_\-]+)", r"", take_name
         ).strip()
         logger.debug("take_name : %s" % take_name)
-        
+
         # replace empty spaces with underscores
         take_name = re.sub(r'[\s]+', '_', take_name)
         logger.debug("take_name : %s" % take_name)
@@ -464,11 +464,11 @@ class Version(Link, StatusMixin):
 
         :return: :class:`~stalker.models.version.Version`
         """
-        return Version.query\
-            .filter(Version.task==self.task)\
-            .filter(Version.take_name==self.take_name)\
-            .filter(Version.is_published==True)\
-            .order_by(Version.version_number.desc())\
+        return Version.query \
+            .filter(Version.task == self.task) \
+            .filter(Version.take_name == self.take_name) \
+            .filter(Version.is_published == True) \
+            .order_by(Version.version_number.desc()) \
             .first()
 
     @validates('created_with')
@@ -491,7 +491,6 @@ class Version(Link, StatusMixin):
             self.task == other.task and \
             self.take_name == other.take_name and \
             self.version_number == other.version_number
-
 
 
 # VERSION INPUTS

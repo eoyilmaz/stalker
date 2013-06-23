@@ -1,22 +1,22 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
 # Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
-# 
+#
 # This file is part of Stalker.
-# 
+#
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation;
 # version 2.1 of the License.
-# 
+#
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import os
 import shutil
@@ -1729,7 +1729,6 @@ class DatabaseModelsTester(unittest2.TestCase):
         date_updated = test_sequence.date_updated
         description = test_sequence.description
         end = test_sequence.end
-        lead = test_sequence.lead
         name = test_sequence.name
         nice_name = test_sequence.nice_name
         notes = test_sequence.notes
@@ -1760,7 +1759,6 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(date_updated, test_sequence_DB.date_updated)
         self.assertEqual(description, test_sequence_DB.description)
         self.assertEqual(end, test_sequence_DB.end)
-        self.assertEqual(lead, test_sequence_DB.lead)
         self.assertEqual(name, test_sequence_DB.name)
         self.assertEqual(nice_name, test_sequence_DB.nice_name)
         self.assertEqual(notes, test_sequence_DB.notes)
@@ -2621,7 +2619,6 @@ class DatabaseModelsTester(unittest2.TestCase):
         groups = new_user.groups
         projects = new_user.projects
         projects_lead = new_user.projects_lead
-        sequences_lead = new_user.sequences_lead
         tags = new_user.tags
         tasks = new_user.tasks
         watching = new_user.watching
@@ -2653,7 +2650,6 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(groups, new_user_DB.groups)
         self.assertEqual(projects, new_user_DB.projects)
         self.assertEqual(projects_lead, new_user_DB.projects_lead)
-        self.assertEqual(sequences_lead, new_user_DB.sequences_lead)
         self.assertEqual(tags, new_user_DB.tags)
         self.assertEqual(tasks, new_user_DB.tasks)
         self.assertEqual(watching, new_user_DB.watching)

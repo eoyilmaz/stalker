@@ -27,7 +27,6 @@ Inheritance Diagram
    stalker.models.mixins.ScheduleMixin
    stalker.models.mixins.StatusMixin
    stalker.models.mixins.TargetEntityTypeMixin
-   stalker.models.mixins.VacationMixin
    stalker.models.mixins.WorkingHoursMixin
    stalker.models.note.Note
    stalker.models.project.Project

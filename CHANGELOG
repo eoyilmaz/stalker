@@ -2,6 +2,17 @@
 Stalker Changes
 ===============
 
+0.2.0.rc3
+=========
+
+* **New:** Added a new attribute to **Task** class called **responsible**.
+* **Update:** Updated documentation to include documentation about
+  Configuring Stalker with ``config.py``.
+* **Update:** The ``duration`` argument in Task class is removed. It is somehow
+  against the idea of having ``schedule_model`` and ``schedule_timing``
+  arguments (schedule_model='duration' is kind of the same).
+* **Update:** Updated task documentation.
+
 0.2.0.rc2
 =========
 

@@ -1,22 +1,22 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
 # Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
-# 
+#
 # This file is part of Stalker.
-# 
+#
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation;
 # version 2.1 of the License.
-# 
+#
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import os
 import platform
@@ -33,25 +33,25 @@ logger.setLevel(logging_level)
 
 class Repository(Entity):
     """Manages fileserver/repository related data.
-    
+
     A repository is a network share that all users have access to.
-    
+
     A studio can create several repositories, for example, one for movie
     projects and one for commercial projects.
-    
+
     A repository also defines the default paths for linux, windows and mac
     foreshores.
-    
+
     The path separator in the repository is always forward slashes ("/").
     Setting a path that contains backward slashes ("\\"), will be converted to
     a path with forward slashes.
-    
+
     :param linux_path: shows the linux path of the repository root, should be a
       string
-    
+
     :param osx_path: shows the mac osx path of the repository root, should be a
       string
-    
+
     :param windows_path: shows the windows path of the repository root, should
       be a string
     """
@@ -150,7 +150,7 @@ class Repository(Entity):
 
     def _to_path(self, path, replace_with):
         """Helper function fot to_*_path functions
-        
+
         :param path: the input path
         :param replace_with: replace_with path
         :return:
@@ -197,7 +197,7 @@ class Repository(Entity):
 
     def to_native_path(self, path):
         """Returns the native version of the given path
-        
+
         :param path: The path that needs to be converted to native path.
         :return:
         """

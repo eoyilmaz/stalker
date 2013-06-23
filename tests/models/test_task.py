@@ -1,22 +1,22 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
 # Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
-# 
+#
 # This file is part of Stalker.
-# 
+#
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation;
 # version 2.1 of the License.
-# 
+#
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import datetime
 import unittest2
@@ -31,8 +31,8 @@ from stalker.db.session import DBSession
 from stalker import (Entity, Project, Repository, StatusList, Status, Task,
                      Type, User, TimeLog)
 
-from stalker.models.task import (CONSTRAINT_NONE, CONSTRAINT_START,
-                                 CONSTRAINT_END, CONSTRAINT_BOTH)
+from stalker.models.task import (CONSTRAIN_NONE, CONSTRAIN_START,
+                                 CONSTRAIN_END, CONSTRAIN_BOTH)
 
 import logging
 
@@ -160,6 +160,7 @@ class TaskTester(unittest2.TestCase):
             'description': 'A Modeling Task',
             'project': self.test_project1,
             'priority': 500,
+            'responsible': self.test_user1,
             'resources': [self.test_user1, self.test_user2],
             'watchers': [self.test_user3],
             'bid_timing': 4,
@@ -1627,48 +1628,6 @@ class TaskTester(unittest2.TestCase):
         self.assertRaises(ValueError, setattr, self.test_task, 'schedule_unit',
                           'so')
 
-    #    def test_length_argument_skipped(self):
-    #        """testing if the length attribute will be None if the effort argument
-    #        is skipped
-    #        """
-    #        self.kwargs.pop("length")
-    #        new_task = Task(**self.kwargs)
-    #        self.assertIsNone(new_task.length)
-    #    
-    #    def test_length_argument_is_None(self):
-    #        """testing if the length attribute will be None if the effort argument
-    #        is None
-    #        """
-    #        self.kwargs["length"] = None
-    #        new_task = Task(**self.kwargs)
-    #        self.assertIsNone(new_task.length)
-    #    
-    #    def test_length_attribute_is_set_to_None(self):
-    #        """testing if the length attribute will be None if it is set to None
-    #        """
-    #        self.test_task.length = None
-    #        self.assertIsNone(self.test_task.length)
-    #    
-    #    def test_length_argument_is_not_a_string(self):
-    #        """testing if a TypeError will be raised when the length is not a
-    #        string
-    #        """
-    #        self.kwargs["length"] = 10
-    #        self.assertRaises(TypeError, Task, **self.kwargs)
-    #
-    #    def test_length_attribute_is_not_a_string(self):
-    #        """testing if a TypeError will be raised when the length attribute is
-    #        not set to a string
-    #        """
-    #        self.assertRaises(TypeError, setattr, self.test_task, 'length', 10)
-    #    
-    #    def test_length_attribute_is_working_properly(self):
-    #        """testing if the length attribute is working properly
-    #        """
-    #        test_value = '18h'
-    #        self.test_task.length = test_value
-    #        self.assertEqual(self.test_task.length, test_value)
-
     def test_depends_argument_is_skipped_depends_attribute_is_empty_list(self):
         """testing if the depends attribute is an empty list when the depends
         argument is skipped
@@ -2755,7 +2714,7 @@ class TaskTester(unittest2.TestCase):
         # remove effort and duration. Why?
         self.kwargs.pop('schedule_timing')
         self.kwargs.pop('schedule_unit')
-        self.kwargs['schedule_constraint'] = CONSTRAINT_BOTH
+        self.kwargs['schedule_constraint'] = CONSTRAIN_BOTH
 
         now = datetime.datetime(2013, 3, 22, 15, 0)
         dt = datetime.timedelta
@@ -2813,7 +2772,7 @@ class TaskTester(unittest2.TestCase):
         # remove effort and duration
         self.kwargs.pop('schedule_timing')
         self.kwargs.pop('schedule_unit')
-        self.kwargs['schedule_constraint'] = CONSTRAINT_BOTH
+        self.kwargs['schedule_constraint'] = CONSTRAIN_BOTH
 
         now = datetime.datetime(2013, 3, 22, 15, 0)
         dt = datetime.timedelta
@@ -2888,7 +2847,7 @@ class TaskTester(unittest2.TestCase):
         """
         self.kwargs['start'] = datetime.datetime(2013, 4, 17, 0, 0)
         self.kwargs['end'] = datetime.datetime(2013, 4, 18, 0, 0)
-        self.kwargs['schedule_constraint'] = CONSTRAINT_END
+        self.kwargs['schedule_constraint'] = CONSTRAIN_END
         self.kwargs['schedule_timing'] = 10
         self.kwargs['schedule_unit'] = 'd'
 
@@ -2909,7 +2868,7 @@ class TaskTester(unittest2.TestCase):
         """
         self.kwargs['start'] = datetime.datetime(2013, 4, 17, 0, 0)
         self.kwargs['end'] = datetime.datetime(2013, 4, 27, 0, 0)
-        self.kwargs['schedule_constraint'] = CONSTRAINT_BOTH
+        self.kwargs['schedule_constraint'] = CONSTRAIN_BOTH
         self.kwargs['schedule_timing'] = 100
         self.kwargs['schedule_unit'] = 'd'
 
@@ -3613,7 +3572,84 @@ class TaskTester(unittest2.TestCase):
         """
         self.assertEqual(self.test_task.schedule_constraint, 0)
 
-    # TODO: add schedule_constraint validation tests
+    def test_schedule_constraint_argument_is_skipped(self):
+        """testing if the schedule_constraint attribute will be 0 if
+        schedule_constraint is skipped
+        """
+        try:
+            self.kwargs.pop('schedule_constraint')
+        except KeyError:
+            pass
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.schedule_constraint, 0)
+
+    def test_schedule_constraint_argument_is_None(self):
+        """testing if the schedule_constraint attribute will be 0 if
+        schedule_constraint is None
+        """
+        self.kwargs['schedule_constraint'] = None
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.schedule_constraint, 0)
+
+    def test_schedule_constraint_attribute_is_set_to_None(self):
+        """testing if the schedule_constraint attribute will be 0 if
+        it is set to None
+        """
+        self.test_task.schedule_constraint = None
+        self.assertEqual(self.test_task.schedule_constraint, 0)
+
+    def test_schedule_constraint_argument_is_not_an_integer(self):
+        """testing if a TypeError will be raised when the schedule_constraint
+        argument is not an integer
+        """
+        self.kwargs['schedule_constraint'] = 'not an integer'
+        self.assertRaises(TypeError, Task, **self.kwargs)
+
+    def test_schedule_constraint_attribute_is_not_an_integer(self):
+        """testing if a TypeError will be raised when the schedule_constraint
+        attribute is set to a value other than an integer
+        """
+        self.assertRaises(TypeError, setattr, self.test_task,
+                          'schedule_constraint', 'not an integer')
+
+    def test_schedule_constraint_argument_is_working_properly(self):
+        """testing if the schedule_constraint argument value is correctly
+        passed to schedule_constraint attribute
+        """
+        test_value = 2
+        self.kwargs['schedule_constraint'] = test_value
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.schedule_constraint, test_value)
+
+    def test_schedule_constraint_attribute_is_working_properly(self):
+        """testing if the schedule_constraint attribute value is correctly
+        changed
+        """
+        test_value = 3
+        self.test_task.schedule_constraint = test_value
+        self.assertEqual(self.test_task.schedule_constraint, test_value)
+
+    def test_schedule_constraint_argument_value_is_out_of_range(self):
+        """testing if the value of schedule_constraint argument value will be
+        clamped to the [0-3] range if it is out of range
+        """
+        self.kwargs['schedule_constraint'] = -1
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.schedule_constraint, 0)
+
+        self.kwargs['schedule_constraint'] = 4
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.schedule_constraint, 3)
+
+    def test_schedule_constraint_attribute_value_is_out_of_range(self):
+        """testing if the value of schedule_constraint attribute value will be
+        clamped to the [0-3] range if it is out of range
+        """
+        self.test_task.schedule_constraint = -1
+        self.assertEqual(self.test_task.schedule_constraint, 0)
+
+        self.test_task.schedule_constraint = 4
+        self.assertEqual(self.test_task.schedule_constraint, 3)
 
     def test_parents_attribute_is_read_only(self):
         """testing if the parents attribute is read only
@@ -3642,3 +3678,97 @@ class TaskTester(unittest2.TestCase):
             t3.parents,
             [t1, t2]
         )
+
+    def test_responsible_argument_is_skipped(self):
+        """testing if the responsible argument can be skipped
+        """
+        self.kwargs.pop('responsible')
+        new_task = Task(**self.kwargs)
+
+    def test_responsible_argument_is_None(self):
+        """testing if the responsible argument can be None
+        """
+        self.kwargs['responsible'] = None
+        new_task = Task(**self.kwargs)
+
+    def test_responsible_attribute_is_set_to_None(self):
+        """testing if the responsible attribute can be set to None
+        """
+        self.test_task.responsible = None
+
+    def test_responsible_argument_is_not_a_User_instance(self):
+        """testing if a TypeError will be raised if the responsible argument
+        value is not a User instance
+        """
+        self.kwargs['responsible'] = 'not a user instance'
+        self.assertRaises(TypeError, Task, **self.kwargs)
+
+    def test_responsible_attribute_is_set_to_something_other_than_User_instance(self):
+        """testing if a TypeError will be raised if the responsible attribute
+        is set to something other than a User instance
+        """
+        self.assertRaises(TypeError, setattr, self.test_task, 'responsible',
+                          'not a user instance')
+
+    def test_responsible_argument_is_None_or_skipped_responsible_attribute_comes_from_parents(self):
+        """testing if the responsible argument is None or skipped then the
+        responsible attribute value comes from parents
+        """
+        # create two new tasks
+        self.kwargs['responsible'] = None
+        new_task1 = Task(**self.kwargs)
+        new_task1.parent = self.test_task
+
+        new_task2 = Task(**self.kwargs)
+        new_task2.parent = new_task1
+
+        self.assertEqual(new_task1.responsible, self.test_user1)
+        self.assertEqual(new_task2.responsible, self.test_user1)
+
+    def test_responsible_attribute_is_set_to_None_responsible_attribute_comes_from_parents(self):
+        """testing if the responsible attribute is None or skipped then its
+        value comes from parents
+        """
+        # create two new tasks
+        new_task1 = Task(**self.kwargs)
+        new_task1.parent = self.test_task
+
+        new_task2 = Task(**self.kwargs)
+        new_task2.parent = new_task1
+
+        new_task1.responsible = None
+        new_task2.responsible = None
+        self.test_task.responsible = self.test_user2
+
+        self.assertEqual(new_task1.responsible, self.test_user2)
+        self.assertEqual(new_task2.responsible, self.test_user2)
+
+    def test_responsible_attribute_value_comes_from_project_if_no_parent_exists(self):
+        """testing if the responsible attribute value comes from project.lead
+        attribute if there are no parents
+        """
+        self.test_task.responsible = None
+        self.test_project1.lead = self.test_user3
+
+        self.assertEqual(self.test_task.responsible, self.test_user3)
+
+    def test_responsible_attribute_value_comes_from_project_if_parents_doesnt_have_a_responsible(self):
+        """testing if the responsible attribute value comes from the
+        project.lead attribute if parents doesn't have a responsible
+        """
+        # create two new tasks
+        self.kwargs['responsible'] = None
+        new_task1 = Task(**self.kwargs)
+        new_task1.parent = self.test_task
+
+        new_task2 = Task(**self.kwargs)
+        new_task2.parent = new_task1
+
+        new_task1.responsible = None
+        new_task2.responsible = None
+        self.test_task.responsible = None
+        self.test_project1.lead = self.test_user2
+
+        self.assertEqual(new_task1.responsible, self.test_user2)
+        self.assertEqual(new_task2.responsible, self.test_user2)
+

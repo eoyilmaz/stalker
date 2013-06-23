@@ -1,22 +1,22 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
 # Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
-# 
+#
 # This file is part of Stalker.
-# 
+#
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation;
 # version 2.1 of the License.
-# 
+#
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import os
 import datetime
@@ -42,7 +42,7 @@ class Config(object):
         #
         # The default settings for the database, see sqlalchemy.create_engine
         # for possible parameters
-        # 
+        #
         database_engine_settings = {
             "sqlalchemy.url": "sqlite:///:memory:",
             "sqlalchemy.echo": False,
@@ -61,13 +61,12 @@ class Config(object):
         #
         auto_create_admin = True,
 
-        # 
+        #
         # these are for new projects
         # after creating the project you can change them from the interface
-        # 
+        #
         admin_name = 'admin',
         admin_login = 'admin',
-        admin_code = 'adm',
         admin_password = 'admin',
         admin_email = 'admin@admin.com',
         admin_department_name = 'admins',
@@ -165,13 +164,13 @@ class Config(object):
         task_priority = 500,
 
         working_hours = {
-          'mon': [[540, 1080]], # 9:00 - 18:00
-          'tue': [[540, 1080]], # 9:00 - 18:00
-          'wed': [[540, 1080]], # 9:00 - 18:00
-          'thu': [[540, 1080]], # 9:00 - 18:00
-          'fri': [[540, 1080]], # 9:00 - 18:00
-          'sat': [], # saturday off
-          'sun': [], # sunday off
+            'mon': [[540, 1080]], # 9:00 - 18:00
+            'tue': [[540, 1080]], # 9:00 - 18:00
+            'wed': [[540, 1080]], # 9:00 - 18:00
+            'thu': [[540, 1080]], # 9:00 - 18:00
+            'fri': [[540, 1080]], # 9:00 - 18:00
+            'sat': [], # saturday off
+            'sun': [], # sunday off
         },
 
         # this is strongly related with the working_hours settings,
@@ -364,7 +363,7 @@ class Config(object):
     def __init__(self):
         self.config_values = Config.default_config_values.copy()
         self.user_config = {}
-        
+
         # the priority order is
         # stalker.config
         # config.py under .stalker_rc directory

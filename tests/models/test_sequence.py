@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
 # Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
-# 
+#
 # This file is part of Stalker.
-# 
+#
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation;
 # version 2.1 of the License.
-# 
+#
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
@@ -24,10 +24,11 @@ import datetime
 from stalker import (Entity, Link, Project, Repository, Sequence, Status,
                      StatusList, Task, Type, User)
 
+
 class SequenceTester(unittest2.TestCase):
     """Tests stalker.models.sequence.Sequence class
     """
-    
+
     def setUp(self):
         """setup the test
         """
@@ -54,7 +55,7 @@ class SequenceTester(unittest2.TestCase):
                 self.test_status3,
                 self.test_status4,
                 self.test_status5,
-                ],
+            ],
             target_entity_type=Project,
         )
 
@@ -87,20 +88,6 @@ class SequenceTester(unittest2.TestCase):
             repository=self.test_repository,
         )
 
-        self.test_lead = User(
-            name="User1",
-            login="testuser1",
-            email="user1@users.com",
-            password="user1",
-        )
-
-        self.test_lead2 = User(
-            name="User2",
-            login="testuser2",
-            email="user2@users.com",
-            password="user2",
-        )
-
         self.sequence_status_list = StatusList(
             name="Sequence Statuses",
             statuses=[
@@ -109,9 +96,9 @@ class SequenceTester(unittest2.TestCase):
                 self.test_status3,
                 self.test_status4,
                 self.test_status5,
-                ],
+            ],
             target_entity_type=Sequence,
-        ) 
+        )
 
         # the parameters
         self.kwargs = {
@@ -119,69 +106,17 @@ class SequenceTester(unittest2.TestCase):
             'code': 'tseq',
             "description": "A test sequence",
             "project": self.test_project,
-            "lead": self.test_lead,
             "status_list": self.sequence_status_list
         }
 
-        # the test seuqence
+        # the test sequence
         self.test_sequence = Sequence(**self.kwargs)
-    
+
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for
         Sequence class
         """
         self.assertFalse(Sequence.__auto_name__)
-    
-    def test_lead_attribute_defaults_to_None(self):
-        """testing if the lead attribute defualts to None when no lead argument
-        is given
-        """
-        self.kwargs.pop("lead")
-        new_sequence = Sequence(**self.kwargs)
-        self.assertEqual(new_sequence.lead, None)
-
-    def test_lead_argument_is_None(self):
-        """testing if nothing will happen when the lead argument is given as
-        None
-        """
-        self.kwargs["lead"] = None
-        new_sequence = Sequence(**self.kwargs)
-
-    def test_lead_attribute_is_None(self):
-        """testing if nothing will happen when the lead attribute is set to
-        None
-        """
-        self.test_sequence.lead = None
-
-    def test_lead_argument_is_not_User(self):
-        """testing if a TypeError will be raised when the lead argument is not
-        an instance of User
-        """
-        test_values = [1, 1.2, "a user", ["a", "list", "as", "user"]]
-
-        for test_value in test_values:
-            self.kwargs["lead"] = test_value
-            self.assertRaises(TypeError, Sequence, **self.kwargs)
-
-    def test_lead_attribute_is_not_User(self):
-        """testing if a TypeError will be raised when the lead attribute is
-        set to something other than a User
-        """
-        test_values = [1, 1.2, "a user", ["a", "list", "as", "user"]]
-        for test_value in test_values:
-            self.assertRaises(
-                TypeError,
-                setattr,
-                self.test_sequence,
-                "lead",
-                test_value
-            )
-
-    def test_lead_attribute_works_properly(self):
-        """testing if the lead attribute is working properly
-        """
-        self.test_sequence.lead = self.test_lead2
-        self.assertEqual(self.test_sequence.lead, self.test_lead2)
 
     def test_shots_attribute_defaults_to_empty_list(self):
         """testing if the shots attribute defaults to an empty list
@@ -302,7 +237,7 @@ class SequenceTester(unittest2.TestCase):
         self.kwargs["status_list"] = status_list
         new_sequence = Sequence(**self.kwargs)
         self.assertEqual(new_sequence.status_list, status_list)
-    
+
     def test_TaskableEntity_initialization(self):
         """testing if the TaskableEntity part is initialized correctly
         """
@@ -317,7 +252,7 @@ class SequenceTester(unittest2.TestCase):
         project_status_list = StatusList(
             name="Project Statuses", statuses=[status1],
             target_entity_type=Project,
-            )
+        )
 
         project_type = Type(
             name="Commercial",
@@ -331,7 +266,7 @@ class SequenceTester(unittest2.TestCase):
             status_list=project_status_list,
             type=project_type,
             repository=self.test_repository,
-            )
+        )
 
         self.kwargs["new_project"] = new_project
 

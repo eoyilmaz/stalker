@@ -1,22 +1,22 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
 # Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
-# 
+#
 # This file is part of Stalker.
-# 
+#
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation;
 # version 2.1 of the License.
-# 
+#
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 
 import unittest2
@@ -1106,87 +1106,87 @@ class UserTest(unittest2.TestCase):
             0
         )
 
-    def test_sequences_lead_argument_None(self):
-        """testing if the sequences_lead attribute will be an empty list when
-        the sequences_lead argument is None
-        """
-        self.kwargs["sequences_lead"] = None
-        new_user = User(**self.kwargs)
-        self.assertEqual(new_user.sequences_lead, [])
-
-    def test_sequences_lead_attribute_None(self):
-        """testing if a TypeError will be raised when the sequences_lead
-        attribute is set to None
-        """
-        self.assertRaises(TypeError, setattr, self.test_user, "sequences_lead",
-                          None)
-
-    def test_sequences_lead_argument_accepts_empty_list(self):
-        """testing if sequences_lead argument accepts an empty list
-        """
-        self.kwargs["sequences_lead"] = []
-        #this should work
-        a_user = User(**self.kwargs)
-
-    def test_sequences_lead_attribute_accepts_empty_list(self):
-        """testing if sequences_lead attribute accepts an empty list
-        """
-        # this should work without any error
-        self.test_user.sequences_lead = []
-
-    def test_sequences_lead_argument_accepts_only_lists(self):
-        """testing if a TypeError will be raised when trying to assign a list
-        of other objects than a list of Project objects to the
-        sequences_lead argument
-        """
-        test_values = ["a sequence", 123123, {}, 12.2132]
-        for test_value in test_values:
-            self.kwargs["sequences_lead"] = test_value
-            self.assertRaises(TypeError, User, **self.kwargs)
-
-    def test_sequences_lead_argument_accepts_only_lists_of_project_obj(self):
-        """testing if a TypeError will be raised when trying to assign a list
-        of other objects than a list of Project objects to the
-        sequences_lead argument
-        """
-        test_value = ["a sequence", 123123, [], {}, 12.2132]
-        self.kwargs["sequences_lead"] = test_value
-        self.assertRaises(TypeError, User, **self.kwargs)
-
-    def test_sequences_lead_attribute_accepts_only_list_of_project_obj(self):
-        """testing if a TypeError will be raised when trying to assign a list
-        of other object than a list of Project objects to the
-        sequences_lead attribute
-        """
-        test_value = ["a sequence", 123123, [], {}, 12.2132]
-        self.kwargs["sequences_lead"] = test_value
-        self.assertRaises(TypeError, User, **self.kwargs)
-
-    def test_sequence_lead_attribute_works_propertly(self):
-        """testing if sequence_lead attribute works properly
-        """
-        self.assertEqual(self.test_user.sequences_lead,
-                         self.kwargs["sequences_lead"]
-        )
-
-    def test_sequences_lead_attribute_elements_accepts_Project_only(self):
-        """testing if a TypeError will be raised when trying to assign
-        something other than a Sequence object to the sequence_lead list
-        """
-        # append
-        self.assertRaises(
-            TypeError,
-            self.test_user.sequences_lead.append,
-            0
-        )
-
-        # __setitem__
-        self.assertRaises(
-            TypeError,
-            self.test_user.sequences_lead.__setitem__,
-            0,
-            0
-        )
+    # def test_sequences_lead_argument_None(self):
+    #     """testing if the sequences_lead attribute will be an empty list when
+    #     the sequences_lead argument is None
+    #     """
+    #     self.kwargs["sequences_lead"] = None
+    #     new_user = User(**self.kwargs)
+    #     self.assertEqual(new_user.sequences_lead, [])
+    # 
+    # def test_sequences_lead_attribute_None(self):
+    #     """testing if a TypeError will be raised when the sequences_lead
+    #     attribute is set to None
+    #     """
+    #     self.assertRaises(TypeError, setattr, self.test_user, "sequences_lead",
+    #                       None)
+    # 
+    # def test_sequences_lead_argument_accepts_empty_list(self):
+    #     """testing if sequences_lead argument accepts an empty list
+    #     """
+    #     self.kwargs["sequences_lead"] = []
+    #     #this should work
+    #     a_user = User(**self.kwargs)
+    # 
+    # def test_sequences_lead_attribute_accepts_empty_list(self):
+    #     """testing if sequences_lead attribute accepts an empty list
+    #     """
+    #     # this should work without any error
+    #     self.test_user.sequences_lead = []
+    # 
+    # def test_sequences_lead_argument_accepts_only_lists(self):
+    #     """testing if a TypeError will be raised when trying to assign a list
+    #     of other objects than a list of Project objects to the
+    #     sequences_lead argument
+    #     """
+    #     test_values = ["a sequence", 123123, {}, 12.2132]
+    #     for test_value in test_values:
+    #         self.kwargs["sequences_lead"] = test_value
+    #         self.assertRaises(TypeError, User, **self.kwargs)
+    # 
+    # def test_sequences_lead_argument_accepts_only_lists_of_project_obj(self):
+    #     """testing if a TypeError will be raised when trying to assign a list
+    #     of other objects than a list of Project objects to the
+    #     sequences_lead argument
+    #     """
+    #     test_value = ["a sequence", 123123, [], {}, 12.2132]
+    #     self.kwargs["sequences_lead"] = test_value
+    #     self.assertRaises(TypeError, User, **self.kwargs)
+    # 
+    # def test_sequences_lead_attribute_accepts_only_list_of_project_obj(self):
+    #     """testing if a TypeError will be raised when trying to assign a list
+    #     of other object than a list of Project objects to the
+    #     sequences_lead attribute
+    #     """
+    #     test_value = ["a sequence", 123123, [], {}, 12.2132]
+    #     self.kwargs["sequences_lead"] = test_value
+    #     self.assertRaises(TypeError, User, **self.kwargs)
+    # 
+    # def test_sequence_lead_attribute_works_propertly(self):
+    #     """testing if sequence_lead attribute works properly
+    #     """
+    #     self.assertEqual(self.test_user.sequences_lead,
+    #                      self.kwargs["sequences_lead"]
+    #     )
+    # 
+    # def test_sequences_lead_attribute_elements_accepts_Sequences_only(self):
+    #     """testing if a TypeError will be raised when trying to assign
+    #     something other than a Sequence object to the sequence_lead list
+    #     """
+    #     # append
+    #     self.assertRaises(
+    #         TypeError,
+    #         self.test_user.sequences_lead.append,
+    #         0
+    #     )
+    # 
+    #     # __setitem__
+    #     self.assertRaises(
+    #         TypeError,
+    #         self.test_user.sequences_lead.__setitem__,
+    #         0,
+    #         0
+    #     )
 
     def test_tasks_argument_None(self):
         """testing if the tasks attribute will be an empty list when the tasks

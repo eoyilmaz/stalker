@@ -50,7 +50,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Stalker'
-copyright = u'2010-2011, the Stalker authors and contributors'
+copyright = u'2009-2013, the Stalker authors and contributors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -80,7 +80,7 @@ release = stalker.__version__
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['templates']
+exclude_patterns = ['build', 'templates']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
@@ -236,3 +236,11 @@ man_pages = [
 
 autosummary_generate = True
 autodoc_member_order = "bysource"
+
+
+def setup(app):
+    app.add_object_type(
+        'confval', 'confval',
+        objname='configuration value',
+        indextemplate='pair: %s; configuration value'
+    )

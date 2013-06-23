@@ -1,22 +1,22 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
 # Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
-# 
+#
 # This file is part of Stalker.
-# 
+#
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation;
 # version 2.1 of the License.
-# 
+#
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import os
 import logging
@@ -34,19 +34,19 @@ class EnvironmentBase(object):
     Generally a GUI for the end user is given an environment which helps the
     QtGui to be able to open, save, import or export a Version without
     knowing the details of the environment.
-    
+
     The environment object supplies **methods** like ``open``, ``save``,
     ``export``,  ``import`` or ``reference``. The main duty of the Environment
     object is to introduce the host application (Maya, Houdini, Nuke, etc.) to
     Stalker and let it to open, save, export, import or reference a file.
-    
+
     It is the pipeline developers duty to create the environment classes for
     the programs used in the studio by instantiating this class and overriding
     the methods as necessary. You can find good examples in `Anima Tools`_
     which is a Python package developed in `Anima Istanbul`_.
 
-    .. _Anima Tools:: https://pypi.python.org/pypi/anima
-    .. _Anima Istanbul:: http;//www.animaistanbul.com
+    .. _Anima Tools: https://pypi.python.org/pypi/anima
+    .. _Anima Istanbul: http;//www.animaistanbul.com
 
     Here is a brief example for creating an environment for a generic program::
 

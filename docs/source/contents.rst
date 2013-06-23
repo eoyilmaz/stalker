@@ -10,6 +10,7 @@ Table of Contents
     installation.rst
     tutorial.rst
     design.rst
+    configure.rst
     contribute.rst
     roadmap.rst
     changelog.rst
