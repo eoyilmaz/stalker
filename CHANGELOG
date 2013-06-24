@@ -6,6 +6,7 @@ Stalker Changes
 =========
 
 * **New:** Added a new attribute to **Task** class called **responsible**.
+* **Update:** Removed **Sequence.lead_id** use **Task.reponsible** instead.
 * **Update:** Updated documentation to include documentation about
   Configuring Stalker with ``config.py``.
 * **Update:** The ``duration`` argument in Task class is removed. It is somehow
