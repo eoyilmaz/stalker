@@ -236,29 +236,31 @@ class Version(Link, StatusMixin):
         return take_name
 
     @property
+    def latest_version(self):
+        """returns the Version instance with the highest version number in this
+        series
+
+        :returns: :class:`~stalker.models.version.Version` instance
+        """
+        try:
+            last_version = Version.query\
+                .filter(Version.task == self.task)\
+                .filter(Version.take_name == self.take_name)\
+                .order_by(Version.version_number.desc())\
+                .first()
+        except UnboundExecutionError:
+            last_version = None
+        return last_version
+
+    @property
     def max_version_number(self):
         """returns the maximum version number for this Version
         :return: int
         """
+        latest_version = self.latest_version
 
-        try:
-            all_versions = Version.query \
-                .filter(Version.task == self.task) \
-                .filter(Version.take_name == self.take_name) \
-                .order_by(Version.version_number.asc()) \
-                .all()
-        except UnboundExecutionError:
-            all_versions = []
-
-        if len(all_versions):
-            version_with_max_version_number = all_versions[-1]
-
-            # skip the current version if it is itself to prevent increasing
-            # the version number unnecessarily
-            if version_with_max_version_number is not self:
-                return version_with_max_version_number.version_number
-            elif len(all_versions) > 1:
-                return all_versions[-2].version_number
+        if latest_version:
+            return latest_version.version_number
 
         return 0
 
@@ -266,16 +268,35 @@ class Version(Link, StatusMixin):
     def _validate_version_number(self, key, version_number):
         """validates the given version_number value
         """
-        max_version = self.max_version_number
-        logger.debug('max_version_number: %s' % max_version)
+        # get the latest version
+        # and do it with auto flush turned off,
+        # or it will find itself and increase the version number unnecessarily
+        from stalker.db import DBSession
+        with DBSession.no_autoflush:
+            latest_version = self.latest_version
+
+        max_version_number = 0
+        if latest_version:
+            max_version_number = latest_version.version_number
+
+        logger.debug('max_version_number: %s' % max_version_number)
         logger.debug('given version_number: %s' % version_number)
-        if version_number is None or version_number <= max_version:
-            version_number = max_version + 1
-            logger.debug(
-                'given Version.version_number is too low, max version_number '
-                'in the database is %s, setting the current version_number to '
-                '%s' % (max_version, version_number)
-            )
+
+        if version_number is None or version_number <= max_version_number:
+            if latest_version == self:
+                version_number = latest_version.version_number
+                logger.debug(
+                    'the version is the latest version in database, the '
+                    'number will not be changed from %s' % version_number)
+            else:
+                version_number = max_version_number + 1
+                logger.debug(
+                    'given Version.version_number is too low,'
+                    'max version_number in the database is %s, setting the '
+                    'current version_number to %s' % (
+                        max_version_number, version_number
+                    )
+                )
 
         return version_number
 

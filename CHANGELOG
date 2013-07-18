@@ -2,6 +2,12 @@
 Stalker Changes
 ===============
 
+0.2.0.rc4
+=========
+
+* **New:** Added a new attribute to **Version** class called
+  **latest_version** which holds the latest version in the version queue.
+
 0.2.0.rc3
 =========
 

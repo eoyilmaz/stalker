@@ -142,7 +142,7 @@ class VersionTester(unittest2.TestCase):
             code='test',
             target_entity_type=Project,
         )
-        
+
         # create a structure
         self.test_structure = Structure(
             name='Test Project Structure'
@@ -439,12 +439,10 @@ class VersionTester(unittest2.TestCase):
         """
         self.assertEqual(self.test_version.version_number, 1)
 
-    def test_version_number_attribute_is_set_to_a_lower_then_it_should_be(
-            self):
+    def test_version_number_attribute_is_set_to_a_lower_then_it_should_be(self):
         """testing if the version_number attribute will be set to a correct
         unique value when it is set to a lower number then it should be
         """
-
         self.test_version.version_number = -1
         self.assertEqual(self.test_version.version_number, 1)
 
@@ -1219,3 +1217,77 @@ class VersionTester(unittest2.TestCase):
         self.assertNotEqual(self.test_version.created_with, test_value)
         self.test_version.created_with = test_value
         self.assertEqual(self.test_version.created_with, test_value)
+
+    def test_max_version_number_attribute_is_read_only(self):
+        """testing if the max_version_number attribute is read only
+        """
+        self.assertRaises(AttributeError, setattr ,self.test_version,
+                          'max_version_number', 20)
+
+    def test_max_version_number_attribute_is_working_properly(self):
+        """testing if the max_version_number attribute is working properly
+        """
+        new_version1 = Version(**self.kwargs)
+        DBSession.add(new_version1)
+        DBSession.commit()
+
+        new_version2 = Version(**self.kwargs)
+        DBSession.add(new_version2)
+        DBSession.commit()
+
+        new_version3 = Version(**self.kwargs)
+        DBSession.add(new_version3)
+        DBSession.commit()
+
+        new_version4 = Version(**self.kwargs)
+        DBSession.add(new_version4)
+        DBSession.commit()
+
+        new_version5 = Version(**self.kwargs)
+        DBSession.add(new_version5)
+        DBSession.commit()
+
+        self.assertEqual(new_version5.version_number, 5)
+
+        self.assertEqual(new_version1.max_version_number, 5)
+        self.assertEqual(new_version2.max_version_number, 5)
+        self.assertEqual(new_version3.max_version_number, 5)
+        self.assertEqual(new_version4.max_version_number, 5)
+        self.assertEqual(new_version5.max_version_number, 5)
+
+    def test_latest_version_attribute_is_read_only(self):
+        """testing if the last_version attribute is a read only attribute
+        """
+        self.assertRaises(AttributeError, setattr, self.test_version,
+                          'latest_version', 3453)
+
+    def test_latest_version_attribute_is_working_properly(self):
+        """testing if the last_version attribute is working properly
+        """
+        new_version1 = Version(**self.kwargs)
+        DBSession.add(new_version1)
+        DBSession.commit()
+
+        new_version2 = Version(**self.kwargs)
+        DBSession.add(new_version2)
+        DBSession.commit()
+
+        new_version3 = Version(**self.kwargs)
+        DBSession.add(new_version3)
+        DBSession.commit()
+
+        new_version4 = Version(**self.kwargs)
+        DBSession.add(new_version4)
+        DBSession.commit()
+
+        new_version5 = Version(**self.kwargs)
+        DBSession.add(new_version5)
+        DBSession.commit()
+
+        self.assertEqual(new_version5.version_number, 5)
+
+        self.assertEqual(new_version1.latest_version, new_version5)
+        self.assertEqual(new_version2.latest_version, new_version5)
+        self.assertEqual(new_version3.latest_version, new_version5)
+        self.assertEqual(new_version4.latest_version, new_version5)
+        self.assertEqual(new_version5.latest_version, new_version5)

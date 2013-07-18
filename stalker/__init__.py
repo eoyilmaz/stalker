@@ -22,7 +22,7 @@ Stalker is a Production Asset Management System (ProdAM) designed for Animation
 and VFX Studios. See docs for more information.
 """
 
-__version__ = '0.2.0.rc3'
+__version__ = '0.2.0.rc4'
 
 
 # before anything about stalker create the defaults

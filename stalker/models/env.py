@@ -171,7 +171,7 @@ class EnvironmentBase(object):
 
     def find_repo(self, path):
         """returns the repository from the given path
-        
+
         :param str path: path in a repository
         :return: stalker.models.repository.Repository
         """
@@ -244,12 +244,13 @@ class EnvironmentBase(object):
 
         # trim repo path
         full_path_trimmed = self.trim_repo_path(full_path)
+        logger.debug('full_path_trimmed: %s' % full_path_trimmed)
 
         from stalker import Version
 
         # try to get a version with that info
         version = Version.query\
-            .filter(Version.full_path==full_path_trimmed).first()
+            .filter(Version.full_path == full_path_trimmed).first()
         return version
     
     def get_current_version(self):

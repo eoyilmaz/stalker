@@ -2306,7 +2306,7 @@ class TaskTester(unittest2.TestCase):
         task4 = Task(**self.kwargs)
         task5 = Task(**self.kwargs)
         task6 = Task(**self.kwargs)
-        
+
         task1.depends = [task2]
         task2.parent = task3
         task3.parent = task4
@@ -2317,7 +2317,7 @@ class TaskTester(unittest2.TestCase):
         self.assertTrue(self.test_task == task0)
         self.assertFalse(self.test_task == task1)
         self.assertFalse(self.test_task == task5)
-        
+
         self.assertFalse(task1 == task2)
         self.assertFalse(task1 == task3)
         self.assertFalse(task1 == task4)
@@ -2326,8 +2326,10 @@ class TaskTester(unittest2.TestCase):
         self.assertFalse(task2 == task4)
 
         self.assertFalse(task3 == task4)
-        
+
         self.assertFalse(task5 == task6)
+
+        # check task with same names but different projects
 
     def test_inequality(self):
         """testing the inequality operator
@@ -2343,7 +2345,7 @@ class TaskTester(unittest2.TestCase):
         task4 = Task(**self.kwargs)
         task5 = Task(**self.kwargs)
         task6 = Task(**self.kwargs)
-        
+
         task1.depends = [task2]
         task2.parent = task3
         task3.parent = task4
@@ -2353,7 +2355,7 @@ class TaskTester(unittest2.TestCase):
         self.assertFalse(self.test_task != task0)
         self.assertTrue(self.test_task != task1)
         self.assertTrue(self.test_task != task5)
-        
+
         self.assertTrue(task1 != task2)
         self.assertTrue(task1 != task3)
         self.assertTrue(task1 != task4)
@@ -2362,7 +2364,7 @@ class TaskTester(unittest2.TestCase):
         self.assertTrue(task2 != task4)
 
         self.assertTrue(task3 != task4)
-        
+
         self.assertTrue(task5 != task6)
 
     def test_parent_argument_is_skipped_there_is_a_project_arg(self):
@@ -2414,6 +2416,7 @@ class TaskTester(unittest2.TestCase):
         # there is no way to generate a CycleError by using the parent argument,
 
         # cause the Task is just created, it is not in relationship with other
+
     # Tasks, there is no parent nor child.
 
     def test_parent_attribute_creates_a_cycle(self):
@@ -3304,19 +3307,20 @@ class TaskTester(unittest2.TestCase):
         self.maxDiff = None
         self.assertMultiLineEqual(t1.to_tjp, expected_tjp)
 
-    def test_to_tjp_attribute_is_working_properly_for_a_container_task_with_dependency(self):
+    def test_to_tjp_attribute_is_working_properly_for_a_container_task_with_dependency(
+            self):
         """testing if the to_tjp attribute is working properly for a container
         task which has dependency
         """
-        
+
         self.kwargs['project'].id = 87987
         self.kwargs['parent'] = None
         self.kwargs['depends'] = []
         self.kwargs['name'] = 'Random Task Name 1'
-        
+
         t0 = Task(**self.kwargs)
         t0.id = 35546
-        
+
         self.kwargs['depends'] = [t0]
         self.kwargs['name'] = 'Modeling'
 
@@ -3459,7 +3463,7 @@ class TaskTester(unittest2.TestCase):
         #print expected_tjp
         #print '-----------------------'
         self.assertMultiLineEqual(t1.to_tjp, expected_tjp)
-        
+
 
     def test_is_scheduled_is_a_read_only_attribute(self):
         """testing if the is_scheduled is a read-only attribute
@@ -3703,14 +3707,16 @@ class TaskTester(unittest2.TestCase):
         self.kwargs['responsible'] = 'not a user instance'
         self.assertRaises(TypeError, Task, **self.kwargs)
 
-    def test_responsible_attribute_is_set_to_something_other_than_User_instance(self):
+    def test_responsible_attribute_is_set_to_something_other_than_User_instance(
+            self):
         """testing if a TypeError will be raised if the responsible attribute
         is set to something other than a User instance
         """
         self.assertRaises(TypeError, setattr, self.test_task, 'responsible',
                           'not a user instance')
 
-    def test_responsible_argument_is_None_or_skipped_responsible_attribute_comes_from_parents(self):
+    def test_responsible_argument_is_None_or_skipped_responsible_attribute_comes_from_parents(
+            self):
         """testing if the responsible argument is None or skipped then the
         responsible attribute value comes from parents
         """
@@ -3725,7 +3731,8 @@ class TaskTester(unittest2.TestCase):
         self.assertEqual(new_task1.responsible, self.test_user1)
         self.assertEqual(new_task2.responsible, self.test_user1)
 
-    def test_responsible_attribute_is_set_to_None_responsible_attribute_comes_from_parents(self):
+    def test_responsible_attribute_is_set_to_None_responsible_attribute_comes_from_parents(
+            self):
         """testing if the responsible attribute is None or skipped then its
         value comes from parents
         """
@@ -3743,7 +3750,8 @@ class TaskTester(unittest2.TestCase):
         self.assertEqual(new_task1.responsible, self.test_user2)
         self.assertEqual(new_task2.responsible, self.test_user2)
 
-    def test_responsible_attribute_value_comes_from_project_if_no_parent_exists(self):
+    def test_responsible_attribute_value_comes_from_project_if_no_parent_exists(
+            self):
         """testing if the responsible attribute value comes from project.lead
         attribute if there are no parents
         """
@@ -3752,7 +3760,8 @@ class TaskTester(unittest2.TestCase):
 
         self.assertEqual(self.test_task.responsible, self.test_user3)
 
-    def test_responsible_attribute_value_comes_from_project_if_parents_doesnt_have_a_responsible(self):
+    def test_responsible_attribute_value_comes_from_project_if_parents_doesnt_have_a_responsible(
+            self):
         """testing if the responsible attribute value comes from the
         project.lead attribute if parents doesn't have a responsible
         """
