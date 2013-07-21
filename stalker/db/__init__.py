@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
 
-def setup(settings=None, callback=None):
+def setup(settings=None):
     """Utility function that helps to connect the system to the given database.
 
     if the database is None then the it setups using the default database in
@@ -72,17 +72,9 @@ def setup(settings=None, callback=None):
     # create the database
     logger.debug("creating the tables")
     Base.metadata.create_all(engine)
-    #Base.metadata.bind = engine
-
-    # init database
-    __init_db__()
-
-    # call callback function
-    if callback:
-        callback()
 
 
-def __init_db__():
+def init():
     """fills the database with default values
     """
     logger.debug("initializing database")
@@ -113,12 +105,6 @@ def __init_db__():
     # create Ticket statuses
     __create_ticket_statuses()
 
-    # create FilenameTemplate Types
-    # __create_filename_template_types()
-
-    ## create TimeLog Types
-    #__create_time_log_types()
-
     logger.debug('finished initializing the database')
 
 
@@ -129,9 +115,8 @@ def __create_admin__():
     from stalker.models.department import Department
 
     # check if there is already an admin in the database
-    if len(User.query
-    .filter_by(name=defaults.admin_name)
-    .all()) > 0:
+    admin = User.query.filter_by(name=defaults.admin_name).first()
+    if admin:
         #there should be an admin user do nothing
         logger.debug("there is an admin already")
         return
@@ -158,23 +143,23 @@ def __create_admin__():
         admins_group = Group(name=defaults.admin_group_name)
         DBSession.add(admins_group)
 
-    # create the admin user
-    admin = User.query \
-        .filter_by(name=defaults.admin_name) \
-        .first()
+    # # create the admin user
+    # admin = User.query \
+    #     .filter_by(name=defaults.admin_name) \
+    #     .first()
 
-    if not admin:
-        admin = User(
-            name=defaults.admin_name,
-            login=defaults.admin_login,
-            password=defaults.admin_password,
-            email=defaults.admin_email,
-            departments=[admin_department],
-            groups=[admins_group]
-        )
+    # if not admin:
+    admin = User(
+        name=defaults.admin_name,
+        login=defaults.admin_login,
+        password=defaults.admin_password,
+        email=defaults.admin_email,
+        departments=[admin_department],
+        groups=[admins_group]
+    )
 
-        admin.created_by = admin
-        admin.updated_by = admin
+    admin.created_by = admin
+    admin.updated_by = admin
 
     # update the department as created and updated by admin user
     admin_department.created_by = admin
@@ -274,44 +259,8 @@ def __create_ticket_statuses():
         DBSession.rollback()
         logger.debug("Ticket Types are already in the database!")
     else:
-        DBSession.flush()
+        # DBSession.flush()
         logger.debug("Ticket Types are created successfully")
-
-# def __create_time_log_types():
-#     """Creates two default :class:`~stalker.models.type.Type`\ s for
-#     :class:`~stalker.models.task.TimeLog` objects.
-#     """
-#     from stalker import TimeLog, Type, User
-# 
-#     admin = User.query.filter_by(login=defaults.admin_name).first()
-# 
-#     # Normal
-#     logger.debug('Creating TimeLog.type "Normal"')
-#     normal_type = Type(
-#         name='Normal',
-#         code='Normal',
-#         target_entity_type=TimeLog,
-#         created_by=admin
-#     )
-#     DBSession.add(normal_type)
-# 
-#     logger.debug('Creating TimeLog.type "Extra"')
-#     extra_type = Type(
-#         name='Extra',
-#         code='Extra',
-#         target_entity_type=TimeLog,
-#         created_by=admin
-#     )
-#     DBSession.add(extra_type)
-#     try:
-#         DBSession.commit()
-#     except IntegrityError as e:
-#         logger.debug(e)
-#         DBSession.rollback()
-#         logger.debug('TimeLog Types are already in database')
-#     else:
-#         DBSession.flush()
-#         logger.debug('TimeLog Types are created successfully')
 
 
 def register(class_):
@@ -396,5 +345,5 @@ def register(class_):
         DBSession.commit()
     except IntegrityError:
         DBSession.rollback()
-    else:
-        DBSession.flush()
+    # else:
+    #     DBSession.flush()

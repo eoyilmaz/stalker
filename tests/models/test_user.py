@@ -24,6 +24,7 @@ import datetime
 import logging
 from stalker import db
 from stalker import config
+
 defaults = config.Config()
 
 from stalker.db.session import DBSession
@@ -34,30 +35,32 @@ from stalker import (Group, Department, Project, Repository,
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+
 class UserTest(unittest2.TestCase):
     """Tests the user class
     """
-    
+
     @classmethod
     def setUpClass(cls):
         """set up the test for class
         """
         DBSession.remove()
         DBSession.configure(extension=None)
-    
+
     @classmethod
     def tearDownClass(cls):
         """clean up the test
         """
         DBSession.configure(extension=None)
-    
+
     def setUp(self):
         """setup the test
         """
         # setup a test database
         self.TEST_DATABASE_URI = "sqlite:///:memory:"
         db.setup()
-        
+        db.init()
+
         # need to have some test object for
         # a department
         self.test_department1 = Department(
@@ -69,13 +72,13 @@ class UserTest(unittest2.TestCase):
         self.test_department3 = Department(
             name="Test Department 3"
         )
-        
+
         DBSession.add_all([
             self.test_department1,
             self.test_department2,
             self.test_department3
         ])
-        
+
         # a couple of groups
         self.test_group1 = Group(
             name="Test Group 1"
@@ -86,7 +89,7 @@ class UserTest(unittest2.TestCase):
         self.test_group3 = Group(
             name="Test Group 3"
         )
-        
+
         DBSession.add_all([
             self.test_group1,
             self.test_group2,
@@ -98,14 +101,14 @@ class UserTest(unittest2.TestCase):
         self.test_status2 = Status(name="Work In Progress", code="WIP")
         self.test_status3 = Status(name="Waiting To Start", code="WTS")
         self.test_status4 = Status(name="Pending Review", code="PRev")
-        
+
         DBSession.add_all([
             self.test_status1,
             self.test_status2,
             self.test_status3,
             self.test_status4
         ])
-        
+
         # a project status list
         self.project_status_list = StatusList(
             name="Project Status List",
@@ -117,14 +120,14 @@ class UserTest(unittest2.TestCase):
             ],
             target_entity_type=Project,
         )
-        
+
         # a repository type
         self.test_repository_type = Type(
             name="Test",
             code='test',
             target_entity_type=Repository,
         )
-        
+
         # a repository
         self.test_repository = Repository(
             name="Test Repository",
@@ -137,7 +140,7 @@ class UserTest(unittest2.TestCase):
             code='comm',
             target_entity_type=Project,
         )
-        
+
         # a couple of projects
         self.test_project1 = Project(
             name="Test Project 1",
@@ -146,7 +149,7 @@ class UserTest(unittest2.TestCase):
             type=self.commercial_project_type,
             repository=self.test_repository,
         )
-        
+
         self.test_project2 = Project(
             name="Test Project 2",
             code='tp2',
@@ -162,13 +165,13 @@ class UserTest(unittest2.TestCase):
             type=self.commercial_project_type,
             repository=self.test_repository,
         )
-        
+
         DBSession.add_all([
             self.test_project1,
             self.test_project2,
             self.test_project3
         ])
-        
+
         # a task status list
         self.task_status_list = StatusList(
             name="Task Status List",
@@ -205,14 +208,14 @@ class UserTest(unittest2.TestCase):
             status_list=self.task_status_list,
             project=self.test_project3,
         )
-        
+
         DBSession.add_all([
             self.test_task1,
             self.test_task2,
             self.test_task3,
             self.test_task4
         ])
-        
+
         # a couple of versions
         # a version status list
         self.version_status_list = StatusList(
@@ -225,7 +228,7 @@ class UserTest(unittest2.TestCase):
             ],
             target_entity_type=Version
         )
-        
+
         # for task1
         self.test_version1 = Version(
             task=self.test_task1,
@@ -233,21 +236,21 @@ class UserTest(unittest2.TestCase):
             full_path='some/path'
         )
         DBSession.add(self.test_version1)
-        
+
         self.test_version2 = Version(
             task=self.test_task1,
             status_list=self.version_status_list,
             full_path='some/path'
         )
         DBSession.add(self.test_version2)
-        
+
         self.test_version3 = Version(
             task=self.test_task1,
             status_list=self.version_status_list,
             full_path='some/path'
         )
         DBSession.add(self.test_version3)
-        
+
         # for task2
         self.test_version4 = Version(
             task=self.test_task2,
@@ -255,21 +258,21 @@ class UserTest(unittest2.TestCase):
             full_path='some/path'
         )
         DBSession.add(self.test_version4)
-        
+
         self.test_version5 = Version(
             task=self.test_task2,
             status_list=self.version_status_list,
             full_path='some/path'
         )
         DBSession.add(self.test_version5)
-        
+
         self.test_version6 = Version(
             task=self.test_task2,
             status_list=self.version_status_list,
             full_path='some/path'
         )
         DBSession.add(self.test_version6)
-        
+
         # for task3
         self.test_version7 = Version(
             task=self.test_task3,
@@ -277,21 +280,21 @@ class UserTest(unittest2.TestCase):
             full_path='some/path'
         )
         DBSession.add(self.test_version7)
-        
+
         self.test_version8 = Version(
             task=self.test_task3,
             status_list=self.version_status_list,
             full_path='some/path'
         )
         DBSession.add(self.test_version8)
-        
+
         self.test_version9 = Version(
             task=self.test_task3,
             status_list=self.version_status_list,
             full_path='some/path'
         )
         DBSession.add(self.test_version9)
-        
+
         # for task4
         self.test_version10 = Version(
             task=self.test_task4,
@@ -299,28 +302,28 @@ class UserTest(unittest2.TestCase):
             full_path='some/path'
         )
         DBSession.add(self.test_version10)
-        
+
         self.test_version11 = Version(
             task=self.test_task4,
             status_list=self.version_status_list,
             full_path='some/path'
         )
         DBSession.add(self.test_version11)
-        
+
         self.test_version12 = Version(
             task=self.test_task4,
             status_list=self.version_status_list,
             full_path='some/path'
         )
         DBSession.add(self.test_version12)
-        
+
         # *********************************************************************
         # Tickets
         # *********************************************************************
-        
+
         # no need to create status list for tickets cause we have a database
         # set up an running so it will be automatically linked
-        
+
         # tickets for version1
         self.test_ticket1 = Ticket(
             project=self.test_project1,
@@ -329,14 +332,14 @@ class UserTest(unittest2.TestCase):
         DBSession.add(self.test_ticket1)
         # set it to closed
         self.test_ticket1.resolve()
-        
+
         # create a new ticket and leave it open
         self.test_ticket2 = Ticket(
             project=self.test_project1,
             links=[self.test_version1],
         )
         DBSession.add(self.test_ticket2)
-        
+
         # create a new ticket and close and then reopen it
         self.test_ticket3 = Ticket(
             project=self.test_project1,
@@ -345,7 +348,7 @@ class UserTest(unittest2.TestCase):
         DBSession.add(self.test_ticket3)
         self.test_ticket3.resolve()
         self.test_ticket3.reopen()
-        
+
         # *********************************************************************
         # tickets for version2
         # create a new ticket and leave it open
@@ -354,7 +357,7 @@ class UserTest(unittest2.TestCase):
             links=[self.test_version2],
         )
         DBSession.add(self.test_ticket4)
-        
+
         # create a new Ticket and close it
         self.test_ticket5 = Ticket(
             project=self.test_project1,
@@ -362,7 +365,7 @@ class UserTest(unittest2.TestCase):
         )
         DBSession.add(self.test_ticket5)
         self.test_ticket5.resolve()
-        
+
         # create a new Ticket and close it
         self.test_ticket6 = Ticket(
             project=self.test_project1,
@@ -370,7 +373,7 @@ class UserTest(unittest2.TestCase):
         )
         DBSession.add(self.test_ticket6)
         self.test_ticket6.resolve()
-        
+
         # *********************************************************************
         # tickets for version3
         # create a new ticket and close it
@@ -380,7 +383,7 @@ class UserTest(unittest2.TestCase):
         )
         DBSession.add(self.test_ticket7)
         self.test_ticket7.resolve()
-        
+
         # create a new ticket and close it
         self.test_ticket8 = Ticket(
             project=self.test_project1,
@@ -388,7 +391,7 @@ class UserTest(unittest2.TestCase):
         )
         DBSession.add(self.test_ticket8)
         self.test_ticket8.resolve()
-        
+
         # *********************************************************************
         # tickets for version4
         # create a new ticket and close it
@@ -397,12 +400,12 @@ class UserTest(unittest2.TestCase):
             links=[self.test_version4],
         )
         DBSession.add(self.test_ticket9)
-        
+
         self.test_ticket9.resolve()
-        
+
         # no tickets for any other version
         # *********************************************************************
-        
+
         # a status list for sequence
         self.sequence_status_list = StatusList(
             name="Sequence Status List",
@@ -414,7 +417,7 @@ class UserTest(unittest2.TestCase):
             ],
             target_entity_type=Sequence
         )
-        
+
         # a couple of sequences
         self.test_sequence1 = Sequence(
             name="Test Seq 1",
@@ -422,7 +425,7 @@ class UserTest(unittest2.TestCase):
             project=self.test_project1,
             status_list=self.sequence_status_list
         )
-        
+
         self.test_sequence2 = Sequence(
             name="Test Seq 2",
             code='ts2',
@@ -443,7 +446,7 @@ class UserTest(unittest2.TestCase):
             project=self.test_project1,
             status_list=self.sequence_status_list
         )
-        
+
         DBSession.add_all([
             self.test_sequence1,
             self.test_sequence2,
@@ -458,10 +461,10 @@ class UserTest(unittest2.TestCase):
         #    email='admin@admin.com',
         #    password='admin'
         #)
-        self.test_admin = User.query.filter_by(name=defaults.admin_name)\
-                                                                       .first()
+        self.test_admin = User.query.filter_by(name=defaults.admin_name) \
+            .first()
         self.assertIsNotNone(self.test_admin)
-        
+
         # create the default values for parameters
         self.kwargs = {
             'name': 'Erkan Ozgur Yilmaz',
@@ -482,27 +485,27 @@ class UserTest(unittest2.TestCase):
             'updated_by': self.test_admin,
             'last_login': None
         }
-        
+
         # create a proper user object
         self.test_user = User(**self.kwargs)
         DBSession.add(self.test_user)
         DBSession.commit()
-        
+
         # just change the kwargs for other tests
         self.kwargs['name'] = 'some other name'
         self.kwargs['email'] = 'some@other.email'
-    
+
     def tearDown(self):
         """tear down the test
         """
         DBSession.remove()
-    
+
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for
         User class
         """
         self.assertFalse(User.__auto_name__)
-     
+
     def test_email_argument_accepting_only_string_or_unicode(self):
         """testing if email argument accepting only string or unicode
         values
@@ -542,11 +545,13 @@ class UserTest(unittest2.TestCase):
     def test_email_argument_format(self):
         """testing if given an email in wrong format will raise a ValueError
         """
-        test_values = ["an email in no format",
-                       "an_email_with_no_part2",
-                       "@an_email_with_only_part2",
-                       "@",
-                       ]
+        test_values = [
+            "an email in no format",
+            "an_email_with_no_part2",
+            "@an_email_with_only_part2",
+            "@"
+        ]
+
         # any of this values should raise a ValueError
         for test_value in test_values:
             self.kwargs["email"] = test_value
@@ -561,7 +566,7 @@ class UserTest(unittest2.TestCase):
             "@an_email_with_only_part2",
             "@",
             "eoyilmaz@",
-            "eoyilmaz@somecompony@com",
+            "eoyilmaz@some.compony@com",
         ]
         # any of these email values should raise a ValueError
         for value in test_values:
@@ -614,7 +619,7 @@ class UserTest(unittest2.TestCase):
         """
         self.kwargs.pop("login")
         self.assertRaises(TypeError, User, **self.kwargs)
-    
+
     def test_login_argument_is_None(self):
         """testing if a TypeError will be raised when trying to assign None
         to login argument
@@ -633,12 +638,13 @@ class UserTest(unittest2.TestCase):
             "login",
             None
         )
-    
+
     def test_login_argument_formatted_correctly(self):
         """testing if login argument formatted correctly
         """
         #                 input       expected
-        test_values = [("e. ozgur", "eozgur"),
+        test_values = [
+            ("e. ozgur", "eozgur"),
             ("erkan", "erkan"),
             ("Ozgur", "ozgur"),
             ("Erkan ozgur", "erkanozgur"),
@@ -648,7 +654,7 @@ class UserTest(unittest2.TestCase):
             (" eRkan ozGur", "erkanozgur"),
             ("213 e.ozgur", "eozgur"),
         ]
-        
+
         for valuePair in test_values:
             # set the input and expect the expected output
             self.kwargs["login"] = valuePair[0]
@@ -662,7 +668,8 @@ class UserTest(unittest2.TestCase):
         """testing if login attribute formatted correctly
         """
         #                 input       expected
-        test_values = [("e. ozgur", "eozgur"),
+        test_values = [
+            ("e. ozgur", "eozgur"),
             ("erkan", "erkan"),
             ("Ozgur", "ozgur"),
             ("Erkan ozgur", "erkanozgur"),
@@ -680,19 +687,19 @@ class UserTest(unittest2.TestCase):
                 self.test_user.login,
                 valuePair[1]
             )
-    
+
     def test_login_argument_is_working_properly(self):
         """testing if the login argument is working properly
         """
         self.assertEqual(self.test_user.login, self.kwargs['login'])
-    
+
     def test_login_attribute_is_working_properly(self):
         """testing if the login attribute is working properly
         """
         test_value = 'newlogin'
         self.test_user.login = test_value
         self.assertEqual(self.test_user.login, test_value)
-    
+
     def test_last_login_argument_accepts_None(self):
         """testing if nothing happens when the last login argument is set to
         None
@@ -722,7 +729,7 @@ class UserTest(unittest2.TestCase):
         argument
         """
         test_values = [1, 2.3, "login time", ["last login time"],
-                {"a last": "login time"}]
+                       {"a last": "login time"}]
         for test_value in test_values:
             self.kwargs["last_login"] = test_value
             self.assertRaises(TypeError, User, **self.kwargs)
@@ -733,7 +740,7 @@ class UserTest(unittest2.TestCase):
         attribute
         """
         test_values = [1, 2.3, "login time", ["last login time"],
-                {"a last": "login time"}]
+                       {"a last": "login time"}]
         for test_value in test_values:
             self.assertRaises(
                 TypeError,
@@ -749,7 +756,7 @@ class UserTest(unittest2.TestCase):
         test_value = datetime.datetime.now()
         self.test_user.last_login = test_value
         self.assertEqual(self.test_user.last_login, test_value)
-    
+
     def test_departments_argument_is_skipped(self):
         """testing if a User can be created without a Department instance
         """
@@ -757,10 +764,10 @@ class UserTest(unittest2.TestCase):
             self.kwargs.pop('departments')
         except KeyError:
             pass
-        
+
         new_user = User(**self.kwargs)
         self.assertEqual(new_user.departments, [])
-    
+
     def test_departments_argument_is_None(self):
         """testing if a User can be created with the departments argument value
         is to None
@@ -768,28 +775,29 @@ class UserTest(unittest2.TestCase):
         self.kwargs['departments'] = None
         new_user = User(**self.kwargs)
         self.assertEqual(new_user.departments, [])
-    
+
     def test_departments_attribute_is_set_None(self):
         """testing if a TypeError will be raised when the User's departments
         attribute set to None
         """
         self.assertRaises(TypeError, setattr, self.test_user, 'departments',
                           None)
-    
+
     def test_departments_argument_is_an_empty_list(self):
         """testing if a User can be created with the departments argument is an
         empty list
         """
         self.kwargs['departments'] = []
         new_user = User(**self.kwargs)
-    
+
     def test_departments_attribute_is_an_empty_list(self):
         """testing if the departments attribute can be set to an empty list
         """
         self.test_user.departments = []
         self.assertEqual(self.test_user.departments, [])
-    
-    def test_departments_argument_only_accepts_list_of_department_objects(self):
+
+    def test_departments_argument_only_accepts_list_of_department_objects(
+            self):
         """testing if a TypeError will be raised when trying to assign
         anything other than a Department object to departments argument
         """
@@ -801,10 +809,10 @@ class UserTest(unittest2.TestCase):
             ["a department"],
             {"a": "deparment"}
         ]
-        
+
         self.kwargs["departments"] = test_values
         self.assertRaises(TypeError, User, **self.kwargs)
-    
+
     def test_departments_attribute_only_accepts_department_objects(self):
         """testing if a TypeError will be raised when trying to assign
         anything other than a Department object to departments attribute
@@ -824,8 +832,9 @@ class UserTest(unittest2.TestCase):
         """
         # try to set and get the same value back
         self.test_user.departments = [self.test_department2]
-        self.assertItemsEqual(self.test_user.departments, [self.test_department2])
-    
+        self.assertItemsEqual(self.test_user.departments,
+                              [self.test_department2])
+
     def test_departments_attribute_supports_appending(self):
         """testing if departments attribute supports appending
         """
@@ -834,7 +843,7 @@ class UserTest(unittest2.TestCase):
         self.test_user.departments.append(self.test_department2)
         self.assertItemsEqual(self.test_user.departments,
                               [self.test_department1, self.test_department2])
-    
+
     def test_password_argument_being_None(self):
         """testing if a TypeError will be raised when trying to assign None
         to the password argument
@@ -874,7 +883,7 @@ class UserTest(unittest2.TestCase):
         """
         test_password = "a new test password"
         self.test_user.password = test_password
-        
+
         # test if they are not the same any more
         self.assertNotEquals(self.test_user.password, test_password)
 
@@ -967,26 +976,26 @@ class UserTest(unittest2.TestCase):
             0,
             0
         )
-    
+
     def test_projects_attribute_is_None(self):
         """testing if a TypeError will be raised when the projects attribute is
         set to None
         """
         self.assertRaises(TypeError, setattr, self.test_user, 'projects', None)
-    
+
     def test_projects_attribute_is_set_to_a_value_which_is_not_a_list(self):
         """testing if the projects attribute is accepting lists only
         """
         self.assertRaises(TypeError, setattr, self.test_user, 'projects',
                           'not a list')
-    
+
     def test_projects_attribute_is_set_to_list_of_other_objects_than_Project_instances(self):
         """testing if a TypeError will be raised when the projects attribute is
         set to a value which is a list of other values than Projects instances
         """
         self.assertRaises(TypeError, setattr, self.test_user, 'projects',
                           ['not', 'a', 'list', 'of', 'projects', 32])
-    
+
     def test_projects_attribute_is_working_properly(self):
         """testing if the projects attribute is working properly
         """
@@ -999,7 +1008,7 @@ class UserTest(unittest2.TestCase):
         self.assertIn(self.test_user, self.test_project1.users)
         self.assertIn(self.test_user, self.test_project2.users)
         self.assertIn(self.test_user, self.test_project3.users)
-    
+
     def test_projects_lead_argument_None(self):
         """testing if the projects_lead attribute will be an empty list when
         the projects_lead attribute is None
@@ -1106,88 +1115,6 @@ class UserTest(unittest2.TestCase):
             0
         )
 
-    # def test_sequences_lead_argument_None(self):
-    #     """testing if the sequences_lead attribute will be an empty list when
-    #     the sequences_lead argument is None
-    #     """
-    #     self.kwargs["sequences_lead"] = None
-    #     new_user = User(**self.kwargs)
-    #     self.assertEqual(new_user.sequences_lead, [])
-    # 
-    # def test_sequences_lead_attribute_None(self):
-    #     """testing if a TypeError will be raised when the sequences_lead
-    #     attribute is set to None
-    #     """
-    #     self.assertRaises(TypeError, setattr, self.test_user, "sequences_lead",
-    #                       None)
-    # 
-    # def test_sequences_lead_argument_accepts_empty_list(self):
-    #     """testing if sequences_lead argument accepts an empty list
-    #     """
-    #     self.kwargs["sequences_lead"] = []
-    #     #this should work
-    #     a_user = User(**self.kwargs)
-    # 
-    # def test_sequences_lead_attribute_accepts_empty_list(self):
-    #     """testing if sequences_lead attribute accepts an empty list
-    #     """
-    #     # this should work without any error
-    #     self.test_user.sequences_lead = []
-    # 
-    # def test_sequences_lead_argument_accepts_only_lists(self):
-    #     """testing if a TypeError will be raised when trying to assign a list
-    #     of other objects than a list of Project objects to the
-    #     sequences_lead argument
-    #     """
-    #     test_values = ["a sequence", 123123, {}, 12.2132]
-    #     for test_value in test_values:
-    #         self.kwargs["sequences_lead"] = test_value
-    #         self.assertRaises(TypeError, User, **self.kwargs)
-    # 
-    # def test_sequences_lead_argument_accepts_only_lists_of_project_obj(self):
-    #     """testing if a TypeError will be raised when trying to assign a list
-    #     of other objects than a list of Project objects to the
-    #     sequences_lead argument
-    #     """
-    #     test_value = ["a sequence", 123123, [], {}, 12.2132]
-    #     self.kwargs["sequences_lead"] = test_value
-    #     self.assertRaises(TypeError, User, **self.kwargs)
-    # 
-    # def test_sequences_lead_attribute_accepts_only_list_of_project_obj(self):
-    #     """testing if a TypeError will be raised when trying to assign a list
-    #     of other object than a list of Project objects to the
-    #     sequences_lead attribute
-    #     """
-    #     test_value = ["a sequence", 123123, [], {}, 12.2132]
-    #     self.kwargs["sequences_lead"] = test_value
-    #     self.assertRaises(TypeError, User, **self.kwargs)
-    # 
-    # def test_sequence_lead_attribute_works_propertly(self):
-    #     """testing if sequence_lead attribute works properly
-    #     """
-    #     self.assertEqual(self.test_user.sequences_lead,
-    #                      self.kwargs["sequences_lead"]
-    #     )
-    # 
-    # def test_sequences_lead_attribute_elements_accepts_Sequences_only(self):
-    #     """testing if a TypeError will be raised when trying to assign
-    #     something other than a Sequence object to the sequence_lead list
-    #     """
-    #     # append
-    #     self.assertRaises(
-    #         TypeError,
-    #         self.test_user.sequences_lead.append,
-    #         0
-    #     )
-    # 
-    #     # __setitem__
-    #     self.assertRaises(
-    #         TypeError,
-    #         self.test_user.sequences_lead.__setitem__,
-    #         0,
-    #         0
-    #     )
-
     def test_tasks_argument_None(self):
         """testing if the tasks attribute will be an empty list when the tasks
         argument is given as None
@@ -1276,9 +1203,9 @@ class UserTest(unittest2.TestCase):
             "email": "generic.user@generic.com",
             "password": "verysecret",
         })
-        
+
         new_user = User(**self.kwargs)
-        
+
         self.assertFalse(self.test_user == new_user)
 
     def test_inequality_operator(self):
@@ -1290,12 +1217,12 @@ class UserTest(unittest2.TestCase):
             "login": "guser",
             "email": "generic.user@generic.com",
             "password": "verysecret",
-            })
+        })
 
         new_user = User(**self.kwargs)
 
         self.assertTrue(self.test_user != new_user)
-    
+
     def test___repr__(self):
         """testing the representation
         """
@@ -1305,37 +1232,37 @@ class UserTest(unittest2.TestCase):
                 self.test_user.name,
                 self.test_user.login)
         )
-    
+
     def test_tickets_attribute_is_an_empty_list_by_default(self):
         """testing if the User.tickets is an empty list by default
         """
         self.assertEqual(self.test_user.tickets, [])
-    
+
     def test_open_tickets_attribute_is_an_empty_list_by_default(self):
         """testing if the User.open_tickets is an empty list by default
         """
         self.assertEqual(self.test_user.open_tickets, [])
-    
+
     def test_tickets_attribute_is_read_only(self):
         """testing if the User.tickets attribute is a read only attribute
         """
         self.assertRaises(AttributeError, setattr, self.test_user, 'tickets',
             [])
-    
+
     def test_open_tickets_attribute_is_read_only(self):
         """testing if the User.open_tickets attribute is a read only attribute
         """
         self.assertRaises(AttributeError, setattr, self.test_user,
                           'open_tickets', [])
-    
+
     def test_tickets_attribute_returns_all_tickets_owned_by_this_user(self):
         """testing if User.tickets returns all the tickets owned by this user
         """
         self.assertEqual(len(self.test_user.tasks), 0)
-        
+
         # there should be no tickets assigned to this user
         self.assertTrue(self.test_user.tickets == [])
-        
+
         # be careful not all of these are open tickets
         self.test_ticket1.reassign(self.test_user, self.test_user)
         self.test_ticket2.reassign(self.test_user, self.test_user)
@@ -1345,26 +1272,27 @@ class UserTest(unittest2.TestCase):
         self.test_ticket6.reassign(self.test_user, self.test_user)
         self.test_ticket7.reassign(self.test_user, self.test_user)
         self.test_ticket8.reassign(self.test_user, self.test_user)
-        
+
         # now we should have some tickets
         self.assertTrue(len(self.test_user.tickets) > 0)
-        
+
         # now check for exact items
         self.assertItemsEqual(
             self.test_user.tickets,
             [self.test_ticket2, self.test_ticket3, self.test_ticket4]
         )
-    
 
-    def test_open_tickets_attribute_returns_all_open_tickets_owned_by_this_user(self):
+
+    def test_open_tickets_attribute_returns_all_open_tickets_owned_by_this_user(
+            self):
         """testing if User.open_tickets returns all the open tickets owned by
         this user
         """
         self.assertEqual(len(self.test_user.tasks), 0)
-        
+
         # there should be no tickets assigned to this user
         self.assertTrue(self.test_user.open_tickets == [])
-        
+
         # assign the user to some tickets
         self.test_ticket1.reopen(self.test_user)
         self.test_ticket2.reopen(self.test_user)
@@ -1374,7 +1302,7 @@ class UserTest(unittest2.TestCase):
         self.test_ticket6.reopen(self.test_user)
         self.test_ticket7.reopen(self.test_user)
         self.test_ticket8.reopen(self.test_user)
-        
+
         # be careful not all of these are open tickets
         self.test_ticket1.reassign(self.test_user, self.test_user)
         self.test_ticket2.reassign(self.test_user, self.test_user)
@@ -1384,10 +1312,10 @@ class UserTest(unittest2.TestCase):
         self.test_ticket6.reassign(self.test_user, self.test_user)
         self.test_ticket7.reassign(self.test_user, self.test_user)
         self.test_ticket8.reassign(self.test_user, self.test_user)
-        
+
         # now we should have some open tickets
         self.assertTrue(len(self.test_user.open_tickets) > 0)
-        
+
         # now check for exact items
         self.assertItemsEqual(
             self.test_user.open_tickets,
@@ -1402,15 +1330,15 @@ class UserTest(unittest2.TestCase):
                 self.test_ticket8,
             ]
         )
-        
+
         # close a couple of them
         from stalker.models.ticket import (FIXED, CANTFIX, WONTFIX, DUPLICATE,
                                            WORKSFORME, INVALID)
-        
+
         self.test_ticket1.resolve(self.test_user, FIXED)
         self.test_ticket2.resolve(self.test_user, INVALID)
         self.test_ticket3.resolve(self.test_user, CANTFIX)
-        
+
         # new check again
         self.assertItemsEqual(
             self.test_user.open_tickets,
@@ -1422,12 +1350,12 @@ class UserTest(unittest2.TestCase):
                 self.test_ticket8
             ]
         )
-    
+
     def test_tjp_id_is_working_properly(self):
         """testing if the tjp_id is working properly
         """
         self.assertEqual(self.test_user.tjp_id, 'User_%s' % self.test_user.id)
-    
+
     def test_to_tjp_is_working_properly(self):
         """testing if the to_tjp property is working properly
         """

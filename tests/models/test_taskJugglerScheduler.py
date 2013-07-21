@@ -53,6 +53,7 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
             'sqlalchemy.url': 'sqlite:///:memory:',
             'sqlalchemy.echo': False
         })
+        db.init()
 
         # replace datetime now function
 

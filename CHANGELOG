@@ -7,6 +7,18 @@ Stalker Changes
 
 * **New:** Added a new attribute to **Version** class called
   **latest_version** which holds the latest version in the version queue.
+* **New:** To optimize the database connection times, *stalker.db.setup()* will
+  not try to initialize the database every time it is called anymore. This
+  leads a ~4x speed up in database connection setup. To initialize a newly
+  created database please use::
+
+    # for a newly created database
+    from stalker import db
+    db.setup() # connects to database
+    db.init()  # fills some default values to be used with Stalker
+
+    # for any subsequent access just use (don't need to call db.init())
+    db.setup()
 
 0.2.0.rc3
 =========
@@ -200,7 +212,7 @@ Stalker Changes
   with the ``schedule_model`` attribute it will be used in scheduling the Task.
 * Updated the config system to the one used in oyProjectManager (based on
   Sphinx config system). Now to reach the defaults::
-    
+
     # instead of doing the following
     from stalker.conf import defaults # not valid anymore
     
@@ -293,7 +305,7 @@ Stalker Changes
 
   * Removed Project.project_tasks attribute, use Project.tasks directly to get
     all the Tasks in that project. For root task you can do a quick query::
-      
+
       Task.query.filter(Task.project==proj_id).filter(Task.parent==None).all()
     
     This will also return the Assets, Sequences and Shots in that project,
@@ -380,7 +392,7 @@ Stalker Changes
   mixin. To let it be used by the classes it is really needed.
 * The ``query`` method is now converted to a property so it is now possible to
   use it like a property as in the SQLAlchemy.orm.Session as shown below::
-    
+
     from stalker import Project
     Project.query.all() # instead of Project.query().all()
 
@@ -389,11 +401,11 @@ Stalker Changes
   controls the naming of the instances and instances derived from SimpleEntity.
   If ``__auto_name__`` is set to True the ``name`` attribute of the instance
   will be automatically generated and it will have the following format::
-    
+
     {{ClassName}}_{{UUID4}}
     
   Here are a couple of naming examples::
-    
+
     Ticket_74bb46b0-29de-4f3e-b4e6-8bcf6aed352d
     Version_2fa5749e-8cdb-4887-aef2-6d8cec6a4faa
 
@@ -417,7 +429,7 @@ Stalker Changes
   one is called "Reference" and it is used when injecting references to a given
   class. Along with the FilenameTemplate.target_entity_type this will allow one
   to create two different FilenameTemplates for one class::
-    
+
     # first get the Types
     vers_type = Type.query()\
                 .filter_by(target_entity_type="FilenameTemplate")\
@@ -497,7 +509,7 @@ Stalker Changes
   ORMClass (a random name) which lets all the derived class to have a method
   called ``query`` which will bypass the need of calling
   ``DBSession.query(class_)`` but instead just call ``class_.query()``::
-    
+
     from stalker.models.auth import User
     user_1 = User.query().filter_by(name='a user name').first()
 
@@ -519,7 +531,7 @@ Stalker Changes
   this errors out of the ``with`` block.
 * Refactored the code, all the models are now in separate python files, but can
   be directly imported from the main stalker module as shown::
-  
+
     from stalker import User, Department, Task
   
   By using this kind of organization, both development and usage will be eased

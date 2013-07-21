@@ -158,6 +158,7 @@ class DatabaseTester(unittest2.TestCase):
         defaults.auto_create_admin = True
 
         db.setup()
+        db.init()
 
         # check if there is an admin
         admin_DB = User.query.filter(User.name == defaults.admin_name).first()
@@ -174,6 +175,7 @@ class DatabaseTester(unittest2.TestCase):
         db.setup({
             "sqlalchemy.url": self.TEST_DATABASE_URI
         })
+        db.init()
 
         # try to call the db.setup for a second time and see if there are more
         # than one admin
@@ -181,6 +183,7 @@ class DatabaseTester(unittest2.TestCase):
         db.setup({
             "sqlalchemy.url": self.TEST_DATABASE_URI
         })
+        db.init()
 
         self._createdDB = True
 
@@ -191,28 +194,6 @@ class DatabaseTester(unittest2.TestCase):
 
         self.assertTrue(len(admins) == 1)
 
-    #    def test_auth_authenticate_LogginError_raised(self):
-    #        """testing if stalker.errors.LoginError will be raised when
-    #        authentication information is wrong
-    #        """
-    #        
-    #        db.setup()
-    #        
-    #        test_datas = [
-    #            ("", ""),
-    #            ("a user name", ""),
-    #            ("", "just a pass"),
-    #            ("no correct user", "wrong pass")
-    #        ]
-    #
-    #        for user_name, password in test_datas:
-    #            self.assertRaises(
-    #                LoginError,
-    #                auth.authenticate,
-    #                user_name,
-    #                password
-    #            )
-
     def test_no_default_admin_creation(self):
         """testing if there is no user if stalker.config.Conf.auto_create_admin
         is False
@@ -222,6 +203,7 @@ class DatabaseTester(unittest2.TestCase):
 
         # setup the db
         db.setup()
+        db.init()
 
         # check if there is a use with name admin
         self.assertTrue(
@@ -266,19 +248,11 @@ class DatabaseTester(unittest2.TestCase):
         # expect nothing, this should work without any error
         DBSession.commit()
 
-    #    def test_entity_types_table_is_created_properly(self):
-    #        """testing if the entity_types table is created properly
-    #        """
-    #        
-    #        db.setup()
-    #        
-    #        # check if db.metadata.tables has a table with name entity_types
-    #        self.assertTrue("entity_types", db.metadata.tables)
-
     def test_ticket_status_initialization(self):
         """testing if the ticket statuses are correctly created
         """
         db.setup()
+        db.init()
 
         #ticket_statuses = Status.query.all()
         ticket_status_list = StatusList.query \
@@ -293,20 +267,6 @@ class DatabaseTester(unittest2.TestCase):
                          len(expected_status_names))
         for status in ticket_status_list.statuses:
             self.assertTrue(status.name in expected_status_names)
-
-    # def test_time_log_type_initialization(self):
-    #     """testing if the TimeLog types are correctly created
-    #     """
-    #     db.setup()
-    # 
-    #     time_log_types = Type.query \
-    #         .filter(Type.target_entity_type == 'TimeLog') \
-    #         .all()
-    # 
-    #     expected_type_names = ['Normal', 'Extra']
-    #     self.assertEqual(len(time_log_types), len(expected_type_names))
-    #     for type_ in time_log_types:
-    #         self.assertTrue(type_.name in expected_type_names)
 
     def test_register_creates_suitable_Permissions(self):
         """testing if stalker.db.register is able to create suitable
@@ -340,21 +300,13 @@ class DatabaseTester(unittest2.TestCase):
         db.setup()
         self.assertRaises(TypeError, db.register, 23425)
 
-    def test_setup_calls_the_callback_function(self):
-        """testing if setup will call the given callback function
-        """
-
-        def test_func():
-            raise RuntimeError
-
-        self.assertRaises(RuntimeError, db.setup, **{"callback": test_func})
-
     def test_permissions_created_for_all_the_classes(self):
         """testing if Permission instances are created for classes in the SOM
         """
         DBSession.remove()
         DBSession.configure(extension=None)
         db.setup()
+        db.init()
 
         class_names = [
             'Asset', 'Group', 'Permission', 'User', 'Department',
@@ -393,10 +345,12 @@ class DatabaseTester(unittest2.TestCase):
 
         DBSession.remove()
         db.setup(settings={'sqlalchemy.url': temp_db_url})
+        db.init()
 
         # this should not give any error
         DBSession.remove()
         db.setup(settings={'sqlalchemy.url': temp_db_url})
+        db.init()
 
         # and we still have correct amount of Permissions
         permissions = Permission.query.all()
@@ -418,14 +372,17 @@ class DatabaseTester(unittest2.TestCase):
 
         DBSession.remove()
         db.setup(settings={'sqlalchemy.url': temp_db_url})
+        db.init()
 
         # this should not give any error
         # DBSession.remove()
         db.setup(settings={'sqlalchemy.url': temp_db_url})
+        db.init()
 
         # this should not give any error
         # DBSession.remove()
         db.setup(settings={'sqlalchemy.url': temp_db_url})
+        db.init()
 
         # and we still have correct amount of Permissions
         statuses = Status.query.all()
@@ -479,6 +436,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.TEST_DATABASE_URI = "sqlite:///" + self.TEST_DATABASE_FILE
 
         db.setup()
+        db.init()
 
     def tearDown(self):
         """tearing down the test

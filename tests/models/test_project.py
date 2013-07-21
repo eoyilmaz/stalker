@@ -36,59 +36,60 @@ from stalker import log
 logger = logging.getLogger('stalker.models.project')
 logger.setLevel(log.logging_level)
 
+
 class ProjectTester(unittest2.TestCase):
     """tests the Project class
     """
-    
+
     @classmethod
     def setUpClass(cls):
         """set up the test for class
         """
         DBSession.remove()
         DBSession.configure(extension=None)
-    
+
     @classmethod
     def tearDownClass(cls):
         """clean up the test
         """
         DBSession.configure(extension=None)
-    
+
     def tearDown(self):
         """tearDown the tests
         """
         DBSession.remove()
-    
+
     def setUp(self):
         """setup the test
         """
-        
         DBSession.remove()
         DBSession.configure(extension=None)
         self.TEST_DATABASE_URI = "sqlite:///:memory:"
-        
+
         db.setup({
             "sqlalchemy.url": self.TEST_DATABASE_URI,
             "sqlalchemy.echo": False,
         })
-        
+        # db.init()
+
         # create test objects
         self.start = datetime.date.today()
         self.end = self.start + datetime.timedelta(days=20)
-        
+
         self.test_lead = User(
             name="lead",
             login="lead",
             email="lead@lead.com",
             password="lead"
         )
-        
+
         self.test_user1 = User(
             name="User1",
             login="user1",
             email="user1@users.com",
             password="123456"
         )
-        
+
         self.test_user2 = User(
             name="User2",
             login="user2",
@@ -247,7 +248,7 @@ class ProjectTester(unittest2.TestCase):
                 self.test_status3,
                 self.test_status4,
                 self.test_status5,
-                ],
+            ],
             target_entity_type=Sequence
         )
 
@@ -357,14 +358,14 @@ class ProjectTester(unittest2.TestCase):
             ],
             target_entity_type=Asset,
         )
-        
+
         # asset types
         self.asset_type = Type(
             name="Character",
             code='char',
             target_entity_type=Asset,
         )
-        
+
         # assets without tasks
         self.test_asset1 = Asset(
             name="Test Asset 1",
@@ -435,7 +436,7 @@ class ProjectTester(unittest2.TestCase):
             project=self.test_project,
             resources=[self.test_user2],
             status_list=self.task_status_list,
-            )
+        )
 
         self.test_task3 = Task(
             name="Test Task 3",
@@ -443,7 +444,7 @@ class ProjectTester(unittest2.TestCase):
             resources=[self.test_user3],
             status_list=self.task_status_list,
         )
-        
+
         # for sequence4
         self.test_task4 = Task(
             name="Test Task 4",
@@ -619,16 +620,16 @@ class ProjectTester(unittest2.TestCase):
             resources=[self.test_user10, self.test_user1],
             status_list=self.task_status_list,
         )
-        
+
         DBSession.add(self.test_project)
         DBSession.commit()
-    
+
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for
         Project class
         """
         self.assertFalse(Project.__auto_name__)
-    
+
     def test_setup_is_working_correctly(self):
         """testing if the setup is done correctly
         """
@@ -675,13 +676,13 @@ class ProjectTester(unittest2.TestCase):
                 "lead",
                 test_value
             )
-    
+
     def test_lead_attribute_works_properly(self):
         """testing if the lead attribute works properly
         """
         self.test_project.lead = self.test_user1
         self.assertEqual(self.test_project.lead, self.test_user1)
-    
+
     def test_sequences_attribute_is_read_only(self):
         """testing if the sequence attribute is read-only
         """
@@ -692,8 +693,8 @@ class ProjectTester(unittest2.TestCase):
         """testing if the assets attribute is read only
         """
         self.assertRaises(AttributeError, setattr, self.test_project, "assets",
-            ["some list"])
-    
+                          ["some list"])
+
     def test_image_format_argument_is_skipped(self):
         """testing if image_format attribute will be None when the image_format
         argument is skipped
@@ -701,7 +702,7 @@ class ProjectTester(unittest2.TestCase):
         self.kwargs.pop("image_format")
         new_project = Project(**self.kwargs)
         self.assertIsNone(new_project.image_format)
-    
+
     def test_image_format_argument_is_None(self):
         """testing if nothing is going to happen when the image_format is set
         to None
@@ -709,7 +710,7 @@ class ProjectTester(unittest2.TestCase):
         self.kwargs["image_format"] = None
         new_project = Project(**self.kwargs)
         self.assertIsNone(new_project.image_format)
-    
+
     def test_image_format_attribute_is_set_to_None(self):
         """testing if nothing will happen when the image_format attribute is
         set to None
@@ -829,7 +830,6 @@ class ProjectTester(unittest2.TestCase):
             new_project = Project(**self.kwargs)
             self.assertAlmostEquals(new_project.fps, test_value[1])
 
-
     def test_fps_attribute_string_to_float_conversion(self):
         """testing if valid string literals of fps attribute will be converted
         to float correctly
@@ -887,21 +887,6 @@ class ProjectTester(unittest2.TestCase):
             self.kwargs["repository"] = test_value
             self.assertRaises(TypeError, Project, **self.kwargs)
 
-            #def test_repository_attribute_is_set_to_non_Repository_object(self):
-            #"""testing if a TypeErorr will be raised when the repository attribute
-            #is tried to be set to something other than a Repository object
-            #"""
-
-            #test_values = [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
-            #for test_value in test_values:
-            #self.assertRaises(
-            #TypeError,
-            #setattr,
-            #self.test_project,
-            #"repository",
-            #test_value
-            #)
-
     def test_repository_attribute_is_working_properly(self):
         """testing if the repository attribute is working properly
         """
@@ -937,7 +922,7 @@ class ProjectTester(unittest2.TestCase):
                 self.test_project.is_stereoscopic,
                 bool(test_value)
             )
-    
+
     def test_structure_argument_is_None(self):
         """testing if nothing happens when the structure argument is None
         """
@@ -1074,8 +1059,9 @@ class ProjectTester(unittest2.TestCase):
         """
         self.kwargs.pop("type")
         new_project = Project(**self.kwargs) # should be possible
-    
-    def test_tasks_attribute_returns_the_Tasks_instances_related_to_this_project(self):
+
+    def test_tasks_attribute_returns_the_Tasks_instances_related_to_this_project(
+            self):
         """testing if the tasks attribute returns a list of Task instances
         related to this Project instance.
         """
@@ -1108,7 +1094,7 @@ class ProjectTester(unittest2.TestCase):
         self.assertIn(self.test_task25, self.test_project.tasks)
         self.assertIn(self.test_task26, self.test_project.tasks)
         self.assertIn(self.test_task27, self.test_project.tasks)
-        
+
         # assets, sequences and shots are also Tasks
         self.assertIn(self.test_seq1, self.test_project.tasks)
         self.assertIn(self.test_seq2, self.test_project.tasks)
@@ -1117,20 +1103,20 @@ class ProjectTester(unittest2.TestCase):
         self.assertIn(self.test_seq5, self.test_project.tasks)
         self.assertIn(self.test_seq6, self.test_project.tasks)
         self.assertIn(self.test_seq7, self.test_project.tasks)
-        
+
         self.assertIn(self.test_asset1, self.test_project.tasks)
         self.assertIn(self.test_asset2, self.test_project.tasks)
         self.assertIn(self.test_asset3, self.test_project.tasks)
         self.assertIn(self.test_asset4, self.test_project.tasks)
         self.assertIn(self.test_asset5, self.test_project.tasks)
-        
+
         self.assertIn(self.test_shot1, self.test_project.tasks)
         self.assertIn(self.test_shot2, self.test_project.tasks)
         self.assertIn(self.test_shot3, self.test_project.tasks)
         self.assertIn(self.test_shot4, self.test_project.tasks)
-    
 
-    def test_root_tasks_attribute_returns_the_Tasks_instances_with_no_parent_in_this_project(self):
+    def test_root_tasks_attribute_returns_the_Tasks_instances_with_no_parent_in_this_project(
+            self):
         """testing if the root_tasks attribute returns a list of Task instances
         related to this Project instance and has no parent.
         """
@@ -1140,7 +1126,7 @@ class ProjectTester(unittest2.TestCase):
         self.assertIn(self.test_task1, root_tasks)
         self.assertIn(self.test_task2, root_tasks)
         self.assertIn(self.test_task3, root_tasks)
-        
+
         # assets, sequences and shots are also Tasks
         self.assertIn(self.test_seq1, root_tasks)
         self.assertIn(self.test_seq2, root_tasks)
@@ -1149,18 +1135,18 @@ class ProjectTester(unittest2.TestCase):
         self.assertIn(self.test_seq5, root_tasks)
         self.assertIn(self.test_seq6, root_tasks)
         self.assertIn(self.test_seq7, root_tasks)
-        
+
         self.assertIn(self.test_asset1, root_tasks)
         self.assertIn(self.test_asset2, root_tasks)
         self.assertIn(self.test_asset3, root_tasks)
         self.assertIn(self.test_asset4, root_tasks)
         self.assertIn(self.test_asset5, root_tasks)
-        
+
         self.assertIn(self.test_shot1, root_tasks)
         self.assertIn(self.test_shot2, root_tasks)
         self.assertIn(self.test_shot3, root_tasks)
         self.assertIn(self.test_shot4, root_tasks)
-    
+
     def test_users_argument_is_skipped(self):
         """testing if the users attribute will be an empty list when the users
         argument is skipped
@@ -1172,7 +1158,7 @@ class ProjectTester(unittest2.TestCase):
             pass
         new_project = Project(**self.kwargs)
         self.assertEquals(new_project.users, [])
-    
+
     def test_users_argument_is_None(self):
         """testing if a the users attribute will be an empty list when the
         users argument is set to None
@@ -1181,13 +1167,13 @@ class ProjectTester(unittest2.TestCase):
         self.kwargs['users'] = None
         new_project = Project(**self.kwargs)
         self.assertEquals(new_project.users, [])
-    
+
     def test_users_attribute_is_set_to_None(self):
         """testing if a TypeError will be raised when the users attribute is
         set to None
         """
         self.assertRaises(TypeError, setattr, self.test_project, 'users', None)
-    
+
     def test_users_argument_is_not_a_list_of_User_instances(self):
         """testing if a TypeError will be raised when the users argument is not
         a list of Users
@@ -1195,13 +1181,14 @@ class ProjectTester(unittest2.TestCase):
         self.kwargs['name'] = 'New Project Name'
         self.kwargs['users'] = ['not a list of User instances']
         self.assertRaises(TypeError, Project, **self.kwargs)
-    
-    def test_users_attribute_is_set_to_a_value_which_is_not_a_list_of_User_instances(self):
+
+    def test_users_attribute_is_set_to_a_value_which_is_not_a_list_of_User_instances(
+            self):
         """testing if a TypeError will be raised when the user attribute is set
         to a value which is not a list of User instances
         """
         self.assertRaises(TypeError, setattr, 'users', ['not a list of Users'])
-    
+
     def test_users_argument_is_working_properly(self):
         """testing if the users argument value is passed to the users attribute
         properly
@@ -1211,7 +1198,7 @@ class ProjectTester(unittest2.TestCase):
                                 self.test_user3]
         new_proj = Project(**self.kwargs)
         self.assertItemsEqual(self.kwargs['users'], new_proj.users)
-    
+
     def test_users_attribute_is_working_properly(self):
         """testing if the users attribute is working properly
         """
@@ -1220,297 +1207,298 @@ class ProjectTester(unittest2.TestCase):
                  self.test_user3]
         self.test_project.users = users
         self.assertItemsEqual(users, self.test_project.users)
-    
+
     def test_tjp_id_is_working_properly(self):
         """testing if the tjp_id attribute is working properly
         """
         self.test_project.id = 654654
         self.assertEqual(self.test_project.tjp_id, 'Project_654654')
-    
+
     def test_to_tjp_is_working_properly(self):
         """testing if the to_tjp attribute is working properly
         """
         self.maxDiff = None
         from jinja2 import Template
-        expected_tjp_temp = Template("""task Project_39 "Test Project" {
+
+        expected_tjp_temp = Template("""task Project_28 "Test Project" {
             
-                task Sequence_40 "Seq1" {
+                task Sequence_29 "Seq1" {
         
             
         }
         
             
-                task Sequence_41 "Seq2" {
+                task Sequence_30 "Seq2" {
         
             
         }
         
             
-                task Sequence_42 "Seq3" {
+                task Sequence_31 "Seq3" {
         
             
         }
         
             
-                task Sequence_43 "Seq4" {
+                task Sequence_32 "Seq4" {
         
-                task Task_59 "Test Task 4" {
+                task Task_48 "Test Task 4" {
         
             
             effort 1.0h
-            allocate User_26
+            allocate User_15
         }
         
-                task Task_60 "Test Task 5" {
+                task Task_49 "Test Task 5" {
         
             
             effort 1.0h
-            allocate User_27
+            allocate User_16
         }
         
-                task Task_61 "Test Task 6" {
+                task Task_50 "Test Task 6" {
         
             
             effort 1.0h
-            allocate User_28
+            allocate User_17
         }
         
         }
         
             
-                task Sequence_44 "Seq5" {
+                task Sequence_33 "Seq5" {
         
-                task Task_62 "Test Task 7" {
+                task Task_51 "Test Task 7" {
         
             
             effort 1.0h
-            allocate User_29
+            allocate User_18
         }
         
-                task Task_63 "Test Task 8" {
+                task Task_52 "Test Task 8" {
         
             
             effort 1.0h
-            allocate User_30
+            allocate User_19
         }
         
-                task Task_64 "Test Task 9" {
+                task Task_53 "Test Task 9" {
         
             
             effort 1.0h
-            allocate User_31
+            allocate User_20
         }
         
         }
         
             
-                task Sequence_45 "Seq6" {
+                task Sequence_34 "Seq6" {
         
             
         }
         
             
-                task Sequence_46 "Seq7" {
+                task Sequence_35 "Seq7" {
         
             
         }
         
             
-                task Shot_47 "{{shot1.name}}" {
+                task Shot_36 "{{shot1.name}}" {
         
-                task Task_65 "Test Task 10" {
+                task Task_54 "Test Task 10" {
         
             
             effort 1.0h
-            allocate User_32
+            allocate User_21
         }
         
-                task Task_66 "Test Task 11" {
+                task Task_55 "Test Task 11" {
         
             
             effort 1.0h
-            allocate User_22, User_24
+            allocate User_11, User_13
         }
         
-                task Task_67 "Test Task 12" {
+                task Task_56 "Test Task 12" {
         
             
             effort 1.0h
-            allocate User_25, User_26
+            allocate User_14, User_15
         }
         
         }
         
             
-                task Shot_48 "{{shot2.name}}" {
+                task Shot_37 "{{shot2.name}}" {
         
-                task Task_68 "Test Task 13" {
+                task Task_57 "Test Task 13" {
         
             
             effort 1.0h
-            allocate User_27, User_28
+            allocate User_16, User_17
         }
         
-                task Task_69 "Test Task 14" {
+                task Task_58 "Test Task 14" {
         
             
             effort 1.0h
-            allocate User_29, User_30
+            allocate User_18, User_19
         }
         
-                task Task_70 "Test Task 15" {
+                task Task_59 "Test Task 15" {
         
             
             effort 1.0h
-            allocate User_31, User_32
+            allocate User_20, User_21
         }
         
         }
         
             
-                task Shot_49 "{{shot3.name}}" {
+                task Shot_38 "{{shot3.name}}" {
         
-                task Task_71 "Test Task 16" {
+                task Task_60 "Test Task 16" {
         
             
             effort 1.0h
-            allocate User_22, User_24, User_25
+            allocate User_11, User_13, User_14
         }
         
-                task Task_72 "Test Task 17" {
+                task Task_61 "Test Task 17" {
         
             
             effort 1.0h
-            allocate User_26, User_27, User_28
+            allocate User_15, User_16, User_17
         }
         
-                task Task_73 "Test Task 18" {
+                task Task_62 "Test Task 18" {
         
             
             effort 1.0h
-            allocate User_29, User_30, User_31
+            allocate User_18, User_19, User_20
         }
         
         }
         
             
-                task Shot_50 "{{shot4.name}}" {
+                task Shot_39 "{{shot4.name}}" {
         
-                task Task_74 "Test Task 19" {
+                task Task_63 "Test Task 19" {
         
             
             effort 1.0h
-            allocate User_22, User_24, User_32
+            allocate User_11, User_13, User_21
         }
         
-                task Task_75 "Test Task 20" {
+                task Task_64 "Test Task 20" {
         
             
             effort 1.0h
-            allocate User_25, User_26, User_27
+            allocate User_14, User_15, User_16
         }
         
-                task Task_76 "Test Task 21" {
+                task Task_65 "Test Task 21" {
         
             
             effort 1.0h
-            allocate User_28, User_29, User_30
+            allocate User_17, User_18, User_19
         }
         
         }
         
             
-                task Asset_51 "Test Asset 1" {
+                task Asset_40 "Test Asset 1" {
         
             
         }
         
             
-                task Asset_52 "Test Asset 2" {
+                task Asset_41 "Test Asset 2" {
         
             
         }
         
             
-                task Asset_53 "Test Asset 3" {
+                task Asset_42 "Test Asset 3" {
         
             
         }
         
             
-                task Asset_54 "Test Asset 4" {
+                task Asset_43 "Test Asset 4" {
         
-                task Task_77 "Test Task 22" {
+                task Task_66 "Test Task 22" {
         
             
             effort 1.0h
-            allocate User_22, User_31, User_32
+            allocate User_11, User_20, User_21
         }
         
-                task Task_78 "Test Task 23" {
+                task Task_67 "Test Task 23" {
         
             
             effort 1.0h
-            allocate User_24, User_25
+            allocate User_13, User_14
         }
         
-                task Task_79 "Test Task 24" {
+                task Task_68 "Test Task 24" {
         
             
             effort 1.0h
-            allocate User_26, User_27
+            allocate User_15, User_16
         }
         
         }
         
             
-                task Asset_55 "Test Asset 5" {
+                task Asset_44 "Test Asset 5" {
         
-                task Task_80 "Test Task 25" {
+                task Task_69 "Test Task 25" {
         
             
             effort 1.0h
-            allocate User_28, User_29
+            allocate User_17, User_18
         }
         
-                task Task_81 "Test Task 26" {
+                task Task_70 "Test Task 26" {
         
             
             effort 1.0h
-            allocate User_30, User_31
+            allocate User_19, User_20
         }
         
-                task Task_82 "Test Task 27" {
+                task Task_71 "Test Task 27" {
         
             
             effort 1.0h
-            allocate User_22, User_32
+            allocate User_11, User_21
         }
         
         }
         
             
-                task Task_56 "Test Task 1" {
+                task Task_45 "Test Task 1" {
         
             
             effort 1.0h
-            allocate User_22
+            allocate User_11
         }
         
             
-                task Task_57 "Test Task 2" {
+                task Task_46 "Test Task 2" {
         
             
             effort 1.0h
-            allocate User_24
+            allocate User_13
         }
         
             
-                task Task_58 "Test Task 3" {
+                task Task_47 "Test Task 3" {
         
             
             effort 1.0h
-            allocate User_25
+            allocate User_14
         }
         
             
@@ -1523,31 +1511,30 @@ class ProjectTester(unittest2.TestCase):
             'shot3': self.test_shot3,
             'shot4': self.test_shot4
         })
-        
+
         print expected_tjp
         print "-----------------"
         print self.test_project.to_tjp
-        
+
         self.assertEqual(self.test_project.to_tjp, expected_tjp)
-    
+
     def test_active_attribute_is_True_by_default(self):
         """testing if the active attribute is True by default
         """
         new_project = Project(**self.kwargs)
         self.assertEqual(new_project.active, True)
-    
+
     def test_is_active_is_read_only(self):
         """testing if the is_active is a read only property
         """
         self.assertRaises(AttributeError, setattr, self.test_project,
                           'is_active', True)
-    
+
     def test_is_active_is_working_properly(self):
         """testing if is_active is working properly
         """
         self.test_project.active = True
         self.assertEqual(self.test_project.is_active, True)
-        
+
         self.test_project.active = False
         self.assertEqual(self.test_project.is_active, False)
-    

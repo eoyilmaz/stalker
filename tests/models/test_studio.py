@@ -56,6 +56,7 @@ class StudioTester(unittest2.TestCase):
             "sqlalchemy.url": "sqlite:///:memory:",
             "sqlalchemy.echo": False,
         })
+        db.init()
 
         self.test_user1 = User(
             name='User 1',

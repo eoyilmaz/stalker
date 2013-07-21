@@ -57,7 +57,7 @@ class ACLMixinTester(unittest2.TestCase):
         """setup the test
         """
         db.setup()
-        
+
         # create permissions
         self.test_perm1 = Permission(
             access='Allow',

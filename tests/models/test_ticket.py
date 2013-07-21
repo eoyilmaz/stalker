@@ -28,6 +28,7 @@ class TicketTester(unittest2.TestCase):
         DBSession.remove()
         DBSession.configure(extension=None)
         db.setup()
+        db.init()
 
         # create statuses
         self.test_status1 = Status(name='N', code='N')
