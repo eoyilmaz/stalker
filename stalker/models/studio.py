@@ -106,10 +106,10 @@ class Studio(Entity, ScheduleMixin, WorkingHoursMixin):
         self.now = self._validate_now(now)
         self._scheduler = None
 
-    @reconstructor
-    def __init_on_load__(self):
-        self._now = None
-        super(Studio, self).__init_on_load__()
+    # @reconstructor
+    # def __init_on_load__(self):
+    #     self._now = None
+    #     super(Studio, self).__init_on_load__()
 
     @validates('daily_working_hours')
     def _validate_daily_working_hours(self, key, dwh):

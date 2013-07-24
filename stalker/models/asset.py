@@ -25,8 +25,10 @@ from stalker.models.mixins import ReferenceMixin, CodeMixin
 
 from stalker.log import logging_level
 import logging
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
+
 
 class Asset(Task, CodeMixin):
     """The Asset class is the whole idea behind Stalker.
@@ -67,24 +69,24 @@ class Asset(Task, CodeMixin):
 
     asset_id = Column("id", Integer, ForeignKey("Tasks.id"),
                       primary_key=True)
-    
+
     def __init__(self, code, **kwargs):
         kwargs['code'] = code
-        
+
         super(Asset, self).__init__(**kwargs)
         ReferenceMixin.__init__(self, **kwargs)
         CodeMixin.__init__(self, **kwargs)
-    
-    @reconstructor
-    def __init_on_load__(self):
-        """initialized the instance variables when the instance created with
-        SQLAlchemy
-        """
-        # call supers __init_on_load__
-        super(Asset, self).__init_on_load__()
-    
+
+    # @reconstructor
+    # def __init_on_load__(self):
+    #     """initialized the instance variables when the instance created with
+    #     SQLAlchemy
+    #     """
+    #     # call supers __init_on_load__
+    #     super(Asset, self).__init_on_load__()
+
     def __eq__(self, other):
         """the equality operator
         """
-        return super(Asset, self).__eq__(other) and\
+        return super(Asset, self).__eq__(other) and \
                isinstance(other, Asset) and self.type == other.type

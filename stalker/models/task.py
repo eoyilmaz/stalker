@@ -25,6 +25,7 @@ from sqlalchemy import (Table, Column, Integer, ForeignKey, Boolean, Enum,
                         DateTime, Float)
 from sqlalchemy.exc import UnboundExecutionError
 from sqlalchemy.orm import relationship, validates, synonym, reconstructor
+from sqlalchemy.orm.dynamic import AppenderQuery
 
 from stalker.db import DBSession
 from stalker.db.declarative import Base
@@ -516,6 +517,8 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         primaryjoin='Tasks.c.parent_id==Tasks.c.id',
         back_populates='parent',
         post_update=True,
+        # innerjoin=True,
+        #lazy='select',
         doc="""Other :class:`Task` instances which are the children of this
         Task instance. This attribute along with the :attr:`.parent` attribute
         is used in creating a DAG hierarchy of tasks.
@@ -810,16 +813,17 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         self.priority = priority
         self.responsible = responsible
 
-    @reconstructor
-    def __init_on_load__(self):
-        """initialized the instance variables when the instance created with
-        SQLAlchemy
-        """
-        # TODO : fix this
-        tmp = self.start # just read the start to update them
-        self._reschedule(self.schedule_timing, self.schedule_unit)
-        # call supers __init_on_load__
-        super(Task, self).__init_on_load__()
+    # @reconstructor
+    # def __init_on_load__(self):
+    #     """initialized the instance variables when the instance created with
+    #     SQLAlchemy
+    #     """
+    #     # TODO : fix this
+    #     # AppenderQuery
+    #     # tmp = self.start # just read the start to update them
+    #     # self._reschedule(self.schedule_timing, self.schedule_unit)
+    #     # call supers __init_on_load__
+    #     super(Task, self).__init_on_load__()
 
     def __eq__(self, other):
         """the equality operator
@@ -1266,7 +1270,7 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
     def is_leaf(self):
         """Returns True if the Task has no children Tasks
         """
-        return not bool(len(self.children))
+        return not self.is_container
 
     @property
     def parents(self):

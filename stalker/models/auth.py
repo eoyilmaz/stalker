@@ -565,13 +565,13 @@ class User(Entity, ACLMixin):
 
         self.last_login = last_login
 
-    @reconstructor
-    def __init_on_load__(self):
-        """initialized the instance variables when the instance created with
-        SQLAlchemy
-        """
-        # call the Entity __init_on_load__
-        super(User, self).__init_on_load__()
+    # @reconstructor
+    # def __init_on_load__(self):
+    #     """initialized the instance variables when the instance created with
+    #     SQLAlchemy
+    #     """
+    #     # call the Entity __init_on_load__
+    #     super(User, self).__init_on_load__()
 
     def __repr__(self):
         """return the representation of the current User

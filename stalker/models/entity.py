@@ -261,12 +261,12 @@ class SimpleEntity(Base):
         self.thumbnail = thumbnail
         self.__stalker_version__ = stalker.__version__
 
-    @reconstructor
-    def __init_on_load__(self):
-        """initialized the instance variables when the instance created with
-        SQLAlchemy
-        """
-        self._nice_name = None
+    # @reconstructor
+    # def __init_on_load__(self):
+    #     """initialized the instance variables when the instance created with
+    #     SQLAlchemy
+    #     """
+    #     self._nice_name = None
 
     def __repr__(self):
         """the representation of the SimpleEntity
@@ -381,8 +381,8 @@ class SimpleEntity(Base):
         it is always lower case.
         """
         # also set the nice_name
-        if self._nice_name is None or self._nice_name == "":
-            self._nice_name = self._format_nice_name(self.name)
+        #if self._nice_name is None or self._nice_name == "":
+        self._nice_name = self._format_nice_name(self.name)
         return self._nice_name
 
     @validates("created_by")
@@ -562,12 +562,12 @@ class Entity(SimpleEntity):
         self.tags = tags
         self.notes = notes
 
-    @reconstructor
-    def __init_on_load__(self):
-        """initialized the instance variables when the instance created with
-        SQLAlchemy
-        """
-        super(Entity, self).__init_on_load__()
+    # @reconstructor
+    # def __init_on_load__(self):
+    #     """initialized the instance variables when the instance created with
+    #     SQLAlchemy
+    #     """
+    #     super(Entity, self).__init_on_load__()
 
     @validates("notes")
     def _validate_notes(self, key, note):

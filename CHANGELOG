@@ -20,6 +20,11 @@ Stalker Changes
     # for any subsequent access just use (don't need to call db.init())
     db.setup()
 
+* **Update:** Removed all **__init_on_load()** methods from all of the classes.
+  It was causing SQLAlchemy to eagerly load relations, thus slowing down
+  queries in certain cases (especially in Task.parent -> Task.children
+  relation).
+
 0.2.0.rc3
 =========
 

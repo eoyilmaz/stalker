@@ -25,18 +25,20 @@ from stalker.models.entity import Entity
 
 from stalker.log import logging_level
 import logging
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
+
 class ImageFormat(Entity):
     """Common image formats for the :class:`~stalker.models.project.Project`\ s.
-    
+
     :param width: The width of the format, it cannot be zero or negative, if a
       float number is given it will be converted to integer
-    
+
     :param height: The height of the format, it cannot be zero or negative, if
       a float number is given it will be converted to integer
-    
+
     :param pixel_aspect: The pixel aspect ratio of the current ImageFormat
       object, it can not be zero or negative, and if given as an integer it
       will be converted to a float, the default value is 1.0
@@ -68,7 +70,7 @@ class ImageFormat(Entity):
     height = Column(
         Integer,
         doc="""The height of this format
-        
+
         * the height should be set to a positive non-zero integer
         * integers are also accepted but will be converted to float
         * for improper inputs the object will raise an exception.
@@ -79,7 +81,7 @@ class ImageFormat(Entity):
         Float,
         default="1.0",
         doc="""The pixel aspect ratio of this format.
-        
+
         * the pixel_aspect should be set to a positive non-zero float
         * integers are also accepted but will be converted to float
         * for improper inputs the object will raise an exception
@@ -90,7 +92,7 @@ class ImageFormat(Entity):
         Float,
         default="300.0",
         doc="""The print resolution of this format
-        
+
         * it should be set to a positive non-zero float or integer
         * integers are also accepted but will be converted to float
         * for improper inputs the object will raise an exception.
@@ -110,19 +112,19 @@ class ImageFormat(Entity):
         self.height = height
         self.pixel_aspect = pixel_aspect
         self.print_resolution = print_resolution
-        self._device_aspect = 1.0
+        # self._device_aspect = 1.0
 
-    @reconstructor
-    def __init_on_load__(self):
-        """initialized the instance variables when the instance created with
-        SQLAlchemy
-        """
-
-        self._device_aspect = None
-        #self._update_device_aspect()
-
-        # call supers __init_on_load__
-        super(ImageFormat, self).__init_on_load__()
+    # @reconstructor
+    # def __init_on_load__(self):
+    #     """initialized the instance variables when the instance created with
+    #     SQLAlchemy
+    #     """
+    # 
+    #     self._device_aspect = None
+    #     #self._update_device_aspect()
+    # 
+    #     # call supers __init_on_load__
+    #     super(ImageFormat, self).__init_on_load__()
 
     @validates("width")
     def _validate_width(self, key, width):
@@ -193,7 +195,7 @@ class ImageFormat(Entity):
     @property
     def device_aspect(self):
         """returns the device aspect
-        
+
         because the device_aspect is calculated from the width/height*pixel
         formula, this property is read-only.
         """
@@ -204,8 +206,8 @@ class ImageFormat(Entity):
         """the equality operator
         """
 
-        return super(ImageFormat, self).__eq__(other) and\
-               isinstance(other, ImageFormat) and\
-               self.width == other.width and\
-               self.height == other.height and\
+        return super(ImageFormat, self).__eq__(other) and \
+               isinstance(other, ImageFormat) and \
+               self.width == other.width and \
+               self.height == other.height and \
                self.pixel_aspect == other.pixel_aspect

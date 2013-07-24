@@ -229,16 +229,16 @@ class Shot(Task, CodeMixin):
 
         self._update_cut_info(cut_in, cut_duration, cut_out)
 
-    @reconstructor
-    def __init_on_load__(self):
-        """initialized the instance variables when the instance created with
-        SQLAlchemy
-        """
-        self._cut_duration = None
-        self._update_cut_info(self._cut_in, self._cut_duration, self._cut_out)
-
-        # call supers __init_on_load__
-        super(Shot, self).__init_on_load__()
+    # @reconstructor
+    # def __init_on_load__(self):
+    #     """initialized the instance variables when the instance created with
+    #     SQLAlchemy
+    #     """
+    #     self._cut_duration = None
+    #     self._update_cut_info(self._cut_in, self._cut_duration, self._cut_out)
+    # 
+    #     # call supers __init_on_load__
+    #     super(Shot, self).__init_on_load__()
 
     def __repr__(self):
         """the representation of the Shot
@@ -361,21 +361,19 @@ class Shot(Task, CodeMixin):
 
         return imf
 
-    def _cut_duration_getter(self):
+    @property
+    def cut_duration(self):
+        try:
+            if self._cut_duration is None:
+                self._update_cut_info(self._cutin, None, self._cut_out)
+        except AttributeError:
+            setattr(self, '_cut_duration', None)
+            self._update_cut_info(self._cut_in, None, self._cut_out)
         return self._cut_duration
 
-    def _cut_duration_setter(self, cut_duration_in):
+    @cut_duration.setter
+    def cut_duration(self, cut_duration_in):
         self._update_cut_info(self._cut_in, cut_duration_in, self._cut_out)
-
-    cut_duration = synonym(
-        "_cut_duration",
-        descriptor=property(_cut_duration_getter, _cut_duration_setter),
-        doc="""The duration of this shot in frames.
-
-        It should be a positive integer value. If updated also updates the
-        :attr:`~stalker.models.shot.Shot.cut_duration` attribute. The default
-        value is 100."""
-    )
 
     def _cut_in_getter(self):
         return self._cut_in
