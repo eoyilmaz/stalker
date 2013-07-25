@@ -2200,12 +2200,14 @@ class DatabaseModelsTester(unittest2.TestCase):
         daily_working_hours = test_studio.daily_working_hours
         timing_resolution = test_studio._timing_resolution
         working_hours = test_studio.working_hours
+        now = test_studio.now
 
         del test_studio
 
         # get it back
         test_studio_DB = Studio.query.first()
 
+        self.assertEqual(now, test_studio_DB.now)
         self.assertEqual(name, test_studio_DB.name)
         self.assertEqual(daily_working_hours,
                          test_studio_DB.daily_working_hours)

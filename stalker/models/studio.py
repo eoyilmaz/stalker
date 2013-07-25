@@ -143,8 +143,11 @@ class Studio(Entity, ScheduleMixin, WorkingHoursMixin):
     def now(self):
         """now getter
         """
-        if self._now is None:
-            self._now = self.round_time(datetime.datetime.now())
+        try:
+            if self._now is None:
+                self._now = self.round_time(datetime.datetime.now())
+        except AttributeError:
+            setattr(self, '_now', self.round_time(datetime.datetime.now()))
         return self._now
 
     @now.setter

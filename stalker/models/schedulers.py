@@ -28,11 +28,10 @@ import stalker
 from stalker import defaults
 from stalker.models.entity import Entity
 
-from stalker import log
 import logging
 
 logger = logging.getLogger(__name__)
-logger.setLevel(log.logging_level)
+logger.setLevel(logging.DEBUG)
 
 
 class SchedulerBase(object):
@@ -168,7 +167,9 @@ class TaskJugglerScheduler(SchedulerBase):
             for data in lines:
                 id_line = data[0]
                 entity_id = int(id_line.split('.')[-1].split('_')[-1])
+                logger.debug('updating entity with id : %s' % entity_id)
                 entity = Entity.query.filter(Entity.id == entity_id).first()
+                logger.debug('updating : %s' % entity)
                 if entity:
                     start_date = datetime.datetime.strptime(
                         data[1], "%Y-%m-%d-%H:%M"
@@ -177,8 +178,13 @@ class TaskJugglerScheduler(SchedulerBase):
                         data[2],
                         "%Y-%m-%d-%H:%M"
                     )
+                    logger.debug('   start : %s' % start_date)
+                    logger.debug('     end : %s' % end_date)
+
                     entity.computed_start = start_date
                     entity.computed_end = end_date
+                    logger.debug('updated : %s' % entity)
+        logger.debug('completed parsing csv file')
 
     def schedule(self):
         """does the scheduling

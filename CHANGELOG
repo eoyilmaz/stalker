@@ -25,6 +25,8 @@ Stalker Changes
   queries in certain cases (especially in Task.parent -> Task.children
   relation).
 * **Fix:** Fixed Vacation class tj3 format.
+* **Fix:** **Studio.now** attribute was not properly working when the Studio
+  instance has been restored from database.
 
 0.2.0.rc3
 =========

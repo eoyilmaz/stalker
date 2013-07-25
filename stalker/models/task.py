@@ -24,8 +24,7 @@ import logging
 from sqlalchemy import (Table, Column, Integer, ForeignKey, Boolean, Enum,
                         DateTime, Float)
 from sqlalchemy.exc import UnboundExecutionError
-from sqlalchemy.orm import relationship, validates, synonym, reconstructor
-from sqlalchemy.orm.dynamic import AppenderQuery
+from sqlalchemy.orm import relationship, validates, synonym
 
 from stalker.db import DBSession
 from stalker.db.declarative import Base
@@ -819,7 +818,6 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
     #     SQLAlchemy
     #     """
     #     # TODO : fix this
-    #     # AppenderQuery
     #     # tmp = self.start # just read the start to update them
     #     # self._reschedule(self.schedule_timing, self.schedule_unit)
     #     # call supers __init_on_load__
