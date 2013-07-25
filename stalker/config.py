@@ -271,7 +271,7 @@ class Config(object):
         {%- endfor %}
         }''',
 
-        tjp_vacation_template = '''vacation {{ vacation.start.strftime('%Y-%m-%d-%H:%M') }}, {{ vacation.end.strftime('%Y-%m-%d-%H:%M') }}''',
+        tjp_vacation_template = '''vacation {{ vacation.start.strftime('%Y-%m-%d') }} - {{ vacation.end.strftime('%Y-%m-%d') }}''',
 
         tjp_user_template = '''resource {{user.tjp_id}} "{{user.name}}"{% if user.vacations %} {
             {% for vacation in user.vacations -%}

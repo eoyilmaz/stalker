@@ -24,6 +24,7 @@ Stalker Changes
   It was causing SQLAlchemy to eagerly load relations, thus slowing down
   queries in certain cases (especially in Task.parent -> Task.children
   relation).
+* **Fix:** Fixed Vacation class tj3 format.
 
 0.2.0.rc3
 =========

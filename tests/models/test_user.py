@@ -1387,8 +1387,8 @@ class UserTest(unittest2.TestCase):
         )
 
         expected_tjp = """resource User_69 "Erkan Ozgur Yilmaz" {
-            vacation 2013-06-07-00:00, 2013-06-21-00:00
-            vacation 2013-07-01-00:00, 2013-07-15-00:00
+            vacation 2013-06-07 - 2013-06-21
+            vacation 2013-07-01 - 2013-07-15
             }"""
         print expected_tjp
         print '---------------'
