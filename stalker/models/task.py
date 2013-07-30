@@ -129,6 +129,30 @@ class TimeLog(Entity, ScheduleMixin):
         self.resource = resource
         self.task = task
 
+    def _start_setter(self, start_in):
+        """overridden start_setter method
+        """
+        prev_total_seconds = self.total_seconds
+        self._validate_dates(start_in, self.end, self.duration)
+        new_total_seconds = self.total_seconds
+        # update total_logged_seconds of the task parent
+        if self.task.parent:
+            self.task.parent.total_logged_seconds = \
+                self.task.parent.total_logged_seconds - prev_total_seconds + \
+                new_total_seconds
+
+    def _end_setter(self, end_in):
+        """overridden end_setter method
+        """
+        prev_total_seconds = self.total_seconds
+        self._validate_dates(self.start, end_in, self.duration)
+        new_total_seconds = self.total_seconds
+        # update total_logged_seconds of the task parent
+        if self.task.parent:
+            self.task.parent.total_logged_seconds = \
+                self.task.parent.total_logged_seconds - prev_total_seconds + \
+                new_total_seconds
+
     def _expand_task_schedule_timing(self, task):
         """Expands the task schedule timing if necessary
 
@@ -857,11 +881,9 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
                 "of stalker.models.task.TimeLog not %s instance" %
                 (self.__class__.__name__, time_log.__class__.__name__))
 
-        # update total_logged_seconds for this task if it is a container
-        # with DBSession.no_autoflush:
-        #     if self.is_container:
-        #         # upadate the total_logged_seconds
-        #         if time_log
+        # update parents total_logged_second attribute
+        if self.parent:
+            self.parent.total_logged_seconds += time_log.total_seconds
 
         return time_log
 
@@ -924,10 +946,20 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         :param schedule_timing: a float value showing the schedule timing
         :return: None
         """
+        old_schedule_seconds = 0
+        if self.schedule_seconds:
+            old_schedule_seconds = self.schedule_seconds
+
         self._schedule_timing = self._validate_schedule_timing(schedule_timing)
 
         # reschedule
         self._reschedule(self._schedule_timing, self.schedule_unit)
+
+        # update parents schedule_seconds attribute
+        if self.parent:
+            self.parent.schedule_seconds = \
+                self.parent.schedule_seconds - old_schedule_seconds + \
+                self.schedule_seconds
 
     schedule_timing = synonym(
         '_schedule_timing',
@@ -1081,8 +1113,18 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
             # check for cycle
             check_circular_dependency(self, parent, 'children')
             check_circular_dependency(self, parent, 'depends')
-            # update parents schedule seconds
-            parent._update_schedule_seconds(self.schedule_seconds)
+
+            # if there is a current parent, remove current schedule_seconds
+            # value from the parent
+            if self.parent:
+                self.parent.schedule_seconds = \
+                    self.parent.schedule_seconds - self.schedule_seconds
+                self.parent.total_logged_seconds = \
+                    self.parent.total_logged_seconds - self.total_logged_seconds
+
+            # update the new parent
+            parent.schedule_seconds = parent.schedule_seconds + self.schedule_seconds
+            parent.total_logged_seconds = parent.total_logged_seconds + self.total_logged_seconds
 
         return parent
 
@@ -1414,7 +1456,14 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
 
         :param seconds: An integer value for the seconds
         """
+        # update parent
+        old_value = 0
+        if self._total_logged_seconds:
+            old_value = self._total_logged_seconds
         self._total_logged_seconds = seconds
+        if self.parent:
+            self.parent.total_logged_seconds = \
+                self.parent.total_logged_seconds - old_value + seconds
 
     total_logged_seconds = synonym(
         '_total_logged_seconds',
@@ -1423,25 +1472,6 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
             _total_logged_seconds_setter
         )
     )
-
-    @property
-    def schedule_seconds(self):
-        """returns the total effort, length or duration in seconds, for
-        completeness calculation
-        """
-        # for container tasks use the children schedule_seconds attribute
-        if self.is_container:
-            if self._schedule_seconds is None:
-                self._update_schedule_seconds()
-            return self._schedule_seconds
-        else:
-            schedule_timing = self.schedule_timing
-            schedule_model = self.schedule_model
-            schedule_unit = self.schedule_unit
-
-            if schedule_model == 'effort':
-                return \
-                    self._calculate_seconds(schedule_timing, schedule_unit)
 
     def _calculate_seconds(self, timing, unit):
         """Calculates the seconds from the timing and unit values
@@ -1485,14 +1515,33 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
                 data_source.yearly_working_days * \
                 data_source.daily_working_hours * 3600
 
-    @schedule_seconds.setter
-    def schedule_seconds(self, seconds):
+    def _schedule_seconds_getter(self):
+        """returns the total effort, length or duration in seconds, for
+        completeness calculation
+        """
+        # for container tasks use the children schedule_seconds attribute
+        if self.is_container:
+            if self._schedule_seconds is None:
+                self._update_schedule_seconds()
+            return self._schedule_seconds
+        else:
+            schedule_timing = self.schedule_timing
+            schedule_model = self.schedule_model
+            schedule_unit = self.schedule_unit
+
+            if schedule_model == 'effort':
+                return \
+                    self._calculate_seconds(schedule_timing, schedule_unit)
+            return 0
+
+    def _schedule_seconds_setter(self, seconds):
         """Sets the schedule_seconds of this task. Mainly used for container
         tasks.
 
         :param seconds: An integer value of schedule_seconds for this task.
         :return:
         """
+        # do it only for container tasks
         if self.is_container:
             # also update the parents
             if self.parent:
@@ -1503,20 +1552,28 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
                     self.parent.schedule_seconds - current_value + seconds
             self._schedule_seconds = seconds
 
-    def _update_schedule_seconds(self, extra_schedule_seconds=0):
+    schedule_seconds = synonym(
+        '_schedule_seconds',
+        descriptor=property(
+            _schedule_seconds_getter,
+            _schedule_seconds_setter
+        )
+    )
+
+    def _update_schedule_seconds(self):
         """updates the total_logged_seconds and schedule_seconds attributes
         """
-        if extra_schedule_seconds is None:
-            extra_schedule_seconds = 0
         total_logged_seconds = 0
         schedule_seconds = 0
         if self.is_container:
             for child in self.children:
-                total_logged_seconds += child.total_logged_seconds
-                schedule_seconds += child.schedule_seconds
+                if child.schedule_seconds:
+                    schedule_seconds += child.schedule_seconds
+                if child.total_logged_seconds:
+                    total_logged_seconds += child.total_logged_seconds
 
+            self._schedule_seconds = schedule_seconds
             self._total_logged_seconds = total_logged_seconds
-            self._schedule_seconds = schedule_seconds + extra_schedule_seconds
 
     @property
     def percent_complete(self):
@@ -1524,8 +1581,10 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         schedule_seconds of the task. Container tasks will use info from their
         children
         """
-        if self.total_logged_seconds is None or self.schedule_seconds is None:
-            self._update_schedule_seconds()
+        if self.is_container:
+            if self.total_logged_seconds is None or \
+               self.schedule_seconds is None:
+                self._update_schedule_seconds()
         return self.total_logged_seconds / self.schedule_seconds * 100
 
     @property
