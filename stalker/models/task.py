@@ -389,6 +389,15 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
     :class:`~stalker.models.project.Project.lead` of the related
     :class:`~stalker.models.project.Project`.
 
+    **Percent Complete Calculation**
+
+    .. versionadded:: 0.2.0
+
+    Tasks can now calculate how much it is completed based on the
+    schedule_seconds and total_logged_seconds attributes. For a parent task,
+    the calculation is based on the total schedule_seconds and
+    total_logged_seconds attributes of their children.
+
     :param project: A Task which doesn't have a parent (a root task) should be
       created with a :class:`~stalker.models.project.Project` instance. If it
       is skipped an no :attr:`.parent` is given then Stalker will raise a
@@ -1332,8 +1341,12 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         """
         seconds = 0
         with DBSession.no_autoflush:
-            for time_log in self.time_logs:
-                seconds += time_log.total_seconds
+            if self.is_leaf:
+                for time_log in self.time_logs:
+                    seconds += time_log.total_seconds
+            else:
+                for child in self.children:
+                    seconds += child.total_logged_seconds
         return seconds
 
     @property
@@ -1341,39 +1354,60 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         """returns the total effort, length or duration in seconds, for
         completeness calculation
         """
-        schedule_timing = self.schedule_timing
-        schedule_model = self.schedule_model
-        schedule_unit = self.schedule_unit
-        from stalker import Studio
-
-        try:
+        # for container tasks use the children schedule_seconds attribute
+        if self.is_container:
+            schedule_seconds = 0
             with DBSession.no_autoflush:
-                studio = Studio.query.first()
-        except UnboundExecutionError:
-            studio = None
-        data_source = studio if studio else defaults
+                for child in self.children:
+                    schedule_seconds += child.schedule_seconds
+                return schedule_seconds
+        else:
+            schedule_timing = self.schedule_timing
+            schedule_model = self.schedule_model
+            schedule_unit = self.schedule_unit
+            from stalker import Studio
 
-        if schedule_model == 'effort':
-            if schedule_unit == 'min':
-                return schedule_timing * 60
+            # for leaf tasks do it normally
+            try:
+                with DBSession.no_autoflush:
+                    # there is only one studio support in Stalker for now
+                    studio = Studio.query.first()
+            except UnboundExecutionError:
+                studio = None
+            data_source = studio if studio else defaults
 
-            elif schedule_unit == 'h':
-                return schedule_timing * 3600
+            if schedule_model == 'effort':
+                if schedule_unit == 'min':
+                    return schedule_timing * 60
 
-            elif schedule_unit == 'd':
-                # we need to have a studio or defaults
-                return schedule_timing * data_source.daily_working_hours * 3600
+                elif schedule_unit == 'h':
+                    return schedule_timing * 3600
 
-            elif schedule_unit == 'w':
-                return schedule_timing * data_source.weekly_working_hours * 3600
+                elif schedule_unit == 'd':
+                    # we need to have a studio or defaults
+                    return schedule_timing * \
+                        data_source.daily_working_hours * 3600
 
-            elif schedule_unit == 'm':
-                return schedule_timing * 4 * data_source.weekly_working_hours * 3600
+                elif schedule_unit == 'w':
+                    return schedule_timing * \
+                        data_source.weekly_working_hours * 3600
 
-            elif schedule_unit == 'y':
-                return schedule_timing * \
-                    data_source.yearly_working_days * \
-                    data_source.daily_working_hours * 3600
+                elif schedule_unit == 'm':
+                    return schedule_timing * \
+                        4 * data_source.weekly_working_hours * 3600
+
+                elif schedule_unit == 'y':
+                    return schedule_timing * \
+                        data_source.yearly_working_days * \
+                        data_source.daily_working_hours * 3600
+
+    @property
+    def percent_complete(self):
+        """returns the percent_complete based on the total_logged_seconds and
+        schedule_seconds of the task. Container tasks will use info from their
+        children
+        """
+        return self.total_logged_seconds / self.schedule_seconds * 100
 
     @property
     def remaining_seconds(self):

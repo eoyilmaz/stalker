@@ -196,8 +196,7 @@ class TaskTester(unittest2.TestCase):
         new_task = Task(**self.kwargs)
         self.assertEqual(new_task.priority, defaults.task_priority)
 
-    def test_priority_argument_is_given_as_None_will_default_to_task_priority(
-            self):
+    def test_priority_argument_is_given_as_None_will_default_to_task_priority(self):
         """testing if the priority argument is given as None will default the
         priority attribute to task_priority.
         """
@@ -205,16 +204,14 @@ class TaskTester(unittest2.TestCase):
         new_task = Task(**self.kwargs)
         self.assertEqual(new_task.priority, defaults.task_priority)
 
-    def test_priority_attribute_is_given_as_None_will_default_to_task_priority(
-            self):
+    def test_priority_attribute_is_given_as_None_will_default_to_task_priority(self):
         """testing if the priority attribute is given as None will default the
         priority attribute to task_priority.
         """
         self.test_task.priority = None
         self.assertEqual(self.test_task.priority, defaults.task_priority)
 
-    def test_priority_argument_any_given_other_value_then_integer_will_default_to_task_priority(
-            self):
+    def test_priority_argument_any_given_other_value_then_integer_will_default_to_task_priority(self):
         """testing if any other value then an positive integer for priority
         argument will default the priority attribute to task_priority.
         """
@@ -225,8 +222,7 @@ class TaskTester(unittest2.TestCase):
             new_task = Task(**self.kwargs)
             self.assertEqual(new_task.priority, defaults.task_priority)
 
-    def test_priority_attribute_any_given_other_value_then_integer_will_default_to_task_priority(
-            self):
+    def test_priority_attribute_any_given_other_value_then_integer_will_default_to_task_priority(self):
         """testing if any other value then an positive integer for priority
         attribute will default it to task_priority.
         """
@@ -329,8 +325,7 @@ class TaskTester(unittest2.TestCase):
         self.assertRaises(TypeError, setattr, self.test_task, "resources",
                           "a resource")
 
-    def test_resources_argument_is_set_to_a_list_of_other_values_then_User(
-            self):
+    def test_resources_argument_is_set_to_a_list_of_other_values_then_User(self):
         """testing if a TypeError will be raised when the resources argument is
         set to a list of other values then a User
         """
@@ -338,8 +333,7 @@ class TaskTester(unittest2.TestCase):
                                     self.test_user1]
         self.assertRaises(TypeError, Task, **self.kwargs)
 
-    def test_resources_attribute_is_set_to_a_list_of_other_values_then_User(
-            self):
+    def test_resources_attribute_is_set_to_a_list_of_other_values_then_User(self):
         """testing if a TypeError will be raised when the resources attribute
         is set to a list of other values then a User
         """
@@ -409,8 +403,7 @@ class TaskTester(unittest2.TestCase):
         # now check if the user has the task in its tasks list
         self.assertIn(new_task, new_user.tasks)
 
-    def test_resources_attribute_will_clear_itself_from_the_previous_Users(
-            self):
+    def test_resources_attribute_will_clear_itself_from_the_previous_Users(self):
         """testing if the resources attribute is updated will clear itself from
         the current resources tasks attribute.
         """
@@ -959,8 +952,7 @@ class TaskTester(unittest2.TestCase):
         self.assertRaises(TypeError, setattr, self.test_task, "watchers",
                           "a resource")
 
-    def test_watchers_argument_is_set_to_a_list_of_other_values_then_User(
-            self):
+    def test_watchers_argument_is_set_to_a_list_of_other_values_then_User(self):
         """testing if a TypeError will be raised when the watchers argument is
         set to a list of other values then a User
         """
@@ -968,8 +960,7 @@ class TaskTester(unittest2.TestCase):
                                    self.test_user1]
         self.assertRaises(TypeError, Task, **self.kwargs)
 
-    def test_watchers_attribute_is_set_to_a_list_of_other_values_then_User(
-            self):
+    def test_watchers_attribute_is_set_to_a_list_of_other_values_then_User(self):
         """testing if a TypeError will be raised when the watchers attribute
         is set to a list of other values then a User
         """
@@ -1039,8 +1030,7 @@ class TaskTester(unittest2.TestCase):
         # now check if the user has the task in its watching list
         self.assertIn(new_task, new_user.watching)
 
-    def test_watchers_attribute_will_clear_itself_from_the_previous_Users(
-            self):
+    def test_watchers_attribute_will_clear_itself_from_the_previous_Users(self):
         """testing if the watchers attribute is updated will clear itself from
         the current watchers watching attribute.
         """
@@ -1612,16 +1602,14 @@ class TaskTester(unittest2.TestCase):
         self.test_task.schedule_unit = test_value
         self.assertEqual(self.test_task.schedule_unit, test_value)
 
-    def test_schedule_unit_argument_value_is_not_in_defaults_datetime_units(
-            self):
+    def test_schedule_unit_argument_value_is_not_in_defaults_datetime_units(self):
         """testing if a ValueError will be raised when the schedule_unit value
         is not in stalker.config.Config.datetime_units list
         """
         self.kwargs['schedule_unit'] = 'os'
         self.assertRaises(ValueError, Task, **self.kwargs)
 
-    def test_schedule_unit_attribute_value_is_not_in_defaults_datetime_units(
-            self):
+    def test_schedule_unit_attribute_value_is_not_in_defaults_datetime_units(self):
         """testing if a ValueError will be raised when it is set to a value
         which is not in stalker.config.Config.datetime_units list
         """
@@ -1731,8 +1719,7 @@ class TaskTester(unittest2.TestCase):
         self.assertRaises(CircularDependencyError, setattr, taskA, "depends",
                           [taskC])
 
-    def test_depends_attribute_doesnt_allow_more_deeper_cyclic_dependencies(
-            self):
+    def test_depends_attribute_doesnt_allow_more_deeper_cyclic_dependencies(self):
         """testing if a CircularDependencyError will be raised when the depends
         attribute has a deeper circular dependency in dependencies
         """
@@ -1784,8 +1771,7 @@ class TaskTester(unittest2.TestCase):
         self.assertRaises(CircularDependencyError, Task, **self.kwargs)
 
 
-    def test_depends_argument_doesnt_allow_one_of_the_parents_of_the_task(
-            self):
+    def test_depends_argument_doesnt_allow_one_of_the_parents_of_the_task(self):
         """testing if a CircularDependencyError will be raised when the depends
         attribute has one of the parents of this task
         """
@@ -1843,13 +1829,78 @@ class TaskTester(unittest2.TestCase):
         self.assertEqual(self.test_task.is_complete, False)
 
     def test_is_complete_attribute_evaluates_the_given_value_to_a_bool(self):
-        """testing if the is_complete attribute is evaluated correctly to a bool
-        value when set to anything other than a bool value.
+        """testing if the is_complete attribute is evaluated correctly to a
+        bool value when set to anything other than a bool value.
         """
         test_values = [1, 0, 1.2, "A string", "", [], [1]]
         for test_value in test_values:
             self.test_task.is_complete = test_value
             self.assertEqual(self.test_task.is_complete, bool(test_value))
+
+    def test_percent_complete_attribute_is_read_only(self):
+        """testing if the percent_complete attribute is a read-only attribute
+        """
+        self.assertRaises(AttributeError, setattr, self.test_task,
+                          'percent_complete', 32)
+
+    def test_percent_complete_attribute_is_working_properly_for_a_leaf_task(self):
+        """testing if the percent_complete attribute is working properly for a
+        leaf task
+        """
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+
+        self.test_task.time_logs = []
+        book1 = TimeLog(
+            task=self.test_task,
+            resource=self.test_task.resources[0],
+            start=now,
+            end=now + td(hours=8)
+        )
+
+        self.assertIn(book1, self.test_task.time_logs)
+
+        book2 = TimeLog(
+            task=self.test_task,
+            resource=self.test_task.resources[1],
+            start=now,
+            end=now + td(hours=12)
+        )
+        self.assertEqual(self.test_task.total_logged_seconds, 20 * 3600)
+        self.assertEqual(self.test_task.percent_complete, 100)
+
+    def test_percent_complete_attribute_is_working_properly_for_a_container_task(self):
+        """testing if the percent complete attribute is working properly for a
+        container task
+        """
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+
+        parent_task = Task(**self.kwargs)
+
+        self.test_task.time_logs = []
+        book1 = TimeLog(
+            task=self.test_task,
+            resource=self.test_task.resources[0],
+            start=now,
+            end=now + td(hours=8)
+        )
+
+        self.assertIn(book1, self.test_task.time_logs)
+
+        book2 = TimeLog(
+            task=self.test_task,
+            resource=self.test_task.resources[1],
+            start=now,
+            end=now + td(hours=12)
+        )
+        self.test_task.parent = parent_task
+
+        self.assertEqual(self.test_task.total_logged_seconds, 20 * 3600)
+        self.assertEqual(self.test_task.percent_complete, 100)
+        self.assertEqual(parent_task.percent_complete, 100)
 
     def test_is_milestone_argument_is_skipped(self):
         """testing if the default value of the is_milestone attribute is going
@@ -1895,8 +1946,7 @@ class TaskTester(unittest2.TestCase):
             self.test_task.is_milestone = test_value
             self.assertEqual(self.test_task.is_milestone, bool(test_value))
 
-    def test_is_milestone_argument_makes_the_resources_list_an_empty_list(
-            self):
+    def test_is_milestone_argument_makes_the_resources_list_an_empty_list(self):
         """testing if the resources will be an empty list when the is_milestone
         argument is given as True
         """
@@ -1906,8 +1956,7 @@ class TaskTester(unittest2.TestCase):
         new_task = Task(**self.kwargs)
         self.assertEqual(new_task.resources, [])
 
-    def test_is_milestone_attribute_makes_the_resource_list_an_empty_list(
-            self):
+    def test_is_milestone_attribute_makes_the_resource_list_an_empty_list(self):
         """testing if the resources will be an empty list when the is_milestone
         attribute is given as True
         """
@@ -2021,14 +2070,82 @@ class TaskTester(unittest2.TestCase):
         )
         self.assertEqual(self.test_task.total_logged_seconds, 20 * 3600)
 
+    def test_total_logged_seconds_is_the_sum_of_all_time_logs_of_children_for_a_container_task(self):
+        """testing if the total_logged_seconds is the sum of all time_logs of
+        the child tasks for a container task
+        """
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+
+        self.kwargs.pop('schedule_timing')
+        self.kwargs.pop('schedule_unit')
+        parent_task = Task(**self.kwargs)
+
+        self.test_task.parent = parent_task
+
+        self.test_task.time_logs = []
+        book1 = TimeLog(
+            task=self.test_task,
+            resource=self.test_task.resources[0],
+            start=now,
+            end=now + td(hours=8)
+        )
+
+        self.assertIn(book1, self.test_task.time_logs)
+
+        book2 = TimeLog(
+            task=self.test_task,
+            resource=self.test_task.resources[1],
+            start=now,
+            end=now + td(hours=12)
+        )
+        self.assertEqual(self.test_task.total_logged_seconds, 20 * 3600)
+        self.assertEqual(parent_task.total_logged_seconds, 20 * 3600)
+
+    def test_total_logged_seconds_is_the_sum_of_all_time_logs_of_children_for_a_container_task_deeper(self):
+        """testing if the total_logged_seconds is the sum of all time_logs of
+        the child tasks for a container task (test deeper)
+        """
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+
+        self.kwargs.pop('schedule_timing')
+        self.kwargs.pop('schedule_unit')
+        parent_task = Task(**self.kwargs)
+        parent_task2 = Task(**self.kwargs)
+
+        self.test_task.parent = parent_task
+        parent_task.parent = parent_task2
+
+        self.test_task.time_logs = []
+        book1 = TimeLog(
+            task=self.test_task,
+            resource=self.test_task.resources[0],
+            start=now,
+            end=now + td(hours=8)
+        )
+
+        self.assertIn(book1, self.test_task.time_logs)
+
+        book2 = TimeLog(
+            task=self.test_task,
+            resource=self.test_task.resources[1],
+            start=now,
+            end=now + td(hours=12)
+        )
+        self.assertEqual(self.test_task.total_logged_seconds, 20 * 3600)
+        self.assertEqual(parent_task.total_logged_seconds, 20 * 3600)
+        self.assertEqual(parent_task2.total_logged_seconds, 20 * 3600)
+
     def test_schedule_seconds_is_a_read_only_attribute(self):
         """testing if the schedule_seconds is a read only attribute
         """
         self.assertRaises(AttributeError, setattr, self.test_task,
                           'schedule_seconds', 232400)
 
-    def test_schedule_seconds_is_working_properly_for_an_effort_based_task_no_studio(
-            self):
+    def test_schedule_seconds_is_working_properly_for_an_effort_based_task_no_studio(self):
         """testing if schedule_seconds attribute is working properly for a
         effort based task on an environment where there are no studio
         """
@@ -2066,8 +2183,7 @@ class TaskTester(unittest2.TestCase):
             3.1 * defaults.yearly_working_days * defaults.daily_working_hours * 3600
         )
 
-    def test_schedule_seconds_is_working_properly_for_an_effort_based_task_with_studio(
-            self):
+    def test_schedule_seconds_is_working_properly_for_an_effort_based_task_with_studio(self):
         """testing if schedule_seconds attribute is working properly for a
         effort based task where there is a studio present
         """
@@ -2108,6 +2224,67 @@ class TaskTester(unittest2.TestCase):
             new_task.schedule_seconds,
             3.1 * studio.yearly_working_days * studio.daily_working_hours * 3600
         )
+
+
+    def test_schedule_seconds_is_working_properly_for_a_container_task(self):
+        """testing if schedule_seconds attribute is working properly for a
+        container task
+        """
+        # no studio, using defaults
+        parent_task = Task(**self.kwargs)
+
+        self.kwargs['schedule_model'] = 'effort'
+
+        self.kwargs['schedule_timing'] = 10
+        self.kwargs['schedule_unit'] = 'h'
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.schedule_seconds, 10 * 3600)
+        new_task.parent = parent_task
+        self.assertEqual(parent_task.schedule_seconds, 10 * 3600)
+
+        self.kwargs['schedule_timing'] = 23
+        self.kwargs['schedule_unit'] = 'd'
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.schedule_seconds,
+                         23 * defaults.daily_working_hours * 3600)
+        new_task.parent = parent_task
+        self.assertEqual(parent_task.schedule_seconds,
+                         10 * 3600 + 23 * defaults.daily_working_hours * 3600)
+
+        self.kwargs['schedule_timing'] = 2
+        self.kwargs['schedule_unit'] = 'w'
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.schedule_seconds,
+                         2 * defaults.weekly_working_hours * 3600)
+        new_task.parent = parent_task
+        self.assertEqual(parent_task.schedule_seconds,
+                         10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
+                         2 * defaults.weekly_working_hours * 3600)
+
+        self.kwargs['schedule_timing'] = 2.5
+        self.kwargs['schedule_unit'] = 'm'
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.schedule_seconds,
+                         2.5 * 4 * defaults.weekly_working_hours * 3600)
+        new_task.parent = parent_task
+        self.assertEqual(parent_task.schedule_seconds,
+                         10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
+                         2 * defaults.weekly_working_hours * 3600 +
+                         2.5 * 4 * defaults.weekly_working_hours * 3600)
+
+        self.kwargs['schedule_timing'] = 3.1
+        self.kwargs['schedule_unit'] = 'y'
+        new_task = Task(**self.kwargs)
+        self.assertEqual(
+            new_task.schedule_seconds,
+            3.1 * defaults.yearly_working_days * defaults.daily_working_hours * 3600
+        )
+        new_task.parent = parent_task
+        self.assertEqual(parent_task.schedule_seconds,
+                         10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
+                         2 * defaults.weekly_working_hours * 3600 +
+                         2.5 * 4 * defaults.weekly_working_hours * 3600 +
+                         3.1 * defaults.yearly_working_days * defaults.daily_working_hours * 3600)
 
     def test_remaining_seconds_attribute_is_a_read_only_attribute(self):
         """testing if the remaining hours is a read only attribute
@@ -2459,8 +2636,7 @@ class TaskTester(unittest2.TestCase):
         new_task.parent = new_task2
         self.assertEqual(new_task.parent, new_task2)
 
-    def test_parent_argument_will_not_allow_a_dependent_task_to_be_parent(
-            self):
+    def test_parent_argument_will_not_allow_a_dependent_task_to_be_parent(self):
         """testing if a CircularDependencyError will be raised when one of the
         dependencies assigned also as the parent
         """
@@ -2472,8 +2648,7 @@ class TaskTester(unittest2.TestCase):
         self.kwargs['parent'] = taskA
         self.assertRaises(CircularDependencyError, Task, **self.kwargs)
 
-    def test_parent_attribute_will_not_allow_a_dependent_task_to_be_parent(
-            self):
+    def test_parent_attribute_will_not_allow_a_dependent_task_to_be_parent(self):
         """testing if a CircularDependencyError will be raised when one of the
         dependent tasks are assigned as the parent
         """
@@ -2691,8 +2866,7 @@ class TaskTester(unittest2.TestCase):
                 issubclass(w[-1].category, RuntimeWarning)
             )
 
-    def test_project_argument_is_not_matching_the_given_parent_argument_new_task_will_use_parents_project(
-            self):
+    def test_project_argument_is_not_matching_the_given_parent_argument_new_task_will_use_parents_project(self):
         """testing if the new task will use the parents project when the given
         project is not matching the given parent
         """
@@ -2707,8 +2881,7 @@ class TaskTester(unittest2.TestCase):
         new_task = Task(**self.kwargs)
         self.assertEqual(new_task.project, self.test_task.project)
 
-    def test_start_and_end_attribute_values_of_a_container_task_are_defined_by_its_child_tasks(
-            self):
+    def test_start_and_end_attribute_values_of_a_container_task_are_defined_by_its_child_tasks(self):
         """testing if the start and end attribute values is defined by the
         earliest start and the latest end date values of the children Tasks for
         a container Task
@@ -2818,8 +2991,7 @@ class TaskTester(unittest2.TestCase):
         self.assertEqual(task1.start, now + dt(1))
         self.assertEqual(task1.end, now + dt(8))
 
-    def test_end_value_is_calculated_with_the_schedule_timing_and_schedule_unit(
-            self):
+    def test_end_value_is_calculated_with_the_schedule_timing_and_schedule_unit(self):
         """testing for a newly created task the end attribute value will be
         calculated using the schedule_timing and schedule_unit
         """
@@ -2842,8 +3014,7 @@ class TaskTester(unittest2.TestCase):
             datetime.datetime(2013, 4, 22, 0, 0)
         )
 
-    def test_start_value_is_calculated_with_the_schedule_timing_and_schedule_unit_if_schedule_constraint_is_set_to_end(
-            self):
+    def test_start_value_is_calculated_with_the_schedule_timing_and_schedule_unit_if_schedule_constraint_is_set_to_end(self):
         """testing if the start date value will be recalculated from the
         schedule_timing and schedule_unit if the schedule_constraint is set to
         end
@@ -2864,8 +3035,7 @@ class TaskTester(unittest2.TestCase):
             datetime.datetime(2013, 4, 8, 0, 0)
         )
 
-    def test_start_and_end_values_are_not_touched_if_the_schedule_constraint_is_set_to_both(
-            self):
+    def test_start_and_end_values_are_not_touched_if_the_schedule_constraint_is_set_to_both(self):
         """testing if the start and end date values are not touched if the
         schedule constraint is set to both
         """
@@ -3307,8 +3477,7 @@ class TaskTester(unittest2.TestCase):
         self.maxDiff = None
         self.assertMultiLineEqual(t1.to_tjp, expected_tjp)
 
-    def test_to_tjp_attribute_is_working_properly_for_a_container_task_with_dependency(
-            self):
+    def test_to_tjp_attribute_is_working_properly_for_a_container_task_with_dependency(self):
         """testing if the to_tjp attribute is working properly for a container
         task which has dependency
         """
@@ -3471,8 +3640,7 @@ class TaskTester(unittest2.TestCase):
         self.assertRaises(AttributeError, setattr, self.test_task,
                           'is_scheduled', True)
 
-    def test_is_scheduled_is_true_if_the_computed_start_and_computed_end_is_not_None(
-            self):
+    def test_is_scheduled_is_true_if_the_computed_start_and_computed_end_is_not_None(self):
         """testing if the is_scheduled attribute value is True if the
         computed_start and computed_end has both valid values
         """
@@ -3481,8 +3649,7 @@ class TaskTester(unittest2.TestCase):
                                       + datetime.timedelta(10)
         self.assertTrue(self.test_task.is_scheduled)
 
-    def test_is_scheduled_is_false_if_one_of_computed_start_and_computed_end_is_None(
-            self):
+    def test_is_scheduled_is_false_if_one_of_computed_start_and_computed_end_is_None(self):
         """testing if the is_scheduled attribute value is False if one of the
         computed_start and computed_end values is None
         """
@@ -3707,16 +3874,14 @@ class TaskTester(unittest2.TestCase):
         self.kwargs['responsible'] = 'not a user instance'
         self.assertRaises(TypeError, Task, **self.kwargs)
 
-    def test_responsible_attribute_is_set_to_something_other_than_User_instance(
-            self):
+    def test_responsible_attribute_is_set_to_something_other_than_User_instance(self):
         """testing if a TypeError will be raised if the responsible attribute
         is set to something other than a User instance
         """
         self.assertRaises(TypeError, setattr, self.test_task, 'responsible',
                           'not a user instance')
 
-    def test_responsible_argument_is_None_or_skipped_responsible_attribute_comes_from_parents(
-            self):
+    def test_responsible_argument_is_None_or_skipped_responsible_attribute_comes_from_parents(self):
         """testing if the responsible argument is None or skipped then the
         responsible attribute value comes from parents
         """
@@ -3731,8 +3896,7 @@ class TaskTester(unittest2.TestCase):
         self.assertEqual(new_task1.responsible, self.test_user1)
         self.assertEqual(new_task2.responsible, self.test_user1)
 
-    def test_responsible_attribute_is_set_to_None_responsible_attribute_comes_from_parents(
-            self):
+    def test_responsible_attribute_is_set_to_None_responsible_attribute_comes_from_parents(self):
         """testing if the responsible attribute is None or skipped then its
         value comes from parents
         """
@@ -3750,8 +3914,7 @@ class TaskTester(unittest2.TestCase):
         self.assertEqual(new_task1.responsible, self.test_user2)
         self.assertEqual(new_task2.responsible, self.test_user2)
 
-    def test_responsible_attribute_value_comes_from_project_if_no_parent_exists(
-            self):
+    def test_responsible_attribute_value_comes_from_project_if_no_parent_exists(self):
         """testing if the responsible attribute value comes from project.lead
         attribute if there are no parents
         """
@@ -3760,8 +3923,7 @@ class TaskTester(unittest2.TestCase):
 
         self.assertEqual(self.test_task.responsible, self.test_user3)
 
-    def test_responsible_attribute_value_comes_from_project_if_parents_doesnt_have_a_responsible(
-            self):
+    def test_responsible_attribute_value_comes_from_project_if_parents_doesnt_have_a_responsible(self):
         """testing if the responsible attribute value comes from the
         project.lead attribute if parents doesn't have a responsible
         """
