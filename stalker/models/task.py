@@ -22,7 +22,7 @@ import datetime
 import logging
 
 from sqlalchemy import (Table, Column, Integer, ForeignKey, Boolean, Enum,
-                        DateTime, Float)
+                        DateTime, Float, event)
 from sqlalchemy.exc import UnboundExecutionError
 from sqlalchemy.orm import relationship, validates, synonym
 
@@ -128,30 +128,6 @@ class TimeLog(Entity, ScheduleMixin):
         ScheduleMixin.__init__(self, **kwargs)
         self.resource = resource
         self.task = task
-
-    def _start_setter(self, start_in):
-        """overridden start_setter method
-        """
-        prev_total_seconds = self.total_seconds
-        self._validate_dates(start_in, self.end, self.duration)
-        new_total_seconds = self.total_seconds
-        # update total_logged_seconds of the task parent
-        if self.task.parent:
-            self.task.parent.total_logged_seconds = \
-                self.task.parent.total_logged_seconds - prev_total_seconds + \
-                new_total_seconds
-
-    def _end_setter(self, end_in):
-        """overridden end_setter method
-        """
-        prev_total_seconds = self.total_seconds
-        self._validate_dates(self.start, end_in, self.duration)
-        new_total_seconds = self.total_seconds
-        # update total_logged_seconds of the task parent
-        if self.task.parent:
-            self.task.parent.total_logged_seconds = \
-                self.task.parent.total_logged_seconds - prev_total_seconds + \
-                new_total_seconds
 
     def _expand_task_schedule_timing(self, task):
         """Expands the task schedule timing if necessary
@@ -1662,3 +1638,67 @@ Task_Watchers = Table(
     Column("task_id", Integer, ForeignKey("Tasks.id"), primary_key=True),
     Column("watcher_id", Integer, ForeignKey("Users.id"), primary_key=True)
 )
+
+# Register Events
+@event.listens_for(TimeLog._start, 'set')
+def update_time_log_task_parents_for_start(tlog, start, old_start, initiator):
+    """Updates the parent task of the task related to the time_log when the
+    start or end values are changed
+
+    :param tlog: The TimeLog instance
+    :param start: The datetime.datetime instance showing the new value
+    :param old_start: The datetime.datetime instance showing the old value
+    :param initiator: not used
+    :return: None
+    """
+    logger.debug('Received set event for start in target : %s' % tlog)
+    if tlog.end and old_start and start:
+        old_duration = tlog.end - old_start
+        new_duration = tlog.end - start
+        __update_total_logged_seconds_cache__(tlog, old_duration, new_duration)
+
+@event.listens_for(TimeLog._end, 'set')
+def update_time_log_task_parents_for_end(tlog, end, old_end, initiator):
+    """Updates the parent task of the task related to the time_log when the
+    start or end values are changed
+
+    :param tlog: The TimeLog instance
+    :param end: The datetime.datetime instance showing the new value
+    :param old_end: The datetime.datetime instance showing the old value
+    :param initiator: not used
+    :return: None
+    """
+    logger.debug('received set event for end in target : %s' % tlog)
+    if tlog.start and old_end and end:
+        old_duration = old_end - tlog.start
+        new_duration = end - tlog.start
+        __update_total_logged_seconds_cache__(tlog, old_duration, new_duration)
+
+def __update_total_logged_seconds_cache__(tlog, old_duration, new_duration):
+    """Updates the given parent tasks total_logged_seconds attribute with the
+    new duration
+
+    :param tlog: A :class:`~stalker.models.task.Task` instance which is the
+      parent of the 
+    :param old_duration: 
+    :param new_duration: 
+    :return:
+    """
+    if tlog.task:
+        logger.debug('TimeLog has a task: %s' % tlog.task)
+        parent = tlog.task.parent
+        if parent:
+            logger.debug('TImeLog.task has a parent: %s' % parent)
+
+            logger.debug('old_duration: %s' % old_duration)
+            logger.debug('new_duration: %s' % new_duration)
+
+            old_total_seconds = old_duration.days * 86400 + old_duration.seconds
+            new_total_seconds = new_duration.days * 86400 + new_duration.seconds
+
+            parent.total_logged_seconds = \
+                parent.total_logged_seconds - old_total_seconds + new_total_seconds
+        else:
+            logger.debug("TimeLog.task doesn't have a parent:")
+    else:
+        logger.debug("TimeLog doesn't have a task yet: %s" % tlog)
