@@ -5,11 +5,20 @@ Stalker Changes
 0.2.0.rc5
 =========
 
-* **Update:** **Task.total_logged_seconds** and **Task.schedule_seconds**
-  attributes are now using the info of the child tasks for a container task.
+* **Update:** For a container task, **Task.total_logged_seconds** and
+  **Task.schedule_seconds** attributes are now using the info of the child
+  tasks. Also these attributes are cached to database, so instead of querying
+  the child tasks all the time, the calculated data is cached and whenever a
+  TimeLog is created or updated for a child task (which changes the
+  **total_logged_seconds** for the child task) or the **schedule_timing** or
+  **schedule_unit** attributes are updated, the cached values are updated on
+  the parents. Allowing Stalker to display percent_complete info of a container
+  task without loading any of its children.
 * **New:** Added **Task.percent_complete** attribute, which calculates the
   percent of completeness of the task based on the
   **Task.total_logged_seconds** and **Task.schedule_seconds** attributes.
+* **Fix:** Added TimeLog.__eq__() operator to more robustly check if the time
+  logs are overlapping.
 
 0.2.0.rc4
 =========

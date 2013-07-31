@@ -602,7 +602,6 @@ class Entity(SimpleEntity):
     def __eq__(self, other):
         """the equality operator
         """
-
         return super(Entity, self).__eq__(other) and \
                isinstance(other, Entity)
 

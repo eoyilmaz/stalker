@@ -2113,12 +2113,31 @@ class TaskTester(unittest2.TestCase):
 
         self.kwargs.pop('schedule_timing')
         self.kwargs.pop('schedule_unit')
-        parent_task = Task(**self.kwargs)
+        parent_task1 = Task(**self.kwargs)
+        self.assertEqual(parent_task1.total_logged_seconds, 0)
         parent_task2 = Task(**self.kwargs)
+        self.assertEqual(parent_task2.total_logged_seconds, 0)
+
+        # create some other child
+        child = Task(**self.kwargs)
+        self.assertEqual(child.total_logged_seconds, 0)
+        # create a TimeLog for that child
+        tlog1 = TimeLog(
+            task=child,
+            resource=child.resources[0],
+            start=now - td(hours=50),
+            end=now - td(hours=40)
+        )
+        self.assertEqual(child.total_logged_seconds, 10 * 3600)
+        parent_task2.children.append(child)
+        self.assertEqual(parent_task2.total_logged_seconds, 10 * 3600)
 
         # self.test_task.parent = parent_task
-        parent_task.children.append(self.test_task)
-        parent_task.parent = parent_task2
+        parent_task1.children.append(self.test_task)
+        self.assertEqual(parent_task1.total_logged_seconds, 0)
+
+        parent_task1.parent = parent_task2
+        self.assertEqual(parent_task2.total_logged_seconds, 10 * 3600)
 
         self.test_task.time_logs = []
         book1 = TimeLog(
@@ -2129,6 +2148,9 @@ class TaskTester(unittest2.TestCase):
         )
 
         self.assertIn(book1, self.test_task.time_logs)
+        self.assertEqual(self.test_task.total_logged_seconds, 8 * 3600)
+        self.assertEqual(parent_task1.total_logged_seconds, 8 * 3600)
+        self.assertEqual(parent_task2.total_logged_seconds, 18 * 3600)
 
         book2 = TimeLog(
             task=self.test_task,
@@ -2137,8 +2159,8 @@ class TaskTester(unittest2.TestCase):
             end=now + td(hours=12)
         )
         self.assertEqual(self.test_task.total_logged_seconds, 20 * 3600)
-        self.assertEqual(parent_task.total_logged_seconds, 20 * 3600)
-        self.assertEqual(parent_task2.total_logged_seconds, 20 * 3600)
+        self.assertEqual(parent_task1.total_logged_seconds, 20 * 3600)
+        self.assertEqual(parent_task2.total_logged_seconds, 30 * 3600)
 
     def test_total_logged_seconds_attribute_is_working_properly_for_a_container_task_when_the_time_log_of_child_is_changed(self):
         """testing if the total_logged_seconds attribute is working properly
@@ -2396,15 +2418,24 @@ class TaskTester(unittest2.TestCase):
         """
         # no studio, using defaults
         parent_task1 = Task(**self.kwargs)
+        self.assertEqual(parent_task1.schedule_seconds, 9 * 3600)
+
         parent_task2 = Task(**self.kwargs)
+        self.assertEqual(parent_task2.schedule_seconds, 9 * 3600)
+        parent_task2.schedule_timing = 5
+        self.assertEqual(parent_task2.schedule_seconds, 5 * 9 * 3600)
+        parent_task2.schedule_unit = 'h'
+        self.assertEqual(parent_task2.schedule_seconds, 5 * 3600)
+
         parent_task1.parent = parent_task2
+        self.assertEqual(parent_task2.schedule_seconds, 9 * 3600)
 
         # create another child task for parent_task2
         child_task = Task(**self.kwargs)
         child_task.schedule_timing = 10
         child_task.schedule_unit = 'h'
         self.assertEqual(child_task.schedule_seconds, 10 * 3600)
-        self.assertEqual(parent_task2.schedule_seconds, 9 * 3600) # because we have parent_task1
+
         parent_task2.children.append(child_task)
         self.assertEqual(parent_task2.schedule_seconds, 10 * 3600 + 9 * 3600)
 

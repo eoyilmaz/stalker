@@ -48,20 +48,21 @@ CONSTRAIN_BOTH = 3
 
 
 class TimeLog(Entity, ScheduleMixin):
-    """Holds information about the uninterrupted time spend on a specific
+    """Holds information about the uninterrupted time spent on a specific
     :class:`~stalker.models.task.Task` by a specific
     :class:`~stalker.models.auth.User`.
 
-    It is so important to note that the TimeLog reports the uninterrupted time
-    that is spent for a Task. Thus it doesn't care about the working time
-    attributes like daily working hours, weekly working days or anything else.
-    Again it is the uninterrupted time which is spent for a task.
+    It is so important to note that the TimeLog reports the **uninterrupted**
+    time interval that is spent for a Task. Thus it doesn't care about the
+    working time attributes like daily working hours, weekly working days or
+    anything else. Again it is the uninterrupted time which is spent for a
+    task.
 
-    Entering a time log for 2 days will book the resource for 48 hours not,
+    Entering a time log for 2 days will book the resource for 48 hours and not,
     2 * daily working hours.
 
-    TimeLogs are created per resource. It means, you need to record all the 
-    works separately for each resource. So there is only one resource in a 
+    TimeLogs are created per resource. It means, you need to record all the
+    works separately for each resource. So there is only one resource in a
     TimeLog instance.
 
     A :class:`~stalker.models.task.TimeLog` instance needs to be initialized
@@ -71,11 +72,12 @@ class TimeLog(Entity, ScheduleMixin):
     Adding overlapping time log for a :class:`~stalker.models.auth.User` will
     raise a :class:`~stalker.errors.OverBookedError`.
 
-    TimeLog instances automatically extends the
-    :attr:`~stalker.models.task.Task.schedule_timing` of the assigned Task if
-    the :attr:`~stalker.models.task.Task.total_logged_seconds` is getting
-    bigger than the :attr:`~stalker.models.task.Task.schedule_timing` after
-    this TimeLog.
+    .. ::
+      TimeLog instances automatically extends the
+      :attr:`~stalker.models.task.Task.schedule_timing` of the assigned Task if
+      the :attr:`~stalker.models.task.Task.total_logged_seconds` is getting
+      bigger than the :attr:`~stalker.models.task.Task.schedule_timing` after
+      this TimeLog.
 
     :param task: The :class:`~stalker.models.task.Task` instance that this
       time log belongs to.
@@ -185,7 +187,8 @@ class TimeLog(Entity, ScheduleMixin):
                              task.__class__.__name__))
 
         # adjust task schedule
-        self._expand_task_schedule_timing(task)
+        with DBSession.no_autoflush:
+            self._expand_task_schedule_timing(task)
 
         return task
 
@@ -224,10 +227,15 @@ class TimeLog(Entity, ScheduleMixin):
                     )
         return resource
 
+    def __eq__(self, other):
+        """equality of TimeLog instances
+        """
+        return isinstance(other, TimeLog) and self.task is other.task and \
+            self.resource is other.resource and self.start == other.start and \
+            self.end == other.end and self.name == other.name
+
 # TODO: Consider contracting a Task with TimeLogs, what will happen when the task has logged in time
 # TODO: Check, what happens when a task has TimeLogs and will have child task later on, will it be ok with TJ
-# TODO: Create a TimeLog/Resource view where each resource is in one row and we have the days and hours in columns, you can temporarily store the resource report of TJ in db
-# TODO: Task with no resource can not have TimeLogs (I think this is automatically done already!)
 
 
 
@@ -832,17 +840,6 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         self.priority = priority
         self.responsible = responsible
 
-    # @reconstructor
-    # def __init_on_load__(self):
-    #     """initialized the instance variables when the instance created with
-    #     SQLAlchemy
-    #     """
-    #     # TODO : fix this
-    #     # tmp = self.start # just read the start to update them
-    #     # self._reschedule(self.schedule_timing, self.schedule_unit)
-    #     # call supers __init_on_load__
-    #     super(Task, self).__init_on_load__()
-
     def __eq__(self, other):
         """the equality operator
         """
@@ -863,8 +860,9 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
 
         # TODO: convert this to an event
         # update parents total_logged_second attribute
-        if self.parent:
-            self.parent.total_logged_seconds += time_log.total_seconds
+        with DBSession.no_autoflush:
+            if self.parent:
+                    self.parent.total_logged_seconds += time_log.total_seconds
 
         return time_log
 
@@ -1319,7 +1317,8 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
     def is_container(self):
         """Returns True if the Task has children Tasks
         """
-        return bool(len(self.children))
+        with DBSession.no_autoflush:
+            return bool(len(self.children))
 
     @property
     def is_leaf(self):
@@ -1404,14 +1403,16 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
 
         :param seconds: An integer value for the seconds
         """
-        # update parent
-        old_value = 0
-        if self._total_logged_seconds:
-            old_value = self._total_logged_seconds
-        self._total_logged_seconds = seconds
-        if self.parent:
-            self.parent.total_logged_seconds = \
-                self.parent.total_logged_seconds - old_value + seconds
+        # only set for container tasks
+        if self.is_container:
+            # update parent
+            old_value = 0
+            if self._total_logged_seconds:
+                old_value = self._total_logged_seconds
+            self._total_logged_seconds = seconds
+            if self.parent:
+                self.parent.total_logged_seconds = \
+                    self.parent.total_logged_seconds - old_value + seconds
 
     total_logged_seconds = synonym(
         '_total_logged_seconds',
@@ -1424,9 +1425,10 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
     def _calculate_seconds(self, timing, unit):
         """Calculates the seconds from the timing and unit values
 
-        :param timing: 
-        :param unit: 
-        :return:
+        :param float timing: The timing value as an float
+        :param str unit: A string which has a value one of 'min', 'h', 'd',
+          'w', 'm', 'y' showing the timing unit
+        :return int: An integer value showing the total seconds
         """
         if not timing:
             return 0
