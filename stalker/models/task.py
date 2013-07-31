@@ -227,7 +227,7 @@ class TimeLog(Entity, ScheduleMixin):
 # TODO: Consider contracting a Task with TimeLogs, what will happen when the task has logged in time
 # TODO: Check, what happens when a task has TimeLogs and will have child task later on, will it be ok with TJ
 # TODO: Create a TimeLog/Resource view where each resource is in one row and we have the days and hours in columns, you can temporarily store the resource report of TJ in db
-# TODO: Task with no resource can not have booking (I think this is automatically done already!)
+# TODO: Task with no resource can not have TimeLogs (I think this is automatically done already!)
 
 
 
@@ -643,6 +643,7 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         yet.
         """
     )
+
     computed_end = Column(
         DateTime,
         doc="""A :class:`~datetime.datetime` instance showing the end value
@@ -666,13 +667,13 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         """
     )
 
-    _schedule_timing = Column(
+    schedule_timing = Column(
         Float, nullable=True, default=0,
         doc="""It is the value of the schedule timing. It is a float value.
         """
     )
 
-    _schedule_unit = Column(
+    schedule_unit = Column(
         Enum(*defaults.datetime_units, name='TaskScheduleUnit'),
         nullable=False, default='h',
         doc="""It is the unit of the schedule timing. It is a string value. And
@@ -751,10 +752,13 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
     )
 
     _schedule_seconds = Column(
-        Integer, nullable=True, doc='cache column for schedule_seconds'
+        Integer, nullable=True, default=0,
+        doc='cache column for schedule_seconds'
     )
+
     _total_logged_seconds = Column(
-        Integer, nullable=True, doc='cache column for total_logged_seconds'
+        Integer, nullable=True, default=0,
+        doc='cache column for total_logged_seconds'
     )
 
     def __init__(self,
@@ -857,6 +861,7 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
                 "of stalker.models.task.TimeLog not %s instance" %
                 (self.__class__.__name__, time_log.__class__.__name__))
 
+        # TODO: convert this to an event
         # update parents total_logged_second attribute
         if self.parent:
             self.parent.total_logged_seconds += time_log.total_seconds
@@ -894,7 +899,8 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
                 parent = parent.parent
         return depends
 
-    def _validate_schedule_timing(self, schedule_timing):
+    @validates('schedule_timing')
+    def _validate_schedule_timing(self, key, schedule_timing):
         """validates the given schedule_timing
         """
         if schedule_timing is None:
@@ -909,43 +915,13 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
                     schedule_timing.__class__.__name__)
             )
 
+        # reschedule
+        self._reschedule(schedule_timing, self.schedule_unit)
+
         return schedule_timing
 
-    def _schedule_timing_getter(self):
-        """returns the _schedule_timing attribute value
-        """
-        return self._schedule_timing
-
-    def _schedule_timing_setter(self, schedule_timing):
-        """sets the _schedule_timing attribute value
-
-        :param schedule_timing: a float value showing the schedule timing
-        :return: None
-        """
-        old_schedule_seconds = 0
-        if self.schedule_seconds:
-            old_schedule_seconds = self.schedule_seconds
-
-        self._schedule_timing = self._validate_schedule_timing(schedule_timing)
-
-        # reschedule
-        self._reschedule(self._schedule_timing, self.schedule_unit)
-
-        # update parents schedule_seconds attribute
-        if self.parent:
-            self.parent.schedule_seconds = \
-                self.parent.schedule_seconds - old_schedule_seconds + \
-                self.schedule_seconds
-
-    schedule_timing = synonym(
-        '_schedule_timing',
-        descriptor=property(
-            _schedule_timing_getter,
-            _schedule_timing_setter
-        )
-    )
-
-    def _validate_schedule_unit(self, schedule_unit):
+    @validates('schedule_unit')
+    def _validate_schedule_unit(self, key, schedule_unit):
         """validates the given schedule_unit
         """
         if schedule_unit is None:
@@ -967,32 +943,10 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
                     self.__class__.__name__, schedule_unit.__class__.__name__)
             )
 
-        return schedule_unit
-
-    def _schedule_unit_getter(self):
-        """returns the _schedule_unit attribute value
-        """
-        return self._schedule_unit
-
-    def _schedule_unit_setter(self, schedule_unit):
-        """Sets the schedule_unit attribute value
-
-        :param str schedule_unit: one of 'min', 'h', 'd', 'w', 'm', 'y'
-        :return: None
-        """
-        self._schedule_unit = self._validate_schedule_unit(schedule_unit)
-
-        # reschedule
         if self.schedule_timing:
             self._reschedule(self.schedule_timing, schedule_unit)
 
-    schedule_unit = synonym(
-        '_schedule_unit',
-        descriptor=property(
-            _schedule_unit_getter,
-            _schedule_unit_setter,
-        )
-    )
+        return schedule_unit
 
     @validates('schedule_model')
     def _validate_schedule_model(self, key, schedule_model):
@@ -1090,17 +1044,23 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
             check_circular_dependency(self, parent, 'children')
             check_circular_dependency(self, parent, 'depends')
 
-            # if there is a current parent, remove current schedule_seconds
-            # value from the parent
-            if self.parent:
-                self.parent.schedule_seconds = \
-                    self.parent.schedule_seconds - self.schedule_seconds
-                self.parent.total_logged_seconds = \
-                    self.parent.total_logged_seconds - self.total_logged_seconds
+        old_parent = self.parent
+        new_parent = parent
 
-            # update the new parent
-            parent.schedule_seconds = parent.schedule_seconds + self.schedule_seconds
-            parent.total_logged_seconds = parent.total_logged_seconds + self.total_logged_seconds
+        if old_parent:
+            old_parent.schedule_seconds -= self.schedule_seconds
+            old_parent.total_logged_seconds -= self.total_logged_seconds
+
+        # update the new parent
+        if new_parent:
+            # if the new parent was a leaf task before this attachment
+            # set schedule_seconds to 0
+            if new_parent.is_leaf:
+                new_parent.schedule_seconds = self.schedule_seconds
+                new_parent.total_logged_seconds = self.total_logged_seconds
+            else:
+                new_parent.schedule_seconds += self.schedule_seconds
+                new_parent.total_logged_seconds += self.total_logged_seconds
 
         return parent
 
@@ -1185,6 +1145,20 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         # do it without a flush
         with DBSession.no_autoflush:
             self.resources = []
+
+            # if this is the first ever child we receive
+            # set total_scheduled_seconds to child's total_logged_seconds
+            # and set schedule_seconds to child's schedule_seconds
+            if self.is_leaf:
+                # remove info from parent
+                old_schedule_seconds = self.schedule_seconds
+                self._total_logged_seconds = child.total_logged_seconds
+                self._schedule_seconds = child.schedule_seconds
+                # got a parent ?
+                if self.parent:
+                    # update schedule_seconds
+                    self.parent._schedule_seconds -= old_schedule_seconds
+                    self.parent._schedule_seconds += child.schedule_seconds
 
         return child
 
@@ -1329,7 +1303,7 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
             _project_getter
         ),
         doc="""The owner Project of this task.
-        
+
         It is a read-only attribute. It is not possible to change the owner
         Project of a Task it is defined when the Task is created.
         """
@@ -1419,10 +1393,8 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
                 for time_log in self.time_logs:
                     seconds += time_log.total_seconds
             else:
-                #for child in self.children:
-                #    seconds += child.total_logged_seconds
                 if self._total_logged_seconds is None:
-                    self._update_schedule_seconds()
+                    self.update_schedule_info()
                 return self._total_logged_seconds
         return seconds
 
@@ -1456,6 +1428,9 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         :param unit: 
         :return:
         """
+        if not timing:
+            return 0
+
         from stalker import Studio
 
         # for leaf tasks do it normally
@@ -1491,6 +1466,8 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
                 data_source.yearly_working_days * \
                 data_source.daily_working_hours * 3600
 
+        return 0
+
     def _schedule_seconds_getter(self):
         """returns the total effort, length or duration in seconds, for
         completeness calculation
@@ -1498,7 +1475,7 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         # for container tasks use the children schedule_seconds attribute
         if self.is_container:
             if self._schedule_seconds is None:
-                self._update_schedule_seconds()
+                self.update_schedule_info()
             return self._schedule_seconds
         else:
             schedule_timing = self.schedule_timing
@@ -1536,13 +1513,17 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         )
     )
 
-    def _update_schedule_seconds(self):
-        """updates the total_logged_seconds and schedule_seconds attributes
+    def update_schedule_info(self):
+        """updates the total_logged_seconds and schedule_seconds attributes by
+        using the children info and triggers an update on every children
         """
-        total_logged_seconds = 0
-        schedule_seconds = 0
         if self.is_container:
+            total_logged_seconds = 0
+            schedule_seconds = 0
             for child in self.children:
+                # update children if they are a container task
+                if child.is_container:
+                    child.update_schedule_info()
                 if child.schedule_seconds:
                     schedule_seconds += child.schedule_seconds
                 if child.total_logged_seconds:
@@ -1560,7 +1541,7 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         if self.is_container:
             if self.total_logged_seconds is None or \
                self.schedule_seconds is None:
-                self._update_schedule_seconds()
+                self.update_schedule_info()
         return self.total_logged_seconds / self.schedule_seconds * 100
 
     @property
@@ -1639,42 +1620,48 @@ Task_Watchers = Table(
     Column("watcher_id", Integer, ForeignKey("Users.id"), primary_key=True)
 )
 
+# *****************************************************************************
 # Register Events
+# *****************************************************************************
+
+# *****************************************************************************
+# TimeLog updates the owner tasks parents total_logged_seconds attribute
+# with new duration
 @event.listens_for(TimeLog._start, 'set')
-def update_time_log_task_parents_for_start(tlog, start, old_start, initiator):
+def update_time_log_task_parents_for_start(tlog, new_start, old_start, initiator):
     """Updates the parent task of the task related to the time_log when the
-    start or end values are changed
+    new_start or end values are changed
 
     :param tlog: The TimeLog instance
-    :param start: The datetime.datetime instance showing the new value
+    :param new_start: The datetime.datetime instance showing the new value
     :param old_start: The datetime.datetime instance showing the old value
     :param initiator: not used
     :return: None
     """
-    logger.debug('Received set event for start in target : %s' % tlog)
-    if tlog.end and old_start and start:
+    logger.debug('Received set event for new_start in target : %s' % tlog)
+    if tlog.end and old_start and new_start:
         old_duration = tlog.end - old_start
-        new_duration = tlog.end - start
-        __update_total_logged_seconds_cache__(tlog, old_duration, new_duration)
+        new_duration = tlog.end - new_start
+        __update_total_logged_seconds__(tlog, new_duration, old_duration)
 
 @event.listens_for(TimeLog._end, 'set')
-def update_time_log_task_parents_for_end(tlog, end, old_end, initiator):
+def update_time_log_task_parents_for_end(tlog, new_end, old_end, initiator):
     """Updates the parent task of the task related to the time_log when the
-    start or end values are changed
+    start or new_end values are changed
 
     :param tlog: The TimeLog instance
-    :param end: The datetime.datetime instance showing the new value
+    :param new_end: The datetime.datetime instance showing the new value
     :param old_end: The datetime.datetime instance showing the old value
     :param initiator: not used
     :return: None
     """
-    logger.debug('received set event for end in target : %s' % tlog)
-    if tlog.start and old_end and end:
+    logger.debug('received set event for new_end in target : %s' % tlog)
+    if tlog.start and old_end and new_end:
         old_duration = old_end - tlog.start
-        new_duration = end - tlog.start
-        __update_total_logged_seconds_cache__(tlog, old_duration, new_duration)
+        new_duration = new_end - tlog.start
+        __update_total_logged_seconds__(tlog, new_duration, old_duration)
 
-def __update_total_logged_seconds_cache__(tlog, old_duration, new_duration):
+def __update_total_logged_seconds__(tlog, new_duration, old_duration):
     """Updates the given parent tasks total_logged_seconds attribute with the
     new duration
 
@@ -1702,3 +1689,94 @@ def __update_total_logged_seconds_cache__(tlog, old_duration, new_duration):
             logger.debug("TimeLog.task doesn't have a parent:")
     else:
         logger.debug("TimeLog doesn't have a task yet: %s" % tlog)
+
+
+# *****************************************************************************
+# Task.schedule_timing updates Task.parent.schedule_seconds attribute
+# *****************************************************************************
+@event.listens_for(Task.schedule_timing, 'set')
+def update_parents_schedule_seconds_with_schedule_timing(
+        task, new_schedule_timing, old_schedule_timing, initiator):
+    """Updates the parent tasks schedule_seconds attribute when the
+    schedule_timing attribute is updated on a task
+
+    :param task: The base task
+    :param new_schedule_timing: an integer showing the schedule_timing of the
+      task
+    :param old_schedule_timing: the old value of schedule_timing
+    :param initiator: not used
+    :return: None
+    """
+    # update parents schedule_seconds attribute
+    if task.parent:
+        old_schedule_seconds = task._calculate_seconds(
+            old_schedule_timing, task.schedule_unit
+        )
+        new_schedule_seconds = task._calculate_seconds(
+            new_schedule_timing, task.schedule_unit
+        )
+        # remove the old and add the new one
+        task.parent.schedule_seconds = \
+            task.parent.schedule_seconds - old_schedule_seconds + \
+            new_schedule_seconds
+
+# *****************************************************************************
+# Task.schedule_unit updates Task.parent.schedule_seconds attribute
+# *****************************************************************************
+@event.listens_for(Task.schedule_unit, 'set')
+def update_parents_schedule_seconds_with_schedule_unit(
+        task, new_schedule_unit, old_schedule_unit, initiator):
+    """Updates the parent tasks schedule_seconds attribute when the
+    new_schedule_unit attribute is updated on a task
+
+    :param task: The base task that the schedule unit is updated of
+    :param new_schedule_unit: a string with a value of 'min', 'h', 'd', 'w', 'm' or
+      'y' showing the timing unit.
+    :param old_schedule_unit: the old value of new_schedule_unit
+    :param initiator: not used
+    :return: None
+    """
+    # update parents schedule_seconds attribute
+    if task.parent:
+        schedule_timing = 0
+        if task.schedule_timing:
+            schedule_timing = task.schedule_timing
+        old_schedule_seconds = task._calculate_seconds(
+            schedule_timing, old_schedule_unit
+        )
+        new_schedule_seconds = task._calculate_seconds(
+            schedule_timing, new_schedule_unit
+        )
+        # remove the old and add the new one
+        parent_schedule_seconds = 0
+        if task.parent.schedule_seconds:
+            parent_schedule_seconds = task.parent.schedule_seconds
+        task.parent.schedule_seconds = \
+            parent_schedule_seconds - old_schedule_seconds + \
+            new_schedule_seconds
+
+# # *****************************************************************************
+# # Task.schedule_seconds updates Task.parent.schedule_seconds attribute
+# # *****************************************************************************
+# @event.listens_for(Task.schedule_seconds, 'set')
+# def update_parents_schedule_seconds_with_schedule_schedule_seconds(
+#         task, new_schedule_seconds, old_schedule_seconds, initiator):
+#     """Updates the parent tasks schedule_seconds attribute when the
+#     schedule_seconds attribute of a container task is changed
+# 
+#     :param task: The base task that the schedule unit is updated of
+#     :param new_schedule_seconds: an integer value showing the new value of the
+#       schedule seconds.
+#     :param old_schedule_seconds: the old value of schedule_unit
+#     :param initiator: not used
+#     :return: None
+#     """
+#     # check if this task is a container
+#     if task.is_container:
+#         # update parents schedule_seconds attribute
+#         if task.parent:
+#             # remove the old and add the new one
+#             task.parent.schedule_seconds = \
+#                 task.parent.schedule_seconds - old_schedule_seconds + \
+#                 new_schedule_seconds
+
