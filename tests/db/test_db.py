@@ -592,12 +592,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         """
         logger.setLevel(log.logging_level)
 
-        name = 'Test TimeLog'
         description = 'this is a time log'
-        created_by = None
-        updated_by = None
-        date_created = datetime.datetime.now()
-        date_updated = datetime.datetime.now()
         start = datetime.datetime(2013, 1, 10)
         end = datetime.datetime(2013, 1, 13)
 
@@ -671,23 +666,25 @@ class DatabaseModelsTester(unittest2.TestCase):
             task=test_task,
             resource=user1,
             start=datetime.datetime(2013, 1, 10),
-            end=datetime.datetime(2013, 1, 13)
+            end=datetime.datetime(2013, 1, 13),
+            description=description
         )
 
-    #        DBSession.add(test_time_log)
-    #        DBSession.commit()
-    #        
-    #        del test_time_log
-    #        
-    #        # now retrieve it back
-    #        test_time_log_DB = TimeLog.query.filter_by(name=name).first()
-    #        
-    #        self.assertEqual(date_created, test_time_log_DB.date_created)
-    #        self.assertEqual(date_updated, test_time_log_DB.date_updated)
-    #        self.assertEqual(start, test_time_log_DB.start)
-    #        self.assertEqual(end, test_time_log_DB.end)
-    #        self.assertEqual(user1, test_time_log_DB.user1)
+        DBSession.add(test_time_log)
+        DBSession.commit()
 
+        id = test_time_log.id
+
+        del test_time_log
+
+        # now retrieve it back
+        test_time_log_DB = TimeLog.query.filter_by(id=id).first()
+
+        self.assertEqual(description, test_time_log_DB.description)
+        self.assertEqual(start, test_time_log_DB.start)
+        self.assertEqual(end, test_time_log_DB.end)
+        self.assertEqual(user1, test_time_log_DB.resource)
+        self.assertEqual(test_task, test_time_log_DB.task)
 
     def test_persistence_of_Department(self):
         """testing the persistence of Department
@@ -2200,14 +2197,14 @@ class DatabaseModelsTester(unittest2.TestCase):
         daily_working_hours = test_studio.daily_working_hours
         timing_resolution = test_studio._timing_resolution
         working_hours = test_studio.working_hours
-        now = test_studio.now
+        # now = test_studio.now
 
         del test_studio
 
         # get it back
         test_studio_DB = Studio.query.first()
 
-        self.assertEqual(now, test_studio_DB.now)
+        # self.assertEqual(now, test_studio_DB.now)
         self.assertEqual(name, test_studio_DB.name)
         self.assertEqual(daily_working_hours,
                          test_studio_DB.daily_working_hours)
@@ -2791,4 +2788,4 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(updated_by, test_version_DB.updated_by)
         self.assertEqual(version_number, test_version_DB.version_number)
         self.assertEqual(task, test_version_DB.task)
-   
+
