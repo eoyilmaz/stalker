@@ -258,6 +258,7 @@ class ProjectTester(unittest2.TestCase):
             code='Seq1',
             project=self.test_project,
             status_list=self.sequence_status_list,
+            resources=[self.test_user1]
         )
 
         self.test_seq2 = Sequence(
@@ -265,6 +266,7 @@ class ProjectTester(unittest2.TestCase):
             code='Seq2',
             project=self.test_project,
             status_list=self.sequence_status_list,
+            resources=[self.test_user2]
         )
 
         self.test_seq3 = Sequence(
@@ -272,6 +274,7 @@ class ProjectTester(unittest2.TestCase):
             code='Seq3',
             project=self.test_project,
             status_list=self.sequence_status_list,
+            resources=[self.test_user3]
         )
 
         # sequences with tasks
@@ -373,6 +376,7 @@ class ProjectTester(unittest2.TestCase):
             type=self.asset_type,
             project=self.test_project,
             status_list=self.asset_status_list,
+            resources=[self.test_user2]
         )
 
         self.test_asset2 = Asset(
@@ -495,6 +499,7 @@ class ProjectTester(unittest2.TestCase):
             parent=self.test_shot1,
             resources=[self.test_user10],
             status_list=self.task_status_list,
+            schedule_timing=10
         )
 
         self.test_task11 = Task(
@@ -620,6 +625,55 @@ class ProjectTester(unittest2.TestCase):
             resources=[self.test_user10, self.test_user1],
             status_list=self.task_status_list,
         )
+
+        # final task hierarchy
+        # test_seq1
+        # test_seq2
+        # test_seq3
+        #
+        # test_seq4
+        #     test_task4
+        #     test_task5
+        #     test_task6
+        # test_seq5
+        #     test_task7
+        #     test_task8
+        #     test_task9
+        # test_seq6
+        # test_seq7
+        #
+        # test_shot1
+        #     test_task10
+        #     test_task11
+        #     test_task12
+        # test_shot2
+        #     test_task13
+        #     test_task14
+        #     test_task15
+        # test_shot3
+        #     test_task16
+        #     test_task17
+        #     test_task18
+        # test_shot4
+        #     test_task19
+        #     test_task20
+        #     test_task21
+        #
+        # test_asset1
+        # test_asset2
+        # test_asset3
+        # test_asset4
+        #     test_task22
+        #     test_task23
+        #     test_task24
+        # test_asset5
+        #     test_task25
+        #     test_task26
+        #     test_task27
+        #
+        # test_task1
+        # test_task2
+        # test_task3
 
         DBSession.add(self.test_project)
         DBSession.commit()
@@ -1538,3 +1592,163 @@ class ProjectTester(unittest2.TestCase):
 
         self.test_project.active = False
         self.assertEqual(self.test_project.is_active, False)
+
+    def test_total_logged_seconds_attribute_is_read_only(self):
+        """testing if the total_logged_seconds attribute is a read-only
+        attribute
+        """
+        self.assertRaises(AttributeError, setattr, self.test_project,
+                          'total_logged_seconds', 32.3)
+
+    def test_total_logged_seconds_is_0_for_a_project_with_no_child_tasks(self):
+        """testing if the total_logged_seconds
+        """
+        new_project = Project(**self.kwargs)
+        self.assertEqual(new_project.total_logged_seconds, 0)
+
+    def test_total_logged_seconds_attribute_is_working_properly(self):
+        """testing if the total_logged_seconds attribute is working properly
+        """
+        # create some time logs
+        from stalker import TimeLog
+        tlog1 = TimeLog(
+            task=self.test_task1,
+            resource=self.test_task1.resources[0],
+            start=datetime.datetime(2013, 8, 1, 1, 0),
+            duration=datetime.timedelta(hours=1)
+        )
+        self.assertEqual(self.test_project.total_logged_seconds, 3600)
+
+        # add more time logs
+        tlog2 = TimeLog(
+            task=self.test_seq1,
+            resource=self.test_seq1.resources[0],
+            start=datetime.datetime(2013, 8, 1, 2, 0),
+            duration=datetime.timedelta(hours=1)
+        )
+        self.assertEqual(self.test_project.total_logged_seconds, 7200)
+
+        # create more deeper time logs
+        tlog3 = TimeLog(
+            task=self.test_task10,
+            resource=self.test_task10.resources[0],
+            start=datetime.datetime(2013, 8, 1, 3, 0),
+            duration=datetime.timedelta(hours=3)
+        )
+        self.assertEqual(self.test_project.total_logged_seconds, 18000)
+
+        # create a time log for one asset
+        tlog4 = TimeLog(
+            task=self.test_asset1,
+            resource=self.test_asset1.resources[0],
+            start=datetime.datetime(2013, 8, 1, 6, 0),
+            duration=datetime.timedelta(hours=10)
+        )
+        self.assertEqual(self.test_project.total_logged_seconds, 15 * 3600)
+
+    def test_schedule_seconds_attribute_is_read_only(self):
+        """testing if the schedule_seconds is a read-only attribute
+        """
+        self.assertRaises(AttributeError, setattr, self.test_project,
+                          'schedule_seconds', 3)
+
+    def test_schedule_seconds_attribute_value_is_0_for_a_project_with_no_tasks(self):
+        """testing if the schedule_seconds attribute value is 0 for a project
+        with no tasks
+        """
+        new_project = Project(**self.kwargs)
+        self.assertEqual(new_project.schedule_seconds, 0)
+
+    def test_schedule_seconds_attribute_is_working_properly(self):
+        """testing if the schedule_seconds attribute value is gathered from the
+        child tasks
+        """
+        self.assertTrue(self.test_shot1.is_container)
+        self.assertEqual(self.test_task10.parent, self.test_shot1)
+
+        self.assertEqual(self.test_seq1.schedule_seconds, 3600)
+        self.assertEqual(self.test_seq2.schedule_seconds, 3600)
+        self.assertEqual(self.test_seq3.schedule_seconds, 3600)
+        self.assertEqual(self.test_seq4.schedule_seconds, 3 * 3600)
+        self.assertEqual(self.test_seq5.schedule_seconds, 3 * 3600)
+        self.assertEqual(self.test_seq6.schedule_seconds, 3600)
+        self.assertEqual(self.test_seq7.schedule_seconds, 3600)
+
+        self.assertEqual(self.test_shot1.schedule_seconds, 12 * 3600)
+        self.assertEqual(self.test_shot2.schedule_seconds, 3 * 3600)
+        self.assertEqual(self.test_shot3.schedule_seconds, 3 * 3600)
+        self.assertEqual(self.test_shot4.schedule_seconds, 3 * 3600)
+
+        self.assertEqual(self.test_asset1.schedule_seconds, 3600)
+        self.assertEqual(self.test_asset2.schedule_seconds, 3600)
+        self.assertEqual(self.test_asset3.schedule_seconds, 3600)
+        self.assertEqual(self.test_asset4.schedule_seconds, 3 * 3600)
+        self.assertEqual(self.test_asset5.schedule_seconds, 3 * 3600)
+
+        self.assertEqual(self.test_task1.schedule_seconds, 3600)
+        self.assertEqual(self.test_task2.schedule_seconds, 3600)
+        self.assertEqual(self.test_task3.schedule_seconds, 3600)
+        self.assertEqual(self.test_task4.schedule_seconds, 3600)
+        self.assertEqual(self.test_task5.schedule_seconds, 3600)
+        self.assertEqual(self.test_task6.schedule_seconds, 3600)
+        self.assertEqual(self.test_task7.schedule_seconds, 3600)
+        self.assertEqual(self.test_task8.schedule_seconds, 3600)
+        self.assertEqual(self.test_task9.schedule_seconds, 3600)
+        self.assertEqual(self.test_task10.schedule_seconds, 10 * 3600)
+        self.assertEqual(self.test_task11.schedule_seconds, 3600)
+        self.assertEqual(self.test_task12.schedule_seconds, 3600)
+        self.assertEqual(self.test_task13.schedule_seconds, 3600)
+        self.assertEqual(self.test_task14.schedule_seconds, 3600)
+        self.assertEqual(self.test_task15.schedule_seconds, 3600)
+        self.assertEqual(self.test_task16.schedule_seconds, 3600)
+        self.assertEqual(self.test_task17.schedule_seconds, 3600)
+        self.assertEqual(self.test_task18.schedule_seconds, 3600)
+        self.assertEqual(self.test_task19.schedule_seconds, 3600)
+        self.assertEqual(self.test_task20.schedule_seconds, 3600)
+        self.assertEqual(self.test_task21.schedule_seconds, 3600)
+        self.assertEqual(self.test_task22.schedule_seconds, 3600)
+        self.assertEqual(self.test_task23.schedule_seconds, 3600)
+        self.assertEqual(self.test_task24.schedule_seconds, 3600)
+        self.assertEqual(self.test_task25.schedule_seconds, 3600)
+        self.assertEqual(self.test_task26.schedule_seconds, 3600)
+        self.assertEqual(self.test_task27.schedule_seconds, 3600)
+
+        self.assertEqual(self.test_project.schedule_seconds, 44 * 3600)
+
+
+    def test_percent_complete_attribute_is_read_only(self):
+        """testing if the percent_complete is a read-only attribute
+        """
+        self.assertRaises(AttributeError, setattr, self.test_project,
+                          'percent_complete', 32.3)
+
+    def test_percent_complete_is_0_for_a_project_with_no_tasks(self):
+        """testing if the percent_complete attribute value is 0 for a project
+        with no tasks
+        """
+        new_project = Project(**self.kwargs)
+        self.assertEqual(new_project.percent_complete, 0)
+
+    def test_percent_complete_attribute_is_working_properly(self):
+        """testing if the percent_complete attribute is working properly
+        """
+        self.assertEqual(self.test_project.percent_complete, 0)
+
+        self.assertTrue(self.test_shot1.is_container)
+        self.assertEqual(self.test_task10.parent, self.test_shot1)
+        self.assertEqual(self.test_task10.schedule_seconds, 36000)
+        self.assertEqual(self.test_task11.schedule_seconds, 3600)
+        self.assertEqual(self.test_task12.schedule_seconds, 3600)
+        self.assertEqual(self.test_shot1.schedule_seconds, 12 * 3600)
+
+
+        # create some time logs
+        from stalker import TimeLog
+        tlog1 = TimeLog(
+            task=self.test_task1,
+            resource=self.test_task1.resources[0],
+            start=datetime.datetime(2013, 8, 1, 1, 0),
+            duration=datetime.timedelta(hours=1)
+        )
+
+        self.assertEqual(self.test_project.percent_complete, (1.0 / 44.0 * 100))

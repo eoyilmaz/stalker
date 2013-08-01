@@ -19,6 +19,8 @@ Stalker Changes
   **Task.total_logged_seconds** and **Task.schedule_seconds** attributes.
 * **Fix:** Added TimeLog.__eq__() operator to more robustly check if the time
   logs are overlapping.
+* **New:** Added **Project.percent_complete**,
+  **Percent.total_logged_seconds** and **Project.schedule_seconds** attributes.
 
 0.2.0.rc4
 =========

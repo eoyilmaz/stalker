@@ -397,6 +397,56 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
         """predicate for Project.active attribute
         """
         return self.active
+    
+    @property
+    def total_logged_seconds(self):
+        """returns an integer representing the total TimeLog seconds recorded
+        in child tasks.
+        """
+        total_logged_seconds = 0
+        for task in self.root_tasks:
+            if task.total_logged_seconds is None:
+                task.update_schedule_info()
+
+            logger.debug('task                         : %s' % task.name)
+            logger.debug('task.total_logged_seconds    : %s' % task.total_logged_seconds)
+            logger.debug('task.schedule_seconds        : %s' % task.schedule_seconds)
+
+            total_logged_seconds += task.total_logged_seconds
+        return total_logged_seconds
+
+    @property
+    def schedule_seconds(self):
+        """returns an integer showing the total amount of schedule timing of
+        the in child tasks in seconds
+        """
+        schedule_seconds = 0
+        for task in self.root_tasks:
+            if task.schedule_seconds is None:
+                task.update_schedule_info()
+
+            logger.debug('task                         : %s' % task.name)
+            logger.debug('task.total_logged_seconds    : %s' % task.total_logged_seconds)
+            logger.debug('task.schedule_seconds        : %s' % task.schedule_seconds)
+
+            schedule_seconds += task.schedule_seconds
+
+        logger.debug('project.schedule_seconds     : %s' % schedule_seconds)
+
+        return schedule_seconds
+
+    @property
+    def percent_complete(self):
+        """returns the percent_complete based on the total_logged_seconds and
+        schedule_seconds of the root tasks.
+        """
+        total_logged_seconds = self.total_logged_seconds
+        schedule_seconds = self.schedule_seconds
+        if schedule_seconds > 0:
+            return total_logged_seconds / schedule_seconds * 100
+        else:
+            return 0
+
 
 # PROJECT_USERS
 Project_Users = Table(

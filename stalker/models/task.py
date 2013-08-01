@@ -760,12 +760,12 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
     )
 
     _schedule_seconds = Column(
-        Integer, nullable=True, default=0,
+        Integer, nullable=True,
         doc='cache column for schedule_seconds'
     )
 
     _total_logged_seconds = Column(
-        Integer, nullable=True, default=0,
+        Integer, nullable=True,
         doc='cache column for total_logged_seconds'
     )
 
@@ -778,7 +778,7 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
                  watchers=None,
                  start=None,
                  end=None,
-                 schedule_timing=None,
+                 schedule_timing=1,
                  schedule_unit='h',
                  schedule_model=None,
                  schedule_constraint=0,
@@ -1476,7 +1476,7 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         """
         # for container tasks use the children schedule_seconds attribute
         if self.is_container:
-            if self._schedule_seconds is None:
+            if self._schedule_seconds is None or self._schedule_seconds < 0:
                 self.update_schedule_info()
             return self._schedule_seconds
         else:
@@ -1522,6 +1522,7 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         if self.is_container:
             total_logged_seconds = 0
             schedule_seconds = 0
+            logger.debug('updating schedule info for : %s' % self.name)
             for child in self.children:
                 # update children if they are a container task
                 if child.is_container:
@@ -1696,7 +1697,7 @@ def __update_total_logged_seconds__(tlog, new_duration, old_duration):
 # *****************************************************************************
 # Task.schedule_timing updates Task.parent.schedule_seconds attribute
 # *****************************************************************************
-@event.listens_for(Task.schedule_timing, 'set')
+@event.listens_for(Task.schedule_timing, 'set', propagate=True)
 def update_parents_schedule_seconds_with_schedule_timing(
         task, new_schedule_timing, old_schedule_timing, initiator):
     """Updates the parent tasks schedule_seconds attribute when the
@@ -1725,7 +1726,7 @@ def update_parents_schedule_seconds_with_schedule_timing(
 # *****************************************************************************
 # Task.schedule_unit updates Task.parent.schedule_seconds attribute
 # *****************************************************************************
-@event.listens_for(Task.schedule_unit, 'set')
+@event.listens_for(Task.schedule_unit, 'set', propagate=True)
 def update_parents_schedule_seconds_with_schedule_unit(
         task, new_schedule_unit, old_schedule_unit, initiator):
     """Updates the parent tasks schedule_seconds attribute when the
@@ -1756,29 +1757,3 @@ def update_parents_schedule_seconds_with_schedule_unit(
         task.parent.schedule_seconds = \
             parent_schedule_seconds - old_schedule_seconds + \
             new_schedule_seconds
-
-# # *****************************************************************************
-# # Task.schedule_seconds updates Task.parent.schedule_seconds attribute
-# # *****************************************************************************
-# @event.listens_for(Task.schedule_seconds, 'set')
-# def update_parents_schedule_seconds_with_schedule_schedule_seconds(
-#         task, new_schedule_seconds, old_schedule_seconds, initiator):
-#     """Updates the parent tasks schedule_seconds attribute when the
-#     schedule_seconds attribute of a container task is changed
-# 
-#     :param task: The base task that the schedule unit is updated of
-#     :param new_schedule_seconds: an integer value showing the new value of the
-#       schedule seconds.
-#     :param old_schedule_seconds: the old value of schedule_unit
-#     :param initiator: not used
-#     :return: None
-#     """
-#     # check if this task is a container
-#     if task.is_container:
-#         # update parents schedule_seconds attribute
-#         if task.parent:
-#             # remove the old and add the new one
-#             task.parent.schedule_seconds = \
-#                 task.parent.schedule_seconds - old_schedule_seconds + \
-#                 new_schedule_seconds
-

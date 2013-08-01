@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
 
+# TODO: Add handles_at_start and handles_at_end attributes
 class Shot(Task, CodeMixin):
     """Manages Shot related data.
 
@@ -228,17 +229,6 @@ class Shot(Task, CodeMixin):
         self._cut_out = cut_out
 
         self._update_cut_info(cut_in, cut_duration, cut_out)
-
-    # @reconstructor
-    # def __init_on_load__(self):
-    #     """initialized the instance variables when the instance created with
-    #     SQLAlchemy
-    #     """
-    #     self._cut_duration = None
-    #     self._update_cut_info(self._cut_in, self._cut_duration, self._cut_out)
-    # 
-    #     # call supers __init_on_load__
-    #     super(Shot, self).__init_on_load__()
 
     def __repr__(self):
         """the representation of the Shot
