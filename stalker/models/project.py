@@ -407,12 +407,10 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
         for task in self.root_tasks:
             if task.total_logged_seconds is None:
                 task.update_schedule_info()
-
-            logger.debug('task                         : %s' % task.name)
-            logger.debug('task.total_logged_seconds    : %s' % task.total_logged_seconds)
-            logger.debug('task.schedule_seconds        : %s' % task.schedule_seconds)
-
             total_logged_seconds += task.total_logged_seconds
+
+        logger.debug('project.total_logged_seconds     : %s' % total_logged_seconds)
+
         return total_logged_seconds
 
     @property
@@ -424,11 +422,6 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
         for task in self.root_tasks:
             if task.schedule_seconds is None:
                 task.update_schedule_info()
-
-            logger.debug('task                         : %s' % task.name)
-            logger.debug('task.total_logged_seconds    : %s' % task.total_logged_seconds)
-            logger.debug('task.schedule_seconds        : %s' % task.schedule_seconds)
-
             schedule_seconds += task.schedule_seconds
 
         logger.debug('project.schedule_seconds     : %s' % schedule_seconds)
