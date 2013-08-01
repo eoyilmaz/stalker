@@ -1279,18 +1279,24 @@ class ProjectTester(unittest2.TestCase):
                 task Sequence_29 "Seq1" {
         
             
+            effort 1.0h
+            allocate User_1
         }
         
             
                 task Sequence_30 "Seq2" {
         
             
+            effort 1.0h
+            allocate User_8
         }
         
             
                 task Sequence_31 "Seq3" {
         
             
+            effort 1.0h
+            allocate User_9
         }
         
             
@@ -1363,7 +1369,7 @@ class ProjectTester(unittest2.TestCase):
                 task Task_54 "Test Task 10" {
         
             
-            effort 1.0h
+            effort 10.0h
             allocate User_21
         }
         
@@ -1371,14 +1377,14 @@ class ProjectTester(unittest2.TestCase):
         
             
             effort 1.0h
-            allocate User_11, User_13
+            allocate User_1, User_8
         }
         
                 task Task_56 "Test Task 12" {
         
             
             effort 1.0h
-            allocate User_14, User_15
+            allocate User_9, User_15
         }
         
         }
@@ -1416,7 +1422,7 @@ class ProjectTester(unittest2.TestCase):
         
             
             effort 1.0h
-            allocate User_11, User_13, User_14
+            allocate User_1, User_8, User_9
         }
         
                 task Task_61 "Test Task 17" {
@@ -1442,14 +1448,14 @@ class ProjectTester(unittest2.TestCase):
         
             
             effort 1.0h
-            allocate User_11, User_13, User_21
+            allocate User_1, User_8, User_21
         }
         
                 task Task_64 "Test Task 20" {
         
             
             effort 1.0h
-            allocate User_14, User_15, User_16
+            allocate User_9, User_15, User_16
         }
         
                 task Task_65 "Test Task 21" {
@@ -1465,6 +1471,8 @@ class ProjectTester(unittest2.TestCase):
                 task Asset_40 "Test Asset 1" {
         
             
+            effort 1.0h
+            allocate User_8
         }
         
             
@@ -1486,14 +1494,14 @@ class ProjectTester(unittest2.TestCase):
         
             
             effort 1.0h
-            allocate User_11, User_20, User_21
+            allocate User_1, User_20, User_21
         }
         
                 task Task_67 "Test Task 23" {
         
             
             effort 1.0h
-            allocate User_13, User_14
+            allocate User_8, User_9
         }
         
                 task Task_68 "Test Task 24" {
@@ -1526,7 +1534,7 @@ class ProjectTester(unittest2.TestCase):
         
             
             effort 1.0h
-            allocate User_11, User_21
+            allocate User_1, User_21
         }
         
         }
@@ -1536,7 +1544,7 @@ class ProjectTester(unittest2.TestCase):
         
             
             effort 1.0h
-            allocate User_11
+            allocate User_1
         }
         
             
@@ -1544,7 +1552,7 @@ class ProjectTester(unittest2.TestCase):
         
             
             effort 1.0h
-            allocate User_13
+            allocate User_8
         }
         
             
@@ -1552,7 +1560,7 @@ class ProjectTester(unittest2.TestCase):
         
             
             effort 1.0h
-            allocate User_14
+            allocate User_9
         }
         
             
