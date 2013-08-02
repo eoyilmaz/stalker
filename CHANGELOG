@@ -30,6 +30,10 @@ Stalker Changes
   is no need to create a **Type** instance to be able to create a Vacation.
 * **New:** **Studio.vacations** property now returns the **Vacation** instances
   which has now *user*.
+* **Update:** **Task.start** and **Task.end** values are no more read from
+  children Tasks for a container task over and over again but calculated
+  whenever the start and end values of a child task are changed or a new child
+  is appended or removed.
 
 0.2.0.rc4
 =========
