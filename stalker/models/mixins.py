@@ -470,7 +470,8 @@ class ScheduleMixin(object):
                  timing_resolution=None,
                  **kwargs):
         self.timing_resolution = timing_resolution
-        self._validate_dates(start, end, duration)
+        self._start, self._end, self._duration = \
+            self._validate_dates(start, end, duration)
 
     @declared_attr
     def _end(cls):
@@ -488,7 +489,8 @@ class ScheduleMixin(object):
         return self._end
 
     def _end_setter(self, end_in):
-        self._validate_dates(self.start, end_in, self.duration)
+        self._start, self._end, self._duration = \
+            self._validate_dates(self.start, end_in, self.duration)
 
     @declared_attr
     def end(cls):
@@ -521,7 +523,8 @@ class ScheduleMixin(object):
         return self._start
 
     def _start_setter(self, start_in):
-        self._validate_dates(start_in, self.end, self.duration)
+        self._start, self._end, self._duration = \
+            self._validate_dates(start_in, self.end, self.duration)
 
     @declared_attr
     def start(cls):
@@ -545,11 +548,14 @@ class ScheduleMixin(object):
             if isinstance(duration_in, datetime.timedelta):
                 # set the end to None
                 # to make it recalculated
-                self._validate_dates(self.start, None, duration_in)
+                self._start, self._end, self._duration = \
+                    self._validate_dates(self.start, None, duration_in)
             else:
-                self._validate_dates(self.start, self.end, duration_in)
+                self._start, self._end, self._duration = \
+                    self._validate_dates(self.start, self.end, duration_in)
         else:
-            self._validate_dates(self.start, self.end, duration_in)
+            self._start, self._end, self._duration = \
+                self._validate_dates(self.start, self.end, duration_in)
 
     @declared_attr
     def duration(self):
@@ -599,7 +605,10 @@ attribute value."""
                 if duration is None:
                     duration = defaults.task_duration
 
+                # try:
                 start = end - duration
+                # except OverflowError: # end is datetime.datetime.min
+                #     start = end
 
         # check end
         if end is None:
@@ -613,12 +622,16 @@ attribute value."""
             if duration is None or duration < datetime.timedelta(1):
                 duration = datetime.timedelta(1)
 
+            # try:
             end = start + duration
+            # except OverflowError: # start is datetime.datetime.max
+            #     end = start
 
         # round the dates to the timing_resolution
-        self._start = self.round_time(start)
-        self._end = self.round_time(end)
-        self._duration = self._end - self._start
+        rounded_start = self.round_time(start)
+        rounded_end = self.round_time(end)
+        rounded_duration = rounded_end - rounded_start
+        return rounded_start, rounded_end, rounded_duration
 
     @declared_attr
     def _timing_resolution(cls):
@@ -636,11 +649,12 @@ attribute value."""
         logger.debug('self._timing_resolution: %s' % self._timing_resolution)
         # update date values
         if self.start and self.end and self.duration:
-            self._validate_dates(
-                self.round_time(self.start),
-                self.round_time(self.end),
-                None
-            )
+            self._start, self._end, self._duration = \
+                self._validate_dates(
+                    self.round_time(self.start),
+                    self.round_time(self.end),
+                    None
+                )
 
     @declared_attr
     def timing_resolution(cls):

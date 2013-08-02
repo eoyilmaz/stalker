@@ -284,6 +284,9 @@ class Config(object):
 
         # resources
         resource resources "Resources" {
+        {%- for vacation in studio.vacations %}
+            {{vacation.to_tjp}}
+        {%- endfor %}
         {%- for user in studio.users %}
             {{user.to_tjp}}
         {%- endfor %}

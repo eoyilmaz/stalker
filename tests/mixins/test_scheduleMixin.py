@@ -500,15 +500,15 @@ class ScheduleMixinTester(unittest2.TestCase):
         """testing if the start and end dates are rounded to the given
         timing_resolution
         """
-        self.kwargs['start'] = datetime.datetime(2013,3,22,02,38,55,531)
-        self.kwargs['end'] = datetime.datetime(2013,3,24,16,46,32,102)
+        self.kwargs['start'] = datetime.datetime(2013, 3, 22, 2, 38, 55, 531)
+        self.kwargs['end'] = datetime.datetime(2013, 3, 24, 16, 46, 32, 102)
         self.kwargs['timing_resolution'] = datetime.timedelta(minutes=5)
         new_foo_obj = SchedMixFooMixedInClass(**self.kwargs)
         # check the start
-        expected_start = datetime.datetime(2013,3,22,02,40)
+        expected_start = datetime.datetime(2013, 3, 22, 2, 40)
         self.assertEqual(new_foo_obj.start, expected_start)
         # check the end
-        expected_end = datetime.datetime(2013,3,24,16,45)
+        expected_end = datetime.datetime(2013, 3, 24, 16, 45)
         self.assertEqual(new_foo_obj.end, expected_end)
         # check the duration
         self.assertEqual(new_foo_obj.duration, expected_end - expected_start)

@@ -56,7 +56,7 @@ class StudioTester(unittest2.TestCase):
             "sqlalchemy.url": "sqlite:///:memory:",
             "sqlalchemy.echo": False,
         })
-        db.init()
+        # db.init()
 
         self.test_user1 = User(
             name='User 1',
@@ -732,6 +732,7 @@ class StudioTester(unittest2.TestCase):
         """testing if the departments attribute is working properly
         """
         # don't forget admins department
+        db.init()
         admins_dep = Department.query.filter_by(name='admins').first()
         self.assertItemsEqual(self.test_studio.departments,
                               [self.test_department1, self.test_department2,
@@ -747,11 +748,11 @@ class StudioTester(unittest2.TestCase):
         """testing if the users attribute is working properly
         """
         # don't forget the admin
-        admin = User.query.filter_by(name='admin').first()
+        # admin = User.query.filter_by(name='admin').first()
 
         self.assertItemsEqual(
             self.test_studio.users,
-            [admin, self.test_user1, self.test_user2, self.test_user3]
+            [self.test_user1, self.test_user2, self.test_user3]
         )
 
     def test_to_tjp_attribute_is_read_only(self):
@@ -1278,4 +1279,35 @@ class StudioTester(unittest2.TestCase):
             self.test_task31.computed_end,
             datetime.datetime(2013, 06, 12, 16, 00)
         )
-    
+
+    def test_vacation_attribute_is_read_only(self):
+        """testing if the vacation attribute is a read-only attribute
+        """
+        self.assertRaises(AttributeError, setattr, self.test_studio,
+                          'vacations', 'some random value')
+
+    def test_vacation_attribute_returns_studio_vacation_instances(self):
+        """Testing if the vacation attribute is returning the Vacation
+        instances with no user set.
+        """
+        from stalker.models.studio import Vacation
+        vacation1 = Vacation(
+            start=datetime.datetime(2013, 8, 2),
+            end=datetime.datetime(2013, 8, 10)
+        )
+        vacation2 = Vacation(
+            start=datetime.datetime(2013, 8, 11),
+            end=datetime.datetime(2013, 8, 20)
+        )
+        vacation3 = Vacation(
+            user=self.test_user1,
+            start=datetime.datetime(2013, 8, 11),
+            end=datetime.datetime(2013, 8, 20)
+        )
+        DBSession.add_all([vacation1, vacation2, vacation3])
+        DBSession.commit()
+
+        self.assertItemsEqual(
+            self.test_studio.vacations,
+            [vacation1, vacation2]
+        )

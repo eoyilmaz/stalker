@@ -21,6 +21,15 @@ Stalker Changes
   logs are overlapping.
 * **New:** Added **Project.percent_complete**,
   **Percent.total_logged_seconds** and **Project.schedule_seconds** attributes.
+* **Update:** **ScheduleMixin._validate_dates()** does not set the date values
+  anymore, it just return the calculated and validated start, end and duration
+  values.
+* **Update:** **Vacation** now can be created without a user instance, effectively
+  making the Vacation a Studio wide vacation, which applies to all users.
+* **Update:** **Vacation.__strictly_typed__** is updated to **False**, so there
+  is no need to create a **Type** instance to be able to create a Vacation.
+* **New:** **Studio.vacations** property now returns the **Vacation** instances
+  which has now *user*.
 
 0.2.0.rc4
 =========

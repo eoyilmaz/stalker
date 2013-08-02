@@ -62,33 +62,28 @@ class VacationTestCase(unittest2.TestCase):
 
         self.test_vacation = Vacation(**self.kwargs)
 
-    def test_strictly_typed_is_True(self):
-        """testing if the __strictly_typed_ attribute is True for Vacation
+    def test_strictly_typed_is_False(self):
+        """testing if the __strictly_typed_ attribute is False for Vacation
         class
         """
-        self.assertTrue(
-            Vacation.__strictly_typed__,
-            True
-        )
+        self.assertEqual(Vacation.__strictly_typed__, False)
 
     def test_user_argument_is_skipped(self):
-        """testing if a TypeError will be raised when the user argument is
-         skipped
+        """testing if the user argument can be skipped skipped
         """
         self.kwargs.pop('user')
-        self.assertRaises(TypeError, Vacation, **self.kwargs)
+        new_vacation = Vacation(**self.kwargs)
 
     def test_user_argument_is_None(self):
-        """testing if a TypeError will be raised when the user argument is None
+        """testing if the user argument can be set to None
         """
         self.kwargs['user'] = None
-        self.assertRaises(TypeError, Vacation, **self.kwargs)
+        new_vacation = Vacation(**self.kwargs)
 
     def test_user_attribute_is_None(self):
-        """testing if a TypeError will be raised when the user attribute is set
-        to None
+        """testing if the user attribute cat be set to None
         """
-        self.assertRaises(TypeError, setattr, self.test_vacation, 'user', None)
+        self.test_vacation.user = None
 
     def test_user_argument_is_not_a_User_instance(self):
         """testing if a TypeError will be raised when the user argument is not

@@ -1910,7 +1910,6 @@ class TaskTester(unittest2.TestCase):
         new_task = Task(**self.kwargs)
         self.assertEqual(new_task.is_milestone, False)
 
-
     def test_is_milestone_argument_is_None(self):
         """testing if the is_milestone attribute will be set to False when the
         is_milestone argument is given as None
@@ -3183,56 +3182,66 @@ class TaskTester(unittest2.TestCase):
         self.assertEqual(task1.start, now + dt(1))
         self.assertEqual(task1.end, now + dt(8))
 
-    def test_start_attribute_value_doesnt_change_for_a_container_Task(self):
-        """testing if the start attribute doesn't change when it is set to
-        another value for a container Task.
-        """
+        self.kwargs['name'] = 'Task4'
+        self.kwargs['start'] = now + dt(15)
+        self.kwargs['end'] = now + dt(16)
+        task4 = Task(**self.kwargs)
+        task3.parent = task4
+        self.assertEqual(task4.start, task3.start)
+        self.assertEqual(task4.end, task3.end)
+        self.assertEqual(task1.start, task2.start)
+        self.assertEqual(task1.end, task2.end)
+        # TODO: with SQLAlchemy 0.9 please also check if removing the last child from a parent will update the parents start and end date values
 
-        # remove effort and duration
-        self.kwargs.pop('schedule_timing')
-        self.kwargs.pop('schedule_unit')
-        self.kwargs['schedule_constraint'] = CONSTRAIN_BOTH
-
-        now = datetime.datetime(2013, 3, 22, 15, 0)
-        dt = datetime.timedelta
-
-        # task1
-        self.kwargs['name'] = 'Task1'
-        self.kwargs['start'] = now
-        self.kwargs['end'] = now + dt(3)
-        task1 = Task(**self.kwargs)
-
-        # task2
-        self.kwargs['name'] = 'Task2'
-        self.kwargs['start'] = now + dt(1)
-        self.kwargs['end'] = now + dt(5)
-        task2 = Task(**self.kwargs)
-
-        # task3
-        self.kwargs['name'] = 'Task3'
-        self.kwargs['start'] = now + dt(3)
-        self.kwargs['end'] = now + dt(8)
-        task3 = Task(**self.kwargs)
-
-        # check start conditions
-        self.assertEqual(task1.start, now)
-        self.assertEqual(task1.end, now + dt(3))
-
-        # now parent the task2 and task3 to task1
-        task2.parent = task1
-        task1.children.append(task3)
-
-        # but
-        self.assertEqual(task1.start, now + dt(1))
-        self.assertEqual(task1.end, now + dt(8))
-
-        # now try to change it
-        task1.start = now
-        task1.end = now + dt(3)
-
-        # check if it is still the same
-        self.assertEqual(task1.start, now + dt(1))
-        self.assertEqual(task1.end, now + dt(8))
+    # def test_start_attribute_value_doesnt_change_for_a_container_Task(self):
+    #     """testing if the start attribute doesn't change when it is set to
+    #     another value for a container Task.
+    #     """
+    #     # remove effort and duration
+    #     self.kwargs.pop('schedule_timing')
+    #     self.kwargs.pop('schedule_unit')
+    #     self.kwargs['schedule_constraint'] = CONSTRAIN_BOTH
+    # 
+    #     now = datetime.datetime(2013, 3, 22, 15, 0)
+    #     dt = datetime.timedelta
+    # 
+    #     # task1
+    #     self.kwargs['name'] = 'Task1'
+    #     self.kwargs['start'] = now
+    #     self.kwargs['end'] = now + dt(3)
+    #     task1 = Task(**self.kwargs)
+    # 
+    #     # task2
+    #     self.kwargs['name'] = 'Task2'
+    #     self.kwargs['start'] = now + dt(1)
+    #     self.kwargs['end'] = now + dt(5)
+    #     task2 = Task(**self.kwargs)
+    # 
+    #     # task3
+    #     self.kwargs['name'] = 'Task3'
+    #     self.kwargs['start'] = now + dt(3)
+    #     self.kwargs['end'] = now + dt(8)
+    #     task3 = Task(**self.kwargs)
+    # 
+    #     # check start conditions
+    #     self.assertEqual(task1.start, now)
+    #     self.assertEqual(task1.end, now + dt(3))
+    # 
+    #     # now parent the task2 and task3 to task1
+    #     task2.parent = task1
+    #     task1.children.append(task3)
+    # 
+    #     # but
+    #     self.assertEqual(task1.start, now + dt(1))
+    #     self.assertEqual(task1.end, now + dt(8))
+    # 
+    #     # now try to change it
+    #     task1.start = now
+    #     task1.end = now + dt(3)
+    # 
+    #     # check if it is still the same
+    #     self.assertEqual(task1.start, now + dt(1))
+    #     self.assertEqual(task1.end, now + dt(8))
 
     def test_end_value_is_calculated_with_the_schedule_timing_and_schedule_unit(self):
         """testing for a newly created task the end attribute value will be
@@ -4186,3 +4195,22 @@ class TaskTester(unittest2.TestCase):
         self.assertEqual(new_task1.responsible, self.test_user2)
         self.assertEqual(new_task2.responsible, self.test_user2)
 
+    def test_computed_start_also_sets_start(self):
+        """testing if computed_start also sets the start value of the task
+        """
+        new_task1 = Task(**self.kwargs)
+        test_value = datetime.datetime(2013, 8, 2, 13, 0)
+        self.assertNotEqual(new_task1.start, test_value)
+        new_task1.computed_start = test_value
+        self.assertEqual(new_task1.computed_start, test_value)
+        self.assertEqual(new_task1.start, test_value)
+
+    def test_computed_end_also_sets_end(self):
+        """testing if computed_end also sets the end value of the task
+        """
+        new_task1 = Task(**self.kwargs)
+        test_value = datetime.datetime(2013, 8, 2, 13, 0)
+        self.assertNotEqual(new_task1.end, test_value)
+        new_task1.computed_end = test_value
+        self.assertEqual(new_task1.computed_end, test_value)
+        self.assertEqual(new_task1.end, test_value)

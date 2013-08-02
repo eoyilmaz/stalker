@@ -1009,13 +1009,16 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
             if self.schedule_constraint == CONSTRAIN_NONE or \
                             self.schedule_constraint == CONSTRAIN_START:
                 # get end
-                self._validate_dates(self.start, None, calculated_duration)
+                self._start, self._end, self._duration = \
+                    self._validate_dates(self.start, None, calculated_duration)
             elif self.schedule_constraint == CONSTRAIN_END:
                 # get start
-                self._validate_dates(None, self.end, calculated_duration)
+                self._start, self._end, self._duration = \
+                    self._validate_dates(None, self.end, calculated_duration)
             elif self.schedule_constraint == CONSTRAIN_BOTH:
                 # restore duration
-                self._validate_dates(self.start, self.end, None)
+                self._start, self._end, self._duration = \
+                    self._validate_dates(self.start, self.end, None)
 
     @validates("is_milestone")
     def _validate_is_milestone(self, key, is_milestone):
@@ -1158,6 +1161,14 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
                     self.parent._schedule_seconds -= old_schedule_seconds
                     self.parent._schedule_seconds += child.schedule_seconds
 
+                # it was a leaf but now a parent, so set the start to max and
+                # end to min
+                self._start = datetime.datetime.max
+                self._end = datetime.datetime.min
+
+            # extend start and end dates
+            self._expand_dates(self, child.start, child.end)
+
         return child
 
     @validates("resources")
@@ -1238,6 +1249,33 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
 
         return bid_unit
 
+    def _expand_dates(self, task, start, end):
+        """extends the given tasks date values with the given start and end
+        values
+        """
+        # update parents start and end date
+        if task:
+            if task.start > start:
+                task.start = start
+                logger.debug('start is updated to : %s' % start)
+            if task.end < end:
+                task.end = end
+                logger.debug('end is updated to   : %s' % end)
+
+    @validates('computed_start')
+    def _validate_computed_start(self, key, computed_start):
+        """validates the given computed_start value
+        """
+        self.start = computed_start
+        return computed_start
+
+    @validates('computed_end')
+    def _validate_computed_end(self, key, computed_end):
+        """validates the given computed_start value
+        """
+        self.end = computed_end
+        return computed_end
+
     def _validate_start(self, start_in):
         """validates the given start value
         """
@@ -1253,44 +1291,27 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
     def _start_getter(self):
         """overridden start getter
         """
-        # use children start
-        if self.is_container:
-            start = datetime.datetime.max
-            for child in self.children:
-                if child.start < start:
-                    start = child.start
-            self._validate_dates(start, self._end, self._duration)
         return self._start
 
     def _start_setter(self, start_in):
         """overridden start setter
         """
-        # logger.debug('Task.start_setter       : %s' % start_in)
-        # update the start only if this is not a container task
-        if self.is_leaf:
+        self._start, self._end, self._duration = \
             self._validate_dates(start_in, self._end, self._duration)
-
-            # logger.debug('Task.start_setter afterV: %s' % self.start)
+        self._expand_dates(self.parent, self.start, self.end)
 
     def _end_getter(self):
         """overridden end getter
         """
-        # TODO: do it only once not all the time they ask for it
-        # use children end
-        if self.is_container:
-            end = datetime.datetime.min
-            for child in self.children:
-                if child.end > end:
-                    end = child.end
-            self._validate_dates(self._start, end, self._duration)
         return self._end
 
     def _end_setter(self, end_in):
         """overridden end setter
         """
         # update the end only if this is not a container task
-        if self.is_leaf:
+        self._start, self._end, self._duration = \
             self._validate_dates(self.start, end_in, self.duration)
+        self._expand_dates(self.parent, self.start, self.end)
 
     def _project_getter(self):
         return self._project
@@ -1757,3 +1778,34 @@ def update_parents_schedule_seconds_with_schedule_unit(
         task.parent.schedule_seconds = \
             parent_schedule_seconds - old_schedule_seconds + \
             new_schedule_seconds
+
+# *****************************************************************************
+# Task.children removed
+# *****************************************************************************
+@event.listens_for(Task.children, 'remove', propagate=True)
+def update_task_date_values(task, removed_child, initiator):
+    """Runs when a child is removed from parent
+
+    :param task: The task that a child is removed from
+    :param removed_child: The removed child
+    :param initiator: not used
+    """
+    # update start and end date values of the task
+    with DBSession.no_autoflush:
+        start = datetime.datetime.max
+        end = datetime.datetime.min
+        for child in task.children:
+            if child is not removed_child:
+                if child.start < start:
+                    start = child.start
+                if child.end > end:
+                    end = child.end
+
+        if start != datetime.datetime.max and end != datetime.datetime.min:
+            task.start = start
+            task.end = end
+        else:
+            # no child left
+            # set it to now
+            task.start = datetime.datetime.now()
+            # this will also update end

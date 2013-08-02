@@ -232,6 +232,12 @@ class Studio(Entity, ScheduleMixin, WorkingHoursMixin):
 
         return User.query.all()
 
+    @property
+    def vacations(self):
+        """returns all Vacations which doesn't have a User defined
+        """
+        return Vacation.query.filter(Vacation.user==None).all()
+
     def schedule(self):
         """Schedules all the active projects in the studio. Needs a Scheduler,
         so before calling it set a scheduler by using the :attr:`.scheduler`
@@ -493,8 +499,8 @@ class Vacation(SimpleEntity, ScheduleMixin):
     """Vacation is the way to manage the User vacations.
 
     :param user: The user of this vacation. Should be an instance of
-      :class:`~stalker.models.auth.User` and can not be skipped or can not be
-      None.
+      :class:`~stalker.models.auth.User` if skipped or given as None the
+      Vacation is considered as a Studio vacation and applies to all Users.
 
     :param start: The start datetime of the vacation. Is is an
       datetime.datetime instance. When skipped it will be set to the rounded
@@ -507,13 +513,13 @@ class Vacation(SimpleEntity, ScheduleMixin):
     __tablename__ = 'Vacations'
     __mapper_args__ = {'polymorphic_identity': 'Vacation'}
 
-    __strictly_typed__ = True
+    __strictly_typed__ = False
 
     vacation_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
                          primary_key=True)
 
     user_id = Column('user_id', Integer, ForeignKey('Users.id'),
-                     nullable=False)
+                     nullable=True)
 
     user = relationship(
         'User',
@@ -536,12 +542,12 @@ class Vacation(SimpleEntity, ScheduleMixin):
     def _validate_user(self, key, user):
         """validates the given user instance
         """
-        from stalker import User
-
-        if not isinstance(user, User):
-            raise TypeError('%s.user should be an instance of '
-                            'stalker.models.auth.User, not %s' %
-                            (self.__class__.__name__, user.__class__.__name__))
+        if user is not None:
+            from stalker import User
+            if not isinstance(user, User):
+                raise TypeError('%s.user should be an instance of '
+                                'stalker.models.auth.User, not %s' %
+                                (self.__class__.__name__, user.__class__.__name__))
         return user
 
     @property
