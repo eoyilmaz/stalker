@@ -285,13 +285,18 @@ class SimpleEntity(Base):
         return not self.__eq__(other)
 
     @validates("description")
-    def _validate_description(self, key, description_in):
-        """validates the given description_in value
+    def _validate_description(self, key, description):
+        """validates the given description value
         """
-        if description_in is None:
-            description_in = ""
+        if description is None:
+            description = ""
 
-        return str(description_in)
+        if not isinstance(description, (str, unicode)):
+            raise TypeError('%s.description should be an instance of '
+                            'string or unicode, not %s' % (
+                                self.__class__.__name__,
+                                description.__class__.__name__))
+        return description
 
     @validates("name")
     def _validate_name(self, key, name):
