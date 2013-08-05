@@ -34,6 +34,9 @@ Stalker Changes
   children Tasks for a container task over and over again but calculated
   whenever the start and end values of a child task are changed or a new child
   is appended or removed.
+* **Update:** **SimpleEntity.description** validation routine doesn't convert
+  the input to string anymore, but checks the given description value against
+  being a string or unicode instance.
 
 0.2.0.rc4
 =========

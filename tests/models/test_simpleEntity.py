@@ -218,29 +218,19 @@ class SimpleEntityTester(unittest2.TestCase):
         self.test_simple_entity.description = None
         self.assertEqual(self.test_simple_entity.description, "")
 
-    def test_description_argument_string_conversion(self):
-        """testing if description argument will be converted to string
-        correctly
+    def test_description_argument_is_not_a_string_or_unicode(self):
+        """testing if a TypeError will be raised when the description argument
+        value is not a string or unicode
         """
-        test_values = [["a description"], {"a": "description"}]
+        self.kwargs['description'] = {'a': 'description'}
+        self.assertRaises(TypeError, SimpleEntity, **self.kwargs)
 
-        for test_value in test_values:
-            self.kwargs["description"] = test_value
-            new_simple_entity = SimpleEntity(**self.kwargs)
-
-            self.assertIsInstance(new_simple_entity.description,
-                                  (str, unicode))
-
-    def test_description_attribute_string_conversion(self):
-        """testing if description attribute will be converted to string
-        correctly
+    def test_description_attribute_is_not_a_string_or_unicode(self):
+        """testing if a TypeError will be raised when the description attribute
+        value is set to a value other than a string or unicide
         """
-        test_values = [["a description"], {"a": "description"}]
-
-        for test_value in test_values:
-            self.test_simple_entity.description = test_value
-            self.assertIsInstance(self.test_simple_entity.description,
-                                  (str, unicode))
+        self.assertRaises(TypeError, setattr, self.test_simple_entity,
+                          'description', ["a description"])
 
     def test_equality(self):
         """testing the equality of two simple entities
