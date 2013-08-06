@@ -717,3 +717,57 @@ class TicketTester(unittest2.TestCase):
         self.assertNotEqual(self.test_ticket.owner, self.test_user)
         self.test_ticket.accept(created_by=self.test_user)
         self.assertEqual(self.test_ticket.owner, self.test_user)
+
+    def test_summary_argument_skipped(self):
+        """testing if the summary argument can be skipped
+        """
+        try:
+            self.kwargs.pop('summary')
+        except KeyError:
+            pass
+        new_ticket = Ticket(**self.kwargs)
+        self.assertEqual(new_ticket.summary, '')
+
+    def test_summary_argument_can_be_None(self):
+        """testing if the summary argument can be None
+        """
+        self.kwargs['summary'] = None
+        new_ticket = Ticket(**self.kwargs)
+        self.assertEqual(new_ticket.summary, '')
+
+    def test_summary_attribute_can_be_set_to_None(self):
+        """testing if the summary attribute can be set to None
+        """
+        self.test_ticket.summary = None
+        self.assertEqual(self.test_ticket.summary, '')
+
+    def test_summary_argument_is_not_a_string_or_unicode_instance(self):
+        """testing if a TypeError will be raised when the summary argument
+        value is not a string or unicode
+        """
+        self.kwargs['summary'] = ['not a string instance']
+        self.assertRaises(TypeError, Ticket, self.kwargs)
+
+    def test_summary_attribute_is_set_to_a_value_other_than_a_string_or_unicode(self):
+        """testing if the summary attribute is set to a value other than a
+        string or unicode
+        """
+        self.assertRaises(TypeError, setattr, self.test_ticket, 'summary',
+                          ['not a string or unicode'])
+
+    def test_summary_argument_is_working_properly(self):
+        """testing if the summary argument value is passed to summary attribute
+        correctly
+        """
+        test_value = 'test summary'
+        self.kwargs['summary'] = test_value
+        new_ticket = Ticket(**self.kwargs)
+        self.assertEqual(new_ticket.summary, test_value)
+
+    def test_summary_attribute_is_working_properly(self):
+        """testing if the summary attribute is working properly
+        """
+        test_value = 'test_summary'
+        self.assertNotEqual(self.test_ticket.summary, test_value)
+        self.test_ticket.summary = test_value
+        self.assertEqual(self.test_ticket.summary, test_value)

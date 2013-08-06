@@ -25,6 +25,7 @@ from sqlalchemy.orm import synonym, relationship
 from sqlalchemy.orm.mapper import validates
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.schema import ForeignKey, Table
+from sqlalchemy.sql.expression import _truncated_label
 from sqlalchemy.types import Enum
 
 from stalker.db.declarative import Base
@@ -189,13 +190,16 @@ class Ticket(Entity, StatusMixin):
         """
     )
 
+    summary = Column(String)
+
     links = relationship(
         'SimpleEntity',
         secondary='Ticket_SimpleEntities'
     )
 
-    comments = synonym('notes',
-                       doc="""A list of :class:`~stalker.models.note.Note` instances showing
+    comments = synonym(
+        'notes',
+        doc="""A list of :class:`~stalker.models.note.Note` instances showing
         the comments made for this Ticket instance. It is a synonym for the
         :attr:`~stalker.models.ticket.Ticket.notes` attribute.
         """
@@ -235,7 +239,8 @@ class Ticket(Entity, StatusMixin):
         """
     )
 
-    def __init__(self, project=None, links=None, priority='TRIVIAL', **kwargs):
+    def __init__(self, project=None, links=None, priority='TRIVIAL',
+                 summary=None, **kwargs):
         # just force auto name generation
         self._number = self._generate_ticket_number()
         kwargs['name'] = defaults.ticket_label + ' #%i' % self.number
@@ -249,6 +254,7 @@ class Ticket(Entity, StatusMixin):
         if links is None:
             links = []
         self.links = links
+        self.summary = summary
 
     def _number_getter(self):
         """returns the number attribute
@@ -325,8 +331,17 @@ class Ticket(Entity, StatusMixin):
 
         return project
 
-    #Ticket.resolve(User1, 'fixed')
-    #Ticket.__action__('resolve', User1, 'fixed')
+    @validates('summary')
+    def _validate_summary(self, key, summary):
+        """validates the given summary value
+        """
+        if summary is None:
+            summary = ''
+        if not isinstance(summary, (str, unicode)):
+            raise TypeError('%s.summary should be an instance of str or '
+                            'unicode, not %s' % (self.__class__.__name__,
+                                                 summary.__class__.__name__))
+        return summary
 
     def __action__(self, action, created_by, action_arg=None):
         """updates the ticket status and creates a ticket log according to the
