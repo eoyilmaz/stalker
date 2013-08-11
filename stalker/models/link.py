@@ -46,18 +46,18 @@ class Link(Entity):
 
     For sequences of files the file name should be in "%h%p%t %R" format in
     PySeq_ formatting rules.
-    
+
     There are three secondary attributes (properties to be more precise)
     ``path``, ``filename`` and ``extension``. These attributes are derived from
     the :attr:`.full_path` attribute and they modify it.
 
     Path
       It is the path part of the full_path
-    
+
     Filename
       It is the filename part of the full_path, also includes the extension,
       so changing the filename also changes the extension part.
-    
+
     Extension
       It is the extension part of the full_path. It also includes the extension
       separator ('.' for most of the file systems).
@@ -67,7 +67,7 @@ class Link(Entity):
       "%h%p%t %R" format, for more information see `PySeq Documentation`_.
       It can be set to empty string (or None which will be converted to an
       empty string automatically).
-    
+
     .. _PySeq: http://packages.python.org/pyseq/
     .. _PySeq Documentation: http://packages.python.org/pyseq/
 
