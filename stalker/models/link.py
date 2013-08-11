@@ -202,9 +202,9 @@ class Link(Entity):
         if extension is None:
             extension = ''
 
-        if not isinstance(extension, str):
-            raise TypeError('%s.extension should be an instance of str, '
-                            'not %s' % (self.__class__.__name__,
+        if not isinstance(extension, (str, unicode)):
+            raise TypeError('%s.extension should be an instance of str or '
+                            'unicode, not %s' % (self.__class__.__name__,
                                         extension.__class__.__name__))
 
         if extension != '':

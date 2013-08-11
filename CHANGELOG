@@ -38,6 +38,7 @@ Stalker Changes
   the input to string anymore, but checks the given description value against
   being a string or unicode instance.
 * **New:** Added **Ticket.summary** field.
+* **Fix:** Fixed **Link.extension**, it is now accepting unicode.
 
 0.2.0.rc4
 =========

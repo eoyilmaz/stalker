@@ -196,7 +196,6 @@ class Version(Link, StatusMixin):
         """formats the given take_name value
         """
         logger.debug("-------------------------------------")
-
         logger.debug("take_name : %s" % take_name)
 
         # remove unnecessary characters
@@ -213,7 +212,6 @@ class Version(Link, StatusMixin):
         take_name = re.sub(r'([_]+)', r'_', take_name)
         logger.debug("take_name : %s" % take_name)
 
-        # take_name = re.sub(r"(.+?[^a-zA-Z]+)([a-zA-Z0-9\s_\-]+)", r"\2", take_name)
         take_name = re.sub(r"^[^a-zA-Z0-9]+", r"", take_name)
         logger.debug("take_name : %s" % take_name)
 
