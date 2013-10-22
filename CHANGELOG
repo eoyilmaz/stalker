@@ -2,6 +2,14 @@
 Stalker Changes
 ===============
 
+0.2.1
+=====
+
+* **Fix:** As usual the distutil thinks 0.2.0 is a lower version number than
+  0.2.0.rc5 (I should have read the documentation again and used 0.2.0.c5
+  instead of 0.2.0.rc5) so this is a dummy update to just to fix the version
+  number.
+
 0.2.0
 =====
 
