@@ -151,7 +151,7 @@ class VacationTestCase(unittest2.TestCase):
     def test_to_tjp_attribute_is_working_properly(self):
         """testing if the to_tjp attribute is working properly
         """
-        expected_tjp = "vacation 2013-06-06 - 2013-06-10"
+        expected_tjp = "vacation 2013-06-06-10:00:00 - 2013-06-10-19:00:00"
         self.assertEqual(
             self.test_vacation.to_tjp,
             expected_tjp

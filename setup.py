@@ -11,11 +11,10 @@ requires = [
     'alembic',
     'jinja2',
     'unittest2',
-    #'sphinx==1.1.3',
 ]
 
 setup(name='stalker',
-      version='0.2.0.rc5',
+      version='0.2.0',
       description='A Production Asset Management (ProdAM) System',
       long_description=README + '\n\n' +  CHANGES,
       classifiers=[

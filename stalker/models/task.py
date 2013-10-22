@@ -1271,7 +1271,7 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
 
     @validates('computed_end')
     def _validate_computed_end(self, key, computed_end):
-        """validates the given computed_start value
+        """validates the given computed_end value
         """
         self.end = computed_end
         return computed_end
@@ -1399,7 +1399,6 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         """
         return self.computed_start is not None and \
             self.computed_end is not None
-
 
     def _total_logged_seconds_getter(self):
         """The total effort spent for this Task. It is the sum of all the

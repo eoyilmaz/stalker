@@ -2,6 +2,12 @@
 Stalker Changes
 ===============
 
+0.2.0
+=====
+
+* **Update:** Vacation tjp template now includes the time values of the start
+  and end dates of the Vacation instance.
+
 0.2.0.rc5
 =========
 

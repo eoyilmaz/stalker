@@ -43,59 +43,59 @@ class Config(object):
         # The default settings for the database, see sqlalchemy.create_engine
         # for possible parameters
         #
-        database_engine_settings = {
+        database_engine_settings={
             "sqlalchemy.url": "sqlite:///:memory:",
             "sqlalchemy.echo": False,
         },
 
-        database_session_settings = {},
+        database_session_settings={},
         # Local storage path
-        local_storage_path = os.path.expanduser('~/.strc'),
-        local_session_data_file_name = 'local_session_data',
+        local_storage_path=os.path.expanduser('~/.strc'),
+        local_session_data_file_name='local_session_data',
 
         # Storage for uploaded files
-        server_side_storage_path = os.path.expanduser('~/Stalker_Storage'),
+        server_side_storage_path=os.path.expanduser('~/Stalker_Storage'),
 
         #
         # Tells Stalker to create an admin by default
         #
-        auto_create_admin = True,
+        auto_create_admin=True,
 
         #
         # these are for new projects
         # after creating the project you can change them from the interface
         #
-        admin_name = 'admin',
-        admin_login = 'admin',
-        admin_password = 'admin',
-        admin_email = 'admin@admin.com',
-        admin_department_name = 'admins',
-        admin_group_name = 'admins',
+        admin_name='admin',
+        admin_login='admin',
+        admin_password='admin',
+        admin_email='admin@admin.com',
+        admin_department_name='admins',
+        admin_group_name='admins',
 
         # the default keyword which is going to be used in password scrambling
-        key = "stalker_default_key",
+        key="stalker_default_key",
 
-        version_take_name = "Main",
+        version_take_name="Main",
 
-        actions = ['Create', 'Read', 'Update', 'Delete', 'List'], #CRUDL
+        actions=['Create', 'Read', 'Update', 'Delete', 'List'],  #CRUDL
 
-        status_bg_color = 0xffffff,
-        status_fg_color = 0x000000,
+        status_bg_color=0xffffff,
+        status_fg_color=0x000000,
 
         # Tickets
-        ticket_label = "Ticket",
+        ticket_label="Ticket",
 
         # define the available actions per Status
-        ticket_status_order = [
+        ticket_status_order=[
             'new', 'accepted', 'assigned', 'reopened', 'closed'
         ],
 
-        ticket_resolutions = [
+        ticket_resolutions=[
             'fixed', 'invalid', 'wontfix', 'duplicate', 'worksforme', 'cantfix'
         ],
 
-        ticket_workflow = {
-            'resolve' : {
+        ticket_workflow={
+            'resolve': {
                 'new': {
                     'new_status': 'closed',
                     'action': 'set_resolution'
@@ -113,7 +113,7 @@ class Config(object):
                     'action': 'set_resolution'
                 },
             },
-            'accept' : {
+            'accept': {
                 'new': {
                     'new_status': 'accepted',
                     'action': 'set_owner'
@@ -158,34 +158,34 @@ class Config(object):
         },
 
         # Task Management
-        timing_resolution = datetime.timedelta(hours=1),
-        task_duration = datetime.timedelta(hours=1),
+        timing_resolution=datetime.timedelta(hours=1),
+        task_duration=datetime.timedelta(hours=1),
 
-        task_priority = 500,
+        task_priority=500,
 
-        working_hours = {
-            'mon': [[540, 1080]], # 9:00 - 18:00
-            'tue': [[540, 1080]], # 9:00 - 18:00
-            'wed': [[540, 1080]], # 9:00 - 18:00
-            'thu': [[540, 1080]], # 9:00 - 18:00
-            'fri': [[540, 1080]], # 9:00 - 18:00
-            'sat': [], # saturday off
-            'sun': [], # sunday off
+        working_hours={
+            'mon': [[540, 1080]],  # 9:00 - 18:00
+            'tue': [[540, 1080]],  # 9:00 - 18:00
+            'wed': [[540, 1080]],  # 9:00 - 18:00
+            'thu': [[540, 1080]],  # 9:00 - 18:00
+            'fri': [[540, 1080]],  # 9:00 - 18:00
+            'sat': [],  # saturday off
+            'sun': [],  # sunday off
         },
 
         # this is strongly related with the working_hours settings,
         # this should match each other
-        daily_working_hours = 9,
-        weekly_working_hours = 45,
-        weekly_working_days = 5,
-        yearly_working_days = 260.714, # 5 * 52.1428
+        daily_working_hours=9,
+        weekly_working_hours=45,
+        weekly_working_days=5,
+        yearly_working_days=260.714,  # 5 * 52.1428
 
-        day_order = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'],
+        day_order=['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'],
 
-        datetime_units = ['min', 'h', 'd', 'w', 'm', 'y'],
-        datetime_unit_names = ['minute', 'hour', 'day', 'week', 'month', 'year'],
+        datetime_units=['min', 'h', 'd', 'w', 'm', 'y'],
+        datetime_unit_names=['minute', 'hour', 'day', 'week', 'month', 'year'],
 
-        datetime_units_to_timedelta_kwargs = {
+        datetime_units_to_timedelta_kwargs={
             'min': {'name': 'minutes', 'multiplier': 1},
             'h'  : {'name': 'hours'  , 'multiplier': 1},
             'd'  : {'name': 'days'   , 'multiplier': 1},
@@ -194,11 +194,11 @@ class Config(object):
             'y'  : {'name': 'days'   , 'multiplier': 365}
         },
 
-        task_schedule_models = ['effort', 'length', 'duration'],
+        task_schedule_models=['effort', 'length', 'duration'],
 
-        task_schedule_constraints = ['none', 'start', 'end', 'both'],
+        task_schedule_constraints=['none', 'start', 'end', 'both'],
 
-        tjp_working_hours_template = """{% macro wh(wh, day) -%}
+        tjp_working_hours_template="""{% macro wh(wh, day) -%}
         {%- if wh[day]|length %}    workinghours {{day}} {% for part in wh[day] -%}
                 {%- if loop.index != 1%}, {% endif -%}
                 {{"%02d"|format(part[0]//60)}}:{{"%02d"|format(part[0]%60)}} - {{"%02d"|format(part[1]//60)}}:{{"%02d"|format(part[1]%60)}}
@@ -214,7 +214,7 @@ class Config(object):
         {{wh(workinghours, 'sat')}}
         {{wh(workinghours, 'sun')}}""",
 
-        tjp_studio_template = """project {{ studio.tjp_id }} "{{ studio.name }}" {{ studio.start.date() }} - {{ studio.end.date() }} {
+        tjp_studio_template="""project {{ studio.tjp_id }} "{{ studio.name }}" {{ studio.start.date() }} - {{ studio.end.date() }} {
             timingresolution {{ '%i'|format((studio.timing_resolution.days * 86400 + studio.timing_resolution.seconds)//60|int) }}min
             now {{ studio.now.strftime('%Y-%m-%d-%H:%M') }}
             dailyworkinghours {{ studio.daily_working_hours }}
@@ -226,14 +226,14 @@ class Config(object):
         }
         """,
 
-        tjp_project_template = """task {{project.tjp_id}} "{{project.name}}" {
+        tjp_project_template="""task {{project.tjp_id}} "{{project.name}}" {
             {% for task in project.root_tasks %}
                 {{task.to_tjp}}
             {% endfor %}
         }
         """,
 
-        tjp_task_template = """task {{task.tjp_id}} "{{task.name}}" {
+        tjp_task_template="""task {{task.tjp_id}} "{{task.name}}" {
         {% if task.priority != 500 -%}priority {{task.priority}}{%- endif %}
         {%- if task.depends %}
             depends {% for depends in task.depends %}
@@ -265,21 +265,21 @@ class Config(object):
         }
         """,
 
-        tjp_department_template = '''resource {{department.tjp_id}} "{{department.name}}" {
+        tjp_department_template='''resource {{department.tjp_id}} "{{department.name}}" {
         {%- for resource in department.users %}
             {{resource.to_tjp}}
         {%- endfor %}
         }''',
 
-        tjp_vacation_template = '''vacation {{ vacation.start.strftime('%Y-%m-%d') }} - {{ vacation.end.strftime('%Y-%m-%d') }}''',
+        tjp_vacation_template='''vacation {{ vacation.start.strftime('%Y-%m-%d-%H:%M:%S') }} - {{ vacation.end.strftime('%Y-%m-%d-%H:%M:%S') }}''',
 
-        tjp_user_template = '''resource {{user.tjp_id}} "{{user.name}}"{% if user.vacations %} {
+        tjp_user_template='''resource {{user.tjp_id}} "{{user.name}}"{% if user.vacations %} {
             {% for vacation in user.vacations -%}
                 {{vacation.to_tjp}}
             {% endfor -%}
         }{% endif %}''',
 
-        tjp_main_template = """# Generated By Stalker v{{stalker.__version__}}
+        tjp_main_template="""# Generated By Stalker v{{stalker.__version__}}
         {{studio.to_tjp}}
 
         # resources
@@ -305,18 +305,18 @@ class Config(object):
         }
         """,
 
-        tj_command = '/usr/local/bin/tj3',
+        tj_command='/usr/local/bin/tj3',
 
-        path_template = '{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}',
-        filename_template = '{{task.entity_type}}_{{task.id}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}',
+        path_template='{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}',
+        filename_template='{{task.entity_type}}_{{task.id}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}',
 
         # --------------------------------------------
-        # the following settings came from oyProjectManager 
-        sequence_format = "%h%p%t %R",
-        file_size_format = "%.2f MB",
-        date_time_format = '%Y.%m.%d %H:%M',
+        # the following settings came from oyProjectManager
+        sequence_format="%h%p%t %R",
+        file_size_format="%.2f MB",
+        date_time_format='%Y.%m.%d %H:%M',
 
-        resolution_presets = {
+        resolution_presets={
             "PC Video": [640, 480, 1.0],
             "NTSC": [720, 486, 0.91],
             "NTSC 16:9": [720, 486, 1.21],
@@ -343,9 +343,9 @@ class Config(object):
             "4k Square": [4096, 4096, 1.0],
         },
 
-        default_resolution_preset = "HD 1080",
+        default_resolution_preset="HD 1080",
 
-        project_structure = """{% for shot in project.shots %}
+        project_structure="""{% for shot in project.shots %}
                 Shots/{{shot.code}}
                 Shots/{{shot.code}}/Plate
                 Shots/{{shot.code}}/Reference
@@ -358,9 +358,9 @@ class Config(object):
         {% endfor %}
         """,
 
-        thumbnail_format = "jpg",
-        thumbnail_quality = 70,
-        thumbnail_size = [320, 180],
+        thumbnail_format="jpg",
+        thumbnail_quality=70,
+        thumbnail_size=[320, 180],
     )
 
     def __init__(self):
@@ -379,7 +379,7 @@ class Config(object):
         ENV_KEY = "STALKER_PATH"
 
         # try to get the environment variable
-        if not os.environ.has_key(ENV_KEY):
+        if ENV_KEY not in os.environ:
             # don't do anything
             logger.debug("no environment key found for user settings")
         else:

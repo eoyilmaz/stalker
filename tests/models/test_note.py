@@ -31,7 +31,7 @@ class NoteTester(unittest2.TestCase):
             "name": "Note to something",
             "description": "this is a simple note",
             "content": "this is a note content",
-            }
+        }
 
         # create a Note object
         self.test_note = Note(**self.kwargs)
