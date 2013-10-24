@@ -858,7 +858,6 @@ class ReferenceMixin(object):
     def _validate_references(self, key, reference):
         """validates the given reference
         """
-
         from stalker.models.entity import SimpleEntity
 
         # all the elements should be instance of stalker.models.entity.Entity

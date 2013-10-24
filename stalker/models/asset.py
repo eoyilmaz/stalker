@@ -19,7 +19,6 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 from sqlalchemy import Column, Integer, ForeignKey
-from sqlalchemy.orm import reconstructor
 from stalker.models.task import Task
 from stalker.models.mixins import ReferenceMixin, CodeMixin
 
@@ -32,12 +31,12 @@ logger.setLevel(logging_level)
 
 class Asset(Task, CodeMixin):
     """The Asset class is the whole idea behind Stalker.
-    
+
     *Assets* are containers of :class:`~stalker.models.task.Task`\ s. And
     :class:`~stalker.models.task.Task`\ s are the smallest meaningful part that
     should be accomplished to complete the
     :class:`~stalker.models.project.Project`.
-    
+
     An example could be given as follows; you can create an asset for one of
     the characters in your project. Than you can divide this character asset in
     to :class:`~stalker.models.task.Task`\ s. These
@@ -46,17 +45,17 @@ class Asset(Task, CodeMixin):
     :class:`~stalker.models.type.Type` object created specifically for
     :class:`~stalker.models.asset.Asset` (ie. has its
     :attr:`~stalker.models.type.Type.target_entity_type` set to "Asset"),
-    
+
     An :class:`~stalker.models.asset.Asset` instance should be initialized with
     a :class:`~stalker.models.project.Project` instance (as the other classes
     which are mixed with the :class:`~stalker.models.mixins.TaskMixin`). And
     when a :class:`~stalker.models.project.Project` instance is given then the
     asset will append itself to the
     :attr:`~stalker.models.project.Project.assets` list.
-    
+
     ..versionadded: 0.2.0:
         No more Asset to Shot connection:
-        
+
         Assets now are not directly related to Shots. Instead a
         :class:`~stalker.models.Version` will reference the Asset and then it
         is easy to track which shots are referencing this Asset by querying
@@ -74,16 +73,8 @@ class Asset(Task, CodeMixin):
         kwargs['code'] = code
 
         super(Asset, self).__init__(**kwargs)
-        ReferenceMixin.__init__(self, **kwargs)
         CodeMixin.__init__(self, **kwargs)
-
-    # @reconstructor
-    # def __init_on_load__(self):
-    #     """initialized the instance variables when the instance created with
-    #     SQLAlchemy
-    #     """
-    #     # call supers __init_on_load__
-    #     super(Asset, self).__init_on_load__()
+        ReferenceMixin.__init__(self, **kwargs)
 
     def __eq__(self, other):
         """the equality operator

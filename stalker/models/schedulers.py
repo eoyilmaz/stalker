@@ -167,9 +167,9 @@ class TaskJugglerScheduler(SchedulerBase):
             for data in lines:
                 id_line = data[0]
                 entity_id = int(id_line.split('.')[-1].split('_')[-1])
-                logger.debug('updating entity with id : %s' % entity_id)
+                #logger.debug('updating entity with id : %s' % entity_id)
                 entity = Entity.query.filter(Entity.id == entity_id).first()
-                logger.debug('updating : %s' % entity)
+                #logger.debug('updating : %s' % entity)
                 if entity:
                     start_date = datetime.datetime.strptime(
                         data[1], "%Y-%m-%d-%H:%M"
@@ -178,12 +178,12 @@ class TaskJugglerScheduler(SchedulerBase):
                         data[2],
                         "%Y-%m-%d-%H:%M"
                     )
-                    logger.debug('   start : %s' % start_date)
-                    logger.debug('     end : %s' % end_date)
+                    #logger.debug('   start : %s' % start_date)
+                    #logger.debug('     end : %s' % end_date)
 
                     entity.computed_start = start_date
                     entity.computed_end = end_date
-                    logger.debug('updated : %s' % entity)
+                    #logger.debug('updated : %s' % entity)
         logger.debug('completed parsing csv file')
 
     def schedule(self):
@@ -230,21 +230,25 @@ class TaskJugglerScheduler(SchedulerBase):
         # pass it to tj3
         proc = subprocess.Popen(
             [defaults.tj_command,
-             self.tjp_file_full_path],
+            self.tjp_file_full_path],
             stderr=subprocess.PIPE
         )
         # wait it to complete
         proc.wait()
 
-        if proc.returncode:
-            raise RuntimeError(proc.stderr.readlines())
+        stderr = proc.stderr.readlines()
 
-        logger.debug('tj3 return code: %s' % proc.returncode)
-        logger.debug('tj3 output: %s' % proc.stderr.readlines())
+        if proc.returncode:
+            # there is an error
+            raise RuntimeError(stderr)
+
         # read back the csv file
         self._parse_csv_file()
+
+        logger.debug('tj3 return code: %s' % proc.returncode)
+        logger.debug('tj3 output: %s' % stderr)
 
         # remove the tjp file
         #self._clean_up()
 
-
+        return stderr

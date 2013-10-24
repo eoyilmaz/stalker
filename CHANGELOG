@@ -2,6 +2,20 @@
 Stalker Changes
 ===============
 
+0.2.1.2
+=======
+
+* **Update:** TaskJugglerScheduler now returns the stderr message out of the
+  ``TaskJugglerScheduler.schedule()`` method.
+
+0.2.1.1
+=======
+
+* **Fix:** Disabled some deep debug messages on
+  TaskJugglerScheduler._parse_csv_file().
+* **Fix:** Fixed a flush issue related to the Task.parent attribute which is
+  lazily loaded in Task._schedule_seconds_setter().
+
 0.2.1
 =====
 

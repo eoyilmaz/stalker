@@ -1519,13 +1519,14 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         # do it only for container tasks
         if self.is_container:
             # also update the parents
-            if self.parent:
-                current_value = 0
-                if self._schedule_seconds:
-                    current_value = self._schedule_seconds
-                self.parent.schedule_seconds = \
-                    self.parent.schedule_seconds - current_value + seconds
-            self._schedule_seconds = seconds
+            with DBSession.no_autoflush:
+                if self.parent:
+                    current_value = 0
+                    if self._schedule_seconds:
+                        current_value = self._schedule_seconds
+                    self.parent.schedule_seconds = \
+                        self.parent.schedule_seconds - current_value + seconds
+                self._schedule_seconds = seconds
 
     schedule_seconds = synonym(
         '_schedule_seconds',

@@ -238,7 +238,7 @@ class SimpleEntity(Base):
             date_updated=None,
             thumbnail=None,
             **kwargs
-    ): # pylint: disable=W0613
+    ):  # pylint: disable=W0613
 
         # name and nice_name
         self._nice_name = ""
@@ -260,13 +260,6 @@ class SimpleEntity(Base):
         self.type = type
         self.thumbnail = thumbnail
         self.__stalker_version__ = stalker.__version__
-
-    # @reconstructor
-    # def __init_on_load__(self):
-    #     """initialized the instance variables when the instance created with
-    #     SQLAlchemy
-    #     """
-    #     self._nice_name = None
 
     def __repr__(self):
         """the representation of the SimpleEntity
@@ -336,11 +329,6 @@ class SimpleEntity(Base):
         """
         # remove unnecessary characters from the string
         name_in = name_in.strip()
-        #name_in = re.sub(r'([^a-zA-Z0-9\s_\-#]+)', '', name_in).strip()
-
-        # remove all the characters which are not alphabetic from the start of
-        # the string
-        #name_in = re.sub(r"(^[^a-zA-Z0-9]+)", '', name_in)
 
         # remove multiple spaces
         name_in = re.sub(r'[\s]+', ' ', name_in)
@@ -370,9 +358,6 @@ class SimpleEntity(Base):
 
         # remove multiple underscores
         nice_name_in = re.sub(r"([_]+)", r"_", nice_name_in)
-
-        # turn it to lower case
-        #nice_name_in = nice_name_in.lower()
 
         return nice_name_in
 
@@ -461,22 +446,17 @@ class SimpleEntity(Base):
     def _validate_type(self, key, type_in):
         """validates the given type value
         """
-        from stalker.models.type import Type
+        check_for_type_class = True
+        if not self.__strictly_typed__ and type_in is None:
+            check_for_type_class = False
 
-        raise_error = False
-
-        if not self.__strictly_typed__:
-            if type_in is not None:
-                if not isinstance(type_in, Type):
-                    raise_error = True
-        else:
+        if check_for_type_class:
+            from stalker.models.type import Type
             if not isinstance(type_in, Type):
-                raise_error = True
-
-        if raise_error:
-            raise TypeError("%s.type must be an instance of "
-                            "stalker.models.type.Type not %s" %
-                            (self.__class__.__name__, type_in))
+                raise TypeError(
+                    "%s.type must be an instance of "
+                    "stalker.models.type.Type not %s" %
+                    (self.__class__.__name__, type_in))
         return type_in
 
     @validates('thumbnail')
