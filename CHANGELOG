@@ -5,8 +5,8 @@ Stalker Changes
 0.2.1.2
 =======
 
-* **Update:** TaskJugglerScheduler now returns the stderr message out of the
-  ``TaskJugglerScheduler.schedule()`` method.
+* **Update:** TaskJugglerScheduler and the Studio classes are now returning the
+  stderr message out of their ``schedule()`` methods.
 
 0.2.1.1
 =======

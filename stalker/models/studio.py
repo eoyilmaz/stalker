@@ -255,7 +255,7 @@ class Studio(Entity, ScheduleMixin, WorkingHoursMixin):
 
         # run the scheduler
         self.scheduler.studio = self
-        self.scheduler.schedule()
+        return self.scheduler.schedule()
 
     @property
     def weekly_working_hours(self):
