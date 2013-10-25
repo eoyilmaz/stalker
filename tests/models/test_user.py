@@ -1359,7 +1359,7 @@ class UserTest(unittest2.TestCase):
     def test_to_tjp_is_working_properly(self):
         """testing if the to_tjp property is working properly
         """
-        expected_tjp = 'resource User_69 "Erkan Ozgur Yilmaz"'
+        expected_tjp = 'resource User_68 "Erkan Ozgur Yilmaz"'
         self.assertEqual(self.test_user.to_tjp, expected_tjp)
 
     def test_to_tjp_is_working_properly_for_a_user_with_vacations(self):
@@ -1386,7 +1386,7 @@ class UserTest(unittest2.TestCase):
             end=datetime.datetime(2013, 7, 15, 0, 0)
         )
 
-        expected_tjp = """resource User_69 "Erkan Ozgur Yilmaz" {
+        expected_tjp = """resource User_68 "Erkan Ozgur Yilmaz" {
             vacation 2013-06-07-00:00:00 - 2013-06-21-00:00:00
             vacation 2013-07-01-00:00:00 - 2013-07-15-00:00:00
             }"""

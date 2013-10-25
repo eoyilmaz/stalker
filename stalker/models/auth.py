@@ -512,6 +512,7 @@ class User(Entity, ACLMixin):
         'Vacation',
         primaryjoin='Vacations.c.user_id==Users.c.id',
         back_populates='user',
+        cascade='all, delete-orphan',
         doc="""A list of :class:`~stalker.models.studio.Vacation` instances
         which holds the vacations created for this :class:`.User`
         """

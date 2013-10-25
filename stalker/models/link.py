@@ -82,8 +82,8 @@ class Link(Entity):
         primary_key=True,
     )
 
-    original_filename = Column(String(256)) # this is a limit for most of
-    # the filesystems
+    original_filename = Column(String(256))  # this is a limit for most
+                                             # filesystems
 
     full_path = Column(
         String,
@@ -129,7 +129,8 @@ class Link(Entity):
 
         return original_filename
 
-    def _format_path(self, path):
+    @staticmethod
+    def _format_path(path):
         """formats the path to internal format, which is Linux forward slashes
         for path separation
         """
@@ -162,7 +163,7 @@ class Link(Entity):
         self.full_path = self._format_path(
             os.path.join(path, self.filename)
         )
-    
+
     @property
     def filename(self):
         """the filename property
@@ -205,7 +206,7 @@ class Link(Entity):
         if not isinstance(extension, (str, unicode)):
             raise TypeError('%s.extension should be an instance of str or '
                             'unicode, not %s' % (self.__class__.__name__,
-                                        extension.__class__.__name__))
+                                                 extension.__class__.__name__))
 
         if extension != '':
             if not extension.startswith(os.path.extsep):

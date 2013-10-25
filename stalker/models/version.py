@@ -29,7 +29,6 @@ from sqlalchemy.orm import relationship, validates
 from stalker.db.declarative import Base
 from stalker.models import check_circular_dependency
 from stalker.models.link import Link
-from stalker.models.mixins import StatusMixin
 
 from stalker import defaults
 
@@ -40,7 +39,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
 
-class Version(Link, StatusMixin):
+class Version(Link):
     """Holds information about the created versions (files) for a class:`~stalker.models.task.Task`
 
     A :class:`~stalker.models.version.Version` holds information about the
@@ -173,7 +172,6 @@ class Version(Link, StatusMixin):
         # call supers __init__
         kwargs['full_path'] = full_path
         super(Version, self).__init__(**kwargs)
-        StatusMixin.__init__(self, **kwargs)
 
         self.take_name = take_name
         self.task = task

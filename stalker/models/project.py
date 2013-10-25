@@ -127,7 +127,8 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
     tasks = relationship(
         'Task',
         primaryjoin='Tasks.c.project_id==Projects.c.id',
-        uselist=True
+        uselist=True,
+        cascade="all, delete-orphan"
     )
 
     users = relationship(
@@ -200,7 +201,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
         'Ticket',
         primaryjoin='Tickets.c.project_id==Projects.c.id',
         uselist=True,
-
+        cascade="all, delete-orphan"
     )
 
     def __init__(self,

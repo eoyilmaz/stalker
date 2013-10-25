@@ -533,8 +533,7 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         primaryjoin='Tasks.c.parent_id==Tasks.c.id',
         back_populates='parent',
         post_update=True,
-        # innerjoin=True,
-        #lazy='select',
+        cascade='all, delete-orphan',
         doc="""Other :class:`Task` instances which are the children of this
         Task instance. This attribute along with the :attr:`.parent` attribute
         is used in creating a DAG hierarchy of tasks.
@@ -594,7 +593,6 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         secondary="Task_Resources",
         primaryjoin="Tasks.c.id==Task_Resources.c.task_id",
         secondaryjoin="Task_Resources.c.resource_id==Users.c.id",
-        #backref="tasks",
         back_populates="tasks",
         doc="""The list of :class:`~stalker.models.auth.User`\ s assigned to this Task.
         """
@@ -630,6 +628,7 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         "TimeLog",
         primaryjoin="TimeLogs.c.task_id==Tasks.c.id",
         back_populates="task",
+        cascade='all, delete-orphan',
         doc="""A list of :class:`~stalker.models.task.TimeLog` instances
         showing who and when has spent how much effort on this task.
         """
@@ -639,6 +638,7 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         "Version",
         primaryjoin="Versions.c.task_id==Tasks.c.id",
         back_populates="task",
+        cascade='all, delete-orphan',
         doc="""A list of :class:`~stalker.models.version.Version` instances
         showing the files created for this task.
         """
@@ -1181,13 +1181,8 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
             raise TypeError("Task.resources should be a list of "
                             "stalker.models.auth.User instances not %s" %
                             resource.__class__.__name__)
-
-            ## milestones do not need resources
-            #if self.is_milestone:
-            #resource = None
-
         return resource
-    
+
     @validates("watchers")
     def _validate_watchers(self, key, watcher):
         """validates the given watcher value

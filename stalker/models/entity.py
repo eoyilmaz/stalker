@@ -113,7 +113,7 @@ class SimpleEntity(Base):
     __auto_name__ = True
     __strictly_typed__ = False
 
-    # TODO: Allow the user to specify the formatting of the name attribute as a Regular Expression (name_formatter)
+    # TODO: Allow the user to specify the formatting of the name attribute with a Regular Expression (name_formatter)
     __name_formatter__ = None
 
     __tablename__ = "SimpleEntities"
@@ -525,6 +525,7 @@ class Entity(SimpleEntity):
         "Note",
         primaryjoin="Entities.c.id==Notes.c.entity_id",
         backref="entity",
+        cascade='all, delete-orphan',
         doc="""All the :class:`~stalker.models.note.Notes`\ s attached to this entity.
 
         It is a list of :class:`~stalker.models.note.Note` instances or an
@@ -546,13 +547,6 @@ class Entity(SimpleEntity):
 
         self.tags = tags
         self.notes = notes
-
-    # @reconstructor
-    # def __init_on_load__(self):
-    #     """initialized the instance variables when the instance created with
-    #     SQLAlchemy
-    #     """
-    #     super(Entity, self).__init_on_load__()
 
     @validates("notes")
     def _validate_notes(self, key, note):
@@ -581,7 +575,6 @@ class Entity(SimpleEntity):
                             "stalker.models.tag.Tag not %s" %
                             (self.__class__.__name__,
                              tag.__class__.__name__))
-
         return tag
 
     def __eq__(self, other):
@@ -590,7 +583,7 @@ class Entity(SimpleEntity):
         return super(Entity, self).__eq__(other) and \
                isinstance(other, Entity)
 
-# ENTITY_TAGS
+# Entity Tags
 Entity_Tags = Table(
     "Entity_Tags", Base.metadata,
     Column(
@@ -608,7 +601,7 @@ Entity_Tags = Table(
     )
 )
 
-# SIMPLEENTITY_GENERICDATA
+# SimpleEntity Generic Data
 SimpleEntity_GenericData = Table(
     'SimpleEntity_GenericData', Base.metadata,
     Column(

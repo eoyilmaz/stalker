@@ -2,6 +2,15 @@
 Stalker Changes
 ===============
 
+0.2.2
+=====
+
+* **Update:** Added cascade attributes to all necessary relations for all the
+  classes.
+* **Update:** The Version class is not mixed with the StatusMixin anymore. So
+  the versions are not going to be statusable anymore. Also created alembic
+  revision (a6598cde6b) for that update.
+
 0.2.1.2
 =======
 

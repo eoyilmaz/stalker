@@ -25,7 +25,6 @@ from sqlalchemy.orm import synonym, relationship
 from sqlalchemy.orm.mapper import validates
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.schema import ForeignKey, Table
-from sqlalchemy.sql.expression import _truncated_label
 from sqlalchemy.types import Enum
 
 from stalker.db.declarative import Base
@@ -81,9 +80,9 @@ class Ticket(Entity, StatusMixin):
           |              | enhancement                                     |
           +--------------+-------------------------------------------------+
           | 1 / MINOR    | defect with minor impact / small enhancement    |
-          +--------------+-------------------------------------------------+  
+          +--------------+-------------------------------------------------+
           | 2 / MAJOR    | defect with major impact / big enhancement      |
-          +--------------+-------------------------------------------------+ 
+          +--------------+-------------------------------------------------+
           | 3 / CRITICAL | severe loss of data due to the defect or highly |
           |              | needed enhancement                              |
           +--------------+-------------------------------------------------+
@@ -95,7 +94,7 @@ class Ticket(Entity, StatusMixin):
         created this Ticket. It is basically a synonym for the
         :attr:`~stalker.models.entity.SimpleEntity.created_by` attribute.
 
-    Changing the :class:`~stalker.models.ticket.Ticket`\ .\ 
+    Changing the :class:`~stalker.models.ticket.Ticket`\ .\
     :attr`~stalker.models.ticket.Ticket.status` will create a new
     :class:`~stalker.models.Ticket.TicketLog` instance showing the previous
     operation.
@@ -191,6 +190,13 @@ class Ticket(Entity, StatusMixin):
     )
 
     summary = Column(String)
+
+    logs = relationship(
+        'TicketLog',
+        primaryjoin='Tickets.c.id==TicketLogs.c.ticket_id',
+        back_populates='ticket',
+        cascade='all, delete-orphan'
+    )
 
     links = relationship(
         'SimpleEntity',
@@ -481,7 +487,7 @@ class TicketLog(SimpleEntity):
     ticket = relationship(
         'Ticket',
         primaryjoin='TicketLogs.c.ticket_id==Tickets.c.id',
-        backref='logs'
+        back_populates='logs'
     )
 
     def __init__(self,
