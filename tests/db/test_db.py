@@ -2731,6 +2731,43 @@ class DatabaseModelsTester(unittest2.TestCase):
         DBSession.add(user1)
         DBSession.commit()
 
+        # create a test project
+        repo1 = Repository(name='Test Repo')
+        status1 = Status(name='New', code='NEW')
+        status2 = Status(name='Work In Progress', code='WIP')
+        project_statuses = StatusList(
+            name='Project Statuses',
+            target_entity_type='Project',
+            statuses=[status1, status2]
+        )
+        project1 = Project(
+            name='Test Project',
+            code='TP',
+            repository=repo1,
+            status_list=project_statuses
+        )
+        task_statuses = StatusList(
+            name='Task Statuses',
+            target_entity_type='Task',
+            statuses=[status1, status2]
+        )
+        task1 = Task(
+            name='Test Task 1',
+            project=project1,
+            status_list=task_statuses,
+            resources=[user1],
+        )
+        dt = datetime.datetime
+        td = datetime.timedelta
+        time_log1 = TimeLog(
+            task=task1,
+            resource=user1,
+            start=dt.now(),
+            end=dt.now() + td(1)
+        )
+        DBSession.add(task1)
+        DBSession.commit()
+
         # store attributes
         created_by = user1.created_by
         date_created = user1.date_created
@@ -2803,6 +2840,9 @@ class DatabaseModelsTester(unittest2.TestCase):
         DBSession.commit()
 
         self.assertItemsEqual([], Vacation.query.all())
+
+        # deleting a user should also delete the time logs
+        self.assertItemsEqual([], TimeLog.query.all())
 
     def test_persistence_of_Vacation(self):
         """testing the persistence of Vacation instances

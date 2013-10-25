@@ -503,6 +503,7 @@ class User(Entity, ACLMixin):
         "TimeLog",
         primaryjoin="TimeLogs.c.resource_id==Users.c.id",
         back_populates="resource",
+        cascade='all, delete-orphan',
         doc="""A list of :class:`~stalker.models.task.TimeLog` instances which
         holds the time logs created for this :class:`.User`.
         """
