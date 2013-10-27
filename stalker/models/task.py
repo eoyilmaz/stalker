@@ -1561,7 +1561,7 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
             if self.total_logged_seconds is None or \
                self.schedule_seconds is None:
                 self.update_schedule_info()
-        return self.total_logged_seconds / self.schedule_seconds * 100
+        return self.total_logged_seconds / float(self.schedule_seconds) * 100
 
     @property
     def remaining_seconds(self):

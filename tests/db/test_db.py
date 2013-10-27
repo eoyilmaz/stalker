@@ -1037,6 +1037,33 @@ class DatabaseModelsTester(unittest2.TestCase):
         DBSession.add_all([sound_link_type, link1])
         DBSession.commit()
 
+        # use it as a task reference
+        repo1 = Repository(name='test repo')
+        status1 = Status(name='New', code='NEW')
+        status2 = Status(name='Work In Progress', code='WIP')
+        project_statuses = StatusList(
+            target_entity_type='Project',
+            statuses=[status1, status2]
+        )
+        project1 = Project(
+            name='Test Project 1',
+            code='TP1',
+            status_list=project_statuses,
+            repository=repo1
+        )
+        task_statuses = StatusList(
+            target_entity_type='Task',
+            statuses=[status1, status2]
+        )
+        task1 = Task(
+            name='Test Task',
+            project=project1,
+            status_list=task_statuses
+        )
+        task1.references.append(link1)
+        DBSession.add(task1)
+        DBSession.commit()
+
         # store attributes
         created_by = link1.created_by
         date_created = link1.date_created
@@ -1070,6 +1097,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(tags, link1_DB.tags)
         self.assertEqual(type_, link1_DB.type)
         self.assertEqual(updated_by, link1_DB.updated_by)
+        self.assertEqual(task1.references[0], link1_DB)
 
         # delete tests
         # Deleting a Link should not delete anything else
@@ -1082,6 +1110,10 @@ class DatabaseModelsTester(unittest2.TestCase):
 
         self.assertIsNotNone(Type.query.get(type_.id))
         self.assertEqual(type_, Type.query.get(type_.id))
+
+        # The task should stay
+        self.assertIsNotNone(Task.query.get(task1.id))
+        self.assertEqual(task1, Task.query.get(task1.id))
 
     def test_persistence_of_Note(self):
         """testing the persistence of Note
@@ -2442,10 +2474,24 @@ class DatabaseModelsTester(unittest2.TestCase):
             task=task2
         )
 
+        # referenes
+        ref1 = Link(
+            full_path='some_path',
+            original_filename='original_filename'
+        )
+
+        ref2 = Link(
+            full_path='some_path',
+            original_filename='original_filename'
+        )
+
+        task1.references.append(ref1)
+        task1.references.append(ref2)
 
         DBSession.add_all([
             task1, child_task1, child_task2, task2, time_log1,
-            time_log2, time_log3, user1, user2, version1, version2, version3
+            time_log2, time_log3, user1, user2, version1, version2, version3,
+            ref1, ref2
         ])
         DBSession.commit()
 

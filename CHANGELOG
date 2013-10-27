@@ -2,6 +2,12 @@
 Stalker Changes
 ===============
 
+0.2.2.1
+=======
+
+* **Fix:** Task.percent_complete() now calculates the percent complete
+  correctly.
+
 0.2.2
 =====
 

@@ -1885,7 +1885,7 @@ class TaskTester(unittest2.TestCase):
             task=self.test_task,
             resource=self.test_task.resources[0],
             start=now,
-            end=now + td(hours=8)
+            end=now + td(hours=2)
         )
 
         self.assertIn(book1, self.test_task.time_logs)
@@ -1894,13 +1894,22 @@ class TaskTester(unittest2.TestCase):
             task=self.test_task,
             resource=self.test_task.resources[1],
             start=now,
-            end=now + td(hours=12)
+            end=now + td(hours=5)
         )
         self.test_task.parent = parent_task
 
-        self.assertEqual(self.test_task.total_logged_seconds, 20 * 3600)
-        self.assertEqual(self.test_task.percent_complete, 100)
-        self.assertEqual(parent_task.percent_complete, 100)
+        self.assertEqual(self.test_task.total_logged_seconds, 7 * 3600)
+        self.assertEqual(self.test_task.schedule_seconds, 9 * 3600)
+        self.assertAlmostEqual(
+            self.test_task.percent_complete,
+            77.7777778 * 100,
+            delta=0.01
+        )
+        self.assertAlmostEqual(
+            parent_task.percent_complete,
+            77.7777778 * 100,
+            delta=0.01
+        )
 
     def test_is_milestone_argument_is_skipped(self):
         """testing if the default value of the is_milestone attribute is going
