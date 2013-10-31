@@ -21,9 +21,10 @@
 import copy
 import logging
 import datetime
+import time
 
-from sqlalchemy import Column, Integer, ForeignKey, Table
-from sqlalchemy.orm import validates, reconstructor, relationship
+from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy.orm import validates, relationship
 
 from stalker import defaults, log
 from stalker.models.entity import SimpleEntity, Entity
@@ -186,11 +187,15 @@ class Studio(Entity, ScheduleMixin, WorkingHoursMixin):
         from jinja2 import Template
 
         temp = Template(defaults.tjp_studio_template)
-        return temp.render({
+        start = time.time()
+        rendered_template = temp.render({
             'studio': self,
             'datetime': datetime,
             'now': self.round_time(self.now).strftime('%Y-%m-%d-%H:%M')
         })
+        end = time.time()
+        logger.debug('render studio to tjp took: %s seconds' % (end - start))
+        return rendered_template
 
     @property
     def projects(self):
@@ -255,7 +260,11 @@ class Studio(Entity, ScheduleMixin, WorkingHoursMixin):
 
         # run the scheduler
         self.scheduler.studio = self
-        return self.scheduler.schedule()
+        start = time.time()
+        result = self.scheduler.schedule()
+        end = time.time()
+        logger.debug('scheduling took %s seconds' % (end - start))
+        return result
 
     @property
     def weekly_working_hours(self):
@@ -280,7 +289,7 @@ class WorkingHours(object):
     """A helper class to manage Studio working hours.
 
     Working hours is a data class to store the weekly working hours pattern of
-    the studio. 
+    the studio.
 
     The data stored as a dictionary with the short day names are used as the
     key and the value is a list of two integers showing the working hours

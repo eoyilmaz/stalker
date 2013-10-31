@@ -2,6 +2,14 @@
 Stalker Changes
 ===============
 
+0.2.2.2
+=======
+
+* **Update:** Studio.schedule() now returns information about how much did it
+  take to schedule the tasks.
+* **Update:** Studio.to_tjp() now returns information about how much did it
+  take to complete the conversion.
+
 0.2.2.1
 =======
 

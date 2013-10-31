@@ -22,6 +22,7 @@ import os
 import subprocess
 import tempfile
 import datetime
+import time
 import csv
 
 import stalker
@@ -119,12 +120,17 @@ class TaskJugglerScheduler(SchedulerBase):
 
         template = Template(defaults.tjp_main_template)
 
+        start = time.time()
         self.tjp_content = template.render({
             'stalker': stalker,
             'studio': self.studio,
             'csv_file_name': self.temp_file_name,
             'csv_file_full_path': self.temp_file_full_path
         })
+        end = time.time()
+        logger.debug(
+            'rendering the whole tjp file took : %s seconds' % (end - start)
+        )
 
     def _fill_tjp_file(self):
         """fills the tjp file with content
@@ -203,8 +209,9 @@ class TaskJugglerScheduler(SchedulerBase):
         # get the active projects
         # get root tasks
         # calculate the earliest start and the latest end
-        self.studio._start = datetime.datetime(2013, 1, 1) # TODO: remove the hardcoded datetime
-        self.studio._end = datetime.datetime(2016, 1, 1) # TODO: remove the hardcoded datetime
+        # TODO: remove the hardcoded datetime
+        self.studio._start = datetime.datetime(2013, 1, 1)
+        self.studio._end = datetime.datetime(2016, 1, 1)
         #for project in self.studio.active_projects:
         #    for root_task in project.root_tasks:
         #        if root_task.start < self.studio.start:
@@ -228,24 +235,24 @@ class TaskJugglerScheduler(SchedulerBase):
         logger.debug('tjp_file_full_path: %s' % self.tjp_file_full_path)
 
         # pass it to tj3
-        proc = subprocess.Popen(
+        process = subprocess.Popen(
             [defaults.tj_command,
-            self.tjp_file_full_path],
+             self.tjp_file_full_path],
             stderr=subprocess.PIPE
         )
         # wait it to complete
-        proc.wait()
+        process.wait()
 
-        stderr = proc.stderr.readlines()
+        stderr = process.stderr.readlines()
 
-        if proc.returncode:
+        if process.returncode:
             # there is an error
             raise RuntimeError(stderr)
 
         # read back the csv file
         self._parse_csv_file()
 
-        logger.debug('tj3 return code: %s' % proc.returncode)
+        logger.debug('tj3 return code: %s' % process.returncode)
         logger.debug('tj3 output: %s' % stderr)
 
         # remove the tjp file

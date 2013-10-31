@@ -238,11 +238,9 @@ class TimeLog(Entity, ScheduleMixin):
 # TODO: Check, what happens when a task has TimeLogs and will have child task later on, will it be ok with TJ
 
 
-
 def update_task_dates(func):
     """decorator that updates the date after the function finishes its job
     """
-
     def wrap(*args, **kwargs):
         # call the function as usual
         rvalue = func(*args, **kwargs)
@@ -251,8 +249,7 @@ def update_task_dates(func):
         args[0]._validate_dates(task_class.start, task_class.end, None)
         return rvalue
 
-        # return decorated function
-
+    # return decorated function
     return wrap
 
 
@@ -1252,10 +1249,10 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         if task:
             if task.start > start:
                 task.start = start
-                logger.debug('start is updated to : %s' % start)
+                #logger.debug('start is updated to : %s' % start)
             if task.end < end:
                 task.end = end
-                logger.debug('end is updated to   : %s' % end)
+                #logger.debug('end is updated to   : %s' % end)
 
     @validates('computed_start')
     def _validate_computed_start(self, key, computed_start):
@@ -1363,7 +1360,7 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         else:
             abs_id = self.project.tjp_id
 
-        return abs_id + '.' + self.tjp_id
+        return '%s.%s' % (abs_id, self.tjp_id)
 
     @property
     def to_tjp(self):

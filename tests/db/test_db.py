@@ -2601,7 +2601,6 @@ class DatabaseModelsTester(unittest2.TestCase):
     def test_persistence_of_Ticket(self):
         """testing the persistence of Ticket
         """
-
         repo = Repository(
             name='Test Repository'
         )

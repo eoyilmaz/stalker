@@ -118,8 +118,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
 
     __mapper_args__ = {
         "polymorphic_identity": "Project",
-        "inherit_condition":
-            project_id_local == Entity.entity_id
+        "inherit_condition": project_id_local == Entity.entity_id
     }
 
     active = Column(Boolean, default=True)
@@ -386,19 +385,15 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
         """returns a TaskJuggler compatible string representing this project
         """
         from jinja2 import Template
-
         temp = Template(defaults.tjp_project_template)
-
-        return temp.render({
-            'project': self
-        })
+        return temp.render({'project': self})
 
     @property
     def is_active(self):
         """predicate for Project.active attribute
         """
         return self.active
-    
+
     @property
     def total_logged_seconds(self):
         """returns an integer representing the total TimeLog seconds recorded
