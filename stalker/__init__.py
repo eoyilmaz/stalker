@@ -17,12 +17,13 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-"""
-Stalker is a Production Asset Management System (ProdAM) designed for Animation
-and VFX Studios. See docs for more information.
+"""Stalker is a Production Asset Management System (ProdAM) designed for
+Animation and VFX Studios.
+
+See docs for more information.
 """
 
-__version__ = '0.2.2.3'
+__version__ = '0.2.3'
 
 
 # before anything about stalker create the defaults

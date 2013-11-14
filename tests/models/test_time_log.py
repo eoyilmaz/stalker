@@ -153,9 +153,9 @@ class TimeLogTester(unittest2.TestCase):
         self.assertEqual(self.test_time_log.task, new_task)
 
     def test_task_argument_updates_backref(self):
-        """testing if the Task given with the task argument is updated correctly
-        with the current TimeLog instance is listed in the time_logs attribute of
-        the Task
+        """testing if the Task given with the task argument is updated
+        correctly with the current TimeLog instance is listed in the time_logs
+        attribute of the Task
         """
         new_task = Task(
             name="Test Task 3",
@@ -301,8 +301,8 @@ class TimeLogTester(unittest2.TestCase):
         self.assertRaises(OverBookedError, TimeLog, **self.kwargs)
 
     def test_OverbookedError_2(self):
-        """testing if a OverBookedError will be raised when the resource 
-        is already booked for the given time period.
+        """testing if a OverBookedError will be raised when the resource is
+        already booked for the given time period.
 
         Simple case diagram:
         #######
@@ -319,8 +319,8 @@ class TimeLogTester(unittest2.TestCase):
         self.assertRaises(OverBookedError, TimeLog, **self.kwargs)
 
     def test_OverbookedError_3(self):
-        """testing if a OverBookedError will be raised when the resource 
-        is already booked for the given time period.
+        """testing if a OverBookedError will be raised when the resource is
+        already booked for the given time period.
 
         Simple case diagram:
         #####
@@ -338,8 +338,8 @@ class TimeLogTester(unittest2.TestCase):
         self.assertRaises(OverBookedError, TimeLog, **self.kwargs)
 
     def test_OverbookedError_4(self):
-        """testing if a OverBookedError will be raised when the resource 
-        is already booked for the given time period.
+        """testing if a OverBookedError will be raised when the resource is
+        already booked for the given time period.
 
         Simple case diagram:
         #######
@@ -360,8 +360,8 @@ class TimeLogTester(unittest2.TestCase):
         self.assertRaises(OverBookedError, TimeLog, **self.kwargs)
 
     def test_OverbookedError_5(self):
-        """testing if a OverBookedError will be raised when the resource 
-        is already booked for the given time period.
+        """testing if a OverBookedError will be raised when the resource is
+        already booked for the given time period.
 
         Simple case diagram:
           #####
@@ -376,14 +376,14 @@ class TimeLogTester(unittest2.TestCase):
 
         # time_log2
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0) - \
-            datetime.timedelta(2)
+                               datetime.timedelta(2)
         self.kwargs["duration"] = datetime.timedelta(12)
 
         self.assertRaises(OverBookedError, TimeLog, **self.kwargs)
 
     def test_OverbookedError_6(self):
-        """testing if a OverBookedError will be raised when the resource 
-        is already booked for the given time period.
+        """testing if a OverBookedError will be raised when the resource is
+        already booked for the given time period.
 
         Simple case diagram:
           #######
@@ -398,14 +398,14 @@ class TimeLogTester(unittest2.TestCase):
 
         # time_log2
         self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0) - \
-            datetime.timedelta(5)
+                               datetime.timedelta(5)
         self.kwargs["duration"] = datetime.timedelta(15)
 
         self.assertRaises(OverBookedError, TimeLog, **self.kwargs)
 
     def test_OverbookedError_7(self):
-        """testing if a OverBookedError will be raised when the resource 
-        is already booked for the given time period.
+        """testing if a OverBookedError will be raised when the resource is
+        already booked for the given time period.
 
         Simple case diagram:
         #######
@@ -413,8 +413,8 @@ class TimeLogTester(unittest2.TestCase):
         """
         # time_log1
         self.kwargs["resource"] = self.test_resource2
-        self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0) - \
-                               datetime.timedelta(5)
+        self.kwargs["start"] = \
+            datetime.datetime(2013, 3, 22, 4, 0) - datetime.timedelta(5)
         self.kwargs["duration"] = datetime.timedelta(15)
 
         time_log1 = TimeLog(**self.kwargs)
@@ -426,8 +426,8 @@ class TimeLogTester(unittest2.TestCase):
         self.assertRaises(OverBookedError, TimeLog, **self.kwargs)
 
     def test_OverbookedError_8(self):
-        """testing if no OverBookedError will be raised when the resource 
-        is not already booked for the given time period.
+        """testing if no OverBookedError will be raised when the resource is
+        not already booked for the given time period.
 
         Simple case diagram:
         #######
@@ -446,8 +446,8 @@ class TimeLogTester(unittest2.TestCase):
         time_log2 = TimeLog(**self.kwargs)
 
     def test_OverbookedError_9(self):
-        """testing if no OverBookedError will be raised when the resource 
-        is not already booked for the given time period.
+        """testing if no OverBookedError will be raised when the resource is
+        not already booked for the given time period.
 
         Simple case diagram:
                  #######
@@ -455,8 +455,8 @@ class TimeLogTester(unittest2.TestCase):
         """
         # time_log1
         self.kwargs["resource"] = self.test_resource2
-        self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0) + \
-                               datetime.timedelta(20)
+        self.kwargs["start"] =\
+            datetime.datetime(2013, 3, 22, 4, 0) + datetime.timedelta(20)
         self.kwargs["duration"] = datetime.timedelta(5)
         time_log1 = TimeLog(**self.kwargs)
 
@@ -479,121 +479,6 @@ class TimeLogTester(unittest2.TestCase):
         # no warning
         self.test_resource2.time_logs.append(time_log1)
 
-    # def test_time_log_extends_effort_of_task(self):
-    #     """testing if the TimeLog will expand the Task.schedule_timing if it is
-    #     getting longer than Task.total_logged_seconds
-    #     """
-    #     task1 = Task(
-    #         name='Test Task 1',
-    #         schedule_timing=10,
-    #         schedule_unit='h',
-    #         schedule_model='effort',
-    #         resource=self.test_resource1,
-    #         status_list=self.test_task_status_list,
-    #         project=self.test_project
-    #     )
-    # 
-    #     # check everything is initialized as they should be
-    #     self.assertEqual(task1.total_logged_seconds, 0)
-    #     self.assertEqual(task1.remaining_seconds, 36000)
-    # 
-    #     dt = datetime.datetime
-    #     td = datetime.timedelta
-    # 
-    #     # now create time log for the task
-    #     timeLog1 = TimeLog(
-    #         task=task1,
-    #         resource=self.test_resource1,
-    #         start=dt(2013, 5, 2, 15, 0),
-    #         duration=td(hours=5)
-    #     )
-    # 
-    #     # now check if the remaining seconds is correctly calculated
-    #     self.assertEqual(
-    #         task1.remaining_seconds, 18000
-    #     )
-    # 
-    #     # and the schedule_timing is not expanded
-    #     self.assertEqual(
-    #         task1.schedule_timing,
-    #         10
-    #     )
-    # 
-    #     # now add a new timeLog which expands the Task
-    #     timeLog2 = TimeLog(
-    #         task=task1,
-    #         resource=self.test_resource1,
-    #         start=dt(2013, 5, 2, 20, 0),
-    #         duration=td(hours=8)
-    #     )
-    # 
-    #     # check if the task schedule_timing is correctly expanded to 13 hours
-    #     self.assertEqual(
-    #         task1.schedule_timing,
-    #         13
-    #     )
-
-    # def test_time_log_extends_effort_of_task_with_different_time_unit(self):
-    #     """testing if the TimeLog will expand the Task.schedule_timing if it is
-    #     getting longer than Task.total_logged_seconds and can work with
-    #     different time units
-    #     """
-    #     from stalker import defaults
-    #     defaults.daily_working_hours = 10
-    # 
-    #     task1 = Task(
-    #         name='Test Task 1',
-    #         schedule_timing=2,
-    #         schedule_unit='d',
-    #         schedule_model='effort',
-    #         resource=self.test_resource1,
-    #         status_list=self.test_task_status_list,
-    #         project=self.test_project
-    #     )
-    # 
-    #     # check everything is initialized as they should be
-    #     self.assertEqual(task1.total_logged_seconds, 0)
-    # 
-    #     # there are no studio created so it should use the defaults
-    #     self.assertEqual(task1.remaining_seconds,
-    #                      2 * 10 * 60 * 60)
-    # 
-    #     dt = datetime.datetime
-    #     td = datetime.timedelta
-    # 
-    #     # now create time log for the task
-    #     timeLog1 = TimeLog(
-    #         task=task1,
-    #         resource=self.test_resource1,
-    #         start=dt(2013, 5, 2, 10, 0),
-    #         duration=td(hours=10)
-    #     )
-    # 
-    #     # now check if the remaining seconds is correctly calculated
-    #     self.assertEqual(
-    #         task1.remaining_seconds, 10 * 60 * 60
-    #     )
-    # 
-    #     # and the schedule_timing is not expanded
-    #     self.assertEqual(
-    #         task1.schedule_timing,
-    #         2
-    #     )
-    # 
-    #     # now add a new timeLog which expands the Task
-    #     timeLog2 = TimeLog(
-    #         task=task1,
-    #         resource=self.test_resource1,
-    #         start=dt(2013, 5, 2, 20, 0),
-    #         duration=td(hours=15)
-    #     )
-    # 
-    #     # check if the task schedule_timing is correctly expanded to 2.5 days
-    #     self.assertEqual(
-    #         task1.schedule_timing,
-    #         2.5
-    #     )
-
 
 class TimeLogDBTestCase(unittest2.TestCase):
     """Tests database interaction of TimeLog instances
@@ -604,6 +489,7 @@ class TimeLogDBTestCase(unittest2.TestCase):
         """
         # create an in memory database
         from stalker import db
+
         db.setup()
         db.init()
 
@@ -671,6 +557,7 @@ class TimeLogDBTestCase(unittest2.TestCase):
         schedule_timing attribute
         """
         from stalker.db import DBSession
+
         tlog1 = TimeLog(**self.kwargs)
         DBSession.add(tlog1)
         DBSession.commit()

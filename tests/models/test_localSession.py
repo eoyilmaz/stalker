@@ -68,7 +68,7 @@ class LocalSessionTester(unittest2.TestCase):
         """
         new_local_session = LocalSession()
         new_local_session.save()
-        
+
         # check if a file is created in the users local storage
         self.assertTrue(
             os.path.exists(
@@ -133,7 +133,7 @@ class LocalSessionTester(unittest2.TestCase):
             local_session2.logged_in_user_id,
             new_user.id
         )
-        
+
         self.assertEqual(
             local_session2.logged_in_user,
             new_user
@@ -154,7 +154,7 @@ class LocalSessionTester(unittest2.TestCase):
         # save it to the Database
         DBSession.add(new_user)
         DBSession.commit()
-        
+
         self.assertIsNotNone(new_user.id)
 
         # save it to the local storage
@@ -165,8 +165,8 @@ class LocalSessionTester(unittest2.TestCase):
         local_session.save()
 
         # set the valid time to an early date
-        local_session.valid_to = datetime.datetime.now() - \
-                                 datetime.timedelta(10)
+        local_session.valid_to = \
+            datetime.datetime.now() - datetime.timedelta(10)
 
         # pickle the data
         local_session._write_data(pickle.dumps(local_session, -1))
@@ -195,7 +195,7 @@ class LocalSessionTester(unittest2.TestCase):
         # save it to the Database
         DBSession.add(new_user)
         DBSession.commit()
-        
+
         self.assertIsNotNone(new_user.id)
 
         # save it to the local storage
@@ -204,7 +204,7 @@ class LocalSessionTester(unittest2.TestCase):
 
         # save the session
         local_session.save()
-        
+
         # check if the file is created
         # check if a file is created in the users local storage
         self.assertTrue(
@@ -215,10 +215,10 @@ class LocalSessionTester(unittest2.TestCase):
                 )
             )
         )
-        
+
         # now delete the session by calling delete()
         local_session.delete()
-        
+
         # check if the file is gone
         # check if a file is created in the users local storage
         self.assertFalse(

@@ -19,15 +19,15 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import unittest2
-import datetime
 
-from stalker import (Entity, Link, Project, Repository, Status,
-                     StatusList, Type, User, Scene)
+from stalker import (Entity, Project, Repository, Status, StatusList, Type,
+                     Scene)
+
 
 class SceneTester(unittest2.TestCase):
     """Tests stalker.models.scene.Scene class
     """
-    
+
     def setUp(self):
         """setup the test
         """
@@ -97,13 +97,13 @@ class SceneTester(unittest2.TestCase):
 
         # the test seuqence
         self.test_scene = Scene(**self.kwargs)
-    
+
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for
         Scene class
         """
         self.assertFalse(Scene.__auto_name__)
-    
+
     def test_shots_attribute_defaults_to_empty_list(self):
         """testing if the shots attribute defaults to an empty list
         """
@@ -209,7 +209,7 @@ class SceneTester(unittest2.TestCase):
         self.kwargs["project"] = new_project
         new_scene = Scene(**self.kwargs)
         self.assertEqual(new_scene.project, new_project)
-    
+
     def test___strictly_typed___is_False(self):
         """testing if the __strictly_typed__ class attribute is False for
         Scene class.

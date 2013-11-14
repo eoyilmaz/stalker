@@ -72,13 +72,13 @@ class VacationTestCase(unittest2.TestCase):
         """testing if the user argument can be skipped skipped
         """
         self.kwargs.pop('user')
-        new_vacation = Vacation(**self.kwargs)
+        Vacation(**self.kwargs)
 
     def test_user_argument_is_None(self):
         """testing if the user argument can be set to None
         """
         self.kwargs['user'] = None
-        new_vacation = Vacation(**self.kwargs)
+        Vacation(**self.kwargs)
 
     def test_user_attribute_is_None(self):
         """testing if the user attribute cat be set to None

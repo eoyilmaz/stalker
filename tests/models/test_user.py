@@ -796,8 +796,7 @@ class UserTest(unittest2.TestCase):
         self.test_user.departments = []
         self.assertEqual(self.test_user.departments, [])
 
-    def test_departments_argument_only_accepts_list_of_department_objects(
-            self):
+    def test_departments_argument_only_accepts_list_of_department_objects(self):
         """testing if a TypeError will be raised when trying to assign
         anything other than a Department object to departments argument
         """
@@ -1282,9 +1281,7 @@ class UserTest(unittest2.TestCase):
             [self.test_ticket2, self.test_ticket3, self.test_ticket4]
         )
 
-
-    def test_open_tickets_attribute_returns_all_open_tickets_owned_by_this_user(
-            self):
+    def test_open_tickets_attribute_returns_all_open_tickets_owned_by_this_user(self):
         """testing if User.open_tickets returns all the open tickets owned by
         this user
         """

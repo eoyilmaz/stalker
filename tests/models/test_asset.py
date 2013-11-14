@@ -22,8 +22,10 @@ import unittest2
 from stalker import (Asset, Entity, Project, Repository, Sequence, Status,
                      StatusList, Task, Type, Link, Shot)
 
+
 class AssetTester(unittest2.TestCase):
-    """tests Asset class    """    
+    """tests Asset class
+    """
 
     def setUp(self):
         """setup the test
@@ -33,12 +35,12 @@ class AssetTester(unittest2.TestCase):
             name="Complete",
             code="CMPLT",
         )
-        
+
         self.test_data_status_wip = Status(
             name="Work In Progress",
             code="WIP",
         )
-        
+
         # status lists
         self.test_data_project_status_list = StatusList(
             name="Project Status List",
@@ -108,7 +110,7 @@ class AssetTester(unittest2.TestCase):
             name="Test Repository Type",
             code='testrepo',
             target_entity_type=Repository,
-            )
+        )
 
         # repository
         self.test_data_repository = Repository(
@@ -140,7 +142,7 @@ class AssetTester(unittest2.TestCase):
             project=self.test_data_project1,
             sequences=[self.test_data_sequence],
         )
-        
+
         self.test_data_shot2 = Shot(
             code="TestSH002",
             status_list=self.test_data_shot_status_list,
@@ -154,14 +156,14 @@ class AssetTester(unittest2.TestCase):
             project=self.test_data_project1,
             sequences=[self.test_data_sequence],
         )
-        
+
         self.test_data_shot4 = Shot(
             code="TestSH004",
             status_list=self.test_data_shot_status_list,
             project=self.test_data_project1,
             sequences=[self.test_data_sequence],
         )
-        
+
         self.kwargs = {
             "name": "Test Asset",
             'code': 'ta',
@@ -171,9 +173,9 @@ class AssetTester(unittest2.TestCase):
             "status": 0,
             "status_list": self.test_data_asset_status_list,
         }
-        
+
         self.test_data_test_asset = Asset(**self.kwargs)
-        
+
         # tasks
         self.test_data_task1 = Task(
             name="Task1",
@@ -192,13 +194,13 @@ class AssetTester(unittest2.TestCase):
             parent=self.test_data_test_asset,
             status_list=self.test_data_task_status_list
         )
-    
+
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for
         Asset class
         """
         self.assertFalse(Asset.__auto_name__)
-    
+
     def test_equality(self):
         """testing equality of two Asset objects
         """
@@ -240,7 +242,7 @@ class AssetTester(unittest2.TestCase):
         self.assertTrue(new_asset1 != new_asset4)
         self.assertTrue(new_asset3 != new_asset4)
         self.assertTrue(new_asset1 != new_entity1)
-    
+
     def test_ReferenceMixin_initialization(self):
         """testing if the ReferenceMixin part is initialized correctly
         """
@@ -250,30 +252,30 @@ class AssetTester(unittest2.TestCase):
             code='image',
             target_entity_type="Link"
         )
-        
+
         link1 = Link(
             name="Artwork 1",
             full_path="/mnt/M/JOBs/TEST_PROJECT",
             filename="a.jpg",
             type=link_type_1
         )
-        
+
         link2 = Link(
             name="Artwork 2",
             full_path="/mnt/M/JOBs/TEST_PROJECT",
             filename="b.jbg",
             type=link_type_1
         )
-        
+
         references = [link1, link2]
-        
+
         self.kwargs["code"] = "SH12314"
         self.kwargs["references"] = references
-        
+
         new_asset = Asset(**self.kwargs)
-        
+
         self.assertEqual(new_asset.references, references)
-    
+
     def test_StatusMixin_initialization(self):
         """testing if the StatusMixin part is initialized correctly
         """
@@ -284,7 +286,7 @@ class AssetTester(unittest2.TestCase):
         status_list = StatusList(name="Project Statuses",
                                  statuses=[status1, status2],
                                  target_entity_type=Asset)
-        
+
         self.kwargs["code"] = "SH12314"
         self.kwargs["status"] = 0
         self.kwargs["status_list"] = status_list
@@ -309,13 +311,13 @@ class AssetTester(unittest2.TestCase):
             name="Project Statuses",
             statuses=[status1],
             target_entity_type=Project,
-            )
+        )
 
         commercial_project_type = Type(
             name="Commercial",
             code='comm',
             target_entity_type=Project,
-            )
+        )
 
         new_project = Project(
             name="Commercial",
@@ -343,7 +345,7 @@ class AssetTester(unittest2.TestCase):
             code="tstasset",
             status_list=asset_status_list,
             project=new_project,
-            )
+        )
 
         task1 = Task(
             name="Modeling",
@@ -361,76 +363,6 @@ class AssetTester(unittest2.TestCase):
 
         self.assertItemsEqual(new_asset.tasks, tasks)
 
-
-        # TODO: this test should be in tests.db
-        # because the property it is testing is using DBSession.query
-        #
-        #def test_asset_appends_itself_to_the_assets_list_of_project_instance(self):
-        #"""testing if the created Asset instance will append itself to the
-        #assets list of the given Project instance.
-        #"""
-
-        #status1 = Status(name="On Hold", code="OH")
-
-        #task_status_list = StatusList(
-        #name="Task Statuses",
-        #statuses=[status1],
-        #target_entity_type=Task
-        #)
-
-        #project_status_list = StatusList(
-        #name="Project Statuses",
-        #statuses=[status1],
-        #target_entity_type=Project
-        #)
-
-        #commercial_project_type = Type(
-        #name="Commercial",
-        #code='comm',
-        #target_entity_type=Project,
-        #)
-
-        #new_project = Project(
-        #name="Commercial",
-        #type=commercial_project_type,
-        #status_list=project_status_list,
-        #repository=self.test_data_repository,
-        #)
-
-        #character_asset_type = Type(
-        #name="Character",
-        #code='char',
-        #target_entity_type=Asset
-        #)
-
-        #asset_status_list = StatusList(
-        #name="Asset Status List",
-        #statuses=[status1],
-        #target_entity_type=Asset
-        #)
-
-        #new_asset = Asset(
-        #   name="test asset",
-        #   type=character_asset_type,
-        #   code="tstasset",
-        #   status_list=asset_status_list,
-        #   project=new_project,
-        #)
-
-        #task1 = Task(
-        #   name="Modeling",
-        #   status_list=task_status_list,
-        #   parent=new_asset
-        #)
-
-        #task2 = Task(
-        #   name="Lighting",
-        #   status_list=task_status_list,
-        #   parent=new_asset
-        #)
-
-        #self.assertIn(new_asset, new_project.assets)
-
     def test_plural_class_name(self):
         """testing the default plural name of the Asset class
         """
@@ -441,122 +373,3 @@ class AssetTester(unittest2.TestCase):
         """
 
         self.assertEqual(Asset.__strictly_typed__, True)
-
-#    def test_shots_argument_is_skipped(self):
-#        """testing if the shots attribute will be an empty list when the shots
-#        argument is skipped
-#        """
-#        self.kwargs.pop("shots")
-#        new_asset = Asset(**self.kwargs)
-#        self.assertEqual(new_asset.shots, [])
-#
-#    def test_shots_argument_is_None(self):
-#        """testing if the shots attribute will be an empty list when the shots
-#        argument is None
-#        """
-#        self.kwargs["shots"] = None
-#        new_asset = Asset(**self.kwargs)
-#        self.assertEqual(new_asset.shots, [])
-#
-#    def test_shots_attribute_is_None(self):
-#        """testing if a TypeError will be raised when the shots attribute is
-#        set to None
-#        """
-#        self.assertRaises(TypeError, setattr, self.test_data_test_asset,
-#                          "shots", None)
-#
-#    def test_shots_argument_is_not_a_list(self):
-#        """testing if a TypeError will be raised when the shots argument is not
-#        a list
-#        """
-#        self.kwargs["shots"] = "1"
-#        self.assertRaises(TypeError, Asset, **self.kwargs)
-#
-#    def test_shots_attribute_is_not_a_list(self):
-#        """testing if a TypeError will be raised when the shots attribute is
-#        set to a value other than a list
-#        """
-#        self.assertRaises(TypeError, setattr, self.test_data_test_asset,
-#                          "shots", "1")
-#
-#    def test_shots_argument_is_not_a_list_of_Shots(self):
-#        """testing if a TypeError will be raised when the shots argument is not
-#        a list of Shot instances
-#        """
-#        self.kwargs["shots"] = [1, 1.2, "a shot"]
-#        self.assertRaises(TypeError, Asset, **self.kwargs)
-#
-#    def test_shots_attribute_is_not_a_list_of_Shots(self):
-#        """testing if a TypeError will be raised when the shots attribute is
-#        set to a value other than a list of Shot instances
-#        """
-#        self.assertRaises(TypeError, setattr, self.test_data_test_asset,
-#                          "shots", [1, 1.2, "a shot"])
-#
-#    def test_shots_argument_is_a_list_of_Shot_instances(self):
-#        """testing if the assets attribute of the Shot instances will be
-#        updated and have the current asset in their assets list when the shots
-#        argument is a list of Shot instances
-#        """
-#
-#        self.kwargs["shots"] = [self.test_data_shot1,
-#                                self.test_data_shot2]
-#
-#        new_asset = Asset(**self.kwargs)
-#
-#        self.assertIn(new_asset, self.test_data_shot1.assets)
-#        self.assertIn(new_asset, self.test_data_shot2.assets)
-#
-#    def test_shots_attribute_is_a_list_of_Shot_instances(self):
-#        """testing if the assets attribute of the Shot instances will be
-#        updated and have the current asset in their assets list when the shots
-#        attribute is a list of Shot instances
-#        """
-#
-#        self.kwargs["name"] = "New Test Asset"
-#        self.kwargs["shots"] = [self.test_data_shot1,
-#                                self.test_data_shot2]
-#
-#        #print "creating new asset"
-#        new_asset = Asset(**self.kwargs)
-#
-#        #print "appending new shots"
-#        new_asset.shots = [self.test_data_shot3,
-#                           self.test_data_shot4]
-#
-#        self.assertIn(new_asset, self.test_data_shot3.assets)
-#        self.assertIn(new_asset, self.test_data_shot4.assets)
-#
-#        self.assertNotIn(new_asset, self.test_data_shot1.assets)
-#        self.assertNotIn(new_asset, self.test_data_shot2.assets)
-#
-#    def test_shots_attribute_will_update_the_backreference_value_assets_in_Shot_instances(self):
-#        """testing if the shots attribute will update the backreference
-#        attribute in Shot instances
-#        """
-#
-#        self.kwargs["name"] = "New Test Asset"
-#        self.kwargs["shots"] = [self.test_data_shot1, self.test_data_shot2]
-#
-#        new_asset = Asset(**self.kwargs)
-#
-#        # append
-#        new_asset.shots.append(self.test_data_shot3)
-#        self.assertIn(new_asset, self.test_data_shot3.assets)
-#
-#        # extend
-#        new_asset.shots.extend([self.test_data_shot4])
-#        self.assertIn(new_asset, self.test_data_shot4.assets)
-#
-#        # remove
-#        new_asset.shots.remove(self.test_data_shot1)
-#        self.assertNotIn(new_asset, self.test_data_shot1.assets)
-#
-#        # pop
-#        new_asset.shots.pop(0)
-#        self.assertNotIn(new_asset, self.test_data_shot2.assets)
-#
-#        # pop again
-#        new_asset.shots.pop()
-#        self.assertNotIn(new_asset, self.test_data_shot4.assets)
-#    

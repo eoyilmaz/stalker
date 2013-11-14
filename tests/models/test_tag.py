@@ -21,9 +21,11 @@
 import unittest2
 from stalker import Tag, SimpleEntity
 
+
 class TagTest(unittest2.TestCase):
     """testing the Tag class
     """
+
     def setUp(self):
         """setup the test
         """
@@ -34,19 +36,20 @@ class TagTest(unittest2.TestCase):
 
         # create another SimpleEntity with kwargs for __eq__ and __ne__ tests
         self.simple_entity = SimpleEntity(**self.kwargs)
-    
+
     def test___auto_name__class_attribute_is_set_to_false(self):
         """testing if the __auto_name__ class attribute is set to False for Tag
         class
         """
         self.assertFalse(Tag.__auto_name__)
-    
+
     def test_tag_init(self):
         """testing if tag inits properly
         """
         # this should work without any error
-        a_tag_object = Tag(**self.kwargs)
-    
+        tag = Tag(**self.kwargs)
+        self.assertIsInstance(tag, Tag)
+
     def test_equality(self):
         """testing the equality of two Tags
         """

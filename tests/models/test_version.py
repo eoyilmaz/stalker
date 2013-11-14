@@ -20,7 +20,8 @@
 
 import unittest2
 from stalker import (Link, Project, Repository, Sequence, Shot, Status,
-                     StatusList, Task, Type, Version, FilenameTemplate, Structure)
+                     StatusList, Task, Type, Version, FilenameTemplate,
+                     Structure)
 from stalker import db
 from stalker.db.session import DBSession
 
@@ -302,8 +303,7 @@ class VersionTester(unittest2.TestCase):
 
             self.assertEqual(new_version.take_name, test_value[1])
 
-    def test_take_name_attribute_is_not_a_string_will_be_converted_to_one(
-            self):
+    def test_take_name_attribute_is_not_a_string_will_be_converted_to_one(self):
         """testing if the given take_name attribute is not a string will be
         converted to a proper string
         """
@@ -464,52 +464,6 @@ class VersionTester(unittest2.TestCase):
 
         new_version.version_number = 100
         self.assertEqual(new_version.version_number, 100)
-
-    # def test_source_file_argument_is_skipped(self):
-    #     """testing if the source_file will be None when the source_file
-    #     argument is skipped
-    #     """
-    #     self.kwargs.pop('source_file')
-    #     new_version = Version(**self.kwargs)
-    #     self.assertIs(new_version.source_file, None)
-    # 
-    # def test_source_file_argument_is_None(self):
-    #     """testing if the source_file will be None when the source argument is
-    #     None
-    #     """
-    #     self.kwargs['source_file'] = None
-    #     new_version = Version(**self.kwargs)
-    #     self.assertIs(new_version.source_file, None)
-    # 
-    # def test_source_file_argument_is_not_a_Link_instance(self):
-    #     """testing if a TypeError will be raised when the source_file argument
-    #     is not a stalker.models.link.Link instance
-    #     """
-    #     self.kwargs['source_file'] = 123123
-    #     self.assertRaises(TypeError, Version, **self.kwargs)
-    # 
-    # def test_source_file_attribute_is_not_a_Link_instance(self):
-    #     """testing if a TypeError will be raised when the source_file attribute
-    #     is set to something other than a Link instance
-    #     """
-    #     self.assertRaises(TypeError, setattr, self.test_version, 'source_file',
-    #                       121)
-    # 
-    # def test_source_file_argument_is_working_properly(self):
-    #     """testing if the source_file argument is working properly
-    #     """
-    #     new_source_file = Link(name='Test Link', full_path='none')
-    #     self.kwargs['source_file'] = new_source_file
-    #     new_version = Version(**self.kwargs)
-    #     self.assertEqual(new_version.source_file, new_source_file)
-    # 
-    # def test_source_file_attribute_is_working_properly(self):
-    #     """testing if the source_file attribute is working properly
-    #     """
-    #     new_source_file = Link(name='Test Link', full_path='empty string')
-    #     self.assertNotEqual(self.test_version.source_file, new_source_file)
-    #     self.test_version.source_file = new_source_file
-    #     self.assertEqual(self.test_version.source_file, new_source_file)
 
     def test_inputs_argument_is_skipped(self):
         """testing if the inputs attribute will be an empty list when the
@@ -714,8 +668,7 @@ class VersionTester(unittest2.TestCase):
         self.assertRaises(CircularDependencyError, setattr, self.test_version,
                           'parent', version1)
 
-    def test_parent_attribute_will_not_allow_deeper_circular_dependencies(
-            self):
+    def test_parent_attribute_will_not_allow_deeper_circular_dependencies(self):
         """testing if a CircularDependency will be raised when the given
         Version is a parent of the current parent
         """
@@ -743,8 +696,7 @@ class VersionTester(unittest2.TestCase):
         self.assertRaises(TypeError, setattr, self.test_version, 'children',
                           'not a list of Version instances')
 
-    def test_children_attribute_is_not_set_to_a_list_of_Version_instances(
-            self):
+    def test_children_attribute_is_not_set_to_a_list_of_Version_instances(self):
         """testing if a TypeError will be raised when the children attribute is
         not set to a list of Version instances
         """
@@ -788,8 +740,7 @@ class VersionTester(unittest2.TestCase):
         self.assertRaises(CircularDependencyError,
                           new_version1.children.append, new_version2)
 
-    def test_children_attribute_will_not_allow_deeper_circular_dependencies(
-            self):
+    def test_children_attribute_will_not_allow_deeper_circular_dependencies(self):
         """testing if a CircularDependency error will be raised when the a
         parent Version of a parent Version is set as a children to its grand
         child
@@ -805,8 +756,7 @@ class VersionTester(unittest2.TestCase):
         self.assertRaises(CircularDependencyError,
                           new_version1.children.append, new_version3)
 
-    def test_update_paths_will_render_the_appropriate_template_from_the_related_project(
-            self):
+    def test_update_paths_will_render_the_appropriate_template_from_the_related_project(self):
         """testing if update_paths method will update the Version.full_path by
         rendering the related Project FilenameTemplate.
         """
@@ -858,8 +808,10 @@ class VersionTester(unittest2.TestCase):
         ft = FilenameTemplate(
             name='Task Filename Template',
             target_entity_type='Task',
-            path='{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}',
-            filename='{{task.nice_name}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}{{extension}}',
+            path='{{project.code}}/{%- for parent_task in parent_tasks -%}'
+                 '{{parent_task.nice_name}}/{%- endfor -%}',
+            filename='{{task.nice_name}}_{{version.take_name}}'
+                     '_v{{"%03d"|format(version.version_number)}}{{extension}}'
         )
         self.test_project.structure.templates.append(ft)
         new_version1 = Version(**self.kwargs)
@@ -878,8 +830,7 @@ class VersionTester(unittest2.TestCase):
             'Task1_TestTake_v001.ma'
         )
 
-    def test_update_paths_will_raise_a_RuntimeError_if_there_is_no_suitable_FilenameTemplate(
-            self):
+    def test_update_paths_will_raise_a_RuntimeError_if_there_is_no_suitable_FilenameTemplate(self):
         """testing if update_paths method will raise a RuntimeError if there is
         no suitable FilenameTemplate instance found
         """
@@ -976,8 +927,10 @@ class VersionTester(unittest2.TestCase):
         ft = FilenameTemplate(
             name='Task Filename Template',
             target_entity_type='Task',
-            path='{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}',
-            filename='{{task.nice_name}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}{{extension}}',
+            path='{{project.code}}/{%- for parent_task in parent_tasks -%}'
+                 '{{parent_task.nice_name}}/{%- endfor -%}',
+            filename='{{task.nice_name}}_{{version.take_name}}'
+                     '_v{{"%03d"|format(version.version_number)}}{{extension}}'
         )
         self.test_project.structure.templates.append(ft)
         new_version1 = Version(**self.kwargs)
@@ -991,29 +944,6 @@ class VersionTester(unittest2.TestCase):
         self.assertEqual(
             new_version1.absolute_full_path,
             '/mnt/T/tp/SH001/Task1/Task1_TestTake_v001.ma'
-        )
-
-    def test_absolute_full_path_works_properly(self):
-        """testing if the absolute_full_path attribute works properly
-        """
-        ft = FilenameTemplate(
-            name='Task Filename Template',
-            target_entity_type='Task',
-            path='{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}',
-            filename='{{task.nice_name}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}{{extension}}',
-        )
-        self.test_project.structure.templates.append(ft)
-        new_version1 = Version(**self.kwargs)
-        DBSession.add(new_version1)
-        DBSession.commit()
-
-        new_version1.update_paths()
-        new_version1.extension = '.ma'
-        self.assertEqual(new_version1.extension, '.ma')
-
-        self.assertEqual(
-            new_version1.absolute_path,
-            '/mnt/T/tp/SH001/Task1'
         )
 
     def test_latest_published_version_is_read_only(self):
@@ -1174,13 +1104,13 @@ class VersionTester(unittest2.TestCase):
         """testing if the created_with argument can be skipped
         """
         self.kwargs.pop('created_with')
-        test_version = Version(**self.kwargs)
+        Version(**self.kwargs)
 
     def test_created_with_argument_can_be_None(self):
         """testing if the created_with argument can be None
         """
         self.kwargs['created_with'] = None
-        test_version = Version(**self.kwargs)
+        Version(**self.kwargs)
 
     def test_created_with_attribute_can_be_set_to_None(self):
         """testing if the created with attribute can be set to None
@@ -1221,7 +1151,7 @@ class VersionTester(unittest2.TestCase):
     def test_max_version_number_attribute_is_read_only(self):
         """testing if the max_version_number attribute is read only
         """
-        self.assertRaises(AttributeError, setattr ,self.test_version,
+        self.assertRaises(AttributeError, setattr, self.test_version,
                           'max_version_number', 20)
 
     def test_max_version_number_attribute_is_working_properly(self):

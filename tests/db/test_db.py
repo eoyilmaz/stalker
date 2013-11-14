@@ -1940,7 +1940,9 @@ class DatabaseModelsTester(unittest2.TestCase):
         kwargs = {
             "name": "Simple Entity 1",
             "description": "this is for testing purposes",
-            'thumbnail': thumbnail
+            'thumbnail': thumbnail,
+            'html_style': 'width: 100px; color: purple',
+            'html_class': 'purple'
         }
 
         test_simple_entity = SimpleEntity(**kwargs)
@@ -1956,28 +1958,32 @@ class DatabaseModelsTester(unittest2.TestCase):
         name = test_simple_entity.name
         nice_name = test_simple_entity.nice_name
         updated_by = test_simple_entity.updated_by
+        html_style = test_simple_entity.html_style
+        html_class = test_simple_entity.html_class
         __stalker_version__ = test_simple_entity.__stalker_version__
 
         del test_simple_entity
 
         # now try to retrieve it
-        test_simple_entity_DB = DBSession.query(SimpleEntity) \
+        test_simple_entity_db = DBSession.query(SimpleEntity) \
             .filter(SimpleEntity.name == kwargs["name"]).first()
 
-        assert (isinstance(test_simple_entity_DB, SimpleEntity))
+        assert (isinstance(test_simple_entity_db, SimpleEntity))
 
         #self.assertEqual(test_simple_entity, test_simple_entity_DB)
-        self.assertEqual(created_by, test_simple_entity_DB.created_by)
-        self.assertEqual(date_created, test_simple_entity_DB.date_created)
-        self.assertEqual(date_updated, test_simple_entity_DB.date_updated)
-        self.assertEqual(description, test_simple_entity_DB.description)
-        self.assertEqual(name, test_simple_entity_DB.name)
-        self.assertEqual(nice_name, test_simple_entity_DB.nice_name)
-        self.assertEqual(updated_by, test_simple_entity_DB.updated_by)
+        self.assertEqual(created_by, test_simple_entity_db.created_by)
+        self.assertEqual(date_created, test_simple_entity_db.date_created)
+        self.assertEqual(date_updated, test_simple_entity_db.date_updated)
+        self.assertEqual(description, test_simple_entity_db.description)
+        self.assertEqual(name, test_simple_entity_db.name)
+        self.assertEqual(nice_name, test_simple_entity_db.nice_name)
+        self.assertEqual(updated_by, test_simple_entity_db.updated_by)
+        self.assertEqual(html_style, test_simple_entity_db.html_style)
+        self.assertEqual(html_class, test_simple_entity_db.html_class)
         self.assertEqual(__stalker_version__,
-                         test_simple_entity_DB.__stalker_version__)
+                         test_simple_entity_db.__stalker_version__)
         self.assertIsNotNone(thumbnail)
-        self.assertEqual(thumbnail, test_simple_entity_DB.thumbnail)
+        self.assertEqual(thumbnail, test_simple_entity_db.thumbnail)
 
         ## delete tests
         #self.assertIsNotNone(Link.query.all())

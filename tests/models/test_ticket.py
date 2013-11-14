@@ -1,7 +1,22 @@
-# Copyright (c) 2009-2012, Erkan Ozgur Yilmaz
-# 
-# This module is part of Stalker and is released under the BSD 2
-# License: http://www.opensource.org/licenses/BSD-2-Clause
+# -*- coding: utf-8 -*-
+# Stalker a Production Asset Management System
+# Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
+#
+# This file is part of Stalker.
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation;
+# version 2.1 of the License.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import unittest2
 
@@ -313,8 +328,7 @@ class TicketTester(unittest2.TestCase):
         """
         self.assertEqual(self.test_ticket.related_tickets, [])
 
-    def test_related_tickets_attribute_is_set_to_something_other_then_a_list_of_Tickets(
-            self):
+    def test_related_tickets_attribute_is_set_to_something_other_then_a_list_of_Tickets(self):
         """testing if a TypeError will be raised when the related_tickets
         attribute is set to something other than a list of Tickets
         """
@@ -423,8 +437,7 @@ class TicketTester(unittest2.TestCase):
     ## STATUSES ##
 
     ## resolve ##
-    def test_resolve_method_will_change_the_status_from_New_to_Closed_and_creates_a_log(
-            self):
+    def test_resolve_method_will_change_the_status_from_New_to_Closed_and_creates_a_log(self):
         """testing if invoking the resolve method will change the status of the
         Ticket from New to Closed
         """
@@ -436,8 +449,7 @@ class TicketTester(unittest2.TestCase):
         self.assertEqual(log.to_status, self.status_CLOSED)
         self.assertEqual(log.action, 'resolve')
 
-    def test_resolve_method_will_change_the_status_from_Accepted_to_Closed(
-            self):
+    def test_resolve_method_will_change_the_status_from_Accepted_to_Closed(self):
         """testing if invoking the resolve method will change the status of the
         Ticket from Accepted to Closed
         """
@@ -450,8 +462,7 @@ class TicketTester(unittest2.TestCase):
         self.assertEqual(log.to_status, self.status_CLOSED)
         self.assertEqual(log.action, 'resolve')
 
-    def test_resolve_method_will_change_the_status_from_Assigned_to_Closed(
-            self):
+    def test_resolve_method_will_change_the_status_from_Assigned_to_Closed(self):
         """testing if invoking the resolve method will change the status of the
         Ticket from Assigned to Closed
         """
@@ -464,8 +475,7 @@ class TicketTester(unittest2.TestCase):
         self.assertEqual(log.to_status, self.status_CLOSED)
         self.assertEqual(log.action, 'resolve')
 
-    def test_resolve_method_will_change_the_status_from_Reopened_to_Closed(
-            self):
+    def test_resolve_method_will_change_the_status_from_Reopened_to_Closed(self):
         """testing if invoking the accept method will change the status of the
         Ticket from Reopened to closed
         """
@@ -478,8 +488,7 @@ class TicketTester(unittest2.TestCase):
         self.assertEqual(log.to_status, self.status_CLOSED)
         self.assertEqual(log.action, 'resolve')
 
-    def test_resolve_method_will_not_change_the_status_from_Closed_to_anything(
-            self):
+    def test_resolve_method_will_not_change_the_status_from_Closed_to_anything(self):
         """testing if invoking the resolve method will not change the status of
         the Ticket from Closed to anything
         """
@@ -488,11 +497,8 @@ class TicketTester(unittest2.TestCase):
         self.test_ticket.resolve()
         self.assertEqual(self.test_ticket.status, self.status_CLOSED)
 
-
     ## reopen ##
-
-    def test_reopen_method_will_not_change_the_status_from_New_to_anything(
-            self):
+    def test_reopen_method_will_not_change_the_status_from_New_to_anything(self):
         """testing if invoking the reopen method will not change the status of
         the Ticket from New to anything
         """
@@ -501,8 +507,7 @@ class TicketTester(unittest2.TestCase):
         self.test_ticket.reopen()
         self.assertEqual(self.test_ticket.status, self.status_NEW)
 
-    def test_reopen_method_will_not_change_the_status_from_Accepted_to_anything(
-            self):
+    def test_reopen_method_will_not_change_the_status_from_Accepted_to_anything(self):
         """testing if invoking the reopen method will not change the status of
         the Ticket from Accepted to anything
         """
@@ -511,8 +516,7 @@ class TicketTester(unittest2.TestCase):
         self.test_ticket.reopen()
         self.assertEqual(self.test_ticket.status, self.status_ACCEPTED)
 
-    def test_reopen_method_will_not_change_the_status_from_Assigned_to_anything(
-            self):
+    def test_reopen_method_will_not_change_the_status_from_Assigned_to_anything(self):
         """testing if invoking the reopen method will not change the status of
         the Ticket from Assigned to anything
         """
@@ -521,8 +525,7 @@ class TicketTester(unittest2.TestCase):
         self.test_ticket.reopen()
         self.assertEqual(self.test_ticket.status, self.status_ASSIGNED)
 
-    def test_reopen_method_will_not_change_the_status_from_Reopened_to_anything(
-            self):
+    def test_reopen_method_will_not_change_the_status_from_Reopened_to_anything(self):
         """testing if invoking the reopen method will not change the status of
         the Ticket from Reopened to anything
         """
@@ -531,8 +534,7 @@ class TicketTester(unittest2.TestCase):
         self.test_ticket.reopen()
         self.assertEqual(self.test_ticket.status, self.status_REOPENED)
 
-    def test_reopen_method_will_change_the_status_from_Closed_to_Reopened(
-            self):
+    def test_reopen_method_will_change_the_status_from_Closed_to_Reopened(self):
         """testing if invoking the reopen method will change the status of the
         Ticket from Closed to Reopened
         """
@@ -560,8 +562,7 @@ class TicketTester(unittest2.TestCase):
         self.assertEqual(log.to_status, self.status_ACCEPTED)
         self.assertEqual(log.action, 'accept')
 
-    def test_accept_method_will_change_the_status_from_Accepted_to_Accepted(
-            self):
+    def test_accept_method_will_change_the_status_from_Accepted_to_Accepted(self):
         """testing if invoking the accept method will change the status of the
         Ticket from Accepted to Accepted
         """
@@ -574,8 +575,7 @@ class TicketTester(unittest2.TestCase):
         self.assertEqual(log.to_status, self.status_ACCEPTED)
         self.assertEqual(log.action, 'accept')
 
-    def test_accept_method_will_change_the_status_from_Assigned_to_Accepted(
-            self):
+    def test_accept_method_will_change_the_status_from_Assigned_to_Accepted(self):
         """testing if invoking the accept method will change the status of the
         Ticket from Assigned to Accepted
         """
@@ -588,8 +588,7 @@ class TicketTester(unittest2.TestCase):
         self.assertEqual(log.to_status, self.status_ACCEPTED)
         self.assertEqual(log.action, 'accept')
 
-    def test_accept_method_will_change_the_status_from_Reopened_to_Accepted(
-            self):
+    def test_accept_method_will_change_the_status_from_Reopened_to_Accepted(self):
         """testing if invoking the accept method will change the status of the
         Ticket from Reopened to Accepted
         """
@@ -602,8 +601,7 @@ class TicketTester(unittest2.TestCase):
         self.assertEqual(log.to_status, self.status_ACCEPTED)
         self.assertEqual(log.action, 'accept')
 
-    def test_accept_method_will_not_change_the_status_of_Closed_to_Anything(
-            self):
+    def test_accept_method_will_not_change_the_status_of_Closed_to_Anything(self):
         """testing if invoking the accept method will not change the status of
         the Ticket from Closed to Anything
         """
@@ -628,8 +626,7 @@ class TicketTester(unittest2.TestCase):
         self.assertEqual(log.to_status, self.status_ASSIGNED)
         self.assertEqual(log.action, 'reassign')
 
-    def test_reassign_method_will_change_the_status_from_Accepted_to_Assigned(
-            self):
+    def test_reassign_method_will_change_the_status_from_Accepted_to_Assigned(self):
         """testing if invoking the reassign method will change the status of
         the Ticket from Accepted to Accepted
         """
@@ -642,8 +639,7 @@ class TicketTester(unittest2.TestCase):
         self.assertEqual(log.to_status, self.status_ASSIGNED)
         self.assertEqual(log.action, 'reassign')
 
-    def test_reassign_method_will_change_the_status_from_Assigned_to_Assigned(
-            self):
+    def test_reassign_method_will_change_the_status_from_Assigned_to_Assigned(self):
         """testing if invoking the reassign method will change the status of
         the Ticket from Assigned to Accepted
         """
@@ -656,8 +652,7 @@ class TicketTester(unittest2.TestCase):
         self.assertEqual(log.to_status, self.status_ASSIGNED)
         self.assertEqual(log.action, 'reassign')
 
-    def test_reassign_method_will_change_the_status_from_Reopened_to_Assigned(
-            self):
+    def test_reassign_method_will_change_the_status_from_Reopened_to_Assigned(self):
         """testing if invoking the accept method will change the status of the
         Ticket from Reopened to Assigned
         """
@@ -670,8 +665,7 @@ class TicketTester(unittest2.TestCase):
         self.assertEqual(log.to_status, self.status_ASSIGNED)
         self.assertEqual(log.action, 'reassign')
 
-    def test_reassign_method_will_not_change_the_status_of_Closed_to_Anything(
-            self):
+    def test_reassign_method_will_not_change_the_status_of_Closed_to_Anything(self):
         """testing if invoking the reassign method will not change the status
         of the Ticket from Closed to Anything
         """

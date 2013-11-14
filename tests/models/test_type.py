@@ -21,10 +21,11 @@
 import unittest2
 from stalker import Entity, Type
 
+
 class TypeTester(unittest2.TestCase):
     """Tests Type class
     """
-    
+
     def setUp(self):
         """set up the test
         """
@@ -34,20 +35,19 @@ class TypeTester(unittest2.TestCase):
             "description": "this is a test type",
             "target_entity_type": "SimpleEntity"
         }
-        
+
         self.test_type = Type(**self.kwargs)
-        
+
         # create another Entity with the same name of the
         # test_type for __eq__ and __ne__ tests
         self.entity1 = Entity(**self.kwargs)
-    
+
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for
         Ticket class
         """
         self.assertFalse(Type.__auto_name__)
-     
-    
+
     def test_equality(self):
         """testing the equality operator
         """
@@ -113,7 +113,7 @@ class TypeTester(unittest2.TestCase):
         """
         self.kwargs["target_entity_type"] = "Asset"
         # no error should be raised
-        new_type = Type(**self.kwargs)
+        Type(**self.kwargs)
 
     def test_target_entity_type_argument_accepts_Python_classes(self):
         """testing if target_entity_type argument is given as a Python class

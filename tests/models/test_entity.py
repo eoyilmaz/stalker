@@ -1,12 +1,31 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
+# Stalker a Production Asset Management System
+# Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
+#
+# This file is part of Stalker.
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation;
+# version 2.1 of the License.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import unittest2
 from stalker import Entity, Note, Tag, User
 
+
 class EntityTester(unittest2.TestCase):
     """tests the Entity class
     """
-    
+
     def setUp(self):
         """setting up some proper values
         """
@@ -20,7 +39,7 @@ class EntityTester(unittest2.TestCase):
 
         # create some test Tag objects, not necessarily needed but create them
         self.test_tag1 = Tag(name="Test Tag 1")
-        self.test_tag2 = Tag(name="Test Tag 1") # make it equal to tag1
+        self.test_tag2 = Tag(name="Test Tag 1")  # make it equal to tag1
         self.test_tag3 = Tag(name="Test Tag 3")
 
         self.tags = [self.test_tag1, self.test_tag2]
@@ -40,23 +59,23 @@ class EntityTester(unittest2.TestCase):
             "updated_by": self.test_user,
             "tags": self.tags,
             "notes": self.notes,
-            }
+        }
 
         # create a proper SimpleEntity to use it later in the tests
         self.test_entity = Entity(**self.kwargs)
-    
 
     def test___auto_name__class_attribute_is_set_to_True(self):
         """testing if the __auto_name__ class attribute is set to False for
         Entity class
         """
         self.assertTrue(Entity.__auto_name__)
-     
+
     def test_notes_argument_being_omitted(self):
         """testing if no error raised when omitted the notes argument
         """
         self.kwargs.pop("notes")
         new_entity = Entity(**self.kwargs)
+        self.assertIsInstance(new_entity, Entity)
 
     def test_notes_argument_is_set_to_None(self):
         """testing if the notes attribute will be set to an empty list when the
@@ -100,7 +119,7 @@ class EntityTester(unittest2.TestCase):
         argument to a list of other kind of objects than Note objects
         """
         self.kwargs["notes"] = [1, 12.2, "this is a string",
-            ["a list"], {"a": "note"}]
+                                ["a list"], {"a": "note"}]
         self.assertRaises(TypeError, Entity, **self.kwargs)
 
     def test_notes_attribute_set_to_a_list_of_other_objects(self):
@@ -140,16 +159,17 @@ class EntityTester(unittest2.TestCase):
         """
         self.kwargs.pop("tags")
         # this should work without errors
-        aNewEntity = Entity(**self.kwargs)
+        new_entity = Entity(**self.kwargs)
+        self.assertIsInstance(new_entity, Entity)
 
     def test_tags_argument_being_initialized_as_an_empty_list(self):
         """testing if nothing happens when tags argument an empty list
         """
         # this should work without errors
         self.kwargs.pop("tags")
-        aNewEntity = Entity(**self.kwargs)
+        new_entity = Entity(**self.kwargs)
         expected_result = []
-        self.assertEqual(aNewEntity.tags, expected_result)
+        self.assertEqual(new_entity.tags, expected_result)
 
     def test_tags_argument_set_to_something_other_than_a_list(self):
         """testing if a TypeError is going to be raised when initializing the
@@ -213,5 +233,3 @@ class EntityTester(unittest2.TestCase):
 
         self.assertFalse(entity1 != entity2)
         self.assertTrue(entity1 != entity3)
-
-

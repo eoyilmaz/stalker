@@ -27,7 +27,7 @@ from stalker import Type, User
 from stalker.models.entity import SimpleEntity
 
 
-class newClass(SimpleEntity):
+class NewClass(SimpleEntity):
     __strictly_typed__ = True
 
 
@@ -172,7 +172,7 @@ class SimpleEntityTester(unittest2.TestCase):
             self.assertEqual(
                 self.test_simple_entity.name,
                 test_value[1],
-                "\nfor     : %s\nexpected: %s\ngot     : %s" % \
+                "\nfor     : %s\nexpected: %s\ngot     : %s" %
                 (str(test_value[0]), test_value[1],
                  self.test_simple_entity.name)
             )
@@ -186,7 +186,7 @@ class SimpleEntityTester(unittest2.TestCase):
             self.assertEqual(
                 self.test_simple_entity.nice_name,
                 test_value[1],
-                "the nice name attribute is not correctly formatted for, " + \
+                "the nice name attribute is not correctly formatted for, " +
                 test_value[0] + ", " + test_value[1]
             )
 
@@ -237,29 +237,29 @@ class SimpleEntityTester(unittest2.TestCase):
         """
         # create two simple entities with same parameters and check for
         # equality
-        simpleEntity1 = SimpleEntity(**self.kwargs)
-        simpleEntity2 = SimpleEntity(**self.kwargs)
+        se1 = SimpleEntity(**self.kwargs)
+        se2 = SimpleEntity(**self.kwargs)
 
         self.kwargs["name"] = "a different simple entity"
         self.kwargs["description"] = "no description"
-        simpleEntity3 = SimpleEntity(**self.kwargs)
-        self.assertTrue(simpleEntity1 == simpleEntity2)
-        self.assertFalse(simpleEntity1 == simpleEntity3)
+        se3 = SimpleEntity(**self.kwargs)
+        self.assertTrue(se1 == se2)
+        self.assertFalse(se1 == se3)
 
     def test_inequality(self):
         """testing the inequality of two simple entites
         """
         # create two simple entities with same parameters and check for
         # equality
-        simpleEntity1 = SimpleEntity(**self.kwargs)
-        simpleEntity2 = SimpleEntity(**self.kwargs)
+        se1 = SimpleEntity(**self.kwargs)
+        se2 = SimpleEntity(**self.kwargs)
 
         self.kwargs["name"] = "a different simple entity"
         self.kwargs["description"] = "no description"
-        simpleEntity3 = SimpleEntity(**self.kwargs)
+        se3 = SimpleEntity(**self.kwargs)
 
-        self.assertFalse(simpleEntity1 != simpleEntity2)
-        self.assertTrue(simpleEntity1 != simpleEntity3)
+        self.assertFalse(se1 != se2)
+        self.assertTrue(se1 != se3)
 
     def test_created_by_argument_is_not_a_User_instance(self):
         """testing if TypeError is raised when assigned anything other than a
@@ -347,11 +347,11 @@ class SimpleEntityTester(unittest2.TestCase):
         """
         self.kwargs["updated_by"] = None
 
-        aNewSimpleEntity = SimpleEntity(**self.kwargs)
+        new_simple_entity = SimpleEntity(**self.kwargs)
 
         # now check if they are same
-        self.assertEqual(aNewSimpleEntity.created_by,
-                         aNewSimpleEntity.updated_by)
+        self.assertEqual(new_simple_entity.created_by,
+                         new_simple_entity.updated_by)
 
     def test_date_created_argument_accepts_datetime_only(self):
         """testing if TypeError raises when the date_created argument is set
@@ -483,10 +483,11 @@ class SimpleEntityTester(unittest2.TestCase):
         """
         self.kwargs["type"] = None
         new_simple_entity = SimpleEntity(**self.kwargs)
+        self.assertIsInstance(new_simple_entity, SimpleEntity)
 
     def test_type_attribute_is_set_to_None(self):
-        """testing if nothing will be happened when the type attribute is set to
-        None.
+        """testing if nothing will be happened when the type attribute is set
+        to None
         """
         self.test_simple_entity.type = None
 
@@ -507,6 +508,7 @@ class SimpleEntityTester(unittest2.TestCase):
         self.kwargs["type"] = self.test_type
         # no error is expected
         new_simple_entity = SimpleEntity(**self.kwargs)
+        self.assertIsInstance(new_simple_entity, SimpleEntity)
 
     def test_type_attribute_accepts_only_Type_instances(self):
         """testing if a TypeError will be raised when the given type attribute
@@ -536,16 +538,16 @@ class SimpleEntityTester(unittest2.TestCase):
         argument defined
         """
         ## create a new class deriving from the SimpleEntity
-        #class newClass(SimpleEntity):
+        #class NewClass(SimpleEntity):
         #__strictly_typed__ = True
-        self.assertEqual(newClass.__strictly_typed__, True)
+        self.assertEqual(NewClass.__strictly_typed__, True)
 
         # create a new instance and skip the Type attribute and expect a
         # TypeError
         if self.kwargs.has_key("type"):
             self.kwargs.pop("type")
 
-        self.assertRaises(TypeError, newClass, **self.kwargs)
+        self.assertRaises(TypeError, NewClass, **self.kwargs)
 
     def test___strictly_typed___attribute_set_to_True_and_type_argument_is_None(self):
         """testing if a TypeError will be raised the __strictly_typed__
@@ -553,12 +555,12 @@ class SimpleEntityTester(unittest2.TestCase):
         is None
         """
         ## create a new class deriving from the SimpleEntity
-        #class newClass(SimpleEntity):
+        #class NewClass(SimpleEntity):
         #__strictly_typed__ = True
 
         # set it to None and expect a TypeError
         self.kwargs["type"] = None
-        self.assertRaises(TypeError, newClass, **self.kwargs)
+        self.assertRaises(TypeError, NewClass, **self.kwargs)
 
     def test___strictly_typed___attribute_set_to_True_and_type_argument_is_not_Type(self):
         """testing if a TypeError will be raised the __strictly_typed__
@@ -566,7 +568,7 @@ class SimpleEntityTester(unittest2.TestCase):
         is not a string
         """
         ## create a new class deriving from the SimpleEntity
-        #class newClass(SimpleEntity):
+        #class NewClass(SimpleEntity):
         #__strictly_typed__ = True
 
         test_values = [1, 1.2, ["a", "list"], {"a": "dict"}]
@@ -574,14 +576,14 @@ class SimpleEntityTester(unittest2.TestCase):
         for test_value in test_values:
             # set it and expect a TypeError
             self.kwargs["type"] = test_value
-            self.assertRaises(TypeError, newClass, **self.kwargs)
+            self.assertRaises(TypeError, NewClass, **self.kwargs)
 
     def test___stalker_version__attribute_is_automatically_set_to_the_current_task_Stalker(self):
         """testing if the __stalker_version__ is automatically set to the
         current version for the newly created SimpleEntities
         """
-        new_simpleEntity = SimpleEntity(**self.kwargs)
-        self.assertEqual(new_simpleEntity.__stalker_version__,
+        new_simple_entity = SimpleEntity(**self.kwargs)
+        self.assertEqual(new_simple_entity.__stalker_version__,
                          stalker.__version__)
 
         # update stalker.__version__ to a test value
@@ -594,8 +596,8 @@ class SimpleEntityTester(unittest2.TestCase):
         self.assertEqual(stalker.__version__, test_version)
 
         # create a new SimpleEntity and check if it is following the version
-        new_simpleEntity2 = SimpleEntity(**self.kwargs)
-        self.assertEqual(new_simpleEntity2.__stalker_version__, test_version)
+        new_simple_entity2 = SimpleEntity(**self.kwargs)
+        self.assertEqual(new_simple_entity2.__stalker_version__, test_version)
 
         # restore the stalker.__version__
         stalker.__version__ = current_version
@@ -613,7 +615,7 @@ class SimpleEntityTester(unittest2.TestCase):
 
         db.setup()
 
-        new_simpleEntity = SimpleEntity(**self.kwargs)
+        new_simple_entity = SimpleEntity(**self.kwargs)
         test_user = User(
             name='email',
             login='email',
@@ -659,28 +661,28 @@ class SimpleEntityTester(unittest2.TestCase):
             status_list=test_project_status_list
         )
 
-        new_simpleEntity.generic_data.extend(
+        new_simple_entity.generic_data.extend(
             [test_proj, test_project_status_list, test_struct, test_repo,
              test_department, test_user]
         )
 
-        DBSession.add(new_simpleEntity)
+        DBSession.add(new_simple_entity)
         DBSession.commit()
 
         # now check if it is added to the database correctly
-        del new_simpleEntity
+        del new_simple_entity
 
-        new_simpleEntity_DB = SimpleEntity.query \
+        new_simple_entity_db = SimpleEntity.query \
             .filter_by(name=self.kwargs['name']) \
             .first()
 
-        self.assertTrue(test_proj in new_simpleEntity_DB.generic_data)
+        self.assertTrue(test_proj in new_simple_entity_db.generic_data)
         self.assertTrue(
-            test_project_status_list in new_simpleEntity_DB.generic_data)
-        self.assertTrue(test_struct in new_simpleEntity_DB.generic_data)
-        self.assertTrue(test_repo in new_simpleEntity_DB.generic_data)
-        self.assertTrue(test_department in new_simpleEntity_DB.generic_data)
-        self.assertTrue(test_user in new_simpleEntity_DB.generic_data)
+            test_project_status_list in new_simple_entity_db.generic_data)
+        self.assertTrue(test_struct in new_simple_entity_db.generic_data)
+        self.assertTrue(test_repo in new_simple_entity_db.generic_data)
+        self.assertTrue(test_department in new_simple_entity_db.generic_data)
+        self.assertTrue(test_user in new_simple_entity_db.generic_data)
 
         DBSession.remove()
         DBSession.configure(extension=None)
@@ -744,3 +746,111 @@ class SimpleEntityTester(unittest2.TestCase):
         self.assertNotEqual(self.test_simple_entity.thumbnail, thumb)
         self.test_simple_entity.thumbnail = thumb
         self.assertEqual(self.test_simple_entity.thumbnail, thumb)
+
+    def test_html_style_argument_is_skipped(self):
+        """testing if the html_style argument is skipped the html_style
+        attribute will be an empty string
+        """
+        if 'html_style' in self.kwargs:
+            self.kwargs.pop('html_style')
+        se = SimpleEntity(**self.kwargs)
+        self.assertEqual(se.html_style, '')
+
+    def test_html_style_argument_is_None(self):
+        """testing if the html_style argument is set to None the html_style
+        attribute will be an empty string
+        """
+        self.kwargs['html_style'] = None
+        se = SimpleEntity(**self.kwargs)
+        self.assertEqual(se.html_style, '')
+
+    def test_html_style_attribute_is_set_to_None(self):
+        """testing if the html_style attribute is set to None it will be an
+        empty string
+        """
+        self.test_simple_entity.html_style = None
+        self.assertEqual(self.test_simple_entity.html_style, '')
+
+    def test_html_style_argument_is_not_a_string(self):
+        """testing if a TypeError will be raised when the html_style argument
+        is not a string
+        """
+        self.kwargs['html_style'] = 123
+        self.assertRaises(TypeError, SimpleEntity, **self.kwargs)
+
+    def test_html_style_attribute_is_not_set_to_a_string(self):
+        """testing if a TypeError will be raised when the html_style attribute
+        is not set to a string
+        """
+        self.assertRaises(TypeError, setattr, self.test_simple_entity,
+                          'html_style', 34324)
+
+    def test_html_style_argument_is_working_properly(self):
+        """testing if the html_style argument value is correctly passed to the
+        html_style attribute
+        """
+        test_value = 'width: 100px; color: purple; background-color: black'
+        self.kwargs['html_style'] = test_value
+        se = SimpleEntity(**self.kwargs)
+        self.assertEqual(se.html_style, test_value)
+
+    def test_html_style_attribute_is_working_properly(self):
+        """testing if the html_style attribute is working properly
+        """
+        test_value = 'width: 100px; color: purple; background-color: black'
+        self.test_simple_entity.html_style = test_value
+        self.assertEqual(self.test_simple_entity.html_style, test_value)
+
+    def test_html_class_argument_is_skipped(self):
+        """testing if the html_class argument is skipped the html_class
+        attribute will be an empty string
+        """
+        if 'html_class' in self.kwargs:
+            self.kwargs.pop('html_class')
+        se = SimpleEntity(**self.kwargs)
+        self.assertEqual(se.html_class, '')
+
+    def test_html_class_argument_is_None(self):
+        """testing if the html_class argument is set to None the html_class
+        attribute will be an empty string
+        """
+        self.kwargs['html_class'] = None
+        se = SimpleEntity(**self.kwargs)
+        self.assertEqual(se.html_class, '')
+
+    def test_html_class_attribute_is_set_to_None(self):
+        """testing if the html_class attribute is set to None it will be an
+        empty string
+        """
+        self.test_simple_entity.html_class = None
+        self.assertEqual(self.test_simple_entity.html_class, '')
+
+    def test_html_class_argument_is_not_a_string(self):
+        """testing if a TypeError will be raised when the html_class argument
+        is not a string
+        """
+        self.kwargs['html_class'] = 123
+        self.assertRaises(TypeError, SimpleEntity, **self.kwargs)
+
+    def test_html_class_attribute_is_not_set_to_a_string(self):
+        """testing if a TypeError will be raised when the html_class attribute
+        is not set to a string
+        """
+        self.assertRaises(TypeError, setattr, self.test_simple_entity,
+                          'html_class', 34324)
+
+    def test_html_class_argument_is_working_properly(self):
+        """testing if the html_class argument value is correctly passed to the
+        html_class attribute
+        """
+        test_value = 'purple'
+        self.kwargs['html_class'] = test_value
+        se = SimpleEntity(**self.kwargs)
+        self.assertEqual(se.html_class, test_value)
+
+    def test_html_class_attribute_is_working_properly(self):
+        """testing if the html_class attribute is working properly
+        """
+        test_value = 'purple'
+        self.test_simple_entity.html_class = test_value
+        self.assertEqual(self.test_simple_entity.html_class, test_value)

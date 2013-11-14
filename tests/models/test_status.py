@@ -21,12 +21,14 @@
 import unittest2
 from stalker import Entity, Status
 from stalker import config
+
 defaults = config.Config()
+
 
 class StatusTest(unittest2.TestCase):
     """tests the stalker.models.status.Status class
     """
-    
+
     def setUp(self):
         """setup the test
         """
@@ -37,18 +39,18 @@ class StatusTest(unittest2.TestCase):
             'fg_color': 0x000000,
             'bg_color': 0x00ff00,
         }
-        
+
         # create an entity object with same kwargs for __eq__ and __ne__ tests
         # (it should return False for __eq__ and True for __ne__ for same
         # kwargs)
         self.entity1 = Entity(**self.kwargs)
-    
+
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for
         Status class
         """
         self.assertFalse(Status.__auto_name__)
-     
+
     def test_equality(self):
         """testing equality of two statuses
         """
@@ -134,7 +136,7 @@ class StatusTest(unittest2.TestCase):
         self.assertFalse(a_status != unicode(self.kwargs["code"]))
         self.assertFalse(a_status != unicode(self.kwargs["code"].lower()))
         self.assertFalse(a_status != unicode(self.kwargs["code"].upper()))
-    
+
     def test_bg_color_argument_is_skipped(self):
         """testing if the bg_color attribute will be filled with the default
         color when the bg_color argument is skipped
@@ -145,7 +147,7 @@ class StatusTest(unittest2.TestCase):
             defaults.status_bg_color,
             new_status.bg_color
         )
-    
+
     def test_bg_color_argument_is_None(self):
         """testing if the bg_color attribute will be filled with the default
         color when the bg_color argument is None
@@ -156,7 +158,7 @@ class StatusTest(unittest2.TestCase):
             defaults.status_bg_color,
             new_status.bg_color
         )
-    
+
     def test_bg_color_attribute_is_None(self):
         """testing if the bg_color attribute is set to None will reset the
         color to default color
@@ -167,22 +169,22 @@ class StatusTest(unittest2.TestCase):
             defaults.status_bg_color,
             new_status.bg_color
         )
-    
+
     def test_bg_color_argument_is_not_an_integer(self):
         """testing if a TypeError will be raised when the bg_color argument is
         not an integer
         """
-        self.kwargs['bg_color'] = ["2342", 53, 33 ]
+        self.kwargs['bg_color'] = ["2342", 53, 33]
         self.assertRaises(TypeError, Status, **self.kwargs)
-    
+
     def test_bg_color_attribute_is_not_an_integer(self):
         """testing if a TypeError will be raised when the bg_color attribute is
         not an integer
         """
         new_status = Status(**self.kwargs)
         self.assertRaises(TypeError, setattr, new_status, 'bg_color',
-            ["asdf", 65, 25])
-    
+                          ["asdf", 65, 25])
+
     def test_bg_color_argument_is_negative(self):
         """testing if the bg_color attribute value is clamped to 0 if bg_color
         argument is negative
@@ -190,7 +192,7 @@ class StatusTest(unittest2.TestCase):
         self.kwargs['bg_color'] = -10
         new_status = Status(**self.kwargs)
         self.assertEqual(new_status.bg_color, 0)
-    
+
     def test_bg_color_attribute_is_negative(self):
         """testing if the bg_color attribute value is clamped to 0 if it is set
         to a negative value
@@ -198,7 +200,7 @@ class StatusTest(unittest2.TestCase):
         new_status = Status(**self.kwargs)
         new_status.bg_color = -10
         self.assertEqual(new_status.bg_color, 0)
-    
+
     def test_bg_color_argument_is_too_big(self):
         """testing if the bg_color attribute value is clamped to 0xffffff if
         bg_color argument is bigger than that value
@@ -206,7 +208,7 @@ class StatusTest(unittest2.TestCase):
         self.kwargs['bg_color'] = 0xffffff + 10
         new_status = Status(**self.kwargs)
         self.assertEqual(new_status.bg_color, 0xffffff)
-    
+
     def test_bg_color_attribute_is_too_big(self):
         """testing if the bg_color attribute value is clamped to 0xffffff if it
         is bigger than that value
@@ -214,7 +216,7 @@ class StatusTest(unittest2.TestCase):
         new_status = Status(**self.kwargs)
         new_status.bg_color = 0xffffff + 10
         self.assertEqual(new_status.bg_color, 0xffffff)
-    
+
     def test_bg_color_argument_is_working_properly(self):
         """testing if the bg_color argument is working properly by setting its
         value its value to the bg_color attribute
@@ -222,7 +224,7 @@ class StatusTest(unittest2.TestCase):
         self.kwargs['bg_color'] = 0xa0a000
         new_status = Status(**self.kwargs)
         self.assertEqual(self.kwargs['bg_color'], new_status.bg_color)
-    
+
     def test_bg_color_attribute_is_working_properly(self):
         """testing if the bg_color attribute is working properly
         """
@@ -230,7 +232,7 @@ class StatusTest(unittest2.TestCase):
         test_color = 0x564852
         new_status.bg_color = test_color
         self.assertEqual(test_color, new_status.bg_color)
-    
+
     def test_fg_color_argument_is_skipped(self):
         """testing if the fg_color attribute will be filled with the default
         color when the fg_color argument is skipped
@@ -241,7 +243,7 @@ class StatusTest(unittest2.TestCase):
             defaults.status_fg_color,
             new_status.fg_color
         )
-    
+
     def test_fg_color_argument_is_None(self):
         """testing if the fg_color attribute will be filled with the default
         color when the fg_color argument is None
@@ -252,7 +254,7 @@ class StatusTest(unittest2.TestCase):
             defaults.status_fg_color,
             new_status.fg_color
         )
-    
+
     def test_fg_color_attribute_is_None(self):
         """testing if the fg_color attribute is set to None will reset the
         color to default color
@@ -263,22 +265,22 @@ class StatusTest(unittest2.TestCase):
             defaults.status_fg_color,
             new_status.fg_color
         )
-    
+
     def test_fg_color_argument_is_not_an_integer(self):
         """testing if a TypeError will be raised when the fg_color argument is
         not an integer
         """
-        self.kwargs['fg_color'] = ["2342", 53, 33 ]
+        self.kwargs['fg_color'] = ["2342", 53, 33]
         self.assertRaises(TypeError, Status, **self.kwargs)
-    
+
     def test_fg_color_attribute_is_not_an_integer(self):
         """testing if a TypeError will be raised when the fg_color attribute is
         not an integer
         """
         new_status = Status(**self.kwargs)
         self.assertRaises(TypeError, setattr, new_status, 'fg_color',
-            ["asdf", 65, 25])
-    
+                          ["asdf", 65, 25])
+
     def test_fg_color_argument_is_negative(self):
         """testing if the fg_color attribute value is clamped to 0 if fg_color
         argument is negative
@@ -286,7 +288,7 @@ class StatusTest(unittest2.TestCase):
         self.kwargs['fg_color'] = -10
         new_status = Status(**self.kwargs)
         self.assertEqual(new_status.fg_color, 0)
-    
+
     def test_fg_color_attribute_is_negative(self):
         """testing if the fg_color attribute value is clamped to 0 if it is set
         to a negative value
@@ -294,7 +296,7 @@ class StatusTest(unittest2.TestCase):
         new_status = Status(**self.kwargs)
         new_status.fg_color = -10
         self.assertEqual(new_status.fg_color, 0)
-    
+
     def test_fg_color_argument_is_too_big(self):
         """testing if the fg_color attribute value is clamped to 0xffffff if
         fg_color argument is bigger than that value
@@ -302,7 +304,7 @@ class StatusTest(unittest2.TestCase):
         self.kwargs['fg_color'] = 0xffffff + 10
         new_status = Status(**self.kwargs)
         self.assertEqual(new_status.fg_color, 0xffffff)
-    
+
     def test_fg_color_attribute_is_too_big(self):
         """testing if the fg_color attribute value is clamped to 0xffffff if it
         is bigger than that value
@@ -310,7 +312,7 @@ class StatusTest(unittest2.TestCase):
         new_status = Status(**self.kwargs)
         new_status.fg_color = 0xffffff + 10
         self.assertEqual(new_status.fg_color, 0xffffff)
-    
+
     def test_fg_color_argument_is_working_properly(self):
         """testing if the fg_color argument is working properly by setting its
         value its value to the fg_color attribute
@@ -318,7 +320,7 @@ class StatusTest(unittest2.TestCase):
         self.kwargs['fg_color'] = 0xa0a000
         new_status = Status(**self.kwargs)
         self.assertEqual(self.kwargs['fg_color'], new_status.fg_color)
-    
+
     def test_fg_color_attribute_is_working_properly(self):
         """testing if the fg_color attribute is working properly
         """
@@ -326,4 +328,3 @@ class StatusTest(unittest2.TestCase):
         test_color = 0x564852
         new_status.fg_color = test_color
         self.assertEqual(test_color, new_status.fg_color)
-    

@@ -22,10 +22,11 @@ import unittest2
 
 from stalker import Studio, SchedulerBase
 
+
 class SchedulerBaseTester(unittest2.TestCase):
     """tests the stalker.models.scheduler.SchedulerBase
     """
-    
+
     def setUp(self):
         """set up the test
         """
@@ -34,7 +35,7 @@ class SchedulerBaseTester(unittest2.TestCase):
             'studio': self.test_studio
         }
         self.test_scheduler_base = SchedulerBase(**self.kwargs)
-    
+
     def test_studio_argument_is_skipped(self):
         """testing if the studio attribute will be None if the studio argument
         is skipped
@@ -42,7 +43,7 @@ class SchedulerBaseTester(unittest2.TestCase):
         self.kwargs.pop('studio')
         new_scheduler_base = SchedulerBase(**self.kwargs)
         self.assertIsNone(new_scheduler_base.studio)
-    
+
     def test_studio_argument_is_None(self):
         """testing if the studio attribute will be None if the studio argument
         is None
@@ -50,34 +51,34 @@ class SchedulerBaseTester(unittest2.TestCase):
         self.kwargs['studio'] = None
         new_scheduler_base = SchedulerBase(**self.kwargs)
         self.assertIsNone(new_scheduler_base.studio)
-    
+
     def test_studio_attribute_is_None(self):
         """testing if the studio argument can be set to None
         """
         self.test_scheduler_base.studio = None
         self.assertIsNone(self.test_scheduler_base.studio)
-    
+
     def test_studio_argument_is_not_a_Studio_instance(self):
         """testing if a TypeError will be raised when the studio argument is
         not stalker.models.studio.Studio instance
         """
         self.kwargs['studio'] = 'not a studio instance'
         self.assertRaises(TypeError, SchedulerBase, **self.kwargs)
-    
+
     def test_studio_attribute_is_not_a_Studio_instance(self):
         """testing if a TypeError will be raised when the studio attribute is
         set to a value which is not a stalker.models.studio.Studio instance
         """
         self.assertRaises(TypeError, setattr, self.test_scheduler_base,
                           'studio', 'not a studio instance')
-    
+
     def test_studio_argument_is_working_properly(self):
         """testing if the studio argument value is correctly passed to the
         studio attribute
         """
         self.assertEqual(self.test_scheduler_base.studio,
                          self.kwargs['studio'])
-    
+
     def test_studio_attribute_is_working_properly(self):
         """testing if the studio attribute is working properly
         """

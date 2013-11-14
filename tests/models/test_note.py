@@ -21,9 +21,11 @@
 import unittest2
 from stalker import Note
 
+
 class NoteTester(unittest2.TestCase):
     """tests  the Note class
     """
+
     def setUp(self):
         """setup the test
         """
@@ -35,19 +37,20 @@ class NoteTester(unittest2.TestCase):
 
         # create a Note object
         self.test_note = Note(**self.kwargs)
-    
+
     def test___auto_name__class_attribute_is_set_to_True(self):
         """testing if the __auto_name__ class attribute is set to True for
         Note class
         """
         self.assertTrue(Note.__auto_name__)
-    
+
     def test_content_argument_is_missing(self):
         """testing if nothing is going to happen when no content argument is
         given
         """
         self.kwargs.pop("content")
         new_note = Note(**self.kwargs)
+        self.assertIsInstance(new_note, Note)
 
     def test_content_argument_is_set_to_None(self):
         """testing if nothing is going to happen when content argument is given
@@ -55,6 +58,7 @@ class NoteTester(unittest2.TestCase):
         """
         self.kwargs["content"] = None
         new_note = Note(**self.kwargs)
+        self.assertIsInstance(new_note, Note)
 
     def test_content_attribute_is_set_to_None(self):
         """testing if nothing is going to happen when content attribute is set
@@ -71,8 +75,8 @@ class NoteTester(unittest2.TestCase):
         new_note = Note(**self.kwargs)
 
     def test_content_attribute_is_set_to_empty_string(self):
-        """testing if nothing is goin to happen when content argument is set to
-        an empty string
+        """testing if nothing is going to happen when content argument is set
+        to an empty string
         """
         # nothing should happen
         self.test_note.content = ""

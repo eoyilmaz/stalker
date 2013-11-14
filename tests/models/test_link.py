@@ -44,7 +44,8 @@ class LinkTester(unittest2.TestCase):
 
         self.kwargs = {
             'name': 'An Image Link',
-            'full_path': 'C:/A_NEW_PROJECT/td/dsdf/22-fdfffsd-32342-dsf2332-dsfd-3.exr',
+            'full_path': 'C:/A_NEW_PROJECT/td/dsdf/'
+                         '22-fdfffsd-32342-dsf2332-dsfd-3.exr',
             'original_filename': 'this_is_an_image.jpg',
             'type': self.test_link_type1
         }
@@ -119,7 +120,6 @@ class LinkTester(unittest2.TestCase):
 
         self.test_link.full_path = windows_path
         self.assertEqual(self.test_link.full_path, expected_result)
-
 
     def test_original_filename_argument_is_None(self):
         """testing if the original_filename attribute value will be set to the
@@ -273,7 +273,8 @@ class LinkTester(unittest2.TestCase):
         properly
         """
         test_value = '/mnt/some/new/path'
-        expected_full_path = '/mnt/some/new/path/22-fdfffsd-32342-dsf2332-dsfd-3.exr'
+        expected_full_path = '/mnt/some/new/path/' \
+                             '22-fdfffsd-32342-dsf2332-dsfd-3.exr'
 
         self.assertNotEqual(self.test_link.path, test_value)
         self.test_link.path = test_value
@@ -318,7 +319,7 @@ class LinkTester(unittest2.TestCase):
         self.assertEqual(self.test_link.filename, test_value)
         self.assertEqual(self.test_link.full_path,
                          'C:/A_NEW_PROJECT/td/dsdf/new_filename.tif')
-    
+
     def test_filename_attribute_changes_also_the_extension(self):
         """testing if the filename attribute also changes the extension
         attribute

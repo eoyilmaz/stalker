@@ -21,33 +21,40 @@
 import unittest2
 from stalker import Structure, FilenameTemplate, Type
 
+
 # mock classes
-class Asset(object): pass
+class Asset(object):
+    pass
 
-class Shot(object): pass
 
-class Link(object): pass
+class Shot(object):
+    pass
+
+
+class Link(object):
+    pass
+
 
 class StructureTester(unittest2.TestCase):
     """tests the stalker.models.structure.Structure class
     """
-    
+
     def setUp(self):
         """setting up the tests
         """
-        
+
         vers_type = Type(
             name="Version",
             code='vers',
             target_entity_type="FilenameTemplate"
         )
-        
+
         ref_type = Type(
             name="Reference",
             code='ref',
             target_entity_type="FilenameTemplate"
         )
-        
+
         # type templates
         self.asset_template = FilenameTemplate(
             name="Test Asset Template",
@@ -90,13 +97,13 @@ class StructureTester(unittest2.TestCase):
             "type": self.test_type,
         }
         self.test_structure = Structure(**self.kwargs)
-    
+
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for
         Structure class
         """
-        self.assertFalse(Structure.__auto_name__) 
-    
+        self.assertFalse(Structure.__auto_name__)
+
     def test_custom_template_argument_can_be_skipped(self):
         """testing if the custom_template argument can be skipped
         """
@@ -119,27 +126,28 @@ class StructureTester(unittest2.TestCase):
         self.kwargs["custom_template"] = ""
         new_structure = Structure(**self.kwargs)
         self.assertEqual(new_structure.custom_template, "")
-    
+
     def test_custom_template_argument_is_not_a_string(self):
         """testing if a TypeError will be raised when the custom_template
         argument is not a string
         """
         self.kwargs['custom_template'] = ["this is not a string"]
         self.assertRaises(TypeError, Structure, **self.kwargs)
-    
+
     def test_custom_template_attribute_is_not_a_string(self):
         """testing if a TypeError will be raised when the custom_template
         attribute is not a string
         """
         self.assertRaises(TypeError, setattr, self.test_structure,
                           'custom_template', ['this is not a string'])
-    
+
     def test_templates_argument_can_be_skipped(self):
         """testing if no error will be raised when the templates argument is
         skipped
         """
         self.kwargs.pop("templates")
         new_structure = Structure(**self.kwargs)
+        self.assertIsInstance(new_structure, Structure)
 
     def test_templates_argument_can_be_None(self):
         """testing if no error will be raised when the templates argument is
@@ -147,6 +155,7 @@ class StructureTester(unittest2.TestCase):
         """
         self.kwargs["templates"] = None
         new_structure = Structure(**self.kwargs)
+        self.assertIsInstance(new_structure, Structure)
 
     def test_templates_attribute_cannot_be_set_to_None(self):
         """testing if a TypeError will be raised when the templates attribute
@@ -183,6 +192,7 @@ class StructureTester(unittest2.TestCase):
         # test the correct value
         self.kwargs["templates"] = self.test_templates
         new_structure = Structure(**self.kwargs)
+        self.assertIsInstance(new_structure, Structure)
 
     def test_templates_attribute_accpets_only_list_of_FilenameTemplate_instances(self):
         """testing if a TypeError will be raised when the templates attribute
@@ -234,4 +244,3 @@ class StructureTester(unittest2.TestCase):
         """testing the plural name of Structure class
         """
         self.assertTrue(self.test_structure.plural_class_name, "Structures")
-    

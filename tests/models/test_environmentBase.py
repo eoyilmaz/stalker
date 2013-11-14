@@ -76,8 +76,10 @@ class EnvironmentBaseTestCase(unittest2.TestCase):
         task_ft = FilenameTemplate(
             name='Task Filename Template',
             target_entity_type='Task',
-            path='{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}',
-            filename='{{task.nice_name}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}',
+            path='{{project.code}}/{%- for parent_task in parent_tasks -%}'
+                 '{{parent_task.nice_name}}/{%- endfor -%}',
+            filename='{{task.nice_name}}_{{version.take_name}}'
+                     '_v{{"%03d"|format(version.version_number)}}',
         )
         DBSession.add(task_ft)
 
@@ -240,10 +242,11 @@ class EnvironmentBaseTestCase(unittest2.TestCase):
             name='Test Repo 0',
             linux_path='/mnt/T/with_a_very_long_path_which_will_cause_errors/',
             windows_path='T:/with_a_very_long_path_which_will_cause_errors/',
-            osx_path='/Volumes/T/with_a_very_long_path_which_will_cause_errors/'
+            osx_path='/Volumes/T/'
+                     'with_a_very_long_path_which_will_cause_errors/'
         )
         DBSession.add(repo0)
-        
+
         repo1 = Repository(
             name='Test Repo 1',
             linux_path='/mnt/T/',
@@ -263,8 +266,10 @@ class EnvironmentBaseTestCase(unittest2.TestCase):
         task_ft = FilenameTemplate(
             name='Task Filename Template',
             target_entity_type='Task',
-            path='{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}',
-            filename='{{task.nice_name}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}',
+            path='{{project.code}}/{%- for parent_task in parent_tasks -%}'
+                 '{{parent_task.nice_name}}/{%- endfor -%}',
+            filename='{{task.nice_name}}_{{version.take_name}}'
+                     '_v{{"%03d"|format(version.version_number)}}',
         )
         DBSession.add(task_ft)
 
@@ -389,37 +394,37 @@ class EnvironmentBaseTestCase(unittest2.TestCase):
             '/mnt/S/TP2/Test_Task_1'
         )
         self.assertEqual(versions_found, [version3, version4])
-        
+
         # version1, version2 in windows
         versions_found = env.get_versions_from_path(
             'T:/TP1/Test_Task_1'
         )
         self.assertEqual(versions_found, [version1, version2])
-        
+
         # version3, version4 in windows
         versions_found = env.get_versions_from_path(
             'S:/TP2/Test_Task_1'
         )
         self.assertEqual(versions_found, [version3, version4])
-        
+
         # version1, version2 in linux
         versions_found = env.get_versions_from_path(
             '/mnt/T/TP1/Test_Task_1'
         )
         self.assertEqual(versions_found, [version1, version2])
-        
+
         # version3, version4 in linux
         versions_found = env.get_versions_from_path(
             '/mnt/S/TP2/Test_Task_1'
         )
         self.assertEqual(versions_found, [version3, version4])
-        
+
         # version1, version2 in osx
         versions_found = env.get_versions_from_path(
             '/Volumes/T/TP1/Test_Task_1'
         )
         self.assertEqual(versions_found, [version1, version2])
-        
+
         # version3, version4 in linux
         versions_found = env.get_versions_from_path(
             '/Volumes/S/TP2/Test_Task_1'
@@ -434,10 +439,11 @@ class EnvironmentBaseTestCase(unittest2.TestCase):
             name='Test Repo 0',
             linux_path='/mnt/T/with_a_very_long_path_which_will_cause_errors/',
             windows_path='T:/with_a_very_long_path_which_will_cause_errors/',
-            osx_path='/Volumes/T/with_a_very_long_path_which_will_cause_errors/'
+            osx_path='/Volumes/T/'
+                     'with_a_very_long_path_which_will_cause_errors/'
         )
         DBSession.add(repo0)
-        
+
         repo1 = Repository(
             name='Test Repo 1',
             linux_path='/mnt/T/',
@@ -457,8 +463,10 @@ class EnvironmentBaseTestCase(unittest2.TestCase):
         task_ft = FilenameTemplate(
             name='Task Filename Template',
             target_entity_type='Task',
-            path='{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}',
-            filename='{{task.nice_name}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}',
+            path='{{project.code}}/{%- for parent_task in parent_tasks -%}'
+                 '{{parent_task.nice_name}}/{%- endfor -%}',
+            filename='{{task.nice_name}}_{{version.take_name}}'
+                     '_v{{"%03d"|format(version.version_number)}}',
         )
         DBSession.add(task_ft)
 
@@ -571,7 +579,7 @@ class EnvironmentBaseTestCase(unittest2.TestCase):
 
         # now try to get the versions with an EnvironmentBase instance
         env = EnvironmentBase()
-        
+
         expected_value1 = 'TP1/Test_Task_1/Test_Task_1_Main_v001'
         expected_value2 = 'TP2/Test_Task_1/Test_Task_1_Main_v001'
 

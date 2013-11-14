@@ -696,6 +696,7 @@ class ProjectTester(unittest2.TestCase):
         """
         self.kwargs["lead"] = None
         new_project = Project(**self.kwargs)
+        self.assertIsInstance(new_project, Project)
 
     def test_lead_attribute_is_set_to_None(self):
         """testing if no error will be raised when the lead attribute is set to
@@ -783,6 +784,7 @@ class ProjectTester(unittest2.TestCase):
         # and a proper image format
         self.kwargs["image_format"] = self.test_imageFormat
         new_project = Project(**self.kwargs)
+        self.assertIsInstance(new_project, Project)
 
     def test_image_format_attribute_accepts_ImageFormat_only(self):
         """testing if a TypeError will be raised when the image_format
@@ -982,6 +984,7 @@ class ProjectTester(unittest2.TestCase):
         """
         self.kwargs["structure"] = None
         new_project = Project(**self.kwargs)
+        self.assertIsInstance(new_project, Project)
 
     def test_structure_attribute_is_None(self):
         """testing if nothing happens when the structure attribute is set to
@@ -1114,8 +1117,7 @@ class ProjectTester(unittest2.TestCase):
         self.kwargs.pop("type")
         new_project = Project(**self.kwargs) # should be possible
 
-    def test_tasks_attribute_returns_the_Tasks_instances_related_to_this_project(
-            self):
+    def test_tasks_attribute_returns_the_Tasks_instances_related_to_this_project(self):
         """testing if the tasks attribute returns a list of Task instances
         related to this Project instance.
         """
@@ -1169,8 +1171,7 @@ class ProjectTester(unittest2.TestCase):
         self.assertIn(self.test_shot3, self.test_project.tasks)
         self.assertIn(self.test_shot4, self.test_project.tasks)
 
-    def test_root_tasks_attribute_returns_the_Tasks_instances_with_no_parent_in_this_project(
-            self):
+    def test_root_tasks_attribute_returns_the_Tasks_instances_with_no_parent_in_this_project(self):
         """testing if the root_tasks attribute returns a list of Task instances
         related to this Project instance and has no parent.
         """
@@ -1236,8 +1237,7 @@ class ProjectTester(unittest2.TestCase):
         self.kwargs['users'] = ['not a list of User instances']
         self.assertRaises(TypeError, Project, **self.kwargs)
 
-    def test_users_attribute_is_set_to_a_value_which_is_not_a_list_of_User_instances(
-            self):
+    def test_users_attribute_is_set_to_a_value_which_is_not_a_list_of_User_instances(self):
         """testing if a TypeError will be raised when the user attribute is set
         to a value which is not a list of User instances
         """
@@ -1619,6 +1619,7 @@ class ProjectTester(unittest2.TestCase):
         """
         # create some time logs
         from stalker import TimeLog
+
         tlog1 = TimeLog(
             task=self.test_task1,
             resource=self.test_task1.resources[0],
@@ -1749,9 +1750,9 @@ class ProjectTester(unittest2.TestCase):
         self.assertEqual(self.test_task12.schedule_seconds, 3600)
         self.assertEqual(self.test_shot1.schedule_seconds, 12 * 3600)
 
-
         # create some time logs
         from stalker import TimeLog
+
         tlog1 = TimeLog(
             task=self.test_task1,
             resource=self.test_task1.resources[0],
@@ -1759,4 +1760,5 @@ class ProjectTester(unittest2.TestCase):
             duration=datetime.timedelta(hours=1)
         )
 
-        self.assertEqual(self.test_project.percent_complete, (1.0 / 44.0 * 100))
+        self.assertEqual(self.test_project.percent_complete,
+                         (1.0 / 44.0 * 100))

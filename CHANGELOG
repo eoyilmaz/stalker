@@ -2,6 +2,12 @@
 Stalker Changes
 ===============
 
+0.2.3
+=====
+
+* **New:** SimpleEntity now have two new attributes called ``html_style`` and
+  ``html_class`` which can be used in storing cosmetic html values.
+
 0.2.2.3
 =======
 

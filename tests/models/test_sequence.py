@@ -19,10 +19,9 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 import unittest2
-import datetime
 
 from stalker import (Entity, Link, Project, Repository, Sequence, Status,
-                     StatusList, Task, Type, User)
+                     StatusList, Task, Type)
 
 
 class SequenceTester(unittest2.TestCase):

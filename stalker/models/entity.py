@@ -45,6 +45,15 @@ class SimpleEntity(Base):
     :attr:`.nice_name` and last but not least the :attr:`.type` attribute which
     is very important for entities that needs a type.
 
+    .. versionadded: 0.2.2.3
+        :attr:`.html_style` and :attr:`.html_class` attributes:
+
+        SimpleEntity instances now have two new attributes called
+        :attr:`.html_style` and :attr:`.html_class` which can be used to store
+        html styles and html classes per entity. (Hint: Can be used to colorize
+        different type of Tasks in different colors or different statused tasks
+        in different classes etc.)
+
     .. note::
 
        For derived classes if the
@@ -225,6 +234,9 @@ class SimpleEntity(Base):
         post_update=True
     )
 
+    html_style = Column(String, nullable=True, default='')
+    html_class = Column(String, nullable=True, default='')
+
     __stalker_version__ = Column("stalker_version", String(256))
 
     def __init__(
@@ -237,6 +249,8 @@ class SimpleEntity(Base):
             date_created=None,
             date_updated=None,
             thumbnail=None,
+            html_style='',
+            html_class='',
             **kwargs
     ):  # pylint: disable=W0613
 
@@ -259,6 +273,8 @@ class SimpleEntity(Base):
         self.date_updated = date_updated
         self.type = type
         self.thumbnail = thumbnail
+        self.html_style = html_style
+        self.html_class = html_class
         self.__stalker_version__ = stalker.__version__
 
     def __repr__(self):
@@ -486,6 +502,32 @@ class SimpleEntity(Base):
         """
         raise NotImplementedError('This property is not implemented in %s' %
                                   self.__class__.__name__)
+
+    @validates('html_style')
+    def _validate_html_style(self, key, html_style):
+        """validates the given html_style value
+        """
+        if html_style is None:
+            html_style = ''
+        if not isinstance(html_style, basestring):
+            raise TypeError('%s.html_style should be an instance of '
+                            'basestring, not %s' % (
+                            self.__class__.__name__,
+                            html_style.__class__.__name__))
+        return html_style
+
+    @validates('html_class')
+    def _validate_html_class(self, key, html_class):
+        """validates the given html_class value
+        """
+        if html_class is None:
+            html_class = ''
+        if not isinstance(html_class, basestring):
+            raise TypeError('%s.html_class should be an instance of '
+                            'basestring, not %s' % (
+                            self.__class__.__name__,
+                            html_class.__class__.__name__))
+        return html_class
 
 
 class Entity(SimpleEntity):

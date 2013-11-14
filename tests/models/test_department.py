@@ -22,9 +22,11 @@ import unittest2
 import datetime
 from stalker import Department, Entity, User
 
+
 class DepartmentTester(unittest2.TestCase):
     """tests the Department class
     """
+
     def setUp(self):
         """lets setup the tests
         """
@@ -35,28 +37,28 @@ class DepartmentTester(unittest2.TestCase):
             email="user1@test.com",
             password="123456",
         )
-        
+
         self.test_user2 = User(
             name="User2",
             login="user2",
             email="user2@test.com",
             password="123456",
         )
-        
+
         self.test_user3 = User(
             name="User3",
             login="user3",
             email="user3@test.com",
             password="123456",
         )
-        
+
         self.test_user4 = User(
             name="User4",
             login="user4",
             email="user4@test.com",
             password="123456",
         )
-        
+
         self.members_list = [
             self.test_user1,
             self.test_user2,
@@ -86,19 +88,20 @@ class DepartmentTester(unittest2.TestCase):
 
         # create a default department object
         self.test_department = Department(**self.kwargs)
-    
+
     def test___auto_name__class_attribute_is_set_to_false(self):
         """testing if the __auto_name__ class attribute is set to False for
         Department class
         """
         self.assertFalse(Department.__auto_name__)
-    
+
     def test_members_argument_accepts_an_empty_list(self):
         """testing if members argument accepts an empty list
         """
         # this should work without raising any error
         self.kwargs["members"] = []
-        aNewDepartment = Department(**self.kwargs)
+        new_dep = Department(**self.kwargs)
+        self.assertIsInstance(new_dep, Department)
 
     def test_members_attribute_accepts_an_empty_list(self):
         """testing if members attribute accepts an empty list
@@ -182,14 +185,14 @@ class DepartmentTester(unittest2.TestCase):
         """
         self.assertRaises(TypeError, setattr, self.test_department, "members",
                           None)
-    
+
     def test_users_attribute_is_a_synonym_for_members(self):
         """testing if the users attribute is actually a synonym for the members
         attribute
         """
         self.assertEqual(self.test_department.members,
                          self.test_department.users)
-    
+
     def test_lead_argument_accepts_only_user_objects(self):
         """testing if lead argument accepts only user objects
         """
@@ -224,16 +227,16 @@ class DepartmentTester(unittest2.TestCase):
         """
         # check if the user is in the department
         self.assertIn(self.test_department, self.test_user1.departments)
-        
+
         # now remove the user from the department
         self.test_department.members.remove(self.test_user1)
-        
+
         # now check if department is not in users departments anymore
         self.assertNotIn(self.test_department, self.test_user1.departments)
-        
+
         # assign the user back
         self.test_user1.departments.append(self.test_department)
-        
+
         # check if the user is in the department
         self.assertIn(self.test_user1, self.test_department.members)
 
@@ -272,12 +275,12 @@ class DepartmentTester(unittest2.TestCase):
         self.assertFalse(dep1 != dep2)
         self.assertTrue(dep1 != dep3)
         self.assertTrue(dep1 != entity1)
-    
+
     def test_tjp_id_is_working_properly(self):
         """testing if the tjp_is working properly
         """
         self.assertEqual(self.test_department.tjp_id, 'Department_None')
-    
+
     def test_to_tjp_is_working_properly(self):
         """testing if the to_tjp property is working properly
         """
@@ -286,7 +289,7 @@ class DepartmentTester(unittest2.TestCase):
         self.test_user2.id = 1326
         self.test_user3.id = 1327
         self.test_user4.id = 1328
-        
+
         expected_tjp = """resource Department_1324 "Test Department" {
             resource User_1325 "User1"
             resource User_1326 "User2"

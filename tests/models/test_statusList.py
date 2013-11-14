@@ -21,10 +21,11 @@
 import unittest2
 from stalker import Status, StatusList
 
+
 class StatusListTest(unittest2.TestCase):
     """testing the StatusList class
     """
-    
+
     def setUp(self):
         """let's create proper values for the tests
         """
@@ -39,18 +40,18 @@ class StatusListTest(unittest2.TestCase):
                 Status(name="Approved", code="APPR"),
                 Status(name="Completed", code="COMP"),
                 Status(name="On Hold", code="OH"),
-                ],
+            ],
             "target_entity_type": "Project",
-            }
-        
+        }
+
         self.test_status_list = StatusList(**self.kwargs)
-    
+
     def test___auto_name__class_attribute_is_set_to_True(self):
         """testing if the __auto_name__ class attribute is set to True for
         StatusList class
         """
         self.assertTrue(StatusList.__auto_name__)
-     
+
     def test_statuses_argument_accepts_statuses_only(self):
         """testing if statuses list argument accepts list of statuses only
         """
@@ -136,7 +137,7 @@ class StatusListTest(unittest2.TestCase):
             Status(name="Waiting For Approve", code="WAPPR"),
             Status(name="Approved", code="APPR"),
             Status(name="Finished", code="FNSH"),
-            ]
+        ]
 
         status_list4 = StatusList(**self.kwargs)
 
@@ -159,7 +160,7 @@ class StatusListTest(unittest2.TestCase):
             Status(name="Waiting For Approve", code="WAPPR"),
             Status(name="Approved", code="APPR"),
             Status(name="Finished", code="FNSH"),
-            ]
+        ]
 
         status_list4 = StatusList(**self.kwargs)
 
@@ -223,4 +224,3 @@ class StatusListTest(unittest2.TestCase):
         # get the len and compare it wiht len(statuses)
         self.assertEqual(len(self.test_status_list.statuses),
                          len(self.test_status_list))
-

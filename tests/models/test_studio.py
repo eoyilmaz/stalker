@@ -651,7 +651,7 @@ class StudioTester(unittest2.TestCase):
         """
         self.kwargs['name'] = 'New Studio'
         try:
-            self.kwargs.pop('working_hours') # pop if there are any
+            self.kwargs.pop('working_hours')  # pop if there are any
         except KeyError:
             pass
 
@@ -800,8 +800,7 @@ class StudioTester(unittest2.TestCase):
         self.kwargs['now'] = 'not a datetime instance'
         self.assertRaises(TypeError, Studio, **self.kwargs)
 
-    def test_now_attribute_is_set_to_a_value_other_than_datetime_instance(
-            self):
+    def test_now_attribute_is_set_to_a_value_other_than_datetime_instance(self):
         """testing if a TypeError will be raised when the now attribute is set
         to a value other than a datetime.datetime instance
         """
@@ -810,7 +809,7 @@ class StudioTester(unittest2.TestCase):
 
     def test_now_argument_is_working_properly(self):
         """testing if the now argument value is passed to the now attribute
-        properly 
+        properly
         """
         self.kwargs['now'] = datetime.datetime(2013, 4, 15, 21, 9)
         expected_now = datetime.datetime(2013, 4, 15, 21, 0)
@@ -1291,6 +1290,7 @@ class StudioTester(unittest2.TestCase):
         instances with no user set.
         """
         from stalker.models.studio import Vacation
+
         vacation1 = Vacation(
             start=datetime.datetime(2013, 8, 2),
             end=datetime.datetime(2013, 8, 10)
