@@ -1902,12 +1902,12 @@ class TaskTester(unittest2.TestCase):
         self.assertEqual(self.test_task.schedule_seconds, 9 * 3600)
         self.assertAlmostEqual(
             self.test_task.percent_complete,
-            77.7777778 * 100,
+            77.7777778,
             delta=0.01
         )
         self.assertAlmostEqual(
             parent_task.percent_complete,
-            77.7777778 * 100,
+            77.7777778,
             delta=0.01
         )
 

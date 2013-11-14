@@ -19,6 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import platform
+import mocker
 import unittest2
 from stalker import Repository, Tag
 
@@ -170,23 +171,38 @@ class RepositoryTester(unittest2.TestCase):
         self.test_repo.osx_path = test_value
         self.assertEqual(self.test_repo.osx_path, expected_value)
 
-    @unittest2.skipUnless(platform.system() == "Windows", "requires Windows")
     def test_path_returns_properly_for_windows(self):
         """testing if path returns the correct value for the os
         """
+        m1 = mocker.Mocker()
+        o = m1.replace(platform.system)
+        o()
+        m1.result("Windows")
+        m1.replay()
         self.assertEqual(self.test_repo.path, self.test_repo.windows_path)
+        m1.restore()
 
-    @unittest2.skipUnless(platform.system() == "Linux", "requires Linux")
     def test_path_returns_properly_for_linux(self):
         """testing if path returns the correct value for the os
         """
+        m1 = mocker.Mocker()
+        o = m1.replace(platform.system)
+        o()
+        m1.result("Linux")
+        m1.replay()
         self.assertEqual(self.test_repo.path, self.test_repo.linux_path)
+        m1.restore()
 
-    @unittest2.skipUnless(platform.system() == "Darwin", "requires OSX")
     def test_path_returns_properly_for_osx(self):
         """testing if path returns the correct value for the os
         """
+        m1 = mocker.Mocker()
+        o = m1.replace(platform.system)
+        o()
+        m1.result("Darwin")
+        m1.replay()
         self.assertEqual(self.test_repo.path, self.test_repo.osx_path)
+        m1.restore()
 
     def test_equality(self):
         """testing the equality of two repositories

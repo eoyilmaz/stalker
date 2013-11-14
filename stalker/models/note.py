@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 from sqlalchemy import Column, Integer, ForeignKey, String
-from sqlalchemy.orm import validates
+from sqlalchemy.orm import validates, synonym
 from stalker.models.entity import SimpleEntity
 
 from stalker.log import logging_level
@@ -55,31 +55,18 @@ class Note(SimpleEntity):
         ForeignKey("Entities.id")
     )
 
-    content = Column(
-        String,
+    content = synonym(
+        'description',
         doc="""The content of this :class:`~stalker.models.note.Note` instance.
 
-        Content is a string representing the content of this Note, can be given
-        as an empty string or can be even None, but anything other than None or
-        string or unicode will raise a TypeError.
+        Content is a string representing the content of this Note, can be an
+        empty.
         """
     )
 
     def __init__(self, content="", **kwargs):
         super(Note, self).__init__(**kwargs)
         self.content = content
-
-    @validates("content")
-    def _validate_content(self, key, content_in):
-        """validates the given content
-        """
-        if content_in is not None and \
-                not isinstance(content_in, (str, unicode)):
-            raise TypeError("%s.content should be an instance of string or "
-                            "unicode not %s" %
-                            (self.__class__.__name__,
-                             content_in.__class__.__name__))
-        return content_in
 
     def __eq__(self, other):
         """the equality operator

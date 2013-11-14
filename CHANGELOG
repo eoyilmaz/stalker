@@ -2,6 +2,12 @@
 Stalker Changes
 ===============
 
+0.2.2.3
+=======
+
+* **Update:** Note.content attribute is now a synonym of the Note.description
+  attribute.
+
 0.2.2.2
 =======
 
