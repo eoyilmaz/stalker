@@ -2,6 +2,16 @@
 Stalker Changes
 ===============
 
+0.2.3.1
+=======
+
+* **Fix:** Fixed an inconvenience in SimpleEntity.__init__() when a
+  date_created argument with a value is later than datetime.datetime.now() is
+  supplied and the date_updated argument is skipped or given as None, then the
+  date_updated attribute value was generated from datetime.datetime.now() this
+  was causing an unnecessary ValueError. This is fixed by directly copying the
+  date_created value to date_updated value when it is skipped or None.
+
 0.2.3
 =====
 

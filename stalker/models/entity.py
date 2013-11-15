@@ -267,7 +267,7 @@ class SimpleEntity(Base):
         if date_created is None:
             date_created = datetime.datetime.now()
         if date_updated is None:
-            date_updated = datetime.datetime.now()
+            date_updated = date_created
 
         self.date_created = date_created
         self.date_updated = date_updated
