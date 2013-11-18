@@ -814,11 +814,7 @@ class User(Entity, ACLMixin):
         """The list of :class:`~stalker.models.ticket.Ticket`\ s that this user has.
 
         returns a list of :class:`~stalker.models.ticket.Ticket` instances
-        which are derived from the :class:`~stalker.models.task.Task`\ s that
-        this user is assigned to
-        (Stalker checks the related :class:`~stalker.models.version.Version`
-        instances and then the `~stalker.models.ticket.Ticket` instances
-        assigned to the Versions.).
+        which this user is the owner of.
         """
         # do it with sqlalchemy
         from stalker import Ticket
@@ -832,18 +828,12 @@ class User(Entity, ACLMixin):
         """The list of open :class:`~stalker.models.ticket.Ticket`\ s that this user has.
 
         returns a list of :class:`~stalker.models.ticket.Ticket` instances
-        which has a status of `Open` and are derived from the
-        :class:`~stalker.models.task.Task`\ s that this user is assigned to
-        (Stalker checks the related :class:`~stalker.models.version.Version`
-        instances and then the `~stalker.models.ticket.Ticket` instances
-        assigned to the Version and has a status of `Open`.).
+        which has a status of `Open` that this user is assigned as the owner.
         """
-        # do it with sqlalchemy
         from stalker import Ticket, Status
-
         return Ticket.query \
+            .join(Status, Ticket.status) \
             .filter(Ticket.owner == self) \
-            .join(Ticket.status) \
             .filter(Status.code != 'CLOSED') \
             .all()
 

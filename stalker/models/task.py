@@ -775,7 +775,7 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
                  watchers=None,
                  start=None,
                  end=None,
-                 schedule_timing=1,
+                 schedule_timing=1.0,
                  schedule_unit='h',
                  schedule_model=None,
                  schedule_constraint=0,

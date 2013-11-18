@@ -23,7 +23,7 @@ import unittest2
 
 from stalker import (Asset, Entity, ImageFormat, Link, Project, Repository,
                      Sequence, Shot, Status, StatusList, Structure, Task, Type,
-                     User, db)
+                     User, db, Ticket)
 from stalker import config
 
 defaults = config.Config()
@@ -37,7 +37,7 @@ logger = logging.getLogger('stalker.models.project')
 logger.setLevel(log.logging_level)
 
 
-class ProjectTester(unittest2.TestCase):
+class ProjectTestCase(unittest2.TestCase):
     """tests the Project class
     """
 
@@ -70,7 +70,7 @@ class ProjectTester(unittest2.TestCase):
             "sqlalchemy.url": self.TEST_DATABASE_URI,
             "sqlalchemy.echo": False,
         })
-        # db.init()
+        #db.init()  # for tickets
 
         # create test objects
         self.start = datetime.date.today()
@@ -913,6 +913,31 @@ class ProjectTester(unittest2.TestCase):
         self.test_project.fps = test_value
         self.assertIsInstance(self.test_project.fps, float)
         self.assertEqual(self.test_project.fps, float(test_value))
+
+    def test_fps_argument_is_zero(self):
+        """testing if a ValueError will be raised when the fps is 0
+        """
+        self.kwargs['fps'] = 0
+        self.assertRaises(ValueError, Project, **self.kwargs)
+
+    def test_fps_attribute_is_set_to_zero(self):
+        """testing if a value error will be raised when the fps attribute is
+        set to zero
+        """
+        self.assertRaises(ValueError, setattr, self.test_project, 'fps', 0)
+
+    def test_fps_argument_is_negative(self):
+        """testing if a ValueError will be raised when the fps argument is
+        negative
+        """
+        self.kwargs['fps'] = -1.0
+        self.assertRaises(ValueError, Project, **self.kwargs)
+
+    def test_fps_attribute_is_negative(self):
+        """testing if a ValueError will be raised when the fps attribute is
+        set to a negative value
+        """
+        self.assertRaises(ValueError, setattr, self.test_project, 'fps', -1)
 
     def test_repository_argument_is_skipped(self):
         """testing if a TypeError will be raised when the repository argument
@@ -1762,3 +1787,389 @@ class ProjectTester(unittest2.TestCase):
 
         self.assertEqual(self.test_project.percent_complete,
                          (1.0 / 44.0 * 100))
+
+
+class ProjectTicketsTestCase(unittest2.TestCase):
+    """tests the Project <-> Ticket relation
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        """set up the test for class
+        """
+        DBSession.remove()
+        DBSession.configure(extension=None)
+
+    @classmethod
+    def tearDownClass(cls):
+        """clean up the test
+        """
+        DBSession.configure(extension=None)
+
+    def tearDown(self):
+        """tearDown the tests
+        """
+        DBSession.remove()
+
+    def setUp(self):
+        """setup the test
+        """
+        DBSession.remove()
+        DBSession.configure(extension=None)
+        self.TEST_DATABASE_URI = "sqlite:///:memory:"
+
+        db.setup({
+            "sqlalchemy.url": self.TEST_DATABASE_URI,
+            "sqlalchemy.echo": False,
+        })
+        db.init()  # for tickets
+
+        # create test objects
+        self.start = datetime.date.today()
+        self.end = self.start + datetime.timedelta(days=20)
+
+        self.test_lead = User(
+            name="lead",
+            login="lead",
+            email="lead@lead.com",
+            password="lead"
+        )
+
+        self.test_user1 = User(
+            name="User1",
+            login="user1",
+            email="user1@users.com",
+            password="123456"
+        )
+
+        self.test_user2 = User(
+            name="User2",
+            login="user2",
+            email="user2@users.com",
+            password="123456"
+        )
+
+        self.test_user3 = User(
+            name="User3",
+            login="user3",
+            email="user3@users.com",
+            password="123456"
+        )
+
+        self.test_user4 = User(
+            name="User4",
+            login="user4",
+            email="user4@users.com",
+            password="123456"
+        )
+
+        self.test_user5 = User(
+            name="User5",
+            login="user5",
+            email="user5@users.com",
+            password="123456"
+        )
+
+        self.test_user6 = User(
+            name="User6",
+            login="user6",
+            email="user6@users.com",
+            password="123456"
+        )
+
+        self.test_user7 = User(
+            name="User7",
+            login="user7",
+            email="user7@users.com",
+            password="123456"
+        )
+
+        self.test_user8 = User(
+            name="User8",
+            login="user8",
+            email="user8@users.com",
+            password="123456"
+        )
+
+        self.test_user9 = User(
+            name="user9",
+            login="user9",
+            email="user9@users.com",
+            password="123456"
+        )
+
+        self.test_user10 = User(
+            name="User10",
+            login="user10",
+            email="user10@users.com",
+            password="123456"
+        )
+
+        # statuses
+        self.test_status1 = Status(name="Status1", code="S1")
+        self.test_status2 = Status(name="Status2", code="S2")
+        self.test_status3 = Status(name="Status3", code="S3")
+        self.test_status4 = Status(name="Status4", code="S4")
+        self.test_status5 = Status(name="Status5", code="S5")
+
+        # status list for project
+        self.project_status_list = StatusList(
+            name="Project Statuses",
+            target_entity_type=Project,
+            statuses=[
+                self.test_status1,
+                self.test_status2,
+                self.test_status3,
+                self.test_status4,
+                self.test_status5,
+            ],
+        )
+
+        self.test_imageFormat = ImageFormat(
+            name="HD",
+            width=1920,
+            height=1080,
+        )
+
+        # type for project
+        self.test_project_type = Type(
+            name="Project Type 1",
+            code='projt1',
+            target_entity_type=Project
+        )
+
+        self.test_project_type2 = Type(
+            name="Project Type 2",
+            code='projt2',
+            target_entity_type=Project
+        )
+
+        # type for structure
+        self.test_structure_type1 = Type(
+            name="Structure Type 1",
+            code='struct1',
+            target_entity_type=Structure
+        )
+
+        self.test_structure_type2 = Type(
+            name="Structure Type 2",
+            code='struct2',
+            target_entity_type=Structure
+        )
+
+        self.test_project_structure = Structure(
+            name="Project Structure 1",
+            type=self.test_structure_type1,
+        )
+
+        self.test_project_structure2 = Structure(
+            name="Project Structure 2",
+            type=self.test_structure_type2,
+        )
+
+        self.test_repo = Repository(
+            name="Commercials Repository",
+        )
+
+        # create a project object
+        self.kwargs = {
+            "name": "Test Project",
+            'code': 'tp',
+            "description": "This is a project object for testing purposes",
+            "lead": self.test_lead,
+            "image_format": self.test_imageFormat,
+            "fps": 25,
+            "type": self.test_project_type,
+            "structure": self.test_project_structure,
+            "repository": self.test_repo,
+            "is_stereoscopic": False,
+            "display_width": 15,
+            "start": self.start,
+            "end": self.end,
+            "status_list": self.project_status_list
+        }
+
+        self.test_project = Project(**self.kwargs)
+
+        # *********************************************************************
+        # Tickets
+        # *********************************************************************
+
+        # no need to create status list for tickets cause we have a database
+        # set up an running so it will be automatically linked
+
+        # tickets for version1
+        self.test_ticket1 = Ticket(
+            project=self.test_project
+        )
+        DBSession.add(self.test_ticket1)
+        # set it to closed
+        self.test_ticket1.resolve()
+
+        # create a new ticket and leave it open
+        self.test_ticket2 = Ticket(
+            project=self.test_project
+        )
+        DBSession.add(self.test_ticket2)
+
+        # create a new ticket and close and then reopen it
+        self.test_ticket3 = Ticket(
+            project=self.test_project
+        )
+        DBSession.add(self.test_ticket3)
+        self.test_ticket3.resolve()
+        self.test_ticket3.reopen()
+
+        # *********************************************************************
+        # tickets for version2
+        # create a new ticket and leave it open
+        self.test_ticket4 = Ticket(
+            project=self.test_project
+        )
+        DBSession.add(self.test_ticket4)
+
+        # create a new Ticket and close it
+        self.test_ticket5 = Ticket(
+            project=self.test_project
+        )
+        DBSession.add(self.test_ticket5)
+        self.test_ticket5.resolve()
+
+        # create a new Ticket and close it
+        self.test_ticket6 = Ticket(
+            project=self.test_project
+        )
+        DBSession.add(self.test_ticket6)
+        self.test_ticket6.resolve()
+
+        # *********************************************************************
+        # tickets for version3
+        # create a new ticket and close it
+        self.test_ticket7 = Ticket(
+            project=self.test_project
+        )
+        DBSession.add(self.test_ticket7)
+        self.test_ticket7.resolve()
+
+        # create a new ticket and close it
+        self.test_ticket8 = Ticket(
+            project=self.test_project
+        )
+        DBSession.add(self.test_ticket8)
+        self.test_ticket8.resolve()
+
+        # *********************************************************************
+        # tickets for version4
+        # create a new ticket and close it
+        self.test_ticket9 = Ticket(
+            project=self.test_project
+        )
+        DBSession.add(self.test_ticket9)
+
+        self.test_ticket9.resolve()
+
+        # *********************************************************************
+
+        DBSession.add(self.test_project)
+        DBSession.commit()
+
+    def test_tickets_attribute_is_an_empty_list_by_default(self):
+        """testing if the Project.tickets is an empty list by default
+        """
+        project1 = Project(**self.kwargs)
+        self.assertEqual(project1.tickets, [])
+
+    def test_open_tickets_attribute_is_an_empty_list_by_default(self):
+        """testing if the Project.open_tickets is an empty list by default
+        """
+        project1 = Project(**self.kwargs)
+        self.assertEqual(project1.open_tickets, [])
+
+    def test_open_tickets_attribute_is_read_only(self):
+        """testing if the Project.open_tickets attribute is a read only
+        attribute
+        """
+        self.assertRaises(AttributeError, setattr, self.test_project,
+                          'open_tickets', [])
+
+    def test_tickets_attribute_returns_all_tickets_in_this_project(self):
+        """testing if Project.tickets returns all the tickets in this project
+        """
+        # there should be tickets in this project already
+        self.assertTrue(self.test_project.tickets != [])
+
+        # now we should have some tickets
+        self.assertTrue(len(self.test_project.tickets) > 0)
+
+        # now check for exact items
+        self.assertItemsEqual(
+            self.test_project.tickets,
+            [self.test_ticket1, self.test_ticket2, self.test_ticket3,
+             self.test_ticket4, self.test_ticket5, self.test_ticket6,
+             self.test_ticket7, self.test_ticket8, self.test_ticket9]
+        )
+
+    def test_open_tickets_attribute_returns_all_open_tickets_owned_by_this_user(self):
+        """testing if User.open_tickets returns all the open tickets owned by
+        this user
+        """
+        # there should be tickets in this project already
+        self.assertTrue(self.test_project.open_tickets != [])
+
+        # assign the user to some tickets
+        self.test_ticket1.reopen(self.test_user1)
+        self.test_ticket2.reopen(self.test_user1)
+        self.test_ticket3.reopen(self.test_user1)
+        self.test_ticket4.reopen(self.test_user1)
+        self.test_ticket5.reopen(self.test_user1)
+        self.test_ticket6.reopen(self.test_user1)
+        self.test_ticket7.reopen(self.test_user1)
+        self.test_ticket8.reopen(self.test_user1)
+
+        # be careful not all of these are open tickets
+        self.test_ticket1.reassign(self.test_user1, self.test_user1)
+        self.test_ticket2.reassign(self.test_user1, self.test_user1)
+        self.test_ticket3.reassign(self.test_user1, self.test_user1)
+        self.test_ticket4.reassign(self.test_user1, self.test_user1)
+        self.test_ticket5.reassign(self.test_user1, self.test_user1)
+        self.test_ticket6.reassign(self.test_user1, self.test_user1)
+        self.test_ticket7.reassign(self.test_user1, self.test_user1)
+        self.test_ticket8.reassign(self.test_user1, self.test_user1)
+
+        # now we should have some open tickets
+        self.assertTrue(len(self.test_project.open_tickets) > 0)
+
+        # now check for exact items
+        self.assertItemsEqual(
+            self.test_project.open_tickets,
+            [
+                self.test_ticket1,
+                self.test_ticket2,
+                self.test_ticket3,
+                self.test_ticket4,
+                self.test_ticket5,
+                self.test_ticket6,
+                self.test_ticket7,
+                self.test_ticket8,
+            ]
+        )
+
+        # close a couple of them
+        from stalker.models.ticket import (FIXED, CANTFIX, WONTFIX, DUPLICATE,
+                                           WORKSFORME, INVALID)
+
+        self.test_ticket1.resolve(self.test_user1, FIXED)
+        self.test_ticket2.resolve(self.test_user1, INVALID)
+        self.test_ticket3.resolve(self.test_user1, CANTFIX)
+
+        # new check again
+        self.assertItemsEqual(
+            self.test_project.open_tickets,
+            [
+                self.test_ticket4,
+                self.test_ticket5,
+                self.test_ticket6,
+                self.test_ticket7,
+                self.test_ticket8
+            ]
+        )

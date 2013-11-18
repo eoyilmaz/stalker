@@ -1246,7 +1246,7 @@ class UserTest(unittest2.TestCase):
         """testing if the User.tickets attribute is a read only attribute
         """
         self.assertRaises(AttributeError, setattr, self.test_user, 'tickets',
-            [])
+                          [])
 
     def test_open_tickets_attribute_is_read_only(self):
         """testing if the User.open_tickets attribute is a read only attribute

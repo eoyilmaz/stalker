@@ -60,16 +60,6 @@ class Status(Entity, CodeMixin):
 
     :param code: The code of this Status, its generally the short version of
       the name attribute.
-
-    :param bg_color: A positive integer between 0-16777215 or 0x000000-0xffffff
-      showing the background color of this status mainly used for UI stuff. If
-      skipped or given as None the color will be set to the default background
-      color (which is white).
-
-    :param fg_color: A positive integer between 0-16777215 or 0x000000-0xffffff
-      showing the foreground color of this status mainly used for UI stuff. If
-      skipped or given as None the color will be set to the default foreground
-      color (which is black).
     """
     __auto_name__ = False
     __tablename__ = "Statuses"
@@ -80,66 +70,26 @@ class Status(Entity, CodeMixin):
         ForeignKey("Entities.id"),
         primary_key=True,
     )
-    bg_color = Column(Integer, default=0xffffff)
-    fg_color = Column(Integer, default=0x000000)
 
     def __init__(self,
                  name=None,
                  code=None,
-                 fg_color=None,
-                 bg_color=None,
                  **kwargs):
         kwargs['name'] = name
         kwargs['code'] = code
 
         super(Status, self).__init__(**kwargs)
-        #CodeMixin.__init__(self, **kwargs)
-
         self.code = code
-        self.bg_color = bg_color
-        self.fg_color = fg_color
 
     def __eq__(self, other):
         """the equality operator
         """
         if isinstance(other, (str, unicode)):
             return self.name.lower() == other.lower() or \
-                   self.code.lower() == other.lower()
+                self.code.lower() == other.lower()
         else:
             return super(Status, self).__eq__(other) and \
-                   isinstance(other, Status)
-
-    @validates('bg_color')
-    def _validate_bg_color(self, key, bg_color):
-        """validates the given bg_color value
-        """
-        if bg_color is None:
-            bg_color = defaults.status_bg_color
-
-        if not isinstance(bg_color, int):
-            raise TypeError('Status.bg_color should be an integer '
-                            'not %s' % bg_color.__class__.__name__)
-
-        bg_color = max(0, bg_color)
-        bg_color = min(0xffffff, bg_color)
-
-        return bg_color
-
-    @validates('fg_color')
-    def _validate_fg_color(self, key, fg_color):
-        """validates the given fg_color value
-        """
-        if fg_color is None:
-            fg_color = defaults.status_fg_color
-
-        if not isinstance(fg_color, int):
-            raise TypeError('Status.fg_color should be an integer '
-                            'not %s' % fg_color.__class__.__name__)
-
-        fg_color = max(0, fg_color)
-        fg_color = min(0xffffff, fg_color)
-
-        return fg_color
+                isinstance(other, Status)
 
 
 class StatusList(Entity, TargetEntityTypeMixin):

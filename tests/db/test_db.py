@@ -30,7 +30,8 @@ from stalker import (db, defaults, Asset, Department, SimpleEntity, Entity,
                      ImageFormat, Link, Note, Project, Repository, Sequence,
                      Shot, Status, StatusList, Structure, Tag, Task, Type,
                      FilenameTemplate, User, Version, Permission, Group,
-                     TimeLog, Ticket, Scene, WorkingHours, Studio, Vacation, TicketLog)
+                     TimeLog, Ticket, Scene, WorkingHours, Studio, Vacation,
+                     TicketLog)
 import logging
 from stalker import log
 
@@ -64,7 +65,7 @@ class DatabaseTester(unittest2.TestCase):
         defaults.admin_name = "admin"
         defaults.admin_password = "admin"
 
-        self.TEST_DATABASE_URI = "sqlite:///:memory:"
+        self.test_database_uri = "sqlite:///:memory:"
 
         self._createdDB = False
 
@@ -92,14 +93,14 @@ class DatabaseTester(unittest2.TestCase):
             "password": "password",
         }
 
-        newUser = User(**kwargs)
-        DBSession.add(newUser)
+        new_user = User(**kwargs)
+        DBSession.add(new_user)
         DBSession.commit()
 
         # now check if the newUser is there
-        newUser_DB = User.query.filter_by(name=kwargs["name"]).first()
+        new_user_db = User.query.filter_by(name=kwargs["name"]).first()
 
-        self.assertTrue(newUser_DB is not None)
+        self.assertTrue(new_user_db is not None)
 
     def test_default_admin_creation(self):
         """testing if a default admin is created
@@ -111,9 +112,9 @@ class DatabaseTester(unittest2.TestCase):
         db.init()
 
         # check if there is an admin
-        admin_DB = User.query.filter(User.name == defaults.admin_name).first()
+        admin_db = User.query.filter(User.name == defaults.admin_name).first()
 
-        self.assertEqual(admin_DB.name, defaults.admin_name)
+        self.assertEqual(admin_db.name, defaults.admin_name)
 
     def test_default_admin_for_already_created_databases(self):
         """testing if no extra admin is going to be created for already setup
@@ -123,7 +124,7 @@ class DatabaseTester(unittest2.TestCase):
         defaults.auto_create_admin = True
 
         db.setup({
-            "sqlalchemy.url": self.TEST_DATABASE_URI
+            "sqlalchemy.url": self.test_database_uri
         })
         db.init()
 
@@ -131,7 +132,7 @@ class DatabaseTester(unittest2.TestCase):
         # than one admin
 
         db.setup({
-            "sqlalchemy.url": self.TEST_DATABASE_URI
+            "sqlalchemy.url": self.test_database_uri
         })
         db.init()
 
@@ -232,15 +233,15 @@ class DatabaseTester(unittest2.TestCase):
 
         # now check if the TestClass entry is created in Permission table
 
-        permissions_DB = Permission.query \
+        permissions_db = Permission.query \
             .filter(Permission.class_name == 'TestClass') \
             .all()
 
-        logger.debug("%s" % permissions_DB)
+        logger.debug("%s" % permissions_db)
 
         actions = defaults.actions
 
-        for action in permissions_DB:
+        for action in permissions_db:
             self.assertTrue(action.action in actions)
 
     def test_register_raise_TypeError_for_wrong_class_name_argument(self):
@@ -267,14 +268,14 @@ class DatabaseTester(unittest2.TestCase):
             'Version',
         ]
 
-        permission_DB = Permission.query.all()
+        permission_db = Permission.query.all()
 
         self.assertEqual(
-            len(permission_DB),
+            len(permission_db),
             len(class_names) * len(defaults.actions) * 2
         )
 
-        for permission in permission_DB:
+        for permission in permission_db:
             self.assertTrue(permission.access in ['Allow', 'Deny'])
             self.assertTrue(permission.action in defaults.actions)
             self.assertTrue(permission.class_name in class_names)
@@ -375,15 +376,15 @@ class DatabaseModelsTester(unittest2.TestCase):
         """clean up the test
         """
         # delete the default test database file
-        #os.remove(cls.TEST_DATABASE_FILE)
+        #os.remove(cls.test_db_file)
         DBSession.configure(extension=None)
 
     def setUp(self):
         """setup the test
         """
-        # create a test database, possibly an in memory datase
-        self.TEST_DATABASE_FILE = ":memory:"
-        self.TEST_DATABASE_URI = "sqlite:///" + self.TEST_DATABASE_FILE
+        # create a test database, possibly an in memory database
+        self.test_db_file = ":memory:"
+        self.test_db_uri = "sqlite:///" + self.test_db_file
 
         db.setup()
         db.init()
@@ -424,7 +425,7 @@ class DatabaseModelsTester(unittest2.TestCase):
             type=test_repository_type
         )
 
-        project_statusList = StatusList(
+        project_status_list = StatusList(
             name='Project Status List A',
             statuses=[status1, status2, status3],
             target_entity_type='Project',
@@ -439,7 +440,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         test_project = Project(
             name='Test Project For Asset Creation',
             code='TPFAC',
-            status_list=project_statusList,
+            status_list=project_status_list,
             type=commercial_type,
             repository=test_repository,
         )
@@ -453,7 +454,7 @@ class DatabaseModelsTester(unittest2.TestCase):
             target_entity_type=Task,
         )
 
-        asset_statusList = StatusList(
+        asset_status_list = StatusList(
             name='Asset Status List',
             statuses=[status1, status2, status3],
             target_entity_type=Asset
@@ -465,7 +466,7 @@ class DatabaseModelsTester(unittest2.TestCase):
             'description': 'This is a test Asset object',
             'type': asset_type,
             'project': test_project,
-            'status_list': asset_statusList,
+            'status_list': asset_status_list,
             'created_by': test_user
         }
 
@@ -475,7 +476,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         DBSession.add(test_asset)
         DBSession.commit()
 
-        # logger.debug('test_asset.project (after commit): %s' % 
+        # logger.debug('test_asset.project (after commit): %s' %
         #              test_asset.project)
 
         test_task1 = Task(
@@ -521,33 +522,34 @@ class DatabaseModelsTester(unittest2.TestCase):
 
         del test_asset
 
-        test_asset_DB = Asset.query.filter_by(name=kwargs['name']).one()
+        test_asset_db = Asset.query.filter_by(name=kwargs['name']).one()
 
-        assert (isinstance(test_asset_DB, Asset))
+        assert (isinstance(test_asset_db, Asset))
 
         #self.assertEqual(test_asset, test_asset_DB)
-        self.assertEqual(code, test_asset_DB.code)
-        self.assertIsNotNone(test_asset_DB.created_by)
-        self.assertEqual(created_by, test_asset_DB.created_by)
-        self.assertEqual(date_created, test_asset_DB.date_created)
-        self.assertEqual(date_updated, test_asset_DB.date_updated)
-        self.assertEqual(description, test_asset_DB.description)
-        self.assertEqual(duration, test_asset_DB.duration)
-        self.assertEqual(end, test_asset_DB.end)
-        self.assertEqual(name, test_asset_DB.name)
-        self.assertEqual(nice_name, test_asset_DB.nice_name)
-        self.assertEqual(notes, test_asset_DB.notes)
-        self.assertEqual(project, test_asset_DB.project)
-        self.assertEqual(references, test_asset_DB.references)
-        self.assertEqual(status, test_asset_DB.status)
-        self.assertEqual(status_list, test_asset_DB.status_list)
-        self.assertEqual(tags, test_asset_DB.tags)
-        self.assertEqual(children, test_asset_DB.children)
-        self.assertEqual(type_, test_asset_DB.type)
-        self.assertEqual(updated_by, test_asset_DB.updated_by)
+        self.assertEqual(code, test_asset_db.code)
+        self.assertIsNotNone(test_asset_db.created_by)
+        self.assertEqual(created_by, test_asset_db.created_by)
+        self.assertEqual(date_created, test_asset_db.date_created)
+        self.assertEqual(date_updated, test_asset_db.date_updated)
+        self.assertEqual(description, test_asset_db.description)
+        self.assertEqual(duration, test_asset_db.duration)
+        self.assertEqual(end, test_asset_db.end)
+        self.assertEqual(name, test_asset_db.name)
+        self.assertEqual(nice_name, test_asset_db.nice_name)
+        self.assertEqual(notes, test_asset_db.notes)
+        self.assertEqual(project, test_asset_db.project)
+        self.assertEqual(references, test_asset_db.references)
+        self.assertEqual(start, test_asset_db.start)
+        self.assertEqual(status, test_asset_db.status)
+        self.assertEqual(status_list, test_asset_db.status_list)
+        self.assertEqual(tags, test_asset_db.tags)
+        self.assertEqual(children, test_asset_db.children)
+        self.assertEqual(type_, test_asset_db.type)
+        self.assertEqual(updated_by, test_asset_db.updated_by)
 
         # now test the deletion of the asset class
-        DBSession.delete(test_asset_DB)
+        DBSession.delete(test_asset_db)
         DBSession.commit()
 
         # we should still have the user
@@ -646,18 +648,18 @@ class DatabaseModelsTester(unittest2.TestCase):
         DBSession.add(test_time_log)
         DBSession.commit()
 
-        id = test_time_log.id
+        tlog_id = test_time_log.id
 
         del test_time_log
 
         # now retrieve it back
-        test_time_log_DB = TimeLog.query.filter_by(id=id).first()
+        test_time_log_db = TimeLog.query.filter_by(id=tlog_id).first()
 
-        self.assertEqual(description, test_time_log_DB.description)
-        self.assertEqual(start, test_time_log_DB.start)
-        self.assertEqual(end, test_time_log_DB.end)
-        self.assertEqual(user1, test_time_log_DB.resource)
-        self.assertEqual(test_task, test_time_log_DB.task)
+        self.assertEqual(description, test_time_log_db.description)
+        self.assertEqual(start, test_time_log_db.start)
+        self.assertEqual(end, test_time_log_db.end)
+        self.assertEqual(user1, test_time_log_db.resource)
+        self.assertEqual(test_task, test_time_log_db.task)
 
     def test_persistence_of_Department(self):
         """testing the persistence of Department
@@ -852,26 +854,26 @@ class DatabaseModelsTester(unittest2.TestCase):
         del test_entity
 
         # now try to retrieve it
-        test_entity_DB = Entity.query.filter_by(name=name).first()
+        test_entity_db = Entity.query.filter_by(name=name).first()
 
-        assert (isinstance(test_entity_DB, Entity))
+        assert (isinstance(test_entity_db, Entity))
 
         #self.assertEqual(test_entity, test_entity_DB)
-        self.assertEqual(created_by, test_entity_DB.created_by)
-        self.assertEqual(date_created, test_entity_DB.date_created)
-        self.assertEqual(date_updated, test_entity_DB.date_updated)
-        self.assertEqual(description, test_entity_DB.description)
-        self.assertEqual(name, test_entity_DB.name)
-        self.assertEqual(nice_name, test_entity_DB.nice_name)
+        self.assertEqual(created_by, test_entity_db.created_by)
+        self.assertEqual(date_created, test_entity_db.date_created)
+        self.assertEqual(date_updated, test_entity_db.date_updated)
+        self.assertEqual(description, test_entity_db.description)
+        self.assertEqual(name, test_entity_db.name)
+        self.assertEqual(nice_name, test_entity_db.nice_name)
         self.assertItemsEqual(notes, [note1, note2])
-        self.assertEqual(notes, test_entity_DB.notes)
-        self.assertEqual(tags, test_entity_DB.tags)
-        self.assertEqual(updated_by, test_entity_DB.updated_by)
+        self.assertEqual(notes, test_entity_db.notes)
+        self.assertEqual(tags, test_entity_db.tags)
+        self.assertEqual(updated_by, test_entity_db.updated_by)
 
         # delete tests
 
         # Deleting an Entity should also delete the associated notes
-        DBSession.delete(test_entity_DB)
+        DBSession.delete(test_entity_db)
         DBSession.commit()
 
         self.assertItemsEqual([], Note.query.all())
@@ -879,7 +881,6 @@ class DatabaseModelsTester(unittest2.TestCase):
     def test_persistence_of_FilenameTemplate(self):
         """testing the persistence of FilenameTemplate
         """
-
         vers_type = Type.query.filter_by(name="Version").first()
         ref_type = Type.query.filter_by(name="Reference").first()
 
@@ -920,25 +921,25 @@ class DatabaseModelsTester(unittest2.TestCase):
         del new_type_template
 
         # get it back
-        new_type_template_DB = \
+        new_type_template_db = \
             FilenameTemplate.query.filter_by(name=kwargs["name"]).first()
 
-        assert (isinstance(new_type_template_DB, FilenameTemplate))
+        assert (isinstance(new_type_template_db, FilenameTemplate))
 
-        self.assertEqual(created_by, new_type_template_DB.created_by)
-        self.assertEqual(date_created, new_type_template_DB.date_created)
-        self.assertEqual(date_updated, new_type_template_DB.date_updated)
-        self.assertEqual(description, new_type_template_DB.description)
-        self.assertEqual(filename, new_type_template_DB.filename)
-        self.assertEqual(name, new_type_template_DB.name)
-        self.assertEqual(nice_name, new_type_template_DB.nice_name)
-        self.assertEqual(notes, new_type_template_DB.notes)
-        self.assertEqual(path, new_type_template_DB.path)
-        self.assertEqual(tags, new_type_template_DB.tags)
+        self.assertEqual(created_by, new_type_template_db.created_by)
+        self.assertEqual(date_created, new_type_template_db.date_created)
+        self.assertEqual(date_updated, new_type_template_db.date_updated)
+        self.assertEqual(description, new_type_template_db.description)
+        self.assertEqual(filename, new_type_template_db.filename)
+        self.assertEqual(name, new_type_template_db.name)
+        self.assertEqual(nice_name, new_type_template_db.nice_name)
+        self.assertEqual(notes, new_type_template_db.notes)
+        self.assertEqual(path, new_type_template_db.path)
+        self.assertEqual(tags, new_type_template_db.tags)
         self.assertEqual(target_entity_type,
-                         new_type_template_DB.target_entity_type)
-        self.assertEqual(updated_by, new_type_template_DB.updated_by)
-        self.assertEqual(type_, new_type_template_DB.type)
+                         new_type_template_db.target_entity_type)
+        self.assertEqual(updated_by, new_type_template_db.updated_by)
+        self.assertEqual(type_, new_type_template_db.type)
 
     def test_persistence_of_ImageFormat(self):
         """testing the persistence of ImageFormat
@@ -982,26 +983,26 @@ class DatabaseModelsTester(unittest2.TestCase):
         del im_format
 
         # get it back
-        im_format_DB = ImageFormat.query.filter_by(name=kwargs["name"]).first()
+        im_format_db = ImageFormat.query.filter_by(name=kwargs["name"]).first()
 
-        assert (isinstance(im_format_DB, ImageFormat))
+        assert (isinstance(im_format_db, ImageFormat))
 
         # just test the repository part of the attributes
         #self.assertEqual(im_format, im_format_DB)
-        self.assertEqual(created_by, im_format_DB.created_by)
-        self.assertEqual(date_created, im_format_DB.date_created)
-        self.assertEqual(date_updated, im_format_DB.date_updated)
-        self.assertEqual(description, im_format_DB.description)
-        self.assertEqual(device_aspect, im_format_DB.device_aspect)
-        self.assertEqual(height, im_format_DB.height)
-        self.assertEqual(name, im_format_DB.name)
-        self.assertEqual(nice_name, im_format_DB.nice_name)
-        self.assertEqual(notes, im_format_DB.notes)
-        self.assertEqual(pixel_aspect, im_format_DB.pixel_aspect)
-        self.assertEqual(print_resolution, im_format_DB.print_resolution)
-        self.assertEqual(tags, im_format_DB.tags)
-        self.assertEqual(updated_by, im_format_DB.updated_by)
-        self.assertEqual(width, im_format_DB.width)
+        self.assertEqual(created_by, im_format_db.created_by)
+        self.assertEqual(date_created, im_format_db.date_created)
+        self.assertEqual(date_updated, im_format_db.date_updated)
+        self.assertEqual(description, im_format_db.description)
+        self.assertEqual(device_aspect, im_format_db.device_aspect)
+        self.assertEqual(height, im_format_db.height)
+        self.assertEqual(name, im_format_db.name)
+        self.assertEqual(nice_name, im_format_db.nice_name)
+        self.assertEqual(notes, im_format_db.notes)
+        self.assertEqual(pixel_aspect, im_format_db.pixel_aspect)
+        self.assertEqual(print_resolution, im_format_db.print_resolution)
+        self.assertEqual(tags, im_format_db.tags)
+        self.assertEqual(updated_by, im_format_db.updated_by)
+        self.assertEqual(width, im_format_db.width)
 
     def test_persistence_of_Link(self):
         """testing the persistence of Link
@@ -1081,27 +1082,27 @@ class DatabaseModelsTester(unittest2.TestCase):
         del link1
 
         # retrieve it back
-        link1_DB = Link.query.filter_by(name=kwargs["name"]).first()
+        link1_db = Link.query.filter_by(name=kwargs["name"]).first()
 
-        assert (isinstance(link1_DB, Link))
+        assert (isinstance(link1_db, Link))
 
         #self.assertEqual(new_link, new_link_DB)
-        self.assertEqual(created_by, link1_DB.created_by)
-        self.assertEqual(date_created, link1_DB.date_created)
-        self.assertEqual(date_updated, link1_DB.date_updated)
-        self.assertEqual(description, link1_DB.description)
-        self.assertEqual(name, link1_DB.name)
-        self.assertEqual(nice_name, link1_DB.nice_name)
-        self.assertEqual(notes, link1_DB.notes)
-        self.assertEqual(full_path, link1_DB.full_path)
-        self.assertEqual(tags, link1_DB.tags)
-        self.assertEqual(type_, link1_DB.type)
-        self.assertEqual(updated_by, link1_DB.updated_by)
-        self.assertEqual(task1.references[0], link1_DB)
+        self.assertEqual(created_by, link1_db.created_by)
+        self.assertEqual(date_created, link1_db.date_created)
+        self.assertEqual(date_updated, link1_db.date_updated)
+        self.assertEqual(description, link1_db.description)
+        self.assertEqual(name, link1_db.name)
+        self.assertEqual(nice_name, link1_db.nice_name)
+        self.assertEqual(notes, link1_db.notes)
+        self.assertEqual(full_path, link1_db.full_path)
+        self.assertEqual(tags, link1_db.tags)
+        self.assertEqual(type_, link1_db.type)
+        self.assertEqual(updated_by, link1_db.updated_by)
+        self.assertEqual(task1.references[0], link1_db)
 
         # delete tests
         # Deleting a Link should not delete anything else
-        DBSession.delete(link1_DB)
+        DBSession.delete(link1_db)
         DBSession.commit()
 
         # We still should have the user and the type intact
@@ -1158,23 +1159,19 @@ class DatabaseModelsTester(unittest2.TestCase):
         del test_note
 
         # try to get the note directly
-        test_note_DB = \
+        test_note_db = \
             Note.query.filter(Note.name == note_kwargs["name"]).first()
 
-        assert (isinstance(test_note_DB, Note))
+        assert (isinstance(test_note_db, Note))
 
-        # try to get the note from the entity
-        test_entity_DB = \
-            Entity.query.filter(Entity.name == entity_kwargs["name"]).first()
-
-        self.assertEqual(content, test_note_DB.content)
-        self.assertEqual(created_by, test_note_DB.created_by)
-        self.assertEqual(date_created, test_note_DB.date_created)
-        self.assertEqual(date_updated, test_note_DB.date_updated)
-        self.assertEqual(description, test_note_DB.description)
-        self.assertEqual(name, test_note_DB.name)
-        self.assertEqual(nice_name, test_note_DB.nice_name)
-        self.assertEqual(updated_by, test_note_DB.updated_by)
+        self.assertEqual(content, test_note_db.content)
+        self.assertEqual(created_by, test_note_db.created_by)
+        self.assertEqual(date_created, test_note_db.date_created)
+        self.assertEqual(date_updated, test_note_db.date_updated)
+        self.assertEqual(description, test_note_db.description)
+        self.assertEqual(name, test_note_db.name)
+        self.assertEqual(nice_name, test_note_db.nice_name)
+        self.assertEqual(updated_by, test_note_db.updated_by)
 
     def test_persistence_of_Group(self):
         """testing the persistence of Group
@@ -1206,10 +1203,10 @@ class DatabaseModelsTester(unittest2.TestCase):
         users = group1.users
 
         del group1
-        group_DB = Group.query.filter_by(name=name).first()
+        group_db = Group.query.filter_by(name=name).first()
 
-        self.assertEqual(name, group_DB.name)
-        self.assertEqual(users, group_DB.users)
+        self.assertEqual(name, group_db.name)
+        self.assertEqual(users, group_db.users)
 
     def test_persistence_of_Project(self):
         """testing the persistence of Project
@@ -1375,6 +1372,7 @@ class DatabaseModelsTester(unittest2.TestCase):
             status_list=task_status_list,
             status=0,
             project=new_project,
+            resources=[user1, user2]
         )
 
         task2 = Task(
@@ -1382,11 +1380,13 @@ class DatabaseModelsTester(unittest2.TestCase):
             status_list=task_status_list,
             status=0,
             project=new_project,
+            resources=[user3]
         )
 
-        new_project._computed_start = datetime.datetime.now()
-        new_project._computed_end = datetime.datetime.now() \
-                                    + datetime.timedelta(10)
+        dt = datetime.datetime
+        td = datetime.timedelta
+        new_project._computed_start = dt.now()
+        new_project._computed_end = dt.now() + td(10)
 
         DBSession.add_all([task1, task2])
         DBSession.commit()
@@ -1423,7 +1423,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         structure = new_project.structure
         tags = new_project.tags
         tasks = new_project.tasks
-        type = new_project.type
+        type_ = new_project.type
         updated_by = new_project.updated_by
         users = new_project.users
         computed_start = new_project.computed_start
@@ -1434,49 +1434,49 @@ class DatabaseModelsTester(unittest2.TestCase):
         del new_project
 
         # now get it
-        new_project_DB = DBSession.query(Project). \
+        new_project_db = DBSession.query(Project). \
             filter_by(name=kwargs["name"]).first()
 
-        assert (isinstance(new_project_DB, Project))
+        assert (isinstance(new_project_db, Project))
 
         #self.assertEqual(new_project, new_project_DB)
-        self.assertEqual(assets, new_project_DB.assets)
-        self.assertEqual(code, new_project_DB.code)
-        self.assertEqual(computed_start, new_project_DB.computed_start)
-        self.assertEqual(computed_end, new_project_DB.computed_end)
-        self.assertEqual(created_by, new_project_DB.created_by)
-        self.assertEqual(date_created, new_project_DB.date_created)
-        self.assertEqual(date_updated, new_project_DB.date_updated)
-        self.assertEqual(description, new_project_DB.description)
-        self.assertEqual(end, new_project_DB.end)
-        self.assertEqual(duration, new_project_DB.duration)
-        self.assertEqual(fps, new_project_DB.fps)
-        self.assertEqual(image_format, new_project_DB.image_format)
-        self.assertEqual(is_stereoscopic, new_project_DB.is_stereoscopic)
-        self.assertEqual(lead, new_project_DB.lead)
-        self.assertEqual(name, new_project_DB.name)
-        self.assertEqual(nice_name, new_project_DB.nice_name)
-        self.assertEqual(notes, new_project_DB.notes)
-        self.assertEqual(references, new_project_DB.references)
-        self.assertEqual(repository, new_project_DB.repository)
-        self.assertEqual(sequences, new_project_DB.sequences)
-        self.assertEqual(start, new_project_DB.start)
-        self.assertEqual(status, new_project_DB.status)
-        self.assertEqual(status_list, new_project_DB.status_list)
-        self.assertEqual(structure, new_project_DB.structure)
-        self.assertEqual(tags, new_project_DB.tags)
-        self.assertEqual(tasks, new_project_DB.tasks)
-        self.assertEqual(timing_resolution, new_project_DB.timing_resolution)
-        self.assertEqual(type, new_project_DB.type)
-        self.assertEqual(updated_by, new_project_DB.updated_by)
-        self.assertEqual(users, new_project_DB.users)
+        self.assertEqual(assets, new_project_db.assets)
+        self.assertEqual(code, new_project_db.code)
+        self.assertEqual(computed_start, new_project_db.computed_start)
+        self.assertEqual(computed_end, new_project_db.computed_end)
+        self.assertEqual(created_by, new_project_db.created_by)
+        self.assertEqual(date_created, new_project_db.date_created)
+        self.assertEqual(date_updated, new_project_db.date_updated)
+        self.assertEqual(description, new_project_db.description)
+        self.assertEqual(end, new_project_db.end)
+        self.assertEqual(duration, new_project_db.duration)
+        self.assertEqual(fps, new_project_db.fps)
+        self.assertEqual(image_format, new_project_db.image_format)
+        self.assertEqual(is_stereoscopic, new_project_db.is_stereoscopic)
+        self.assertEqual(lead, new_project_db.lead)
+        self.assertEqual(name, new_project_db.name)
+        self.assertEqual(nice_name, new_project_db.nice_name)
+        self.assertEqual(notes, new_project_db.notes)
+        self.assertEqual(references, new_project_db.references)
+        self.assertEqual(repository, new_project_db.repository)
+        self.assertEqual(sequences, new_project_db.sequences)
+        self.assertEqual(start, new_project_db.start)
+        self.assertEqual(status, new_project_db.status)
+        self.assertEqual(status_list, new_project_db.status_list)
+        self.assertEqual(structure, new_project_db.structure)
+        self.assertEqual(tags, new_project_db.tags)
+        self.assertEqual(tasks, new_project_db.tasks)
+        self.assertEqual(timing_resolution, new_project_db.timing_resolution)
+        self.assertEqual(type_, new_project_db.type)
+        self.assertEqual(updated_by, new_project_db.updated_by)
+        self.assertEqual(users, new_project_db.users)
 
         # delete tests
         # now delete the project and expect the following also to be deleted
         #
         # Tasks
         # Tickets
-        DBSession.delete(new_project_DB)
+        DBSession.delete(new_project_db)
         DBSession.commit()
 
         # Tasks
@@ -1610,7 +1610,7 @@ class DatabaseModelsTester(unittest2.TestCase):
             scenes=[test_scene],
             status_list=shot_status_list
         )
-
+        DBSession.add_all([shot1, shot2, shot3])
         DBSession.add(test_scene)
         DBSession.commit()
 
@@ -1631,21 +1631,21 @@ class DatabaseModelsTester(unittest2.TestCase):
         # delete the test_sequence
         del test_scene
 
-        test_scene_DB = Scene.query.filter_by(name=kwargs['name']).first()
+        test_scene_db = Scene.query.filter_by(name=kwargs['name']).first()
 
         #self.assertEqual(test_sequence, test_sequence_DB)
-        self.assertEqual(code, test_scene_DB.code)
-        self.assertEqual(created_by, test_scene_DB.created_by)
-        self.assertEqual(date_created, test_scene_DB.date_created)
-        self.assertEqual(date_updated, test_scene_DB.date_updated)
-        self.assertEqual(description, test_scene_DB.description)
-        self.assertEqual(name, test_scene_DB.name)
-        self.assertEqual(nice_name, test_scene_DB.nice_name)
-        self.assertEqual(notes, test_scene_DB.notes)
-        self.assertEqual(project, test_scene_DB.project)
-        self.assertEqual(shots, test_scene_DB.shots)
-        self.assertEqual(tags, test_scene_DB.tags)
-        self.assertEqual(updated_by, test_scene_DB.updated_by)
+        self.assertEqual(code, test_scene_db.code)
+        self.assertEqual(created_by, test_scene_db.created_by)
+        self.assertEqual(date_created, test_scene_db.date_created)
+        self.assertEqual(date_updated, test_scene_db.date_updated)
+        self.assertEqual(description, test_scene_db.description)
+        self.assertEqual(name, test_scene_db.name)
+        self.assertEqual(nice_name, test_scene_db.nice_name)
+        self.assertEqual(notes, test_scene_db.notes)
+        self.assertEqual(project, test_scene_db.project)
+        self.assertEqual(shots, test_scene_db.shots)
+        self.assertEqual(tags, test_scene_db.tags)
+        self.assertEqual(updated_by, test_scene_db.updated_by)
 
     def test_persistence_of_Sequence(self):
         """testing the persistence of Sequence
@@ -1732,6 +1732,7 @@ class DatabaseModelsTester(unittest2.TestCase):
             status_list=shot_status_list
         )
 
+        DBSession.add_all([shot1, shot2, shot3])
         DBSession.add(test_sequence)
         DBSession.commit()
 
@@ -1762,34 +1763,34 @@ class DatabaseModelsTester(unittest2.TestCase):
         # delete the test_sequence
         del test_sequence
 
-        test_sequence_DB = Sequence.query \
+        test_sequence_db = Sequence.query \
             .filter_by(name=kwargs['name']).first()
 
         #self.assertEqual(test_sequence, test_sequence_DB)
-        self.assertEqual(code, test_sequence_DB.code)
-        self.assertEqual(created_by, test_sequence_DB.created_by)
-        self.assertEqual(date_created, test_sequence_DB.date_created)
-        self.assertEqual(date_updated, test_sequence_DB.date_updated)
-        self.assertEqual(description, test_sequence_DB.description)
-        self.assertEqual(end, test_sequence_DB.end)
-        self.assertEqual(name, test_sequence_DB.name)
-        self.assertEqual(nice_name, test_sequence_DB.nice_name)
-        self.assertEqual(notes, test_sequence_DB.notes)
-        self.assertEqual(project, test_sequence_DB.project)
-        self.assertEqual(references, test_sequence_DB.references)
-        self.assertEqual(shots, test_sequence_DB.shots)
-        self.assertEqual(start, test_sequence_DB.start)
-        self.assertEqual(status, test_sequence_DB.status)
-        self.assertEqual(status_list, test_sequence_DB.status_list)
-        self.assertEqual(tags, test_sequence_DB.tags)
-        self.assertEqual(children, test_sequence_DB.children)
-        self.assertEqual(tasks, test_sequence_DB.tasks)
-        self.assertEqual(updated_by, test_sequence_DB.updated_by)
-        self.assertEqual(schedule_model, test_sequence_DB.schedule_model)
+        self.assertEqual(code, test_sequence_db.code)
+        self.assertEqual(created_by, test_sequence_db.created_by)
+        self.assertEqual(date_created, test_sequence_db.date_created)
+        self.assertEqual(date_updated, test_sequence_db.date_updated)
+        self.assertEqual(description, test_sequence_db.description)
+        self.assertEqual(end, test_sequence_db.end)
+        self.assertEqual(name, test_sequence_db.name)
+        self.assertEqual(nice_name, test_sequence_db.nice_name)
+        self.assertEqual(notes, test_sequence_db.notes)
+        self.assertEqual(project, test_sequence_db.project)
+        self.assertEqual(references, test_sequence_db.references)
+        self.assertEqual(shots, test_sequence_db.shots)
+        self.assertEqual(start, test_sequence_db.start)
+        self.assertEqual(status, test_sequence_db.status)
+        self.assertEqual(status_list, test_sequence_db.status_list)
+        self.assertEqual(tags, test_sequence_db.tags)
+        self.assertEqual(children, test_sequence_db.children)
+        self.assertEqual(tasks, test_sequence_db.tasks)
+        self.assertEqual(updated_by, test_sequence_db.updated_by)
+        self.assertEqual(schedule_model, test_sequence_db.schedule_model)
         self.assertEqual(schedule_timing,
-                         test_sequence_DB.schedule_timing)
+                         test_sequence_db.schedule_timing)
         self.assertEqual(schedule_unit,
-                         test_sequence_DB.schedule_unit)
+                         test_sequence_db.schedule_unit)
 
     def test_persistence_of_Shot(self):
         """testing the persistence of Shot
@@ -1909,28 +1910,28 @@ class DatabaseModelsTester(unittest2.TestCase):
         # delete the shot
         del test_shot
 
-        test_shot_DB = Shot.query.filter_by(code=shot_kwargs["code"]).first()
+        test_shot_db = Shot.query.filter_by(code=shot_kwargs["code"]).first()
 
         #self.assertEqual(test_shot, test_shot_DB)
-        self.assertEqual(code, test_shot_DB.code)
-        self.assertEqual(children, test_shot_DB.children)
-        self.assertEqual(cut_duration, test_shot_DB.cut_duration)
-        self.assertEqual(cut_in, test_shot_DB.cut_in)
-        self.assertEqual(cut_out, test_shot_DB.cut_out)
-        self.assertEqual(date_created, test_shot_DB.date_created)
-        self.assertEqual(date_updated, test_shot_DB.date_updated)
-        self.assertEqual(description, test_shot_DB.description)
-        self.assertEqual(name, test_shot_DB.name)
-        self.assertEqual(nice_name, test_shot_DB.nice_name)
-        self.assertEqual(notes, test_shot_DB.notes)
-        self.assertEqual(references, test_shot_DB.references)
-        self.assertEqual(scenes, test_shot_DB.scenes)
-        self.assertEqual(sequences, test_shot_DB.sequences)
-        self.assertEqual(status, test_shot_DB.status)
-        self.assertEqual(status_list, test_shot_DB.status_list)
-        self.assertEqual(tags, test_shot_DB.tags)
-        self.assertEqual(tasks, test_shot_DB.tasks)
-        self.assertEqual(updated_by, test_shot_DB.updated_by)
+        self.assertEqual(code, test_shot_db.code)
+        self.assertEqual(children, test_shot_db.children)
+        self.assertEqual(cut_duration, test_shot_db.cut_duration)
+        self.assertEqual(cut_in, test_shot_db.cut_in)
+        self.assertEqual(cut_out, test_shot_db.cut_out)
+        self.assertEqual(date_created, test_shot_db.date_created)
+        self.assertEqual(date_updated, test_shot_db.date_updated)
+        self.assertEqual(description, test_shot_db.description)
+        self.assertEqual(name, test_shot_db.name)
+        self.assertEqual(nice_name, test_shot_db.nice_name)
+        self.assertEqual(notes, test_shot_db.notes)
+        self.assertEqual(references, test_shot_db.references)
+        self.assertEqual(scenes, test_shot_db.scenes)
+        self.assertEqual(sequences, test_shot_db.sequences)
+        self.assertEqual(status, test_shot_db.status)
+        self.assertEqual(status_list, test_shot_db.status_list)
+        self.assertEqual(tags, test_shot_db.tags)
+        self.assertEqual(tasks, test_shot_db.tasks)
+        self.assertEqual(updated_by, test_shot_db.updated_by)
 
     def test_persistence_of_SimpleEntity(self):
         """testing the persistence of SimpleEntity
@@ -2003,9 +2004,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         kwargs = {
             "name": "TestStatus_test_creating_Status",
             "description": "this is for testing purposes",
-            "code": "TSTST",
-            'bg_color': 15,
-            'fg_color': 105
+            "code": "TSTST"
         }
 
         test_status = Status(**kwargs)
@@ -2025,32 +2024,28 @@ class DatabaseModelsTester(unittest2.TestCase):
         notes = test_status.notes
         tags = test_status.tags
         updated_by = test_status.updated_by
-        bg_color = test_status.bg_color
-        fg_color = test_status.fg_color
 
         # delete the test_status
         del test_status
 
         # now try to retrieve it
-        test_status_DB = DBSession.query(Status) \
+        test_status_db = DBSession.query(Status) \
             .filter(Status.name == kwargs["name"]).first()
 
-        assert (isinstance(test_status_DB, Status))
+        assert (isinstance(test_status_db, Status))
 
-        # just test the satuts part of the object
+        # just test the status part of the object
         #self.assertEqual(test_status, test_status_DB)
-        self.assertEqual(code, test_status_DB.code)
-        self.assertEqual(created_by, test_status_DB.created_by)
-        self.assertEqual(date_created, test_status_DB.date_created)
-        self.assertEqual(date_updated, test_status_DB.date_updated)
-        self.assertEqual(description, test_status_DB.description)
-        self.assertEqual(name, test_status_DB.name)
-        self.assertEqual(nice_name, test_status_DB.nice_name)
-        self.assertEqual(notes, test_status_DB.notes)
-        self.assertEqual(tags, test_status_DB.tags)
-        self.assertEqual(updated_by, test_status_DB.updated_by)
-        self.assertEqual(bg_color, test_status_DB.bg_color)
-        self.assertEqual(fg_color, test_status_DB.fg_color)
+        self.assertEqual(code, test_status_db.code)
+        self.assertEqual(created_by, test_status_db.created_by)
+        self.assertEqual(date_created, test_status_db.date_created)
+        self.assertEqual(date_updated, test_status_db.date_updated)
+        self.assertEqual(description, test_status_db.description)
+        self.assertEqual(name, test_status_db.name)
+        self.assertEqual(nice_name, test_status_db.nice_name)
+        self.assertEqual(notes, test_status_db.notes)
+        self.assertEqual(tags, test_status_db.tags)
+        self.assertEqual(updated_by, test_status_db.updated_by)
 
     def test_persistence_of_StatusList(self):
         """testing the persistence of StatusList
@@ -2092,25 +2087,25 @@ class DatabaseModelsTester(unittest2.TestCase):
         del sequence_status_list
 
         # now get it back
-        sequence_status_list_DB = StatusList.query \
+        sequence_status_list_db = StatusList.query \
             .filter_by(name=kwargs["name"]) \
             .first()
 
-        assert (isinstance(sequence_status_list_DB, StatusList))
+        assert (isinstance(sequence_status_list_db, StatusList))
 
         #self.assertEqual(sequence_status_list, sequence_status_list_DB)
-        self.assertEqual(created_by, sequence_status_list_DB.created_by)
-        self.assertEqual(date_created, sequence_status_list_DB.date_created)
-        self.assertEqual(date_updated, sequence_status_list_DB.date_updated)
-        self.assertEqual(description, sequence_status_list_DB.description)
-        self.assertEqual(name, sequence_status_list_DB.name)
-        self.assertEqual(nice_name, sequence_status_list_DB.nice_name)
-        self.assertEqual(notes, sequence_status_list_DB.notes)
-        self.assertEqual(statuses, sequence_status_list_DB.statuses)
-        self.assertEqual(tags, sequence_status_list_DB.tags)
+        self.assertEqual(created_by, sequence_status_list_db.created_by)
+        self.assertEqual(date_created, sequence_status_list_db.date_created)
+        self.assertEqual(date_updated, sequence_status_list_db.date_updated)
+        self.assertEqual(description, sequence_status_list_db.description)
+        self.assertEqual(name, sequence_status_list_db.name)
+        self.assertEqual(nice_name, sequence_status_list_db.nice_name)
+        self.assertEqual(notes, sequence_status_list_db.notes)
+        self.assertEqual(statuses, sequence_status_list_db.statuses)
+        self.assertEqual(tags, sequence_status_list_db.tags)
         self.assertEqual(target_entity_type,
-                         sequence_status_list_DB.target_entity_type)
-        self.assertEqual(updated_by, sequence_status_list_DB.updated_by)
+                         sequence_status_list_db.target_entity_type)
+        self.assertEqual(updated_by, sequence_status_list_db.updated_by)
 
         # try to create another StatusList for the same target_entity_type
         # and do not expect an IntegrityError
@@ -2160,7 +2155,7 @@ class DatabaseModelsTester(unittest2.TestCase):
             .first()
 
         # create a new type template for character assets
-        assetTemplate = FilenameTemplate(
+        asset_template = FilenameTemplate(
             name="Character Asset Template",
             description="This is the template for character assets",
             path="Assets/{{asset_type.name}}/{{pipeline_step.code}}",
@@ -2185,7 +2180,7 @@ class DatabaseModelsTester(unittest2.TestCase):
             .first()
 
         # create a new template for references
-        imageReferenceTemplate = FilenameTemplate(
+        image_reference_template = FilenameTemplate(
             name="Image Reference Template",
             description="this is the template for image references, it "
                         "shows where to place the image files",
@@ -2211,7 +2206,7 @@ class DatabaseModelsTester(unittest2.TestCase):
                 Sequences
                 Sequences/{% for sequence in project.sequences %}
                 {{sequence.code}}""",
-            'templates': [assetTemplate, imageReferenceTemplate],
+            'templates': [asset_template, image_reference_template],
             'type': commercial_structure_type
         }
 
@@ -2236,22 +2231,22 @@ class DatabaseModelsTester(unittest2.TestCase):
         # delete the new_structure
         del new_structure
 
-        new_structure_DB = DBSession.query(Structure). \
+        new_structure_db = DBSession.query(Structure). \
             filter_by(name=kwargs["name"]).first()
 
-        assert (isinstance(new_structure_DB, Structure))
+        assert (isinstance(new_structure_db, Structure))
 
-        self.assertEqual(templates, new_structure_DB.templates)
-        self.assertEqual(created_by, new_structure_DB.created_by)
-        self.assertEqual(date_created, new_structure_DB.date_created)
-        self.assertEqual(date_updated, new_structure_DB.date_updated)
-        self.assertEqual(description, new_structure_DB.description)
-        self.assertEqual(name, new_structure_DB.name)
-        self.assertEqual(nice_name, new_structure_DB.nice_name)
-        self.assertEqual(notes, new_structure_DB.notes)
-        self.assertEqual(custom_template, new_structure_DB.custom_template)
-        self.assertEqual(tags, new_structure_DB.tags)
-        self.assertEqual(updated_by, new_structure_DB.updated_by)
+        self.assertEqual(templates, new_structure_db.templates)
+        self.assertEqual(created_by, new_structure_db.created_by)
+        self.assertEqual(date_created, new_structure_db.date_created)
+        self.assertEqual(date_updated, new_structure_db.date_updated)
+        self.assertEqual(description, new_structure_db.description)
+        self.assertEqual(name, new_structure_db.name)
+        self.assertEqual(nice_name, new_structure_db.nice_name)
+        self.assertEqual(notes, new_structure_db.notes)
+        self.assertEqual(custom_template, new_structure_db.custom_template)
+        self.assertEqual(tags, new_structure_db.tags)
+        self.assertEqual(updated_by, new_structure_db.updated_by)
 
     def test_persistence_of_Studio(self):
         """testing the persistence of Studio
@@ -2279,15 +2274,14 @@ class DatabaseModelsTester(unittest2.TestCase):
         del test_studio
 
         # get it back
-        test_studio_DB = Studio.query.first()
+        test_studio_db = Studio.query.first()
 
         # self.assertEqual(now, test_studio_DB.now)
-        self.assertEqual(name, test_studio_DB.name)
+        self.assertEqual(name, test_studio_db.name)
         self.assertEqual(daily_working_hours,
-                         test_studio_DB.daily_working_hours)
-        self.assertEqual(timing_resolution, test_studio_DB.timing_resolution)
-        self.assertEqual(working_hours, test_studio_DB.working_hours)
-
+                         test_studio_db.daily_working_hours)
+        self.assertEqual(timing_resolution, test_studio_db.timing_resolution)
+        self.assertEqual(working_hours, test_studio_db.working_hours)
 
     def test_persistence_of_Tag(self):
         """testing the persistence of Tag
@@ -2298,7 +2292,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         updated_by = None
         date_created = date_updated = datetime.datetime.now()
 
-        aTag = Tag(
+        tag = Tag(
             name=name,
             description=description,
             created_by=created_by,
@@ -2307,31 +2301,30 @@ class DatabaseModelsTester(unittest2.TestCase):
             date_updated=date_updated)
 
         # persist it to the database
-        DBSession.add(aTag)
+        DBSession.add(tag)
         DBSession.commit()
 
         # store the attributes
-        description = aTag.description
-        created_by = aTag.created_by
-        updated_by = aTag.updated_by
-        date_created = aTag.date_created
-        date_updated = aTag.date_updated
+        description = tag.description
+        created_by = tag.created_by
+        updated_by = tag.updated_by
+        date_created = tag.date_created
+        date_updated = tag.date_updated
 
         # delete the aTag
-        del aTag
+        del tag
 
         # now try to retrieve it
-        aTag_DB = DBSession.query(Tag).filter_by(name=name).first()
+        tag_db = DBSession.query(Tag).filter_by(name=name).first()
 
-        assert (isinstance(aTag_DB, Tag))
+        assert (isinstance(tag_db, Tag))
 
-        self.assertEqual(name, aTag_DB.name)
-        self.assertEqual(description, aTag_DB.description)
-        self.assertEqual(created_by, aTag_DB.created_by)
-        self.assertEqual(updated_by, aTag_DB.updated_by)
-        self.assertEqual(date_created, aTag_DB.date_created)
-        self.assertEqual(date_updated, aTag_DB.date_updated)
-
+        self.assertEqual(name, tag_db.name)
+        self.assertEqual(description, tag_db.description)
+        self.assertEqual(created_by, tag_db.created_by)
+        self.assertEqual(updated_by, tag_db.updated_by)
+        self.assertEqual(date_created, tag_db.date_created)
+        self.assertEqual(date_updated, tag_db.date_updated)
 
     def test_persistence_of_Task(self):
         """testing the persistence of Task
@@ -2531,38 +2524,38 @@ class DatabaseModelsTester(unittest2.TestCase):
         del task1
 
         # now query it back
-        task1_DB = Task.query.filter_by(name=name).first()
+        task1_db = Task.query.filter_by(name=name).first()
 
-        assert (isinstance(task1_DB, Task))
+        assert (isinstance(task1_db, Task))
 
-        self.assertEqual(time_logs, task1_DB.time_logs)
-        self.assertEqual(created_by, task1_DB.created_by)
-        self.assertEqual(computed_start, task1_DB.computed_start)
-        self.assertEqual(computed_end, task1_DB.computed_end)
-        self.assertEqual(date_created, task1_DB.date_created)
-        self.assertEqual(date_updated, task1_DB.date_updated)
-        self.assertEqual(duration, task1_DB.duration)
-        self.assertEqual(end, task1_DB.end)
-        self.assertEqual(is_complete, task1_DB.is_complete)
-        self.assertEqual(is_milestone, task1_DB.is_milestone)
-        self.assertEqual(name, task1_DB.name)
-        self.assertEqual(parent, task1_DB.parent)
-        self.assertEqual(priority, task1_DB.priority)
-        self.assertItemsEqual(resources, []) # it is a parent task, so no child
-        self.assertItemsEqual(resources, task1_DB.resources)
-        self.assertEqual(start, task1_DB.start)
-        self.assertEqual(status, task1_DB.status)
-        self.assertEqual(status_list, task1_DB.status_list)
-        self.assertEqual(tags, task1_DB.tags)
-        self.assertItemsEqual(tasks, task1_DB.tasks)
+        self.assertEqual(time_logs, task1_db.time_logs)
+        self.assertEqual(created_by, task1_db.created_by)
+        self.assertEqual(computed_start, task1_db.computed_start)
+        self.assertEqual(computed_end, task1_db.computed_end)
+        self.assertEqual(date_created, task1_db.date_created)
+        self.assertEqual(date_updated, task1_db.date_updated)
+        self.assertEqual(duration, task1_db.duration)
+        self.assertEqual(end, task1_db.end)
+        self.assertEqual(is_complete, task1_db.is_complete)
+        self.assertEqual(is_milestone, task1_db.is_milestone)
+        self.assertEqual(name, task1_db.name)
+        self.assertEqual(parent, task1_db.parent)
+        self.assertEqual(priority, task1_db.priority)
+        self.assertItemsEqual(resources, [])  # it is a parent task, no child
+        self.assertItemsEqual(resources, task1_db.resources)
+        self.assertEqual(start, task1_db.start)
+        self.assertEqual(status, task1_db.status)
+        self.assertEqual(status_list, task1_db.status_list)
+        self.assertEqual(tags, task1_db.tags)
+        self.assertItemsEqual(tasks, task1_db.tasks)
         self.assertEqual(tasks, [child_task1, child_task2])
-        self.assertEqual(type_, task1_DB.type)
-        self.assertEqual(updated_by, task1_DB.updated_by)
-        self.assertEqual(versions, task1_DB.versions)
-        self.assertEqual(watchers, task1_DB.watchers)
-        self.assertEqual(schedule_model, task1_DB.schedule_model)
-        self.assertEqual(schedule_timing, task1_DB.schedule_timing)
-        self.assertEqual(schedule_unit, task1_DB.schedule_unit)
+        self.assertEqual(type_, task1_db.type)
+        self.assertEqual(updated_by, task1_db.updated_by)
+        self.assertEqual(versions, task1_db.versions)
+        self.assertEqual(watchers, task1_db.watchers)
+        self.assertEqual(schedule_model, task1_db.schedule_model)
+        self.assertEqual(schedule_timing, task1_db.schedule_timing)
+        self.assertEqual(schedule_unit, task1_db.schedule_unit)
 
         # delete tests
 
@@ -2571,7 +2564,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         # Child Tasks
         # TimeLogs
         # Versions
-        DBSession.delete(task1_DB)
+        DBSession.delete(task1_db)
         DBSession.commit()
 
         # Expect to have all child tasks also to be deleted
@@ -2600,9 +2593,9 @@ class DatabaseModelsTester(unittest2.TestCase):
         id_ = task2.id
         del task2
 
-        another_task_DB = Task.query.get(id_)
+        another_task_db = Task.query.get(id_)
         self.assertItemsEqual(resources, [user1])
-        self.assertItemsEqual(resources, another_task_DB.resources)
+        self.assertItemsEqual(resources, another_task_db.resources)
 
     def test_persistence_of_Ticket(self):
         """testing the persistence of Ticket
@@ -2703,35 +2696,35 @@ class DatabaseModelsTester(unittest2.TestCase):
         del test_ticket
 
         # now query it back
-        test_ticket_DB = Ticket.query.filter_by(name=name).first()
+        test_ticket_db = Ticket.query.filter_by(name=name).first()
 
-        self.assertEqual(comments, test_ticket_DB.comments)
-        self.assertEqual(created_by, test_ticket_DB.created_by)
-        self.assertEqual(date_created, test_ticket_DB.date_created)
-        self.assertEqual(date_updated, test_ticket_DB.date_updated)
-        self.assertEqual(description, test_ticket_DB.description)
+        self.assertEqual(comments, test_ticket_db.comments)
+        self.assertEqual(created_by, test_ticket_db.created_by)
+        self.assertEqual(date_created, test_ticket_db.date_created)
+        self.assertEqual(date_updated, test_ticket_db.date_updated)
+        self.assertEqual(description, test_ticket_db.description)
         self.assertNotEqual([], logs)
-        self.assertEqual(logs, test_ticket_DB.logs)
-        self.assertEqual(links, test_ticket_DB.links)
-        self.assertEqual(name, test_ticket_DB.name)
-        self.assertEqual(notes, test_ticket_DB.notes)
-        self.assertEqual(number, test_ticket_DB.number)
-        self.assertEqual(owner, test_ticket_DB.owner)
-        self.assertEqual(priority, test_ticket_DB.priority)
-        self.assertEqual(project, test_ticket_DB.project)
-        self.assertEqual(related_tickets, test_ticket_DB.related_tickets)
-        self.assertEqual(reported_by, test_ticket_DB.reported_by)
-        self.assertEqual(resolution, test_ticket_DB.resolution)
-        self.assertEqual(status, test_ticket_DB.status)
-        self.assertEqual(type_, test_ticket_DB.type)
-        self.assertEqual(updated_by, test_ticket_DB.updated_by)
+        self.assertEqual(logs, test_ticket_db.logs)
+        self.assertEqual(links, test_ticket_db.links)
+        self.assertEqual(name, test_ticket_db.name)
+        self.assertEqual(notes, test_ticket_db.notes)
+        self.assertEqual(number, test_ticket_db.number)
+        self.assertEqual(owner, test_ticket_db.owner)
+        self.assertEqual(priority, test_ticket_db.priority)
+        self.assertEqual(project, test_ticket_db.project)
+        self.assertEqual(related_tickets, test_ticket_db.related_tickets)
+        self.assertEqual(reported_by, test_ticket_db.reported_by)
+        self.assertEqual(resolution, test_ticket_db.resolution)
+        self.assertEqual(status, test_ticket_db.status)
+        self.assertEqual(type_, test_ticket_db.type)
+        self.assertEqual(updated_by, test_ticket_db.updated_by)
 
         # delete tests
         # Deleting a Ticket should also delete all the logs related to the
         # ticket
-        self.assertItemsEqual(test_ticket_DB.logs, logs)
+        self.assertItemsEqual(test_ticket_db.logs, logs)
 
-        DBSession.delete(test_ticket_DB)
+        DBSession.delete(test_ticket_db)
         DBSession.commit()
 
         self.assertEqual([], TicketLog.query.all())
@@ -2816,6 +2809,7 @@ class DatabaseModelsTester(unittest2.TestCase):
             start=dt.now(),
             end=dt.now() + td(1)
         )
+        DBSession.add(time_log1)
         DBSession.add(task1)
         DBSession.commit()
 
@@ -2844,41 +2838,41 @@ class DatabaseModelsTester(unittest2.TestCase):
         # delete new_user
         del user1
 
-        user1_DB = DBSession.query(User) \
+        user1_db = DBSession.query(User) \
             .filter(User.name == user_kwargs["name"]) \
             .first()
 
-        assert (isinstance(user1_DB, User))
+        assert (isinstance(user1_db, User))
 
         # the user itself
         #self.assertEqual(new_user, new_user_DB)
-        self.assertEqual(created_by, user1_DB.created_by)
-        self.assertEqual(date_created, user1_DB.date_created)
-        self.assertEqual(date_updated, user1_DB.date_updated)
-        self.assertEqual(departments, user1_DB.departments)
-        self.assertEqual(description, user1_DB.description)
-        self.assertEqual(email, user1_DB.email)
-        self.assertEqual(last_login, user1_DB.last_login)
-        self.assertEqual(login, user1_DB.login)
-        self.assertEqual(name, user1_DB.name)
-        self.assertEqual(nice_name, user1_DB.nice_name)
-        self.assertEqual(notes, user1_DB.notes)
-        self.assertEqual(password, user1_DB.password)
-        self.assertEqual(groups, user1_DB.groups)
-        self.assertEqual(projects, user1_DB.projects)
-        self.assertEqual(projects_lead, user1_DB.projects_lead)
-        self.assertEqual(tags, user1_DB.tags)
-        self.assertEqual(tasks, user1_DB.tasks)
-        self.assertItemsEqual(vacations, user1_DB.vacations)
-        self.assertEqual(watching, user1_DB.watching)
-        self.assertEqual(updated_by, user1_DB.updated_by)
+        self.assertEqual(created_by, user1_db.created_by)
+        self.assertEqual(date_created, user1_db.date_created)
+        self.assertEqual(date_updated, user1_db.date_updated)
+        self.assertEqual(departments, user1_db.departments)
+        self.assertEqual(description, user1_db.description)
+        self.assertEqual(email, user1_db.email)
+        self.assertEqual(last_login, user1_db.last_login)
+        self.assertEqual(login, user1_db.login)
+        self.assertEqual(name, user1_db.name)
+        self.assertEqual(nice_name, user1_db.nice_name)
+        self.assertEqual(notes, user1_db.notes)
+        self.assertEqual(password, user1_db.password)
+        self.assertEqual(groups, user1_db.groups)
+        self.assertEqual(projects, user1_db.projects)
+        self.assertEqual(projects_lead, user1_db.projects_lead)
+        self.assertEqual(tags, user1_db.tags)
+        self.assertEqual(tasks, user1_db.tasks)
+        self.assertItemsEqual(vacations, user1_db.vacations)
+        self.assertEqual(watching, user1_db.watching)
+        self.assertEqual(updated_by, user1_db.updated_by)
 
         # as the member of a department
         department_db = DBSession.query(Department) \
             .filter(Department.name == dep_kwargs["name"]) \
             .first()
 
-        self.assertEqual(user1_DB, department_db.members[0])
+        self.assertEqual(user1_db, department_db.members[0])
 
         # delete tests
         self.assertItemsEqual(
@@ -2887,7 +2881,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         )
 
         # deleting a user should also delete its vacations
-        DBSession.delete(user1_DB)
+        DBSession.delete(user1_db)
         DBSession.commit()
 
         self.assertItemsEqual([], Vacation.query.all())
@@ -2931,13 +2925,13 @@ class DatabaseModelsTester(unittest2.TestCase):
         del vacation
 
         # get it back
-        vacation_DB = Vacation.query.filter_by(name=name).first()
+        vacation_db = Vacation.query.filter_by(name=name).first()
 
-        assert isinstance(vacation_DB, Vacation)
-        self.assertEqual(new_user, vacation_DB.user)
-        self.assertEqual(start, vacation_DB.start)
-        self.assertEqual(end, vacation_DB.end)
-        self.assertEqual(personal_vacation, vacation_DB.type)
+        assert isinstance(vacation_db, Vacation)
+        self.assertEqual(new_user, vacation_db.user)
+        self.assertEqual(start, vacation_db.start)
+        self.assertEqual(end, vacation_db.end)
+        self.assertEqual(personal_vacation, vacation_db.type)
 
     def test_persistence_of_Version(self):
         """testing the persistence of Version instances
@@ -2995,13 +2989,13 @@ class DatabaseModelsTester(unittest2.TestCase):
             task=test_task,
             version=10,
             take='MAIN',
-            full_path='M:/Shows/Proj1/Seq1/Shots/SH001/Ligting' + \
-                     '/Proj1_Seq1_Sh001_MAIN_Lighting_v001.ma',
+            full_path='M:/Shows/Proj1/Seq1/Shots/SH001/Ligting'
+            '/Proj1_Seq1_Sh001_MAIN_Lighting_v001.ma',
             outputs=[
                 Link(
                     name='Renders',
-                    full_path='M:/Shows/Proj1/Seq1/Shots/SH001/Lighting/Output/' + \
-                         'test1.###.jpg'
+                    full_path='M:/Shows/Proj1/Seq1/Shots/SH001/Lighting/'
+                    'Output/test1.###.jpg'
                 ),
             ]
         )
@@ -3022,7 +3016,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         tags = test_version.tags
         take_name = test_version.take_name
         #        tickets = test_version.tickets
-        type = test_version.type
+        type_ = test_version.type
         updated_by = test_version.updated_by
         version_number = test_version.version_number
         task = test_version.task
@@ -3030,23 +3024,22 @@ class DatabaseModelsTester(unittest2.TestCase):
         del test_version
 
         # get it back from the db
-        test_version_DB = Version.query.filter_by(name=name).first()
+        test_version_db = Version.query.filter_by(name=name).first()
 
-        assert (isinstance(test_version_DB, Version))
+        assert (isinstance(test_version_db, Version))
 
-        self.assertEqual(created_by, test_version_DB.created_by)
-        self.assertEqual(date_created, test_version_DB.date_created)
-        self.assertEqual(date_updated, test_version_DB.date_updated)
-        self.assertEqual(name, test_version_DB.name)
-        self.assertEqual(nice_name, test_version_DB.nice_name)
-        self.assertEqual(notes, test_version_DB.notes)
-        self.assertEqual(outputs, test_version_DB.outputs)
-        self.assertEqual(is_published, test_version_DB.is_published)
-        self.assertEqual(full_path, test_version_DB.full_path)
-        self.assertEqual(tags, test_version_DB.tags)
-        self.assertEqual(take_name, test_version_DB.take_name)
-        self.assertEqual(type, test_version_DB.type)
-        self.assertEqual(updated_by, test_version_DB.updated_by)
-        self.assertEqual(version_number, test_version_DB.version_number)
-        self.assertEqual(task, test_version_DB.task)
-
+        self.assertEqual(created_by, test_version_db.created_by)
+        self.assertEqual(date_created, test_version_db.date_created)
+        self.assertEqual(date_updated, test_version_db.date_updated)
+        self.assertEqual(name, test_version_db.name)
+        self.assertEqual(nice_name, test_version_db.nice_name)
+        self.assertEqual(notes, test_version_db.notes)
+        self.assertEqual(outputs, test_version_db.outputs)
+        self.assertEqual(is_published, test_version_db.is_published)
+        self.assertEqual(full_path, test_version_db.full_path)
+        self.assertEqual(tags, test_version_db.tags)
+        self.assertEqual(take_name, test_version_db.take_name)
+        self.assertEqual(type_, test_version_db.type)
+        self.assertEqual(updated_by, test_version_db.updated_by)
+        self.assertEqual(version_number, test_version_db.version_number)
+        self.assertEqual(task, test_version_db.task)

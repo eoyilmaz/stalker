@@ -2,6 +2,18 @@
 Stalker Changes
 ===============
 
+0.2.3.2
+=======
+
+* **Update:** Added tests for negative or zero fps value in Project class.
+* **Fix:** Minor fix to ``schedule_timing`` argument in Task class, where IDEs
+  where assuming that the value passed to the ``schedule_timing`` should be
+  integer where as it accepts floats also.
+* **Update:** Removed ``bg_color`` and ``fg_color`` attributes (and columns)
+  from Status class. Use SimpleEntity.html_class and SimpleEntity.html_style
+  attributes instead.
+* **New:** Added ``Project.open_tickets`` property.
+
 0.2.3.1
 =======
 

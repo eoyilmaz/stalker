@@ -248,12 +248,16 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
         """the equality operator
         """
         return super(Project, self).__eq__(other) and \
-               isinstance(other, Project)
+            isinstance(other, Project)
 
     @validates("fps")
     def _validate_fps(self, key, fps):
         """validates the given fps_in value
         """
+        fps = float(fps)
+        if fps <= 0:
+            raise ValueError('%s.fps can not be 0 or a negative value' %
+                             self.__class__.__name__)
         return float(fps)
 
     @validates("image_format")
@@ -435,6 +439,24 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
             return total_logged_seconds / schedule_seconds * 100
         else:
             return 0
+
+    @property
+    def open_tickets(self):
+        """The list of open :class:`~stalker.models.ticket.Ticket`\ s that this user has.
+
+        returns a list of :class:`~stalker.models.ticket.Ticket` instances
+        which has a status of `Open` and are derived from the
+        :class:`~stalker.models.task.Task`\ s that this user is assigned to
+        (Stalker checks the related :class:`~stalker.models.version.Version`
+        instances and then the `~stalker.models.ticket.Ticket` instances
+        assigned to the Version and has a status of `Open`.).
+        """
+        from stalker import Ticket, Status
+        return Ticket.query \
+            .join(Status, Ticket.status) \
+            .filter(Ticket.project == self) \
+            .filter(Status.code != 'CLOSED') \
+            .all()
 
 
 # PROJECT_USERS
