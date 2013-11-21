@@ -359,6 +359,7 @@ class Ticket(Entity, StatusMixin):
         """
         statuses = defaults.ticket_workflow[action].keys()
         status = self.status.code.lower()
+        return_value = None
         if status in statuses:
             action_data = defaults.ticket_workflow[action][status]
             new_status_code = action_data['new_status']
@@ -374,31 +375,34 @@ class Ticket(Entity, StatusMixin):
             func = getattr(self, action_name)
             func(action_arg)
 
-            # create log entry
-            self.logs.append(
-                TicketLog(self, from_status, to_status, action,
-                          created_by=created_by)
+            ticket_log = TicketLog(
+                self, from_status, to_status, action, created_by=created_by
             )
+
+            # create log entry
+            self.logs.append(ticket_log)
+            return_value = ticket_log
+        return return_value
 
     def resolve(self, created_by=None, resolution=''):
         """resolves the ticket
         """
-        self.__action__('resolve', created_by, resolution)
+        return self.__action__('resolve', created_by, resolution)
 
     def accept(self, created_by=None):
         """accepts the ticket
         """
-        self.__action__('accept', created_by, created_by)
+        return self.__action__('accept', created_by, created_by)
 
     def reassign(self, created_by=None, assign_to=None):
         """reassigns the ticket
         """
-        self.__action__('reassign', created_by, assign_to)
+        return self.__action__('reassign', created_by, assign_to)
 
     def reopen(self, created_by=None):
         """reopens the ticket
         """
-        self.__action__('reopen', created_by)
+        return self.__action__('reopen', created_by)
 
     # actions
     def set_owner(self, *args):

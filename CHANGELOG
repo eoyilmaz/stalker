@@ -2,6 +2,12 @@
 Stalker Changes
 ===============
 
+0.2.3.3
+=======
+
+* **New:** Ticket action methods (resolve, accept, reassign, reopen) now
+  return the created TicketLog instance.
+
 0.2.3.2
 =======
 
