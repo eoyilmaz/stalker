@@ -212,9 +212,7 @@ class Link(Entity):
             if not extension.startswith(os.path.extsep):
                 extension = os.path.extsep + extension
 
-        self.filename = os.path.join(
-            os.path.splitext(self.filename)[0] + extension
-        )
+        self.filename = os.path.splitext(self.filename)[0] + extension
 
     def __eq__(self, other):
         """the equality operator

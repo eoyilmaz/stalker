@@ -1004,7 +1004,7 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
             }
             calculated_duration = datetime.timedelta(**kwargs)
             if self.schedule_constraint == CONSTRAIN_NONE or \
-                            self.schedule_constraint == CONSTRAIN_START:
+               self.schedule_constraint == CONSTRAIN_START:
                 # get end
                 self._start, self._end, self._duration = \
                     self._validate_dates(self.start, None, calculated_duration)
@@ -1016,6 +1016,9 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
                 # restore duration
                 self._start, self._end, self._duration = \
                     self._validate_dates(self.start, self.end, None)
+
+            # also update cached _schedule_seconds value
+            self._schedule_seconds = self.schedule_seconds
 
     @validates("is_milestone")
     def _validate_is_milestone(self, key, is_milestone):
@@ -1547,6 +1550,9 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
 
             self._schedule_seconds = schedule_seconds
             self._total_logged_seconds = total_logged_seconds
+        else:
+            self._schedule_seconds = self.schedule_seconds
+            self._total_logged_seconds = self.total_logged_seconds
 
     @property
     def percent_complete(self):
@@ -1574,7 +1580,7 @@ class Task(Entity, StatusMixin, ScheduleMixin, ReferenceMixin):
         if self._responsible:
             return self._responsible
         else:
-            for parent in self.parents:
+            for parent in reversed(self.parents):
                 if parent.responsible:
                     return parent.responsible
         return self.project.lead
@@ -1640,6 +1646,7 @@ Task_Watchers = Table(
 # Register Events
 # *****************************************************************************
 
+
 # *****************************************************************************
 # TimeLog updates the owner tasks parents total_logged_seconds attribute
 # with new duration
@@ -1660,6 +1667,7 @@ def update_time_log_task_parents_for_start(tlog, new_start, old_start, initiator
         new_duration = tlog.end - new_start
         __update_total_logged_seconds__(tlog, new_duration, old_duration)
 
+
 @event.listens_for(TimeLog._end, 'set')
 def update_time_log_task_parents_for_end(tlog, new_end, old_end, initiator):
     """Updates the parent task of the task related to the time_log when the
@@ -1677,14 +1685,15 @@ def update_time_log_task_parents_for_end(tlog, new_end, old_end, initiator):
         new_duration = new_end - tlog.start
         __update_total_logged_seconds__(tlog, new_duration, old_duration)
 
+
 def __update_total_logged_seconds__(tlog, new_duration, old_duration):
     """Updates the given parent tasks total_logged_seconds attribute with the
     new duration
 
     :param tlog: A :class:`~stalker.models.task.Task` instance which is the
-      parent of the 
-    :param old_duration: 
-    :param new_duration: 
+      parent of the
+    :param new_duration:
+    :param old_duration:
     :return:
     """
     if tlog.task:
@@ -1696,11 +1705,14 @@ def __update_total_logged_seconds__(tlog, new_duration, old_duration):
             logger.debug('old_duration: %s' % old_duration)
             logger.debug('new_duration: %s' % new_duration)
 
-            old_total_seconds = old_duration.days * 86400 + old_duration.seconds
-            new_total_seconds = new_duration.days * 86400 + new_duration.seconds
+            old_total_seconds = old_duration.days * 86400 + \
+                old_duration.seconds
+            new_total_seconds = new_duration.days * 86400 + \
+                new_duration.seconds
 
             parent.total_logged_seconds = \
-                parent.total_logged_seconds - old_total_seconds + new_total_seconds
+                parent.total_logged_seconds - old_total_seconds + \
+                new_total_seconds
         else:
             logger.debug("TimeLog.task doesn't have a parent:")
     else:
@@ -1736,6 +1748,7 @@ def update_parents_schedule_seconds_with_schedule_timing(
             task.parent.schedule_seconds - old_schedule_seconds + \
             new_schedule_seconds
 
+
 # *****************************************************************************
 # Task.schedule_unit updates Task.parent.schedule_seconds attribute
 # *****************************************************************************
@@ -1770,6 +1783,7 @@ def update_parents_schedule_seconds_with_schedule_unit(
         task.parent.schedule_seconds = \
             parent_schedule_seconds - old_schedule_seconds + \
             new_schedule_seconds
+
 
 # *****************************************************************************
 # Task.children removed

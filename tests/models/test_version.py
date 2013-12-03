@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import unittest2
-from stalker import (Link, Project, Repository, Sequence, Shot, Status,
+from stalker import (Link, Project, Repository, Asset, Sequence, Shot, Status,
                      StatusList, Task, Type, Version, FilenameTemplate,
                      Structure)
 from stalker import db
@@ -830,6 +830,35 @@ class VersionTester(unittest2.TestCase):
             'Task1_TestTake_v001.ma'
         )
 
+    def test_update_paths_will_preserve_extension(self):
+        """testing if update_paths method will preserve the extension.
+        """
+        # create a FilenameTemplate for Task instances
+        ft = FilenameTemplate(
+            name='Task Filename Template',
+            target_entity_type='Task',
+            path='{{project.code}}/{%- for parent_task in parent_tasks -%}'
+                 '{{parent_task.nice_name}}/{%- endfor -%}',
+            filename='{{task.nice_name}}_{{version.take_name}}'
+                     '_v{{"%03d"|format(version.version_number)}}{{extension}}'
+        )
+        self.test_project.structure.templates.append(ft)
+        new_version1 = Version(**self.kwargs)
+        DBSession.add(new_version1)
+        DBSession.commit()
+        new_version1.update_paths()
+
+        self.assertEqual(
+            new_version1.path,
+            'tp/SH001/Task1'
+        )
+
+        new_version1.extension = '.ma'
+        self.assertEqual(
+            new_version1.filename,
+            'Task1_TestTake_v001.ma'
+        )
+
     def test_update_paths_will_raise_a_RuntimeError_if_there_is_no_suitable_FilenameTemplate(self):
         """testing if update_paths method will raise a RuntimeError if there is
         no suitable FilenameTemplate instance found
@@ -1221,3 +1250,216 @@ class VersionTester(unittest2.TestCase):
         self.assertEqual(new_version3.latest_version, new_version5)
         self.assertEqual(new_version4.latest_version, new_version5)
         self.assertEqual(new_version5.latest_version, new_version5)
+
+    def test_naming_parents_attribute_is_a_read_only_property(self):
+        """testing if the naming_parents attribute is a read only property
+        """
+        self.assertRaises(AttributeError, setattr, self.test_version,
+                          'naming_parents', [self.test_task1])
+
+    def test_naming_parents_attribute_is_working_properly(self):
+        """testing if the naming_parents attribute is working properly
+        """
+        # for self.test_version
+        self.assertEqual(
+            self.test_version.naming_parents,
+            [self.test_shot1, self.test_task1]
+        )
+
+        # for a new version of a task
+        task1 = Task(
+            name='Test Task 1',
+            project=self.test_project,
+            status_list=self.test_task_status_list
+        )
+
+        task2 = Task(
+            name='Test Task 2',
+            parent=task1,
+            status_list=self.test_task_status_list
+        )
+
+        task3 = Task(
+            name='Test Task 3',
+            parent=task2,
+            status_list=self.test_task_status_list
+        )
+        DBSession.add_all([task1, task2, task3])
+        DBSession.commit()
+
+        version1 = Version(
+            task=task3
+        )
+        DBSession.add(version1)
+        DBSession.commit()
+
+        self.assertEqual(
+            version1.naming_parents,
+            [task1, task2, task3]
+        )
+
+        # for a an asset version
+        asset_statuses = StatusList(
+            target_entity_type='Asset',
+            statuses=[self.test_status1, self.test_status2, self.test_status3]
+        )
+        character_type = Type(
+            target_entity_type='Asset',
+            name='Character',
+            code='Char'
+        )
+        asset1 = Asset(
+            name='Asset1',
+            code='Asset1',
+            parent=task1,
+            status_list=asset_statuses,
+            type=character_type
+        )
+        version2 = Version(
+            task=asset1
+        )
+        self.assertEqual(
+            version2.naming_parents,
+            [asset1]
+        )
+
+        # for a version of a task of a shot
+        shot2 = Shot(
+            name='SH002',
+            code='SH002',
+            parent=task3,
+            status_list=self.test_shot_status_list
+        )
+
+        task4 = Task(
+            name='Test Task 4',
+            parent=shot2,
+            status_list=self.test_task_status_list
+        )
+
+        version3 = Version(
+            task=task4
+        )
+
+        self.assertEqual(
+            version3.naming_parents,
+            [shot2, task4]
+        )
+
+        # for an asset of a shot
+        asset2 = Asset(
+            name='Asset2',
+            code='Asset2',
+            parent=shot2,
+            status_list=asset_statuses,
+            type=character_type
+        )
+        version4 = Version(task=asset2)
+        self.assertEqual(version4.naming_parents, [asset2])
+
+    def test_nice_name_attribute_is_working_properly(self):
+        """testing if the nice_name attribute is working properly
+        """
+        # for self.test_version
+        self.assertEqual(
+            self.test_version.naming_parents,
+            [self.test_shot1, self.test_task1]
+        )
+
+        # for a new version of a task
+        task1 = Task(
+            name='Test Task 1',
+            project=self.test_project,
+            status_list=self.test_task_status_list
+        )
+
+        task2 = Task(
+            name='Test Task 2',
+            parent=task1,
+            status_list=self.test_task_status_list
+        )
+
+        task3 = Task(
+            name='Test Task 3',
+            parent=task2,
+            status_list=self.test_task_status_list
+        )
+        DBSession.add_all([task1, task2, task3])
+        DBSession.commit()
+
+        version1 = Version(
+            task=task3,
+            take_name='Take1'
+        )
+        DBSession.add(version1)
+        DBSession.commit()
+
+        self.assertEqual(
+            version1.nice_name,
+            '%s_%s_%s_%s' % (
+                task1.nice_name, task2.nice_name, task3.nice_name,
+                version1.take_name
+            )
+        )
+
+        # for a an asset version
+        asset_statuses = StatusList(
+            target_entity_type='Asset',
+            statuses=[self.test_status1, self.test_status2, self.test_status3]
+        )
+        character_type = Type(
+            target_entity_type='Asset',
+            name='Character',
+            code='Char'
+        )
+        asset1 = Asset(
+            name='Asset1',
+            code='Asset1',
+            parent=task1,
+            status_list=asset_statuses,
+            type=character_type
+        )
+        version2 = Version(
+            task=asset1
+        )
+        self.assertEqual(
+            version2.nice_name,
+            '%s_%s' % (asset1.nice_name, version2.take_name)
+        )
+
+        # for a version of a task of a shot
+        shot2 = Shot(
+            name='SH002',
+            code='SH002',
+            parent=task3,
+            status_list=self.test_shot_status_list
+        )
+
+        task4 = Task(
+            name='Test Task 4',
+            parent=shot2,
+            status_list=self.test_task_status_list
+        )
+
+        version3 = Version(
+            task=task4
+        )
+
+        self.assertEqual(
+            version3.nice_name,
+            '%s_%s_%s' % (shot2.nice_name, task4.nice_name, version3.take_name)
+        )
+
+        # for an asset of a shot
+        asset2 = Asset(
+            name='Asset2',
+            code='Asset2',
+            parent=shot2,
+            status_list=asset_statuses,
+            type=character_type
+        )
+        version4 = Version(task=asset2)
+        self.assertEqual(
+            version4.nice_name,
+            '%s_%s' % (asset2.nice_name, version4.take_name)
+        )

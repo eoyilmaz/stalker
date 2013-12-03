@@ -23,7 +23,7 @@ Animation and VFX Studios.
 See docs for more information.
 """
 
-__version__ = '0.2.3.3'
+__version__ = '0.2.3.4'
 
 
 # before anything about stalker create the defaults
@@ -33,7 +33,6 @@ from stalker.models.auth import Group, Permission, User, LocalSession
 from stalker.models.asset import Asset
 from stalker.models.department import Department
 from stalker.models.entity import SimpleEntity, Entity
-from stalker.models.env import EnvironmentBase
 from stalker.models.format import ImageFormat
 from stalker.models.link import Link
 from stalker.models.message import Message

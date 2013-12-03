@@ -4042,8 +4042,17 @@ class TaskTester(unittest2.TestCase):
         new_task2 = Task(**self.kwargs)
         new_task2.parent = new_task1
 
+        new_task3 = Task(**self.kwargs)
+        new_task3.parent = new_task2
+
         self.assertEqual(new_task1.responsible, self.test_user1)
         self.assertEqual(new_task2.responsible, self.test_user1)
+        self.assertEqual(new_task3.responsible, self.test_user1)
+
+        new_task2.responsible = self.test_user2
+        self.assertEqual(new_task1.responsible, self.test_user1)
+        self.assertEqual(new_task2.responsible, self.test_user2)
+        self.assertEqual(new_task3.responsible, self.test_user2)
 
     def test_responsible_attribute_is_set_to_None_responsible_attribute_comes_from_parents(self):
         """testing if the responsible attribute is None or skipped then its
@@ -4056,12 +4065,22 @@ class TaskTester(unittest2.TestCase):
         new_task2 = Task(**self.kwargs)
         new_task2.parent = new_task1
 
+        new_task3 = Task(**self.kwargs)
+        new_task3.parent = new_task2
+
         new_task1.responsible = None
         new_task2.responsible = None
+        new_task3.responsible = None
         self.test_task.responsible = self.test_user2
 
         self.assertEqual(new_task1.responsible, self.test_user2)
         self.assertEqual(new_task2.responsible, self.test_user2)
+        self.assertEqual(new_task3.responsible, self.test_user2)
+
+        new_task2.responsible = self.test_user1
+        self.assertEqual(new_task1.responsible, self.test_user2)
+        self.assertEqual(new_task2.responsible, self.test_user1)
+        self.assertEqual(new_task3.responsible, self.test_user1)
 
     def test_responsible_attribute_value_comes_from_project_if_no_parent_exists(self):
         """testing if the responsible attribute value comes from project.lead

@@ -2,6 +2,21 @@
 Stalker Changes
 ===============
 
+0.2.3.4
+=======
+
+* **Update:** Fixed a little bug in Link.extension property setter.
+* **New:** Moved the stalker.models.env.EnvironmentBase class to
+  "Anima Tools" python module.
+* **Fix:** Fixed a bug in stalker.models.task.Task._responsible_getter() where
+  it was always returning the greatest parents responsible as the responsible
+  for the child task when the responsible is set to None for the child.
+* **New:** Added ``stalker.models.version.Version.naming_parents`` which
+  returns a list of parents starting from the closest parent Asset, Shot or
+  Sequence.
+* **New:** ``stalker.models.version.Version.nice_name`` now generates a name
+  starting from the closest Asset, Shot or Sequence parent.
+
 0.2.3.3
 =======
 

@@ -509,6 +509,43 @@ class Version(Link):
             self.take_name == other.take_name and \
             self.version_number == other.version_number
 
+    @property
+    def naming_parents(self):
+        """returns a list of parents which start from the nearest Asset, Shot
+        or Sequence
+        """
+        # find a Asset, Shot or Sequence, and store it as the significant
+        # parent, and name the task starting from that entity
+        all_parents = self.task.parents
+        all_parents.append(self.task)
+        naming_parents = []
+        if all_parents:
+            significant_parent = all_parents[0]
+
+            for parent in reversed(all_parents):
+                if parent.entity_type in ['Asset', 'Shot', 'Sequence']:
+                    significant_parent = parent
+                    break
+
+            # now start from that parent towards the task
+            past_significant_parent = False
+            naming_parents = []
+            for parent in all_parents:
+                if parent is significant_parent:
+                    past_significant_parent = True
+                if past_significant_parent:
+                    naming_parents.append(parent)
+        return naming_parents
+
+    @property
+    def nice_name(self):
+        """the overridden nice name for Version class
+        """
+        naming_parents = self.naming_parents
+        return self._format_nice_name(
+            '_'.join(map(lambda x: x.nice_name, naming_parents)) +
+            '_' + self.take_name
+        )
 
 # VERSION INPUTS
 Version_Inputs = Table(
