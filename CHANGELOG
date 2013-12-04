@@ -2,6 +2,15 @@
 Stalker Changes
 ===============
 
+0.2.3.5
+=======
+
+* **Fix:** Fixed a bug in ``stalker.models.auth.LocalSession`` where stalker
+  was complaining about "copy_reg" module, it seems that it is related to
+  `this bug`_.
+
+  .. _this bug: http://www.archivum.info/python-bugs-list@python.org/2007-04/msg00222.html
+
 0.2.3.4
 =======
 

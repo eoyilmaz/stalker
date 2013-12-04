@@ -866,7 +866,7 @@ class LocalSession(object):
         """loads the data from the saved local session
         """
         try:
-            with open(LocalSession.session_file_full_path(), 'r') as s:
+            with open(LocalSession.session_file_full_path(), 'rb') as s:
                 # try:
                 unpickled_object = pickle.load(s)
                 if unpickled_object.valid_to > datetime.datetime.now():
@@ -932,7 +932,7 @@ class LocalSession(object):
             # dir exists
             pass
         finally:
-            with open(file_full_path, 'w') as data_file:
+            with open(file_full_path, 'wb') as data_file:
                 data_file.writelines(data)
 
 

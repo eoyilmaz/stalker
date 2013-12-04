@@ -4130,3 +4130,5 @@ class TaskTester(unittest2.TestCase):
         new_task1.computed_end = test_value
         self.assertEqual(new_task1.computed_end, test_value)
         self.assertEqual(new_task1.end, test_value)
+
+# TODO: please add tests for _total_logged_seconds for leaf tasks
