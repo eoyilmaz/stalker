@@ -23,7 +23,7 @@ Animation and VFX Studios.
 See docs for more information.
 """
 
-__version__ = '0.2.3.5'
+__version__ = '0.2.4'
 
 
 # before anything about stalker create the defaults
@@ -36,7 +36,7 @@ from stalker.models.entity import SimpleEntity, Entity
 from stalker.models.format import ImageFormat
 from stalker.models.link import Link
 from stalker.models.message import Message
-from stalker.models.mixins import (ProjectMixin, ReferenceMixin, ScheduleMixin,
+from stalker.models.mixins import (ProjectMixin, ReferenceMixin, DateRangeMixin,
                                    StatusMixin, TargetEntityTypeMixin,
                                    CodeMixin, WorkingHoursMixin)
 from stalker.models.note import Note

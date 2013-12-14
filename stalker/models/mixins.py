@@ -42,11 +42,9 @@ def create_secondary_table(
         secondary_cls_name,
         primary_cls_table_name,
         secondary_cls_table_name,
-        secondary_table_name=None
-):
+        secondary_table_name=None):
     """creates any secondary table
     """
-
     plural_secondary_cls_name = make_plural(secondary_cls_name)
 
     # use the given class_name and the class_table
@@ -81,7 +79,7 @@ def create_secondary_table(
 class TargetEntityTypeMixin(object):
     """Adds target_entity_type attribute to mixed in class.
 
-    :param target_entity_type: The target entity type which this class is 
+    :param target_entity_type: The target entity type which this class is
       designed for. Should be a class or a class name.
 
       For example::
@@ -360,16 +358,16 @@ class StatusMixin(object):
             raise ValueError("The given Status instance for %s.status is not "
                              "in the %s.status_list, please supply a status "
                              "from that list." %
-                             (self.__class__.__name__, self.__class__.__name__)
-            )
+                             (self.__class__.__name__,
+                              self.__class__.__name__))
 
         return status
 
 
-class ScheduleMixin(object):
-    """Adds schedule info to the mixed in class.
+class DateRangeMixin(object):
+    """Adds date range info to the mixed in class.
 
-    Adds schedule information like ``start``, ``end`` and ``duration``. These
+    Adds date range information like ``start``, ``end`` and ``duration``. These
     attributes will be used in TaskJuggler. Because ``effort`` is only
     meaningful if there are some ``resources`` this attribute has been left
     special for :class:`~stalker.models.task.Task` class. The ``length`` has
@@ -460,9 +458,6 @@ class ScheduleMixin(object):
     :type timing_resolution: datetime.timedelta
     """
 
-    #    # add this lines for Sphinx
-    #    __tablename__ = "ScheduleMixins"
-
     def __init__(self,
                  start=None,
                  end=None,
@@ -510,13 +505,13 @@ class ScheduleMixin(object):
         """The date that this entity should start.
 
         Also effects the
-        :attr:`~stalker.models.mixins.ScheduleMixin.end` attribute value in
+        :attr:`~stalker.models.mixins.DateRangeMixin.end` attribute value in
         certain conditions, if the
-        :attr:`~stalker.models.mixins.ScheduleMixin.start` is set to a time
-        passing the :attr:`~stalker.models.mixins.ScheduleMixin.end` it will
-        also offset the :attr:`~stalker.models.mixins.ScheduleMixin.end` to
-        keep the :attr:`~stalker.models.mixins.ScheduleMixin.duration` value
-        fixed. :attr:`~stalker.models.mixins.ScheduleMixin.start` should be an
+        :attr:`~stalker.models.mixins.DateRangeMixin.start` is set to a time
+        passing the :attr:`~stalker.models.mixins.DateRangeMixin.end` it will
+        also offset the :attr:`~stalker.models.mixins.DateRangeMixin.end` to
+        keep the :attr:`~stalker.models.mixins.DateRangeMixin.duration` value
+        fixed. :attr:`~stalker.models.mixins.DateRangeMixin.start` should be an
         instance of class:`datetime.datetime` and the default value is
         :func:`datetime.datetime.now()`
         """
@@ -741,7 +736,7 @@ attribute value."""
         """returns the duration as seconds
         """
         return self.computed_duration.days * 86400 + \
-               self.computed_duration.seconds
+            self.computed_duration.seconds
 
 
 class ProjectMixin(object):
@@ -972,10 +967,10 @@ class CodeMixin(object):
             raise TypeError("%s.code cannot be None" % self.__class__.__name__)
 
         if not isinstance(code, (str, unicode)):
-            raise TypeError('%s.code should be an instance of string or '
-                            'unicode not %s' %
-                            (self.__class__.__name__,
-                             code.__class__.__name__)
+            raise TypeError(
+                '%s.code should be a string not %s' % (
+                    self.__class__.__name__, code.__class__.__name__
+                )
             )
 
         if code == '':
@@ -1013,3 +1008,12 @@ class WorkingHoursMixin(object):
 
             wh = WorkingHours()
         return wh
+
+
+class ScheduleMixin(object):
+    """Adds schedule info to the mixed in class.
+
+    Adds attributes like schedule_timing, schedule_unit and schedule_model
+    attributes to the mixed in class.
+    """
+    pass

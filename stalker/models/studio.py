@@ -28,14 +28,14 @@ from sqlalchemy.orm import validates, relationship
 
 from stalker import defaults, log
 from stalker.models.entity import SimpleEntity, Entity
-from stalker.models.mixins import ScheduleMixin, WorkingHoursMixin
+from stalker.models.mixins import DateRangeMixin, WorkingHoursMixin
 from stalker.models.schedulers import SchedulerBase
 
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
 
 
-class Studio(Entity, ScheduleMixin, WorkingHoursMixin):
+class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
     """Manage all the studio information at once.
 
     With Stalker you can manage all you Studio data by using this class. Studio
@@ -99,7 +99,7 @@ class Studio(Entity, ScheduleMixin, WorkingHoursMixin):
                  now=None,
                  **kwargs):
         super(Studio, self).__init__(**kwargs)
-        ScheduleMixin.__init__(self, **kwargs)
+        DateRangeMixin.__init__(self, **kwargs)
         WorkingHoursMixin.__init__(self, **kwargs)
         # TODO: daily_working_hours should be in WorkingHours not in Studio
         self.daily_working_hours = daily_working_hours
@@ -283,6 +283,13 @@ class Studio(Entity, ScheduleMixin, WorkingHoursMixin):
         """returns the yearly working days
         """
         return self.working_hours.yearly_working_days
+
+    def to_unit(self, from_timing, from_unit, to_unit, working_hours=True):
+        """converts the given timing and unit to the desired unit
+        if working_hours=True then the given timing is considered as working
+        hours
+        """
+        raise NotImplementedError('this is not implemented yet')
 
 
 class WorkingHours(object):
@@ -504,7 +511,7 @@ class WorkingHours(object):
         return self.weekly_working_days * 52.1428
 
 
-class Vacation(SimpleEntity, ScheduleMixin):
+class Vacation(SimpleEntity, DateRangeMixin):
     """Vacation is the way to manage the User vacations.
 
     :param user: The user of this vacation. Should be an instance of
@@ -544,7 +551,7 @@ class Vacation(SimpleEntity, ScheduleMixin):
         kwargs['start'] = start
         kwargs['end'] = end
         super(Vacation, self).__init__(**kwargs)
-        ScheduleMixin.__init__(self, **kwargs)
+        DateRangeMixin.__init__(self, **kwargs)
         self.user = user
 
     @validates('user')

@@ -1117,7 +1117,7 @@ class ProjectTestCase(unittest2.TestCase):
         self.assertEqual(new_project.status_list, status_list)
 
     def test_ScheduleMixin_initialization(self):
-        """testing if the ScheduleMixin part is initialized correctly
+        """testing if the DateRangeMixin part is initialized correctly
         """
         start = \
             datetime.datetime(2013, 3, 22, 4, 0) + datetime.timedelta(days=25)

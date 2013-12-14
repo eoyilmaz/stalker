@@ -22,7 +22,7 @@ import datetime
 import unittest2
 
 from sqlalchemy import Column, Integer, ForeignKey
-from stalker.models.mixins import ScheduleMixin
+from stalker.models.mixins import DateRangeMixin
 from stalker.db.session import DBSession
 from stalker.models.entity import SimpleEntity
 
@@ -30,7 +30,7 @@ from stalker import config
 defaults = config.Config()
 
 
-class SchedMixFooMixedInClass(SimpleEntity, ScheduleMixin):
+class SchedMixFooMixedInClass(SimpleEntity, DateRangeMixin):
     """a class which derives from another which has and __init__ already
     """
     __tablename__ = "SchedMixFooMixedInClasses"
@@ -41,11 +41,11 @@ class SchedMixFooMixedInClass(SimpleEntity, ScheduleMixin):
 
     def __init__(self, **kwargs):
         super(SchedMixFooMixedInClass, self).__init__(**kwargs)
-        ScheduleMixin.__init__(self, **kwargs)
+        DateRangeMixin.__init__(self, **kwargs)
 
 
 class ScheduleMixinTester(unittest2.TestCase):
-    """Tests the ScheduleMixin
+    """Tests the DateRangeMixin
     """
 
     def setUp(self):
@@ -59,7 +59,7 @@ class ScheduleMixinTester(unittest2.TestCase):
         self.kwargs = {
             'name': 'Test Schedule Mixin',
             'description': 'This is a simple entity object for testing '
-                           'ScheduleMixin',
+                           'DateRangeMixin',
             'start': self.start,
             'end': self.end,
             'duration': self.duration,

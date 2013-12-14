@@ -23,10 +23,10 @@ import datetime
 
 from sqlalchemy import Column, Integer, ForeignKey
 from stalker.db.session import DBSession
-from stalker.models.mixins import ScheduleMixin
+from stalker.models.mixins import DateRangeMixin
 from stalker.models.entity import SimpleEntity
 
-class DeclSchedMixA(SimpleEntity, ScheduleMixin):
+class DeclSchedMixA(SimpleEntity, DateRangeMixin):
     __tablename__ = "DeclSchedMixAs"
     __mapper_args__ = {"polymorphic_identity": "DeclSchedMixA"}
     a_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
@@ -35,10 +35,10 @@ class DeclSchedMixA(SimpleEntity, ScheduleMixin):
 
     def __init__(self, **kwargs):
         super(DeclSchedMixA, self).__init__(**kwargs)
-        ScheduleMixin.__init__(self, **kwargs)
+        DateRangeMixin.__init__(self, **kwargs)
 
 
-class DeclSchedMixB(SimpleEntity, ScheduleMixin):
+class DeclSchedMixB(SimpleEntity, DateRangeMixin):
     __tablename__ = "DeclSchedMixBs"
     __mapper_args__ = {"polymorphic_identity": "DeclSchedMixB"}
     b_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
@@ -47,11 +47,11 @@ class DeclSchedMixB(SimpleEntity, ScheduleMixin):
 
     def __init__(self, **kwargs):
         super(DeclSchedMixB, self).__init__(**kwargs)
-        ScheduleMixin.__init__(self, **kwargs)
+        DateRangeMixin.__init__(self, **kwargs)
 
 
 class ScheduleMixinTester(unittest2.TestCase):
-    """tests ScheduleMixin setup
+    """tests DateRangeMixin setup
     """
 
 

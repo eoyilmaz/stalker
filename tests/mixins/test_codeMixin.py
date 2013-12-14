@@ -52,7 +52,7 @@ class CodeMixinTester(unittest2.TestCase):
             'name': 'Test Code Mixin',
             'code': 'this_is_a_test_code',
             'description': 'This is a simple entity object for testing '
-                           'ScheduleMixin',
+                           'DateRangeMixin',
         }
 
         self.test_foo_obj = CodeMixFooMixedInClass(**self.kwargs)

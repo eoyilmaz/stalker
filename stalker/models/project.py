@@ -29,7 +29,7 @@ from stalker import defaults
 from stalker.db.session import DBSession
 from stalker.db.declarative import Base
 from stalker.models.entity import Entity
-from stalker.models.mixins import (StatusMixin, ScheduleMixin, ReferenceMixin,
+from stalker.models.mixins import (StatusMixin, DateRangeMixin, ReferenceMixin,
                                    CodeMixin)
 from stalker.log import logging_level
 
@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
 
-class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
+class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
     """All the information about a Project in Stalker is hold in this class.
 
     Project is one of the main classes that will direct the others. A project
@@ -45,7 +45,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
 
     It is mixed with :class:`~stalker.models.mixins.ReferenceMixin`,
     :class:`~stalker.models.mixins.StatusMixin`,
-    :class:`~stalker.models.mixins.ScheduleMixin` and
+    :class:`~stalker.models.mixins.DateRangeMixin` and
     :class:`~stalker.models.mixins.CodeMixin` to give reference, status,
     schedule and code attribute. Please read the individual documentation of
     each of the mixins.
@@ -224,7 +224,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, ScheduleMixin, CodeMixin):
         # call the mixin __init__ methods
         ReferenceMixin.__init__(self, **kwargs)
         StatusMixin.__init__(self, **kwargs)
-        ScheduleMixin.__init__(self, **kwargs)
+        DateRangeMixin.__init__(self, **kwargs)
         #CodeMixin.__init__(self, **kwargs)
 
         self.lead = lead

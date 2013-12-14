@@ -22,7 +22,7 @@ import datetime
 import re
 import uuid
 from sqlalchemy import Table, Column, Integer, String, ForeignKey, DateTime
-from sqlalchemy.orm import relationship, validates, reconstructor
+from sqlalchemy.orm import relationship, validates
 
 import stalker
 from stalker.db import Base

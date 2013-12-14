@@ -72,10 +72,10 @@ DONE:
   datetime.datetime class instead of datetime.date object. This will let us
   to increase the granularity of the scheduling.
 
-* ``end_date`` attribute in ScheduleMixin:
+* ``end_date`` attribute in DateRangeMixin:
   
   there could be a synonym for the ``due_date`` attribute in the
-  :class:`~stalker.core.models.ScheduleMixin`\ . Which will be meaningful for
+  :class:`~stalker.core.models.DateRangeMixin`\ . Which will be meaningful for
   :class:`~stalker.core.models.Booking` class.
 * Logging:
 

@@ -24,7 +24,7 @@ Inheritance Diagram
    stalker.models.mixins.CodeMixin
    stalker.models.mixins.ProjectMixin
    stalker.models.mixins.ReferenceMixin
-   stalker.models.mixins.ScheduleMixin
+   stalker.models.mixins.DateRangeMixin
    stalker.models.mixins.StatusMixin
    stalker.models.mixins.TargetEntityTypeMixin
    stalker.models.mixins.WorkingHoursMixin

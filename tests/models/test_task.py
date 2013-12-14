@@ -4131,4 +4131,116 @@ class TaskTester(unittest2.TestCase):
         self.assertEqual(new_task1.computed_end, test_value)
         self.assertEqual(new_task1.end, test_value)
 
-# TODO: please add tests for _total_logged_seconds for leaf tasks
+    # TODO: please add tests for _total_logged_seconds for leaf tasks
+
+    def test_tickets_attribute_is_a_read_only_property(self):
+        """testing if the tickets attribute is a read-only property
+        """
+        self.assertRaises(AttributeError, setattr, self.test_task, 'tickets',
+                          'some value')
+
+    def test_tickets_attribute_is_working_properly(self):
+        """testing if the tickets attribute is working properly
+        """
+        from stalker import Ticket
+        # create ticket statuses
+        db.init()
+
+        new_ticket1 = Ticket(
+            project=self.test_task.project,
+            links=[self.test_task]
+        )
+        DBSession.add(new_ticket1)
+        DBSession.commit()
+
+        new_ticket2 = Ticket(
+            project=self.test_task.project,
+            links=[self.test_task]
+        )
+        DBSession.add(new_ticket2)
+        DBSession.commit()
+
+        # add some other tickets
+        new_ticket3 = Ticket(
+            project=self.test_task.project,
+            links=[]
+        )
+        DBSession.add(new_ticket3)
+        DBSession.commit()
+
+        self.assertItemsEqual(
+            self.test_task.tickets,
+            [new_ticket1, new_ticket2]
+        )
+
+    def test_open_tickets_attribute_is_a_read_only_property(self):
+        """testing if the open_tickets attribute is a read-only property
+        """
+        self.assertRaises(AttributeError, setattr, self.test_task,
+                          'open_tickets', 'some value')
+
+    def test_open_tickets_attribute_is_working_properly(self):
+        """testing if the open_tickets attribute is working properly
+        """
+        from stalker import Ticket
+        # create ticket statuses
+        db.init()
+
+        new_ticket1 = Ticket(
+            project=self.test_task.project,
+            links=[self.test_task]
+        )
+        DBSession.add(new_ticket1)
+        DBSession.commit()
+
+        new_ticket2 = Ticket(
+            project=self.test_task.project,
+            links=[self.test_task]
+        )
+        DBSession.add(new_ticket2)
+        DBSession.commit()
+
+        # close this ticket
+        new_ticket2.resolve(None, 'fixed')
+        DBSession.commit()
+
+        # add some other tickets
+        new_ticket3 = Ticket(
+            project=self.test_task.project,
+            links=[]
+        )
+        DBSession.add(new_ticket3)
+        DBSession.commit()
+
+        self.assertItemsEqual(
+            self.test_task.open_tickets,
+            [new_ticket1]
+        )
+
+    def test_revisions_attribute_is_an_empty_list_by_default(self):
+        """testing if the revisions attribute is an empty list by default
+        """
+        self.fail('test is not implemented yet')
+
+    def test_revisions_attribute_is_set_to_None(self):
+        """testing if a TypeError will be raised when the revisions attribute
+        is set to None
+        """
+        self.fail('test is not implemented yet')
+
+    def test_revisions_attribute_will_accept_lists_only(self):
+        """testing if a TypeError will be raised when the value assigned to the
+        revisions attribute is something other than a list
+        """
+        self.fail('test is not implemented yet')
+
+    def test_revisions_attribute_will_accept_lists_of_Revisions_only(self):
+        """testing if a TypeError will be raised when the value assigned to the
+        revisions attribute is something other than a list of Revisions
+        """
+        self.fail('test is not implemented yet')
+
+    def test_revisions_attribute_is_working_properly(self):
+        """testing if the revisions is working properly
+        """
+        self.fail('test is not implemented yet')

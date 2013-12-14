@@ -272,7 +272,7 @@ class TimeLogTester(unittest2.TestCase):
         self.assertEqual(self.test_time_log.resource, new_resource)
 
     def test_ScheduleMixin_initialization(self):
-        """testing if the ScheduleMixin part is initialized correctly
+        """testing if the DateRangeMixin part is initialized correctly
         """
         # it should have schedule attributes
         self.assertEqual(self.test_time_log.start,

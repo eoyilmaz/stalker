@@ -2,6 +2,17 @@
 Stalker Changes
 ===============
 
+0.2.4
+=====
+
+* **New:** Added new class called ``Revision`` to hold info about Task
+  revisions.
+* **Update:** Renamed ``ScheduleMixin`` to ``DateRangeMixin``.
+* **New:** Added a new mixin called ``ScheduleMixin`` (replacing the old one)
+  which adds attributes like ``schedule_timing``, ``schedule_unit``,
+  ``schedule_model`` and ``schedule_constraint``.
+* **New:** Added ``Task.tickets`` and ``Task.open_tickets`` properties.
+
 0.2.3.5
 =======
 

@@ -249,7 +249,7 @@ Variables which can be set in ``config.py`` are as follows:
 .. confval:: timing_resolution
 
    Defines the default timing resolution for classes which are mixed with
-   :class:`~stalker.models.mixins.ScheduleMixin`\ . Stalker uses the
+   :class:`~stalker.models.mixins.DateRangeMixin`\ . Stalker uses the
    TaskJuggler default timing resolution which is 1 hour::
 
      timing_resolution = datetime.timedelta(hours=1)
