@@ -20,9 +20,6 @@
 
 import unittest2
 from stalker import Entity, Status
-from stalker import config
-
-defaults = config.Config()
 
 
 class StatusTest(unittest2.TestCase):

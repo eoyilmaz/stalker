@@ -73,6 +73,23 @@ def setup(settings=None):
     logger.debug("creating the tables")
     Base.metadata.create_all(engine)
 
+    # update defaults
+    update_defaults_with_studio()
+
+
+def update_defaults_with_studio():
+    """updates the default values from Studio instance if a database and a
+    Studio instance is present
+    """
+    from stalker.db import DBSession
+    if DBSession:
+        with DBSession.no_autoflush:
+            from stalker.models.studio import Studio
+            studio = Studio.query.first()
+            if studio:
+                logger.debug('found a studio, updating defaults')
+                studio.update_defaults()
+
 
 def init():
     """fills the database with default values
@@ -83,9 +100,9 @@ def init():
     class_names = [
         'Asset', 'TimeLog', 'Department', 'Entity', 'FilenameTemplate',
         'Group', 'ImageFormat', 'Link', 'Message', 'Note', 'Permission',
-        'Project', 'Repository', 'Scene', 'Sequence', 'Shot', 'SimpleEntity',
-        'Status', 'StatusList', 'Structure', 'Studio', 'Tag', 'Task', 'Ticket',
-        'TicketLog', 'Type', 'User', 'Vacation', 'Version']
+        'Project', 'Repository', 'Revision', 'Scene', 'Sequence', 'Shot',
+        'SimpleEntity', 'Status', 'StatusList', 'Structure', 'Studio', 'Tag',
+        'Task', 'Ticket', 'TicketLog', 'Type', 'User', 'Vacation', 'Version']
 
     for class_name in class_names:
         _temp = __import__(
@@ -319,7 +336,8 @@ def register(class_):
         raise TypeError('To register a class please supply the class itself ')
 
     # register the class name to entity_types table
-    from stalker import EntityType, StatusMixin, DateRangeMixin, ReferenceMixin
+    from stalker import (EntityType, StatusMixin, DateRangeMixin,
+                         ReferenceMixin, ScheduleMixin)
 
     class_name = class_.__name__
 
@@ -329,6 +347,8 @@ def register(class_):
         if issubclass(class_, StatusMixin):
             new_entity_type.statusable = True
         if issubclass(class_, DateRangeMixin):
+            new_entity_type.dateable = True
+        if issubclass(class_, ScheduleMixin):
             new_entity_type.schedulable = True
         if issubclass(class_, ReferenceMixin):
             new_entity_type.accepts_references = True

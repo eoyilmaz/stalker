@@ -37,21 +37,10 @@ class StudioTester(unittest2.TestCase):
     """tests the stalker.models.studio.Studio class
     """
 
-    @classmethod
-    def setUpClass(cls):
-        """setup the test
-        """
-        DBSession.configure(extension=None)
-
-    @classmethod
-    def tearDownClass(cls):
-        """cleanup the test
-        """
-        DBSession.configure(extension=None)
-
     def setUp(self):
         """setup the test
         """
+        DBSession.remove()
         db.setup({
             "sqlalchemy.url": "sqlite:///:memory:",
             "sqlalchemy.echo": False,
@@ -582,11 +571,17 @@ class StudioTester(unittest2.TestCase):
         self.kwargs = dict(
             name='Studio',
             daily_working_hours=8,
+            timing_resolution=datetime.timedelta(hours=1)
         )
 
         self.test_studio = Studio(**self.kwargs)
         DBSession.add(self.test_studio)
         DBSession.commit()
+
+    def tearDown(self):
+        """clean up the test
+        """
+        DBSession.remove()
 
     def test_daily_working_hours_argument_is_skipped(self):
         """testing if the daily_working_hours attribute will be equal to the
@@ -860,11 +855,11 @@ class StudioTester(unittest2.TestCase):
         expected_tjp = expected_tjp_template.render({
             'studio': self.test_studio
         })
-        #print '-----------------------------------'
-        #print expected_tjp
-        #print '-----------------------------------'
-        #print self.test_studio.to_tjp
-        #print '-----------------------------------'
+        # print '-----------------------------------'
+        # print expected_tjp
+        # print '-----------------------------------'
+        # print self.test_studio.to_tjp
+        # print '-----------------------------------'
         self.assertEqual(self.test_studio.to_tjp, expected_tjp)
 
     def test_scheduler_attribute_can_be_set_to_None(self):
@@ -1311,3 +1306,160 @@ class StudioTester(unittest2.TestCase):
             self.test_studio.vacations,
             [vacation1, vacation2]
         )
+
+    def test_timing_resolution_argument_skipped(self):
+        """testing if the timing_resolution attribute will be set to the
+        default value from the defaults.timing_resolution if timing_resolution
+        argument is skipped
+        """
+        try:
+            self.kwargs.pop('timing_resolution')
+        except KeyError:
+            pass
+
+        studio = Studio(**self.kwargs)
+        self.assertEqual(
+            studio.timing_resolution,
+            defaults.timing_resolution
+        )
+
+    # def test_timing_resolution_argument_skipped_Studio_is_present(self):
+    #     """testing if the timing_resolution attribute will be set to the Studio
+    #     timing resolution if timing_resolution argument is skipped and there is
+    #     a Studio instance
+    #     """
+    #     try:
+    #         self.kwargs.pop('timing_resolution')
+    #     except KeyError:
+    #         pass
+    # 
+    #     from stalker import Studio
+    #     db.setup({'sqlalchemy.url': 'sqlite:///:memory:'})
+    #     studio = Studio(
+    #         name='Test Studio',
+    #         timing_resolution=datetime.timedelta(minutes=15)
+    #     )
+    #     db.DBSession.add(studio)
+    #     db.DBSession.commit()
+    # 
+    #     new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
+    #     self.assertEqual(
+    #         new_foo_obj.timing_resolution,
+    #         studio.timing_resolution
+    #     )
+
+    def test_timing_resolution_argument_is_None(self):
+        """testing if the timing_resolution attribute will be set to the
+        default value from the default.timing_resolution if timing_resolution
+        argument is None
+        """
+        self.kwargs['timing_resolution'] = None
+        studio = Studio(**self.kwargs)
+        self.assertEqual(
+            studio.timing_resolution,
+            defaults.timing_resolution
+        )
+
+    # def test_timing_resolution_argument_is_None_Studio_is_present(self):
+    #     """testing if the timing_resolution attribute will be set to the
+    #     default value from the Studio.timing_resolution if timing_resolution
+    #     argument is None and there is a Studio
+    #     """
+    #     self.kwargs['timing_resolution'] = None
+    # 
+    #     from stalker import Studio
+    #     db.setup({'sqlalchemy.url': 'sqlite:///:memory:'})
+    #     studio = Studio(
+    #         name='Test Studio',
+    #         timing_resolution=datetime.timedelta(minutes=15)
+    #     )
+    #     db.DBSession.add(studio)
+    #     db.DBSession.commit()
+    # 
+    #     new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
+    #     self.assertEqual(
+    #         new_foo_obj.timing_resolution,
+    #         studio.timing_resolution
+    #     )
+
+    def test_timing_resolution_attribute_is_set_to_None(self):
+        """testing if the timing_resolution attribute will be set to the
+        default value from the defaults.timing_resolution if it is set to None
+        """
+        self.kwargs['timing_resolution'] = datetime.timedelta(minutes=5)
+        studio = Studio(**self.kwargs)
+        # check start conditions
+        self.assertEqual(
+            studio.timing_resolution,
+            self.kwargs['timing_resolution']
+        )
+        studio.timing_resolution = None
+        self.assertEqual(
+            studio.timing_resolution,
+            defaults.timing_resolution
+        )
+
+    # def test_timing_resolution_attribute_is_set_to_None_Studio_is_present(self):
+    #     """testing if the timing_resolution attribute will be set to the
+    #     default value from the Studio.timing_resolution if it is set to None
+    #     and there is a Studio instance
+    #     """
+    #     from stalker import Studio
+    #     db.setup({'sqlalchemy.url': 'sqlite:///:memory:'})
+    #     studio = Studio(
+    #         name='Test Studio',
+    #         resolution=datetime.timedelta(minutes=15)
+    #     )
+    #     DBSession.add(studio)
+    #     DBSession.commit()
+    # 
+    #     self.kwargs['timing_resolution'] = datetime.timedelta(minutes=5)
+    #     new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
+    #     # check start conditions
+    #     self.assertEqual(new_foo_obj.timing_resolution,
+    #                      self.kwargs['timing_resolution'])
+    #     new_foo_obj.timing_resolution = None
+    #     self.assertEqual(
+    #         studio.timing_resolution,
+    #         datetime.timedelta(minutes=15)
+    #     )
+    #     self.assertEqual(
+    #         new_foo_obj.timing_resolution,
+    #         studio.timing_resolution
+    #     )
+
+    def test_timing_resolution_argument_is_not_a_timedelta_instance(self):
+        """testing if a TypeError will be raised when the timing_resolution
+        argument is not a datetime.timedelta instance
+        """
+        self.kwargs['timing_resolution'] = 'not a timedelta instance'
+        self.assertRaises(TypeError, Studio, **self.kwargs)
+
+    def test_timing_resolution_attribute_is_not_a_timedelta_instance(self):
+        """testing if a TypeError will be raised when the timing_resolution
+        attribute is not a datetime.timedelta instance
+        """
+        new_foo_obj = Studio(**self.kwargs)
+        self.assertRaises(TypeError, setattr, new_foo_obj, 'timing_resolution',
+                          'not a timedelta instance')
+
+    def test_timing_resolution_argument_is_working_properly(self):
+        """testing if the timing_resolution argument value is passed to
+        timing_resolution attribute correctly
+        """
+        self.kwargs['timing_resolution'] = datetime.timedelta(minutes=5)
+        studio = Studio(**self.kwargs)
+        self.assertEqual(
+            studio.timing_resolution,
+            self.kwargs['timing_resolution']
+        )
+
+    def test_timing_resolution_attribute_is_working_properly(self):
+        """testing if the timing_resolution attribute is working properly
+        """
+        studio = Studio(**self.kwargs)
+        res = studio
+        new_res = datetime.timedelta(hours=1, minutes=30)
+        self.assertNotEqual(res, new_res)
+        studio.timing_resolution = new_res
+        self.assertEqual(studio.timing_resolution, new_res)

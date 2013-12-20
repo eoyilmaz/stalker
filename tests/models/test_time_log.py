@@ -97,7 +97,7 @@ class TimeLogTester(unittest2.TestCase):
         """
         self.assertTrue(TimeLog.__auto_name__)
 
-    def test_task_argument_is_Skipped(self):
+    def test_task_argument_is_skipped(self):
         """testing if a TypeError will be raised when the task argument is
         skipped
         """

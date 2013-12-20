@@ -12,6 +12,15 @@ Stalker Changes
   which adds attributes like ``schedule_timing``, ``schedule_unit``,
   ``schedule_model`` and ``schedule_constraint``.
 * **New:** Added ``Task.tickets`` and ``Task.open_tickets`` properties.
+* **Update:** Removed unnecessary arguments (project_lead, tasks, watching,
+  last_login) from User class.
+* **Update:** The ``timing_resolution`` attribute is moved from the
+  DateRangeMixin to Studio class. So instances of classes like Project or Task
+  will not have their own timing resolution anymore.
+* **New:** The Studio instance now overrides the values on stalker.defaults on
+  creation and on load, and also the db.setup() function lets the first Studio
+  instance that it finds to update the defaults. So it is now possible to use
+  ``stalker.defaults`` all the time without worrying about the Studio settings.
 
 0.2.3.5
 =======

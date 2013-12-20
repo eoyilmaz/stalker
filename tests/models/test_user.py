@@ -22,11 +22,9 @@
 import unittest2
 import datetime
 import logging
+
 from stalker import db
-from stalker import config
-
-defaults = config.Config()
-
+from stalker import defaults
 from stalker.db.session import DBSession
 from stalker import (Group, Department, Project, Repository,
                      Sequence, Status, StatusList, Task, Type, User, Version,
@@ -700,39 +698,12 @@ class UserTest(unittest2.TestCase):
         self.test_user.login = test_value
         self.assertEqual(self.test_user.login, test_value)
 
-    def test_last_login_argument_accepts_None(self):
-        """testing if nothing happens when the last login argument is set to
-        None
-        """
-        self.kwargs["last_login"] = None
-        # nothing should happen
-        a_new_user = User(**self.kwargs)
-
     def test_last_login_attribute_None(self):
         """testing if nothing happens when the last login attribute is set to
         None
         """
         # nothing should happen
         self.test_user.last_login = None
-
-    def test_last_login_argument_accepts_datetime_instance(self):
-        """testing if a nothing happens when tried to set the last_login
-        to a datetime.datetime instance
-        """
-        self.kwargs["last_login"] = datetime.datetime.now()
-        # nothing should happen
-        a_new_user = User(**self.kwargs)
-
-    def test_last_login_argument_accepts_only_datetime_instance_or_None(self):
-        """testing if a TypeError will be raised for values other than a
-        datetime.datetime instances or None tried to be set to last_login
-        argument
-        """
-        test_values = [1, 2.3, "login time", ["last login time"],
-                       {"a last": "login time"}]
-        for test_value in test_values:
-            self.kwargs["last_login"] = test_value
-            self.assertRaises(TypeError, User, **self.kwargs)
 
     def test_last_login_attribute_accepts_only_datetime_instance_or_None(self):
         """testing if a TypeError will be raised for values other than
@@ -1008,14 +979,6 @@ class UserTest(unittest2.TestCase):
         self.assertIn(self.test_user, self.test_project2.users)
         self.assertIn(self.test_user, self.test_project3.users)
 
-    def test_projects_lead_argument_None(self):
-        """testing if the projects_lead attribute will be an empty list when
-        the projects_lead attribute is None
-        """
-        self.kwargs["projects_lead"] = None
-        new_user = User(**self.kwargs)
-        self.assertEqual(new_user.projects_lead, [])
-
     def test_projects_lead_attribute_None(self):
         """testing if a TypeError will be raised when the project_lead
         attribute is set to None
@@ -1023,39 +986,12 @@ class UserTest(unittest2.TestCase):
         self.assertRaises(TypeError, setattr, self.test_user, "projects_lead",
                           None)
 
-    def test_projects_lead_argument_accepts_empty_list(self):
-        """testing if projects_lead argument accepts an empty list
-        """
-        self.kwargs["projects_lead"] = []
-        # this should work without any problems
-        self.test_user = User(**self.kwargs)
-
     def test_projects_lead_attribute_accepts_empty_list(self):
         """testing if projects_lead attribute accepts an empty list
         """
 
         # this should work without any problem
         self.test_user.projects_lead = []
-
-
-    def test_projects_lead_argument_accepts_only_list(self):
-        """testing if a TypeError will be raised when trying to assign a list
-        of other objects than a list of Project objects to the
-        projects_lead argument
-        """
-        test_values = ["a project", 123123, {}, 12.2132]
-        for test_value in test_values:
-            self.kwargs["projects_lead"] = test_value
-            self.assertRaises(TypeError, User, **self.kwargs)
-
-    def test_projects_lead_argument_accepts_only_lists_of_project_obj(self):
-        """testing if a TypeError will be raised when trying to assign a list
-        of other objects than a list of Project objects to the
-        projects_lead argument
-        """
-        test_value = ["a project", 123123, [], {}, 12.2132]
-        self.kwargs["projects_lead"] = test_value
-        self.assertRaises(TypeError, User, **self.kwargs)
 
     def test_projects_lead_attribute_accepts_only_lists(self):
         """testing if a TypeError will be raised when trying to assign a list
@@ -1106,37 +1042,11 @@ class UserTest(unittest2.TestCase):
             0
         )
 
-        # __setitem__
-        self.assertRaises(
-            TypeError,
-            self.test_user.projects_lead.__setitem__,
-            0,
-            0
-        )
-
-    def test_tasks_argument_None(self):
-        """testing if the tasks attribute will be an empty list when the tasks
-        argument is given as None
-        """
-        self.kwargs["tasks"] = None
-        new_user = User(**self.kwargs)
-        self.assertEqual(new_user.tasks, [])
-
     def test_tasks_attribute_None(self):
         """testing if a TypeError will be raised when the tasks attribute is
         set to None
         """
         self.assertRaises(TypeError, setattr, self.test_user, "tasks", None)
-
-    def test_tasks_argument_accepts_only_list_of_task_objects(self):
-        """testing if a TypeError will be raised when trying to assign
-        anything other than a list of task objects to the tasks argument
-        """
-        test_values = [12312, 1233244.2341, ["aTask1", "aTask2"], "a_task"]
-
-        for test_value in test_values:
-            self.kwargs["tasks"] = test_value
-            self.assertRaises(TypeError, User, **self.kwargs)
 
     def test_tasks_attribute_accepts_only_list_of_task_objects(self):
         """testing if a TypeError will be raised when trying to assign
@@ -1152,15 +1062,6 @@ class UserTest(unittest2.TestCase):
                 "tasks",
                 test_value
             )
-
-    def test_tasks_argument_accepts_an_empty_list(self):
-        """testing if nothing happens when trying to assign an empty list to
-        tasks argument
-        """
-        self.kwargs["tasks"] = []
-
-        # this should work without any error
-        aUserObj = User(**self.kwargs)
 
     def test_tasks_attribute_accepts_an_empty_list(self):
         """testing if nothing happens when trying to assign an empty list to

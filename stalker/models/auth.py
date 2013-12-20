@@ -527,11 +527,6 @@ class User(Entity, ACLMixin):
             password=None,
             departments=None,
             groups=None,
-            projects_lead=None,
-            tasks=None,
-            watching=None,
-            # TODO: Watchlist should be a list of lists `WatchLists` so one can create task lists (playlists) for different tasks
-            last_login=None,
             **kwargs
     ):
         kwargs['name'] = name
@@ -553,27 +548,10 @@ class User(Entity, ACLMixin):
             groups = []
         self.groups = groups
 
-        if projects_lead is None:
-            projects_lead = []
-        self.projects_lead = projects_lead
+        self.projects_lead = []
+        self.tasks = []
 
-        if tasks is None:
-            tasks = []
-
-        self.tasks = tasks
-
-        if watching is None:
-            watching = []
-
-        self.last_login = last_login
-
-    # @reconstructor
-    # def __init_on_load__(self):
-    #     """initialized the instance variables when the instance created with
-    #     SQLAlchemy
-    #     """
-    #     # call the Entity __init_on_load__
-    #     super(User, self).__init_on_load__()
+        self.last_login = None
 
     def __repr__(self):
         """return the representation of the current User

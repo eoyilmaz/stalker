@@ -176,8 +176,8 @@ class Config(object):
         # this is strongly related with the working_hours settings,
         # this should match each other
         daily_working_hours=9,
-        weekly_working_hours=45,
         weekly_working_days=5,
+        weekly_working_hours=45,
         yearly_working_days=260.714,  # 5 * 52.1428
 
         day_order=['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'],

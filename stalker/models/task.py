@@ -32,7 +32,8 @@ from stalker import defaults
 from stalker.models import check_circular_dependency
 from stalker.models.entity import Entity
 from stalker.models.auth import User
-from stalker.models.mixins import DateRangeMixin, StatusMixin, ReferenceMixin
+from stalker.models.mixins import (DateRangeMixin, StatusMixin, ReferenceMixin,
+                                   ScheduleMixin)
 from stalker.exceptions import OverBookedError, CircularDependencyError
 from stalker.log import logging_level
 
@@ -92,9 +93,7 @@ class TimeLog(Entity, DateRangeMixin):
                          primary_key=True)
     task_id = Column(
         Integer, ForeignKey("Tasks.id"), nullable=False,
-        doc="""The id of this task in the database. Used by SQLAlchemy to map
-        this task in relationships.
-        """
+        doc="""The id of the related task."""
     )
     task = relationship(
         "Task",
@@ -139,30 +138,21 @@ class TimeLog(Entity, DateRangeMixin):
         # do the schedule_timing expansion here
         total_seconds = self.duration.days * 86400 + self.duration.seconds
         remaining_seconds = task.remaining_seconds
-        from stalker import Studio
 
-        studio = None
-        try:
-            with DBSession.no_autoflush:
-                studio = Studio.query.first()
-        except UnboundExecutionError:
-            pass
-
-        data_source = studio if studio else defaults
         conversion_ratio = 1
         if task.schedule_unit == 'min':
             conversion_ratio = 60
         elif task.schedule_unit == 'h':
             conversion_ratio = 3600
         elif task.schedule_unit == 'd':
-            conversion_ratio = data_source.daily_working_hours * 3600
+            conversion_ratio = defaults.daily_working_hours * 3600
         elif task.schedule_unit == 'w':
-            conversion_ratio = data_source.weekly_working_hours * 3600
+            conversion_ratio = defaults.weekly_working_hours * 3600
         elif task.schedule_unit == 'm':
-            conversion_ratio = data_source.weekly_working_hours * 4 * 3600
+            conversion_ratio = defaults.weekly_working_hours * 4 * 3600
         elif task.schedule_unit == 'y':
-            conversion_ratio = data_source.yearly_working_days * \
-                               data_source.daily_working_hours * 3600
+            conversion_ratio = defaults.yearly_working_days * \
+                               defaults.daily_working_hours * 3600
         logger.debug('remaining_seconds : %s' % remaining_seconds)
         logger.debug('total_seconds     : %s' % total_seconds)
         logger.debug('conversion_ratio  : %s' % conversion_ratio)
@@ -253,7 +243,7 @@ def update_task_dates(func):
     return wrap
 
 
-class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin):
+class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     """Manages Task related data.
 
     **Introduction**
@@ -695,90 +685,6 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin):
         """
     )
 
-    schedule_timing = Column(
-        Float, nullable=True, default=0,
-        doc="""It is the value of the schedule timing. It is a float value.
-        """
-    )
-
-    schedule_unit = Column(
-        Enum(*defaults.datetime_units, name='TaskScheduleUnit'),
-        nullable=False, default='h',
-        doc="""It is the unit of the schedule timing. It is a string value. And
-        should be one of 'min', 'h', 'd', 'w', 'm', 'y'.
-        """
-    )
-
-    schedule_model = Column(
-        Enum(*defaults.task_schedule_models, name='TaskScheduleModels'),
-        default=defaults.task_schedule_models[0], nullable=False,
-        doc="""Defines the schedule model which is going to be used by
-        **TaskJuggler** while scheduling this Task. It has three possible
-        values; **effort**, **duration**, **length**. ``effort`` is the default
-        value. Each value causes this task to be scheduled in different ways:
-
-        ======== ==============================================================
-        effort   If the :attr:`.schedule_model` attribute is set to
-                 **"effort"** then the start and end date values are calculated
-                 so that a resource should spent this much of work time to
-                 complete a Task. For example, a task with
-                 :attr:`.schedule_timing` of 4 days, needs 4 working days. So
-                 it can take 4 working days to complete the Task, but it
-                 doesn't mean that the task duration will be 4 days. If the
-                 resource works overtime then the task will be finished before
-                 4 days or if the resource will not be available (due to a
-                 vacation) then the task duration can be much more.
-
-        duration The duration of the task will exactly be equal to
-                 :attr:`.schedule_timing` regardless of the resource
-                 availability. So the difference between :attr:`.start` and
-                 :attr:`.end` attribute values are equal to
-                 :attr:`.schedule_timing`. Essentially making the task duration
-                 in calendar days instead of working days.
-
-        length   In this model the duration of the task will exactly be equal
-                 to the given length value in working days regardless of the
-                 resource availability. So a task with the
-                 :attr:`.schedule_timing` is set to 4 days will be completed in
-                 4 working days. But again it will not be always 4 calendar
-                 days due to the weekends or non working days.
-        ======== ==============================================================
-        """
-    )
-
-    schedule_constraint = Column(
-        Integer,
-        default=0,
-        nullable=False,
-        doc="""An integer number showing the constraint schema for this task.
-
-        Possible values are:
-
-         ===== ===============
-           0   Constrain None
-           1   Constrain Start
-           2   Constrain End
-           3   Constrain Both
-         ===== ===============
-
-        For convenience use **stalker.models.task.CONSTRAIN_NONE**,
-        **stalker.models.task.CONSTRAIN_START**,
-        **stalker.models.task.CONSTRAIN_END**,
-        **stalker.models.task.CONSTRAIN_BOTH**.
-
-        This value is going to be used to constrain the start and end date
-        values of this task. So if you want to pin the start of a task to a
-        certain date. Set its :attr:`.schedule_constraint` value to
-        **CONSTRAIN_START**. When the task is scheduled by **TaskJuggler** the
-        start date will be pinned to the :attr:`start` attribute of this task.
-
-        And if both of the date values (start and end) wanted to be pinned to
-        certain dates (making the task effectively a ``duration`` task) set the
-        desired :attr:`start` and :attr:`end` and then set the
-        :attr:`schedule_constraint` to **CONSTRAIN_BOTH**.
-        """
-    )
-
     _schedule_seconds = Column(
         Integer, nullable=True,
         doc='cache column for schedule_seconds'
@@ -787,6 +693,16 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin):
     _total_logged_seconds = Column(
         Integer, nullable=True,
         doc='cache column for total_logged_seconds'
+    )
+
+    _revisions = relationship(
+        "Revision",
+        primaryjoin="Revisions.c.task_id==Tasks.c.id",
+        back_populates="_task",
+        cascade='all, delete-orphan',
+        doc="""A list of :class:`~stalker.models.revision.Revision` holding
+        the details about any given revision to this task.
+        """
     )
 
     def __init__(self,
@@ -812,11 +728,17 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin):
         kwargs['start'] = start
         kwargs['end'] = end
 
+        kwargs['schedule_timing'] = schedule_timing
+        kwargs['schedule_unit'] = schedule_unit
+        kwargs['schedule_model'] = schedule_model
+        kwargs['schedule_constraint'] = schedule_constraint
+
         super(Task, self).__init__(**kwargs)
 
         # call the mixin __init__ methods
         StatusMixin.__init__(self, **kwargs)
         DateRangeMixin.__init__(self, **kwargs)
+        ScheduleMixin.__init__(self, **kwargs)
 
         self.parent = parent
         self._project = project
@@ -843,12 +765,6 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin):
             watchers = []
         self.watchers = watchers
 
-        self.schedule_constraint = schedule_constraint
-        self.schedule_unit = schedule_unit
-        self.schedule_timing = schedule_timing
-
-        self.schedule_model = schedule_model
-
         if bid_timing is None:
             bid_timing = self.schedule_timing
 
@@ -874,9 +790,11 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin):
         """
         if not isinstance(time_log, TimeLog):
             raise TypeError(
-                "all the elements in the %s.time_logs should be an instances "
-                "of stalker.models.task.TimeLog not %s instance" %
-                (self.__class__.__name__, time_log.__class__.__name__))
+                "%s.time_logs should be all stalker.models.task.TimeLog "
+                "instances, not %s" % (
+                    self.__class__.__name__, time_log.__class__.__name__
+                )
+            )
 
         # TODO: convert this to an event
         # update parents total_logged_second attribute
@@ -885,6 +803,21 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin):
                     self.parent.total_logged_seconds += time_log.total_seconds
 
         return time_log
+
+    @validates("_revisions")
+    def _validate_revisions(self, key, revision):
+        """validates the given revision value
+        """
+        from stalker.models.revision import Revision
+        if not isinstance(revision, Revision):
+            raise TypeError(
+                "%s.revisions should be all stalker.models.revision.Revision "
+                "instances, not %s" % (
+                    self.__class__.__name__,
+                    revision.__class__.__name__
+                )
+            )
+        return revision
 
     @validates("is_complete")
     def _validate_is_complete(self, key, complete_in):
@@ -921,17 +854,8 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin):
     def _validate_schedule_timing(self, key, schedule_timing):
         """validates the given schedule_timing
         """
-        if schedule_timing is None:
-            schedule_timing = defaults.timing_resolution.seconds / 3600
-            self.schedule_unit = 'h'
-
-        if not isinstance(schedule_timing, (int, float)):
-            raise TypeError(
-                '%s.schedule_timing should be an integer or float number'
-                'showing the value of the timing of this %s, not %s' % (
-                    self.__class__.__name__, self.__class__.__name__,
-                    schedule_timing.__class__.__name__)
-            )
+        schedule_timing = \
+            ScheduleMixin._validate_schedule_timing(self, key, schedule_timing)
 
         # reschedule
         self._reschedule(schedule_timing, self.schedule_unit)
@@ -942,67 +866,13 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin):
     def _validate_schedule_unit(self, key, schedule_unit):
         """validates the given schedule_unit
         """
-        if schedule_unit is None:
-            schedule_unit = 'h'
-
-        if not isinstance(schedule_unit, (str, unicode)):
-            raise TypeError(
-                '%s.schedule_unit should be a string value one of %s showing '
-                'the unit of the schedule timing of this %s, not %s' % (
-                    self.__class__.__name__, defaults.datetime_units,
-                    self.__class__.__name__, schedule_unit.__class__.__name__)
-            )
-
-        if schedule_unit not in defaults.datetime_units:
-            raise ValueError(
-                '%s.schedule_unit should be a string value one of %s showing '
-                'the unit of the schedule timing of this %s, not %s' % (
-                    self.__class__.__name__, defaults.datetime_units,
-                    self.__class__.__name__, schedule_unit.__class__.__name__)
-            )
+        schedule_unit = \
+            ScheduleMixin._validate_schedule_unit(self, key, schedule_unit)
 
         if self.schedule_timing:
             self._reschedule(self.schedule_timing, schedule_unit)
 
         return schedule_unit
-
-    @validates('schedule_model')
-    def _validate_schedule_model(self, key, schedule_model):
-        """validates the given schedule_model value
-        """
-        if not schedule_model:
-            schedule_model = defaults.task_schedule_models[0]
-
-        error_message = '%s.schedule_model should be one of %s, not %s' % (
-            self.__class__.__name__, defaults.task_schedule_models,
-            schedule_model.__class__.__name__
-        )
-
-        if not isinstance(schedule_model, (str, unicode)):
-            raise TypeError(error_message)
-
-        if schedule_model not in defaults.task_schedule_models:
-            raise ValueError(error_message)
-
-        return schedule_model
-
-    @validates('schedule_constraint')
-    def _validate_schedule_constraint(self, key, schedule_constraint):
-        """validates the given schedule_constraint value
-        """
-        if not schedule_constraint:
-            schedule_constraint = 0
-
-        if not isinstance(schedule_constraint, int):
-            raise TypeError('%s.schedule_constraint should be an integer '
-                            'between 0 and 3, not %s' % 
-                            (self.__class__.__name__,
-                             schedule_constraint.__class__.__name__))
-
-        schedule_constraint = max(schedule_constraint, 0)
-        schedule_constraint = min(schedule_constraint, 3)
-
-        return schedule_constraint
 
     def _reschedule(self, schedule_timing, schedule_unit):
         """Updates the start and end date values by using the schedule_timing
@@ -1218,7 +1088,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin):
                             (self.__class__.__name__,
                              watcher.__class__.__name__))
         return watcher
-    
+
     @validates("versions")
     def _validate_versions(self, key, version):
         """validates the given version value
@@ -1471,17 +1341,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin):
         if not timing:
             return 0
 
-        from stalker import Studio
-
         # for leaf tasks do it normally
-        try:
-            with DBSession.no_autoflush:
-                # there is only one studio support in Stalker for now
-                studio = Studio.query.first()
-        except UnboundExecutionError:
-            studio = None
-        data_source = studio if studio else defaults
-
         if unit == 'min':
             return timing * 60
 
@@ -1491,20 +1351,20 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin):
         elif unit == 'd':
             # we need to have a studio or defaults
             return timing * \
-                data_source.daily_working_hours * 3600
+                defaults.daily_working_hours * 3600
 
         elif unit == 'w':
             return timing * \
-                data_source.weekly_working_hours * 3600
+                defaults.weekly_working_hours * 3600
 
         elif unit == 'm':
             return timing * \
-                4 * data_source.weekly_working_hours * 3600
+                4 * defaults.weekly_working_hours * 3600
 
         elif unit == 'y':
             return timing * \
-                data_source.yearly_working_days * \
-                data_source.daily_working_hours * 3600
+                defaults.yearly_working_days * \
+                defaults.daily_working_hours * 3600
 
         return 0
 
@@ -1660,6 +1520,12 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin):
         return Ticket.query\
             .filter(Ticket.links.contains(self))\
             .filter(Ticket.status != status_closed).all()
+
+    @property
+    def revisions(self):
+        """returns the revisions of this task
+        """
+        return self._revisions
 
 # TASK_DEPENDENCIES
 Task_Dependencies = Table(

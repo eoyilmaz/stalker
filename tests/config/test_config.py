@@ -21,8 +21,13 @@
 import os
 import shutil
 import tempfile
+import datetime
 import unittest2
 import logging
+import stalker
+
+logger = logging.getLogger("stalker")
+logger.setLevel(logging.DEBUG)
 
 
 class ConfigTester(unittest2.TestCase):
@@ -32,9 +37,6 @@ class ConfigTester(unittest2.TestCase):
     def setUp(self):
         """setup the test
         """
-        logger = logging.getLogger("stalker")
-        logger.setLevel(logging.DEBUG)
-
         # so we need a temp directory to be specified as our config folder
         self.temp_config_folder = tempfile.mkdtemp()
 
@@ -48,8 +50,13 @@ class ConfigTester(unittest2.TestCase):
     def tearDown(self):
         """clean up the test
         """
+        from stalker import db
+        db.DBSession.remove()
         # and remove the temp directory
         shutil.rmtree(self.temp_config_folder)
+        # restore defaults.timing_resolution
+        stalker.defaults.timing_resolution = datetime.timedelta(hours=1)
+        stalker.defaults.task_duration = datetime.timedelta(hours=1)
 
     def test_config_variable_updates_with_user_config(self):
         """testing if the database_file_name will be updated by the user
@@ -169,3 +176,34 @@ class ConfigTester(unittest2.TestCase):
         # database_file_name variable
         from stalker import config
         self.assertRaises(RuntimeError, config.Config)
+
+    def test_update_with_studio_is_working_properly(self):
+        """testing if the default values are updated with the Studio instance
+        if there is a database connection and there is a Studio in there
+        """
+        import datetime
+        from stalker import db
+        from stalker.models.studio import Studio
+
+        db.setup({'sqlalchemy.url': 'sqlite:///:memory:'})
+        db.init()
+
+        # check the defaults are still using them self
+        from stalker import defaults
+        self.assertEqual(
+            defaults.timing_resolution,
+            datetime.timedelta(hours=1)
+        )
+
+        studio = Studio(
+            name='Test Studio',
+            timing_resolution=datetime.timedelta(minutes=15)
+        )
+        db.DBSession.add(studio)
+        db.DBSession.commit()
+
+        # now check it again
+        self.assertEqual(
+            defaults.timing_resolution,
+            studio.timing_resolution
+        )

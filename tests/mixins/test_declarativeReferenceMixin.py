@@ -26,6 +26,7 @@ from stalker.models.entity import SimpleEntity
 from stalker.models.mixins import ReferenceMixin
 from stalker.models.link import  Link
 
+
 class DeclRefMixA(SimpleEntity, ReferenceMixin):
     """A test class for ReferenceMixin
     """
@@ -34,7 +35,6 @@ class DeclRefMixA(SimpleEntity, ReferenceMixin):
     __mapper_args__ = {"polymorphic_identity": "DeclRefMixA"}
     a_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
                   primary_key=True)
-
 
     def __init__(self, **kwargs):
         super(DeclRefMixA, self).__init__(**kwargs)
@@ -49,7 +49,6 @@ class DeclRefMixB(SimpleEntity, ReferenceMixin):
     __mapper_args__ = {"polymorphic_identity": "DeclRefMixB"}
     b_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
                   primary_key=True)
-
 
     def __init__(self, **kwargs):
         super(DeclRefMixB, self).__init__(**kwargs)

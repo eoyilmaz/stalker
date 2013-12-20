@@ -19,17 +19,19 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import os
+import copy
 import shutil
 import datetime
 import unittest2
 import tempfile
 from sqlalchemy.exc import IntegrityError
 
+import stalker
 from stalker.db.session import DBSession
 from stalker import (db, defaults, Asset, Department, SimpleEntity, Entity,
-                     ImageFormat, Link, Note, Project, Repository, Sequence,
-                     Shot, Status, StatusList, Structure, Tag, Task, Type,
-                     FilenameTemplate, User, Version, Permission, Group,
+                     ImageFormat, Link, Note, Project, Repository, Revision,
+                     Sequence, Shot, Status, StatusList, Structure, Tag, Task,
+                     Type, FilenameTemplate, User, Version, Permission, Group,
                      TimeLog, Ticket, Scene, WorkingHours, Studio, Vacation,
                      TicketLog)
 import logging
@@ -43,24 +45,13 @@ class DatabaseTester(unittest2.TestCase):
     """tests the database and connection to the database
     """
 
-    @classmethod
-    def setUpClass(cls):
-        """set up the test for class
-        """
-        DBSession.remove()
-        DBSession.configure(extension=None)
-
-    @classmethod
-    def tearDownClass(cls):
-        """clean up the test
-        """
-        DBSession.configure(extension=None)
-
     def setUp(self):
         """setup the tests
         """
         # just set the default admin creation to true
         # some tests are relying on that
+
+        DBSession.remove()
         defaults.auto_create_admin = True
         defaults.admin_name = "admin"
         defaults.admin_password = "admin"
@@ -262,10 +253,10 @@ class DatabaseTester(unittest2.TestCase):
         class_names = [
             'Asset', 'Group', 'Permission', 'User', 'Department',
             'SimpleEntity', 'Entity', 'ImageFormat', 'Link', 'Message', 'Note',
-            'Project', 'Repository', 'Scene', 'Sequence', 'Shot', 'Status',
-            'StatusList', 'Structure', 'Studio', 'Tag', 'TimeLog', 'Task',
-            'FilenameTemplate', 'Ticket', 'TicketLog', 'Type', 'Vacation',
-            'Version',
+            'Project', 'Repository', 'Revision', 'Scene', 'Sequence', 'Shot',
+            'Status', 'StatusList', 'Structure', 'Studio', 'Tag', 'TimeLog',
+            'Task', 'FilenameTemplate', 'Ticket', 'TicketLog', 'Type',
+            'Vacation', 'Version',
         ]
 
         permission_db = Permission.query.all()
@@ -305,7 +296,7 @@ class DatabaseTester(unittest2.TestCase):
 
         # and we still have correct amount of Permissions
         permissions = Permission.query.all()
-        self.assertEqual(len(permissions), 290)
+        self.assertEqual(len(permissions), 300)
 
         # clean the test
         shutil.rmtree(temp_db_path)
@@ -369,7 +360,6 @@ class DatabaseModelsTester(unittest2.TestCase):
         """
         # use a normal session instead of a managed one
         DBSession.remove()
-        DBSession.configure(extension=None)
 
     @classmethod
     def tearDownClass(cls):
@@ -377,7 +367,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         """
         # delete the default test database file
         #os.remove(cls.test_db_file)
-        DBSession.configure(extension=None)
+        DBSession.remove()
 
     def setUp(self):
         """setup the test
@@ -393,6 +383,9 @@ class DatabaseModelsTester(unittest2.TestCase):
         """tearing down the test
         """
         DBSession.remove()
+        # restore defaults.timing_resolution
+        stalker.defaults.timing_resolution = datetime.timedelta(hours=1)
+        stalker.defaults.task_duration = datetime.timedelta(hours=1)
 
     def test_persistence_of_Asset(self):
         """testing the persistence of Asset
@@ -1428,7 +1421,6 @@ class DatabaseModelsTester(unittest2.TestCase):
         users = new_project.users
         computed_start = new_project.computed_start
         computed_end = new_project.computed_end
-        timing_resolution = new_project.timing_resolution
 
         # delete the project
         del new_project
@@ -1439,7 +1431,6 @@ class DatabaseModelsTester(unittest2.TestCase):
 
         assert (isinstance(new_project_db, Project))
 
-        #self.assertEqual(new_project, new_project_DB)
         self.assertEqual(assets, new_project_db.assets)
         self.assertEqual(code, new_project_db.code)
         self.assertEqual(computed_start, new_project_db.computed_start)
@@ -1466,7 +1457,6 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(structure, new_project_db.structure)
         self.assertEqual(tags, new_project_db.tags)
         self.assertEqual(tasks, new_project_db.tasks)
-        self.assertEqual(timing_resolution, new_project_db.timing_resolution)
         self.assertEqual(type_, new_project_db.type)
         self.assertEqual(updated_by, new_project_db.updated_by)
         self.assertEqual(users, new_project_db.users)
@@ -2276,7 +2266,6 @@ class DatabaseModelsTester(unittest2.TestCase):
         # get it back
         test_studio_db = Studio.query.first()
 
-        # self.assertEqual(now, test_studio_DB.now)
         self.assertEqual(name, test_studio_db.name)
         self.assertEqual(daily_working_hours,
                          test_studio_db.daily_working_hours)
@@ -2596,6 +2585,191 @@ class DatabaseModelsTester(unittest2.TestCase):
         another_task_db = Task.query.get(id_)
         self.assertItemsEqual(resources, [user1])
         self.assertItemsEqual(resources, another_task_db.resources)
+
+    def test_persistence_of_Revision(self):
+        """testing the persistence of Revision
+        """
+        # create a task
+        status_new = Status(name="New", code="NEW")
+        status_rts = Status(name="Ready To Start", code="RTS")
+        status_wip = Status(name="Work In Progress", code="WIP")
+        status_prev = Status(name="Pending Review", code="PREV")
+        status_hrev = Status(name="Has Revision", code="HREV")
+        status_cmpl = Status(name="Complete", code="CMPL")
+
+        task_status_list = StatusList(
+            name="Task Status List",
+            statuses=[status_new, status_rts, status_wip, status_prev,
+                      status_hrev, status_cmpl],
+            target_entity_type=Task,
+        )
+
+        project_status_list = StatusList(
+            name="Project Status List",
+            statuses=[status_new, status_wip, status_cmpl],
+            target_entity_type=Project,
+        )
+
+        asset_status_list = StatusList(
+            name="Asset Status List",
+            statuses=[status_new, status_rts, status_wip, status_prev,
+                      status_hrev, status_cmpl],
+            target_entity_type=Asset,
+        )
+
+        repo = Repository(
+            name='Test Repo',
+            linux_path='/mnt/M/JOBs',
+            windows_path='M:/JOBs',
+            osx_path='/Users/Shared/Servers/M',
+        )
+
+        project1 = Project(
+            name='Tests Project',
+            code='tp',
+            status_list=project_status_list,
+            repository=repo,
+        )
+
+        char_asset_type = Type(
+            name='Character Asset',
+            code='char',
+            target_entity_type=Asset
+        )
+
+        asset1 = Asset(
+            name='Char1',
+            code='char1',
+            status_list=asset_status_list,
+            type=char_asset_type,
+            project=project1,
+        )
+
+        user1 = User(
+            name="User1",
+            login="user1",
+            email="user1@user.com",
+            password="1234",
+        )
+
+        user2 = User(
+            name="User2",
+            login="user2",
+            email="user2@user.com",
+            password="1234",
+        )
+
+        user3 = User(
+            name="User3",
+            login="user3",
+            email="user3@user.com",
+            password="1234",
+        )
+
+        task1 = Task(
+            name="Test Task",
+            watchers=[user3],
+            parent=asset1,
+            status_list=task_status_list,
+            schedule_timing=5,
+            schedule_unit='h',
+        )
+
+        child_task1 = Task(
+            name='Child Task 1',
+            resources=[user1, user2],
+            parent=task1,
+            status_list=task_status_list
+        )
+
+        child_task2 = Task(
+            name='Child Task 2',
+            resources=[user1, user2],
+            parent=task1,
+            status_list=task_status_list
+        )
+
+        task2 = Task(
+            name='Another Task',
+            project=project1,
+            status_list=task_status_list,
+            resources=[user1]
+        )
+
+        # time logs
+        time_log1 = TimeLog(
+            task=child_task1,
+            resource=user1,
+            start=datetime.datetime.now(),
+            end=datetime.datetime.now() + datetime.timedelta(1)
+        )
+        task1.computed_start = datetime.datetime.now()
+        task1.computed_end = datetime.datetime.now() \
+            + datetime.timedelta(10)
+
+        time_log2 = TimeLog(
+            task=child_task2,
+            resource=user1,
+            start=datetime.datetime.now() + datetime.timedelta(1),
+            end=datetime.datetime.now() + datetime.timedelta(2)
+        )
+
+        # time log for another task
+        time_log3 = TimeLog(
+            task=task2,
+            resource=user1,
+            start=datetime.datetime.now() + datetime.timedelta(2),
+            end=datetime.datetime.now() + datetime.timedelta(3)
+        )
+
+        rev1 = Revision(
+            task=task2,
+            schedule_timing=1,
+            schedule_unit='h'
+        )
+
+        DBSession.add_all([
+            task1, child_task1, child_task2, task2, time_log1,
+            time_log2, time_log3, user1, user2, rev1
+        ])
+        DBSession.commit()
+
+        created_by = rev1.created_by
+        date_created = rev1.date_created
+        date_updated = rev1.date_updated
+        name = rev1.name
+        schedule_timing = rev1.schedule_timing
+        schedule_unit = rev1.schedule_unit
+        task = rev1.task
+        updated_by = rev1.updated_by
+
+        del rev1
+
+        # now query it back
+        rev1_db = Revision.query.filter_by(name=name).first()
+
+        assert (isinstance(rev1_db, Revision))
+
+        self.assertEqual(created_by, rev1_db.created_by)
+        self.assertEqual(date_created, rev1_db.date_created)
+        self.assertEqual(date_updated, rev1_db.date_updated)
+        self.assertEqual(name, rev1_db.name)
+        self.assertEqual(task, rev1_db.task)
+        self.assertEqual(updated_by, rev1_db.updated_by)
+        self.assertEqual(schedule_timing, rev1_db.schedule_timing)
+        self.assertEqual(schedule_unit, rev1_db.schedule_unit)
+
+        # delete tests
+
+        # deleting a Revision should be fairly simple:
+        DBSession.delete(rev1_db)
+        DBSession.commit()
+
+        # Expect to have no task is deleted
+        self.assertItemsEqual(
+            [asset1, task1, task2, child_task1, child_task2],
+            Task.query.all()
+        )
 
     def test_persistence_of_Ticket(self):
         """testing the persistence of Ticket

@@ -429,12 +429,11 @@ class Version(Link):
                 "`stalker.models.template.FilenameTemplate` instance with its "
                 "'target_entity_type' attribute is set to '%s' and assign it "
                 "to the `templates` attribute of the structure of the "
-                "project" % (self.task.entity_type,
-                             self.task.entity_type)
+                "project" % (self.task.entity_type, self.task.entity_type)
             )
 
-        self.filename = jinja2.Template(vers_template.filename) \
-            .render(**kwargs)
+        self.filename = \
+            jinja2.Template(vers_template.filename).render(**kwargs)
         self.path = jinja2.Template(vers_template.path).render(**kwargs)
 
     @property

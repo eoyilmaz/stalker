@@ -100,6 +100,7 @@ class Type(Entity, TargetEntityTypeMixin, CodeMixin):
 
         return not self.__eq__(other)
 
+
 # TODO: add a comparator as you did in oyProjectManager VersionStatusComparator
 class EntityType(Base):
     """A simple class just to hold the registered class names in Stalker
@@ -110,6 +111,7 @@ class EntityType(Base):
     id = Column("id", Integer, primary_key=True)
     name = Column(String(128), nullable=False, unique=True)
     statusable = Column(Boolean, default=False)
+    dateable = Column(Boolean, default=False)
     schedulable = Column(Boolean, default=False)
     accepts_references = Column(Boolean, default=False)
 

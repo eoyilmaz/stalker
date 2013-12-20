@@ -22,7 +22,7 @@ import datetime
 import logging
 
 from sqlalchemy import (Table, Column, String, Integer, ForeignKey, Interval,
-                        DateTime, PickleType)
+                        DateTime, PickleType, Float, Enum)
 from sqlalchemy.exc import UnboundExecutionError
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import synonym, relationship, validates
@@ -231,8 +231,7 @@ class StatusMixin(object):
     def status(cls):
         return relationship(
             'Status',
-            primaryjoin= \
-                "%s.status_id==Status.status_id" % cls.__name__,
+            primaryjoin= "%s.status_id==Status.status_id" % cls.__name__,
             doc="""The current status of the object.
 
             It is a :class:`~stalker.models.status.Status` instance which
@@ -246,7 +245,7 @@ class StatusMixin(object):
         return Column(
             'status_list_id',
             Integer,
-            ForeignKey('StatusLists.id'), #, use_alter=True, name="x"),
+            ForeignKey('StatusLists.id'),
             nullable=False
         )
 
@@ -448,23 +447,15 @@ class DateRangeMixin(object):
       initialization rules.
 
     :type duration: :class:`datetime.timedelta`
-
-    :param timing_resolution: The timing_resolution of the datetime.datetime
-      object in datetime.timedelta. Uses ``timing_resolution`` settings in the
-      :class:`stalker.config.Config` class which defaults to 1 hour. Setting
-      the timing_resolution to less then 5 minutes is not suggested because it
-      is a limit for TaskJuggler.
-
-    :type timing_resolution: datetime.timedelta
     """
 
-    def __init__(self,
-                 start=None,
-                 end=None,
-                 duration=None,
-                 timing_resolution=None,
-                 **kwargs):
-        self.timing_resolution = timing_resolution
+    def __init__(
+            self,
+            start=None,
+            end=None,
+            duration=None,
+            **kwargs
+    ):
         self._start, self._end, self._duration = \
             self._validate_dates(start, end, duration)
 
@@ -561,11 +552,10 @@ class DateRangeMixin(object):
                 self._duration_setter,
                 doc="""Duration of the entity.
 
-It is a datetime.timedelta instance. Showing the difference of the
-:attr:`.start` and the :attr:`.end`. If edited it changes the :attr:`.end`
-attribute value."""
+                It is a datetime.timedelta instance. Showing the difference of
+                the :attr:`.start` and the :attr:`.end`. If edited it changes
+                the :attr:`.end` attribute value."""
             )
-
         )
 
     def _validate_dates(self, start, end, duration):
@@ -629,59 +619,6 @@ attribute value."""
         return rounded_start, rounded_end, rounded_duration
 
     @declared_attr
-    def _timing_resolution(cls):
-        return Column("timing_resolution", Interval)
-
-    def _timing_resolution_getter(self):
-        """returns the timing_resolution
-        """
-        return self._timing_resolution
-
-    def _timing_resolution_setter(self, res_in):
-        """sets the timing_resolution
-        """
-        self._timing_resolution = self._validate_timing_resolution(res_in)
-        logger.debug('self._timing_resolution: %s' % self._timing_resolution)
-        # update date values
-        if self.start and self.end and self.duration:
-            self._start, self._end, self._duration = \
-                self._validate_dates(
-                    self.round_time(self.start),
-                    self.round_time(self.end),
-                    None
-                )
-
-    @declared_attr
-    def timing_resolution(cls):
-        return synonym(
-            '_timing_resolution',
-            descriptor=property(
-                cls._timing_resolution_getter,
-                cls._timing_resolution_setter,
-                doc="""The timing_resolution of this object.
-
-                Can be set to any value that is representable with
-                datetime.timedelta. The default value is 1 hour. Whenever it is
-                changed the start, end and duration values will be updated.
-                """
-            )
-        )
-
-    def _validate_timing_resolution(self, timing_resolution):
-        """validates the given timing_resolution value
-        """
-        if timing_resolution is None:
-            timing_resolution = defaults.timing_resolution
-
-        if not isinstance(timing_resolution, datetime.timedelta):
-            raise TypeError('%s.timing_resolution should be an instance of '
-                            'datetime.timedelta not, %s' %
-                            (self.__class__.__name__,
-                             timing_resolution.__class__.__name__))
-
-        return timing_resolution
-
-    @declared_attr
     def computed_start(cls):
         return Column('computed_start', DateTime)
 
@@ -699,7 +636,8 @@ attribute value."""
         return self.computed_end - self.computed_start \
             if self.computed_end and self.computed_start else None
 
-    def round_time(self, dt):
+    @classmethod
+    def round_time(cls, dt):
         """Round a datetime object to any time laps in seconds.
 
         Uses class property timing_resolution as the closest number of seconds
@@ -713,8 +651,8 @@ attribute value."""
         """
         # to be compatible with python 2.6 use the following instead of
         # total_seconds()
-        trs = self.timing_resolution.days * 86400 + \
-             self.timing_resolution.seconds
+        timing_resolution = defaults.timing_resolution
+        trs = timing_resolution.days * 86400 + timing_resolution.seconds
 
         # convert to seconds
         # FIX: using strftime(%s) is dangerous, it uses system time zone
@@ -989,9 +927,7 @@ class WorkingHoursMixin(object):
       is stored as a PickleType in the database.
     """
 
-    def __init__(self,
-                 working_hours=None,
-                 **kwargs):
+    def __init__(self, working_hours=None, **kwargs):
         self.working_hours = working_hours
 
     @declared_attr
@@ -1016,4 +952,196 @@ class ScheduleMixin(object):
     Adds attributes like schedule_timing, schedule_unit and schedule_model
     attributes to the mixed in class.
     """
-    pass
+
+    def __init__(self,
+                 schedule_timing=1.0,
+                 schedule_unit='h',
+                 schedule_model=None,
+                 schedule_constraint=0,
+                 **kwargs):
+        self.schedule_constraint = schedule_constraint
+        self.schedule_unit = schedule_unit
+        self.schedule_timing = schedule_timing
+        self.schedule_model = schedule_model
+
+    @declared_attr
+    def schedule_timing(cls):
+        return Column(
+            Float, nullable=True, default=0,
+            doc="""It is the value of the schedule timing. It is a float value.
+            """
+        )
+
+    @declared_attr
+    def schedule_unit(cls):
+        return Column(
+            Enum(*defaults.datetime_units, name='TaskScheduleUnit'),
+            nullable=False, default='h',
+            doc="""It is the unit of the schedule timing. It is a string value.
+            And should be one of 'min', 'h', 'd', 'w', 'm', 'y'.
+            """
+        )
+
+    @declared_attr
+    def schedule_model(cls):
+        return Column(
+            Enum(*defaults.task_schedule_models, name='TaskScheduleModels'),
+            default=defaults.task_schedule_models[0], nullable=False,
+            doc="""Defines the schedule model which is going to be used by
+            **TaskJuggler** while scheduling this Task. It has three possible
+            values; **effort**, **duration**, **length**. ``effort`` is the
+            default value. Each value causes this task to be scheduled in
+            different ways:
+
+            ======== ==========================================================
+            effort   If the :attr:`.schedule_model` attribute is set to
+                     **"effort"** then the start and end date values are
+                     calculated so that a resource should spent this much of
+                     work time to complete a Task. For example, a task with
+                     :attr:`.schedule_timing` of 4 days, needs 4 working days.
+                     So it can take 4 working days to complete the Task, but it
+                     doesn't mean that the task duration will be 4 days. If the
+                     resource works overtime then the task will be finished
+                     before 4 days or if the resource will not be available
+                     (due to a vacation) then the task duration can be much
+                     more.
+
+            duration The duration of the task will exactly be equal to
+                     :attr:`.schedule_timing` regardless of the resource
+                     availability. So the difference between :attr:`.start`
+                     and :attr:`.end` attribute values are equal to
+                     :attr:`.schedule_timing`. Essentially making the task
+                     duration in calendar days instead of working days.
+
+            length   In this model the duration of the task will exactly be
+                     equal to the given length value in working days regardless
+                     of the resource availability. So a task with the
+                     :attr:`.schedule_timing` is set to 4 days will be
+                     completed in 4 working days. But again it will not be
+                     always 4 calendar days due to the weekends or non working
+                     days.
+            ======== ==========================================================
+            """
+        )
+
+    @declared_attr
+    def schedule_constraint(cls):
+        return Column(
+            Integer,
+            default=0,
+            nullable=False,
+            doc="""An integer number showing the constraint schema for this
+            task.
+
+            Possible values are:
+
+             ===== ===============
+               0   Constrain None
+               1   Constrain Start
+               2   Constrain End
+               3   Constrain Both
+             ===== ===============
+
+            For convenience use **stalker.models.task.CONSTRAIN_NONE**,
+            **stalker.models.task.CONSTRAIN_START**,
+            **stalker.models.task.CONSTRAIN_END**,
+            **stalker.models.task.CONSTRAIN_BOTH**.
+
+            This value is going to be used to constrain the start and end date
+            values of this task. So if you want to pin the start of a task to a
+            certain date. Set its :attr:`.schedule_constraint` value to
+            **CONSTRAIN_START**. When the task is scheduled by **TaskJuggler**
+            the start date will be pinned to the :attr:`start` attribute of
+            this task.
+
+            And if both of the date values (start and end) wanted to be pinned
+            to certain dates (making the task effectively a ``duration`` task)
+            set the desired :attr:`start` and :attr:`end` and then set the
+            :attr:`schedule_constraint` to **CONSTRAIN_BOTH**.
+            """
+        )
+
+    @validates('schedule_constraint')
+    def _validate_schedule_constraint(self, key, schedule_constraint):
+        """validates the given schedule_constraint value
+        """
+        if not schedule_constraint:
+            schedule_constraint = 0
+
+        if not isinstance(schedule_constraint, int):
+            raise TypeError('%s.schedule_constraint should be an integer '
+                            'between 0 and 3, not %s' % 
+                            (self.__class__.__name__,
+                             schedule_constraint.__class__.__name__))
+
+        schedule_constraint = max(schedule_constraint, 0)
+        schedule_constraint = min(schedule_constraint, 3)
+
+        return schedule_constraint
+
+    @validates('schedule_model')
+    def _validate_schedule_model(self, key, schedule_model):
+        """validates the given schedule_model value
+        """
+        if not schedule_model:
+            schedule_model = defaults.task_schedule_models[0]
+
+        error_message = '%s.schedule_model should be one of %s, not %s' % (
+            self.__class__.__name__, defaults.task_schedule_models,
+            schedule_model.__class__.__name__
+        )
+
+        if not isinstance(schedule_model, (str, unicode)):
+            raise TypeError(error_message)
+
+        if schedule_model not in defaults.task_schedule_models:
+            raise ValueError(error_message)
+
+        return schedule_model
+
+    @validates('schedule_unit')
+    def _validate_schedule_unit(self, key, schedule_unit):
+        """validates the given schedule_unit
+        """
+        if schedule_unit is None:
+            schedule_unit = 'h'
+
+        if not isinstance(schedule_unit, (str, unicode)):
+            raise TypeError(
+                '%s.schedule_unit should be a string value one of %s showing '
+                'the unit of the schedule timing of this %s, not %s' % (
+                    self.__class__.__name__, defaults.datetime_units,
+                    self.__class__.__name__, schedule_unit.__class__.__name__)
+            )
+
+        if schedule_unit not in defaults.datetime_units:
+            raise ValueError(
+                '%s.schedule_unit should be a string value one of %s showing '
+                'the unit of the schedule timing of this %s, not %s' % (
+                    self.__class__.__name__, defaults.datetime_units,
+                    self.__class__.__name__, schedule_unit.__class__.__name__)
+            )
+
+        return schedule_unit
+
+    @validates('schedule_timing')
+    def _validate_schedule_timing(self, key, schedule_timing):
+        """validates the given schedule_timing
+        """
+        if schedule_timing is None:
+            schedule_timing = defaults.timing_resolution.seconds / 60
+            self.schedule_unit = 'min'
+
+        if not isinstance(schedule_timing, (int, float)):
+            raise TypeError(
+                '%s.schedule_timing should be an integer or float number'
+                'showing the value of the timing of this %s, not %s' % (
+                    self.__class__.__name__, self.__class__.__name__,
+                    schedule_timing.__class__.__name__)
+            )
+
+        return schedule_timing
+
+
+
+

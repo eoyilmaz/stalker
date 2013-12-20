@@ -36,11 +36,13 @@ from stalker.models.entity import SimpleEntity, Entity
 from stalker.models.format import ImageFormat
 from stalker.models.link import Link
 from stalker.models.message import Message
-from stalker.models.mixins import (ProjectMixin, ReferenceMixin, DateRangeMixin,
-                                   StatusMixin, TargetEntityTypeMixin,
-                                   CodeMixin, WorkingHoursMixin)
+from stalker.models.mixins import (ProjectMixin, ReferenceMixin,
+                                   DateRangeMixin, StatusMixin,
+                                   TargetEntityTypeMixin, CodeMixin,
+                                   WorkingHoursMixin, ScheduleMixin)
 from stalker.models.note import Note
 from stalker.models.project import Project
+from stalker.models.revision import Revision
 from stalker.models.repository import Repository
 from stalker.models.scene import Scene
 from stalker.models.schedulers import SchedulerBase, TaskJugglerScheduler

@@ -26,12 +26,12 @@ from stalker.db.session import DBSession
 from stalker.models.mixins import DateRangeMixin
 from stalker.models.entity import SimpleEntity
 
+
 class DeclSchedMixA(SimpleEntity, DateRangeMixin):
     __tablename__ = "DeclSchedMixAs"
     __mapper_args__ = {"polymorphic_identity": "DeclSchedMixA"}
     a_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
                   primary_key=True)
-
 
     def __init__(self, **kwargs):
         super(DeclSchedMixA, self).__init__(**kwargs)
@@ -44,7 +44,6 @@ class DeclSchedMixB(SimpleEntity, DateRangeMixin):
     b_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
                   primary_key=True)
 
-
     def __init__(self, **kwargs):
         super(DeclSchedMixB, self).__init__(**kwargs)
         DateRangeMixin.__init__(self, **kwargs)
@@ -53,7 +52,6 @@ class DeclSchedMixB(SimpleEntity, DateRangeMixin):
 class ScheduleMixinTester(unittest2.TestCase):
     """tests DateRangeMixin setup
     """
-
 
     def setUp(self):
         """setup the test
@@ -69,27 +67,25 @@ class ScheduleMixinTester(unittest2.TestCase):
     def tearDown(self):
         """clean up the test
         """
-        if DBSession:
-            DBSession.close()
+        DBSession.remove()
 
     def test_mixin_setup_is_working_properly(self):
         """testing if the mixin setup is working properly
         """
-
         new_A = DeclSchedMixA(**self.kwargs) # should not create any problem
         self.assertEqual(new_A.start, self.kwargs["start"])
         self.assertEqual(new_A.end, self.kwargs["end"])
         self.assertEqual(new_A.duration, self.kwargs["duration"])
-        
+
         #print "----------------------------"
         #print new_A.start
         #print new_A.end
         #print new_A.duration
-        
+
         # try to change the start and check if the duration is also updated
         new_A.start = \
             datetime.datetime(2013, 3, 30, 10, 0) 
-        
+
         self.assertEqual(
             new_A.start,
             datetime.datetime(2013, 3, 30, 10, 0)
@@ -98,12 +94,12 @@ class ScheduleMixinTester(unittest2.TestCase):
             new_A.end,
             datetime.datetime(2013, 4, 9, 10, 0)
         )
-        
+
         self.assertEqual(
             new_A.duration,
             datetime.timedelta(10)
         )
-        
+
         a_start = new_A.start
         a_end = new_A.end
         a_duration = new_A.duration
@@ -134,4 +130,3 @@ class ScheduleMixinTester(unittest2.TestCase):
         self.assertEqual(new_A.start, a_start)
         self.assertEqual(new_A.end, a_end)
         self.assertEqual(new_A.duration, a_duration)
-    

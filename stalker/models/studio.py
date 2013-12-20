@@ -23,8 +23,8 @@ import logging
 import datetime
 import time
 
-from sqlalchemy import Column, Integer, ForeignKey
-from sqlalchemy.orm import validates, relationship
+from sqlalchemy import Column, Integer, ForeignKey, Interval
+from sqlalchemy.orm import validates, relationship, synonym, reconstructor
 
 from stalker import defaults, log
 from stalker.models.entity import SimpleEntity, Entity
@@ -80,6 +80,15 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
       datetime.datetime.now().
 
     :type now: datetime.datetime
+
+    :param timing_resolution: The timing_resolution of the datetime.datetime
+      object in datetime.timedelta. Uses ``timing_resolution`` settings in the
+      :class:`stalker.config.Config` class which defaults to 1 hour. Setting
+      the timing_resolution to less then 5 minutes is not suggested because it
+      is a limit for TaskJuggler.
+
+    :type timing_resolution: datetime.timedelta
+
     """
     __auto_name__ = False
     __tablename__ = 'Studios'
@@ -93,24 +102,103 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
     )
 
     daily_working_hours = Column(Integer, default=8)
+    _timing_resolution = Column("timing_resolution", Interval)
 
     def __init__(self,
                  daily_working_hours=None,
                  now=None,
+                 timing_resolution=None,
                  **kwargs):
         super(Studio, self).__init__(**kwargs)
         DateRangeMixin.__init__(self, **kwargs)
         WorkingHoursMixin.__init__(self, **kwargs)
         # TODO: daily_working_hours should be in WorkingHours not in Studio
+        self.timing_resolution = timing_resolution
         self.daily_working_hours = daily_working_hours
         self._now = None
         self.now = self._validate_now(now)
         self._scheduler = None
 
-    # @reconstructor
-    # def __init_on_load__(self):
-    #     self._now = None
-    #     super(Studio, self).__init_on_load__()
+        # update defaults
+        self.update_defaults()
+
+    def update_defaults(self):
+        """updates the default values with the studio
+        """
+        logger.debug('updating defaults with Studio instance')
+        from stalker import defaults
+        if self.daily_working_hours:
+            defaults.daily_working_hours = self.daily_working_hours
+            logger.debug(
+                'updated defaults.daily_working_hours: %s' %
+                defaults.daily_working_hours
+            )
+        else:
+            logger.debug('can not update defaults.daily_working_hours')
+
+        if self.weekly_working_days:
+            defaults.weekly_working_days = self.weekly_working_days
+            logger.debug(
+                'updated defaults.weekly_working_days: %s' %
+                defaults.weekly_working_days
+            )
+        else:
+            logger.debug('can not update defaults.weekly_working_days')
+
+        if self.weekly_working_hours:
+            defaults.weekly_working_hours = self.weekly_working_hours
+            logger.debug(
+                'updated defaults.weekly_working_hours: %s' %
+                defaults.weekly_working_hours
+            )
+        else:
+            logger.debug('can not update defaults.weekly_working_hours')
+
+        if self.yearly_working_days:
+            defaults.yearly_working_days = self.yearly_working_days
+            logger.debug(
+                'updated defaults.yearly_working_days: %s' %
+                defaults.yearly_working_days
+            )
+        else:
+            logger.debug('can not update defaults.yearly_working_days')
+
+        if self.timing_resolution:
+            defaults.timing_resolution = self.timing_resolution
+            defaults.task_duration = self.timing_resolution
+            logger.debug(
+                'updated defaults.timing_resolution: %s' %
+                defaults.timing_resolution
+            )
+            logger.debug(
+                'updated defaults.task_duration: %s' %
+                defaults.task_duration
+            )
+        else:
+            logger.debug('can not update defaults.timing_resolution')
+            logger.debug('can not update defaults.task_duration')
+
+        logger.debug("""don updating defaults: 
+        daily_working_hours  : %(daily_working_hours)s
+        weekly_working_days  : %(weekly_working_days)s
+        weekly_working_hours : %(weekly_working_hours)s
+        yearly_working_days  : %(yearly_working_days)s
+        timing_resolution    : %(timing_resolution)s
+        task_duration        : %(task_duration)s
+        """ % {
+            'daily_working_hours': defaults.daily_working_hours,
+            'weekly_working_days': defaults.weekly_working_days,
+            'weekly_working_hours': defaults.weekly_working_hours,
+            'yearly_working_days': defaults.yearly_working_days,
+            'timing_resolution': defaults.timing_resolution,
+            'task_duration': defaults.task_duration
+        })
+
+    @reconstructor
+    def __init_on_load__(self):
+        """update defaults on load
+        """
+        self.update_defaults()
 
     @validates('daily_working_hours')
     def _validate_daily_working_hours(self, key, dwh):
@@ -118,12 +206,12 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         """
         if dwh is None:
             dwh = defaults.daily_working_hours
-        else:
-            if not isinstance(dwh, int):
-                raise TypeError('%s.daily_working_hours should be an integer, '
-                                'not %s' %
-                                (self.__class__.__name__,
-                                 dwh.__class__.__name__))
+
+        if not isinstance(dwh, int):
+            raise TypeError('%s.daily_working_hours should be an integer, '
+                            'not %s' %
+                            (self.__class__.__name__,
+                             dwh.__class__.__name__))
         return dwh
 
     def _validate_now(self, now_in):
@@ -290,6 +378,53 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         hours
         """
         raise NotImplementedError('this is not implemented yet')
+
+    def _timing_resolution_getter(self):
+        """returns the timing_resolution
+        """
+        return self._timing_resolution
+
+    def _timing_resolution_setter(self, res_in):
+        """sets the timing_resolution
+        """
+        self._timing_resolution = self._validate_timing_resolution(res_in)
+        logger.debug('self._timing_resolution: %s' % self._timing_resolution)
+        # update date values
+        if self.start and self.end and self.duration:
+            self._start, self._end, self._duration = \
+                self._validate_dates(
+                    self.round_time(self.start),
+                    self.round_time(self.end),
+                    None
+                )
+
+    timing_resolution = synonym(
+        '_timing_resolution',
+        descriptor=property(
+            _timing_resolution_getter,
+            _timing_resolution_setter,
+            doc="""The timing_resolution of this object.
+
+            Can be set to any value that is representable with
+            datetime.timedelta. The default value is 1 hour. Whenever it is
+            changed the start, end and duration values will be updated.
+            """
+        )
+    )
+
+    def _validate_timing_resolution(self, timing_resolution):
+        """validates the given timing_resolution value
+        """
+        if timing_resolution is None:
+            timing_resolution = defaults.timing_resolution
+
+        if not isinstance(timing_resolution, datetime.timedelta):
+            raise TypeError('%s.timing_resolution should be an instance of '
+                            'datetime.timedelta not, %s' %
+                            (self.__class__.__name__,
+                             timing_resolution.__class__.__name__))
+
+        return timing_resolution
 
 
 class WorkingHours(object):

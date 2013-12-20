@@ -21,17 +21,14 @@
 import datetime
 import unittest2
 
+from stalker import log
+from stalker.db.session import DBSession
 from stalker import (Asset, Entity, ImageFormat, Link, Project, Repository,
                      Sequence, Shot, Status, StatusList, Structure, Task, Type,
                      User, db, Ticket)
-from stalker import config
 
-defaults = config.Config()
-
-from stalker.db.session import DBSession
 
 import logging
-from stalker import log
 
 logger = logging.getLogger('stalker.models.project')
 logger.setLevel(log.logging_level)

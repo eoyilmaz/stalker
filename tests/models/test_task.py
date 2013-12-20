@@ -22,19 +22,14 @@ import datetime
 import unittest2
 from stalker.exceptions import CircularDependencyError
 
-from stalker import config
-
-defaults = config.Config()
-
 from stalker import db
+from stalker import defaults
 from stalker.db.session import DBSession
 from stalker import (Entity, Project, Repository, StatusList, Status, Task,
                      Type, User, TimeLog)
-
 from stalker.models.task import CONSTRAIN_END, CONSTRAIN_BOTH
 
 import logging
-
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
@@ -45,19 +40,13 @@ class TaskTester(unittest2.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        """set up tests in class level
+        """run once
         """
-        DBSession.remove()
-        DBSession.configure(extension=None)
-
-    @classmethod
-    def tearDownClass(cls):
-        """clean up the test
-        """
-        DBSession.configure(extension=None)
+        defaults.timing_resolution = datetime.timedelta(hours=1)
+        defaults.task_duration = datetime.timedelta(hours=1)
 
     def setUp(self):
-        """setup the test
+        """run before every test
         """
         # create a new DBSession
         db.setup({
@@ -180,6 +169,13 @@ class TaskTester(unittest2.TestCase):
 
         # create a test Task
         self.test_task = Task(**self.kwargs)
+
+    def tearDown(self):
+        """run after every test and clean up
+        """
+        DBSession.remove()
+        defaults.timing_resolution = datetime.timedelta(hours=1)
+        defaults.task_duration = datetime.timedelta(hours=1)
 
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for
@@ -1468,114 +1464,6 @@ class TaskTester(unittest2.TestCase):
         new_task.watchers.remove(new_user2)
         self.assertNotIn(new_task, new_user2.watching)
 
-    def test_schedule_timing_argument_skipped(self):
-        """testing if the schedule_timing attribute will be equal to the
-        stalker.config.Config.timing_resolution.seconds/3600 if the
-        schedule_timing argument is skipped
-        """
-        self.kwargs.pop("schedule_timing")
-        new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.schedule_timing,
-                         defaults.timing_resolution.seconds / 3600)
-
-    def test_schedule_timing_argument_is_None(self):
-        """testing if the schedule_timing attribute will be equal to the
-        stalker.config.Config.timing_resolution.seconds/3600 if the
-        schedule_timing argument is None
-        """
-        self.kwargs["schedule_timing"] = None
-        new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.schedule_timing,
-                         defaults.timing_resolution.seconds / 3600)
-
-    def test_schedule_timing_attribute_is_set_to_None(self):
-        """testing if the schedule_timing attribute will be equal to the
-        stalker.config.Config.timing_resolution.seconds/3600 if it is set to
-        None
-        """
-        self.test_task.schedule_timing = None
-        self.assertEqual(self.test_task.schedule_timing,
-                         defaults.timing_resolution.seconds / 3600)
-
-    def test_schedule_timing_argument_is_not_an_integer_or_float(self):
-        """testing if a TypeError will be raised when the schedule_timing
-        is not an integer or float
-        """
-        self.kwargs["schedule_timing"] = '10d'
-        self.assertRaises(TypeError, Task, **self.kwargs)
-
-    def test_schedule_timing_attribute_is_not_an_integer_or_float(self):
-        """testing if a TypeError will be raised when the schedule_timing
-        attribute is not set to an integer or float
-        """
-        self.assertRaises(TypeError, setattr, self.test_task,
-                          'schedule_timing', '10d')
-
-    def test_schedule_timing_attribute_is_working_properly(self):
-        """testing if the schedule_timing attribute is working properly
-        """
-        test_value = 18
-        self.test_task.schedule_timing = test_value
-        self.assertEqual(self.test_task.schedule_timing, test_value)
-
-    def test_schedule_unit_argument_skipped(self):
-        """testing if the schedule_unit attribute will be 'h' if the
-        schedule_unit argument is skipped
-        """
-        self.kwargs.pop("schedule_unit")
-        new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.schedule_unit, 'h')
-
-    def test_schedule_unit_argument_is_None(self):
-        """testing if the schedule_unit attribute will be 'h' if the
-        schedule_unit argument is None
-        """
-        self.kwargs["schedule_unit"] = None
-        new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.schedule_unit, 'h')
-
-    def test_schedule_unit_attribute_is_set_to_None(self):
-        """testing if the schedule_unit attribute will be 'h' if it is set to
-        None
-        """
-        self.test_task.schedule_unit = None
-        self.assertEqual(self.test_task.schedule_unit, 'h')
-
-    def test_schedule_unit_argument_is_not_a_string(self):
-        """testing if a TypeError will be raised when the schedule_unit is not
-        an integer
-        """
-        self.kwargs["schedule_unit"] = 10
-        self.assertRaises(TypeError, Task, **self.kwargs)
-
-    def test_schedule_unit_attribute_is_not_a_string(self):
-        """testing if a TypeError will be raised when the schedule_unit
-        attribute is not set to a string
-        """
-        self.assertRaises(TypeError, setattr, self.test_task, 'schedule_unit',
-                          23)
-
-    def test_schedule_unit_attribute_is_working_properly(self):
-        """testing if the schedule_unit attribute is working properly
-        """
-        test_value = 'w'
-        self.test_task.schedule_unit = test_value
-        self.assertEqual(self.test_task.schedule_unit, test_value)
-
-    def test_schedule_unit_argument_value_is_not_in_defaults_datetime_units(self):
-        """testing if a ValueError will be raised when the schedule_unit value
-        is not in stalker.config.Config.datetime_units list
-        """
-        self.kwargs['schedule_unit'] = 'os'
-        self.assertRaises(ValueError, Task, **self.kwargs)
-
-    def test_schedule_unit_attribute_value_is_not_in_defaults_datetime_units(self):
-        """testing if a ValueError will be raised when it is set to a value
-        which is not in stalker.config.Config.datetime_units list
-        """
-        self.assertRaises(ValueError, setattr, self.test_task, 'schedule_unit',
-                          'so')
-
     def test_depends_argument_is_skipped_depends_attribute_is_empty_list(self):
         """testing if the depends attribute is an empty list when the depends
         argument is skipped
@@ -1825,19 +1713,23 @@ class TaskTester(unittest2.TestCase):
         td = datetime.timedelta
         now = dt.now()
 
+        defaults.timing_resolution = td(hours=1)
+        defaults.task_duration = td(hours=1)
+        defaults.daily_working_hours = 9
+
         parent_task = Task(**self.kwargs)
 
         self.test_task.time_logs = []
-        book1 = TimeLog(
+        tlog1 = TimeLog(
             task=self.test_task,
             resource=self.test_task.resources[0],
             start=now,
             end=now + td(hours=2)
         )
 
-        self.assertIn(book1, self.test_task.time_logs)
+        self.assertIn(tlog1, self.test_task.time_logs)
 
-        book2 = TimeLog(
+        tlog2 = TimeLog(
             task=self.test_task,
             resource=self.test_task.resources[1],
             start=now,
@@ -1845,7 +1737,7 @@ class TaskTester(unittest2.TestCase):
         )
         self.test_task.parent = parent_task
 
-        self.assertIn(book2, self.test_task.time_logs)
+        self.assertIn(tlog2, self.test_task.time_logs)
         self.assertEqual(self.test_task.total_logged_seconds, 7 * 3600)
         self.assertEqual(self.test_task.schedule_seconds, 9 * 3600)
         self.assertAlmostEqual(
@@ -2195,7 +2087,13 @@ class TaskTester(unittest2.TestCase):
         # no studio, using defaults
         from stalker import Studio
 
-        studio = Studio(name='Test Studio')
+        defaults.timing_resolution = datetime.timedelta(hours=1)
+        defaults.task_duration = datetime.timedelta(hours=1)
+
+        studio = Studio(
+            name='Test Studio',
+            timing_resolution=datetime.timedelta(hours=1)
+        )
 
         self.kwargs['schedule_model'] = 'effort'
 
@@ -2371,6 +2269,10 @@ class TaskTester(unittest2.TestCase):
         """testing if schedule_seconds attribute is working properly for a
         container task
         """
+        defaults.timing_resolution = datetime.timedelta(hours=1)
+        defaults.task_duration = datetime.timedelta(hours=1)
+        defaults.daily_working_hours = 9
+
         # no studio, using defaults
         parent_task1 = Task(**self.kwargs)
         self.assertEqual(parent_task1.schedule_seconds, 9 * 3600)
@@ -3810,167 +3712,6 @@ class TaskTester(unittest2.TestCase):
         self.test_task.computed_end = None
         self.assertFalse(self.test_task.is_scheduled)
 
-    def test_schedule_model_attribute_is_effort_by_default(self):
-        """testing if the schedule_model is effort by default
-        """
-        self.assertEqual(self.test_task.schedule_model, 'effort')
-
-    def test_schedule_model_argument_is_None(self):
-        """testing if the schedule model attribute will be 'effort' if the
-        schedule_model argument is set to None
-        """
-        self.kwargs['schedule_model'] = None
-        new_task = Task(**self.kwargs)
-        self.assertEqual(
-            new_task.schedule_model,
-            'effort'
-        )
-
-    def test_schedule_model_attribute_is_set_to_None(self):
-        """testing if the schedule_model will be 'effort' if it is set to None
-        """
-        self.test_task.schedule_model = None
-        self.assertEqual(
-            self.test_task.schedule_model,
-            'effort'
-        )
-
-    def test_schedule_model_argument_is_not_a_string(self):
-        """testing if a TypeError will be raised when the schedule_model
-        argument is not a string
-        """
-        self.kwargs['schedule_model'] = 234
-        self.assertRaises(TypeError, Task, **self.kwargs)
-
-    def test_schedule_model_attribute_is_not_a_string(self):
-        """testing if a TypeError will be raised when the schedule_model
-        attribute is set to a value other than a string
-        """
-        self.assertRaises(
-            TypeError, setattr, self.test_task, 'schedule_model', 2343
-        )
-
-    def test_schedule_model_argument_is_not_in_correct_value(self):
-        """testing if a ValueError will be raised when the schedule_model
-        argument is not in correct value
-        """
-        self.kwargs['schedule_model'] = 'not in the list'
-        self.assertRaises(ValueError, Task, **self.kwargs)
-
-    def test_schedule_model_attribute_is_not_in_correct_value(self):
-        """testing if a ValueError will be raised when the schedule_model
-        attribute is not set to a correct value
-        """
-        self.assertRaises(
-            ValueError, setattr, self.test_task, 'schedule_model',
-            'not in the list'
-        )
-
-    def test_schedule_model_argument_is_working_properly(self):
-        """testing if the schedule_model argument value is correctly passed to
-        the schedule_model attribute
-        """
-        test_value = 'duration'
-        self.kwargs['schedule_model'] = test_value
-        new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.schedule_model, test_value)
-
-    def test_schedule_model_attribute_is_working_properly(self):
-        """testing if the schedule_model attribute is working properly
-        """
-        test_value = 'duration'
-        self.assertNotEqual(
-            self.test_task.schedule_model, test_value
-        )
-        self.test_task.schedule_model = test_value
-        self.assertEqual(
-            self.test_task.schedule_model, test_value
-        )
-
-    def test_schedule_constraint_is_0_by_default(self):
-        """testing if the schedule_constraint attribute is None by default
-        """
-        self.assertEqual(self.test_task.schedule_constraint, 0)
-
-    def test_schedule_constraint_argument_is_skipped(self):
-        """testing if the schedule_constraint attribute will be 0 if
-        schedule_constraint is skipped
-        """
-        try:
-            self.kwargs.pop('schedule_constraint')
-        except KeyError:
-            pass
-        new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.schedule_constraint, 0)
-
-    def test_schedule_constraint_argument_is_None(self):
-        """testing if the schedule_constraint attribute will be 0 if
-        schedule_constraint is None
-        """
-        self.kwargs['schedule_constraint'] = None
-        new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.schedule_constraint, 0)
-
-    def test_schedule_constraint_attribute_is_set_to_None(self):
-        """testing if the schedule_constraint attribute will be 0 if
-        it is set to None
-        """
-        self.test_task.schedule_constraint = None
-        self.assertEqual(self.test_task.schedule_constraint, 0)
-
-    def test_schedule_constraint_argument_is_not_an_integer(self):
-        """testing if a TypeError will be raised when the schedule_constraint
-        argument is not an integer
-        """
-        self.kwargs['schedule_constraint'] = 'not an integer'
-        self.assertRaises(TypeError, Task, **self.kwargs)
-
-    def test_schedule_constraint_attribute_is_not_an_integer(self):
-        """testing if a TypeError will be raised when the schedule_constraint
-        attribute is set to a value other than an integer
-        """
-        self.assertRaises(TypeError, setattr, self.test_task,
-                          'schedule_constraint', 'not an integer')
-
-    def test_schedule_constraint_argument_is_working_properly(self):
-        """testing if the schedule_constraint argument value is correctly
-        passed to schedule_constraint attribute
-        """
-        test_value = 2
-        self.kwargs['schedule_constraint'] = test_value
-        new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.schedule_constraint, test_value)
-
-    def test_schedule_constraint_attribute_is_working_properly(self):
-        """testing if the schedule_constraint attribute value is correctly
-        changed
-        """
-        test_value = 3
-        self.test_task.schedule_constraint = test_value
-        self.assertEqual(self.test_task.schedule_constraint, test_value)
-
-    def test_schedule_constraint_argument_value_is_out_of_range(self):
-        """testing if the value of schedule_constraint argument value will be
-        clamped to the [0-3] range if it is out of range
-        """
-        self.kwargs['schedule_constraint'] = -1
-        new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.schedule_constraint, 0)
-
-        self.kwargs['schedule_constraint'] = 4
-        new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.schedule_constraint, 3)
-
-    def test_schedule_constraint_attribute_value_is_out_of_range(self):
-        """testing if the value of schedule_constraint attribute value will be
-        clamped to the [0-3] range if it is out of range
-        """
-        self.test_task.schedule_constraint = -1
-        self.assertEqual(self.test_task.schedule_constraint, 0)
-
-        self.test_task.schedule_constraint = 4
-        self.assertEqual(self.test_task.schedule_constraint, 3)
-
     def test_parents_attribute_is_read_only(self):
         """testing if the parents attribute is read only
         """
@@ -4220,27 +3961,16 @@ class TaskTester(unittest2.TestCase):
     def test_revisions_attribute_is_an_empty_list_by_default(self):
         """testing if the revisions attribute is an empty list by default
         """
-        self.fail('test is not implemented yet')
+        self.assertEqual(self.test_task.revisions, [])
 
-    def test_revisions_attribute_is_set_to_None(self):
-        """testing if a TypeError will be raised when the revisions attribute
-        is set to None
+    def test_revisions_attribute_is_read_only(self):
+        """testing if the revisions attribute is read only
         """
-        self.fail('test is not implemented yet')
+        # create some revisions
+        from stalker import Revision
+        rev1 = Revision(task=self.test_task)
+        rev2 = Revision(task=self.test_task)
+        rev3 = Revision(task=self.test_task)
 
-    def test_revisions_attribute_will_accept_lists_only(self):
-        """testing if a TypeError will be raised when the value assigned to the
-        revisions attribute is something other than a list
-        """
-        self.fail('test is not implemented yet')
-
-    def test_revisions_attribute_will_accept_lists_of_Revisions_only(self):
-        """testing if a TypeError will be raised when the value assigned to the
-        revisions attribute is something other than a list of Revisions
-        """
-        self.fail('test is not implemented yet')
-
-    def test_revisions_attribute_is_working_properly(self):
-        """testing if the revisions is working properly
-        """
-        self.fail('test is not implemented yet')
+        self.assertRaises(AttributeError, setattr, self.test_task, 'revisions',
+                          [rev1, rev2, rev3])

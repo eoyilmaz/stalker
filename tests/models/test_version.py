@@ -853,11 +853,23 @@ class VersionTester(unittest2.TestCase):
             'tp/SH001/Task1'
         )
 
-        new_version1.extension = '.ma'
+        extension = '.ma'
+        new_version1.extension = extension
         self.assertEqual(
             new_version1.filename,
             'Task1_TestTake_v001.ma'
         )
+
+        # rename the task and update the paths
+        self.test_task1.name = 'Task2'
+
+        # now call update_paths and expect the extension to be preserved
+        new_version1.update_paths()
+        self.assertEqual(
+            new_version1.filename,
+            'Task2_TestTake_v001.ma'
+        )
+        self.assertEqual(new_version1.extension, extension)
 
     def test_update_paths_will_raise_a_RuntimeError_if_there_is_no_suitable_FilenameTemplate(self):
         """testing if update_paths method will raise a RuntimeError if there is
