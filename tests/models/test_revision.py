@@ -17,10 +17,11 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
 import tempfile
 import datetime
-
 import unittest2
+
 from stalker import (Task, Project, User, Status, StatusList, Repository,
                      Structure, Revision, TimeLog)
 
@@ -185,3 +186,26 @@ class RevisionTestCase(unittest2.TestCase):
         # and the schedule_timing of 6
         self.assertEqual(task1.schedule_timing, 6)
 
+        # create another revision with 15 minutes of schedule timing
+        rev2 = Revision(
+            task=task1,
+            schedule_timing=15,
+            schedule_unit='min'
+        )
+
+        # and expect the schedule_unit to be converted to minutes
+        self.assertEqual(task1.schedule_unit, 'min')
+
+        # and the schedule_timing of 375
+        self.assertEqual(task1.schedule_timing, 315)
+
+        rev3 = Revision(
+            task=task1,
+            schedule_timing=120,
+            schedule_unit='min'
+        )
+        # and expect the schedule_unit to be converted to minutes
+        self.assertEqual(task1.schedule_unit, 'h')
+
+        # and the schedule_timing of 375
+        self.assertEqual(task1.schedule_timing, 7)

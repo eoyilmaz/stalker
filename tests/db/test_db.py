@@ -385,7 +385,6 @@ class DatabaseModelsTester(unittest2.TestCase):
         DBSession.remove()
         # restore defaults.timing_resolution
         stalker.defaults.timing_resolution = datetime.timedelta(hours=1)
-        stalker.defaults.task_duration = datetime.timedelta(hours=1)
 
     def test_persistence_of_Asset(self):
         """testing the persistence of Asset

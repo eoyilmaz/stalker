@@ -159,7 +159,6 @@ class Config(object):
 
         # Task Management
         timing_resolution=datetime.timedelta(hours=1),
-        task_duration=datetime.timedelta(hours=1),
 
         task_priority=500,
 
@@ -178,7 +177,7 @@ class Config(object):
         daily_working_hours=9,
         weekly_working_days=5,
         weekly_working_hours=45,
-        yearly_working_days=260.714,  # 5 * 52.1428
+        yearly_working_days=261,  # math.ceil(5 * 52.1428)
 
         day_order=['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'],
 

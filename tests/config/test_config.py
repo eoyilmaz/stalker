@@ -56,7 +56,6 @@ class ConfigTester(unittest2.TestCase):
         shutil.rmtree(self.temp_config_folder)
         # restore defaults.timing_resolution
         stalker.defaults.timing_resolution = datetime.timedelta(hours=1)
-        stalker.defaults.task_duration = datetime.timedelta(hours=1)
 
     def test_config_variable_updates_with_user_config(self):
         """testing if the database_file_name will be updated by the user

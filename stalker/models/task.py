@@ -136,35 +136,25 @@ class TimeLog(Entity, DateRangeMixin):
         :param task: The task that is going to be adjusted
         """
         # do the schedule_timing expansion here
-        total_seconds = self.duration.days * 86400 + self.duration.seconds
-        remaining_seconds = task.remaining_seconds
+        task_remaining_seconds = task.remaining_seconds
+        tlog_total_seconds = self.duration.days * 86400 + self.duration.seconds
 
-        conversion_ratio = 1
-        if task.schedule_unit == 'min':
-            conversion_ratio = 60
-        elif task.schedule_unit == 'h':
-            conversion_ratio = 3600
-        elif task.schedule_unit == 'd':
-            conversion_ratio = defaults.daily_working_hours * 3600
-        elif task.schedule_unit == 'w':
-            conversion_ratio = defaults.weekly_working_hours * 3600
-        elif task.schedule_unit == 'm':
-            conversion_ratio = defaults.weekly_working_hours * 4 * 3600
-        elif task.schedule_unit == 'y':
-            conversion_ratio = defaults.yearly_working_days * \
-                               defaults.daily_working_hours * 3600
-        logger.debug('remaining_seconds : %s' % remaining_seconds)
-        logger.debug('total_seconds     : %s' % total_seconds)
-        logger.debug('conversion_ratio  : %s' % conversion_ratio)
-        if remaining_seconds < total_seconds:
-            # expand it
-            # first convert the task.schedule_timing to hours (by using studio
-            # or defaults)
-            # then add the needed seconds as hours
+        logger.debug('task_remaining_seconds  : %s' % task_remaining_seconds)
+        logger.debug('tlog_total_seconds      : %s' % tlog_total_seconds)
+
+        if task_remaining_seconds < tlog_total_seconds:
+            # expand the task
+            # first convert the task.schedule_timing to seconds
+            # then add the needed seconds to it then convert to least
+            # meaningful time unit
 
             # do it normally
-            task.schedule_timing = float(task.schedule_timing) + \
-                float(total_seconds - remaining_seconds) / conversion_ratio
+            task.schedule_timing, task.schedule_unit = \
+                task.least_meaningful_time_unit(
+                    task.schedule_seconds
+                    + tlog_total_seconds
+                    - task_remaining_seconds
+                )
 
     @validates("task")
     def _validate_task(self, key, task):
@@ -889,7 +879,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
                 schedule_unit,
                 None
             )
-            if not unit: # we are in a pre flushing state do not do anything
+            if not unit:  # we are in a pre flushing state do not do anything
                 return
 
             kwargs = {
@@ -1330,44 +1320,6 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         )
     )
 
-    def _calculate_seconds(self, timing, unit):
-        """Calculates the seconds from the timing and unit values
-
-        :param float timing: The timing value as an float
-        :param str unit: A string which has a value one of 'min', 'h', 'd',
-          'w', 'm', 'y' showing the timing unit
-        :return int: An integer value showing the total seconds
-        """
-        if not timing:
-            return 0
-
-        # for leaf tasks do it normally
-        if unit == 'min':
-            return timing * 60
-
-        elif unit == 'h':
-            return timing * 3600
-
-        elif unit == 'd':
-            # we need to have a studio or defaults
-            return timing * \
-                defaults.daily_working_hours * 3600
-
-        elif unit == 'w':
-            return timing * \
-                defaults.weekly_working_hours * 3600
-
-        elif unit == 'm':
-            return timing * \
-                4 * defaults.weekly_working_hours * 3600
-
-        elif unit == 'y':
-            return timing * \
-                defaults.yearly_working_days * \
-                defaults.daily_working_hours * 3600
-
-        return 0
-
     def _schedule_seconds_getter(self):
         """returns the total effort, length or duration in seconds, for
         completeness calculation
@@ -1378,14 +1330,11 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
                 self.update_schedule_info()
             return self._schedule_seconds
         else:
-            schedule_timing = self.schedule_timing
-            schedule_model = self.schedule_model
-            schedule_unit = self.schedule_unit
-
-            if schedule_model == 'effort':
-                return \
-                    self._calculate_seconds(schedule_timing, schedule_unit)
-            return 0
+            return self.to_seconds(
+                self.schedule_timing,
+                self.schedule_unit,
+                self.schedule_model
+            )
 
     def _schedule_seconds_setter(self, seconds):
         """Sets the schedule_seconds of this task. Mainly used for container
@@ -1644,11 +1593,11 @@ def update_parents_schedule_seconds_with_schedule_timing(
     """
     # update parents schedule_seconds attribute
     if task.parent:
-        old_schedule_seconds = task._calculate_seconds(
-            old_schedule_timing, task.schedule_unit
+        old_schedule_seconds = task.to_seconds(
+            old_schedule_timing, task.schedule_unit, task.schedule_model
         )
-        new_schedule_seconds = task._calculate_seconds(
-            new_schedule_timing, task.schedule_unit
+        new_schedule_seconds = task.to_seconds(
+            new_schedule_timing, task.schedule_unit, task.schedule_model
         )
         # remove the old and add the new one
         task.parent.schedule_seconds = \
@@ -1677,11 +1626,11 @@ def update_parents_schedule_seconds_with_schedule_unit(
         schedule_timing = 0
         if task.schedule_timing:
             schedule_timing = task.schedule_timing
-        old_schedule_seconds = task._calculate_seconds(
-            schedule_timing, old_schedule_unit
+        old_schedule_seconds = task.to_seconds(
+            schedule_timing, old_schedule_unit, task.schedule_model
         )
-        new_schedule_seconds = task._calculate_seconds(
-            schedule_timing, new_schedule_unit
+        new_schedule_seconds = task.to_seconds(
+            schedule_timing, new_schedule_unit, task.schedule_model
         )
         # remove the old and add the new one
         parent_schedule_seconds = 0

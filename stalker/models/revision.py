@@ -17,13 +17,16 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+
 from sqlalchemy import Column, Integer, ForeignKey
-from sqlalchemy.exc import UnboundExecutionError
 from sqlalchemy.orm import relationship, validates
-from stalker import defaults
 
 from stalker.models.entity import SimpleEntity
 from stalker.models.mixins import ScheduleMixin
+
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 class Revision(SimpleEntity, ScheduleMixin):
@@ -111,32 +114,17 @@ class Revision(SimpleEntity, ScheduleMixin):
             )
 
         # adjust the timing
-        task.schedule_timing = task.total_logged_seconds / 3600
-        task.schedule_unit = 'h'
+        seconds = task.total_logged_seconds + self.schedule_seconds
+        logger.debug('seconds: %s' % seconds)
 
-        # and extend it with this revision
-        # convert the schedule_unit to hours
+        # convert the schedule_unit to the most meaningful one
+        schedule_timing, schedule_unit = \
+            self.least_meaningful_time_unit(seconds)
 
-        # do nothing if the schedule_unit is 'h'
-        # TODO: try converting it in to minutes if it has some residuals
-        if self.schedule_unit == 'd':
-            self.schedule_timing = \
-                self.schedule_timing * defaults.daily_working_hours
-        elif self.schedule_unit == 'w':
-            self.schedule_timing = \
-                self.schedule_timing * defaults.weekly_working_hours
-        elif self.schedule_unit == 'm':
-            self.schedule_timing = \
-                self.schedule_timing * defaults.weekly_working_hours * 4
-        elif self.schedule_unit == 'y':
-            self.schedule_timing = \
-                int(self.schedule_timing * defaults.yearly_working_days *
-                    defaults.daily_working_hours)
-        self.schedule_unit = 'h'
-
-        # add the revisions timing to the task
-        task.schedule_unit = 'h'
-        task.schedule_timing += self.schedule_timing
+        # first set the unit to prevent task instance to reschedule itself
+        # incorrectly
+        task.schedule_unit = schedule_unit
+        task.schedule_timing = schedule_timing
 
         return task
 

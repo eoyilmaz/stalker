@@ -71,7 +71,7 @@ class DateRangeMixinTester(unittest2.TestCase):
             'duration': self.duration
         }
         db.setup({'sqlalchemy.url': 'sqlite:///:memory:'})
-        self.mock_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
+        self.test_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
 
     def tearDown(self):
         """clean up the test
@@ -79,7 +79,6 @@ class DateRangeMixinTester(unittest2.TestCase):
         DBSession.remove()
         # restore defaults.timing_resolution
         defaults.timing_resolution = datetime.timedelta(hours=1)
-        defaults.task_duration = datetime.timedelta(hours=1)
 
     def test_start_argument_is_not_a_date_object(self):
         """testing if defaults will be used for the start attribute when
@@ -106,39 +105,39 @@ class DateRangeMixinTester(unittest2.TestCase):
         test_values = [1, 1.2, "str", ["a", "date"]]
 
         for test_value in test_values:
-            end = self.mock_foo_obj.end
-            duration = self.mock_foo_obj.duration
+            end = self.test_foo_obj.end
+            duration = self.test_foo_obj.duration
 
-            self.mock_foo_obj.start = test_value
+            self.test_foo_obj.start = test_value
 
             self.assertEqual(
-                self.mock_foo_obj.start,
-                self.mock_foo_obj.end - self.mock_foo_obj.duration
+                self.test_foo_obj.start,
+                self.test_foo_obj.end - self.test_foo_obj.duration
             )
 
             # check if we still have the same end
-            self.assertEqual(self.mock_foo_obj.end, end)
+            self.assertEqual(self.test_foo_obj.end, end)
 
             # check if we still have the same duration
-            self.assertEqual(self.mock_foo_obj.duration, duration)
+            self.assertEqual(self.test_foo_obj.duration, duration)
 
     def test_start_attribute_is_set_to_None_use_the_default_value(self):
         """testing if setting the start attribute to None will update the
         start to today
         """
-        self.mock_foo_obj.start = None
+        self.test_foo_obj.start = None
         self.assertEqual(
-            self.mock_foo_obj.start,
+            self.test_foo_obj.start,
             datetime.datetime(2013, 3, 22, 15, 00)
         )
-        self.assertIsInstance(self.mock_foo_obj.start, datetime.datetime)
+        self.assertIsInstance(self.test_foo_obj.start, datetime.datetime)
 
     def test_start_attribute_works_properly(self):
         """testing if the start properly is working properly
         """
         test_value = datetime.datetime(year=2011, month=1, day=1)
-        self.mock_foo_obj.start = test_value
-        self.assertEqual(self.mock_foo_obj.start, test_value)
+        self.test_foo_obj.start = test_value
+        self.assertEqual(self.test_foo_obj.start, test_value)
 
     def test_end_argument_is_not_a_date_object(self):
         """testing if default values will be for the end attribute used when
@@ -164,11 +163,11 @@ class DateRangeMixinTester(unittest2.TestCase):
                        datetime.timedelta(days=100)]
 
         for test_value in test_values:
-            self.mock_foo_obj.end = test_value
+            self.test_foo_obj.end = test_value
 
-            self.assertEqual(self.mock_foo_obj.end,
-                             self.mock_foo_obj.start + \
-                             self.mock_foo_obj.duration)
+            self.assertEqual(self.test_foo_obj.end,
+                             self.test_foo_obj.start + \
+                             self.test_foo_obj.duration)
 
     def test_end_argument_is_tried_to_set_to_a_time_before_start(self):
         """testing if end attribute will be updated to
@@ -189,21 +188,21 @@ class DateRangeMixinTester(unittest2.TestCase):
         and duration attributes when the end is tried to be set to a date
         before start
         """
-        new_end = self.mock_foo_obj.start - datetime.timedelta(days=10)
-        self.mock_foo_obj.end = new_end
-        self.assertEqual(self.mock_foo_obj.end,
-                         self.mock_foo_obj.start + \
-                         self.mock_foo_obj.duration)
+        new_end = self.test_foo_obj.start - datetime.timedelta(days=10)
+        self.test_foo_obj.end = new_end
+        self.assertEqual(self.test_foo_obj.end,
+                         self.test_foo_obj.start + \
+                         self.test_foo_obj.duration)
 
     def test_end_attribute_is_shifted_when_start_passes_it(self):
         """testing if end attribute will be shifted when the start
         attribute passes it
         """
-        time_delta = self.mock_foo_obj.end - self.mock_foo_obj.start
-        self.mock_foo_obj.start += 2 * time_delta
+        time_delta = self.test_foo_obj.end - self.test_foo_obj.start
+        self.test_foo_obj.start += 2 * time_delta
 
         self.assertEqual(
-            self.mock_foo_obj.end - self.mock_foo_obj.start,
+            self.test_foo_obj.end - self.test_foo_obj.start,
             time_delta
         )
 
@@ -224,9 +223,9 @@ class DateRangeMixinTester(unittest2.TestCase):
                              new_foo_obj.end - new_foo_obj.start)
 
     def test_duration_argument_is_not_an_instance_of_date_when_start_argument_is_missing(self):
-        """testing if defaults for the duration attribute will be used  when
-        the duration argument is not an instance of datetime.datetime class
-        when start argument is also missing
+        """testing if defaults.timing_resolution will be used when the duration
+        argument is not an instance of datetime.datetime class when start
+        argument is also missing
         """
         test_values = [1, 1.2, "10", "10 days"]
         self.kwargs.pop("start")
@@ -235,15 +234,15 @@ class DateRangeMixinTester(unittest2.TestCase):
             new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
             self.assertEqual(
                 new_foo_obj.duration,
-                defaults.task_duration
+                defaults.timing_resolution
             )
 
     def test_duration_argument_is_not_an_instance_of_date_when_end_argument_is_missing(self):
-        """testing if the defaults for the duration attribute will be used when
-        the duration argument is not an instance of datetime.datetime class and
+        """testing if the defaults.timing_resolution will be used when the
+        duration argument is not an instance of datetime.datetime class and
         when end argument is also missing
         """
-        defaults.task_duration = datetime.timedelta(hours=1)
+        defaults.timing_resolution = datetime.timedelta(hours=1)
         # some wrong values for the duration
         test_values = [1, 1.2, "10", "10 days"]
         self.kwargs.pop("end")
@@ -253,8 +252,25 @@ class DateRangeMixinTester(unittest2.TestCase):
             new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
             self.assertEqual(
                 new_foo_obj.duration,
-                defaults.task_duration
+                defaults.timing_resolution
             )
+
+    def test_duration_argument_is_smaller_than_timing_resolution(self):
+        """testing if the defaults.timing_resolution will be used as for the
+        duration value when the duration argument is smaller than the
+        defaults.timing_resolution
+        """
+        self.kwargs.pop("end")
+        self.kwargs['duration'] = datetime.timedelta(minutes=1)
+        obj = DateRangeMixFooMixedInClass(**self.kwargs)
+        self.assertEqual(
+            obj.start,
+            datetime.datetime(2013, 3, 22, 15, 0)
+        )
+        self.assertEqual(
+            obj.end,
+            datetime.datetime(2013, 3, 22, 16, 0)
+        )
 
     def test_duration_attribute_is_calculated_correctly(self):
         """testing if the duration attribute is calculated correctly
@@ -274,69 +290,80 @@ class DateRangeMixinTester(unittest2.TestCase):
 
         # no problem if there are start and end arguments
         for test_value in test_values:
-            self.mock_foo_obj.duration = test_value
+            self.test_foo_obj.duration = test_value
 
             # check the value
-            self.assertEqual(self.mock_foo_obj.duration,
-                             self.mock_foo_obj.end - \
-                             self.mock_foo_obj.start)
+            self.assertEqual(self.test_foo_obj.duration,
+                             self.test_foo_obj.end - \
+                             self.test_foo_obj.start)
 
     def test_duration_attribute_expands_then_end_shifts(self):
         """testing if duration attribute is expanded then the end
         attribute is shifted
         """
-        end = self.mock_foo_obj.end
-        start = self.mock_foo_obj.start
-        duration = self.mock_foo_obj.duration
+        end = self.test_foo_obj.end
+        start = self.test_foo_obj.start
+        duration = self.test_foo_obj.duration
 
         # change the duration
         new_duration = duration * 10
-        self.mock_foo_obj.duration = new_duration
+        self.test_foo_obj.duration = new_duration
 
         # duration expanded
-        self.assertEqual(self.mock_foo_obj.duration, new_duration)
+        self.assertEqual(self.test_foo_obj.duration, new_duration)
 
         # start is not changed
-        self.assertEqual(self.mock_foo_obj.start, start)
+        self.assertEqual(self.test_foo_obj.start, start)
 
         # end is postponed
-        self.assertEqual(self.mock_foo_obj.end, start + new_duration)
+        self.assertEqual(self.test_foo_obj.end, start + new_duration)
 
     def test_duration_attribute_contracts_then_end_shifts_back(self):
         """testing if duration attribute is contracted then the end
         attribute is shifted back
         """
-        end = self.mock_foo_obj.end
-        start = self.mock_foo_obj.start
-        duration = self.mock_foo_obj.duration
+        end = self.test_foo_obj.end
+        start = self.test_foo_obj.start
+        duration = self.test_foo_obj.duration
 
         # change the duration
         new_duration = duration / 2
-        self.mock_foo_obj.duration = new_duration
+        self.test_foo_obj.duration = new_duration
 
         # duration expanded
-        self.assertEqual(self.mock_foo_obj.duration, new_duration)
+        self.assertEqual(self.test_foo_obj.duration, new_duration)
 
         # start is not changed
-        self.assertEqual(self.mock_foo_obj.start, start)
+        self.assertEqual(self.test_foo_obj.start, start)
 
         # end is postponed
-        self.assertEqual(self.mock_foo_obj.end, start + new_duration)
+        self.assertEqual(self.test_foo_obj.end, start + new_duration)
+
+    def test_duration_attribute_is_smaller_then_timing_resolution(self):
+        """testing if the defaults.timing_resolution will be used as for the
+        duration value when the given value for the duration attribute is
+        smaller then the defaults.timing_resolution
+        """
+        self.test_foo_obj.duration = datetime.timedelta(minutes=10)
+        self.assertEqual(
+            self.test_foo_obj.duration,
+            defaults.timing_resolution
+        )
 
     def test_duration_is_a_negative_timedelta(self):
         """testing if the duration is a negative timedelta will set the
         duration to 1 days
         """
-        start = self.mock_foo_obj.start
-        self.mock_foo_obj.duration = datetime.timedelta(-10)
-        self.assertEqual(self.mock_foo_obj.duration, datetime.timedelta(1))
-        self.assertEqual(self.mock_foo_obj.start, start)
+        start = self.test_foo_obj.start
+        self.test_foo_obj.duration = datetime.timedelta(-10)
+        self.assertEqual(self.test_foo_obj.duration, datetime.timedelta(1))
+        self.assertEqual(self.test_foo_obj.start, start)
 
     def test_init_all_parameters_skipped(self):
         """testing if the attributes are initialized to:
 
         start = datetime.datetime.now()
-        duration = stalker.config.Config.task_duration
+        duration = stalker.config.Config.timing_resolution
         end = start + duration
         """
         #self.fail("test is not implemented yet")
@@ -352,14 +379,14 @@ class DateRangeMixinTester(unittest2.TestCase):
         #self.assertEqual(new_foo_entity.start,
         #                 datetime.datetime(2013, 3, 22, 15, 30))
         self.assertEqual(new_foo_entity.duration,
-                         defaults.task_duration)
+                         defaults.timing_resolution)
         self.assertEqual(new_foo_entity.end,
                          new_foo_entity.start + new_foo_entity.duration)
 
     def test_init_only_start_argument_is_given(self):
         """testing if the attributes are initialized to:
 
-        duration = stalker.config.Config.default_task_duration
+        duration = defaults.timing_resolution
         end = start + duration
         """
         self.kwargs.pop("end")
@@ -367,7 +394,7 @@ class DateRangeMixinTester(unittest2.TestCase):
 
         new_foo_entity = DateRangeMixFooMixedInClass(**self.kwargs)
 
-        self.assertEqual(new_foo_entity.duration, defaults.task_duration)
+        self.assertEqual(new_foo_entity.duration, defaults.timing_resolution)
         self.assertEqual(new_foo_entity.end,
                          new_foo_entity.start + new_foo_entity.duration)
 
@@ -380,6 +407,20 @@ class DateRangeMixinTester(unittest2.TestCase):
         new_foo_entity = DateRangeMixFooMixedInClass(**self.kwargs)
         self.assertEqual(new_foo_entity.duration,
                          new_foo_entity.end - new_foo_entity.start)
+
+    def test_init_start_and_end_argument_is_given_but_duration_is_smaller_than_timing_resolution(self):
+        """testing if the start will be anchored and the end will be
+        recalculated when the start and end values are given but the calculated
+        duration is smaller than timing_resolution
+
+        duration = end - start
+        """
+        self.kwargs.pop("duration")
+        self.kwargs['start'] = datetime.datetime(2013, 12, 22, 23, 8)
+        self.kwargs['end'] = datetime.datetime(2013, 12, 22, 23, 15)
+        obj = DateRangeMixFooMixedInClass(**self.kwargs)
+        self.assertEqual(obj.start, datetime.datetime(2013, 12, 22, 23, 0))
+        self.assertEqual(obj.end, datetime.datetime(2013, 12, 23, 0, 0))
 
     def test_init_start_and_duration_argument_is_given(self):
         """testing if the attributes are initialized to:
@@ -416,14 +457,14 @@ class DateRangeMixinTester(unittest2.TestCase):
     def test_init_only_end_argument_is_given(self):
         """testing if the attributes are initialized to:
 
-        duration = stalker.config.Config.default_task_duration
+        duration = defaults.timing_resolution
         start = end - duration
         """
         self.kwargs.pop("duration")
         self.kwargs.pop("start")
         new_foo_entity = DateRangeMixFooMixedInClass(**self.kwargs)
         self.assertEqual(new_foo_entity.duration,
-                         defaults.task_duration)
+                         defaults.timing_resolution)
         self.assertEqual(new_foo_entity.start,
                          new_foo_entity.end - new_foo_entity.duration)
 

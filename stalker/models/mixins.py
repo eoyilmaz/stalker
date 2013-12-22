@@ -537,6 +537,7 @@ class DateRangeMixin(object):
                 self._start, self._end, self._duration = \
                     self._validate_dates(self.start, None, duration_in)
             else:
+                # use the end
                 self._start, self._end, self._duration = \
                     self._validate_dates(self.start, self.end, duration_in)
         else:
@@ -583,12 +584,12 @@ class DateRangeMixin(object):
 
                 if duration is None:
                     # set the defaults
-                    duration = defaults.task_duration
+                    duration = defaults.timing_resolution
 
                 end = start + duration
             else:
                 if duration is None:
-                    duration = defaults.task_duration
+                    duration = defaults.timing_resolution
 
                 # try:
                 start = end - duration
@@ -598,7 +599,7 @@ class DateRangeMixin(object):
         # check end
         if end is None:
             if duration is None:
-                duration = defaults.task_duration
+                duration = defaults.timing_resolution
 
             end = start + duration
 
@@ -616,6 +617,11 @@ class DateRangeMixin(object):
         rounded_start = self.round_time(start)
         rounded_end = self.round_time(end)
         rounded_duration = rounded_end - rounded_start
+
+        if rounded_duration < defaults.timing_resolution:
+            rounded_duration = defaults.timing_resolution
+            rounded_end = rounded_start + rounded_duration
+
         return rounded_start, rounded_end, rounded_duration
 
     @declared_attr
@@ -640,8 +646,8 @@ class DateRangeMixin(object):
     def round_time(cls, dt):
         """Round a datetime object to any time laps in seconds.
 
-        Uses class property timing_resolution as the closest number of seconds
-        to round to, defaults 1 hour.
+        Uses class defaults.timing_resolution as the closest number of seconds
+        to round to.
 
         :param dt: datetime.datetime object, defaults now.
 
@@ -953,16 +959,18 @@ class ScheduleMixin(object):
     attributes to the mixed in class.
     """
 
-    def __init__(self,
-                 schedule_timing=1.0,
-                 schedule_unit='h',
-                 schedule_model=None,
-                 schedule_constraint=0,
-                 **kwargs):
+    def __init__(
+            self,
+            schedule_timing=1.0,
+            schedule_unit='h',
+            schedule_model=None,
+            schedule_constraint=0,
+            **kwargs
+    ):
         self.schedule_constraint = schedule_constraint
-        self.schedule_unit = schedule_unit
-        self.schedule_timing = schedule_timing
         self.schedule_model = schedule_model
+        self.schedule_timing = schedule_timing
+        self.schedule_unit = schedule_unit
 
     @declared_attr
     def schedule_timing(cls):
@@ -1142,6 +1150,122 @@ class ScheduleMixin(object):
 
         return schedule_timing
 
+    @classmethod
+    def least_meaningful_time_unit(cls, seconds, as_work_time=True):
+        """returns the least meaningful timing unit that corresponds to the
+        given seconds. So if:
 
+          as_work_time == True
+              seconds % (1 years work time as seconds) == 0 --> 'y' else:
+              seconds % (1 month work time as seconds) == 0 --> 'm' else:
+              seconds % (1 week work time as seconds) == 0 --> 'w' else:
+              seconds % (1 day work time as seconds) == 0 --> 'd' else:
+              seconds % (1 hour work time as seconds) == 0 --> 'h' else:
+              seconds % (1 minutes work time as seconds) == 0 --> 'min' else:
+              raise RuntimeError
+          as_work_time == False
+              seconds % (1 years as seconds) == 0 --> 'y' else:
+              seconds % (1 month as seconds) == 0 --> 'm' else:
+              seconds % (1 week as seconds) == 0 --> 'w' else:
+              seconds % (1 day as seconds) == 0 --> 'd' else:
+              seconds % (1 hour as seconds) == 0 --> 'h' else:
+              seconds % (1 minutes as seconds) == 0 --> 'min' else:
+              raise RuntimeError
 
+        :param int seconds: An integer showing the total seconds to be
+          converted.
+        :param bool as_work_time: Should the input be considered as work time
+          or calendar time.
+        :returns int, string: Returns one integer and one string, showing the
+          timing value and the unit.
+        """
+        minutes = 60
+        hour = 3600
+        day = 86400
+        week = 604800
+        month = 2419200
+        year = 31536000
 
+        day_wt = defaults.daily_working_hours * 3600
+        week_wt = defaults.weekly_working_days * day_wt
+        month_wt = 4 * week_wt
+        year_wt = int(defaults.yearly_working_days) * day_wt
+
+        if as_work_time:
+            logger.debug('calculating in work time')
+            if seconds % year_wt == 0:
+                return seconds // year_wt, 'y'
+            elif seconds % month_wt == 0:
+                return seconds // month_wt, 'm'
+            elif seconds % week_wt == 0:
+                return seconds // week_wt, 'w'
+            elif seconds % day_wt == 0:
+                return seconds // day_wt, 'd'
+        else:
+            logger.debug('calculating in calendar time')
+            if seconds % year == 0:
+                return seconds // year, 'y'
+            elif seconds % month == 0:
+                return seconds // month, 'm'
+            elif seconds % week == 0:
+                return seconds // week, 'w'
+            elif seconds % day == 0:
+                return seconds // day, 'd'
+
+        # in either case
+        if seconds % hour == 0:
+            return seconds // hour, 'h'
+
+        # at this point we understand that it has a residual of less then one
+        # minute so return in minutes
+        return seconds // minutes, 'min'
+
+    def to_seconds(self, timing, unit, model):
+        """converts the schedule values to seconds, depending on to the
+        schedule_model the value will differ. So if the schedule_model is
+        'effort' or 'length' then the schedule_time and schedule_unit values
+        are interpreted as work time, if the schedule_model is 'duration' then
+        the schedule_time and schedule_unit values are considered as calendar
+        time.
+        """
+        if not unit:
+            return None
+
+        lut = {
+            'min': 60,
+            'h': 3600,
+            'd': 86400,
+            'w': 604800,
+            'm': 2419200,
+            'y': 31536000
+        }
+
+        if model in ['effort', 'length']:
+            day_wt = defaults.daily_working_hours * 3600
+            week_wt = defaults.weekly_working_days * day_wt
+            month_wt = 4 * week_wt
+            year_wt = int(defaults.yearly_working_days) * day_wt
+
+            lut = {
+                'min': 60,
+                'h': 3600,
+                'd': day_wt,
+                'w': week_wt,
+                'm': month_wt,
+                'y': year_wt
+            }
+
+        return timing * lut[unit]
+
+    @property
+    def schedule_seconds(self):
+        """Returns the schedule values as seconds, depending on to the
+        schedule_model the value will differ. So if the schedule_model is
+        'effort' or 'length' then the schedule_time and schedule_unit values
+        are interpreted as work time, if the schedule_model is 'duration' then
+        the schedule_time and schedule_unit values are considered as calendar
+        time.
+        """
+        return self.to_seconds(
+            self.schedule_timing, self.schedule_unit, self.schedule_model
+        )

@@ -21,6 +21,34 @@ Stalker Changes
   creation and on load, and also the db.setup() function lets the first Studio
   instance that it finds to update the defaults. So it is now possible to use
   ``stalker.defaults`` all the time without worrying about the Studio settings.
+* **Update:** The ``Studio.yearly_working_days`` value is now always an
+  integer.
+* **New:** Added a new method ``ScheduleMixin.least_meaningful_time_unit()`` to
+  calculate the most appropriate timing unit and the value of the given seconds
+  which represents an interval of time.
+  
+  So it will convert 3600 seconds to 1 hours, and 8424000 seconds to 1 years if
+  it represents working time (as_working_time=True) or 2340 hours if it is
+  representing the calendar time.
+* **New:** Added a new method to ``ScheduleMixin`` called ``to_seconds()``. The
+  ``to_seconds()`` method converts the given schedule info values
+  (schedule_timing, schedule_unit, schedule_model) to seconds considering if
+  the given schedule_model is work time based ('effort' or 'length') or
+  calendar time based ('duration').
+* **New:** Added a new method to ``ScheduleMixin`` called ``schedule_seconds``
+  which you may recognise from ``Task`` class. What it does is pretty much the
+  same as in the Task class, it converts the given schedule info values to
+  seconds.
+* **Update:** When a TimeLog expands a task, the task schedule info values are
+  now expanded by using the least meaningful timing unit.
+* **Update:** In DateRangeMixin, when the start, end or duration arguments
+  given so that the duration is smaller then the defaults.timing_resolution the
+  defaults.timing_resolution will be used as the duration and the end will be
+  recalculated by anchoring the start value.
+* **New:** Adding a TimeLog to a Task and extending its schedule timing will
+  now always use the least meaningful timing unit. So expanding a task from 16
+  hours to 18 hours will result a task with 2 days of schedule (considering the
+  daily_working_hours = 9).
 
 0.2.3.5
 =======

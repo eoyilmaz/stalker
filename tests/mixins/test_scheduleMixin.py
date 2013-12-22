@@ -333,3 +333,153 @@ class ScheduleMixinTestCase(unittest2.TestCase):
         self.assertRaises(ValueError, setattr, self.test_obj, 'schedule_unit',
                           'so')
 
+    def test_least_meaningful_time_unit_is_working_properly(self):
+        """testing if the least_meaningful_time_unit is working properly
+        """
+        defaults.daily_working_hours = 9
+        defaults.weekly_working_days = 5
+        defaults.weekly_working_hours = 45
+        defaults.yearly_working_days = 52.1428 * 5
+
+        test_values = [
+            [[60, True], (1, 'min')],
+            [[125, True], (2, 'min')],
+            [[1800, True], (30, 'min')],
+            [[3600, True], (1, 'h')],
+            [[5400, True], (90, 'min')],
+            [[6000, True], (100, 'min')],
+            [[7200, True], (2, 'h')],
+            [[9600, True], (160, 'min')],
+            [[10000, True], (166, 'min')],
+            [[12000, True], (200, 'min')],
+            [[14400, True], (4, 'h')],
+            [[15000, True], (250, 'min')],
+            [[18000, True], (5, 'h')],
+            [[32400, True], (1, 'd')],
+            [[32400, False], (9, 'h')],
+            [[64800, True], (2, 'd')],
+            [[64800, False], (18, 'h')],
+            [[86400, True], (24, 'h')],
+            [[86400, False], (1, 'd')],
+            [[162000, True], (1, 'w')],
+            [[162000, False], (45, 'h')],
+            [[648000, True], (1, 'm')],
+            [[648000, False], (180, 'h')],
+            [[8424000, True], (1, 'y')],
+            [[8424000, False], (2340, 'h')]
+        ]
+
+        for test_value in test_values:
+            input_value = test_value[0]
+            expected_result = test_value[1]
+            self.assertEqual(
+                expected_result,
+                self.test_obj.least_meaningful_time_unit(*input_value)
+            )
+
+    def test_to_seconds_is_working_properly(self):
+        """testing if the to_seconds method is working properly
+        """
+        defaults.daily_working_hours = 9
+        defaults.weekly_working_days = 5
+        defaults.weekly_working_hours = 45
+        defaults.yearly_working_days = 52.1428 * 5
+
+        test_values = [
+            # effort values
+            ['effort', 1, 'min', 60],
+            ['effort', 1, 'h', 3600],
+            ['effort', 1, 'd', 32400],
+            ['effort', 1, 'w', 162000],
+            ['effort', 1, 'm', 648000],
+            ['effort', 1, 'y', 8424000],
+
+            # lenth values
+            ['length', 1, 'min', 60],
+            ['length', 1, 'h', 3600],
+            ['length', 1, 'd', 32400],
+            ['length', 1, 'w', 162000],
+            ['length', 1, 'm', 648000],
+            ['length', 1, 'y', 8424000],
+
+            # duration values
+            ['duration', 1, 'min', 60],
+            ['duration', 1, 'h', 3600],
+            ['duration', 1, 'd', 86400],
+            ['duration', 1, 'w', 604800],
+            ['duration', 1, 'm', 2419200],
+            ['duration', 1, 'y', 31536000]
+        ]
+
+        for test_value in test_values:
+            self.test_obj.schedule_model = test_value[0]
+            self.test_obj.schedule_timing = test_value[1]
+            self.test_obj.schedule_unit = test_value[2]
+            self.assertEqual(
+                test_value[3],
+                self.test_obj.to_seconds(
+                    self.test_obj.schedule_timing,
+                    self.test_obj.schedule_unit,
+                    self.test_obj.schedule_model
+                )
+            )
+
+    def test_schedule_seconds_is_working_properly(self):
+        """testing if the schedule_seconds property is working properly
+        """
+        defaults.daily_working_hours = 9
+        defaults.weekly_working_days = 5
+        defaults.weekly_working_hours = 45
+        defaults.yearly_working_days = 52.1428 * 5
+
+        test_values = [
+            # effort values
+            ['effort', 1, 'min', 60],
+            ['effort', 1, 'h', 3600],
+            ['effort', 1, 'd', 32400],
+            ['effort', 1, 'w', 162000],
+            ['effort', 1, 'm', 648000],
+            ['effort', 1, 'y', 8424000],
+
+            # lenth values
+            ['length', 1, 'min', 60],
+            ['length', 1, 'h', 3600],
+            ['length', 1, 'd', 32400],
+            ['length', 1, 'w', 162000],
+            ['length', 1, 'm', 648000],
+            ['length', 1, 'y', 8424000],
+
+            # duration values
+            ['duration', 1, 'min', 60],
+            ['duration', 1, 'h', 3600],
+            ['duration', 1, 'd', 86400],
+            ['duration', 1, 'w', 604800],
+            ['duration', 1, 'm', 2419200],
+            ['duration', 1, 'y', 31536000]
+        ]
+
+        for test_value in test_values:
+            self.test_obj.schedule_model = test_value[0]
+            self.test_obj.schedule_timing = test_value[1]
+            self.test_obj.schedule_unit = test_value[2]
+            self.assertEqual(
+                test_value[3],
+                self.test_obj.schedule_seconds
+            )
+
+    # def test_schedule_timing_and_schedule_unit_are_converted_to_the_least_meaningful_unit(self):
+    #     """testing if the schedule_unit is converted to the least meaningful
+    #     unit automatically
+    #     """
+    #     defaults.daily_working_hours = 9
+    #     self.kwargs['schedule_timing'] = 9
+    #     self.kwargs['schedule_unit'] = 'h'
+    # 
+    #     test_obj = MixedInClass(**self.kwargs)
+    #     self.assertEqual(
+    #         test_obj.schedule_timing, 1
+    #     )
+    #     self.assertEqual(
+    #         test_obj.schedule_unit, 'd'
+    #     )
+

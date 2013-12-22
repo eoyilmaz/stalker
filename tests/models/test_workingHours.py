@@ -412,7 +412,7 @@ class WorkingHoursTester(unittest2.TestCase):
         wh['fri'] = [[9, 10]]
         wh['sat'] = []
         wh['sun'] = []
-        self.assertAlmostEqual(wh.yearly_working_days, 260.714, 3)
+        self.assertAlmostEqual(wh.yearly_working_days, 261, 3)
 
         wh = WorkingHours()
         wh['mon'] = [[1, 2]]
@@ -422,7 +422,7 @@ class WorkingHoursTester(unittest2.TestCase):
         wh['fri'] = [[9, 10]]
         wh['sat'] = [[11, 12]]
         wh['sun'] = []
-        self.assertAlmostEqual(wh.yearly_working_days, 312.8568, 4)
+        self.assertAlmostEqual(wh.yearly_working_days, 313, 4)
 
         wh = WorkingHours()
         wh['mon'] = [[1, 2]]

@@ -43,7 +43,6 @@ class TaskTester(unittest2.TestCase):
         """run once
         """
         defaults.timing_resolution = datetime.timedelta(hours=1)
-        defaults.task_duration = datetime.timedelta(hours=1)
 
     def setUp(self):
         """run before every test
@@ -175,7 +174,6 @@ class TaskTester(unittest2.TestCase):
         """
         DBSession.remove()
         defaults.timing_resolution = datetime.timedelta(hours=1)
-        defaults.task_duration = datetime.timedelta(hours=1)
 
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for
@@ -1714,7 +1712,6 @@ class TaskTester(unittest2.TestCase):
         now = dt.now()
 
         defaults.timing_resolution = td(hours=1)
-        defaults.task_duration = td(hours=1)
         defaults.daily_working_hours = 9
 
         parent_task = Task(**self.kwargs)
@@ -2075,9 +2072,11 @@ class TaskTester(unittest2.TestCase):
         self.kwargs['schedule_timing'] = 3.1
         self.kwargs['schedule_unit'] = 'y'
         new_task = Task(**self.kwargs)
-        self.assertEqual(
+        self.assertAlmostEqual(
             new_task.schedule_seconds,
-            3.1 * defaults.yearly_working_days * defaults.daily_working_hours * 3600
+            3.1 * defaults.yearly_working_days *
+            defaults.daily_working_hours * 3600,
+            3
         )
 
     def test_schedule_seconds_is_working_properly_for_an_effort_based_task_with_studio(self):
@@ -2088,7 +2087,6 @@ class TaskTester(unittest2.TestCase):
         from stalker import Studio
 
         defaults.timing_resolution = datetime.timedelta(hours=1)
-        defaults.task_duration = datetime.timedelta(hours=1)
 
         studio = Studio(
             name='Test Studio',
@@ -2123,10 +2121,11 @@ class TaskTester(unittest2.TestCase):
         self.kwargs['schedule_timing'] = 3.1
         self.kwargs['schedule_unit'] = 'y'
         new_task = Task(**self.kwargs)
-        self.assertEqual(
+        self.assertAlmostEqual(
             new_task.schedule_seconds,
             3.1 * studio.yearly_working_days * studio.daily_working_hours *
-            3600
+            3600,
+            3
         )
 
     def test_schedule_seconds_is_working_properly_for_a_container_task(self):
@@ -2178,18 +2177,21 @@ class TaskTester(unittest2.TestCase):
         self.kwargs['schedule_timing'] = 3.1
         self.kwargs['schedule_unit'] = 'y'
         new_task = Task(**self.kwargs)
-        self.assertEqual(
+        self.assertAlmostEqual(
             new_task.schedule_seconds,
             3.1 * defaults.yearly_working_days * defaults.daily_working_hours *
-            3600
+            3600, 3
         )
         new_task.parent = parent_task
-        self.assertEqual(parent_task.schedule_seconds,
-                         10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
-                         2 * defaults.weekly_working_hours * 3600 +
-                         2.5 * 4 * defaults.weekly_working_hours * 3600 +
-                         3.1 * defaults.yearly_working_days *
-                         defaults.daily_working_hours * 3600)
+        self.assertAlmostEqual(
+            parent_task.schedule_seconds,
+            10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
+            2 * defaults.weekly_working_hours * 3600 +
+            2.5 * 4 * defaults.weekly_working_hours * 3600 +
+            3.1 * defaults.yearly_working_days *
+            defaults.daily_working_hours * 3600,
+            3
+        )
 
     def test_schedule_seconds_is_working_properly_for_a_container_task_when_the_child_is_updated(self):
         """testing if schedule_seconds attribute is working properly for a
@@ -2252,25 +2254,27 @@ class TaskTester(unittest2.TestCase):
         self.kwargs['schedule_timing'] = 3.1
         self.kwargs['schedule_unit'] = 'y'
         new_task = Task(**self.kwargs)
-        self.assertEqual(
+        self.assertAlmostEqual(
             new_task.schedule_seconds,
             3.1 * defaults.yearly_working_days * defaults.daily_working_hours *
             3600
         )
         new_task.parent = parent_task
-        self.assertEqual(parent_task.schedule_seconds,
-                         10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
-                         2 * defaults.weekly_working_hours * 3600 +
-                         2.5 * 4 * defaults.weekly_working_hours * 3600 +
-                         3.1 * defaults.yearly_working_days *
-                         defaults.daily_working_hours * 3600)
+        self.assertAlmostEqual(
+            parent_task.schedule_seconds,
+            10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
+            2 * defaults.weekly_working_hours * 3600 +
+            2.5 * 4 * defaults.weekly_working_hours * 3600 +
+            3.1 * defaults.yearly_working_days *
+            defaults.daily_working_hours * 3600,
+            3
+        )
 
     def test_schedule_seconds_is_working_properly_for_a_container_task_when_the_child_is_updated_deeper(self):
         """testing if schedule_seconds attribute is working properly for a
         container task
         """
         defaults.timing_resolution = datetime.timedelta(hours=1)
-        defaults.task_duration = datetime.timedelta(hours=1)
         defaults.daily_working_hours = 9
 
         # no studio, using defaults
@@ -2322,71 +2326,98 @@ class TaskTester(unittest2.TestCase):
         self.kwargs['schedule_timing'] = 23
         self.kwargs['schedule_unit'] = 'd'
         new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.schedule_seconds,
-                         23 * defaults.daily_working_hours * 3600)
+        self.assertEqual(
+            new_task.schedule_seconds,
+            23 * defaults.daily_working_hours * 3600
+        )
         new_task.parent = parent_task1
-        self.assertEqual(parent_task1.schedule_seconds,
-                         10 * 3600 + 23 * defaults.daily_working_hours * 3600)
-        self.assertEqual(parent_task2.schedule_seconds,
-                         10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
-                         10 * 3600)
+        self.assertEqual(
+            parent_task1.schedule_seconds,
+            10 * 3600 + 23 * defaults.daily_working_hours * 3600
+        )
+        self.assertEqual(
+            parent_task2.schedule_seconds,
+            10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
+            10 * 3600
+        )
 
         self.kwargs['schedule_timing'] = 2
         self.kwargs['schedule_unit'] = 'w'
         new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.schedule_seconds,
-                         2 * defaults.weekly_working_hours * 3600)
+        self.assertEqual(
+            new_task.schedule_seconds,
+            2 * defaults.weekly_working_hours * 3600
+        )
         new_task.parent = parent_task1
-        self.assertEqual(parent_task1.schedule_seconds,
-                         10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
-                         2 * defaults.weekly_working_hours * 3600)
+        self.assertEqual(
+            parent_task1.schedule_seconds,
+            10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
+            2 * defaults.weekly_working_hours * 3600
+        )
 
         # update it to 1 week
         new_task.schedule_timing = 1
-        self.assertEqual(parent_task1.schedule_seconds,
-                         10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
-                         1 * defaults.weekly_working_hours * 3600)
-        self.assertEqual(parent_task2.schedule_seconds,
-                         10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
-                         1 * defaults.weekly_working_hours * 3600 + 10 * 3600)
+        self.assertEqual(
+            parent_task1.schedule_seconds,
+            10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
+            1 * defaults.weekly_working_hours * 3600
+        )
+        self.assertEqual(
+            parent_task2.schedule_seconds,
+            10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
+            1 * defaults.weekly_working_hours * 3600 + 10 * 3600
+        )
 
         self.kwargs['schedule_timing'] = 2.5
         self.kwargs['schedule_unit'] = 'm'
         new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.schedule_seconds,
-                         2.5 * 4 * defaults.weekly_working_hours * 3600)
+        self.assertEqual(
+            new_task.schedule_seconds,
+            2.5 * 4 * defaults.weekly_working_hours * 3600
+        )
         new_task.parent = parent_task1
-        self.assertEqual(parent_task1.schedule_seconds,
-                         10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
-                         1 * defaults.weekly_working_hours * 3600 +
-                         2.5 * 4 * defaults.weekly_working_hours * 3600)
-        self.assertEqual(parent_task2.schedule_seconds,
-                         10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
-                         1 * defaults.weekly_working_hours * 3600 +
-                         2.5 * 4 * defaults.weekly_working_hours * 3600 +
-                         10 * 3600)
+        self.assertEqual(
+            parent_task1.schedule_seconds,
+            10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
+            1 * defaults.weekly_working_hours * 3600 +
+            2.5 * 4 * defaults.weekly_working_hours * 3600
+        )
+        self.assertEqual(
+            parent_task2.schedule_seconds,
+            10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
+            1 * defaults.weekly_working_hours * 3600 +
+            2.5 * 4 * defaults.weekly_working_hours * 3600 +
+            10 * 3600
+        )
 
         self.kwargs['schedule_timing'] = 3.1
         self.kwargs['schedule_unit'] = 'y'
         new_task = Task(**self.kwargs)
-        self.assertEqual(
+        self.assertAlmostEqual(
             new_task.schedule_seconds,
             3.1 * defaults.yearly_working_days * defaults.daily_working_hours *
-            3600
+            3600,
+            3
         )
         new_task.parent = parent_task1
-        self.assertEqual(parent_task1.schedule_seconds,
-                         10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
-                         1 * defaults.weekly_working_hours * 3600 +
-                         2.5 * 4 * defaults.weekly_working_hours * 3600 +
-                         3.1 * defaults.yearly_working_days *
-                         defaults.daily_working_hours * 3600)
-        self.assertEqual(parent_task2.schedule_seconds,
-                         10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
-                         1 * defaults.weekly_working_hours * 3600 +
-                         2.5 * 4 * defaults.weekly_working_hours * 3600 +
-                         3.1 * defaults.yearly_working_days *
-                         defaults.daily_working_hours * 3600 + 10 * 3600)
+        self.assertAlmostEqual(
+            parent_task1.schedule_seconds,
+            10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
+            1 * defaults.weekly_working_hours * 3600 +
+            2.5 * 4 * defaults.weekly_working_hours * 3600 +
+            3.1 * defaults.yearly_working_days *
+            defaults.daily_working_hours * 3600,
+            3
+        )
+        self.assertAlmostEqual(
+            parent_task2.schedule_seconds,
+            10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
+            1 * defaults.weekly_working_hours * 3600 +
+            2.5 * 4 * defaults.weekly_working_hours * 3600 +
+            3.1 * defaults.yearly_working_days *
+            defaults.daily_working_hours * 3600 + 10 * 3600,
+            3
+        )
 
     def test_remaining_seconds_attribute_is_a_read_only_attribute(self):
         """testing if the remaining hours is a read only attribute

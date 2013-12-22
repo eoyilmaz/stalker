@@ -21,6 +21,7 @@
 import copy
 import logging
 import datetime
+from math import ceil
 import time
 
 from sqlalchemy import Column, Integer, ForeignKey, Interval
@@ -165,18 +166,12 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
 
         if self.timing_resolution:
             defaults.timing_resolution = self.timing_resolution
-            defaults.task_duration = self.timing_resolution
             logger.debug(
                 'updated defaults.timing_resolution: %s' %
                 defaults.timing_resolution
             )
-            logger.debug(
-                'updated defaults.task_duration: %s' %
-                defaults.task_duration
-            )
         else:
             logger.debug('can not update defaults.timing_resolution')
-            logger.debug('can not update defaults.task_duration')
 
         logger.debug("""don updating defaults: 
         daily_working_hours  : %(daily_working_hours)s
@@ -184,14 +179,12 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         weekly_working_hours : %(weekly_working_hours)s
         yearly_working_days  : %(yearly_working_days)s
         timing_resolution    : %(timing_resolution)s
-        task_duration        : %(task_duration)s
         """ % {
             'daily_working_hours': defaults.daily_working_hours,
             'weekly_working_days': defaults.weekly_working_days,
             'weekly_working_hours': defaults.weekly_working_hours,
             'yearly_working_days': defaults.yearly_working_days,
             'timing_resolution': defaults.timing_resolution,
-            'task_duration': defaults.task_duration
         })
 
     @reconstructor
@@ -643,7 +636,7 @@ class WorkingHours(object):
     def yearly_working_days(self):
         """returns the total working days in a year
         """
-        return self.weekly_working_days * 52.1428
+        return int(ceil(self.weekly_working_days * 52.1428))
 
 
 class Vacation(SimpleEntity, DateRangeMixin):
