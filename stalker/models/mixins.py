@@ -97,9 +97,8 @@ class TargetEntityTypeMixin(object):
         a_obj = A(target_entity_type=Project)
 
       The ``a_obj`` will only be accepted by
-      :class:`~stalker.models.project.Project` instances. You can not assign it
-      to any other class which accepts a :class:`~stalker.models.type.Type`
-      instance.
+      :class:`.Project` instances. You can not assign it to any other class
+      which accepts a :class:`.Type` instance.
 
     To control the mixed-in class behaviour add these class variables to the 
     mixed in class:
@@ -133,12 +132,16 @@ class TargetEntityTypeMixin(object):
         """
         # it can not be None
         if target_entity_type_in is None:
-            raise TypeError("%s.target_entity_type can not be None" %
-                            self.__class__.__name__)
+            raise TypeError(
+                "%s.target_entity_type can not be None" %
+                self.__class__.__name__
+            )
 
         if str(target_entity_type_in) == "":
-            raise ValueError("%s.target_entity_type can not be empty" %
-                             self.__class__.__name__)
+            raise ValueError(
+                "%s.target_entity_type can not be empty" %
+                self.__class__.__name__
+            )
 
         # check if it is a class
         if isinstance(target_entity_type_in, type):
@@ -182,18 +185,16 @@ class StatusMixin(object):
 
         The status_list argument now can be skipped or can be None if there
         is an active database connection (stalker.models.DBSession is not
-        None) and there is a suitable
-        :class:`~stalker.models.status.StatusList` instance in the database
-        whom :attr:`~stalker.models.status.StatusList.target_entity_type`
-        attribute is set to the current mixed-in class name.
+        None) and there is a suitable :class:`.StatusList` instance in the
+        database whom :attr:`.StatusList.target_entity_type` attribute is set
+        to the current mixed-in class name.
 
-    :param status: It is a :class:`~stalker.models.status.Status` instance
-      which shows the current status of the statusable object. Integer values
-      are also accepted, which shows the index of the desired status in the
-      ``status_list`` attribute of the current statusable object. If a
-      :class:`~stalker.models.status.Status` instance is supplied, it should
-      also be present in the ``status_list`` attribute. If set to None then the
-      first :class:`~stalker.models.status.Status` instance in the
+    :param status: It is a :class:`.Status` instance which shows the current
+      status of the statusable object. Integer values are also accepted, which
+      shows the index of the desired status in the ``status_list`` attribute of
+      the current statusable object. If a :class:`.Status` instance is
+      supplied, it should also be present in the ``status_list`` attribute. If
+      set to None then the first :class:`.Status` instance in the
       ``status_list`` will be used.
 
       .. versionadded:: 0.2.0
@@ -201,9 +202,8 @@ class StatusMixin(object):
         Status attribute as Status instance:
 
         It is now possible to set the status of the instance by a
-        :class:`~stalker.models.status.Status` instance directly. And the
-        :attr:`~stalker.models.mixins.StatusMixin.status` will return a proper
-        :class:`~stalker.models.status.Status` instance.
+        :class:`.Status` instance directly. And the :attr:`.StatusMixin.status`
+        will return a proper :class:`.Status` instance.
     """
 
     def __init__(self, status=None, status_list=None, **kwargs):
@@ -234,7 +234,7 @@ class StatusMixin(object):
             primaryjoin= "%s.status_id==Status.status_id" % cls.__name__,
             doc="""The current status of the object.
 
-            It is a :class:`~stalker.models.status.Status` instance which
+            It is a :class:`.Status` instance which
             is one of the Statuses stored in the ``status_list`` attribute
             of this object.
             """
@@ -297,17 +297,17 @@ class StatusMixin(object):
                 raise TypeError(
                     "%s.status_list should be an instance of "
                     "stalker.models.status.StatusList not %s" %
-                    (self.__class__.__name__,
-                     status_list.__class__.__name__)
+                    (self.__class__.__name__, status_list.__class__.__name__)
                 )
 
-            # check if the entity_type matches to the StatusList.target_entity_type
+            # check if the entity_type matches to the
+            # StatusList.target_entity_type
             if self.__class__.__name__ != status_list.target_entity_type:
                 raise TypeError(
                     "the given StatusLists' target_entity_type is %s, "
-                    "whereas the entity_type of this object is %s" % \
-                    (status_list.target_entity_type,
-                     self.__class__.__name__))
+                    "whereas the entity_type of this object is %s" %
+                    (status_list.target_entity_type, self.__class__.__name__)
+                )
 
         return status_list
 
@@ -318,8 +318,10 @@ class StatusMixin(object):
         from stalker.models.status import Status, StatusList
 
         if not isinstance(self.status_list, StatusList):
-            raise TypeError("please set the %s.status_list attribute first" %
-                            self.__class__.__name__)
+            raise TypeError(
+                "Please set the %s.status_list attribute first" %
+                self.__class__.__name__
+            )
 
         # it is set to None
         if status is None:
@@ -328,24 +330,30 @@ class StatusMixin(object):
 
         # it is not an instance of status or int
         if not isinstance(status, (Status, int)):
-            raise TypeError("%s.status must be an instance of "
-                            "stalker.models.status.Status or an integer "
-                            "showing the index of the Status object in the "
-                            "%s.status_list, not %s" %
-                            (self.__class__.__name__,
-                             self.__class__.__name__,
-                             status.__class__.__name__))
+            raise TypeError(
+                "%(class)s.status must be an instance of "
+                "stalker.models.status.Status or an integer showing the index "
+                "of the Status object in the %(class)s.status_list, not "
+                "%(status)s" %
+                {
+                    'class': self.__class__.__name__,
+                    'status': status.__class__.__name__
+                }
+            )
 
         if isinstance(status, int):
             # if it is not in the correct range:
             if status < 0:
-                raise ValueError("%s.status must be a non-negative integer" %
-                                 self.__class__.__name__)
+                raise ValueError(
+                    "%s.status must be a non-negative integer" %
+                    self.__class__.__name__
+                )
 
             if status >= len(self.status_list.statuses):
-                raise ValueError("%s.status can not be bigger than the length "
-                                 "of the status_list" %
-                                 self.__class__.__name__)
+                raise ValueError(
+                    "%s.status can not be bigger than the length of the "
+                    "status_list" % self.__class__.__name__
+                )
                 # get the tatus instance out of the status_list instance
             status = self.status_list[status]
 
@@ -354,11 +362,11 @@ class StatusMixin(object):
         # logger.debug('given status: %s' % status)
 
         if status not in self.status_list:
-            raise ValueError("The given Status instance for %s.status is not "
-                             "in the %s.status_list, please supply a status "
-                             "from that list." %
-                             (self.__class__.__name__,
-                              self.__class__.__name__))
+            raise ValueError(
+                "The given Status instance for %s.status is not in the"
+                "%s.status_list, please supply a status from that list." %
+                (self.__class__.__name__, self.__class__.__name__)
+            )
 
         return status
 
@@ -369,8 +377,8 @@ class DateRangeMixin(object):
     Adds date range information like ``start``, ``end`` and ``duration``. These
     attributes will be used in TaskJuggler. Because ``effort`` is only
     meaningful if there are some ``resources`` this attribute has been left
-    special for :class:`~stalker.models.task.Task` class. The ``length`` has
-    not been implemented because of its rare use.
+    special for :class:`.Task` class. The ``length`` has not been implemented
+    because of its rare use.
 
     The preceding order for the attributes is as follows::
 
@@ -443,8 +451,8 @@ class DateRangeMixin(object):
 
     :param duration: The duration of the entity. It is a
       :class:`datetime.timedelta` instance. The default value is read from
-      the :class:`~stalker.config.Config` class. See the table above for the
-      initialization rules.
+      the :class:`.Config` class. See the table above for the initialization
+      rules.
 
     :type duration: :class:`datetime.timedelta`
     """
@@ -495,15 +503,13 @@ class DateRangeMixin(object):
     def _start_getter(self):
         """The date that this entity should start.
 
-        Also effects the
-        :attr:`~stalker.models.mixins.DateRangeMixin.end` attribute value in
-        certain conditions, if the
-        :attr:`~stalker.models.mixins.DateRangeMixin.start` is set to a time
-        passing the :attr:`~stalker.models.mixins.DateRangeMixin.end` it will
-        also offset the :attr:`~stalker.models.mixins.DateRangeMixin.end` to
-        keep the :attr:`~stalker.models.mixins.DateRangeMixin.duration` value
-        fixed. :attr:`~stalker.models.mixins.DateRangeMixin.start` should be an
-        instance of class:`datetime.datetime` and the default value is
+        Also effects the :attr:`.DateRangeMixin.end` attribute value in certain
+        conditions, if the :attr:`.DateRangeMixin.start` is set to a time
+        passing the :attr:`.DateRangeMixin.end` it will also offset the
+        :attr:`.DateRangeMixin.end` to keep the
+        :attr:`.DateRangeMixin.duration` value fixed.
+        :attr:`.DateRangeMixin.start` should be an instance of
+        class:`datetime.datetime` and the default value is
         :func:`datetime.datetime.now()`
         """
         return self._start
@@ -684,13 +690,13 @@ class DateRangeMixin(object):
 
 
 class ProjectMixin(object):
-    """Gives the ability to connect to a :class:`~stalker.models.project.Project` to the mixed in object.
+    """Gives the ability to connect to a :class:`.Project` to the mixed in object.
 
-    :param project: A :class:`~stalker.models.project.Project` instance holding
-      the project which this object is related to. It can not be None, or
-      anything other than a :class:`~stalker.models.project.Project` instance.
+    :param project: A :class:`.Project` instance holding the project which this
+      object is related to. It can not be None, or anything other than a
+      :class:`.Project` instance.
 
-    :type project: :class:`~stalker.models.project.Project`
+    :type project: :class:`.Project`
     """
 
     #    # add this lines for Sphinx
@@ -712,7 +718,7 @@ class ProjectMixin(object):
     @declared_attr
     def project(cls):
         backref = cls.__tablename__.lower()
-        doc = """The :class:`~stalker.models.project.Project` instance that
+        doc = """The :class:`.Project` instance that
         this object belongs to.
         """
 
@@ -735,19 +741,19 @@ class ProjectMixin(object):
     def _validate_project(self, key, project):
         """validates the given project value
         """
-
         from stalker.models.project import Project
-
         if project is None:
-            raise TypeError("%s.project can not be None it must be an "
-                            "instance of stalker.models.project.Project" %
-                            self.__class__.__name__)
+            raise TypeError(
+                "%s.project can not be None it must be an instance of "
+                "stalker.models.project.Project" % self.__class__.__name__
+            )
 
         if not isinstance(project, Project):
-            raise TypeError("%s.project should be an instance of "
-                            "stalker.models.project.Project instance not %s" %
-                            (self.__class__.__name__,
-                             project.__class__.__name__))
+            raise TypeError(
+                "%s.project should be an instance of "
+                "stalker.models.project.Project instance not %s" %
+                (self.__class__.__name__, project.__class__.__name__)
+            )
         return project
 
 
@@ -759,9 +765,9 @@ class ReferenceMixin(object):
     the References are generally to give more info to direct the evolution of
     the object.
 
-    :param references: A list of :class:`~stalker.models.link.Link` instances.
+    :param references: A list of :class:`.Link` instances.
 
-    :type references: list of :class:`~stalker.models.link.Link` instances.
+    :type references: list of :class:`.Link` instances.
     """
     # add this lines for Sphinx
     #    __tablename__ = "ReferenceMixins"
@@ -788,8 +794,8 @@ class ReferenceMixin(object):
         return relationship(
             "Link",
             secondary=secondary_table,
-            doc="""A list of :class:`~stalker.models.link.Link` instances given
-            as a reference for this entity.
+            doc="""A list of :class:`.Link` instances given as a reference for
+            this entity.
             """
         )
 
@@ -801,10 +807,11 @@ class ReferenceMixin(object):
 
         # all the elements should be instance of stalker.models.entity.Entity
         if not isinstance(reference, SimpleEntity):
-            raise TypeError("%s.references should be all instances of "
-                            "stalker.models.entity.SimpleEntity not %s"
-                            % (self.__class__.__name__,
-                               reference.__class__.__name__))
+            raise TypeError(
+                "%s.references should be all instances of "
+                "stalker.models.entity.SimpleEntity not %s" %
+                (self.__class__.__name__, reference.__class__.__name__)
+            )
         return reference
 
 
@@ -833,12 +840,12 @@ class ACLMixin(object):
         """validates the given permission value
         """
         from stalker.models.auth import Permission
-
         if not isinstance(permission, Permission):
-            raise TypeError("%s.permissions should be all instances of "
-                            "stalker.models.auth.Permission not %s" %
-                            (self.__class__.__name__,
-                             permission.__class__.__name__))
+            raise TypeError(
+                "%s.permissions should be all instances of "
+                "stalker.models.auth.Permission not %s" %
+                (self.__class__.__name__, permission.__class__.__name__)
+            )
 
         return permission
 
@@ -912,13 +919,14 @@ class CodeMixin(object):
 
         if not isinstance(code, (str, unicode)):
             raise TypeError(
-                '%s.code should be a string not %s' % (
-                    self.__class__.__name__, code.__class__.__name__
-                )
+                '%s.code should be a string not %s' %
+                (self.__class__.__name__, code.__class__.__name__)
             )
 
         if code == '':
-            raise ValueError('%s.code can not be an empty string')
+            raise ValueError(
+                '%s.code can not be an empty string' % self.__class__.__name__
+            )
 
         return code
 
@@ -928,9 +936,9 @@ class WorkingHoursMixin(object):
 
     Generally is meaningful for users, departments and studio.
 
-    :param working_hours: A :class:`~stalker.models.project.WorkingHours`
-      instance showing the working hours settings for that project. This data
-      is stored as a PickleType in the database.
+    :param working_hours: A :class:`.WorkingHours` instance showing the working
+      hours settings for that project. This data is stored as a PickleType in
+      the database.
     """
 
     def __init__(self, working_hours=None, **kwargs):
@@ -1077,10 +1085,12 @@ class ScheduleMixin(object):
             schedule_constraint = 0
 
         if not isinstance(schedule_constraint, int):
-            raise TypeError('%s.schedule_constraint should be an integer '
-                            'between 0 and 3, not %s' % 
-                            (self.__class__.__name__,
-                             schedule_constraint.__class__.__name__))
+            raise TypeError(
+                '%s.schedule_constraint should be an integer between 0 and 3, '
+                'not %s' %
+                (self.__class__.__name__,
+                 schedule_constraint.__class__.__name__)
+            )
 
         schedule_constraint = max(schedule_constraint, 0)
         schedule_constraint = min(schedule_constraint, 3)
@@ -1119,7 +1129,8 @@ class ScheduleMixin(object):
                 '%s.schedule_unit should be a string value one of %s showing '
                 'the unit of the schedule timing of this %s, not %s' % (
                     self.__class__.__name__, defaults.datetime_units,
-                    self.__class__.__name__, schedule_unit.__class__.__name__)
+                    self.__class__.__name__, schedule_unit.__class__.__name__
+                )
             )
 
         if schedule_unit not in defaults.datetime_units:
@@ -1127,7 +1138,8 @@ class ScheduleMixin(object):
                 '%s.schedule_unit should be a string value one of %s showing '
                 'the unit of the schedule timing of this %s, not %s' % (
                     self.__class__.__name__, defaults.datetime_units,
-                    self.__class__.__name__, schedule_unit.__class__.__name__)
+                    self.__class__.__name__, schedule_unit.__class__.__name__
+                )
             )
 
         return schedule_unit
@@ -1145,7 +1157,8 @@ class ScheduleMixin(object):
                 '%s.schedule_timing should be an integer or float number'
                 'showing the value of the timing of this %s, not %s' % (
                     self.__class__.__name__, self.__class__.__name__,
-                    schedule_timing.__class__.__name__)
+                    schedule_timing.__class__.__name__
+                )
             )
 
         return schedule_timing

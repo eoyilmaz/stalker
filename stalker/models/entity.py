@@ -57,21 +57,19 @@ class SimpleEntity(Base):
     .. note::
 
        For derived classes if the
-       :attr:`~stalker.models.entity.SimpleEntity.type` needed to be
-       specifically specified, that is it can not be None or nothing else then
-       a :class:`~stalker.models.type.Type` instance, set the
-       ``strictly_typed`` class attribute to True::
+       :attr:`.SimpleEntity.type` needed to be specifically specified, that is
+       it can not be None or nothing else then a :class:`.Type` instance, set
+       the ``strictly_typed`` class attribute to True::
 
            class NewClass(SimpleEntity):
                __strictly_typed__ = True
 
        This will ensure that the derived class always have a proper
-       :attr:`~stalker.models.entity.SimpleEntity.type` attribute and can not
-       be initialized without one.
+       :attr:`.SimpleEntity.type` attribute and can not be initialized without
+       one.
 
     Two SimpleEntities considered to be equal if they have the same
-    :attr:`.name`, the
-    other attributes doesn't matter.
+    :attr:`.name`, the other attributes doesn't matter.
 
     .. versionadded:: 0.2.0
        Name attribute can be skipped. Starting from version 0.2.0 the ``name``
@@ -94,14 +92,14 @@ class SimpleEntity(Base):
       could not again have white spaces at the beginning and at the end of the
       string, again any given objects will be converted to strings
 
-    :param created_by: The :class:`~stalker.models.auth.User` who has created
+    :param created_by: The :class:`.User` who has created
       this object
 
-    :type created_by: :class:`~stalker.models.auth.User`
+    :type created_by: :class:`.User`
 
-    :param updated_by: The :class:`~stalker.models.auth.User` who has updated
-      this object lastly. The created_by and updated_by attributes point the
-      same object if this object is just created.
+    :param updated_by: The :class:`.User` who has updated this object lastly.
+      The created_by and updated_by attributes point the same object if this
+      object is just created.
 
     :param date_created: The date that this object is created.
 
@@ -116,7 +114,7 @@ class SimpleEntity(Base):
     :param type: The type of the current SimpleEntity. Used across several
       places in Stalker. Can be None. The default value is None.
 
-    :type type: :class:`~stalker.models.type.Type`
+    :type type: :class:`.Type`
     """
     # auto generate name values
     __auto_name__ = True
@@ -150,8 +148,7 @@ class SimpleEntity(Base):
         "created_by_id",
         Integer,
         ForeignKey("Users.id", use_alter=True, name="xc"),
-        doc="""The id of the :class:`~stalker.models.auth.User` who has created
-        this entity."""
+        doc="""The id of the :class:`.User` who has created this entity."""
     )
 
     created_by = relationship(
@@ -159,15 +156,14 @@ class SimpleEntity(Base):
         backref="entities_created",
         primaryjoin="SimpleEntity.created_by_id==User.user_id",
         post_update=True,
-        doc="""The :class:`~stalker.models.auth.User` who has created this object."""
+        doc="""The :class:`.User` who has created this object."""
     )
 
     updated_by_id = Column(
         "updated_by_id",
         Integer,
         ForeignKey("Users.id", use_alter=True, name="xu"),
-        doc="""The id of the :class:`~stalker.models.auth.User` who has updated
-        this entity."""
+        doc="""The id of the :class:`.User` who has updated this entity."""
     )
 
     updated_by = relationship(
@@ -175,7 +171,7 @@ class SimpleEntity(Base):
         backref="entities_updated",
         primaryjoin="SimpleEntity.updated_by_id==User.user_id",
         post_update=True,
-        doc="""The :class:`~stalker.models.auth.User` who has updated this object."""
+        doc="""The :class:`.User` who has updated this object."""
     )
 
     date_created = Column(
@@ -195,9 +191,9 @@ class SimpleEntity(Base):
         "type_id",
         Integer,
         ForeignKey("Types.id", use_alter=True, name="y"),
-        doc="""The id of the :class:`~stalker.models.type.Type` of this entity.
-        Mainly used by SQLAlchemy to create a Many-to-One relates between
-        SimpleEntities and Types.
+        doc="""The id of the :class:`.Type` of this entity. Mainly used by
+        SQLAlchemy to create a Many-to-One relates between SimpleEntities and
+        Types.
         """
     )
 
@@ -207,8 +203,8 @@ class SimpleEntity(Base):
         post_update=True,
         doc="""The type of the object.
 
-        It is an instance of :class:`~stalker.models.type.Type` with a proper
-        :attr:`~stalker.models.type.Type.target_entity_type`.
+        It is an instance of :class:`.Type` with a proper
+        :attr:`.Type.target_entity_type`.
         """
     )
 
@@ -301,10 +297,11 @@ class SimpleEntity(Base):
             description = ""
 
         if not isinstance(description, (str, unicode)):
-            raise TypeError('%s.description should be an instance of '
-                            'string or unicode, not %s' % (
-                                self.__class__.__name__,
-                                description.__class__.__name__))
+            raise TypeError(
+                '%s.description should be an instance of string or unicode, '
+                'not %s' %
+                (self.__class__.__name__, description.__class__.__name__)
+            )
         return description
 
     @validates("name")
@@ -319,21 +316,23 @@ class SimpleEntity(Base):
 
         # it is None
         if name is None:
-            raise TypeError("%s.name can not be None" %
-                            self.__class__.__name__)
+            raise TypeError(
+                "%s.name can not be None" % self.__class__.__name__
+            )
 
         if not isinstance(name, (str, unicode)):
-            raise TypeError("%s.name should be an instance of string or "
-                            "unicode not %s" %
-                            (self.__class__.__name__,
-                             name.__class__.__name__))
+            raise TypeError(
+                "%s.name should be an instance of string or unicode not %s" %
+                (self.__class__.__name__, name.__class__.__name__)
+            )
 
         name = self._format_name(str(name))
 
         # it is empty
         if name == "":
-            raise ValueError("%s.name can not be an empty string" %
-                             self.__class__.__name__)
+            raise ValueError(
+                "%s.name can not be an empty string" % self.__class__.__name__
+            )
 
         # also set the nice_name
         self._nice_name = self._format_nice_name(name)
@@ -399,9 +398,10 @@ class SimpleEntity(Base):
 
         if created_by_in is not None:
             if not isinstance(created_by_in, User):
-                raise TypeError("%s.created_by should be an instance of"
-                                "stalker.models.auth.User" %
-                                self.__class__.__name__)
+                raise TypeError(
+                    "%s.created_by should be an instance of "
+                    "stalker.models.auth.User" % self.__class__.__name__
+                )
         return created_by_in
 
     @validates("updated_by")
@@ -416,9 +416,10 @@ class SimpleEntity(Base):
 
         if updated_by_in is not None:
             if not isinstance(updated_by_in, User):
-                raise TypeError("%s.updated_by should be an instance of"
-                                "stalker.models.auth.User" %
-                                self.__class__.__name__)
+                raise TypeError(
+                    "%s.updated_by should be an instance of "
+                    "stalker.models.auth.User" % self.__class__.__name__
+                )
         return updated_by_in
 
     @validates("date_created")
@@ -426,12 +427,15 @@ class SimpleEntity(Base):
         """validates the given date_created_in
         """
         if date_created_in is None:
-            raise TypeError("%s.date_created can not be None" %
-                            self.__class__.__name__)
+            raise TypeError(
+                "%s.date_created can not be None" % self.__class__.__name__
+            )
 
         if not isinstance(date_created_in, datetime.datetime):
-            raise TypeError("%s.date_created should be an instance of "
-                            "datetime.datetime" % self.__class__.__name__)
+            raise TypeError(
+                "%s.date_created should be an instance of datetime.datetime" %
+                self.__class__.__name__
+            )
 
         return date_created_in
 
@@ -441,21 +445,24 @@ class SimpleEntity(Base):
         """
         # it is None
         if date_updated_in is None:
-            raise TypeError("%s.date_updated can not be None" %
-                            self.__class__.__name__)
+            raise TypeError(
+                "%s.date_updated can not be None" % self.__class__.__name__
+            )
 
         # it is not an instance of datetime.datetime
         if not isinstance(date_updated_in, datetime.datetime):
-            raise TypeError("%s.date_updated should be an instance of "
-                            "datetime.datetime" % self.__class__.__name__)
+            raise TypeError(
+                "%s.date_updated should be an instance of datetime.datetime" %
+                self.__class__.__name__
+            )
 
         # lower than date_created
         if date_updated_in < self.date_created:
-            raise ValueError("%s.date_updated could not be set to a date "
-                             "before 'date_created', try setting the "
-                             "'date_created' before" %
-                             self.__class__.__name__)
-            # TODO: all the attribute check errors should use self.__class__.__name__ as used here
+            raise ValueError(
+                "%s.date_updated could not be set to a date before"
+                "%s.date_created, try setting the 'date_created' before" %
+                self.__class__.__name__
+            )
         return date_updated_in
 
     @validates("type")
@@ -483,10 +490,11 @@ class SimpleEntity(Base):
             from stalker import Link
 
             if not isinstance(thumb, Link):
-                raise TypeError('%s.thumbnail should be a '
-                                'stalker.models.link.Link instance, not %s' %
-                                (self.__class__.__name__,
-                                 thumb.__class__.__name__))
+                raise TypeError(
+                    '%s.thumbnail should be a stalker.models.link.Link '
+                    'instance, not %s' %
+                    (self.__class__.__name__, thumb.__class__.__name__)
+                )
         return thumb
 
     @property
@@ -500,8 +508,9 @@ class SimpleEntity(Base):
         """renders a TaskJuggler compliant string used for TaskJuggler
         integration. Needs to be overridden in inherited classes.
         """
-        raise NotImplementedError('This property is not implemented in %s' %
-                                  self.__class__.__name__)
+        raise NotImplementedError(
+            'This property is not implemented in %s' % self.__class__.__name__
+        )
 
     @validates('html_style')
     def _validate_html_style(self, key, html_style):
@@ -510,10 +519,10 @@ class SimpleEntity(Base):
         if html_style is None:
             html_style = ''
         if not isinstance(html_style, basestring):
-            raise TypeError('%s.html_style should be an instance of '
-                            'basestring, not %s' % (
-                            self.__class__.__name__,
-                            html_style.__class__.__name__))
+            raise TypeError(
+                '%s.html_style should be an instance of basestring, not %s' %
+                (self.__class__.__name__, html_style.__class__.__name__)
+            )
         return html_style
 
     @validates('html_class')
@@ -523,10 +532,10 @@ class SimpleEntity(Base):
         if html_class is None:
             html_class = ''
         if not isinstance(html_class, basestring):
-            raise TypeError('%s.html_class should be an instance of '
-                            'basestring, not %s' % (
-                            self.__class__.__name__,
-                            html_class.__class__.__name__))
+            raise TypeError(
+                '%s.html_class should be an instance of basestring, not %s' %
+                (self.__class__.__name__, html_class.__class__.__name__)
+            )
         return html_class
 
 
@@ -539,13 +548,13 @@ class Entity(SimpleEntity):
     Two Entities considered equal if they have the same name. It doesn't matter
     if they have different tags or notes.
 
-    :param list tags: A list of :class:`~stalker.models.tag.Tag` objects
-      related to this entity. tags could be an empty list, or when omitted it
-      will be set to an empty list.
+    :param list tags: A list of :class:`.Tag` objects related to this entity.
+      tags could be an empty list, or when omitted it will be set to an empty
+      list.
 
-    :param list notes: A list of :class:`~stalker.models.note.Note` instances.
-      Can be an empty list, or when omitted it will be set to an empty list,
-      when set to None it will be converted to an empty list.
+    :param list notes: A list of :class:`.Note` instances. Can be an empty
+      list, or when omitted it will be set to an empty list, when set to None
+      it will be converted to an empty list.
     """
     __auto_name__ = True
     __tablename__ = "Entities"
@@ -559,7 +568,7 @@ class Entity(SimpleEntity):
         backref="entities",
         doc="""A list of tags attached to this object.
 
-        It is a list of :class:`~stalker.models.tag.Tag` instances which shows
+        It is a list of :class:`.Tag` instances which shows
         the tags of this object"""
     )
 
@@ -568,9 +577,9 @@ class Entity(SimpleEntity):
         primaryjoin="Entities.c.id==Notes.c.entity_id",
         backref="entity",
         cascade='all, delete-orphan',
-        doc="""All the :class:`~stalker.models.note.Notes`\ s attached to this entity.
+        doc="""All the :class:`.Notes`\ s attached to this entity.
 
-        It is a list of :class:`~stalker.models.note.Note` instances or an
+        It is a list of :class:`.Note` instances or an
         empty list, setting it None will raise a TypeError.
         """
     )
@@ -594,29 +603,26 @@ class Entity(SimpleEntity):
     def _validate_notes(self, key, note):
         """validates the given note value
         """
-
         from stalker.models.note import Note
-
         if not isinstance(note, Note):
-            raise TypeError("%s.note should be an instance of "
-                            "stalker.models.note.Note not %s" %
-                            (self.__class__.__name__,
-                             note.__class__.__name__))
-
+            raise TypeError(
+                "%s.note should be an instance of stalker.models.note.Note "
+                "not %s" %
+                (self.__class__.__name__, note.__class__.__name__)
+            )
         return note
 
     @validates("tags")
     def _validate_tags(self, key, tag):
         """validates the given tag
         """
-
         from stalker.models.tag import Tag
-
         if not isinstance(tag, Tag):
-            raise TypeError("%s.tag should be an instance of "
-                            "stalker.models.tag.Tag not %s" %
-                            (self.__class__.__name__,
-                             tag.__class__.__name__))
+            raise TypeError(
+                "%s.tag should be an instance of stalker.models.tag.Tag not "
+                "%s" %
+                (self.__class__.__name__, tag.__class__.__name__)
+            )
         return tag
 
     def __eq__(self, other):

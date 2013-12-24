@@ -283,17 +283,16 @@ def __create_ticket_statuses():
 def register(class_):
     """Registers the given class to the database.
 
-    It is mainly used to create the :class:`~stalker.models.auth.Action`\ s
-    needed for the :class:`~stalker.models.auth.User`\ s and
-    :class:`~stalker.models.auth.Group`\ s to be able to interact with the
+    It is mainly used to create the :class:`.Action`\ s needed for the
+    :class:`.User`\ s and :class:`.Group`\ s to be able to interact with the
     given class. Whatever class you have created needs to be registered.
 
     Example, lets say that you have a data class which is specific to your
     studio and it is not present in Stalker Object Model (SOM), so you need to
     extend SOM with a new data type. Here is a simple Data class inherited from
-    the :class:`~stalker.models.entity.SimpleEntity` class (which is the
-    simplest class you should inherit your classes from or use more complex
-    classes down to the hierarchy)::
+    the :class:`.SimpleEntity` class (which is the simplest class you should
+    inherit your classes from or use more complex classes down to the
+    hierarchy)::
 
       from sqlalchemy import Column, Integer, ForeignKey
       from stalker.models.entity import SimpleEntity
@@ -310,20 +309,18 @@ def register(class_):
                             primary_key=True)
 
     Now because Stalker is using Pyramid authorization mechanism it needs to be
-    able to have an :class:`~stalker.models.auth.Permission` about your new
-    class, so you can assign this :class;`~stalker.models.auth.Permission` to
-    your :class:`~stalker.models.auth.User`\ s or
-    :class:`~stalker.models.auth.Group`\ s. So you ned to register your new
-    class with stalker.db.register like shown below::
+    able to have an :class:`.Permission` about your new class, so you can
+    assign this :class;`.Permission` to your :class:`.User`\ s or
+    :class:`.Group`\ s. So you ned to register your new class with
+    :func:`stalker.db.register` like shown below::
 
       from stalker import db
       db.register(MyDataClass)
 
     This will create the necessary Actions in the 'Actions' table on your
-    database, then you can create :class:`~stalker.models.auth.Permission`\ s
-    and assign these to your :class:`~stalker.models.auth.User`\ s and
-    :class:`~stalker.models.auth.Group`\ s so they are Allowed or Denied to do
-    the specified Action.
+    database, then you can create :class:`.Permission`\ s and assign these to
+    your :class:`.User`\ s and :class:`.Group`\ s so they are Allowed or Denied
+    to do the specified Action.
 
     :param class_: The class itself that needs to be registered.
     """
@@ -333,7 +330,7 @@ def register(class_):
     permissions_db = Permission.query.all()
 
     if not isinstance(class_, type):
-        raise TypeError('To register a class please supply the class itself ')
+        raise TypeError('To register a class please supply the class itself.')
 
     # register the class name to entity_types table
     from stalker import (EntityType, StatusMixin, DateRangeMixin,

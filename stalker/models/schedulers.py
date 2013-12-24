@@ -50,12 +50,12 @@ class SchedulerBase(object):
         """
         if studio_in is not None:
             from stalker import Studio
-
             if not isinstance(studio_in, Studio):
-                raise TypeError('%s.studio should be an instance of '
-                                'stalker.models.studio.Studio, not %s' %
-                                (self.__class__.__name__,
-                                 studio_in.__class__.__name__))
+                raise TypeError(
+                    '%s.studio should be an instance of '
+                    'stalker.models.studio.Studio, not %s' %
+                    (self.__class__.__name__, studio_in.__class__.__name__)
+                )
         return studio_in
 
     @property
@@ -83,11 +83,11 @@ class TaskJugglerScheduler(SchedulerBase):
     Integrates Stalker and TaskJuggler together by using TaskJugglerScheduler
     to solve the scheduling problem.
 
-    TaskJugglerScheduler needs a :class:`~stalker.models.studio.Studio`
-    instance to work with. TJS will create a .tjp file and then solve the tasks
-    and restore the computed_start and computed_end dates. Combining all the
-    Projects in one tjp file has a very nice side effect, projects using the
-    same resources will respect their allocations to the resource.
+    TaskJugglerScheduler needs a :class:`.Studio` instance to work with. TJS
+    will create a .tjp file and then solve the tasks and restore the
+    computed_start and computed_end dates. Combining all the Projects in one
+    tjp file has a very nice side effect, projects using the same resources
+    will respect their allocations to the resource.
     """
 
     def __init__(self, studio=None):
@@ -199,10 +199,11 @@ class TaskJugglerScheduler(SchedulerBase):
         from stalker import Studio
 
         if not isinstance(self.studio, Studio):
-            raise TypeError('%s.studio should be an instance of '
-                            'stalker.models.studio.Studio, not %s' %
-                            (self.__class__.__name__,
-                             self.studio.__class__.__name__))
+            raise TypeError(
+                '%s.studio should be an instance of '
+                'stalker.models.studio.Studio, not %s' %
+                (self.__class__.__name__, self.studio.__class__.__name__)
+            )
 
         # ********************************************************************
         # Adjust Studio.start and Studio.end

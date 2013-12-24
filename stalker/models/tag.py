@@ -33,7 +33,7 @@ class Tag(SimpleEntity):
     """Use it to create tags for any object available in SOM.
 
     Doesn't have any other attribute than what is inherited from
-    :class:`~stalker.models.entity.SimpleEntity`
+    :class:`.SimpleEntity`
     """
     __auto_name__ = False
     __tablename__ = "Tags"

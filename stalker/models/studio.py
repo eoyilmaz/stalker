@@ -201,10 +201,10 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
             dwh = defaults.daily_working_hours
 
         if not isinstance(dwh, int):
-            raise TypeError('%s.daily_working_hours should be an integer, '
-                            'not %s' %
-                            (self.__class__.__name__,
-                             dwh.__class__.__name__))
+            raise TypeError(
+                '%s.daily_working_hours should be an integer, not %s' %
+                (self.__class__.__name__, dwh.__class__.__name__)
+            )
         return dwh
 
     def _validate_now(self, now_in):
@@ -214,10 +214,11 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
             now_in = datetime.datetime.now()
 
         if not isinstance(now_in, datetime.datetime):
-            raise TypeError('%s.now attribute should be an instance of '
-                            'datetime.datetime, not %s' %
-                            (self.__class__.__name__,
-                             now_in.__class__.__name__))
+            raise TypeError(
+                '%s.now attribute should be an instance of datetime.datetime, '
+                'not %s' %
+                (self.__class__.__name__, now_in.__class__.__name__)
+            )
 
         return self.round_time(now_in)
 
@@ -243,10 +244,11 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         """
         if scheduler_in is not None:
             if not isinstance(scheduler_in, SchedulerBase):
-                raise TypeError('%s.scheduler should be an instance of '
-                                'stalker.models.scheduler.SchedulerBase, not '
-                                '%s' % (self.__class__.__name__,
-                                        scheduler_in.__class__.__name__))
+                raise TypeError(
+                    '%s.scheduler should be an instance of '
+                    'stalker.models.scheduler.SchedulerBase, not %s' %
+                    (self.__class__.__name__, scheduler_in.__class__.__name__)
+                )
         return scheduler_in
 
     @property
@@ -283,7 +285,6 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         """returns all the projects in the studio
         """
         from stalker import Project
-
         return Project.query.all()
 
     @property
@@ -291,7 +292,6 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         """returns all the active projects in the studio
         """
         from stalker import Project
-
         return Project.query.filter(Project.active == True).all()
 
     @property
@@ -299,7 +299,6 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         """return all the inactive projects in the studio
         """
         from stalker import Project
-
         return Project.query.filter(Project.active == False).all()
 
     @property
@@ -307,7 +306,6 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         """returns all the departments in the studio
         """
         from stalker import Department
-
         return Department.query.all()
 
     @property
@@ -315,7 +313,6 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         """returns all the users in the studio
         """
         from stalker import User
-
         return User.query.all()
 
     @property
@@ -332,12 +329,14 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         # check the scheduler first
         if self.scheduler is None or \
                 not isinstance(self.scheduler, SchedulerBase):
-            raise RuntimeError('There is no scheduler for this %s, please '
-                               'assign a scheduler to the %s.scheduler '
-                               'attribute, before calling %s.schedule()' %
-                               (self.__class__.__name__,
-                                self.__class__.__name__,
-                                self.__class__.__name__))
+            raise RuntimeError(
+                'There is no scheduler for this %(class)s, please assign a '
+                'scheduler to the %(class)s.scheduler attribute, before '
+                'calling %(class)s.schedule()' %
+                {
+                    'class': self.__class__.__name__
+                }
+            )
 
         # run the scheduler
         self.scheduler.studio = self
@@ -412,10 +411,11 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
             timing_resolution = defaults.timing_resolution
 
         if not isinstance(timing_resolution, datetime.timedelta):
-            raise TypeError('%s.timing_resolution should be an instance of '
-                            'datetime.timedelta not, %s' %
-                            (self.__class__.__name__,
-                             timing_resolution.__class__.__name__))
+            raise TypeError(
+                '%s.timing_resolution should be an instance of '
+                'datetime.timedelta not, %s' %
+                (self.__class__.__name__, timing_resolution.__class__.__name__)
+            )
 
         return timing_resolution
 
@@ -486,7 +486,7 @@ class WorkingHours(object):
         """equality test
         """
         return isinstance(other, WorkingHours) and \
-               other.working_hours == self.working_hours
+            other.working_hours == self.working_hours
 
     def __getitem__(self, item):
         if isinstance(item, int):
@@ -501,27 +501,30 @@ class WorkingHours(object):
         elif isinstance(key, str):
             # check if key is in
             if key not in defaults.day_order:
-                raise KeyError('%s accepts only %s as key, not %s' %
-                               (self.__class__.__name__, defaults.day_order,
-                                key))
+                raise KeyError(
+                    '%s accepts only %s as key, not %s' %
+                    (self.__class__.__name__, defaults.day_order, key)
+                )
             self._wh[key] = value
 
     def _validate_working_hours(self, wh_in):
         """validates the given working hours
         """
         if not isinstance(wh_in, dict):
-            raise TypeError('%s.working_hours should be a dictionary, not %s' %
-                            (self.__class__.__name__,
-                             wh_in.__class__.__name__))
+            raise TypeError(
+                '%s.working_hours should be a dictionary, not %s' %
+                (self.__class__.__name__, wh_in.__class__.__name__)
+            )
 
         for key in wh_in.keys():
             if not isinstance(wh_in[key], list):
-                raise TypeError('%s.working_hours should be a dictionary with '
-                                'keys "mon, tue, wed, thu, fri, sat, sun" '
-                                'and the values should a list of lists of '
-                                'two integers like [[540, 720], [800, 1080]], '
-                                'not %s' % (self.__class__.__name__,
-                                            wh_in[key].__class__.__name__))
+                raise TypeError(
+                    '%s.working_hours should be a dictionary with keys "mon, '
+                    'tue, wed, thu, fri, sat, sun" and the values should a '
+                    'list of lists of two integers like [[540, 720], [800, '
+                    '1080]], not %s' %
+                    (self.__class__.__name__, wh_in[key].__class__.__name__)
+                )
 
             # validate item values
             self._validate_wh_value(wh_in[key])
@@ -643,12 +646,12 @@ class Vacation(SimpleEntity, DateRangeMixin):
     """Vacation is the way to manage the User vacations.
 
     :param user: The user of this vacation. Should be an instance of
-      :class:`~stalker.models.auth.User` if skipped or given as None the
+      :class:`.User` if skipped or given as None the
       Vacation is considered as a Studio vacation and applies to all Users.
 
     :param start: The start datetime of the vacation. Is is an
       datetime.datetime instance. When skipped it will be set to the rounded
-      value of 
+      value of.
 
     :param end: The end datetime of the vacation. It is an datetime.datetime
       instance.
@@ -671,7 +674,7 @@ class Vacation(SimpleEntity, DateRangeMixin):
         back_populates='vacations',
         doc="""The User of this Vacation.
 
-        Accepts:class:`~stalker.models.auth.User` instance.
+        Accepts :class:`.User` instance.
         """
     )
 
@@ -689,9 +692,11 @@ class Vacation(SimpleEntity, DateRangeMixin):
         if user is not None:
             from stalker import User
             if not isinstance(user, User):
-                raise TypeError('%s.user should be an instance of '
-                                'stalker.models.auth.User, not %s' %
-                                (self.__class__.__name__, user.__class__.__name__))
+                raise TypeError(
+                    '%s.user should be an instance of '
+                    'stalker.models.auth.User, not %s' %
+                    (self.__class__.__name__, user.__class__.__name__)
+                )
         return user
 
     @property

@@ -16,21 +16,22 @@ Inheritance Diagram
    stalker.models.department.Department
    stalker.models.entity.Entity
    stalker.models.entity.SimpleEntity
-   stalker.models.env.EnvironmentBase
    stalker.models.format.ImageFormat
    stalker.models.link.Link
    stalker.models.message.Message
    stalker.models.mixins.ACLMixin
    stalker.models.mixins.CodeMixin
+   stalker.models.mixins.DateRangeMixin
    stalker.models.mixins.ProjectMixin
    stalker.models.mixins.ReferenceMixin
-   stalker.models.mixins.DateRangeMixin
+   stalker.models.mixins.ScheduleMixin
    stalker.models.mixins.StatusMixin
    stalker.models.mixins.TargetEntityTypeMixin
    stalker.models.mixins.WorkingHoursMixin
    stalker.models.note.Note
    stalker.models.project.Project
    stalker.models.repository.Repository
+   stalker.models.revision.Revision
    stalker.models.scene.Scene
    stalker.models.schedulers.SchedulerBase
    stalker.models.schedulers.TaskJugglerScheduler

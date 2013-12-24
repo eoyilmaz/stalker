@@ -36,13 +36,12 @@ class Link(Entity):
 
     Links are all about giving some external information to the current entity
     (external to the database, so it can be something on the
-    :class:`~stalker.models.repository.Repository` or in the Web or anywhere
-    that the server can reach). The type of the link (general, file, folder,
-    web page, image, image sequence, video, movie, sound, text etc.) can be
-    defined by a :class:`~stalker.models.type.Type` instance (you can also use
-    multiple :class:`~stalker.models.tag.Tag` instances to add more
-    information, and to filter them back). Again it is defined by the needs of
-    the studio.
+    :class:`.Repository` or in the Web or anywhere that the server can reach).
+    The type of the link (general, file, folder, web page, image, image
+    sequence, video, movie, sound, text etc.) can be defined by a
+    :class:`.Type` instance (you can also use multiple :class:`.Tag` instances
+    to add more information, and to filter them back). Again it is defined by
+    the needs of the studio.
 
     For sequences of files the file name should be in "%h%p%t %R" format in
     PySeq_ formatting rules.
@@ -103,10 +102,11 @@ class Link(Entity):
             full_path = ''
 
         if not isinstance(full_path, (str, unicode)):
-            raise TypeError("%s.full_path should be an instance of string or "
-                            "unicode not %s" %
-                            (self.__class__.__name__,
-                             full_path.__class__.__name__))
+            raise TypeError(
+                "%s.full_path should be an instance of string or unicode not "
+                "%s" %
+                (self.__class__.__name__, full_path.__class__.__name__)
+            )
 
         return self._format_path(full_path)
 
@@ -122,10 +122,11 @@ class Link(Entity):
             original_filename = filename_from_path
 
         if not isinstance(original_filename, (str, unicode)):
-            raise TypeError('%s.original_filename should be an instance of '
-                            'str or unicode and not %s' %
-                            (self.__class__.__name__,
-                             original_filename.__class__.__name__))
+            raise TypeError(
+                '%s.original_filename should be an instance of str or '
+                'unicode and not %s' %
+                (self.__class__.__name__, original_filename.__class__.__name__)
+            )
 
         return original_filename
 
@@ -149,16 +150,20 @@ class Link(Entity):
         :param str path: the new path
         """
         if path is None:
-            raise TypeError('%s.path can not be set to None' %
-                            self.__class__.__name__)
+            raise TypeError(
+                '%s.path can not be set to None' % self.__class__.__name__
+            )
 
         if not isinstance(path, (str, unicode)):
-            raise TypeError('%s.path should be an instance of str or unicode, '
-                            'not %s' % (self.__class__.__name__,
-                                        path.__class__.__name__))
+            raise TypeError(
+                '%s.path should be an instance of str or unicode, not %s' %
+                (self.__class__.__name__, path.__class__.__name__)
+            )
 
         if path == '':
-            raise ValueError('%s.path can not be an empty string')
+            raise ValueError(
+                '%s.path can not be an empty string' % self.__class__.__name__
+            )
 
         self.full_path = self._format_path(
             os.path.join(path, self.filename)
@@ -180,9 +185,10 @@ class Link(Entity):
             filename = ''
 
         if not isinstance(filename, (str, unicode)):
-            raise TypeError('%s.filename should be an instance of str or '
-                            'unicode, not %s' % (self.__class__.__name__,
-                                                 filename.__class__.__name__))
+            raise TypeError(
+                '%s.filename should be an instance of str or unicode, not %s' %
+                (self.__class__.__name__, filename.__class__.__name__)
+            )
 
         self.full_path = self._format_path(
             os.path.join(self.path, filename)
@@ -204,9 +210,10 @@ class Link(Entity):
             extension = ''
 
         if not isinstance(extension, (str, unicode)):
-            raise TypeError('%s.extension should be an instance of str or '
-                            'unicode, not %s' % (self.__class__.__name__,
-                                                 extension.__class__.__name__))
+            raise TypeError(
+                '%s.extension should be an instance of str or unicode, not %s'
+                % (self.__class__.__name__, extension.__class__.__name__)
+            )
 
         if extension != '':
             if not extension.startswith(os.path.extsep):

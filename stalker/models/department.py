@@ -86,7 +86,7 @@ class Department(Entity):
         back_populates="departments",
         doc="""List of users representing the members of this department.""",
     )
-    
+
     users = synonym('members')
 
     def __init__(self, members=None, lead=None, **kwargs):
@@ -97,24 +97,23 @@ class Department(Entity):
 
         self.members = members
         self.lead = lead
-    
+
     def __eq__(self, other):
         """the equality operator
         """
-        return super(Department, self).__eq__(other) and\
-               isinstance(other, Department) 
-    
+        return super(Department, self).__eq__(other) and \
+            isinstance(other, Department)
+
     @validates("members")
     def _validate_members(self, key, member):
         """validates the given member attribute
         """
-
         if not isinstance(member, User):
-            raise TypeError("Every element in the %s.members list should be "
-                            "an instance of stalker.models.auth.User class "
-                            "not %s" %
-                            (self.__class__.__name__,
-                             member.__class__.__name__))
+            raise TypeError(
+                "Every element in the %s.members list should be an instance "
+                "of stalker.models.auth.User not %s" %
+                (self.__class__.__name__, member.__class__.__name__)
+            )
         return member
 
     @validates("lead")
@@ -125,10 +124,11 @@ class Department(Entity):
         if lead is not None:
             # the lead should be an instance of User class
             if not isinstance(lead, User):
-                raise TypeError("%s.lead should be an instance of "
-                                "stalker.models.auth.User not %s" %
-                                (self.__class__.__name__,
-                                 lead.__class__.__name__))
+                raise TypeError(
+                    "%s.lead should be an instance of "
+                    "stalker.models.auth.User not %s" %
+                    (self.__class__.__name__, lead.__class__.__name__)
+                )
         return lead
 
     @property

@@ -87,10 +87,11 @@ class Repository(Entity):
         """validates the given linux path
         """
         if not isinstance(linux_path_in, (str, unicode)):
-            raise TypeError("%s.linux_path should be an instance of string "
-                            "or unicode not %s" %
-                            (self.__class__.__name__,
-                             linux_path_in.__class__.__name__))
+            raise TypeError(
+                "%s.linux_path should be an instance of string or unicode not "
+                "%s" %
+                (self.__class__.__name__, linux_path_in.__class__.__name__)
+            )
 
         linux_path_in = os.path.normpath(linux_path_in) + '/'
 
@@ -101,10 +102,10 @@ class Repository(Entity):
         """validates the given osx path
         """
         if not isinstance(osx_path_in, (str, unicode)):
-            raise TypeError("%s.osx_path should be an instance of string or "
-                            "unicode not %s" %
-                            (self.__class__.__name__,
-                             osx_path_in.__class__.__name__))
+            raise TypeError(
+                "%s.osx_path should be an instance of string or unicode not %s"
+                % (self.__class__.__name__, osx_path_in.__class__.__name__)
+            )
 
         osx_path_in = os.path.normpath(osx_path_in) + '/'
 
@@ -115,10 +116,11 @@ class Repository(Entity):
         """validates the given windows path
         """
         if not isinstance(windows_path_in, (str, unicode)):
-            raise TypeError("%s.windows_path should be an instance of string "
-                            "or unicode not %s" %
-                            (self.__class__.__name__,
-                             windows_path_in.__class__.__name__))
+            raise TypeError(
+                "%s.windows_path should be an instance of string or unicode "
+                "not %s" %
+                (self.__class__.__name__, windows_path_in.__class__.__name__)
+            )
 
         windows_path_in = os.path.normpath(windows_path_in) + '/'
 

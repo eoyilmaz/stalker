@@ -43,9 +43,8 @@ class Sequence(Task, CodeMixin):
 
        .. deprecated:: 0.2.0
 
-       Sequences do not have a lead anymore. Use the
-       :class:`~stalker.models.task.Task.responsible` attribute of the super
-       (:class:`~stalker.models.task.Task`).
+       Sequences do not have a lead anymore. Use the :class:`.Task.responsible`
+       attribute of the super (:class:`.Task`).
     """
     __auto_name__ = False
     __tablename__ = "Sequences"
@@ -57,9 +56,9 @@ class Sequence(Task, CodeMixin):
         "Shot",
         secondary='Shot_Sequences',
         back_populates="sequences",
-        doc="""The :class:`~stalker.models.shot.Shot`\ s assigned to this Sequence.
+        doc="""The :class:`.Shot`\ s assigned to this Sequence.
 
-        It is a list of :class:`~stalker.models.shot.Shot` instances.
+        It is a list of :class:`.Shot` instances.
         """
     )
 
@@ -78,8 +77,10 @@ class Sequence(Task, CodeMixin):
         from stalker.models.shot import Shot
 
         if not isinstance(shot, Shot):
-            raise TypeError('%s.shots should be all '
-                            'stalker.models.shot.Shot instances, not %s')
+            raise TypeError(
+                '%s.shots should be all stalker.models.shot.Shot instances, '
+                'not %s'
+            )
         return shot
 
     def __eq__(self, other):

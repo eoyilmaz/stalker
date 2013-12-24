@@ -22,7 +22,6 @@
 from sqlalchemy import Table, Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship, validates
 
-from stalker import defaults
 from stalker.db.declarative import Base
 from stalker.models.entity import Entity
 from stalker.models.mixins import TargetEntityTypeMixin
@@ -93,15 +92,14 @@ class Status(Entity, CodeMixin):
 
 
 class StatusList(Entity, TargetEntityTypeMixin):
-    """Type specific list of :class:`~stalker.models.status.Status` instances.
+    """Type specific list of :class:`.Status` instances.
 
-    Holds multiple :class:`~stalker.models.status.Status`\ es to be used as a
-    choice list for several other classes.
+    Holds multiple :class:`.Status`\ es to be used as a choice list for several
+    other classes.
 
     A StatusList can only be assigned to only one entity type. So a
-    :class:`~stalker.models.project.Project` can only have one suitable
-    StatusList object which is designed for
-    :class:`~stalker.models.project.Project` entities.
+    :class:`.Project` can only have one suitable StatusList object which is
+    designed for :class:`.Project` entities.
 
     The list of statuses in StatusList can be accessed by using a list like
     indexing and it also supports string indexes only for getting the item,
@@ -121,10 +119,9 @@ class StatusList(Entity, TargetEntityTypeMixin):
     >>> a_status_list["WIP"]
     <Status (Work in Progress, WIP)>
 
-    :param statuses: This is a list of :class:`~stalker.models.status.Status`
-      instances, so you can prepare
-      different StatusLists for different kind of entities using the same pool
-      of :class:`~stalker.models.status.Status`\ es.
+    :param statuses: This is a list of :class:`.Status` instances, so you can
+      prepare different StatusLists for different kind of entities using the
+      same pool of :class:`.Status`\ es.
 
     :param target_entity_type: use this parameter to specify the target entity
       type that this StatusList is designed for. It accepts classes or names
@@ -160,8 +157,8 @@ class StatusList(Entity, TargetEntityTypeMixin):
       object to any other class than a ``Project`` object.
 
       The StatusList instance can be empty, means it may not have anything in
-      its :attr:`~stalker.models.status.StatusList.statuses`. But it is
-      useless. The validation for empty statuses list is left to the SOM user.
+      its :attr:`.StatusList.statuses`. But it is useless. The validation for
+      empty statuses list is left to the SOM user.
     """
     __auto_name__ = True
     __tablename__ = "StatusLists"
@@ -179,7 +176,7 @@ class StatusList(Entity, TargetEntityTypeMixin):
     statuses = relationship(
         "Status",
         secondary="StatusList_Statuses",
-        doc="""list of :class:`~stalker.models.status.Status` objects, showing the possible statuses"""
+        doc="""list of :class:`.Status` objects, showing the possible statuses"""
     )
 
     def __init__(self, statuses=None, target_entity_type=None, **kwargs):
@@ -195,19 +192,20 @@ class StatusList(Entity, TargetEntityTypeMixin):
         """validates the given status
         """
         if not isinstance(status, Status):
-            raise TypeError("all the elements in %s.statuses must be an "
-                            "instance of stalker.models.status.Status not %s" %
-                            (self.__class__.__name__,
-                             status.__class__.__name__))
+            raise TypeError(
+                "All of the elements in %s.statuses must be an instance of "
+                "stalker.models.status.Status, and not %s" %
+                (self.__class__.__name__, status.__class__.__name__)
+            )
         return status
 
     def __eq__(self, other):
         """the equality operator
         """
         return super(StatusList, self).__eq__(other) and \
-               isinstance(other, StatusList) and \
-               self.statuses == other.statuses and \
-               self.target_entity_type == other.target_entity_type
+            isinstance(other, StatusList) and \
+            self.statuses == other.statuses and \
+            self.target_entity_type == other.target_entity_type
 
     def __getitem__(self, key):
         """the indexing attributes for getting item
@@ -241,7 +239,7 @@ class StatusList(Entity, TargetEntityTypeMixin):
         return len(self.statuses)
 
 
-# STATUSLIST_STATUSES
+# Statuslist_Statuses Table
 StatusList_Statuses = Table(
     "StatusList_Statuses", Base.metadata,
     Column(

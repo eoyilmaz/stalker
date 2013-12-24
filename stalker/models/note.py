@@ -57,7 +57,7 @@ class Note(SimpleEntity):
 
     content = synonym(
         'description',
-        doc="""The content of this :class:`~stalker.models.note.Note` instance.
+        doc="""The content of this :class:`.Note` instance.
 
         Content is a string representing the content of this Note, can be an
         empty.

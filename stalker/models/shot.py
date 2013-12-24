@@ -33,7 +33,6 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
 
-# TODO: Add handles_at_start and handles_at_end attributes
 class Shot(Task, CodeMixin):
     """Manages Shot related data.
 
@@ -45,16 +44,15 @@ class Shot(Task, CodeMixin):
        the same name, which is a kind of a code like SH001, SH012A etc., and
        in Stalker you can not have two entities with the same name if their
        types are also matching, to guarantee all the shots are going to have
-       different names the :attr:`~stalker.models.shot.Shot.name` attribute
-       of the Shot instances are automatically set to a randomly generated
-       **uuid4** sequence.
+       different names the :attr:`.name` attribute of the Shot instances are
+       automatically set to a randomly generated **uuid4** sequence.
 
     .. note::
 
        .. versionadded:: 0.1.2
 
-       The name of the shot can be freely set without worrying about
-       clashing names.
+       The name of the shot can be freely set without worrying about clashing
+       names.
 
     .. note::
 
@@ -76,81 +74,72 @@ class Shot(Task, CodeMixin):
        .. versionadded:: 0.2.0
 
        Shots now have a new attribute called ``scenes``, holding
-       :class:`~stalker.models.scene.Scene` instances which is another grouping
-       attribute like ``sequences``. Where Sequences are grouping the Shots
-       according to their temporal position to each other, Scenes are grouping
-       the Shots according to their view to the world, that is shots taking
-       place in the same set configuration can be grouped together by using
-       Scenes.
+       :class:`.Scene` instances which is another grouping attribute like
+       ``sequences``. Where Sequences are grouping the Shots according to their
+       temporal position to each other, Scenes are grouping the Shots according
+       to their view to the world, that is shots taking place in the same set
+       configuration can be grouped together by using Scenes.
 
-    Two shots with the same :attr:`~stalker.models.shot.Shot.code` can not be
-    assigned to the same :class:`~stalker.models.sequence.Sequence`.
+    Two shots with the same :attr:`.code` can not be assigned to the same
+    :class:`.Sequence`.
 
-    The :attr:`~stalker.models.shot.Shot.cut_out` and
-    :attr:`~stalker.models.shot.Shot.cut_duration` attributes effects each
-    other. Setting the :attr:`~stalker.models.shot.Shot.cut_out` will change
-    the :attr:`~stalker.models.shot.Shot.cut_duration` and setting the
-    :attr:`~stalker.models.shot.Shot.cut_duration` will change the
-    :attr:`~stalker.models.shot.Shot.cut_out` value. The default value of the
-    :attr:`~stalker.models.shot.Shot.cut_out` attribute is calculated from the
-    :attr:`~stalker.models.shot.Shot.cut_in` and
-    :attr:`~stalker.models.shot.Shot.cut_duration` attributes. If both
-    :attr:`~stalker.models.shot.Shot.cut_out` and
-    :attr:`~stalker.models.shot.Shot.cut_duration` arguments are set to None,
-    the :attr:`~stalker.models.shot.Shot.cut_duration` defaults to 100 and
-    :attr:`~stalker.models.shot.Shot.cut_out` will be set to
-    :attr:`~stalker.models.shot.Shot.cut_in` +
-    :attr:`~stalker.models.shot.Shot.cut_duration`. So the priority of the
-    attributes are as follows:
+    The :attr:`.cut_out` and :attr:`.cut_duration` attributes effects each
+    other. Setting the :attr:`.cut_out` will change the :attr:`.cut_duration`
+    and setting the :attr:`.cut_duration` will change the :attr:`.cut_out`
+    value. The default value of the :attr:`.cut_out` attribute is calculated
+    from the :attr:`.cut_in` and :attr:`.cut_duration` attributes. If both
+    :attr:`.cut_out` and :attr:`.cut_duration` arguments are set to None, the
+    :attr:`.cut_duration` defaults to 100 and :attr:`.cut_out` will be set to
+    :attr:`.cut_in` + :attr:`.cut_duration`. So the priority of the attributes
+    are as follows:
 
-      :attr:`~stalker.models.shot.Shot.cut_in` >
-      :attr:`~stalker.models.shot.Shot.cut_duration` >
-      :attr:`~stalker.models.shot.Shot.cut_out`
+      :attr:`.cut_in` >
+      :attr:`.cut_duration` >
+      :attr:`.cut_out`
 
-    For still images (which can be also managed by shots) the
-    :attr:`~stalker.models.shot.Shot.cut_in` and
-    :attr:`~stalker.models.shot.Shot.cut_out` can be set to the same value
-    so the :attr:`~stalker.models.shot.Shot.cut_duration` can be set to zero.
+    For still images (which can be also managed by shots) the :attr:`.cut_in`
+    and :attr:`.cut_out` can be set to the same value so the
+    :attr:`.cut_duration` can be set to zero.
 
-    Because Shot is getting its relation to a
-    :class:`~stalker.models.project.Project` from the
-    passed :class:`~stalker.models.sequence.Sequence`, you can skip the
-    ``project`` argument, and if you not the value of the ``project`` argument
-    is not going to be used.
+    Because Shot is getting its relation to a :class:`.Project` from the passed
+    :class:`.Sequence`, you can skip the ``project`` argument, and if you not
+    the value of the ``project`` argument is not going to be used.
 
-    :param project: This is the :class:`~stalker.models.project.Project`
-      instance that this shot belongs to. A Shot can not be created without a
-      Project instance.
+    .. note::
 
-    :type project: :class:`~stalker.models.project.Project`
+       .. versionadded:: 0.2.4
 
-    :param sequences: This is a list of
-      :class:`~stalker.models.sequence.Sequence`\ s that this shot is assigned
-      to. A Shot can be created without having a Sequence instance.
+       :attr:`.handles_at_start` and :attr:`.handles_at_end` attributes.
 
-    :type sequences: list of :class:`~stalker.models.sequence.Sequence`
+    :param project: This is the :class:`.Project` instance that this shot
+      belongs to. A Shot can not be created without a Project instance.
 
-    :param integer cut_in: The in frame number that this shot starts. The
-      default value is 1. When the ``cut_in`` is bigger then
-      ``cut_out``, the :attr:`~stalker.models.shot.Shot.cut_out` attribute is
-      set to :attr:`~stalker.models.shot.Shot.cut_in` + 1.
+    :type project: :class:`.Project`
 
-    :param integer cut_duration: The duration of this shot in frames. It should
+    :param sequences: This is a list of :class:`.Sequence`\ s that this shot is
+      assigned to. A Shot can be created without having a Sequence instance.
+
+    :type sequences: list of :class:`.Sequence`
+
+    :param int cut_in: The in frame number that this shot starts. The default
+      value is 1. When the ``cut_in`` is bigger then ``cut_out``, the
+      :attr:`.cut_out` attribute is set to :attr:`.cut_in` + 1.
+
+    :param int cut_duration: The duration of this shot in frames. It should
       be zero or a positive integer value (natural number?) or . The default
       value is None.
 
-    :param integer cut_out: The out frame number that this shot ends. If it is
+    :param int cut_out: The out frame number that this shot ends. If it is
       given as a value lower then the ``cut_in`` parameter, then the
-      :attr:`~stalker.models.shot.Shot.cut_out` will be set to the same value
-      with :attr:`~stalker.models.shot.Shot.cut_in` and the
-      :attr:`~stalker.models.shot.Shot.cut_duration` attribute will be set to
-      1. Can be skipped. The default value is None.
+      :attr:`.cut_out` will be set to the same value with :attr:`.cut_in` and
+      the :attr:`.cut_duration` attribute will be set to 1. Can be skipped. The
+      default value is None.
 
     :param image_format: The image format of this shot. This is an optional
       variable to differentiate the image format per shot. The default value is
       the same with the Project that this Shot belongs to.
 
-    :type image_format: :class:`~stalker.models.format.ImageFormat`
+    :type image_format: :class:`.ImageFormat`
     """
     __auto_name__ = True
     __tablename__ = 'Shots'
@@ -179,10 +168,10 @@ class Shot(Task, CodeMixin):
     image_format = relationship(
         "ImageFormat",
         primaryjoin="Shots.c.image_format_id==ImageFormats.c.id",
-        doc="""The :class:`~stalker.models.format.ImageFormat` of this shot.
+        doc="""The :class:`.ImageFormat` of this shot.
 
         This value defines the output image format of this shot, should be an
-        instance of :class:`~stalker.models.format.ImageFormat`.
+        instance of :class:`.ImageFormat`.
         """
     )
 
@@ -255,8 +244,10 @@ class Shot(Task, CodeMixin):
                 if isinstance(task, Shot):
                     shot = task
                     if shot.code == code:
-                        raise ValueError("The given project already has a "
-                                         "Shot with a code of %s" % self.code)
+                        raise ValueError(
+                            "The given project already has a Shot with a code "
+                            "of %s" % self.code
+                        )
         return True
 
     def _update_cut_info(self, cut_in, cut_duration, cut_out):
@@ -287,7 +278,10 @@ class Shot(Task, CodeMixin):
         """
         if cut_duration_in is not None and \
                 not isinstance(cut_duration_in, int):
-            raise TypeError("cut_duration should be an instance of int")
+            raise TypeError(
+                "%s.cut_duration should be an instance of int, not %s" %
+                (self.__class__.__name__, cut_duration_in.__class__.__name__)
+            )
 
         return cut_duration_in
 
@@ -296,7 +290,10 @@ class Shot(Task, CodeMixin):
         """
         if cut_in_in is not None:
             if not isinstance(cut_in_in, int):
-                raise TypeError("cut_in should be an instance of int")
+                raise TypeError(
+                    "%s.cut_in should be an instance of int, not %s" %
+                    (self.__class__.__name__, cut_in_in.__class__.__name__)
+                )
 
         return cut_in_in
 
@@ -305,7 +302,10 @@ class Shot(Task, CodeMixin):
         """
         if cut_out_in is not None:
             if not isinstance(cut_out_in, int):
-                raise TypeError("cut_out should be an instance of int")
+                raise TypeError(
+                    "%s.cut_out should be an instance of int, not %s" %
+                    (self.__class__.__name__, cut_out_in.__class__.__name__)
+                )
 
         return cut_out_in
 
@@ -316,10 +316,11 @@ class Shot(Task, CodeMixin):
         from stalker.models.sequence import Sequence
 
         if not isinstance(sequence, Sequence):
-            raise TypeError("%s.sequences should all be "
-                            "stalker.models.sequence.Sequence instances, not "
-                            "%s" % (self.__class__.__name__,
-                                    sequence.__class__.__name__))
+            raise TypeError(
+                "%s.sequences should all be stalker.models.sequence.Sequence "
+                "instances, not %s" %
+                (self.__class__.__name__, sequence.__class__.__name__)
+            )
         return sequence
 
     @validates('scenes')
@@ -329,10 +330,11 @@ class Shot(Task, CodeMixin):
         from stalker.models.scene import Scene
 
         if not isinstance(scene, Scene):
-            raise TypeError("%s.scenes should all be "
-                            "stalker.models.scene.Scene instances, not "
-                            "%s" % (self.__class__.__name__,
-                                    scene.__class__.__name__))
+            raise TypeError(
+                "%s.scenes should all be stalker.models.scene.Scene "
+                "instances, not %s" %
+                (self.__class__.__name__, scene.__class__.__name__)
+            )
         return scene
 
     @validates('image_format')
@@ -345,9 +347,11 @@ class Shot(Task, CodeMixin):
 
         if imf is not None:
             if not isinstance(imf, ImageFormat):
-                raise TypeError('%s.image_format should be an instance of '
-                                'stalker.models.format.ImageFormat, not %s' %
-                                (self.__class__.__name__, imf.__class__.__name__))
+                raise TypeError(
+                    '%s.image_format should be an instance of '
+                    'stalker.models.format.ImageFormat, not %s' %
+                    (self.__class__.__name__, imf.__class__.__name__)
+                )
 
         return imf
 
@@ -377,9 +381,9 @@ class Shot(Task, CodeMixin):
         doc="""The in frame number that this shot starts.
 
         The default value is 1. When the cut_in is bigger then
-        :attr:`~stalker.models.shot.Shot.cut_out`, the
-        :attr:`~stalker.models.shot.Shot.cut_out` value is update to
-        :attr:`~stalker.models.shot.Shot.cut_in` + 1."""
+        :attr:`.cut_out`, the
+        :attr:`.cut_out` value is update to
+        :attr:`.cut_in` + 1."""
     )
 
     def _cut_out_getter(self):
@@ -395,12 +399,12 @@ class Shot(Task, CodeMixin):
         descriptor=property(_cut_out_getter, _cut_out_setter),
         doc="""The out frame number that this shot ends.
 
-        When the :attr:`~stalker.models.shot.Shot.cut_out` is set to a value
-        lower than :attr:`~stalker.models.shot.Shot.cut_in`,
-        :attr:`~stalker.models.shot.Shot.cut_out` will be updated to
-        :attr:`~stalker.models.shot.Shot.cut_in` + 1. The default value is
-        :attr:`~stalker.models.shot.Shot.cut_in` +
-        :attr:`~stalker.models.shot.Shot.cut_duration`."""
+        When the :attr:`.cut_out` is set to a value
+        lower than :attr:`.cut_in`,
+        :attr:`.cut_out` will be updated to
+        :attr:`.cut_in` + 1. The default value is
+        :attr:`.cut_in` +
+        :attr:`.cut_duration`."""
     )
 
 

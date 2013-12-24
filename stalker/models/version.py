@@ -40,13 +40,13 @@ logger.setLevel(logging_level)
 
 
 class Version(Link):
-    """Holds information about the created versions (files) for a class:`~stalker.models.task.Task`
+    """Holds information about the created versions (files) for a class:`.Task`
 
-    A :class:`~stalker.models.version.Version` holds information about the
-    created files related to a class:`~stalker.models.task.Task`. So if one
+    A :class:`.Version` holds information about the
+    created files related to a class:`.Task`. So if one
     creates a new version for a file or a sequences of file for a
-    :class:`~stalker.models.task.Task` then the information is hold in the
-    :class:`~stalker.models.version.Version` instance.
+    :class:`.Task` then the information is hold in the
+    :class:`.Version` instance.
 
     :param str take_name: A short string holding the current take name. Takes
       in Stalker are used solely for grouping individual versions together.
@@ -56,32 +56,30 @@ class Version(Link):
       it will use the default value. It can not start with a number. It can not
       have white spaces.
 
-    :param inputs: A list o :class:`~stalker.models.link.Link` instances,
-      holding the inputs of the current version. It could be a texture for a
-      Maya file or an image sequence for Nuke, or anything those you can think
-      as the input for the current Version.
+    :param inputs: A list o :class:`.Link` instances, holding the inputs of the
+      current version. It could be a texture for a Maya file or an image
+      sequence for Nuke, or anything those you can think as the input for the
+      current Version.
 
-    :type inputs: list of :class:`~stalker.models.link.Link`
+    :type inputs: list of :class:`.Link`
 
-    :param outputs: A list of :class:`~stalker.models.link.Link` instances,
-      holding the outputs of the current version. It could be the rendered
-      image sequences out of Maya or Nuke, or it can be a Targa file which is
-      the output of a Photoshop file (\*.psd), or anything that you can think
-      as the output which is created out of this Version.
+    :param outputs: A list of :class:`.Link` instances, holding the outputs of
+      the current version. It could be the rendered image sequences out of Maya
+      or Nuke, or it can be a Targa file which is the output of a Photoshop
+      file (\*.psd), or anything that you can think as the output which is
+      created out of this Version.
 
-    :type outputs: list of :class:`~stalker.models.link.Link` instances
+    :type outputs: list of :class:`.Link` instances
 
-    :param task: A :class:`~stalker.models.task.Task` instance showing the
-      owner of this Version.
+    :param task: A :class:`.Task` instance showing the owner of this Version.
 
-    :type task: :class:`~stalker.models.task.Task`
+    :type task: :class:`.Task`
 
-    :param parent: A :class:`~stalker.models.version.Version` instance which is
-      the parent of this Version. It is mainly used to see which Version is
-      derived from which in the Version history of a
-      :class:`~stalker.models.task.Task`.
+    :param parent: A :class:`.Version` instance which is the parent of this
+      Version. It is mainly used to see which Version is derived from which in
+      the Version history of a :class:`.Task`.
 
-    :type parent: :class:`~stalker.models.version.Version`
+    :type parent: :class:`.Version`
     """
     __auto_name__ = True
     __tablename__ = "Versions"
@@ -93,7 +91,7 @@ class Version(Link):
     task = relationship(
         "Task",
         primaryjoin="Versions.c.task_id==Tasks.c.id",
-        doc="""The :class:`~stalker.models.task.Task` instance that this Version is created for.
+        doc="""The :class:`.Task` instance that this Version is created for.
         """,
         uselist=False,
         back_populates="versions",
@@ -129,8 +127,8 @@ class Version(Link):
         primaryjoin='Versions.c.parent_id==Versions.c.id',
         back_populates='parent',
         post_update=True,
-        doc="""The children :class:`~stalker.models.version.Version` instances
-        which are derived from this particular Version instance.
+        doc="""The children :class:`.Version` instances which are derived from
+        this particular Version instance.
         """
     )
 
@@ -141,7 +139,7 @@ class Version(Link):
         secondaryjoin="Version_Inputs.c.link_id==Links.c.id",
         doc="""The inputs of the current version.
 
-        It is a list of :class:`~stalker.models.link.Link` instances.
+        It is a list of :class:`.Link` instances.
         """
     )
 
@@ -152,7 +150,7 @@ class Version(Link):
         secondaryjoin="Version_Outputs.c.link_id==Links.c.id",
         doc="""The outputs of the current version.
 
-        It is a list of :class:`~stalker.models.link.Link` instances.
+        It is a list of :class:`.Link` instances.
         """
     )
 
@@ -220,23 +218,27 @@ class Version(Link):
         """validates the given take_name value
         """
         if take_name is None:
-            raise TypeError("%s.take_name can not be None, please give a "
-                            "proper string" % self.__class__.__name__)
+            raise TypeError(
+                "%s.take_name can not be None, please give a proper string" %
+                self.__class__.__name__
+            )
 
         take_name = self._format_take_name(str(take_name))
 
         if take_name == "":
-            raise ValueError("%s.take_name can not be an empty string" %
-                             self.__class__.__name__)
+            raise ValueError(
+                "%s.take_name can not be an empty string" %
+                self.__class__.__name__
+            )
 
         return take_name
 
     @property
     def latest_version(self):
         """returns the Version instance with the highest version number in this
-        series
+        series.
 
-        :returns: :class:`~stalker.models.version.Version` instance
+        :returns: :class:`.Version` instance
         """
         try:
             last_version = Version.query\
@@ -301,16 +303,17 @@ class Version(Link):
         """validates the given task value
         """
         if task is None:
-            raise TypeError("%s.task can not be None" %
-                            self.__class__.__name__)
+            raise TypeError(
+                "%s.task can not be None" % self.__class__.__name__
+            )
 
         from stalker.models.task import Task
 
         if not isinstance(task, Task):
-            raise TypeError("%s.task should be a "
-                            "stalker.models.task.Task instance not %s" %
-                            (self.__class__.__name__,
-                             task.__class__.__name__))
+            raise TypeError(
+                "%s.task should be a stalker.models.task.Task instance not %s"
+                % (self.__class__.__name__, task.__class__.__name__)
+            )
 
         return task
 
@@ -321,10 +324,10 @@ class Version(Link):
         from stalker.models.link import Link
 
         if not isinstance(input, Link):
-            raise TypeError("all elements in %s.inputs should be all "
-                            "stalker.models.link.Link instances not %s" %
-                            (self.__class__.__name__,
-                             input.__class__.__name__)
+            raise TypeError(
+                "All elements in %s.inputs should be all "
+                "stalker.models.link.Link instances not %s" %
+                (self.__class__.__name__, input.__class__.__name__)
             )
 
         return input
@@ -336,10 +339,10 @@ class Version(Link):
         from stalker.models.link import Link
 
         if not isinstance(output, Link):
-            raise TypeError("all elements in %s.outputs should be all "
-                            "stalker.models.link.Link instances not %s" %
-                            (self.__class__.__name__,
-                             output.__class__.__name__)
+            raise TypeError(
+                "All elements in %s.outputs should be all "
+                "stalker.models.link.Link instances not %s" %
+                (self.__class__.__name__, output.__class__.__name__)
             )
 
         return output
@@ -350,10 +353,11 @@ class Version(Link):
         """
         if parent is not None:
             if not isinstance(parent, Version):
-                raise TypeError('%s.parent should be a '
-                                'stalker.models.version.Version instance, '
-                                'not %s' % (self.__class__.__name__,
-                                            parent.__class__.__name__))
+                raise TypeError(
+                    '%s.parent should be a stalker.models.version.Version '
+                    'instance, not %s' %
+                    (self.__class__.__name__, parent.__class__.__name__)
+                )
 
         # check for CircularDependency
         check_circular_dependency(self, parent, 'children')
@@ -365,10 +369,11 @@ class Version(Link):
         """validates the given child value
         """
         if not isinstance(child, Version):
-            raise TypeError('All elements in %s.children should be a '
-                            'stalker.models.version.Version instance, not %s' %
-                            (self.__class__.__name__,
-                             child.__class__.__name__))
+            raise TypeError(
+                'All elements in %s.children should be a '
+                'stalker.models.version.Version instance, not %s' %
+                (self.__class__.__name__, child.__class__.__name__)
+            )
         return child
 
     def _template_variables(self):
@@ -478,7 +483,7 @@ class Version(Link):
     def latest_published_version(self):
         """Returns the last published version.
 
-        :return: :class:`~stalker.models.version.Version`
+        :return: :class:`.Version`
         """
         return Version.query \
             .filter(Version.task == self.task) \
@@ -493,10 +498,11 @@ class Version(Link):
         """
         if created_with is not None:
             if not isinstance(created_with, (str, unicode)):
-                raise TypeError('%s.created_with should be an instance of '
-                                'str or unicode, not %s' %
-                                (self.__class__.__name__,
-                                 created_with.__class__.__name__))
+                raise TypeError(
+                    '%s.created_with should be an instance of str or unicode, '
+                    'not %s' %
+                    (self.__class__.__name__, created_with.__class__.__name__)
+                )
         return created_with
 
     def __eq__(self, other):

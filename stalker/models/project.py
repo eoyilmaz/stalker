@@ -43,43 +43,40 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
     Project is one of the main classes that will direct the others. A project
     in Stalker is a gathering point.
 
-    It is mixed with :class:`~stalker.models.mixins.ReferenceMixin`,
-    :class:`~stalker.models.mixins.StatusMixin`,
-    :class:`~stalker.models.mixins.DateRangeMixin` and
-    :class:`~stalker.models.mixins.CodeMixin` to give reference, status,
+    It is mixed with :class:`.ReferenceMixin`, :class:`.StatusMixin`,
+    :class:`.DateRangeMixin` and :class:`.CodeMixin` to give reference, status,
     schedule and code attribute. Please read the individual documentation of
     each of the mixins.
 
     **Project Users**
 
-    The :attr:`~stalker.models.project.Project.users` attribute lists the users
-    in this project. UIs like task creation for example will only list these
-    users as available resources for this project.
+    The :attr:`.Project.users` attribute lists the users in this project. UIs
+    like task creation for example will only list these users as available
+    resources for this project.
 
     **TaskJuggler Integration**
 
     Stalker uses TaskJuggler for scheduling the project tasks. The
-    :attr:`~stalker.models.project.Project.to_tjp` attribute generates a tjp
-    compliant string which includes the project definition, the tasks of the
-    project, the resources in the project including the vacation definitions
-    and all the time logs recorded for the project.
+    :attr:`.Project.to_tjp` attribute generates a tjp compliant string which
+    includes the project definition, the tasks of the project, the resources in
+    the project including the vacation definitions and all the time logs
+    recorded for the project.
 
     For custom attributes or directives that needs to be passed to TaskJuggler
-    you can use the :attr:`~stalker.models.project.Project.custom_tjp`
-    attribute which will be attached to the generated tjp file (inside the
-    "project" directive).
+    you can use the :attr:`.Project.custom_tjp` attribute which will be
+    attached to the generated tjp file (inside the "project" directive).
 
     To manage all the studio projects at once (schedule them at once please use
-    :class:`~stalker.models.studio.Studio`).
+    :class:`.Studio`).
 
     :param lead: The lead of the project. Default value is None.
 
-    :type lead: :class:`~stalker.User`
+    :type lead: :class:`.User`
 
     :param image_format: The output image format of the project. Default
       value is None.
 
-    :type image_format: :class:`~stalker.models.format.ImageFormat`
+    :type image_format: :class:`.ImageFormat`
 
     :param float fps: The FPS of the project, it should be a integer or float
       number, or a string literal which can be correctly converted to a float.
@@ -87,28 +84,27 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
 
     :param type: The type of the project. Default value is None.
 
-    :type type: :class:`~stalker.models.type.Type`
+    :type type: :class:`.Type`
 
     :param structure: The structure of the project. Default value is None
 
-    :type structure: :class:`~stalker.models.structure.Structure`
+    :type structure: :class:`.Structure`
 
     :param repository: The repository that the project files are going to be
-      stored in. You can not create a project without specifying the
-      repository argument and passing a
-      :class:`~stalker.models.repository.Repository` to it. Default value is
-      None which raises a TypeError.
+      stored in. You can not create a project without specifying the repository
+      argument and passing a :class:`.Repository` to it. Default value is None
+      which raises a TypeError.
 
-    :type repository: :class:`~stalker.models.repository.Repository`.
+    :type repository: :class:`.Repository`.
 
     :param bool is_stereoscopic: a bool value, showing if the project is going
       to be a stereo 3D project, anything given as the argument will be
       converted to True or False. Default value is False.
 
-    :param users: A list of :class:`~stalker.models.auth.User`\ s holding the
-      users in this project. This will create a reduced or grouped list of
-      studio workers and will make it easier to define the resources for a Task
-      related to this project. The default value is an empty list.
+    :param users: A list of :class:`.User`\ s holding the users in this
+      project. This will create a reduced or grouped list of studio workers and
+      will make it easier to define the resources for a Task related to this
+      project. The default value is an empty list.
     """
 
     __auto_name__ = False
@@ -143,7 +139,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         back_populates="projects_lead",
         doc="""The lead of the project.
 
-        Should be an instance of :class:`~stalker.models.auth.User`,
+        Should be an instance of :class:`.User`,
         also can set to None.
         """
     )
@@ -152,13 +148,11 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
     repository = relationship(
         "Repository",
         primaryjoin="Project.repository_id==Repository.repository_id",
-        doc="""The :class:`~stalker.models.repository.Repository` that this
-        project should reside.
+        doc="""The :class:`.Repository` that this project should reside.
 
-        Should be an instance of
-        :class:`~stalker.models.repository.Repository`\ . It
-        is a read-only attribute. So it is not possible to change the
-        repository of one project.
+        Should be an instance of :class:`.Repository`\ . It is a read-only
+        attribute. So it is not possible to change the repository of one
+        project.
         """
     )
 
@@ -167,18 +161,17 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         "Structure",
         primaryjoin="Project.structure_id==Structure.structure_id",
         doc="""The structure of the project. Should be an instance of
-        :class:`~stalker.models.structure.Structure` class"""
+        :class:`.Structure` class"""
     )
 
     image_format_id = Column(Integer, ForeignKey("ImageFormats.id"))
     image_format = relationship(
         "ImageFormat",
         primaryjoin="Projects.c.image_format_id==ImageFormats.c.id",
-        doc="""The :class:`~stalker.models.format.ImageFormat` of this
-        project.
+        doc="""The :class:`.ImageFormat` of this project.
 
         This value defines the output image format of the project, should be an
-        instance of :class:`~stalker.models.format.ImageFormat`.
+        instance of :class:`.ImageFormat`.
         """
     )
 
@@ -256,8 +249,10 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         """
         fps = float(fps)
         if fps <= 0:
-            raise ValueError('%s.fps can not be 0 or a negative value' %
-                             self.__class__.__name__)
+            raise ValueError(
+                '%s.fps can not be 0 or a negative value' %
+                self.__class__.__name__
+            )
         return float(fps)
 
     @validates("image_format")
@@ -267,11 +262,12 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         from stalker.models.format import ImageFormat
 
         if image_format is not None and \
-                not isinstance(image_format, ImageFormat):
-            raise TypeError("%s.image_format should be an instance of "
-                            "stalker.models.format.ImageFormat, not %s" %
-                            (self.__class__.__name__,
-                             image_format.__class__.__name__))
+           not isinstance(image_format, ImageFormat):
+            raise TypeError(
+                "%s.image_format should be an instance of "
+                "stalker.models.format.ImageFormat, not %s" %
+                (self.__class__.__name__, image_format.__class__.__name__)
+            )
         return image_format
 
     @validates("lead")
@@ -280,10 +276,11 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         """
         if lead is not None:
             if not isinstance(lead, User):
-                raise TypeError("%s.lead should be an instance of "
-                                "stalker.models.auth.User, not %s" %
-                                (self.__class__.__name__,
-                                 lead.__class__.__name__))
+                raise TypeError(
+                    "%s.lead should be an instance of "
+                    "stalker.models.auth.User, not %s" %
+                    (self.__class__.__name__, lead.__class__.__name__)
+                )
         return lead
 
     @validates("repository")
@@ -293,10 +290,11 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         from stalker.models.repository import Repository
 
         if not isinstance(repository, Repository):
-            raise TypeError("%s.repository should be an instance of "
-                            "stalker.models.repository.Repository, not %s" %
-                            (self.__class__.__name__,
-                             repository.__class__.__name__))
+            raise TypeError(
+                "%s.repository should be an instance of "
+                "stalker.models.repository.Repository, not %s" %
+                (self.__class__.__name__, repository.__class__.__name__)
+            )
         return repository
 
     @validates("structure")
@@ -307,10 +305,11 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
 
         if structure_in is not None:
             if not isinstance(structure_in, Structure):
-                raise TypeError("%s.structure should be an instance of "
-                                "stalker.models.structure.Structure, not %s" %
-                                (self.__class__.__name__,
-                                 structure_in.__class__.__name__))
+                raise TypeError(
+                    "%s.structure should be an instance of "
+                    "stalker.models.structure.Structure, not %s" %
+                    (self.__class__.__name__, structure_in.__class__.__name__)
+                )
         return structure_in
 
     @validates('is_stereoscopic')
@@ -322,10 +321,11 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         """validates the given users_in value
         """
         if not isinstance(user_in, User):
-            raise TypeError('%s.users should be all stalker.models.auth.User '
-                            'instances, not %s' %
-                            (self.__class__.__name__,
-                             user_in.__class__.__name__))
+            raise TypeError(
+                '%s.users should be all stalker.models.auth.User instances, '
+                'not %s' %
+                (self.__class__.__name__, user_in.__class__.__name__)
+            )
         return user_in
 
     @property
@@ -442,14 +442,10 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
 
     @property
     def open_tickets(self):
-        """The list of open :class:`~stalker.models.ticket.Ticket`\ s that this user has.
+        """The list of open :class:`.Ticket`\ s in this project.
 
-        returns a list of :class:`~stalker.models.ticket.Ticket` instances
-        which has a status of `Open` and are derived from the
-        :class:`~stalker.models.task.Task`\ s that this user is assigned to
-        (Stalker checks the related :class:`~stalker.models.version.Version`
-        instances and then the `~stalker.models.ticket.Ticket` instances
-        assigned to the Version and has a status of `Open`.).
+        returns a list of :class:`.Ticket` instances which has a status of
+        `Open` and created in this project.
         """
         from stalker import Ticket, Status
         return Ticket.query \

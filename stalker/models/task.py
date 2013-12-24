@@ -50,8 +50,7 @@ CONSTRAIN_BOTH = 3
 
 class TimeLog(Entity, DateRangeMixin):
     """Holds information about the uninterrupted time spent on a specific
-    :class:`~stalker.models.task.Task` by a specific
-    :class:`~stalker.models.auth.User`.
+    :class:`.Task` by a specific :class:`.User`.
 
     It is so important to note that the TimeLog reports the **uninterrupted**
     time interval that is spent for a Task. Thus it doesn't care about the
@@ -66,25 +65,21 @@ class TimeLog(Entity, DateRangeMixin):
     works separately for each resource. So there is only one resource in a
     TimeLog instance.
 
-    A :class:`~stalker.models.task.TimeLog` instance needs to be initialized
-    with a :class:`~stalker.models.task.Task` and a
-    :class:`~stalker.models.auth.User` instances.
+    A :class:`.TimeLog` instance needs to be initialized with a :class:`.Task`
+    and a :class:`.User` instances.
 
-    Adding overlapping time log for a :class:`~stalker.models.auth.User` will
-    raise a :class:`~stalker.errors.OverBookedError`.
+    Adding overlapping time log for a :class:`.User` will raise a
+    :class:`.OverBookedError`.
 
     .. ::
-      TimeLog instances automatically extends the
-      :attr:`~stalker.models.task.Task.schedule_timing` of the assigned Task if
-      the :attr:`~stalker.models.task.Task.total_logged_seconds` is getting
-      bigger than the :attr:`~stalker.models.task.Task.schedule_timing` after
-      this TimeLog.
+      TimeLog instances automatically extends the :attr:`.Task.schedule_timing`
+      of the assigned Task if the :attr:`.Task.total_logged_seconds` is getting
+      bigger than the :attr:`.Task.schedule_timing` after this TimeLog.
 
-    :param task: The :class:`~stalker.models.task.Task` instance that this
-      time log belongs to.
+    :param task: The :class:`.Task` instance that this time log belongs to.
 
-    :param resource: The :class:`~stalker.models.auth.User` instance that this
-      time log is created for.
+    :param resource: The :class:`.User` instance that this time log is created
+      for.
     """
     __auto_name__ = True
     __tablename__ = "TimeLogs"
@@ -100,8 +95,7 @@ class TimeLog(Entity, DateRangeMixin):
         primaryjoin="TimeLogs.c.task_id==Tasks.c.id",
         uselist=False,
         back_populates="time_logs",
-        doc="""The :class:`~stalker.models.task.Task` instance that this 
-        time log is created for"""
+        doc="""The :class:`.Task` instance that this time log is created for"""
     )
 
     resource_id = Column(Integer, ForeignKey("Users.id"), nullable=False)
@@ -110,8 +104,7 @@ class TimeLog(Entity, DateRangeMixin):
         primaryjoin="TimeLogs.c.resource_id==Users.c.id",
         uselist=False,
         back_populates="time_logs",
-        doc="""The :class:`~stalker.models.auth.User` instance that this 
-        time_log is created for"""
+        doc="""The :class:`.User` instance that this time_log is created for"""
     )
 
     def __init__(
@@ -161,10 +154,11 @@ class TimeLog(Entity, DateRangeMixin):
         """validates the given task value
         """
         if not isinstance(task, Task):
-            raise TypeError("%s.task should be an instance of "
-                            "stalker.models.task.Task not %s" %
-                            (self.__class__.__name__,
-                             task.__class__.__name__))
+            raise TypeError(
+                "%s.task should be an instance of stalker.models.task.Task "
+                "not %s" %
+                (self.__class__.__name__, task.__class__.__name__)
+            )
 
         # adjust task schedule
         with DBSession.no_autoflush:
@@ -178,14 +172,16 @@ class TimeLog(Entity, DateRangeMixin):
         """
 
         if resource is None:
-            raise TypeError("%s.resource can not be None" %
-                            self.__class__.__name__)
+            raise TypeError(
+                "%s.resource can not be None" % self.__class__.__name__
+            )
 
         if not isinstance(resource, User):
-            raise TypeError("%s.resource should be a "
-                            "stalker.models.auth.User instance not %s" %
-                            (self.__class__.__name__,
-                             resource.__class__.__name__))
+            raise TypeError(
+                "%s.resource should be a stalker.models.auth.User instance "
+                "not %s" %
+                (self.__class__.__name__, resource.__class__.__name__)
+            )
 
         # check for overbooking
         logger.debug('resource.time_logs: %s' % resource.time_logs)
@@ -198,9 +194,9 @@ class TimeLog(Entity, DateRangeMixin):
 
             if time_log != self:
                 if time_log.start == self.start or \
-                                time_log.end == self.end or \
-                                        time_log.start < self.end < time_log.end or \
-                                        time_log.start < self.start < time_log.end:
+                   time_log.end == self.end or \
+                   time_log.start < self.end < time_log.end or \
+                   time_log.start < self.start < time_log.end:
                     raise OverBookedError(
                         "The resource %s is overly booked with %s and %s" %
                         (resource, self, time_log),
@@ -239,7 +235,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     **Introduction**
 
     Tasks are the smallest unit of work that should be accomplished to complete
-    a :class:`~stalker.models.project.Project`.
+    a :class:`.Project`.
 
     Stalker tries to follow the concepts stated in TaskJuggler_.
 
@@ -254,10 +250,9 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     **Initialization**
 
     Because Tasks are a part of a bigger Project, a Task needs to be created
-    with a :class:`~stalker.models.project.Project` instance. It is also valid
-    if no project is supplied but there should be a parent Task passed to the
-    ``parent`` argument. And it is also possible to pass both project and the
-    parent task.
+    with a :class:`.Project` instance. It is also valid if no project is
+    supplied but there should be a parent Task passed to the ``parent``
+    argument. And it is also possible to pass both project and the parent task.
 
     But because passing both a project and a parent task may create an
     ambiguity, Stalker will raise a RuntimeWarning, if both project and task
@@ -297,13 +292,12 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
     Stalker uses TaskJuggler for task scheduling. After defining all the tasks,
     Stalker will convert them to a single tjp file along with the recorded
-    :class:`~stalker.models.task.TimeLog`\ s and let TaskJuggler to solve the
-    scheduling problem.
+    :class:`.TimeLog`\ s and let TaskJuggler to solve the scheduling problem.
 
     During the auto scheduling (with TaskJuggler), the calculation of task
     duration, start and end dates are effected by the working hours setting of
-    the :class:`~stalker.models.studio.Studio`, the effort that needs to spend
-    for that task and the availability of the resources assigned to the task.
+    the :class:`.Studio`, the effort that needs to spend for that task and the
+    availability of the resources assigned to the task.
 
     A good practice for creating a project plan is to supply the parent/child
     and dependency relation between tasks and the effort and resource
@@ -369,15 +363,13 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
     .. versionadded:: 0.2.0
 
-    Tasks have a **responsible** which is a :class:`~stalker.models.auth.User`
-    instance that is responsible of the assigned task and all the hierarchy
-    under it.
+    Tasks have a **responsible** which is a :class:`.User` instance that is
+    responsible of the assigned task and all the hierarchy under it.
 
     If a task doesn't have any user assigned to its responsible attribute,
     then it will start to look to its parents until it can find a task with a
     responsible or there are no parent left, meaning the responsible is the
-    :class:`~stalker.models.project.Project.lead` of the related
-    :class:`~stalker.models.project.Project`.
+    :class:`.Project.lead` of the related :class:`.Project`.
 
     You can create complex responsibility chains for different branches of
     Tasks.
@@ -397,52 +389,50 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     .. versionadded:: 0.2.4
 
     One may wanted to track all the dirty details about the revisions requested
-    for a particular task. Stalker supplies
-    :class:`~stalker.models.log.RevisionLog` for that purpose. It is possible
-    to hold revision information about the revision description, who has given
-    the revision and how much extra time has given for that revision etc. by
-    using a RevisionLog instance. The :attr:`.revisions` is a list that holds
-    the RevisionLog instances for that task.
+    for a particular task. Stalker supplies :class:`.RevisionLog` for that
+    purpose. It is possible to hold revision information about the revision
+    description, who has given the revision and how much extra time has given
+    for that revision etc. by using a RevisionLog instance. The
+    :attr:`.revisions` is a list that holds the RevisionLog instances for that
+    task.
 
     **Arguments**
 
     :param project: A Task which doesn't have a parent (a root task) should be
-      created with a :class:`~stalker.models.project.Project` instance. If it
-      is skipped an no :attr:`.parent` is given then Stalker will raise a
-      RuntimeError. If both the ``project`` and the :attr:`.parent` argument
-      contains data and the project of the Task instance given with parent
-      argument is different than the Project instance given with the
-      ``project`` argument then a RuntimeWarning will be raised and the project
-      of the parent task will be used.
+      created with a :class:`.Project` instance. If it is skipped an no
+      :attr:`.parent` is given then Stalker will raise a RuntimeError. If both
+      the ``project`` and the :attr:`.parent` argument contains data and the
+      project of the Task instance given with parent argument is different than
+      the Project instance given with the ``project`` argument then a
+      RuntimeWarning will be raised and the project of the parent task will be
+      used.
 
-    :type project: :class:`~stalker.models.project.Project`
+    :type project: :class:`.Project`
 
     :param parent: The parent Task or Project of this Task. Every Task in
-      Stalker should be related with a :class:`~stalker.models.project.Project`
-      instance. So if no parent task is desired, at least a Project instance
-      should be passed as the parent of the created Task or the Task will be an
-      orphan task and Stalker will raise a RuntimeError.
+      Stalker should be related with a :class:`.Project` instance. So if no
+      parent task is desired, at least a Project instance should be passed as
+      the parent of the created Task or the Task will be an orphan task and
+      Stalker will raise a RuntimeError.
 
     :type parent: :class:`Task`
 
-    :param depends: A list of :class:`~stalker.models.task.Task`\ s that this
-      :class:`~stalker.models.task.Task` is depending on. A Task can not depend
-      to itself or any other Task which are already depending to this one in
-      anyway or a CircularDependency error will be raised.
+    :param depends: A list of :class:`.Task`\ s that this :class:`.Task` is
+      depending on. A Task can not depend to itself or any other Task which are
+      already depending to this one in anyway or a CircularDependency error
+      will be raised.
 
     :type depends: [:class:`Task`]
 
-    :param resources: The :class:`~stalker.models.auth.User`\ s assigned to
-      this :class:`~stalker.models.task.Task`. A
-      :class:`~stalker.models.task.Task` without any resource can not be
-      scheduled.
+    :param resources: The :class:`.User`\ s assigned to this :class:`.Task`. A
+      :class:`.Task` without any resource can not be scheduled.
 
-    :type resources: [:class:`~stalker.models.auth.User`]
+    :type resources: [:class:`.User`]
 
-    :param watchers: A list of :class:`~stalker.models.auth.User` those are
-      added this Task instance to their watchlist.
+    :param watchers: A list of :class:`.User` those are added this Task
+      instance to their watchlist.
 
-    :type watchers: [:class:`~stalker.models.auth.User`]
+    :type watchers: [:class:`.User`]
 
     :param start: The start date and time of this task instance. It is only
       used if the :attr:`.schedule_constraint` attribute is set to
@@ -480,9 +470,8 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
       is a milestone which doesn't need any resource and effort.
 
     :param int priority: It is a number between 0 to 1000 which defines the
-      priority of the :class:`~stalker.models.task.Task`. The higher the value
-      the higher its priority. The default value is 500. Mainly used by
-      TaskJuggler.
+      priority of the :class:`.Task`. The higher the value the higher its
+      priority. The default value is 500. Mainly used by TaskJuggler.
     """
     __auto_name__ = False
     __tablename__ = "Tasks"
@@ -496,9 +485,9 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
     project_id = Column(
         'project_id', Integer, ForeignKey('Projects.id'), nullable=True,
-        doc="""The id of the owner :class:`~stalker.models.project.Project`
-        of this Task. This attribute is mainly used by **SQLAlchemy** to map
-        a :class:`~stalker.models.project.Project` instance to a Task.
+        doc="""The id of the owner :class:`.Project` of this Task. This
+        attribute is mainly used by **SQLAlchemy** to map a :class:`.Project`
+        instance to a Task.
         """
     )
     _project = relationship(
@@ -543,10 +532,8 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     tasks = synonym(
         'children',
         doc="""A synonym for the :attr:`.children` attribute used by the
-        descendants of the :class:`Task` class (currently
-        :class:`~stalker.models.asset.Asset`,
-        :class:`~stalker.models.shot.Shot` and
-        :class:`~stalker.models.sequence.Sequence` classes).
+        descendants of the :class:`Task` class (currently :class:`.Asset`,
+        :class:`.Shot` and :class:`.Sequence` classes).
         """
     )
 
@@ -579,7 +566,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         primaryjoin="Tasks.c.id==Task_Dependencies.c.task_id",
         secondaryjoin="Task_Dependencies.c.depends_to_task_id==Tasks.c.id",
         backref="dependent_of",
-        doc="""A list of :class:`~stalker.models.task.Task`\ s that this one is depending on.
+        doc="""A list of :class:`.Task`\ s that this one is depending on.
 
         A CircularDependencyError will be raised when the task dependency
         creates a circular dependency which means it is not allowed to create
@@ -594,7 +581,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         primaryjoin="Tasks.c.id==Task_Resources.c.task_id",
         secondaryjoin="Task_Resources.c.resource_id==Users.c.id",
         back_populates="tasks",
-        doc="""The list of :class:`~stalker.models.auth.User`\ s assigned to this Task.
+        doc="""The list of :class:`.User`\ s assigned to this Task.
         """
     )
 
@@ -604,8 +591,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         primaryjoin='Tasks.c.id==Task_Watchers.c.task_id',
         secondaryjoin='Task_Watchers.c.watcher_id==Users.c.id',
         back_populates='watching',
-        doc="""The list of :class:`~stalker.models.auth.User`\ s watching this
-        Task.
+        doc="""The list of :class:`.User`\ s watching this Task.
         """
     )
 
@@ -629,8 +615,8 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         primaryjoin="TimeLogs.c.task_id==Tasks.c.id",
         back_populates="task",
         cascade='all, delete-orphan',
-        doc="""A list of :class:`~stalker.models.task.TimeLog` instances
-        showing who and when has spent how much effort on this task.
+        doc="""A list of :class:`.TimeLog` instances showing who and when has
+        spent how much effort on this task.
         """
     )
 
@@ -639,8 +625,8 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         primaryjoin="Versions.c.task_id==Tasks.c.id",
         back_populates="task",
         cascade='all, delete-orphan',
-        doc="""A list of :class:`~stalker.models.version.Version` instances
-        showing the files created for this task.
+        doc="""A list of :class:`.Version` instances showing the files created
+        for this task.
         """
     )
 
@@ -690,8 +676,8 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         primaryjoin="Revisions.c.task_id==Tasks.c.id",
         back_populates="_task",
         cascade='all, delete-orphan',
-        doc="""A list of :class:`~stalker.models.revision.Revision` holding
-        the details about any given revision to this task.
+        doc="""A list of :class:`.Revision` holding the details about any given
+        revision to this task.
         """
     )
 
@@ -820,8 +806,11 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         """validates the given depends value
         """
         if not isinstance(depends, Task):
-            raise TypeError("all the elements in the depends should be an "
-                            "instance of stalker.models.task.Task")
+            raise TypeError(
+                "All the elements in the %s.depends should be an instance of "
+                "stalker.models.task.Task, not %s" %
+                (self.__class__.__name__, depends.__class__.__name__)
+            )
 
         # check for the circular dependency
         check_circular_dependency(depends, self, 'depends')
@@ -834,9 +823,9 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             while parent:
                 if parent in depends.depends:
                     raise CircularDependencyError(
-                        'One of the parents of %s is '
-                        'depending to %s' %
-                        (self, depends))
+                        'One of the parents of %s is depending to %s' %
+                        (self, depends)
+                    )
                 parent = parent.parent
         return depends
 
@@ -919,10 +908,11 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         if parent is not None:
             # if it is not a Task instance, go mad (cildir!!)
             if not isinstance(parent, Task):
-                raise TypeError('%s.parent should be an instance of '
-                                'stalker.models.task.Task, not '
-                                'a %s' % (self.__class__.__name__,
-                                          parent.__class__.__name__))
+                raise TypeError(
+                    '%s.parent should be an instance of '
+                    'stalker.models.task.Task, not %s' %
+                    (self.__class__.__name__, parent.__class__.__name__)
+                )
 
             # check for cycle
             check_circular_dependency(self, parent, 'children')
@@ -963,22 +953,23 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
             else:
                 # no project, no task, go mad again!!!
-                raise TypeError('%s.project should be an instance of '
-                                'stalker.models.project.Project, not %s. Or '
-                                'please supply a stalker.models.task.Task '
-                                'with the parent argument, so Stalker can use '
-                                'the project of the supplied parent task' %
-                                (self.__class__.__name__,
-                                 project.__class__.__name__))
+                raise TypeError(
+                    '%s.project should be an instance of '
+                    'stalker.models.project.Project, not %s. Or please supply '
+                    'a stalker.models.task.Task with the parent argument, so '
+                    'Stalker can use the project of the supplied parent task' %
+                    (self.__class__.__name__, project.__class__.__name__)
+                )
 
         from stalker import Project
 
         if not isinstance(project, Project):
             # go mad again it is not a project instance
-            raise TypeError('%s.project should be an instance of '
-                            'stalker.models.project.Project, not %s' %
-                            (self.__class__.__name__,
-                             project.__class__.__name__))
+            raise TypeError(
+                '%s.project should be an instance of '
+                'stalker.models.project.Project, not %s' %
+                (self.__class__.__name__, project.__class__.__name__)
+            )
         else:
             # check if there is a parent
             if self.parent:
@@ -1061,9 +1052,11 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         from stalker.models.auth import User
 
         if not isinstance(resource, User):
-            raise TypeError("Task.resources should be a list of "
-                            "stalker.models.auth.User instances not %s" %
-                            resource.__class__.__name__)
+            raise TypeError(
+                "%s.resources should be a list of "
+                "stalker.models.auth.User instances, not %s" %
+                (self.__class__.__name__, resource.__class__.__name__)
+            )
         return resource
 
     @validates("watchers")
@@ -1073,10 +1066,11 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         from stalker.models.auth import User
 
         if not isinstance(watcher, User):
-            raise TypeError("%s.watchers should be a list of "
-                            "stalker.models.auth.User instances not %s" %
-                            (self.__class__.__name__,
-                             watcher.__class__.__name__))
+            raise TypeError(
+                "%s.watchers should be a list of "
+                "stalker.models.auth.User instances not %s" %
+                (self.__class__.__name__, watcher.__class__.__name__)
+            )
         return watcher
 
     @validates("versions")
@@ -1086,8 +1080,11 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         from stalker.models.version import Version
 
         if not isinstance(version, Version):
-            raise TypeError("Task.versions should only have "
-                            "stalker.models.version.Version instances")
+            raise TypeError(
+                "%s.versions should only have stalker.models.version.Version "
+                "instances, and not %s" %
+                (self.__class__.__name__, version.__clas__.__name__)
+            )
 
         return version
 
@@ -1098,10 +1095,14 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         if bid_timing is not None:
             if not isinstance(bid_timing, (int, float)):
                 raise TypeError(
-                    '%s.bid_timing should be an integer or float showing the '
-                    'value of the initial bid for this %s, not %s' %
-                    (self.__class__.__name__, self.__class__.__name__,
-                     bid_timing.__class__.__name__))
+                    '%(class)s.bid_timing should be an integer or float '
+                    'showing the value of the initial bid for this %(class)s, '
+                    'not %(bid)s' %
+                    {
+                        'class': self.__class__.__name__,
+                        'bid': bid_timing.__class__.__name__
+                    }
+                )
         return bid_timing
 
     @validates('bid_unit')
@@ -1113,17 +1114,25 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
         if not isinstance(bid_unit, (str, unicode)):
             raise TypeError(
-                '%s.bid_unit should be a string value one of %s showing '
-                'the unit of the bid timing of this %s, not %s' % (
-                    self.__class__.__name__, defaults.datetime_units,
-                    self.__class__.__name__, bid_unit.__class__.__name__))
+                '%(class)s.bid_unit should be a string value one of %(units)s '
+                'showing the unit of the bid timing of this %(class)s, not '
+                '%(bid)s' % {
+                    'class': self.__class__.__name__,
+                    'units': defaults.datetime_units,
+                    'bid': bid_unit.__class__.__name__
+                }
+            )
 
         if bid_unit not in defaults.datetime_units:
             raise ValueError(
-                '%s.bid_unit should be a string value one of %s showing '
-                'the unit of the bid timing of this %s, not %s' % (
-                    self.__class__.__name__, defaults.datetime_units,
-                    self.__class__.__name__, bid_unit.__class__.__name__))
+                '%(class)s.bid_unit should be a string value one of %(units)s '
+                'showing the unit of the bid timing of this %(class)s, not '
+                '%(bid)s' % {
+                    'class': self.__class__.__name__,
+                    'units': defaults.datetime_units,
+                    'bid': bid_unit.__class__.__name__
+                }
+            )
 
         return bid_unit
 
@@ -1160,10 +1169,10 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         if start_in is None:
             start_in = self.project.round_time(datetime.datetime.now())
         elif not isinstance(start_in, datetime.datetime):
-            raise TypeError('%s.start should be an instance of '
-                            'datetime.datetime, not %s' %
-                            (self.__class__.__name__,
-                             start_in.__class__.__name__))
+            raise TypeError(
+                '%s.start should be an instance of datetime.datetime, not %s' %
+                (self.__class__.__name__, start_in.__class__.__name__)
+            )
         return start_in
 
     def _start_getter(self):
@@ -1420,7 +1429,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     def _responsible_setter(self, responsible):
         """sets the responsible attribute
 
-        :param responsible: A :class:`~stalker.models.auth.User` instance
+        :param responsible: A :class:`.User` instance
         """
         self._responsible = self._validate_responsible(responsible)
 
@@ -1430,10 +1439,11 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         if responsible is not None:
             from stalker.models.auth import User
             if not isinstance(responsible, User):
-                raise TypeError('%s.responsible should be an instance of '
-                                'stalker.models.auth.User, not %s' % 
-                                (self.__class__.__name__,
-                                 responsible.__class__.__name__))
+                raise TypeError(
+                    '%s.responsible should be an instance of '
+                    'stalker.models.auth.User, not %s' %
+                    (self.__class__.__name__, responsible.__class__.__name__)
+                )
         return responsible
 
     responsible = synonym(
@@ -1444,7 +1454,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             doc="""The responsible of this task.
 
             This attribute will return the responsible of this task which is a
-            :class:`~stalker.models.auth.User` instance. If there is no
+            :class:`.User` instance. If there is no
             responsible set for this task, then it will try to find a
             responsible in its parents and will return the project.lead if it
             can not find anybody.
@@ -1546,8 +1556,7 @@ def __update_total_logged_seconds__(tlog, new_duration, old_duration):
     """Updates the given parent tasks total_logged_seconds attribute with the
     new duration
 
-    :param tlog: A :class:`~stalker.models.task.Task` instance which is the
-      parent of the
+    :param tlog: A :class:`.Task` instance which is the parent of the
     :param new_duration:
     :param old_duration:
     :return:

@@ -40,13 +40,11 @@ class Type(Entity, TargetEntityTypeMixin, CodeMixin):
     Type is a generalized version of the previous design that defines types for
     specific classes.
 
-    The purpose of the :class:`~stalker.models.type.Type` class is just to
-    define a new type for a specific :class:`~stalker.models.entity.Entity`.
-    For example, you can have a ``Character``
-    :class:`~stalker.models.asset.Asset` or you can have a ``Commercial``
-    :class:`~stalker.models.project.Project` or you can define a
-    :class:`~stalker.models.link.Link` as an ``Image`` etc.,
-    to create a new :class:`~stalker.models.type.Type` for various classes::
+    The purpose of the :class:`.Type` class is just to define a new type for a
+    specific :class:`.Entity`. For example, you can have a ``Character``
+    :class:`.Asset` or you can have a ``Commercial`` :class:`.Project` or you
+    can define a :class:`.Link` as an ``Image`` etc., to create a new
+    :class:`.Type` for various classes::
 
       Type(name="Character", target_entity_type="Asset")
       Type(name="Commercial", target_entity_type="Project")
@@ -64,14 +62,13 @@ class Type(Entity, TargetEntityTypeMixin, CodeMixin):
       Type(name="Commercial", target_entity_type=Project)
       Type(name="Image", target_entity_type=Link)
 
-    By using :class:`~stalker.models.type.Type`\ s, one can able to sort and
-    group same type of entities.
+    By using :class:`.Type`\ s, one can able to sort and group same type of
+    entities.
 
-    :class:`~stalker.models.type.Type`\ s are generally used in
-    :class:`~stalker.models.type.Structure`\ s.
+    :class:`.Type`\ s are generally used in :class:`.Structure`\ s.
 
     :param string target_entity_type: The string defining the target type of
-      this :class:`~stalker.models.type.Type`.
+      this :class:`.Type`.
     """
     __auto_name__ = False
     __tablename__ = "Types"
@@ -127,4 +124,3 @@ class EntityType(Base):
         self.accepts_references = accepts_references
 
         # TODO: add tests for the name attribute
-

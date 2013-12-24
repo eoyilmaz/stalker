@@ -30,24 +30,23 @@ logger.setLevel(logging.DEBUG)
 
 
 class Revision(SimpleEntity, ScheduleMixin):
-    """Holds information about :class:`~stalker.models.task.Task` revisions.
+    """Holds information about :class:`.Task` revisions.
 
     One may wanted to track all the nasty information about a revisions
-    requested for a particular task. Stalker supplies
-    :class:`~stalker.models.log.Revision` class for that purpose. It is
-    possible to hold revision information like the revision description, who
-    has given the revision and how much extra time has given for that revision
-    etc. by using a Revision instance. The :attr:`.task` is a link to the
-    revised :class:`~stalker.models.task.Task`.
+    requested for a particular task. Stalker supplies :class:`.Revision` class
+    for that purpose. It is possible to hold revision information like the
+    revision description, who has given the revision and how much extra time
+    has given for that revision etc. by using a Revision instance. The
+    :attr:`.task` is a link to the revised :class:`.Task`.
 
     Creating a revision will automatically cap the schedule timing value of the
     related task to the total logged time logs for that task and then extend
     the timing values according to the revision schedule values.
 
-    :param task: A :class:`~stalker.models.task.Task` instance that this
-      revision is related to. It can not be skipped.
+    :param task: A :class:`.Task` instance that this revision is related to.
+      It can not be skipped.
 
-    :type task: :class:`~stalker.models.task.Task`
+    :type task: :class:`Task`
 
     :param schedule_timing: Holds the timing value of this revision. It is a
       float value.
@@ -73,8 +72,7 @@ class Revision(SimpleEntity, ScheduleMixin):
         primaryjoin="Revisions.c.task_id==Tasks.c.id",
         uselist=False,
         back_populates="_revisions",
-        doc="""The :class:`~stalker.models.task.Task` instance that this
-        revision is created for"""
+        doc="""The :class:`.Task` instance that this revision is created for"""
     )
 
     def __init__(self,
@@ -101,10 +99,10 @@ class Revision(SimpleEntity, ScheduleMixin):
         from stalker.models.task import Task
         if not isinstance(task, Task):
             raise TypeError(
-                '%s.task should be an instance of '
-                'stalker.models.task.Task, not %s' % (
-                    self.__class__.__name__, task.__class__.__name__
-                ))
+                '%s.task should be an instance of stalker.models.task.Task, '
+                'not %s' %
+                (self.__class__.__name__, task.__class__.__name__)
+            )
 
         # is it a leaf task
         if not task.is_leaf:

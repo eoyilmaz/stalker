@@ -3216,3 +3216,5 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(updated_by, test_version_db.updated_by)
         self.assertEqual(version_number, test_version_db.version_number)
         self.assertEqual(task, test_version_db.task)
+
+        # TODO: add delete tests for the Version class

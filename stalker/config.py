@@ -412,8 +412,10 @@ class Config(object):
                 logger.warning("The $STALKER_PATH: %s doesn't exists! "
                                "skipping user config" % resolved_path)
             except SyntaxError, err:
-                raise RuntimeError("There is a syntax error in your "
-                                   "configuration file: %s" % str(err))
+                raise RuntimeError(
+                    "There is a syntax error in your configuration file: %s" %
+                    str(err)
+                )
             finally:
                 # append the data to the current settings
                 logger.debug("updating system config")

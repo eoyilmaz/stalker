@@ -32,34 +32,29 @@ logger.setLevel(logging_level)
 class Asset(Task, CodeMixin):
     """The Asset class is the whole idea behind Stalker.
 
-    *Assets* are containers of :class:`~stalker.models.task.Task`\ s. And
-    :class:`~stalker.models.task.Task`\ s are the smallest meaningful part that
-    should be accomplished to complete the
-    :class:`~stalker.models.project.Project`.
+    *Assets* are containers of :class:`.Task`\ s. And :class:`.Task`\ s are the
+    smallest meaningful part that should be accomplished to complete the
+    :class:`.Project`.
 
     An example could be given as follows; you can create an asset for one of
     the characters in your project. Than you can divide this character asset in
-    to :class:`~stalker.models.task.Task`\ s. These
-    :class:`~stalker.models.task.Task`\ s can be defined by the type of the
-    :class:`~stalker.models.asset.Asset`, which is a
-    :class:`~stalker.models.type.Type` object created specifically for
-    :class:`~stalker.models.asset.Asset` (ie. has its
-    :attr:`~stalker.models.type.Type.target_entity_type` set to "Asset"),
+    to :class:`.Task`\ s. These :class:`.Task`\ s can be defined by the type of
+    the :class:`.Asset`, which is a :class:`.Type` object created specifically
+    for :class:`.Asset` (ie. has its :attr:`.Type.target_entity_type` set to
+    "Asset"),
 
-    An :class:`~stalker.models.asset.Asset` instance should be initialized with
-    a :class:`~stalker.models.project.Project` instance (as the other classes
-    which are mixed with the :class:`~stalker.models.mixins.TaskMixin`). And
-    when a :class:`~stalker.models.project.Project` instance is given then the
-    asset will append itself to the
-    :attr:`~stalker.models.project.Project.assets` list.
+    An :class:`.Asset` instance should be initialized with a :class:`.Project`
+    instance (as the other classes which are mixed with the
+    :class:`.TaskMixin`). And when a :class:`.Project` instance is given then
+    the asset will append itself to the :attr:`.Project.assets` list.
 
     ..versionadded: 0.2.0:
         No more Asset to Shot connection:
 
         Assets now are not directly related to Shots. Instead a
-        :class:`~stalker.models.Version` will reference the Asset and then it
-        is easy to track which shots are referencing this Asset by querying
-        with a join of Shot Versions referencing this Asset.
+        :class:`.Version` will reference the Asset and then it is easy to track
+        which shots are referencing this Asset by querying with a join of Shot
+        Versions referencing this Asset.
     """
     __auto_name__ = False
     __strictly_typed__ = True

@@ -32,41 +32,35 @@ logger.setLevel(logging_level)
 
 
 class Structure(Entity):
-    """Holds data about how the physical files are arranged in the :class:`~stalker.models.repository.Repository`.
+    """Holds data about how the physical files are arranged in the :class:`.Repository`.
 
-    Structures are generally owned by :class:`~stalker.models.project.Project`
-    objects. Whenever a :class:`~stalker.models.project.Project` is physically
-    created, project folders are created by looking at
-    :attr:`~stalker.models.structure.Structure.custom_template` of the
-    :class:`~stalker.models.structure.Structure`, the
-    :class:`~stalker.models.project.Project` object is generally given to the
-    :class:`~stalker.models.structure.Structure`. So it is possible to use a
-    variable like "{{project}}" or derived variables like::
+    Structures are generally owned by :class:`.Project` objects. Whenever a
+    :class:`.Project` is physically created, project folders are created by
+    looking at :attr:`.Structure.custom_template` of the :class:`.Structure`,
+    the :class:`.Project` object is generally given to the :class:`.Structure`.
+    So it is possible to use a variable like "{{project}}" or derived variables
+    like::
 
       {% for seq in project.sequences %}
           {{do something here}}
 
     Every line of this rendered template will represent a folder and Stalker
-    will create these folders on the attached
-    :class:`~stalker.models.repository.Repository`.
+    will create these folders on the attached :class:`.Repository`.
 
-    :param templates: A list of
-      :class:`~stalker.models.template.FilenameTemplate`\ s which
-      defines a specific template for the given
-      :attr:`~stalker.models.template.FilenameTemplate.target_entity_type`\ s.
+    :param templates: A list of :class:`.FilenameTemplate`\ s which defines a
+      specific template for the given
+      :attr:`.FilenameTemplate.target_entity_type`\ s.
 
-    :type templates: list of :class:`~stalker.models.template.FilenameTemplate`\ s
+    :type templates: list of :class:`.FilenameTemplate`\ s
 
     :param str custom_template: A string containing several lines of folder
-      names. The folders are relative to the
-      :class:`~stalker.models.project.Project` root. It can also contain a
-      Jinja2 Template code. Which will be rendered to show the list of folders
-      to be created with the project. The Jinja2 Template is going to have the
-      {{project}} variable. The important point to be careful about is to list
-      all the custom folders of the project in a new line in this string. For
-      example a :class:`~stalker.models.structure.Structure` for a
-      :class:`~stalker.models.project.Project` can have the following
-      :attr:`~stalker.models.structure.Structure.custom_template`::
+      names. The folders are relative to the :class:`.Project` root. It can
+      also contain a Jinja2 Template code. Which will be rendered to show the
+      list of folders to be created with the project. The Jinja2 Template is
+      going to have the {{project}} variable. The important point to be careful
+      about is to list all the custom folders of the project in a new line in
+      this string. For example a :class:`.Structure` for a :class:`.Project`
+      can have the following :attr:`.Structure.custom_template`::
 
         ASSETS
         {% for asset in project.assets %}
@@ -93,38 +87,32 @@ class Structure(Entity):
                     {{task_root}}
 
       The above example has gone far beyond deep than it is needed, where it
-      started to define paths for :class:`~stalker.models.asset.Asset`\ s. Even
-      it is possible to create a :class:`~stalker.models.project.Project`
-      structure like that, in general it is unnecessary. Because the above
-      folders are going to be created but they are probably going to be empty
-      for a while, because the :class:`~stalker.models.asset.Asset`\ s are not
-      created yet (or in fact no :class:`~stalker.models.version.Version`\ s
-      are created for the :class:`~stalker.models.task.Task`\ s). Anyway, it is
-      much suitable and desired to create this details by using
-      :class:`~stalker.models.template.FilenameTemplate` objects. Which are
-      specific to certain
-      :attr:`~stalker.models.template.FilenameTemplate.target_entity_type`\ s.
-      And by using the
-      :attr:`~stalker.models.structure.Structure.custom_template`
-      attribute, Stalker can not place any source or output file of a
-      :class:`~stalker.models.version.Version` in the
-      :class:`~stalker.models.repository.Repository` where as it can by using
-      :class:`~stalker.models.template.FilenameTemplate`\ s.
+      started to define paths for :class:`.Asset`\ s. Even it is possible to
+      create a :class:`.Project` structure like that, in general it is
+      unnecessary. Because the above folders are going to be created but they
+      are probably going to be empty for a while, because the
+      :class:`.Asset`\ s are not created yet (or in fact no
+      :class:`.Version`\ s are created for the :class:`.Task`\ s). Anyway, it
+      is much suitable and desired to create this details by using
+      :class:`.FilenameTemplate` objects. Which are specific to certain
+      :attr:`.FilenameTemplate.target_entity_type`\ s. And by using the
+      :attr:`.Structure.custom_template` attribute, Stalker can not place any
+      source or output file of a :class:`.Version` in the :class:`.Repository`
+      where as it can by using :class:`.FilenameTemplate`\ s.
 
-      But for certain types of :class:`~stalker.models.task.Task`\ s it is may
-      be good to previously create the folder structure just because in certain
+      But for certain types of :class:`.Task`\ s it is may be good to
+      previously create the folder structure just because in certain
       environments (programs) it is not possible to run a Python code that will
       place the file in to the Repository like in Photoshop.
 
       The ``custom_template`` parameter can be None or an empty string if it is
       not needed.
 
-    A :class:`~stalker.models.structure.Structure` can not be created without a
-    ``type`` (__strictly_typed__ = True). By giving a ``type`` to the
-    :class:`~stalker.models.structure.Structure`, you can create one structure
-    for **Commercials** and another project structure for **Movies** and
-    another one for **Print** projects etc. and can reuse them with new
-    :class:`~stalker.models.project.Project`\ s.
+    A :class:`.Structure` can not be created without a ``type``
+    (__strictly_typed__ = True). By giving a ``type`` to the
+    :class:`.Structure`, you can create one structure for **Commercials** and
+    another project structure for **Movies** and another one for **Print**
+    projects etc. and can reuse them with new :class:`.Project`\ s.
     """
 
     #__strictly_typed__ = True
@@ -171,9 +159,13 @@ class Structure(Entity):
             custom_template_in = ""
 
         if not isinstance(custom_template_in, (str, unicode)):
-            raise TypeError("%s.custom_template should be a string not %s"
-                            % (self.__class__.__name__,
-                               custom_template_in.__class__.__name__))
+            raise TypeError(
+                "%s.custom_template should be a string not %s" %
+                (
+                    self.__class__.__name__,
+                    custom_template_in.__class__.__name__
+                )
+            )
         return custom_template_in
 
     @validates("templates")
@@ -184,16 +176,15 @@ class Structure(Entity):
         from stalker.models.template import FilenameTemplate
 
         if not isinstance(template_in, FilenameTemplate):
-            raise TypeError("all the elements in the %s.templates should be a "
-                            "list of "
-                            "stalker.models.template.FilenameTemplate "
-                            "instances not %s" %
-                            (self.__class__.__name__,
-                             template_in.__class__.__name__))
+            raise TypeError(
+                "All the elements in the %s.templates should be a list of "
+                "stalker.models.template.FilenameTemplate instances not %s" %
+                (self.__class__.__name__, template_in.__class__.__name__)
+            )
 
         return template_in
 
-# STRUCTURE_FILENAMETEMPLATES
+# Structure_Filenametemplates Table
 Structure_FilenameTemplates = Table(
     "Structure_FilenameTemplates", Base.metadata,
     Column("structure_id", Integer, ForeignKey("Structures.id"),

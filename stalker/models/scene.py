@@ -38,11 +38,10 @@ class Scene(Entity, ProjectMixin, CodeMixin):
     shots taking place in the same set configuration can be grouped together by
     using Scenes.
 
-    You can not replace :class:`~stalker.models.sequence.Sequence`\ s with
-    Scenes, because Scene instances doesn't have some key features that
-    :class:`~stalker.models.sequence.Sequence`\ s have.
+    You can not replace :class:`.Sequence`\ s with Scenes, because Scene
+    instances doesn't have some key features that :class:`.Sequence`\ s have.
 
-    A Scene needs to be tied to a :class:`~stalker.models.project.Project`
+    A Scene needs to be tied to a :class:`.Project`
     instance, so it is not possible to create a Scene without a one.
     """
     __auto_name__ = False
@@ -55,9 +54,9 @@ class Scene(Entity, ProjectMixin, CodeMixin):
         "Shot",
         secondary='Shot_Scenes',
         back_populates="scenes",
-        doc="""The :class:`~stalker.models.shot.Shot`\ s that is related with this Scene.
+        doc="""The :class:`.Shot`\ s that is related with this Scene.
 
-        It is a list of :class:`~stalker.models.shot.Shot` instances.
+        It is a list of :class:`.Shot` instances.
         """
     )
 
@@ -80,9 +79,11 @@ class Scene(Entity, ProjectMixin, CodeMixin):
         from stalker.models.shot import Shot
 
         if not isinstance(shot, Shot):
-            raise TypeError('%s.shots needs to be all '
-                            'stalker.models.shot.Shot instances, not %s' %
-                            (self.__class__.__name__, shot.__class__.__name__))
+            raise TypeError(
+                '%s.shots needs to be all stalker.models.shot.Shot instances, '
+                'not %s' %
+                (self.__class__.__name__, shot.__class__.__name__)
+            )
         return shot
 
     def __eq__(self, other):

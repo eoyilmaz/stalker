@@ -33,26 +33,22 @@ logger.setLevel(logging_level)
 class FilenameTemplate(Entity, TargetEntityTypeMixin):
     """Holds templates for filename and path conventions.
 
-    FilenameTemplate objects help to specify where to place a 
-    :class:`~stalker.models.version.Version` related file.
+    FilenameTemplate objects help to specify where to place a :class:`.Version`
+    related file.
 
-    Although, it is mainly used by Stalker to define
-    :class:`~stalker.models.version.Version` related file paths and file names
-    to place them in to proper places inside a
-    :class:`~stalker.models.project.Project`'s
-    :attr:`~stalker.models.project.Project.structure`, the idea behind is open
-    to endless possibilities.
+    Although, it is mainly used by Stalker to define :class:`.Version` related
+    file paths and file names to place them in to proper places inside a
+    :class:`.Project`'s :attr:`.Project.structure`, the idea behind is open to
+    endless possibilities.
 
     Here is an example::
 
         p1 = Project(name="Test Project") # shortened for this example
         s1 = Structure(name="Commercial Project Structure") # shortened for this example
 
-        # this is going to be used by Stalker to decide the
-        # :stalker:`~stalker.models.link.Link`
-        # :stalker:`~stalker.models.link.Link.filename` and
-        # :stalker:`~stalker.models.link.Link.path` (which is the way Stalker
-        # links external files to Version instances)
+        # this is going to be used by Stalker to decide the :stalker:`.Link`
+        # :stalker:`.Link.filename` and :stalker:`.Link.path` (which is the way
+        # Stalker links external files to Version instances)
         f1 = FilenameTemplate(
             name="Asset Version Template",
             target_entity_type="Asset",
@@ -86,8 +82,7 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
 
     :param str filename: A `Jinja2`_ template code which specifies the file
       name of the given item. It is relative to the
-      :attr:`~stalker.models.template.FilenameTemplate.path`. A typical
-      example could be::
+      :attr:`.FilenameTemplate.path`. A typical example could be::
 
         asset_filename = "{{asset.code}}_{{version.take}}_{{task.code}}_v"{{'%03d'|format(version.version)}}{{version.extension}}"
 
@@ -134,9 +129,10 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
             path_in = ""
 
         if not isinstance(path_in, (str, unicode)):
-            raise TypeError("%s.path attribute should be string or unicode "
-                            "not %s" % (self.__class__.__name__,
-                                        path_in.__class__.__name__))
+            raise TypeError(
+                "%s.path attribute should be string or unicode not %s" %
+                (self.__class__.__name__, path_in.__class__.__name__)
+            )
 
         return path_in
 
@@ -149,9 +145,10 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
             filename_in = ""
 
         if not isinstance(filename_in, (str, unicode)):
-            raise TypeError("%s.filename attribute should be string or "
-                            "unicode not %s" % (self.__class__.__name__,
-                                                filename_in.__class__.__name__))
+            raise TypeError(
+                "%s.filename attribute should be string or unicode not %s" %
+                (self.__class__.__name__, filename_in.__class__.__name__)
+            )
 
         return filename_in
 

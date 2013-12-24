@@ -43,8 +43,8 @@ def group_finder(login, request):
     """Returns the group of the given login. The login name will be in
     'User:{login}' format.
 
-    :param login: The login of the user, both '{login}' and
-      'User:{login}' format is accepted.
+    :param login: The login of the user, both '{login}' and 'User:{login}'
+      format is accepted.
 
     :param request: The Request object
 
@@ -140,7 +140,7 @@ class Permission(Base):
       #
       # stalker.db.__init_db__ will create all the Actions possible with the
       # SOM classes automatically
-      # 
+      #
       # What is left to you is to create the permissions
       setup.db()
 
@@ -189,12 +189,17 @@ class Permission(Base):
         """validates the given access value
         """
         if not isinstance(access, (str, unicode)):
-            raise TypeError('Permission.access should be an instance of str '
-                            'or unicode not %s' % access.__class__.__name__)
+            raise TypeError(
+                '%s.access should be an instance of str or unicode '
+                'not %s' % (self.__class__.__name__,
+                            access.__class__.__name__)
+            )
 
         if access not in ['Allow', 'Deny']:
-            raise ValueError('Permission.access should be "Allow" or "Deny"'
-                             'not %s' % access)
+            raise ValueError(
+                '%s.access should be "Allow" or "Deny" not %s' %
+                (self.__class__.__name__, access)
+            )
 
         return access
 
@@ -209,9 +214,11 @@ class Permission(Base):
         """validates the given class_name value
         """
         if not isinstance(class_name, (str, unicode)):
-            raise TypeError('Permission.class_name should be an instance of '
-                            'str or unicode not %s' %
-                            class_name.__class__.__name__)
+            raise TypeError(
+                '%s.class_name should be an instance of str or '
+                'unicode not %s' %
+                (self.__class__.__name__, class_name.__class__.__name__)
+            )
 
         return class_name
 
@@ -228,13 +235,17 @@ class Permission(Base):
         """
 
         if not isinstance(action, (str, unicode)):
-            raise TypeError('Permission.action should be an instance of str '
-                            'or unicode not %s' % action.__class__.__name__)
+            raise TypeError(
+                '%s.action should be an instance of str or unicode '
+                'not %s' %
+                (self.__class__.__name__, action.__class__.__name__)
+            )
 
         if action not in defaults.actions:
-            raise ValueError('Permission.action should be one of the values '
-                             'of %s not %s' %
-                             (defaults.actions, action))
+            raise ValueError(
+                '%s.action should be one of the values of %s not %s' %
+                (self.__class__.__name__, defaults.actions, action)
+            )
 
         return action
 
@@ -266,12 +277,14 @@ class Group(Entity, ACLMixin):
     to be able to assign permissions in a group level.
 
     The Group class, as with the :class:`.User` class, is mixed with the
-    :class:`~stalker.models.mixins.ACLMixin` which adds ability to hold
-    :class:`~stalker.models.mixin.Permission` instances and serve ACLs to
-    Pyramid.
+    :class:`.ACLMixin` which adds ability to hold :class:`.Permission`
+    instances and serve ACLs to Pyramid.
+
+    :param str name: The name of this group.
+    :param list users: A list of :class:`.User` instances, holding the desired
+      users in this group.
     """
 
-    # TODO: Update Group class documentation
     __auto_name__ = False
     __tablename__ = 'Groups'
     __mapper_args__ = {'polymorphic_identity': 'Group'}
@@ -303,8 +316,9 @@ class Group(Entity, ACLMixin):
         """
         if not isinstance(user, User):
             raise TypeError(
-                'Group.users attribute must all be stalker.models.auth.User '
-                'instances not %s' % user.__class__.__name__
+                '%s.users attribute must all be stalker.models.auth.User '
+                'instances not %s' %
+                (self.__class__.__name__, user.__class__.__name__)
             )
 
         return user
@@ -313,30 +327,12 @@ class Group(Entity, ACLMixin):
 class User(Entity, ACLMixin):
     """The user class is designed to hold data about a User in the system.
 
-    There are a couple of points to take your attention to:
-
-    * The :attr:`.code` attribute is derived from the :attr:`.nice_name` as it
-      is in a :class:`~stalker.models.entity.SimpleEntity`, but the
-      :attr:`.nice_name` is derived from the :attr:`.login` instead of the
-      :attr:`.name` attribute, so the :attr:`.code` of a :class:`.User` and a
-      :class:`~stalker.models.entity.SimpleEntity` will be different then each
-      other. The formatting of the :attr:`.code` attribute is as follows:
-
-      * no underscore character is allowed, so while in the
-        :class:`~stalker.models.entity.SimpleEntity` class the code could have
-        underscores, in :class:`.User` class it is not
-        allowed.
-      * all the letters in the code will be converted to lower case.
-
-      Other than these two new rules all the previous formatting rules from the
-      :class:`~stalker.models.entity.SimpleEntity` are valid.
-
     .. note::
        .. versionadded 0.2.0: Task Watchers
 
-       New to version 0.2.0 users can be assigned to a
-       :class:`~stalker.models.task.Task` as a **Watcher**. Which can be used
-       to inform the users in watchers list about the updates of certain Tasks.
+       New to version 0.2.0 users can be assigned to a :class:`.Task` as a
+       **Watcher**. Which can be used to inform the users in watchers list
+       about the updates of certain Tasks.
 
     .. note::
        .. versionadded 0.2.0: Vacations
@@ -347,8 +343,8 @@ class User(Entity, ACLMixin):
         .. deprecated 0.2.0: User.sequences_lead
 
         User.sequences_lead attribute has been deprecated. Use
-        :attr:`.responsible_of` to query all the
-        :class:`~stalker.models.task.Task`\ s and derivatives.
+        :attr:`.responsible_of` to query all the :class:`.Task`\ s and
+        derivatives.
 
     :param email: holds the e-mail of the user, should be in [part1]@[part2]
       format
@@ -366,7 +362,7 @@ class User(Entity, ACLMixin):
       should be a list of Department objects. One user can be listed in
       multiple departments.
 
-    :type departments: list of :class:`~stalker.models.department.Department`\ s
+    :type departments: list of :class:`.Department`\ s
 
     :param password: it is the password of the user, can contain any character.
       Stalker doesn't store the raw passwords of the users. To check a stored
@@ -383,12 +379,12 @@ class User(Entity, ACLMixin):
     :param tasks: it is a list of Task objects which holds the tasks that this
       user has been assigned to
 
-    :type tasks: list of :class:`~stalker.models.task.Task`\ s
+    :type tasks: list of :class:`.Task`\ s
 
-    :param projects_lead: it is a list of Project objects that this user
-      is the leader of, it is for back referencing purposes.
+    :param projects_lead: it is a list of Project objects that this user is the
+      leader of, it is for back referencing purposes.
 
-    :type projects_lead: list of :class:`~stalker.models.project.Project`\ s
+    :type projects_lead: list of :class:`.Project`\ s
 
     :param last_login: it is a datetime.datetime object holds the last login
       date of the user (not implemented yet)
@@ -406,7 +402,7 @@ class User(Entity, ACLMixin):
         "Department",
         secondary='User_Departments',
         back_populates="members",
-        doc="""A list of :class:`~stalker.models.department.Department`\ s that
+        doc="""A list of :class:`.Department`\ s that
         this user is a part of""",
     )
 
@@ -463,9 +459,9 @@ class User(Entity, ACLMixin):
         primaryjoin="Projects.c.lead_id==Users.c.id",
         #uselist=True,
         back_populates="lead",
-        doc=""":class:`~stalker.models.project.Project`\ s lead by this user.
+        doc=""":class:`.Project`\ s lead by this user.
 
-        It is a list of :class:`~stalker.models.project.Project` instances.
+        It is a list of :class:`.Project` instances.
         """
     )
 
@@ -473,9 +469,9 @@ class User(Entity, ACLMixin):
         "Task",
         secondary="Task_Resources",
         back_populates="resources",
-        doc=""":class:`~stalker.models.task.Task`\ s assigned to this user.
+        doc=""":class:`.Task`\ s assigned to this user.
 
-        It is a list of :class:`~stalker.models.task.Task` instances.
+        It is a list of :class:`.Task` instances.
         """
     )
 
@@ -483,10 +479,10 @@ class User(Entity, ACLMixin):
         'Task',
         secondary='Task_Watchers',
         back_populates='watchers',
-        doc=''':class:`~stalker.models.task.Tasks`\ s that this user is
+        doc=''':class:`.Tasks`\ s that this user is
         assigned as a watcher.
 
-        It is a list of :class:`~stalker.models.task.Task` instances.
+        It is a list of :class:`.Task` instances.
         '''
     )
 
@@ -495,7 +491,7 @@ class User(Entity, ACLMixin):
         primaryjoin='Users.c.id==Tasks.c.responsible_id',
         back_populates='_responsible',
         uselist=True,
-        doc='''A list of :class:`~stalker.models.task.Task` instances that this user is responsible of.
+        doc='''A list of :class:`.Task` instances that this user is responsible of.
         '''
     )
 
@@ -504,7 +500,7 @@ class User(Entity, ACLMixin):
         primaryjoin="TimeLogs.c.resource_id==Users.c.id",
         back_populates="resource",
         cascade='all, delete-orphan',
-        doc="""A list of :class:`~stalker.models.task.TimeLog` instances which
+        doc="""A list of :class:`.TimeLog` instances which
         holds the time logs created for this :class:`.User`.
         """
     )
@@ -514,7 +510,7 @@ class User(Entity, ACLMixin):
         primaryjoin='Vacations.c.user_id==Users.c.id',
         back_populates='user',
         cascade='all, delete-orphan',
-        doc="""A list of :class:`~stalker.models.studio.Vacation` instances
+        doc="""A list of :class:`.Vacation` instances
         which holds the vacations created for this :class:`.User`
         """
     )
@@ -577,15 +573,18 @@ class User(Entity, ACLMixin):
         """validates the given login value
         """
         if login is None:
-            raise TypeError('%s.login can not be None' %
-                            self.__class__.__name__)
+            raise TypeError(
+                '%s.login can not be None' % self.__class__.__name__
+            )
 
         login = self._format_login(login)
 
         # raise a ValueError if the login is an empty string after formatting
         if login == '':
-            raise ValueError('%s.login can not be an empty string' %
-                             self.__class__.__name__)
+            raise ValueError(
+                '%s.login can not be an empty string' %
+                self.__class__.__name__
+            )
 
         logger.debug("name out: %s" % login)
 
@@ -599,10 +598,11 @@ class User(Entity, ACLMixin):
 
         # check if it is instance of Department object
         if not isinstance(department, Department):
-            raise TypeError("%s.department should be instance of "
-                            "stalker.models.department.Department not %s" %
-                            (self.__class__.__name__,
-                             department.__class__.__name__))
+            raise TypeError(
+                "%s.department should be instance of "
+                "stalker.models.department.Department not %s" %
+                (self.__class__.__name__, department.__class__.__name__)
+            )
         return department
 
     @validates("email")
@@ -611,10 +611,11 @@ class User(Entity, ACLMixin):
         """
         # check if email_in is an instance of string or unicode
         if not isinstance(email_in, (str, unicode)):
-            raise TypeError("%s.email should be an instance of string or "
-                            "unicode not %s" %
-                            (self.__class__.__name__,
-                             email_in.__class__.__name__))
+            raise TypeError(
+                "%s.email should be an instance of string or "
+                "unicode not %s" %
+                (self.__class__.__name__, email_in.__class__.__name__)
+            )
         return self._validate_email_format(email_in)
 
     def _validate_email_format(self, email_in):
@@ -627,20 +628,28 @@ class User(Entity, ACLMixin):
 
         # there should be one and only one @ sign
         if len_splits > 2:
-            raise ValueError("check the %s.email formatting, there are more "
-                             "than one @ sign" % self.__class__.__name__)
+            raise ValueError(
+                "check the formatting of %s.email, there are more than one @ "
+                "sign" % self.__class__.__name__
+            )
 
         if len_splits < 2:
-            raise ValueError("check the %s.email formatting, there are no @ "
-                             "sign" % self.__class__.__name__)
+            raise ValueError(
+                "check the formatting %s.email, there are no @ sign" %
+                self.__class__.__name__
+            )
 
         if splits[0] == "":
-            raise ValueError("check the %s.email formatting, the name part "
-                             "is missing" % self.__class__.__name__)
+            raise ValueError(
+                "check the formatting %s.email, the name part is missing" %
+                self.__class__.__name__
+            )
 
         if splits[1] == "":
-            raise ValueError("check the %s.email formatting, the domain part "
-                             "is missing" % self.__class__.__name__)
+            raise ValueError(
+                "check the %s.email formatting, the domain part is missing" %
+                self.__class__.__name__
+            )
 
         return email_in
 
@@ -650,10 +659,11 @@ class User(Entity, ACLMixin):
         """
         if not isinstance(last_login_in, datetime.datetime) and \
                         last_login_in is not None:
-            raise TypeError("%s.last_login should be an instance of "
-                            "datetime.datetime or None not %s" %
-                            (self.__class__.__name__,
-                             last_login_in.__class__.__name__))
+            raise TypeError(
+                "%s.last_login should be an instance of datetime.datetime or "
+                "None not %s" %
+                (self.__class__.__name__, last_login_in.__class__.__name__)
+            )
         return last_login_in
 
     def _format_login(self, login):
@@ -684,8 +694,9 @@ class User(Entity, ACLMixin):
         """validates the given password
         """
         if password_in is None:
-            raise TypeError("%s.password cannot be None" %
-                            self.__class__.__name__)
+            raise TypeError(
+                "%s.password cannot be None" % self.__class__.__name__
+            )
 
         if password_in == "":
             raise ValueError("raw_password can not be empty string")
@@ -710,7 +721,7 @@ class User(Entity, ACLMixin):
         """
         if not isinstance(group, Group):
             raise TypeError(
-                "any group in %s.groups should be an instance of"
+                "Any group in %s.groups should be an instance of"
                 "stalker.models.auth.Group not %s" %
                 (self.__class__.__name__, group.__class__.__name__)
             )
@@ -725,7 +736,7 @@ class User(Entity, ACLMixin):
 
         if not isinstance(project, Project):
             raise TypeError(
-                "any element in %s.projects_lead should be a"
+                "Any element in %s.projects_lead should be a"
                 "stalker.models.project.Project instance not %s" %
                 (self.__class__.__name__, project.__class__.__name__)
             )
@@ -739,7 +750,7 @@ class User(Entity, ACLMixin):
 
         if not isinstance(task, Task):
             raise TypeError(
-                "any element in %s.tasks should be an instance of "
+                "Any element in %s.tasks should be an instance of "
                 "stalker.models.task.Task not %s" %
                 (self.__class__.__name__, task.__class__.__name__)
             )
@@ -753,7 +764,7 @@ class User(Entity, ACLMixin):
 
         if not isinstance(task, Task):
             raise TypeError(
-                "any element in %s.watching should be an instance of "
+                "Any element in %s.watching should be an instance of "
                 "stalker.models.task.Task not %s" %
                 (self.__class__.__name__, task.__class__.__name__)
             )
@@ -766,10 +777,11 @@ class User(Entity, ACLMixin):
         from stalker import Project
 
         if not isinstance(project, Project):
-            raise TypeError('%s.projects should a list of '
-                            'stalker.models.project.Project instances, not '
-                            '%s' % (self.__class__.__name__,
-                                    project.__class__.__name__))
+            raise TypeError(
+                '%s.projects should a list of stalker.models.project.Project '
+                'instances, not %s' %
+                (self.__class__.__name__, project.__class__.__name__)
+            )
         return project
 
     @validates('vacations')
@@ -779,19 +791,18 @@ class User(Entity, ACLMixin):
         from stalker.models.studio import Vacation
 
         if not isinstance(vacation, Vacation):
-            raise TypeError("Every member of %s.vacations should be an "
-                            "instance of stalker.models.studio.Vacation, "
-                            "not %s" %
-                            (self.__class__.__name__,
-                             vacation.__class__.__name__))
-
+            raise TypeError(
+                "All of the members of %s.vacations should be an instance of "
+                "stalker.models.studio.Vacation, not %s" %
+                (self.__class__.__name__, vacation.__class__.__name__)
+            )
         return vacation
 
     @property
     def tickets(self):
-        """The list of :class:`~stalker.models.ticket.Ticket`\ s that this user has.
+        """The list of :class:`.Ticket`\ s that this user has.
 
-        returns a list of :class:`~stalker.models.ticket.Ticket` instances
+        returns a list of :class:`.Ticket` instances
         which this user is the owner of.
         """
         # do it with sqlalchemy
@@ -803,10 +814,10 @@ class User(Entity, ACLMixin):
 
     @property
     def open_tickets(self):
-        """The list of open :class:`~stalker.models.ticket.Ticket`\ s that this user has.
+        """The list of open :class:`.Ticket`\ s that this user has.
 
-        returns a list of :class:`~stalker.models.ticket.Ticket` instances
-        which has a status of `Open` that this user is assigned as the owner.
+        returns a list of :class:`.Ticket` instances which has a status of
+        `Open` that this user is assigned as the owner.
         """
         from stalker import Ticket, Status
         return Ticket.query \
