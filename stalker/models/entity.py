@@ -459,9 +459,9 @@ class SimpleEntity(Base):
         # lower than date_created
         if date_updated_in < self.date_created:
             raise ValueError(
-                "%s.date_updated could not be set to a date before"
-                "%s.date_created, try setting the 'date_created' before" %
-                self.__class__.__name__
+                "%(class)s.date_updated could not be set to a date before"
+                "%(class)s.date_created, try setting the 'date_created' before"
+                % {'class': self.__class__.__name__}
             )
         return date_updated_in
 

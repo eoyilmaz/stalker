@@ -1081,9 +1081,9 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
         if not isinstance(version, Version):
             raise TypeError(
-                "%s.versions should only have stalker.models.version.Version "
-                "instances, and not %s" %
-                (self.__class__.__name__, version.__clas__.__name__)
+                "%(class)s.versions should only have"
+                "stalker.models.version.Version instances, and not %(class)s" %
+                {'class': self.__class__.__name__}
             )
 
         return version

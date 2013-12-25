@@ -49,6 +49,11 @@ Stalker Changes
   now always use the least meaningful timing unit. So expanding a task from 16
   hours to 18 hours will result a task with 2 days of schedule (considering the
   daily_working_hours = 9).
+* **Update:** Moved the ``daily_working_hours`` attribute from Studio class to
+  WorkingHours class as it was much related to this one then Studio class. Left
+  a property with the same name in the Studio class, so it will still
+  function as it was before but there will be no column in the database for
+  that attribute anymore.
 
 0.2.3.5
 =======

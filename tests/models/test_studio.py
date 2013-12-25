@@ -583,63 +583,6 @@ class StudioTester(unittest2.TestCase):
         """
         DBSession.remove()
 
-    def test_daily_working_hours_argument_is_skipped(self):
-        """testing if the daily_working_hours attribute will be equal to the
-        default settings when the daily_working_hours argument is skipped
-        """
-        try:
-            self.kwargs.pop('daily_working_hours')
-        except KeyError:
-            pass
-        new_studio = Studio(**self.kwargs)
-        self.assertEqual(new_studio.daily_working_hours,
-                         defaults.daily_working_hours)
-
-    def test_daily_working_hours_argument_is_None(self):
-        """testing if the daily_working_hours attribute will be equal to the
-        default settings value when the daily_working_hours argument is None
-        """
-        self.kwargs['daily_working_hours'] = None
-        new_studio = Studio(**self.kwargs)
-        self.assertEqual(new_studio.daily_working_hours,
-                         defaults.daily_working_hours)
-
-    def test_daily_working_hours_attribute_is_None(self):
-        """testing if the daily_working_hours attribute will be equal to the
-        default settings value when it is set to None
-        """
-        self.test_studio.daily_working_hours = None
-        self.assertEqual(self.test_studio.daily_working_hours,
-                         defaults.daily_working_hours)
-
-    def test_daily_working_hours_argument_is_not_integer(self):
-        """testing if a TypeError will be raised when the daily_working_hours
-        argument is not an integer
-        """
-        self.kwargs['daily_working_hours'] = 'not an integer'
-        self.assertRaises(TypeError, Studio, **self.kwargs)
-
-    def test_daily_working_hours_attribute_is_not_an_integer(self):
-        """testing if a TypeError will be raised when the daily_working hours
-        attribute is set to a value other than an integer
-        """
-        self.assertRaises(TypeError, setattr, self.test_studio,
-                          'daily_working_hours', 'not an intger')
-
-    def test_daily_working_hours_argument_is_working_fine(self):
-        """testing if the daily working hours argument value is correctly
-        passed to daily_working_hours attribute
-        """
-        self.kwargs['daily_working_hours'] = 12
-        new_project = Studio(**self.kwargs)
-        self.assertEqual(new_project.daily_working_hours, 12)
-
-    def test_daily_working_hours_attribute_is_working_properly(self):
-        """testing if the daily_working_hours attribute is working properly
-        """
-        self.test_studio.daily_working_hours = 23
-        self.assertEqual(self.test_studio.daily_working_hours, 23)
-
     def test_working_hours_argument_is_skipped(self):
         """testing if the default working hours will be used when the
         working_hours argument is skipped

@@ -23,11 +23,11 @@ import datetime
 import unittest2
 
 from stalker import (Task, Project, User, Status, StatusList, Repository,
-                     Structure, Revision, TimeLog)
+                     Structure, Review, TimeLog)
 
 
-class RevisionTestCase(unittest2.TestCase):
-    """tests the stalker.models.revision.Revision class
+class ReviewTestCase(unittest2.TestCase):
+    """tests the stalker.models.review.Review class
     """
 
     def setUp(self):
@@ -44,8 +44,12 @@ class RevisionTestCase(unittest2.TestCase):
         self.status_rts = Status(name='Ready To Start', code='RTS')
         self.status_wip = Status(name='Work In Progress', code='WIP')
         self.status_prev = Status(name='Pending Review', code='PREV')
-        self.status_hrev = Status(name='Has Revision', code='HREV')
+        self.status_hrev = Status(name='Has Review', code='HREV')
         self.status_cmpl = Status(name='Complete', code='CMPL')
+
+        # Review Statuses
+        self.status_app = Status(name='Approved', code='APP')
+        self.status_rrev = Status(name='Request Review', code='RREV')
 
         self.project_status_list = StatusList(
             target_entity_type='Project',
@@ -59,6 +63,13 @@ class RevisionTestCase(unittest2.TestCase):
             statuses=[
                 self.status_new, self.status_rts, self.status_wip,
                 self.status_prev, self.status_hrev, self.status_cmpl
+            ]
+        )
+
+        self.review_status_list = StatusList(
+            target_entity_type='Review',
+            statuses=[
+                self.status_new, self.status_rrev, self.status_app
             ]
         )
 
@@ -91,32 +102,32 @@ class RevisionTestCase(unittest2.TestCase):
         self.kwargs = {
             'task': self.task
         }
-        self.revision = Revision(**self.kwargs)
+        self.review = Review(**self.kwargs)
 
     def test_task_argument_is_skipped(self):
         """testing if a TypeError will be raised when the task argument is
         skipped
         """
         self.kwargs.pop('task')
-        self.assertRaises(TypeError, Revision, **self.kwargs)
+        self.assertRaises(TypeError, Review, **self.kwargs)
 
     def test_task_argument_is_None(self):
         """testing if a TypeError will be raised when the task argument is None
         """
         self.kwargs['task'] = None
-        self.assertRaises(TypeError, Revision, **self.kwargs)
+        self.assertRaises(TypeError, Review, **self.kwargs)
 
     def test_task_argument_is_not_a_Task_instance(self):
         """testing if a TypeError will be raised when the task argument value
         is not a Task instance
         """
         self.kwargs['task'] = 'not a Task instance'
-        self.assertRaises(TypeError, Revision, **self.kwargs)
+        self.assertRaises(TypeError, Review, **self.kwargs)
 
     def test_task_attribute_is_read_only(self):
         """testing if a the task attribute is read only
         """
-        self.assertRaises(AttributeError, setattr, self.revision, 'task',
+        self.assertRaises(AttributeError, setattr, self.review, 'task',
                           self.task)
 
     def test_task_argument_is_not_a_leaf_task(self):
@@ -134,23 +145,23 @@ class RevisionTestCase(unittest2.TestCase):
             status_list=self.task_status_list
         )
         self.kwargs['task'] = task1
-        self.assertRaises(ValueError, Revision, **self.kwargs)
+        self.assertRaises(ValueError, Review, **self.kwargs)
 
     def test_task_argument_is_working_properly(self):
         """testing if the task argument value is passed to the task argument
         properly
         """
-        self.assertEqual(self.revision.task, self.task)
+        self.assertEqual(self.review.task, self.task)
 
     def test_auto_name_is_true(self):
-        """testing if revision instances are named automatically
+        """testing if review instances are named automatically
         """
-        self.assertTrue(Revision.__auto_name__)
+        self.assertTrue(Review.__auto_name__)
 
-    def test_task_argument_schedule_timing_values_are_clipped_and_extended_with_revision_schedule_info(self):
+    def test_task_argument_schedule_timing_values_are_clipped_and_extended_with_Review_schedule_info_if_the_review_is_rrev(self):
         """testing if the task given with the task argument schedule timing
         values are capped to the current total logged seconds and then it is
-        extended with the revision timing values
+        extended with the review timing values when the review.status is RREV
         """
         task1 = Task(
             name='Test Task 2',
@@ -173,8 +184,8 @@ class RevisionTestCase(unittest2.TestCase):
             end=dt.now() + td(hours=5)
         )
 
-        # now create a revision for that task
-        rev1 = Revision(
+        # now create a review for that task
+        rev1 = Review(
             task=task1,
             schedule_timing=1,
             schedule_unit='h'
@@ -186,8 +197,8 @@ class RevisionTestCase(unittest2.TestCase):
         # and the schedule_timing of 6
         self.assertEqual(task1.schedule_timing, 6)
 
-        # create another revision with 15 minutes of schedule timing
-        rev2 = Revision(
+        # create another review with 15 minutes of schedule timing
+        rev2 = Review(
             task=task1,
             schedule_timing=15,
             schedule_unit='min'
@@ -199,7 +210,7 @@ class RevisionTestCase(unittest2.TestCase):
         # and the schedule_timing of 375
         self.assertEqual(task1.schedule_timing, 315)
 
-        rev3 = Revision(
+        rev3 = Review(
             task=task1,
             schedule_timing=120,
             schedule_unit='min'

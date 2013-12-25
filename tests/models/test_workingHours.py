@@ -433,3 +433,105 @@ class WorkingHoursTester(unittest2.TestCase):
         wh['sat'] = [[11, 12]]
         wh['sun'] = [[13, 14]]
         self.assertAlmostEqual(wh.yearly_working_days, 365, 0)
+
+    def test_daily_working_hours_argument_is_skipped(self):
+        """testing if the daily_working_hours attribute will be equal to the
+        default settings when the daily_working_hours argument is skipped
+        """
+        wh = WorkingHours()
+        self.assertEqual(wh.daily_working_hours, defaults.daily_working_hours)
+
+    def test_daily_working_hours_argument_is_None(self):
+        """testing if the daily_working_hours attribute will be equal to the
+        default settings value when the daily_working_hours argument is None
+        """
+        kwargs = dict()
+        kwargs['daily_working_hours'] = None
+        wh = WorkingHours(**kwargs)
+        self.assertEqual(wh.daily_working_hours,
+                         defaults.daily_working_hours)
+
+    def test_daily_working_hours_attribute_is_None(self):
+        """testing if the daily_working_hours attribute will be equal to the
+        default settings value when it is set to None
+        """
+        wh = WorkingHours()
+        wh.daily_working_hours = None
+        self.assertEqual(wh.daily_working_hours, defaults.daily_working_hours)
+
+    def test_daily_working_hours_argument_is_not_integer(self):
+        """testing if a TypeError will be raised when the daily_working_hours
+        argument is not an integer
+        """
+        kwargs = dict()
+        kwargs['daily_working_hours'] = 'not an integer'
+        self.assertRaises(TypeError, WorkingHours, **kwargs)
+
+    def test_daily_working_hours_attribute_is_not_an_integer(self):
+        """testing if a TypeError will be raised when the daily_working hours
+        attribute is set to a value other than an integer
+        """
+        wh = WorkingHours()
+        self.assertRaises(TypeError, setattr, wh, 'daily_working_hours',
+                          'not an intger')
+
+    def test_daily_working_hours_argument_is_working_fine(self):
+        """testing if the daily working hours argument value is correctly
+        passed to daily_working_hours attribute
+        """
+        kwargs = dict()
+        kwargs['daily_working_hours'] = 12
+        wh = WorkingHours(**kwargs)
+        self.assertEqual(wh.daily_working_hours, 12)
+
+    def test_daily_working_hours_attribute_is_working_properly(self):
+        """testing if the daily_working_hours attribute is working properly
+        """
+        wh = WorkingHours()
+        wh.daily_working_hours = 23
+        self.assertEqual(wh.daily_working_hours, 23)
+
+    def test_daily_working_hours_argument_is_zero(self):
+        """testing if a ValueError will be raised when the daily_working_hours
+        argument value is zero
+        """
+        kwargs = dict()
+        kwargs['daily_working_hours'] = 0
+        self.assertRaises(ValueError, WorkingHours, **kwargs)
+
+    def test_daily_working_hours_attribute_is_zero(self):
+        """testing if a ValueError will be raised when the daily_working_hours
+        attribute is set to zero
+        """
+        wh = WorkingHours()
+        self.assertRaises(ValueError, setattr, wh, 'daily_working_hours', 0)
+
+    def test_daily_working_hours_argument_is_a_negative_number(self):
+        """testing if a ValueError will be raised when the daily_working_hours
+        argument value is negative
+        """
+        kwargs = dict()
+        kwargs['daily_working_hours'] = -10
+        self.assertRaises(ValueError, WorkingHours, **kwargs)
+
+    def test_daily_working_hours_attribute_is_a_negative_number(self):
+        """testing if a ValueError will be raised when the daily_working_hours
+        attribute is set to a negative value
+        """
+        wh = WorkingHours()
+        self.assertRaises(ValueError, setattr, wh, 'daily_working_hours', -10)
+
+    def test_daily_working_hours_argument_is_set_to_a_number_bigger_than_24(self):
+        """testing if a ValueError will be raised when the daily working hours
+        argument value is bigger than 24
+        """
+        kwargs = dict()
+        kwargs['daily_working_hours'] = 25
+        self.assertRaises(ValueError, WorkingHours, **kwargs)
+
+    def test_daily_working_hours_attribute_is_set_to_a_number_bigger_than_24(self):
+        """testing if a ValueError will be raised when the daily working hours
+        attribute value is bigger than 24
+        """
+        wh = WorkingHours()
+        self.assertRaises(ValueError, setattr, wh, 'daily_working_hours', 25)

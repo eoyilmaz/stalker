@@ -102,7 +102,6 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         primary_key=True,
     )
 
-    daily_working_hours = Column(Integer, default=8)
     _timing_resolution = Column("timing_resolution", Interval)
 
     def __init__(self,
@@ -113,7 +112,6 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         super(Studio, self).__init__(**kwargs)
         DateRangeMixin.__init__(self, **kwargs)
         WorkingHoursMixin.__init__(self, **kwargs)
-        # TODO: daily_working_hours should be in WorkingHours not in Studio
         self.timing_resolution = timing_resolution
         self.daily_working_hours = daily_working_hours
         self._now = None
@@ -122,6 +120,18 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
 
         # update defaults
         self.update_defaults()
+
+    @property
+    def daily_working_hours(self):
+        """a shourtcut for Studio.working_hours.daily_working_hours
+        """
+        return self.working_hours.daily_working_hours
+
+    @daily_working_hours.setter
+    def daily_working_hours(self, dwh):
+        """a shortcut for Studio.working_hours.daily_working_hours
+        """
+        self.working_hours.daily_working_hours = dwh
 
     def update_defaults(self):
         """updates the default values with the studio
@@ -192,20 +202,6 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         """update defaults on load
         """
         self.update_defaults()
-
-    @validates('daily_working_hours')
-    def _validate_daily_working_hours(self, key, dwh):
-        """validates the given daily working hours value
-        """
-        if dwh is None:
-            dwh = defaults.daily_working_hours
-
-        if not isinstance(dwh, int):
-            raise TypeError(
-                '%s.daily_working_hours should be an integer, not %s' %
-                (self.__class__.__name__, dwh.__class__.__name__)
-            )
-        return dwh
 
     def _validate_now(self, now_in):
         """validates the given now_in value
@@ -476,11 +472,16 @@ class WorkingHours(object):
       value is going to be used.
     """
 
-    def __init__(self, working_hours=None, **kwargs):
+    def __init__(self,
+                 working_hours=None,
+                 daily_working_hours=None,
+                 **kwargs):
         if working_hours is None:
             working_hours = defaults.working_hours
         self._wh = None
         self.working_hours = self._validate_working_hours(working_hours)
+        self._daily_working_hours = None
+        self.daily_working_hours = daily_working_hours
 
     def __eq__(self, other):
         """equality test
@@ -640,6 +641,37 @@ class WorkingHours(object):
         """returns the total working days in a year
         """
         return int(ceil(self.weekly_working_days * 52.1428))
+
+    def _validate_daily_working_hours(self, dwh):
+        """validates the given daily working hours value
+        """
+        if dwh is None:
+            dwh = defaults.daily_working_hours
+
+        if not isinstance(dwh, int):
+            raise TypeError(
+                '%s.daily_working_hours should be an integer, not %s' %
+                (self.__class__.__name__, dwh.__class__.__name__)
+            )
+
+        if dwh <= 0 or dwh > 24:
+            raise ValueError(
+                '%s.daily_working_hours should be a positive integer value '
+                'greater than 0 and smaller than or equal to 24'
+            )
+        return dwh
+
+    @property
+    def daily_working_hours(self):
+        """getter for daily_working_hours attribute
+        """
+        return self._daily_working_hours
+
+    @daily_working_hours.setter
+    def daily_working_hours(self, dwh):
+        """setter for daily_working_hours attribute
+        """
+        self._daily_working_hours = self._validate_daily_working_hours(dwh)
 
 
 class Vacation(SimpleEntity, DateRangeMixin):
