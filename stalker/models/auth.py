@@ -488,11 +488,13 @@ class User(Entity, ACLMixin):
 
     responsible_of = relationship(
         'Task',
-        primaryjoin='Users.c.id==Tasks.c.responsible_id',
+        secondary='Task_Responsible',
+        primaryjoin='Users.c.id==Task_Responsible.c.responsible_id',
+        secondaryjoin='Task_Responsible.c.task_id==Tasks.c.id',
         back_populates='_responsible',
         uselist=True,
-        doc='''A list of :class:`.Task` instances that this user is responsible of.
-        '''
+        doc="""A list of :class:`.Task` instances that this user is responsible
+        of."""
     )
 
     time_logs = relationship(
@@ -523,8 +525,7 @@ class User(Entity, ACLMixin):
             password=None,
             departments=None,
             groups=None,
-            **kwargs
-    ):
+            **kwargs):
         kwargs['name'] = name
 
         super(User, self).__init__(**kwargs)

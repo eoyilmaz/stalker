@@ -19,7 +19,6 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import os
-import copy
 import shutil
 import datetime
 import unittest2
@@ -29,7 +28,7 @@ from sqlalchemy.exc import IntegrityError
 import stalker
 from stalker.db.session import DBSession
 from stalker import (db, defaults, Asset, Department, SimpleEntity, Entity,
-                     ImageFormat, Link, Note, Project, Repository, Revision,
+                     ImageFormat, Link, Note, Project, Repository, Review,
                      Sequence, Shot, Status, StatusList, Structure, Tag, Task,
                      Type, FilenameTemplate, User, Version, Permission, Group,
                      TimeLog, Ticket, Scene, WorkingHours, Studio, Vacation,
@@ -203,8 +202,14 @@ class DatabaseTester(unittest2.TestCase):
 
         self.assertTrue(isinstance(ticket_status_list, StatusList))
 
-        expected_status_names = ['New', 'Reopened', 'Closed', 'Accepted',
-                                 'Assigned']
+        expected_status_names = [
+            'New',
+            'Reopened',
+            'Closed',
+            'Accepted',
+            'Assigned'
+        ]
+
         self.assertEqual(len(ticket_status_list.statuses),
                          len(expected_status_names))
         for status in ticket_status_list.statuses:
@@ -246,14 +251,13 @@ class DatabaseTester(unittest2.TestCase):
         """testing if Permission instances are created for classes in the SOM
         """
         DBSession.remove()
-        DBSession.configure(extension=None)
         db.setup()
         db.init()
 
         class_names = [
             'Asset', 'Group', 'Permission', 'User', 'Department',
             'SimpleEntity', 'Entity', 'ImageFormat', 'Link', 'Message', 'Note',
-            'Project', 'Repository', 'Revision', 'Scene', 'Sequence', 'Shot',
+            'Project', 'Repository', 'Review', 'Scene', 'Sequence', 'Shot',
             'Status', 'StatusList', 'Structure', 'Studio', 'Tag', 'TimeLog',
             'Task', 'FilenameTemplate', 'Ticket', 'TicketLog', 'Type',
             'Vacation', 'Version',
@@ -326,17 +330,261 @@ class DatabaseTester(unittest2.TestCase):
         db.setup(settings={'sqlalchemy.url': temp_db_url})
         db.init()
 
-        # and we still have correct amount of Permissions
+        # and we still have correct amount of Statuses
         statuses = Status.query.all()
-        self.assertEqual(len(statuses), 5)
+        self.assertEqual(len(statuses), 14)
 
-        status_list = StatusList.query.all()
-        self.assertEqual(len(status_list), 1)
-        self.assertEqual(status_list[0].name, 'Ticket Statuses')
+        status_list = StatusList.query.filter_by(target_entity_type='Ticket').first()
+        self.assertIsNotNone(status_list)
+        self.assertEqual(status_list.name, 'Ticket Statuses')
         # self.fail(temp_db_url)
 
         # clean the test
         shutil.rmtree(temp_db_path)
+
+    def test_task_status_initialization(self):
+        """testing if the task statuses are correctly created
+        """
+        db.setup()
+        db.init()
+
+        task_status_list = StatusList.query \
+            .filter(StatusList.name == 'Task Statuses') \
+            .first()
+
+        self.assertTrue(isinstance(task_status_list, StatusList))
+
+        expected_status_names = [
+            'New',
+            'Ready To Start',
+            'Work In Progress',
+            'Pending Review',
+            'Has Revision',
+            'On Hold',
+            'Stopped',
+            'Completed'
+        ]
+
+        expected_status_codes = [
+            'NEW',
+            'RTS',
+            'WIP',
+            'PREV',
+            'HREV',
+            'OH',
+            'STOP',
+            'CMPL'
+        ]
+
+
+        self.assertEqual(
+            len(task_status_list.statuses),
+            len(expected_status_names)
+        )
+
+        db_status_names = map(lambda x: x.name, task_status_list.statuses)
+        db_status_codes = map(lambda x: x.code, task_status_list.statuses)
+        self.assertItemsEqual(expected_status_names, db_status_names)
+        self.assertItemsEqual(expected_status_codes, db_status_codes)
+
+    def test_asset_status_initialization(self):
+        """testing if the asset statuses are correctly created
+        """
+        db.setup()
+        db.init()
+
+        asset_status_list = StatusList.query \
+            .filter(StatusList.name == 'Asset Statuses') \
+            .first()
+
+        self.assertTrue(isinstance(asset_status_list, StatusList))
+
+        expected_status_names = [
+            'New',
+            'Ready To Start',
+            'Work In Progress',
+            'Pending Review',
+            'Has Revision',
+            'On Hold',
+            'Stopped',
+            'Completed'
+        ]
+
+        expected_status_codes = [
+            'NEW',
+            'RTS',
+            'WIP',
+            'PREV',
+            'HREV',
+            'OH',
+            'STOP',
+            'CMPL'
+        ]
+
+        self.assertEqual(
+            len(asset_status_list.statuses),
+            len(expected_status_names)
+        )
+
+        db_status_names = map(lambda x: x.name, asset_status_list.statuses)
+        db_status_codes = map(lambda x: x.code, asset_status_list.statuses)
+        self.assertItemsEqual(expected_status_names, db_status_names)
+        self.assertItemsEqual(expected_status_codes, db_status_codes)
+
+    def test_shot_status_initialization(self):
+        """testing if the shot statuses are correctly created
+        """
+        db.setup()
+        db.init()
+
+        shot_status_list = StatusList.query \
+            .filter(StatusList.name == 'Shot Statuses') \
+            .first()
+
+        self.assertTrue(isinstance(shot_status_list, StatusList))
+
+        expected_status_names = [
+            'New',
+            'Ready To Start',
+            'Work In Progress',
+            'Pending Review',
+            'Has Revision',
+            'On Hold',
+            'Stopped',
+            'Completed'
+        ]
+
+        expected_status_codes = [
+            'NEW',
+            'RTS',
+            'WIP',
+            'PREV',
+            'HREV',
+            'OH',
+            'STOP',
+            'CMPL'
+        ]
+
+        self.assertEqual(
+            len(shot_status_list.statuses),
+            len(expected_status_names)
+        )
+
+        db_status_names = map(lambda x: x.name, shot_status_list.statuses)
+        db_status_codes = map(lambda x: x.code, shot_status_list.statuses)
+        self.assertItemsEqual(expected_status_names, db_status_names)
+        self.assertItemsEqual(expected_status_codes, db_status_codes)
+
+    def test_sequence_status_initialization(self):
+        """testing if the sequence statuses are correctly created
+        """
+        db.setup()
+        db.init()
+
+        sequence_status_list = StatusList.query \
+            .filter(StatusList.name == 'Sequence Statuses') \
+            .first()
+
+        self.assertTrue(isinstance(sequence_status_list, StatusList))
+
+        expected_status_names = [
+            'New',
+            'Ready To Start',
+            'Work In Progress',
+            'Pending Review',
+            'Has Revision',
+            'On Hold',
+            'Stopped',
+            'Completed'
+        ]
+
+        expected_status_codes = [
+            'NEW',
+            'RTS',
+            'WIP',
+            'PREV',
+            'HREV',
+            'OH',
+            'STOP',
+            'CMPL'
+        ]
+
+        self.assertEqual(
+            len(sequence_status_list.statuses),
+            len(expected_status_names)
+        )
+
+        db_status_names = map(lambda x: x.name, sequence_status_list.statuses)
+        db_status_codes = map(lambda x: x.code, sequence_status_list.statuses)
+        self.assertItemsEqual(expected_status_names, db_status_names)
+        self.assertItemsEqual(expected_status_codes, db_status_codes)
+
+    def test_review_status_initialization(self):
+        """testing if the review statuses are correctly created
+        """
+        db.setup()
+        db.init()
+
+        review_status_list = StatusList.query \
+            .filter(StatusList.name == 'Review Statuses') \
+            .first()
+
+        self.assertTrue(isinstance(review_status_list, StatusList))
+
+        expected_status_names = [
+            'New',
+            'Requested Revision',
+            'Approved',
+        ]
+
+        expected_status_codes = [
+            'NEW',
+            'RREV',
+            'APP'
+        ]
+
+        self.assertEqual(
+            len(review_status_list.statuses),
+            len(expected_status_names)
+        )
+
+        db_status_names = map(lambda x: x.name, review_status_list.statuses)
+        db_status_codes = map(lambda x: x.code, review_status_list.statuses)
+        self.assertItemsEqual(expected_status_names, db_status_names)
+        self.assertItemsEqual(expected_status_codes, db_status_codes)
+
+    def test___create_entity_statuses_no_entity_type_supplied(self):
+        """testing db.__create_entity_statuses() will raise a ValueError when
+        no entity_type is supplied
+        """
+        from stalker.db import create_entity_statuses
+        kwargs = {
+            'status_names': ['A', 'B'],
+            'status_codes': ['A', 'B']
+        }
+        self.assertRaises(ValueError, create_entity_statuses, **kwargs)
+
+    def test___create_entity_statuses_no_status_names_supplied(self):
+        """testing db.__create_entity_statuses() will raise a ValueError when
+        no statuse_names is supplied
+        """
+        from stalker.db import create_entity_statuses
+        kwargs = {
+            'entity_type': 'Hede Hodo',
+            'status_codes': ['A', 'B']
+        }
+        self.assertRaises(ValueError, create_entity_statuses, **kwargs)
+
+    def test___create_entity_statuses_no_status_codes_supplied(self):
+        """testing db.__create_entity_statuses() will raise a ValueError when
+        no statuse_codes is supplied
+        """
+        from stalker.db import create_entity_statuses
+        kwargs = {
+            'entity_type': 'Hede Hodo',
+            'status_names': ['A', 'B']
+        }
+        self.assertRaises(ValueError, create_entity_statuses, **kwargs)
 
 
 class DatabaseModelsTester(unittest2.TestCase):
@@ -440,17 +688,10 @@ class DatabaseModelsTester(unittest2.TestCase):
         DBSession.add(test_project)
         DBSession.commit()
 
-        task_status_list = StatusList(
-            name='Task Status List',
-            statuses=[status1, status2, status3],
-            target_entity_type=Task,
-        )
-
-        asset_status_list = StatusList(
-            name='Asset Status List',
-            statuses=[status1, status2, status3],
-            target_entity_type=Asset
-        )
+        task_status_list = StatusList.query\
+            .filter_by(target_entity_type='Task').first()
+        asset_status_list = StatusList.query\
+            .filter_by(target_entity_type='Asset').first()
 
         kwargs = {
             'name': 'Test Asset',
@@ -600,11 +841,8 @@ class DatabaseModelsTester(unittest2.TestCase):
             target_entity_type='Project'
         )
 
-        task_status_list = StatusList(
-            name='Task Statuses',
-            statuses=[stat1, stat2],
-            target_entity_type='Task'
-        )
+        task_status_list = StatusList.query\
+            .filter_by(target_entity_type='Task').first()
 
         projtype = Type(
             name='Commercial Project',
@@ -1032,8 +1270,9 @@ class DatabaseModelsTester(unittest2.TestCase):
 
         # use it as a task reference
         repo1 = Repository(name='test repo')
-        status1 = Status(name='New', code='NEW')
-        status2 = Status(name='Work In Progress', code='WIP')
+        status1 = Status.query.filter_by(code='NEW').first()
+        status2 = Status.query.filter_by(code='WIP').first()
+
         project_statuses = StatusList(
             target_entity_type='Project',
             statuses=[status1, status2]
@@ -1044,10 +1283,8 @@ class DatabaseModelsTester(unittest2.TestCase):
             status_list=project_statuses,
             repository=repo1
         )
-        task_statuses = StatusList(
-            target_entity_type='Task',
-            statuses=[status1, status2]
-        )
+        task_statuses = StatusList.query\
+            .filter_by(target_entity_type='Task').first()
         task1 = Task(
             name='Test Task',
             project=project1,
@@ -1268,15 +1505,8 @@ class DatabaseModelsTester(unittest2.TestCase):
             osx_path="/mnt/M/Projects"
         )
 
-        status1 = Status(
-            name="On Hold",
-            code="OH"
-        )
-
-        status2 = Status(
-            name="Complete",
-            code="CMPLT"
-        )
+        status1 = Status.query.filter_by(code="OH").first()
+        status2 = Status.query.filter_by(code="CMPL").first()
 
         project_status_list = StatusList(
             name="A Status List for testing Project",
@@ -1310,11 +1540,8 @@ class DatabaseModelsTester(unittest2.TestCase):
         )
 
         # TaskMixin
-        task_status_list = StatusList(
-            name="Task Statuses",
-            statuses=[status1, status2],
-            target_entity_type=Task
-        )
+        task_status_list = StatusList.query\
+            .filter_by(target_entity_type='Task').first()
 
         DBSession.add(task_status_list)
         DBSession.add_all([ref1, ref2])
@@ -1537,9 +1764,9 @@ class DatabaseModelsTester(unittest2.TestCase):
     def test_persistence_of_Scene(self):
         """testing the persistence of Scene
         """
-        status1 = Status(name="On Hold", code="OH")
-        status2 = Status(name="Work In Progress", code="WIP")
-        status3 = Status(name="Finished", code="FIN")
+        status1 = Status.query.filter_by(code="OH").first()
+        status2 = Status.query.filter_by(code="WIP").first()
+        status3 = Status.query.filter_by(code="CMPL").first()
 
         project_status_list = StatusList(
             name="Project Statuses",
@@ -1547,11 +1774,8 @@ class DatabaseModelsTester(unittest2.TestCase):
             target_entity_type=Project
         )
 
-        shot_status_list = StatusList(
-            name="Shot Statuses",
-            statuses=[status1, status2, status3],
-            target_entity_type=Shot
-        )
+        shot_status_list = StatusList.query\
+            .filter_by(target_entity_type='Shot').first()
 
         repo1 = Repository(
             name="Commercial Repository"
@@ -1639,10 +1863,9 @@ class DatabaseModelsTester(unittest2.TestCase):
     def test_persistence_of_Sequence(self):
         """testing the persistence of Sequence
         """
-
-        status1 = Status(name="On Hold", code="OH")
-        status2 = Status(name="Work In Progress", code="WIP")
-        status3 = Status(name="Finished", code="FIN")
+        status1 = Status.query.filter_by(code="OH").first()
+        status2 = Status.query.filter_by(code="WIP").first()
+        status3 = Status.query.filter_by(code="CMPL").first()
 
         project_status_list = StatusList(
             name="Project Statuses",
@@ -1650,17 +1873,11 @@ class DatabaseModelsTester(unittest2.TestCase):
             target_entity_type=Project
         )
 
-        sequence_status_list = StatusList(
-            name="Sequence Statuses",
-            statuses=[status1, status2, status3],
-            target_entity_type=Sequence
-        )
+        sequence_status_list = StatusList.query\
+            .filter_by(target_entity_type='Sequence').first()
 
-        shot_status_list = StatusList(
-            name="Shot Statuses",
-            statuses=[status1, status2, status3],
-            target_entity_type=Shot
-        )
+        shot_status_list = StatusList.query\
+            .filter_by(target_entity_type='Shot').first()
 
         repo1 = Repository(
             name="Commercial Repository"
@@ -1785,9 +2002,9 @@ class DatabaseModelsTester(unittest2.TestCase):
         """testing the persistence of Shot
         """
 
-        status1 = Status(name="On Hold", code="OH")
-        status2 = Status(name="Work In Progress", code="WIP")
-        status3 = Status(name="Finished", code="FIN")
+        status1 = Status.query.filter_by(code="OH").first()
+        status2 = Status.query.filter_by(code="WIP").first()
+        status3 = Status.query.filter_by(code="CMPL").first()
 
         project_status_list = StatusList(
             name="Project Statuses",
@@ -1795,17 +2012,11 @@ class DatabaseModelsTester(unittest2.TestCase):
             target_entity_type=Project
         )
 
-        sequence_status_list = StatusList(
-            name="Sequence Statuses",
-            statuses=[status1, status2, status3],
-            target_entity_type=Sequence
-        )
+        sequence_status_list = StatusList.query\
+            .filter_by(target_entity_type='Sequence').first()
 
-        shot_status_list = StatusList(
-            name="Shot Statuses",
-            statuses=[status1, status2, status3],
-            target_entity_type=Shot
-        )
+        shot_status_list = StatusList.query\
+            .filter_by(target_entity_type='Shot').first()
 
         commercial_project_type = Type(
             name='Commercial Project',
@@ -2043,15 +2254,15 @@ class DatabaseModelsTester(unittest2.TestCase):
         # create a couple of statuses
         statuses = [
             Status(name="Waiting To Start", code="WTS"),
-            Status(name="On Hold", code="OH"),
-            Status(name="In Progress", code="WIP"),
-            Status(name="Complete", code="CMPLT"),
+            Status(name="On Hold A", code="OHA"),
+            Status(name="Work In Progress A", code="WIPA"),
+            Status(name="Complete A", code="CMPLA"),
         ]
 
         kwargs = dict(
-            name="Sequence Status List",
+            name="Hede Hodo Status List",
             statuses=statuses,
-            target_entity_type="Sequence"
+            target_entity_type="Hede Hodo"
         )
 
         sequence_status_list = StatusList(**kwargs)
@@ -2324,22 +2535,15 @@ class DatabaseModelsTester(unittest2.TestCase):
         status4 = Status(name="stat4", code="STS4")
         status5 = Status(name="stat5", code="STS5")
 
-        task_status_list = StatusList(
-            name="Task Status List",
-            statuses=[status1, status2, status3, status4, status5],
-            target_entity_type=Task,
-        )
+        task_status_list = StatusList.query\
+            .filter_by(target_entity_type='Task').first()
+        asset_status_list = StatusList.query\
+            .filter_by(target_entity_type='Asset').first()
 
         project_status_list = StatusList(
             name="Project Status List",
             statuses=[status1, status2, status3, status4, status5],
             target_entity_type=Project,
-        )
-
-        asset_status_list = StatusList(
-            name="Asset Status List",
-            statuses=[status1, status2, status3, status4, status5],
-            target_entity_type=Asset,
         )
 
         repo = Repository(
@@ -2585,42 +2789,31 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertItemsEqual(resources, [user1])
         self.assertItemsEqual(resources, another_task_db.resources)
 
-    def test_persistence_of_Revision(self):
-        """testing the persistence of Revision
+    def test_persistence_of_Review(self):
+        """testing the persistence of Review
         """
         # create a task
-        status_new = Status(name="New", code="NEW")
-        status_rts = Status(name="Ready To Start", code="RTS")
-        status_wip = Status(name="Work In Progress", code="WIP")
-        status_prev = Status(name="Pending Review", code="PREV")
-        status_hrev = Status(name="Has Revision", code="HREV")
-        status_cmpl = Status(name="Complete", code="CMPL")
+        status_new = Status.query.filter_by(code="NEW").first()
+        status_rrev = Status.query.filter_by(code="RREV").first()
+        status_app = Status.query.filter_by(code="APP").first()
 
-        task_status_list = StatusList(
-            name="Task Status List",
-            statuses=[status_new, status_rts, status_wip, status_prev,
-                      status_hrev, status_cmpl],
-            target_entity_type=Task,
-        )
+        task_status_list = StatusList.query\
+            .filter_by(target_entity_type='Task').first()
+        asset_status_list = StatusList.query\
+            .filter_by(target_entity_type='Asset').first()
 
         project_status_list = StatusList(
             name="Project Status List",
-            statuses=[status_new, status_wip, status_cmpl],
+            statuses=[status_new, status_app, status_rrev],
             target_entity_type=Project,
         )
 
-        asset_status_list = StatusList(
-            name="Asset Status List",
-            statuses=[status_new, status_rts, status_wip, status_prev,
-                      status_hrev, status_cmpl],
-            target_entity_type=Asset,
-        )
-
+        temp_repo_dir = tempfile.gettempdir()
         repo = Repository(
             name='Test Repo',
-            linux_path='/mnt/M/JOBs',
-            windows_path='M:/JOBs',
-            osx_path='/Users/Shared/Servers/M',
+            linux_path=temp_repo_dir,
+            windows_path=temp_repo_dir,
+            osx_path=temp_repo_dir,
         )
 
         project1 = Project(
@@ -2692,7 +2885,8 @@ class DatabaseModelsTester(unittest2.TestCase):
             name='Another Task',
             project=project1,
             status_list=task_status_list,
-            resources=[user1]
+            resources=[user1],
+            responsible=[user1]
         )
 
         # time logs
@@ -2721,8 +2915,9 @@ class DatabaseModelsTester(unittest2.TestCase):
             end=datetime.datetime.now() + datetime.timedelta(3)
         )
 
-        rev1 = Revision(
+        rev1 = Review(
             task=task2,
+            reviewer=user1,
             schedule_timing=1,
             schedule_unit='h'
         )
@@ -2745,9 +2940,9 @@ class DatabaseModelsTester(unittest2.TestCase):
         del rev1
 
         # now query it back
-        rev1_db = Revision.query.filter_by(name=name).first()
+        rev1_db = Review.query.filter_by(name=name).first()
 
-        assert (isinstance(rev1_db, Revision))
+        assert (isinstance(rev1_db, Review))
 
         self.assertEqual(created_by, rev1_db.created_by)
         self.assertEqual(date_created, rev1_db.date_created)
@@ -2760,7 +2955,7 @@ class DatabaseModelsTester(unittest2.TestCase):
 
         # delete tests
 
-        # deleting a Revision should be fairly simple:
+        # deleting a Review should be fairly simple:
         DBSession.delete(rev1_db)
         DBSession.commit()
 
@@ -2950,8 +3145,8 @@ class DatabaseModelsTester(unittest2.TestCase):
 
         # create a test project
         repo1 = Repository(name='Test Repo')
-        status1 = Status(name='New', code='NEW')
-        status2 = Status(name='Work In Progress', code='WIP')
+        status1 = Status.query.filter_by(code='NEW').first()
+        status2 = Status.query.filter_by(code='WIP').first()
         project_statuses = StatusList(
             name='Project Statuses',
             target_entity_type='Project',
@@ -2963,11 +3158,8 @@ class DatabaseModelsTester(unittest2.TestCase):
             repository=repo1,
             status_list=project_statuses
         )
-        task_statuses = StatusList(
-            name='Task Statuses',
-            target_entity_type='Task',
-            statuses=[status1, status2]
-        )
+        task_statuses = StatusList.query\
+            .filter_by(target_entity_type='Task').first()
         task1 = Task(
             name='Test Task 1',
             project=project1,
@@ -3109,7 +3301,6 @@ class DatabaseModelsTester(unittest2.TestCase):
     def test_persistence_of_Version(self):
         """testing the persistence of Version instances
         """
-
         # create a project
         test_project = Project(
             name='Test Project',
@@ -3118,14 +3309,8 @@ class DatabaseModelsTester(unittest2.TestCase):
                 name='Project Status List',
                 target_entity_type=Project,
                 statuses=[
-                    Status(
-                        name='Work In Progress',
-                        code="WIP"
-                    ),
-                    Status(
-                        name='Completed',
-                        code='Cmplt'
-                    )
+                    Status.query.filter_by(code="WIP").first(),
+                    Status.query.filter_by(code='CMPL').first()
                 ]
             ),
             repository=Repository(
@@ -3140,20 +3325,8 @@ class DatabaseModelsTester(unittest2.TestCase):
         test_task = Task(
             name='Modeling',
             project=test_project,
-            status_list=StatusList(
-                name='Task Status List',
-                target_entity_type=Task,
-                statuses=[
-                    Status(
-                        name='Waiting to be Approved',
-                        code='WAPP',
-                    ),
-                    Status(
-                        name='Started',
-                        code='Strt',
-                    ),
-                ]
-            )
+            status_list=StatusList.query
+            .filter_by(target_entity_type='Task').first()
         )
 
         # create a new version

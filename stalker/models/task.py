@@ -23,7 +23,6 @@ import logging
 
 from sqlalchemy import (Table, Column, Integer, ForeignKey, Boolean, Enum,
                         DateTime, Float, event)
-from sqlalchemy.exc import UnboundExecutionError
 from sqlalchemy.orm import relationship, validates, synonym
 
 from stalker.db import DBSession
@@ -363,8 +362,8 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
     .. versionadded:: 0.2.0
 
-    Tasks have a **responsible** which is a :class:`.User` instance that is
-    responsible of the assigned task and all the hierarchy under it.
+    Tasks have a **responsible** which is a list of :class:`.User` instances
+    who are responsible of the assigned task and all the hierarchy under it.
 
     If a task doesn't have any user assigned to its responsible attribute,
     then it will start to look to its parents until it can find a task with a
@@ -384,17 +383,17 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     :attr:`.schedule_seconds` and :attr:`.total_logged_seconds` attributes of
     their children.
 
-    **Revision Log**
+    **Reviews**
 
-    .. versionadded:: 0.2.4
+    .. versionadded:: 0.2.5
 
-    One may wanted to track all the dirty details about the revisions requested
-    for a particular task. Stalker supplies :class:`.RevisionLog` for that
-    purpose. It is possible to hold revision information about the revision
-    description, who has given the revision and how much extra time has given
-    for that revision etc. by using a RevisionLog instance. The
-    :attr:`.revisions` is a list that holds the RevisionLog instances for that
-    task.
+    One may wanted to track all the details about the reviews created for a
+    particular task. Stalker supplies :class:`.Review` for that purpose. By
+    using a Review instance, it is possible to hold review information like
+    the description of the review, who has given the review and how much extra
+    time has given if it ends up being a revision etc.. The :attr:`.reviews`
+    is a list that holds the Review instances for that task. Please see the
+    :class:`.Review` class documentation for more details.
 
     **Arguments**
 
@@ -595,12 +594,13 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         """
     )
 
-    responsible_id = Column(Integer, ForeignKey('Users.id'), nullable=True)
-
     _responsible = relationship(
         'User',
-        primaryjoin='Tasks.c.responsible_id==Users.c.id',
+        secondary='Task_Responsible',
+        primaryjoin='Tasks.c.id==Task_Responsible.c.task_id',
+        secondaryjoin='Task_Responsible.c.responsible_id==Users.c.id',
         back_populates='responsible_of',
+        doc="The list of :class:`.User`\ s responsible from this Task."
     )
 
     priority = Column(
@@ -671,14 +671,13 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         doc='cache column for total_logged_seconds'
     )
 
-    _revisions = relationship(
-        "Revision",
-        primaryjoin="Revisions.c.task_id==Tasks.c.id",
-        back_populates="_task",
+    reviews = relationship(
+        "Review",
+        primaryjoin="Reviews.c.task_id==Tasks.c.id",
+        back_populates="task",
         cascade='all, delete-orphan',
-        doc="""A list of :class:`.Revision` holding the details about any given
-        revision to this task.
-        """
+        doc="""A list of :class:`.Review` holding the details about the reviews
+        created for this task."""
     )
 
     def __init__(self,
@@ -750,6 +749,8 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         self.bid_timing = bid_timing
         self.bid_unit = bid_unit
         self.priority = priority
+        if responsible is None:
+            responsible = []
         self.responsible = responsible
 
     def __eq__(self, other):
@@ -780,20 +781,20 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
         return time_log
 
-    @validates("_revisions")
-    def _validate_revisions(self, key, revision):
-        """validates the given revision value
+    @validates("_reviews")
+    def _validate_reviews(self, key, review):
+        """validates the given review value
         """
-        from stalker.models.revision import Revision
-        if not isinstance(revision, Revision):
+        from stalker.models.review import Review
+        if not isinstance(review, Review):
             raise TypeError(
-                "%s.revisions should be all stalker.models.revision.Revision "
+                "%s.reviews should be all stalker.models.review.Review "
                 "instances, not %s" % (
                     self.__class__.__name__,
-                    revision.__class__.__name__
+                    review.__class__.__name__
                 )
             )
-        return revision
+        return review
 
     @validates("is_complete")
     def _validate_is_complete(self, key, complete_in):
@@ -1421,29 +1422,36 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         if self._responsible:
             return self._responsible
         else:
+            # traverse parents
             for parent in reversed(self.parents):
                 if parent.responsible:
                     return parent.responsible
-        return self.project.lead
+
+        # use the project lead
+        if self.project.lead:
+            return [self.project.lead]
+        else:
+            # no project lead, strange, return an empty list
+            return []
 
     def _responsible_setter(self, responsible):
         """sets the responsible attribute
 
         :param responsible: A :class:`.User` instance
         """
-        self._responsible = self._validate_responsible(responsible)
+        self._responsible = responsible
 
-    def _validate_responsible(self, responsible):
+    @validates('_responsible')
+    def _validate_responsible(self, key, responsible):
         """validates the given responsible value
         """
-        if responsible is not None:
-            from stalker.models.auth import User
-            if not isinstance(responsible, User):
-                raise TypeError(
-                    '%s.responsible should be an instance of '
-                    'stalker.models.auth.User, not %s' %
-                    (self.__class__.__name__, responsible.__class__.__name__)
-                )
+        from stalker.models.auth import User
+        if not isinstance(responsible, User):
+            raise TypeError(
+                '%s.responsible should be an instance of '
+                'stalker.models.auth.User, not %s' %
+                (self.__class__.__name__, responsible.__class__.__name__)
+            )
         return responsible
 
     responsible = synonym(
@@ -1480,12 +1488,6 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             .filter(Ticket.links.contains(self))\
             .filter(Ticket.status != status_closed).all()
 
-    @property
-    def revisions(self):
-        """returns the revisions of this task
-        """
-        return self._revisions
-
 # TASK_DEPENDENCIES
 Task_Dependencies = Table(
     "Task_Dependencies", Base.metadata,
@@ -1506,6 +1508,13 @@ Task_Watchers = Table(
     "Task_Watchers", Base.metadata,
     Column("task_id", Integer, ForeignKey("Tasks.id"), primary_key=True),
     Column("watcher_id", Integer, ForeignKey("Users.id"), primary_key=True)
+)
+
+# TASK_RESPONSIBLE
+Task_Responsible = Table(
+    "Task_Responsible", Base.metadata,
+    Column("task_id", Integer, ForeignKey("Tasks.id"), primary_key=True),
+    Column("responsible_id", Integer, ForeignKey("Users.id"), primary_key=True)
 )
 
 # *****************************************************************************

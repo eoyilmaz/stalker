@@ -185,6 +185,7 @@ class ConfigTester(unittest2.TestCase):
         from stalker.models.studio import Studio
 
         db.setup({'sqlalchemy.url': 'sqlite:///:memory:'})
+        # db.setup()
         db.init()
 
         # check the defaults are still using them self

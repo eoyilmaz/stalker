@@ -52,35 +52,21 @@ class TaskTester(unittest2.TestCase):
             "sqlalchemy.url": "sqlite:///:memory:",
             "sqlalchemy.echo": False,
         })
+        db.init()
 
-        self.test_status_wip = Status(
-            name="Work In Progress",
-            code="WIP"
-        )
+        self.status_new = Status.query.filter_by(code="NEW").first()
+        self.status_wip = Status.query.filter_by(code="WIP").first()
+        self.status_prev = Status.query.filter_by(code="PREV").first()
+        self.status_cmpl = Status.query.filter_by(code="CMPL").first()
 
-        self.test_status_complete = Status(
-            name="Complete",
-            code="CMPLT"
-        )
-
-        self.test_status_pending_review = Status(
-            name="Pending Review",
-            code="PNDR"
-        )
-
-        self.test_task_status_list = StatusList(
-            name="Task Statuses",
-            statuses=[self.test_status_wip,
-                      self.test_status_pending_review,
-                      self.test_status_complete],
-            target_entity_type=Task,
-        )
+        self.task_status_list = StatusList.query\
+            .filter_by(target_entity_type='Task').first()
 
         self.test_project_status_list = StatusList(
             name="Project Statuses",
-            statuses=[self.test_status_wip,
-                      self.test_status_pending_review,
-                      self.test_status_complete],
+            statuses=[self.status_wip,
+                      self.status_prev,
+                      self.status_cmpl],
             target_entity_type=Project,
         )
 
@@ -99,14 +85,6 @@ class TaskTester(unittest2.TestCase):
         self.test_repository = Repository(
             name="Test Repository",
             type=self.test_repository_type
-        )
-
-        self.test_project1 = Project(
-            name="Test Project1",
-            code='tp1',
-            type=self.test_movie_project_type,
-            status_list=self.test_project_status_list,
-            repository=self.test_repository
         )
 
         self.test_user1 = User(
@@ -130,16 +108,25 @@ class TaskTester(unittest2.TestCase):
             password="1234"
         )
 
+        self.test_project1 = Project(
+            name="Test Project1",
+            code='tp1',
+            type=self.test_movie_project_type,
+            status_list=self.test_project_status_list,
+            repository=self.test_repository,
+            lead=self.test_user1
+        )
+
         self.test_dependent_task1 = Task(
             name="Dependent Task1",
             project=self.test_project1,
-            status_list=self.test_task_status_list,
+            status_list=self.task_status_list,
         )
 
         self.test_dependent_task2 = Task(
             name="Dependent Task2",
             project=self.test_project1,
-            status_list=self.test_task_status_list,
+            status_list=self.task_status_list,
         )
 
         self.kwargs = {
@@ -147,7 +134,7 @@ class TaskTester(unittest2.TestCase):
             'description': 'A Modeling Task',
             'project': self.test_project1,
             'priority': 500,
-            'responsible': self.test_user1,
+            'responsible': [self.test_user1],
             'resources': [self.test_user1, self.test_user2],
             'watchers': [self.test_user3],
             'bid_timing': 4,
@@ -163,7 +150,7 @@ class TaskTester(unittest2.TestCase):
             'versions': [],
             'is_milestone': False,
             'status': 0,
-            'status_list': self.test_task_status_list,
+            'status_list': self.task_status_list,
         }
 
         # create a test Task
@@ -3174,7 +3161,7 @@ class TaskTester(unittest2.TestCase):
             name='Cekimler',
             start=datetime.datetime(2013, 4, 1),
             end=datetime.datetime(2013, 5, 6),
-            status_list=self.test_task_status_list
+            status_list=self.task_status_list
         )
 
         task2 = Task(
@@ -3182,7 +3169,7 @@ class TaskTester(unittest2.TestCase):
             name='Supervising Shootings Part1',
             start=datetime.datetime(2013, 4, 1),
             end=datetime.datetime(2013, 4, 11),
-            status_list=self.test_task_status_list
+            status_list=self.task_status_list
         )
 
         task3 = Task(
@@ -3191,7 +3178,7 @@ class TaskTester(unittest2.TestCase):
             depends=[task2],
             start=datetime.datetime(2013, 4, 12),
             end=datetime.datetime(2013, 4, 16),
-            status_list=self.test_task_status_list
+            status_list=self.task_status_list
         )
 
         task4 = Task(
@@ -3200,7 +3187,7 @@ class TaskTester(unittest2.TestCase):
             depends=[task3],
             start=datetime.datetime(2013, 4, 12),
             end=datetime.datetime(2013, 4, 17),
-            status_list=self.test_task_status_list
+            status_list=self.task_status_list
         )
 
         DBSession.add_all([task1, task2, task3, task4])
@@ -3221,7 +3208,7 @@ class TaskTester(unittest2.TestCase):
             name='Cekimler',
             start=datetime.datetime(2013, 4, 1),
             end=datetime.datetime(2013, 5, 6),
-            status_list=self.test_task_status_list
+            status_list=self.task_status_list
         )
         self.assertRaises(CircularDependencyError, setattr, task1, 'parent',
                           task1)
@@ -3772,35 +3759,55 @@ class TaskTester(unittest2.TestCase):
         )
 
     def test_responsible_argument_is_skipped(self):
-        """testing if the responsible argument can be skipped
+        """testing if the responsible argument can be skipped, then it will use
+        the parents responsible or project.lead
         """
         self.kwargs.pop('responsible')
-        Task(**self.kwargs)
+        test_task = Task(**self.kwargs)
+        self.assertEqual(test_task.responsible, [test_task.project.lead])
 
     def test_responsible_argument_is_None(self):
-        """testing if the responsible argument can be None
+        """testing if the responsible argument can be None, where it will use
+        the project lead as the responsible
         """
         self.kwargs['responsible'] = None
-        Task(**self.kwargs)
+        test_task = Task(**self.kwargs)
+        self.assertEqual(test_task.responsible, [test_task.project.lead])
 
     def test_responsible_attribute_is_set_to_None(self):
-        """testing if the responsible attribute can be set to None
-        """
-        self.test_task.responsible = None
-
-    def test_responsible_argument_is_not_a_User_instance(self):
-        """testing if a TypeError will be raised if the responsible argument
-        value is not a User instance
-        """
-        self.kwargs['responsible'] = 'not a user instance'
-        self.assertRaises(TypeError, Task, **self.kwargs)
-
-    def test_responsible_attribute_is_set_to_something_other_than_User_instance(self):
-        """testing if a TypeError will be raised if the responsible attribute
-        is set to something other than a User instance
+        """testing if a TypeError will be raised when the responsible attribute
+        is set to None
         """
         self.assertRaises(TypeError, setattr, self.test_task, 'responsible',
-                          'not a user instance')
+                          None)
+
+    def test_responsible_argument_not_a_list_instance(self):
+        """testing if a TypeError will be raised when the responsible argument
+        is not a List instance
+        """
+        self.kwargs['responsible'] = 'not a list'
+        self.assertRaises(TypeError, Task, **self.kwargs)
+
+    def test_responsible_attribute_not_a_list_instance(self):
+        """testing if a TypeError will be raised when the responsible attribute
+        is set to a value other than a List of User instances
+        """
+        self.assertRaises(TypeError, setattr, self.test_task, 'responsible',
+                          'not a list of users')
+
+    def test_responsible_argument_is_not_a_list_of_User_instance(self):
+        """testing if a TypeError will be raised if the responsible argument
+        value is not a List of User instance
+        """
+        self.kwargs['responsible'] = ['not a user instance']
+        self.assertRaises(TypeError, Task, **self.kwargs)
+
+    def test_responsible_attribute_is_set_to_something_other_than_a_list_of_User_instance(self):
+        """testing if a TypeError will be raised if the responsible attribute
+        is set to something other than a list of User instance
+        """
+        self.assertRaises(TypeError, setattr, self.test_task, 'responsible',
+                          ['not a user instance'])
 
     def test_responsible_argument_is_None_or_skipped_responsible_attribute_comes_from_parents(self):
         """testing if the responsible argument is None or skipped then the
@@ -3817,14 +3824,14 @@ class TaskTester(unittest2.TestCase):
         new_task3 = Task(**self.kwargs)
         new_task3.parent = new_task2
 
-        self.assertEqual(new_task1.responsible, self.test_user1)
-        self.assertEqual(new_task2.responsible, self.test_user1)
-        self.assertEqual(new_task3.responsible, self.test_user1)
+        self.assertEqual(new_task1.responsible, [self.test_user1])
+        self.assertEqual(new_task2.responsible, [self.test_user1])
+        self.assertEqual(new_task3.responsible, [self.test_user1])
 
-        new_task2.responsible = self.test_user2
-        self.assertEqual(new_task1.responsible, self.test_user1)
-        self.assertEqual(new_task2.responsible, self.test_user2)
-        self.assertEqual(new_task3.responsible, self.test_user2)
+        new_task2.responsible = [self.test_user2]
+        self.assertEqual(new_task1.responsible, [self.test_user1])
+        self.assertEqual(new_task2.responsible, [self.test_user2])
+        self.assertEqual(new_task3.responsible, [self.test_user2])
 
     def test_responsible_attribute_is_set_to_None_responsible_attribute_comes_from_parents(self):
         """testing if the responsible attribute is None or skipped then its
@@ -3840,28 +3847,28 @@ class TaskTester(unittest2.TestCase):
         new_task3 = Task(**self.kwargs)
         new_task3.parent = new_task2
 
-        new_task1.responsible = None
-        new_task2.responsible = None
-        new_task3.responsible = None
-        self.test_task.responsible = self.test_user2
+        new_task1.responsible = []
+        new_task2.responsible = []
+        new_task3.responsible = []
+        self.test_task.responsible = [self.test_user2]
 
-        self.assertEqual(new_task1.responsible, self.test_user2)
-        self.assertEqual(new_task2.responsible, self.test_user2)
-        self.assertEqual(new_task3.responsible, self.test_user2)
+        self.assertEqual(new_task1.responsible, [self.test_user2])
+        self.assertEqual(new_task2.responsible, [self.test_user2])
+        self.assertEqual(new_task3.responsible, [self.test_user2])
 
-        new_task2.responsible = self.test_user1
-        self.assertEqual(new_task1.responsible, self.test_user2)
-        self.assertEqual(new_task2.responsible, self.test_user1)
-        self.assertEqual(new_task3.responsible, self.test_user1)
+        new_task2.responsible = [self.test_user1]
+        self.assertEqual(new_task1.responsible, [self.test_user2])
+        self.assertEqual(new_task2.responsible, [self.test_user1])
+        self.assertEqual(new_task3.responsible, [self.test_user1])
 
     def test_responsible_attribute_value_comes_from_project_if_no_parent_exists(self):
         """testing if the responsible attribute value comes from project.lead
         attribute if there are no parents
         """
-        self.test_task.responsible = None
+        self.test_task.responsible = []
         self.test_project1.lead = self.test_user3
 
-        self.assertEqual(self.test_task.responsible, self.test_user3)
+        self.assertEqual(self.test_task.responsible, [self.test_user3])
 
     def test_responsible_attribute_value_comes_from_project_if_parents_doesnt_have_a_responsible(self):
         """testing if the responsible attribute value comes from the
@@ -3875,13 +3882,13 @@ class TaskTester(unittest2.TestCase):
         new_task2 = Task(**self.kwargs)
         new_task2.parent = new_task1
 
-        new_task1.responsible = None
-        new_task2.responsible = None
-        self.test_task.responsible = None
+        new_task1.responsible = []
+        new_task2.responsible = []
+        self.test_task.responsible = []
         self.test_project1.lead = self.test_user2
 
-        self.assertEqual(new_task1.responsible, self.test_user2)
-        self.assertEqual(new_task2.responsible, self.test_user2)
+        self.assertEqual(new_task1.responsible, [self.test_user2])
+        self.assertEqual(new_task2.responsible, [self.test_user2])
 
     def test_computed_start_also_sets_start(self):
         """testing if computed_start also sets the start value of the task
@@ -3989,19 +3996,15 @@ class TaskTester(unittest2.TestCase):
             [new_ticket1]
         )
 
-    def test_revisions_attribute_is_an_empty_list_by_default(self):
-        """testing if the revisions attribute is an empty list by default
+    def test_reviews_attribute_is_an_empty_list_by_default(self):
+        """testing if the reviews attribute is an empty list by default
         """
-        self.assertEqual(self.test_task.revisions, [])
+        self.assertEqual(self.test_task.reviews, [])
 
-    def test_revisions_attribute_is_read_only(self):
-        """testing if the revisions attribute is read only
+    def test_status_is_NEW_for_a_newly_created_task(self):
+        """testing if the status for a newly created task is NEW by default
         """
-        # create some revisions
-        from stalker import Revision
-        rev1 = Revision(task=self.test_task)
-        rev2 = Revision(task=self.test_task)
-        rev3 = Revision(task=self.test_task)
-
-        self.assertRaises(AttributeError, setattr, self.test_task, 'revisions',
-                          [rev1, rev2, rev3])
+        new_task = Task(**self.kwargs)
+        self.assertEqual(
+            new_task.status, self.status_new
+        )

@@ -183,7 +183,7 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         else:
             logger.debug('can not update defaults.timing_resolution')
 
-        logger.debug("""don updating defaults: 
+        logger.debug("""done updating defaults:
         daily_working_hours  : %(daily_working_hours)s
         weekly_working_days  : %(weekly_working_days)s
         weekly_working_hours : %(weekly_working_hours)s
@@ -288,14 +288,14 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         """returns all the active projects in the studio
         """
         from stalker import Project
-        return Project.query.filter(Project.active == True).all()
+        return Project.query.filter(Project.active==True).all()
 
     @property
     def inactive_projects(self):
         """return all the inactive projects in the studio
         """
         from stalker import Project
-        return Project.query.filter(Project.active == False).all()
+        return Project.query.filter(Project.active==False).all()
 
     @property
     def departments(self):

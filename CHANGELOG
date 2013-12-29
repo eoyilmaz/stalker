@@ -2,6 +2,25 @@
 Stalker Changes
 ===============
 
+0.2.5
+=====
+
+* **Update:** ``Revision`` class is renamed to ``Review`` and introduced a
+  couple of new attributes.
+* **New:** Added a new workflow called "Task Review Workflow". Please see the
+  documentation about the new workflow.
+* **Update:** Task.responsible attribute is now a list which allows multiple
+  responsible to be set for a Task.
+* **New:** Because of the new "Task Review Workflow" task statuses which are
+  normally created in Stalker Pyramid are now automatically created in Stalker
+  database initialization. The new statuses are New (NEW), Ready To Start
+  (RTS), Work In Progress (WIP), Pending Review (PREV), Has
+  Revision (HREV), On Hold (OH), Stopped (STOP) and Completed (CMPL) are all
+  used in Task, Asset, Shot and Sequence status lists by default.
+* **New:** Because of the new "Task Review Workflow" also a status list for
+  Review class is created by default. It contains the Statuses of New (NEW),
+  Requested Revision (RREV) and Approved (APP).
+
 0.2.4
 =====
 

@@ -81,7 +81,7 @@ def update_defaults_with_studio():
     """updates the default values from Studio instance if a database and a
     Studio instance is present
     """
-    from stalker.db import DBSession
+    # from stalker.db import DBSession
     if DBSession:
         with DBSession.no_autoflush:
             from stalker.models.studio import Studio
@@ -100,7 +100,7 @@ def init():
     class_names = [
         'Asset', 'TimeLog', 'Department', 'Entity', 'FilenameTemplate',
         'Group', 'ImageFormat', 'Link', 'Message', 'Note', 'Permission',
-        'Project', 'Repository', 'Revision', 'Scene', 'Sequence', 'Shot',
+        'Project', 'Repository', 'Review', 'Scene', 'Sequence', 'Shot',
         'SimpleEntity', 'Status', 'StatusList', 'Structure', 'Studio', 'Tag',
         'Task', 'Ticket', 'TicketLog', 'Type', 'User', 'Vacation', 'Version']
 
@@ -119,8 +119,23 @@ def init():
     if defaults.auto_create_admin:
         __create_admin__()
 
-    # create Ticket statuses
+    # create statuses
     __create_ticket_statuses()
+    create_entity_statuses(entity_type='Task',
+                           status_names=defaults.task_status_names,
+                           status_codes=defaults.task_status_codes)
+    create_entity_statuses(entity_type='Asset',
+                           status_names=defaults.task_status_names,
+                           status_codes=defaults.task_status_codes)
+    create_entity_statuses(entity_type='Shot',
+                           status_names=defaults.task_status_names,
+                           status_codes=defaults.task_status_codes)
+    create_entity_statuses(entity_type='Sequence',
+                           status_names=defaults.task_status_names,
+                           status_codes=defaults.task_status_codes)
+    create_entity_statuses(entity_type='Review',
+                           status_names=defaults.review_status_names,
+                           status_codes=defaults.review_status_codes)
 
     logger.debug('finished initializing the database')
 
@@ -194,52 +209,13 @@ def __create_ticket_statuses():
     """
     from stalker import User
 
+    # create as admin
     admin = User.query.filter(User.login == defaults.admin_name).first()
 
     # create statuses for Tickets
-    from stalker import Status, StatusList
-
-    logger.debug("Creating Ticket Statuses")
-
-    # Update: check before adding
-    ticket_names = map(str.title, defaults.ticket_status_order)
-    ticket_statuses = Status.query.filter(Status.name.in_(ticket_names)).all()
-    if not ticket_statuses:
-        logger.debug('No Ticket Statuses found, creating new!')
-        ticket_statuses = [
-            Status(
-                name=status_name.title(),
-                code=status_name.upper(),
-                created_by=admin,
-                updated_by=admin
-            ) for status_name in defaults.ticket_status_order
-        ]
-    else:
-        logger.debug('Ticket Statuses are already created')
-
-    ticket_status_list = StatusList.query\
-        .filter(StatusList._target_entity_type=='Ticket')\
-        .first()
-
-    if not ticket_status_list:
-        logger.debug('No Ticket Status List found, creating new!')
-        ticket_status_list = StatusList(
-            name='Ticket Statuses',
-            target_entity_type='Ticket',
-            statuses=ticket_statuses,
-            created_by=admin,
-            updated_by=admin
-        )
-        DBSession.add(ticket_status_list)
-        try:
-            DBSession.commit()
-        except IntegrityError:
-            DBSession.rollback()
-        else:
-            logger.debug("Created Ticket Statuses successfully")
-            DBSession.flush()
-    else:
-        logger.debug("Ticket Status List already created")
+    ticket_names = defaults.ticket_status_names
+    ticket_codes = defaults.ticket_status_codes
+    create_entity_statuses('Ticket', ticket_names, ticket_codes, admin)
 
     # Again I hate doing this in this way
     from stalker import Type
@@ -278,6 +254,66 @@ def __create_ticket_statuses():
     else:
         # DBSession.flush()
         logger.debug("Ticket Types are created successfully")
+
+
+def create_entity_statuses(entity_type='', status_names=None,
+                           status_codes=None, user=None):
+    """creates the default task statuses
+    """
+    if not entity_type:
+        raise ValueError('Please supply entity_type')
+
+    if not status_names:
+        raise ValueError('Please supply status names')
+
+    if not status_codes:
+        raise ValueError('Please supply status codes')
+
+    # create statuses for entity
+    from stalker import Status, StatusList
+
+    logger.debug("Creating %s Statuses" % entity_type)
+
+    statuses = Status.query.filter(Status.name.in_(status_names)).all()
+    status_names_in_db = map(lambda x: x.name, statuses)
+
+    for name, code in zip(status_names, status_codes):
+        if name not in status_names_in_db:
+            logger.debug('Creating Status: %s (%s)' % (name, code))
+            new_status = Status(
+                name=name,
+                code=code,
+                created_by=user,
+                updated_by=user
+            )
+            statuses.append(new_status)
+            DBSession.add(new_status)
+
+    # create the Status List
+    status_list = StatusList.query\
+        .filter(StatusList.target_entity_type == entity_type)\
+        .first()
+
+    if not status_list:
+        logger.debug('No %s Status List found, creating new!' % entity_type)
+        status_list = StatusList(
+            name='%s Statuses' % entity_type,
+            target_entity_type=entity_type,
+            statuses=statuses,
+            created_by=user,
+            updated_by=user
+        )
+        DBSession.add(status_list)
+    else:
+        logger.debug("%s Status List already created" % entity_type)
+
+    try:
+        DBSession.commit()
+    except IntegrityError:
+        DBSession.rollback()
+    else:
+        logger.debug("Created %s Statuses successfully" % entity_type)
+        DBSession.flush()
 
 
 def register(class_):

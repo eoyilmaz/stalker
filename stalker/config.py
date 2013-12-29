@@ -86,8 +86,12 @@ class Config(object):
         ticket_label="Ticket",
 
         # define the available actions per Status
-        ticket_status_order=[
-            'new', 'accepted', 'assigned', 'reopened', 'closed'
+        ticket_status_names=[
+            'New', 'Accepted', 'Assigned', 'Reopened', 'Closed'
+        ],
+
+        ticket_status_codes=[
+            'NEW', 'ACP', 'ASG', 'ROP', 'CLS'
         ],
 
         ticket_resolutions=[
@@ -192,6 +196,38 @@ class Config(object):
             'm'  : {'name': 'days'   , 'multiplier': 30},
             'y'  : {'name': 'days'   , 'multiplier': 365}
         },
+
+        task_status_names=[
+            'New',
+            'Ready To Start',
+            'Work In Progress',
+            'Pending Review',
+            'Has Revision',
+            'On Hold',
+            'Stopped',
+            'Completed'
+        ],
+        task_status_codes=[
+            'NEW',
+            'RTS',
+            'WIP',
+            'PREV',
+            'HREV',
+            'OH',
+            'STOP',
+            'CMPL'
+        ],
+
+        review_status_names=[
+            'New',
+            'Requested Revision',
+            'Approved'
+        ],
+        review_status_codes=[
+            'NEW',
+            'RREV',
+            'APP'
+        ],
 
         task_schedule_models=['effort', 'length', 'duration'],
 

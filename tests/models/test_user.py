@@ -470,18 +470,11 @@ class UserTest(unittest2.TestCase):
             'description': 'this is a test user',
             'password': 'hidden',
             'email': 'eoyilmaz@fake.com',
-            'department': self.test_department1,
+            'departments': [self.test_department1],
             'groups': [self.test_group1,
                        self.test_group2],
-            'projects_lead': [self.test_project1,
-                              self.test_project2],
-            'sequences_lead': [self.test_sequence1,
-                               self.test_sequence2,
-                               self.test_sequence3,
-                               self.test_sequence4],
             'created_by': self.test_admin,
             'updated_by': self.test_admin,
-            'last_login': None
         }
 
         # create a proper user object
@@ -565,7 +558,7 @@ class UserTest(unittest2.TestCase):
             "@",
             "eoyilmaz@",
             "eoyilmaz@some.compony@com",
-        ]
+            ]
         # any of these email values should raise a ValueError
         for value in test_values:
             self.assertRaises(
@@ -576,7 +569,24 @@ class UserTest(unittest2.TestCase):
                 value
             )
 
-    def test_email_attribute_works_properly(self):
+    def test_email_argument_should_be_a_unique_value(self):
+        """testing if the email argument should be a unique value
+        """
+        # this test should include a database
+        test_email = "test@email.com"
+        self.kwargs['login'] = 'test_user1'
+        self.kwargs['email'] = test_email
+        user1 = User(**self.kwargs)
+        DBSession.add(user1)
+        DBSession.commit()
+
+        self.kwargs['login'] = 'test_user2'
+        user2 = User(**self.kwargs)
+        DBSession.add(user2)
+
+        self.assertRaises(Exception, DBSession.commit)
+
+    def test_email_attribute_is_working_properly(self):
         """testing if email attribute works properly
         """
         test_email = "eoyilmaz@somemail.com"
@@ -651,7 +661,7 @@ class UserTest(unittest2.TestCase):
             (" eRkAn", "erkan"),
             (" eRkan ozGur", "erkanozgur"),
             ("213 e.ozgur", "eozgur"),
-        ]
+            ]
 
         for valuePair in test_values:
             # set the input and expect the expected output
@@ -685,6 +695,24 @@ class UserTest(unittest2.TestCase):
                 self.test_user.login,
                 valuePair[1]
             )
+
+    def test_login_argument_should_be_a_unique_value(self):
+        """testing if the login argument should be a unique value
+        """
+        # this test should include a database
+        test_login = 'test_user1'
+        self.kwargs['login'] = test_login
+        self.kwargs['email'] = "test1@email.com"
+        user1 = User(**self.kwargs)
+        DBSession.add(user1)
+        DBSession.commit()
+
+        self.kwargs['email'] = "test2@email.com"
+
+        user2 = User(**self.kwargs)
+        DBSession.add(user2)
+
+        self.assertRaises(Exception, DBSession.commit)
 
     def test_login_argument_is_working_properly(self):
         """testing if the login argument is working properly
@@ -1146,8 +1174,9 @@ class UserTest(unittest2.TestCase):
     def test_tickets_attribute_is_read_only(self):
         """testing if the User.tickets attribute is a read only attribute
         """
-        self.assertRaises(AttributeError, setattr, self.test_user, 'tickets',
-                          [])
+        self.assertRaises(
+            AttributeError, setattr, self.test_user, 'tickets', []
+        )
 
     def test_open_tickets_attribute_is_read_only(self):
         """testing if the User.open_tickets attribute is a read only attribute
