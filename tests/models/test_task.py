@@ -19,6 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import datetime
+import tempfile
 import unittest2
 from stalker.exceptions import CircularDependencyError
 
@@ -4004,7 +4005,1266 @@ class TaskTester(unittest2.TestCase):
     def test_status_is_NEW_for_a_newly_created_task(self):
         """testing if the status for a newly created task is NEW by default
         """
+        # try to trick it
+        self.kwargs['status'] = self.status_cmpl
         new_task = Task(**self.kwargs)
         self.assertEqual(
             new_task.status, self.status_new
         )
+
+
+class TaskReviewWorkflowTestCase(unittest2.TestCase):
+    """tests the Task Workflow
+    """
+
+    def setUp(self):
+        """setup the test
+        """
+        db.setup({'sqlalchemy.url': 'sqlite:///:memory:'})
+        db.init()
+
+        # test users
+        self.test_user1 = User(
+            name='Test User 1',
+            login='tuser1',
+            email='tuser1@test.com',
+            password='secret'
+        )
+        DBSession.add(self.test_user1)
+
+        self.test_user2 = User(
+            name='Test User 2',
+            login='tuser2',
+            email='tuser2@test.com',
+            password='secret'
+        )
+        DBSession.add(self.test_user2)
+
+        # create a couple of tasks
+        self.status_new = Status.query.filter_by(code='NEW').first()
+        self.status_rts = Status.query.filter_by(code='RTS').first()
+        self.status_wip = Status.query.filter_by(code='WIP').first()
+        self.status_prev = Status.query.filter_by(code='PREV').first()
+        self.status_hrev = Status.query.filter_by(code='HREV').first()
+        self.status_oh = Status.query.filter_by(code='OH').first()
+        self.status_stop = Status.query.filter_by(code='STOP').first()
+        self.status_cmpl = Status.query.filter_by(code='CMPL').first()
+
+        self.test_project_status_list = StatusList(
+            name='Project Statuses',
+            target_entity_type='Project',
+            statuses=[self.status_new, self.status_wip,
+                      self.status_cmpl]
+        )
+        DBSession.add(self.test_project_status_list)
+
+        self.test_task_statuses = StatusList.query\
+            .filter_by(target_entity_type='Task').first()
+        DBSession.add(self.test_task_statuses)
+
+        # repository
+        tempdir = tempfile.gettempdir()
+        self.test_repo = Repository(
+            name='Test Repository',
+            linux_path=tempdir,
+            windows_path=tempdir,
+            osx_path=tempdir
+        )
+        DBSession.add(self.test_repo)
+
+        # proj1
+        self.test_project1 = Project(
+            name='Test Project 1',
+            code='TProj1',
+            status_list=self.test_project_status_list,
+            repository=self.test_repo,
+            start=datetime.datetime(2013, 6, 20, 0, 0, 0),
+            end=datetime.datetime(2013, 6, 30, 0, 0, 0),
+            lead=self.test_user1
+        )
+        DBSession.add(self.test_project1)
+
+        # root tasks
+        self.test_task1 = Task(
+            name='Test Task 1',
+            project=self.test_project1,
+            status_list=self.test_task_statuses,
+            start=datetime.datetime(2013, 6, 20, 0, 0),
+            end=datetime.datetime(2013, 6, 30, 0, 0),
+            schedule_timing=10,
+            schedule_unit='d',
+            schedule_model='effort',
+        )
+        DBSession.add(self.test_task1)
+
+        self.test_task2 = Task(
+            name='Test Task 2',
+            project=self.test_project1,
+            status_list=self.test_task_statuses,
+            start=datetime.datetime(2013, 6, 20, 0, 0),
+            end=datetime.datetime(2013, 6, 30, 0, 0),
+            schedule_timing=10,
+            schedule_unit='d',
+            schedule_model='effort',
+        )
+        DBSession.add(self.test_task2)
+
+        self.test_task3 = Task(
+            name='Test Task 3',
+            project=self.test_project1,
+            status_list=self.test_task_statuses,
+            resources=[self.test_user1, self.test_user2],
+            start=datetime.datetime(2013, 6, 20, 0, 0),
+            end=datetime.datetime(2013, 6, 30, 0, 0),
+            schedule_timing=10,
+            schedule_unit='d',
+            schedule_model='effort',
+        )
+        DBSession.add(self.test_task3)
+
+        # children tasks
+
+        # children of self.test_task1
+        self.test_task4 = Task(
+            name='Test Task 4',
+            parent=self.test_task1,
+            status=self.status_new,
+            status_list=self.test_task_statuses,
+            resources=[self.test_user1],
+            depends=[self.test_task3],
+            start=datetime.datetime(2013, 6, 20, 0, 0),
+            end=datetime.datetime(2013, 6, 30, 0, 0),
+            schedule_timing=10,
+            schedule_unit='d',
+            schedule_model='effort',
+        )
+        DBSession.add(self.test_task4)
+
+        self.test_task5 = Task(
+            name='Test Task 5',
+            parent=self.test_task1,
+            status_list=self.test_task_statuses,
+            resources=[self.test_user1],
+            depends=[self.test_task4],
+            start=datetime.datetime(2013, 6, 20, 0, 0),
+            end=datetime.datetime(2013, 6, 30, 0, 0),
+            schedule_timing=10,
+            schedule_unit='d',
+            schedule_model='effort',
+        )
+        DBSession.add(self.test_task5)
+
+        self.test_task6 = Task(
+            name='Test Task 6',
+            parent=self.test_task1,
+            status_list=self.test_task_statuses,
+            resources=[self.test_user1],
+            start=datetime.datetime(2013, 6, 20, 0, 0),
+            end=datetime.datetime(2013, 6, 30, 0, 0),
+            schedule_timing=10,
+            schedule_unit='d',
+            schedule_model='effort',
+        )
+        DBSession.add(self.test_task6)
+
+        # children of self.test_task2
+        self.test_task7 = Task(
+            name='Test Task 7',
+            parent=self.test_task2,
+            status_list=self.test_task_statuses,
+            resources=[self.test_user2],
+            start=datetime.datetime(2013, 6, 20, 0, 0),
+            end=datetime.datetime(2013, 6, 30, 0, 0),
+            schedule_timing=10,
+            schedule_unit='d',
+            schedule_model='effort',
+        )
+        DBSession.add(self.test_task7)
+
+        self.test_task8 = Task(
+            name='Test Task 8',
+            parent=self.test_task2,
+            status_list=self.test_task_statuses,
+            resources=[self.test_user2],
+            start=datetime.datetime(2013, 6, 20, 0, 0),
+            end=datetime.datetime(2013, 6, 30, 0, 0),
+            schedule_timing=10,
+            schedule_unit='d',
+            schedule_model='effort',
+        )
+        DBSession.add(self.test_task8)
+
+        self.test_asset_status_list = StatusList.query\
+            .filter_by(target_entity_type='Asset').first()
+        DBSession.add(self.test_asset_status_list)
+
+        # create an asset in between
+        from stalker import Asset
+        self.test_asset1 = Asset(
+            name='Test Asset 1',
+            code='TA1',
+            parent=self.test_task7,
+            type=Type(
+                name='Character',
+                code='Char',
+                target_entity_type='Asset',
+            ),
+            status_list=self.test_asset_status_list
+        )
+        DBSession.add(self.test_asset1)
+
+        # new task under asset
+        self.test_task9 = Task(
+            name='Test Task 9',
+            parent=self.test_asset1,
+            status_list=self.test_task_statuses,
+            start=datetime.datetime(2013, 6, 20, 0, 0),
+            end=datetime.datetime(2013, 6, 30, 0, 0),
+            schedule_timing=10,
+            schedule_unit='d',
+            schedule_model='effort',
+        )
+        DBSession.add(self.test_task9)
+        DBSession.flush()
+
+        # --------------
+        # Task Hierarchy
+        # --------------
+        #
+        # +-> Test Task 1
+        # |   |
+        # |   +-> Test Task 4
+        # |   |
+        # |   +-> Test Task 5
+        # |   |
+        # |   +-> Test Task 6
+        # |
+        # +-> Test Task 2
+        # |   |
+        # |   +-> Test Task 7
+        # |   |   |
+        # |   |   +-> Test Asset 1
+        # |   |       |
+        # |   |       +-> Test Task 9
+        # |   |
+        # |   +-> Test Task 8
+        # |
+        # +-> Test Task 3
+
+        # no children for self.test_task3
+        self.all_tasks = [
+            self.test_task1, self.test_task2, self.test_task3,
+            self.test_task4, self.test_task5, self.test_task6,
+            self.test_task7, self.test_task8, self.test_task9,
+            self.test_asset1
+        ]
+
+    # Leaf Tasks - status changes
+    # NEW
+    def test_leaf_NEW_task_updated_to_have_a_dependency_of_NEW_task_task(self):
+        """testing if it is possible to set a dependency between a task with
+        NEW status to a task with NEW status and the status of the task will
+        stay NEW
+        """
+        # make a task with NEW status
+        self.test_task8.status = self.status_new
+        self.test_task9.status = self.status_new
+        # find a NEW task
+        self.test_task3.depends.append(self.test_task9)
+        self.assertEqual(self.test_task3.status, self.status_new)
+        # create dependency
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_new)
+
+    def test_leaf_NEW_task_updated_to_have_a_dependency_of_RTS_task(self):
+        """testing if it is possible to set a dependency between a task with
+        NEW status to a task with RTS status and the status of the task will
+        stay NEW
+        """
+        # make a task with RTS status
+        self.test_task8.status = self.status_rts
+        self.test_task9.status = self.status_new
+        # find a NEW task
+        self.test_task3.depends.append(self.test_task9)
+        self.assertEqual(self.test_task3.status, self.status_new)
+        # create dependency
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_new)
+
+    def test_leaf_NEW_task_updated_to_have_a_dependency_of_WIP_task(self):
+        """testing if it is possible to set a dependency between a task with
+        NEW status to a task with WIP status and the status of the task will
+        stay NEW
+        """
+        # make a task with WIP status
+        self.test_task8.status = self.status_wip
+        self.test_task9.status = self.status_new
+        # find a NEW task
+        self.test_task3.depends.append(self.test_task9)
+        self.assertEqual(self.test_task3.status, self.status_new)
+        # create dependency
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_new)
+
+    def test_leaf_NEW_task_updated_to_have_a_dependency_of_PREV_task(self):
+        """testing if it is possible to set a dependency between a task with
+        NEW status to a task with PREV status and the status of the task will
+        stay NEW
+        """
+        # make a task with PREV status
+        self.test_task8.status = self.status_prev
+        self.test_task9.status = self.status_new
+        # find a NEW task
+        self.test_task3.depends.append(self.test_task9)
+        self.assertEqual(self.test_task3.status, self.status_new)
+        # create dependency
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_new)
+
+    def test_leaf_task_NEW_task_updated_to_have_a_dependency_of_HREV_task(self):
+        """testing if it is possible to set a dependency between a task with
+        NEW status to a task with HREV status and the status of the task will
+        stay NEW
+        """
+        # make a task with HREV status
+        self.test_task8.status = self.status_hrev
+        self.test_task9.status = self.status_new
+        # find a NEW task
+        self.test_task3.depends.append(self.test_task9)
+        self.assertEqual(self.test_task3.status, self.status_new)
+        # create dependency
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_new)
+
+    def test_leaf_NEW_task_updated_to_have_a_dependency_of_OH_task(self):
+        """testing if it is possible to set a dependency between a task with
+        NEW status to a task with OH status and the status of the task will
+        stay NEW
+        """
+        # make a task with OH status
+        self.test_task8.status = self.status_oh
+        self.test_task9.status = self.status_new
+        # find a NEW task
+        self.test_task3.depends.append(self.test_task9)
+        self.assertEqual(self.test_task3.status, self.status_new)
+        # create dependency
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_new)
+
+    def test_leaf_NEW_task_updated_to_have_a_dependency_of_STOP_task(self):
+        """testing if it is possible to set a dependency between a task with
+        NEW status to a task with STOP status and the status of the task will
+        stay NEW
+        """
+        # make a task with STOP status
+        self.test_task8.status = self.status_stop
+        self.test_task9.status = self.status_new
+        # find a NEW task
+        self.test_task3.depends.append(self.test_task9)
+        self.assertEqual(self.test_task3.status, self.status_new)
+        # create dependency
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+    def test_leaf_NEW_task_updated_to_have_a_dependency_of_CMPL_task(self):
+        """testing if it is possible to set a dependency between a task with
+        NEW status to a task with CMPL status and the status of the task will
+        stay NEW
+        """
+        # make a task with CMPL status
+        self.test_task8.status = self.status_cmpl
+        # find a NEW task
+        self.test_task3.depends.append(self.test_task9)
+        self.assertEqual(self.test_task3.status, self.status_new)
+        # create dependency
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+    # Leaf Tasks - dependency changes
+    # RTS
+    def test_leaf_RTS_task_updated_to_have_a_dependency_of_NEW_task_task(self):
+        """testing if it is possible to set a dependency between a task with
+        RTS status to a task with NEW status but the status of the task is
+        updated from RTS to NEW
+        """
+        # make a task with NEW status
+        self.test_task8.status = self.status_new
+        # find an RTS task
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # create dependency
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_new)
+
+    def test_leaf_RTS_task_updated_to_have_a_dependency_of_RTS_task(self):
+        """testing if it is possible to set a dependency between a task with
+        RTS status to a task with RTS status but the status of the task is
+        updated from RTS to NEW
+        """
+        # make a task with NEW status
+        self.test_task8.status = self.status_rts
+        # find an RTS task
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # create dependency
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_new)
+
+    def test_leaf_RTS_task_updated_to_have_a_dependency_of_WIP_task(self):
+        """testing if it is possible to set a dependency between a task with
+        RTS status to a task with WIP status but the status of the task is
+        updated from RTS to NEW
+        """
+        # make a task with WIP status
+        self.test_task8.status = self.status_wip
+        # find an RTS task
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # create dependency
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_new)
+
+    def test_leaf_task_RTS_task_updated_to_have_a_dependency_of_PREV_task(self):
+        """testing if it is possible to set a dependency between a task with
+        RTS status to a task with PREV status but the status of the task is
+        updated from RTS to NEW
+        """
+        # make a task with PREV status
+        self.test_task8.status = self.status_prev
+        # find an RTS task
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # create dependency
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_new)
+
+    def test_leaf_task_RTS_task_updated_to_have_a_dependency_of_HREV_task(self):
+        """testing if it is possible to set a dependency between a task with
+        RTS status to a task with HREV status but the status of the task is
+        updated from RTS to NEW
+        """
+        # make a task with HREV status
+        self.test_task8.status = self.status_hrev
+        # find an RTS task
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # create dependency
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_new)
+
+    def test_leaf_RTS_task_updated_to_have_a_dependency_of_OH_task(self):
+        """testing if it is possible to set a dependency between a task with
+        RTS status to a task with OH status and the status of the task is
+        updated from RTS to NEW
+        """
+        # make a task with OH status
+        self.test_task8.status = self.status_oh
+        # find an RTS task
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # create dependency
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_new)
+
+    def test_leaf_RTS_task_updated_to_have_a_dependency_of_STOP_task(self):
+        """testing if it is possible to set a dependency between a task with
+        RTS status to a task with STOP status and the status of the task will
+        stay RTS as if the dependency is not there
+        """
+        # make a task with STOP status
+        self.test_task8.status = self.status_stop
+        # find an RTS task
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # create dependency
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+    def test_leaf_RTS_task_updated_to_have_a_dependency_of_CMPL_task(self):
+        """testing if it is possible to set a dependency between a task with
+        RTS status to a task with CMPL status and the status of the task will
+        stay RTS
+        """
+        # make a task with CMPL status
+        self.test_task8.status = self.status_cmpl
+        # find an RTS task
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # create dependency
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+    # Leaf Tasks - dependency changes
+    # WIP
+    def test_leaf_WIP_task_updated_to_have_a_dependency_of_NEW_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with WIP status to a task with NEW status
+        """
+        # make a task with NEW status
+        self.test_task8.status = self.status_new
+        # find an WIP task
+        self.test_task3.status = self.status_wip
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        # create dependency
+        self.assertRaises(ValueError, self.test_task3.depends.append,
+                          self.test_task8)
+
+    def test_leaf_WIP_task_updated_to_have_a_dependency_of_RTS_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with WIP status to a task with RTS status
+        """
+        # make a task with RTS status
+        self.test_task8.status = self.status_rts
+        # find an WIP task
+        self.test_task3.status = self.status_wip
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        # create dependency
+        self.assertRaises(ValueError, self.test_task3.depends.append,
+                          self.test_task8)
+
+    def test_leaf_WIP_task_updated_to_have_a_dependency_of_WIP_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with WIP status to a task with WIP status
+        """
+        # make a task with WIP status
+        self.test_task8.status = self.status_wip
+        # find an WIP task
+        self.test_task3.status = self.status_wip
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        # create dependency
+        self.assertRaises(ValueError, self.test_task3.depends.append,
+                          self.test_task8)
+
+    def test_leaf_WIP_task_updated_to_have_a_dependency_of_PREV_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with WIP status to a task with PREV status
+        """
+        # make a task with PREV status
+        self.test_task8.status = self.status_prev
+        # find an WIP task
+        self.test_task3.status = self.status_wip
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        # create dependency
+        self.assertRaises(ValueError, self.test_task3.depends.append,
+                          self.test_task8)
+
+    def test_leaf_WIP_task_updated_to_have_a_dependency_of_HREV_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with WIP status to a task with HREV status
+        """
+        # make a task with HREV status
+        self.test_task8.status = self.status_hrev
+        # find an WIP task
+        self.test_task3.status = self.status_wip
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        # create dependency
+        self.assertRaises(ValueError, self.test_task3.depends.append,
+                          self.test_task8)
+
+    def test_leaf_WIP_task_updated_to_have_a_dependency_of_OH_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with WIP status to a task with OH status
+        """
+        # make a task with OH status
+        self.test_task8.status = self.status_oh
+        # find an WIP task
+        self.test_task3.status = self.status_wip
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        # create dependency
+        self.assertRaises(ValueError, self.test_task3.depends.append,
+                          self.test_task8)
+
+    def test_leaf_WIP_task_updated_to_have_a_dependency_of_STOP_task(self):
+        """testing if it is possible to set a dependency between a task with
+        WIP status to a task with STOP status and the task status will stay WIP
+        """
+        # make a task with STOP status
+        self.test_task8.status = self.status_stop
+        # find an WIP task
+        self.test_task3.status = self.status_wip
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        # create dependency
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+    def test_leaf_WIP_task_updated_to_have_a_dependency_of_CMPL_task(self):
+        """testing if it is possible to set a dependency between a task with
+        WIP status to a task with CMPL status and the task status will stay WIP
+        """
+        # make a task with CMPL status
+        self.test_task8.status = self.status_cmpl
+        # find an WIP task
+        self.test_task3.status = self.status_wip
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        # create dependency
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+    # Leaf Tasks - dependency changes
+    # PREV
+    def test_leaf_PREV_task_updated_to_have_a_dependency_of_NEW_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with PREV status to a task with NEW status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_PREV_task_updated_to_have_a_dependency_of_RTS_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with PREV status to a task with RTS status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_PREV_task_updated_to_have_a_dependency_of_WIP_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with PREV status to a task with WIP status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_PREV_task_updated_to_have_a_dependency_of_PREV_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with PREV status to a task with PREV status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_PREV_task_updated_to_have_a_dependency_of_HREV_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with PREV status to a task with HREV status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_PREV_task_updated_to_have_a_dependency_of_OH_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with PREV status to a task with OH status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_PREV_task_updated_to_have_a_dependency_of_STOP_task(self):
+        """testing if it is possible to set a dependency between a task with
+        PREV status to a task with STOP status and the task status will stay
+        PREV
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_PREV_task_updated_to_have_a_dependency_of_CMPL_task(self):
+        """testing if it is possible to set a dependency between a task with
+        PREV status to a task with CMPL status and the task status will stay
+        PREV
+        """
+        self.fail('test is not implemented yet')
+
+    # Leaf Tasks - dependency changes
+    # OH
+    def test_leaf_OH_task_updated_to_have_a_dependency_of_NEW_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with OH status to a task with NEW status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_OH_task_updated_to_have_a_dependency_of_RTS_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with OH status to a task with RTS status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_OH_task_updated_to_have_a_dependency_of_WIP_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with OH status to a task with WIP status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_OH_task_updated_to_have_a_dependency_of_PREV_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with OH status to a task with PREV status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_OH_task_updated_to_have_a_dependency_of_HREV_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with OH status to a task with HREV status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_OH_task_updated_to_have_a_dependency_of_OH_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with OH status to a task with OH status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_OH_task_updated_to_have_a_dependency_of_STOP_task(self):
+        """testing if it is possible to set a dependency between a task with
+        OH status to a task with STOP status and the task status will stay OH
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_OH_task_updated_to_have_a_dependency_of_CMPL_task(self):
+        """testing if it is possible to set a dependency between a task with
+        OH status to a task with CMPL status and the task status will stay OH
+        """
+        self.fail('test is not implemented yet')
+
+    # Leaf Tasks - dependency changes
+    # HREV
+    def test_leaf_HREV_task_updated_to_have_a_dependency_of_NEW_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with HREV status to a task with NEW status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_HREV_task_updated_to_have_a_dependency_of_RTS_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with HREV status to a task with RTS status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_HREV_task_updated_to_have_a_dependency_of_WIP_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with HREV status to a task with WIP status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_HREV_task_updated_to_have_a_dependency_of_PREV_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with HREV status to a task with PREV status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_HREV_task_updated_to_have_a_dependency_of_HREV_task(self):
+        """testing if it is possible to set a dependency between a task with
+        HREV status to a task with HREV status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_HREV_task_updated_to_have_a_dependency_of_OH_task(self):
+        """testing if it is possible to set a dependency between a task with
+        HREV status to a task with OH status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_HREV_task_updated_to_have_a_dependency_of_STOP_task(self):
+        """testing if it is possible to set a dependency between a task with
+        HREV status to a task with STOP status and the task status will stay
+        HREV
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_HREV_task_updated_to_have_a_dependency_of_CMPL_task(self):
+        """testing if it is possible to set a dependency between a task with
+        HREV status to a task with CMPL status and the task status will stay
+        HREV
+        """
+        self.fail('test is not implemented yet')
+
+    # Leaf Tasks - dependency changes
+    # STOP
+    def test_leaf_STOP_task_updated_to_have_a_dependency_of_NEW_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with STOP status to a task with NEW status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_STOP_task_updated_to_have_a_dependency_of_RTS_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with STOP status to a task with RTS status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_STOP_task_updated_to_have_a_dependency_of_WIP_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with STOP status to a task with WIP status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_STOP_task_updated_to_have_a_dependency_of_PREV_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with STOP status to a task with PREV status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_STOP_task_updated_to_have_a_dependency_of_HREV_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with STOP status to a task with HREV status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_STOP_task_updated_to_have_a_dependency_of_OH_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with STOP status to a task with OH status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_STOP_task_updated_to_have_a_dependency_of_STOP_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with STOP status to a task with STOP status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_STOP_task_updated_to_have_a_dependency_of_CMPL_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with STOP status to a task with CMPL status
+        """
+        self.fail('test is not implemented yet')
+
+    # Leaf Tasks - dependency changes
+    # CMPL
+    def test_leaf_CMPL_task_updated_to_have_a_dependency_of_NEW_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with CMPL status to a task with NEW status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_CMPL_task_updated_to_have_a_dependency_of_RTS_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with CMPL status to a task with RTS status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_CMPL_task_updated_to_have_a_dependency_of_WIP_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with CMPL status to a task with WIP status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_CMPL_task_updated_to_have_a_dependency_of_PREV_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with CMPL status to a task with PREV status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_CMPL_task_updated_to_have_a_dependency_of_HREV_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with CMPL status to a task with HREV status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_CMPL_task_updated_to_have_a_dependency_of_OH_task(self):
+        """testing if it is not possible to set a dependency between a task
+        with CMPL status to a task with OH status
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_CMPL_task_updated_to_have_a_dependency_of_STOP_task(self):
+        """testing if it is possible to set a dependency between a task with
+        CMPL status to a task with STOP status and the task status will stay
+        CMPL
+        """
+        self.fail('test is not implemented yet')
+
+    def test_leaf_CMPL_task_updated_to_have_a_dependency_of_CMPL_task(self):
+        """testing if it is possible to set a dependency between a task with
+        CMPL status to a task with CMPL status and the task status will stay
+        CMPL
+        """
+        self.fail('test is not implemented yet')
+
+    # dependencies of parents
+
+    # Container Tasks
+    # dependencies
+    # children status changes
+
+
+
+    # Other tests coming from Stalker Pyramid
+    def test_completed_dependencies(self):
+        """testing if the task status is going to be updated to RTS if all of
+        the dependent tasks are in CMPL status for a task
+        """
+        # the hero task
+        self.assertEqual(self.test_task5.status, self.status_new)
+
+        # the dependencies
+        self.test_task4.status = self.status_cmpl
+        self.test_task6.status = self.status_cmpl
+        self.test_task7.status = self.status_cmpl
+        self.assertEqual(self.test_task4.status, self.status_cmpl)
+        self.assertEqual(self.test_task6.status, self.status_cmpl)
+        self.assertEqual(self.test_task7.status, self.status_cmpl)
+        self.test_task5.depends.append(self.test_task4)
+        self.test_task5.depends.append(self.test_task6)
+        self.test_task5.depends.append(self.test_task7)
+        self.assertEqual(self.test_task5.status, self.status_rts)
+
+    def test_update_task_statuses_with_dependencies_with_half_completed_dependencies(self):
+        """testing if the task status will be set to NEW if dependencies are
+        still not all CMPL
+        """
+        # the hero task
+        self.test_task5.status = self.status_new
+        self.assertEqual(self.test_task5.status, self.status_new)
+
+        # the dependencies
+        self.test_task4.status = self.status_cmpl
+        self.test_task6.status = self.status_cmpl
+        self.test_task7.status = self.status_wip
+        self.assertEqual(self.test_task4.status, self.status_cmpl)
+        self.assertEqual(self.test_task6.status, self.status_cmpl)
+        self.assertEqual(self.test_task7.status, self.status_wip)
+        self.test_task5.depends.append(self.test_task4)
+        self.test_task5.depends.append(self.test_task6)
+        self.test_task5.depends.append(self.test_task7)
+
+        task.update_task_statuses_with_dependencies(self.test_task5)
+        self.assertEqual(self.test_task5.status, self.status_new)
+
+    def test_update_task_statuses_with_dependencies_with_half_completed_dependencies_and_status_wip(self):
+        """testing if the task status will be not changed if the task status is
+        not NEW even if dependencies are still not all CMPL, this is for
+        backward compatibility
+        """
+        # the hero task
+        self.test_task5.status = self.status_wip
+        self.assertEqual(self.test_task5.status, self.status_wip)
+
+        # the dependencies
+        self.test_task4.status = self.status_cmpl
+        self.test_task6.status = self.status_cmpl
+        self.test_task7.status = self.status_wip
+        self.assertEqual(self.test_task4.status, self.status_cmpl)
+        self.assertEqual(self.test_task6.status, self.status_cmpl)
+        self.assertEqual(self.test_task7.status, self.status_wip)
+        self.test_task5.depends.append(self.test_task4)
+        self.test_task5.depends.append(self.test_task6)
+        self.test_task5.depends.append(self.test_task7)
+
+        task.update_task_statuses_with_dependencies(self.test_task5)
+        self.assertEqual(self.test_task5.status, self.status_wip)
+
+    def test_update_task_statuses_with_dependencies_with_half_completed_dependencies_and_status_prev(self):
+        """testing if the task status will be not changed if the task status is
+        not NEW even if dependencies are still not all CMPL, this is for
+        backward compatibility
+        """
+        # the hero task
+        self.test_task5.status = self.status_prev
+        self.assertEqual(self.test_task5.status, self.status_prev)
+
+        # the dependencies
+        self.test_task4.status = self.status_cmpl
+        self.test_task6.status = self.status_cmpl
+        self.test_task7.status = self.status_wip
+        self.assertEqual(self.test_task4.status, self.status_cmpl)
+        self.assertEqual(self.test_task6.status, self.status_cmpl)
+        self.assertEqual(self.test_task7.status, self.status_wip)
+        self.test_task5.depends.append(self.test_task4)
+        self.test_task5.depends.append(self.test_task6)
+        self.test_task5.depends.append(self.test_task7)
+
+        task.update_task_statuses_with_dependencies(self.test_task5)
+        self.assertEqual(self.test_task5.status, self.status_prev)
+
+    def test_update_task_statuses_with_dependencies_with_half_completed_dependencies_and_status_hrev(self):
+        """testing if the task status will be not changed if the task status is
+        not NEW even if dependencies are still not all CMPL, this is for
+        backward compatibility
+        """
+        # the hero task
+        self.test_task5.status = self.status_hrev
+        self.assertEqual(self.test_task5.status, self.status_hrev)
+
+        # the dependencies
+        self.test_task4.status = self.status_cmpl
+        self.test_task6.status = self.status_cmpl
+        self.test_task7.status = self.status_wip
+        self.assertEqual(self.test_task4.status, self.status_cmpl)
+        self.assertEqual(self.test_task6.status, self.status_cmpl)
+        self.assertEqual(self.test_task7.status, self.status_wip)
+        self.test_task5.depends.append(self.test_task4)
+        self.test_task5.depends.append(self.test_task6)
+        self.test_task5.depends.append(self.test_task7)
+
+        task.update_task_statuses_with_dependencies(self.test_task5)
+        self.assertEqual(self.test_task5.status, self.status_hrev)
+
+    def test_update_task_statuses_with_dependencies_with_half_completed_dependencies_and_status_cmpl(self):
+        """testing if the task status will be not changed if the task status is
+        not NEW even if dependencies are still not all CMPL, this is for
+        backward compatibility
+        """
+        # the hero task
+        self.test_task5.status = self.status_cmpl
+        self.assertEqual(self.test_task5.status, self.status_cmpl)
+
+        # the dependencies
+        self.test_task4.status = self.status_cmpl
+        self.test_task6.status = self.status_cmpl
+        self.test_task7.status = self.status_wip
+        self.assertEqual(self.test_task4.status, self.status_cmpl)
+        self.assertEqual(self.test_task6.status, self.status_cmpl)
+        self.assertEqual(self.test_task7.status, self.status_wip)
+        self.test_task5.depends.append(self.test_task4)
+        self.test_task5.depends.append(self.test_task6)
+        self.test_task5.depends.append(self.test_task7)
+
+        task.update_task_statuses_with_dependencies(self.test_task5)
+        self.assertEqual(self.test_task5.status, self.status_cmpl)
+
+
+
+    def test_update_task_wip_task_updated_to_have_a_new_dependency_which_is_not_complete(self):
+        """testing if in update_task() it is not possible to set a dependency
+        which is not complete for a wip task
+        """
+        self.fail('test is not implemented yet')
+
+    def test_update_task_task_updated_to_have_a_new_dependency_which_has_revision(self):
+        """testing if in update_task() it is not possible to set a dependency
+        with status is hrev
+        """
+        self.fail('test is not implemented yet')
+
+    def test_update_task_task_status_is_changed_and_depending_task_statuses_updated_correctly(self):
+        """testing if in update_task() task status is changed due to a change
+        in parent or dependency, the depending task statuses are updated
+        correctly
+        """
+        self.fail('test is not implemented yet')
+
+    def test_update_task_task_parent_is_changed_and_previous_parent_status_updated_correctly(self):
+        """testing if in update_task() task parent is changed and the previous
+        parent status is updated correctly
+        """
+        self.fail('test is not implemented yet')
+
+    def test_update_task_task_parent_is_changed_and_new_parent_status_updated_correctly(self):
+        """testing if in update_task() task parent is changed and the new
+        parent status is updated correctly
+        """
+        self.fail('test is not implemented yet')
+
+    def test_request_review_should_not_work_for_tasks_with_the_status_is_set_to_new(self):
+        """testing if a server error will be returned if the task issued in
+        request_review has a status of "new"
+        """
+        # request revision for self.test_task4
+        self.test_task4.status = self.status_new
+        request = testing.DummyRequest()
+        request.matchdict['id'] = self.test_task4.id
+        request.params['send_email'] = 0
+
+        # patch get_logged_in_user
+        admin = User.query.filter(User.login == 'admin').first()
+        m = mocker.Mocker()
+        obj = m.replace("stalker_pyramid.views.auth.get_logged_in_user")
+        obj(request)
+        m.result(admin)
+        m.replay()
+
+        response = task.request_review(request)
+        self.assertEqual(response.status_int, 500)
+        self.assertEqual(
+            response.body,
+            'You can not request a review for a task with status is set to '
+            '"New"'
+        )
+
+    def test_request_review_should_not_work_for_tasks_with_the_status_is_set_to_ready_to_start(self):
+        """testing if a server error will be returned if the task issued in
+        request_review has a status of "rts"
+        """
+        # request revision for self.test_task4
+        self.test_task4.status = self.status_rts
+        request = testing.DummyRequest()
+        request.matchdict['id'] = self.test_task4.id
+        request.params['send_email'] = 0
+
+        # patch get_logged_in_user
+        admin = User.query.filter(User.login == 'admin').first()
+        m = mocker.Mocker()
+        obj = m.replace("stalker_pyramid.views.auth.get_logged_in_user")
+        obj(request)
+        m.result(admin)
+        m.replay()
+
+        response = task.request_review(request)
+        self.assertEqual(response.status_int, 500)
+        self.assertEqual(
+            response.body,
+            'You can not request a review for a task with status is set to '
+            '"Ready To Start"'
+        )
+
+    def test_request_review_should_not_work_for_tasks_with_the_status_is_set_to_pending_review(self):
+        """testing if a server error will be returned if the task issued in
+        request_revision has a status of "prev"
+        """
+        # request revision for self.test_task4
+        self.test_task4.status = self.status_prev
+        request = testing.DummyRequest()
+        request.matchdict['id'] = self.test_task4.id
+        request.params['send_email'] = 0
+
+        # patch get_logged_in_user
+        admin = User.query.filter(User.login == 'admin').first()
+        m = mocker.Mocker()
+        obj = m.replace("stalker_pyramid.views.auth.get_logged_in_user")
+        obj(request)
+        m.result(admin)
+        m.replay()
+
+        response = task.request_review(request)
+        self.assertEqual(response.status_int, 500)
+        self.assertEqual(
+            response.body,
+            'You can not request a review for a task with status is set to '
+            '"Pending Review"'
+        )
+
+    def test_request_review_should_not_work_for_tasks_with_the_status_is_set_to_has_revision(self):
+        """testing if a server error will be returned if the task issued in
+        request_review has a status of "has revision"
+        """
+        # request revision for self.test_task4
+        self.test_task4.status = self.status_hrev
+        request = testing.DummyRequest()
+        request.matchdict['id'] = self.test_task4.id
+        request.params['send_email'] = 0
+
+        # patch get_logged_in_user
+        admin = User.query.filter(User.login == 'admin').first()
+        m = mocker.Mocker()
+        obj = m.replace("stalker_pyramid.views.auth.get_logged_in_user")
+        obj(request)
+        m.result(admin)
+        m.replay()
+
+        response = task.request_review(request)
+        self.assertEqual(response.status_int, 500)
+        self.assertEqual(
+            response.body,
+            'You can not request a review for a task with status is set to '
+            '"Has Revision"'
+        )
+
+    def test_request_review_should_not_work_for_tasks_with_the_status_is_set_to_completed(self):
+        """testing if a server error will be returned if the task issued in
+        request_review has a status of "completed"
+        """
+        # request revision for self.test_task4
+        self.test_task4.status = self.status_cmpl
+        request = testing.DummyRequest()
+        request.matchdict['id'] = self.test_task4.id
+        request.params['send_email'] = 0
+        request.params['schedule_timing'] = 5
+        request.params['schedule_unit'] = 'h'
+
+        # patch get_logged_in_user
+        admin = User.query.filter(User.login == 'admin').first()
+        m = mocker.Mocker()
+        obj = m.replace("stalker_pyramid.views.auth.get_logged_in_user")
+        obj(request)
+        m.result(admin)
+        m.replay()
+
+        response = task.request_review(request)
+        self.assertEqual(response.status_int, 500)
+        self.assertEqual(
+            response.body,
+            'You can not request a review for a task with status is set to '
+            '"Completed"'
+        )
+
+    def test_request_review_will_work_only_for_leaf_tasks(self):
+        """testing if the request_review will only work for leaf tasks
+        """
+        # create a time log before asking review
+        time_log = TimeLog(
+            resource=self.test_task4.resources[0],
+            task=self.test_task4,
+            start=datetime.datetime(2013, 6, 20, 10, 0),
+            end=datetime.datetime(2013, 6, 20, 19, 0)
+        )
+        DBSession.add(time_log)
+        self.test_task1.status = self.status_wip
+
+        # request review for self.test_task1
+        request = testing.DummyRequest()
+        request.matchdict['id'] = self.test_task1.id
+        request.params['send_email'] = 0
+
+        # patch get_logged_in_user
+        admin = User.query.filter(User.login == 'admin').first()
+        m = mocker.Mocker()
+        obj = m.replace("stalker_pyramid.views.auth.get_logged_in_user")
+        obj(request)
+        m.result(admin)
+        m.replay()
+
+        # also patch route_url of request
+        request.route_url = lambda x, id: 'localhost:6453/tasks/23/view'
+
+        response = task.request_review(request)
+        self.assertEqual(response.status_int, 500)
+        self.assertEqual(response.body, 'Can not request review for a '
+                                        'container task')
+
+    def test_request_review_should_not_work_for_users_who_are_not_a_resource_nor_responsible_of_the_task(self):
+        """testing if request_review() will not work for users who are not a
+        resource nor the responsible of the task
+        """
+        # create a time log before asking review
+        time_log = TimeLog(
+            resource=self.test_task4.resources[0],
+            task=self.test_task4,
+            start=datetime.datetime(2013, 6, 20, 10, 0),
+            end=datetime.datetime(2013, 6, 20, 19, 0)
+        )
+        DBSession.add(time_log)
+        self.test_task4.status = self.status_wip
+
+        # request review for self.test_task4
+        request = testing.DummyRequest()
+        request.matchdict['id'] = self.test_task4.id
+        request.params['send_email'] = 0
+
+        # patch get_logged_in_user
+        admin = User.query.filter(User.login == 'admin').first()
+        m = mocker.Mocker()
+        obj = m.replace("stalker_pyramid.views.auth.get_logged_in_user")
+        obj(request)
+        m.result(admin)
+        m.replay()
+
+        # also patch route_url of request
+        request.route_url = lambda x, id: 'localhost:6453/tasks/23/view'
+
+        response = task.request_review(request)
+        self.assertEqual(response.status_int, 500)
+        self.assertEqual(response.body,
+                         'You are not one of the resources nor the '
+                         'responsible of this task, so you can not request a '
+                         'review for this task')
+
+    def test_request_review_is_working_properly(self):
+        """testing if the request_review function is working properly
+        """
+        # create a time log before asking review
+        time_log = TimeLog(
+            resource=self.test_task4.resources[0],
+            task=self.test_task4,
+            start=datetime.datetime(2013, 6, 20, 10, 0),
+            end=datetime.datetime(2013, 6, 20, 19, 0)
+        )
+        DBSession.add(time_log)
+        self.test_task4.status = self.status_wip
+
+        # request review for self.test_task4
+        request = testing.DummyRequest()
+        request.matchdict['id'] = self.test_task4.id
+        request.params['send_email'] = 0
+
+        # patch get_logged_in_user
+        m = mocker.Mocker()
+        obj = m.replace("stalker_pyramid.views.auth.get_logged_in_user")
+        obj(request)
+        m.result(self.test_task4.resources[0])
+        m.replay()
+
+        # also patch route_url of request
+        request.route_url = lambda x, id: 'localhost:6453/tasks/23/view'
+
+        # also patch route_url of request
+        request.route_path = lambda x, id: '/tasks/23/view'
+
+        response = task.request_review(request)
+        self.assertEqual(response.status_int, 200)
+
+        # check if the status of the original task is set to Pending Revision
+        #self.test_task4 = Task.query.get(self.test_task4.id)
+        self.assertEqual(self.test_task4.status, self.status_prev)
+
+        # check if the task percent_complete is 100
+        self.assertEqual(self.test_task4.percent_complete, 100)
+
+

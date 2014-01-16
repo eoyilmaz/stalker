@@ -147,11 +147,8 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
         self.test_proj1.now = datetime.datetime(2013, 4, 4)
 
         # create task status list
-        self.test_task_status_list = StatusList(
-            name='Task Statuses',
-            statuses=[self.test_status4, self.test_status5],
-            target_entity_type='Task'
-        )
+        self.test_task_status_list = StatusList.query\
+            .filter_by(target_entity_type='Task').first()
         DBSession.add(self.test_task_status_list)
 
         # create two tasks with the same resources
@@ -244,31 +241,31 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
         # resources
         resource resources "Resources" {
             resource User_3 "admin"
-            resource User_12 "User1"
-            resource User_14 "User2"
-            resource User_15 "User3"
-            resource User_17 "User4"
-            resource User_18 "User5"
-            resource User_19 "User6"
+            resource User_26 "User1"
+            resource User_28 "User2"
+            resource User_29 "User3"
+            resource User_31 "User4"
+            resource User_32 "User5"
+            resource User_33 "User6"
         }
 
         # tasks
         
-            task Project_28 "Test Project 1" {
+            task Project_41 "Test Project 1" {
             
-                task Task_29 "Task1" {
+                task Task_42 "Task1" {
         
             
             effort 50.0h
-            allocate User_12, User_14
+            allocate User_26, User_28
         }
         
             
-                task Task_30 "Task2" {
+                task Task_43 "Task2" {
         
             
             effort 60.0h
-            allocate User_12, User_14
+            allocate User_26, User_28
         }
         
             

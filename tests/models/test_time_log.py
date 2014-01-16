@@ -60,11 +60,8 @@ class TimeLogTester(unittest2.TestCase):
             target_entity_type=Project
         )
 
-        self.test_task_status_list = StatusList(
-            name="Task Statuses",
-            statuses=[self.test_status1, self.test_status2, self.test_status3],
-            target_entity_type=Task
-        )
+        self.test_task_status_list = StatusList.query\
+            .filter_by(target_entity_type='Task').first()
 
         self.test_project = Project(
             name="test project",
@@ -521,11 +518,8 @@ class TimeLogDBTestCase(unittest2.TestCase):
             target_entity_type=Project
         )
 
-        self.test_task_status_list = StatusList(
-            name="Task Statuses",
-            statuses=[self.test_status1, self.test_status2, self.test_status3],
-            target_entity_type=Task
-        )
+        self.test_task_status_list = StatusList.query\
+            .filter_by(target_entity_type='Task').first()
 
         self.test_project = Project(
             name="test project",

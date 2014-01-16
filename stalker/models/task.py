@@ -395,6 +395,108 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     is a list that holds the Review instances for that task. Please see the
     :class:`.Review` class documentation for more details.
 
+    **Task Status Workflow**
+
+    .. note::
+       .. versionadded:: 0.2.5
+          Task Status Workflow
+
+       Task statuses now follow a workflow called "Task Status Workflow".
+
+    The "Task Status Workflow" defines the different statuses that a Task will
+    have along its normal life cycle. Container and leaf tasks will have
+    different workflow using nearly the same set of statuses (container tasks
+    have only 4 statuses where as leaf tasks have 8). The workflow defines the
+    following statuses at described situations:
+
+      +-----------------------------------------------------------------------+
+      |                       LEAF TASK STATUS WORKFLOW                       |
+      +------------------+----------------------------------------------------+
+      |   Status Name    | Description                                        |
+      +------------------+----------------------------------------------------+
+      |                  | This is the base status that a task will have at   |
+      |        New       | its birth. A task may have this status momentarily |
+      |       (NEW)      | before it is set to RTS. A NEW Task can not have a |
+      |                  | TimeLog or a review request can not be made for    |
+      |                  | it.                                                |
+      +------------------+----------------------------------------------------+
+      |                  | A task is set to RTS when there is no dependencies |
+      |  Ready To Start  | or all of its dependencies are completed, so there |
+      |       (RTS)      | is nothing preventing it to be started. An RTS     |
+      |                  | Task can have new TimeLogs. A review can not be    |
+      |                  | requested at this stage cause no work is done yet. |
+      +------------------+----------------------------------------------------+
+      |                  | A task is set to WIP when a TimeLog has been       |
+      | Work In Progress | created for that task. A WIP task can have new     |
+      |       (WIP)      | TimeLogs and a review can be requested for that    |
+      |                  | task.                                              |
+      +------------------+----------------------------------------------------+
+      |                  | A task is set to PREV when a new set of Review     |
+      |                  | instances created for it by using the              |
+      |  Pending Review  | :meth:`.Task.request_review` method. And it is     |
+      |      (PREV)      | possible to request a review only for a task with  |
+      |                  | status WIP. A PREV task can not have new TimeLogs  |
+      |                  | nor a new request can be made because it is in     |
+      |                  | already in review.                                 |
+      +------------------+----------------------------------------------------+
+      |                  | A task is set to HREV when one of its Reviews      |
+      |   Has Revision   | completed by requesting a review by using the      |
+      |      (HREV)      | :meth:`.Review.request_review` method. A HREV Task |
+      |                  | can have new TimeLogs, and it will be converted to |
+      |                  | a WIP task when it happens.                        |
+      +------------------+----------------------------------------------------+
+      |                  | A task is set to OH when the resource needs to     |
+      |                  | work for another task, and the :meth:`Task.hold`   |
+      |     On Hold      | is called. An OH Task can be resumed by calling    |
+      |       (OH)       | :meth:`.Task.resume` method and depending to its   |
+      |                  | :attr:`.Task.time_logs` attribute it will have its |
+      |                  | status set to RTS or WIP.                          |
+      +------------------+----------------------------------------------------+
+      |                  | A task is set to STOP when no more work needs to   |
+      |                  | done for that task and it will not be used         |
+      |                  | anymore. Call :meth:`.Task.stop` method to do it   |
+      |     Stopped      | properly. Only applicable to WIP tasks.            |
+      |      (STOP)      |                                                    |
+      |                  | The schedule values of the task will be capped to  |
+      |                  | current time spent on it, so Task Juggler will not |
+      |                  | reserve any more resources for it.                 |
+      +------------------+----------------------------------------------------+
+      |                  | A task is set to CMPL when all of the Reviews are  |
+      |    Completed     | completed by approving the task. It is not         |
+      |      (CMPL)      | possible to create any new TimeLogs and no new     |
+      |                  | review can be requested for a CMPL Task.           |
+      +------------------+----------------------------------------------------+
+
+    Container "Task Status Workflow" defines a set of statuses where the
+    container task status will only change according to its children task
+    statuses:
+
+      +-----------------------------------------------------------------------+
+      |                    CONTAINER TASK STATUS WORKFLOW                     |
+      +------------------+----------------------------------------------------+
+      |    Status Name   | Description                                        |
+      +------------------+----------------------------------------------------+
+      |        New       | If all of the child tasks are in NEW status then   |
+      |       (NEW)      | the container task is also NEW.                    |
+      +------------------+----------------------------------------------------+
+      |  Ready To Start  | A container task is set to RTS when children tasks |
+      |       (RTS)      | have statuses of only NEW and RTS.                 |
+      +------------------+----------------------------------------------------+
+      | Work In Progress | A container task is set to WIP when one of its     |
+      |       (WIP)      | children tasks have any of the statuses of NEW,    |
+      |                  | RTS, WIP, PREV, HREV or CMPL.                      |
+      +------------------+----------------------------------------------------+
+      |    Completed     | A container task is set to CMPL when all of its    |
+      |      (CMPL)      | children task have CMPL status.                    |
+      +------------------+----------------------------------------------------+
+
+    Here you can find the workflow diagram for leaf tasks:
+
+    .. image:: ../../../docs/source/images/Task_Status_Workflow.png
+          :width: 610 px
+          :height: 385 px
+          :align: left
+
     **Arguments**
 
     :param project: A Task which doesn't have a parent (a root task) should be
@@ -752,6 +854,13 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         if responsible is None:
             responsible = []
         self.responsible = responsible
+
+        # no matter what is given for the status
+        # set the status to NEW for a newly created task
+        with DBSession.no_autoflush:
+            from stalker import Status
+            status_new = Status.query.filter_by(code='NEW').first()
+        self.status = status_new
 
     def __eq__(self, other):
         """the equality operator
@@ -1487,6 +1596,69 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         return Ticket.query\
             .filter(Ticket.links.contains(self))\
             .filter(Ticket.status != status_closed).all()
+
+    # =============
+    # ** ACTIONS **
+    # =============
+    def request_review(self):
+        """Creates and returns Review instances for each of the responsible of
+        this task and sets the task status to PREV. Also calling this method
+        will cap the schedule timing of this task to current time spent on it.
+        Thus a task with 4 days of effort can be capped to 2 days if a review
+        is requested at day 2. Only applicable to leaf tasks.
+        """
+        raise NotImplementedError
+
+    def request_revision(self, reviews):
+        """Requests revision.
+
+        Only applicable for PREV leaf tasks. This method will expand the
+        schedule timings of the task by looking at the supplied reviews. Only
+        RREV Reviews are considered, and if non of the supplied
+        :class:`.Review` instances are reviews with RREV status then the task
+        will be set to CMPL.
+
+        :param reviews: A list of Review instances, where they have APP or RREV
+          statuses.
+
+        :type reviews: list of class:`.Review` instances.
+        """
+        raise NotImplementedError
+
+    def approve(self):
+        """Approves the task and sets its status to CMPL.
+        """
+        raise NotImplementedError
+
+    def hold(self):
+        """Pauses the execution of this task by setting its status to OH. Only
+        applicable to RTS and WIP tasks, any task with other statuses will
+        raise a ValueError.
+        """
+        raise NotImplementedError
+
+    def stop(self):
+        """Stops this task. It is nearly equivalent to deleting this task. But
+        this will at least preserve the TimeLogs entered for this task. Only
+        applicable to tasks with status WIP. You can use :meth:`.resume` to
+        resume the task. The only difference between :meth:`.hold` (other than
+        setting the task to different statuses) is the schedule info, while the
+        hold() method will preserve the schedule info, stop will set the
+        schedule info to the current effort. So if 2 days of effort has been
+        entered for a 4 days task, when stopped the task effort will be capped
+        to 2 days, thus TaskJuggler will not try to reserve any resource for
+        this task anymore.
+        """
+        raise NotImplementedError
+
+    def resume(self):
+        """Resumes the execution of this task by setting its status to RTS or
+        WIP depending to its time_logs attribute, so if it has TimeLogs then it
+        will resume as WIP and if it doesn't then it will resume as RTS. Only
+        applicable to Tasks with status OH.
+        """
+        raise NotImplementedError
+
 
 # TASK_DEPENDENCIES
 Task_Dependencies = Table(

@@ -227,9 +227,9 @@ class Ticket(Entity, StatusMixin):
           |              | enhancement                                     |
           +--------------+-------------------------------------------------+
           | 1 / MINOR    | defect with minor impact / small enhancement    |
-          +--------------+-------------------------------------------------+  
+          +--------------+-------------------------------------------------+
           | 2 / MAJOR    | defect with major impact / big enhancement      |
-          +--------------+-------------------------------------------------+ 
+          +--------------+-------------------------------------------------+
           | 3 / CRITICAL | severe loss of data due to the defect or highly |
           |              | needed enhancement                              |
           +--------------+-------------------------------------------------+
@@ -357,7 +357,7 @@ class Ticket(Entity, StatusMixin):
             action
         """
         statuses = defaults.ticket_workflow[action].keys()
-        status = self.status.code.lower()
+        status = self.status.name
         return_value = None
         if status in statuses:
             action_data = defaults.ticket_workflow[action][status]
@@ -428,8 +428,7 @@ class Ticket(Entity, StatusMixin):
                other.number == self.number and \
                other.status == self.status and \
                other.logs == self.logs and \
-               other.priority == self.priority and \
-               other.ticket_for == self.ticket_for
+               other.priority == self.priority
 
 
 class TicketLog(SimpleEntity):
@@ -449,14 +448,14 @@ class TicketLog(SimpleEntity):
     :param operation: An Enumerator holding the type of the operation. Possible
       values are: RESOLVE or REOPEN
 
-      Operations follow the `Track Workflow`_\ , 
+      Operations follow the `Track Workflow`_\ ,
 
       .. image:: http://trac.edgewall.org/chrome/common/guide/original-workflow.png
           :width: 787 px
           :height: 509 px
           :align: left
 
-    .. _Track Workflow: http://trac.edgewall.org/wiki/TracWorkflow 
+    .. _Track Workflow: http://trac.edgewall.org/wiki/TracWorkflow
     """
 
     # TODO: there are no tests for the TicketLog class

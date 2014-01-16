@@ -100,62 +100,62 @@ class Config(object):
 
         ticket_workflow={
             'resolve': {
-                'new': {
-                    'new_status': 'closed',
+                'New': {
+                    'new_status': 'Closed',
                     'action': 'set_resolution'
                 },
-                'accepted': {
-                    'new_status': 'closed',
+                'Accepted': {
+                    'new_status': 'Closed',
                     'action': 'set_resolution'
                 },
-                'assigned': {
-                    'new_status': 'closed',
+                'Assigned': {
+                    'new_status': 'Closed',
                     'action': 'set_resolution'
                 },
-                'reopened': {
-                    'new_status': 'closed',
+                'Reopened': {
+                    'new_status': 'Closed',
                     'action': 'set_resolution'
                 },
             },
             'accept': {
-                'new': {
-                    'new_status': 'accepted',
+                'New': {
+                    'new_status': 'Accepted',
                     'action': 'set_owner'
                 },
-                'accepted': {
-                    'new_status': 'accepted',
+                'Accepted': {
+                    'new_status': 'Accepted',
                     'action': 'set_owner'
                 },
-                'assigned': {
-                    'new_status': 'accepted',
+                'Assigned': {
+                    'new_status': 'Accepted',
                     'action': 'set_owner'
                 },
-                'reopened': {
-                    'new_status': 'accepted',
+                'Reopened': {
+                    'new_status': 'Accepted',
                     'action': 'set_owner'
                 },
             },
             'reassign': {
-                'new': {
-                    'new_status': 'assigned',
+                'New': {
+                    'new_status': 'Assigned',
                     'action': 'set_owner'
                 },
-                'accepted': {
-                    'new_status': 'assigned',
+                'Accepted': {
+                    'new_status': 'Assigned',
                     'action': 'set_owner'
                 },
-                'assigned': {
-                    'new_status': 'assigned',
+                'Assigned': {
+                    'new_status': 'Assigned',
                     'action': 'set_owner'
                 },
-                'reopened': {
-                    'new_status': 'assigned',
+                'Reopened': {
+                    'new_status': 'Assigned',
                     'action': 'set_owner'
                 },
             },
             'reopen': {
-                'closed': {
-                    'new_status': 'reopened',
+                'Closed': {
+                    'new_status': 'Reopened',
                     'action': 'del_resolution'
                 }
             }

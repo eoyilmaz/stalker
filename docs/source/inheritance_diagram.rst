@@ -31,7 +31,7 @@ Inheritance Diagram
    stalker.models.note.Note
    stalker.models.project.Project
    stalker.models.repository.Repository
-   stalker.models.revision.Revision
+   stalker.models.review.Review
    stalker.models.scene.Scene
    stalker.models.schedulers.SchedulerBase
    stalker.models.schedulers.TaskJugglerScheduler

@@ -432,6 +432,7 @@ class User(Entity, ACLMixin):
     login = Column(
         String(256),
         nullable=False,
+        unique=True,
         doc="""The login name of the user.
 
         Can not be empty.
@@ -824,7 +825,7 @@ class User(Entity, ACLMixin):
         return Ticket.query \
             .join(Status, Ticket.status) \
             .filter(Ticket.owner == self) \
-            .filter(Status.code != 'CLOSED') \
+            .filter(Status.code != 'CLS') \
             .all()
 
     @property

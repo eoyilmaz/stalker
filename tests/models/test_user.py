@@ -171,16 +171,8 @@ class UserTest(unittest2.TestCase):
         ])
 
         # a task status list
-        self.task_status_list = StatusList(
-            name="Task Status List",
-            statuses=[
-                self.test_status1,
-                self.test_status2,
-                self.test_status3,
-                self.test_status4
-            ],
-            target_entity_type=Task
-        )
+        self.task_status_list = StatusList.query\
+            .filter_by(target_entity_type='Task').first()
 
         # a couple of tasks
         self.test_task1 = Task(
@@ -214,37 +206,21 @@ class UserTest(unittest2.TestCase):
             self.test_task4
         ])
 
-        # a couple of versions
-        # a version status list
-        self.version_status_list = StatusList(
-            name="Version Status List",
-            statuses=[
-                self.test_status1,
-                self.test_status2,
-                self.test_status3,
-                self.test_status4
-            ],
-            target_entity_type=Version
-        )
-
         # for task1
         self.test_version1 = Version(
             task=self.test_task1,
-            status_list=self.version_status_list,
             full_path='some/path'
         )
         DBSession.add(self.test_version1)
 
         self.test_version2 = Version(
             task=self.test_task1,
-            status_list=self.version_status_list,
             full_path='some/path'
         )
         DBSession.add(self.test_version2)
 
         self.test_version3 = Version(
             task=self.test_task1,
-            status_list=self.version_status_list,
             full_path='some/path'
         )
         DBSession.add(self.test_version3)
@@ -252,21 +228,18 @@ class UserTest(unittest2.TestCase):
         # for task2
         self.test_version4 = Version(
             task=self.test_task2,
-            status_list=self.version_status_list,
             full_path='some/path'
         )
         DBSession.add(self.test_version4)
 
         self.test_version5 = Version(
             task=self.test_task2,
-            status_list=self.version_status_list,
             full_path='some/path'
         )
         DBSession.add(self.test_version5)
 
         self.test_version6 = Version(
             task=self.test_task2,
-            status_list=self.version_status_list,
             full_path='some/path'
         )
         DBSession.add(self.test_version6)
@@ -274,21 +247,18 @@ class UserTest(unittest2.TestCase):
         # for task3
         self.test_version7 = Version(
             task=self.test_task3,
-            status_list=self.version_status_list,
             full_path='some/path'
         )
         DBSession.add(self.test_version7)
 
         self.test_version8 = Version(
             task=self.test_task3,
-            status_list=self.version_status_list,
             full_path='some/path'
         )
         DBSession.add(self.test_version8)
 
         self.test_version9 = Version(
             task=self.test_task3,
-            status_list=self.version_status_list,
             full_path='some/path'
         )
         DBSession.add(self.test_version9)
@@ -296,21 +266,18 @@ class UserTest(unittest2.TestCase):
         # for task4
         self.test_version10 = Version(
             task=self.test_task4,
-            status_list=self.version_status_list,
             full_path='some/path'
         )
         DBSession.add(self.test_version10)
 
         self.test_version11 = Version(
             task=self.test_task4,
-            status_list=self.version_status_list,
             full_path='some/path'
         )
         DBSession.add(self.test_version11)
 
         self.test_version12 = Version(
             task=self.test_task4,
-            status_list=self.version_status_list,
             full_path='some/path'
         )
         DBSession.add(self.test_version12)
@@ -405,16 +372,8 @@ class UserTest(unittest2.TestCase):
         # *********************************************************************
 
         # a status list for sequence
-        self.sequence_status_list = StatusList(
-            name="Sequence Status List",
-            statuses=[
-                self.test_status1,
-                self.test_status2,
-                self.test_status3,
-                self.test_status4
-            ],
-            target_entity_type=Sequence
-        )
+        self.sequence_status_list = StatusList.query\
+            .filter_by(target_entity_type='Sequence').first()
 
         # a couple of sequences
         self.test_sequence1 = Sequence(
@@ -1286,8 +1245,8 @@ class UserTest(unittest2.TestCase):
     def test_to_tjp_is_working_properly(self):
         """testing if the to_tjp property is working properly
         """
-        expected_tjp = 'resource User_68 "Erkan Ozgur Yilmaz"'
-        self.assertEqual(self.test_user.to_tjp, expected_tjp)
+        expected_tjp = 'resource User_80 "Erkan Ozgur Yilmaz"'
+        self.assertEqual(expected_tjp, self.test_user.to_tjp)
 
     def test_to_tjp_is_working_properly_for_a_user_with_vacations(self):
         """testing if the to_tjp property is working properly for a user with
@@ -1313,16 +1272,16 @@ class UserTest(unittest2.TestCase):
             end=datetime.datetime(2013, 7, 15, 0, 0)
         )
 
-        expected_tjp = """resource User_68 "Erkan Ozgur Yilmaz" {
+        expected_tjp = """resource User_80 "Erkan Ozgur Yilmaz" {
             vacation 2013-06-07-00:00:00 - 2013-06-21-00:00:00
             vacation 2013-07-01-00:00:00 - 2013-07-15-00:00:00
             }"""
-        print expected_tjp
-        print '---------------'
-        print self.test_user.to_tjp
+        # print expected_tjp
+        # print '---------------'
+        # print self.test_user.to_tjp
         self.assertEqual(
-            self.test_user.to_tjp,
-            expected_tjp
+            expected_tjp,
+            self.test_user.to_tjp
         )
 
     def test_vacations_attribute_is_set_to_None(self):

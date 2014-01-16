@@ -20,6 +20,9 @@ Stalker Changes
 * **New:** Because of the new "Task Review Workflow" also a status list for
   Review class is created by default. It contains the Statuses of New (NEW),
   Requested Revision (RREV) and Approved (APP).
+* **Fix:** Users.login column is now unique.
+* **Update:** Ticket workflow in config is now using the proper status names
+  instead of the lower case names of the statuses.
 
 0.2.4
 =====

@@ -2147,7 +2147,7 @@ class ProjectTicketsTestCase(unittest2.TestCase):
                 self.test_ticket5,
                 self.test_ticket6,
                 self.test_ticket7,
-                self.test_ticket8,
+                self.test_ticket8
             ]
         )
 

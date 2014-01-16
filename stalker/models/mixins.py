@@ -220,7 +220,7 @@ class StatusMixin(object):
             nullable=False
             # This is set to nullable=True but it is impossible to set the
             # status to None by using this Declarative approach.
-            # 
+            #
             # This is done in that way cause SQLAlchemy was flushing the data
             # (AutoFlush) preliminarily while checking if the given Status was
             # in the related StatusList, and it was complaining about the

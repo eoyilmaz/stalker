@@ -86,14 +86,8 @@ class TicketTester(unittest2.TestCase):
             ]
         )
 
-        self.test_task_status_list = StatusList(
-            name="Task Status List",
-            target_entity_type=Task,
-            statuses=[
-                self.test_project_status1,
-                self.test_project_status2
-            ]
-        )
+        self.test_task_status_list = StatusList.query\
+            .filter_by(target_entity_type='Task').first()
 
         # create a Project
         self.test_project = Project(
@@ -105,11 +99,8 @@ class TicketTester(unittest2.TestCase):
         )
 
         # create an Asset
-        self.test_asset_status_list = StatusList(
-            name="Asset Status List",
-            target_entity_type=Asset,
-            statuses=[self.test_status1, self.test_status2]
-        )
+        self.test_asset_status_list = StatusList.query\
+            .filter_by(target_entity_type='Asset').first()
 
         self.test_asset_type = Type(
             name='Character Asset',

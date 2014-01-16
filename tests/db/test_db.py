@@ -952,8 +952,8 @@ class DatabaseModelsTester(unittest2.TestCase):
         # create three users, one for lead and two for members
         user3 = User(
             name="User3 Test Persistence Department",
-            login='u2tpd',
-            initials='u2tpd',
+            login='u3tpd',
+            initials='u3tpd',
             description="this is for testing purposes",
             created_by=None,
             updated_by=None,

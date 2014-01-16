@@ -3,16 +3,13 @@
 Statuses and Status Lists
 =========================
 
-In Stalker, classes mixed with :class:`~stalker.models.mixins.StatusMixin`
-needs to be created with a *suitable*
-:class:`~stalker.models.status.StatusList` instance.
+In Stalker, classes mixed with :class:`.StatusMixin` needs to be created with a
+*suitable* :class:`.StatusList` instance.
 
 Because most of the *statusable* classes are going to be using the same
-:class:`~stalker.models.status.Status`\ es (ex: **WIP**, **Waiting Review**,
-**Completed** etc.) over and over again, it is much efficient to create those
-Statuses only once and use them multiple times by grouping them in
-:class:`~stalker.models.status.StatusList`\ s.
+:class:`.Status`\ es (ex: **WIP**, **Pending Review**, **Completed** etc.) over
+and over again, it is much efficient to create those Statuses only once and use
+them multiple times by grouping them in :class:`.StatusList`\ s.
 
-A *suitable status list* means, the
-:attr:`~stalker.models.status.StatusList.target_entity_type` is set to the name
-of that particular class.
+A *suitable status list* means, the :attr:`.StatusList.target_entity_type` is
+set to the name of that particular class.

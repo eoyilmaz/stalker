@@ -451,7 +451,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         return Ticket.query \
             .join(Status, Ticket.status) \
             .filter(Ticket.project == self) \
-            .filter(Status.code != 'CLOSED') \
+            .filter(Status.code != 'CLS') \
             .all()
 
 
