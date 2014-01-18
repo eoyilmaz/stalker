@@ -30,7 +30,7 @@ logger.setLevel(logging.DEBUG)
 
 
 class Review(SimpleEntity, ScheduleMixin, StatusMixin):
-    """Holds information about :class:`.Task` reviews.
+    """Manages the Task Review Workflow.
 
     This class represents a very important part of the review workflow. For
     more information about the workflow please read the documentation about the

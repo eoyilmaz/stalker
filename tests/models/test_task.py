@@ -4268,7 +4268,9 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         """
         # make a task with NEW status
         self.test_task8.status = self.status_new
+        self.assertEqual(self.test_task8.status, self.status_new)
         self.test_task9.status = self.status_new
+        self.assertEqual(self.test_task9.status, self.status_new)
         # find a NEW task
         self.test_task3.depends.append(self.test_task9)
         self.assertEqual(self.test_task3.status, self.status_new)
@@ -4283,7 +4285,9 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         """
         # make a task with RTS status
         self.test_task8.status = self.status_rts
+        self.assertEqual(self.test_task8.status, self.status_rts)
         self.test_task9.status = self.status_new
+        self.assertEqual(self.test_task9.status, self.status_new)
         # find a NEW task
         self.test_task3.depends.append(self.test_task9)
         self.assertEqual(self.test_task3.status, self.status_new)
@@ -4298,7 +4302,9 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         """
         # make a task with WIP status
         self.test_task8.status = self.status_wip
+        self.assertEqual(self.test_task8.status, self.status_wip)
         self.test_task9.status = self.status_new
+        self.assertEqual(self.test_task8.status, self.status_new)
         # find a NEW task
         self.test_task3.depends.append(self.test_task9)
         self.assertEqual(self.test_task3.status, self.status_new)
@@ -4313,7 +4319,9 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         """
         # make a task with PREV status
         self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
         self.test_task9.status = self.status_new
+        self.assertEqual(self.test_task9.status, self.status_new)
         # find a NEW task
         self.test_task3.depends.append(self.test_task9)
         self.assertEqual(self.test_task3.status, self.status_new)
@@ -4328,7 +4336,9 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         """
         # make a task with HREV status
         self.test_task8.status = self.status_hrev
+        self.assertEqual(self.test_task8.status, self.status_hrev)
         self.test_task9.status = self.status_new
+        self.assertEqual(self.test_task9.status, self.status_new)
         # find a NEW task
         self.test_task3.depends.append(self.test_task9)
         self.assertEqual(self.test_task3.status, self.status_new)
@@ -4343,7 +4353,9 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         """
         # make a task with OH status
         self.test_task8.status = self.status_oh
+        self.assertEqual(self.test_task8.status, self.status_oh)
         self.test_task9.status = self.status_new
+        self.assertEqual(self.test_task9.status, self.status_new)
         # find a NEW task
         self.test_task3.depends.append(self.test_task9)
         self.assertEqual(self.test_task3.status, self.status_new)
@@ -4358,7 +4370,9 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         """
         # make a task with STOP status
         self.test_task8.status = self.status_stop
+        self.assertEqual(self.test_task8.status, self.status_stop)
         self.test_task9.status = self.status_new
+        self.assertEqual(self.test_task9.status, self.status_new)
         # find a NEW task
         self.test_task3.depends.append(self.test_task9)
         self.assertEqual(self.test_task3.status, self.status_new)
@@ -4373,6 +4387,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         """
         # make a task with CMPL status
         self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
         # find a NEW task
         self.test_task3.depends.append(self.test_task9)
         self.assertEqual(self.test_task3.status, self.status_new)
@@ -4389,6 +4404,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         """
         # make a task with NEW status
         self.test_task8.status = self.status_new
+        self.assertEqual(self.test_task8.status, self.status_new)
         # find an RTS task
         self.assertEqual(self.test_task3.status, self.status_rts)
         # create dependency
@@ -4402,6 +4418,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         """
         # make a task with NEW status
         self.test_task8.status = self.status_rts
+        self.assertEqual(self.test_task8.status, self.status_rts)
         # find an RTS task
         self.assertEqual(self.test_task3.status, self.status_rts)
         # create dependency
@@ -4415,6 +4432,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         """
         # make a task with WIP status
         self.test_task8.status = self.status_wip
+        self.assertEqual(self.test_task8.status, self.status_wip)
         # find an RTS task
         self.assertEqual(self.test_task3.status, self.status_rts)
         # create dependency
@@ -4428,6 +4446,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         """
         # make a task with PREV status
         self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
         # find an RTS task
         self.assertEqual(self.test_task3.status, self.status_rts)
         # create dependency
@@ -4441,6 +4460,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         """
         # make a task with HREV status
         self.test_task8.status = self.status_hrev
+        self.assertEqual(self.test_task8.status, self.status_hrev)
         # find an RTS task
         self.assertEqual(self.test_task3.status, self.status_rts)
         # create dependency
@@ -4454,6 +4474,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         """
         # make a task with OH status
         self.test_task8.status = self.status_oh
+        self.assertEqual(self.test_task8.status, self.status_oh)
         # find an RTS task
         self.assertEqual(self.test_task3.status, self.status_rts)
         # create dependency
@@ -4467,6 +4488,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         """
         # make a task with STOP status
         self.test_task8.status = self.status_stop
+        self.assertEqual(self.test_task8.status, self.status_stop)
         # find an RTS task
         self.assertEqual(self.test_task3.status, self.status_rts)
         # create dependency
@@ -4480,6 +4502,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         """
         # make a task with CMPL status
         self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
         # find an RTS task
         self.assertEqual(self.test_task3.status, self.status_rts)
         # create dependency
@@ -4494,6 +4517,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         """
         # make a task with NEW status
         self.test_task8.status = self.status_new
+        self.assertEqual(self.test_task8.status, self.status_new)
         # find an WIP task
         self.test_task3.status = self.status_wip
         self.assertEqual(self.test_task3.status, self.status_wip)
@@ -4507,6 +4531,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         """
         # make a task with RTS status
         self.test_task8.status = self.status_rts
+        self.assertEqual(self.test_task8.status, self.status_rts)
         # find an WIP task
         self.test_task3.status = self.status_wip
         self.assertEqual(self.test_task3.status, self.status_wip)
@@ -4520,6 +4545,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         """
         # make a task with WIP status
         self.test_task8.status = self.status_wip
+        self.assertEqual(self.test_task8.status, self.status_wip)
         # find an WIP task
         self.test_task3.status = self.status_wip
         self.assertEqual(self.test_task3.status, self.status_wip)
@@ -4533,6 +4559,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         """
         # make a task with PREV status
         self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
         # find an WIP task
         self.test_task3.status = self.status_wip
         self.assertEqual(self.test_task3.status, self.status_wip)
@@ -4546,6 +4573,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         """
         # make a task with HREV status
         self.test_task8.status = self.status_hrev
+        self.assertEqual(self.test_task8.status, self.status_hrev)
         # find an WIP task
         self.test_task3.status = self.status_wip
         self.assertEqual(self.test_task3.status, self.status_wip)
@@ -4559,6 +4587,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         """
         # make a task with OH status
         self.test_task8.status = self.status_oh
+        self.assertEqual(self.test_task8.status, self.status_oh)
         # find an WIP task
         self.test_task3.status = self.status_wip
         self.assertEqual(self.test_task3.status, self.status_wip)
@@ -4572,6 +4601,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         """
         # make a task with STOP status
         self.test_task8.status = self.status_stop
+        self.assertEqual(self.test_task8.status, self.status_stop)
         # find an WIP task
         self.test_task3.status = self.status_wip
         self.assertEqual(self.test_task3.status, self.status_wip)
@@ -4585,6 +4615,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         """
         # make a task with CMPL status
         self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
         # find an WIP task
         self.test_task3.status = self.status_wip
         self.assertEqual(self.test_task3.status, self.status_wip)
@@ -4598,25 +4629,57 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         """testing if it is not possible to set a dependency between a task
         with PREV status to a task with NEW status
         """
-        self.fail('test is not implemented yet')
+        # make a task with NEW status
+        self.test_task8.status = self.status_new
+        self.assertEqual(self.test_task8.status, self.status_new)
+        # find an PREV task
+        self.test_task3.status = self.status_prev
+        self.assertEqual(self.test_task3.status, self.status_prev)
+        # create dependency
+        self.assertRaises(ValueError, self.test_task3.depends.append,
+                          self.test_task8)
 
     def test_leaf_PREV_task_updated_to_have_a_dependency_of_RTS_task(self):
         """testing if it is not possible to set a dependency between a task
         with PREV status to a task with RTS status
         """
-        self.fail('test is not implemented yet')
+        # make a task with RTS status
+        self.test_task8.status = self.status_rts
+        self.assertEqual(self.test_task8.status, self.status_rts)
+        # find an PREV task
+        self.test_task3.status = self.status_prev
+        self.assertEqual(self.test_task3.status, self.status_prev)
+        # create dependency
+        self.assertRaises(ValueError, self.test_task3.depends.append,
+                          self.test_task8)
 
     def test_leaf_PREV_task_updated_to_have_a_dependency_of_WIP_task(self):
         """testing if it is not possible to set a dependency between a task
         with PREV status to a task with WIP status
         """
-        self.fail('test is not implemented yet')
+        # make a task with RTS status
+        self.test_task8.status = self.status_rts
+        self.assertEqual(self.test_task8.status, self.status_rts)
+        # find an PREV task
+        self.test_task3.status = self.status_prev
+        self.assertEqual(self.test_task3.status, self.status_prev)
+        # create dependency
+        self.assertRaises(ValueError, self.test_task3.depends.append,
+                          self.test_task8)
 
     def test_leaf_PREV_task_updated_to_have_a_dependency_of_PREV_task(self):
         """testing if it is not possible to set a dependency between a task
         with PREV status to a task with PREV status
         """
-        self.fail('test is not implemented yet')
+        # make a task with PREV status
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
+        # find an PREV task
+        self.test_task3.status = self.status_prev
+        self.assertEqual(self.test_task3.status, self.status_prev)
+        # create dependency
+        self.assertRaises(ValueError, self.test_task3.depends.append,
+                          self.test_task8)
 
     def test_leaf_PREV_task_updated_to_have_a_dependency_of_HREV_task(self):
         """testing if it is not possible to set a dependency between a task

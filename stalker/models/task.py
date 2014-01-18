@@ -25,7 +25,7 @@ from sqlalchemy import (Table, Column, Integer, ForeignKey, Boolean, Enum,
                         DateTime, Float, event)
 from sqlalchemy.orm import relationship, validates, synonym
 
-from stalker.db import DBSession
+from stalker.db.session import DBSession
 from stalker.db.declarative import Base
 from stalker import defaults
 from stalker.models import check_circular_dependency
@@ -234,9 +234,10 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     **Introduction**
 
     Tasks are the smallest unit of work that should be accomplished to complete
-    a :class:`.Project`.
+    a :class:`.Project`. Tasks define a certain amount of time needed to be
+    spent for a purpose. They also define a complex hierarchy of relation.
 
-    Stalker tries to follow the concepts stated in TaskJuggler_.
+    Stalker follows and enhances the concepts stated in TaskJuggler_.
 
     .. _TaskJuggler : http://www.taskjuggler.org/
 
@@ -248,10 +249,10 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
     **Initialization**
 
-    Because Tasks are a part of a bigger Project, a Task needs to be created
-    with a :class:`.Project` instance. It is also valid if no project is
-    supplied but there should be a parent Task passed to the ``parent``
-    argument. And it is also possible to pass both project and the parent task.
+    Tasks are a part of a bigger Project, that's way a Task needs to be created
+    with a :class:`.Project` instance. It is possible to create a task without
+    a project, if it is created to be a child of another task. And it is also
+    possible to pass both a project and a parent task.
 
     But because passing both a project and a parent task may create an
     ambiguity, Stalker will raise a RuntimeWarning, if both project and task
@@ -263,22 +264,24 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     The following codes are a couple of examples for creating Task instances::
 
       # with a project instance
-      task1 = Task(name='Schedule', project=proj1)
+      >>> task1 = Task(name='Schedule', project=proj1)
 
       # with a parent task
-      task2 = Task(name='Documentation', parent=task1)
+      >>> task2 = Task(name='Documentation', parent=task1)
 
       # or both
-      task3 = Task(name='Test', project=proj1, parent=task1)
+      >>> task3 = Task(name='Test', project=proj1, parent=task1)
 
       # this will create a RuntimeWarning
-      task4 = Task(name='Test', project=proj2, parent=task1) # task1 is not a
-                                                             # task of proj2
-      assert task4.project == proj1 # Stalker uses the task1.project for task4
+      >>> task4 = Task(name='Test', project=proj2, parent=task1)
+      # task1 is not a # task of proj2
+
+      >>> assert task4.project == proj1
+      # Stalker uses the task1.project for task4
 
       # this will also create a RuntimeError
-      task3 = Task(name='Failure 2') # no project no parent, this is an orphan
-                                     # task.
+      >>> task3 = Task(name='Failure 2') # no project no parent, this is an
+                                         # orphan task.
 
     Also initially Stalker will pin point the :attr:`.start` value and then
     will calculate proper :attr:`.end` and :attr:`.duration` values by using
@@ -291,7 +294,8 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
     Stalker uses TaskJuggler for task scheduling. After defining all the tasks,
     Stalker will convert them to a single tjp file along with the recorded
-    :class:`.TimeLog`\ s and let TaskJuggler to solve the scheduling problem.
+    :class:`.TimeLog`\ s :class:`.Vacation`\ s etc. and let TaskJuggler to
+    solve the scheduling problem.
 
     During the auto scheduling (with TaskJuggler), the calculation of task
     duration, start and end dates are effected by the working hours setting of
@@ -306,22 +310,23 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     The default :attr:`.schedule_model` for Stalker tasks is 'effort`, the
     default :attr:`.schedule_unit` is ``hour`` and the default value of
     :attr:`.schedule_timing` is defined by the
-    :attr:`stalker.config.Config.timing_resolution`. So for a
-    config where the ``timing_resolution`` is set to 1 hour the schedule_timing
-    is 1.
+    :attr:`stalker.config.Config.timing_resolution`. So for a config where the
+    ``timing_resolution`` is set to 1 hour the schedule_timing is 1.
 
-    It is also possible to use the ``length`` or ``duration``
-    values for :attr:`.schedule_model` (set it to 'effort', 'length' or
-    'duration' to get the desired scheduling model).
+    It is also possible to use the ``length`` or ``duration`` values for
+    :attr:`.schedule_model` (set it to 'effort', 'length' or 'duration' to get
+    the desired scheduling model).
 
     To convert a Task instance to a TaskJuggler compatible string use the
     :attr:`.to_tjp`` attribute. It will try to create a good representation of
     the Task by using the resources, schedule_model, schedule_timing and
     schedule_constraint attributes.
 
-    **Task/Task Relation**
+    **Task to Task Relation**
 
-    .. versionadded:: 0.2.0
+    .. note::
+       .. versionadded:: 0.2.0
+       Task to Task Relation
 
     Tasks can have child Tasks. So you can create complex relations of Tasks to
     comply with your project needs.
@@ -349,18 +354,24 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     task is gathered from the child tasks. The start is equal to the earliest
     start value of the children tasks, and the end is equal to the latest end
     value of the children tasks. Of course, these values are going to be
-    ignored by the TaskJuggler, but for interactive gantt charts these are good
-    toy attributes to play with.
+    ignored by TaskJuggler, but for interactive gantt charts these are good toy
+    attributes to play with.
 
     Stalker will check if there will be a cycle if one wants to parent a Task
     to a child Task of its own or the dependency relation creates a cycle.
 
     In Gantt Charts the ``computed_start`` and ``computed_end`` attributes will
-    be used if the task :attr:`.is_scheduled`.
+    be used if the task :attr:`.is_scheduled` is True.
 
     **Task Responsible**
 
-    .. versionadded:: 0.2.0
+    .. note::
+       .. versionadded:: 0.2.0
+          Task Responsible
+
+    .. note::
+       .. versionadded:: 0.2.5
+          Multiple Responsible Per Task
 
     Tasks have a **responsible** which is a list of :class:`.User` instances
     who are responsible of the assigned task and all the hierarchy under it.
@@ -373,27 +384,25 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     You can create complex responsibility chains for different branches of
     Tasks.
 
-    **Percent Complete Calculation**
-
-    .. versionadded:: 0.2.0
+    **Percent Complete Calculation** .. versionadded:: 0.2.0
 
     Tasks can calculate how much it is completed based on the
-    :attr:`.schedule_seconds` and :attr:`.total_logged_seconds` attributes. For
-    a parent task, the calculation is based on the total
+    :attr:`.schedule_seconds` and :attr:`.total_logged_seconds` attributes.
+    For a parent task, the calculation is based on the total
     :attr:`.schedule_seconds` and :attr:`.total_logged_seconds` attributes of
-    their children.
+    their children. Even tough, the percent_complete attribute of a task is
+    100% the task may not be considered as completed, because it may not be
+    reviewed and approved by the responsible yet.
 
-    **Reviews**
+    **Task Review Workflow**
 
     .. versionadded:: 0.2.5
+       Task Review Workflow
 
-    One may wanted to track all the details about the reviews created for a
-    particular task. Stalker supplies :class:`.Review` for that purpose. By
-    using a Review instance, it is possible to hold review information like
-    the description of the review, who has given the review and how much extra
-    time has given if it ends up being a revision etc.. The :attr:`.reviews`
-    is a list that holds the Review instances for that task. Please see the
-    :class:`.Review` class documentation for more details.
+    Starting with Stalker v0.2.5 tasks are reviewed by their responsible users.
+    The reviews done by responsible users will set the task status according to
+    the supplied reviews. Please see the :class:`.Review` class documentation
+    for more details.
 
     **Task Status Workflow**
 
@@ -401,69 +410,86 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
        .. versionadded:: 0.2.5
           Task Status Workflow
 
-       Task statuses now follow a workflow called "Task Status Workflow".
+    Task statuses now follow a workflow called "Task Status Workflow".
 
     The "Task Status Workflow" defines the different statuses that a Task will
     have along its normal life cycle. Container and leaf tasks will have
     different workflow using nearly the same set of statuses (container tasks
-    have only 4 statuses where as leaf tasks have 8). The workflow defines the
-    following statuses at described situations:
+    have only 4 statuses where as leaf tasks have 9).
+
+    The following diagram shows the status workflow for leaf tasks:
+
+    .. image:: ../../../docs/source/images/Task_Status_Workflow.png
+          :width: 637 px
+          :height: 381 px
+          :align: center
+
+    The workflow defines the following statuses at described situations:
 
       +-----------------------------------------------------------------------+
-      |                       LEAF TASK STATUS WORKFLOW                       |
+      | LEAF TASK STATUS WORKFLOW                                             |
       +------------------+----------------------------------------------------+
-      |   Status Name    | Description                                        |
+      | Status Name      | Description                                        |
       +------------------+----------------------------------------------------+
-      |                  | This is the base status that a task will have at   |
-      |        New       | its birth. A task may have this status momentarily |
-      |       (NEW)      | before it is set to RTS. A NEW Task can not have a |
-      |                  | TimeLog or a review request can not be made for    |
-      |                  | it.                                                |
+      | Waiting For      | If a task has uncompleted dependencies then it     |
+      | Dependency (WFD) | will have its status to set to WFD. A WFD Task can |
+      |                  | not have a TimeLog or a review request can not be  |
+      |                  | made for it.                                       |
       +------------------+----------------------------------------------------+
-      |                  | A task is set to RTS when there is no dependencies |
-      |  Ready To Start  | or all of its dependencies are completed, so there |
-      |       (RTS)      | is nothing preventing it to be started. An RTS     |
-      |                  | Task can have new TimeLogs. A review can not be    |
-      |                  | requested at this stage cause no work is done yet. |
+      | Ready To Start   | A task is set to RTS when there are no             |
+      | (RTS)            | dependencies or all of its dependencies are        |
+      |                  | completed, so there is nothing preventing it to be |
+      |                  | started. An RTS Task can have new TimeLogs. A      |
+      |                  | review can not be requested at this stage cause no |
+      |                  | work is done yet.                                  |
       +------------------+----------------------------------------------------+
-      |                  | A task is set to WIP when a TimeLog has been       |
-      | Work In Progress | created for that task. A WIP task can have new     |
-      |       (WIP)      | TimeLogs and a review can be requested for that    |
+      | Work In Progress | A task is set to WIP when a TimeLog has been       |
+      | (WIP)            | created for that task. A WIP task can have new     |
+      |                  | TimeLogs and a review can be requested for that    |
       |                  | task.                                              |
       +------------------+----------------------------------------------------+
-      |                  | A task is set to PREV when a new set of Review     |
-      |                  | instances created for it by using the              |
-      |  Pending Review  | :meth:`.Task.request_review` method. And it is     |
-      |      (PREV)      | possible to request a review only for a task with  |
+      | Pending Review   | A task is set to PREV when a new set of Review     |
+      | (PREV)           | instances created for it by using the              |
+      |                  | :meth:`.Task.request_review` method. And it is     |
+      |                  | possible to request a review only for a task with  |
       |                  | status WIP. A PREV task can not have new TimeLogs  |
       |                  | nor a new request can be made because it is in     |
       |                  | already in review.                                 |
       +------------------+----------------------------------------------------+
-      |                  | A task is set to HREV when one of its Reviews      |
-      |   Has Revision   | completed by requesting a review by using the      |
-      |      (HREV)      | :meth:`.Review.request_review` method. A HREV Task |
+      | Has Revision     | A task is set to HREV when one of its Reviews      |
+      | (HREV)           | completed by requesting a review by using the      |
+      |                  | :meth:`.Review.request_review` method. A HREV Task |
       |                  | can have new TimeLogs, and it will be converted to |
-      |                  | a WIP task when it happens.                        |
+      |                  | a WIP or DREV depending to its dependency tasks.   |
       +------------------+----------------------------------------------------+
-      |                  | A task is set to OH when the resource needs to     |
+      | Dependency Has   | If a CMPL dependency task of a WIP, PREV, HREV,    |
+      | Revision (DREV)  | DREV or CMPL task has a revision then depending on |
+      |                  | to the reviewers choice the dependent tasks can    |
+      |                  | have their status to be set to DREV which means    |
+      |                  | both of the dependee and the dependent tasks can   |
+      |                  | work at the same time. For a DREV task a review    |
+      |                  | request can not be made until it is set to WIP     |
+      |                  | again by setting the depending task to CMPL again. |
+      +------------------+----------------------------------------------------+
+      | On Hold (OH)     | A task is set to OH when the resource needs to     |
       |                  | work for another task, and the :meth:`Task.hold`   |
-      |     On Hold      | is called. An OH Task can be resumed by calling    |
-      |       (OH)       | :meth:`.Task.resume` method and depending to its   |
+      |                  | is called. An OH Task can be resumed by calling    |
+      |                  | :meth:`.Task.resume` method and depending to its   |
       |                  | :attr:`.Task.time_logs` attribute it will have its |
       |                  | status set to RTS or WIP.                          |
       +------------------+----------------------------------------------------+
-      |                  | A task is set to STOP when no more work needs to   |
+      | Stopped (STOP)   | A task is set to STOP when no more work needs to   |
       |                  | done for that task and it will not be used         |
       |                  | anymore. Call :meth:`.Task.stop` method to do it   |
-      |     Stopped      | properly. Only applicable to WIP tasks.            |
-      |      (STOP)      |                                                    |
+      |                  | properly. Only applicable to WIP tasks.            |
+      |                  |                                                    |
       |                  | The schedule values of the task will be capped to  |
       |                  | current time spent on it, so Task Juggler will not |
       |                  | reserve any more resources for it.                 |
       +------------------+----------------------------------------------------+
-      |                  | A task is set to CMPL when all of the Reviews are  |
-      |    Completed     | completed by approving the task. It is not         |
-      |      (CMPL)      | possible to create any new TimeLogs and no new     |
+      | Completed (CMPL) | A task is set to CMPL when all of the Reviews are  |
+      |                  | completed by approving the task. It is not         |
+      |                  | possible to create any new TimeLogs and no new     |
       |                  | review can be requested for a CMPL Task.           |
       +------------------+----------------------------------------------------+
 
@@ -474,28 +500,21 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
       +-----------------------------------------------------------------------+
       |                    CONTAINER TASK STATUS WORKFLOW                     |
       +------------------+----------------------------------------------------+
-      |    Status Name   | Description                                        |
+      | Status Name      | Description                                        |
       +------------------+----------------------------------------------------+
-      |        New       | If all of the child tasks are in NEW status then   |
-      |       (NEW)      | the container task is also NEW.                    |
+      | Waiting For      | If all of the child tasks are in WFD status then   |
+      | Dependency (WFD) | the container task is also WFD.                    |
       +------------------+----------------------------------------------------+
-      |  Ready To Start  | A container task is set to RTS when children tasks |
-      |       (RTS)      | have statuses of only NEW and RTS.                 |
+      | Ready To Start   | A container task is set to RTS when children tasks |
+      | (RTS)            | have statuses of only NEW and RTS.                 |
       +------------------+----------------------------------------------------+
       | Work In Progress | A container task is set to WIP when one of its     |
-      |       (WIP)      | children tasks have any of the statuses of NEW,    |
-      |                  | RTS, WIP, PREV, HREV or CMPL.                      |
+      | (WIP)            | children tasks have any of the statuses of RTS,    |
+      |                  | WIP, PREV, HREV, DREV or CMPL.                     |
       +------------------+----------------------------------------------------+
-      |    Completed     | A container task is set to CMPL when all of its    |
-      |      (CMPL)      | children task have CMPL status.                    |
+      | Completed (CMPL) | A container task is set to CMPL when all of its    |
+      |                  | children tasks are CMPL.                           |
       +------------------+----------------------------------------------------+
-
-    Here you can find the workflow diagram for leaf tasks:
-
-    .. image:: ../../../docs/source/images/Task_Status_Workflow.png
-          :width: 610 px
-          :height: 385 px
-          :align: left
 
     **Arguments**
 
@@ -1600,6 +1619,12 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     # =============
     # ** ACTIONS **
     # =============
+    def create_time_log(self, resource, start, end):
+        """A helper method to create TimeLogs, this will ease creating TimeLog
+        instances for task.
+        """
+        raise NotImplementedError
+
     def request_review(self):
         """Creates and returns Review instances for each of the responsible of
         this task and sets the task status to PREV. Also calling this method
@@ -1622,11 +1647,6 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
           statuses.
 
         :type reviews: list of class:`.Review` instances.
-        """
-        raise NotImplementedError
-
-    def approve(self):
-        """Approves the task and sets its status to CMPL.
         """
         raise NotImplementedError
 
@@ -1656,6 +1676,11 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         WIP depending to its time_logs attribute, so if it has TimeLogs then it
         will resume as WIP and if it doesn't then it will resume as RTS. Only
         applicable to Tasks with status OH.
+        """
+        raise NotImplementedError
+
+    def approve(self):
+        """Approves the task and sets its status to CMPL.
         """
         raise NotImplementedError
 

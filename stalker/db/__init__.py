@@ -27,10 +27,11 @@ import logging
 
 from sqlalchemy import engine_from_config
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import sessionmaker
 
 from stalker import defaults
 from stalker.db.declarative import Base
-from stalker.db.session import DBSession
+from stalker.db import session
 from stalker.log import logging_level
 
 logger = logging.getLogger(__name__)
@@ -47,10 +48,7 @@ def setup(settings=None):
         "sqlalchemy" and shows the settings. The most important one is the
         engine. The default is None, and in this case it uses the settings from
         stalker.config.Config.database_engine_settings
-
-    :param callback: A callback function which is called after database is
-        initialized. It is a good place to register your own classes.
-   """
+    """
 
     if settings is None:
         settings = defaults.database_engine_settings
@@ -58,20 +56,16 @@ def setup(settings=None):
 
     logger.debug("settings: %s" % settings)
     # create engine
-    engine = engine_from_config(settings, 'sqlalchemy.')
+    session.engine = engine_from_config(settings, 'sqlalchemy.')
 
-    logger.debug('engine: %s' % engine)
+    logger.debug('engine: %s' % session.engine)
 
     # create the Session class
-    DBSession.remove()
-    DBSession.configure(
-        bind=engine,
-        extension=None
-    )
+    session.DBSession = sessionmaker(bind=session.engine)
 
     # create the database
     logger.debug("creating the tables")
-    Base.metadata.create_all(engine)
+    Base.metadata.create_all(session.engine)
 
     # update defaults
     update_defaults_with_studio()
@@ -82,8 +76,8 @@ def update_defaults_with_studio():
     Studio instance is present
     """
     # from stalker.db import DBSession
-    if DBSession:
-        with DBSession.no_autoflush:
+    if session.DBSession:
+        with session.DBSession.no_autoflush:
             from stalker.models.studio import Studio
             studio = Studio.query.first()
             if studio:
@@ -162,7 +156,7 @@ def __create_admin__():
 
     if not admin_department:
         admin_department = Department(name=defaults.admin_department_name)
-        DBSession.add(admin_department)
+        session.DBSession.add(admin_department)
         # create the admins group
 
     from stalker.models.auth import Group
@@ -173,7 +167,7 @@ def __create_admin__():
 
     if not admins_group:
         admins_group = Group(name=defaults.admin_group_name)
-        DBSession.add(admins_group)
+        session.DBSession.add(admins_group)
 
     # # create the admin user
     # admin = User.query \
@@ -200,8 +194,8 @@ def __create_admin__():
     admins_group.created_by = admin
     admins_group.updated_by = admin
 
-    DBSession.add(admin)
-    DBSession.commit()
+    session.DBSession.add(admin)
+    session.DBSession.commit()
 
 
 def __create_ticket_statuses():
@@ -235,7 +229,7 @@ def __create_ticket_statuses():
             created_by=admin,
             updated_by=admin
         )
-        DBSession.add(ticket_type_1)
+        session.DBSession.add(ticket_type_1)
 
     if 'Enhancement' not in t_names:
         ticket_type_2 = Type(
@@ -245,11 +239,11 @@ def __create_ticket_statuses():
             created_by=admin,
             updated_by=admin
         )
-        DBSession.add(ticket_type_2)
+        session.DBSession.add(ticket_type_2)
     try:
-        DBSession.commit()
+        session.DBSession.commit()
     except IntegrityError:
-        DBSession.rollback()
+        session.DBSession.rollback()
         logger.debug("Ticket Types are already in the database!")
     else:
         # DBSession.flush()
@@ -287,7 +281,7 @@ def create_entity_statuses(entity_type='', status_names=None,
                 updated_by=user
             )
             statuses.append(new_status)
-            DBSession.add(new_status)
+            session.DBSession.add(new_status)
 
     # create the Status List
     status_list = StatusList.query\
@@ -303,17 +297,17 @@ def create_entity_statuses(entity_type='', status_names=None,
             created_by=user,
             updated_by=user
         )
-        DBSession.add(status_list)
+        session.DBSession.add(status_list)
     else:
         logger.debug("%s Status List already created" % entity_type)
 
     try:
-        DBSession.commit()
+        session.DBSession.commit()
     except IntegrityError:
-        DBSession.rollback()
+        session.DBSession.rollback()
     else:
         logger.debug("Created %s Statuses successfully" % entity_type)
-        DBSession.flush()
+        session.DBSession.flush()
 
 
 def register(class_):
@@ -386,17 +380,17 @@ def register(class_):
         if issubclass(class_, ReferenceMixin):
             new_entity_type.accepts_references = True
 
-        DBSession.add(new_entity_type)
+        session.DBSession.add(new_entity_type)
 
     for action in defaults.actions:
         for access in ['Allow', 'Deny']:
             permission_obj = Permission(access, action, class_name)
             if permission_obj not in permissions_db:
-                DBSession.add(permission_obj)
+                session.DBSession.add(permission_obj)
 
     try:
-        DBSession.commit()
+        session.DBSession.commit()
     except IntegrityError:
-        DBSession.rollback()
+        session.DBSession.rollback()
     # else:
-    #     DBSession.flush()
+    #     session.DBSession.flush()

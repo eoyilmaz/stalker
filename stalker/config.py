@@ -79,9 +79,6 @@ class Config(object):
 
         actions=['Create', 'Read', 'Update', 'Delete', 'List'],  #CRUDL
 
-        status_bg_color=0xffffff,
-        status_fg_color=0x000000,
-
         # Tickets
         ticket_label="Ticket",
 

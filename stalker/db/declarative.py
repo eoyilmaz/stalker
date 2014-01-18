@@ -17,8 +17,6 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-""" store the declarative_base in this module
-"""
 
 from sqlalchemy.ext.declarative import declarative_base
 from stalker.db.session import DBSession
@@ -26,8 +24,13 @@ from stalker.models import make_plural
 
 
 class ORMClass(object):
-    query = DBSession.query_property()
-    
+    """The base of the Base class
+    """
+
+    @property
+    def query(self):
+        return DBSession.query_property()
+
     @property
     def plural_class_name(self):
         """the plural name of this class

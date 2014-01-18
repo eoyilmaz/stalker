@@ -50,7 +50,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Stalker'
-copyright = u'2009-2013, the Stalker authors and contributors'
+copyright = u'2009-2014, the Stalker authors and contributors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -110,7 +110,8 @@ pygments_style = 'sphinx'
 #html_theme = 'default'
 #html_theme = 'scrolls'
 #html_theme = 'agogo'
-html_theme = 'sphinxdoc'
+#html_theme = 'sphinxdoc'
+html_theme = 'pyramid'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -244,3 +245,8 @@ def setup(app):
         objname='configuration value',
         indextemplate='pair: %s; configuration value'
     )
+
+    # this next two lines are for Sphinx 1.2 to work
+    import sqlalchemy.ext.declarative.api
+    from stalker.db.declarative import Base
+    sqlalchemy.ext.declarative.api.Base = Base
