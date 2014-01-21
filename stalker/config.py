@@ -195,21 +195,23 @@ class Config(object):
         },
 
         task_status_names=[
-            'New',
+            'Waiting For Dependency',
             'Ready To Start',
             'Work In Progress',
             'Pending Review',
             'Has Revision',
+            'Dependency Has Revision',
             'On Hold',
             'Stopped',
             'Completed'
         ],
         task_status_codes=[
-            'NEW',
+            'WFD',
             'RTS',
             'WIP',
             'PREV',
             'HREV',
+            'DREV',
             'OH',
             'STOP',
             'CMPL'

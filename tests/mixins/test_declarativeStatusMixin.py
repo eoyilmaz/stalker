@@ -21,12 +21,13 @@
 import unittest2
 
 from sqlalchemy import Column, Integer, ForeignKey
+from stalker import db
 from stalker.models.mixins import StatusMixin
-from stalker.db.session import DBSession
 from stalker.models.status import StatusList, Status
 
 # create a new mixed in SimpleEntity
 from stalker.models.entity import SimpleEntity
+
 
 class DeclStatMixA(SimpleEntity, StatusMixin):
     __tablename__ = "DeclStatMixAs"
@@ -38,6 +39,7 @@ class DeclStatMixA(SimpleEntity, StatusMixin):
         super(DeclStatMixA, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)
 
+
 class DeclStatMixB(SimpleEntity, StatusMixin):
     __tablename__ = "DeclStatMixBs"
     __mapper_args__ = {"polymorphic_identity": "DeclStatMixB"}
@@ -48,6 +50,7 @@ class DeclStatMixB(SimpleEntity, StatusMixin):
         super(B, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)
 
+
 class StatusMixinTester(unittest2.TestCase):
     """tests StatusMixin
     """
@@ -55,7 +58,6 @@ class StatusMixinTester(unittest2.TestCase):
     def setUp(self):
         """setup the test
         """
-
         self.test_stat1 = Status(name="On Hold", code="OH")
         self.test_stat2 = Status(name="Work In Progress", code="WIP")
         self.test_stat3 = Status(name="Approved", code="APP")
@@ -76,11 +78,13 @@ class StatusMixinTester(unittest2.TestCase):
             "name": "ozgur",
             "status_list": self.test_a_statusList
         }
-    
+
     def tearDown(self):
         """clean up the test
         """
-        DBSession.remove()
+        if db.session:
+            #db.session.remove()
+            db.session.close()
 
     def test_status_list_argument_not_set(self):
         """testing if a TypeError will be raised when the status_list argument
@@ -108,4 +112,3 @@ class StatusMixinTester(unittest2.TestCase):
         self.assertTrue(self.test_stat1 in new_a_ins.status_list)
         self.assertFalse(self.test_stat2 in new_a_ins.status_list)
         self.assertTrue(self.test_stat3 in new_a_ins.status_list)
-    

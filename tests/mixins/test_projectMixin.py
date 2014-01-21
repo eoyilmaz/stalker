@@ -21,9 +21,10 @@
 import unittest2
 
 from sqlalchemy import Column, Integer, ForeignKey
-from stalker.db.session import DBSession
+from stalker import db
 from stalker import (SimpleEntity, ProjectMixin, Status, StatusList, Type,
                      Project, Repository)
+
 
 class ProjMixClass(SimpleEntity, ProjectMixin):
     __tablename__ = "ProjMixClasses"
@@ -35,10 +36,10 @@ class ProjMixClass(SimpleEntity, ProjectMixin):
         super(ProjMixClass, self).__init__(**kwargs)
         ProjectMixin.__init__(self, **kwargs)
 
+
 class ProjectMixinTester(unittest2.TestCase):
     """Tests the ProjectMixin
     """
-
 
     def setUp(self):
         """setup the test
@@ -106,7 +107,9 @@ class ProjectMixinTester(unittest2.TestCase):
     def tearDown(self):
         """clean up the test
         """
-        DBSession.remove()
+        if db.session:
+            #db.session.remove()
+            db.session.close()
 
     def test_project_argument_is_skipped(self):
         """testing if a TypeError will be raised when the project argument is
@@ -115,14 +118,12 @@ class ProjectMixinTester(unittest2.TestCase):
         self.kwargs.pop("project")
         self.assertRaises(TypeError, ProjMixClass, **self.kwargs)
 
-
     def test_project_argument_is_None(self):
         """testing if a TypeError will be raised when the project argument is
         None
         """
         self.kwargs["project"] = None
         self.assertRaises(TypeError, ProjMixClass, **self.kwargs)
-
 
     def test_project_attribute_is_None(self):
         """testing if a TypeError will be raised when the project attribute is
@@ -131,7 +132,6 @@ class ProjectMixinTester(unittest2.TestCase):
         self.assertRaises(TypeError, setattr, self.test_foo_obj, "project",
                           None)
 
-
     def test_project_argument_is_not_a_Project_instance(self):
         """testing if a TypeError will be raised when the project argument is
         not a stalker.models.project.Project instance
@@ -139,14 +139,12 @@ class ProjectMixinTester(unittest2.TestCase):
         self.kwargs["project"] = "a project"
         self.assertRaises(TypeError, ProjMixClass, **self.kwargs)
 
-
     def test_project_attribute_is_not_a_Project_instance(self):
         """testing if a TypeError will be raised when the project attribute is
         set to something other than a stalker.models.project.Project instance
         """
         self.assertRaises(TypeError, setattr, self.test_foo_obj, "project",
                           "a project")
-
 
     def test_project_attribute_is_working_properly(self):
         """testing if the project attribute is working properly
@@ -163,5 +161,3 @@ class ProjectMixinTester(unittest2.TestCase):
 
         #self.assertRaises(AttributeError, setattr, self.test_foo_obj,
         #"project", self.test_project2)
-    
-    

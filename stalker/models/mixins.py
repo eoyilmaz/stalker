@@ -28,8 +28,8 @@ from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import synonym, relationship, validates
 
 from stalker import defaults
-from stalker.db import Base
-from stalker.db.session import DBSession
+from stalker import db
+from stalker.db.declarative import Base
 from stalker.log import logging_level
 from stalker.models import make_plural
 
@@ -184,7 +184,7 @@ class StatusMixin(object):
       .. versionadded:: 0.1.2.a4
 
         The status_list argument now can be skipped or can be None if there
-        is an active database connection (stalker.models.DBSession is not
+        is an active database connection (stalker.db.session is not
         None) and there is a suitable :class:`.StatusList` instance in the
         database whom :attr:`.StatusList.target_entity_type` attribute is set
         to the current mixed-in class name.
@@ -265,16 +265,16 @@ class StatusMixin(object):
         from stalker.models.status import StatusList
 
         if status_list is None:
-            # check if there is a db setup and try to get the appropriate 
+            # check if there is a db setup and try to get the appropriate
             # StatusList from the database
 
             # disable autoflush to prevent premature class initialization
-            with DBSession.no_autoflush:
+            with db.session.no_autoflush:
                 try:
-                    # try to get a StatusList with the target_entity_type is 
+                    # try to get a StatusList with the target_entity_type is
                     # matching the class name
-                    status_list = DBSession.query(StatusList) \
-                        .filter_by(target_entity_type=self.__class__.__name__) \
+                    status_list = StatusList.query\
+                        .filter_by(target_entity_type=self.__class__.__name__)\
                         .first()
                 except UnboundExecutionError:
                     # it is not mapped just skip it
@@ -325,7 +325,7 @@ class StatusMixin(object):
 
         # it is set to None
         if status is None:
-            with DBSession.no_autoflush:
+            with db.session.no_autoflush:
                 status = self.status_list.statuses[0]
 
         # it is not an instance of status or int
@@ -354,7 +354,7 @@ class StatusMixin(object):
                     "%s.status can not be bigger than the length of the "
                     "status_list" % self.__class__.__name__
                 )
-                # get the tatus instance out of the status_list instance
+                # get the status instance out of the status_list instance
             status = self.status_list[status]
 
         # check if the given status is in the status_list

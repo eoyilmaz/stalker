@@ -133,19 +133,29 @@ class Permission(Base):
     Users are allowed to create Projects::
 
       from stalker import db
-      from stalker.db.session import DBSession
+      from stalker import db
       from stalker.models.auth import User, Group, Permission
 
       # first setup the db with the default database
       #
-      # stalker.db.__init_db__ will create all the Actions possible with the
+      # stalker.db.init() will create all the Actions possible with the
       # SOM classes automatically
       #
       # What is left to you is to create the permissions
-      setup.db()
+      db.setup()
 
-      user1 = User(login='test_user1', password='1234')
-      user2 = User(login='test_user2', password='1234')
+      user1 = User(
+          name='Test User',
+          login='test_user1',
+          password='1234',
+          email='testuser1@test.com'
+      )
+      user2 = User(
+          name='Test User',
+          login='test_user2',
+          password='1234',
+          email='testuser2@test.com'
+      )
 
       group1 = Group(name='users')
       group1.users = [user1, user2]
@@ -165,8 +175,8 @@ class Permission(Base):
       group1.permissions.append(permission)
 
       # and persist this information in the database
-      DBSession.add(group)
-      DBSession.commit()
+      db.session.add(group)
+      db.session.commit()
     """
     __tablename__ = 'Permissions'
     __table_args__ = (
@@ -554,7 +564,7 @@ class User(Entity, ACLMixin):
     def __repr__(self):
         """return the representation of the current User
         """
-        return "<User (%s ('%s'))>" % (self.name, self.login)
+        return "<%s ('%s') (User)>" % (self.name, self.login)
 
     def __eq__(self, other):
         """the equality operator

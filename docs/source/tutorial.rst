@@ -55,9 +55,9 @@ or::
    .. _engine: http://www.sqlalchemy.org/docs/core/engines.html
    .. _mapping: http://www.sqlalchemy.org/docs/orm/mapper_config.html
 
-Lets continue by creating a :class:`~stalker.models.user.User` for ourselves in
-the database. The first thing we need to do is to import the
-:class:`~stalker.models.user.User` class in to the current namespace::
+Lets continue by creating a **User** for ourselves in the database. The first
+thing we need to do is to import the :class:`.User` class in to the current
+namespace::
 
   from stalker import User
 
@@ -66,14 +66,14 @@ then create the :class:`~stalker.models.user.User` object::
   myUser = User(
       name="Erkan Ozgur Yilmaz",
       login="eoyilmaz",
-      email="eoyilmaz@gmail.com",
+      email="some_email_address@gmail.com",
       password="secret",
       description="This is me"
   )
 
-Our studio possibly has **Departments**. Lets add a new
-:class:`~stalker.models.department.Department` object to define your
-department::
+Now we have just created a user which represents us.
+
+Lets create a new :class:`.Department` to define your department::
 
   from stalker import Department
   tds_department = Department(
@@ -83,32 +83,34 @@ department::
 
 Now add your user to the department::
 
-  tds_department.members.append(myUser)
+  tds_department.users.append(myUser)
 
-or::
+or we can do it by using the User instance::
 
   myUser.department = tds_department
 
-We have created successfully a :class:`~stalker.models.user.User` and a
-:class:`~stalker.models.department.Department` and we assigned the user as one
-of the member of the **TDs Department**.
+We have successfully created a :class:`.User` and a :class:`.Department` and we
+assigned the user as one of the member of the **TDs Department**.
 
-For now, because we didn't tell Stalker to commit the changes, no data has been
-saved to the database yet. So lets send it the data to the database::
+Because we didn't tell Stalker to commit the changes, no data has been saved to
+the database yet. So lets send it the data to the database::
 
   db.session.add(myUser)
   db.session.add(tds_department)
   db.session.commit()
 
-These information are in the database right now. Lets show this by querying all
-the departments, then getting the second one (the first department is always
-the "admins" which is created by default) and getting its first members name::
+As you see we have used the ``db.session`` object to send the data to the
+database. These information are in the database right now.
+
+Lets try to get something back from the database by querying all the
+departments, then getting the second one (the first department is always the
+"admins" which is created by default) and getting its first members name::
 
   all_departments = Department.query.all()
   all_members = all_departments[1].members
-  print all_members[0].name
+  print all_members[0]
 
-this should print out "Erkan Ozgur Yilmaz".
+this should print out "<User (Erkan Ozgur Yilmaz ('eoyilmaz'))>".
 
 Part II/A - Creating Simple Data
 ================================

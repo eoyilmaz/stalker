@@ -210,9 +210,9 @@ class StatusList(Entity, TargetEntityTypeMixin):
     def __getitem__(self, key):
         """the indexing attributes for getting item
         """
-        from stalker.db import DBSession
+        from stalker import db
 
-        with DBSession.no_autoflush:
+        with db.session.no_autoflush:
             return_item = None
             if isinstance(key, (str, unicode)):
                 for item in self.statuses:

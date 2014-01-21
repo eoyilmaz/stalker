@@ -292,7 +292,7 @@ class SequenceTester(unittest2.TestCase):
         self.assertItemsEqual(new_sequence.tasks, tasks)
 
         # UPDATE THIS: This test needs to be in the tests.db
-        # because the property it is testing is using DBSession.query
+        # because the property it is testing is using session.query
         #
         #def test_sequences_attribute_is_updated_in_the_project_instance(self):
         #"""testing if the sequences attribute is updated in the Project

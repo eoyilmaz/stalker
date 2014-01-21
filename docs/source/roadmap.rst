@@ -21,3 +21,7 @@ Below you can find the roadmap based on the version
 ------
  * Web interface
  * Complete ProdAM capabilities.
+
+0.3.0:
+------
+ * Complete working Event system

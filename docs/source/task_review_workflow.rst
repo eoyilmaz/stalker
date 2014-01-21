@@ -111,7 +111,7 @@ WIP.
 The following workflow diagram shows the status workflow, and it is a good idea
 to study this to become familiar with the task statuses used in Stalker.
 
-.. image:: ../../../docs/source/images/Task_Status_Workflow.png
+.. image:: ../../../docs/source/_static/images/Task_Status_Workflow.png
       :width: 637 px
       :height: 381 px
       :align: center
@@ -122,16 +122,16 @@ Revision Counter
 Both :class:`.Task` instances and :class:`.Review` instances have an attribute
 called ``revision_number``. Each Review with the same revision_number
 considered in the same set of revisions. It is only possible to have multiple
-Review instances with the same revision_number value if there are more than
-one responsible for a Task.
+Review instances with the same revision_number value if their :attr:`.reviewer`
+attribute are different.
 
 The :attr:`.Task.revision_number` starts from 0 and this represents the base or
 initial revision and it is increased by 1 when one of the resources request a
 review (by calling :meth:`.Task.request_review()`).
 
 A newly created Review instance will have a revision_number which is equal to
-the value of the Task.revision_number at the time it is created. But it never
-will or should be 0 cause this represents the base or initial revision.
+the value of the Task.revision_number + 1 at the time it is created. But it
+never will or should be 0 cause this represents the base or initial revision.
 
 So, a Task with revision_number is 0 has no revision yet. A Task with revision
 number is set to 2 has two sets of Revisions.

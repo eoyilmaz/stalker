@@ -25,7 +25,6 @@ from stalker.exceptions import CircularDependencyError
 
 from stalker import db
 from stalker import defaults
-from stalker.db.session import DBSession
 from stalker import (Entity, Project, Repository, StatusList, Status, Task,
                      Type, User, TimeLog)
 from stalker.models.task import CONSTRAIN_END, CONSTRAIN_BOTH
@@ -48,16 +47,21 @@ class TaskTester(unittest2.TestCase):
     def setUp(self):
         """run before every test
         """
-        # create a new DBSession
+        # create a new session
         db.setup({
             "sqlalchemy.url": "sqlite:///:memory:",
             "sqlalchemy.echo": False,
         })
         db.init()
 
-        self.status_new = Status.query.filter_by(code="NEW").first()
+        self.status_wfd = Status.query.filter_by(code="WFD").first()
+        self.status_rts = Status.query.filter_by(code="RTS").first()
         self.status_wip = Status.query.filter_by(code="WIP").first()
         self.status_prev = Status.query.filter_by(code="PREV").first()
+        self.status_hrev = Status.query.filter_by(code="HREV").first()
+        self.status_drev = Status.query.filter_by(code="DREV").first()
+        self.status_oh = Status.query.filter_by(code="OH").first()
+        self.status_stop = Status.query.filter_by(code="STOP").first()
         self.status_cmpl = Status.query.filter_by(code="CMPL").first()
 
         self.task_status_list = StatusList.query\
@@ -160,7 +164,8 @@ class TaskTester(unittest2.TestCase):
     def tearDown(self):
         """run after every test and clean up
         """
-        DBSession.remove()
+        if db.session:
+            db.session.close()
         defaults.timing_resolution = datetime.timedelta(hours=1)
 
     def test___auto_name__class_attribute_is_set_to_False(self):
@@ -1849,8 +1854,8 @@ class TaskTester(unittest2.TestCase):
             end=now + dt(103)
         )
 
-        DBSession.add_all([new_time_log1, new_time_log2, new_time_log3])
-        DBSession.commit()
+        db.session.add_all([new_time_log1, new_time_log2, new_time_log3])
+        db.session.commit()
 
         # check if everything is in place
         self.assertIn(new_time_log1, self.test_task.time_logs)
@@ -1866,7 +1871,7 @@ class TaskTester(unittest2.TestCase):
         # there needs to be a database session commit to remove the time_log
         # from the previous tasks time_logs attribute
 
-        DBSession.commit()
+        db.session.commit()
 
         self.assertIn(new_time_log3, self.test_task.time_logs)
         self.assertNotIn(new_time_log3, new_task.time_logs)
@@ -2840,8 +2845,8 @@ class TaskTester(unittest2.TestCase):
         task3.parent = task1
 
         # we need to commit the Session
-        DBSession.add_all([task1, task2, task3])
-        DBSession.commit()
+        db.session.add_all([task1, task2, task3])
+        db.session.commit()
 
         self.assertTrue(task2.is_leaf)
         self.assertTrue(task3.is_leaf)
@@ -2871,8 +2876,8 @@ class TaskTester(unittest2.TestCase):
         task3.parent = task1
 
         # we need to commit the Session
-        DBSession.add_all([task1, task2, task3])
-        DBSession.commit()
+        db.session.add_all([task1, task2, task3])
+        db.session.commit()
 
         self.assertFalse(task2.is_root)
         self.assertFalse(task3.is_root)
@@ -2900,13 +2905,13 @@ class TaskTester(unittest2.TestCase):
         task3 = Task(**self.kwargs)
 
         # we need to commit the Session
-        DBSession.add_all([task1, task2, task3])
-        DBSession.commit()
+        db.session.add_all([task1, task2, task3])
+        db.session.commit()
 
         task2.parent = task1
         task3.parent = task1
 
-        DBSession.commit()
+        db.session.commit()
 
         self.assertFalse(task2.is_container)
         self.assertFalse(task3.is_container)
@@ -3191,12 +3196,12 @@ class TaskTester(unittest2.TestCase):
             status_list=self.task_status_list
         )
 
-        DBSession.add_all([task1, task2, task3, task4])
-        DBSession.commit()
+        db.session.add_all([task1, task2, task3, task4])
+        db.session.commit()
 
         # move task4 dependency to task2
         task4.depends = [task2]
-        DBSession.commit()
+        db.session.commit()
 
     def test_parent_attribute_checks_cycle_on_self(self):
         """Bug ID: None
@@ -3930,23 +3935,23 @@ class TaskTester(unittest2.TestCase):
             project=self.test_task.project,
             links=[self.test_task]
         )
-        DBSession.add(new_ticket1)
-        DBSession.commit()
+        db.session.add(new_ticket1)
+        db.session.commit()
 
         new_ticket2 = Ticket(
             project=self.test_task.project,
             links=[self.test_task]
         )
-        DBSession.add(new_ticket2)
-        DBSession.commit()
+        db.session.add(new_ticket2)
+        db.session.commit()
 
         # add some other tickets
         new_ticket3 = Ticket(
             project=self.test_task.project,
             links=[]
         )
-        DBSession.add(new_ticket3)
-        DBSession.commit()
+        db.session.add(new_ticket3)
+        db.session.commit()
 
         self.assertItemsEqual(
             self.test_task.tickets,
@@ -3970,27 +3975,27 @@ class TaskTester(unittest2.TestCase):
             project=self.test_task.project,
             links=[self.test_task]
         )
-        DBSession.add(new_ticket1)
-        DBSession.commit()
+        db.session.add(new_ticket1)
+        db.session.commit()
 
         new_ticket2 = Ticket(
             project=self.test_task.project,
             links=[self.test_task]
         )
-        DBSession.add(new_ticket2)
-        DBSession.commit()
+        db.session.add(new_ticket2)
+        db.session.commit()
 
         # close this ticket
         new_ticket2.resolve(None, 'fixed')
-        DBSession.commit()
+        db.session.commit()
 
         # add some other tickets
         new_ticket3 = Ticket(
             project=self.test_task.project,
             links=[]
         )
-        DBSession.add(new_ticket3)
-        DBSession.commit()
+        db.session.add(new_ticket3)
+        db.session.commit()
 
         self.assertItemsEqual(
             self.test_task.open_tickets,
@@ -4002,19 +4007,32 @@ class TaskTester(unittest2.TestCase):
         """
         self.assertEqual(self.test_task.reviews, [])
 
-    def test_status_is_NEW_for_a_newly_created_task(self):
-        """testing if the status for a newly created task is NEW by default
+    def test_status_is_WFD_for_a_newly_created_task_with_dependencies(self):
+        """testing if the status for a newly created task is WFD by default if
+        there are dependencies
         """
         # try to trick it
         self.kwargs['status'] = self.status_cmpl
         new_task = Task(**self.kwargs)
         self.assertEqual(
-            new_task.status, self.status_new
+            new_task.status, self.status_wfd
+        )
+
+    def test_status_is_RTS_for_a_newly_created_task_without_dependency(self):
+        """testing if the status for a newly created task is RTS by default if
+        there are no dependencies
+        """
+        # try to trick it
+        self.kwargs['status'] = self.status_cmpl
+        self.kwargs.pop('depends')
+        new_task = Task(**self.kwargs)
+        self.assertEqual(
+            new_task.status, self.status_rts
         )
 
 
-class TaskReviewWorkflowTestCase(unittest2.TestCase):
-    """tests the Task Workflow
+class TaskStatusWorkflowTestCase(unittest2.TestCase):
+    """tests the Task Status Workflow
     """
 
     def setUp(self):
@@ -4030,7 +4048,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
             email='tuser1@test.com',
             password='secret'
         )
-        DBSession.add(self.test_user1)
+        db.session.add(self.test_user1)
 
         self.test_user2 = User(
             name='Test User 2',
@@ -4038,14 +4056,15 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
             email='tuser2@test.com',
             password='secret'
         )
-        DBSession.add(self.test_user2)
+        db.session.add(self.test_user2)
 
         # create a couple of tasks
-        self.status_new = Status.query.filter_by(code='NEW').first()
+        self.status_wfd = Status.query.filter_by(code='WFD').first()
         self.status_rts = Status.query.filter_by(code='RTS').first()
         self.status_wip = Status.query.filter_by(code='WIP').first()
         self.status_prev = Status.query.filter_by(code='PREV').first()
         self.status_hrev = Status.query.filter_by(code='HREV').first()
+        self.status_drev = Status.query.filter_by(code='DREV').first()
         self.status_oh = Status.query.filter_by(code='OH').first()
         self.status_stop = Status.query.filter_by(code='STOP').first()
         self.status_cmpl = Status.query.filter_by(code='CMPL').first()
@@ -4053,14 +4072,14 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         self.test_project_status_list = StatusList(
             name='Project Statuses',
             target_entity_type='Project',
-            statuses=[self.status_new, self.status_wip,
+            statuses=[self.status_wfd, self.status_wip,
                       self.status_cmpl]
         )
-        DBSession.add(self.test_project_status_list)
+        db.session.add(self.test_project_status_list)
 
         self.test_task_statuses = StatusList.query\
             .filter_by(target_entity_type='Task').first()
-        DBSession.add(self.test_task_statuses)
+        db.session.add(self.test_task_statuses)
 
         # repository
         tempdir = tempfile.gettempdir()
@@ -4070,7 +4089,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
             windows_path=tempdir,
             osx_path=tempdir
         )
-        DBSession.add(self.test_repo)
+        db.session.add(self.test_repo)
 
         # proj1
         self.test_project1 = Project(
@@ -4082,7 +4101,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
             end=datetime.datetime(2013, 6, 30, 0, 0, 0),
             lead=self.test_user1
         )
-        DBSession.add(self.test_project1)
+        db.session.add(self.test_project1)
 
         # root tasks
         self.test_task1 = Task(
@@ -4095,7 +4114,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
             schedule_unit='d',
             schedule_model='effort',
         )
-        DBSession.add(self.test_task1)
+        db.session.add(self.test_task1)
 
         self.test_task2 = Task(
             name='Test Task 2',
@@ -4107,7 +4126,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
             schedule_unit='d',
             schedule_model='effort',
         )
-        DBSession.add(self.test_task2)
+        db.session.add(self.test_task2)
 
         self.test_task3 = Task(
             name='Test Task 3',
@@ -4120,7 +4139,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
             schedule_unit='d',
             schedule_model='effort',
         )
-        DBSession.add(self.test_task3)
+        db.session.add(self.test_task3)
 
         # children tasks
 
@@ -4128,7 +4147,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         self.test_task4 = Task(
             name='Test Task 4',
             parent=self.test_task1,
-            status=self.status_new,
+            status=self.status_wfd,
             status_list=self.test_task_statuses,
             resources=[self.test_user1],
             depends=[self.test_task3],
@@ -4138,7 +4157,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
             schedule_unit='d',
             schedule_model='effort',
         )
-        DBSession.add(self.test_task4)
+        db.session.add(self.test_task4)
 
         self.test_task5 = Task(
             name='Test Task 5',
@@ -4152,7 +4171,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
             schedule_unit='d',
             schedule_model='effort',
         )
-        DBSession.add(self.test_task5)
+        db.session.add(self.test_task5)
 
         self.test_task6 = Task(
             name='Test Task 6',
@@ -4165,7 +4184,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
             schedule_unit='d',
             schedule_model='effort',
         )
-        DBSession.add(self.test_task6)
+        db.session.add(self.test_task6)
 
         # children of self.test_task2
         self.test_task7 = Task(
@@ -4179,7 +4198,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
             schedule_unit='d',
             schedule_model='effort',
         )
-        DBSession.add(self.test_task7)
+        db.session.add(self.test_task7)
 
         self.test_task8 = Task(
             name='Test Task 8',
@@ -4192,11 +4211,11 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
             schedule_unit='d',
             schedule_model='effort',
         )
-        DBSession.add(self.test_task8)
+        db.session.add(self.test_task8)
 
         self.test_asset_status_list = StatusList.query\
             .filter_by(target_entity_type='Asset').first()
-        DBSession.add(self.test_asset_status_list)
+        db.session.add(self.test_asset_status_list)
 
         # create an asset in between
         from stalker import Asset
@@ -4211,7 +4230,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
             ),
             status_list=self.test_asset_status_list
         )
-        DBSession.add(self.test_asset1)
+        db.session.add(self.test_asset1)
 
         # new task under asset
         self.test_task9 = Task(
@@ -4224,8 +4243,8 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
             schedule_unit='d',
             schedule_model='effort',
         )
-        DBSession.add(self.test_task9)
-        DBSession.flush()
+        db.session.add(self.test_task9)
+        db.session.flush()
 
         # --------------
         # Task Hierarchy
@@ -4259,239 +4278,3038 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
             self.test_asset1
         ]
 
-    # Leaf Tasks - status changes
-    # NEW
-    def test_leaf_NEW_task_updated_to_have_a_dependency_of_NEW_task_task(self):
-        """testing if it is possible to set a dependency between a task with
-        NEW status to a task with NEW status and the status of the task will
-        stay NEW
-        """
-        # make a task with NEW status
-        self.test_task8.status = self.status_new
-        self.assertEqual(self.test_task8.status, self.status_new)
-        self.test_task9.status = self.status_new
-        self.assertEqual(self.test_task9.status, self.status_new)
-        # find a NEW task
-        self.test_task3.depends.append(self.test_task9)
-        self.assertEqual(self.test_task3.status, self.status_new)
-        # create dependency
-        self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_new)
+    # Leaf Tasks
+    # Setting Status directly
+    #
+    # The following tests are testing a leaf task status is directly set to a
+    # status. In some cases Stalker will prevent having meaningless statuses,
+    # like having a WFD task which doesn't have a dependency or setting to WIP
+    # without having a TimeLog yet or setting it to RTS when there are TimeLogs
+    # etc.
 
-    def test_leaf_NEW_task_updated_to_have_a_dependency_of_RTS_task(self):
-        """testing if it is possible to set a dependency between a task with
-        NEW status to a task with RTS status and the status of the task will
-        stay NEW
+    # leaf: WFD -> RTS
+    def test_leaf_WFD_task_updated_to_RTS_while_dependencies_are_still_not_CMPL(self):
+        """testing if a WFD task status will stay WFD when it is set to RTS
+        when its dependencies are still not CMPL
         """
-        # make a task with RTS status
-        self.test_task8.status = self.status_rts
+        # expect the task3 status to be RTS before setting the dependency
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # expect the status of task8 to be RTS
         self.assertEqual(self.test_task8.status, self.status_rts)
-        self.test_task9.status = self.status_new
-        self.assertEqual(self.test_task9.status, self.status_new)
-        # find a NEW task
-        self.test_task3.depends.append(self.test_task9)
-        self.assertEqual(self.test_task3.status, self.status_new)
-        # create dependency
+        # create a dependency between task3 and task8
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_new)
+        # expect the status to be WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        # now try to force it to be rts
+        self.test_task3.status = self.status_rts
+        # and expect the status to be still WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
 
-    def test_leaf_NEW_task_updated_to_have_a_dependency_of_WIP_task(self):
-        """testing if it is possible to set a dependency between a task with
-        NEW status to a task with WIP status and the status of the task will
-        stay NEW
+    # leaf: WFD -> OH
+    def test_leaf_WFD_task_updated_to_OH(self):
+        """testing if a WFD task status stays WFD when its set to OH
         """
-        # make a task with WIP status
-        self.test_task8.status = self.status_wip
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create a dependency between task3 and task8
+        self.test_task3.depends = [self.test_task8]
+
+        # check the statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # now try to force it to be OH
+        self.test_task3.status = self.status_oh
+
+        # and expect the status to be WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+    # leaf: WFD -> STOP
+    def test_leaf_WFD_task_updated_to_STOP(self):
+        """testing if a WFD task status stays WFD when its set to STOP
+        """
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create a dependency between task3 and task8
+        self.test_task3.depends = [self.test_task8]
+
+        # check the statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # now try to force it to be STOP
+        self.test_task3.status = self.status_stop
+
+        # and expect the status to be WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+    # leaf: WFD -> WIP
+    def test_leaf_WFD_task_updated_to_WIP(self):
+        """testing if a WFD task status will stay WFD when it is updated to WIP
+        """
+        # expect the task3 status to be RTS before setting the dependency
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # expect the status of task8 to be RTS
+        self.assertEqual(self.test_task8.status, self.status_rts)
+        # create a dependency between task3 and task8
+        self.test_task3.depends.append(self.test_task8)
+        # expect the status to be WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        # now try to force it to be wip
+        self.test_task3.status = self.status_wip
+        # and expect the status to be still WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+    # leaf: WFD -> PREV
+    def test_leaf_WFD_task_updated_to_PREV(self):
+        """testing if a WFD task status will stay WFD when it is updated to
+        PREV
+        """
+        # expect the task3 status to be RTS before setting the dependency
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # expect the status of task8 to be RTS
+        self.assertEqual(self.test_task8.status, self.status_rts)
+        # create a dependency between task3 and task8
+        self.test_task3.depends.append(self.test_task8)
+        # expect the status to be WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        # now try to force it to be PREV
+        self.test_task3.status = self.status_prev
+        # and expect the status to be still WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+    # leaf: WFD -> HREV
+    def test_leaf_WFD_task_updated_to_HREV(self):
+        """testing if a WFD task status will stay WFD when it is updated to
+        HREV
+        """
+        # expect the task3 status to be RTS before setting the dependency
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # expect the status of task8 to be RTS
+        self.assertEqual(self.test_task8.status, self.status_rts)
+        # create a dependency between task3 and task8
+        self.test_task3.depends.append(self.test_task8)
+        # expect the status to be WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        # now try to force it to be HREV
+        self.test_task3.status = self.status_hrev
+        # and expect the status to be still WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+    # leaf: WFD -> DREV
+    def test_leaf_WFD_task_updated_to_DREV(self):
+        """testing if a WFD task status will stay WFD when it is updated to
+        DREV
+        """
+        # expect the task3 status to be RTS before setting the dependency
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # expect the status of task8 to be RTS
+        self.assertEqual(self.test_task8.status, self.status_rts)
+        # create a dependency between task3 and task8
+        self.test_task3.depends.append(self.test_task8)
+        # expect the status to be WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        # now try to force it to be DREV
+        self.test_task3.status = self.status_drev
+        # and expect the status to be still WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+    # leaf: WFD -> CMPL
+    def test_leaf_WFD_task_updated_to_CMPL(self):
+        """testing if a WFD task status will stay WFD when it is updated to
+        CMPL
+        """
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create a dependency between task3 and task8
+        self.test_task3.depends = [self.test_task8]
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # now try to set task3.status to CMPL
+        self.test_task3.status = self.status_cmpl
+
+        # and expect the status to be still WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+    # leaf: RTS -> WFD
+    def test_leaf_RTS_task_updated_to_WFD_while_dependencies_CMPL(self):
+        """testing if a RTS task status will stay RTS when it is updated to WFD
+        when its dependencies are still CMPL
+        """
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create dependency
+        self.test_task3.depends = [self.test_task8]
+        self.test_task8.depends = []
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP -> PREV -> CMPL
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resouce=self.test_task8.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the status is updated to WIP
         self.assertEqual(self.test_task8.status, self.status_wip)
-        self.test_task9.status = self.status_new
-        self.assertEqual(self.test_task8.status, self.status_new)
-        # find a NEW task
-        self.test_task3.depends.append(self.test_task9)
-        self.assertEqual(self.test_task3.status, self.status_new)
-        # create dependency
-        self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_new)
 
-    def test_leaf_NEW_task_updated_to_have_a_dependency_of_PREV_task(self):
-        """testing if it is possible to set a dependency between a task with
-        NEW status to a task with PREV status and the status of the task will
-        stay NEW
-        """
-        # make a task with PREV status
+        # now update to PREV
         self.test_task8.status = self.status_prev
         self.assertEqual(self.test_task8.status, self.status_prev)
-        self.test_task9.status = self.status_new
-        self.assertEqual(self.test_task9.status, self.status_new)
-        # find a NEW task
-        self.test_task3.depends.append(self.test_task9)
-        self.assertEqual(self.test_task3.status, self.status_new)
-        # create dependency
-        self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_new)
 
-    def test_leaf_task_NEW_task_updated_to_have_a_dependency_of_HREV_task(self):
-        """testing if it is possible to set a dependency between a task with
-        NEW status to a task with HREV status and the status of the task will
-        stay NEW
-        """
-        # make a task with HREV status
-        self.test_task8.status = self.status_hrev
-        self.assertEqual(self.test_task8.status, self.status_hrev)
-        self.test_task9.status = self.status_new
-        self.assertEqual(self.test_task9.status, self.status_new)
-        # find a NEW task
-        self.test_task3.depends.append(self.test_task9)
-        self.assertEqual(self.test_task3.status, self.status_new)
-        # create dependency
-        self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_new)
-
-    def test_leaf_NEW_task_updated_to_have_a_dependency_of_OH_task(self):
-        """testing if it is possible to set a dependency between a task with
-        NEW status to a task with OH status and the status of the task will
-        stay NEW
-        """
-        # make a task with OH status
-        self.test_task8.status = self.status_oh
-        self.assertEqual(self.test_task8.status, self.status_oh)
-        self.test_task9.status = self.status_new
-        self.assertEqual(self.test_task9.status, self.status_new)
-        # find a NEW task
-        self.test_task3.depends.append(self.test_task9)
-        self.assertEqual(self.test_task3.status, self.status_new)
-        # create dependency
-        self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_new)
-
-    def test_leaf_NEW_task_updated_to_have_a_dependency_of_STOP_task(self):
-        """testing if it is possible to set a dependency between a task with
-        NEW status to a task with STOP status and the status of the task will
-        stay NEW
-        """
-        # make a task with STOP status
-        self.test_task8.status = self.status_stop
-        self.assertEqual(self.test_task8.status, self.status_stop)
-        self.test_task9.status = self.status_new
-        self.assertEqual(self.test_task9.status, self.status_new)
-        # find a NEW task
-        self.test_task3.depends.append(self.test_task9)
-        self.assertEqual(self.test_task3.status, self.status_new)
-        # create dependency
-        self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_rts)
-
-    def test_leaf_NEW_task_updated_to_have_a_dependency_of_CMPL_task(self):
-        """testing if it is possible to set a dependency between a task with
-        NEW status to a task with CMPL status and the status of the task will
-        stay NEW
-        """
-        # make a task with CMPL status
+        # and then CMPL
         self.test_task8.status = self.status_cmpl
         self.assertEqual(self.test_task8.status, self.status_cmpl)
-        # find a NEW task
-        self.test_task3.depends.append(self.test_task9)
-        self.assertEqual(self.test_task3.status, self.status_new)
-        # create dependency
-        self.test_task3.depends.append(self.test_task8)
+
+        # now try to set the task3.status to WFD
+        self.test_task3.status = self.status_wfd
+
+        # and expect the status to be still RTS
         self.assertEqual(self.test_task3.status, self.status_rts)
 
-    # Leaf Tasks - dependency changes
-    # RTS
-    def test_leaf_RTS_task_updated_to_have_a_dependency_of_NEW_task_task(self):
-        """testing if it is possible to set a dependency between a task with
-        RTS status to a task with NEW status but the status of the task is
-        updated from RTS to NEW
+    # leaf: RTS -> WFD
+    def test_leaf_RTS_task_updated_to_WFD_while_dependencies_STOP(self):
+        """testing if a RTS task status will stay RTS when it is updated to WFD
+        when its dependencies are still STOP
         """
-        # make a task with NEW status
-        self.test_task8.status = self.status_new
-        self.assertEqual(self.test_task8.status, self.status_new)
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create a dependency between task3 and task8
+        self.test_task3.depends = [self.test_task8]
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # update dependencies to CMPL
+        # create a time log to be able to set it to WIP -> PREV -> CMPL
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resouce=self.test_task8.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # and then STOP
+        self.test_task8.status = self.status_stop
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # expect the status to be RTS
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # now try to force it to be WFD again
+        self.test_task3.status = self.status_wfd
+
+        # and expect the status to be still RTS
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+    # leaf: RTS -> WFD
+    def test_leaf_RTS_task_updated_to_WFD_while_dependencies_are_not_CMPL(self):
+        """testing if a RTS task status will be WFD when it is updated to WFD
+        when its dependencies are not CMPL or STOP
+        """
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create a dependency between task3 and task8
+        self.test_task3.depends = [self.test_task8]
+
+        # check statuses
+        self.assertEqual(self.test_tsak3.status, self.status_wfd)
+        self.assertEqual(self.test_tsak8.status, self.status_rts)
+
+    # leaf: RTS -> OH
+    def test_leaf_RTS_task_updated_to_OH(self):
+        """testing if a RTS task status will be OH when it is set to OH
+        """
+        # check initial statuses
+        self.assertEqual(self.test_task3.depends, [])
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # now try to force it to be OH
+        self.test_task3.status = self.status_oh
+
+        # and expect the status to be RTS
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+    # leaf: RTS -> STOP
+    def test_leaf_RTS_task_updated_to_STOP(self):
+        """testing if a RTS task status will stay RTS when it is set to STOP
+        """
+        # expect the task3 status to be RTS
+        self.assertEqual(self.test_task3.depends, [])
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # now try to set it to be STOP
+        self.test_task3.status = self.status_stop
+
+        # and expect the status to be RTS
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+    # leaf: RTS -> WIP w/o TimeLogs
+    def test_leaf_RTS_task_updated_to_WIP_without_TimeLogs(self):
+        """testing if a RTS task status will stay RTS when it is set to WIP
+        if there are no TimeLogs entered
+        """
+        # expect the task3 status to be RTS
+        self.assertEqual(self.test_task3.depends, [])
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # now try to force it to be WIP
+        self.test_task3.status = self.status_wip
+        # and expect the status to be RTS
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+    # leaf: RTS -> PREV
+    def test_leaf_RTS_task_updated_to_PREV(self):
+        """testing if a RTS task status will stay RTS when it is set to PREV
+        """
+        # expect the task3 status to be RTS
+        self.assertEqual(self.test_task3.depends, [])
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # now try to force it to be PREV
+        self.test_task3.status = self.status_prev
+        # and expect the status to be RTS
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+    # leaf: RTS -> HREV
+    def test_leaf_RTS_task_updated_to_HREV(self):
+        """testing if a RTS task status will stay RTS when it is set to HREV
+        """
+        # expect the task3 status to be RTS
+        self.assertEqual(self.test_task3.depends, [])
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # now try to force it to be HREV
+        self.test_task3.status = self.status_hrev
+        # and expect the status to be RTS
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+    # leaf: RTS -> DREV
+    def test_leaf_RTS_task_updated_to_DREV(self):
+        """testing if a RTS task status will stay RTS when it is set to DREV
+        """
+        # expect the task3 status to be RTS
+        self.assertEqual(self.test_task3.depends, [])
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # now try to force it to be DREV
+        self.test_task3.status = self.status_drev
+        # and expect the status to be RTS
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+    # leaf: RTS -> CMPL
+    def test_leaf_RTS_task_updated_to_CMPL(self):
+        """testing if a RTS task status will stay RTS when it is set to CMPL
+        """
+        # expect the task3 status to be RTS
+        self.assertEqual(self.test_task3.depends, [])
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # now try to force it to be CMPL
+        self.test_task3.status = self.status_cmpl
+        # and expect the status to be RTS
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+    # leaf: OH -> WFD
+    def test_leaf_OH_task_updated_to_WFD_while_dependencies_CMPL(self):
+        """testing if a OH task status will stay OH when it is updated to WFD
+        when its dependencies are still CMPL
+        """
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create a dependency between task3 and task8
+        self.test_task3.depends = [self.test_task8]
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # update dependencies to CMPL
+        # create a time log to be able to set it to WIP -> PREV -> CMPL
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resouce=self.test_task8.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # now update to PREV
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
+
+        # and then CMPL
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+
+        # expect task3.status to be RTS
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # enter time log to make it WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resouce=self.test_task8.resource[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # set it to OH
+        self.test_task3.status = self.status_oh
+
+        # now try to force it to be WFD again
+        self.test_task3.status = self.status_wfd
+
+        # and expect the status to be still oh
+        self.assertEqual(self.test_task3.status, self.status_oh)
+
+    # leaf: OH -> RTS
+    def test_leaf_OH_task_updated_to_RTS(self):
+        """testing if a OH task status will stay OH when it is set to RTS
+        """
+        # expect the task3 status to be RTS
+        self.assertEqual(self.test_task3.depends, [])
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # enter time log to make it WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now set it to OH
+        self.test_task3.status = self.status_oh
+        self.assertEqual(self.test_task3.status, self.status_oh)
+
+        # now set it back to RTS
+        self.test_task3.status = self.status_rts
+
+        # and expect the status to be OH
+        self.assertEqual(self.test_task3.status, self.status_oh)
+
+    # leaf: OH -> STOP
+    def test_leaf_OH_task_updated_to_STOP(self):
+        """testing if a OH task status will stay OH when it is set to STOP
+        """
+        # expect the task3 status to be RTS
+        self.assertEqual(self.test_task3.depends, [])
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # enter time log to make it WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now set it to OH
+        self.test_task3.status = self.status_oh
+        self.assertEqual(self.test_task3.status, self.status_oh)
+
+        # now set it back to STOP
+        self.test_task3.status = self.status_stop
+
+        # and expect the status to be OH
+        self.assertEqual(self.test_task3.status, self.status_oh)
+
+    # leaf: OH -> WIP
+    def test_leaf_OH_task_updated_to_WIP(self):
+        """testing if a OH task status will be WIP when it is set to WIP
+        """
+        # expect the task3 status to be RTS
+        self.assertEqual(self.test_task3.depends, [])
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # enter time log to make it WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now set it to OH
+        self.test_task3.status = self.status_oh
+        self.assertEqual(self.test_task3.status, self.status_oh)
+
+        # now set it back to WIP
+        self.test_task3.status = self.status_wip
+
+        # and expect the status to be WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+    # leaf: OH -> PREV
+    def test_leaf_OH_task_updated_to_PREV(self):
+        """testing if a OH task status will stay OH when it is set to PREV
+        """
+        # expect the task3 status to be RTS
+        self.assertEqual(self.test_task3.depends, [])
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # now try to force it to be OH
+        self.test_task3.status = self.status_oh
+        # and expect the status to be OH
+        self.assertEqual(self.test_task3.status, self.status_oh)
+        # now try to force it to be PREV
+        self.test_task3.status = self.status_prev
+        # and expect the status to be OH
+        self.assertEqual(self.test_task3.status, self.status_oh)
+
+    # leaf: OH -> HREV
+    def test_leaf_OH_task_updated_to_HREV(self):
+        """testing if a OH task status will stay OH when it is set to HREV
+        """
+        # expect the task3 status to be RTS
+        self.assertEqual(self.test_task3.depends, [])
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # now try to force it to be OH
+        self.test_task3.status = self.status_oh
+        # and expect the status to be OH
+        self.assertEqual(self.test_task3.status, self.status_oh)
+        # now try to force it to be HREV
+        self.test_task3.status = self.status_hrev
+        # and expect the status to be OH
+        self.assertEqual(self.test_task3.status, self.status_oh)
+
+    # leaf: OH -> DREV
+    def test_leaf_OH_task_updated_to_DREV(self):
+        """testing if a OH task status will stay OH when it is set to DREV
+        """
+        # expect the task3 status to be RTS
+        self.assertEqual(self.test_task3.depends, [])
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # now try to force it to be OH
+        self.test_task3.status = self.status_oh
+        # and expect the status to be OH
+        self.assertEqual(self.test_task3.status, self.status_oh)
+        # now try to force it to be DREV
+        self.test_task3.status = self.status_drev
+        # and expect the status to be OH
+        self.assertEqual(self.test_task3.status, self.status_oh)
+
+    # leaf: OH -> CMPL
+    def test_leaf_OH_task_updated_to_CMPL(self):
+        """testing if a OH task status will stay OH when it is set to CMPL
+        """
+        # expect the task3 status to be RTS
+        self.assertEqual(self.test_task3.depends, [])
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # now try to force it to be OH
+        self.test_task3.status = self.status_oh
+        # and expect the status to be OH
+        self.assertEqual(self.test_task3.status, self.status_oh)
+        # now try to force it to be CMPL
+        self.test_task3.status = self.status_cmpl
+        # and expect the status to be OH
+        self.assertEqual(self.test_task3.status, self.status_oh)
+
+    # leaf: STOP -> WFD
+    def test_leaf_STOP_task_updated_to_WFD(self):
+        """testing if a STOP task status will stay STOP when it is updated to
+        WFD
+        """
+        # check initial status
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # set it to STOP
+        self.test_task3.status = self.status_stop
+        self.assertEqual(self.test_task3.status, self.status_stop)
+
+        # now try to force it to be WFD again
+        self.test_task3.status = self.status_wfd
+
+        # and expect the status to be still stop
+        self.assertEqual(self.test_task3.status, self.status_stop)
+
+    # leaf: STOP -> RTS
+    def test_leaf_STOP_task_updated_to_RTS(self):
+        """testing if a STOP task status will be RTS when it is set to RTS
+        """
+        # check initial status
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # set it to STOP
+        self.test_task3.status = self.status_stop
+        self.assertEqual(self.test_task3.status, self.status_stop)
+
+        # now try to force it to be RTS again
+        self.test_task3.status = self.status_rts
+
+        # and expect the status to be still stop
+        self.assertEqual(self.test_task3.status, self.status_stop)
+
+    # leaf: STOP -> OH
+    def test_leaf_STOP_task_updated_to_OH(self):
+        """testing if a STOP task status will be OH when it is set to OH
+        """
+        # check initial status
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # set it to STOP
+        self.test_task3.status = self.status_stop
+        self.assertEqual(self.test_task3.status, self.status_stop)
+
+        # now try to force it to be OH again
+        self.test_task3.status = self.status_oh
+
+        # and expect the status to be still stop
+        self.assertEqual(self.test_task3.status, self.status_stop)
+
+    # leaf: STOP -> WIP
+    def test_leaf_STOP_task_updated_to_WIP(self):
+        """testing if a STOP task status will be WIP when it is set to WIP
+        """
+        # check initial status
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # set it to STOP
+        self.test_task3.status = self.status_stop
+        self.assertEqual(self.test_task3.status, self.status_stop)
+
+        # now try to force it to be WIP again
+        self.test_task3.status = self.status_wip
+
+        # and expect the status to be WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+    # leaf: STOP -> PREV
+    def test_leaf_STOP_task_updated_to_PREV(self):
+        """testing if a STOP task status will stay STOP when it is set to PREV
+        """
+        # check initial status
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # set it to STOP
+        self.test_task3.status = self.status_stop
+        self.assertEqual(self.test_task3.status, self.status_stop)
+
+        # now try to force it to be PREV
+        self.test_task3.status = self.status_prev
+
+        # and expect the status to be still stop
+        self.assertEqual(self.test_task3.status, self.status_stop)
+
+    # leaf: STOP -> HREV
+    def test_leaf_STOP_task_updated_to_HREV(self):
+        """testing if a STOP task status will stay STOP when it is set to HREV
+        """
+        # check initial status
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # set it to STOP
+        self.test_task3.status = self.status_stop
+        self.assertEqual(self.test_task3.status, self.status_stop)
+
+        # now try to force it to be HREV
+        self.test_task3.status = self.status_hrev
+
+        # and expect the status to be still stop
+        self.assertEqual(self.test_task3.status, self.status_stop)
+
+    # leaf: STOP -> DREV
+    def test_leaf_STOP_task_updated_to_DREV(self):
+        """testing if a STOP task status will stay STOP when it is set to DREV
+        """
+        # check initial status
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # set it to STOP
+        self.test_task3.status = self.status_stop
+        self.assertEqual(self.test_task3.status, self.status_stop)
+
+        # now try to force it to be DREV
+        self.test_task3.status = self.status_drev
+
+        # and expect the status to be still stop
+        self.assertEqual(self.test_task3.status, self.status_stop)
+
+    # leaf: STOP -> CMPL
+    def test_leaf_STOP_task_updated_to_CMPL(self):
+        """testing if a STOP task status will stay STOP when it is set to CMPL
+        """
+        # check initial status
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # set it to STOP
+        self.test_task3.status = self.status_stop
+        self.assertEqual(self.test_task3.status, self.status_stop)
+
+        # now try to force it to be CMPL again
+        self.test_task3.status = self.status_cmpl
+
+        # and expect the status to be still stop
+        self.assertEqual(self.test_task3.status, self.status_stop)
+
+    # leaf: WIP -> WFD
+    def test_leaf_WIP_task_updated_to_WFD(self):
+        """testing if a WIP task status will stay WIP when it is updated to WFD
+        """
+        # expect the task3 status to be RTS before setting the dependency
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update to WFD
+        self.test_task3.status = self.status_wfd
+
+        # and expect the status to be still wip
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+    # leaf: WIP -> RTS
+    def test_leaf_WIP_task_updated_to_RTS_when_it_still_has_time_logs(self):
+        """testing if a WIP task status will be WIP when it is set to RTS when
+        it still has TimeLogs attached
+        """
+        # expect the task3 status to be RTS before setting the dependency
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update to RTS
+        self.test_task3.status = self.status_rts
+
+        # and expect the status to be still wip
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+    # leaf: WIP -> STOP
+    def test_leaf_WIP_task_updated_to_STOP(self):
+        """testing if a WIP task status will be STOP when it is set to STOP
+        """
+        # expect the task3 status to be RTS before setting the dependency
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update to STOP
+        self.test_task3.status = self.status_stop
+
+        # and expect the status to be still stop
+        self.assertEqual(self.test_task3.status, self.status_stop)
+
+    # leaf: WIP -> OH
+    def test_leaf_WIP_task_updated_to_OH(self):
+        """testing if a WIP task status will be OH when it is set to OH
+        """
+        # expect the task3 status to be RTS before setting the dependency
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update to OH
+        self.test_task3.status = self.status_oh
+
+        # and expect the status to be OH
+        self.assertEqual(self.test_task3.status, self.status_oh)
+
+    # leaf: WIP -> PREV
+    def test_leaf_WIP_task_updated_to_PREV(self):
+        """testing if a WIP task status will be PREV when it is set to PREV
+        """
+        # expect the task3 status to be RTS before setting the dependency
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update to PREV
+        self.test_task3.status = self.status_prev
+
+        # and expect the status to be PREV
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+    # leaf: WIP -> HREV
+    def test_leaf_WIP_task_updated_to_HREV(self):
+        """testing if a WIP task status will stay WIP when it is set to HREV
+        """
+        # expect the task3 status to be RTS before setting the dependency
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update to HREV
+        self.test_task3.status = self.status_hrev
+
+        # and expect the status to be WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+    # leaf: WIP -> DREV
+    def test_leaf_WIP_task_updated_to_DREV_with_no_dependency(self):
+        """testing if a WIP task status will stay WIP when it is set to DREV
+        when there are no dependent tasks
+        """
+        # expect the task3 status to be RTS before setting the dependency
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update to DREV
+        self.test_task3.status = self.status_drev
+
+        # and expect the status to be WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+    # leaf: WIP -> DREV with CMPL dependency
+    def test_leaf_WIP_task_updated_to_DREV_with_CMPL_dependency(self):
+        """testing if a WIP task status will stay WIP when it is set to DREV
+        when the dependent tasks are CMPL
+        """
+        # expect the task3 status to be RTS before setting the dependency
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # append a dependent task which is complete
+        self.test_task3.depends.append(self.test_task8)
+
+        # complete the task8
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resouce=self.test_task8.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # set it to prev
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
+
+        # set it to cmpl
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+
+        # check if task3 is rts
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update to DREV
+        self.test_task3.status = self.status_drev
+
+        # and expect the status to be WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+    # leaf: WIP -> DREV with STOP dependency
+    def test_leaf_WIP_task_updated_to_DREV_with_STOP_dependency(self):
+        """testing if a WIP task status will stay WIP when it is set to DREV
+        when the dependent tasks are STOP
+        """
+        # expect the task3 status to be RTS before setting the dependency
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # append a dependent task which is complete
+        self.test_task3.depends.append(self.test_task8)
+
+        # complete the task8
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resouce=self.test_task8.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # set it to stop
+        self.test_task8.status = self.status_stop
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # check if task3 is rts
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update to DREV
+        self.test_task3.status = self.status_drev
+
+        # and expect the status to be WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+    # leaf: WIP -> CMPL
+    def test_leaf_WIP_task_updated_to_CMPL(self):
+        """testing if a WIP task status will stay WIP when it is set to CMPL
+        """
+        # expect the task3 status to be RTS before creating a TimeLog
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update to CMPL
+        self.test_task3.status = self.status_cmpl
+
+        # and expect the status to be WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+    # leaf: PREV -> WFD
+    def test_leaf_PREV_task_updated_to_WFD(self):
+        """testing if a PREV task status will stay PREV when it is updated to
+        WFD
+        """
+        # expect the task3 status to be RTS before creating a TimeLog
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the status to PREV
+        self.test_task3.status = self.status_prev
+        # check if the status is updated to PREV
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # now update to WFD
+        self.test_task3.status = self.status_wfd
+
+        # and expect the status to be still PREV
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+    # leaf: PREV -> RTS
+    def test_leaf_PREV_task_updated_to_RTS(self):
+        """testing if a PREV task status will be PREV when it is set to RTS
+        """
+        # expect the task3 status to be RTS before creating a TimeLog
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the status to PREV
+        self.test_task3.status = self.status_prev
+        # check if the status is updated to PREV
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # now update to RTS
+        self.test_task3.status = self.status_rts
+
+        # and expect the status to be still PREV
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+    # leaf: PREV -> STOP
+    def test_leaf_PREV_task_updated_to_STOP(self):
+        """testing if a PREV task status will be PREV when it is set to STOP
+        """
+        # expect the task3 status to be RTS before creating a TimeLog
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the status to PREV
+        self.test_task3.status = self.status_prev
+        # check if the status is updated to PREV
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # now update to STOP
+        self.test_task3.status = self.status_stop
+
+        # and expect the status to be still PREV
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+    # leaf: PREV -> OH
+    def test_leaf_PREV_task_updated_to_OH(self):
+        """testing if a PREV task status will be PREV when it is set to OH
+        """
+        # expect the task3 status to be RTS before creating a TimeLog
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the status to PREV
+        self.test_task3.status = self.status_prev
+        # check if the status is updated to PREV
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # now update to OH
+        self.test_task3.status = self.status_oh
+
+        # and expect the status to be still PREV
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+    # leaf: PREV -> WIP
+    def test_leaf_PREV_task_updated_to_WIP(self):
+        """testing if a PREV task status will be PREV when it is set to WIP
+        """
+        # expect the task3 status to be RTS before creating a TimeLog
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the status to PREV
+        self.test_task3.status = self.status_prev
+        # check if the status is updated to PREV
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # now update to WIP
+        self.test_task3.status = self.status_wip
+
+        # and expect the status to be still PREV
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+    # leaf: PREV -> HREV
+    def test_leaf_PREV_task_updated_to_HREV(self):
+        """testing if a PREV task status will be HREV when it is set to HREV
+        """
+        # expect the task3 status to be RTS before creating a TimeLog
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the status to PREV
+        self.test_task3.status = self.status_prev
+        # check if the status is updated to PREV
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # now update to HREV
+        self.test_task3.status = self.status_hrev
+
+        # and expect the status to be HREV
+        self.assertEqual(self.test_task3.status, self.status_hrev)
+
+    # leaf: PREV -> DREV
+    def test_leaf_PREV_task_updated_to_DREV(self):
+        """testing if a PREV task status will stay PREV when it is set to DREV
+        """
+        # expect the task3 status to be RTS before creating a TimeLog
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the status to PREV
+        self.test_task3.status = self.status_prev
+        # check if the status is updated to PREV
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # now update to DREV
+        self.test_task3.status = self.status_drev
+
+        # and expect the status to be still PREV
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+    # leaf: PREV -> CMPL
+    def test_leaf_PREV_task_updated_to_CMPL(self):
+        """testing if a PREV task status will be CMPL when it is set to CMPL
+        """
+        # expect the task3 status to be RTS before creating a TimeLog
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the status to PREV
+        self.test_task3.status = self.status_prev
+        # check if the status is updated to PREV
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # now update to CMPL
+        self.test_task3.status = self.status_cmpl
+
+        # and expect the status to be CMPL
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+
+    # leaf: HREV -> WFD
+    def test_leaf_HREV_task_updated_to_WFD(self):
+        """testing if a HREV task status will stay HREV when it is updated to
+        WFD
+        """
+        # expect the task3 status to be RTS before creating a TimeLog
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the status to PREV
+        self.test_task3.status = self.status_prev
+        # check if the status is updated to PREV
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # now update the status to HREV
+        self.test_task3.status = self.status_hrev
+        # check if the status is updated to HREV
+        self.assertEqual(self.test_task3.status, self.status_hrev)
+
+        # now update to WFD
+        self.test_task3.status = self.status_wfd
+
+        # and expect the status to be still HREV
+        self.assertEqual(self.test_task3.status, self.status_hrev)
+
+    # leaf: HREV -> RTS
+    def test_leaf_HREV_task_updated_to_RTS(self):
+        """testing if a HREV task status will be HREV when it is set to RTS
+        """
+        # expect the task3 status to be RTS before creating a TimeLog
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the status to PREV
+        self.test_task3.status = self.status_prev
+        # check if the status is updated to PREV
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # now update the status to HREV
+        self.test_task3.status = self.status_hrev
+        # check if the status is updated to HREV
+        self.assertEqual(self.test_task3.status, self.status_hrev)
+
+        # now update to RTS
+        self.test_task3.status = self.status_rts
+
+        # and expect the status to be still HREV
+        self.assertEqual(self.test_task3.status, self.status_hrev)
+
+    # leaf: HREV -> STOP
+    def test_leaf_HREV_task_updated_to_STOP(self):
+        """testing if a HREV task status will be HREV when it is set to STOP
+        """
+        # expect the task3 status to be RTS before creating a TimeLog
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the status to PREV
+        self.test_task3.status = self.status_prev
+        # check if the status is updated to PREV
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # now update the status to HREV
+        self.test_task3.status = self.status_hrev
+        # check if the status is updated to HREV
+        self.assertEqual(self.test_task3.status, self.status_hrev)
+
+        # now update to STOP
+        self.test_task3.status = self.status_stop
+
+        # and expect the status to be still HREV
+        self.assertEqual(self.test_task3.status, self.status_hrev)
+
+    # leaf: HREV -> OH
+    def test_leaf_HREV_task_updated_to_OH(self):
+        """testing if a HREV task status will be HREV when it is set to OH
+        """
+        # expect the task3 status to be RTS before creating a TimeLog
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the status to PREV
+        self.test_task3.status = self.status_prev
+        # check if the status is updated to PREV
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # now update the status to HREV
+        self.test_task3.status = self.status_hrev
+        # check if the status is updated to HREV
+        self.assertEqual(self.test_task3.status, self.status_hrev)
+
+        # now update to OH
+        self.test_task3.status = self.status_oh
+
+        # and expect the status to be still HREV
+        self.assertEqual(self.test_task3.status, self.status_hrev)
+
+    # leaf: HREV -> WIP
+    def test_leaf_HREV_task_updated_to_WIP(self):
+        """testing if a HREV task status will be WIP when it is set to WIP
+        """
+        # expect the task3 status to be RTS before creating a TimeLog
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the status to PREV
+        self.test_task3.status = self.status_prev
+        # check if the status is updated to PREV
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # now update the status to HREV
+        self.test_task3.status = self.status_hrev
+        # check if the status is updated to HREV
+        self.assertEqual(self.test_task3.status, self.status_hrev)
+
+        # now update to WIP
+        self.test_task3.status = self.status_wip
+
+        # and expect the status to be WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+    # leaf: HREV -> PREV
+    def test_leaf_HREV_task_updated_to_PREV(self):
+        """testing if a HREV task status will be HREV when it is set to PREV
+        """
+        # expect the task3 status to be RTS before creating a TimeLog
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the status to PREV
+        self.test_task3.status = self.status_prev
+        # check if the status is updated to PREV
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # now update the status to HREV
+        self.test_task3.status = self.status_hrev
+        # check if the status is updated to HREV
+        self.assertEqual(self.test_task3.status, self.status_hrev)
+
+        # now update to PREV
+        self.test_task3.status = self.status_prev
+
+        # and expect the status to be HREV
+        self.assertEqual(self.test_task3.status, self.status_hrev)
+
+    # leaf: HREV -> DREV
+    def test_leaf_HREV_task_updated_to_DREV(self):
+        """testing if a HREV task status will stay HREV when it is set to DREV
+        """
+        # expect the task3 status to be RTS before creating a TimeLog
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the status to PREV
+        self.test_task3.status = self.status_prev
+        # check if the status is updated to PREV
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # now update the status to HREV
+        self.test_task3.status = self.status_hrev
+        # check if the status is updated to HREV
+        self.assertEqual(self.test_task3.status, self.status_hrev)
+
+        # now update to DREV
+        self.test_task3.status = self.status_drev
+
+        # and expect the status to be HREV
+        self.assertEqual(self.test_task3.status, self.status_hrev)
+
+    # leaf: HREV -> CMPL
+    def test_leaf_HREV_task_updated_to_CMPL(self):
+        """testing if a HREV task status will stay HREV when it is set to CMPL
+        """
+        # expect the task3 status to be RTS before creating a TimeLog
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the status is updated to WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the status to PREV
+        self.test_task3.status = self.status_prev
+        # check if the status is updated to PREV
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # now update the status to HREV
+        self.test_task3.status = self.status_hrev
+        # check if the status is updated to HREV
+        self.assertEqual(self.test_task3.status, self.status_hrev)
+
+        # now update to CMPL
+        self.test_task3.status = self.status_cmpl
+
+        # and expect the status to be HREV
+        self.assertEqual(self.test_task3.status, self.status_hrev)
+
+    # leaf: DREV -> WFD
+    def test_leaf_DREV_task_updated_to_WFD(self):
+        """testing if a DREV task status will stay DREV when it is updated to
+        WFD
+        """
+        # expect the task3 status to be RTS before creating a dependency
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a dependency
+        self.test_task3.depends(self.test_task8)
+
+        # expect the task3 status to be WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resouce=self.test_task8.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the task8.status is updated to WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # update it to PREV then
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
+
+        # then to CMPL
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+
+        # check if the task3.status is updated to RTS
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a TimeLog for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # and expect the status to be WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the task8.status to HREV
+        self.test_task8.status = self.status_hrev
+
+        # expect the task3.status to be DREV
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+        # now update task3.status to WFD
+        self.test_task3.status = self.status_wfd
+
+        # and expect the status to be still DREV
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+    # leaf: DREV -> RTS
+    def test_leaf_DREV_task_updated_to_RTS(self):
+        """testing if a DREV task status will be DREV when it is set to RTS
+        """
+        # expect the task3 status to be RTS before creating a dependency
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a dependency
+        self.test_task3.depends(self.test_task8)
+
+        # expect the task3 status to be WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resouce=self.test_task8.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the task8.status is updated to WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # update it to PREV then
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
+
+        # then to CMPL
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+
+        # check if the task3.status is updated to RTS
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a TimeLog for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # and expect the status to be WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the task8.status to HREV
+        self.test_task8.status = self.status_hrev
+
+        # expect the task3.status to be DREV
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+        # now update task3.status to RTS
+        self.test_task3.status = self.status_rts
+
+        # and expect the status to be still DREV
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+    # leaf: DREV -> STOP
+    def test_leaf_DREV_task_updated_to_STOP(self):
+        """testing if a DREV task status will be DREV when it is set to STOP
+        """
+        # expect the task3 status to be RTS before creating a dependency
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a dependency
+        self.test_task3.depends(self.test_task8)
+
+        # expect the task3 status to be WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resouce=self.test_task8.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the task8.status is updated to WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # update it to PREV then
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
+
+        # then to CMPL
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+
+        # check if the task3.status is updated to RTS
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a TimeLog for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # and expect the status to be WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the task8.status to HREV
+        self.test_task8.status = self.status_hrev
+
+        # expect the task3.status to be DREV
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+        # now update task3.status to STOP
+        self.test_task3.status = self.status_stop
+
+        # and expect the status to be still DREV
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+    # leaf: DREV -> OH
+    def test_leaf_DREV_task_updated_to_OH(self):
+        """testing if a DREV task status will be DREV when it is set to OH
+        """
+        # expect the task3 status to be RTS before creating a dependency
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a dependency
+        self.test_task3.depends(self.test_task8)
+
+        # expect the task3 status to be WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resouce=self.test_task8.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the task8.status is updated to WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # update it to PREV then
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
+
+        # then to CMPL
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+
+        # check if the task3.status is updated to RTS
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a TimeLog for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # and expect the status to be WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the task8.status to HREV
+        self.test_task8.status = self.status_hrev
+
+        # expect the task3.status to be DREV
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+        # now update task3.status to OH
+        self.test_task3.status = self.status_oh
+
+        # and expect the status to be still DREV
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+    # leaf: DREV -> WIP
+    def test_leaf_DREV_task_updated_to_WIP_when_dependent_task_is_still_not_CMPL_or_STOP(self):
+        """testing if a DREV task status will be DREV when it is set to WIP
+        when the dependent task is still not CMPL or STOP
+        """
+        # expect the task3 status to be RTS before creating a dependency
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a dependency
+        self.test_task3.depends(self.test_task8)
+
+        # expect the task3 status to be WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resouce=self.test_task8.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the task8.status is updated to WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # update it to PREV then
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
+
+        # then to CMPL
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+
+        # check if the task3.status is updated to RTS
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a TimeLog for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # and expect the status to be WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the task8.status to HREV
+        self.test_task8.status = self.status_hrev
+
+        # expect the task3.status to be DREV
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+        # now update task3.status to WIP
+        self.test_task3.status = self.status_wip
+
+        # and expect the status to be still DREV
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+    # leaf: DREV -> WIP
+    def test_leaf_DREV_task_updated_to_WIP_when_dependent_task_is_CMPL(self):
+        """testing if a DREV task status will be DREV when it is set to WIP
+        when the dependent task is CMPL
+        """
+        # expect the task3 status to be RTS before creating a dependency
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a dependency
+        self.test_task3.depends(self.test_task8)
+
+        # expect the task3 status to be WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resouce=self.test_task8.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the task8.status is updated to WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # update it to PREV then
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
+
+        # then to CMPL
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+
+        # check if the task3.status is updated to RTS
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a TimeLog for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # and expect the status to be WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the task8.status to HREV
+        self.test_task8.status = self.status_hrev
+
+        # expect the task3.status to be DREV
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+        # now update the task8.status back to WIP
+        self.test_task8.status = self.status_wip
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # then update the task8.status to PREV
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
+
+        # then update the task8.status to CMPL
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+
+        # now task3.status should be WIP already
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+    # leaf: DREV -> WIP
+    def test_leaf_DREV_task_updated_to_WIP_when_dependent_task_is_STOP(self):
+        """testing if a DREV task status will be DREV when it is set to WIP
+        when the dependent task is STOP
+        """
+        # expect the task3 status to be RTS before creating a dependency
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a dependency
+        self.test_task3.depends(self.test_task8)
+
+        # expect the task3 status to be WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resouce=self.test_task8.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the task8.status is updated to WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # update it to PREV then
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
+
+        # then to CMPL
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+
+        # check if the task3.status is updated to RTS
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a TimeLog for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # and expect the status to be WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the task8.status to HREV
+        self.test_task8.status = self.status_hrev
+
+        # expect the task3.status to be DREV
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+        # now update the task8.status back to WIP
+        self.test_task8.status = self.status_wip
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # then update the task8.status to STOP
+        self.test_task8.status = self.status_stop
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # now task3.status should be WIP already
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+    # leaf: DREV -> PREV
+    def test_leaf_DREV_task_updated_to_PREV(self):
+        """testing if a DREV task status will be DREV when it is set to PREV
+        """
+        # expect the task3 status to be RTS before creating a dependency
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a dependency
+        self.test_task3.depends(self.test_task8)
+
+        # expect the task3 status to be WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resouce=self.test_task8.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the task8.status is updated to WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # update it to PREV then
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
+
+        # then to CMPL
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+
+        # check if the task3.status is updated to RTS
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a TimeLog for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # and expect the status to be WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the task8.status to HREV
+        self.test_task8.status = self.status_hrev
+
+        # expect the task3.status to be DREV
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+        # now update task3.status to PREV
+        self.test_task3.status = self.status_prev
+
+        # and expect the status to be still DREV
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+    # leaf: DREV -> HREV
+    def test_leaf_DREV_task_updated_to_HREV(self):
+        """testing if a DREV task status will stay DREV when it is set to HREV
+        """
+        # expect the task3 status to be RTS before creating a dependency
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a dependency
+        self.test_task3.depends(self.test_task8)
+
+        # expect the task3 status to be WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resouce=self.test_task8.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the task8.status is updated to WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # update it to PREV then
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
+
+        # then to CMPL
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+
+        # check if the task3.status is updated to RTS
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a TimeLog for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # and expect the status to be WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the task8.status to HREV
+        self.test_task8.status = self.status_hrev
+
+        # expect the task3.status to be DREV
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+        # now update task3.status to HREV
+        self.test_task3.status = self.status_hrev
+
+        # and expect the status to be still DREV
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+    # leaf: DREV -> CMPL
+    def test_leaf_DREV_task_updated_to_CMPL(self):
+        """testing if a DREV task status will stay DREV when it is set to CMPL
+        """
+        # expect the task3 status to be RTS before creating a dependency
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a dependency
+        self.test_task3.depends(self.test_task8)
+
+        # expect the task3 status to be WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resouce=self.test_task8.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the task8.status is updated to WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # update it to PREV then
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
+
+        # then to CMPL
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+
+        # check if the task3.status is updated to RTS
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a TimeLog for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # and expect the status to be WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the task8.status to HREV
+        self.test_task8.status = self.status_hrev
+
+        # expect the task3.status to be DREV
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+        # now update task3.status to CMPL
+        self.test_task3.status = self.status_cmpl
+
+        # and expect the status to be still DREV
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+    # leaf: CMPL -> WFD
+    def test_leaf_CMPL_task_updated_to_WFD(self):
+        """testing if a CMPL task status will stay CMPL when it is updated to
+        WFD
+        """
+        # check if the task3.status is RTS before creating a TimeLog
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a TimeLog for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # and expect the status to be WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the task3.status to PREV
+        self.test_task3.status = self.status_prev
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # then task3.status to CMPL
+        self.test_task3.status = self.status_cmpl
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+
+        # now update task3.status to WFD
+        self.test_task3.status = self.status_wfd
+
+        # and expect the status to be still CMPL
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+
+    # leaf: CMPL -> RTS
+    def test_leaf_CMPL_task_updated_to_RTS(self):
+        """testing if a CMPL task status will be CMPL when it is set to RTS
+        """
+        # check if the task3.status is RTS before creating a TimeLog
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a TimeLog for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # and expect the status to be WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the task3.status to PREV
+        self.test_task3.status = self.status_prev
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # then task3.status to CMPL
+        self.test_task3.status = self.status_cmpl
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+
+        # now update task3.status to RTS
+        self.test_task3.status = self.status_rts
+
+        # and expect the status to be still CMPL
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+
+    # leaf: CMPL -> STOP
+    def test_leaf_CMPL_task_updated_to_STOP(self):
+        """testing if a CMPL task status will be CMPL when it is set to STOP
+        """
+        # check if the task3.status is RTS before creating a TimeLog
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a TimeLog for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # and expect the status to be WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the task3.status to PREV
+        self.test_task3.status = self.status_prev
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # then task3.status to CMPL
+        self.test_task3.status = self.status_cmpl
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+
+        # now update task3.status to STOP
+        self.test_task3.status = self.status_stop
+
+        # and expect the status to be still CMPL
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+
+    # leaf: CMPL -> OH
+    def test_leaf_CMPL_task_updated_to_OH(self):
+        """testing if a CMPL task status will be CMPL when it is set to OH
+        """
+        # check if the task3.status is RTS before creating a TimeLog
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a TimeLog for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # and expect the status to be WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the task3.status to PREV
+        self.test_task3.status = self.status_prev
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # then task3.status to CMPL
+        self.test_task3.status = self.status_cmpl
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+
+        # now update task3.status to OH
+        self.test_task3.status = self.status_oh
+
+        # and expect the status to be still CMPL
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+
+    # leaf: CMPL -> WIP
+    def test_leaf_CMPL_task_updated_to_WIP(self):
+        """testing if a CMPL task status will be CMPL when it is set to WIP
+        """
+        # check if the task3.status is RTS before creating a TimeLog
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a TimeLog for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # and expect the status to be WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the task3.status to PREV
+        self.test_task3.status = self.status_prev
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # then task3.status to CMPL
+        self.test_task3.status = self.status_cmpl
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+
+        # now update task3.status to WIP
+        self.test_task3.status = self.status_wip
+
+        # and expect the status to be still CMPL
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+
+    # leaf: CMPL -> PREV
+    def test_leaf_CMPL_task_updated_to_PREV(self):
+        """testing if a CMPL task status will be CMPL when it is set to PREV
+        """
+        # check if the task3.status is RTS before creating a TimeLog
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a TimeLog for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # and expect the status to be WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the task3.status to PREV
+        self.test_task3.status = self.status_prev
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # then task3.status to CMPL
+        self.test_task3.status = self.status_cmpl
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+
+        # now update task3.status to PREV
+        self.test_task3.status = self.status_prev
+
+        # and expect the status to be still CMPL
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+
+    # leaf: CMPL -> HREV
+    def test_leaf_CMPL_task_updated_to_HREV(self):
+        """testing if a CMPL task status will be HREV when it is set to HREV
+        """
+        # check if the task3.status is RTS before creating a TimeLog
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a TimeLog for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # and expect the status to be WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the task3.status to PREV
+        self.test_task3.status = self.status_prev
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # then task3.status to CMPL
+        self.test_task3.status = self.status_cmpl
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+
+        # now update task3.status to HREV
+        self.test_task3.status = self.status_hrev
+
+        # and expect the status to be HREV
+        self.assertEqual(self.test_task3.status, self.status_hrev)
+
+    # leaf: CMPL -> DREV w/o dependency
+    def test_leaf_CMPL_task_updated_to_DREV_when_no_dependent_task(self):
+        """testing if a CPML task status will stay CMPL when it is set to DREV
+        and there are no dependency
+        """
+        # check if the task3.status is RTS before creating a TimeLog
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a TimeLog for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # and expect the status to be WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # now update the task3.status to PREV
+        self.test_task3.status = self.status_prev
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # then task3.status to CMPL
+        self.test_task3.status = self.status_cmpl
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+
+        # now update task3.status to DREV
+        self.test_task3.status = self.status_drev
+
+        # and expect the status to be CMPL
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+
+    # leaf: CMPL -> DREV with CMPL dependency
+    def test_leaf_CMPL_task_updated_to_DREV_when_there_are_CMPL_dependent_tasks(self):
+        """testing if a CPML task status will stay CMPL when it is set to DREV
+        even there are dependencies but the dependent tasks are CMPL
+        """
+        # expect the task3 status to be RTS before creating a dependency
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a dependency
+        self.test_task3.depends(self.test_task8)
+
+        # expect the task3 status to be WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resouce=self.test_task8.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the task8.status is updated to WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # update it to PREV then
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
+
+        # then to CMPL
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+
+        # check if the task3.status is updated to RTS
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a TimeLog for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # and expect the status to be WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # update the task3.status to PREV
+        self.test_task3.status = self.status_prev
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # update the task3.status to CMPL
+        self.test_task3.status = self.status_cmpl
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+
+        # now update task3.status to DREV
+        self.test_task3.status = self.status_drev
+
+        # and expect the status to be still CMPL
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+
+    # leaf: CMPL -> DREV with STOP dependency
+    def test_leaf_CMPL_task_updated_to_DREV_when_there_are_STOP_dependent_tasks(self):
+        """testing if a CPML task status will stay CMPL when it is set to DREV
+        even there are dependencies but the dependent tasks are STOP
+        """
+        # expect the task3 status to be RTS before creating a dependency
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a dependency
+        self.test_task3.depends(self.test_task8)
+
+        # expect the task3 status to be WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # create a time log to be able to set it to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resouce=self.test_task8.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the task8.status is updated to WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # update it to STOP then
+        self.test_task8.status = self.status_stop
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # check if the task3.status is updated to RTS
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a TimeLog for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # and expect the status to be WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # update the task3.status to PREV
+        self.test_task3.status = self.status_prev
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # update the task3.status to CMPL
+        self.test_task3.status = self.status_cmpl
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+
+        # now update task3.status to DREV
+        self.test_task3.status = self.status_drev
+
+        # and expect the status to be still CMPL
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+
+    # container task: WFD -> RTS
+    def test_container_WFD_task_updated_to_RTS(self):
+        """testing if WFD container task is updated to RTS when one of its
+        child task is updated to RTS
+        """
+        # check if task1 is RTS
+        self.assertEqual(self.test_task1.status, self.status_rts)
+
+        # set one of child to WFD then to RTS
+        self.assertEqual(self.test_task4.status, self.status_rts)
+        self.assertEqual(self.test_task5.status, self.status_rts)
+        self.assertEqual(self.test_task6.status, self.status_rts)
+
+        # append a dependent task to each of the children
+        self.test_task4.depends(self.test_task9)
+        self.test_task5.depends(self.test_task8)
+        self.test_task6.depends(self.test_task3)
+
+        # check the statuses are WFD
+        self.assertEqual(self.test_task4.status, self.status_wfd)
+        self.assertEqual(self.test_task5.status, self.status_wfd)
+        self.assertEqual(self.test_task6.status, self.status_wfd)
+
+        # complete task3 to set task6 to RTS
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # create a TimeLog for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resouce=self.test_task3.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if the status is WIP
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # to PREV
+        self.test_task3.status = self.status_prev
+
+        # to CMPL
+        self.test_task3.status = self.status_cmpl
+
+        # check if task6 is RTS now
+        self.assertEqual(self.test_task6.status, self.status_rts)
+
+        # and if task1 is RTS now
+        self.assertEqual(self.test_task1.status, self.status_rts)
+
+    # container task: RTS -> WIP
+    def test_container_RTS_task_updated_to_WIP(self):
+        """testing if RTS container task is updated to WIP when one of its
+        child task is updated to WIP
+        """
+        # check if task1 is RTS
+        self.assertEqual(self.test_task1.status, self.status_rts)
+
+        # check all children are RTS
+        self.assertEqual(self.test_task4.status, self.status_rts)
+        self.assertEqual(self.test_task5.status, self.status_rts)
+        self.assertEqual(self.test_task6.status, self.status_rts)
+
+        # enter a TimeLog to task6
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task6,
+            resouce=self.test_task6.resource[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # check if task6 is WIP now
+        self.assertEqual(self.test_task6.status, self.status_wip)
+
+        # and check if task1 is also WIP
+        self.assertEqual(self.test_task1.status, self.status_wip)
+
+    # container task: WIP -> CMPL
+    def test_container_WIP_task_updated_to_CMPL(self):
+        """testing if WIP container task is updated to CMPL when all of its
+        children tasks are updated to CMPL
+        """
+        # check if task1 is RTS
+        self.assertEqual(self.test_task1.status, self.status_rts)
+
+        # check all children are RTS
+        self.assertEqual(self.test_task4.status, self.status_rts)
+        self.assertEqual(self.test_task5.status, self.status_rts)
+        self.assertEqual(self.test_task6.status, self.status_rts)
+
+        # enter a TimeLog to task4
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task4,
+            resouce=self.test_task4.resource[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # check if task4 is WIP now
+        self.assertEqual(self.test_task4.status, self.status_wip)
+
+        # and check if task1 is also WIP
+        self.assertEqual(self.test_task1.status, self.status_wip)
+
+        # enter a TimeLog to task5
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task5,
+            resouce=self.test_task5.resource[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # check if task5 is WIP now
+        self.assertEqual(self.test_task5.status, self.status_wip)
+
+        # enter a TimeLog to task6
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task6,
+            resouce=self.test_task6.resource[0],
+            start=now + datetime.timedelta(days=2),
+            end=now + datetime.timedelta(days=3)
+        )
+
+        # check if task6 is WIP now
+        self.assertEqual(self.test_task6.status, self.status_wip)
+
+        # complete all the tasks
+        self.test_task4.status = self.status_prev
+        self.test_task5.status = self.status_prev
+        self.test_task6.status = self.status_prev
+
+        self.test_task4.status = self.status_cmpl
+        self.test_task5.status = self.status_cmpl
+        self.test_task6.status = self.status_cmpl
+
+        # expect the task1.status to be CMPL also
+        self.assertEqual(self.test_task1.status, self.status_cmpl)
+
+    def test_container_task_status_change_to_anything(self):
+        """testing if changing the container task status to anything will not
+        change its status
+        """
+        # setting container task statuses by hand will not change its status
+        self.assertEqual(self.test_task1.status, self.status_rts)
+
+        self.test_task1.status = self.status_rts
+        self.assertEqual(self.test_task1.status, self.status_rts)
+
+        self.test_task1.status = self.status_wip
+        self.assertEqual(self.test_task1.status, self.status_rts)
+
+        self.test_task1.status = self.status_cmpl
+        self.assertEqual(self.test_task1.status, self.status_rts)
+
+        # and some other statuses
+        self.test_task1.status = self.status_oh
+        self.assertEqual(self.test_task1.status, self.status_rts)
+
+        self.test_task1.status = self.status_stop
+        self.assertEqual(self.test_task1.status, self.status_rts)
+
+        self.test_task1.status = self.status_prev
+        self.assertEqual(self.test_task1.status, self.status_rts)
+
+        self.test_task1.status = self.status_hrev
+        self.assertEqual(self.test_task1.status, self.status_rts)
+
+        self.test_task1.status = self.status_drev
+        self.assertEqual(self.test_task1.status, self.status_rts)
+
+    # The following tests will test the status changes in dependency changes
+
+    # Leaf Tasks - dependency relation changes
+    # WFD
+    def test_leaf_WFD_task_updated_to_have_a_dependency_of_WFD_task_task(self):
+        """testing if it is possible to set a dependency between a task with
+        WFD status to a task with WFD status and the status of the task will
+        stay WFD
+        """
+        # create another dependency to make the task3 a WFD task
+        self.test_task9.status = self.status_wip
+        self.assertEqual(self.test_task9.status, self.status_wip)
+        self.test_task3.depends.append(self.test_task9)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        # make a task with HREV status
+        # create dependency
+        self.test_task8.status = self.status_wfd
+        self.assertEqual(self.test_task8.status, self.status_wfd)
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+    def test_leaf_WFD_task_updated_to_have_a_dependency_of_RTS_task(self):
+        """testing if it is possible to set a dependency between a task with
+        WFD status to a task with RTS status and the status of the task will
+        stay WFD
+        """
+        # create another dependency to make the task3 a WFD task
+        self.test_task9.status = self.status_wip
+        self.assertEqual(self.test_task9.status, self.status_wip)
+        self.test_task3.depends.append(self.test_task9)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        # make a task with HREV status
+        # create dependency
+        self.test_task8.status = self.status_rts
+        self.assertEqual(self.test_task8.status, self.status_rts)
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+    def test_leaf_WFD_task_updated_to_have_a_dependency_of_WIP_task(self):
+        """testing if it is possible to set a dependency between a task with
+        WFD status to a task with WIP status and the status of the task will
+        stay WFD
+        """
+        # create another dependency to make the task3 a WFD task
+        self.test_task9.status = self.status_wip
+        self.assertEqual(self.test_task9.status, self.status_wip)
+        self.test_task3.depends.append(self.test_task9)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        # make a task with HREV status
+        # create dependency
+        self.test_task8.status = self.status_wip
+        self.assertEqual(self.test_task8.status, self.status_wip)
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+    def test_leaf_WFD_task_updated_to_have_a_dependency_of_PREV_task(self):
+        """testing if it is possible to set a dependency between a task with
+        WFD status to a task with PREV status and the status of the task will
+        stay WFD
+        """
+        # create another dependency to make the task3 a WFD task
+        self.test_task9.status = self.status_wip
+        self.assertEqual(self.test_task9.status, self.status_wip)
+        self.test_task3.depends.append(self.test_task9)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        # make a task with HREV status
+        # create dependency
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+    def test_leaf_WFD_task_updated_to_have_a_dependency_of_HREV_task(self):
+        """testing if it is possible to set a dependency between a task with
+        WFD status to a task with HREV status and the status of the task will
+        stay WFD
+        """
+        # create another dependency to make the task3 a WFD task
+        self.test_task9.status = self.status_wip
+        self.assertEqual(self.test_task9.status, self.status_wip)
+        self.test_task3.depends.append(self.test_task9)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        # make a task with HREV status
+        # create dependency
+        self.test_task8.status = self.status_hrev
+        self.assertEqual(self.test_task8.status, self.status_hrev)
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+    def test_leaf_WFD_task_updated_to_have_a_dependency_of_OH_task(self):
+        """testing if it is possible to set a dependency between a task with
+        WFD status to a task with OH status and the status of the task will
+        stay WFD
+        """
+        # create another dependency to make the task3 a WFD task
+        self.test_task9.status = self.status_wip
+        self.assertEqual(self.test_task9.status, self.status_wip)
+        self.test_task3.depends.append(self.test_task9)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        # make a task with HREV status
+        # create dependency
+        self.test_task8.status = self.status_oh
+        self.assertEqual(self.test_task8.status, self.status_oh)
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+    def test_leaf_WFD_task_updated_to_have_a_dependency_of_STOP_task(self):
+        """testing if it is possible to set a dependency between a task with
+        WFD status to a task with STOP status and the status of the task status
+        will stay WFD
+        """
+        # create another dependency to make the task3 a WFD task
+        self.test_task9.status = self.status_wip
+        self.assertEqual(self.test_task9.status, self.status_wip)
+        self.test_task3.depends.append(self.test_task9)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        # make a task with HREV status
+        # create dependency
+        self.test_task8.status = self.status_stop
+        self.assertEqual(self.test_task8.status, self.status_stop)
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+    def test_leaf_WFD_task_updated_to_have_a_dependency_of_CMPL_task(self):
+        """testing if it is possible to set a dependency between a task with
+        WFD status to a task with CMPL status and the status of the task status
+        will stay to WFD
+        """
+        # create another dependency to make the task3 a WFD task
+        self.test_task9.status = self.status_wip
+        self.assertEqual(self.test_task9.status, self.status_wip)
+        self.test_task3.depends.append(self.test_task9)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        # make a task with HREV status
+        # create dependency
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+    # Leaf Tasks - dependency relation changes
+    # RTS
+    def test_leaf_RTS_task_updated_to_have_a_dependency_of_WFD_task_task(self):
+        """testing if it is possible to set a dependency between a task with
+        RTS status to a task with WFD status but the status of the task is
+        updated from RTS to WFD
+        """
         # find an RTS task
+        self.test_task3.status = self.status_rts
         self.assertEqual(self.test_task3.status, self.status_rts)
         # create dependency
+        # make a task with WFD status
+        self.test_task8.status = self.status_wfd
+        self.assertEqual(self.test_task8.status, self.status_wfd)
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_new)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
 
     def test_leaf_RTS_task_updated_to_have_a_dependency_of_RTS_task(self):
         """testing if it is possible to set a dependency between a task with
         RTS status to a task with RTS status but the status of the task is
-        updated from RTS to NEW
+        updated from RTS to WFD
         """
-        # make a task with NEW status
-        self.test_task8.status = self.status_rts
-        self.assertEqual(self.test_task8.status, self.status_rts)
         # find an RTS task
+        self.test_task3.status = self.status_rts
         self.assertEqual(self.test_task3.status, self.status_rts)
         # create dependency
+        # make a task with RTS status
+        self.test_task8.status = self.status_rts
+        self.assertEqual(self.test_task8.status, self.status_rts)
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_new)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
 
     def test_leaf_RTS_task_updated_to_have_a_dependency_of_WIP_task(self):
         """testing if it is possible to set a dependency between a task with
         RTS status to a task with WIP status but the status of the task is
-        updated from RTS to NEW
+        updated from RTS to WFD
         """
+        # find an RTS task
+        self.test_task3.status = self.status_rts
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # create dependency
         # make a task with WIP status
         self.test_task8.status = self.status_wip
         self.assertEqual(self.test_task8.status, self.status_wip)
-        # find an RTS task
-        self.assertEqual(self.test_task3.status, self.status_rts)
-        # create dependency
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_new)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
 
-    def test_leaf_task_RTS_task_updated_to_have_a_dependency_of_PREV_task(self):
+    def test_leaf_RTS_task_updated_to_have_a_dependency_of_PREV_task(self):
         """testing if it is possible to set a dependency between a task with
         RTS status to a task with PREV status but the status of the task is
-        updated from RTS to NEW
+        updated from RTS to WFD
         """
+        # find an RTS task
+        self.test_task3.status = self.status_rts
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # create dependency
         # make a task with PREV status
         self.test_task8.status = self.status_prev
         self.assertEqual(self.test_task8.status, self.status_prev)
-        # find an RTS task
-        self.assertEqual(self.test_task3.status, self.status_rts)
-        # create dependency
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_new)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
 
-    def test_leaf_task_RTS_task_updated_to_have_a_dependency_of_HREV_task(self):
+    def test_leaf_RTS_task_updated_to_have_a_dependency_of_HREV_task(self):
         """testing if it is possible to set a dependency between a task with
         RTS status to a task with HREV status but the status of the task is
-        updated from RTS to NEW
+        updated from RTS to WFD
         """
+        # find an RTS task
+        self.test_task3.status = self.status_rts
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # create dependency
         # make a task with HREV status
         self.test_task8.status = self.status_hrev
         self.assertEqual(self.test_task8.status, self.status_hrev)
-        # find an RTS task
-        self.assertEqual(self.test_task3.status, self.status_rts)
-        # create dependency
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_new)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
 
     def test_leaf_RTS_task_updated_to_have_a_dependency_of_OH_task(self):
         """testing if it is possible to set a dependency between a task with
         RTS status to a task with OH status and the status of the task is
-        updated from RTS to NEW
+        updated from RTS to WFD
         """
+        # find an RTS task
+        self.test_task3.status = self.status_rts
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # create dependency
         # make a task with OH status
         self.test_task8.status = self.status_oh
         self.assertEqual(self.test_task8.status, self.status_oh)
-        # find an RTS task
-        self.assertEqual(self.test_task3.status, self.status_rts)
-        # create dependency
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_new)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
 
     def test_leaf_RTS_task_updated_to_have_a_dependency_of_STOP_task(self):
         """testing if it is possible to set a dependency between a task with
         RTS status to a task with STOP status and the status of the task will
         stay RTS as if the dependency is not there
         """
-        # make a task with STOP status
-        self.test_task8.status = self.status_stop
-        self.assertEqual(self.test_task8.status, self.status_stop)
         # find an RTS task
+        self.test_task3.status = self.status_rts
         self.assertEqual(self.test_task3.status, self.status_rts)
         # create dependency
+        # make a task with STOP status
+        self.test_task8.status = self.status_stop
+        self.assertEqual(self.test_task8.status, self.status_hrev)
         self.test_task3.depends.append(self.test_task8)
         self.assertEqual(self.test_task3.status, self.status_rts)
 
@@ -4500,422 +7318,3907 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         RTS status to a task with CMPL status and the status of the task will
         stay RTS
         """
+        # find an RTS task
+        self.test_task3.status = self.status_rts
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # create dependency
         # make a task with CMPL status
         self.test_task8.status = self.status_cmpl
         self.assertEqual(self.test_task8.status, self.status_cmpl)
-        # find an RTS task
-        self.assertEqual(self.test_task3.status, self.status_rts)
-        # create dependency
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
 
     # Leaf Tasks - dependency changes
-    # WIP
-    def test_leaf_WIP_task_updated_to_have_a_dependency_of_NEW_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with WIP status to a task with NEW status
+    # WIP - DREV - PREV - HREV - OH - STOP - CMPL
+    def test_leaf_WIP_task_dependency_can_not_be_updated(self):
+        """testing if it is not possible to update the dependencies of a WIP
+        task
         """
-        # make a task with NEW status
-        self.test_task8.status = self.status_new
-        self.assertEqual(self.test_task8.status, self.status_new)
         # find an WIP task
         self.test_task3.status = self.status_wip
         self.assertEqual(self.test_task3.status, self.status_wip)
         # create dependency
-        self.assertRaises(ValueError, self.test_task3.depends.append,
-                          self.test_task8)
+        self.assertRaises(
+            RuntimeError, self.test_task3.depends.append, self.test_task8
+        )
 
-    def test_leaf_WIP_task_updated_to_have_a_dependency_of_RTS_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with WIP status to a task with RTS status
+    def test_leaf_PREV_task_dependency_can_not_be_updated(self):
+        """testing if it is not possible to update the dependencies of a PREV
+        task
+        """
+        # find an PREV task
+        self.test_task3.status = self.status_prev
+        self.assertEqual(self.test_task3.status, self.status_prev)
+        # create dependency
+        self.assertRaises(
+            RuntimeError, self.test_task3.depends.append, self.test_task8
+        )
+
+    def test_leaf_HREV_task_dependency_can_not_be_updated(self):
+        """testing if it is not possible to update the dependencies of a HREV
+        task
+        """
+        # find an HREV task
+        self.test_task3.status = self.status_hrev
+        self.assertEqual(self.test_task3.status, self.status_hrev)
+        # create dependency
+        self.assertRaises(
+            RuntimeError, self.test_task3.depends.append, self.test_task8
+        )
+
+    def test_leaf_DREV_task_dependency_can_not_be_updated(self):
+        """testing if it is not possible to update the dependencies of a DREV
+        task
+        """
+        # find an DREV task
+        self.test_task3.status = self.status_drev
+        self.assertEqual(self.test_task3.status, self.status_drev)
+        # create dependency
+        self.assertRaises(
+            RuntimeError, self.test_task3.depends.append, self.test_task8
+        )
+
+    def test_leaf_OH_task_dependency_can_not_be_updated(self):
+        """testing if it is not possible to update the dependencies of a OH
+        task
+        """
+        # find an OH task
+        self.test_task3.status = self.status_oh
+        self.assertEqual(self.test_task3.status, self.status_oh)
+        # create dependency
+        self.assertRaises(
+            RuntimeError, self.test_task3.depends.append, self.test_task8
+        )
+
+    def test_leaf_STOP_task_dependency_can_not_be_updated(self):
+        """testing if it is not possible to update the dependencies of a STOP
+        task
+        """
+        # find an STOP task
+        self.test_task3.status = self.status_stop
+        self.assertEqual(self.test_task3.status, self.status_stop)
+        # create dependency
+        self.assertRaises(
+            RuntimeError, self.test_task3.depends.append, self.test_task8
+        )
+
+    def test_leaf_CMPL_task_dependency_can_not_be_updated(self):
+        """testing if it is not possible to update the dependencies of a CMPL
+        task
+        """
+        # find an CMPL task
+        self.test_task3.status = self.status_cmpl
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        # create dependency
+        self.assertRaises(
+            RuntimeError, self.test_task3.depends.append, self.test_task8
+        )
+
+    # leaf tasks - dependency status changes
+    # WFD
+    def test_leaf_WFD_task_dependency_status_changed_to_WFD(self):
+        """testing if the status of a WFD leaf task will stay WFD when the
+        status of the dependent task is set to WFD
+        """
+        # test initial status
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create a dependency between task3 and task8
+        self.test_task3.depends(self.test_task8)
+
+        # expect the task3.status changed from RTS ->  WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # change task8.status to WFD by assigning a dependency to it
+        self.test_task8.depends(self.test_task6)
+        self.assertEqual(self.test_task8.status, self.status_wfd)
+
+        # expect the task3.status also be updated to WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+    def test_leaf_WFD_task_dependency_status_changed_to_RTS(self):
+        """testing if the status of a WFD leaf task will stay WFD when the
+        status of the dependent task is set to RTS
+        """
+        # test initial status
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create a dependency between task3 and task8
+        self.test_task3.depends(self.test_task8)
+
+        # expect the task3.status changed from RTS ->  WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # change task8.status to WFD by assigning a dependency to it
+        self.test_task8.depends(self.test_task6)
+        self.assertEqual(self.test_task8.status, self.status_wfd)
+
+        # expect the task3.status also be updated to WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # now remove dependency and expect the task8.status to be RTS
+        self.test_task8.depends.remove(self.test_task6)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # and task3.status to be WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+    def test_leaf_WFD_task_dependency_status_changed_to_WIP(self):
+        """testing if the status of a WFD leaf task will stay WFD when the
+        status of the dependent task is set to WIP
+        """
+        # test initial status
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create a dependency between task3 and task8
+        self.test_task3.depends(self.test_task8)
+
+        # expect the task3.status changed from RTS ->  WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # add a TimeLog to change task8.status to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # expect task8.status to be WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # and task3.status to be WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+    def test_leaf_WFD_task_dependency_status_changed_to_PREV(self):
+        """testing if the status of a WFD leaf task will stay WFD when the
+        status of the dependent task is set to PREV
+        """
+        # test initial status
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create a dependency between task3 and task8
+        self.test_task3.depends(self.test_task8)
+
+        # expect the task3.status changed from RTS ->  WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # add a TimeLog to change task8.status to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # expect task8.status to be WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # change it to PREV
+        self.test_task8.status = self.status_prev
+
+        # and task3.status to be WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+    def test_leaf_WFD_task_dependency_status_changed_to_HREV(self):
+        """testing if the status of a WFD leaf task will stay WFD when the
+        status of the dependent task is set to HREV
+        """
+        # test initial status
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create a dependency between task3 and task8
+        self.test_task3.depends(self.test_task8)
+
+        # expect the task3.status changed from RTS ->  WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # add a TimeLog to change task8.status to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # expect task8.status to be WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # change it to PREV
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
+
+        # change it to HREV
+        self.test_task8.status = self.status_hrev
+        self.assertEqual(self.test_task8.status, self.status_hrev)
+
+        # and task3.status to be WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+    def test_leaf_WFD_task_dependency_status_changed_to_DREV(self):
+        """testing if the status of a WFD leaf task will stay WFD when the
+        status of the dependent task is set to DREV
+        """
+        # test initial status
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+        self.assertEqual(self.test_task9.status, self.status_rts)
+
+        # create a dependency between task3 and task8
+        self.test_task3.depends(self.test_task8)
+
+        # and between task8 and task9
+        self.test_task8.depends(self.test_task9)
+
+        # expect the task3.status changed from RTS ->  WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # and task8.status changed from RTS ->  WFD
+        self.assertEqual(self.test_task8.status, self.status_wfd)
+
+        # add a TimeLog to change task9.status to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task9,
+            resource=self.test_task9.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # expect task9.status to be WIP
+        self.assertEqual(self.test_task9.status, self.status_wip)
+
+        # change it to PREV
+        self.test_task9.status = self.status_prev
+        self.assertEqual(self.test_task9.status, self.status_prev)
+
+        # change it to CMPL
+        self.test_task9.status = self.status_cmpl
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # expect the task8.status to be RTS
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # and task3.status still WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # add a TimeLog to change task8.status to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resource[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # expect task8.status to be WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # change it to DREV by setting task9.status to HREV
+        self.test_task9.status = self.status_hrev
+        self.assertEqual(self.test_task9.status, self.status_hrev)
+
+        # and expect task8.status to be DREV
+        self.assertEqual(self.test_task8.status, self.status_drev)
+
+        # and task3.status to be still WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+    def test_leaf_WFD_task_dependency_status_changed_to_OH(self):
+        """testing if the status of a WFD leaf task will stay WFD when the
+        status of the dependent task is set to OH
+        """
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create dependency between task3 and task8
+        self.test_task3.depends.append(self.test_task8)
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # set task8 to OH
+        self.test_task8.status = self.status_oh
+        self.assertEqual(self.test_task8.status, self.status_oh)
+
+        # expect task3.status to be WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+    def test_leaf_WFD_task_dependency_status_changed_to_STOP(self):
+        """testing if the status of a WFD leaf task will be set to RTS when the
+        status of the dependent task is set to STOP
+        """
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create dependency between task3 and task8
+        self.test_task3.depends.append(self.test_task8)
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # set task8 to STOP
+        self.test_task8.status = self.status_stop
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # expect task3.status to be RTS
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+    def test_leaf_WFD_task_dependency_status_changed_to_CMPL(self):
+        """testing if the status of a WFD leaf task will be set to RTS when the
+        status of the dependent task is set to CMPL
+        """
+        # test initial status
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create a dependency between task3 and task8
+        self.test_task3.depends(self.test_task8)
+
+        # expect the task3.status changed from RTS ->  WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # add a TimeLog to change task8.status to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resource[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # expect task8.status to be WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # change it to PREV
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
+
+        # change it to CMPL
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+
+        # and task3.status to be updated to RTS
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+    # leaf tasks - dependency status changes
+    # RTS
+    def test_leaf_RTS_task_dependency_status_changed_to_WFD(self):
+        """testing if the status of a RTS leaf task will be set to WFD when the
+        status of the dependent task is set to WFD
+        """
+        # this can only happen when a task is depending to a STOPped task and
+        # it is updated to status WFD
+
+        # test initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+        self.assertEqual(self.test_task9.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends(self.test_task8)
+        self.test_task8.depends(self.test_task9)
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # STOP the task9
+        self.test_task9.status = self.status_stop
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+        self.assertEqual(self.test_task9.status, self.status_stop)
+
+        # now resume task9
+        self.test_task9.status = self.status_rts
+        self.assertEqual(self.test_task9.status, self.status_rts)
+
+        # except task8.status to be WFD
+        self.assertEqual(self.test_task8.status, self.status_wfd)
+
+        # except task3.status to be WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+    def test_leaf_RTS_task_dependency_status_changed_to_RTS(self):
+        """testing if the status of a RTS leaf task will be set to WFD when the
+        status of the dependent task is set to RTS
+        """
+        # this can only happen when a task is depending to a STOP task and it
+        # is updated to status RTS
+
+        # test initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends(self.test_task8)
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # STOP the task8
+        self.test_task8.status = self.status_stop
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # now resume task8
+        self.test_task8.status = self.status_rts
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # except task3.status to be WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+    def test_leaf_RTS_task_dependency_status_changed_to_WIP(self):
+        """testing if the status of a RTS leaf task will be set to WFD when the
+        status of the dependent task is set to WIP
+        """
+        # this can only happen when a task is depending to a STOP task and it
+        # is updated to status RTS
+
+        # test initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends(self.test_task8)
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create a TimeLog to set task8.status to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check the task8.status
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # now STOP the task8
+        self.test_task8.status = self.status_stop
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # now resume task8
+        self.test_task8.status = self.status_rts
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # except task3.status to be WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+    def test_leaf_RTS_task_dependency_status_changed_to_PREV(self):
+        """testing if the status of a RTS leaf task will be set to WFD when the
+        status of the dependent task is set to PREV
+        """
+        # this will not happen in any case
+        # An RTS task with PREV status can not happen
+        # a dependent task can be set to PREV but then the dependee will be set
+        # to either WFD or DREV, which will not lead us to RTS in any case
+        pass
+
+    def test_leaf_RTS_task_dependency_status_changed_to_HREV(self):
+        """testing if the status of a RTS leaf task will be set to WFD when the
+        status of the dependent task is set to HREV
+        """
+        # this can happen when a dependent task is updated from CMPL to HREV
+        # lets do it
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create dependency
+        self.test_task3.depends(self.test_task8)
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # complete task8
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check the task8.status
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # to PREV
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
+
+        # to CMPL
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
+
+        # check task3.status
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # now set task8.status to HREV
+        self.test_task8.status = self.status_hrev
+
+        # check task3.status to be WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+    def test_leaf_RTS_task_dependency_status_changed_to_DREV(self):
+        """testing if the status of a RTS leaf task will be set to WFD when the
+        status of the dependent task is set to DREV
+        """
+        # this can happen when a task which is a dependent of another task, has
+        # one of its dependent tasks to be updated from CMPL to HREV, then its
+        # status become DREV
+
+        # test initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+        self.assertEqual(self.test_task9.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends = [self.test_task8]
+        self.test_task8.depends = [self.test_task9]
+        self.test_task9.depends = []
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_wfd)
+        self.assertEqual(self.test_task9.status, self.status_rts)
+
+        # create a time log for task9
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task9,
+            resource=self.test_task9.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if task9.status is now WIP
+        self.assertEqual(self.test_task9.status, self.status_wip)
+
+        # set it to PREV
+        self.test_task9.status = self.status_prev
+        self.assertEqual(self.test_task9.status, self.status_prev)
+
+        # and then CMPL
+        self.test_task9.status = self.status_cmpl
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # check if task8.status is RTS now
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create a time log for task8
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # check if task9.status is now WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # set it to PREV
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
+
+        # and then CMPL
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+
+        # check if task3.status is RTS now
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # now set update task9 to HREV
+        self.test_task9.status = self.status_hrev
+
+        # expect task8.status to be DREV
+        self.assertEqual(self.test_task8.status, self.status_drev)
+
+        # and expect task3.status to be WFD
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+    def test_leaf_RTS_task_dependency_status_changed_to_OH(self):
+        """testing if the status of a RTS leaf task will be set to WFD when the
+        status of the dependent task is set to OH
+        """
+        # this could happen when the dependent task is STOP and then OH
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create dependency relation
+        sefl.test_task3.depends = [self.test_task8]
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # now STOP the task8
+        self.test_task8.status = self.status_stop
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # now update task8.status to OH
+        self.test_task8.status = self.status_oh
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_oh)
+
+    def test_leaf_RTS_task_dependency_status_changed_to_STOP(self):
+        """testing if the status of a RTS leaf task will stay RTS when the
+        status of the dependent task is set to STOP
+        """
+        # this can not happen in a meaningful way
+        # An RTS task dependency should be one of STOP or CMPL
+        # and there are no way to change a CMPL task to STOP task
+        # and changing from STOP to STOP is meaningless
+        pass
+
+    def test_leaf_RTS_task_dependency_status_changed_to_CMPL(self):
+        """testing if the status of a RTS leaf task will stay RTS when the
+        status of the dependent task is set to CMPL
+        """
+        # again this is meaningless
+        # An RTS tasks dependent task status should be STOP or CMPL
+        # and there is no one simple step from STOP to CMPL
+        # it should be like STOP -> RTS or WIP -> PREV -> CMPL
+        # and whenever task goes from STOP to RTS or WIP the original task will
+        # become WFD. So the test should be a WFD task dependency status is
+        # changed to CMPL
+        pass
+
+    # leaf tasks - dependency status changes
+    # WIP
+    def test_leaf_WIP_task_dependency_status_changed_to_WFD(self):
+        """testing if the status of a WIP leaf task will be set to DREV when
+        the status of the dependent task is set to WFD.
+        """
+        # This is not possible
+        # A task can be WIP while it has dependencies if the dependecies are
+        # STOP or CMPL, And a STOP or CMPL task can not be set back to WFD.
+        #
+        # unless you delete all the TimeLogs magically, which is not allowed
+        pass
+
+    def test_leaf_WIP_task_dependency_status_changed_to_RTS(self):
+        """testing if the status of a WIP leaf task will be set to DREV when
+        the status of the dependent task is set to RTS
+        """
+        # This is not possible
+        # A task can be WIP while it has dependencies if the dependecies are
+        # STOP or CMPL, And a STOP or CMPL task can not be set back to RTS.
+        #
+        # unless you delete all the TimeLogs magically, which is not allowed
+        pass
+
+    def test_leaf_WIP_task_dependency_status_changed_to_WIP(self):
+        """testing if the status of a WIP leaf task will be set to DREV when
+        the status of the dependent task is set to WIP
+        """
+        # this can be only possible if the dependent task was STOP and then
+        # is resumed and the the original task will be set to DREV
+
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends = [self.test_task8]
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # set task8 to WIP
+        # create a time log for task8
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if task8.status is now WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # now stop it
+        self.test_task8.status = self.status_stop
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # set task3 to WIP
+        # create a time log for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resource=self.test_task3.resources[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # now resume task8
+        self.test_task8.status = self.status_wip
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # expect the task3.status to be DREV
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+    def test_leaf_WIP_task_dependency_status_changed_to_PREV(self):
+        """testing if the status of a WIP leaf task will be set to DREV when
+        the status of the dependent task is set to PREV
+        """
+        # This test is unnecessary.
+        #
+        # Consider TaskA and TaskB. TaskB is depending to TaskA.
+        #
+        # This can be only possible if TaskA is set to STOP (after it is set to
+        # WIP) and then TaskB is set to WIP and then TaskA is resumed.
+        #
+        # But as soon as TaskA is resumed TaskB will be set to DREV and it will
+        # stay there until TaskA is CMPL.
+        # So when TaskA is set to PREV, TaskB status will stay in DREV
+        pass
+
+
+    def test_leaf_WIP_task_dependency_status_changed_to_HREV(self):
+        """testing if the status of a WIP leaf task will be set to DREV when
+        the status of the dependent task is set to HREV
+        """
+        # Consider TaskA and TaskB. TaskB is depending to TaskA.
+        #
+        # This can happen when TaskA is CMPL, TaskB is RTS -> WIP, and then
+        # TaskA is set to HREV directly. So TaskB will end up being DREV
+
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends = [self.test_task8]
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # set task8 to WIP
+        # create a time log for task8
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if task8.status is now WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # now task8 to PREV
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
+
+        # now task8 to CMPL
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+
+        # check task3.status is RTS
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # set task3 to WIP
+        # create a time log for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resource=self.test_task3.resources[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # now set task8.status to HREV
+        self.test_task8.status = self.status_hrev
+        self.assertEqual(self.test_task8.status, self.status_hrev)
+
+        # expect the task3.status to be DREV
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+
+    def test_leaf_WIP_task_dependency_status_changed_to_DREV(self):
+        """testing if the status of a WIP leaf task will be set to DREV when
+        the status of the dependent task is set to DREV
+        """
+        # This can happen with a three dependent task configuration
+        #
+        # consider TaskA, TaskB and TaskC all depending to the previous.
+        #
+        # so TaskA is RTS, TaskB and TaskC are WFD.
+        # now when TaskA is CMPL then TaskB becomes RTS, TaskC stays WFD
+        # then TaskB is set to CML (WIP -> PREV -> CMPL), and then TaskC
+        # becomes RTS, then WIP. And when TaskA is set to HREV TaskB becomes
+        # DREV and TaskC should also be DREV
+
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+        self.assertEqual(self.test_task9.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends = [self.test_task8]
+        self.test_task8.depends = [self.test_task9]
+        self.test_task9.depends = []
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_wfd)
+        self.assertEqual(self.test_task9.status, self.status_rts)
+
+        # task9 to WIP -> PREV -> CMPL
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task9,
+            resource=self.test_task9.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_wfd)
+        self.assertEqual(self.test_task9.status, self.status_wip)
+
+        # task9 to PREV
+        self.test_task9.status = self.status_prev
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_wfd)
+        self.assertEqual(self.test_task9.status, self.status_prev)
+
+        # task9 to CMPL
+        self.test_task9.status = self.status_cmpl
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task8 to WIP -> PREV -> CMPL
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_wip)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task8 to PREV
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_prev)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task8 to CMPL
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task3 to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resource=self.test_task3.resources[0],
+            start=now + datetime.timedelta(days=2),
+            end=now + datetime.timedelta(days=3)
+        )
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task9 to HREV
+        self.test_task9.status = self.status_hrev
+        self.assertEqual(self.test_task3.status, self.status_drev)
+        self.assertEqual(self.test_task8.status, self.status_drev)
+        self.assertEqual(self.test_task9.status, self.status_hrev)
+
+    def test_leaf_WIP_task_dependency_status_changed_to_OH(self):
+        """testing if the status of a WIP leaf task will be set to DREV when
+        the status of the dependent task is set to OH
+        """
+        # This is again not possible in one step from WIP to DREV when
+        # dependent task status is set to OH
+        #
+        # Consider TaskA and TaskB. TaskB depends to TaskA
+        #
+        # TaskB can only be set to WIP if TaskA is CMPL or STOP
+        # And TaskA can only be set to OH if it is WIP, Thus there are no one
+        # step configuration from CMPL to OH of STOP to OH
+        #
+        # So this test is invalid
+        pass
+
+    def test_leaf_WIP_task_dependency_status_changed_to_STOP(self):
+        """testing if the status of a WIP leaf task will stay WIP when the
+        status of the dependent task is set to STOP
+        """
+        # This can not happen in single step again
+        # 
+        # A Task can only be set to STOP if it is WIP and a task can not be WIP
+        # at the same time depending to another WIP task (one should be DREV)
+        #
+        # So this is implossible
+        pass
+
+    def test_leaf_WIP_task_dependency_status_changed_to_CMPL(self):
+        """testing if the status of a WIP leaf task will stay WIP when the
+        status of the dependent task is set to CMPL
+        """
+        # This can not happen in single step again
+        # 
+        # A Task can only be set to CMPL if it is PREV and a task can not be WIP
+        # at the same time depending to another PREV task (the dependee should
+        # be DREV)
+        #
+        # So this is implossible
+        pass
+
+    # leaf tasks - dependency status changes
+    # OH
+    def test_leaf_OH_task_dependency_status_changed_to_WFD(self):
+        """testing if the status of a OH leaf task will still be OH when the
+        status of the dependent task is set to WFD.
+        """
+        # This is not possible
+        # A task can be WIP while it has dependencies if the dependecies are
+        # STOP or CMPL, And a STOP or CMPL task can not be set back to WFD.
+        #
+        # unless you delete all the TimeLogs magically, which is not allowed
+        pass
+
+    def test_leaf_OH_task_dependency_status_changed_to_RTS(self):
+        """testing if the status of a WIP leaf task will be set to DREV when
+        the status of the dependent task is set to RTS
+        """
+        # This is not possible
+        # A task can be WIP while it has dependencies if the dependecies are
+        # STOP or CMPL, And a STOP or CMPL task can not be set back to RTS.
+        #
+        # unless you delete all the TimeLogs magically, which is not allowed
+        pass
+
+    def test_leaf_OH_task_dependency_status_changed_to_WIP(self):
+        """testing if the status of a WIP leaf task will be set to DREV when
+        the status of the dependent task is set to WIP
+        """
+        # this can be only possible if the dependent task was STOP and then
+        # is resumed and the the original task will be set to DREV
+
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends = [self.test_task8]
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # set task8 to WIP
+        # create a time log for task8
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if task8.status is now WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # now stop it
+        self.test_task8.status = self.status_stop
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # set task3 to WIP
+        # create a time log for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resource=self.test_task3.resources[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # now resume task8
+        self.test_task8.status = self.status_wip
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # expect the task3.status to be DREV
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+    def test_leaf_OH_task_dependency_status_changed_to_PREV(self):
+        """testing if the status of a WIP leaf task will be set to DREV when
+        the status of the dependent task is set to PREV
+        """
+        # This test is unnecessary.
+        #
+        # Consider TaskA and TaskB. TaskB is depending to TaskA.
+        #
+        # This can be only possible if TaskA is set to STOP (after it is set to
+        # WIP) and then TaskB is set to WIP and then TaskA is resumed.
+        #
+        # But as soon as TaskA is resumed TaskB will be set to DREV and it will
+        # stay there until TaskA is CMPL.
+        # So when TaskA is set to PREV, TaskB status will stay in DREV
+        pass
+
+    def test_leaf_OH_task_dependency_status_changed_to_HREV(self):
+        """testing if the status of a WIP leaf task will be set to DREV when
+        the status of the dependent task is set to HREV
+        """
+        # Consider TaskA and TaskB. TaskB is depending to TaskA.
+        #
+        # This can happen when TaskA is CMPL, TaskB is RTS -> WIP, and then
+        # TaskA is set to HREV directly. So TaskB will end up being DREV
+
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends = [self.test_task8]
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # set task8 to WIP
+        # create a time log for task8
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if task8.status is now WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # now task8 to PREV
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
+
+        # now task8 to CMPL
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+
+        # check task3.status is RTS
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # set task3 to WIP
+        # create a time log for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resource=self.test_task3.resources[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # now set task8.status to HREV
+        self.test_task8.status = self.status_hrev
+        self.assertEqual(self.test_task8.status, self.status_hrev)
+
+        # expect the task3.status to be DREV
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+    def test_leaf_OH_task_dependency_status_changed_to_DREV(self):
+        """testing if the status of a WIP leaf task will be set to DREV when
+        the status of the dependent task is set to DREV
+        """
+        # This can happen with a three dependent task configuration
+        #
+        # consider TaskA, TaskB and TaskC all depending to the previous.
+        #
+        # so TaskA is RTS, TaskB and TaskC are WFD.
+        # now when TaskA is CMPL then TaskB becomes RTS, TaskC stays WFD
+        # then TaskB is set to CML (WIP -> PREV -> CMPL), and then TaskC
+        # becomes RTS, then WIP. And when TaskA is set to HREV TaskB becomes
+        # DREV and TaskC should also be DREV
+
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+        self.assertEqual(self.test_task9.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends = [self.test_task8]
+        self.test_task8.depends = [self.test_task9]
+        self.test_task9.depends = []
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_wfd)
+        self.assertEqual(self.test_task9.status, self.status_rts)
+
+        # task9 to WIP -> PREV -> CMPL
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task9,
+            resource=self.test_task9.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_wfd)
+        self.assertEqual(self.test_task9.status, self.status_wip)
+
+        # task9 to PREV
+        self.test_task9.status = self.status_prev
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_wfd)
+        self.assertEqual(self.test_task9.status, self.status_prev)
+
+        # task9 to CMPL
+        self.test_task9.status = self.status_cmpl
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task8 to WIP -> PREV -> CMPL
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_wip)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task8 to PREV
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_prev)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task8 to CMPL
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task3 to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resource=self.test_task3.resources[0],
+            start=now + datetime.timedelta(days=2),
+            end=now + datetime.timedelta(days=3)
+        )
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task9 to HREV
+        self.test_task9.status = self.status_hrev
+        self.assertEqual(self.test_task3.status, self.status_drev)
+        self.assertEqual(self.test_task8.status, self.status_drev)
+        self.assertEqual(self.test_task9.status, self.status_hrev)
+
+    def test_leaf_OH_task_dependency_status_changed_to_OH(self):
+        """testing if the status of a WIP leaf task will be set to DREV when
+        the status of the dependent task is set to OH
+        """
+        # This is again not possible in one step from WIP to DREV when
+        # dependent task status is set to OH
+        #
+        # Consider TaskA and TaskB. TaskB depends to TaskA
+        #
+        # TaskB can only be set to WIP if TaskA is CMPL or STOP
+        # And TaskA can only be set to OH if it is WIP, Thus there are no one
+        # step configuration from CMPL to OH of STOP to OH
+        #
+        # So this test is invalid
+        pass
+
+    def test_leaf_OH_task_dependency_status_changed_to_STOP(self):
+        """testing if the status of a WIP leaf task will stay WIP when the
+        status of the dependent task is set to STOP
+        """
+        # This can not happen in single step again
+        # 
+        # A Task can only be set to STOP if it is WIP and a task can not be WIP
+        # at the same time depending to another WIP task (one should be DREV)
+        #
+        # So this is implossible
+        pass
+
+    def test_leaf_OH_task_dependency_status_changed_to_CMPL(self):
+        """testing if the status of a WIP leaf task will stay WIP when the
+        status of the dependent task is set to CMPL
+        """
+        # This can not happen in single step again
+        # 
+        # A Task can only be set to CMPL if it is PREV and a task can not be WIP
+        # at the same time depending to another PREV task (the dependee should
+        # be DREV)
+        #
+        # So this is implossible
+        pass
+
+    # leaf tasks - dependency status changes
+    # STOP
+    def test_leaf_STOP_task_dependency_status_changed_to_WFD(self):
+        """testing if the status of a STOP leaf task will still be STOP when
+        the status of the dependent task is set to WFD.
+        """
+        # This is not possible
+        # A task can be STOP while it has dependencies if the dependecies are
+        # STOP or CMPL, And a STOP or CMPL task can not be set back to WFD.
+        #
+        # unless you delete all the TimeLogs magically, which is not allowed
+        pass
+
+    def test_leaf_STOP_task_dependency_status_changed_to_RTS(self):
+        """testing if the status of a STOP leaf task will be still STOP when
+        the status of the dependent task is set to RTS
+        """
+        # This is not possible
+        # A task can be STOP while it has dependencies if the dependecies are
+        # STOP or CMPL, And a STOP or CMPL task can not be set back to RTS.
+        #
+        # unless you delete all the TimeLogs magically, which is not allowed
+        pass
+
+    def test_leaf_STOP_task_dependency_status_changed_to_WIP(self):
+        """testing if the status of a STOP leaf task will be set to STOP when
+        the status of the dependent task is set to WIP
+        """
+        # this can be only possible if the dependent task was STOP and then
+        # is resumed and the the original task will stay on STOP
+
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends = [self.test_task8]
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # set task8 to WIP
+        # create a time log for task8
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if task8.status is now WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # now stop it
+        self.test_task8.status = self.status_stop
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # set task3 to WIP
+        # create a time log for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resource=self.test_task3.resources[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # and stop it
+        self.test_task3.status = self.status_stop
+
+        # now resume task8
+        self.test_task8.status = self.status_wip
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # expect the task3.status to be STOP
+        self.assertEqual(self.test_task3.status, self.status_stop)
+
+    def test_leaf_STOP_task_dependency_status_changed_to_PREV(self):
+        """testing if the status of a STOP leaf task will be still STOP when
+        the status of the dependent task is set to PREV
+        """
+        # This test is unnecessary.
+        #
+        # Consider TaskA and TaskB. TaskB is depending to TaskA.
+        #
+        # This can be only possible if TaskA is set to STOP (after it is set to
+        # WIP) and then TaskB is set to WIP and then STOP then TaskA is resumed.
+
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends = [self.test_task8]
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # set task8 to WIP
+        # create a time log for task8
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if task8.status is now WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # now set task8 to STOP
+        self.test_task8.status = self.status_stop
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # check task3.status is RTS
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # set task3 to WIP
+        # create a time log for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resource=self.test_task3.resources[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # stop task3
+        self.test_task3.status = self.status_stop
+
+        # now resume task8
+        self.test_task8.status = self.status_wip
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # now task8 to PREV
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
+
+        # expect the task3.status to be STOP
+        self.assertEqual(self.test_task3.status, self.status_stop)
+
+    def test_leaf_STOP_task_dependency_status_changed_to_HREV(self):
+        """testing if the status of a STOP leaf task will be still STOP when
+        the status of the dependent task is set to HREV
+        """
+        # Consider TaskA and TaskB. TaskB is depending to TaskA.
+        #
+        # This can happen when TaskA is CMPL, TaskB is RTS -> WIP, and then
+        # TaskA is set to HREV directly. So TaskB will end up being DREV
+
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends = [self.test_task8]
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # set task8 to WIP
+        # create a time log for task8
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if task8.status is now WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # now task8 to PREV
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
+
+        # now task8 to CMPL
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+
+        # check task3.status is RTS
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # set task3 to WIP
+        # create a time log for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resource=self.test_task3.resources[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # now set task8.status to HREV
+        self.test_task8.status = self.status_hrev
+        self.assertEqual(self.test_task8.status, self.status_hrev)
+
+        # expect the task3.status to be DREV
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+    def test_leaf_STOP_task_dependency_status_changed_to_DREV(self):
+        """testing if the status of a STOP leaf task will still be STOP when
+        the status of the dependent task is set to DREV
+        """
+        # This can happen with a three dependent task configuration
+        #
+        # consider TaskA, TaskB and TaskC all depending to the previous.
+        #
+        # so TaskA is RTS, TaskB and TaskC are WFD.
+        # now when TaskA is CMPL then TaskB becomes RTS, TaskC stays WFD
+        # then TaskB is set to CML (WIP -> PREV -> CMPL), and then TaskC
+        # becomes RTS -> WIP -> STOP. And when TaskA is set to HREV TaskB
+        # becomes DREV and TaskC still should be STOP
+
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+        self.assertEqual(self.test_task9.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends = [self.test_task8]
+        self.test_task8.depends = [self.test_task9]
+        self.test_task9.depends = []
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_wfd)
+        self.assertEqual(self.test_task9.status, self.status_rts)
+
+        # task9 to WIP -> PREV -> CMPL
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task9,
+            resource=self.test_task9.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_wfd)
+        self.assertEqual(self.test_task9.status, self.status_wip)
+
+        # task9 to PREV
+        self.test_task9.status = self.status_prev
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_wfd)
+        self.assertEqual(self.test_task9.status, self.status_prev)
+
+        # task9 to CMPL
+        self.test_task9.status = self.status_cmpl
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task8 to WIP -> PREV -> CMPL
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_wip)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task8 to PREV
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_prev)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task8 to CMPL
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task3 to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resource=self.test_task3.resources[0],
+            start=now + datetime.timedelta(days=2),
+            end=now + datetime.timedelta(days=3)
+        )
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task3 to STOP
+        self.test_task3.status = self.status_stop
+
+        # task9 to HREV
+        self.test_task9.status = self.status_hrev
+        self.assertEqual(self.test_task3.status, self.status_stop)
+        self.assertEqual(self.test_task8.status, self.status_drev)
+        self.assertEqual(self.test_task9.status, self.status_hrev)
+
+    def test_leaf_STOP_task_dependency_status_changed_to_OH(self):
+        """testing if the status of a STOP leaf task will be set to STOP when
+        the status of the dependent task is set to OH
+        """
+        # check initial statuses
+        self.assertEquals(self.test_task3.status, self.status_rts)
+        self.assertEquals(self.test_task8.status, self.status_rts)
+
+        # create dependency
+        self.test_task3.depends = [self.test_task8]
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # set task8 to WIP -> OH
+        # task3 to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # STOP task8
+        self.test_task8.status = self.status_stop
+        
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # task3 to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resource=self.test_task3.resources[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # task3 to STOP
+        self.test_task3.status = self.status_stop
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_stop)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # task8 to WIP
+        self.test_task8.status = self.status_wip
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_stop)
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # task8 to OH
+        self.test_task8.status = self.status_oh
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_stop)
+        self.assertEqual(self.test_task8.status, self.status_oh)
+
+    def test_leaf_STOP_task_dependency_status_changed_to_STOP(self):
+        """testing if the status of a STOP leaf task will stay STOP when the
+        status of the dependent task is set to STOP
+        """
+        # check initial statuses
+        self.assertEquals(self.test_task3.status, self.status_rts)
+        self.assertEquals(self.test_task8.status, self.status_rts)
+
+        # create dependency
+        self.test_task3.depends = [self.test_task8]
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # set task8 to WIP -> OH
+        # task3 to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # STOP task8
+        self.test_task8.status = self.status_stop
+        
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # task3 to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resource=self.test_task3.resources[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # task3 to STOP
+        self.test_task3.status = self.status_stop
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_stop)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # task8 to WIP
+        self.test_task8.status = self.status_wip
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_stop)
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # task8 to STOP
+        self.test_task8.status = self.status_stop
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_stop)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+    def test_leaf_STOP_task_dependency_status_changed_to_CMPL(self):
+        """testing if the status of a STOP leaf task will stay STOP when the
+        status of the dependent task is set to CMPL
+        """
+        # check initial statuses
+        self.assertEquals(self.test_task3.status, self.status_rts)
+        self.assertEquals(self.test_task8.status, self.status_rts)
+
+        # create dependency
+        self.test_task3.depends = [self.test_task8]
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # set task8 to WIP -> OH
+        # task3 to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # STOP task8
+        self.test_task8.status = self.status_stop
+        
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # task3 to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resource=self.test_task3.resources[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # task3 to STOP
+        self.test_task3.status = self.status_stop
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_stop)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # task8 to WIP
+        self.test_task8.status = self.status_wip
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_stop)
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # task8 to WIP
+        self.test_task8.status = self.status_wip
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_stop)
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # task8 to PREV
+        self.test_task8.status = self.status_prev
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_stop)
+        self.assertEqual(self.test_task8.status, self.status_prev)
+        
+        # task8 to CMPL
+        self.test_task8.status = self.status_cmpl
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_stop)
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+
+    # leaf tasks - dependency status changes
+    # PREV
+    def test_leaf_PREV_task_dependency_status_changed_to_WFD(self):
+        """testing if the status of a PREV leaf task will still be PREV when
+        the status of the dependent task is set to WFD.
+        """
+        # This is not possible
+        # A task can be PREV while it has dependencies if the dependecies are
+        # STOP or CMPL, And a STOP or CMPL task can not be set back to WFD.
+        pass
+
+    def test_leaf_PREV_task_dependency_status_changed_to_RTS(self):
+        """testing if the status of a PREV leaf task will still be PREV when
+        the status of the dependent task is set to RTS
+        """
+        # This is not possible
+        # A task can be PREV while it has dependencies if the dependecies are
+        # STOP or CMPL, And a STOP or CMPL task can not be set back to RTS.
+        pass
+
+    def test_leaf_PREV_task_dependency_status_changed_to_WIP(self):
+        """testing if the status of a PREV leaf task will still be PREV when
+        the status of the dependent task is set to WIP
+        """
+        # this can be only possible if the dependent task was STOP and then
+        # is resumed and the the original task will still be PREV
+
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends = [self.test_task8]
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # set task8 to WIP
+        # create a time log for task8
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if task8.status is now WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # now stop it
+        self.test_task8.status = self.status_stop
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # set task3 to WIP
+        # create a time log for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resource=self.test_task3.resources[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # check status
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # set task3.status to PREV
+        self.test_task3.status = self.status_prev
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_prev)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # now resume task8
+        self.test_task8.status = self.status_wip
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # expect the task3.status still to be PREV
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+    def test_leaf_PREV_task_dependency_status_changed_to_PREV(self):
+        """testing if the status of a PREV leaf task will still be PREV when
+        the status of the dependent task is set to PREV
+        """
+        # this can be only possible if the dependent task was STOP and then
+        # is resumed and set to PREV and the original task will still be PREV
+
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends = [self.test_task8]
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # set task8 to WIP
+        # create a time log for task8
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if task8.status is now WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # now stop it
+        self.test_task8.status = self.status_stop
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # set task3 to WIP
+        # create a time log for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resource=self.test_task3.resources[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # check status
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # set task3.status to PREV
+        self.test_task3.status = self.status_prev
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_prev)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # now resume task8
+        self.test_task8.status = self.status_wip
+
+        # check statuses
+        self.assertEqual(self.test_task8.status, self.status_wip)
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # set task8.status to PREV
+        self.test_task8.status = self.status_prev
+
+        # check statuses
+        self.assertEqual(self.test_task8.status, self.status_prev)
+
+        # expect the task3.status still to be PREV
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+    def test_leaf_PREV_task_dependency_status_changed_to_HREV(self):
+        """testing if the status of a PREV leaf task will still be PREV when
+        the status of the dependent task is set to HREV
+        """
+        # this can be only possible if the dependent task was STOP and then
+        # is resumed and set to PREV and the original task will still be PREV
+
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends = [self.test_task8]
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # set task8 to WIP
+        # create a time log for task8
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if task8.status is now WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # now stop it
+        self.test_task8.status = self.status_stop
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # set task3 to WIP
+        # create a time log for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resource=self.test_task3.resources[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # check status
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # set task3.status to PREV
+        self.test_task3.status = self.status_prev
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_prev)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # now resume task8
+        self.test_task8.status = self.status_wip
+
+        # check statuses
+        self.assertEqual(self.test_task8.status, self.status_wip)
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # set task8.status to PREV
+        self.test_task8.status = self.status_prev
+
+        # check statuses
+        self.assertEqual(self.test_task8.status, self.status_prev)
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # set task8.status to HREV
+        self.test_task8.status = self.status_hrev
+
+        # check statuses
+        self.assertEqual(self.test_task8.status, self.status_hrev)
+
+        # expect the task3.status still to be PREV
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+    def test_leaf_PREV_task_dependency_status_changed_to_DREV(self):
+        """testing if the status of a PREV leaf task will still be PREV when
+        the status of the dependent task is set to DREV
+        """
+        # This can happen with a three dependent task configuration
+        #
+        # consider TaskA, TaskB and TaskC all depending to the previous.
+        #
+        # so TaskA is RTS, TaskB and TaskC are WFD.
+        # now when TaskA is CMPL then TaskB becomes RTS, TaskC stays WFD
+        # then TaskB is set to CML (WIP -> PREV -> CMPL), and then TaskC
+        # becomes RTS -> WIP -> PREV. And when TaskA is set to HREV TaskB
+        # becomes DREV and TaskC should be still PREV
+
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+        self.assertEqual(self.test_task9.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends = [self.test_task8]
+        self.test_task8.depends = [self.test_task9]
+        self.test_task9.depends = []
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_wfd)
+        self.assertEqual(self.test_task9.status, self.status_rts)
+
+        # task9 to WIP -> PREV -> CMPL
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task9,
+            resource=self.test_task9.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_wfd)
+        self.assertEqual(self.test_task9.status, self.status_wip)
+
+        # task9 to PREV
+        self.test_task9.status = self.status_prev
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_wfd)
+        self.assertEqual(self.test_task9.status, self.status_prev)
+
+        # task9 to CMPL
+        self.test_task9.status = self.status_cmpl
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task8 to WIP -> PREV -> CMPL
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_wip)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task8 to PREV
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_prev)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task8 to CMPL
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task3 to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resource=self.test_task3.resources[0],
+            start=now + datetime.timedelta(days=2),
+            end=now + datetime.timedelta(days=3)
+        )
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task3 to PREV
+        self.test_task3.status = self.status_prev
+        self.assertEqual(self.test_task3.status, self.status_prev)
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task9 to HREV
+        self.test_task9.status = self.status_hrev
+        self.assertEqual(self.test_task3.status, self.status_prev)
+        self.assertEqual(self.test_task8.status, self.status_drev)
+        self.assertEqual(self.test_task9.status, self.status_hrev)
+
+    def test_leaf_PREV_task_dependency_status_changed_to_OH(self):
+        """testing if the status of a PREV leaf task will still be PREV when
+        the status of the dependent task is set to OH
+        """
+        # this can be possible if the dependent task was STOP and then is
+        # resumed and set to OH and the original task will still be PREV
+
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends = [self.test_task8]
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # set task8 to WIP
+        # create a time log for task8
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if task8.status is now WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # now stop it
+        self.test_task8.status = self.status_stop
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # set task3 to WIP
+        # create a time log for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resource=self.test_task3.resources[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # check status
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # set task3.status to PREV
+        self.test_task3.status = self.status_prev
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_prev)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # now resume task8
+        self.test_task8.status = self.status_wip
+
+        # check statuses
+        self.assertEqual(self.test_task8.status, self.status_wip)
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # set task8.status to OH
+        self.test_task8.status = self.status_oh
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_prev)
+        self.assertEqual(self.test_task8.status, self.status_oh)
+
+    def test_leaf_PREV_task_dependency_status_changed_to_STOP(self):
+        """testing if the status of a WIP leaf task will stay WIP when the
+        status of the dependent task is set to STOP
+        """
+        # this can be possible if the dependent task was STOP and then is
+        # resumed and set to STOP again and the original task will still be
+        # PREV
+
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends = [self.test_task8]
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # set task8 to WIP
+        # create a time log for task8
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if task8.status is now WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # now stop it
+        self.test_task8.status = self.status_stop
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # set task3 to WIP
+        # create a time log for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resource=self.test_task3.resources[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # check status
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # set task3.status to PREV
+        self.test_task3.status = self.status_prev
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_prev)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # now resume task8
+        self.test_task8.status = self.status_wip
+
+        # check statuses
+        self.assertEqual(self.test_task8.status, self.status_wip)
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # set task8.status to STOP
+        self.test_task8.status = self.status_stop
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_prev)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+    def test_leaf_PREV_task_dependency_status_changed_to_CMPL(self):
+        """testing if the status of a WIP leaf task will stay WIP when the
+        status of the dependent task is set to CMPL
+        """
+        # this can be possible if the dependent task was STOP and then is
+        # resumed and set to PREV -> CMPL and the original task will still be
+        # PREV
+
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends = [self.test_task8]
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # set task8 to WIP
+        # create a time log for task8
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if task8.status is now WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # now stop it
+        self.test_task8.status = self.status_stop
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # set task3 to WIP
+        # create a time log for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resource=self.test_task3.resources[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # check status
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # set task3.status to PREV
+        self.test_task3.status = self.status_prev
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_prev)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # now resume task8
+        self.test_task8.status = self.status_wip
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_prev)
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # set task8.status to PREV
+        self.test_task8.status = self.status_prev
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_prev)
+        self.assertEqual(self.test_task8.status, self.status_prev)
+
+        # set task8.status to CMPL
+        self.test_task8.status = self.status_cmpl
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_prev)
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+
+    # leaf tasks - dependency status changes
+    # HREV
+    def test_leaf_HREV_task_dependency_status_changed_to_WFD(self):
+        """testing if the status of a WIP leaf task will be set to DREV when
+        the status of the dependent task is set to WFD.
+        """
+        # This is not possible
+        # A task can be HREV while it has dependencies if the dependecies are
+        # STOP or CMPL, And a STOP or CMPL task can not be set back to WFD.
+        #
+        # unless you delete all the TimeLogs magically, which is not allowed
+        pass
+
+    def test_leaf_HREV_task_dependency_status_changed_to_RTS(self):
+        """testing if the status of a WIP leaf task will be set to DREV when
+        the status of the dependent task is set to RTS
+        """
+        # This is not possible
+        # A task can be HREV while it has dependencies if the dependecies are
+        # STOP or CMPL, And a STOP or CMPL task can not be set back to RTS.
+        #
+        # unless you delete all the TimeLogs magically, which is not allowed
+        pass
+
+    def test_leaf_HREV_task_dependency_status_changed_to_WIP(self):
+        """testing if the status of a HREV leaf task will be set to DREV when
+        the status of the dependent task is set to WIP
+        """
+        # this can be only possible if the dependent task was STOP and then
+        # is resumed and the the original task will be set to DREV
+
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends = [self.test_task8]
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # set task8 to WIP
+        # create a time log for task8
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if task8.status is now WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # now stop it
+        self.test_task8.status = self.status_stop
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # set task3 to WIP
+        # create a time log for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resource=self.test_task3.resources[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # then PREV
+        self.test_task3.status = self.status_prev
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_prev)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # then HREV
+        self.test_task3.status = self.status_hrev
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_hrev)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # now resume task8
+        self.test_task8.status = self.status_wip
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # expect the task3.status to be DREV
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+    def test_leaf_HREV_task_dependency_status_changed_to_PREV(self):
+        """testing if the status of a WIP leaf task will be set to DREV when
+        the status of the dependent task is set to PREV
+        """
+        # This test is unnecessary.
+        #
+        # Consider TaskA and TaskB. TaskB is depending to TaskA.
+        #
+        # This can be only possible if TaskA is set to STOP (after it is set to
+        # WIP) and then TaskB is set to WIP and then TaskA is resumed.
+        #
+        # But as soon as TaskA is resumed TaskB will be set to DREV and it will
+        # stay there until TaskA is CMPL.
+        # So when TaskA is set to PREV, TaskB status will stay in DREV
+        pass
+
+    def test_leaf_HREV_task_dependency_status_changed_to_HREV(self):
+        """testing if the status of a HREV leaf task will be set to DREV when
+        the status of the dependent task is set to HREV
+        """
+        # Consider TaskA and TaskB. TaskB is depending to TaskA.
+        #
+        # This can happen when TaskA is CMPL, TaskB is RTS -> WIP, and then
+        # TaskA is set to HREV directly. So TaskB will end up being DREV
+
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends = [self.test_task8]
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # set task8 to WIP
+        # create a time log for task8
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check if task8.status is now WIP
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # now task8 to PREV
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
+
+        # now task8 to CMPL
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+
+        # check task3.status is RTS
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # set task3 to WIP
+        # create a time log for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resource=self.test_task3.resources[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # task3 -> PREV
+        self.test_task3.status = self.status_prev
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_prev)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # task3 -> HREV
+        self.test_task3.status = self.status_hrev
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_hrev)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # set task8.status to WIP
+        self.test_task8.status = self.status_wip
+        self.assertEqual(self.test_task3.status, self.status_drev)
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # now set task8.status to HREV
+        self.test_task8.status = self.status_hrev
+        self.assertEqual(self.test_task8.status, self.status_hrev)
+
+        # expect the task3.status to be DREV
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+    def test_leaf_HREV_task_dependency_status_changed_to_DREV(self):
+        """testing if the status of a HREV leaf task will be set to DREV when
+        the status of the dependent task is set to DREV
+        """
+        # This can happen with a three dependent task configuration
+        #
+        # consider TaskA, TaskB and TaskC all depending to the previous.
+        #
+        # so TaskA is RTS, TaskB and TaskC are WFD.
+        # now when TaskA is CMPL then TaskB becomes RTS, TaskC stays WFD
+        # then TaskB is set to CML (WIP -> PREV -> CMPL), and then TaskC
+        # becomes RTS, then WIP. And when TaskA is set to HREV TaskB becomes
+        # DREV and TaskC should also be DREV
+
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+        self.assertEqual(self.test_task9.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends = [self.test_task8]
+        self.test_task8.depends = [self.test_task9]
+        self.test_task9.depends = []
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_wfd)
+        self.assertEqual(self.test_task9.status, self.status_rts)
+
+        # task9 to WIP -> PREV -> CMPL
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task9,
+            resource=self.test_task9.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_wfd)
+        self.assertEqual(self.test_task9.status, self.status_wip)
+
+        # task9 to PREV
+        self.test_task9.status = self.status_prev
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_wfd)
+        self.assertEqual(self.test_task9.status, self.status_prev)
+
+        # task9 to CMPL
+        self.test_task9.status = self.status_cmpl
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task8 to WIP -> PREV -> CMPL
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_wip)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task8 to PREV
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_prev)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task8 to CMPL
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task3 to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resource=self.test_task3.resources[0],
+            start=now + datetime.timedelta(days=2),
+            end=now + datetime.timedelta(days=3)
+        )
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task3 to PREV
+        self.test_task3.status = self.status_prev
+        self.assertEqual(self.test_task3.status, self.status_prev)
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task3 to HREV
+        self.test_task3.status = self.status_hrev
+        self.assertEqual(self.test_task3.status, self.status_hrev)
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task9 to HREV
+        self.test_task9.status = self.status_hrev
+        self.assertEqual(self.test_task3.status, self.status_drev)
+        self.assertEqual(self.test_task8.status, self.status_drev)
+        self.assertEqual(self.test_task9.status, self.status_hrev)
+
+    def test_leaf_HREV_task_dependency_status_changed_to_OH(self):
+        """testing if the status of a HREV leaf task will be ???? when the
+        status of the dependent task is set to OH
+        """
+        # This is again not possible in one step from WIP to DREV when
+        # dependent task status is set to OH
+        #
+        # Consider TaskA and TaskB. TaskB depends to TaskA
+        #
+        # TaskB can only be set to HREV if TaskA is CMPL or STOP
+        # And TaskA can only be set to OH if it is WIP, Thus there are no one
+        # step configuration from CMPL to OH of STOP to OH
+        #
+        # So this test is invalid
+        pass
+
+    def test_leaf_HREV_task_dependency_status_changed_to_STOP(self):
+        """testing if the status of a HREV leaf task will be ???? when the
+        status of the dependent task is set to STOP
+        """
+        # This can not happen in single step again
+        # 
+        # A Task can only be set to STOP if it is WIP and a task can not be
+        # HREV at the same time depending to another WIP task (one should be DREV)
+        #
+        # So this is implossible
+        pass
+
+    def test_leaf_HREV_task_dependency_status_changed_to_CMPL(self):
+        """testing if the status of a HREV leaf task will be ???? when the
+        status of the dependent task is set to CMPL
+        """
+        # This can not happen in single step again
+        # 
+        # A Task can only be set to CMPL if it is PREV and a task can not be
+        # HREV at the same time depending to another PREV task (the dependee
+        # should be DREV)
+        #
+        # So this is implossible
+        pass
+
+    # leaf tasks - dependency status changes
+    # DREV
+    def test_leaf_DREV_task_dependency_status_changed_to_WFD(self):
+        """testing if the status of a DREV leaf task will be set to ???? when
+        the status of the dependent task is set to WFD.
+        """
+        # This is not possible
+        # A task can be WIP while it has dependencies if the dependecies are
+        # STOP or CMPL, And a STOP or CMPL task can not be set back to WFD.
+        #
+        # unless you delete all the TimeLogs magically, which is not allowed
+        pass
+
+    def test_leaf_DREV_task_dependency_status_changed_to_RTS(self):
+        """testing if the status of a DREV leaf task will be set to ???? when
+        the status of the dependent task is set to RTS
+        """
+        # This is not possible
+        # A task can be WIP while it has dependencies if the dependecies are
+        # STOP or CMPL, And a STOP or CMPL task can not be set back to RTS.
+        #
+        # unless you delete all the TimeLogs magically, which is not allowed
+        pass
+
+    def test_leaf_DREV_task_dependency_status_changed_to_WIP(self):
+        """testing if the status of a DREV leaf task will stay DREV when the
+        status of the dependent task is set to WIP
+        """
+        # Task B depends Task A
+        # Task A : RTS
+        # Task B : WFD
+        # Task A : RTS -> WIP -> STOP
+        # Task B : WFD -> RTS -> WIP
+        # Task A : STOP -> WIP
+        # Task B : WIP -> DREV
+        # Task A : WIP -> STOP
+        # Task B : DREV -> WIP
+        # ...
+        # Task A : STOP -> WIP
+        # Task B : WIP -> DREV
+        # Task A : WIP -> STOP
+        # Task B : DREV -> WIP
+        #
+        # It is not going anywhere, this test is meaningless, the Task B do not
+        # stay at DREV when the Task A is set to STOP
+        pass
+
+    def test_leaf_DREV_task_dependency_status_changed_to_PREV(self):
+        """testing if the status of a DREV leaf task will be set to DREV when
+        the status of the dependent task is set to PREV
+        """
+        # initial condition
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends = [self.test_task8]
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # task8 to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + datetime.timedeldat(days=1)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # task8 to STOP
+        self.test_task8.status = self.status_stop
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # task3 to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now + datetime.timedeldat(days=1),
+            end=now + datetime.timedeldat(days=2)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # task8 to WIP
+        self.test_task8.status = self.status_wip
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_drev)
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # task8 to PREV
+        self.test_task8.status = self.status_prev
+
+        # check status
+        self.assertEqual(self.test_task3.status, self.status_drev)
+        self.assertEqual(self.test_task8.status, self.status_prev)
+
+    def test_leaf_DREV_task_dependency_status_changed_to_HREV(self):
+        """testing if the status of a DREV leaf task will be set to DREV when
+        the status of the dependent task is set to HREV
+        """
+        # initial condition
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends = [self.test_task8]
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # task8 to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + datetime.timedeldat(days=1)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        # task8 to STOP
+        self.test_task8.status = self.status_stop
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # task3 to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now + datetime.timedeldat(days=1),
+            end=now + datetime.timedeldat(days=2)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task8.status, self.status_stop)
+
+        # task8 to WIP
+        self.test_task8.status = self.status_wip
+
+        # check statuses
+        self.assertEqual(self.test_task8.status, self.status_wip)
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+        # task8 to PREV
+        self.test_task8.status = self.status_prev
+
+        # check status
+        self.assertEqual(self.test_task8.status, self.status_prev)
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+        # task8 to HREV
+        self.test_task8.status = self.status_hrev
+
+        # check status
+        self.assertEqual(self.test_task8.status, self.status_hrev)
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+    def test_leaf_DREV_task_dependency_status_changed_to_DREV(self):
+        """testing if the status of a DREV leaf task will be set to DREV when
+        the status of the dependent task is set to DREV
+        """
+        # This can happen with a three dependent task configuration
+        #
+        # consider TaskA, TaskB and TaskC all depending to the previous.
+        #
+        # so TaskA is RTS, TaskB and TaskC are WFD.
+        # now when TaskA is CMPL then TaskB becomes RTS, TaskC stays WFD
+        # then TaskB is set to CML (WIP -> PREV -> CMPL), and then TaskC
+        # becomes RTS, then WIP.
+        # TaskB to HREV, TaskC to DREV (initial setup)
+        #
+        # TaskB to WIP -> PREV -> CMPL, TaskC to WIP
+        # TaskA CMPL -> HREV, TaskB CMPL -> DREV, TaskC -> DREV
+        #
+        # So it is not possible to keep TaskC at DREV while, TaskB is set to
+        # DREV (from CMPL for example), cause as soon as TaskB is set to CMPL
+        # TaskC becomes WIP so the initial setup is broken.
+        #
+        # And that case (TaskC WIP -> DREV) has been tested before
+        pass
+
+    def test_leaf_DREV_task_dependency_status_changed_to_OH(self):
+        """testing if the status of a DREV leaf task will be set to DREV when
+        the status of the dependent task is set to OH
+        """
+        # TaskA and TaskB, TaskB depends to TaskA
+        # 
+        # TaskA RTS -> WIP -> PREV -> CMPL -> HREV -> WIP  -> OH
+        # TaskB WFD -> WFD -> WFD  -> RTS  -> DREV -> DREV -> DREV
+
+        # initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends = [self.test_task8]
+        self.test_task8.depends = []
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # task8 to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task8.status, self.status_wip)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # task8 to PREV
+        self.test_task8.status = self.status_prev
+
+        # check statuses
+        self.assertEqual(self.test_task8.status, self.status_prev)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # task8 to CMPL
+        self.test_task8.status = self.status_cmpl
+
+        # check statuses
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # task8 to HREV
+        self.test_task8.status = self.status_hrev
+
+        # check statuses
+        self.assertEqual(self.test_task8.status, self.status_hrev)
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+        # task8 to WIP
+        self.test_task8.status = self.status_wip
+
+        # check statuses
+        self.assertEqual(self.test_task8.status, self.status_wip)
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+        # task8 to OH
+        self.test_task8.status = self.status_oh
+
+        # check statuses
+        self.assertEqual(self.test_task8.status, self.status_oh)
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+    def test_leaf_DREV_task_dependency_status_changed_to_STOP(self):
+        """testing if the status of a DREV leaf task will be set to RTS when
+        the status of the dependent task is set to STOP
+        """
+        # TaskA and TaskB, TaskB depends to TaskA
+        # 
+        # TaskA RTS -> WIP -> PREV -> CMPL -> HREV -> WIP  -> OH
+        # TaskB WFD -> WFD -> WFD  -> RTS  -> DREV -> DREV -> DREV
+
+        # initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends = [self.test_task8]
+        self.test_task8.depends = []
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # task8 to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task8.status, self.status_wip)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # task8 to PREV
+        self.test_task8.status = self.status_prev
+
+        # check statuses
+        self.assertEqual(self.test_task8.status, self.status_prev)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # task8 to CMPL
+        self.test_task8.status = self.status_cmpl
+
+        # check statuses
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # task8 to HREV
+        self.test_task8.status = self.status_hrev
+
+        # check statuses
+        self.assertEqual(self.test_task8.status, self.status_hrev)
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+        # task8 to WIP
+        self.test_task8.status = self.status_wip
+
+        # check statuses
+        self.assertEqual(self.test_task8.status, self.status_wip)
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+        # task8 to STOP
+        self.test_task8.status = self.status_stop
+
+        # check statuses
+        self.assertEqual(self.test_task8.status, self.status_stop)
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+    def test_leaf_DREV_task_dependency_status_changed_to_CMPL(self):
+        """testing if the status of a DREV leaf task will be set to RTS when
+        the status of the dependent task is set to CMPL
+        """
+        # TaskA and TaskB, TaskB depends to TaskA
+        # 
+        # TaskA RTS -> WIP -> PREV -> CMPL -> HREV -> WIP  -> PREV -> CMPL 
+        # TaskB WFD -> WFD -> WFD  -> RTS  -> DREV -> DREV -> DREV -> RTS
+
+        # initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends = [self.test_task8]
+        self.test_task8.depends = []
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # task8 to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task8.status, self.status_wip)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # task8 to PREV
+        self.test_task8.status = self.status_prev
+
+        # check statuses
+        self.assertEqual(self.test_task8.status, self.status_prev)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # task8 to CMPL
+        self.test_task8.status = self.status_cmpl
+
+        # check statuses
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # task8 to HREV
+        self.test_task8.status = self.status_hrev
+
+        # check statuses
+        self.assertEqual(self.test_task8.status, self.status_hrev)
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+        # task8 to WIP
+        self.test_task8.status = self.status_wip
+
+        # check statuses
+        self.assertEqual(self.test_task8.status, self.status_wip)
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+        # task8 to PREV
+        self.test_task8.status = self.status_prev
+
+        # check statuses
+        self.assertEqual(self.test_task8.status, self.status_prev)
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+        # task8 to CMPL
+        self.test_task8.status = self.status_cmpl
+
+        # check statuses
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+    # leaf tasks - dependency status changes
+    # CMPL
+    def test_leaf_CMPL_task_dependency_status_changed_to_WFD(self):
+        """testing if the status of a CMPL leaf task will be set to ???? when
+        the status of the dependent task is set to WFD.
+        """
+        # This is not possible
+        # A dependent task can not be set to WFD
+        pass
+
+    def test_leaf_CMPL_task_dependency_status_changed_to_RTS(self):
+        """testing if the status of a CMPL leaf task will be set to ???? when
+        the status of the dependent task is set to RTS
+        """
+        # This is not possible
+        # A dependent task can not be set to RTS
+        pass
+
+    def test_leaf_CMPL_task_dependency_status_changed_to_WIP(self):
+        """testing if the status of a CMPL leaf task will be set to DREV when
+        the status of the dependent task is set to WIP
+        """
+        # This test is unnecessary
+        # 
+        #     TaskA TaskB
+        #  1. RTS   WFD
+        #  2. WIP   WFD
+        #  3. PREV  WFD
+        #  4. CMPL  RTS
+        #  5. CMPL  WIP
+        #  6. CMPL  PREV
+        #  7. CMPL  CMPL
+        #  8. HREV  DREV <- initial condition is broken
+        #  9. WIP   DREV
+        # 10. PREV  DREV
+        # 11. CMPL  WIP
+        #
+        # TaskB will be set to DREV as soon as TaskA is set to HREV
+        pass
+
+    def test_leaf_CMPL_task_dependency_status_changed_to_PREV(self):
+        """testing if the status of a CMPL leaf task will be set to DREV when
+        the status of the dependent task is set to PREV
+        """
+        # This test is unnecessary
+        # TaskB depends to TaskA
+        
+        #     TaskA TaskB
+        #  1. RTS   WFD
+        #  2. WIP   WFD
+        #  3. PREV  WFD
+        #  4. CMPL  RTS
+        #  5. CMPL  WIP
+        #  6. CMPL  PREV
+        #  7. CMPL  CMPL
+        #  8. HREV  DREV <- initial condition is broken
+        #  9. WIP   DREV
+        # 10. PREV  DREV
+        # 11. CMPL  WIP
+        #
+        # TaskB will be set to DREV as soon as TaskA is set to HREV
+        pass
+
+    def test_leaf_CMPL_task_dependency_status_changed_to_HREV(self):
+        """testing if the status of a WIP leaf task will be set to DREV when
+        the status of the dependent task is set to HREV
+        """
+        # TaskB depends to TaskA
+        #
+        #     TaskA TaskB
+        #  1. RTS   WFD
+        #  2. WIP   WFD
+        #  3. PREV  WFD
+        #  4. CMPL  RTS
+        #  5. CMPL  WIP
+        #  6. CMPL  PREV
+        #  7. CMPL  CMPL <- initial condition
+        #  8. HREV  DREV <- expected statuses
+
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends = [self.test_task8]
+        self.test_task8.depends = []
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        # set task8 to WIP
+        # create a time log for task8
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task8.status, self.status_wip)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # now task8 to PREV
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # now task8 to CMPL
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        self.assertEqual(self.test_task3.status, self.status_rts)
+
+        # set task3 to WIP
+        # create a time log for task3
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resource=self.test_task3.resources[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # task3 to PREV
+        self.test_task3.status = self.status_prev
+        self.assertEqual(self.test_task3.status, self.status_prev)
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+
+        # task3 to CMPL
+        self.test_task3.status = self.status_cmpl
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+
+        # task8 to HREV
+        self.test_task8.status = self.status_hrev
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+    def test_leaf_CMPL_task_dependency_status_changed_to_DREV(self):
+        """testing if the status of a CMPL leaf task will be set to DREV when
+        the status of the dependent task is set to DREV
+        """
+        # TaskC > TaskB > TaskA
+        #
+        # Steps table
+        #
+        #     TaskA TaskB TaskC
+        #  1. RTS   WFD   WFD
+        #  2. WIP   WFD   WFD
+        #  3. PREV  WFD   WFD
+        #  4. CMPL  RTS   WFD
+        #  5. CMPL  WIP   WFD
+        #  6. CMPL  PREV  WFD
+        #  7. CMPL  CMPL  RTS
+        #  8. CMPL  CMPL  WIP
+        #  9. CMPL  CMPL  PREV
+        # 10. CMPL  CMPL  CMPL <- initial condition
+        # 11. HREV  DREV  DREV <- expected conditions
+
+        # check initial statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+        self.assertEqual(self.test_task9.status, self.status_rts)
+
+        # create dependencies
+        self.test_task3.depends = [self.test_task8]
+        self.test_task8.depends = [self.test_task9]
+        self.test_task9.depends = []
+
+        # check statuses
+        self.assertEqual(self.test_task9.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_wfd)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # task9 to WIP -> PREV -> CMPL
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task9,
+            resource=self.test_task9.resources[0],
+            start=now,
+            end=now + datetime.timedelta(days=1)
+        )
+        self.assertEqual(self.test_task9.status, self.status_wip)
+        self.assertEqual(self.test_task8.status, self.status_wfd)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # task9 to PREV
+        self.test_task9.status = self.status_prev
+        self.assertEqual(self.test_task9.status, self.status_prev)
+        self.assertEqual(self.test_task8.status, self.status_wfd)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # task9 to CMPL
+        self.test_task9.status = self.status_cmpl
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # task8 to WIP -> PREV -> CMPL
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now + datetime.timedelta(days=1),
+            end=now + datetime.timedelta(days=2)
+        )
+        self.assertEqual(self.test_task8.status, self.status_wip)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+        # task8 to PREV
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task8.status, self.status_prev)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task8 to CMPL
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task3 to WIP
+        now = datetime.datetime.now()
+        TimeLog(
+            task=self.test_task3,
+            resource=self.test_task3.resources[0],
+            start=now + datetime.timedelta(days=2),
+            end=now + datetime.timedelta(days=3)
+        )
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task3 to PREV
+        self.test_task3.status = self.status_prev
+        self.assertEqual(self.test_task3.status, self.status_prev)
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task3 to CMPL <- initial condition
+        self.test_task3.status = self.status_cmpl
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+
+        # task9 to HREV
+        self.test_task9.status = self.status_hrev
+        self.assertEqual(self.test_task9.status, self.status_hrev)
+        self.assertEqual(self.test_task8.status, self.status_drev)
+        self.assertEqual(self.test_task3.status, self.status_drev)
+
+    def test_leaf_CMPL_task_dependency_status_changed_to_OH(self):
+        """testing if the status of a CMPL leaf task will be set to ???? when
+        the status of the dependent task is set to OH
+        """
+        # TaskB depends to TaskA
+        #
+        # Steps Table
+        #
+        #     TaskA TaskB
+        #  1. RTS   WFD  
+        #  2. WIP   WFD  
+        #  3. PREV  WFD  
+        #  4. CMPL  RTS  
+        #  5. CMPL  WIP  
+        #  6. CMPL  PREV 
+        #  7. CMPL  CMPL <- initial condition
+        #  8. HREV  DREV <- initial condition is broken here
+        #  9. WIP   DREV
+        # 10. OH    DREV
+        #
+        # Test is invalid
+        pass
+
+    def test_leaf_CMPL_task_dependency_status_changed_to_STOP(self):
+        """testing if the status of a CMPL leaf task will be set to ???? when
+        the status of the dependent task is set to STOP
+        """
+        # TaskB depends to TaskA
+        #
+        # Steps Table
+        #
+        #     Scenario 1
+        #     TaskA TaskB
+        #  1. RTS   WFD  
+        #  2. WIP   WFD  
+        #  3. PREV  WFD  
+        #  4. CMPL  RTS  
+        #  5. CMPL  WIP  
+        #  6. CMPL  PREV 
+        #  7. CMPL  CMPL <- initial condition
+        #  8. HREV  DREV <- initial condition is broken here
+        #  9. WIP   DREV
+        # 10. STOP  DREV
+        #
+        #     Scenario 2
+        #     TaskA TaskB
+        #  1. RTS   WFD  
+        #  2. WIP   WFD  
+        #  3. STOP  RTS  
+        #  5. STOP  WIP  
+        #  6. STOP  PREV 
+        #  7. STOP  CMPL <- initial condition can not be met
+        #
+        # Test is invalid
+        pass
+
+    def test_leaf_CMPL_task_dependency_status_changed_to_CMPL(self):
+        """testing if the status of a CMPL leaf task will be set to ???? when
+        the status of the dependent task is set to CMPL
+        """
+        # TaskB depends to TaskA
+        #
+        # Steps Table
+        #
+        #     Scenario 1
+        #     TaskA TaskB
+        #  1. RTS   WFD  
+        #  2. WIP   WFD  
+        #  3. PREV  WFD  
+        #  4. CMPL  RTS  
+        #  5. CMPL  WIP  
+        #  6. CMPL  PREV 
+        #  7. CMPL  CMPL <- initial condition can not be met
+        #  8. HREV  DREV <- initial condition is broken here
+        #  9. WIP   DREV
+        # 10. STOP  DREV
+        #
+        #     Scenario 2
+        #     TaskA TaskB
+        #  1. RTS   WFD  
+        #  2. WIP   WFD  
+        #  3. STOP  RTS  
+        #  5. STOP  WIP  
+        #  6. STOP  PREV 
+        #  7. STOP  CMPL
+        #  8. WIP   DREV <- initial condition can not be met
+        #
+        # Test is invalid
+        pass
+
+    # dependencies of containers
+    # container Tasks - dependency relation changes
+    # WFD
+    def test_container_WFD_task_updated_to_have_a_dependency_of_WFD_task(self):
+        """testing if it is possible to set a dependency between a WFD
+        container task to a WFD task and the status of the container task will
+        stay WFD
+        """
+        # make a task with WFD status
+        self.test_task8.status = self.status_wfd
+        self.assertEqual(self.test_task8.status, self.status_wfd)
+        self.test_task9.status = self.status_wfd
+        self.assertEqual(self.test_task9.status, self.status_wfd)
+        # find a WFD container task
+        self.test_task3.children.append(self.test_task2)
+        self.test_task2.status = self.status_wfd
+        self.test_task3.status = self.status_wfd
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        # create dependency
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+
+    def test_container_WFD_task_updated_to_have_a_dependency_of_RTS_task(self):
+        """testing if it is possible to set a dependency between a WFD
+        container task to a RTS task and the status of the container task will
+        stay WFD
         """
         # make a task with RTS status
         self.test_task8.status = self.status_rts
         self.assertEqual(self.test_task8.status, self.status_rts)
-        # find an WIP task
-        self.test_task3.status = self.status_wip
-        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.test_task9.status = self.status_wfd
+        self.assertEqual(self.test_task9.status, self.status_wfd)
+        # find a WFD container task
+        self.test_task3.children.append(self.test_task2)
+        self.test_task2.status = self.status_wfd
+        self.test_task3.status = self.status_wfd
+        self.assertEqual(self.test_task3.status, self.status_wfd)
         # create dependency
-        self.assertRaises(ValueError, self.test_task3.depends.append,
-                          self.test_task8)
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
 
-    def test_leaf_WIP_task_updated_to_have_a_dependency_of_WIP_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with WIP status to a task with WIP status
+    def test_container_WFD_task_updated_to_have_a_dependency_of_WIP_task(self):
+        """testing if it is possible to set a dependency between a WFD
+        container task to a WIP task and the status of the container task will
+        stay WFD
         """
         # make a task with WIP status
         self.test_task8.status = self.status_wip
         self.assertEqual(self.test_task8.status, self.status_wip)
-        # find an WIP task
-        self.test_task3.status = self.status_wip
-        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.test_task9.status = self.status_wfd
+        self.assertEqual(self.test_task8.status, self.status_wfd)
+        # find a WFD container task
+        self.test_task3.children.append(self.test_task2)
+        self.test_task2.status = self.status_wfd
+        self.test_task3.status = self.status_wfd
+        self.assertEqual(self.test_task3.status, self.status_wfd)
         # create dependency
-        self.assertRaises(ValueError, self.test_task3.depends.append,
-                          self.test_task8)
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
 
-    def test_leaf_WIP_task_updated_to_have_a_dependency_of_PREV_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with WIP status to a task with PREV status
+    def test_container_WFD_task_updated_to_have_a_dependency_of_PREV_task(self):
+        """testing if it is possible to set a dependency between a WFD
+        container task to a PREV task and the status of the container task will
+        stay WFD
         """
         # make a task with PREV status
         self.test_task8.status = self.status_prev
         self.assertEqual(self.test_task8.status, self.status_prev)
-        # find an WIP task
-        self.test_task3.status = self.status_wip
-        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.test_task9.status = self.status_wfd
+        self.assertEqual(self.test_task9.status, self.status_wfd)
+        # find a WFD container task
+        self.test_task3.children.append(self.test_task2)
+        self.test_task2.status = self.status_wfd
+        self.test_task3.status = self.status_wfd
+        self.assertEqual(self.test_task3.status, self.status_wfd)
         # create dependency
-        self.assertRaises(ValueError, self.test_task3.depends.append,
-                          self.test_task8)
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
 
-    def test_leaf_WIP_task_updated_to_have_a_dependency_of_HREV_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with WIP status to a task with HREV status
+    def test_container_WFD_task_updated_to_have_a_dependency_of_HREV_task(self):
+        """testing if it is possible to set a dependency between a WFD
+        container task to a HREV task and the status of the container task will
+        stay WFD
         """
         # make a task with HREV status
         self.test_task8.status = self.status_hrev
         self.assertEqual(self.test_task8.status, self.status_hrev)
-        # find an WIP task
-        self.test_task3.status = self.status_wip
-        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.test_task9.status = self.status_wfd
+        self.assertEqual(self.test_task9.status, self.status_wfd)
+        # find a WFD container task
+        self.test_task3.children.append(self.test_task2)
+        self.test_task2.status = self.status_wfd
+        self.test_task3.status = self.status_wfd
+        self.assertEqual(self.test_task3.status, self.status_wfd)
         # create dependency
-        self.assertRaises(ValueError, self.test_task3.depends.append,
-                          self.test_task8)
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
 
-    def test_leaf_WIP_task_updated_to_have_a_dependency_of_OH_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with WIP status to a task with OH status
+    def test_container_WFD_task_updated_to_have_a_dependency_of_OH_task(self):
+        """testing if it is possible to set a dependency between a WFD
+        container task to a OH task and the status of the container task will
+        stay WFD
         """
         # make a task with OH status
         self.test_task8.status = self.status_oh
         self.assertEqual(self.test_task8.status, self.status_oh)
-        # find an WIP task
-        self.test_task3.status = self.status_wip
-        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.test_task9.status = self.status_wfd
+        self.assertEqual(self.test_task9.status, self.status_wfd)
+        # find a WFD container task
+        self.test_task3.children.append(self.test_task2)
+        self.test_task2.status = self.status_wfd
+        self.test_task3.status = self.status_wfd
+        self.assertEqual(self.test_task3.status, self.status_wfd)
         # create dependency
-        self.assertRaises(ValueError, self.test_task3.depends.append,
-                          self.test_task8)
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
 
-    def test_leaf_WIP_task_updated_to_have_a_dependency_of_STOP_task(self):
-        """testing if it is possible to set a dependency between a task with
-        WIP status to a task with STOP status and the task status will stay WIP
+    def test_container_WFD_task_updated_to_have_a_dependency_of_STOP_task(self):
+        """testing if it is possible to set a dependency between a WFD
+        container task to a STOP task and the status of the container task will
+        stay WFD
         """
         # make a task with STOP status
         self.test_task8.status = self.status_stop
         self.assertEqual(self.test_task8.status, self.status_stop)
-        # find an WIP task
-        self.test_task3.status = self.status_wip
-        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.test_task9.status = self.status_wfd
+        self.assertEqual(self.test_task9.status, self.status_wfd)
+        # find a WFD container task
+        self.test_task3.children.append(self.test_task2)
+        self.test_task2.status = self.status_wfd
+        self.test_task3.status = self.status_wfd
+        self.assertEqual(self.test_task3.status, self.status_wfd)
         # create dependency
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task3.status, self.status_rts)
 
-    def test_leaf_WIP_task_updated_to_have_a_dependency_of_CMPL_task(self):
-        """testing if it is possible to set a dependency between a task with
-        WIP status to a task with CMPL status and the task status will stay WIP
+    def test_container_WFD_task_updated_to_have_a_dependency_of_CMPL_task(self):
+        """testing if it is possible to set a dependency between a WFD
+        container task to a CMPL task and the status of the container task will
+        stay WFD
         """
         # make a task with CMPL status
         self.test_task8.status = self.status_cmpl
         self.assertEqual(self.test_task8.status, self.status_cmpl)
-        # find an WIP task
-        self.test_task3.status = self.status_wip
-        self.assertEqual(self.test_task3.status, self.status_wip)
+        # find a WFD container task
+        self.test_task3.children.append(self.test_task2)
+        self.test_task2.status = self.status_wfd
+        self.test_task3.status = self.status_wfd
+        self.assertEqual(self.test_task3.status, self.status_wfd)
         # create dependency
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task3.status, self.status_rts)
 
-    # Leaf Tasks - dependency changes
-    # PREV
-    def test_leaf_PREV_task_updated_to_have_a_dependency_of_NEW_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with PREV status to a task with NEW status
+    # dependencies of containers
+    # container Tasks - dependency relation changes
+    # RTS
+    def test_container_RTS_task_updated_to_have_a_dependency_of_WFD_task_task(self):
+        """testing if it is possible to set a dependency between an RTS
+        container task to a WFD task but the status of the container task is
+        updated from RTS to WFD
         """
-        # make a task with NEW status
-        self.test_task8.status = self.status_new
-        self.assertEqual(self.test_task8.status, self.status_new)
-        # find an PREV task
-        self.test_task3.status = self.status_prev
-        self.assertEqual(self.test_task3.status, self.status_prev)
+        # make a task with WFD status
+        self.test_task8.status = self.status_wfd
+        self.assertEqual(self.test_task8.status, self.status_wfd)
+        # find a RTS container task
+        self.test_task3.children.append(self.test_task2)
+        self.test_task2.status = self.status_rts
+        self.test_task3.status = self.status_rts
+        self.assertEqual(self.test_task3.status, self.status_rts)
         # create dependency
-        self.assertRaises(ValueError, self.test_task3.depends.append,
-                          self.test_task8)
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
 
-    def test_leaf_PREV_task_updated_to_have_a_dependency_of_RTS_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with PREV status to a task with RTS status
+    def test_container_RTS_task_updated_to_have_a_dependency_of_RTS_task(self):
+        """testing if it is possible to set a dependency between an RTS
+        container task to an RTS task but the status of the container task is
+        updated from RTS to WFD
         """
-        # make a task with RTS status
+        # make a task with WFD status
         self.test_task8.status = self.status_rts
         self.assertEqual(self.test_task8.status, self.status_rts)
-        # find an PREV task
-        self.test_task3.status = self.status_prev
-        self.assertEqual(self.test_task3.status, self.status_prev)
+        # find a RTS container task
+        self.test_task3.children.append(self.test_task2)
+        self.test_task2.status = self.status_rts
+        self.test_task3.status = self.status_rts
+        self.assertEqual(self.test_task3.status, self.status_rts)
         # create dependency
-        self.assertRaises(ValueError, self.test_task3.depends.append,
-                          self.test_task8)
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
 
-    def test_leaf_PREV_task_updated_to_have_a_dependency_of_WIP_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with PREV status to a task with WIP status
+    def test_container_RTS_task_updated_to_have_a_dependency_of_WIP_task(self):
+        """testing if it is possible to set a dependency between an RTS
+        container task to a WIP task but the status of the container task is
+        updated from RTS to WFD
         """
-        # make a task with RTS status
-        self.test_task8.status = self.status_rts
-        self.assertEqual(self.test_task8.status, self.status_rts)
-        # find an PREV task
-        self.test_task3.status = self.status_prev
-        self.assertEqual(self.test_task3.status, self.status_prev)
+        # make a task with WIP status
+        self.test_task8.status = self.status_wip
+        self.assertEqual(self.test_task8.status, self.status_wip)
+        # find a RTS container task
+        self.test_task3.children.append(self.test_task2)
+        self.test_task2.status = self.status_rts
+        self.test_task3.status = self.status_rts
+        self.assertEqual(self.test_task3.status, self.status_rts)
         # create dependency
-        self.assertRaises(ValueError, self.test_task3.depends.append,
-                          self.test_task8)
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
 
-    def test_leaf_PREV_task_updated_to_have_a_dependency_of_PREV_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with PREV status to a task with PREV status
+    def test_container_RTS_task_updated_to_have_a_dependency_of_PREV_task(self):
+        """testing if it is possible to set a dependency between an RTS
+        container task to a PREV task but the status of the container task is
+        updated from RTS to WFD
         """
         # make a task with PREV status
         self.test_task8.status = self.status_prev
         self.assertEqual(self.test_task8.status, self.status_prev)
-        # find an PREV task
-        self.test_task3.status = self.status_prev
-        self.assertEqual(self.test_task3.status, self.status_prev)
+        # find a RTS container task
+        self.test_task3.children.append(self.test_task2)
+        self.test_task2.status = self.status_rts
+        self.test_task3.status = self.status_rts
+        self.assertEqual(self.test_task3.status, self.status_rts)
         # create dependency
-        self.assertRaises(ValueError, self.test_task3.depends.append,
-                          self.test_task8)
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
 
-    def test_leaf_PREV_task_updated_to_have_a_dependency_of_HREV_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with PREV status to a task with HREV status
+    def test_container_RTS_task_updated_to_have_a_dependency_of_HREV_task(self):
+        """testing if it is possible to set a dependency between an RTS
+        container task to an HREV task but the status of the container task is
+        updated from RTS to WFD
         """
-        self.fail('test is not implemented yet')
+        # make a task with HREV status
+        self.test_task8.status = self.status_hrev
+        self.assertEqual(self.test_task8.status, self.status_hrev)
+        # find a RTS container task
+        self.test_task3.children.append(self.test_task2)
+        self.test_task2.status = self.status_rts
+        self.test_task3.status = self.status_rts
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # create dependency
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
 
-    def test_leaf_PREV_task_updated_to_have_a_dependency_of_OH_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with PREV status to a task with OH status
+    def test_container_RTS_task_updated_to_have_a_dependency_of_OH_task(self):
+        """testing if it is possible to set a dependency between an RTS
+        container task to an OH task but the status of the container task is
+        updated from RTS to WFD
         """
-        self.fail('test is not implemented yet')
+        # make a task with OH status
+        self.test_task8.status = self.status_oh
+        self.assertEqual(self.test_task8.status, self.status_oh)
+        # find a RTS container task
+        self.test_task3.children.append(self.test_task2)
+        self.test_task2.status = self.status_rts
+        self.test_task3.status = self.status_rts
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # create dependency
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
 
-    def test_leaf_PREV_task_updated_to_have_a_dependency_of_STOP_task(self):
-        """testing if it is possible to set a dependency between a task with
-        PREV status to a task with STOP status and the task status will stay
-        PREV
+    def test_container_RTS_task_updated_to_have_a_dependency_of_STOP_task(self):
+        """testing if it is possible to set a dependency between an RTS
+        container task to a STOP task and the status of the container task will
+        stay RTS as if the dependency is not there
         """
-        self.fail('test is not implemented yet')
+        # make a task with STOP status
+        self.test_task8.status = self.status_stop
+        self.assertEqual(self.test_task8.status, self.status_stop)
+        # find a RTS container task
+        self.test_task3.children.append(self.test_task2)
+        self.test_task2.status = self.status_rts
+        self.test_task3.status = self.status_rts
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # create dependency
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_rts)
 
-    def test_leaf_PREV_task_updated_to_have_a_dependency_of_CMPL_task(self):
-        """testing if it is possible to set a dependency between a task with
-        PREV status to a task with CMPL status and the task status will stay
-        PREV
+    def test_container_RTS_task_updated_to_have_a_dependency_of_CMPL_task(self):
+        """testing if it is possible to set a dependency between an RTS
+        container task to a CMPL task and the status of the task will stay RTS
         """
-        self.fail('test is not implemented yet')
+        # make a task with CMPL status
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        # find a RTS container task
+        self.test_task3.children.append(self.test_task2)
+        self.test_task2.status = self.status_rts
+        self.test_task3.status = self.status_rts
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        # create dependency
+        self.test_task3.depends.append(self.test_task8)
+        self.assertEqual(self.test_task3.status, self.status_rts)
 
-    # Leaf Tasks - dependency changes
-    # OH
-    def test_leaf_OH_task_updated_to_have_a_dependency_of_NEW_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with OH status to a task with NEW status
+    # Container Tasks - dependency relation changes
+    # WIP - DREV - PREV - HREV - OH - STOP - CMPL
+    def test_container_WIP_task_dependency_can_not_be_updated(self):
+        """testing if it is not possible to update the dependencies of a WIP
+        container task
         """
-        self.fail('test is not implemented yet')
+        # find an WIP task
+        self.test_task3.status = self.status_wip
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        # create dependency
+        self.assertRaises(
+            RuntimeError, self.test_task3.depends.append, self.test_task8
+        )
 
-    def test_leaf_OH_task_updated_to_have_a_dependency_of_RTS_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with OH status to a task with RTS status
+    def test_container_CMPL_task_dependency_can_not_be_updated(self):
+        """testing if it is not possible to update the dependencies of a CMPL
+        container task
         """
-        self.fail('test is not implemented yet')
-
-    def test_leaf_OH_task_updated_to_have_a_dependency_of_WIP_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with OH status to a task with WIP status
-        """
-        self.fail('test is not implemented yet')
-
-    def test_leaf_OH_task_updated_to_have_a_dependency_of_PREV_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with OH status to a task with PREV status
-        """
-        self.fail('test is not implemented yet')
-
-    def test_leaf_OH_task_updated_to_have_a_dependency_of_HREV_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with OH status to a task with HREV status
-        """
-        self.fail('test is not implemented yet')
-
-    def test_leaf_OH_task_updated_to_have_a_dependency_of_OH_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with OH status to a task with OH status
-        """
-        self.fail('test is not implemented yet')
-
-    def test_leaf_OH_task_updated_to_have_a_dependency_of_STOP_task(self):
-        """testing if it is possible to set a dependency between a task with
-        OH status to a task with STOP status and the task status will stay OH
-        """
-        self.fail('test is not implemented yet')
-
-    def test_leaf_OH_task_updated_to_have_a_dependency_of_CMPL_task(self):
-        """testing if it is possible to set a dependency between a task with
-        OH status to a task with CMPL status and the task status will stay OH
-        """
-        self.fail('test is not implemented yet')
-
-    # Leaf Tasks - dependency changes
-    # HREV
-    def test_leaf_HREV_task_updated_to_have_a_dependency_of_NEW_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with HREV status to a task with NEW status
-        """
-        self.fail('test is not implemented yet')
-
-    def test_leaf_HREV_task_updated_to_have_a_dependency_of_RTS_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with HREV status to a task with RTS status
-        """
-        self.fail('test is not implemented yet')
-
-    def test_leaf_HREV_task_updated_to_have_a_dependency_of_WIP_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with HREV status to a task with WIP status
-        """
-        self.fail('test is not implemented yet')
-
-    def test_leaf_HREV_task_updated_to_have_a_dependency_of_PREV_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with HREV status to a task with PREV status
-        """
-        self.fail('test is not implemented yet')
-
-    def test_leaf_HREV_task_updated_to_have_a_dependency_of_HREV_task(self):
-        """testing if it is possible to set a dependency between a task with
-        HREV status to a task with HREV status
-        """
-        self.fail('test is not implemented yet')
-
-    def test_leaf_HREV_task_updated_to_have_a_dependency_of_OH_task(self):
-        """testing if it is possible to set a dependency between a task with
-        HREV status to a task with OH status
-        """
-        self.fail('test is not implemented yet')
-
-    def test_leaf_HREV_task_updated_to_have_a_dependency_of_STOP_task(self):
-        """testing if it is possible to set a dependency between a task with
-        HREV status to a task with STOP status and the task status will stay
-        HREV
-        """
-        self.fail('test is not implemented yet')
-
-    def test_leaf_HREV_task_updated_to_have_a_dependency_of_CMPL_task(self):
-        """testing if it is possible to set a dependency between a task with
-        HREV status to a task with CMPL status and the task status will stay
-        HREV
-        """
-        self.fail('test is not implemented yet')
-
-    # Leaf Tasks - dependency changes
-    # STOP
-    def test_leaf_STOP_task_updated_to_have_a_dependency_of_NEW_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with STOP status to a task with NEW status
-        """
-        self.fail('test is not implemented yet')
-
-    def test_leaf_STOP_task_updated_to_have_a_dependency_of_RTS_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with STOP status to a task with RTS status
-        """
-        self.fail('test is not implemented yet')
-
-    def test_leaf_STOP_task_updated_to_have_a_dependency_of_WIP_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with STOP status to a task with WIP status
-        """
-        self.fail('test is not implemented yet')
-
-    def test_leaf_STOP_task_updated_to_have_a_dependency_of_PREV_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with STOP status to a task with PREV status
-        """
-        self.fail('test is not implemented yet')
-
-    def test_leaf_STOP_task_updated_to_have_a_dependency_of_HREV_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with STOP status to a task with HREV status
-        """
-        self.fail('test is not implemented yet')
-
-    def test_leaf_STOP_task_updated_to_have_a_dependency_of_OH_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with STOP status to a task with OH status
-        """
-        self.fail('test is not implemented yet')
-
-    def test_leaf_STOP_task_updated_to_have_a_dependency_of_STOP_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with STOP status to a task with STOP status
-        """
-        self.fail('test is not implemented yet')
-
-    def test_leaf_STOP_task_updated_to_have_a_dependency_of_CMPL_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with STOP status to a task with CMPL status
-        """
-        self.fail('test is not implemented yet')
-
-    # Leaf Tasks - dependency changes
-    # CMPL
-    def test_leaf_CMPL_task_updated_to_have_a_dependency_of_NEW_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with CMPL status to a task with NEW status
-        """
-        self.fail('test is not implemented yet')
-
-    def test_leaf_CMPL_task_updated_to_have_a_dependency_of_RTS_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with CMPL status to a task with RTS status
-        """
-        self.fail('test is not implemented yet')
-
-    def test_leaf_CMPL_task_updated_to_have_a_dependency_of_WIP_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with CMPL status to a task with WIP status
-        """
-        self.fail('test is not implemented yet')
-
-    def test_leaf_CMPL_task_updated_to_have_a_dependency_of_PREV_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with CMPL status to a task with PREV status
-        """
-        self.fail('test is not implemented yet')
-
-    def test_leaf_CMPL_task_updated_to_have_a_dependency_of_HREV_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with CMPL status to a task with HREV status
-        """
-        self.fail('test is not implemented yet')
-
-    def test_leaf_CMPL_task_updated_to_have_a_dependency_of_OH_task(self):
-        """testing if it is not possible to set a dependency between a task
-        with CMPL status to a task with OH status
-        """
-        self.fail('test is not implemented yet')
-
-    def test_leaf_CMPL_task_updated_to_have_a_dependency_of_STOP_task(self):
-        """testing if it is possible to set a dependency between a task with
-        CMPL status to a task with STOP status and the task status will stay
-        CMPL
-        """
-        self.fail('test is not implemented yet')
-
-    def test_leaf_CMPL_task_updated_to_have_a_dependency_of_CMPL_task(self):
-        """testing if it is possible to set a dependency between a task with
-        CMPL status to a task with CMPL status and the task status will stay
-        CMPL
-        """
-        self.fail('test is not implemented yet')
-
-    # dependencies of parents
+        # find an CMPL task
+        self.test_task3.status = self.status_cmpl
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        # create dependency
+        self.assertRaises(
+            RuntimeError, self.test_task3.depends.append, self.test_task8
+        )
 
     # Container Tasks
-    # dependencies
-    # children status changes
+    # children status updates
+    def test_container_WFD_task_children_is_updated_to_RTS(self):
+        """testing if the status of the WFD container task will updated to RTS
+        when one of the child tasks is updated to RTS
+        """
+        # set the statuses of children to wfd
+        self.test_task7.status = self.status_wfd
+        self.test_task8.status = self.status_wfd
+        self.test_task2.status = self.status_wfd
+        self.assertEqual(self.test_task7.status, self.status_wfd)
+        self.assertEqual(self.test_task8.status, self.status_wfd)
+        self.assertEqual(self.test_task2.status, self.status_wfd)
+        # now update the status of test_task8 to rts and expect the status of
+        # test task2 to be updated to rts too
+        self.test_task8.status = self.status_rts
+        self.assertEqual(self.test_task2.status, self.status_rts)
+
+    def test_container_RTS_task_children_is_updated_to_WIP(self):
+        """testing if the status of the RTS container task will updated to WIP
+        when one of the child tasks is updated to WIP
+        """
+        # set the statuses of children to rts
+        self.test_task7.status = self.status_rts
+        self.test_task8.status = self.status_rts
+        self.test_task2.status = self.status_rts
+        self.assertEqual(self.test_task7.status, self.status_rts)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+        self.assertEqual(self.test_task2.status, self.status_rts)
+        # now update the status of test_task8 to rts and expect the status of
+        # test task2 to be updated to wip too
+        self.test_task8.status = self.status_wip
+        self.assertEqual(self.test_task2.status, self.status_wip)
+
+    def test_container_WIP_task_children_is_updated_to_PREV(self):
+        """testing if the status of the WIP container task will stay WIP when
+        one of the child tasks is updated to PREV
+        """
+        # set the statuses of children to wip
+        self.test_task7.status = self.status_wip
+        self.test_task8.status = self.status_wip
+        self.test_task2.status = self.status_wip
+        self.assertEqual(self.test_task7.status, self.status_wip)
+        self.assertEqual(self.test_task8.status, self.status_wip)
+        self.assertEqual(self.test_task2.status, self.status_wip)
+        # now update the status of test_task8 to rts and expect the status of
+        # test task2 to stay wip
+        self.test_task8.status = self.status_prev
+        self.assertEqual(self.test_task2.status, self.status_wip)
+
+    def test_container_WIP_task_children_is_updated_to_HREV(self):
+        """testing if the status of the WIP container task will stay WIP when
+        one of the child tasks is updated to HREV
+        """
+        # set the statuses of children to wip
+        self.test_task7.status = self.status_wip
+        self.test_task8.status = self.status_wip
+        self.test_task2.status = self.status_wip
+        self.assertEqual(self.test_task7.status, self.status_wip)
+        self.assertEqual(self.test_task8.status, self.status_wip)
+        self.assertEqual(self.test_task2.status, self.status_wip)
+        # now update the status of test_task8 to hrev and expect the status of
+        # test task2 to stay wip
+        self.test_task8.status = self.status_hrev
+        self.assertEqual(self.test_task2.status, self.status_wip)
+
+    def test_container_WIP_task_children_is_updated_to_DREV(self):
+        """testing if the status of the WIP container task will stay WIP when
+        one of the child tasks is updated to DREV
+        """
+        # set the statuses of children to wip
+        self.test_task7.status = self.status_wip
+        self.test_task8.status = self.status_wip
+        self.test_task2.status = self.status_wip
+        self.assertEqual(self.test_task7.status, self.status_wip)
+        self.assertEqual(self.test_task8.status, self.status_wip)
+        self.assertEqual(self.test_task2.status, self.status_wip)
+        # now update the status of test_task8 to rts and expect the status of
+        # test task2 to stay wip
+        self.test_task8.status = self.status_drev
+        self.assertEqual(self.test_task2.status, self.status_wip)
+
+    def test_container_WIP_task_children_is_updated_to_CMPL(self):
+        """testing if the status of the WIP container task will stay WIP when
+        one of the child tasks is updated to CMPL
+        """
+        # set the statuses of children to wip
+        self.test_task7.status = self.status_wip
+        self.test_task8.status = self.status_wip
+        self.test_task2.status = self.status_wip
+        self.assertEqual(self.test_task7.status, self.status_wip)
+        self.assertEqual(self.test_task8.status, self.status_wip)
+        self.assertEqual(self.test_task2.status, self.status_wip)
+        # now update the status of test_task8 to rts and expect the status of
+        # test task2 to stay wip
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task2.status, self.status_wip)
+
+    def test_container_WIP_task_all_children_is_updated_to_CMPL(self):
+        """testing if the status of the WIP container task will updated to CMPL
+        when all of its children are updated to CMPL
+        """
+        # set the statuses of children to wip
+        self.test_task7.status = self.status_wip
+        self.test_task8.status = self.status_wip
+        self.test_task2.status = self.status_wip
+        self.assertEqual(self.test_task7.status, self.status_wip)
+        self.assertEqual(self.test_task8.status, self.status_wip)
+        self.assertEqual(self.test_task2.status, self.status_wip)
+        # now update the status of test_task8 to rts and expect the status of
+        # test task2 to stay wip
+        self.test_task7.status = self.status_cmpl
+        self.test_task8.status = self.status_cmpl
+        self.assertEqual(self.test_task2.status, self.status_cmpl)
+
+
+
 
 
 
@@ -4925,7 +11228,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         the dependent tasks are in CMPL status for a task
         """
         # the hero task
-        self.assertEqual(self.test_task5.status, self.status_new)
+        self.assertEqual(self.test_task5.status, self.status_wfd)
 
         # the dependencies
         self.test_task4.status = self.status_cmpl
@@ -4940,12 +11243,12 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         self.assertEqual(self.test_task5.status, self.status_rts)
 
     def test_update_task_statuses_with_dependencies_with_half_completed_dependencies(self):
-        """testing if the task status will be set to NEW if dependencies are
+        """testing if the task status will be set to WFD if dependencies are
         still not all CMPL
         """
         # the hero task
-        self.test_task5.status = self.status_new
-        self.assertEqual(self.test_task5.status, self.status_new)
+        self.test_task5.status = self.status_wfd
+        self.assertEqual(self.test_task5.status, self.status_wfd)
 
         # the dependencies
         self.test_task4.status = self.status_cmpl
@@ -4959,11 +11262,11 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         self.test_task5.depends.append(self.test_task7)
 
         task.update_task_statuses_with_dependencies(self.test_task5)
-        self.assertEqual(self.test_task5.status, self.status_new)
+        self.assertEqual(self.test_task5.status, self.status_wfd)
 
     def test_update_task_statuses_with_dependencies_with_half_completed_dependencies_and_status_wip(self):
         """testing if the task status will be not changed if the task status is
-        not NEW even if dependencies are still not all CMPL, this is for
+        not WFD even if dependencies are still not all CMPL, this is for
         backward compatibility
         """
         # the hero task
@@ -4986,7 +11289,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
 
     def test_update_task_statuses_with_dependencies_with_half_completed_dependencies_and_status_prev(self):
         """testing if the task status will be not changed if the task status is
-        not NEW even if dependencies are still not all CMPL, this is for
+        not WFD even if dependencies are still not all CMPL, this is for
         backward compatibility
         """
         # the hero task
@@ -5009,7 +11312,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
 
     def test_update_task_statuses_with_dependencies_with_half_completed_dependencies_and_status_hrev(self):
         """testing if the task status will be not changed if the task status is
-        not NEW even if dependencies are still not all CMPL, this is for
+        not WFD even if dependencies are still not all CMPL, this is for
         backward compatibility
         """
         # the hero task
@@ -5032,7 +11335,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
 
     def test_update_task_statuses_with_dependencies_with_half_completed_dependencies_and_status_cmpl(self):
         """testing if the task status will be not changed if the task status is
-        not NEW even if dependencies are still not all CMPL, this is for
+        not WFD even if dependencies are still not all CMPL, this is for
         backward compatibility
         """
         # the hero task
@@ -5091,7 +11394,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
         request_review has a status of "new"
         """
         # request revision for self.test_task4
-        self.test_task4.status = self.status_new
+        self.test_task4.status = self.status_wfd
         request = testing.DummyRequest()
         request.matchdict['id'] = self.test_task4.id
         request.params['send_email'] = 0
@@ -5228,7 +11531,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
             start=datetime.datetime(2013, 6, 20, 10, 0),
             end=datetime.datetime(2013, 6, 20, 19, 0)
         )
-        DBSession.add(time_log)
+        db.session.add(time_log)
         self.test_task1.status = self.status_wip
 
         # request review for self.test_task1
@@ -5263,7 +11566,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
             start=datetime.datetime(2013, 6, 20, 10, 0),
             end=datetime.datetime(2013, 6, 20, 19, 0)
         )
-        DBSession.add(time_log)
+        db.session.add(time_log)
         self.test_task4.status = self.status_wip
 
         # request review for self.test_task4
@@ -5299,7 +11602,7 @@ class TaskReviewWorkflowTestCase(unittest2.TestCase):
             start=datetime.datetime(2013, 6, 20, 10, 0),
             end=datetime.datetime(2013, 6, 20, 19, 0)
         )
-        DBSession.add(time_log)
+        db.session.add(time_log)
         self.test_task4.status = self.status_wip
 
         # request review for self.test_task4

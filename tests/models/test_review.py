@@ -22,6 +22,7 @@ import tempfile
 import datetime
 import unittest2
 
+from stalker import db
 from stalker import (Task, Project, User, Status, StatusList, Repository,
                      Structure, Review, TimeLog)
 
@@ -33,6 +34,8 @@ class ReviewTestCase(unittest2.TestCase):
     def setUp(self):
         """set up the test
         """
+        db.setup()
+
         self.user1 = User(
             name='Test User 1',
             login='test_user1',
@@ -115,6 +118,11 @@ class ReviewTestCase(unittest2.TestCase):
             'task': self.task
         }
         self.review = Review(**self.kwargs)
+
+    def tearDown(self):
+        """clean up test
+        """
+        db.session.close()
 
     def test_task_argument_is_skipped(self):
         """testing if a TypeError will be raised when the task argument is

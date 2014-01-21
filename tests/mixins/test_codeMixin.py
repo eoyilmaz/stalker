@@ -17,14 +17,13 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-import copy
 
 import unittest2
 
 from sqlalchemy import Column, Integer, ForeignKey
-import stalker
+
+from stalker import db
 from stalker.models.mixins import CodeMixin
-from stalker.db.session import DBSession
 from stalker.models.entity import SimpleEntity
 
 
@@ -63,7 +62,9 @@ class CodeMixinTester(unittest2.TestCase):
     def tearDown(self):
         """clean up the test
         """
-        DBSession.remove()
+        if db.session:
+            #db.session.remove()
+            db.session.close()
 
     def test_code_argument_is_skipped(self):
         """testing if a TypeError will be raised when the code argument is

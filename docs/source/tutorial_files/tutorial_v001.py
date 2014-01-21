@@ -1,41 +1,33 @@
 
-from stalker import db
-db.setup()
+from datetime import datetime
+from stalker import db, User, Department, Project, ImageFormat
+from stalker.db.session import session
 
 db.setup("sqlite:////tmp/studio.db")
 
-from stalker.models import User
-
-
 myUser = User(
-    first_name=u"Erkan Ozgur",
-    last_name=u"Yilmaz",
-    login_name=u"eoyilmaz",
-    email=u"eoyilmaz@gmail.com",
-    password=u"secret",
+    name="Erkan Ozgur Yilmaz",
+    login_name="eoyilmaz",
+    email="eoyilmaz@gmail.com",
+    password="secret",
     description="This is me"
 )
 
+tds_department = Department(
+    name="TDs",
+    description="This is the TDs department"
+)
 
-from stalker.models import Department
-tds_department = Department(name="TDs",
-                            description="This is the TDs department")
+tds_department.users.append(myUser)
 
-
-tds_department.members.append(myUser)
-
-all_departments = db.DBSession.query(Department).all()
+all_departments = Department.query.all()
 all_members_of_dep = all_departments[0].members
 print all_members_of_dep[0].first_name
 
-db.DBSession.add(myUser)
-db.DBSession.add(tds_department)
+session.add(myUser)
+session.add(tds_department)
 
-from stalker.models import Project
 new_project = Project(name="Fancy Commercial")
-
-from datetime import datetime
-from stalker.models import ImageFormat
 
 new_project.description = """The commercial is about this fancy product. The
                              client want us to have a shinny look with their
@@ -45,43 +37,29 @@ new_project.fps = 25
 new_project.due = datetime(2011,2,15)
 new_project.lead = myUser
 
-from stalker.models import ProjectType
+from stalker import Type
 
-commercial_project_type = ProjectType(name="Commercial")
+commercial_project_type = Type(name="Commercial")
 new_project.type = commercial_project_type
 
-db.DBSession.add(new_project)
-db.DBSession.commit()
+session.add(new_project)
+session.commit()
 
 
-from stalker.models import Sequence
-seq1 = Sequence(name="Sequence 1", code="SEQ1")
+from stalker import Sequence
+seq1 = Sequence(name="Sequence 1", code="SEQ1", project=new_project)
 
-# add it to the project
-new_project.sequences.append(seq1)
+from stalker import Shot
 
-from stalker.models import Shot
+sh001 = Shot(name="Shot 1", code="SH001", project=new_project)
+sh002 = Shot(name="Shot 2", code="SH002", project=new_project)
+sh003 = Shot(name="Shot 3", code="SH003", project=new_project)
 
-sh001 = Shot(name="Shot 1", code="SH001")
-sh002 = Shot(name="Shot 2", code="SH002")
-sh003 = Shot(name="Shot 3", code="SH003")
-  
 # assign them to the sequence
 seq1.shots.extend([sh001, sh002, sh003])
 
 
-from stalker.models import PipelineStep
 
-previs      = PipelineStep(name="Previs"     , code="PREVIS")
-matchmove   = PipelineStep(name="Match Move" , code="MM")
-anim        = PipelineStep(name="Animation"  , code="ANIM")
-layout      = PipelineStep(name="Layout"     , code="LAYOUT")
-light       = PipelineStep(name="Ligting"    , code="LIGHT")
-comp        = PipelineStep(name="Compositing", code="COMP")
-
-
-
-from stalker.models import AssetType
 
 # the order of the PipelineSteps are not important
 shot_pSteps = [previs, match, anim, layout, light, comp]

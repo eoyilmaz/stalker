@@ -21,7 +21,6 @@
 import unittest2
 
 from stalker import db, TicketLog
-from stalker.db.session import DBSession
 from stalker import (Asset, User, Note, Project, Repository, Status,
                      StatusList, Task, Ticket, Type, Version)
 
@@ -40,8 +39,8 @@ class TicketTester(unittest2.TestCase):
         """set up the test
         """
         # create the db
-        DBSession.remove()
-        DBSession.configure(extension=None)
+        if db.session:
+            db.session.close()
         db.setup()
         db.init()
 
@@ -150,8 +149,8 @@ class TicketTester(unittest2.TestCase):
         }
 
         self.test_ticket = Ticket(**self.kwargs)
-        DBSession.add(self.test_ticket)
-        DBSession.commit()
+        db.session.add(self.test_ticket)
+        db.session.commit()
 
         # get the Ticket Statuses
         self.status_new = Status.query.filter_by(name='New').first()
@@ -163,15 +162,16 @@ class TicketTester(unittest2.TestCase):
     def tearDown(self):
         """clean up the test
         """
-        DBSession.remove()
+        if db.session:
+            db.session.close()
 
     @classmethod
     def tearDownClass(cls):
         """clean up the test
         """
         # revert the session back to the normal state
-        DBSession.remove()
-        DBSession.configure(extension=None)
+        if db.session:
+            db.session.close()
 
     def test___auto_name__class_attribute_is_set_to_True(self):
         """testing if the __auto_name__ class attribute is set to True for
@@ -222,43 +222,43 @@ class TicketTester(unittest2.TestCase):
         )
 
         p1_t1 = Ticket(project=proj1)
-        DBSession.add(p1_t1)
-        DBSession.commit()
+        db.session.add(p1_t1)
+        db.session.commit()
         self.assertEqual(p1_t1.number, 2)
 
         p1_t2 = Ticket(project=proj1)
-        DBSession.add(p1_t2)
-        DBSession.commit()
+        db.session.add(p1_t2)
+        db.session.commit()
         self.assertEqual(p1_t2.number, 3)
 
         p2_t1 = Ticket(project=proj2)
-        DBSession.add(p2_t1)
-        DBSession.commit()
+        db.session.add(p2_t1)
+        db.session.commit()
         self.assertEqual(p2_t1.number, 4)
 
         p1_t3 = Ticket(project=proj1)
-        DBSession.add(p1_t3)
-        DBSession.commit()
+        db.session.add(p1_t3)
+        db.session.commit()
         self.assertEqual(p1_t3.number, 5)
 
         p3_t1 = Ticket(project=proj3)
-        DBSession.add(p3_t1)
-        DBSession.commit()
+        db.session.add(p3_t1)
+        db.session.commit()
         self.assertEqual(p3_t1.number, 6)
 
         p2_t2 = Ticket(project=proj2)
-        DBSession.add(p2_t2)
-        DBSession.commit()
+        db.session.add(p2_t2)
+        db.session.commit()
         self.assertEqual(p2_t2.number, 7)
 
         p3_t2 = Ticket(project=proj3)
-        DBSession.add(p3_t2)
-        DBSession.commit()
+        db.session.add(p3_t2)
+        db.session.commit()
         self.assertEqual(p3_t2.number, 8)
 
         p2_t3 = Ticket(project=proj2)
-        DBSession.add(p2_t3)
-        DBSession.commit()
+        db.session.add(p2_t3)
+        db.session.commit()
         self.assertEqual(p2_t3.number, 9)
 
     def test_number_attribute_is_read_only(self):
@@ -272,12 +272,12 @@ class TicketTester(unittest2.TestCase):
         """
         # create two new tickets
         ticket1 = Ticket(**self.kwargs)
-        DBSession.add(ticket1)
-        DBSession.commit()
+        db.session.add(ticket1)
+        db.session.commit()
 
         ticket2 = Ticket(**self.kwargs)
-        DBSession.add(ticket2)
-        DBSession.commit()
+        db.session.add(ticket2)
+        db.session.commit()
 
         self.assertEqual(ticket1.number + 1, ticket2.number)
         self.assertEqual(ticket1.number, 2)
@@ -386,7 +386,7 @@ class TicketTester(unittest2.TestCase):
     def test_status_for_newly_created_tickets_will_be_NEW_when_skipped(self):
         """testing if the status of newly created tickets will be New
         """
-        # get the status NEW from the DBSession
+        # get the status NEW from the session
         new_ticket = Ticket(**self.kwargs)
         self.assertEqual(new_ticket.status, self.status_new)
 

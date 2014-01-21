@@ -19,17 +19,33 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 from sqlalchemy.ext.declarative import declarative_base
-from stalker.db.session import DBSession
+from sqlalchemy.orm import class_mapper
+from sqlalchemy.orm.exc import UnmappedClassError
+
 from stalker.models import make_plural
+
+
+def query_property():
+    """A ripped off version of the sqlalchemy.orm.ScopedSession.query_property
+    """
+    class query(object):
+        def __get__(s, instance, owner):
+            try:
+                mapper = class_mapper(owner)
+                if mapper:
+                    # session's configured query class
+                    from stalker import db
+                    return db.session.query(mapper)
+            except UnmappedClassError:
+                return None
+    return query()
 
 
 class ORMClass(object):
     """The base of the Base class
     """
 
-    @property
-    def query(self):
-        return DBSession.query_property()
+    query = query_property()
 
     @property
     def plural_class_name(self):

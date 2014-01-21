@@ -25,7 +25,7 @@ from sqlalchemy import (Table, Column, Integer, ForeignKey, Boolean, Enum,
                         DateTime, Float, event)
 from sqlalchemy.orm import relationship, validates, synonym
 
-from stalker.db.session import DBSession
+from stalker import db
 from stalker.db.declarative import Base
 from stalker import defaults
 from stalker.models import check_circular_dependency
@@ -160,7 +160,7 @@ class TimeLog(Entity, DateRangeMixin):
             )
 
         # adjust task schedule
-        with DBSession.no_autoflush:
+        with db.session.no_autoflush:
             self._expand_task_schedule_timing(task)
 
         return task
@@ -419,7 +419,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
     The following diagram shows the status workflow for leaf tasks:
 
-    .. image:: ../../../docs/source/images/Task_Status_Workflow.png
+    .. image:: ../../../docs/source/_static/images/Task_Status_Workflow.png
           :width: 637 px
           :height: 381 px
           :align: center
@@ -460,16 +460,16 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
       | (HREV)           | completed by requesting a review by using the      |
       |                  | :meth:`.Review.request_review` method. A HREV Task |
       |                  | can have new TimeLogs, and it will be converted to |
-      |                  | a WIP or DREV depending to its dependency tasks.   |
+      |                  | a WIP or DREV depending to its dependency task     |
+      |                  | statuses.                                          |
       +------------------+----------------------------------------------------+
-      | Dependency Has   | If a CMPL dependency task of a WIP, PREV, HREV,    |
-      | Revision (DREV)  | DREV or CMPL task has a revision then depending on |
-      |                  | to the reviewers choice the dependent tasks can    |
-      |                  | have their status to be set to DREV which means    |
-      |                  | both of the dependee and the dependent tasks can   |
-      |                  | work at the same time. For a DREV task a review    |
-      |                  | request can not be made until it is set to WIP     |
-      |                  | again by setting the depending task to CMPL again. |
+      | Dependency Has   | If the dependent task of a WIP, PREV, HREV, DREV   |
+      | Revision (DREV)  | or CMPL task has a revision then the statuses of   |
+      |                  | the tasks are set to DREV which means both of the  |
+      |                  | dependee and the dependent tasks can work at the   |
+      |                  | same time. For a DREV task a review request can    |
+      |                  | not be made until it is set to WIP again by        |
+      |                  | setting the depending task to CMPL again.          |
       +------------------+----------------------------------------------------+
       | On Hold (OH)     | A task is set to OH when the resource needs to     |
       |                  | work for another task, and the :meth:`Task.hold`   |
@@ -486,6 +486,8 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
       |                  | The schedule values of the task will be capped to  |
       |                  | current time spent on it, so Task Juggler will not |
       |                  | reserve any more resources for it.                 |
+      |                  |                                                    |
+      |                  | Also STOP tasks are treated as if they are dead.   |
       +------------------+----------------------------------------------------+
       | Completed (CMPL) | A task is set to CMPL when all of the Reviews are  |
       |                  | completed by approving the task. It is not         |
@@ -506,7 +508,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
       | Dependency (WFD) | the container task is also WFD.                    |
       +------------------+----------------------------------------------------+
       | Ready To Start   | A container task is set to RTS when children tasks |
-      | (RTS)            | have statuses of only NEW and RTS.                 |
+      | (RTS)            | have statuses of only WFD and RTS.                 |
       +------------------+----------------------------------------------------+
       | Work In Progress | A container task is set to WIP when one of its     |
       | (WIP)            | children tasks have any of the statuses of RTS,    |
@@ -515,6 +517,40 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
       | Completed (CMPL) | A container task is set to CMPL when all of its    |
       |                  | children tasks are CMPL.                           |
       +------------------+----------------------------------------------------+
+
+    Even though, users are encouraged to use the actions (like
+    :meth:`.Task.create_time_log`, :meth:`.Task.hold`, :meth:`.Task.stop`,
+    :meth:`.Task.resume`, :meth:`.Task.request_revision`,
+    :meth:`.Task.request_review`, :meth:`.Task.approve`) to update the task
+    statuses , setting the :attr:`.Task.status` will also update the dependent
+    tasks or will check the new status against dependencies or the current
+    status of the task.
+
+    Thus in some situations setting the :attr:`.Task.status` will not change
+    the status of the task. For example, setting the task status to WFD when
+    there are no dependencies will not update the task status to WFD,
+    also updating a PREV task status to STOP or HOLD or RTS is not possible.
+    And it is not possible to set a task to WIP if there are no TimeLogs
+    entered for that task.
+
+    So the task will strictly follow the Task Status Workflow diagram above.
+
+    .. warning::
+       **Dependency Relation in Task Status Workflow**
+
+       Because the Task Status Workflow heavily effected by the dependent task
+       statuses, and the main reason of having dependency relation is to let
+       TaskJuggler to schedule the tasks correctly, and any task status other
+       than WFD or RTS means that a TimeLog has been created for a task (which
+       means that you can not change the :attr:`.computed_start` anymore), it
+       is only allowed to change the dependencies of a WFD and RTS tasks.
+
+    .. warning::
+       **Resuming a STOP Task
+
+       Resuming a STOP Task will be treated as if a revision has been made to
+       that task, and all the statuses of the tasks depending to this
+       particular task will be updated accordingly.
 
     **Arguments**
 
@@ -535,14 +571,14 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
       the parent of the created Task or the Task will be an orphan task and
       Stalker will raise a RuntimeError.
 
-    :type parent: :class:`Task`
+    :type parent: :class:`.Task`
 
     :param depends: A list of :class:`.Task`\ s that this :class:`.Task` is
       depending on. A Task can not depend to itself or any other Task which are
       already depending to this one in anyway or a CircularDependency error
       will be raised.
 
-    :type depends: [:class:`Task`]
+    :type depends: [:class:`.Task`]
 
     :param resources: The :class:`.User`\ s assigned to this :class:`.Task`. A
       :class:`.Task` without any resource can not be scheduled.
@@ -875,11 +911,20 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         self.responsible = responsible
 
         # no matter what is given for the status
-        # set the status to NEW for a newly created task
-        with DBSession.no_autoflush:
-            from stalker import Status
-            status_new = Status.query.filter_by(code='NEW').first()
-        self.status = status_new
+        # set the status to WFD for a newly created task
+
+        # status_wfd = None
+        # if db.session:
+        #     with db.session.no_autoflush:
+        #         from stalker import Status
+        #         status_wfd = Status.query.filter_by(code='WFD').first()
+        #         status_rts = Status.query.filter_by(code='RTS').first()
+        # 
+        #     # TODO: check the statuses of the dependencies
+        #     if self.depends:
+        #         self.status = status_wfd
+        #     else:
+        #         self.status = status_rts
 
     def __eq__(self, other):
         """the equality operator
@@ -903,7 +948,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
         # TODO: convert this to an event
         # update parents total_logged_second attribute
-        with DBSession.no_autoflush:
+        with db.session.no_autoflush:
             if self.parent:
                     self.parent.total_logged_seconds += time_log.total_seconds
 
@@ -947,7 +992,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
         # check for circular dependency toward the parent, non of the parents
         # should be depending to the given depends_to_task
-        with DBSession.no_autoflush:
+        with db.session.no_autoflush:
             parent = self.parent
             while parent:
                 if parent in depends.depends:
@@ -1077,7 +1122,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
                 # use its project as the project
 
                 # to prevent prematurely flush the parent
-                with DBSession.no_autoflush:
+                with db.session.no_autoflush:
                     project = self.parent.project
 
             else:
@@ -1103,7 +1148,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             # check if there is a parent
             if self.parent:
                 # check if given project is matching the parent.project
-                with DBSession.no_autoflush:
+                with db.session.no_autoflush:
                     if self.parent._project != project:
                         # don't go mad again, but warn the user that there is an
                         # ambiguity!!!
@@ -1147,7 +1192,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         """
         # just empty the resources list
         # do it without a flush
-        with DBSession.no_autoflush:
+        with db.session.no_autoflush:
             self.resources = []
 
             # if this is the first ever child we receive
@@ -1354,7 +1399,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     def is_container(self):
         """Returns True if the Task has children Tasks
         """
-        with DBSession.no_autoflush:
+        with db.session.no_autoflush:
             return bool(len(self.children))
 
     @property
@@ -1423,7 +1468,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         :returns int: An integer showing the total seconds spent.
         """
         seconds = 0
-        with DBSession.no_autoflush:
+        with db.session.no_autoflush:
             if self.is_leaf:
                 for time_log in self.time_logs:
                     seconds += time_log.total_seconds
@@ -1484,7 +1529,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         # do it only for container tasks
         if self.is_container:
             # also update the parents
-            with DBSession.no_autoflush:
+            with db.session.no_autoflush:
                 if self.parent:
                     current_value = 0
                     if self._schedule_seconds:
@@ -1868,7 +1913,7 @@ def update_task_date_values(task, removed_child, initiator):
     :param initiator: not used
     """
     # update start and end date values of the task
-    with DBSession.no_autoflush:
+    with db.session.no_autoflush:
         start = datetime.datetime.max
         end = datetime.datetime.min
         for child in task.children:

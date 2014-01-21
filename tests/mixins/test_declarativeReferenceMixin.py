@@ -21,10 +21,10 @@
 import unittest2
 
 from sqlalchemy import Column, Integer, ForeignKey
-from stalker.db.session import DBSession
+from stalker import db
 from stalker.models.entity import SimpleEntity
 from stalker.models.mixins import ReferenceMixin
-from stalker.models.link import  Link
+from stalker.models.link import Link
 
 
 class DeclRefMixA(SimpleEntity, ReferenceMixin):
@@ -78,8 +78,8 @@ class ReferenceMixinTester(unittest2.TestCase):
     def tearDown(self):
         """clean up the test
         """
-        if DBSession:
-            DBSession.close()
+        if db.session:
+            db.session.close()
 
 
 

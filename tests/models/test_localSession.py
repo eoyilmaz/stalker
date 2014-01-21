@@ -26,7 +26,6 @@ import datetime
 import unittest2
 
 from stalker import defaults, db, User
-from stalker.db import DBSession
 from stalker.models.auth import LocalSession
 
 
@@ -38,20 +37,21 @@ class LocalSessionTester(unittest2.TestCase):
     def setUpClass(cls):
         """setting up the test in class level
         """
-        DBSession.remove()
-        DBSession.configure(extension=None)
+        if db.session:
+            db.session.close()
 
     @classmethod
     def tearDownClass(cls):
         """clean up the test in class level
         """
-        DBSession.remove()
-        DBSession.configure(extension=None)
+        if db.session:
+            db.session.close()
 
     def setUp(self):
         """setup the test
         """
-        DBSession.remove()
+        if db.session:
+            db.session.close()
         db.setup()
         defaults.local_storage_path = tempfile.mktemp()
 
@@ -114,8 +114,8 @@ class LocalSessionTester(unittest2.TestCase):
         )
 
         # save it to the Database
-        DBSession.add(new_user)
-        DBSession.commit()
+        db.session.add(new_user)
+        db.session.commit()
 
         self.assertIsNotNone(new_user.id)
 
@@ -152,8 +152,8 @@ class LocalSessionTester(unittest2.TestCase):
         )
 
         # save it to the Database
-        DBSession.add(new_user)
-        DBSession.commit()
+        db.session.add(new_user)
+        db.session.commit()
 
         self.assertIsNotNone(new_user.id)
 
@@ -193,8 +193,8 @@ class LocalSessionTester(unittest2.TestCase):
         )
 
         # save it to the Database
-        DBSession.add(new_user)
-        DBSession.commit()
+        db.session.add(new_user)
+        db.session.commit()
 
         self.assertIsNotNone(new_user.id)
 

@@ -51,7 +51,9 @@ class ConfigTester(unittest2.TestCase):
         """clean up the test
         """
         from stalker import db
-        db.DBSession.remove()
+        if db.session:
+            db.session.close()
+
         # and remove the temp directory
         shutil.rmtree(self.temp_config_folder)
         # restore defaults.timing_resolution
@@ -181,15 +183,13 @@ class ConfigTester(unittest2.TestCase):
         if there is a database connection and there is a Studio in there
         """
         import datetime
-        from stalker import db
+        from stalker import db, defaults
         from stalker.models.studio import Studio
 
-        db.setup({'sqlalchemy.url': 'sqlite:///:memory:'})
-        # db.setup()
+        db.setup()
         db.init()
 
         # check the defaults are still using them self
-        from stalker import defaults
         self.assertEqual(
             defaults.timing_resolution,
             datetime.timedelta(hours=1)
@@ -199,8 +199,8 @@ class ConfigTester(unittest2.TestCase):
             name='Test Studio',
             timing_resolution=datetime.timedelta(minutes=15)
         )
-        db.DBSession.add(studio)
-        db.DBSession.commit()
+        db.session.add(studio)
+        db.session.commit()
 
         # now check it again
         self.assertEqual(

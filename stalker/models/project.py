@@ -26,7 +26,7 @@ from sqlalchemy.orm import relationship, validates
 
 from stalker import User
 from stalker import defaults
-from stalker.db.session import DBSession
+from stalker.db import session
 from stalker.db.declarative import Base
 from stalker.models.entity import Entity
 from stalker.models.mixins import (StatusMixin, DateRangeMixin, ReferenceMixin,
@@ -346,7 +346,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         # use joins over the session.query
         from stalker.models.asset import Asset
 
-        if DBSession is not None:
+        if session is not None:
             return Asset.query \
                 .join(Asset.project) \
                 .filter(Project.name == self.name) \

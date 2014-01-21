@@ -25,7 +25,7 @@ from sqlalchemy import Table, Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship, validates
 
 import stalker
-from stalker.db import Base
+from stalker.db.declarative import Base
 
 from stalker.log import logging_level
 import logging

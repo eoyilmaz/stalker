@@ -13,8 +13,8 @@ Stalker Changes
   responsible to be set for a Task.
 * **New:** Because of the new "Task Review Workflow" task statuses which are
   normally created in Stalker Pyramid are now automatically created in Stalker
-  database initialization. The new statuses are New (NEW), Ready To Start
-  (RTS), Work In Progress (WIP), Pending Review (PREV), Has
+  database initialization. The new statuses are Waiting For Dependency (WFD),
+  Ready To Start (RTS), Work In Progress (WIP), Pending Review (PREV), Has
   Revision (HREV), On Hold (OH), Stopped (STOP) and Completed (CMPL) are all
   used in Task, Asset, Shot and Sequence status lists by default.
 * **New:** Because of the new "Task Review Workflow" also a status list for
@@ -23,6 +23,9 @@ Stalker Changes
 * **Fix:** Users.login column is now unique.
 * **Update:** Ticket workflow in config is now using the proper status names
   instead of the lower case names of the statuses.
+* **Update:** Instead of Sqlalchemy.ORM.ScopedSession Stalker now uses
+  Sqlalchemy.ORM.Session. Also created a query_property() function to mimic the
+  ScopedSession.query_property().
 
 0.2.4
 =====

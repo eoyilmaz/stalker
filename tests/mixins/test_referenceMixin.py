@@ -21,12 +21,13 @@
 import unittest2
 
 from sqlalchemy import Column, Integer, ForeignKey
+from stalker import db
 from stalker.models.entity import Entity
 from stalker.models.link import Link
 from stalker.models.mixins import ReferenceMixin
-from stalker.db.session import DBSession
 from stalker.models.type import Type
 from stalker.models.entity import SimpleEntity
+
 
 class RefMixFooClass(SimpleEntity, ReferenceMixin):
     __tablename__ = "RefMixFooClasses"
@@ -41,9 +42,9 @@ class RefMixFooClass(SimpleEntity, ReferenceMixin):
 class ReferenceMixinTester(unittest2.TestCase):
     """tests the ReferenceMixin
     """
-    
+
     # TODO: Tests are not reflecting the latest design
-    
+
     def setUp(self):
         """setup the test
         """
@@ -103,7 +104,9 @@ class ReferenceMixinTester(unittest2.TestCase):
     def tearDown(self):
         """clean up the test
         """
-        DBSession.remove()
+        if db.session:
+            #db.session.remove()
+            db.session.close()
 
     def test_references_attribute_accepting_empty_list(self):
         """testing if references attribute accepting empty lists
@@ -175,7 +178,7 @@ class ReferenceMixinTester(unittest2.TestCase):
         myGreatEntity = GreatEntity(name="Test")
         # we should have a references attribute right now
         var = myGreatEntity.references
-        
+
         image_link_type = Type(
             name='Image',
             code='image',

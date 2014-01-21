@@ -39,11 +39,6 @@ class PermissionTester(unittest2.TestCase):
 
         self.test_permission = Permission(**self.kwargs)
 
-    #def tearDown(self):
-    #    """clean the test
-    #    """
-    #    DBSession.remove()
-
     def test_access_argument_is_skipped(self):
         """testing if a TypeError will be raised when the access argument is
         skipped
