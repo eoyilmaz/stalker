@@ -682,3 +682,57 @@ class TimeLogDBTestCase(unittest2.TestCase):
         self.assertEqual(parent_task2.total_logged_seconds, 9 * 3600)
         self.assertEqual(child_task1.total_logged_seconds, 9 * 3600)
         self.assertEqual(child_task2.total_logged_seconds, 12 * 3600)
+
+    def test_time_log_creation_for_a_WFD_leaf_task(self):
+        """testing if a StatusError will be raised when a TimeLog instance
+        wanted to be created for a WFD leaf task
+        """
+        self.fail('test is not implemented yet')
+
+    def test_time_log_creation_for_a_RTS_leaf_task(self):
+        """testing if the status will be updated to WIP when a TimeLog instance
+        is created for a RTS leaf task
+        """
+        self.fail('test is not implemented yet')
+
+    def test_time_log_creation_for_a_WIP_leaf_task(self):
+        """testing if the status will stay at WIP when a TimeLog instance is
+        created for a WIP leaf task
+        """
+        self.fail('test is not implemented yet')
+
+    def test_time_log_creation_for_a_PREV_leaf_task(self):
+        """testing if a StatusError will be raised when a TimeLog instance is
+        created for a PREV leaf task
+        """
+        self.fail('test is not implemented yet')
+
+    def test_time_log_creation_for_a_HREV_leaf_task(self):
+        """testing if the status will be updated to WIP when a TimeLog instance
+        is created for a HREV leaf task
+        """
+        self.fail('test is not implemented yet')
+
+    def test_time_log_creation_for_a_DREV_leaf_task(self):
+        """testing if the status will stay at DREV when a TimeLog instance is
+        created for a DREV leaf task
+        """
+        self.fail('test is not implemented yet')
+
+    def test_time_log_creation_for_a_OH_leaf_task(self):
+        """testing if a StatusError will be raised when a TimeLog instance is
+        created for a OH leaf task
+        """
+        self.fail('test is not implemented yet')
+
+    def test_time_log_creation_for_a_STOP_leaf_task(self):
+        """testing if a StatusError will be raised when a TimeLog instance is
+        created for a STOP leaf task
+        """
+        self.fail('test is not implemented yet')
+
+    def test_time_log_creation_for_a_CMPL_leaf_task(self):
+        """testing if a StatusError will be raised when a TimeLog instance is
+        created for a CMPL leaf task
+        """
+        self.fail('test is not implemented yet')

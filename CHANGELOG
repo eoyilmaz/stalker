@@ -26,6 +26,8 @@ Stalker Changes
 * **Update:** Instead of Sqlalchemy.ORM.ScopedSession Stalker now uses
   Sqlalchemy.ORM.Session. Also created a query_property() function to mimic the
   ScopedSession.query_property().
+* **New:** Added Task.walk_hierarchy() which iterates over the hierarchy of the
+  task. For now it walks in a breadth first fashion.
 
 0.2.4
 =====

@@ -1661,6 +1661,15 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             .filter(Ticket.links.contains(self))\
             .filter(Ticket.status != status_closed).all()
 
+    def walk_hierarchy(self):
+        """Walks the hierarchy of this task
+        """
+        tasks_to_visit = list([self])
+        while len(tasks_to_visit):
+            current_task = tasks_to_visit.pop(0)
+            tasks_to_visit.extend(current_task.children)
+            yield current_task
+
     # =============
     # ** ACTIONS **
     # =============
