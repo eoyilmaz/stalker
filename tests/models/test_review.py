@@ -115,7 +115,8 @@ class ReviewTestCase(unittest2.TestCase):
         )
 
         self.kwargs = {
-            'task': self.task
+            'task': self.task,
+            'reviewer': self.user1
         }
         self.review = Review(**self.kwargs)
 
@@ -327,21 +328,23 @@ class ReviewTestCase(unittest2.TestCase):
         self.assertRaises(TypeError, setattr, review, 'reviewer', 'not a user')
 
     def test_reviewer_argument_is_not_in_Task_responsible_list(self):
-        """testing if a ValueError will be raised when the reviewer argument
-        value is not in Task.responsible list
+        """testing if it is possible to use some other user which is not in the
+        Task.responsible list as the reviewer
         """
         self.task.responsible = [self.user1]
         self.kwargs['reviewer'] = self.user2
-        self.assertRaises(ValueError, Review, **self.kwargs)
+        review = Review(**self.kwargs)
+        self.assertEqual(review.reviewer, self.user2)
 
     def test_reviewer_attribute_is_not_in_Task_responsible_list(self):
-        """testing if a ValueError is raised when the reviewer attribute is set
-        to a value which is not in Task.responsible list
+        """testing if it is possible to use some other user which is not in the
+        Task.responsible list as the reviewer
         """
         self.task.responsible = [self.user1]
         self.kwargs['reviewer'] = self.user1
         review = Review(**self.kwargs)
-        self.assertRaises(ValueError, setattr, review, 'reviewer', self.user2)
+        review.reviewer = self.user2
+        self.assertEqual(review.reviewer, self.user2)
 
     def test_reviewer_argument_is_working_properly(self):
         """testing if the reviewer argument value is correctly passed to
@@ -415,6 +418,11 @@ class ReviewTestCase(unittest2.TestCase):
             self.status_cmpl,
             self.task.status
         )
+
+    def test_approve_method_updates_task_parent_status(self):
+        """testing if approve method will also update the task parent status
+        """
+        self.fail('test is not implemented yet')
 
     def test_approve_method_updates_task_status_correctly_for_a_multi_responsible_task_when_one_approve(self):
         """testing if the Review.approve() method will update the task status
@@ -518,3 +526,9 @@ class ReviewTestCase(unittest2.TestCase):
             self.status_hrev,
             self.task.status
         )
+
+    def test_request_revision_method_updates_parent_task_status(self):
+        """testing if the request_revision method also updates the task parent
+        statuses
+        """
+        self.fail('test is not implemented yet')

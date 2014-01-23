@@ -13,6 +13,8 @@ Summary
    stalker.exceptions.CircularDependencyError
    stalker.exceptions.DBError
    stalker.exceptions.LoginError
+   stalker.exceptions.OverBookedError
+   stalker.exceptions.StatusError
    stalker.models
    stalker.models.asset.Asset
    stalker.models.auth.Group
