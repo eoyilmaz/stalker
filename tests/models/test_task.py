@@ -6088,7 +6088,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
 
         self.test_task9.approve()
         self.assertEqual(self.test_task9.status, self.status_cmpl)
-        self.assertEqual(self.test_task1.status, self.status_cmpl)
+        self.assertEqual(self.test_asset1.status, self.status_cmpl)
         self.assertEqual(self.test_task7.status, self.status_cmpl)
         self.assertEqual(self.test_task2.status, self.status_wip)
 
@@ -6101,7 +6101,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.test_task6.depends = [self.test_task9]
 
         self.test_task9.status = self.status_prev
-        self.test_task1.status = self.status_wip
+        self.test_asset1.status = self.status_wip
         self.test_task7.status = self.status_wip
         self.test_task8.status = self.status_wip
         self.test_task2.status = self.status_wip
@@ -6109,11 +6109,11 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.test_task4.status = self.status_wfd
         self.test_task5.status = self.status_wfd
         self.test_task6.status = self.status_wfd
-        self.test_task1.status = self.status_wfd
+        self.test_asset1.status = self.status_wfd
 
         self.test_task9.approve()
         self.assertEqual(self.test_task9.status, self.status_cmpl)
-        self.assertEqual(self.test_task1.status, self.status_cmpl)
+        self.assertEqual(self.test_asset1.status, self.status_cmpl)
         self.assertEqual(self.test_task7.status, self.status_cmpl)
         self.assertEqual(self.test_task2.status, self.status_wip)
 
@@ -6156,8 +6156,8 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
 
     # CMPL
     def test_approve_in_CMPL_leaf_task(self):
-        """testing if a StatusError will be raised when the stop action is used
-        in a CMPL leaf task
+        """testing if a StatusError will be raised when the approve action is
+        used in a CMPL leaf task
         """
         self.test_task9.status = self.status_cmpl
         self.assertRaises(StatusError, self.test_task9.approve)

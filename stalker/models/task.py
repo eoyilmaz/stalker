@@ -33,7 +33,9 @@ from stalker.models.entity import Entity
 from stalker.models.auth import User
 from stalker.models.mixins import (DateRangeMixin, StatusMixin, ReferenceMixin,
                                    ScheduleMixin)
-from stalker.exceptions import OverBookedError, CircularDependencyError
+from stalker.models.status import Status
+from stalker.exceptions import (OverBookedError, CircularDependencyError,
+                                StatusError)
 from stalker.log import logging_level
 
 logger = logging.getLogger(__name__)
@@ -855,7 +857,6 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
                  is_milestone=False,
                  priority=defaults.task_priority,
                  **kwargs):
-
         # update kwargs with extras
         kwargs['start'] = start
         kwargs['end'] = end
@@ -1736,8 +1737,646 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     def approve(self):
         """Approves the task and sets its status to CMPL.
         """
-        raise NotImplementedError
+        # get statuses
+        status_prev = Status.query.filter_by(code='PREV').first()
+        status_cmpl = Status.query.filter_by(code='CMPL').first()
+        logger.debug('approving task: %s' % self.name)
 
+        if self.status != status_prev:
+            raise StatusError(
+                '%s.status should be PREV to let it be approved, not %s' %
+                (self.__class__.__name__, self.status.code)
+            )
+
+        self.status = status_cmpl
+        logger.debug('status after approve: %s' % self.status.code)
+
+        # update parent status
+        if self.parent:
+            self.parent.update_status_with_children_statuses()
+
+        # update dependent task statuses
+        for dep in self.dependent_of:
+            dep.update_status_with_dependent_statuses()
+            # also update the status of parents of dependencies
+            if dep.parent:
+                dep.parent.update_status_with_children_statuses()
+
+    def update_status_with_dependent_statuses(self):
+        """updates the status by looking at the dependent tasks
+        """
+
+        if self.is_container:
+            # do nothing, its status will be decided by its children
+            return
+
+        WFD = Status.query.filter_by(code='WFD').first()
+        RTS = Status.query.filter_by(code='RTS').first()
+        WIP = Status.query.filter_by(code='WIP').first()
+        DREV = Status.query.filter_by(code='DREV').first()
+        STOP = Status.query.filter_by(code='STOP').first()
+        CMPL = Status.query.filter_by(code='CMPL').first()
+
+        if not self.depends:
+            # doesn't have any dependency
+            # convert its status from WFD to RTS if necessary
+            if self.status == WFD:
+                self.status = RTS
+            return
+
+        if all([dep.status == CMPL or dep.status == STOP
+                for dep in self.depends]):
+            # all dependencies are set to CMPL or STOP
+            # so WFD -> RTS
+            # DREV -> WIP
+            if self.status == WFD:
+                self.status = RTS
+            elif self.status == DREV:
+                self.status = WIP
+
+    def update_status_with_children_statuses(self):
+        """updates the task status according to its children statuses
+        """
+        logger.debug('setting statuses with child statuses for: %s' %
+                     self.name)
+
+        if not self.is_container:
+            # do nothing
+            logger.debug('not a container returning!')
+            return
+
+        WFD = Status.query.filter(Status.code == 'WFD').first()
+        RTS = Status.query.filter(Status.code == 'RTS').first()
+        WIP = Status.query.filter(Status.code == 'WIP').first()
+        CMPL = Status.query.filter(Status.code == 'CMPL').first()
+
+        # use pure sql
+        sql_query = """select
+            "Statuses".code
+        from "Tasks"
+            join "Statuses" on "Tasks".status_id = "Statuses".id
+        where "Tasks".parent_id = %s
+        group by "Statuses".code
+        """ % self.id
+
+        result = db.session.connection().execute(sql_query)
+
+        binary_status_codes = {
+            'WFD':  0b100000000,
+            'RTS':  0b010000000,
+            'WIP':  0b001000000,
+            'PREV': 0b000100000,
+            'HREV': 0b000010000,
+            'DREV': 0b000001000,
+            'OH':   0b000000100,
+            'STOP': 0b000000010,
+            'CMPL': 0b000000001
+        }
+
+        # convert to a binary value
+        binary_status = reduce(
+            lambda x, y: x+y,
+            map(lambda x: binary_status_codes[x[0]], result.fetchall())
+        )
+
+        children_statuses_lut = {
+            0b000000000: None,  # this will never happen
+
+            0b000000001: CMPL,
+
+            0b000000010: CMPL,
+            0b000000011: CMPL,
+
+            0b000000100: WIP,
+            0b000000101: WIP,
+            0b000000110: WIP,
+            0b000000111: WIP,
+
+            0b000001000: WIP,
+            0b000001001: WIP,
+            0b000001010: WIP,
+            0b000001011: WIP,
+            0b000001100: WIP,
+            0b000001101: WIP,
+            0b000001110: WIP,
+            0b000001111: WIP,
+
+            0b000010000: WIP,
+            0b000010001: WIP,
+            0b000010010: WIP,
+            0b000010011: WIP,
+            0b000010100: WIP,
+            0b000010101: WIP,
+            0b000010110: WIP,
+            0b000010111: WIP,
+            0b000011000: WIP,
+            0b000011001: WIP,
+            0b000011010: WIP,
+            0b000011011: WIP,
+            0b000011100: WIP,
+            0b000011101: WIP,
+            0b000011110: WIP,
+            0b000011111: WIP,
+
+            0b000100000: WIP,
+            0b000100001: WIP,
+            0b000100010: WIP,
+            0b000100011: WIP,
+            0b000100100: WIP,
+            0b000100101: WIP,
+            0b000100110: WIP,
+            0b000100111: WIP,
+            0b000101000: WIP,
+            0b000101001: WIP,
+            0b000101010: WIP,
+            0b000101011: WIP,
+            0b000101100: WIP,
+            0b000101101: WIP,
+            0b000101110: WIP,
+            0b000101111: WIP,
+            0b000110000: WIP,
+            0b000110001: WIP,
+            0b000110010: WIP,
+            0b000110011: WIP,
+            0b000110100: WIP,
+            0b000110101: WIP,
+            0b000110110: WIP,
+            0b000110111: WIP,
+            0b000111000: WIP,
+            0b000111001: WIP,
+            0b000111010: WIP,
+            0b000111011: WIP,
+            0b000111100: WIP,
+            0b000111101: WIP,
+            0b000111110: WIP,
+            0b000111111: WIP,
+
+            0b001000000: WIP,
+            0b001000001: WIP,
+            0b001000010: WIP,
+            0b001000011: WIP,
+            0b001000100: WIP,
+            0b001000101: WIP,
+            0b001000110: WIP,
+            0b001000111: WIP,
+            0b001001000: WIP,
+            0b001001001: WIP,
+            0b001001010: WIP,
+            0b001001011: WIP,
+            0b001001100: WIP,
+            0b001001101: WIP,
+            0b001001110: WIP,
+            0b001001111: WIP,
+            0b001010000: WIP,
+            0b001010001: WIP,
+            0b001010010: WIP,
+            0b001010011: WIP,
+            0b001010100: WIP,
+            0b001010101: WIP,
+            0b001010110: WIP,
+            0b001010111: WIP,
+            0b001011000: WIP,
+            0b001011001: WIP,
+            0b001011010: WIP,
+            0b001011011: WIP,
+            0b001011100: WIP,
+            0b001011101: WIP,
+            0b001011110: WIP,
+            0b001011111: WIP,
+            0b001100000: WIP,
+            0b001100001: WIP,
+            0b001100010: WIP,
+            0b001100011: WIP,
+            0b001100100: WIP,
+            0b001100101: WIP,
+            0b001100110: WIP,
+            0b001100111: WIP,
+            0b001101000: WIP,
+            0b001101001: WIP,
+            0b001101010: WIP,
+            0b001101011: WIP,
+            0b001101100: WIP,
+            0b001101101: WIP,
+            0b001101110: WIP,
+            0b001101111: WIP,
+            0b001110000: WIP,
+            0b001110001: WIP,
+            0b001110010: WIP,
+            0b001110011: WIP,
+            0b001110100: WIP,
+            0b001110101: WIP,
+            0b001110110: WIP,
+            0b001110111: WIP,
+            0b001111000: WIP,
+            0b001111001: WIP,
+            0b001111010: WIP,
+            0b001111011: WIP,
+            0b001111100: WIP,
+            0b001111101: WIP,
+            0b001111110: WIP,
+            0b001111111: WIP,
+
+            0b010000000: RTS,
+            0b010000001: WIP,
+            0b010000010: RTS,
+            0b010000011: WIP,
+            0b010000100: WIP,
+            0b010000101: WIP,
+            0b010000110: WIP,
+            0b010000111: WIP,
+            0b010001000: WIP,
+            0b010001001: WIP,
+            0b010001010: WIP,
+            0b010001011: WIP,
+            0b010001100: WIP,
+            0b010001101: WIP,
+            0b010001110: WIP,
+            0b010001111: WIP,
+            0b010010000: WIP,
+            0b010010001: WIP,
+            0b010010010: WIP,
+            0b010010011: WIP,
+            0b010010100: WIP,
+            0b010010101: WIP,
+            0b010010110: WIP,
+            0b010010111: WIP,
+            0b010011000: WIP,
+            0b010011001: WIP,
+            0b010011010: WIP,
+            0b010011011: WIP,
+            0b010011100: WIP,
+            0b010011101: WIP,
+            0b010011110: WIP,
+            0b010011111: WIP,
+            0b010100000: WIP,
+            0b010100001: WIP,
+            0b010100010: WIP,
+            0b010100011: WIP,
+            0b010100100: WIP,
+            0b010100101: WIP,
+            0b010100110: WIP,
+            0b010100111: WIP,
+            0b010101000: WIP,
+            0b010101001: WIP,
+            0b010101010: WIP,
+            0b010101011: WIP,
+            0b010101100: WIP,
+            0b010101101: WIP,
+            0b010101110: WIP,
+            0b010101111: WIP,
+            0b010110000: WIP,
+            0b010110001: WIP,
+            0b010110010: WIP,
+            0b010110011: WIP,
+            0b010110100: WIP,
+            0b010110101: WIP,
+            0b010110110: WIP,
+            0b010110111: WIP,
+            0b010111000: WIP,
+            0b010111001: WIP,
+            0b010111010: WIP,
+            0b010111011: WIP,
+            0b010111100: WIP,
+            0b010111101: WIP,
+            0b010111110: WIP,
+            0b010111111: WIP,
+            0b011000000: WIP,
+            0b011000001: WIP,
+            0b011000010: WIP,
+            0b011000011: WIP,
+            0b011000100: WIP,
+            0b011000101: WIP,
+            0b011000110: WIP,
+            0b011000111: WIP,
+            0b011001000: WIP,
+            0b011001001: WIP,
+            0b011001010: WIP,
+            0b011001011: WIP,
+            0b011001100: WIP,
+            0b011001101: WIP,
+            0b011001110: WIP,
+            0b011001111: WIP,
+            0b011010000: WIP,
+            0b011010001: WIP,
+            0b011010010: WIP,
+            0b011010011: WIP,
+            0b011010100: WIP,
+            0b011010101: WIP,
+            0b011010110: WIP,
+            0b011010111: WIP,
+            0b011011000: WIP,
+            0b011011001: WIP,
+            0b011011010: WIP,
+            0b011011011: WIP,
+            0b011011100: WIP,
+            0b011011101: WIP,
+            0b011011110: WIP,
+            0b011011111: WIP,
+            0b011100000: WIP,
+            0b011100001: WIP,
+            0b011100010: WIP,
+            0b011100011: WIP,
+            0b011100100: WIP,
+            0b011100101: WIP,
+            0b011100110: WIP,
+            0b011100111: WIP,
+            0b011101000: WIP,
+            0b011101001: WIP,
+            0b011101010: WIP,
+            0b011101011: WIP,
+            0b011101100: WIP,
+            0b011101101: WIP,
+            0b011101110: WIP,
+            0b011101111: WIP,
+            0b011110000: WIP,
+            0b011110001: WIP,
+            0b011110010: WIP,
+            0b011110011: WIP,
+            0b011110100: WIP,
+            0b011110101: WIP,
+            0b011110110: WIP,
+            0b011110111: WIP,
+            0b011111000: WIP,
+            0b011111001: WIP,
+            0b011111010: WIP,
+            0b011111011: WIP,
+            0b011111100: WIP,
+            0b011111101: WIP,
+            0b011111110: WIP,
+            0b011111111: WIP,
+
+            0b100000000: WFD,
+            0b100000001: WIP,
+            0b100000010: WFD,
+            0b100000011: WIP,
+            0b100000100: WIP,
+            0b100000101: WIP,
+            0b100000110: WIP,
+            0b100000111: WIP,
+            0b100001000: WIP,
+            0b100001001: WIP,
+            0b100001010: WIP,
+            0b100001011: WIP,
+            0b100001100: WIP,
+            0b100001101: WIP,
+            0b100001110: WIP,
+            0b100001111: WIP,
+            0b100010000: WIP,
+            0b100010001: WIP,
+            0b100010010: WIP,
+            0b100010011: WIP,
+            0b100010100: WIP,
+            0b100010101: WIP,
+            0b100010110: WIP,
+            0b100010111: WIP,
+            0b100011000: WIP,
+            0b100011001: WIP,
+            0b100011010: WIP,
+            0b100011011: WIP,
+            0b100011100: WIP,
+            0b100011101: WIP,
+            0b100011110: WIP,
+            0b100011111: WIP,
+            0b100100000: WIP,
+            0b100100001: WIP,
+            0b100100010: WIP,
+            0b100100011: WIP,
+            0b100100100: WIP,
+            0b100100101: WIP,
+            0b100100110: WIP,
+            0b100100111: WIP,
+            0b100101000: WIP,
+            0b100101001: WIP,
+            0b100101010: WIP,
+            0b100101011: WIP,
+            0b100101100: WIP,
+            0b100101101: WIP,
+            0b100101110: WIP,
+            0b100101111: WIP,
+            0b100110000: WIP,
+            0b100110001: WIP,
+            0b100110010: WIP,
+            0b100110011: WIP,
+            0b100110100: WIP,
+            0b100110101: WIP,
+            0b100110110: WIP,
+            0b100110111: WIP,
+            0b100111000: WIP,
+            0b100111001: WIP,
+            0b100111010: WIP,
+            0b100111011: WIP,
+            0b100111100: WIP,
+            0b100111101: WIP,
+            0b100111110: WIP,
+            0b100111111: WIP,
+            0b101000000: WIP,
+            0b101000001: WIP,
+            0b101000010: WIP,
+            0b101000011: WIP,
+            0b101000100: WIP,
+            0b101000101: WIP,
+            0b101000110: WIP,
+            0b101000111: WIP,
+            0b101001000: WIP,
+            0b101001001: WIP,
+            0b101001010: WIP,
+            0b101001011: WIP,
+            0b101001100: WIP,
+            0b101001101: WIP,
+            0b101001110: WIP,
+            0b101001111: WIP,
+            0b101010000: WIP,
+            0b101010001: WIP,
+            0b101010010: WIP,
+            0b101010011: WIP,
+            0b101010100: WIP,
+            0b101010101: WIP,
+            0b101010110: WIP,
+            0b101010111: WIP,
+            0b101011000: WIP,
+            0b101011001: WIP,
+            0b101011010: WIP,
+            0b101011011: WIP,
+            0b101011100: WIP,
+            0b101011101: WIP,
+            0b101011110: WIP,
+            0b101011111: WIP,
+            0b101100000: WIP,
+            0b101100001: WIP,
+            0b101100010: WIP,
+            0b101100011: WIP,
+            0b101100100: WIP,
+            0b101100101: WIP,
+            0b101100110: WIP,
+            0b101100111: WIP,
+            0b101101000: WIP,
+            0b101101001: WIP,
+            0b101101010: WIP,
+            0b101101011: WIP,
+            0b101101100: WIP,
+            0b101101101: WIP,
+            0b101101110: WIP,
+            0b101101111: WIP,
+            0b101110000: WIP,
+            0b101110001: WIP,
+            0b101110010: WIP,
+            0b101110011: WIP,
+            0b101110100: WIP,
+            0b101110101: WIP,
+            0b101110110: WIP,
+            0b101110111: WIP,
+            0b101111000: WIP,
+            0b101111001: WIP,
+            0b101111010: WIP,
+            0b101111011: WIP,
+            0b101111100: WIP,
+            0b101111101: WIP,
+            0b101111110: WIP,
+            0b101111111: WIP,
+            0b110000000: RTS,
+            0b110000001: WIP,
+            0b110000010: RTS,
+            0b110000011: WIP,
+            0b110000100: WIP,
+            0b110000101: WIP,
+            0b110000110: WIP,
+            0b110000111: WIP,
+            0b110001000: WIP,
+            0b110001001: WIP,
+            0b110001010: WIP,
+            0b110001011: WIP,
+            0b110001100: WIP,
+            0b110001101: WIP,
+            0b110001110: WIP,
+            0b110001111: WIP,
+            0b110010000: WIP,
+            0b110010001: WIP,
+            0b110010010: WIP,
+            0b110010011: WIP,
+            0b110010100: WIP,
+            0b110010101: WIP,
+            0b110010110: WIP,
+            0b110010111: WIP,
+            0b110011000: WIP,
+            0b110011001: WIP,
+            0b110011010: WIP,
+            0b110011011: WIP,
+            0b110011100: WIP,
+            0b110011101: WIP,
+            0b110011110: WIP,
+            0b110011111: WIP,
+            0b110100000: WIP,
+            0b110100001: WIP,
+            0b110100010: WIP,
+            0b110100011: WIP,
+            0b110100100: WIP,
+            0b110100101: WIP,
+            0b110100110: WIP,
+            0b110100111: WIP,
+            0b110101000: WIP,
+            0b110101001: WIP,
+            0b110101010: WIP,
+            0b110101011: WIP,
+            0b110101100: WIP,
+            0b110101101: WIP,
+            0b110101110: WIP,
+            0b110101111: WIP,
+            0b110110000: WIP,
+            0b110110001: WIP,
+            0b110110010: WIP,
+            0b110110011: WIP,
+            0b110110100: WIP,
+            0b110110101: WIP,
+            0b110110110: WIP,
+            0b110110111: WIP,
+            0b110111000: WIP,
+            0b110111001: WIP,
+            0b110111010: WIP,
+            0b110111011: WIP,
+            0b110111100: WIP,
+            0b110111101: WIP,
+            0b110111110: WIP,
+            0b110111111: WIP,
+            0b111000000: WIP,
+            0b111000001: WIP,
+            0b111000010: WIP,
+            0b111000011: WIP,
+            0b111000100: WIP,
+            0b111000101: WIP,
+            0b111000110: WIP,
+            0b111000111: WIP,
+            0b111001000: WIP,
+            0b111001001: WIP,
+            0b111001010: WIP,
+            0b111001011: WIP,
+            0b111001100: WIP,
+            0b111001101: WIP,
+            0b111001110: WIP,
+            0b111001111: WIP,
+            0b111010000: WIP,
+            0b111010001: WIP,
+            0b111010010: WIP,
+            0b111010011: WIP,
+            0b111010100: WIP,
+            0b111010101: WIP,
+            0b111010110: WIP,
+            0b111010111: WIP,
+            0b111011000: WIP,
+            0b111011001: WIP,
+            0b111011010: WIP,
+            0b111011011: WIP,
+            0b111011100: WIP,
+            0b111011101: WIP,
+            0b111011110: WIP,
+            0b111011111: WIP,
+            0b111100000: WIP,
+            0b111100001: WIP,
+            0b111100010: WIP,
+            0b111100011: WIP,
+            0b111100100: WIP,
+            0b111100101: WIP,
+            0b111100110: WIP,
+            0b111100111: WIP,
+            0b111101000: WIP,
+            0b111101001: WIP,
+            0b111101010: WIP,
+            0b111101011: WIP,
+            0b111101100: WIP,
+            0b111101101: WIP,
+            0b111101110: WIP,
+            0b111101111: WIP,
+            0b111110000: WIP,
+            0b111110001: WIP,
+            0b111110010: WIP,
+            0b111110011: WIP,
+            0b111110100: WIP,
+            0b111110101: WIP,
+            0b111110110: WIP,
+            0b111110111: WIP,
+            0b111111000: WIP,
+            0b111111001: WIP,
+            0b111111010: WIP,
+            0b111111011: WIP,
+            0b111111100: WIP,
+            0b111111101: WIP,
+            0b111111110: WIP,
+            0b111111111: WIP,
+        }
+
+        logger.debug('binary statuses value : %s' % binary_status)
+        logger.debug('setting status to : %s' %
+                     children_statuses_lut[binary_status].code)
+        self.status = children_statuses_lut[binary_status]
+
+        # # update dependent task statuses
+        # for dep in self.dependent_of:
+        #     dep.update_status_with_dependent_statuses()
+
+        # go to parents
+        if self.parent:
+            logger.debug('updating parent (id:%s) status with its children' %
+                         self.parent.id)
+            self.parent.update_status_with_children_statuses()
 
 # TASK_DEPENDENCIES
 Task_Dependencies = Table(
