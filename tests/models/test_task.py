@@ -4788,11 +4788,11 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         container task
         """
         # find an WIP task
-        self.test_task3.status = self.status_wip
-        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.test_task1.status = self.status_wip
+        self.assertEqual(self.test_task1.status, self.status_wip)
         # create dependency
         self.assertRaises(
-            RuntimeError, self.test_task3.depends.append, self.test_task8
+            StatusError, self.test_task1.depends.append, self.test_task8
         )
 
     def test_container_CMPL_task_dependency_can_not_be_updated(self):
@@ -4800,11 +4800,11 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         container task
         """
         # find an CMPL task
-        self.test_task3.status = self.status_cmpl
-        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        self.test_task1.status = self.status_cmpl
+        self.assertEqual(self.test_task1.status, self.status_cmpl)
         # create dependency
         self.assertRaises(
-            RuntimeError, self.test_task3.depends.append, self.test_task8
+            StatusError, self.test_task1.depends.append, self.test_task8
         )
 
     #

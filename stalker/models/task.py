@@ -980,6 +980,34 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     def _validate_depends(self, key, depends):
         """validates the given depends value
         """
+        # check the status of the current task
+        with db.session.no_autoflush:
+            WFD = Status.query.filter_by(code='WFD').first()
+            RTS = Status.query.filter_by(code='RTS').first()
+            WIP = Status.query.filter_by(code='WIP').first()
+            PREV = Status.query.filter_by(code='PREV').first()
+            HREV = Status.query.filter_by(code='HREV').first()
+            DREV = Status.query.filter_by(code='DREV').first()
+            OH = Status.query.filter_by(code='OH').first()
+            STOP = Status.query.filter_by(code='STOP').first()
+            CMPL = Status.query.filter_by(code='CMPL').first()
+
+        if self.status in [WIP, PREV, HREV, DREV, OH, STOP, CMPL]:
+            raise StatusError(
+                'This is a %(status)s task and it is not allowed to change '
+                'the dependencies of a %(status)s task' % {
+                    'status': self.status.code
+                }
+            )
+
+        if self.is_container:
+            if self.status == CMPL:
+                raise StatusError(
+                    'This is a %(status)s container task and it is not '
+                    'allowed to change the dependency in %(status)s container '
+                    'tasks' % {'status': self.status.code}
+                )
+
         if not isinstance(depends, Task):
             raise TypeError(
                 "All the elements in the %s.depends should be an instance of "
@@ -1002,6 +1030,18 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
                         (self, depends)
                     )
                 parent = parent.parent
+
+        # update status with the new dependency
+        # update towards more constrained situation
+        #
+        # Do not update for example to RTS if the current dependent task is
+        # CMPL or STOP, this will be done by the approve or stop action in the
+        # dependent task it self
+
+        if self.status == RTS:
+            if depends.status in [WFD, RTS, WIP, OH, PREV, HREV, DREV, OH]:
+                self.status = WFD
+
         return depends
 
     @validates('schedule_timing')
@@ -1738,17 +1778,17 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         """Approves the task and sets its status to CMPL.
         """
         # get statuses
-        status_prev = Status.query.filter_by(code='PREV').first()
-        status_cmpl = Status.query.filter_by(code='CMPL').first()
+        PREV = Status.query.filter_by(code='PREV').first()
+        CMPL = Status.query.filter_by(code='CMPL').first()
         logger.debug('approving task: %s' % self.name)
 
-        if self.status != status_prev:
+        if self.status != PREV:
             raise StatusError(
                 '%s.status should be PREV to let it be approved, not %s' %
                 (self.__class__.__name__, self.status.code)
             )
 
-        self.status = status_cmpl
+        self.status = CMPL
         logger.debug('status after approve: %s' % self.status.code)
 
         # update parent status
@@ -1765,7 +1805,6 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     def update_status_with_dependent_statuses(self):
         """updates the status by looking at the dependent tasks
         """
-
         if self.is_container:
             # do nothing, its status will be decided by its children
             return
@@ -1773,7 +1812,10 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         WFD = Status.query.filter_by(code='WFD').first()
         RTS = Status.query.filter_by(code='RTS').first()
         WIP = Status.query.filter_by(code='WIP').first()
+        PREV = Status.query.filter_by(code='PREV').first()
+        HREV = Status.query.filter_by(code='HREV').first()
         DREV = Status.query.filter_by(code='DREV').first()
+        OH = Status.query.filter_by(code='OH').first()
         STOP = Status.query.filter_by(code='STOP').first()
         CMPL = Status.query.filter_by(code='CMPL').first()
 
@@ -1784,15 +1826,68 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
                 self.status = RTS
             return
 
-        if all([dep.status == CMPL or dep.status == STOP
-                for dep in self.depends]):
-            # all dependencies are set to CMPL or STOP
-            # so WFD -> RTS
-            # DREV -> WIP
+        # use pure sql
+        sql_query = """select
+    "Statuses".code
+from "Tasks"
+    join "Task_Dependencies" on "Tasks".id = "Task_Dependencies".task_id
+    join "Tasks" as "Dependent_Tasks" on "Task_Dependencies".depends_to_task_id = "Dependent_Tasks".id
+    join "Statuses" on "Dependent_Tasks".status_id = "Statuses".id
+where "Tasks".id = %s
+group by "Statuses".code""" % self.id
+
+        result = db.session.connection().execute(sql_query)
+
+        #   +--------- WFD
+        #   |+-------- RTS
+        #   ||+------- WIP
+        #   |||+------ PREV
+        #   ||||+----- HREV
+        #   |||||+---- DREV
+        #   ||||||+--- OH
+        #   |||||||+-- STOP
+        #   ||||||||+- CMPL
+        #   |||||||||
+        # 0b000000000
+
+        binary_status_codes = {
+            'WFD':  256,
+            'RTS':  128,
+            'WIP':  64,
+            'PREV': 32,
+            'HREV': 16,
+            'DREV': 8,
+            'OH':   4,
+            'STOP': 2,
+            'CMPL': 1
+        }
+
+        # convert to a binary value
+        binary_status = reduce(
+            lambda x, y: x+y,
+            map(lambda x: binary_status_codes[x[0]], result.fetchall())
+        )
+
+        continue_working = False
+        if binary_status < 4:
+            continue_working = True
+
+        if continue_working:
             if self.status == WFD:
                 self.status = RTS
             elif self.status == DREV:
                 self.status = WIP
+        else:
+            if self.status == RTS:
+                self.status = WFD
+            elif self.status == WIP:
+                self.status = DREV
+            elif self.status == CMPL:
+                self.status = DREV
+
+        # also update parent statuses
+        if self.parent:
+            self.parent.update_status_with_children_statuses()
 
     def update_status_with_children_statuses(self):
         """updates the task status according to its children statuses
@@ -1822,6 +1917,18 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         """ % self.id
 
         result = db.session.connection().execute(sql_query)
+
+        #   +--------- WFD
+        #   |+-------- RTS
+        #   ||+------- WIP
+        #   |||+------ PREV
+        #   ||||+----- HREV
+        #   |||||+---- DREV
+        #   ||||||+--- OH
+        #   |||||||+-- STOP
+        #   ||||||||+- CMPL
+        #   |||||||||
+        # 0b000000000
 
         binary_status_codes = {
             'WFD':  256,
@@ -1885,10 +1992,10 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         ]
 
         status_index = children_to_parent_statuses_lut[binary_status]
-        status = parent_statuses_lut[status_index].code
+        status = parent_statuses_lut[status_index]
 
         logger.debug('binary statuses value : %s' % binary_status)
-        logger.debug('setting status to : %s' % status)
+        logger.debug('setting status to : %s' % status.code)
 
         self.status = status
 
@@ -2103,3 +2210,17 @@ def update_task_date_values(task, removed_child, initiator):
             # set it to now
             task.start = datetime.datetime.now()
             # this will also update end
+
+# *****************************************************************************
+# Task.depends set
+# *****************************************************************************
+@event.listens_for(Task.depends, 'set', propagate=True)
+def added_new_dependency(task, dependent_task, initiator):
+    """Runs when a task is appended to another task as dependency
+
+    :param task: The task that a dependent is added to
+    :param dependent_task: The added dependent task
+    :param initiator: not used
+    """
+    # update task status with dependencies
+    task.update_status_with_dependent_statuses()
