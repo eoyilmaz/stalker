@@ -1718,7 +1718,41 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         """A helper method to create TimeLogs, this will ease creating TimeLog
         instances for task.
         """
-        raise NotImplementedError
+        # check if it is not a container task
+        if self.is_container:
+            raise ValueError(
+                '%(task)s (%(id)s) is a container task, and it is not allowed '
+                'to create TimeLogs for a container task' % {
+                    'task': self,
+                    'id': self.id
+                }
+            )
+
+        with db.session.no_autoflush:
+            WFD = Status.query.filter_by(code='WFD').first()
+            RTS = Status.query.filter_by(code='RTS').first()
+            WIP = Status.query.filter_by(code='WIP').first()
+            PREV = Status.query.filter_by(code='PREV').first()
+            HREV = Status.query.filter_by(code='HREV').first()
+            OH = Status.query.filter_by(code='OH').first()
+            STOP = Status.query.filter_by(code='STOP').first()
+            CMPL = Status.query.filter_by(code='CMPL').first()
+
+        # check status
+        if self.status in [WFD, PREV, OH, STOP, CMPL]:
+            raise StatusError(
+                '%(task)s is a %(status)s task, and it is not allowed to '
+                'create TimeLogs for a %(status)s task' % {
+                    'task': self.name,
+                    'status': self.status.code
+                }
+            )
+        elif self.status in [RTS, HREV]:
+            self.status = WIP
+
+        # update also the parent status
+        if self.parent:
+            self.parent.update_status_with_children_statuses()
 
     def request_review(self):
         """Creates and returns Review instances for each of the responsible of
@@ -1750,7 +1784,29 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         applicable to RTS and WIP tasks, any task with other statuses will
         raise a ValueError.
         """
-        raise NotImplementedError
+        # check if status is WIP
+        with db.session.no_autoflush:
+            WIP = Status.query.filter_by(code='WIP').first()
+            DREV = Status.query.filter_by(code='DREV').first()
+            OH = Status.query.filter_by(code='OH').first()
+
+        if self.status not in [WIP, DREV, OH]:
+            raise StatusError(
+                '%(task)s (%(id)s) is a %(status)s task, only WIP or DREV '
+                'tasks can be set to On Hold' % {
+                    'task': self.name,
+                    'id': self.id,
+                    'status': self.status.code
+                }
+            )
+        # update the status to OH
+        self.status = OH
+
+        # set the priority to 0
+        self.priority = 0
+
+        # no need to update the status of dependencies nor parents
+
 
     def stop(self):
         """Stops this task. It is nearly equivalent to deleting this task. But
@@ -1881,6 +1937,8 @@ group by "Statuses".code""" % self.id
             if self.status == RTS:
                 self.status = WFD
             elif self.status == WIP:
+                self.status = DREV
+            elif self.status == HREV:
                 self.status = DREV
             elif self.status == CMPL:
                 self.status = DREV
@@ -2216,7 +2274,8 @@ def update_task_date_values(task, removed_child, initiator):
 # *****************************************************************************
 @event.listens_for(Task.depends, 'set', propagate=True)
 def added_new_dependency(task, dependent_task, initiator):
-    """Runs when a task is appended to another task as dependency
+    """Runs when a task is appended to another task as dependency and it runs
+    after the dependent task is validated.
 
     :param task: The task that a dependent is added to
     :param dependent_task: The added dependent task

@@ -4538,7 +4538,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         # create dependency
         # make a task with STOP status
         self.test_task8.status = self.status_stop
-        self.assertEqual(self.test_task8.status, self.status_hrev)
+        self.assertEqual(self.test_task8.status, self.status_stop)
         self.test_task3.depends.append(self.test_task8)
         self.assertEqual(self.test_task3.status, self.status_rts)
 
@@ -4555,7 +4555,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.test_task8.status = self.status_cmpl
         self.assertEqual(self.test_task8.status, self.status_cmpl)
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task3.status, self.status_rts)
 
     # Leaf Tasks - dependency changes
     # WIP - DREV - PREV - HREV - OH - STOP - CMPL
@@ -4568,7 +4568,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.assertEqual(self.test_task3.status, self.status_wip)
         # create dependency
         self.assertRaises(
-            RuntimeError, self.test_task3.depends.append, self.test_task8
+            StatusError, self.test_task3.depends.append, self.test_task8
         )
 
     def test_leaf_PREV_task_dependency_can_not_be_updated(self):
@@ -4580,7 +4580,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.assertEqual(self.test_task3.status, self.status_prev)
         # create dependency
         self.assertRaises(
-            RuntimeError, self.test_task3.depends.append, self.test_task8
+            StatusError, self.test_task3.depends.append, self.test_task8
         )
 
     def test_leaf_HREV_task_dependency_can_not_be_updated(self):
@@ -4592,7 +4592,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.assertEqual(self.test_task3.status, self.status_hrev)
         # create dependency
         self.assertRaises(
-            RuntimeError, self.test_task3.depends.append, self.test_task8
+            StatusError, self.test_task3.depends.append, self.test_task8
         )
 
     def test_leaf_DREV_task_dependency_can_not_be_updated(self):
@@ -4604,7 +4604,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.assertEqual(self.test_task3.status, self.status_drev)
         # create dependency
         self.assertRaises(
-            RuntimeError, self.test_task3.depends.append, self.test_task8
+            StatusError, self.test_task3.depends.append, self.test_task8
         )
 
     def test_leaf_OH_task_dependency_can_not_be_updated(self):
@@ -4616,7 +4616,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.assertEqual(self.test_task3.status, self.status_oh)
         # create dependency
         self.assertRaises(
-            RuntimeError, self.test_task3.depends.append, self.test_task8
+            StatusError, self.test_task3.depends.append, self.test_task8
         )
 
     def test_leaf_STOP_task_dependency_can_not_be_updated(self):
@@ -4628,7 +4628,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.assertEqual(self.test_task3.status, self.status_stop)
         # create dependency
         self.assertRaises(
-            RuntimeError, self.test_task3.depends.append, self.test_task8
+            StatusError, self.test_task3.depends.append, self.test_task8
         )
 
     def test_leaf_CMPL_task_dependency_can_not_be_updated(self):
@@ -4640,7 +4640,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.assertEqual(self.test_task3.status, self.status_cmpl)
         # create dependency
         self.assertRaises(
-            RuntimeError, self.test_task3.depends.append, self.test_task8
+            StatusError, self.test_task3.depends.append, self.test_task8
         )
 
     # dependencies of containers
@@ -4829,7 +4829,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         """testing if the status of the RTS leaf task will be converted to WIP
         when create_time_log actions is used in an RTS task
         """
-        self.test_task9.status = self.status_wfd
+        self.test_task9.status = self.status_rts
         resource = self.test_task9.resources[0]
         start = datetime.datetime.now()
         end = datetime.datetime.now() + datetime.timedelta(hours=1)
@@ -4842,7 +4842,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         converted to WIP when create_time_log actions is used in an RTS task
         """
         self.test_task2.status = self.status_rts
-        self.test_task8.status = self.status_wfd
+        self.test_task8.status = self.status_rts
         resource = self.test_task8.resources[0]
         start = datetime.datetime.now()
         end = datetime.datetime.now() + datetime.timedelta(hours=1)
@@ -4855,7 +4855,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         """testing if RTS leaf task status will be converted to WIP when
         create_time_log actions is used in an RTS root task
         """
-        self.test_task3.status = self.status_wfd
+        self.test_task3.status = self.status_rts
         resource = self.test_task3.resources[0]
         start = datetime.datetime.now()
         end = datetime.datetime.now() + datetime.timedelta(hours=1)
@@ -5501,7 +5501,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         in a STOP leaf task
         """
         self.test_task3.status = self.status_stop
-        self.assertRaises(StatusError, self.test_task3.oh)
+        self.assertRaises(StatusError, self.test_task3.hold)
 
     # CMPL
     def test_hold_in_CMPL_leaf_task(self):
@@ -5509,7 +5509,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         in a CMPL leaf task
         """
         self.test_task3.status = self.status_cmpl
-        self.assertRaises(StatusError, self.test_task3.oh)
+        self.assertRaises(StatusError, self.test_task3.hold)
 
     # stop
     # WFD
