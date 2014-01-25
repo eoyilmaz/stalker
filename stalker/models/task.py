@@ -1810,17 +1810,53 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
     def stop(self):
         """Stops this task. It is nearly equivalent to deleting this task. But
-        this will at least preserve the TimeLogs entered for this task. Only
-        applicable to tasks with status WIP. You can use :meth:`.resume` to
-        resume the task. The only difference between :meth:`.hold` (other than
-        setting the task to different statuses) is the schedule info, while the
-        hold() method will preserve the schedule info, stop will set the
-        schedule info to the current effort. So if 2 days of effort has been
-        entered for a 4 days task, when stopped the task effort will be capped
-        to 2 days, thus TaskJuggler will not try to reserve any resource for
-        this task anymore.
+        this will at least preserve the TimeLogs entered for this task. It is
+        only possible to stop WIP tasks.
+
+        You can use :meth:`.resume` to resume the task.
+
+        The only difference between :meth:`.hold` (other than setting the task
+        to different statuses) is the schedule info, while the :meth:`.hold`
+        method will preserve the schedule info, stop() will set the schedule
+        info to the current effort.
+        
+        So if 2 days of effort has been entered for a 4 days task, when stopped
+        the task effort will be capped to 2 days, thus TaskJuggler will not try
+        to reserve any resource for this task anymore.
+
+        Also, STOP tasks will be ignored in dependency relations.
         """
-        raise NotImplementedError
+        
+        # check the status
+        with db.session.no_autoflush:
+            WIP = Status.query.filter_by(code='WIP').first()
+            DREV = Status.query.filter_by(code='DREV').first()
+            STOP = Status.query.filter_by(code='STOP').first()
+
+        if self.status not in [WIP, DREV, STOP]:
+            raise StatusError(
+                '%(task)s (id:%(id)s)is a %(status)s task and it is not possible'
+                'to stop a %(status)s task.' % {
+                    'task': self.name,
+                    'id': self.id,
+                    'status': self.status.code
+                }
+            )
+
+        # set the status
+        self.status = STOP
+
+        # clamp schedule values
+        self.schedule_timing, self.schedule_unit = \
+            self.least_meaningful_time_unit(self.total_logged_seconds)
+
+        # update parent statuses
+        if self.parent:
+            self.parent.update_status_with_children_statuses()
+
+        # update dependent task statuses
+        for dep in self.dependent_of:
+            dep.update_status_with_dependent_statuses()
 
     def resume(self):
         """Resumes the execution of this task by setting its status to RTS or
@@ -1828,7 +1864,31 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         will resume as WIP and if it doesn't then it will resume as RTS. Only
         applicable to Tasks with status OH.
         """
-        raise NotImplementedError
+        # check status
+        with db.session.no_autoflush:
+            WIP = Status.query.filter_by(code='WIP').first()
+            OH = Status.query.filter_by(code='OH').first()
+            STOP = Status.query.filter_by(code='STOP').first()
+
+        if self.status not in [OH, STOP]:
+            raise StatusError(
+                '%(task)s (id:%(id)s) is a %(status)s task, and it is not '
+                'suitable to be resumed, please supply an OH or STOP task' %
+                {
+                    'task': self.name,
+                    'id': self.id,
+                    'status': self.status.code
+                }
+            )
+        else:
+            # set to WIP
+            self.status = WIP
+
+        # now update the status with dependencies
+        self.update_status_with_dependent_statuses()
+
+        # and update parents statuses
+        self.update_status_with_children_statuses()
 
     def approve(self):
         """Approves the task and sets its status to CMPL.

@@ -5550,25 +5550,23 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.test_task8.status = self.status_rts
         TimeLog(
             task=self.test_task8,
-            resource=self.test_task8.resource[0],
+            resource=self.test_task8.resources[0],
             start=now,
             end=now + td(hours=1)
         )
         TimeLog(
             task=self.test_task8,
-            resource=self.test_task8.resource[0],
+            resource=self.test_task8.resources[0],
             start=now + td(hours=1),
             end=now + td(hours=2)
         )
         self.test_task8.status = self.status_wip
-
         self.test_task8.stop()
-
         self.assertEqual(self.test_task8.schedule_timing, 2)
         self.assertEqual(self.test_task8.schedule_unit, 'h')
 
     # WIP: Dependency Status: WFD -> RTS
-    def test_stop_in_WIP_leaf_task_status_from_WFD_to_RTS(self):
+    def test_stop_in_WIP_leaf_task_dependent_task_status_updated_from_WFD_to_RTS(self):
         """testing if the dependent task status updated from WFD to RTS when
         the stop action is used in a WIP leaf task
         """
@@ -5584,25 +5582,23 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
 
         TimeLog(
             task=self.test_task8,
-            resource=self.test_task8.resource[0],
+            resource=self.test_task8.resources[0],
             start=now,
             end=now + td(hours=1)
         )
         TimeLog(
             task=self.test_task8,
-            resource=self.test_task8.resource[0],
+            resource=self.test_task8.resources[0],
             start=now + td(hours=1),
             end=now + td(hours=2)
         )
         self.test_task8.status = self.status_wip
-
         self.test_task8.stop()
-
         self.assertEqual(self.test_task9.status, self.status_rts)
 
     # WIP: Dependency Status: DREV -> WIP
     def test_stop_in_WIP_leaf_task_status_from_DREV_to_WIP(self):
-        """testing if the dependent task status updated from WFD to RTS when
+        """testing if the dependent task status updated from DREV to WIP when
         the stop action is used in a WIP leaf task
         """
         # create a couple TimeLogs
@@ -5617,13 +5613,13 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
 
         TimeLog(
             task=self.test_task9,
-            resource=self.test_task9.resource[0],
+            resource=self.test_task9.resources[0],
             start=now,
             end=now + td(hours=1)
         )
         TimeLog(
             task=self.test_task8,
-            resource=self.test_task9.resource[0],
+            resource=self.test_task9.resources[0],
             start=now + td(hours=1),
             end=now + td(hours=2)
         )
@@ -5634,22 +5630,48 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
 
         TimeLog(
             task=self.test_task8,
-            resource=self.test_task8.resource[0],
+            resource=self.test_task8.resources[0],
+            start=now + td(hours=2),
+            end=now + td(hours=3)
+        )
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now + td(hours=4),
+            end=now + td(hours=5)
+        )
+
+        self.test_task8.status = self.status_wip
+        self.test_task8.stop()
+        self.assertEqual(self.test_task9.status, self.status_wip)
+
+    # WIP: parent statuses
+    def test_stop_in_DREV_leaf_task_check_parent_status(self):
+        """testing if the parent status is updated correctly when the stop
+        action is used in a DREV leaf task
+        """
+        # create a couple TimeLogs
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+
+        TimeLog(
+            task=self.test_task9,
+            resource=self.test_task9.resources[0],
             start=now,
             end=now + td(hours=1)
         )
         TimeLog(
             task=self.test_task8,
-            resource=self.test_task8.resource[0],
+            resource=self.test_task9.resources[0],
             start=now + td(hours=1),
             end=now + td(hours=2)
         )
 
-        self.test_task8.status = self.status_wip
-
-        self.test_task8.stop()
-
-        self.assertEqual(self.test_task9.status, self.status_wip)
+        self.test_task9.status = self.status_drev
+        self.test_task9.stop()
+        self.assertEqual(self.test_task9.status, self.status_stop)
+        self.assertEqual(self.test_asset1.status, self.status_cmpl)
 
     # PREV
     def test_stop_in_PREV_leaf_task(self):
@@ -5667,14 +5689,133 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.test_task3.status = self.status_hrev
         self.assertRaises(StatusError, self.test_task3.stop)
 
-    # DREV
-    def test_stop_in_DREV_leaf_task(self):
-        """testing if a StatusError will be raised when the stop action is used
-        in a DREV leaf task
+    # DREV: Status Test
+    def test_stop_in_DREV_leaf_task_status_is_updated_to_STOP(self):
+        """testing if the status will be set to STOP when the stop action is
+        used in a DREV leaf task
         """
         self.test_task3.status = self.status_drev
         self.test_task3.stop()
-        self.assertRaises(self.test_task3.status, self.status_stop)
+        self.assertEquals(self.test_task3.status, self.status_stop)
+
+    # DREV: Schedule Timing Test
+    def test_stop_in_DREV_leaf_task_schedule_values_are_clamped(self):
+        """testing if the schedule timing value will be clamped to the current
+        time logs when the stop action is used in a DREV leaf task
+        """
+        # create a couple TimeLogs
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+
+        self.test_task8.status = self.status_rts
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + td(hours=2)
+        )
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now + td(hours=2),
+            end=now + td(hours=4)
+        )
+        self.test_task8.status = self.status_drev
+        self.test_task8.stop()
+        self.assertEqual(self.test_task8.schedule_timing, 4)
+        self.assertEqual(self.test_task8.schedule_unit, 'h')
+
+    # DREV: parent statuses
+    def test_stop_in_DREV_leaf_task_parent_status(self):
+        """testing if the parent status is updated correctly when the stop
+        action is used in a DREV leaf task
+        """
+        # create a couple TimeLogs
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+
+        TimeLog(
+            task=self.test_task9,
+            resource=self.test_task9.resources[0],
+            start=now,
+            end=now + td(hours=1)
+        )
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task9.resources[0],
+            start=now + td(hours=1),
+            end=now + td(hours=2)
+        )
+
+        self.test_task9.status = self.status_wip
+        self.test_task9.stop()
+        self.assertEqual(self.test_task9.status, self.status_stop)
+        self.assertEqual(self.test_asset1.status, self.status_cmpl)
+
+    # DREV: Dependency Status: WFD -> RTS
+    def test_stop_in_DREV_leaf_task_dependent_task_status_updated_from_WFD_to_RTS(self):
+        """testing if the dependent task statuses are updated correctly when
+        the stop action is used in a DREV leaf task
+        """
+        # create a couple TimeLogs
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+
+        self.test_task9.status = self.status_rts
+        self.test_task8.status = self.status_rts
+
+        self.test_task9.depends = [self.test_task8]
+
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + td(hours=1)
+        )
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now + td(hours=1),
+            end=now + td(hours=2)
+        )
+        self.test_task8.status = self.status_wip
+        self.test_task8.stop()
+        self.assertEqual(self.test_task9.status, self.status_rts)
+
+    # DREV: Dependency Status: DREV -> WIP
+    def test_stop_in_DREV_leaf_task_dependent_task_status_updated_from_DREV_to_WIP(self):
+        """testing if the dependent task statuses are updated correctly when
+        the stop action is used in a DREV leaf task
+        """
+        # create a couple TimeLogs
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+
+        self.test_task9.status = self.status_rts
+        self.test_task8.status = self.status_rts
+
+        self.test_task9.depends = [self.test_task8]
+        self.test_task9.status = self.status_drev  # this will be set by an
+                                                   # action in normal run
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + td(hours=1)
+        )
+        TimeLog(
+            task=self.test_task8,
+            resource=self.test_task8.resources[0],
+            start=now + td(hours=1),
+            end=now + td(hours=2)
+        )
+        self.test_task8.status = self.status_wip
+        self.test_task8.stop()
+        self.assertEqual(self.test_task9.status, self.status_wip)
 
     # OH
     def test_stop_in_OH_leaf_task(self):
@@ -5691,7 +5832,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         """
         self.test_task3.status = self.status_stop
         self.test_task3.stop()
-        self.assertRaises(self.test_task3.status, self.status_stop)
+        self.assertEquals(self.test_task3.status, self.status_stop)
 
     # CMPL
     def test_stop_in_CMPL_leaf_task(self):
