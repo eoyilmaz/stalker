@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 from sqlalchemy import Column, Integer, ForeignKey, Table
-from sqlalchemy.orm import relationship, synonym, validates
+from sqlalchemy.orm import relationship, synonym, validates, reconstructor
 
 from stalker import ImageFormat
 from stalker.db.declarative import Base
@@ -219,6 +219,13 @@ class Shot(Task, CodeMixin):
 
         self._update_cut_info(cut_in, cut_duration, cut_out)
 
+    @reconstructor
+    def __init_on_load(self):
+        """set cut duration attribute
+        """
+        setattr(self, '_cut_duration', None)
+        self._update_cut_info(self._cut_in, None, self._cut_out)
+
     def __repr__(self):
         """the representation of the Shot
         """
@@ -357,12 +364,8 @@ class Shot(Task, CodeMixin):
 
     @property
     def cut_duration(self):
-        try:
-            if self._cut_duration is None:
-                self._update_cut_info(self._cutin, None, self._cut_out)
-        except AttributeError:
-            setattr(self, '_cut_duration', None)
-            self._update_cut_info(self._cut_in, None, self._cut_out)
+        if self._cut_duration is None:
+            self._update_cut_info(self._cutin, None, self._cut_out)
         return self._cut_duration
 
     @cut_duration.setter

@@ -2595,7 +2595,6 @@ class DatabaseModelsTester(unittest2.TestCase):
         asset1 = Asset(
             name='Char1',
             code='char1',
-            status_list=asset_status_list,
             type=char_asset_type,
             project=project1,
         )
@@ -2625,7 +2624,6 @@ class DatabaseModelsTester(unittest2.TestCase):
             name="Test Task",
             watchers=[user3],
             parent=asset1,
-            status_list=task_status_list,
             effort='5h',
             length='15h',
             bid='52h'
@@ -2635,20 +2633,17 @@ class DatabaseModelsTester(unittest2.TestCase):
             name='Child Task 1',
             resources=[user1, user2],
             parent=task1,
-            status_list=task_status_list
         )
 
         child_task2 = Task(
             name='Child Task 2',
             resources=[user1, user2],
             parent=task1,
-            status_list=task_status_list
         )
 
         task2 = Task(
             name='Another Task',
             project=project1,
-            status_list=task_status_list,
             resources=[user1]
         )
 
@@ -2682,14 +2677,32 @@ class DatabaseModelsTester(unittest2.TestCase):
         version1 = Version(
             task=task1
         )
+        db.session.add(version1)
+        db.session.commit()
 
         version2 = Version(
             task=task1
         )
+        db.session.add(version2)
+        db.session.commit()
 
         version3 = Version(
             task=task2
         )
+        db.session.add(version3)
+        db.session.commit()
+
+        version4 = Version(
+            task=task2
+        )
+        db.session.add(version4)
+        db.session.commit()
+
+        version4.inputs = [version2]
+        version3.inputs = [version2]
+        version2.inputs = [version1]
+        db.session.add(version1)
+        db.session.commit()
 
         # referenes
         ref1 = Link(
@@ -2708,7 +2721,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         db.session.add_all([
             task1, child_task1, child_task2, task2, time_log1,
             time_log2, time_log3, user1, user2, version1, version2, version3,
-            ref1, ref2
+            version4, ref1, ref2
         ])
         db.session.commit()
 
@@ -2774,6 +2787,9 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(schedule_model, task1_db.schedule_model)
         self.assertEqual(schedule_timing, task1_db.schedule_timing)
         self.assertEqual(schedule_unit, task1_db.schedule_unit)
+        self.assertEqual(version2.inputs, [version1])
+        self.assertEqual(version3.inputs, [version2])
+        self.assertEqual(version4.inputs, [version2])
 
         # delete tests
 
@@ -2814,6 +2830,9 @@ class DatabaseModelsTester(unittest2.TestCase):
         another_task_db = Task.query.get(id_)
         self.assertItemsEqual(resources, [user1])
         self.assertItemsEqual(resources, another_task_db.resources)
+
+        self.assertEqual(version3.inputs, [])
+        self.assertEqual(version4.inputs, [])
 
     def test_persistence_of_Review(self):
         """testing the persistence of Review
@@ -3359,7 +3378,6 @@ class DatabaseModelsTester(unittest2.TestCase):
         test_version = Version(
             name='version for task modeling',
             task=test_task,
-            version=10,
             take='MAIN',
             full_path='M:/Shows/Proj1/Seq1/Shots/SH001/Ligting'
             '/Proj1_Seq1_Sh001_MAIN_Lighting_v001.ma',
@@ -3374,6 +3392,18 @@ class DatabaseModelsTester(unittest2.TestCase):
 
         # now save it to the database
         db.session.add(test_version)
+        db.session.commit()
+
+        # create a new version
+        test_version_2 = Version(
+            name='version for task modeling',
+            task=test_task,
+            take='MAIN',
+            full_path='M:/Shows/Proj1/Seq1/Shots/SH001/Ligting'
+            '/Proj1_Seq1_Sh001_MAIN_Lighting_v001.ma',
+            inputs=[test_version]
+        )
+        db.session.add(test_version_2)
         db.session.commit()
 
         created_by = test_version.created_by
@@ -3416,4 +3446,9 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(version_number, test_version_db.version_number)
         self.assertEqual(task, test_version_db.task)
 
-        # TODO: add delete tests for the Version class
+        # try to delete version and expect the task, user and other versions
+        # to be intact
+        db.session.delete(test_version_db)
+        db.session.commit()
+
+        self.assertEqual(test_version_2.inputs, [])

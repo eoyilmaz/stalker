@@ -1975,7 +1975,7 @@ class TaskTester(unittest2.TestCase):
         child = Task(**self.kwargs)
         self.assertEqual(child.total_logged_seconds, 0)
         # create a TimeLog for that child
-        tlog1 = TimeLog(
+        TimeLog(
             task=child,
             resource=child.resources[0],
             start=now - td(hours=50),
@@ -2005,7 +2005,7 @@ class TaskTester(unittest2.TestCase):
         self.assertEqual(parent_task1.total_logged_seconds, 8 * 3600)
         self.assertEqual(parent_task2.total_logged_seconds, 18 * 3600)
 
-        book2 = TimeLog(
+        TimeLog(
             task=self.test_task,
             resource=self.test_task.resources[1],
             start=now,
@@ -2451,7 +2451,7 @@ class TaskTester(unittest2.TestCase):
         new_task = Task(**self.kwargs)
 
         # create a time_log of 2 hours
-        book1 = TimeLog(
+        TimeLog(
             task=new_task,
             start=now,
             duration=td(hours=2),
@@ -2470,7 +2470,7 @@ class TaskTester(unittest2.TestCase):
         new_task = Task(**self.kwargs)
 
         # create a time_log of 5 days
-        book1 = TimeLog(
+        TimeLog(
             task=new_task,
             start=now + td(hours=2),
             end=now + td(days=5),
@@ -2484,7 +2484,7 @@ class TaskTester(unittest2.TestCase):
         )
 
         # add another 2 hours
-        book2 = TimeLog(
+        TimeLog(
             task=new_task,
             start=now + td(days=5),
             duration=td(hours=2),
@@ -2646,8 +2646,8 @@ class TaskTester(unittest2.TestCase):
     def test_inequality(self):
         """testing the inequality operator
         """
-        entity1 = Entity(**self.kwargs)
-        task1 = Task(**self.kwargs)
+        Entity(**self.kwargs)
+        Task(**self.kwargs)
 
         entity1 = Entity(**self.kwargs)
         task0 = Task(**self.kwargs)

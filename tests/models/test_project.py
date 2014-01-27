@@ -165,7 +165,7 @@ class ProjectTestCase(unittest2.TestCase):
             ],
         )
 
-        self.test_imageFormat = ImageFormat(
+        self.test_image_format = ImageFormat(
             name="HD",
             width=1920,
             height=1080,
@@ -217,7 +217,7 @@ class ProjectTestCase(unittest2.TestCase):
             'code': 'tp',
             "description": "This is a project object for testing purposes",
             "lead": self.test_lead,
-            "image_format": self.test_imageFormat,
+            "image_format": self.test_image_format,
             "fps": 25,
             "type": self.test_project_type,
             "structure": self.test_project_structure,
@@ -790,7 +790,7 @@ class ProjectTestCase(unittest2.TestCase):
             self.assertRaises(TypeError, Project, **self.kwargs)
 
         # and a proper image format
-        self.kwargs["image_format"] = self.test_imageFormat
+        self.kwargs["image_format"] = self.test_image_format
         new_project = Project(**self.kwargs)
         self.assertIsInstance(new_project, Project)
 
@@ -810,7 +810,7 @@ class ProjectTestCase(unittest2.TestCase):
             )
 
         # and a proper image format
-        self.test_project.image_format = self.test_imageFormat
+        self.test_project.image_format = self.test_image_format
 
     def test_image_format_attribute_works_properly(self):
         """testing if the image_format attribute is working properly
@@ -1655,7 +1655,7 @@ class ProjectTestCase(unittest2.TestCase):
         # create some time logs
         from stalker import TimeLog
 
-        tlog1 = TimeLog(
+        TimeLog(
             task=self.test_task1,
             resource=self.test_task1.resources[0],
             start=datetime.datetime(2013, 8, 1, 1, 0),
@@ -1664,7 +1664,7 @@ class ProjectTestCase(unittest2.TestCase):
         self.assertEqual(self.test_project.total_logged_seconds, 3600)
 
         # add more time logs
-        tlog2 = TimeLog(
+        TimeLog(
             task=self.test_seq1,
             resource=self.test_seq1.resources[0],
             start=datetime.datetime(2013, 8, 1, 2, 0),
@@ -1673,7 +1673,7 @@ class ProjectTestCase(unittest2.TestCase):
         self.assertEqual(self.test_project.total_logged_seconds, 7200)
 
         # create more deeper time logs
-        tlog3 = TimeLog(
+        TimeLog(
             task=self.test_task10,
             resource=self.test_task10.resources[0],
             start=datetime.datetime(2013, 8, 1, 3, 0),
@@ -1682,7 +1682,7 @@ class ProjectTestCase(unittest2.TestCase):
         self.assertEqual(self.test_project.total_logged_seconds, 18000)
 
         # create a time log for one asset
-        tlog4 = TimeLog(
+        TimeLog(
             task=self.test_asset1,
             resource=self.test_asset1.resources[0],
             start=datetime.datetime(2013, 8, 1, 6, 0),
@@ -1759,7 +1759,6 @@ class ProjectTestCase(unittest2.TestCase):
 
         self.assertEqual(self.test_project.schedule_seconds, 44 * 3600)
 
-
     def test_percent_complete_attribute_is_read_only(self):
         """testing if the percent_complete is a read-only attribute
         """
@@ -1788,7 +1787,7 @@ class ProjectTestCase(unittest2.TestCase):
         # create some time logs
         from stalker import TimeLog
 
-        tlog1 = TimeLog(
+        TimeLog(
             task=self.test_task1,
             resource=self.test_task1.resources[0],
             start=datetime.datetime(2013, 8, 1, 1, 0),
@@ -1826,14 +1825,7 @@ class ProjectTicketsTestCase(unittest2.TestCase):
     def setUp(self):
         """setup the test
         """
-        if db.session:
-            db.session.close()
-        self.TEST_DATABASE_URI = "sqlite:///:memory:"
-
-        db.setup({
-            "sqlalchemy.url": self.TEST_DATABASE_URI,
-            "sqlalchemy.echo": False,
-        })
+        db.setup()
         db.init()  # for tickets
 
         # create test objects
@@ -1937,7 +1929,7 @@ class ProjectTicketsTestCase(unittest2.TestCase):
             ],
         )
 
-        self.test_imageFormat = ImageFormat(
+        self.test_image_format = ImageFormat(
             name="HD",
             width=1920,
             height=1080,
@@ -1989,7 +1981,7 @@ class ProjectTicketsTestCase(unittest2.TestCase):
             'code': 'tp',
             "description": "This is a project object for testing purposes",
             "lead": self.test_lead,
-            "image_format": self.test_imageFormat,
+            "image_format": self.test_image_format,
             "fps": 25,
             "type": self.test_project_type,
             "structure": self.test_project_structure,
@@ -2167,8 +2159,7 @@ class ProjectTicketsTestCase(unittest2.TestCase):
         )
 
         # close a couple of them
-        from stalker.models.ticket import (FIXED, CANTFIX, WONTFIX, DUPLICATE,
-                                           WORKSFORME, INVALID)
+        from stalker.models.ticket import (FIXED, CANTFIX, INVALID)
 
         self.test_ticket1.resolve(self.test_user1, FIXED)
         self.test_ticket2.resolve(self.test_user1, INVALID)
