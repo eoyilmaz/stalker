@@ -1233,7 +1233,8 @@ class ScheduleMixin(object):
         # minute so return in minutes
         return seconds // minutes, 'min'
 
-    def to_seconds(self, timing, unit, model):
+    @classmethod
+    def to_seconds(cls, timing, unit, model):
         """converts the schedule values to seconds, depending on to the
         schedule_model the value will differ. So if the schedule_model is
         'effort' or 'length' then the schedule_time and schedule_unit values

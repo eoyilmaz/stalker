@@ -19,12 +19,12 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import tempfile
-import datetime
 import unittest2
+import datetime
 
 from stalker import db
 from stalker import (Task, Project, User, Status, StatusList, Repository,
-                     Structure, Review, TimeLog)
+                     Structure, Review)
 
 
 class ReviewTestCase(unittest2.TestCase):
@@ -35,6 +35,7 @@ class ReviewTestCase(unittest2.TestCase):
         """set up the test
         """
         db.setup()
+        db.init()
 
         self.user1 = User(
             name='Test User 1',
@@ -42,29 +43,37 @@ class ReviewTestCase(unittest2.TestCase):
             email='test1@user.com',
             password='secret'
         )
+        db.session.add(self.user1)
+
         self.user2 = User(
             name='Test User 2',
             login='test_user2',
             email='test2@user.com',
             password='secret'
         )
+        db.session.add(self.user2)
+
         self.user3 = User(
             name='Test User 2',
             login='test_user3',
             email='test3@user.com',
             password='secret'
         )
-
-        self.status_new = Status(name='New', code='NEW')
-        self.status_rts = Status(name='Ready To Start', code='RTS')
-        self.status_wip = Status(name='Work In Progress', code='WIP')
-        self.status_prev = Status(name='Pending Review', code='PREV')
-        self.status_hrev = Status(name='Has Review', code='HREV')
-        self.status_cmpl = Status(name='Complete', code='CMPL')
+        db.session.add(self.user3)
 
         # Review Statuses
-        self.status_app = Status(name='Approved', code='APP')
-        self.status_rrev = Status(name='Request Review', code='RREV')
+        self.status_new = Status.query.filter_by(code='NEW').first()
+        self.status_rrev = Status.query.filter_by(code='RREV').first()
+        self.status_app = Status.query.filter_by(code='APP').first()
+
+        # Task Statuses
+        self.status_wfd = Status.query.filter_by(code='WFD').first()
+        self.status_rts = Status.query.filter_by(code='RTS').first()
+        self.status_wip = Status.query.filter_by(code='WIP').first()
+        self.status_prev = Status.query.filter_by(code='PREV').first()
+        self.status_hrev = Status.query.filter_by(code='HREV').first()
+        self.status_drev = Status.query.filter_by(code='DREV').first()
+        self.status_cmpl = Status.query.filter_by(code='CMPL').first()
 
         self.project_status_list = StatusList(
             target_entity_type='Project',
@@ -72,21 +81,7 @@ class ReviewTestCase(unittest2.TestCase):
                 self.status_new, self.status_wip, self.status_cmpl
             ]
         )
-
-        self.task_status_list = StatusList(
-            target_entity_type='Task',
-            statuses=[
-                self.status_new, self.status_rts, self.status_wip,
-                self.status_prev, self.status_hrev, self.status_cmpl
-            ]
-        )
-
-        self.review_status_list = StatusList(
-            target_entity_type='Review',
-            statuses=[
-                self.status_new, self.status_rrev, self.status_app
-            ]
-        )
+        db.session.add(self.project_status_list)
 
         self.temp_path = tempfile.mkdtemp()
         self.repo = Repository(
@@ -95,10 +90,12 @@ class ReviewTestCase(unittest2.TestCase):
             windows_path=self.temp_path,
             osx_path=self.temp_path
         )
+        db.session.add(self.repo)
 
         self.structure = Structure(
             name='Test Project Structure'
         )
+        db.session.add(self.structure)
 
         self.project = Project(
             name='Test Project',
@@ -107,18 +104,37 @@ class ReviewTestCase(unittest2.TestCase):
             status_list=self.project_status_list,
             repository=self.repo
         )
+        db.session.add(self.project)
 
-        self.task = Task(
-            name='Test Task',
+        self.task1 = Task(
+            name='Test Task 1',
             project=self.project,
-            status_list=self.task_status_list
+            resources=[self.user1]
         )
+        db.session.add(self.task1)
+
+        self.task2 = Task(
+            name='Test Task 2',
+            project=self.project
+        )
+        db.session.add(self.task2)
+
+        self.task3 = Task(
+            name='Test Task 3',
+            parent=self.task2,
+            resources=[self.user1]
+        )
+        db.session.add(self.task3)
 
         self.kwargs = {
-            'task': self.task,
+            'task': self.task1,
             'reviewer': self.user1
         }
-        self.review = Review(**self.kwargs)
+        #self.review = Review(**self.kwargs)
+        #db.session.add(self.review)
+
+        # add everything to the db
+        db.session.commit()
 
     def tearDown(self):
         """clean up test
@@ -145,11 +161,18 @@ class ReviewTestCase(unittest2.TestCase):
         self.kwargs['task'] = 'not a Task instance'
         self.assertRaises(TypeError, Review, **self.kwargs)
 
-    def test_task_attribute_is_read_only(self):
-        """testing if a the task attribute is read only
-        """
-        self.assertRaises(AttributeError, setattr, self.review, 'task',
-                          self.task)
+    # def test_task_attribute_is_read_only(self):
+    #     """testing if a the task attribute is read only
+    #     """
+    #     now = datetime.datetime.now()
+    #     self.task1.create_time_log(
+    #         resource=self.task1.resources[0],
+    #         start=now,
+    #         end=now + datetime.timedelta(hours=1)
+    #     )
+    #     reviews = self.task1.request_review()
+    #     review = reviews[0]
+    #     self.assertRaises(AttributeError, setattr, review, 'task', self.task1)
 
     def test_task_argument_is_not_a_leaf_task(self):
         """testing if a ValueError will be raised when the task given in task
@@ -157,13 +180,11 @@ class ReviewTestCase(unittest2.TestCase):
         """
         task1 = Task(
             name='Task1',
-            project=self.project,
-            status_list=self.task_status_list
+            project=self.project
         )
         task2 = Task(
             name='Task2',
-            parent=task1,
-            status_list=self.task_status_list
+            parent=task1
         )
         self.kwargs['task'] = task1
         self.assertRaises(ValueError, Review, **self.kwargs)
@@ -172,124 +193,71 @@ class ReviewTestCase(unittest2.TestCase):
         """testing if the task argument value is passed to the task argument
         properly
         """
-        self.assertEqual(self.review.task, self.task)
+        now = datetime.datetime.now()
+        self.task1.create_time_log(
+            resource=self.task1.resources[0],
+            start=now,
+            end=now + datetime.timedelta(hours=1)
+        )
+        reviews = self.task1.request_review()
+        self.assertEqual(reviews[0].task, self.task1)
 
     def test_auto_name_is_true(self):
         """testing if review instances are named automatically
         """
         self.assertTrue(Review.__auto_name__)
 
-    def test_task_argument_schedule_timing_values_are_clipped_and_extended_with_Review_schedule_info_if_the_review_is_rrev(self):
-        """testing if the task given with the task argument schedule timing
-        values are capped to the current total logged seconds and then it is
-        extended with the review timing values when the review.status is RREV
-        """
-        task1 = Task(
-            name='Test Task 2',
-            project=self.project,
-            status_list=self.task_status_list,
-            schedule_timing=2,
-            schedule_unit='d',
-            schedule_model='effort',
-            resources=[self.user1]
-        )
-
-        dt = datetime.datetime
-        td = datetime.timedelta
-
-        # create some time logs
-        tlog1 = TimeLog(
-            task=task1,
-            resource=self.user1,
-            start=dt.now(),
-            end=dt.now() + td(hours=5)
-        )
-
-        # now create a review for that task
-        rev1 = Review(
-            task=task1,
-            schedule_timing=1,
-            schedule_unit='h'
-        )
-
-        # expect the schedule_unit of the task to be hours
-        self.assertEqual(task1.schedule_unit, 'h')
-
-        # and the schedule_timing of 6
-        self.assertEqual(task1.schedule_timing, 6)
-
-        # create another review with 15 minutes of schedule timing
-        rev2 = Review(
-            task=task1,
-            schedule_timing=15,
-            schedule_unit='min'
-        )
-
-        # and expect the schedule_unit to be converted to minutes
-        self.assertEqual(task1.schedule_unit, 'min')
-
-        # and the schedule_timing of 375
-        self.assertEqual(task1.schedule_timing, 315)
-
-        rev3 = Review(
-            task=task1,
-            schedule_timing=120,
-            schedule_unit='min'
-        )
-        # and expect the schedule_unit to be converted to minutes
-        self.assertEqual(task1.schedule_unit, 'h')
-
-        # and the schedule_timing of 375
-        self.assertEqual(task1.schedule_timing, 7)
-
     def test_status_is_new_for_a_newly_created_review_instance(self):
         """testing if the status is NEW for a newly created review instance
         """
         review = Review(**self.kwargs)
-        self.assertEqual(review.status == self.status_new)
+        self.assertEqual(review.status, self.status_new)
 
-    def test_revision_number_attribute_is_a_read_only_attribute(self):
-        """testing if the revision_number attribute is a read only attribute
+    def test_review_number_attribute_is_a_read_only_attribute(self):
+        """testing if the review_number attribute is a read only attribute
         """
         review = Review(**self.kwargs)
         self.assertRaises(
-            AttributeError, setattr, review, 'revision_number', 2
+            AttributeError, setattr, review, 'review_number', 2
         )
 
-    def test_revision_number_attribute_is_initialized_to_the_task_revision_number_plus_1(self):
-        """testing if the revision_number attribute is initialized with
-        task.revision_number + 1
+    def test_review_number_attribute_is_initialized_to_the_task_review_number_plus_1(self):
+        """testing if the review_number attribute is initialized with
+        task.review_number + 1
         """
         review = Review(**self.kwargs)
-        self.assertEqual(
-            self.task.revision_number,
-            review.revision_number
-        )
+        self.assertEqual(1, review.review_number)
 
-    def test_revision_number_for_multiple_responsible_task_is_equal_to_each_other(self):
-        """testing if the review.revision_number attribute for each review
+    def test_review_number_for_multiple_responsible_task_is_equal_to_each_other(self):
+        """testing if the review.review_number attribute for each review
         instance created for a task with multiple responsible are equal to each
         other
         """
-        self.task.responsible = [self.user1, self.user2, self.user3]
-        revisions = self.task.request_revision()
-        expected_revision_number = self.task.revision_number + 1
+        self.task1.responsible = [self.user1, self.user2, self.user3]
+        now = datetime.datetime.now()
+        self.task1.create_time_log(
+            resource=self.task1.resources[0],
+            start=now,
+            end=now + datetime.timedelta(hours=1)
+        )
+        reviews = self.task1.request_review()
+        expected_review_number = self.task1.review_number + 1
 
-        self.assertEqual(3, len(revisions))
+        self.assertEqual(3, len(reviews))
 
         self.assertEqual(
-            expected_revision_number,
-            revisions[0].revision_number
+            expected_review_number,
+            reviews[0].review_number
         )
 
         self.assertEqual(
-            expected_revision_number,
-            revisions[1].revision_number
+            expected_review_number,
+            reviews[1].review_number
         )
 
         self.assertEqual(
-            expected_revision_number,
-            revisions[2].revision_number
+            expected_review_number,
+            reviews[2].review_number
         )
 
     def test_reviewer_argument_is_skipped(self):
@@ -331,7 +299,7 @@ class ReviewTestCase(unittest2.TestCase):
         """testing if it is possible to use some other user which is not in the
         Task.responsible list as the reviewer
         """
-        self.task.responsible = [self.user1]
+        self.task1.responsible = [self.user1]
         self.kwargs['reviewer'] = self.user2
         review = Review(**self.kwargs)
         self.assertEqual(review.reviewer, self.user2)
@@ -340,7 +308,7 @@ class ReviewTestCase(unittest2.TestCase):
         """testing if it is possible to use some other user which is not in the
         Task.responsible list as the reviewer
         """
-        self.task.responsible = [self.user1]
+        self.task1.responsible = [self.user1]
         self.kwargs['reviewer'] = self.user1
         review = Review(**self.kwargs)
         review.reviewer = self.user2
@@ -350,7 +318,7 @@ class ReviewTestCase(unittest2.TestCase):
         """testing if the reviewer argument value is correctly passed to
         reviewer attribute
         """
-        self.task.responsible = [self.user1]
+        self.task1.responsible = [self.user1]
         self.kwargs['reviewer'] = self.user1
         review = Review(**self.kwargs)
         self.assertEqual(
@@ -361,7 +329,7 @@ class ReviewTestCase(unittest2.TestCase):
     def test_reviewer_attribute_is_working_properly(self):
         """testing if the reviewer attribute is working properly
         """
-        self.task.responsible = [self.user1, self.user2]
+        self.task1.responsible = [self.user1, self.user2]
         self.kwargs['reviewer'] = self.user1
         review = Review(**self.kwargs)
         review.reviewer = self.user2
@@ -377,158 +345,283 @@ class ReviewTestCase(unittest2.TestCase):
         """testing if the Review.approve() method will update the task status
         correctly for a task with only one responsible
         """
-        self.task.responsible = [self.user1]
+        self.task1.responsible = [self.user1]
         self.kwargs['reviewer'] = self.user1
         self.assertNotEqual(
             self.status_cmpl,
-            self.task.status
+            self.task1.status
         )
         review = Review(**self.kwargs)
         review.approve()
         self.assertEqual(
             self.status_cmpl,
-            self.task.status
+            self.task1.status
         )
 
     def test_approve_method_updates_task_status_correctly_for_a_multi_responsible_task_when_all_approve(self):
         """testing if the Review.approve() method will update the task status
         correctly for a task with multiple responsible
         """
-        self.task.responsible = [self.user1, self.user2]
-        self.assertNotEqual(
-            self.status_cmpl,
-            self.task.status
+        self.task1.responsible = [self.user1, self.user2]
+
+        now = datetime.datetime.now()
+        self.task1.create_time_log(
+            resource=self.user1,
+            start=now,
+            end=now + datetime.timedelta(hours=1)
         )
 
-        # first reviewer
-        self.kwargs['reviewer'] = self.user1
-        review1 = Review(**self.kwargs)
+        reviews = self.task1.request_review()
+        review1 = reviews[0]
+        review2 = reviews[1]
+
         review1.approve()
         # still pending review
         self.assertEqual(
             self.status_prev,
-            self.task.status
+            self.task1.status
         )
 
         # first reviewer
-        self.kwargs['reviewer'] = self.user2
-        review2 = Review(**self.kwargs)
         review2.approve()
         self.assertEqual(
             self.status_cmpl,
-            self.task.status
+            self.task1.status
         )
 
     def test_approve_method_updates_task_parent_status(self):
         """testing if approve method will also update the task parent status
         """
-        self.fail('test is not implemented yet')
+        self.task3.status = self.status_rts
+        now = datetime.datetime.now()
+        td = datetime.timedelta
+        self.task3.create_time_log(
+            resource=self.task3.resources[0],
+            start=now,
+            end=now + td(hours=1)
+        )
+
+        reviews = self.task3.request_review()
+        self.assertEqual(
+            self.task3.status, self.status_prev
+        )
+
+        review1 = reviews[0]
+        review1.approve()
+
+        self.assertEqual(
+            self.task3.status, self.status_cmpl
+        )
+
+        self.assertEqual(
+            self.task2.status, self.status_cmpl
+        )
 
     def test_approve_method_updates_task_status_correctly_for_a_multi_responsible_task_when_one_approve(self):
         """testing if the Review.approve() method will update the task status
         correctly for a task with multiple responsible
         """
-        self.task.responsible = [self.user1, self.user2]
-        self.assertNotEqual(
-            self.status_cmpl,
-            self.task.status
+        self.task1.responsible = [self.user1, self.user2]
+        now = datetime.datetime.now()
+        td = datetime.timedelta
+        self.task1.create_time_log(
+            resource=self.task1.resources[0],
+            start=now,
+            end=now + td(hours=1)
         )
 
-        # first reviewer requests a revision
-        self.kwargs['reviewer'] = self.user1
-        review1 = Review(**self.kwargs)
+        reviews = self.task1.request_review()
+        review1 = reviews[0]
+        review2 = reviews[1]
+
         review1.request_revision()
         # one requst review should be enough to set the status to hrev,
         # note that this is another tests duty to check
         self.assertEqual(
-            self.status_hrev,
-            self.task.status
+            self.status_prev,
+            self.task1.status
         )
 
         # first reviewer
-        self.kwargs['reviewer'] = self.user2
-        review2 = Review(**self.kwargs)
         review2.approve()
         self.assertEqual(
             self.status_hrev,
-            self.task.status
+            self.task1.status
         )
 
     def test_request_revision_method_updates_task_status_correctly_for_a_single_responsible_task(self):
-        """testing if the Review.request_revision() method will update the
-        task status correctly for a Task with only one responsible
+        """testing if the Review.request_revision() method will update the task
+        status correctly to HREV for a Task with only one responsible
         """
-        self.task.responsible = [self.user1]
-        self.kwargs['reviewer'] = self.user1
-        self.assertNotEqual(
-            self.status_cmpl,
-            self.task.status
+        self.task1.responsible = [self.user1]
+        now = datetime.datetime.now()
+        self.task1.create_time_log(
+            resource=self.task1.resources[0],
+            start=now,
+            end=now + datetime.timedelta(hours=1)
         )
-        review = Review(**self.kwargs)
+
+        reviews = self.task1.request_review()
+        review = reviews[0]
         review.request_revision()
         self.assertEqual(
-            self.status_cmpl,
-            self.task.status
+            self.status_hrev,
+            self.task1.status
         )
 
     def test_request_revision_method_updates_task_status_correctly_for_a_multi_responsible_task_when_one_request_revision(self):
         """testing if the Review.request_revision() method will update the
         task status correctly for a Task with multiple responsible
         """
-        self.task.responsible = [self.user1, self.user2]
-        self.assertNotEqual(
-            self.status_cmpl,
-            self.task.status
+        self.task1.responsible = [self.user1, self.user2]
+        now = datetime.datetime.now()
+        self.task1.create_time_log(
+            resource=self.task1.resources[0],
+            start=now,
+            end=now + datetime.timedelta(hours=1)
         )
 
         # first reviewer requests a revision
-        self.kwargs['reviewer'] = self.user1
-        review1 = Review(**self.kwargs)
+        reviews = self.task1.request_review()
+
+        review1 = reviews[0]
+        review2 = reviews[1]
+
         review1.approve()
         self.assertEqual(
             self.status_prev,
-            self.task.status
+            self.task1.status
         )
 
-        # first reviewer
-        self.kwargs['reviewer'] = self.user2
-        review2 = Review(**self.kwargs)
         review2.request_revision()
         self.assertEqual(
             self.status_hrev,
-            self.task.status
+            self.task1.status
         )
 
     def test_request_revision_method_updates_task_status_correctly_for_a_multi_responsible_task_when_all_request_revision(self):
         """testing if the Review.request_revision() method will update the
         task status correctly for a Task with multiple responsible
         """
-        self.task.responsible = [self.user1, self.user2]
-        self.assertNotEqual(
-            self.status_cmpl,
-            self.task.status
+        self.task1.responsible = [self.user1, self.user2]
+        now = datetime.datetime.now()
+        self.task1.create_time_log(
+            resource=self.task1.resources[0],
+            start=now,
+            end=now + datetime.timedelta(hours=1)
         )
 
         # first reviewer requests a revision
-        self.kwargs['reviewer'] = self.user1
-        review1 = Review(**self.kwargs)
+        reviews = self.task1.request_review()
+
+        review1 = reviews[0]
+        review2 = reviews[1]
+
         review1.request_revision()
         self.assertEqual(
-            self.status_hrev,
-            self.task.status
+            self.status_prev,
+            self.task1.status
         )
 
         # first reviewer
-        self.kwargs['reviewer'] = self.user2
-        review2 = Review(**self.kwargs)
         review2.request_revision()
         self.assertEqual(
             self.status_hrev,
-            self.task.status
+            self.task1.status
         )
 
-    def test_request_revision_method_updates_parent_task_status(self):
-        """testing if the request_revision method also updates the task parent
-        statuses
+    def test_request_revision_method_updates_task_timing_correctly_for_a_multi_responsible_task_when_all_request_revision(self):
+        """testing if the Review.request_revision() method will update the task
+        timing values correctly for a Task with multiple responsible
         """
-        self.fail('test is not implemented yet')
+        self.task1.responsible = [self.user1, self.user2]
+        self.assertEqual(
+            self.status_rts,
+            self.task1.status
+        )
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+        # create 1 hour time log
+        self.task1.create_time_log(
+            resource=self.user1,
+            start=now,
+            end=now + td(hours=1)
+        )
+
+        # first reviewer requests a revision
+        reviews = self.task1.request_review()
+
+        self.assertEqual(len(reviews), 2)
+
+        review1 = reviews[0]
+        review2 = reviews[1]
+
+        review1.request_revision(
+            schedule_timing=2,
+            schedule_unit='h',
+            description='do some 2 hours extra work'
+        )
+        self.assertEqual(
+            self.status_prev,
+            self.task1.status
+        )
+
+        # first reviewer
+        review2.request_revision(
+            schedule_timing=5,
+            schedule_unit='h',
+            description='do some 5 hours extra work'
+        )
+
+        self.assertEqual(
+            self.status_hrev,
+            self.task1.status
+        )
+
+        # check the timing values
+        self.assertEqual(self.task1.schedule_timing, 8)
+        self.assertEqual(self.task1.schedule_unit, 'h')
+
+    def test_review_set_property_return_all_the_revision_instances_with_same_review_number(self):
+        """testing if review_set property returns all the Review instances of
+        the same task with the same review_number
+        """
+        self.task1.responsible = [self.user1, self.user2, self.user3]
+        now = datetime.datetime.now()
+        self.task1.create_time_log(
+            resource=self.user1,
+            start=now,
+            end=now + datetime.timedelta(hours=1)
+        )
+        self.task1.status = self.status_wip
+        reviews = self.task1.request_review()
+        review1 = reviews[0]
+        review2 = reviews[1]
+        review3 = reviews[2]
+
+        self.assertEqual(review1.review_number, 1)
+        self.assertEqual(review2.review_number, 1)
+        self.assertEqual(review3.review_number, 1)
+        self.task1.approve()
+
+        review4 = self.task1.request_revision(reviewer=self.user1)
+
+        self.task1.status = self.status_wip
+        self.assertEqual(review4.review_number, 2)
+
+        # enter new time log to turn it into WIP
+        self.task1.create_time_log(
+            resource=self.user1,
+            start=now + datetime.timedelta(hours=1),
+            end=now + datetime.timedelta(hours=2)
+        )
+
+        review_set2 = self.task1.request_review()
+        review5 = review_set2[0]
+        review6 = review_set2[1]
+        review7 = review_set2[2]
+
+        self.assertEqual(review5.review_number, 3)
+        self.assertEqual(review6.review_number, 3)
+        self.assertEqual(review7.review_number, 3)

@@ -4012,7 +4012,7 @@ class TaskTester(unittest2.TestCase):
         there are dependencies
         """
         # try to trick it
-        self.kwargs['status'] = self.status_cmpl
+        self.kwargs['status'] = self.status_cmpl  # this will be ignored
         new_task = Task(**self.kwargs)
         self.assertEqual(
             new_task.status, self.status_wfd
@@ -4029,6 +4029,17 @@ class TaskTester(unittest2.TestCase):
         self.assertEqual(
             new_task.status, self.status_rts
         )
+
+    def test_review_number_attribute_is_read_only(self):
+        """testing if the review_number attribute is read-only
+        """
+        self.assertRaises(AttributeError, setattr,
+                          self.test_task, 'review_number', 12)
+
+    def test_review_number_attribute_initializes_with_0(self):
+        """testing if the review_number attribute initializes to 0
+        """
+        self.assertEqual(self.test_task.review_number, 0)
 
 
 class TaskStatusWorkflowTestCase(unittest2.TestCase):
@@ -4133,6 +4144,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
             project=self.test_project1,
             status_list=self.test_task_statuses,
             resources=[self.test_user1, self.test_user2],
+            responsible=[self.test_user1, self.test_user2],
             start=datetime.datetime(2013, 6, 20, 0, 0),
             end=datetime.datetime(2013, 6, 30, 0, 0),
             schedule_timing=10,
@@ -4956,6 +4968,30 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.assertRaises(ValueError, self.test_task2.create_time_log,
                           resource=None, start=start, end=end)
 
+    def test_create_time_log_is_creating_time_logs(self):
+        """testing if create_time_log action is really creating some time logs
+        """
+        # initial condition
+        self.assertEqual(len(self.test_task3.time_logs), 0)
+
+        now = datetime.datetime.now()
+        self.test_task3.create_time_log(
+            resource=self.test_task3.resources[0],
+            start=now,
+            end=now + datetime.timedelta(hours=1)
+        )
+        self.assertEqual(len(self.test_task3.time_logs), 1)
+        self.assertEqual(self.test_task3.total_logged_seconds, 3600)
+
+        now = datetime.datetime.now()
+        self.test_task3.create_time_log(
+            resource=self.test_task3.resources[0],
+            start=now + datetime.timedelta(hours=1),
+            end=now + datetime.timedelta(hours=2)
+        )
+        self.assertEqual(len(self.test_task3.time_logs), 2)
+        self.assertEqual(self.test_task3.total_logged_seconds, 7200)
+
     # request_review
     # WFD
     def test_request_review_in_WFD_leaf_task(self):
@@ -4994,6 +5030,45 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.assertEqual(len(reviews), 2)
         self.assertIsInstance(reviews[0], Review)
         self.assertIsInstance(reviews[1], Review)
+
+    # WIP: review instances review_number is correct
+    def test_request_review_in_WIP_leaf_task_review_instances_review_number(self):
+        """testing if the review_number attribute of the created Reviews are
+        correctly set
+        """
+        self.test_task3.responsible = [self.test_user1, self.test_user2]
+        self.test_task3.status = self.status_wip
+
+        # request a review
+        reviews = self.test_task3.request_review()
+        review1 = reviews[0]
+        review2 = reviews[1]
+        self.assertEqual(review1.review_number, 1)
+        self.assertEqual(review2.review_number, 1)
+
+        # finalize reviews
+        review1.approve()
+        review2.approve()
+
+        # request a revision
+        review3 = self.test_task3.request_revision(
+            reviewer=self.test_user1,
+            description='some description',
+            schedule_timing=1,
+            schedule_unit='d'
+        )
+
+        # the new_review.revision number still should be 1
+        self.assertEqual(
+            review3.review_number, 2
+        )
+
+        # and then ask a review again
+        self.test_task3.status = self.status_wip
+
+        reviews = self.test_task3.request_review()
+        self.assertEqual(reviews[0].review_number, 3)
+        self.assertEqual(reviews[1].review_number, 3)
 
     # PREV
     def test_request_review_in_PREV_leaf_task(self):
@@ -5088,14 +5163,14 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         )
         self.assertEqual(self.test_task3.status, self.status_hrev)
 
-    #PREV: Timing is extended
+    #PREV: Schedule info update
     def test_request_revision_in_PREV_leaf_task_timing_is_extended(self):
         """testing if the timing will be extended as stated in the action when
         the request_revision action is used in a PREV leaf task
         """
         self.test_task3.status = self.status_prev
 
-        reviewer=self.test_user1
+        reviewer = self.test_user1
         description = 'do something uleyn'
         schedule_timing = 4
         schedule_unit = 'h'
@@ -5108,6 +5183,95 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         )
         self.assertEqual(self.test_task3.schedule_timing, 4)
         self.assertEqual(self.test_task3.schedule_unit, 'h')
+
+    #PREV: Schedule info update also consider RREV Reviews
+    def test_request_revision_in_PREV_leaf_task_schedule_info_update_also_considers_other_RREV_reviews_with_same_review_number(self):
+        """testing if the timing values are extended with the supplied values
+        and also any RREV Review timings with the same revision number are
+        included when the request_revision action is used in a PREV leaf task
+        """
+        # create a couple TimeLogs
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+
+        self.test_task3.status = self.status_rts
+        self.test_task3.responsible = [self.test_user1, self.test_user2]
+
+        self.test_task3.create_time_log(
+            resource=self.test_task3.resources[0],
+            start=now,
+            end=now + td(hours=1)
+        )
+        self.test_task3.create_time_log(
+            resource=self.test_task3.resources[0],
+            start=now + td(hours=1),
+            end=now + td(hours=2)
+        )
+
+        # check the status
+        self.assertEqual(self.test_task3.status, self.status_wip)
+
+        # first request a review
+        reviews = self.test_task3.request_review()
+
+        # only finalize the first review
+        reviews[0].request_revision(
+            schedule_timing=6, schedule_unit='h', description=''
+        )
+
+        # now request_revision using the task
+        review = self.test_task3.request_revision(
+            reviewer=self.test_user1,
+            description='do something uleyn',
+            schedule_timing=4,
+            schedule_unit='h'
+        )
+
+        # the final timing should be 12 hours
+        self.assertEqual(self.test_task3.schedule_timing, 12)
+        self.assertEqual(self.test_task3.schedule_unit, 'h')
+
+    #PREV: Review instances statuses are updated
+    def test_request_revision_in_PREV_leaf_task_review_instances_are_deleted(self):
+        """testing if the NEW Review instances are deleted when the
+        request_revision action is used in a PREV leaf task
+        """
+        self.test_task3.status = self.status_wip
+
+        reviews = self.test_task3.request_review()
+        review1 = reviews[0]
+        review2 = reviews[1]
+
+        review3 = self.test_task3.request_revision(
+            reviewer=self.test_user2,
+            description='some description',
+            schedule_timing=4,
+            schedule_unit='h'
+        )
+
+        # now check if the review instances are not in task3.reviews list
+        # anymore
+        self.assertNotIn(review1, self.test_task3.reviews)
+        self.assertNotIn(review2, self.test_task3.reviews)
+        self.assertIn(review3, self.test_task3.reviews)
+
+    #PREV: Review instances statuses are updated
+    def test_request_revision_in_PREV_leaf_task_new_review_instance_is_created(self):
+        """testing if the statuses of review instances are correctly updated to
+        RREV when the request_revision action is used in a PREV leaf task
+        """
+        self.test_task3.status = self.status_wip
+
+        reviews = self.test_task3.request_review()
+        new_review = self.test_task3.request_revision(
+            reviewer=self.test_user2,
+            description='some description',
+            schedule_timing=1,
+            schedule_unit='w'
+        )
+        from stalker import Review
+        self.assertIsInstance(new_review, Review)
 
     #HREV
     def test_request_revision_in_HREV_leaf_task(self):
@@ -5178,29 +5342,33 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         now = dt.now()
 
         self.test_task3.status = self.status_rts
-        TimeLog(
-            task=self.test_task3,
-            resource=self.test_task3.resource[0],
+        self.test_task3.create_time_log(
+            resource=self.test_task3.resources[0],
             start=now,
             end=now + td(hours=1)
         )
-        TimeLog(
-            task=self.test_task3,
-            resource=self.test_task3.resource[0],
+        self.test_task3.create_time_log(
+            resource=self.test_task3.resources[0],
             start=now + td(hours=1),
             end=now + td(hours=2)
         )
+        self.assertEqual(self.test_task3.total_logged_seconds, 7200)
 
-        self.test_task3.status = self.status_cmpl
+        reviews = self.test_task3.request_review()
+        review1 = reviews[0]
+        review2 = reviews[1]
+        review1.approve()
+        review2.approve()
+
         kw = {
             'reviewer': self.test_user1,
             'description': 'do something uleyn',
             'schedule_timing': 4,
             'schedule_unit': 'h'
         }
-        review = self.test_task3.request_revision(**kw)
-        self.assertEqual(self.test_task3.schedule_timing, 6)
+        review3 = self.test_task3.request_revision(**kw)
         self.assertEqual(self.test_task3.schedule_unit, 'h')
+        self.assertEqual(self.test_task3.schedule_timing, 6)
 
     #CMPL: parent status update
     def test_request_revision_in_CMPL_leaf_task_parent_status_updated_to_WIP(self):
@@ -5215,19 +5383,19 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.test_task9.status = self.status_rts
         TimeLog(
             task=self.test_task9,
-            resource=self.test_task9.resource[0],
+            resource=self.test_task9.resources[0],
             start=now,
             end=now + td(hours=1)
         )
         TimeLog(
             task=self.test_task9,
-            resource=self.test_task9.resource[0],
+            resource=self.test_task9.resources[0],
             start=now + td(hours=1),
             end=now + td(hours=2)
         )
 
         self.test_task9.status = self.status_cmpl
-        self.test_task1.status = self.status_cmpl
+        self.test_asset1.status = self.status_cmpl
 
         kw = {
             'reviewer': self.test_user1,
@@ -5236,7 +5404,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
             'schedule_unit': 'h'
         }
         review = self.test_task9.request_revision(**kw)
-        self.assertEqual(self.test_task1.status, self.status_wip)
+        self.assertEqual(self.test_asset1.status, self.status_wip)
 
     #CMPL: dependent task status update RTS -> WFD
     def test_request_revision_in_CMPL_leaf_task_RTS_dependent_task_updated_to_WFD(self):
@@ -5254,13 +5422,13 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.test_task9.status = self.status_rts
         TimeLog(
             task=self.test_task9,
-            resource=self.test_task9.resource[0],
+            resource=self.test_task9.resources[0],
             start=now,
             end=now + td(hours=1)
         )
         TimeLog(
             task=self.test_task9,
-            resource=self.test_task9.resource[0],
+            resource=self.test_task9.resources[0],
             start=now + td(hours=1),
             end=now + td(hours=2)
         )
@@ -5292,13 +5460,13 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.test_task9.status = self.status_rts
         TimeLog(
             task=self.test_task9,
-            resource=self.test_task9.resource[0],
+            resource=self.test_task9.resources[0],
             start=now,
             end=now + td(hours=1)
         )
         TimeLog(
             task=self.test_task9,
-            resource=self.test_task9.resource[0],
+            resource=self.test_task9.resources[0],
             start=now + td(hours=1),
             end=now + td(hours=2)
         )
@@ -5327,15 +5495,13 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.test_task8.depends = [self.test_task9]
 
         self.test_task9.status = self.status_rts
-        TimeLog(
-            task=self.test_task9,
-            resource=self.test_task9.resource[0],
+        self.test_task9.create_time_log(
+            resource=self.test_task9.resources[0],
             start=now,
             end=now + td(hours=1)
         )
-        TimeLog(
-            task=self.test_task9,
-            resource=self.test_task9.resource[0],
+        self.test_task9.create_time_log(
+            resource=self.test_task9.resources[0],
             start=now + td(hours=1),
             end=now + td(hours=2)
         )
@@ -5349,7 +5515,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
             'schedule_timing': 4,
             'schedule_unit': 'h'
         }
-        review = self.test_task9.request_revision(**kw)
+        self.test_task9.request_revision(**kw)
         self.assertEqual(self.test_task8.status, self.status_drev)
 
     #CMPL: dependent task parent status updated to WIP
@@ -5364,25 +5530,23 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
 
         self.test_task9.depends = [self.test_task8]
         self.test_task9.status = self.status_wfd
-        self.test_task1.status = self.status_wfd
-
+        self.test_asset1.status = self.status_wfd
         self.test_task8.status = self.status_rts
-        TimeLog(
-            task=self.test_task8,
-            resource=self.test_task8.resource[0],
+
+        self.test_task8.create_time_log(
+            resource=self.test_task8.resources[0],
             start=now,
             end=now + td(hours=1)
         )
-        TimeLog(
-            task=self.test_task8,
-            resource=self.test_task8.resource[0],
+        self.test_task8.create_time_log(
+            resource=self.test_task8.resources[0],
             start=now + td(hours=1),
             end=now + td(hours=2)
         )
 
         self.test_task8.status = self.status_cmpl
         self.test_task9.status = self.status_cmpl
-        self.test_task1.status = self.status_cmpl
+        self.test_asset1.status = self.status_cmpl
         self.test_task7.status = self.status_cmpl
 
         kw = {
@@ -5394,7 +5558,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         review = self.test_task8.request_revision(**kw)
 
         self.assertEqual(self.test_task9.status, self.status_drev)
-        self.assertEqual(self.test_task1.status, self.status_wip)
+        self.assertEqual(self.test_asset1.status, self.status_wip)
         self.assertEqual(self.test_task7.status, self.status_wip)
 
     # hold
@@ -6159,7 +6323,13 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         """testing if the status will be set to CMPL when the approve action is
         used in a PREV leaf task
         """
-        self.test_task3.status = self.status_prev
+        now = datetime.datetime.now()
+        self.test_task3.create_time_log(
+            resource=self.test_task3.resources[0],
+            start=now,
+            end=now + datetime.timedelta(hours=1)
+        )
+        self.test_task3.request_review()
         self.test_task3.approve()
         self.assertEqual(self.test_task3.status, self.status_cmpl)
 
@@ -6172,10 +6342,17 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.test_task9.status = self.status_rts
         self.test_task9.depends = [self.test_task3]
 
-        self.test_task3.status = self.status_prev
-        self.test_task9.status = self.status_wfd
+        now = datetime.datetime.now()
+        self.test_task3.create_time_log(
+            resource=self.test_task3.resources[0],
+            start=now,
+            end=now + datetime.timedelta(hours=1)
+        )
+        reviews = self.test_task3.request_review()
+        self.assertEqual(self.test_task3.status, self.status_prev)
 
         self.test_task3.approve()
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
         self.assertEqual(self.test_task9.status, self.status_rts)
 
     # PREV: Dependent task status updates DREV -> WIP
@@ -6187,10 +6364,21 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.test_task9.status = self.status_rts
         self.test_task9.depends = [self.test_task3]
 
-        self.test_task3.status = self.status_prev
-        self.test_task9.status = self.status_drev
+        # hack the status (not good actually, makes this test a half test)
+        self.test_task9.status = self.status_wip
+
+        # create time logs first
+        now = datetime.datetime.now()
+        self.test_task3.create_time_log(
+            resource=self.test_task3.resources[0],
+            start=now,
+            end=now + datetime.timedelta(hours=1)
+        )
+        reviews = self.test_task3.request_review()
 
         self.test_task3.approve()
+
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
         self.assertEqual(self.test_task9.status, self.status_wip)
 
     # PREV: Dependent task status updates other dependencies stay intact
@@ -6221,11 +6409,21 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         """
         self.test_task9.depends = []
 
-        self.test_task9.status = self.status_prev
+        self.test_task9.status = self.status_rts
         self.test_task1.status = self.status_wip
         self.test_task7.status = self.status_wip
         self.test_task8.status = self.status_wip
         self.test_task2.status = self.status_wip
+
+        now = datetime.datetime.now()
+        self.test_task9.create_time_log(
+            resource=self.test_task9.resources[0],
+            start=now,
+            end=now + datetime.timedelta(hours=1)
+        )
+
+        reviews = self.test_task9.request_review()
+        self.assertEqual(self.test_task9.status, self.status_prev)
 
         self.test_task9.approve()
         self.assertEqual(self.test_task9.status, self.status_cmpl)
@@ -6241,7 +6439,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.test_task9.depends = []
         self.test_task6.depends = [self.test_task9]
 
-        self.test_task9.status = self.status_prev
+        self.test_task9.status = self.status_wip
         self.test_asset1.status = self.status_wip
         self.test_task7.status = self.status_wip
         self.test_task8.status = self.status_wip
@@ -6251,6 +6449,15 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.test_task5.status = self.status_wfd
         self.test_task6.status = self.status_wfd
         self.test_asset1.status = self.status_wfd
+
+        now = datetime.datetime.now()
+        self.test_task9.create_time_log(
+            resource=self.test_task9.resources[0],
+            start=now,
+            end=now + datetime.timedelta(hours=1)
+        )
+        reviews = self.test_task9.request_review()
+        self.assertEqual(self.test_task9.status, self.status_prev)
 
         self.test_task9.approve()
         self.assertEqual(self.test_task9.status, self.status_cmpl)
@@ -6262,6 +6469,27 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.assertEqual(self.test_task5.status, self.status_wfd)
         self.assertEqual(self.test_task6.status, self.status_rts)
         self.assertEqual(self.test_task1.status, self.status_rts)
+
+    #PREV: 
+    def test_approve_in_PREV_leaf_task_review_instance_statuses_updated_correctly(self):
+        """testing if the Review instances values are correctly updated to APP
+        when the approve action is used in a PREV leaf task
+        """
+        self.test_task3.status = self.status_wip
+
+        # create reviews automatically
+        reviews = self.test_task3.request_review()
+
+        # check the statuses
+        self.assertEqual(reviews[0].status.code, 'NEW')
+        self.assertEqual(reviews[1].status.code, 'NEW')
+
+        # approve all of them
+        self.test_task3.approve()
+
+        # now expect the statuses of the reviews to be all app
+        self.assertEqual(reviews[0].status.code, 'APP')
+        self.assertEqual(reviews[1].status.code, 'APP')
 
     # HREV
     def test_approve_in_HREV_leaf_task(self):

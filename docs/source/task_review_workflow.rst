@@ -70,7 +70,7 @@ follow the following table:
   +----------------+--------------+
   | WFD            | WFD          |
   +----------------+--------------+
-  | RTS            | DREV         |
+  | RTS            | WFD          |
   +----------------+--------------+
   | WIP            | DREV         |
   +----------------+--------------+
@@ -120,27 +120,30 @@ Revision Counter
 ================
 
 Both :class:`.Task` instances and :class:`.Review` instances have an attribute
-called ``revision_number``. Each Review with the same revision_number
-considered in the same set of revisions. It is only possible to have multiple
-Review instances with the same revision_number value if their :attr:`.reviewer`
-attribute are different.
+called ``review_number``. Each Review with the same review_number considered in
+the same set of review. It is only possible to have multiple Review instances
+with the same review_number value if their :attr:`.reviewer` attribute are
+different.
 
-The :attr:`.Task.revision_number` starts from 0 and this represents the base or
+The :attr:`.Task.review_number` starts from 0 and this represents the base or
 initial revision and it is increased by 1 when one of the resources request a
 review (by calling :meth:`.Task.request_review()`).
 
-A newly created Review instance will have a revision_number which is equal to
-the value of the Task.revision_number + 1 at the time it is created. But it
+A newly created Review instance will have a review_number which is equal to
+the value of the Task.review_number + 1 at the time it is created. But it
 never will or should be 0 cause this represents the base or initial revision.
 
-So, a Task with revision_number is 0 has no revision yet. A Task with revision
-number is set to 2 has two sets of Revisions.
+So, a Task with review_number 0 has no review yet. A Task with review number is
+set to 2 has two sets of reviews.
 
 The best way to create revisions is to use :meth:`.Task.request_review()`. This
 will ensure that there are enough :class:`.Review` instances created for each
-responsible and the revision_number attribute of both ends are correctly set.
+responsible and the review_number attribute of both ends are correctly set.
 And the return value of that method should be a list of Review instances.
 
-Each of the responsible should change the attributes of the Review instances
-according to their reviews. So they both need to set the status and if they're
-requesting a revision they also need to set the timing info for the revision.
+Each of the responsible should use the supplied methods (
+:meth:`.Review.approve` or :meth:`.Review.request_revision`) of the Review
+instances according to their reviews. So by using those actions, the
+responsible users can both set the status to an appropriate value and if
+they're requesting a revision they also can to set the extra timing info
+they've given for the revision.

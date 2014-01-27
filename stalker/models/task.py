@@ -23,6 +23,7 @@ import logging
 
 from sqlalchemy import (Table, Column, Integer, ForeignKey, Boolean, Enum,
                         DateTime, Float, event)
+from sqlalchemy.exc import InvalidRequestError
 from sqlalchemy.orm import relationship, validates, synonym
 
 from stalker import db
@@ -554,6 +555,17 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
        that task, and all the statuses of the tasks depending to this
        particular task will be updated accordingly.
 
+    .. warning::
+       **Initial Status of a Task**
+
+       .. versionadded:: 0.2.5
+
+       Because of the Task Status Workflow, supplying a status with the
+       **status** argument may not set the status of the Task to the desired
+       value. A Task starts with WFD status by default, and updated to RTS if
+       it doesn't have any dependencies or all of the dependencies are STOP or
+       CMPL.
+
     **Arguments**
 
     :param project: A Task which doesn't have a parent (a root task) should be
@@ -839,6 +851,8 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         created for this task."""
     )
 
+    _review_number = Column(Integer, default=0)
+
     def __init__(self,
                  project=None,
                  parent=None,
@@ -873,6 +887,8 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         DateRangeMixin.__init__(self, **kwargs)
         ScheduleMixin.__init__(self, **kwargs)
 
+        self._review_number = 0
+
         self.parent = parent
         self._project = project
 
@@ -881,6 +897,11 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
         self.is_milestone = is_milestone
         self.is_complete = False
+
+        # update the status
+        with db.session.no_autoflush:
+            WFD = Status.query.filter_by(code='WFD').first()
+        self.status = WFD
 
         if depends is None:
             depends = []
@@ -911,21 +932,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             responsible = []
         self.responsible = responsible
 
-        # no matter what is given for the status
-        # set the status to WFD for a newly created task
-
-        # status_wfd = None
-        # if db.session:
-        #     with db.session.no_autoflush:
-        #         from stalker import Status
-        #         status_wfd = Status.query.filter_by(code='WFD').first()
-        #         status_rts = Status.query.filter_by(code='RTS').first()
-        # 
-        #     # TODO: check the statuses of the dependencies
-        #     if self.depends:
-        #         self.status = status_wfd
-        #     else:
-        #         self.status = status_rts
+        self.update_status_with_dependent_statuses()
 
     def __eq__(self, other):
         """the equality operator
@@ -951,7 +958,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         # update parents total_logged_second attribute
         with db.session.no_autoflush:
             if self.parent:
-                    self.parent.total_logged_seconds += time_log.total_seconds
+                self.parent.total_logged_seconds += time_log.total_seconds
 
         return time_log
 
@@ -1750,9 +1757,11 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         elif self.status in [RTS, HREV]:
             self.status = WIP
 
+        # create a TimeLog
+        tlog = TimeLog(task=self, resource=resource, start=start, end=end)
+
         # update also the parent status
-        if self.parent:
-            self.parent.update_status_with_children_statuses()
+        self.update_parent_statuses()
 
     def request_review(self):
         """Creates and returns Review instances for each of the responsible of
@@ -1761,23 +1770,101 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         Thus a task with 4 days of effort can be capped to 2 days if a review
         is requested at day 2. Only applicable to leaf tasks.
         """
-        raise NotImplementedError
+        # check task status
+        with db.session.no_autoflush:
+            WIP = Status.query.filter_by(code='WIP').first()
+            PREV = Status.query.filter_by(code='PREV').first()
 
-    def request_revision(self, reviews):
+        if self.status != WIP:
+            raise StatusError(
+                '%(task)s (id:%(id)s) is a %(status)s task, and %(status)s '
+                'tasks are not suitable for requesting a review, please '
+                'supply a WIP task instead.' % {
+                    'task': self.name,
+                    'id': self.id,
+                    'status': self.status.code
+                }
+            )
+        # crop the timing to the current schedule timing
+        timing, unit = \
+            self.least_meaningful_time_unit(self.total_logged_seconds)
+        self.schedule_timing = timing
+        self.schedule_unit = unit
+
+        # create Review instances for each Responsible of this task
+        from stalker.models.review import Review
+        reviews = []
+        for responsible in self.responsible:
+            reviews.append(
+                Review(
+                    task=self,
+                    reviewer=responsible
+                )
+            )
+
+        # update the status to PREV
+        self.status = PREV
+
+        # no need to update parent or dependent task statuses
+        return reviews
+
+    def request_revision(self, reviewer=None, description='',
+                         schedule_timing=1, schedule_unit='h'):
         """Requests revision.
 
         Only applicable for PREV leaf tasks. This method will expand the
-        schedule timings of the task by looking at the supplied reviews. Only
-        RREV Reviews are considered, and if non of the supplied
-        :class:`.Review` instances are reviews with RREV status then the task
-        will be set to CMPL.
+        schedule timings of the task according to the supplied arguments.
 
-        :param reviews: A list of Review instances, where they have APP or RREV
-          statuses.
+        When request_revision is called on a PREV task, the other NEW Review
+        instances (those created when request_review on a WIP task is called
+        and still waiting a review) will be deleted.
 
-        :type reviews: list of class:`.Review` instances.
+        This method at the end will return a new Review instance with correct
+        attributes (reviewer, description, schedule_timing, schedule_unit and
+        review_number attributes).
+
+        :param reviewer: This is the user that requested the revision. He/she
+          doesn't need to be the responsible, anybody that has a Permission to
+          create a Review instance can request a revision.
+
+        :type reviewer: class:`.User`
         """
-        raise NotImplementedError
+        # check status
+        with db.session.no_autoflush:
+            PREV = Status.query.filter_by(code='PREV').first()
+            CMPL = Status.query.filter_by(code='CMPL').first()
+
+        if self.status not in [PREV, CMPL]:
+            raise StatusError(
+                '%(task)s (id: %(id)s) is a %(status)s task, and it is not '
+                'suitable for requesting a revision, please supply a PREV or '
+                'CMPL task' % {
+                    'task': self.name,
+                    'id': self.id,
+                    'status': self.status.code
+                }
+            )
+
+        # # find other NEW Reviews and delete them
+        # for r in self.reviews:
+        #     if r.status.code == 'NEW':
+        #         try:
+        #             db.session.delete(r)
+        #         except InvalidRequestError:
+        #             # not persisted yet, good just delete it
+        #             pass
+        #         finally:
+        #             #self.reviews.remove(r)
+        #             del r
+
+        # create a Review instance with the given data
+        from stalker.models.review import Review
+        review = Review(reviewer=reviewer, task=self)
+        # and call request_revision in the Review instance
+        review.request_revision(schedule_timing=schedule_timing,
+                                schedule_unit=schedule_unit,
+                                description=description)
+        return review
 
     def hold(self):
         """Pauses the execution of this task by setting its status to OH. Only
@@ -1807,7 +1894,6 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
         # no need to update the status of dependencies nor parents
 
-
     def stop(self):
         """Stops this task. It is nearly equivalent to deleting this task. But
         this will at least preserve the TimeLogs entered for this task. It is
@@ -1819,14 +1905,14 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         to different statuses) is the schedule info, while the :meth:`.hold`
         method will preserve the schedule info, stop() will set the schedule
         info to the current effort.
-        
+
         So if 2 days of effort has been entered for a 4 days task, when stopped
         the task effort will be capped to 2 days, thus TaskJuggler will not try
         to reserve any resource for this task anymore.
 
         Also, STOP tasks will be ignored in dependency relations.
         """
-        
+
         # check the status
         with db.session.no_autoflush:
             WIP = Status.query.filter_by(code='WIP').first()
@@ -1851,8 +1937,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             self.least_meaningful_time_unit(self.total_logged_seconds)
 
         # update parent statuses
-        if self.parent:
-            self.parent.update_status_with_children_statuses()
+        self.update_parent_statuses()
 
         # update dependent task statuses
         for dep in self.dependent_of:
@@ -1891,12 +1976,17 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         self.update_status_with_children_statuses()
 
     def approve(self):
-        """Approves the task and sets its status to CMPL.
+        """Approves a PREV task and sets its status to CMPL.
+
+        The approve() method is a shortcut for setting the related Review
+        instances to APP for each Review instances created for each
+        responsible.
         """
         # get statuses
-        PREV = Status.query.filter_by(code='PREV').first()
-        CMPL = Status.query.filter_by(code='CMPL').first()
         logger.debug('approving task: %s' % self.name)
+
+        with db.session.no_autoflush:
+            PREV = Status.query.filter_by(code='PREV').first()
 
         if self.status != PREV:
             raise StatusError(
@@ -1904,19 +1994,9 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
                 (self.__class__.__name__, self.status.code)
             )
 
-        self.status = CMPL
-        logger.debug('status after approve: %s' % self.status.code)
-
-        # update parent status
-        if self.parent:
-            self.parent.update_status_with_children_statuses()
-
-        # update dependent task statuses
-        for dep in self.dependent_of:
-            dep.update_status_with_dependent_statuses()
-            # also update the status of parents of dependencies
-            if dep.parent:
-                dep.parent.update_status_with_children_statuses()
+        # approve all Reviews
+        for review in self.reviews:
+            review.approve()
 
     def update_status_with_dependent_statuses(self):
         """updates the status by looking at the dependent tasks
@@ -1925,15 +2005,16 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             # do nothing, its status will be decided by its children
             return
 
-        WFD = Status.query.filter_by(code='WFD').first()
-        RTS = Status.query.filter_by(code='RTS').first()
-        WIP = Status.query.filter_by(code='WIP').first()
-        PREV = Status.query.filter_by(code='PREV').first()
-        HREV = Status.query.filter_by(code='HREV').first()
-        DREV = Status.query.filter_by(code='DREV').first()
-        OH = Status.query.filter_by(code='OH').first()
-        STOP = Status.query.filter_by(code='STOP').first()
-        CMPL = Status.query.filter_by(code='CMPL').first()
+        with db.session.no_autoflush:
+            WFD = Status.query.filter_by(code='WFD').first()
+            RTS = Status.query.filter_by(code='RTS').first()
+            WIP = Status.query.filter_by(code='WIP').first()
+            PREV = Status.query.filter_by(code='PREV').first()
+            HREV = Status.query.filter_by(code='HREV').first()
+            DREV = Status.query.filter_by(code='DREV').first()
+            OH = Status.query.filter_by(code='OH').first()
+            STOP = Status.query.filter_by(code='STOP').first()
+            CMPL = Status.query.filter_by(code='CMPL').first()
 
         if not self.depends:
             # doesn't have any dependency
@@ -1941,18 +2022,6 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             if self.status == WFD:
                 self.status = RTS
             return
-
-        # use pure sql
-        sql_query = """select
-    "Statuses".code
-from "Tasks"
-    join "Task_Dependencies" on "Tasks".id = "Task_Dependencies".task_id
-    join "Tasks" as "Dependent_Tasks" on "Task_Dependencies".depends_to_task_id = "Dependent_Tasks".id
-    join "Statuses" on "Dependent_Tasks".status_id = "Statuses".id
-where "Tasks".id = %s
-group by "Statuses".code""" % self.id
-
-        result = db.session.connection().execute(sql_query)
 
         #   +--------- WFD
         #   |+-------- RTS
@@ -1978,11 +2047,37 @@ group by "Statuses".code""" % self.id
             'CMPL': 1
         }
 
-        # convert to a binary value
-        binary_status = reduce(
-            lambda x, y: x+y,
-            map(lambda x: binary_status_codes[x[0]], result.fetchall())
-        )
+        if self.id:
+            # use pure sql
+            logger.debug('using pure SQL to query query dependency statuses')
+            sql_query = """select
+        "Statuses".code
+    from "Tasks"
+        join "Task_Dependencies" on "Tasks".id = "Task_Dependencies".task_id
+        join "Tasks" as "Dependent_Tasks" on "Task_Dependencies".depends_to_task_id = "Dependent_Tasks".id
+        join "Statuses" on "Dependent_Tasks".status_id = "Statuses".id
+    where "Tasks".id = %s
+    group by "Statuses".code""" % self.id
+
+            result = db.session.connection().execute(sql_query)
+
+            # convert to a binary value
+            binary_status = reduce(
+                lambda x, y: x+y,
+                map(lambda x: binary_status_codes[x[0]], result.fetchall())
+            )
+
+        else:
+            # task is not committed yet, use Python version
+            logger.debug('using pure Python to query query dependency '
+                         'statuses')
+            binary_status = 0
+            dep_statuses = []
+            for dep in self.depends:
+                # consider every status only once
+                if dep.status not in dep_statuses:
+                    dep_statuses.append(dep.status)
+                    binary_status += binary_status_codes[dep.status.code]
 
         continue_working = False
         if binary_status < 4:
@@ -2004,6 +2099,11 @@ group by "Statuses".code""" % self.id
                 self.status = DREV
 
         # also update parent statuses
+        self.update_parent_statuses()
+
+    def update_parent_statuses(self):
+        """updates the parent statuses of this task if any
+        """
         if self.parent:
             self.parent.update_status_with_children_statuses()
 
@@ -2122,10 +2222,18 @@ group by "Statuses".code""" % self.id
         #     dep.update_status_with_dependent_statuses()
 
         # go to parents
-        if self.parent:
-            logger.debug('updating parent (id:%s) status with its children' %
-                         self.parent.id)
-            self.parent.update_status_with_children_statuses()
+        self.update_parent_statuses()
+
+    def _review_number_getter(self):
+        """returns the revision number value
+        """
+        return self._review_number
+
+    review_number = synonym(
+        '_review_number',
+        descriptor=property(_review_number_getter),
+        doc="returns the _review_number attribute value"
+    )
 
 # TASK_DEPENDENCIES
 Task_Dependencies = Table(
