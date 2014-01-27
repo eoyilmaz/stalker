@@ -30,6 +30,10 @@ Stalker Changes
   task. For now it walks in a breadth first fashion.
 * **New:** Added a new exception called **StatusError** which states the entity
   status is not suitable for the action it is applied to.
+* **New:** Studio instance now stores the scheduling state to the database to
+  prevent two scheduling process to override each other. It also stores the
+  last schedule message and the last schedule date and the id of the user who
+  has done the scheduling.
 
 0.2.4
 =====

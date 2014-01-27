@@ -20,15 +20,30 @@
 
 import unittest2
 import datetime
-from stalker import (defaults, Studio, WorkingHours, Project, StatusList,
+
+from stalker import (db, defaults, Studio, WorkingHours, Project, StatusList,
                      Status, Repository, Asset, Type, User, Shot, Department,
-                     Task, TaskJugglerScheduler)
-from stalker import db
+                     Task, TaskJugglerScheduler, SchedulerBase)
 
 # for IDEs to help them in code compilation
 if False:
     from sqlalchemy.orm import Session
-    assert isinstance(session, Session)
+    assert isinstance(db.session, Session)
+
+
+class DummyScheduler(SchedulerBase):
+    """this is a dummy scheduler to be used in tests
+    """
+
+    def __init__(self, studio=None, callback=None):
+        SchedulerBase.__init__(self, studio)
+        self.callback = callback
+
+    def schedule(self):
+        """call the callback function before finishing
+        """
+        if self.callback:
+            self.callback()
 
 
 class StudioTester(unittest2.TestCase):
@@ -1195,6 +1210,70 @@ class StudioTester(unittest2.TestCase):
             self.test_task31.computed_end,
             datetime.datetime(2013, 06, 12, 16, 00)
         )
+
+    def test_schedule_will_raise_a_RuntimeError_if_is_scheduling_is_True(self):
+        """testing if a RuntimeError will be raised when the schedule method
+        is called and the is_scheduling attribute is True
+        """
+        tj_scheduler = TaskJugglerScheduler()
+        self.test_studio.now = datetime.datetime(2013, 4, 15, 22, 56)
+        self.test_studio.start = datetime.datetime(2013, 4, 15, 22, 56)
+        self.test_studio.end = datetime.datetime(2013, 7, 30, 0, 0)
+
+        self.test_studio.scheduler = tj_scheduler
+        self.test_studio.is_scheduling = True
+        self.test_studio.is_scheduling_by = self.test_user1
+        self.assertRaises(RuntimeError, self.test_studio.schedule)
+
+    def test_is_scheduling_will_be_False_after_scheduling_is_done(self):
+        """testing if the is_scheduling attribute will be back to False when
+        the scheduling is finished
+        """
+        # use a dummy scheduler
+        self.test_studio.now = datetime.datetime(2013, 4, 15, 22, 56)
+        self.test_studio.start = datetime.datetime(2013, 4, 15, 22, 56)
+        self.test_studio.end = datetime.datetime(2013, 7, 30, 0, 0)
+
+        def callback():
+            self.assertTrue(self.test_studio.is_scheduling)
+
+        dummy_scheduler = DummyScheduler(callback=callback)
+
+        self.test_studio.scheduler = dummy_scheduler
+        self.assertFalse(self.test_studio.is_scheduling)
+        self.test_studio.schedule()
+        self.assertFalse(self.test_studio.is_scheduling)
+
+    def test_schedule_will_store_schedule_info_in_database(self):
+        """testing if the schedule method will store the schedule info in
+        database
+        """
+        tj_scheduler = TaskJugglerScheduler()
+        self.test_studio.now = datetime.datetime(2013, 4, 15, 22, 56)
+        self.test_studio.start = datetime.datetime(2013, 4, 15, 22, 56)
+        self.test_studio.end = datetime.datetime(2013, 7, 30, 0, 0)
+
+        self.test_studio.scheduler = tj_scheduler
+        self.test_studio.schedule(scheduled_by=self.test_user1)
+
+        # delete the studio instance and retrieve it back and check if it has
+        # the info
+        del self.test_studio
+
+        studio = Studio.query.first()
+
+        self.assertFalse(studio.is_scheduling)
+        self.assertTrue(
+            datetime.datetime.now() - studio.scheduling_started_at <
+            datetime.timedelta(minutes=1)
+        )
+        self.assertIsNotNone(studio.last_schedule_message)
+        self.assertTrue(
+            datetime.datetime.now() - studio.last_scheduled_at <
+            datetime.timedelta(minutes=1)
+        )
+        self.assertEqual(studio.last_scheduled_by, self.test_user1)
+        self.assertEqual(studio.last_scheduled_by_id, self.test_user1.id)
 
     def test_vacation_attribute_is_read_only(self):
         """testing if the vacation attribute is a read-only attribute
