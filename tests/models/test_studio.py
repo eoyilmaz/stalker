@@ -38,13 +38,8 @@ class StudioTester(unittest2.TestCase):
     def setUp(self):
         """setup the test
         """
-        if db.session:
-            db.session.close()
-        db.setup({
-            "sqlalchemy.url": "sqlite:///:memory:",
-            "sqlalchemy.echo": False,
-        })
-        # db.init()
+        db.setup()
+        db.init()
 
         self.test_user1 = User(
             name='User 1',
@@ -93,7 +88,7 @@ class StudioTester(unittest2.TestCase):
         db.session.add(self.test_status2)
 
         self.test_project_status_list1 = StatusList(
-            name='ProjectStatuses',
+            name='Project Statuses',
             statuses=[self.test_status1, self.test_status2],
             target_entity_type=Project
         )
@@ -142,18 +137,13 @@ class StudioTester(unittest2.TestCase):
         )
         db.session.add(self.test_asset_type)
 
-        self.test_asset_status_list = StatusList(
-            name='AssetStatuses',
-            statuses=[self.test_status1, self.test_status2],
-            target_entity_type=Asset,
-        )
-        db.session.add(self.test_asset_status_list)
+        self.test_asset_status_list = \
+            StatusList.query.filter_by(target_entity_type='Asset').first()
 
         self.test_asset1 = Asset(
             name='Test Asset 1',
             code='TA1',
             project=self.test_project1,
-            status_list=self.test_asset_status_list,
             type=self.test_asset_type
         )
         db.session.add(self.test_asset1)
@@ -162,18 +152,13 @@ class StudioTester(unittest2.TestCase):
             name='Test Asset 2',
             code='TA2',
             project=self.test_project2,
-            status_list=self.test_asset_status_list,
             type=self.test_asset_type
         )
         db.session.add(self.test_asset2)
 
         # shots
-        self.test_shot_status_list = StatusList(
-            name='ShotStatuses',
-            statuses=[self.test_status1, self.test_status2],
-            target_entity_type=Shot
-        )
-        db.session.add(self.test_shot_status_list)
+        self.test_shot_status_list = \
+            StatusList.query.filter_by(target_entity_type='Shot').first()
 
         # for project 1
         self.test_shot1 = Shot(
@@ -215,18 +200,13 @@ class StudioTester(unittest2.TestCase):
 
         #########################################################3
         # tasks for projects
-        self.test_task_statuses = StatusList(
-            name='Task Statuses',
-            statuses=[self.test_status1, self.test_status2],
-            target_entity_type=Task,
-        )
-        db.session.add(self.test_task_statuses)
+        self.test_task_statuses = \
+            StatusList.query.filter_by(target_entity_type='Task').first()
 
         self.test_task1 = Task(
             name='Project Planing',
             project=self.test_project1,
             resources=[self.test_user1],
-            status_list=self.test_task_statuses,
             schedule_timing=10,
             schedule_unit='d'
         )
@@ -236,7 +216,6 @@ class StudioTester(unittest2.TestCase):
             name='Project Planing',
             project=self.test_project2,
             resources=[self.test_user1],
-            status_list=self.test_task_statuses,
             schedule_timing=10,
             schedule_unit='d'
         )
@@ -686,11 +665,11 @@ class StudioTester(unittest2.TestCase):
         """testing if the users attribute is working properly
         """
         # don't forget the admin
-        # admin = User.query.filter_by(name='admin').first()
+        admin = User.query.filter_by(name='admin').first()
 
         self.assertItemsEqual(
             self.test_studio.users,
-            [self.test_user1, self.test_user2, self.test_user3]
+            [admin, self.test_user1, self.test_user2, self.test_user3]
         )
 
     def test_to_tjp_attribute_is_read_only(self):

@@ -22,7 +22,7 @@ import unittest2
 import datetime
 from stalker import (Project, Repository, Status, StatusList, Task, TimeLog,
                      User)
-from stalker.exceptions import OverBookedError
+from stalker.exceptions import OverBookedError, StatusError
 
 
 class TimeLogTester(unittest2.TestCase):
@@ -490,6 +490,16 @@ class TimeLogDBTestCase(unittest2.TestCase):
         db.setup()
         db.init()
 
+        self.status_wfd = Status.query.filter_by(code='WFD').first()
+        self.status_rts = Status.query.filter_by(code='RTS').first()
+        self.status_wip = Status.query.filter_by(code='WIP').first()
+        self.status_prev = Status.query.filter_by(code='PREV').first()
+        self.status_hrev = Status.query.filter_by(code='HREV').first()
+        self.status_drev = Status.query.filter_by(code='DREV').first()
+        self.status_oh = Status.query.filter_by(code='OH').first()
+        self.status_stop = Status.query.filter_by(code='STOP').first()
+        self.status_cmpl = Status.query.filter_by(code='CMPL').first()
+
         # create a resource
         self.test_resource1 = User(
             name="User1",
@@ -687,52 +697,89 @@ class TimeLogDBTestCase(unittest2.TestCase):
         """testing if a StatusError will be raised when a TimeLog instance
         wanted to be created for a WFD leaf task
         """
-        self.fail('test is not implemented yet')
+        new_task = Task(
+            name='Test Task 2',
+            project=self.test_project
+        )
+        new_task.depends = [self.test_task]
+        self.kwargs['task'] = new_task
+        self.assertRaises(StatusError, TimeLog, **self.kwargs)
 
     def test_time_log_creation_for_a_RTS_leaf_task(self):
         """testing if the status will be updated to WIP when a TimeLog instance
         is created for a RTS leaf task
         """
-        self.fail('test is not implemented yet')
+        task = self.kwargs['task']
+        task.status = self.status_rts
+        self.assertEqual(task.status, self.status_rts)
+        TimeLog(**self.kwargs)
+        self.assertEqual(task.status, self.status_wip)
 
     def test_time_log_creation_for_a_WIP_leaf_task(self):
         """testing if the status will stay at WIP when a TimeLog instance is
         created for a WIP leaf task
         """
-        self.fail('test is not implemented yet')
+        task = self.kwargs['task']
+        task.status = self.status_wip
+        self.assertEqual(task.status, self.status_wip)
+        TimeLog(**self.kwargs)
 
     def test_time_log_creation_for_a_PREV_leaf_task(self):
         """testing if a StatusError will be raised when a TimeLog instance is
         created for a PREV leaf task
         """
-        self.fail('test is not implemented yet')
+        task = self.kwargs['task']
+        task.status = self.status_prev
+        self.assertEqual(task.status, self.status_prev)
+        self.assertRaises(StatusError, TimeLog, **self.kwargs)
 
     def test_time_log_creation_for_a_HREV_leaf_task(self):
         """testing if the status will be updated to WIP when a TimeLog instance
         is created for a HREV leaf task
         """
-        self.fail('test is not implemented yet')
+        task = self.kwargs['task']
+        task.status = self.status_hrev
+        self.assertEqual(task.status, self.status_hrev)
+        TimeLog(**self.kwargs)
 
     def test_time_log_creation_for_a_DREV_leaf_task(self):
         """testing if the status will stay at DREV when a TimeLog instance is
         created for a DREV leaf task
         """
-        self.fail('test is not implemented yet')
+        task = self.kwargs['task']
+        task.status = self.status_drev
+        self.assertEqual(task.status, self.status_drev)
+        TimeLog(**self.kwargs)
 
     def test_time_log_creation_for_a_OH_leaf_task(self):
         """testing if a StatusError will be raised when a TimeLog instance is
         created for a OH leaf task
         """
-        self.fail('test is not implemented yet')
+        task = self.kwargs['task']
+        task.status = self.status_oh
+        self.assertEqual(task.status, self.status_oh)
+        self.assertRaises(StatusError, TimeLog, **self.kwargs)
 
     def test_time_log_creation_for_a_STOP_leaf_task(self):
         """testing if a StatusError will be raised when a TimeLog instance is
         created for a STOP leaf task
         """
-        self.fail('test is not implemented yet')
+        task = self.kwargs['task']
+        task.status = self.status_stop
+        self.assertEqual(task.status, self.status_stop)
+        self.assertRaises(StatusError, TimeLog, **self.kwargs)
 
     def test_time_log_creation_for_a_CMPL_leaf_task(self):
         """testing if a StatusError will be raised when a TimeLog instance is
         created for a CMPL leaf task
+        """
+        task = self.kwargs['task']
+        task.status = self.status_cmpl
+        self.assertEqual(task.status, self.status_cmpl)
+        self.assertRaises(StatusError, TimeLog, **self.kwargs)
+
+    def test_time_log_creation_that_violates_dependency_condition(self):
+        """testing if a ValueError will be raised when the entered TimeLog will
+        violate the dependency relation of the task
         """
         self.fail('test is not implemented yet')

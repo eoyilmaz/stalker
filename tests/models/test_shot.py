@@ -19,8 +19,9 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import unittest2
-from stalker import (Asset, Entity, Link, Project, Repository, Scene, Sequence,
-                     Shot, Status, StatusList, Task, Type, ImageFormat)
+from stalker import (db, Asset, Entity, Link, Project, Repository, Scene,
+                     Sequence, Shot, Status, StatusList, Task, Type,
+                     ImageFormat)
 
 
 class ShotTester(unittest2.TestCase):
@@ -30,52 +31,40 @@ class ShotTester(unittest2.TestCase):
     def setUp(self):
         """setup the test
         """
+        db.setup()
+        db.init()
+
         # statuses
-        self.test_status_complete = Status(
-            name="Complete",
-            code="CMPLT"
-        )
-        self.test_status_wip = Status(
-            name="Work In Progress",
-            code="WIP"
-        )
-        self.test_status_waiting = Status(
-            name="Waiting To Start",
-            code="WTS"
-        )
+        self.status_new = Status.query.filter_by(code='NEW').first()
+        self.status_wfd = Status.query.filter_by(code='WFD').first()
+        self.status_rts = Status.query.filter_by(code='RTS').first()
+        self.status_wip = Status.query.filter_by(code='WIP').first()
+        self.status_prev = Status.query.filter_by(code='PREV').first()
+        self.status_hrev = Status.query.filter_by(code='HREV').first()
+        self.status_drev = Status.query.filter_by(code='DREV').first()
+        self.status_oh = Status.query.filter_by(code='OH').first()
+        self.status_stop = Status.query.filter_by(code='STOP').first()
+        self.status_cmpl = Status.query.filter_by(code='CMPL').first()
 
         # status lists
         self.test_project_status_list = StatusList(
             name="Project Status List",
-            statuses=[self.test_status_complete,
-                      self.test_status_waiting,
-                      self.test_status_wip],
+            statuses=[
+                self.status_new,
+                self.status_wip,
+                self.status_cmpl
+            ],
             target_entity_type=Project,
         )
 
-        self.test_sequence_status_list = StatusList(
-            name="Project Status List",
-            statuses=[self.test_status_complete,
-                      self.test_status_waiting,
-                      self.test_status_wip],
-            target_entity_type='Sequence',
-        )
+        self.test_sequence_status_list = \
+            StatusList.query.filter_by(target_entity_type='Sequence').first()
 
-        self.test_shot_status_list = StatusList(
-            name="Shot Status List",
-            statuses=[self.test_status_complete,
-                      self.test_status_waiting,
-                      self.test_status_wip],
-            target_entity_type=Shot,
-        )
+        self.test_shot_status_list = \
+            StatusList.query.filter_by(target_entity_type='Shot').first()
 
-        self.test_asset_status_list = StatusList(
-            name="Asset Status List",
-            statuses=[self.test_status_complete,
-                      self.test_status_waiting,
-                      self.test_status_wip],
-            target_entity_type=Asset,
-        )
+        self.test_asset_status_list = \
+            StatusList.query.filter_by(target_entity_type='Asset').first()
 
         # types
         self.test_commercial_project_type = Type(
@@ -880,34 +869,10 @@ class ShotTester(unittest2.TestCase):
 
         self.assertEqual(new_shot.references, references)
 
-    def test_StatusMixin_initialization(self):
-        """testing if the StatusMixin part is initialized correctly
-        """
-        status1 = Status(name="On Hold", code="OH")
-        status2 = Status(name="Complete", code="CMPLT")
-
-        status_list = StatusList(
-            name="Project Statuses",
-            statuses=[status1, status2],
-            target_entity_type=Shot
-        )
-
-        self.kwargs["code"] = "SH12314"
-        self.kwargs["status"] = 0
-        self.kwargs["status_list"] = status_list
-
-        new_shot = Shot(**self.kwargs)
-
-        self.assertEqual(new_shot.status_list, status_list)
-
     def test_TaskMixin_initialization(self):
         """testing if the TaskMixin part is initialized correctly
         """
         status1 = Status(name="On Hold", code="OH")
-
-        task_status_list = StatusList(name="Task Statuses",
-                                      statuses=[status1],
-                                      target_entity_type=Task)
 
         project_status_list = StatusList(
             name="Project Statuses",
@@ -935,7 +900,6 @@ class ShotTester(unittest2.TestCase):
 
         task1 = Task(
             name="Modeling", status=0,
-            status_list=task_status_list,
             project=new_project,
             parent=new_shot,
         )
@@ -943,7 +907,6 @@ class ShotTester(unittest2.TestCase):
         task2 = Task(
             name="Lighting",
             status=0,
-            status_list=task_status_list,
             project=new_project,
             parent=new_shot,
         )

@@ -20,7 +20,7 @@
 
 import unittest2
 
-from stalker import (Entity, Link, Project, Repository, Sequence, Status,
+from stalker import (db, Entity, Link, Project, Repository, Sequence, Status,
                      StatusList, Task, Type)
 
 
@@ -31,12 +31,20 @@ class SequenceTester(unittest2.TestCase):
     def setUp(self):
         """setup the test
         """
-        # create statuses
-        self.test_status1 = Status(name="Status1", code="STS1")
-        self.test_status2 = Status(name="Status2", code="STS2")
-        self.test_status3 = Status(name="Status3", code="STS3")
-        self.test_status4 = Status(name="Status4", code="STS4")
-        self.test_status5 = Status(name="Status5", code="STS5")
+        db.setup()
+        db.init()
+
+        # get statuses
+        self.status_new = Status.query.filter_by(code='NEW').first()
+        self.status_wfd = Status.query.filter_by(code='WFD').first()
+        self.status_rts = Status.query.filter_by(code='RTS').first()
+        self.status_wip = Status.query.filter_by(code='WIP').first()
+        self.status_prev = Status.query.filter_by(code='PREV').first()
+        self.status_hrev = Status.query.filter_by(code='HREV').first()
+        self.status_drev = Status.query.filter_by(code='DREV').first()
+        self.status_oh = Status.query.filter_by(code='OH').first()
+        self.status_stop = Status.query.filter_by(code='STOP').first()
+        self.status_cmpl = Status.query.filter_by(code='CMPL').first()
 
         # create a test project, user and a couple of shots
         self.project_type = Type(
@@ -49,11 +57,9 @@ class SequenceTester(unittest2.TestCase):
         self.project_status_list = StatusList(
             name="Project Statuses",
             statuses=[
-                self.test_status1,
-                self.test_status2,
-                self.test_status3,
-                self.test_status4,
-                self.test_status5,
+                self.status_new,
+                self.status_wip,
+                self.status_cmpl,
             ],
             target_entity_type=Project,
         )
@@ -87,17 +93,8 @@ class SequenceTester(unittest2.TestCase):
             repository=self.test_repository,
         )
 
-        self.sequence_status_list = StatusList(
-            name="Sequence Statuses",
-            statuses=[
-                self.test_status1,
-                self.test_status2,
-                self.test_status3,
-                self.test_status4,
-                self.test_status5,
-            ],
-            target_entity_type=Sequence,
-        )
+        self.sequence_status_list = \
+            StatusList.query.filter_by(target_entity_type='Sequence').first()
 
         # the parameters
         self.kwargs = {
@@ -221,32 +218,10 @@ class SequenceTester(unittest2.TestCase):
         new_sequence = Sequence(**self.kwargs)
         self.assertEqual(new_sequence.references, references)
 
-    def test_StatusMixin_initialization(self):
-        """testing if the StatusMixin part is initialized correctly
-        """
-        status1 = Status(name="On Hold", code="OH")
-        status2 = Status(name="Complete", code="CMPLT")
-
-        status_list = StatusList(
-            name="Project Statuses",
-            statuses=[status1, status2],
-            target_entity_type=Sequence
-        )
-        self.kwargs["status"] = 0
-        self.kwargs["status_list"] = status_list
-        new_sequence = Sequence(**self.kwargs)
-        self.assertEqual(new_sequence.status_list, status_list)
-
     def test_TaskableEntity_initialization(self):
         """testing if the TaskableEntity part is initialized correctly
         """
         status1 = Status(name="On Hold", code="OH")
-
-        task_status_list = StatusList(
-            name="Task Statuses",
-            statuses=[status1],
-            target_entity_type=Task
-        )
 
         project_status_list = StatusList(
             name="Project Statuses", statuses=[status1],
@@ -274,7 +249,6 @@ class SequenceTester(unittest2.TestCase):
         task1 = Task(
             name="Modeling",
             status=0,
-            status_list=task_status_list,
             project=new_project,
             parent=new_sequence,
         )
@@ -282,7 +256,6 @@ class SequenceTester(unittest2.TestCase):
         task2 = Task(
             name="Lighting",
             status=0,
-            status_list=task_status_list,
             project=new_project,
             parent=new_sequence,
         )
@@ -290,65 +263,6 @@ class SequenceTester(unittest2.TestCase):
         tasks = [task1, task2]
 
         self.assertItemsEqual(new_sequence.tasks, tasks)
-
-        # UPDATE THIS: This test needs to be in the tests.db
-        # because the property it is testing is using session.query
-        #
-        #def test_sequences_attribute_is_updated_in_the_project_instance(self):
-        #"""testing if the sequences attribute is updated in the Project
-        #instance.
-        #"""
-
-        #status1 = Status(name="On Hold", code="OH")
-
-        #task_status_list = StatusList(
-        #name="Task Statuses",
-        #statuses=[status1],
-        #target_entity_type=Task
-        #)
-
-        #project_status_list = StatusList(
-        #name="Project Statuses", statuses=[status1],
-        #target_entity_type=Project
-        #)
-
-        #project_type = Type(
-        #name="Commercial",
-        #code='comm',
-        #target_entity_type=Project,
-        #)
-
-        #new_project = Project(
-        #name="Commercial",
-        #code='comm',
-        #status_list=project_status_list,
-        #type=project_type,
-        #repository=self.test_repository,
-        #)
-
-        #self.kwargs["project"] = new_project
-
-        #new_sequence = Sequence(**self.kwargs)
-
-        #task1 = Task(
-        #   name="Modeling",
-        #   status=0,
-        #   status_list=task_status_list,
-        #   project=new_project,
-        #   parent=new_sequence,
-        #)
-
-        #task2 = Task(
-        #   name="Lighting",
-        #   status=0,
-        #   status_list=task_status_list,
-        #   project=new_project,
-        #   parent=new_sequence,
-        #)
-
-        #tasks = [task1, task2]
-
-        #self.assertIn(new_sequence, new_project.sequences)
 
     def test_ProjectMixin_initialization(self):
         """testing if the ProjectMixin part is initialized correctly

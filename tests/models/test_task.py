@@ -48,10 +48,7 @@ class TaskTester(unittest2.TestCase):
         """run before every test
         """
         # create a new session
-        db.setup({
-            "sqlalchemy.url": "sqlite:///:memory:",
-            "sqlalchemy.echo": False,
-        })
+        db.setup()
         db.init()
 
         self.status_wfd = Status.query.filter_by(code="WFD").first()
@@ -1672,6 +1669,8 @@ class TaskTester(unittest2.TestCase):
         """testing if the percent_complete attribute is working properly for a
         leaf task
         """
+        self.test_task.depends = []
+
         dt = datetime.datetime
         td = datetime.timedelta
         now = dt.now()
@@ -1700,6 +1699,8 @@ class TaskTester(unittest2.TestCase):
         """testing if the percent complete attribute is working properly for a
         container task
         """
+        self.test_task.status = self.status_rts
+
         dt = datetime.datetime
         td = datetime.timedelta
         now = dt.now()
@@ -1825,6 +1826,9 @@ class TaskTester(unittest2.TestCase):
     def test_time_logs_attribute_is_working_properly(self):
         """testing if the time_log attribute is working properly
         """
+        self.kwargs['depends'] = []
+        self.test_task.depends = []
+
         now = datetime.datetime.now()
         dt = datetime.timedelta
 
@@ -1886,6 +1890,9 @@ class TaskTester(unittest2.TestCase):
         """testing if the total_logged_seconds is the sum of all time_logs in
         hours
         """
+        self.kwargs['depends'] = []
+        self.test_task.depends = []
+
         dt = datetime.datetime
         td = datetime.timedelta
         now = dt.now()
@@ -1913,6 +1920,9 @@ class TaskTester(unittest2.TestCase):
         """testing if the total_logged_seconds is the sum of all time_logs of
         the child tasks for a container task
         """
+        self.kwargs['depends'] = []
+        self.test_task.depends = []
+
         dt = datetime.datetime
         td = datetime.timedelta
         now = dt.now()
@@ -1947,6 +1957,9 @@ class TaskTester(unittest2.TestCase):
         """testing if the total_logged_seconds is the sum of all time_logs of
         the child tasks for a container task (test deeper)
         """
+        self.kwargs['depends'] = []
+        self.test_task.depends = []
+
         dt = datetime.datetime
         td = datetime.timedelta
         now = dt.now()
@@ -2007,6 +2020,9 @@ class TaskTester(unittest2.TestCase):
         for a container task when one of the time logs of one of the children
         of the task is changed
         """
+        self.kwargs['depends'] = []
+        self.test_task.depends = []
+
         dt = datetime.datetime
         td = datetime.timedelta
         now = dt.now()
@@ -2421,6 +2437,8 @@ class TaskTester(unittest2.TestCase):
     def test_remaining_seconds_is_working_properly(self):
         """testing if the remaining hours is working properly
         """
+        self.kwargs['depends'] = []
+
         dt = datetime.datetime
         td = datetime.timedelta
         now = dt(2013, 4, 19, 10, 0)
@@ -2439,7 +2457,6 @@ class TaskTester(unittest2.TestCase):
             duration=td(hours=2),
             resource=new_task.resources[0]
         )
-        new_task.time_logs.append(book1)
 
         # check
         self.assertEqual(
@@ -4855,10 +4872,21 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         """
         self.test_task2.status = self.status_rts
         self.test_task8.status = self.status_rts
-        resource = self.test_task8.resources[0]
-        start = datetime.datetime.now()
-        end = datetime.datetime.now() + datetime.timedelta(hours=1)
-        self.test_task8.create_time_log(resource, start, end)
+
+        self.assertEqual(
+            self.test_task8.parent, self.test_task2
+        )
+
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+
+        self.test_task8.create_time_log(
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + td(hours=1)
+        )
+
         self.assertEqual(self.test_task8.status, self.status_wip)
         self.assertEqual(self.test_task2.status, self.status_wip)
 
@@ -5216,16 +5244,27 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         reviews = self.test_task3.request_review()
 
         # only finalize the first review
-        reviews[0].request_revision(
+        review1 = reviews[0]
+        review2 = reviews[1]
+
+        review1.request_revision(
             schedule_timing=6, schedule_unit='h', description=''
         )
 
         # now request_revision using the task
-        review = self.test_task3.request_revision(
+        review3 = self.test_task3.request_revision(
             reviewer=self.test_user1,
             description='do something uleyn',
             schedule_timing=4,
             schedule_unit='h'
+        )
+        self.assertEqual(
+            len(self.test_task3.reviews), 2
+        )
+
+        # check if they are in the same review set
+        self.assertEqual(
+            review1.review_number, review3.review_number
         )
 
         # the final timing should be 12 hours
@@ -5782,7 +5821,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
             end=now + td(hours=1)
         )
         TimeLog(
-            task=self.test_task8,
+            task=self.test_task9,
             resource=self.test_task9.resources[0],
             start=now + td(hours=1),
             end=now + td(hours=2)
@@ -6074,10 +6113,77 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.test_task9.status = self.status_rts
         self.test_task9.depends = [self.test_task3]
 
-        self.test_task3.status = self.status_wip
-        self.test_task9.status = self.status_oh
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task9.status, self.status_wfd)
 
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+
+        # start working on task3
+        self.test_task3.create_time_log(
+            resource=self.test_task3.resources[0],
+            start=now,
+            end=now + td(hours=1)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task9.status, self.status_wfd)
+
+        # complete task3
+        reviews = self.test_task3.request_review()
+        for r in reviews:
+            r.approve()
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_rts)
+
+        # start working on task9
+        self.test_task9.create_time_log(
+            resource=self.test_task9.resources[0],
+            start=now + td(hours=1),
+            end=now + td(hours=2)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_wip)
+
+        # hold task9
+        self.test_task9.hold()
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_oh)
+
+        # request a revision to task3
+        self.test_task3.request_revision(
+            reviewer=self.test_user1
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_hrev)
+        self.assertEqual(self.test_task9.status, self.status_oh)
+
+        # now continue working on task3
+        self.test_task3.create_time_log(
+            resource=self.test_task3.resources[0],
+            start=now + td(hours=2),
+            end=now + td(hours=3)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task9.status, self.status_oh)
+
+        # now resume task9
         self.test_task9.resume()
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wip)
         self.assertEqual(self.test_task9.status, self.status_drev)
 
     # OH: HREV dependencies -> DREV
@@ -6089,9 +6195,43 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.test_task9.status = self.status_rts
         self.test_task9.depends = [self.test_task3]
 
-        self.test_task3.status = self.status_hrev
-        self.test_task9.status = self.status_oh
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+        self.test_task3.create_time_log(
+            resource=self.test_task3.resources[0],
+            start=now,
+            end=now + td(hours=1)
+        )
 
+        reviews = self.test_task3.request_review()
+        for r in reviews:
+            r.approve()
+
+        # task3 should be cmpl
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+
+        # start working on task9
+        self.test_task9.create_time_log(
+            resource=self.test_task9.resources[0],
+            start=now + td(hours=1),
+            end=now + td(hours=2)
+        )
+
+        # now continue working on test_task3
+        self.test_task3.request_revision(
+            reviewer=self.test_task3.resources[0]
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_hrev)
+        self.assertEqual(self.test_task9.status, self.status_drev)
+
+        # hold task9
+        self.test_task9.hold()
+        self.assertEqual(self.test_task9.status, self.status_oh)
+
+        # resume task9
         self.test_task9.resume()
         self.assertEqual(self.test_task9.status, self.status_drev)
 
@@ -6104,10 +6244,84 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.test_task9.status = self.status_rts
         self.test_task9.depends = [self.test_task3]
 
-        self.test_task3.status = self.status_prev
-        self.test_task9.status = self.status_oh
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task9.status, self.status_wfd)
 
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+
+        # start working on task3
+        self.test_task3.create_time_log(
+            resource=self.test_task3.resources[0],
+            start=now,
+            end=now + td(hours=1)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task9.status, self.status_wfd)
+
+        # complete task3
+        reviews = self.test_task3.request_review()
+        for r in reviews:
+            r.approve()
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_rts)
+
+        # start working on task9
+        self.test_task9.create_time_log(
+            resource=self.test_task9.resources[0],
+            start=now + td(hours=1),
+            end=now + td(hours=2)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_wip)
+
+        # hold task9
+        self.test_task9.hold()
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_oh)
+
+        # request a revision to task3
+        self.test_task3.request_revision(
+            reviewer=self.test_user1
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_hrev)
+        self.assertEqual(self.test_task9.status, self.status_oh)
+
+        # now continue working on task3
+        self.test_task3.create_time_log(
+            resource=self.test_task3.resources[0],
+            start=now + td(hours=2),
+            end=now + td(hours=3)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task9.status, self.status_oh)
+
+        # request a review for task3
+        self.test_task3.request_review()
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_prev)
+        self.assertEqual(self.test_task9.status, self.status_oh)
+
+        # now resume task9
         self.test_task9.resume()
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_prev)
         self.assertEqual(self.test_task9.status, self.status_drev)
 
     # OH: DREV dependencies -> DREV
@@ -6115,14 +6329,89 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         """testing if the status will be updated to DREV when the resume action
         is used in a OH leaf task with DREV dependencies
         """
+        self.test_task6.status = self.status_rts
         self.test_task3.status = self.status_rts
         self.test_task9.status = self.status_rts
         self.test_task9.depends = [self.test_task3]
+        self.test_task3.depends = [self.test_task6]
 
-        self.test_task3.status = self.status_drev
-        self.test_task9.status = self.status_oh
+        # check statuses
+        self.assertEqual(self.test_task6.status, self.status_rts)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task9.status, self.status_wfd)
 
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+        self.test_task6.create_time_log(
+            resource=self.test_task6.resources[0],
+            start=now,
+            end=now + td(hours=1)
+        )
+
+        # approve task6
+        reviews = self.test_task6.request_review()
+        for r in reviews:
+            r.approve()
+
+        # check statuses
+        self.assertEqual(self.test_task6.status, self.status_cmpl)
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task9.status, self.status_wfd)
+
+        # start working on task3
+        self.test_task3.create_time_log(
+            resource=self.test_task3.resources[0],
+            start=now + td(hours=1),
+            end=now + td(hours=2)
+        )
+
+        # approve task3
+        reviews = self.test_task3.request_review()
+        for r in reviews:
+            r.approve()
+
+        # check statuses
+        self.assertEqual(self.test_task6.status, self.status_cmpl)
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_rts)
+
+        # start working on task9
+        self.test_task9.create_time_log(
+            resource=self.test_task9.resources[0],
+            start=now + td(hours=2),
+            end=now + td(hours=3)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task6.status, self.status_cmpl)
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_wip)
+
+        # hold task9
+        self.test_task9.hold()
+
+        # check statuses
+        self.assertEqual(self.test_task6.status, self.status_cmpl)
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_oh)
+
+        # request a revision to task6
+        self.test_task6.request_revision(
+            reviewer=self.test_user1
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task6.status, self.status_hrev)
+        self.assertEqual(self.test_task3.status, self.status_drev)
+        self.assertEqual(self.test_task9.status, self.status_oh)
+
+        # resume task9
         self.test_task9.resume()
+
+        # check statuses
+        self.assertEqual(self.test_task6.status, self.status_hrev)
+        self.assertEqual(self.test_task3.status, self.status_drev)
         self.assertEqual(self.test_task9.status, self.status_drev)
 
     # OH: OH dependencies -> DREV
@@ -6132,10 +6421,45 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         """
         self.test_task3.status = self.status_rts
         self.test_task9.status = self.status_rts
+
+        # finish task3 first
+        now = datetime.datetime.now()
+        self.test_task3.create_time_log(
+            resource=self.test_task3.resources[0],
+            start=now,
+            end=now + datetime.timedelta(hours=1)
+        )
+        reviews = self.test_task3.request_review()
+        for r in reviews:
+            r.approve()
+
         self.test_task9.depends = [self.test_task3]
 
-        self.test_task3.status = self.status_oh
-        self.test_task9.status = self.status_oh
+        # start working for task9
+        self.test_task9.create_time_log(
+            resource=self.test_task9.resources[0],
+            start=now + datetime.timedelta(hours=1),
+            end=now + datetime.timedelta(hours=2)
+        )
+
+        # now request a revision for task3
+        self.test_task3.request_revision(reviewer=self.test_user1)
+        self.assertEqual(self.test_task3.status, self.status_hrev)
+        self.assertEqual(self.test_task9.status, self.status_drev)
+
+        # enter a new time log for task3 to make it wip
+        self.test_task3.create_time_log(
+            resource=self.test_task3.resources[0],
+            start=now + datetime.timedelta(hours=3),
+            end=now + datetime.timedelta(hours=4),
+        )
+
+        # and hold task3 and task9
+        self.test_task9.hold()
+        self.test_task3.hold()
+
+        self.assertEqual(self.test_task3.status, self.status_oh)
+        self.assertEqual(self.test_task9.status, self.status_oh)
 
         self.test_task9.resume()
         self.assertEqual(self.test_task9.status, self.status_drev)
@@ -6189,10 +6513,77 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.test_task9.status = self.status_rts
         self.test_task9.depends = [self.test_task3]
 
-        self.test_task3.status = self.status_wip
-        self.test_task9.status = self.status_stop
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task9.status, self.status_wfd)
 
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+
+        # start working on task3
+        self.test_task3.create_time_log(
+            resource=self.test_task3.resources[0],
+            start=now,
+            end=now + td(hours=1)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task9.status, self.status_wfd)
+
+        # complete task3
+        reviews = self.test_task3.request_review()
+        for r in reviews:
+            r.approve()
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_rts)
+
+        # start working on task9
+        self.test_task9.create_time_log(
+            resource=self.test_task9.resources[0],
+            start=now + td(hours=1),
+            end=now + td(hours=2)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_wip)
+
+        # stop task9
+        self.test_task9.stop()
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_stop)
+
+        # request a revision to task3
+        self.test_task3.request_revision(
+            reviewer=self.test_user1
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_hrev)
+        self.assertEqual(self.test_task9.status, self.status_stop)
+
+        # now continue working on task3
+        self.test_task3.create_time_log(
+            resource=self.test_task3.resources[0],
+            start=now + td(hours=2),
+            end=now + td(hours=3)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task9.status, self.status_stop)
+
+        # now resume task9
         self.test_task9.resume()
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wip)
         self.assertEqual(self.test_task9.status, self.status_drev)
 
     # STOP: HREV dependencies -> DREV
@@ -6204,10 +6595,92 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.test_task9.status = self.status_rts
         self.test_task9.depends = [self.test_task3]
 
-        self.test_task3.status = self.status_hrev
-        self.test_task9.status = self.status_stop
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task9.status, self.status_wfd)
 
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+
+        # start working on task3
+        self.test_task3.create_time_log(
+            resource=self.test_task3.resources[0],
+            start=now,
+            end=now + td(hours=1)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task9.status, self.status_wfd)
+
+        # complete task3
+        reviews = self.test_task3.request_review()
+        for r in reviews:
+            r.approve()
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_rts)
+
+        # start working on task9
+        self.test_task9.create_time_log(
+            resource=self.test_task9.resources[0],
+            start=now + td(hours=1),
+            end=now + td(hours=2)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_wip)
+
+        # stop task9
+        self.test_task9.stop()
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_stop)
+
+        # request a revision to task3
+        self.test_task3.request_revision(
+            reviewer=self.test_user1
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_hrev)
+        self.assertEqual(self.test_task9.status, self.status_stop)
+
+        # now continue working on task3
+        self.test_task3.create_time_log(
+            resource=self.test_task3.resources[0],
+            start=now + td(hours=2),
+            end=now + td(hours=3)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task9.status, self.status_stop)
+
+        # request a review for task3
+        reviews = self.test_task3.request_review()
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_prev)
+        self.assertEqual(self.test_task9.status, self.status_stop)
+
+        # request revisions
+        for r in reviews:
+            r.request_revision()
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_hrev)
+        self.assertEqual(self.test_task9.status, self.status_stop)
+
+        # now resume task9
         self.test_task9.resume()
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_hrev)
         self.assertEqual(self.test_task9.status, self.status_drev)
 
     # STOP: PREV dependencies -> DREV
@@ -6219,10 +6692,84 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.test_task9.status = self.status_rts
         self.test_task9.depends = [self.test_task3]
 
-        self.test_task3.status = self.status_prev
-        self.test_task9.status = self.status_stop
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task9.status, self.status_wfd)
 
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+
+        # start working on task3
+        self.test_task3.create_time_log(
+            resource=self.test_task3.resources[0],
+            start=now,
+            end=now + td(hours=1)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task9.status, self.status_wfd)
+
+        # complete task3
+        reviews = self.test_task3.request_review()
+        for r in reviews:
+            r.approve()
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_rts)
+
+        # start working on task9
+        self.test_task9.create_time_log(
+            resource=self.test_task9.resources[0],
+            start=now + td(hours=1),
+            end=now + td(hours=2)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_wip)
+
+        # stop task9
+        self.test_task9.stop()
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_stop)
+
+        # request a revision to task3
+        self.test_task3.request_revision(
+            reviewer=self.test_user1
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_hrev)
+        self.assertEqual(self.test_task9.status, self.status_stop)
+
+        # now continue working on task3
+        self.test_task3.create_time_log(
+            resource=self.test_task3.resources[0],
+            start=now + td(hours=2),
+            end=now + td(hours=3)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task9.status, self.status_stop)
+
+        # request a review for task3
+        self.test_task3.request_review()
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_prev)
+        self.assertEqual(self.test_task9.status, self.status_stop)
+
+        # now resume task9
         self.test_task9.resume()
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_prev)
         self.assertEqual(self.test_task9.status, self.status_drev)
 
     # STOP: DREV dependencies -> DREV
@@ -6230,14 +6777,89 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         """testing if the status will be updated to DREV when the resume action
         is used in a STOP leaf task with DREV dependencies
         """
-        self.test_task9.status = self.status_rts
+        self.test_task6.status = self.status_rts
         self.test_task3.status = self.status_rts
+        self.test_task9.status = self.status_rts
         self.test_task9.depends = [self.test_task3]
+        self.test_task3.depends = [self.test_task6]
 
-        self.test_task3.status = self.status_drev
-        self.test_task9.status = self.status_stop
+        # check statuses
+        self.assertEqual(self.test_task6.status, self.status_rts)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task9.status, self.status_wfd)
 
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+        self.test_task6.create_time_log(
+            resource=self.test_task6.resources[0],
+            start=now,
+            end=now + td(hours=1)
+        )
+
+        # approve task6
+        reviews = self.test_task6.request_review()
+        for r in reviews:
+            r.approve()
+
+        # check statuses
+        self.assertEqual(self.test_task6.status, self.status_cmpl)
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task9.status, self.status_wfd)
+
+        # start working on task3
+        self.test_task3.create_time_log(
+            resource=self.test_task3.resources[0],
+            start=now + td(hours=1),
+            end=now + td(hours=2)
+        )
+
+        # approve task3
+        reviews = self.test_task3.request_review()
+        for r in reviews:
+            r.approve()
+
+        # check statuses
+        self.assertEqual(self.test_task6.status, self.status_cmpl)
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_rts)
+
+        # start working on task9
+        self.test_task9.create_time_log(
+            resource=self.test_task9.resources[0],
+            start=now + td(hours=2),
+            end=now + td(hours=3)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task6.status, self.status_cmpl)
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_wip)
+
+        # stop task9
+        self.test_task9.stop()
+
+        # check statuses
+        self.assertEqual(self.test_task6.status, self.status_cmpl)
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_stop)
+
+        # request a revision to task6
+        self.test_task6.request_revision(
+            reviewer=self.test_user1
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task6.status, self.status_hrev)
+        self.assertEqual(self.test_task3.status, self.status_drev)
+        self.assertEqual(self.test_task9.status, self.status_stop)
+
+        # resume task9
         self.test_task9.resume()
+
+        # check statuses
+        self.assertEqual(self.test_task6.status, self.status_hrev)
+        self.assertEqual(self.test_task3.status, self.status_drev)
         self.assertEqual(self.test_task9.status, self.status_drev)
 
     # STOP: OH dependencies -> DREV
@@ -6249,10 +6871,84 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.test_task9.status = self.status_rts
         self.test_task9.depends = [self.test_task3]
 
-        self.test_task3.status = self.status_oh
-        self.test_task9.status = self.status_stop
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_rts)
+        self.assertEqual(self.test_task9.status, self.status_wfd)
 
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+
+        # start working on task3
+        self.test_task3.create_time_log(
+            resource=self.test_task3.resources[0],
+            start=now,
+            end=now + td(hours=1)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task9.status, self.status_wfd)
+
+        # complete task3
+        reviews = self.test_task3.request_review()
+        for r in reviews:
+            r.approve()
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_rts)
+
+        # start working on task9
+        self.test_task9.create_time_log(
+            resource=self.test_task9.resources[0],
+            start=now + td(hours=1),
+            end=now + td(hours=2)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_wip)
+
+        # stop task9
+        self.test_task9.stop()
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        self.assertEqual(self.test_task9.status, self.status_stop)
+
+        # request a revision to task3
+        self.test_task3.request_revision(
+            reviewer=self.test_user1
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_hrev)
+        self.assertEqual(self.test_task9.status, self.status_stop)
+
+        # now continue working on task3
+        self.test_task3.create_time_log(
+            resource=self.test_task3.resources[0],
+            start=now + td(hours=2),
+            end=now + td(hours=3)
+        )
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.assertEqual(self.test_task9.status, self.status_stop)
+
+        # hold task3
+        self.test_task3.hold()
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_oh)
+        self.assertEqual(self.test_task9.status, self.status_stop)
+
+        # now resume task9
         self.test_task9.resume()
+
+        # check statuses
+        self.assertEqual(self.test_task3.status, self.status_oh)
         self.assertEqual(self.test_task9.status, self.status_drev)
 
     # STOP: STOP dependencies -> WIP

@@ -28,7 +28,7 @@ Stalker Changes
   ScopedSession.query_property().
 * **New:** Added Task.walk_hierarchy() which iterates over the hierarchy of the
   task. For now it walks in a breadth first fashion.
-* **New:** Added a new exception called *StatusError* which states the entity
+* **New:** Added a new exception called **StatusError** which states the entity
   status is not suitable for the action it is applied to.
 
 0.2.4

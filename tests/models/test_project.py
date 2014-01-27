@@ -58,14 +58,7 @@ class ProjectTestCase(unittest2.TestCase):
     def setUp(self):
         """setup the test
         """
-        if db.session:
-            db.session.close()
-        self.TEST_DATABASE_URI = "sqlite:///:memory:"
-
-        db.setup({
-            "sqlalchemy.url": self.TEST_DATABASE_URI,
-            "sqlalchemy.echo": False,
-        })
+        db.setup()
         #db.init()  # for tickets
 
         # create test objects
@@ -150,22 +143,25 @@ class ProjectTestCase(unittest2.TestCase):
         )
 
         # statuses
-        self.test_status1 = Status(name="Status1", code="S1")
-        self.test_status2 = Status(name="Status2", code="S2")
-        self.test_status3 = Status(name="Status3", code="S3")
-        self.test_status4 = Status(name="Status4", code="S4")
-        self.test_status5 = Status(name="Status5", code="S5")
+        self.status_new = Status(name="New", code="NEW")
+        self.status_wfd = Status(name="Waiting For Dependency", code="WFD")
+        self.status_rts = Status(name="Ready To Start", code="RTS")
+        self.status_wip = Status(name="Work In Progress", code="WIP")
+        self.status_prev = Status(name="Pending Review", code="PREV")
+        self.status_hrev = Status(name="Has Revision", code="HREV")
+        self.status_drev = Status(name="Dependency Has Revision", code="DREV")
+        self.status_oh = Status(name="On Hold", code="OH")
+        self.status_stop = Status(name="Stopped", code="STOP")
+        self.status_cmpl = Status(name="Completed", code="CMPL")
 
         # status list for project
         self.project_status_list = StatusList(
             name="Project Statuses",
             target_entity_type=Project,
             statuses=[
-                self.test_status1,
-                self.test_status2,
-                self.test_status3,
-                self.test_status4,
-                self.test_status5,
+                self.status_new,
+                self.status_wip,
+                self.status_cmpl,
             ],
         )
 
@@ -239,11 +235,15 @@ class ProjectTestCase(unittest2.TestCase):
         self.sequence_status_list = StatusList(
             name="Sequence Statuses",
             statuses=[
-                self.test_status1,
-                self.test_status2,
-                self.test_status3,
-                self.test_status4,
-                self.test_status5,
+                self.status_rts,
+                self.status_wfd,
+                self.status_wip,
+                self.status_prev,
+                self.status_hrev,
+                self.status_drev,
+                self.status_oh,
+                self.status_stop,
+                self.status_cmpl,
             ],
             target_entity_type=Sequence
         )
@@ -307,11 +307,15 @@ class ProjectTestCase(unittest2.TestCase):
         self.shot_status_list = StatusList(
             name="Shot Status List",
             statuses=[
-                self.test_status1,
-                self.test_status2,
-                self.test_status3,
-                self.test_status4,
-                self.test_status5,
+                self.status_rts,
+                self.status_wfd,
+                self.status_wip,
+                self.status_prev,
+                self.status_hrev,
+                self.status_drev,
+                self.status_oh,
+                self.status_stop,
+                self.status_cmpl,
             ],
             target_entity_type=Shot,
         )
@@ -349,11 +353,15 @@ class ProjectTestCase(unittest2.TestCase):
         self.asset_status_list = StatusList(
             name="Asset Status List",
             statuses=[
-                self.test_status1,
-                self.test_status2,
-                self.test_status3,
-                self.test_status4,
-                self.test_status5,
+                self.status_rts,
+                self.status_wfd,
+                self.status_wip,
+                self.status_prev,
+                self.status_hrev,
+                self.status_drev,
+                self.status_oh,
+                self.status_stop,
+                self.status_cmpl,
             ],
             target_entity_type=Asset,
         )
@@ -412,11 +420,15 @@ class ProjectTestCase(unittest2.TestCase):
         self.task_status_list = StatusList(
             name="Task Status List",
             statuses=[
-                self.test_status1,
-                self.test_status2,
-                self.test_status3,
-                self.test_status4,
-                self.test_status5,
+                self.status_rts,
+                self.status_wfd,
+                self.status_wip,
+                self.status_prev,
+                self.status_hrev,
+                self.status_drev,
+                self.status_oh,
+                self.status_stop,
+                self.status_cmpl,
             ],
             target_entity_type=Task,
         )
@@ -1297,9 +1309,9 @@ class ProjectTestCase(unittest2.TestCase):
         self.maxDiff = None
         from jinja2 import Template
 
-        expected_tjp_temp = Template("""task Project_28 "Test Project" {
+        expected_tjp_temp = Template("""task Project_33 "Test Project" {
             
-                task Sequence_29 "Seq1" {
+                task Sequence_34 "Seq1" {
         
             
             effort 1.0h
@@ -1307,263 +1319,263 @@ class ProjectTestCase(unittest2.TestCase):
         }
         
             
-                task Sequence_30 "Seq2" {
+                task Sequence_35 "Seq2" {
         
             
             effort 1.0h
-            allocate User_8
+            allocate User_12
         }
         
             
-                task Sequence_31 "Seq3" {
+                task Sequence_36 "Seq3" {
         
             
             effort 1.0h
-            allocate User_9
+            allocate User_13
         }
         
             
-                task Sequence_32 "Seq4" {
+                task Sequence_37 "Seq4" {
         
-                task Task_48 "Test Task 4" {
-        
-            
-            effort 1.0h
-            allocate User_15
-        }
-        
-                task Task_49 "Test Task 5" {
-        
-            
-            effort 1.0h
-            allocate User_16
-        }
-        
-                task Task_50 "Test Task 6" {
-        
-            
-            effort 1.0h
-            allocate User_17
-        }
-        
-        }
-        
-            
-                task Sequence_33 "Seq5" {
-        
-                task Task_51 "Test Task 7" {
-        
-            
-            effort 1.0h
-            allocate User_18
-        }
-        
-                task Task_52 "Test Task 8" {
+                task Task_53 "Test Task 4" {
         
             
             effort 1.0h
             allocate User_19
         }
         
-                task Task_53 "Test Task 9" {
+                task Task_54 "Test Task 5" {
         
             
             effort 1.0h
             allocate User_20
         }
         
-        }
+                task Task_55 "Test Task 6" {
         
             
-                task Sequence_34 "Seq6" {
-        
-            
-        }
-        
-            
-                task Sequence_35 "Seq7" {
-        
-            
-        }
-        
-            
-                task Shot_36 "{{shot1.name}}" {
-        
-                task Task_54 "Test Task 10" {
-        
-            
-            effort 10.0h
+            effort 1.0h
             allocate User_21
         }
         
-                task Task_55 "Test Task 11" {
+        }
+        
+            
+                task Sequence_38 "Seq5" {
+        
+                task Task_56 "Test Task 7" {
         
             
             effort 1.0h
-            allocate User_1, User_8
+            allocate User_22
         }
         
-                task Task_56 "Test Task 12" {
+                task Task_57 "Test Task 8" {
         
             
             effort 1.0h
-            allocate User_9, User_15
+            allocate User_23
         }
         
-        }
-        
-            
-                task Shot_37 "{{shot2.name}}" {
-        
-                task Task_57 "Test Task 13" {
+                task Task_58 "Test Task 9" {
         
             
             effort 1.0h
-            allocate User_16, User_17
+            allocate User_24
         }
         
-                task Task_58 "Test Task 14" {
+        }
+        
+            
+                task Sequence_39 "Seq6" {
+        
+            
+        }
+        
+            
+                task Sequence_40 "Seq7" {
+        
+            
+        }
+        
+            
+                task Shot_41 "{{shot1.name}}" {
+        
+                task Task_59 "Test Task 10" {
+        
+            
+            effort 10.0h
+            allocate User_25
+        }
+        
+                task Task_60 "Test Task 11" {
         
             
             effort 1.0h
-            allocate User_18, User_19
+            allocate User_1, User_12
         }
         
-                task Task_59 "Test Task 15" {
+                task Task_61 "Test Task 12" {
+        
+            
+            effort 1.0h
+            allocate User_13, User_19
+        }
+        
+        }
+        
+            
+                task Shot_42 "{{shot2.name}}" {
+        
+                task Task_62 "Test Task 13" {
         
             
             effort 1.0h
             allocate User_20, User_21
         }
         
-        }
-        
-            
-                task Shot_38 "{{shot3.name}}" {
-        
-                task Task_60 "Test Task 16" {
+                task Task_63 "Test Task 14" {
         
             
             effort 1.0h
-            allocate User_1, User_8, User_9
+            allocate User_22, User_23
         }
         
-                task Task_61 "Test Task 17" {
+                task Task_64 "Test Task 15" {
         
             
             effort 1.0h
-            allocate User_15, User_16, User_17
+            allocate User_24, User_25
         }
         
-                task Task_62 "Test Task 18" {
+        }
+        
+            
+                task Shot_43 "{{shot3.name}}" {
+        
+                task Task_65 "Test Task 16" {
         
             
             effort 1.0h
-            allocate User_18, User_19, User_20
+            allocate User_1, User_12, User_13
         }
         
-        }
-        
-            
-                task Shot_39 "{{shot4.name}}" {
-        
-                task Task_63 "Test Task 19" {
+                task Task_66 "Test Task 17" {
         
             
             effort 1.0h
-            allocate User_1, User_8, User_21
+            allocate User_19, User_20, User_21
         }
         
-                task Task_64 "Test Task 20" {
+                task Task_67 "Test Task 18" {
         
             
             effort 1.0h
-            allocate User_9, User_15, User_16
+            allocate User_22, User_23, User_24
         }
         
-                task Task_65 "Test Task 21" {
+        }
+        
+            
+                task Shot_44 "{{shot4.name}}" {
+        
+                task Task_68 "Test Task 19" {
         
             
             effort 1.0h
-            allocate User_17, User_18, User_19
+            allocate User_1, User_12, User_25
         }
         
-        }
-        
-            
-                task Asset_40 "Test Asset 1" {
+                task Task_69 "Test Task 20" {
         
             
             effort 1.0h
-            allocate User_8
+            allocate User_13, User_19, User_20
         }
         
-            
-                task Asset_41 "Test Asset 2" {
-        
-            
-        }
-        
-            
-                task Asset_42 "Test Asset 3" {
-        
-            
-        }
-        
-            
-                task Asset_43 "Test Asset 4" {
-        
-                task Task_66 "Test Task 22" {
+                task Task_70 "Test Task 21" {
         
             
             effort 1.0h
-            allocate User_1, User_20, User_21
+            allocate User_21, User_22, User_23
         }
         
-                task Task_67 "Test Task 23" {
+        }
+        
+            
+                task Asset_45 "Test Asset 1" {
         
             
             effort 1.0h
-            allocate User_8, User_9
+            allocate User_12
         }
         
-                task Task_68 "Test Task 24" {
+            
+                task Asset_46 "Test Asset 2" {
+        
+            
+        }
+        
+            
+                task Asset_47 "Test Asset 3" {
+        
+            
+        }
+        
+            
+                task Asset_48 "Test Asset 4" {
+        
+                task Task_71 "Test Task 22" {
         
             
             effort 1.0h
-            allocate User_15, User_16
+            allocate User_1, User_24, User_25
         }
         
-        }
-        
-            
-                task Asset_44 "Test Asset 5" {
-        
-                task Task_69 "Test Task 25" {
+                task Task_72 "Test Task 23" {
         
             
             effort 1.0h
-            allocate User_17, User_18
+            allocate User_12, User_13
         }
         
-                task Task_70 "Test Task 26" {
+                task Task_73 "Test Task 24" {
         
             
             effort 1.0h
             allocate User_19, User_20
         }
         
-                task Task_71 "Test Task 27" {
+        }
+        
+            
+                task Asset_49 "Test Asset 5" {
+        
+                task Task_74 "Test Task 25" {
         
             
             effort 1.0h
-            allocate User_1, User_21
+            allocate User_21, User_22
+        }
+        
+                task Task_75 "Test Task 26" {
+        
+            
+            effort 1.0h
+            allocate User_23, User_24
+        }
+        
+                task Task_76 "Test Task 27" {
+        
+            
+            effort 1.0h
+            allocate User_1, User_25
         }
         
         }
         
             
-                task Task_45 "Test Task 1" {
+                task Task_50 "Test Task 1" {
         
             
             effort 1.0h
@@ -1571,19 +1583,19 @@ class ProjectTestCase(unittest2.TestCase):
         }
         
             
-                task Task_46 "Test Task 2" {
+                task Task_51 "Test Task 2" {
         
             
             effort 1.0h
-            allocate User_8
+            allocate User_12
         }
         
             
-                task Task_47 "Test Task 3" {
+                task Task_52 "Test Task 3" {
         
             
             effort 1.0h
-            allocate User_9
+            allocate User_13
         }
         
             

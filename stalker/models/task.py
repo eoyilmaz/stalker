@@ -122,8 +122,8 @@ class TimeLog(Entity, DateRangeMixin):
         kwargs['end'] = end
         kwargs['duration'] = duration
         DateRangeMixin.__init__(self, **kwargs)
-        self.resource = resource
         self.task = task
+        self.resource = resource
 
     def _expand_task_schedule_timing(self, task):
         """Expands the task schedule timing if necessary
@@ -162,9 +162,46 @@ class TimeLog(Entity, DateRangeMixin):
                 (self.__class__.__name__, task.__class__.__name__)
             )
 
-        # adjust task schedule
+        if task.is_container:
+            raise ValueError(
+                '%(task)s (id: %(id)s) is a container task, and it is not '
+                'allowed to create TimeLogs for a container task' % {
+                    'task': task.name,
+                    'id': task.id
+                }
+            )
+
+        # check status
         with db.session.no_autoflush:
+            WFD = Status.query.filter_by(code='WFD').first()
+            RTS = Status.query.filter_by(code='RTS').first()
+            WIP = Status.query.filter_by(code='WIP').first()
+            PREV = Status.query.filter_by(code='PREV').first()
+            HREV = Status.query.filter_by(code='HREV').first()
+            DREV = Status.query.filter_by(code='DREV').first()
+            OH = Status.query.filter_by(code='OH').first()
+            STOP = Status.query.filter_by(code='STOP').first()
+            CMPL = Status.query.filter_by(code='CMPL').first()
+
+            if task.status in [WFD, PREV, OH, STOP, CMPL]:
+                raise StatusError(
+                    '%(task)s is a %(status)s task, and it is not allowed to '
+                    'create TimeLogs for a %(status)s task, please supply a '
+                    'RTS, WIP, HREV or DREV task!' % {
+                        'task': task.name,
+                        'status': task.status.code
+                    }
+                )
+            elif task.status in [RTS, HREV]:
+                # update task status
+                task.status = WIP
+
+            # adjust task schedule
             self._expand_task_schedule_timing(task)
+
+        # this may need to be in an external event, it needs to trigger a flush
+        # to correctly function
+        task.update_parent_statuses()
 
         return task
 
@@ -186,23 +223,24 @@ class TimeLog(Entity, DateRangeMixin):
             )
 
         # check for overbooking
-        logger.debug('resource.time_logs: %s' % resource.time_logs)
-        for time_log in resource.time_logs:
-            logger.debug('time_log       : %s' % time_log)
-            logger.debug('time_log.start : %s' % time_log.start)
-            logger.debug('time_log.end   : %s' % time_log.end)
-            logger.debug('self.start     : %s' % self.start)
-            logger.debug('self.end       : %s' % self.end)
+        with db.session.no_autoflush:
+            logger.debug('resource.time_logs: %s' % resource.time_logs)
+            for time_log in resource.time_logs:
+                logger.debug('time_log       : %s' % time_log)
+                logger.debug('time_log.start : %s' % time_log.start)
+                logger.debug('time_log.end   : %s' % time_log.end)
+                logger.debug('self.start     : %s' % self.start)
+                logger.debug('self.end       : %s' % self.end)
 
-            if time_log != self:
-                if time_log.start == self.start or \
-                   time_log.end == self.end or \
-                   time_log.start < self.end < time_log.end or \
-                   time_log.start < self.start < time_log.end:
-                    raise OverBookedError(
-                        "The resource %s is overly booked with %s and %s" %
-                        (resource, self, time_log),
-                    )
+                if time_log != self:
+                    if time_log.start == self.start or \
+                       time_log.end == self.end or \
+                       time_log.start < self.end < time_log.end or \
+                       time_log.start < self.start < time_log.end:
+                        raise OverBookedError(
+                            "The resource %s is overly booked with %s and %s" %
+                            (resource, self, time_log),
+                        )
         return resource
 
     def __eq__(self, other):
@@ -1725,43 +1763,11 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         """A helper method to create TimeLogs, this will ease creating TimeLog
         instances for task.
         """
-        # check if it is not a container task
-        if self.is_container:
-            raise ValueError(
-                '%(task)s (%(id)s) is a container task, and it is not allowed '
-                'to create TimeLogs for a container task' % {
-                    'task': self,
-                    'id': self.id
-                }
-            )
-
-        with db.session.no_autoflush:
-            WFD = Status.query.filter_by(code='WFD').first()
-            RTS = Status.query.filter_by(code='RTS').first()
-            WIP = Status.query.filter_by(code='WIP').first()
-            PREV = Status.query.filter_by(code='PREV').first()
-            HREV = Status.query.filter_by(code='HREV').first()
-            OH = Status.query.filter_by(code='OH').first()
-            STOP = Status.query.filter_by(code='STOP').first()
-            CMPL = Status.query.filter_by(code='CMPL').first()
-
-        # check status
-        if self.status in [WFD, PREV, OH, STOP, CMPL]:
-            raise StatusError(
-                '%(task)s is a %(status)s task, and it is not allowed to '
-                'create TimeLogs for a %(status)s task' % {
-                    'task': self.name,
-                    'status': self.status.code
-                }
-            )
-        elif self.status in [RTS, HREV]:
-            self.status = WIP
-
+        # all the status checks are now part of TimeLog._validate_task
         # create a TimeLog
-        tlog = TimeLog(task=self, resource=resource, start=start, end=end)
+        TimeLog(task=self, resource=resource, start=start, end=end)
 
-        # update also the parent status
-        self.update_parent_statuses()
+        # also updating parent statuses are done in TimeLog._validate_task
 
     def request_review(self):
         """Creates and returns Review instances for each of the responsible of
@@ -1812,7 +1818,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
                          schedule_timing=1, schedule_unit='h'):
         """Requests revision.
 
-        Only applicable for PREV leaf tasks. This method will expand the
+        Applicable to PREV or CMPL leaf tasks. This method will expand the
         schedule timings of the task according to the supplied arguments.
 
         When request_revision is called on a PREV task, the other NEW Review
@@ -1845,17 +1851,25 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
                 }
             )
 
-        # # find other NEW Reviews and delete them
-        # for r in self.reviews:
-        #     if r.status.code == 'NEW':
-        #         try:
-        #             db.session.delete(r)
-        #         except InvalidRequestError:
-        #             # not persisted yet, good just delete it
-        #             pass
-        #         finally:
-        #             #self.reviews.remove(r)
-        #             del r
+        # *********************************************************************
+        # TODO: I don't like this part, find another way to delete them directly
+        # find other NEW Reviews and delete them
+        reviews_to_be_deleted = []
+        for r in self.reviews:
+            if r.status.code == 'NEW':
+                try:
+                    db.session.delete(r)
+                except InvalidRequestError:
+                    # not persisted yet
+                    db.session.add(r)
+                    reviews_to_be_deleted.append(r)
+                    pass
+        db.session.commit()
+
+        for r in reviews_to_be_deleted:
+            db.session.delete(r)
+        db.session.commit()
+        # *********************************************************************
 
         # create a Review instance with the given data
         from stalker.models.review import Review
@@ -1879,7 +1893,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
         if self.status not in [WIP, DREV, OH]:
             raise StatusError(
-                '%(task)s (%(id)s) is a %(status)s task, only WIP or DREV '
+                '%(task)s (id:%(id)s) is a %(status)s task, only WIP or DREV '
                 'tasks can be set to On Hold' % {
                     'task': self.name,
                     'id': self.id,
@@ -1973,7 +1987,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         self.update_status_with_dependent_statuses()
 
         # and update parents statuses
-        self.update_status_with_children_statuses()
+        self.update_parent_statuses()
 
     def approve(self):
         """Approves a PREV task and sets its status to CMPL.
@@ -2049,7 +2063,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
         if self.id:
             # use pure sql
-            logger.debug('using pure SQL to query query dependency statuses')
+            logger.debug('using pure SQL to query dependency statuses')
             sql_query = """select
         "Statuses".code
     from "Tasks"
@@ -2064,13 +2078,13 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             # convert to a binary value
             binary_status = reduce(
                 lambda x, y: x+y,
-                map(lambda x: binary_status_codes[x[0]], result.fetchall())
+                map(lambda x: binary_status_codes[x[0]], result.fetchall()),
+                0
             )
 
         else:
             # task is not committed yet, use Python version
-            logger.debug('using pure Python to query query dependency '
-                         'statuses')
+            logger.debug('using pure Python to query dependency statuses')
             binary_status = 0
             dep_statuses = []
             for dep in self.depends:
@@ -2079,24 +2093,32 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
                     dep_statuses.append(dep.status)
                     binary_status += binary_status_codes[dep.status.code]
 
-        continue_working = False
-        if binary_status < 4:
-            continue_working = True
+        logger.debug('status of the task: %s' % self.status.code)
+        logger.debug('binary status for dependency statuses: %s' % 
+                     binary_status)
 
-        if continue_working:
+        work_alone = False
+        if binary_status < 4:
+            work_alone = True
+
+        status = self.status
+        if work_alone:
             if self.status == WFD:
-                self.status = RTS
+                status = RTS
             elif self.status == DREV:
-                self.status = WIP
+                status = WIP
         else:
             if self.status == RTS:
-                self.status = WFD
+                status = WFD
             elif self.status == WIP:
-                self.status = DREV
+                status = DREV
             elif self.status == HREV:
-                self.status = DREV
+                status = DREV
             elif self.status == CMPL:
-                self.status = DREV
+                status = DREV
+
+        logger.debug('setting status from %s to %s: ' % (self.status, status))
+        self.status = status
 
         # also update parent statuses
         self.update_parent_statuses()
@@ -2125,17 +2147,6 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
         parent_statuses_lut = [WFD, RTS, WIP, CMPL]
 
-        # use pure sql
-        sql_query = """select
-            "Statuses".code
-        from "Tasks"
-            join "Statuses" on "Tasks".status_id = "Statuses".id
-        where "Tasks".parent_id = %s
-        group by "Statuses".code
-        """ % self.id
-
-        result = db.session.connection().execute(sql_query)
-
         #   +--------- WFD
         #   |+-------- RTS
         #   ||+------- WIP
@@ -2160,11 +2171,36 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             'CMPL': 1
         }
 
-        # convert to a binary value
-        binary_status = reduce(
-            lambda x, y: x+y,
-            map(lambda x: binary_status_codes[x[0]], result.fetchall())
-        )
+        if self.id:
+            # use pure sql
+            logger.debug('using pure SQL to query children statuses')
+
+            sql_query = """select
+                "Statuses".code
+            from "Tasks"
+                join "Statuses" on "Tasks".status_id = "Statuses".id
+            where "Tasks".parent_id = %s
+            group by "Statuses".code
+            """ % self.id
+
+            result = db.session.connection().execute(sql_query)
+
+            # convert to a binary value
+            binary_status = reduce(
+                lambda x, y: x+y,
+                map(lambda x: binary_status_codes[x[0]], result.fetchall()),
+                0
+            )
+        else:
+            # not persisted yet, so use Python
+            logger.debug('using pure Python to query children statuses')
+            binary_status = 0
+            children_statuses = []
+            for child in self.children:
+                # consider every status only once
+                if child.status not in children_statuses:
+                    children_statuses.append(child.status)
+                    binary_status += binary_status_codes[child.status.code]
 
         #
         # I know that the following list seems cryptic but the it shows the
@@ -2339,7 +2375,6 @@ def __update_total_logged_seconds__(tlog, new_duration, old_duration):
     else:
         logger.debug("TimeLog doesn't have a task yet: %s" % tlog)
 
-
 # *****************************************************************************
 # Task.schedule_timing updates Task.parent.schedule_seconds attribute
 # *****************************************************************************
@@ -2444,6 +2479,17 @@ def update_task_date_values(task, removed_child, initiator):
 def added_new_dependency(task, dependent_task, initiator):
     """Runs when a task is appended to another task as dependency and it runs
     after the dependent task is validated.
+
+    :param task: The task that a dependent is added to
+    :param dependent_task: The added dependent task
+    :param initiator: not used
+    """
+    # update task status with dependencies
+    task.update_status_with_dependent_statuses()
+
+@event.listens_for(Task.depends, 'remove', propagate=True)
+def removed_a_dependency(task, dependent_task, initiator):
+    """Runs when a task is removed from another tasks dependency list.
 
     :param task: The task that a dependent is added to
     :param dependent_task: The added dependent task

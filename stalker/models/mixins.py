@@ -363,7 +363,7 @@ class StatusMixin(object):
 
         if status not in self.status_list:
             raise ValueError(
-                "The given Status instance for %s.status is not in the"
+                "The given Status instance for %s.status is not in the "
                 "%s.status_list, please supply a status from that list." %
                 (self.__class__.__name__, self.__class__.__name__)
             )
