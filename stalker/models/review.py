@@ -269,7 +269,7 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
                 # revise the task
                 logger.debug('total_seconds including reviews: %s' % total_seconds)
                 timing, unit = self.least_meaningful_time_unit(total_seconds)
-    
+
                 self.task.schedule_timing = timing
                 self.task.schedule_unit = unit
                 self.task.status = HREV
@@ -279,7 +279,7 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
                 # update task parent statuses
 
             self.task.update_parent_statuses()
-                
+
             # update dependent task statuses
             for dep in self.task.dependent_of:
                 dep.update_status_with_dependent_statuses()

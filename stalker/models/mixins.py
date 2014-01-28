@@ -317,11 +317,12 @@ class StatusMixin(object):
         """
         from stalker.models.status import Status, StatusList
 
-        if not isinstance(self.status_list, StatusList):
-            raise TypeError(
-                "Please set the %s.status_list attribute first" %
-                self.__class__.__name__
-            )
+        with db.session.no_autoflush:
+            if not isinstance(self.status_list, StatusList):
+                raise TypeError(
+                    "Please set the %s.status_list attribute first" %
+                    self.__class__.__name__
+                )
 
         # it is set to None
         if status is None:

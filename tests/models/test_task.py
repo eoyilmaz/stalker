@@ -1483,19 +1483,19 @@ class TaskTester(unittest2.TestCase):
                           self.test_dependent_task1)
 
     def test_depends_argument_is_a_list_of_other_objects_than_a_Task(self):
-        """testing if a TypeError will be raised when the depends argument is
+        """testing if a AttributeError will be raised when the depends argument is
         a list of other typed objects than Task
         """
         test_value = ["a", "dependent", "task", 1, 1.2]
         self.kwargs["depends"] = test_value
-        self.assertRaises(TypeError, Task, **self.kwargs)
+        self.assertRaises(AttributeError, Task, **self.kwargs)
 
     def test_depends_attribute_is_a_list_of_other_objects_than_a_Task(self):
-        """testing if a TypeError will be raised when the depends attribute is
-        set to a list of other typed objects than Task
+        """testing if a AttributeError will be raised when the depends
+        attribute is set to a list of other typed objects than Task
         """
         test_value = ["a", "dependent", "task", 1, 1.2]
-        self.assertRaises(TypeError, setattr, self.test_task, "depends",
+        self.assertRaises(AttributeError, setattr, self.test_task, "depends",
                           test_value)
 
     def test_depends_attribute_doesnt_allow_simple_cyclic_dependencies(self):
@@ -1669,7 +1669,9 @@ class TaskTester(unittest2.TestCase):
         """testing if the percent_complete attribute is working properly for a
         leaf task
         """
+        logger.debug('self.test_task.depends : %s' % self.test_task.depends)
         self.test_task.depends = []
+        logger.debug('self.test_task.depends : %s' % self.test_task.depends)
 
         dt = datetime.datetime
         td = datetime.timedelta
@@ -1828,6 +1830,7 @@ class TaskTester(unittest2.TestCase):
         """
         self.kwargs['depends'] = []
         self.test_task.depends = []
+        self.assertEqual(self.test_task.depends, [])
 
         now = datetime.datetime.now()
         dt = datetime.timedelta
@@ -1838,6 +1841,7 @@ class TaskTester(unittest2.TestCase):
             start=now + dt(100),
             end=now + dt(101)
         )
+        self.assertEqual(self.test_task.depends, [])
 
         new_time_log2 = TimeLog(
             task=self.test_task,
@@ -1845,10 +1849,12 @@ class TaskTester(unittest2.TestCase):
             start=now + dt(101),
             end=now + dt(102)
         )
+        self.assertEqual(self.test_task.depends, [])
 
         # create a new task
         self.kwargs['name'] = 'New Task'
         new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.depends, [])
 
         # create a new TimeLog for that task
         new_time_log3 = TimeLog(
@@ -1857,8 +1863,15 @@ class TaskTester(unittest2.TestCase):
             start=now + dt(102),
             end=now + dt(103)
         )
+        logger.debug('Task.query.get(37): %s' % Task.query.get(37)) 
+        
+        self.assertEqual(new_task.depends, [])
+        db.session.commit()
 
-        db.session.add_all([new_time_log1, new_time_log2, new_time_log3])
+        db.session.add(new_task)
+        logger.debug('new_task.id : %s' % new_task.id)
+
+        # db.session.add_all([new_time_log1, new_time_log2, new_time_log3])
         db.session.commit()
 
         # check if everything is in place
@@ -4334,6 +4347,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         stay WFD
         """
         # create another dependency to make the task3 a WFD task
+        self.test_task3.depends = []
         self.test_task9.status = self.status_wip
         self.assertEqual(self.test_task9.status, self.status_wip)
         self.test_task3.depends.append(self.test_task9)
@@ -4351,6 +4365,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         stay WFD
         """
         # create another dependency to make the task3 a WFD task
+        self.test_task3.depends = []
         self.test_task9.status = self.status_wip
         self.assertEqual(self.test_task9.status, self.status_wip)
         self.test_task3.depends.append(self.test_task9)
@@ -4368,6 +4383,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         stay WFD
         """
         # create another dependency to make the task3 a WFD task
+        self.test_task3.depends = []
         self.test_task9.status = self.status_wip
         self.assertEqual(self.test_task9.status, self.status_wip)
         self.test_task3.depends.append(self.test_task9)
@@ -4385,6 +4401,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         stay WFD
         """
         # create another dependency to make the task3 a WFD task
+        self.test_task3.depends = []
         self.test_task9.status = self.status_wip
         self.assertEqual(self.test_task9.status, self.status_wip)
         self.test_task3.depends.append(self.test_task9)
@@ -4402,6 +4419,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         stay WFD
         """
         # create another dependency to make the task3 a WFD task
+        self.test_task3.depends = []
         self.test_task9.status = self.status_wip
         self.assertEqual(self.test_task9.status, self.status_wip)
         self.test_task3.depends.append(self.test_task9)
@@ -4419,6 +4437,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         stay WFD
         """
         # create another dependency to make the task3 a WFD task
+        self.test_task3.depends = []
         self.test_task9.status = self.status_wip
         self.assertEqual(self.test_task9.status, self.status_wip)
         self.test_task3.depends.append(self.test_task9)
@@ -4436,6 +4455,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         will stay WFD
         """
         # create another dependency to make the task3 a WFD task
+        self.test_task3.depends = []
         self.test_task9.status = self.status_wip
         self.assertEqual(self.test_task9.status, self.status_wip)
         self.test_task3.depends.append(self.test_task9)
@@ -4453,6 +4473,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         will stay to WFD
         """
         # create another dependency to make the task3 a WFD task
+        self.test_task3.depends = []
         self.test_task9.status = self.status_wip
         self.assertEqual(self.test_task9.status, self.status_wip)
         self.test_task3.depends.append(self.test_task9)
@@ -4472,6 +4493,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         updated from RTS to WFD
         """
         # find an RTS task
+        self.test_task3.depends = []
         self.test_task3.status = self.status_rts
         self.assertEqual(self.test_task3.status, self.status_rts)
         # create dependency
@@ -4487,6 +4509,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         updated from RTS to WFD
         """
         # find an RTS task
+        self.test_task3.depends = []
         self.test_task3.status = self.status_rts
         self.assertEqual(self.test_task3.status, self.status_rts)
         # create dependency
@@ -4502,6 +4525,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         updated from RTS to WFD
         """
         # find an RTS task
+        self.test_task3.depends = []
         self.test_task3.status = self.status_rts
         self.assertEqual(self.test_task3.status, self.status_rts)
         # create dependency
@@ -4517,6 +4541,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         updated from RTS to WFD
         """
         # find an RTS task
+        self.test_task3.depends = []
         self.test_task3.status = self.status_rts
         self.assertEqual(self.test_task3.status, self.status_rts)
         # create dependency
@@ -4532,6 +4557,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         updated from RTS to WFD
         """
         # find an RTS task
+        self.test_task3.depends = []
         self.test_task3.status = self.status_rts
         self.assertEqual(self.test_task3.status, self.status_rts)
         # create dependency
@@ -4547,6 +4573,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         updated from RTS to WFD
         """
         # find an RTS task
+        self.test_task3.depends = []
         self.test_task3.status = self.status_rts
         self.assertEqual(self.test_task3.status, self.status_rts)
         # create dependency
@@ -4562,6 +4589,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         stay RTS as if the dependency is not there
         """
         # find an RTS task
+        self.test_task3.depends = []
         self.test_task3.status = self.status_rts
         self.assertEqual(self.test_task3.status, self.status_rts)
         # create dependency
@@ -4577,6 +4605,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         stay RTS
         """
         # find an RTS task
+        self.assertEqual(self.test_task3.depends, [])
         self.test_task3.status = self.status_rts
         self.assertEqual(self.test_task3.status, self.status_rts)
         # create dependency
@@ -4593,6 +4622,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         task
         """
         # find an WIP task
+        self.test_task3.depends = []
         self.test_task3.status = self.status_wip
         self.assertEqual(self.test_task3.status, self.status_wip)
         # create dependency
@@ -4605,6 +4635,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         task
         """
         # find an PREV task
+        self.test_task3.depends = []
         self.test_task3.status = self.status_prev
         self.assertEqual(self.test_task3.status, self.status_prev)
         # create dependency
@@ -4617,6 +4648,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         task
         """
         # find an HREV task
+        self.test_task3.depends = []
         self.test_task3.status = self.status_hrev
         self.assertEqual(self.test_task3.status, self.status_hrev)
         # create dependency
@@ -4629,6 +4661,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         task
         """
         # find an DREV task
+        self.test_task3.depends = []
         self.test_task3.status = self.status_drev
         self.assertEqual(self.test_task3.status, self.status_drev)
         # create dependency
@@ -4641,6 +4674,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         task
         """
         # find an OH task
+        self.test_task3.depends = []
         self.test_task3.status = self.status_oh
         self.assertEqual(self.test_task3.status, self.status_oh)
         # create dependency
@@ -4653,6 +4687,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         task
         """
         # find an STOP task
+        self.test_task3.depends = []
         self.test_task3.status = self.status_stop
         self.assertEqual(self.test_task3.status, self.status_stop)
         # create dependency
@@ -4665,6 +4700,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         task
         """
         # find an CMPL task
+        self.test_task3.depends = []
         self.test_task3.status = self.status_cmpl
         self.assertEqual(self.test_task3.status, self.status_cmpl)
         # create dependency
@@ -4681,6 +4717,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         updated from RTS to WFD
         """
         # make a task with WFD status
+        self.test_task3.depends = []
         self.test_task8.status = self.status_wfd
         self.assertEqual(self.test_task8.status, self.status_wfd)
         # find a RTS container task
@@ -4698,6 +4735,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         updated from RTS to WFD
         """
         # make a task with WFD status
+        self.test_task3.depends = []
         self.test_task8.status = self.status_rts
         self.assertEqual(self.test_task8.status, self.status_rts)
         # find a RTS container task
@@ -4715,6 +4753,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         updated from RTS to WFD
         """
         # make a task with WIP status
+        self.test_task3.depends = []
         self.test_task8.status = self.status_wip
         self.assertEqual(self.test_task8.status, self.status_wip)
         # find a RTS container task
@@ -4732,6 +4771,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         updated from RTS to WFD
         """
         # make a task with PREV status
+        self.test_task3.depends = []
         self.test_task8.status = self.status_prev
         self.assertEqual(self.test_task8.status, self.status_prev)
         # find a RTS container task
@@ -4749,6 +4789,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         updated from RTS to WFD
         """
         # make a task with HREV status
+        self.test_task3.depends = []
         self.test_task8.status = self.status_hrev
         self.assertEqual(self.test_task8.status, self.status_hrev)
         # find a RTS container task
@@ -4766,6 +4807,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         updated from RTS to WFD
         """
         # make a task with OH status
+        self.test_task3.depends = []
         self.test_task8.status = self.status_oh
         self.assertEqual(self.test_task8.status, self.status_oh)
         # find a RTS container task
@@ -4783,6 +4825,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         stay RTS as if the dependency is not there
         """
         # make a task with STOP status
+        self.test_task3.depends = []
         self.test_task8.status = self.status_stop
         self.assertEqual(self.test_task8.status, self.status_stop)
         # find a RTS container task
@@ -4799,13 +4842,27 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         container task to a CMPL task and the status of the task will stay RTS
         """
         # make a task with CMPL status
-        self.test_task8.status = self.status_cmpl
+        self.test_task3.depends = []
+        self.test_task3.children.append(self.test_task6)
+
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+        self.test_task8.create_time_log(
+            resource=self.test_task8.resources[0],
+            start=now,
+            end=now + td(hours=1)
+        )
+
+        reviews = self.test_task8.request_review()
+        for review in reviews:
+            review.approve()
+
         self.assertEqual(self.test_task8.status, self.status_cmpl)
+
         # find a RTS container task
-        self.test_task3.children.append(self.test_task2)
-        self.test_task2.status = self.status_rts
-        self.test_task3.status = self.status_rts
         self.assertEqual(self.test_task3.status, self.status_rts)
+
         # create dependency
         self.test_task3.depends.append(self.test_task8)
         self.assertEqual(self.test_task3.status, self.status_rts)
@@ -4817,6 +4874,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         container task
         """
         # find an WIP task
+        self.test_task1.depends = []
         self.test_task1.status = self.status_wip
         self.assertEqual(self.test_task1.status, self.status_wip)
         # create dependency
@@ -4832,9 +4890,10 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.test_task1.status = self.status_cmpl
         self.assertEqual(self.test_task1.status, self.status_cmpl)
         # create dependency
-        self.assertRaises(
-            StatusError, self.test_task1.depends.append, self.test_task8
-        )
+        with db.session.no_autoflush:
+            self.assertRaises(
+                StatusError, self.test_task1.depends.append, self.test_task8
+            )
 
     #
     # Action Tests
