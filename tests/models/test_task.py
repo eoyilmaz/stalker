@@ -1577,7 +1577,7 @@ class TaskTester(unittest2.TestCase):
           T3 depends to T1
           T2 depends to T3
         """
-
+        self.kwargs['depends'] = None
         self.kwargs['name'] = 'T1'
         t1 = Task(**self.kwargs)
 

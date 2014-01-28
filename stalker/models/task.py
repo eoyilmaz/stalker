@@ -24,7 +24,8 @@ import logging
 from sqlalchemy import (Table, Column, Integer, ForeignKey, Boolean, Enum,
                         DateTime, Float, event)
 from sqlalchemy.exc import InvalidRequestError
-from sqlalchemy.orm import relationship, validates, synonym
+from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.orm import relationship, validates, synonym, backref
 
 from stalker import db
 from stalker.db.declarative import Base
@@ -768,20 +769,41 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         """
     )
 
-    depends = relationship(
-        "Task",
-        secondary="Task_Dependencies",
-        primaryjoin="Tasks.c.id==Task_Dependencies.c.task_id",
-        secondaryjoin="Task_Dependencies.c.depends_to_task_id==Tasks.c.id",
-        backref="dependent_of",
-        doc="""A list of :class:`.Task`\ s that this one is depending on.
-
-        A CircularDependencyError will be raised when the task dependency
-        creates a circular dependency which means it is not allowed to create
-        a dependency for this Task which is depending on another one which in
-        some way depends to this one again.
-        """
+    # depends = relationship(
+    #     "Task",
+    #     secondary="Task_Dependencies",
+    #     primaryjoin="Tasks.c.id==Task_Dependencies.c.task_id",
+    #     secondaryjoin="Task_Dependencies.c.depends_to_task_id==Tasks.c.id",
+    #     backref="dependent_of",
+    #     doc="""A list of :class:`.Task`\ s that this one is depending on.
+    #
+    #     A CircularDependencyError will be raised when the task dependency
+    #     creates a circular dependency which means it is not allowed to create
+    #     a dependency for this Task which is depending on another one which in
+    #     some way depends to this one again.
+    #     """
+    # )
+    # outgoing
+    depends = association_proxy(
+        'task_depends_to',  # outgoing_edges
+        'to_node',  # to_node
+        creator=lambda n: TaskDependent(to_node=n)
     )
+    # incoming
+    dependent_of = association_proxy(
+        'task_dependent_ofs',  # incoming_edges
+        'from_node',  # from_node
+        creator=lambda n: TaskDependent(from_node=n)
+    )
+
+    # task_dependencies = relationship(
+    #     'TaskDependent',
+    #     primaryjoin='Tasks.c.id==Task_Dependencies.c.task_id'
+    # )
+    # task_dependent_ofs = relationship(
+    #     'TaskDependent',
+    #     primaryjoin='Tasks.c.id==Task_Dependencies.c.depends_to_task_id'
+    # )
 
     resources = relationship(
         "User",
@@ -1021,73 +1043,97 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         """
         return bool(complete_in)
 
-    @validates("depends")
-    def _validate_depends(self, key, depends):
-        """validates the given depends value
+    # @validates("depends")
+    # @validates("task_dependent_ofs")
+    # def _validate_depends(self, key, task_depends):
+    #     """validates the given depends value
+    #     """
+    #     depends = task_depends.depends_to
+    #     logger.debug('VALIDATE DEPENDS IS RUNNNNINGINGINGIGNIGNGINIGNGINGINING')
+    #     # check the status of the current task
+    #     with db.session.no_autoflush:
+    #         WFD = Status.query.filter_by(code='WFD').first()
+    #         RTS = Status.query.filter_by(code='RTS').first()
+    #         WIP = Status.query.filter_by(code='WIP').first()
+    #         PREV = Status.query.filter_by(code='PREV').first()
+    #         HREV = Status.query.filter_by(code='HREV').first()
+    #         DREV = Status.query.filter_by(code='DREV').first()
+    #         OH = Status.query.filter_by(code='OH').first()
+    #         STOP = Status.query.filter_by(code='STOP').first()
+    #         CMPL = Status.query.filter_by(code='CMPL').first()
+    # 
+    #     if self.status in [WIP, PREV, HREV, DREV, OH, STOP, CMPL]:
+    #         raise StatusError(
+    #             'This is a %(status)s task and it is not allowed to change '
+    #             'the dependencies of a %(status)s task' % {
+    #                 'status': self.status.code
+    #             }
+    #         )
+    # 
+    #     if self.is_container:
+    #         if self.status == CMPL:
+    #             raise StatusError(
+    #                 'This is a %(status)s container task and it is not '
+    #                 'allowed to change the dependency in %(status)s container '
+    #                 'tasks' % {'status': self.status.code}
+    #             )
+    # 
+    #     if not isinstance(depends, Task):
+    #         raise TypeError(
+    #             "All the elements in the %s.depends should be an instance of "
+    #             "stalker.models.task.Task, not %s" %
+    #             (self.__class__.__name__, depends.__class__.__name__)
+    #         )
+    # 
+    #     # check for the circular dependency
+    #     check_circular_dependency(depends, self, 'depends')
+    #     check_circular_dependency(depends, self, 'children')
+    # 
+    #     # check for circular dependency toward the parent, non of the parents
+    #     # should be depending to the given depends_to_task
+    #     with db.session.no_autoflush:
+    #         parent = self.parent
+    #         while parent:
+    #             if parent in depends.depends:
+    #                 raise CircularDependencyError(
+    #                     'One of the parents of %s is depending to %s' %
+    #                     (self, depends)
+    #                 )
+    #             parent = parent.parent
+    # 
+    #     # update status with the new dependency
+    #     # update towards more constrained situation
+    #     #
+    #     # Do not update for example to RTS if the current dependent task is
+    #     # CMPL or STOP, this will be done by the approve or stop action in the
+    #     # dependent task it self
+    # 
+    #     if self.status == RTS:
+    #         if depends.status in [WFD, RTS, WIP, OH, PREV, HREV, DREV, OH]:
+    #             self.status = WFD
+    # 
+    #     return depends
+
+    @validates("task_depends_to")
+    def _validate_task_depends_to(self, key, task_depends_to):
+        """validates the given task_depends value
         """
-        # check the status of the current task
-        with db.session.no_autoflush:
-            WFD = Status.query.filter_by(code='WFD').first()
-            RTS = Status.query.filter_by(code='RTS').first()
-            WIP = Status.query.filter_by(code='WIP').first()
-            PREV = Status.query.filter_by(code='PREV').first()
-            HREV = Status.query.filter_by(code='HREV').first()
-            DREV = Status.query.filter_by(code='DREV').first()
-            OH = Status.query.filter_by(code='OH').first()
-            STOP = Status.query.filter_by(code='STOP').first()
-            CMPL = Status.query.filter_by(code='CMPL').first()
+        logger.debug('running validate_task_depends_to with a value of: %s' %
+                     task_depends_to)
+        logger.debug('self                        : %s' % self)
+        logger.debug('task_depends_to.from_node   : %s' % task_depends_to.from_node)
+        logger.debug('task_depends_to.to_node     : %s' % task_depends_to.to_node)
+        return task_depends_to
 
-        if self.status in [WIP, PREV, HREV, DREV, OH, STOP, CMPL]:
-            raise StatusError(
-                'This is a %(status)s task and it is not allowed to change '
-                'the dependencies of a %(status)s task' % {
-                    'status': self.status.code
-                }
-            )
-
-        if self.is_container:
-            if self.status == CMPL:
-                raise StatusError(
-                    'This is a %(status)s container task and it is not '
-                    'allowed to change the dependency in %(status)s container '
-                    'tasks' % {'status': self.status.code}
-                )
-
-        if not isinstance(depends, Task):
-            raise TypeError(
-                "All the elements in the %s.depends should be an instance of "
-                "stalker.models.task.Task, not %s" %
-                (self.__class__.__name__, depends.__class__.__name__)
-            )
-
-        # check for the circular dependency
-        check_circular_dependency(depends, self, 'depends')
-        check_circular_dependency(depends, self, 'children')
-
-        # check for circular dependency toward the parent, non of the parents
-        # should be depending to the given depends_to_task
-        with db.session.no_autoflush:
-            parent = self.parent
-            while parent:
-                if parent in depends.depends:
-                    raise CircularDependencyError(
-                        'One of the parents of %s is depending to %s' %
-                        (self, depends)
-                    )
-                parent = parent.parent
-
-        # update status with the new dependency
-        # update towards more constrained situation
-        #
-        # Do not update for example to RTS if the current dependent task is
-        # CMPL or STOP, this will be done by the approve or stop action in the
-        # dependent task it self
-
-        if self.status == RTS:
-            if depends.status in [WFD, RTS, WIP, OH, PREV, HREV, DREV, OH]:
-                self.status = WFD
-
-        return depends
+    # @validates("task_dependent_ofs")
+    # def _validate_task_dependent_ofs(self, key, task_dependent_ofs):
+    #     """validates the given task_dependent_ofs value
+    #     """
+    #     logger.debug('running validate_task_dependent_ofs with a value of: %s'
+    #                  % task_dependent_ofs)
+    #     logger.debug('task_dependent_ofs.from_node: %s' % task_dependent_ofs.from_node)
+    #     logger.debug('task_dependent_ofs.to_node  : %s' % task_dependent_ofs.to_node)
+    #     return task_dependent_ofs
 
     @validates('schedule_timing')
     def _validate_schedule_timing(self, key, schedule_timing):
@@ -2087,6 +2133,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             logger.debug('using pure Python to query dependency statuses')
             binary_status = 0
             dep_statuses = []
+            print self.depends
             for dep in self.depends:
                 # consider every status only once
                 if dep.status not in dep_statuses:
@@ -2272,12 +2319,210 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     )
 
 # TASK_DEPENDENCIES
-Task_Dependencies = Table(
-    "Task_Dependencies", Base.metadata,
-    Column("task_id", Integer, ForeignKey("Tasks.id"), primary_key=True),
-    Column("depends_to_task_id", Integer, ForeignKey("Tasks.id"),
-           primary_key=True)
-)
+# Task_Dependencies = Table(
+#     "Task_Dependencies", Base.metadata,
+#     Column("task_id", Integer, ForeignKey("Tasks.id"), primary_key=True),
+#     Column("depends_to_task_id", Integer, ForeignKey("Tasks.id"),
+#            primary_key=True)
+# )
+
+
+class TaskDependent(Base):
+    """The association object used in Task-to-Task dependency relation
+    """
+
+    __tablename__ = "Task_Dependencies"
+
+    # from_node_id
+    from_node_id = Column(
+        Integer,
+        ForeignKey("Tasks.id"),
+        primary_key=True
+    )
+
+    # from_node
+    from_node = relationship(
+        Task,
+        backref=backref(
+            'task_depends_to',
+            cascade="all, delete-orphan"
+        ),  # outgoing_edges
+        primaryjoin='Task.task_id==TaskDependent.from_node_id',
+    )
+
+    # to_node_id
+    to_node_id = Column(
+        Integer,
+        ForeignKey("Tasks.id"),
+        primary_key=True
+    )
+
+    # to_node_id
+    to_node = relationship(
+        Task,
+        backref=backref(
+            'task_dependent_ofs',
+            cascade="all, delete-orphan"
+        ),  # incoming_edges
+        primaryjoin="TaskDependent.to_node_id==Task.task_id",
+    )
+
+    def __init__(self, from_node=None, to_node=None, dependency_type=None,
+                 gap=0, gap_model='length'):
+        self.from_node = from_node
+        self.to_node = to_node
+        self.dependency_type = dependency_type
+        self.gap = gap
+        self.gap_model = gap_model
+
+    # @validates("depends_to")
+    # def _validate_depends(self, key, depends):
+    #     """validates the given depends value
+    #     """
+    #     logger.debug('validating depends value of: %s' % depends)
+    #     # check the status of the current task
+    #     with db.session.no_autoflush:
+    #         WFD = Status.query.filter_by(code='WFD').first()
+    #         RTS = Status.query.filter_by(code='RTS').first()
+    #         WIP = Status.query.filter_by(code='WIP').first()
+    #         PREV = Status.query.filter_by(code='PREV').first()
+    #         HREV = Status.query.filter_by(code='HREV').first()
+    #         DREV = Status.query.filter_by(code='DREV').first()
+    #         OH = Status.query.filter_by(code='OH').first()
+    #         STOP = Status.query.filter_by(code='STOP').first()
+    #         CMPL = Status.query.filter_by(code='CMPL').first()
+    # 
+    #     if self.task.status in [WIP, PREV, HREV, DREV, OH, STOP, CMPL]:
+    #         raise StatusError(
+    #             'This is a %(status)s task and it is not allowed to change '
+    #             'the dependencies of a %(status)s task' % {
+    #                 'status': self.task.status.code
+    #             }
+    #         )
+    # 
+    #     if self.task.is_container:
+    #         if self.task.status == CMPL:
+    #             raise StatusError(
+    #                 'This is a %(status)s container task and it is not '
+    #                 'allowed to change the dependency in %(status)s container '
+    #                 'tasks' % {'status': self.task.status.code}
+    #             )
+    # 
+    #     if not isinstance(depends, Task):
+    #         raise TypeError(
+    #             "All the elements in the %s.depends should be an instance of "
+    #             "stalker.models.task.Task, not %s" %
+    #             (self.task.__class__.__name__, depends.__class__.__name__)
+    #         )
+    # 
+    #     # check for the circular dependency
+    #     check_circular_dependency(depends, self.task, 'depends')
+    #     check_circular_dependency(depends, self.task, 'children')
+    # 
+    #     # check for circular dependency toward the parent, non of the parents
+    #     # should be depending to the given depends_to_task
+    #     with db.session.no_autoflush:
+    #         parent = self.task.parent
+    #         while parent:
+    #             if parent in depends.depends:
+    #                 raise CircularDependencyError(
+    #                     'One of the parents of %s is depending to %s' %
+    #                     (self.task, depends)
+    #                 )
+    #             parent = parent.parent
+    # 
+    #     # update status with the new dependency
+    #     # update towards more constrained situation
+    #     #
+    #     # Do not update for example to RTS if the current dependent task is
+    #     # CMPL or STOP, this will be done by the approve or stop action in the
+    #     # dependent task it self
+    # 
+    #     if self.task.status == RTS:
+    #         if depends.status in [WFD, RTS, WIP, OH, PREV, HREV, DREV, OH]:
+    #             self.task.status = WFD
+    # 
+    #     return depends
+
+
+    # @validates("task")
+    # def _validate_task(self, key, task):
+    #     """validates the given task value
+    #     """
+    #     depends = self.depends_to
+    #     if not task:
+    #         return task
+    # 
+    #     logger.debug('validating task value of: %s' % task)
+    #     logger.debug('validating depends value of: %s' % depends)
+    #     # check the status of the current task
+    #     with db.session.no_autoflush:
+    #         WFD = Status.query.filter_by(code='WFD').first()
+    #         RTS = Status.query.filter_by(code='RTS').first()
+    #         WIP = Status.query.filter_by(code='WIP').first()
+    #         PREV = Status.query.filter_by(code='PREV').first()
+    #         HREV = Status.query.filter_by(code='HREV').first()
+    #         DREV = Status.query.filter_by(code='DREV').first()
+    #         OH = Status.query.filter_by(code='OH').first()
+    #         STOP = Status.query.filter_by(code='STOP').first()
+    #         CMPL = Status.query.filter_by(code='CMPL').first()
+    # 
+    #     if task.status in [WIP, PREV, HREV, DREV, OH, STOP, CMPL]:
+    #         print task.status
+    #         raise StatusError(
+    #             'This is a %(status)s task and it is not allowed to change '
+    #             'the dependencies of a %(status)s task' % {
+    #                 'status': task.status.code
+    #             }
+    #         )
+    # 
+    #     if task.is_container:
+    #         if task.status == CMPL:
+    #             raise StatusError(
+    #                 'This is a %(status)s container task and it is not '
+    #                 'allowed to change the dependency in %(status)s container '
+    #                 'tasks' % {'status': task.status.code}
+    #             )
+    # 
+    #     if not isinstance(depends, Task):
+    #         raise TypeError(
+    #             "All the elements in the %s.depends should be an instance of "
+    #             "stalker.models.task.Task, not %s" %
+    #             (task.__class__.__name__, depends.__class__.__name__)
+    #         )
+    # 
+    #     # check for the circular dependency
+    #     with db.session.no_autoflush:
+    #         check_circular_dependency(depends, task, 'depends')
+    #         check_circular_dependency(depends, task, 'children')
+    # 
+    #     # check for circular dependency toward the parent, non of the parents
+    #     # should be depending to the given depends_to_task
+    #     with db.session.no_autoflush:
+    #         parent = task.parent
+    #         while parent:
+    #             if parent in depends.depends:
+    #                 raise CircularDependencyError(
+    #                     'One of the parents of %s is depending to %s' %
+    #                     (task, depends)
+    #                 )
+    #             parent = parent.parent
+    # 
+    #     # update status with the new dependency
+    #     # update towards more constrained situation
+    #     #
+    #     # Do not update for example to RTS if the current dependent task is
+    #     # CMPL or STOP, this will be done by the approve or stop action in the
+    #     # dependent task it self
+    # 
+    #     if task.status == RTS:
+    #         if depends.status in [WFD, RTS, WIP, OH, PREV, HREV, DREV, OH]:
+    #             task.status = WFD
+    # 
+    #     return task
+
+
+
 
 # TASK_RESOURCES
 Task_Resources = Table(
@@ -2475,25 +2720,30 @@ def update_task_date_values(task, removed_child, initiator):
 # *****************************************************************************
 # Task.depends set
 # *****************************************************************************
-@event.listens_for(Task.depends, 'set', propagate=True)
-def added_new_dependency(task, dependent_task, initiator):
-    """Runs when a task is appended to another task as dependency and it runs
-    after the dependent task is validated.
+# @event.listens_for(TaskDependent.depends_to, 'set', propagate=True)
+# def added_new_dependency(task_dependent, dependent_task, task, initiator):
+#     """Runs when a task is appended to another task as dependency and it runs
+#     after the dependent task is validated.
+# 
+#     :param task: The task that a dependent is added to
+#     :param dependent_task: The added dependent task
+#     :param initiator: not used
+#     """
+#     # update task status with dependencies
+#     logger.debug('added_new_dependency args: %s %s %s %s' % (task_dependent,
+#                  task, dependent_task, initiator))
+#     task_dependent.task.update_status_with_dependent_statuses()
+# 
+# @event.listens_for(TaskDependent.depends_to, 'remove', propagate=True)
+# def removed_a_dependency(task_dependent, dependent_task, task, initiator):
+#     """Runs when a task is removed from another tasks dependency list.
+# 
+#     :param task: The task that a dependent is added to
+#     :param dependent_task: The added dependent task
+#     :param initiator: not used
+#     """
+#     # update task status with dependencies
+#     logger.debug('removed_a_dependency args: %s %s %s %s' % (task_dependent,
+#                  task, dependent_task, initiator))
+#     task_dependent.task.update_status_with_dependent_statuses()
 
-    :param task: The task that a dependent is added to
-    :param dependent_task: The added dependent task
-    :param initiator: not used
-    """
-    # update task status with dependencies
-    task.update_status_with_dependent_statuses()
-
-@event.listens_for(Task.depends, 'remove', propagate=True)
-def removed_a_dependency(task, dependent_task, initiator):
-    """Runs when a task is removed from another tasks dependency list.
-
-    :param task: The task that a dependent is added to
-    :param dependent_task: The added dependent task
-    :param initiator: not used
-    """
-    # update task status with dependencies
-    task.update_status_with_dependent_statuses()
