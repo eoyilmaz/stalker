@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2014 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -1049,8 +1049,12 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     def _validate_task_depends_to(self, key, task_depends_to):
         """validates the given task_depends_to value
         """
-        #with db.session.no_autoflush:
         depends = task_depends_to.depends_to
+        if not depends:
+            # the relation is still not setup yet
+            # trust to the TaskDependency class for checking the
+            # depends_to attribute
+            return task_depends_to
 
         # check the status of the current task
         with db.session.no_autoflush:
@@ -2409,6 +2413,36 @@ class TaskDependency(Base):
             gap = datetime.timedelta()
         self.gap = gap
         self.gap_model = gap_model
+
+    @validates("task")
+    def _validate_task(self, key, task):
+        """validates the task value
+        """
+        if task is not None:
+            # trust to the session for checking the task
+            if not isinstance(task, Task):
+                raise TypeError(
+                    '%s.task can should be and instance of '
+                    'stalker.models.task.Task, not %s' % (
+                        self.__class__.__name__, task.__class__.__name__
+                    )
+                )
+        return task
+
+    @validates("depends_to")
+    def _validate_depends_to(self, key, dep):
+        """validates the task value
+        """
+        if dep is not None:
+            # trust to the session for checking the depends_to attribute
+            if not isinstance(dep, Task):
+                raise TypeError(
+                    '%s.depends_to can should be and instance of '
+                    'stalker.models.task.Task, not %s' % (
+                        self.__class__.__name__, dep.__class__.__name__
+                    )
+                )
+        return dep
 
 # TASK_RESOURCES
 Task_Resources = Table(

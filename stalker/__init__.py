@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2014 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -52,7 +52,7 @@ from stalker.models.status import Status, StatusList
 from stalker.models.structure import Structure
 from stalker.models.studio import Studio, WorkingHours, Vacation
 from stalker.models.tag import Tag
-from stalker.models.task import TimeLog, Task
+from stalker.models.task import TimeLog, Task, TaskDependency
 from stalker.models.template import FilenameTemplate
 from stalker.models.ticket import Ticket, TicketLog
 from stalker.models.type import Type, EntityType

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2013 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2014 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -20,16 +20,17 @@
 
 import datetime
 import tempfile
-import unittest2
-from stalker.exceptions import CircularDependencyError, StatusError
+import logging
 
+import unittest2
+
+from stalker.exceptions import CircularDependencyError, StatusError
 from stalker import db
 from stalker import defaults
 from stalker import (Entity, Project, Repository, StatusList, Status, Task,
-                     Type, User, TimeLog)
+                     Type, User, TimeLog )
 from stalker.models.task import CONSTRAIN_END, CONSTRAIN_BOTH
 
-import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
@@ -4077,6 +4078,17 @@ class TaskTester(unittest2.TestCase):
         """testing if the review_number attribute initializes to 0
         """
         self.assertEqual(self.test_task.review_number, 0)
+
+    def test_task_dependency_auto_generates_TaskDependency_object(self):
+        """testing if a TaskDependency instance is automatically created when
+        the association proxy is used
+        """
+        self.test_task.depends = []
+        self.test_task.depends.append(self.test_dependent_task1)
+
+        task_depends = self.test_task.task_depends_to[0]
+        self.assertEqual(task_depends.task, self.test_task)
+        self.assertEqual(task_depends.depends_to, self.test_dependent_task1)
 
 
 class TaskStatusWorkflowTestCase(unittest2.TestCase):
