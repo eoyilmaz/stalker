@@ -22,7 +22,7 @@ import datetime
 import logging
 
 from sqlalchemy import (Table, Column, Integer, ForeignKey, Boolean, Enum,
-                        DateTime, Float, event)
+                        DateTime, Float, event, Interval)
 from sqlalchemy.exc import InvalidRequestError
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship, validates, synonym
@@ -776,45 +776,52 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         """
     )
 
-    # depends = relationship(
-    #     "Task",
-    #     secondary="Task_Dependencies",
-    #     primaryjoin="Tasks.c.id==Task_Dependencies.c.task_id",
-    #     secondaryjoin="Task_Dependencies.c.depends_to_task_id==Tasks.c.id",
-    #     backref="dependent_of",
-    #     doc="""A list of :class:`.Task`\ s that this one is depending on.
-    #
-    #     A CircularDependencyError will be raised when the task dependency
-    #     creates a circular dependency which means it is not allowed to create
-    #     a dependency for this Task which is depending on another one which in
-    #     some way depends to this one again.
-    #     """
-    # )
-
     depends = association_proxy(
         'task_depends_to',
-        'from_node',
-        creator=lambda n: TaskDependent(from_node=n)
+        'depends_to',
+        creator=lambda n: TaskDependent(depends_to=n),
+        doc="""A list of :class:`.Task`\ s that this one is depending on.
+
+        A CircularDependencyError will be raised when the task dependency
+        creates a circular dependency which means it is not allowed to create
+        a dependency for this Task which is depending on another one which in
+        some way depends to this one again.
+        """
     )
-    
+
     dependent_of = association_proxy(
         'task_dependent_of',
-        'to_node',
-        creator=lambda n: TaskDependent(to_node=n)
+        'task',
+        creator=lambda n: TaskDependent(task=n),
+        doc="""A list of :class:`.Task`\ s that this one is being depended by.
+
+        A CircularDependencyError will be raised when the task dependency
+        creates a circular dependency which means it is not allowed to create
+        a dependency for this Task which is depending on another one which in
+        some way depends to this one again.
+        """
     )
 
     task_depends_to = relationship(
         'TaskDependent',
-        back_populates='to_node',
+        back_populates='task',
         cascade="all, delete-orphan",
-        primaryjoin='Tasks.c.id==Task_Dependencies.c.to_node_id'
+        primaryjoin='Tasks.c.id==Task_Dependencies.c.task_id',
+        doc="""A list that holds the association class instances.
+
+        Use this to modify the dependency details.
+        """
     )
 
     task_dependent_of = relationship(
         'TaskDependent',
-        back_populates='from_node',
+        back_populates='depends_to',
         cascade="all, delete-orphan",
-        primaryjoin='Tasks.c.id==Task_Dependencies.c.from_node_id'
+        primaryjoin='Tasks.c.id==Task_Dependencies.c.depends_to_id',
+        doc="""A list that holds the association class instances.
+
+        Use this to modify the dependency details.
+        """
     )
 
     resources = relationship(
@@ -823,8 +830,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         primaryjoin="Tasks.c.id==Task_Resources.c.task_id",
         secondaryjoin="Task_Resources.c.resource_id==Users.c.id",
         back_populates="tasks",
-        doc="""The list of :class:`.User`\ s assigned to this Task.
-        """
+        doc="The list of :class:`.User`\ s assigned to this Task."
     )
 
     watchers = relationship(
@@ -833,8 +839,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         primaryjoin='Tasks.c.id==Task_Watchers.c.task_id',
         secondaryjoin='Task_Watchers.c.watcher_id==Users.c.id',
         back_populates='watching',
-        doc="""The list of :class:`.User`\ s watching this Task.
-        """
+        doc="The list of :class:`.User`\ s watching this Task."
     )
 
     _responsible = relationship(
@@ -849,8 +854,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     priority = Column(
         Integer,
         doc="""An integer number between 0 and 1000 used by TaskJuggler to
-        determine the priority of this Task. The default value is 500.
-        """
+        determine the priority of this Task. The default value is 500."""
     )
 
     time_logs = relationship(
@@ -859,8 +863,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         back_populates="task",
         cascade='all, delete-orphan',
         doc="""A list of :class:`.TimeLog` instances showing who and when has
-        spent how much effort on this task.
-        """
+        spent how much effort on this task."""
     )
 
     versions = relationship(
@@ -981,10 +984,6 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         if depends is None:
             depends = []
 
-        # for dep in depends:
-        #     self.task_depends_to.append(
-        #         TaskDependent(from_node=self, to_node=dep)
-        #     )
         self.depends = depends
 
         if self.is_milestone:
@@ -1067,7 +1066,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         """validates the given task_depends_to value
         """
         #with db.session.no_autoflush:
-        depends = task_depends_to.from_node
+        depends = task_depends_to.depends_to
 
         # check the status of the current task
         with db.session.no_autoflush:
@@ -2138,8 +2137,8 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
                 select
                     "Statuses".code
                 from "Tasks"
-                    join "Task_Dependencies" on "Tasks".id = "Task_Dependencies".to_node_id
-                    join "Tasks" as "Dependent_Tasks" on "Task_Dependencies".from_node_id = "Dependent_Tasks".id
+                    join "Task_Dependencies" on "Tasks".id = "Task_Dependencies".task_id
+                    join "Tasks" as "Dependent_Tasks" on "Task_Dependencies".depends_to_id = "Dependent_Tasks".id
                     join "Statuses" on "Dependent_Tasks".status_id = "Statuses".id
                 where "Tasks".id = %s
                 group by "Statuses".code
@@ -2361,40 +2360,72 @@ class TaskDependent(Base):
 
     __tablename__ = "Task_Dependencies"
 
-    # from_node_id
-    from_node_id = Column(
+    # depends_to_id
+    depends_to_id = Column(
         Integer,
         ForeignKey("Tasks.id"),
         primary_key=True
     )
 
-    # from_node
-    from_node = relationship(
+    # depends_to
+    depends_to = relationship(
         Task,
         back_populates='task_dependent_of',
-        primaryjoin='Task.task_id==TaskDependent.from_node_id',
+        primaryjoin='Task.task_id==TaskDependent.depends_to_id',
     )
 
-    # to_node_id
-    to_node_id = Column(
+    # task_id
+    task_id = Column(
         Integer,
         ForeignKey("Tasks.id"),
         primary_key=True
     )
 
-    # to_node_id
-    to_node = relationship(
+    # task_id
+    task = relationship(
         Task,
         back_populates='task_depends_to',
-        primaryjoin="Task.task_id==TaskDependent.to_node_id",
+        primaryjoin="Task.task_id==TaskDependent.task_id",
     )
 
-    gap = Column(Integer)
+    dependency_type = Column(
+        Enum(*defaults.task_dependency_types, name='TaskDependencyType'),
+        doc="""The dependency model of the relation. The default value is
+        "onend", which will create a dependency between two tasks so that the
+        depending task will start after the dependent is finished.
 
-    def __init__(self, from_node=None, to_node=None, dependency_type=None,
+        The dependency_type attribute is updated to "onstart" when a task has a
+        revision and needs to work together with its depending tasks.
+        """,
+        default="onend"
+    )
+
+    gap = Column(
+        Interval,
+        doc="""A time interval showing the desired gap between the dependent
+        and dependee tasks. The meaning of the gap value, either is it
+        *work time* or *calendar time* is defined by the :attr:`.gap_model`
+        attribute. So when the gap model is "duration" then the value of `gap`
+        is in calendar time, if `gap` is "length" then it is considered as work
+        time.
+        """,
+        default=0
+    )
+
+    gap_model = Column(
+        Enum(*defaults.dependency_gap_models, name='TaskDependencyGapModel'),
+        doc="""An enumeration value one of ["length", "duration"]. The value of
+        this attribute defines if the :attr:`.gap` value is in *Work Time* or
+        *Calendar Time*. The default value is "length" so the gap value defines
+        a time interval in work time.
+        """,
+        default='length'
+    )
+
+    def __init__(self, depends_to=None, task=None, dependency_type=None,
                  gap=0, gap_model='length'):
-        self.from_node = from_node
-        self.to_node = to_node
+        self.depends_to = depends_to
+        self.task = task
         self.dependency_type = dependency_type
         self.gap = gap
         self.gap_model = gap_model
@@ -2608,9 +2639,9 @@ def removed_a_dependency(task, task_dependent, initiator):
     logger.debug('task                    : %s' % task)
     logger.debug('task.depends            : %s' % task.depends)
     logger.debug('task_dependent          : %s' % task_dependent)
-    logger.debug('task_dependent.to_node  : %s' % task_dependent.to_node)
-    logger.debug('task_dependent.from_node: %s' % task_dependent.from_node)
+    logger.debug('task_dependent.task  : %s' % task_dependent.task)
+    logger.debug('task_dependent.depends_to: %s' % task_dependent.depends_to)
     logger.debug('initiator               : %s' % initiator)
     task.update_status_with_dependent_statuses(
-        removing=task_dependent.from_node
+        removing=task_dependent.depends_to
     )

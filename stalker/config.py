@@ -205,6 +205,7 @@ class Config(object):
             'Stopped',
             'Completed'
         ],
+
         task_status_codes=[
             'WFD',
             'RTS',
@@ -229,6 +230,9 @@ class Config(object):
         ],
 
         task_schedule_models=['effort', 'length', 'duration'],
+        task_dependency_gap_models=['length', 'duration'],
+        task_dependency_types=['onstart', 'onend'],
+        task_dependency_type='onend',
 
         task_schedule_constraints=['none', 'start', 'end', 'both'],
 
