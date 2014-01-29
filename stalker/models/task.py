@@ -270,13 +270,6 @@ def update_task_dates(func):
     return wrap
 
 
-def depends_creator(**kwargs):
-    """
-    """
-    # with db.session.no_autoflush:
-    return TaskDependent(**kwargs)
-
-
 class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     """Manages Task related data.
 
@@ -779,48 +772,39 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     depends = association_proxy(
         'task_depends_to',
         'depends_to',
-        creator=lambda n: TaskDependent(depends_to=n),
-        doc="""A list of :class:`.Task`\ s that this one is depending on.
-
-        A CircularDependencyError will be raised when the task dependency
-        creates a circular dependency which means it is not allowed to create
-        a dependency for this Task which is depending on another one which in
-        some way depends to this one again.
-        """
+        creator=lambda n: TaskDependency(depends_to=n)
     )
 
     dependent_of = association_proxy(
         'task_dependent_of',
         'task',
-        creator=lambda n: TaskDependent(task=n),
+        creator=lambda n: TaskDependency(task=n)
+    )
+
+    task_depends_to = relationship(
+        'TaskDependency',
+        back_populates='task',
+        cascade="all, delete-orphan",
+        primaryjoin='Tasks.c.id==Task_Dependencies.c.task_id',
+        doc="""A list of :class:`.Task`\ s that this one is depending on.
+
+        A CircularDependencyError will be raised when the task dependency
+        creates a circular dependency which means it is not allowed to create
+        a dependency for this Task which is depending on another one which in
+        some way depends to this one again."""
+    )
+
+    task_dependent_of = relationship(
+        'TaskDependency',
+        back_populates='depends_to',
+        cascade="all, delete-orphan",
+        primaryjoin='Tasks.c.id==Task_Dependencies.c.depends_to_id',
         doc="""A list of :class:`.Task`\ s that this one is being depended by.
 
         A CircularDependencyError will be raised when the task dependency
         creates a circular dependency which means it is not allowed to create
         a dependency for this Task which is depending on another one which in
         some way depends to this one again.
-        """
-    )
-
-    task_depends_to = relationship(
-        'TaskDependent',
-        back_populates='task',
-        cascade="all, delete-orphan",
-        primaryjoin='Tasks.c.id==Task_Dependencies.c.task_id',
-        doc="""A list that holds the association class instances.
-
-        Use this to modify the dependency details.
-        """
-    )
-
-    task_dependent_of = relationship(
-        'TaskDependent',
-        back_populates='depends_to',
-        cascade="all, delete-orphan",
-        primaryjoin='Tasks.c.id==Task_Dependencies.c.depends_to_id',
-        doc="""A list that holds the association class instances.
-
-        Use this to modify the dependency details.
         """
     )
 
@@ -2345,16 +2329,8 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         doc="returns the _review_number attribute value"
     )
 
-# TASK_DEPENDENCIES
-# Task_Dependencies = Table(
-#     "Task_Dependencies", Base.metadata,
-#     Column("task_id", Integer, ForeignKey("Tasks.id"), primary_key=True),
-#     Column("depends_to_task_id", Integer, ForeignKey("Tasks.id"),
-#            primary_key=True)
-# )
 
-
-class TaskDependent(Base):
+class TaskDependency(Base):
     """The association object used in Task-to-Task dependency relation
     """
 
@@ -2371,7 +2347,7 @@ class TaskDependent(Base):
     depends_to = relationship(
         Task,
         back_populates='task_dependent_of',
-        primaryjoin='Task.task_id==TaskDependent.depends_to_id',
+        primaryjoin='Task.task_id==TaskDependency.depends_to_id',
     )
 
     # task_id
@@ -2385,7 +2361,7 @@ class TaskDependent(Base):
     task = relationship(
         Task,
         back_populates='task_depends_to',
-        primaryjoin="Task.task_id==TaskDependent.task_id",
+        primaryjoin="Task.task_id==TaskDependency.task_id",
     )
 
     dependency_type = Column(
@@ -2413,7 +2389,8 @@ class TaskDependent(Base):
     )
 
     gap_model = Column(
-        Enum(*defaults.dependency_gap_models, name='TaskDependencyGapModel'),
+        Enum(*defaults.task_dependency_gap_models,
+             name='TaskDependencyGapModel'),
         doc="""An enumeration value one of ["length", "duration"]. The value of
         this attribute defines if the :attr:`.gap` value is in *Work Time* or
         *Calendar Time*. The default value is "length" so the gap value defines
@@ -2422,11 +2399,14 @@ class TaskDependent(Base):
         default='length'
     )
 
-    def __init__(self, depends_to=None, task=None, dependency_type=None,
-                 gap=0, gap_model='length'):
-        self.depends_to = depends_to
+    def __init__(self, task=None, depends_to=None,
+                 dependency_type=defaults.task_dependency_type,
+                 gap=None, gap_model=defaults.task_dependency_gap_model):
         self.task = task
+        self.depends_to = depends_to
         self.dependency_type = dependency_type
+        if not gap:
+            gap = datetime.timedelta()
         self.gap = gap
         self.gap_model = gap_model
 
@@ -2526,6 +2506,7 @@ def __update_total_logged_seconds__(tlog, new_duration, old_duration):
     else:
         logger.debug("TimeLog doesn't have a task yet: %s" % tlog)
 
+
 # *****************************************************************************
 # Task.schedule_timing updates Task.parent.schedule_seconds attribute
 # *****************************************************************************
@@ -2622,6 +2603,7 @@ def update_task_date_values(task, removed_child, initiator):
             # set it to now
             task.start = datetime.datetime.now()
             # this will also update end
+
 
 # *****************************************************************************
 # Task.depends set

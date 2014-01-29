@@ -53,6 +53,7 @@ Summary
    stalker.models.studio.WorkingHours
    stalker.models.tag.Tag
    stalker.models.task.Task
+   stalker.models.task.TaskDependency
    stalker.models.task.TimeLog
    stalker.models.template.FilenameTemplate
    stalker.models.ticket.Ticket

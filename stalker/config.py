@@ -231,6 +231,7 @@ class Config(object):
 
         task_schedule_models=['effort', 'length', 'duration'],
         task_dependency_gap_models=['length', 'duration'],
+        task_dependency_gap_model='length',
         task_dependency_types=['onstart', 'onend'],
         task_dependency_type='onend',
 
