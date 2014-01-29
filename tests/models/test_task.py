@@ -1828,6 +1828,16 @@ class TaskTester(unittest2.TestCase):
     def test_time_logs_attribute_is_working_properly(self):
         """testing if the time_log attribute is working properly
         """
+        # add everything to the db just for this test
+        db.session.add_all([
+            self.test_project_status_list, self.test_movie_project_type,
+            self.test_repository_type, self.test_repository, self.test_user1,
+            self.test_user2, self.test_user3, self.test_project1,
+            self.test_dependent_task1, self.test_dependent_task2,
+            self.test_task
+        ])
+        db.session.commit()
+
         self.kwargs['depends'] = []
         self.test_task.depends = []
         self.assertEqual(self.test_task.depends, [])
@@ -1854,7 +1864,6 @@ class TaskTester(unittest2.TestCase):
         # create a new task
         self.kwargs['name'] = 'New Task'
         new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.depends, [])
 
         # create a new TimeLog for that task
         new_time_log3 = TimeLog(
@@ -1863,15 +1872,13 @@ class TaskTester(unittest2.TestCase):
             start=now + dt(102),
             end=now + dt(103)
         )
-        logger.debug('Task.query.get(37): %s' % Task.query.get(37)) 
-        
-        self.assertEqual(new_task.depends, [])
-        db.session.commit()
+        logger.debug('Task.query.get(37): %s' % Task.query.get(37))
 
-        db.session.add(new_task)
+        self.assertEqual(new_task.depends, [])
+
         logger.debug('new_task.id : %s' % new_task.id)
 
-        # db.session.add_all([new_time_log1, new_time_log2, new_time_log3])
+        db.session.add_all([new_time_log1, new_time_log2, new_time_log3])
         db.session.commit()
 
         # check if everything is in place
@@ -5591,6 +5598,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         now = dt.now()
 
         self.test_task8.depends = [self.test_task9]
+        self.assertIn(self.test_task9, self.test_task8.depends)
 
         self.test_task9.status = self.status_rts
         self.test_task9.create_time_log(
@@ -5604,8 +5612,21 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
             end=now + td(hours=2)
         )
 
-        self.test_task9.status = self.status_cmpl
-        self.test_task8.status = self.status_cmpl
+        reviews = self.test_task9.request_review()
+        for r in reviews:
+            r.approve()
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        self.test_task8.create_time_log(
+            resource=self.test_task8.resources[0],
+            start=now + td(hours=2),
+            end=now + td(hours=3)
+        )
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        [r.approve() for r in self.test_task8.request_review()]
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
 
         kw = {
             'reviewer': self.test_user1,
@@ -5614,6 +5635,8 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
             'schedule_unit': 'h'
         }
         self.test_task9.request_revision(**kw)
+        
+        self.assertEqual(self.test_task9.status, self.status_hrev)
         self.assertEqual(self.test_task8.status, self.status_drev)
 
     #CMPL: dependent task parent status updated to WIP

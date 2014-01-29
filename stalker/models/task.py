@@ -793,26 +793,28 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
     depends = association_proxy(
         'task_depends_to',
-        'to_node',
-        creator=lambda n: depends_creator(to_node=n)
+        'from_node',
+        creator=lambda n: TaskDependent(from_node=n)
     )
-
+    
     dependent_of = association_proxy(
         'task_dependent_of',
-        'from_node',
-        creator=lambda n: depends_creator(from_node=n)
+        'to_node',
+        creator=lambda n: TaskDependent(to_node=n)
     )
 
     task_depends_to = relationship(
         'TaskDependent',
+        back_populates='to_node',
         cascade="all, delete-orphan",
-        primaryjoin='Tasks.c.id==Task_Dependencies.c.from_node_id'
+        primaryjoin='Tasks.c.id==Task_Dependencies.c.to_node_id'
     )
 
     task_dependent_of = relationship(
         'TaskDependent',
+        back_populates='from_node',
         cascade="all, delete-orphan",
-        primaryjoin='Tasks.c.id==Task_Dependencies.c.to_node_id'
+        primaryjoin='Tasks.c.id==Task_Dependencies.c.from_node_id'
     )
 
     resources = relationship(
@@ -979,6 +981,10 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         if depends is None:
             depends = []
 
+        # for dep in depends:
+        #     self.task_depends_to.append(
+        #         TaskDependent(from_node=self, to_node=dep)
+        #     )
         self.depends = depends
 
         if self.is_milestone:
@@ -1061,7 +1067,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         """validates the given task_depends_to value
         """
         #with db.session.no_autoflush:
-        depends = task_depends_to.to_node
+        depends = task_depends_to.from_node
 
         # check the status of the current task
         with db.session.no_autoflush:
@@ -2081,7 +2087,9 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
         if removing:
             self._previously_removed_dependent_tasks.append(removing)
-
+        else:
+            self._previously_removed_dependent_tasks = []
+            
         # create a new list from depends and skip_list
         dep_list = []
         for dep in self.depends:
@@ -2126,14 +2134,16 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         if self.id:
             # use pure sql
             logger.debug('using pure SQL to query dependency statuses')
-            sql_query = """select
-        "Statuses".code
-    from "Tasks"
-        join "Task_Dependencies" on "Tasks".id = "Task_Dependencies".from_node_id
-        join "Tasks" as "Dependent_Tasks" on "Task_Dependencies".to_node_id = "Dependent_Tasks".id
-        join "Statuses" on "Dependent_Tasks".status_id = "Statuses".id
-    where "Tasks".id = %s
-    group by "Statuses".code""" % self.id
+            sql_query = """
+                select
+                    "Statuses".code
+                from "Tasks"
+                    join "Task_Dependencies" on "Tasks".id = "Task_Dependencies".to_node_id
+                    join "Tasks" as "Dependent_Tasks" on "Task_Dependencies".from_node_id = "Dependent_Tasks".id
+                    join "Statuses" on "Dependent_Tasks".status_id = "Statuses".id
+                where "Tasks".id = %s
+                group by "Statuses".code
+            """ % self.id
 
             result = db.session.connection().execute(sql_query)
 
@@ -2361,7 +2371,7 @@ class TaskDependent(Base):
     # from_node
     from_node = relationship(
         Task,
-        back_populates='task_depends_to',
+        back_populates='task_dependent_of',
         primaryjoin='Task.task_id==TaskDependent.from_node_id',
     )
 
@@ -2375,9 +2385,11 @@ class TaskDependent(Base):
     # to_node_id
     to_node = relationship(
         Task,
-        back_populates='task_dependent_of',
-        primaryjoin="TaskDependent.to_node_id==Task.task_id",
+        back_populates='task_depends_to',
+        primaryjoin="Task.task_id==TaskDependent.to_node_id",
     )
+
+    gap = Column(Integer)
 
     def __init__(self, from_node=None, to_node=None, dependency_type=None,
                  gap=0, gap_model='length'):
@@ -2600,5 +2612,5 @@ def removed_a_dependency(task, task_dependent, initiator):
     logger.debug('task_dependent.from_node: %s' % task_dependent.from_node)
     logger.debug('initiator               : %s' % initiator)
     task.update_status_with_dependent_statuses(
-        removing=task_dependent.to_node
+        removing=task_dependent.from_node
     )
