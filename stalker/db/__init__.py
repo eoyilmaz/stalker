@@ -35,31 +35,8 @@ from stalker.log import logging_level
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
-
-class DummySession(object):
-    """a dummy sesson just to prevent some tests to fail
-    """
-    @property
-    def no_autoflush(self):
-        """replicate
-        """
-        class DummyContextManager(object):
-            def __enter__(self):
-                return None
-
-            def __exit__(self, exc_type, exc_val, exc_tb):
-                if isinstance(exc_val, AttributeError):
-                    return True
-
-        return DummyContextManager()
-
-    def close(self):
-        """replicate session.close()
-        """
-        pass
-
 Session = sessionmaker()
-session = None  #DummySession()
+session = None
 engine = None
 
 

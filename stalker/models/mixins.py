@@ -968,10 +968,16 @@ class ScheduleMixin(object):
     attributes to the mixed in class.
     """
 
+    # some default values that can be overridden in Mixed in classes
+    __default_schedule_attr_name__ = 'schedule'
+    __default_schedule_timing__ = defaults.timing_resolution.seconds / 60
+    __default_schedule_unit__ = 'h'
+    __default_schedule_models__ = defaults.task_schedule_models
+
     def __init__(
             self,
-            schedule_timing=1.0,
-            schedule_unit='h',
+            schedule_timing=None,
+            schedule_unit=None,
             schedule_model=None,
             schedule_constraint=0,
             **kwargs
@@ -985,8 +991,15 @@ class ScheduleMixin(object):
     def schedule_timing(cls):
         return Column(
             Float, nullable=True, default=0,
-            doc="""It is the value of the schedule timing. It is a float value.
-            """
+            doc="""It is the value of the %(attr)s timing. It is a float
+            value.
+
+            The timing value can either be as Work Time or Calendar Time
+            defined by the %(attr)s_model attribute. So when the %(attr)s_model
+            is `duration` then the value of this attribute is in Calendar Time,
+            and if the %(attr)s_model is either `length` or `effort` then the
+            value is considered as Work Time.
+            """ % {'attr': cls.__default_schedule_attr_name__}
         )
 
     @declared_attr
@@ -994,16 +1007,19 @@ class ScheduleMixin(object):
         return Column(
             Enum(*defaults.datetime_units, name='TaskScheduleUnit'),
             nullable=False, default='h',
-            doc="""It is the unit of the schedule timing. It is a string value.
-            And should be one of 'min', 'h', 'd', 'w', 'm', 'y'.
-            """
+            doc="""It is the unit of the %(attr)s timing. It is a string
+            value. And should be one of 'min', 'h', 'd', 'w', 'm', 'y'.""" %
+                {'attr': cls.__default_schedule_attr_name__}
         )
 
     @declared_attr
     def schedule_model(cls):
         return Column(
-            Enum(*defaults.task_schedule_models, name='TaskScheduleModels'),
-            default=defaults.task_schedule_models[0], nullable=False,
+            Enum(*cls.__default_schedule_models__,
+                 name='Task%(attr)sModels' % {
+                     'attr': cls.__default_schedule_attr_name__.title()
+                 }),
+            default=cls.__default_schedule_models__[0], nullable=False,
             doc="""Defines the schedule model which is going to be used by
             **TaskJuggler** while scheduling this Task. It has three possible
             values; **effort**, **duration**, **length**. ``effort`` is the
@@ -1087,10 +1103,14 @@ class ScheduleMixin(object):
 
         if not isinstance(schedule_constraint, int):
             raise TypeError(
-                '%s.schedule_constraint should be an integer between 0 and 3, '
-                'not %s' %
-                (self.__class__.__name__,
-                 schedule_constraint.__class__.__name__)
+                '%(class)s.%(attr)s_constraint should be an integer '
+                'between 0 and 3, not %(constraint_class)s' %
+                {
+                    'class': self.__class__.__name__,
+                    'attr': self.__default_schedule_attr_name__,
+                    'constraint_class':
+                    schedule_constraint.__class__.__name__
+                }
             )
 
         schedule_constraint = max(schedule_constraint, 0)
@@ -1103,17 +1123,21 @@ class ScheduleMixin(object):
         """validates the given schedule_model value
         """
         if not schedule_model:
-            schedule_model = defaults.task_schedule_models[0]
+            schedule_model = self.__default_schedule_models__[0]
 
-        error_message = '%s.schedule_model should be one of %s, not %s' % (
-            self.__class__.__name__, defaults.task_schedule_models,
-            schedule_model.__class__.__name__
-        )
+        error_message = \
+            '%(class)s.%(attr)s_model should be one of %(defaults)s, not ' \
+            '%(model_class)s' % {
+                'class': self.__class__.__name__,
+                'attr': self.__default_schedule_attr_name__,
+                'defaults': self.__default_schedule_models__,
+                'model_class': schedule_model.__class__.__name__
+            }
 
         if not isinstance(schedule_model, (str, unicode)):
             raise TypeError(error_message)
 
-        if schedule_model not in defaults.task_schedule_models:
+        if schedule_model not in self.__default_schedule_models__:
             raise ValueError(error_message)
 
         return schedule_model
@@ -1123,24 +1147,30 @@ class ScheduleMixin(object):
         """validates the given schedule_unit
         """
         if schedule_unit is None:
-            schedule_unit = 'h'
+            schedule_unit = self.__default_schedule_unit__
 
         if not isinstance(schedule_unit, (str, unicode)):
             raise TypeError(
-                '%s.schedule_unit should be a string value one of %s showing '
-                'the unit of the schedule timing of this %s, not %s' % (
-                    self.__class__.__name__, defaults.datetime_units,
-                    self.__class__.__name__, schedule_unit.__class__.__name__
-                )
+                '%(class)s.%(attr)s_unit should be a string value one of '
+                '%(defaults)s showing the unit of the %(attr)s timing of this '
+                '%(class)s, not %(unit_class)s' % {
+                    'class': self.__class__.__name__,
+                    'attr': self.__default_schedule_attr_name__,
+                    'defaults': defaults.datetime_units,
+                    'unit_class': schedule_unit.__class__.__name__
+                }
             )
 
         if schedule_unit not in defaults.datetime_units:
             raise ValueError(
-                '%s.schedule_unit should be a string value one of %s showing '
-                'the unit of the schedule timing of this %s, not %s' % (
-                    self.__class__.__name__, defaults.datetime_units,
-                    self.__class__.__name__, schedule_unit.__class__.__name__
-                )
+                '%(class)s.%(attr)s_unit should be a string value one of '
+                '%(defaults)s showing the unit of the %(attr)s timing of '
+                'this %(class)s, not %(unit_class)s' % {
+                    'class': self.__class__.__name__,
+                    'attr': self.__default_schedule_attr_name__,
+                    'defaults': defaults.datetime_units,
+                    'unit_class': schedule_unit.__class__.__name__
+                }
             )
 
         return schedule_unit
@@ -1150,16 +1180,18 @@ class ScheduleMixin(object):
         """validates the given schedule_timing
         """
         if schedule_timing is None:
-            schedule_timing = defaults.timing_resolution.seconds / 60
-            self.schedule_unit = 'min'
+            schedule_timing = self.__default_schedule_timing__
+            self.schedule_unit = self.__default_schedule_unit__
 
         if not isinstance(schedule_timing, (int, float)):
             raise TypeError(
-                '%s.schedule_timing should be an integer or float number'
-                'showing the value of the timing of this %s, not %s' % (
-                    self.__class__.__name__, self.__class__.__name__,
-                    schedule_timing.__class__.__name__
-                )
+                '%(class)s.%(attr)s_timing should be an integer or float '
+                'number showing the value of the %(attr)s timing of this '
+                '%(class)s, not %(timing_class)s' % {
+                    'class': self.__class__.__name__,
+                    'attr': self.__default_schedule_attr_name__,
+                    'timing_class': schedule_timing.__class__.__name__
+                }
             )
 
         return schedule_timing

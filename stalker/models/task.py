@@ -2334,9 +2334,15 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     )
 
 
-class TaskDependency(Base):
+class TaskDependency(Base, ScheduleMixin):
     """The association object used in Task-to-Task dependency relation
     """
+
+    __default_schedule_attr_name__ = 'gap'  # used in docstrings coming from
+                                    # ScheduleMixin
+    __default_schedule_models__ = defaults.task_dependency_gap_models
+    __default_schedule_timing__ = 0
+    __default_schedule_unit__ = 'h'
 
     __tablename__ = "Task_Dependencies"
 
@@ -2368,52 +2374,52 @@ class TaskDependency(Base):
         primaryjoin="Task.task_id==TaskDependency.task_id",
     )
 
-    dependency_type = Column(
-        Enum(*defaults.task_dependency_types, name='TaskDependencyType'),
-        doc="""The dependency model of the relation. The default value is
+    dependency_target = Column(
+        Enum(*defaults.task_dependency_targets, name='TaskDependencyTarget'),
+        doc="""The dependency target of the relation. The default value is
         "onend", which will create a dependency between two tasks so that the
-        depending task will start after the dependent is finished.
+        depending task will start after the task that it is depending to is
+        finished.
 
-        The dependency_type attribute is updated to "onstart" when a task has a
-        revision and needs to work together with its depending tasks.
+        The dependency_target attribute is updated to "onstart" when a task has
+        a revision and needs to work together with its depending tasks.
         """,
-        default="onend"
+        default=defaults.task_dependency_targets[0]
     )
 
-    gap = Column(
-        Interval,
-        doc="""A time interval showing the desired gap between the dependent
-        and dependee tasks. The meaning of the gap value, either is it
-        *work time* or *calendar time* is defined by the :attr:`.gap_model`
+    gap_timing = synonym(
+        'schedule_timing',
+        doc="""A positive float value showing the desired gap between the
+        dependent and dependee tasks. The meaning of the gap value, either is
+        it *work time* or *calendar time* is defined by the :attr:`.gap_model`
         attribute. So when the gap model is "duration" then the value of `gap`
         is in calendar time, if `gap` is "length" then it is considered as work
         time.
-        """,
-        default=0
+        """
     )
 
-    gap_model = Column(
-        Enum(*defaults.task_dependency_gap_models,
-             name='TaskDependencyGapModel'),
+    gap_unit = synonym('schedule_unit')
+
+    gap_model = synonym(
+        'schedule_model',
         doc="""An enumeration value one of ["length", "duration"]. The value of
         this attribute defines if the :attr:`.gap` value is in *Work Time* or
         *Calendar Time*. The default value is "length" so the gap value defines
         a time interval in work time.
-        """,
-        default='length'
+        """
     )
 
-    def __init__(self, task=None, depends_to=None, dependency_type=None,
-                 gap=None, gap_model=None):
+    def __init__(self, task=None, depends_to=None, dependency_target=None,
+                 gap_timing=0, gap_unit='h', gap_model='length'):
+
+        ScheduleMixin.__init__(
+            self, schedule_timing=gap_timing, schedule_unit=gap_unit,
+            schedule_model=gap_model
+        )
+
         self.task = task
         self.depends_to = depends_to
-        self.dependency_type = dependency_type
-        self.gap = gap
-
-        if not gap_model:
-            gap_model = defaults.task_dependency_gap_model
-
-        self.gap_model = gap_model
+        self.dependency_target = dependency_target
 
     @validates("task")
     def _validate_task(self, key, task):
@@ -2445,74 +2451,49 @@ class TaskDependency(Base):
                 )
         return dep
 
-    @validates('dependency_type')
-    def _validate_dependency_type(self, key, dep_type):
-        """validates the given dep_type value
+    @validates('dependency_target')
+    def _validate_dependency_target(self, key, dep_target):
+        """validates the given dep_target value
         """
-        if dep_type is None:
-            dep_type = defaults.task_dependency_type
+        if dep_target is None:
+            dep_target = defaults.task_dependency_targets[0]
 
-        if not isinstance(dep_type, str):
+        if not isinstance(dep_target, str):
             raise TypeError(
-                '%s.dependency_type should be a string with a value one of '
+                '%s.dependency_target should be a string with a value one of '
                 '%s, not %s' % (
-                    self.__class__.__name__, defaults.task_dependency_types,
-                    dep_type.__class__.__name__
+                    self.__class__.__name__, defaults.task_dependency_targets,
+                    dep_target.__class__.__name__
                 )
             )
 
-        if dep_type not in defaults.task_dependency_types:
+        if dep_target not in defaults.task_dependency_targets:
             raise ValueError(
-                "%s.dependency_type should be one of %s, not '%s'" % (
-                    self.__class__.__name__, defaults.task_dependency_types,
-                    dep_type
+                "%s.dependency_target should be one of %s, not '%s'" % (
+                    self.__class__.__name__, defaults.task_dependency_targets,
+                    dep_target
                 )
             )
 
-        return dep_type
+        return dep_target
 
-    @validates('gap')
-    def _validate_gap(self, key, gap):
-        """validates the given gap value
+    @property
+    def to_tjp(self):
+        """TaskJuggler representation of this TaskDependency
         """
-        if gap is None:
-            gap = datetime.timedelta()
+        from jinja2 import Template
+        
+        template_variables = {
+            'task': self.task,
+            'depends_to': self.depends_to,
+            'dependency_target': self.dependency_target,
+            'gap_timing': self.gap_timing,
+            'gap_unit': self.gap_unit,
+            'gap_model': self.gap_model
+        }
 
-        if not isinstance(gap, datetime.timedelta):
-            raise TypeError(
-                '%s.gap should be an instance of datetime.timedelta, not %s' %
-                (self.__class__.__name__, gap.__class__.__name__)
-            )
-
-        return gap
-
-    @validates('gap_model')
-    def _validate_gap_model(self, key, gap_model):
-        """validates the given gap_model value
-        """
-        if gap_model is None:
-            gap_model = defaults.task_dependency_gap_model
-
-        if not isinstance(gap_model, str):
-            raise TypeError(
-                '%s.gap_model should be a string with a value one of '
-                '%s, not %s' % (
-                    self.__class__.__name__,
-                    defaults.task_dependency_gap_models,
-                    gap_model.__class__.__name__
-                )
-            )
-
-        if gap_model not in defaults.task_dependency_gap_models:
-            raise ValueError(
-                "%s.gap_model should be one of %s, not '%s'" % (
-                    self.__class__.__name__,
-                    defaults.task_dependency_gap_models,
-                    gap_model
-                )
-            )
-
-        return gap_model
+        temp = Template(defaults.tjp_task_dependency_template)
+        return temp.render(template_variables)
 
 
 # TASK_RESOURCES

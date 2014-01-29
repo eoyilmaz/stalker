@@ -35,11 +35,22 @@ Stalker Changes
   last schedule message and the last schedule date and the id of the user who
   has done the scheduling.
 * **New:** The Task Dependency relation is now using an Association Object
-  instead of just a Secondary Table. And the Task.depends and Task.dependent_of
-  attributes are now association_proxies. Also added extra parameters like
-  ``dependency_type``, ``gap`` and ``gap_model`` to the dependency relation.
-  So all of the dependency relations are now able to hold those extra
-  information.
+  instead of just a Secondary Table. The Task.depends and Task.dependent_of
+  attributes are now association_proxies.
+
+  Also added extra parameters like ``dependency_target``, ``gap_timing``,
+  ``gap_unit`` and ``gap_model`` to the dependency relation. So all of the
+  dependency relations are now able to hold those extra information.
+
+  Updated the task_tjp_template to reflect the details of the dependencies that
+  a task has.
+* **New:** ScheduleMixin class now has some default class attributes that will
+  allow customizations in inherited classes. This is mainly done for
+  TaskDependency class and for the gap_timing, gap_unit, gap_model attributes
+  which are infact synonyms of schedule_timing, schedule_unit and
+  schedule_model attributes coming from the ScheduleMixin class. So by using
+  the __default_schedule_attr_name__ Stalker is able to display error messages
+  complaining about gap_timing attribute instead of schedule_timing etc.
 
 0.2.4
 =====

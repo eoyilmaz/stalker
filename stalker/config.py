@@ -231,9 +231,7 @@ class Config(object):
 
         task_schedule_models=['effort', 'length', 'duration'],
         task_dependency_gap_models=['length', 'duration'],
-        task_dependency_gap_model='length',
-        task_dependency_types=['onstart', 'onend'],
-        task_dependency_type='onend',
+        task_dependency_targets=['onend', 'onstart'],
 
         task_schedule_constraints=['none', 'start', 'end', 'both'],
 
@@ -274,9 +272,9 @@ class Config(object):
 
         tjp_task_template="""task {{task.tjp_id}} "{{task.name}}" {
         {% if task.priority != 500 -%}priority {{task.priority}}{%- endif %}
-        {%- if task.depends %}
-            depends {% for depends in task.depends %}
-            {%- if loop.index != 1 %}, {% endif %}{{depends.tjp_abs_id}}
+        {%- if task.task_depends_to %}
+            depends {% for depends in task.task_depends_to %}
+            {%- if loop.index != 1 %}, {% endif %}{{depends.to_tjp}}
         {%- endfor -%}
         {%- endif -%}
         {%- if task.is_container -%}
@@ -303,6 +301,8 @@ class Config(object):
         {% endif %}
         }
         """,
+
+        tjp_task_dependency_template='''{{depends_to.tjp_abs_id}} { {{- dependency_target}}{%if gap_timing %} gap{{gap_model}} {{gap_timing}}{{gap_unit -}}{%endif -%}}''',
 
         tjp_department_template='''resource {{department.tjp_id}} "{{department.name}}" {
         {%- for resource in department.users %}

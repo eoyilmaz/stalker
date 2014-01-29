@@ -231,7 +231,8 @@ class ScheduleMixinTestCase(unittest2.TestCase):
         self.kwargs.pop("schedule_timing")
         new_task = MixedInClass(**self.kwargs)
 
-        self.assertEqual(new_task.schedule_timing, 1)
+        self.assertEqual(new_task.schedule_timing,
+                         MixedInClass.__default_schedule_timing__)
 
     def test_schedule_timing_argument_is_None(self):
         """testing if the schedule_timing attribute will be equal to the
@@ -278,27 +279,30 @@ class ScheduleMixinTestCase(unittest2.TestCase):
         self.assertEqual(self.test_obj.schedule_timing, test_value)
 
     def test_schedule_unit_argument_skipped(self):
-        """testing if the schedule_unit attribute will be 'h' if the
-        schedule_unit argument is skipped
+        """testing if the schedule_unit attribute will use the default value if
+        the schedule_unit argument is skipped
         """
         self.kwargs.pop("schedule_unit")
         new_task = MixedInClass(**self.kwargs)
-        self.assertEqual(new_task.schedule_unit, 'h')
+        self.assertEqual(new_task.schedule_unit,
+                         MixedInClass.__default_schedule_unit__)
 
     def test_schedule_unit_argument_is_None(self):
-        """testing if the schedule_unit attribute will be 'h' if the
-        schedule_unit argument is None
+        """testing if the schedule_unit attribute will use the default value if
+        the schedule_unit argument is None
         """
         self.kwargs["schedule_unit"] = None
         new_task = MixedInClass(**self.kwargs)
-        self.assertEqual(new_task.schedule_unit, 'h')
+        self.assertEqual(new_task.schedule_unit,
+                         MixedInClass.__default_schedule_unit__)
 
     def test_schedule_unit_attribute_is_set_to_None(self):
-        """testing if the schedule_unit attribute will be 'h' if it is set to
-        None
+        """testing if the schedule_unit attribute will use the default value if
+        it is set to None
         """
         self.test_obj.schedule_unit = None
-        self.assertEqual(self.test_obj.schedule_unit, 'h')
+        self.assertEqual(self.test_obj.schedule_unit,
+                         MixedInClass.__default_schedule_unit__)
 
     def test_schedule_unit_argument_is_not_a_string(self):
         """testing if a TypeError will be raised when the schedule_unit is not
@@ -484,4 +488,3 @@ class ScheduleMixinTestCase(unittest2.TestCase):
     #     self.assertEqual(
     #         test_obj.schedule_unit, 'd'
     #     )
-

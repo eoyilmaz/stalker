@@ -18,7 +18,6 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import datetime
 from sqlalchemy.exc import IntegrityError
 import unittest2
 from stalker import (db, Status, User, Repository, Structure, StatusList,
@@ -124,8 +123,9 @@ class TaskDependencyTestCase(unittest2.TestCase):
         self.kwargs = {
             'task': self.test_task1,
             'depends_to': self.test_task2,
-            'dependency_type': 'onend',
-            'gap': datetime.timedelta(hours=0),
+            'dependency_target': 'onend',
+            'gap_timing': 0,
+            'gap_unit': 'h',
             'gap_model': 'length'
         }
 
@@ -205,60 +205,134 @@ class TaskDependencyTestCase(unittest2.TestCase):
         new_dep = TaskDependency(**self.kwargs)
         self.assertEqual(new_dep.depends_to, self.test_task2)
 
-    def test_gap_argument_is_skipped(self):
-        """testing if the gap attribute value will be a datetime.timedelta with
-        0 duration when the gap argument is skipped
+    def test_gap_timing_argument_is_skipped(self):
+        """testing if the gap_timing attribute value will be 0 when the
+        gap_timing argument is skipped
         """
-        self.kwargs.pop('gap')
+        self.kwargs.pop('gap_timing')
         tdep = TaskDependency(**self.kwargs)
-        self.assertEqual(tdep.gap, datetime.timedelta())
+        self.assertEqual(tdep.gap_timing, 0)
 
-    def test_gap_argument_is_None(self):
-        """testing if the gap attribute value will be a datetime.timedelta with
-        0 duration when the gap argument value is Non
+    def test_gap_timing_argument_is_None(self):
+        """testing if the gap_timing attribute value will be 0 when the
+        gap_timing argument value is None
         """
-        self.kwargs['gap'] = None
+        self.kwargs['gap_timing'] = None
         tdep = TaskDependency(**self.kwargs)
-        self.assertEqual(tdep.gap, datetime.timedelta())
+        self.assertEqual(tdep.gap_timing, 0)
 
-    def test_gap_attribute_is_set_to_None(self):
-        """testing if the gap attribute value will be a datetime.timedelta with
-        0 duration when the gap attribute is set to None
+    def test_gap_timing_attribute_is_set_to_None(self):
+        """testing if the gap_timing attribute value will be 0 when it is set
+        to None
         """
         tdep = TaskDependency(**self.kwargs)
-        tdep.gap = None
-        self.assertEqual(tdep.gap, datetime.timedelta())
+        tdep.gap_timing = None
+        self.assertEqual(tdep.gap_timing, 0)
 
-    def test_gap_argument_is_not_a_timedelta(self):
-        """testing if a TypeError will be raised when the gap argument value is
-        not a datetime.timedelta instance
+    def test_gap_timing_argument_is_not_a_float(self):
+        """testing if a TypeError will be raised when the gap_timing argument
+        value is not a float value
         """
-        self.kwargs['gap'] = 'not a time delta'
+        self.kwargs['gap_timing'] = 'not a time delta'
         self.assertRaises(TypeError, TaskDependency, **self.kwargs)
 
-    def test_gap_attribute_is_not_a_timedelta(self):
-        """testing if a TypeError will be raised when the gap attribute value
-        is set to a value other than a datetime.timedelta instance
+    def test_gap_timing_attribute_is_not_a_float(self):
+        """testing if a TypeError will be raised when the gap_timing attribute
+        value is set to a value other than a float
         """
         tdep = TaskDependency(**self.kwargs)
-        self.assertRaises(TypeError, setattr, tdep, 'gap', 'not a time delta')
+        self.assertRaises(TypeError, setattr, tdep, 'gap_timing', 'not float')
 
-    def test_gap_argument_is_working_properly(self):
-        """testing if the gap argument value is correctly passed to the gap
-        attribute
+    def test_gap_timing_argument_is_working_properly(self):
+        """testing if the gap_timing argument value is correctly passed to the
+        gap_timing attribute
         """
-        test_value = datetime.timedelta(days=1, hours=2)
-        self.kwargs['gap'] = test_value
+        test_value = 11
+        self.kwargs['gap_timing'] = test_value
         tdep = TaskDependency(**self.kwargs)
-        self.assertEqual(tdep.gap, test_value)
+        self.assertEqual(tdep.gap_timing, test_value)
 
-    def test_gap_attribute_is_working_properly(self):
-        """testing if the gap attribute is working properly
+    def test_gap_timing_attribute_is_working_properly(self):
+        """testing if the gap_timing attribute is working properly
         """
         tdep = TaskDependency(**self.kwargs)
-        test_value = datetime.timedelta(days=1, hours=2)
-        tdep.gap = test_value
-        self.assertEqual(tdep.gap, test_value)
+        test_value = 11
+        tdep.gap_timing = test_value
+        self.assertEqual(tdep.gap_timing, test_value)
+
+    def test_gap_unit_argument_is_skipped(self):
+        """testing if the default value will be used when the gap_unit argument
+        is skipped
+        """
+        self.kwargs.pop('gap_unit')
+        tdep = TaskDependency(**self.kwargs)
+        self.assertEqual(tdep.gap_unit,
+                         TaskDependency.__default_schedule_unit__)
+
+    def test_gap_unit_argument_is_None(self):
+        """testing if the default value will be used when the gap_unit argument
+        is None
+        """
+        self.kwargs['gap_unit'] = None
+        tdep = TaskDependency(**self.kwargs)
+        self.assertEqual(tdep.gap_unit,
+                         TaskDependency.__default_schedule_unit__)
+
+    def test_gap_unit_attribute_is_None(self):
+        """testing if the default value will be used when the gap_unit
+        attribute is set to None
+        """
+        tdep = TaskDependency(**self.kwargs)
+        tdep.gap_unit = None
+        self.assertEqual(tdep.gap_unit,
+                         TaskDependency.__default_schedule_unit__)
+
+    def test_gap_unit_argument_is_not_a_string_instance(self):
+        """testing if a TypeError will be raised when the gap_unit argument is
+        not a string
+        """
+        self.kwargs['gap_unit'] = 231
+        self.assertRaises(TypeError, TaskDependency, **self.kwargs)
+
+    def test_gap_unit_attribute_is_not_a_string_instance(self):
+        """testing if a TypeError will be raised when the gap_unit attribute
+        is not a string
+        """
+        tdep = TaskDependency(**self.kwargs)
+        self.assertRaises(TypeError, setattr, tdep, 'gap_unit', 2342)
+
+    def test_gap_unit_argument_value_is_not_in_the_enum_list(self):
+        """testing if a ValueError will be raised when the gap_unit argument
+        value is not one of ['min', 'h', 'd', 'w', 'm', 'y']
+        """
+        self.kwargs['gap_unit'] = 'not in the list'
+        self.assertRaises(ValueError, TaskDependency, **self.kwargs)
+
+    def test_gap_unit_attribute_value_is_not_in_the_enum_list(self):
+        """testing if a ValueError will be raised when the gap_unit attribute
+        value is not one of ['min', 'h', 'd', 'w', 'm', 'y']
+        """
+        tdep = TaskDependency(**self.kwargs)
+        self.assertRaises(ValueError, setattr, tdep, 'gap_unit',
+                          'not in the list')
+
+    def test_gap_unit_argument_is_working_properly(self):
+        """testing if the gap_unit argument value is correctly passed to the
+        gap_unit attribute on init
+        """
+        test_value = 'y'
+        self.kwargs['gap_unit'] = test_value
+        tdep = TaskDependency(**self.kwargs)
+        self.assertEqual(test_value, tdep.gap_unit)
+
+    def test_gap_unit_attribute_is_working_properly(self):
+        """testing if the gap_unit attribute is working properly
+        """
+        tdep = TaskDependency(**self.kwargs)
+        test_value = 'w'
+        self.assertNotEqual(tdep.gap_unit, test_value)
+        tdep.gap_unit = test_value
+        self.assertEqual(tdep.gap_unit, test_value)
 
     def test_gap_model_argument_is_skipped(self):
         """testing if the default value will be used when the gap_model
@@ -266,7 +340,8 @@ class TaskDependencyTestCase(unittest2.TestCase):
         """
         self.kwargs.pop('gap_model')
         tdep = TaskDependency(**self.kwargs)
-        self.assertEqual(tdep.gap_model, defaults.task_dependency_gap_model)
+        self.assertEqual(tdep.gap_model,
+                         defaults.task_dependency_gap_models[0])
 
     def test_gap_model_argument_is_None(self):
         """testing if the default value will be used when the gap_model
@@ -274,7 +349,8 @@ class TaskDependencyTestCase(unittest2.TestCase):
         """
         self.kwargs['gap_model'] = None
         tdep = TaskDependency(**self.kwargs)
-        self.assertEqual(tdep.gap_model, defaults.task_dependency_gap_model)
+        self.assertEqual(tdep.gap_model,
+                         defaults.task_dependency_gap_models[0])
 
     def test_gap_model_attribute_is_None(self):
         """testing if the default value will be used when the gap_model
@@ -282,7 +358,8 @@ class TaskDependencyTestCase(unittest2.TestCase):
         """
         tdep = TaskDependency(**self.kwargs)
         tdep.gap_model = None
-        self.assertEqual(tdep.gap_model, defaults.task_dependency_gap_model)
+        self.assertEqual(tdep.gap_model,
+                         defaults.task_dependency_gap_models[0])
 
     def test_gap_model_argument_is_not_a_string_instance(self):
         """testing if a TypeError will be raised when the gap_model argument is
@@ -331,70 +408,73 @@ class TaskDependencyTestCase(unittest2.TestCase):
         tdep.gap_model = test_value
         self.assertEqual(tdep.gap_model, test_value)
 
-    def test_dependency_type_argument_is_skipped(self):
-        """testing if the default value will be used when the dependency_type
+    def test_dependency_target_argument_is_skipped(self):
+        """testing if the default value will be used when the dependency_target
         argument is skipped
         """
-        self.kwargs.pop('dependency_type')
+        self.kwargs.pop('dependency_target')
         tdep = TaskDependency(**self.kwargs)
-        self.assertEqual(tdep.dependency_type, defaults.task_dependency_type)
+        self.assertEqual(tdep.dependency_target,
+                         defaults.task_dependency_targets[0])
 
-    def test_dependency_type_argument_is_None(self):
-        """testing if the default value will be used when the dependency_type
+    def test_dependency_target_argument_is_None(self):
+        """testing if the default value will be used when the dependency_target
         argument is None
         """
-        self.kwargs['dependency_type'] = None
+        self.kwargs['dependency_target'] = None
         tdep = TaskDependency(**self.kwargs)
-        self.assertEqual(tdep.dependency_type, defaults.task_dependency_type)
+        self.assertEqual(tdep.dependency_target,
+                         defaults.task_dependency_targets[0])
 
-    def test_dependency_type_attribute_is_None(self):
-        """testing if the default value will be used when the dependency_type
+    def test_dependency_target_attribute_is_None(self):
+        """testing if the default value will be used when the dependency_target
         attribute is set to None
         """
         tdep = TaskDependency(**self.kwargs)
-        tdep.dependency_type = None
-        self.assertEqual(tdep.dependency_type, defaults.task_dependency_type)
+        tdep.dependency_target = None
+        self.assertEqual(tdep.dependency_target,
+                         defaults.task_dependency_targets[0])
 
-    def test_dependency_type_argument_is_not_a_string_instance(self):
-        """testing if a TypeError will be raised when the dependency_type
+    def test_dependency_target_argument_is_not_a_string_instance(self):
+        """testing if a TypeError will be raised when the dependency_target
         argument is not a string
         """
-        self.kwargs['dependency_type'] = 0
+        self.kwargs['dependency_target'] = 0
         self.assertRaises(TypeError, TaskDependency, **self.kwargs)
 
-    def test_dependency_type_attribute_is_not_a_string_instance(self):
-        """testing if a TypeError will be raised when the dependency_type
+    def test_dependency_target_attribute_is_not_a_string_instance(self):
+        """testing if a TypeError will be raised when the dependency_target
         attribute is not a string
         """
         tdep = TaskDependency(**self.kwargs)
-        self.assertRaises(TypeError, setattr, tdep, 'dependency_type', 0)
+        self.assertRaises(TypeError, setattr, tdep, 'dependency_target', 0)
 
-    def test_dependency_type_argument_value_is_not_in_the_enum_list(self):
-        """testing if a ValueError will be raised when the dependency_type
+    def test_dependency_target_argument_value_is_not_in_the_enum_list(self):
+        """testing if a ValueError will be raised when the dependency_target
         argument value is not one of ['duration', 'length']
         """
-        self.kwargs['dependency_type'] = 'not in the list'
+        self.kwargs['dependency_target'] = 'not in the list'
         self.assertRaises(ValueError, TaskDependency, **self.kwargs)
 
-    def test_dependency_type_attribute_value_is_not_in_the_enum_list(self):
-        """testing if a ValueError will be raised when the dependency_type
+    def test_dependency_target_attribute_value_is_not_in_the_enum_list(self):
+        """testing if a ValueError will be raised when the dependency_target
         attribute value is not one of ['duration', 'length']
         """
         tdep = TaskDependency(**self.kwargs)
-        self.assertRaises(ValueError, setattr, tdep, 'dependency_type',
+        self.assertRaises(ValueError, setattr, tdep, 'dependency_target',
                           'not in the list')
 
-    def test_dependency_type_argument_is_working_properly(self):
-        """testing if the dependency_type argument value is correctly passed to
-        the dependency_type attribute on init
+    def test_dependency_target_argument_is_working_properly(self):
+        """testing if the dependency_target argument value is correctly passed
+        to the dependency_target attribute on init
         """
         tdep = TaskDependency(**self.kwargs)
-        self.assertEqual(tdep.dependency_type, 'onend')
+        self.assertEqual(tdep.dependency_target, 'onend')
 
-    def test_dependency_type_attribute_is_working_properly(self):
-        """testing if the dependency_type attribute is working properly
+    def test_dependency_target_attribute_is_working_properly(self):
+        """testing if the dependency_target attribute is working properly
         """
         tdep = TaskDependency(**self.kwargs)
         onstart = 'onstart'
-        tdep.dependency_type = onstart
-        self.assertEqual(onstart, tdep.dependency_type)
+        tdep.dependency_target = onstart
+        self.assertEqual(onstart, tdep.dependency_target)
