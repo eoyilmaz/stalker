@@ -2403,15 +2403,16 @@ class TaskDependency(Base):
         default='length'
     )
 
-    def __init__(self, task=None, depends_to=None,
-                 dependency_type=defaults.task_dependency_type,
-                 gap=None, gap_model=defaults.task_dependency_gap_model):
+    def __init__(self, task=None, depends_to=None, dependency_type=None,
+                 gap=None, gap_model=None):
         self.task = task
         self.depends_to = depends_to
         self.dependency_type = dependency_type
-        if not gap:
-            gap = datetime.timedelta()
         self.gap = gap
+
+        if not gap_model:
+            gap_model = defaults.task_dependency_gap_model
+
         self.gap_model = gap_model
 
     @validates("task")
@@ -2443,6 +2444,76 @@ class TaskDependency(Base):
                     )
                 )
         return dep
+
+    @validates('dependency_type')
+    def _validate_dependency_type(self, key, dep_type):
+        """validates the given dep_type value
+        """
+        if dep_type is None:
+            dep_type = defaults.task_dependency_type
+
+        if not isinstance(dep_type, str):
+            raise TypeError(
+                '%s.dependency_type should be a string with a value one of '
+                '%s, not %s' % (
+                    self.__class__.__name__, defaults.task_dependency_types,
+                    dep_type.__class__.__name__
+                )
+            )
+
+        if dep_type not in defaults.task_dependency_types:
+            raise ValueError(
+                "%s.dependency_type should be one of %s, not '%s'" % (
+                    self.__class__.__name__, defaults.task_dependency_types,
+                    dep_type
+                )
+            )
+
+        return dep_type
+
+    @validates('gap')
+    def _validate_gap(self, key, gap):
+        """validates the given gap value
+        """
+        if gap is None:
+            gap = datetime.timedelta()
+
+        if not isinstance(gap, datetime.timedelta):
+            raise TypeError(
+                '%s.gap should be an instance of datetime.timedelta, not %s' %
+                (self.__class__.__name__, gap.__class__.__name__)
+            )
+
+        return gap
+
+    @validates('gap_model')
+    def _validate_gap_model(self, key, gap_model):
+        """validates the given gap_model value
+        """
+        if gap_model is None:
+            gap_model = defaults.task_dependency_gap_model
+
+        if not isinstance(gap_model, str):
+            raise TypeError(
+                '%s.gap_model should be a string with a value one of '
+                '%s, not %s' % (
+                    self.__class__.__name__,
+                    defaults.task_dependency_gap_models,
+                    gap_model.__class__.__name__
+                )
+            )
+
+        if gap_model not in defaults.task_dependency_gap_models:
+            raise ValueError(
+                "%s.gap_model should be one of %s, not '%s'" % (
+                    self.__class__.__name__,
+                    defaults.task_dependency_gap_models,
+                    gap_model
+                )
+            )
+
+        return gap_model
+
 
 # TASK_RESOURCES
 Task_Resources = Table(

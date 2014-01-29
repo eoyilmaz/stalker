@@ -21,7 +21,8 @@
 import datetime
 from sqlalchemy.exc import IntegrityError
 import unittest2
-from stalker import db, Status, User, Repository, Structure, StatusList, Project, Task, TaskDependency
+from stalker import (db, Status, User, Repository, Structure, StatusList,
+                     Project, Task, TaskDependency, defaults)
 
 
 class TaskDependencyTestCase(unittest2.TestCase):
@@ -208,145 +209,192 @@ class TaskDependencyTestCase(unittest2.TestCase):
         """testing if the gap attribute value will be a datetime.timedelta with
         0 duration when the gap argument is skipped
         """
-        self.fail('test is not implemented yet')
+        self.kwargs.pop('gap')
+        tdep = TaskDependency(**self.kwargs)
+        self.assertEqual(tdep.gap, datetime.timedelta())
 
     def test_gap_argument_is_None(self):
         """testing if the gap attribute value will be a datetime.timedelta with
         0 duration when the gap argument value is Non
         """
-        self.fail('test is not implemented yet')
+        self.kwargs['gap'] = None
+        tdep = TaskDependency(**self.kwargs)
+        self.assertEqual(tdep.gap, datetime.timedelta())
 
     def test_gap_attribute_is_set_to_None(self):
         """testing if the gap attribute value will be a datetime.timedelta with
         0 duration when the gap attribute is set to None
         """
-        self.fail('test is not implemented yet')
+        tdep = TaskDependency(**self.kwargs)
+        tdep.gap = None
+        self.assertEqual(tdep.gap, datetime.timedelta())
 
     def test_gap_argument_is_not_a_timedelta(self):
         """testing if a TypeError will be raised when the gap argument value is
         not a datetime.timedelta instance
         """
-        self.fail('test is not implemented yet')
+        self.kwargs['gap'] = 'not a time delta'
+        self.assertRaises(TypeError, TaskDependency, **self.kwargs)
 
     def test_gap_attribute_is_not_a_timedelta(self):
         """testing if a TypeError will be raised when the gap attribute value
         is set to a value other than a datetime.timedelta instance
         """
-        self.fail('test is not implemented yet')
+        tdep = TaskDependency(**self.kwargs)
+        self.assertRaises(TypeError, setattr, tdep, 'gap', 'not a time delta')
 
     def test_gap_argument_is_working_properly(self):
         """testing if the gap argument value is correctly passed to the gap
         attribute
         """
-        self.fail('test is not implemented yet')
+        test_value = datetime.timedelta(days=1, hours=2)
+        self.kwargs['gap'] = test_value
+        tdep = TaskDependency(**self.kwargs)
+        self.assertEqual(tdep.gap, test_value)
 
     def test_gap_attribute_is_working_properly(self):
         """testing if the gap attribute is working properly
         """
-        self.fail('test is not implemented yet')
+        tdep = TaskDependency(**self.kwargs)
+        test_value = datetime.timedelta(days=1, hours=2)
+        tdep.gap = test_value
+        self.assertEqual(tdep.gap, test_value)
 
     def test_gap_model_argument_is_skipped(self):
         """testing if the default value will be used when the gap_model
         argument is skipped
         """
-        self.fail('test is not implemented yet')
+        self.kwargs.pop('gap_model')
+        tdep = TaskDependency(**self.kwargs)
+        self.assertEqual(tdep.gap_model, defaults.task_dependency_gap_model)
 
     def test_gap_model_argument_is_None(self):
         """testing if the default value will be used when the gap_model
         argument is None
         """
-        self.fail('test is not implemented yet')
+        self.kwargs['gap_model'] = None
+        tdep = TaskDependency(**self.kwargs)
+        self.assertEqual(tdep.gap_model, defaults.task_dependency_gap_model)
 
     def test_gap_model_attribute_is_None(self):
         """testing if the default value will be used when the gap_model
         attribute is set to None
         """
-        self.fail('test is not implemented yet')
+        tdep = TaskDependency(**self.kwargs)
+        tdep.gap_model = None
+        self.assertEqual(tdep.gap_model, defaults.task_dependency_gap_model)
 
     def test_gap_model_argument_is_not_a_string_instance(self):
         """testing if a TypeError will be raised when the gap_model argument is
         not a string
         """
-        self.fail('test is not implemented yet')
+        self.kwargs['gap_model'] = 231
+        self.assertRaises(TypeError, TaskDependency, **self.kwargs)
 
     def test_gap_model_attribute_is_not_a_string_instance(self):
         """testing if a TypeError will be raised when the gap_model attribute
         is not a string
         """
-        self.fail('test is not impelemented yet')
+        tdep = TaskDependency(**self.kwargs)
+        self.assertRaises(TypeError, setattr, tdep, 'gap_model', 2342)
 
     def test_gap_model_argument_value_is_not_in_the_enum_list(self):
         """testing if a ValueError will be raised when the gap_model argument
         value is not one of ['duration', 'length']
         """
-        self.fail('test is not impelemented yet')
+        self.kwargs['gap_model'] = 'not in the list'
+        self.assertRaises(ValueError, TaskDependency, **self.kwargs)
 
     def test_gap_model_attribute_value_is_not_in_the_enum_list(self):
         """testing if a ValueError will be raised when the gap_model attribute
         value is not one of ['duration', 'length']
         """
-        self.fail('test is not implemented yet')
+        tdep = TaskDependency(**self.kwargs)
+        self.assertRaises(ValueError, setattr, tdep, 'gap_model',
+                          'not in the list')
 
     def test_gap_model_argument_is_working_properly(self):
         """testing if the gap_model argument value is correctly passed to the
         gap_model attribute on init
         """
-        self.fail('test is not implemented yet')
+        test_value = 'duration'
+        self.kwargs['gap_model'] = test_value
+        tdep = TaskDependency(**self.kwargs)
+        self.assertEqual(test_value, tdep.gap_model)
 
     def test_gap_model_attribute_is_working_properly(self):
         """testing if the gap_model attribute is working properly
         """
-        self.fail('test is not implemented yet')
+        tdep = TaskDependency(**self.kwargs)
+        test_value = 'duration'
+        self.assertNotEqual(tdep.gap_model, test_value)
+        tdep.gap_model = test_value
+        self.assertEqual(tdep.gap_model, test_value)
 
     def test_dependency_type_argument_is_skipped(self):
         """testing if the default value will be used when the dependency_type
         argument is skipped
         """
-        self.fail('test is not implemented yet')
+        self.kwargs.pop('dependency_type')
+        tdep = TaskDependency(**self.kwargs)
+        self.assertEqual(tdep.dependency_type, defaults.task_dependency_type)
 
     def test_dependency_type_argument_is_None(self):
         """testing if the default value will be used when the dependency_type
         argument is None
         """
-        self.fail('test is not implemented yet')
+        self.kwargs['dependency_type'] = None
+        tdep = TaskDependency(**self.kwargs)
+        self.assertEqual(tdep.dependency_type, defaults.task_dependency_type)
 
     def test_dependency_type_attribute_is_None(self):
         """testing if the default value will be used when the dependency_type
         attribute is set to None
         """
-        self.fail('test is not implemented yet')
+        tdep = TaskDependency(**self.kwargs)
+        tdep.dependency_type = None
+        self.assertEqual(tdep.dependency_type, defaults.task_dependency_type)
 
     def test_dependency_type_argument_is_not_a_string_instance(self):
         """testing if a TypeError will be raised when the dependency_type
         argument is not a string
         """
-        self.fail('test is not implemented yet')
+        self.kwargs['dependency_type'] = 0
+        self.assertRaises(TypeError, TaskDependency, **self.kwargs)
 
     def test_dependency_type_attribute_is_not_a_string_instance(self):
         """testing if a TypeError will be raised when the dependency_type
         attribute is not a string
         """
-        self.fail('test is not impelemented yet')
+        tdep = TaskDependency(**self.kwargs)
+        self.assertRaises(TypeError, setattr, tdep, 'dependency_type', 0)
 
     def test_dependency_type_argument_value_is_not_in_the_enum_list(self):
         """testing if a ValueError will be raised when the dependency_type
         argument value is not one of ['duration', 'length']
         """
-        self.fail('test is not impelemented yet')
+        self.kwargs['dependency_type'] = 'not in the list'
+        self.assertRaises(ValueError, TaskDependency, **self.kwargs)
 
     def test_dependency_type_attribute_value_is_not_in_the_enum_list(self):
         """testing if a ValueError will be raised when the dependency_type
         attribute value is not one of ['duration', 'length']
         """
-        self.fail('test is not implemented yet')
+        tdep = TaskDependency(**self.kwargs)
+        self.assertRaises(ValueError, setattr, tdep, 'dependency_type',
+                          'not in the list')
 
     def test_dependency_type_argument_is_working_properly(self):
         """testing if the dependency_type argument value is correctly passed to
         the dependency_type attribute on init
         """
-        self.fail('test is not implemented yet')
+        tdep = TaskDependency(**self.kwargs)
+        self.assertEqual(tdep.dependency_type, 'onend')
 
     def test_dependency_type_attribute_is_working_properly(self):
         """testing if the dependency_type attribute is working properly
         """
-        self.fail('test is not implemented yet')
+        tdep = TaskDependency(**self.kwargs)
+        onstart = 'onstart'
+        tdep.dependency_type = onstart
+        self.assertEqual(onstart, tdep.dependency_type)

@@ -1489,14 +1489,14 @@ class TaskTester(unittest2.TestCase):
         """
         test_value = ["a", "dependent", "task", 1, 1.2]
         self.kwargs["depends"] = test_value
-        self.assertRaises(AttributeError, Task, **self.kwargs)
+        self.assertRaises(TypeError, Task, **self.kwargs)
 
     def test_depends_attribute_is_a_list_of_other_objects_than_a_Task(self):
         """testing if a AttributeError will be raised when the depends
         attribute is set to a list of other typed objects than Task
         """
         test_value = ["a", "dependent", "task", 1, 1.2]
-        self.assertRaises(AttributeError, setattr, self.test_task, "depends",
+        self.assertRaises(TypeError, setattr, self.test_task, "depends",
                           test_value)
 
     def test_depends_attribute_doesnt_allow_simple_cyclic_dependencies(self):
