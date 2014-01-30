@@ -1586,6 +1586,101 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.assertEqual(self.test_task9.status, self.status_hrev)
         self.assertEqual(self.test_task8.status, self.status_drev)
 
+    #CMPL: dependent task dependency_target update CMPL -> DREV
+    def test_request_revision_in_CMPL_leaf_task_CMPL_dependent_task_dependency_target_updated_to_onstart(self):
+        """testing if the dependency_target attribute of the TaskDependency
+        object between the revised task and the dependent CMPL task will be set
+        to 'onstart' when the request_revision action is used in a CMPL leaf
+        task
+        """
+        # create a couple of TimeLogs
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+
+        self.test_task5.depends = [self.test_task9]  # will be STOP
+        self.test_task6.depends = [self.test_task9]  # will be OH
+        self.test_task8.depends = [self.test_task9]  # will be DREV
+        self.assertIn(self.test_task9, self.test_task5.depends)
+        self.assertIn(self.test_task9, self.test_task6.depends)
+        self.assertIn(self.test_task9, self.test_task8.depends)
+
+        self.test_task9.status = self.status_rts
+        self.test_task9.create_time_log(
+            resource=self.test_task9.resources[0],
+            start=now,
+            end=now + td(hours=1)
+        )
+        self.test_task9.create_time_log(
+            resource=self.test_task9.resources[0],
+            start=now + td(hours=1),
+            end=now + td(hours=2)
+        )
+
+        reviews = self.test_task9.request_review()
+        for r in reviews:
+            r.approve()
+        self.assertEqual(self.test_task9.status, self.status_cmpl)
+        self.assertEqual(self.test_task8.status, self.status_rts)
+
+        self.test_task8.create_time_log(
+            resource=self.test_task8.resources[0],
+            start=now + td(hours=2),
+            end=now + td(hours=3)
+        )
+        self.assertEqual(self.test_task8.status, self.status_wip)
+
+        [r.approve() for r in self.test_task8.request_review()]
+        self.assertEqual(self.test_task8.status, self.status_cmpl)
+
+        # now work on task5
+        self.test_task5.create_time_log(
+            resource=self.test_task5.resources[0],
+            start=now + td(hours=3),
+            end=now + td(hours=4)
+        )
+        self.assertEqual(self.test_task5.status, self.status_wip)
+        self.test_task5.hold()
+        self.assertEqual(self.test_task5.status, self.status_oh)
+
+        # now work on task6
+        self.test_task6.create_time_log(
+            resource=self.test_task6.resources[0],
+            start=now + td(hours=4),
+            end=now + td(hours=5)
+        )
+        self.assertEqual(self.test_task6.status, self.status_wip)
+        self.test_task6.stop()
+        self.assertEqual(self.test_task6.status, self.status_stop)
+
+        kw = {
+            'reviewer': self.test_user1,
+            'description': 'do something uleyn',
+            'schedule_timing': 4,
+            'schedule_unit': 'h'
+        }
+        self.test_task9.request_revision(**kw)
+
+        from stalker import TaskDependency
+        tdep_t5 = TaskDependency.query\
+            .filter_by(task=self.test_task5)\
+            .filter_by(depends_to=self.test_task9)\
+            .first()
+        tdep_t6 = TaskDependency.query\
+            .filter_by(task=self.test_task6)\
+            .filter_by(depends_to=self.test_task9)\
+            .first()
+        tdep_t8 = TaskDependency.query\
+            .filter_by(task=self.test_task8)\
+            .filter_by(depends_to=self.test_task9)\
+            .first()
+        self.assertIsNotNone(tdep_t5)
+        self.assertIsNotNone(tdep_t6)
+        self.assertIsNotNone(tdep_t8)
+        self.assertEqual(tdep_t5.dependency_target, 'onstart')
+        self.assertEqual(tdep_t6.dependency_target, 'onstart')
+        self.assertEqual(tdep_t8.dependency_target, 'onstart')
+
     #CMPL: dependent task parent status updated to WIP
     def test_request_revision_in_CMPL_leaf_task_dependent_task_parent_status_updated_to_WIP(self):
         """testing if the status of the dependent task parent updated to WIP

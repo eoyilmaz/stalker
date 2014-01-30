@@ -1914,9 +1914,11 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         from stalker.models.review import Review
         review = Review(reviewer=reviewer, task=self)
         # and call request_revision in the Review instance
-        review.request_revision(schedule_timing=schedule_timing,
-                                schedule_unit=schedule_unit,
-                                description=description)
+        review.request_revision(
+            schedule_timing=schedule_timing,
+            schedule_unit=schedule_unit,
+            description=description
+        )
         return review
 
     def hold(self):
@@ -2076,7 +2078,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             self._previously_removed_dependent_tasks.append(removing)
         else:
             self._previously_removed_dependent_tasks = []
-            
+
         # create a new list from depends and skip_list
         dep_list = []
         for dep in self.depends:

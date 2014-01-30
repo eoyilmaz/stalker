@@ -51,6 +51,11 @@ Stalker Changes
   schedule_model attributes coming from the ScheduleMixin class. So by using
   the __default_schedule_attr_name__ Stalker is able to display error messages
   complaining about gap_timing attribute instead of schedule_timing etc.
+* **New:** Updating a task by calling Task.request_revision() will now set the
+  TaskDependency.dependency_target to 'onstart' for tasks those are depending
+  to the revised task and updated to have a status of DREV, OH or STOP. Thus,
+  TaskJuggler will be able to continue scheduling these tasks even if the tasks
+  are now working together.
 
 0.2.4
 =====

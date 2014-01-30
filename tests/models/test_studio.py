@@ -834,6 +834,10 @@ class StudioTester(unittest2.TestCase):
         self.test_studio.start = datetime.datetime(2013, 4, 15, 22, 56)
         self.test_studio.end = datetime.datetime(2013, 7, 30, 0, 0)
 
+        # just to be sure that it is not creating any issue on schedule
+        self.test_task25.task_depends_to[0].dependency_target = 'onstart'
+        self.test_task25.resources = [self.test_user2]
+
         self.test_studio.scheduler = tj_scheduler
         self.test_studio.schedule()
 
@@ -849,7 +853,7 @@ class StudioTester(unittest2.TestCase):
 
         self.assertEqual(
             self.test_project1.computed_end,
-            datetime.datetime(2013, 7, 19, 13, 0)
+            datetime.datetime(2013, 7, 31, 13, 0)
         )
 
         # Project 2
@@ -860,7 +864,7 @@ class StudioTester(unittest2.TestCase):
 
         self.assertEqual(
             self.test_project1.computed_end,
-            datetime.datetime(2013, 7, 19, 13, 0)
+            datetime.datetime(2013, 7, 31, 13, 0)
         )
 
         # Project 3
@@ -870,61 +874,61 @@ class StudioTester(unittest2.TestCase):
         # self.test_asset1
         self.assertEqual(
             self.test_asset1.computed_start,
-            datetime.datetime(2013, 04, 16, 9, 0)
+            datetime.datetime(2013, 4, 16, 9, 0)
         )
         self.assertEqual(
             self.test_asset1.computed_end,
-            datetime.datetime(2013, 06, 12, 16, 00)
+            datetime.datetime(2013, 6, 28, 12, 0)
         )
 
         # self.test_asset2
         self.assertEqual(
             self.test_asset2.computed_start,
-            datetime.datetime(2013, 04, 16, 9, 0)
+            datetime.datetime(2013, 4, 16, 9, )
         )
         self.assertEqual(
             self.test_asset2.computed_end,
-            datetime.datetime(2013, 06, 12, 16, 00)
+            datetime.datetime(2013, 7, 2, 10, 0)
         )
 
         # self.test_shot1
         self.assertEqual(
             self.test_shot1.computed_start,
-            datetime.datetime(2013, 07, 8, 14, 0)
+            datetime.datetime(2013, 4, 26, 17, 0)
         )
         self.assertEqual(
             self.test_shot1.computed_end,
-            datetime.datetime(2013, 07, 19, 13, 00)
+            datetime.datetime(2013, 7, 31, 13, 0)
         )
 
         # self.test_shot2
         self.assertEqual(
             self.test_shot2.computed_start,
-            datetime.datetime(2013, 04, 16, 9, 0)
+            datetime.datetime(2013, 4, 16, 9, 0)
         )
         self.assertEqual(
             self.test_shot2.computed_end,
-            datetime.datetime(2013, 06, 27, 13, 00)
+            datetime.datetime(2013, 7, 23, 11, 0)
         )
 
         # self.test_shot3
         self.assertEqual(
             self.test_shot3.computed_start,
-            datetime.datetime(2013, 05, 16, 11, 00)
+            datetime.datetime(2013, 4, 30, 15, 0)
         )
         self.assertEqual(
             self.test_shot3.computed_end,
-            datetime.datetime(2013, 07, 22, 12, 00)
+            datetime.datetime(2013, 7, 2, 18, 0)
         )
 
         # self.test_shot4
         self.assertEqual(
             self.test_shot4.computed_start,
-            datetime.datetime(2013, 05, 16, 11, 00)
+            datetime.datetime(2013, 6, 4, 14, 0)
         )
         self.assertEqual(
             self.test_shot4.computed_end,
-            datetime.datetime(2013, 07, 02, 18, 00)
+            datetime.datetime(2013, 7, 26, 16, 0)
         )
 
         # self.test_shot5
@@ -934,21 +938,21 @@ class StudioTester(unittest2.TestCase):
         # self.test_task1
         self.assertEqual(
             self.test_task1.computed_start,
-            datetime.datetime(2013, 06, 12, 16, 00)
+            datetime.datetime(2013, 5, 2, 13, 0)
         )
         self.assertEqual(
             self.test_task1.computed_end,
-            datetime.datetime(2013, 06, 25, 15, 00)
+            datetime.datetime(2013, 5, 15, 12, 0)
         )
 
         # self.test_task2
         self.assertEqual(
             self.test_task2.computed_start,
-            datetime.datetime(2013, 06, 25, 15, 00)
+            datetime.datetime(2013, 5, 15, 12, 0)
         )
         self.assertEqual(
             self.test_task2.computed_end,
-            datetime.datetime(2013, 07, 8, 14, 0)
+            datetime.datetime(2013, 5, 28, 11, 0)
         )
 
         # self.test_task3
@@ -958,161 +962,161 @@ class StudioTester(unittest2.TestCase):
         # self.test_task4
         self.assertEqual(
             self.test_task4.computed_start,
-            datetime.datetime(2013, 07, 8, 14, 0)
+            datetime.datetime(2013, 4, 26, 17, 0)
         )
         self.assertEqual(
             self.test_task4.computed_end,
-            datetime.datetime(2013, 07, 10, 12, 00)
+            datetime.datetime(2013, 4, 30, 15, 0)
         )
 
         # self.test_task5
         self.assertEqual(
             self.test_task5.computed_start,
-            datetime.datetime(2013, 07, 10, 12, 00)
+            datetime.datetime(2013, 7, 3, 17, 0)
         )
         self.assertEqual(
             self.test_task5.computed_end,
-            datetime.datetime(2013, 07, 12, 10, 00)
+            datetime.datetime(2013, 7, 5, 15, 0)
         )
 
         # self.test_task6
         self.assertEqual(
             self.test_task6.computed_start,
-            datetime.datetime(2013, 07, 12, 10, 00)
+            datetime.datetime(2013, 7, 15, 9, 0)
         )
         self.assertEqual(
             self.test_task6.computed_end,
-            datetime.datetime(2013, 07, 16, 16, 00)
+            datetime.datetime(2013, 7, 17, 15, 0)
         )
 
         # self.test_task7
         self.assertEqual(
             self.test_task7.computed_start,
-            datetime.datetime(2013, 07, 16, 16, 00)
+            datetime.datetime(2013, 7, 26, 16, 0)
         )
         self.assertEqual(
             self.test_task7.computed_end,
-            datetime.datetime(2013, 07, 19, 13, 00)
+            datetime.datetime(2013, 7, 31, 13, 0)
         )
 
         # self.test_task8
         self.assertEqual(
             self.test_task8.computed_start,
-            datetime.datetime(2013, 04, 16, 9, 0)
+            datetime.datetime(2013, 4, 16, 9, 0)
         )
         self.assertEqual(
             self.test_task8.computed_end,
-            datetime.datetime(2013, 04, 17, 16, 00)
+            datetime.datetime(2013, 4, 17, 16, 0)
         )
 
         # self.test_task9
         self.assertEqual(
             self.test_task9.computed_start,
-            datetime.datetime(2013, 04, 17, 16, 00)
+            datetime.datetime(2013, 4, 17, 16, 0)
         )
         self.assertEqual(
             self.test_task9.computed_end,
-            datetime.datetime(2013, 04, 19, 14, 00)
+            datetime.datetime(2013, 4, 19, 14, 0)
         )
 
         # self.test_task10
         self.assertEqual(
             self.test_task10.computed_start,
-            datetime.datetime(2013, 06, 14, 14, 00)
+            datetime.datetime(2013, 7, 5, 15, 0)
         )
         self.assertEqual(
             self.test_task10.computed_end,
-            datetime.datetime(2013, 06, 19, 11, 00)
+            datetime.datetime(2013, 7, 10, 12, 0)
         )
 
         # self.test_task11
         self.assertEqual(
             self.test_task11.computed_start,
-            datetime.datetime(2013, 06, 21, 17, 00)
+            datetime.datetime(2013, 7, 17, 15, 0)
         )
         self.assertEqual(
             self.test_task11.computed_end,
-            datetime.datetime(2013, 06, 27, 13, 00)
+            datetime.datetime(2013, 7, 23, 11, 0)
         )
 
         # self.test_task12
         self.assertEqual(
             self.test_task12.computed_start,
-            datetime.datetime(2013, 05, 16, 11, 00)
+            datetime.datetime(2013, 4, 30, 15, 0)
         )
         self.assertEqual(
             self.test_task12.computed_end,
-            datetime.datetime(2013, 05, 17, 18, 00)
+            datetime.datetime(2013, 5, 2, 13, 0)
         )
 
         # self.test_task13
         self.assertEqual(
             self.test_task13.computed_start,
-            datetime.datetime(2013, 07, 10, 12, 00)
+            datetime.datetime(2013, 5, 28, 11, 0)
         )
         self.assertEqual(
             self.test_task13.computed_end,
-            datetime.datetime(2013, 07, 12, 10, 00)
+            datetime.datetime(2013, 5, 29, 18, 0)
         )
 
         # self.test_task14
         self.assertEqual(
             self.test_task14.computed_start,
-            datetime.datetime(2013, 07, 12, 10, 00)
+            datetime.datetime(2013, 5, 30, 9, 0)
         )
         self.assertEqual(
             self.test_task14.computed_end,
-            datetime.datetime(2013, 07, 16, 16, 00)
+            datetime.datetime(2013, 6, 3, 15, 0)
         )
 
         # self.test_task15
         self.assertEqual(
             self.test_task15.computed_start,
-            datetime.datetime(2013, 07, 16, 16, 00)
+            datetime.datetime(2013, 6, 3, 15, 0)
         )
         self.assertEqual(
             self.test_task15.computed_end,
-            datetime.datetime(2013, 07, 22, 12, 00)
+            datetime.datetime(2013, 7, 2, 18, 0)
         )
 
         # self.test_task16
         self.assertEqual(
             self.test_task16.computed_start,
-            datetime.datetime(2013, 05, 16, 11, 00)
+            datetime.datetime(2013, 6, 4, 14, 0)
         )
         self.assertEqual(
             self.test_task16.computed_end,
-            datetime.datetime(2013, 05, 17, 18, 00)
+            datetime.datetime(2013, 6, 6, 12, 0)
         )
 
         # self.test_task17
         self.assertEqual(
             self.test_task17.computed_start,
-            datetime.datetime(2013, 06, 12, 16, 00)
+            datetime.datetime(2013, 7, 2, 10, 0)
         )
         self.assertEqual(
             self.test_task17.computed_end,
-            datetime.datetime(2013, 06, 14, 14, 00)
+            datetime.datetime(2013, 7, 3, 17, 0)
         )
 
         # self.test_task18
         self.assertEqual(
             self.test_task18.computed_start,
-            datetime.datetime(2013, 06, 19, 11, 00)
+            datetime.datetime(2013, 7, 10, 12, 0)
         )
         self.assertEqual(
             self.test_task18.computed_end,
-            datetime.datetime(2013, 06, 21, 17, 00)
+            datetime.datetime(2013, 7, 12, 18, 0)
         )
 
         # self.test_task19
         self.assertEqual(
             self.test_task19.computed_start,
-            datetime.datetime(2013, 06, 27, 13, 00)
+            datetime.datetime(2013, 7, 23, 11, 0)
         )
         self.assertEqual(
             self.test_task19.computed_end,
-            datetime.datetime(2013, 07, 02, 18, 00)
+            datetime.datetime(2013, 7, 26, 16, 0)
         )
 
         # self.test_task20
@@ -1134,81 +1138,81 @@ class StudioTester(unittest2.TestCase):
         # self.test_task24
         self.assertEqual(
             self.test_task24.computed_start,
-            datetime.datetime(2013, 04, 16, 9, 0)
+            datetime.datetime(2013, 4, 16, 9, 0)
         )
         self.assertEqual(
             self.test_task24.computed_end,
-            datetime.datetime(2013, 04, 26, 17, 00)
+            datetime.datetime(2013, 4, 26, 17, 0)
         )
 
         # self.test_task25
         self.assertEqual(
             self.test_task25.computed_start,
-            datetime.datetime(2013, 04, 26, 17, 00)
+            datetime.datetime(2013, 5, 16, 11, 0)
         )
         self.assertEqual(
             self.test_task25.computed_end,
-            datetime.datetime(2013, 05, 16, 11, 00)
+            datetime.datetime(2013, 6, 4, 14, 0)
         )
 
         # self.test_task26
         self.assertEqual(
             self.test_task26.computed_start,
-            datetime.datetime(2013, 05, 20, 9, 0)
+            datetime.datetime(2013, 6, 4, 14, 0)
         )
         self.assertEqual(
             self.test_task26.computed_end,
-            datetime.datetime(2013, 05, 30, 17, 00)
+            datetime.datetime(2013, 6, 17, 13, 0)
         )
 
         # self.test_task27
         self.assertEqual(
             self.test_task27.computed_start,
-            datetime.datetime(2013, 05, 30, 17, 00)
+            datetime.datetime(2013, 6, 17, 13, 0)
         )
         self.assertEqual(
             self.test_task27.computed_end,
-            datetime.datetime(2013, 06, 12, 16, 00)
+            datetime.datetime(2013, 6, 28, 12, 0)
         )
 
         # self.test_task28
         self.assertEqual(
             self.test_task28.computed_start,
-            datetime.datetime(2013, 04, 16, 9, 0)
+            datetime.datetime(2013, 4, 16, 9, 0)
         )
         self.assertEqual(
             self.test_task28.computed_end,
-            datetime.datetime(2013, 04, 26, 17, 00)
+            datetime.datetime(2013, 4, 26, 17, 0)
         )
 
         # self.test_task29
         self.assertEqual(
             self.test_task29.computed_start,
-            datetime.datetime(2013, 04, 26, 17, 00)
+            datetime.datetime(2013, 4, 26, 17, 0)
         )
         self.assertEqual(
             self.test_task29.computed_end,
-            datetime.datetime(2013, 05, 16, 11, 00)
+            datetime.datetime(2013, 5, 16, 11, 0)
         )
 
         # self.test_task30
         self.assertEqual(
             self.test_task30.computed_start,
-            datetime.datetime(2013, 05, 20, 9, 0)
+            datetime.datetime(2013, 6, 6, 12, 0)
         )
         self.assertEqual(
             self.test_task30.computed_end,
-            datetime.datetime(2013, 05, 30, 17, 00)
+            datetime.datetime(2013, 6, 19, 11, 0)
         )
 
         # self.test_task31
         self.assertEqual(
             self.test_task31.computed_start,
-            datetime.datetime(2013, 05, 30, 17, 00)
+            datetime.datetime(2013, 6, 19, 11, 0)
         )
         self.assertEqual(
             self.test_task31.computed_end,
-            datetime.datetime(2013, 06, 12, 16, 00)
+            datetime.datetime(2013, 7, 2, 10, 0)
         )
 
     def test_schedule_will_raise_a_RuntimeError_if_is_scheduling_is_True(self):

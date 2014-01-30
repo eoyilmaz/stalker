@@ -267,7 +267,8 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
             self.task._review_number += 1
             if revise_task:
                 # revise the task
-                logger.debug('total_seconds including reviews: %s' % total_seconds)
+                logger.debug('total_seconds including reviews: %s' %
+                             total_seconds)
                 timing, unit = self.least_meaningful_time_unit(total_seconds)
 
                 self.task.schedule_timing = timing
@@ -281,8 +282,15 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
             self.task.update_parent_statuses()
 
             # update dependent task statuses
-            for dep in self.task.dependent_of:
+            for tdep in self.task.task_dependent_of:
+                dep = tdep.task
                 dep.update_status_with_dependent_statuses()
+                if dep.status.code in ['DREV', 'OH', 'STOP']:
+                    # for tasks that are still be able to continue to work,
+                    # change the dependency_target to "onstart" to allow
+                    # the two of the tasks to work together and still let the
+                    # TJ to be able to schedule the tasks correctly
+                    tdep.dependency_target = 'onstart'
                 # also update the status of parents of dependencies
                 dep.update_parent_statuses()
 
