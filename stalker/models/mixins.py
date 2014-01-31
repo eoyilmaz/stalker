@@ -956,8 +956,8 @@ class WorkingHoursMixin(object):
         if wh is None:
             # use the default one
             from stalker import WorkingHours
-
             wh = WorkingHours()
+
         return wh
 
 

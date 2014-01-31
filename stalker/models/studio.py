@@ -189,16 +189,33 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
     def update_defaults(self):
         """updates the default values with the studio
         """
+        # TODO: add update_defaults() to attribute edit/update methods,
+        #       so we will always have an up to date info about the working
+        #       hours.
+
         logger.debug('updating defaults with Studio instance')
         from stalker import defaults
-        if self.daily_working_hours:
-            defaults.daily_working_hours = self.daily_working_hours
+        try:
+            if self.daily_working_hours:
+                defaults.daily_working_hours = self.daily_working_hours
+                logger.debug(
+                    'updated defaults.daily_working_hours: %s' %
+                    defaults.daily_working_hours
+                )
+            else:
+                logger.debug('can not update defaults.daily_working_hours')
+        except AttributeError:
+            # The Studio and WorkingHours classes has changed from
+            # v0.2.3 to v0.2.5 and with this change it is simply
+            # no possible to initialize the db if we insist to update the
+            # defaults for daily_working_hours, because there is no
+            # WorkingHours._daily_working_hours in versions before than
+            # v0.2.5, so just skip it for at least the studio instance
+            # in the database has been updated.
             logger.debug(
-                'updated defaults.daily_working_hours: %s' %
-                defaults.daily_working_hours
+                'Can not update defaults.daily_working_hours, WorkingHours '
+                'version mismatch'
             )
-        else:
-            logger.debug('can not update defaults.daily_working_hours')
 
         if self.weekly_working_days:
             defaults.weekly_working_days = self.weekly_working_days
