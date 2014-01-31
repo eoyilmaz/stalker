@@ -7,33 +7,44 @@ Stalker Changes
 
 * **Update:** ``Revision`` class is renamed to ``Review`` and introduced a
   couple of new attributes.
+
 * **New:** Added a new workflow called "Task Review Workflow". Please see the
   documentation about the new workflow.
+
 * **Update:** Task.responsible attribute is now a list which allows multiple
   responsible to be set for a Task.
+
 * **New:** Because of the new "Task Review Workflow" task statuses which are
   normally created in Stalker Pyramid are now automatically created in Stalker
   database initialization. The new statuses are Waiting For Dependency (WFD),
   Ready To Start (RTS), Work In Progress (WIP), Pending Review (PREV), Has
   Revision (HREV), On Hold (OH), Stopped (STOP) and Completed (CMPL) are all
   used in Task, Asset, Shot and Sequence status lists by default.
+
 * **New:** Because of the new "Task Review Workflow" also a status list for
   Review class is created by default. It contains the Statuses of New (NEW),
   Requested Revision (RREV) and Approved (APP).
+
 * **Fix:** Users.login column is now unique.
+
 * **Update:** Ticket workflow in config is now using the proper status names
   instead of the lower case names of the statuses.
+
 * **Update:** Instead of Sqlalchemy.ORM.ScopedSession Stalker now uses
   Sqlalchemy.ORM.Session. Also created a query_property() function to mimic the
   ScopedSession.query_property().
+
 * **New:** Added Task.walk_hierarchy() which iterates over the hierarchy of the
   task. For now it walks in a breadth first fashion.
+
 * **New:** Added a new exception called **StatusError** which states the entity
   status is not suitable for the action it is applied to.
+
 * **New:** Studio instance now stores the scheduling state to the database to
   prevent two scheduling process to override each other. It also stores the
   last schedule message and the last schedule date and the id of the user who
   has done the scheduling.
+
 * **New:** The Task Dependency relation is now using an Association Object
   instead of just a Secondary Table. The Task.depends and Task.dependent_of
   attributes are now association_proxies.
@@ -44,18 +55,36 @@ Stalker Changes
 
   Updated the task_tjp_template to reflect the details of the dependencies that
   a task has.
+
 * **New:** ScheduleMixin class now has some default class attributes that will
   allow customizations in inherited classes. This is mainly done for
   TaskDependency class and for the gap_timing, gap_unit, gap_model attributes
-  which are infact synonyms of schedule_timing, schedule_unit and
+  which are in fact synonyms of schedule_timing, schedule_unit and
   schedule_model attributes coming from the ScheduleMixin class. So by using
   the __default_schedule_attr_name__ Stalker is able to display error messages
   complaining about gap_timing attribute instead of schedule_timing etc.
+
 * **New:** Updating a task by calling Task.request_revision() will now set the
   TaskDependency.dependency_target to 'onstart' for tasks those are depending
   to the revised task and updated to have a status of DREV, OH or STOP. Thus,
   TaskJuggler will be able to continue scheduling these tasks even if the tasks
   are now working together.
+
+* **Update:** Updated the TaskJuggler templates to make the tjp output a little
+  bit more readable.
+
+* **New:** ScheduleMixin now creates more localized (to the mixed in class)
+  column and enum type names in the mixed in classes.
+
+  For example, it creates the "TaskScheduleModel" enum type for "Task" class
+  and for "TaskDependency" it creates "TaskDependencyGapModel" with the same
+  setup following the "{{class_name}}{{attr_name}}Model" template.
+
+  Also it creates "schedule_model" column for Task, and "gap_model" for
+  TaskDependency class.
+
+* **Update:** Renamed the "TaskScheduleUnit" enum type name to "TimeUnit"
+  in ScheduleMixin.
 
 0.2.4
 =====

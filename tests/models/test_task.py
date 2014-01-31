@@ -110,6 +110,20 @@ class TaskTester(unittest2.TestCase):
             password="1234"
         )
 
+        self.test_user4 = User(
+            name="User4",
+            login="user4",
+            email="user4@user4.com",
+            password="1234"
+        )
+
+        self.test_user5 = User(
+            name="User5",
+            login="user5",
+            email="user5@user5.com",
+            password="1234"
+        )
+
         self.test_project1 = Project(
             name="Test Project1",
             code='tp1',
@@ -138,6 +152,10 @@ class TaskTester(unittest2.TestCase):
             'priority': 500,
             'responsible': [self.test_user1],
             'resources': [self.test_user1, self.test_user2],
+            'alternative_resources': [self.test_user3, self.test_user4,
+                                      self.test_user5],
+            'allocation_strategy': 'minloaded',
+            'persistent_allocation': True,
             'watchers': [self.test_user3],
             'bid_timing': 4,
             'bid_unit': 'd',
@@ -3466,14 +3484,26 @@ class TaskTester(unittest2.TestCase):
         t1 = Task(**self.kwargs)
         t1.id = 10221
 
-        expected_tjp = """task Task_10221 "Modeling" {
-        
-            depends Project_14875.Task_6484 {onend}, Project_14875.Task_6485 {onend}
+        expected_tjp = """
+task Task_10221 "Modeling" {
+
+    
+            depends Project_14875.Task_6484 {onend}, Project_14875.Task_6485 {onend}        
             
             effort 10d
-            allocate User_5648, User_7999
-        }
-        """
+            allocate User_5648 {
+                    alternative
+                    User_None, User_None, User_None select minloaded
+                    persistent
+                }, User_7999 {
+                    alternative
+                    User_None, User_None, User_None select minloaded
+                    persistent
+                }            
+}"""
+        # print t1.to_tjp
+        # print '---------------------------------'
+        # print expected_tjp
         self.assertEqual(t1.to_tjp, expected_tjp)
 
     def test_to_tjp_attribute_is_working_properly_for_a_leaf_task(self):
@@ -3504,6 +3534,18 @@ class TaskTester(unittest2.TestCase):
         self.test_user2.login = 'testuser2'
         self.test_user2.id = 1232
 
+        self.test_user3.name = 'Test User 3'
+        self.test_user3.login = 'testuser3'
+        self.test_user3.id = 1233
+
+        self.test_user4.name = 'Test User 4'
+        self.test_user4.login = 'testuser4'
+        self.test_user4.id = 1234
+
+        self.test_user5.name = 'Test User 5'
+        self.test_user5.login = 'testuser5'
+        self.test_user5.id = 1235
+
         self.kwargs['resources'] = [self.test_user1, self.test_user2]
 
         self.kwargs['project'].id = 8898
@@ -3511,14 +3553,26 @@ class TaskTester(unittest2.TestCase):
         new_task = Task(**self.kwargs)
         new_task.id = 234234
         # self.maxDiff = None
-        expected_tjp = """task Task_234234 "Modeling" {
-        
-            depends Project_8898.Task_987879.Task_23423 {onend}, Project_8898.Task_987879.Task_23424 {onend}
+        expected_tjp = """
+task Task_234234 "Modeling" {
+
+    
+            depends Project_8898.Task_987879.Task_23423 {onend}, Project_8898.Task_987879.Task_23424 {onend}        
             
             effort 1003h
-            allocate User_1231, User_1232
-        }
-        """
+            allocate User_1231 {
+                    alternative
+                    User_1233, User_1234, User_1235 select minloaded
+                    persistent
+                }, User_1232 {
+                    alternative
+                    User_1233, User_1234, User_1235 select minloaded
+                    persistent
+                }            
+}"""
+        # print new_task.to_tjp
+        # print '---------------------------------'
+        # print expected_tjp
         self.assertEqual(new_task.to_tjp, expected_tjp)
 
     def test_to_tjp_attribute_is_working_properly_for_a_leaf_task_with_dependency_details(self):
@@ -3570,16 +3624,105 @@ class TaskTester(unittest2.TestCase):
         tdep2.gap_unit = 'd'
         tdep2.gap_model = 'duration'
 
-        expected_tjp = """task Task_234234 "Modeling" {
-        
-            depends Project_8898.Task_987879.Task_23423 {onstart gaplength 2d}, Project_8898.Task_987879.Task_23424 {onend gapduration 4d}
+        expected_tjp = """
+task Task_234234 "Modeling" {
+
+    
+            depends Project_8898.Task_987879.Task_23423 {onstart gaplength 2d}, Project_8898.Task_987879.Task_23424 {onend gapduration 4d}        
             
             effort 1003h
-            allocate User_1231, User_1232
-        }
+            allocate User_1231 {
+                    alternative
+                    User_None, User_None, User_None select minloaded
+                    persistent
+                }, User_1232 {
+                    alternative
+                    User_None, User_None, User_None select minloaded
+                    persistent
+                }            
+}"""
+        # print new_task.to_tjp
+        # print '---------------------------------'
+        # print expected_tjp
+        self.assertEqual(new_task.to_tjp, expected_tjp)
+
+    def test_to_tjp_attribute_is_working_properly_for_a_leaf_task_with_custom_allocation_strategy(self):
+        """testing if the to_tjp attribute is working properly for a leaf task
+        with custom allocation_strategy value
         """
-        self.maxDiff = None
-        print new_task.to_tjp
+        self.kwargs['parent'] = self.test_task
+        self.kwargs['depends'] = []
+
+        self.test_task.id = 987879
+
+        dep_task1 = Task(**self.kwargs)
+        dep_task1.id = 23423
+
+        dep_task2 = Task(**self.kwargs)
+        dep_task2.id = 23424
+
+        self.kwargs['name'] = 'Modeling'
+        self.kwargs['schedule_timing'] = 1003
+        self.kwargs['schedule_unit'] = 'h'
+        self.kwargs['schedule_model'] = 'effort'
+        self.kwargs['depends'] = [dep_task1, dep_task2]
+
+        self.test_user1.name = 'Test User 1'
+        self.test_user1.login = 'testuser1'
+        self.test_user1.id = 1231
+
+        self.test_user2.name = 'Test User 2'
+        self.test_user2.login = 'testuser2'
+        self.test_user2.id = 1232
+
+        self.test_user3.name = 'Test User 3'
+        self.test_user3.login = 'testuser3'
+        self.test_user3.id = 1233
+
+        self.kwargs['resources'] = [self.test_user1, self.test_user2]
+
+        self.kwargs['project'].id = 8898
+
+        self.kwargs['alternative_resources'] = [self.test_user3]
+        self.kwargs['allocation_strategy'] = 'minloaded'
+
+        new_task = Task(**self.kwargs)
+        new_task.id = 234234
+        # self.maxDiff = None
+
+        # modify dependency attributes
+        tdep1 = new_task.task_depends_to[0]
+        tdep1.dependency_target = 'onstart'
+        tdep1.gap_timing = 2
+        tdep1.gap_unit = 'd'
+        tdep1.gap_model = 'length'
+
+        tdep2 = new_task.task_depends_to[1]
+        tdep1.dependency_target = 'onstart'
+        tdep2.gap_timing = 4
+        tdep2.gap_unit = 'd'
+        tdep2.gap_model = 'duration'
+
+        expected_tjp = """
+task Task_234234 "Modeling" {
+
+    
+            depends Project_8898.Task_987879.Task_23423 {onstart gaplength 2d}, Project_8898.Task_987879.Task_23424 {onend gapduration 4d}        
+            
+            effort 1003h
+            allocate User_1231 {
+                    alternative
+                    User_1233 select minloaded
+                    persistent
+                }, User_1232 {
+                    alternative
+                    User_1233 select minloaded
+                    persistent
+                }            
+}"""
+        # print new_task.to_tjp
+        # print '---------------------------------'
+        # print expected_tjp
         self.assertEqual(new_task.to_tjp, expected_tjp)
 
     def test_to_tjp_attribute_is_working_properly_for_a_container_task(self):
@@ -3617,38 +3760,80 @@ class TaskTester(unittest2.TestCase):
         self.test_user2.login = 'testuser2'
         self.test_user2.id = 1232
 
+        self.test_user3.name = 'Test User 3'
+        self.test_user3.login = 'testuser3'
+        self.test_user3.id = 1233
+
+        self.test_user4.name = 'Test User 4'
+        self.test_user4.login = 'testuser4'
+        self.test_user4.id = 1234
+
+        self.test_user5.name = 'Test User 5'
+        self.test_user5.login = 'testuser5'
+        self.test_user5.id = 1235
+
         self.kwargs['resources'] = [self.test_user1, self.test_user2]
 
         t2 = Task(**self.kwargs)
         t2.id = 5679
 
-        expected_tjp = '''task Task_5648 "Modeling" {
-        
-                task Task_23423 "Modeling" {
-        
+        expected_tjp = """
+task Task_5648 "Modeling" {
+
+    
+    
+task Task_23423 "Modeling" {
+
+    
+            
             
             effort 1d
-            allocate User_1231, User_1232
-        }
-        
-                task Task_23424 "Modeling" {
-        
+            allocate User_1231 {
+                    alternative
+                    User_1233, User_1234, User_1235 select minloaded
+                    persistent
+                }, User_1232 {
+                    alternative
+                    User_1233, User_1234, User_1235 select minloaded
+                    persistent
+                }            
+}
+task Task_23424 "Modeling" {
+
+    
+            
             
             effort 1d
-            allocate User_1231, User_1232
-        }
-        
-                task Task_5679 "Modeling" {
-        
-            depends Project_87987.Task_5648.Task_23423 {onend}, Project_87987.Task_5648.Task_23424 {onend}
+            allocate User_1231 {
+                    alternative
+                    User_1233, User_1234, User_1235 select minloaded
+                    persistent
+                }, User_1232 {
+                    alternative
+                    User_1233, User_1234, User_1235 select minloaded
+                    persistent
+                }            
+}
+task Task_5679 "Modeling" {
+
+    
+            depends Project_87987.Task_5648.Task_23423 {onend}, Project_87987.Task_5648.Task_23424 {onend}        
             
             effort 1d
-            allocate User_1231, User_1232
-        }
-        
-        }
-        '''
-        self.maxDiff = None
+            allocate User_1231 {
+                    alternative
+                    User_1233, User_1234, User_1235 select minloaded
+                    persistent
+                }, User_1232 {
+                    alternative
+                    User_1233, User_1234, User_1235 select minloaded
+                    persistent
+                }            
+}
+}"""
+        # print t1.to_tjp
+        # print '---------------------------------'
+        # print expected_tjp
         self.assertMultiLineEqual(t1.to_tjp, expected_tjp)
 
     def test_to_tjp_attribute_is_working_properly_for_a_container_task_with_dependency(self):
@@ -3701,34 +3886,63 @@ class TaskTester(unittest2.TestCase):
         t2 = Task(**self.kwargs)
         t2.id = 5679
 
-        expected_tjp = '''task Task_5648 "Modeling" {
-        priority 888
+        expected_tjp = """
+task Task_5648 "Modeling" {
+
+    priority 888
             depends Project_87987.Task_35546 {onend}
-                task Task_23423 "Modeling" {
-        
+task Task_23423 "Modeling" {
+
+    
+            
             
             effort 1d
-            allocate User_1231, User_1232
-        }
-        
-                task Task_23424 "Modeling" {
-        
+            allocate User_1231 {
+                    alternative
+                    User_None, User_None, User_None select minloaded
+                    persistent
+                }, User_1232 {
+                    alternative
+                    User_None, User_None, User_None select minloaded
+                    persistent
+                }            
+}
+task Task_23424 "Modeling" {
+
+    
+            
             
             effort 1d
-            allocate User_1231, User_1232
-        }
-        
-                task Task_5679 "Modeling" {
-        
-            depends Project_87987.Task_5648.Task_23423 {onend}, Project_87987.Task_5648.Task_23424 {onend}
+            allocate User_1231 {
+                    alternative
+                    User_None, User_None, User_None select minloaded
+                    persistent
+                }, User_1232 {
+                    alternative
+                    User_None, User_None, User_None select minloaded
+                    persistent
+                }            
+}
+task Task_5679 "Modeling" {
+
+    
+            depends Project_87987.Task_5648.Task_23423 {onend}, Project_87987.Task_5648.Task_23424 {onend}        
             
             effort 1d
-            allocate User_1231, User_1232
-        }
-        
-        }
-        '''
-        self.maxDiff = None
+            allocate User_1231 {
+                    alternative
+                    User_None, User_None, User_None select minloaded
+                    persistent
+                }, User_1232 {
+                    alternative
+                    User_None, User_None, User_None select minloaded
+                    persistent
+                }            
+}
+}"""
+        print t1.to_tjp
+        print '---------------------------------'
+        print expected_tjp
         self.assertMultiLineEqual(t1.to_tjp, expected_tjp)
 
     def test_to_tjp_schedule_constraint_is_reflected_in_tjp_file(self):
@@ -3773,38 +3987,66 @@ class TaskTester(unittest2.TestCase):
         t2 = Task(**self.kwargs)
         t2.id = 5679
 
-        expected_tjp = '''task Task_5648 "Modeling" {
-        
-                task Task_23423 "Modeling" {
-        
+        expected_tjp = """
+task Task_5648 "Modeling" {
+
+    
+    
+task Task_23423 "Modeling" {
+
+    
+            
             
             effort 1d
-            allocate User_1231, User_1232
-        }
-        
-                task Task_23424 "Modeling" {
-        
+            allocate User_1231 {
+                    alternative
+                    User_None, User_None, User_None select minloaded
+                    persistent
+                }, User_1232 {
+                    alternative
+                    User_None, User_None, User_None select minloaded
+                    persistent
+                }            
+}
+task Task_23424 "Modeling" {
+
+    
+            
             
             effort 1d
-            allocate User_1231, User_1232
-        }
-        
-                task Task_5679 "Modeling" {
-        
-            depends Project_87987.Task_5648.Task_23423 {onend}, Project_87987.Task_5648.Task_23424 {onend}
-            start 2013-05-03-14:00
-                    end 2013-05-04-14:00
+            allocate User_1231 {
+                    alternative
+                    User_None, User_None, User_None select minloaded
+                    persistent
+                }, User_1232 {
+                    alternative
+                    User_None, User_None, User_None select minloaded
+                    persistent
+                }            
+}
+task Task_5679 "Modeling" {
+
+    
+            depends Project_87987.Task_5648.Task_23423 {onend}, Project_87987.Task_5648.Task_23424 {onend}        
+                                                start 2013-05-03-14:00
+                                end 2013-05-04-14:00
+                            
             effort 1d
-            allocate User_1231, User_1232
-        }
-        
-        }
-        '''
-        self.maxDiff = None
-        #print t1.to_tjp
-        #print '-----------------------'
-        #print expected_tjp
-        #print '-----------------------'
+            allocate User_1231 {
+                    alternative
+                    User_None, User_None, User_None select minloaded
+                    persistent
+                }, User_1232 {
+                    alternative
+                    User_None, User_None, User_None select minloaded
+                    persistent
+                }            
+}
+}"""
+        print t1.to_tjp
+        print '-----------------------'
+        print expected_tjp
+        print '-----------------------'
         self.assertMultiLineEqual(t1.to_tjp, expected_tjp)
 
     def test_is_scheduled_is_a_read_only_attribute(self):
@@ -4150,3 +4392,274 @@ class TaskTester(unittest2.TestCase):
         self.assertEqual(task_depends.task, self.test_task)
         self.assertEqual(task_depends.depends_to, self.test_dependent_task1)
 
+    def test_alternative_resources_argument_is_skipped(self):
+        """testing if the alternative_resources attribute will be an empty list
+        when it is skipped
+        """
+        self.kwargs.pop('alternative_resources')
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.alternative_resources, [])
+
+    def test_alternative_resources_argument_is_None(self):
+        """testing if the alternative_resources attribute will be an empth list
+        when the alternative_resources argument value is None
+        """
+        self.kwargs['alternative_resources'] = None
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.alternative_resources, [])
+
+    def test_alternative_resources_attribute_is_set_to_None(self):
+        """testing if a TypeError will be raised when the alternative_resources
+        attribute is set to None
+        """
+        self.assertRaises(TypeError, setattr, self.test_task,
+                          'alternative_resources', None)
+
+    def test_alternative_resources_argument_is_not_a_list(self):
+        """testing if a TypeError will be raised when the alternative_resources
+        argument value is not a list
+        """
+        self.kwargs['alternative_resources'] = self.test_user3
+        self.assertRaises(TypeError, Task, **self.kwargs)
+
+    def test_alternative_resources_attribute_is_not_a_list(self):
+        """testing if a TypeError will be raised when the alternative_resources
+        attribute is set to a value other than a list
+        """
+        self.assertRaises(TypeError, setattr, self.test_task,
+                          'alternative_resources', self.test_user3)
+
+    def test_alternative_resources_argument_elements_are_not_User_instances(self):
+        """testing if a TypeError will be raised when the elements in the
+        alternative_resources argument are not all User instances
+        """
+        self.kwargs['alternative_resources'] = ['not', 1, 'user']
+        self.assertRaises(TypeError, Task, **self.kwargs)
+
+    def test_alternative_resources_attribute_elements_are_not_all_User_instances(self):
+        """testing if a TypeError will be raised when the elements in the
+        alternative_resources attribute are not all User instances
+        """
+        self.assertRaises(TypeError, setattr, self.test_task,
+                          'alternative_resources', ['not', 1, 'user'])
+
+    def test_alternative_resources_argument_is_working_properly(self):
+        """testing if the alternative_resources argument value is correctly
+        passed to the alternative_resources attribute
+        """
+        self.assertItemsEqual(
+            [self.test_user3, self.test_user4, self.test_user5],
+            self.test_task.alternative_resources
+        )
+
+    def test_alternative_resources_attribute_is_working_properly(self):
+        """testing if the alternative_resources attribute value can be
+        correctly set
+        """
+        self.assertItemsEqual(
+            self.test_task.alternative_resources,
+            [self.test_user3, self.test_user4, self.test_user5]
+        )
+        alternative_resources = [self.test_user4, self.test_user5]
+        self.test_task.alternative_resources = alternative_resources
+        self.assertItemsEqual(
+            alternative_resources,
+            self.test_task.alternative_resources
+        )
+
+    def test_allocation_strategy_argument_is_skipped(self):
+        """testing if the default value will be used for allocation_strategy
+        attribute if the allocation_strategy argument is skipped
+        """
+        self.kwargs.pop('allocation_strategy')
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.allocation_strategy,
+                         defaults.allocation_strategy[0])
+
+    def test_allocation_strategy_argument_is_none(self):
+        """testing if the default value will be used for allocation_strategy
+        attribute if the allocation_strategy argument is None
+        """
+        self.kwargs['allocation_strategy'] = None
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.allocation_strategy,
+                         defaults.allocation_strategy[0])
+
+    def test_allocation_strategy_attribute_is_set_to_None(self):
+        """testing if the default value will be used for the
+        allocation_strategy when it is set to None
+        """
+        self.test_task.allocation_strategy = None
+        self.assertEqual(self.test_task.allocation_strategy,
+                         defaults.allocation_strategy[0])
+
+    def test_allocation_strategy_argument_is_not_a_string(self):
+        """testing if a TypeError will be raised when the allocation_strategy
+        argument value is not a string
+        """
+        self.kwargs['allocation_strategy'] = 234
+        self.assertRaises(TypeError, Task, **self.kwargs)
+
+    def test_allocation_strategy_attribute_is_set_to_a_value_other_than_string(self):
+        """testing if a TypeError will be used when the allocation_strategy
+        attribute is set to a value other then a string
+        """
+        self.assertRaises(TypeError, setattr, self.test_task,
+                          'allocation_strategy', 234)
+
+    def test_allocation_strategy_argument_value_is_not_correct(self):
+        """testing if a ValueError will be raised when the allocation_strategy
+        argument value is not one of [minallocated, maxloaded, minloaded,
+        order, random]
+        """
+        self.kwargs['allocation_strategy'] = 'not in the list'
+        self.assertRaises(ValueError, Task, **self.kwargs)
+
+    def test_allocation_strategy_attribute_value_is_not_correct(self):
+        """testing if a ValueError will be raised when the allocation_strategy
+        attribute is set to a value which is not one of [minallocated,
+        maxloaded, minloaded, order, random]
+        """
+        self.assertRaises(ValueError, setattr, self.test_task,
+                          'allocation_strategy', 'not in the list')
+
+    def test_allocation_strategy_argument_is_working_properly(self):
+        """testing if the allocation_strategy argument value is correctly
+        passed to the allocation_strategy attribute
+        """
+        test_value = defaults.allocation_strategy[1]
+        self.kwargs['allocation_strategy'] = test_value
+        new_task = Task(**self.kwargs)
+        self.assertEqual(test_value, new_task.allocation_strategy)
+
+    def test_allocation_strategy_attribute_is_working_properly(self):
+        """testing if the allocation_strategy attribute value can be correctly
+        set
+        """
+        test_value = defaults.allocation_strategy[1]
+        self.assertNotEqual(self.test_task.allocation_strategy, test_value)
+        self.test_task.allocation_strategy = test_value
+        self.assertEqual(self.test_task.allocation_strategy, test_value)
+
+    def test_computed_resources_attribute_value_is_equal_to_the_resources_attribute_for_a_new_task(self):
+        """testing if the computed_resources attribute value is equal to the
+        resources attribute when a task initialized.
+        """
+        self.assertFalse(self.test_task.is_scheduled)
+        self.assertEqual(self.test_task.resources,
+                         self.test_task.computed_resources)
+
+    def test_computed_resources_attribute_value_will_be_updated_with_resources_attribute_if_is_scheduled_is_False_append(self):
+        """testing if the computed_resources attribute will be updated with the
+        resources attribute if the is_scheduled attribute is False
+        """
+        self.assertFalse(self.test_task.is_scheduled)
+        test_value = [self.test_user3, self.test_user5]
+        self.assertNotEqual(self.test_task.resources, test_value)
+        self.assertNotEqual(self.test_task.computed_resources, test_value)
+        self.test_task.resources = test_value
+        self.assertItemsEqual(self.test_task.computed_resources, test_value)
+
+    def test_computed_resources_attribute_value_will_be_updated_with_resources_attribute_if_is_scheduled_is_False_remove(self):
+        """testing if the computed_resources attribute will be updated with the
+        resources attribute if the is_scheduled attribute is False in remove
+        item action
+        """
+        self.assertFalse(self.test_task.is_scheduled)
+        test_value = [self.test_user3, self.test_user5]
+        self.assertNotEqual(self.test_task.resources, test_value)
+        self.assertNotEqual(self.test_task.computed_resources, test_value)
+        self.test_task.resources = test_value
+        self.assertItemsEqual(self.test_task.computed_resources, test_value)
+
+    def test_computed_resources_attribute_value_will_not_be_updated_with_resources_attribute_if_is_scheduled_is_True(self):
+        """testing if the computed_resources attribute will be not be updated
+        with the resources attribute if the is_scheduled is True
+        """
+        self.assertFalse(self.test_task.is_scheduled)
+        test_value = [self.test_user3, self.test_user5]
+        self.assertNotEqual(self.test_task.resources, test_value)
+        self.assertNotEqual(self.test_task.computed_resources, test_value)
+
+        # now set computed_start and computed_end to emulate a computation has
+        # been done
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+
+        self.assertFalse(self.test_task.is_scheduled)
+        self.test_task.computed_start = now
+        self.test_task.computed_end = now + td(hours=1)
+
+        self.assertTrue(self.test_task.is_scheduled)
+
+        self.test_task.resources = test_value
+        self.assertNotEqual(self.test_task.computed_resources, test_value)
+
+    def test_persistent_allocation_argument_is_skipped(self):
+        """testing if the default value will be used for the
+        persistent_allocation attribute value if the persistent_allocation
+        argument is skipped
+        """
+        self.kwargs.pop('persistent_allocation')
+        new_task = Task(**self.kwargs)
+        self.assertTrue(new_task.persistent_allocation)
+
+    def test_persistent_allocation_argument_is_None(self):
+        """testing if the default value will be used for the
+        persistent_allocation attribute value if the persistent_allocation
+        argument is None
+        """
+        self.kwargs['persistent_allocation'] = None
+        new_task = Task(**self.kwargs)
+        self.assertTrue(new_task.persistent_allocation)
+
+    def test_persistent_allocation_attribute_is_set_to_None(self):
+        """testing if the default value will be used when for the
+        persistent_allocation attribute if it is set to None
+        """
+        self.test_task.persistent_allocation = None
+        self.assertTrue(self.test_task.persistent_allocation)
+
+    def test_persistent_allocation_argument_is_not_bool(self):
+        """testing if the value will be converted to bool if the
+        persistent_allocation argument value is not a bool value
+        """
+        test_value = 'not a bool'
+        self.kwargs['persistent_allocation'] = test_value
+        new_task1 = Task(**self.kwargs)
+        self.assertEqual(bool(test_value), new_task1.persistent_allocation)
+
+        test_value = 0
+        self.kwargs['persistent_allocation'] = test_value
+        new_task2 = Task(**self.kwargs)
+        self.assertEqual(bool(test_value), new_task2.persistent_allocation)
+
+    def test_persistent_allocation_attribute_is_not_bool(self):
+        """testing if the persistent_allocation attribute value will be
+        converted to a bool value when it is something other than a bool
+        """
+        test_value = 'not a bool'
+        self.test_task.persistent_allocation = test_value
+        self.assertEqual(bool(test_value),
+                         self.test_task.persistent_allocation)
+
+        test_value = 0
+        self.test_task.persistent_allocation = test_value
+        self.assertEqual(bool(test_value),
+                         self.test_task.persistent_allocation)
+
+    def test_persistent_allocation_argument_is_working_properly(self):
+        """testing if the persistent_allocation argument value is correctly
+        passed to the persistent_allocation attribute
+        """
+        self.kwargs['persistent_allocation'] = False
+        new_task = Task(**self.kwargs)
+        self.assertEqual(new_task.persistent_allocation, False)
+
+    def test_persistent_allocation_attribute_is_working_properly(self):
+        """testing if the persistent_allocation attribute value can be
+        correctly set
+        """
+        self.test_task.persistent_allocation = False
+        self.assertEqual(self.test_task.persistent_allocation, False)

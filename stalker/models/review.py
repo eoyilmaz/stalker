@@ -285,7 +285,7 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
             for tdep in self.task.task_dependent_of:
                 dep = tdep.task
                 dep.update_status_with_dependent_statuses()
-                if dep.status.code in ['DREV', 'OH', 'STOP']:
+                if dep.status.code in ['HREV', 'PREV', 'DREV', 'OH', 'STOP']:
                     # for tasks that are still be able to continue to work,
                     # change the dependency_target to "onstart" to allow
                     # the two of the tasks to work together and still let the

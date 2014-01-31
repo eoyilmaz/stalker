@@ -364,6 +364,85 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     the Task by using the resources, schedule_model, schedule_timing and
     schedule_constraint attributes.
 
+    ** Alternative Resources**
+
+    .. versionadded:: 0.2.5
+       Alternative Resources
+
+    Stalker now supports alternative resources per task. You can specify
+    alternative resources by using the :attr:`.alternative_resources`
+    attribute. The number of resources and the number of alternative resources
+    are not related. So you can define only 1 resource and more than one
+    alternative resources, or you can define 2 resources and only one
+    alternative resource.
+
+    .. warning::
+
+       As opposed to TaskJuggler alternative resources are not per resource
+       based. So Stalker will use the alternatives list for all of the
+       resources in the resources list. Per resource alternative will be
+       supported in future versions of Stalker.
+
+    Stalker will pass the data to TaskJuggler and TJ will compute a list of
+    resources that are assigned to the task in the report time frame and
+    Stalker will store the resultant list of users in
+    :attr:`.computed_resources` attribute.
+
+    .. warning::
+
+       When TaskJuggler computes the resources, the returned list may contain
+       resources which are not in the :attr:`.resources` nor in
+       :attr:`.alternative_resources` list anymore. Stalker will silently
+       filter those resources and will only store resources (
+       in :attr:`.computed_resources`) those are still
+       available as a direct or alternative resource to that particular task.
+
+    The selection strategy of the alternative resource is defined by the
+    :attr:`.allocation_strategy` attribute. The `allocation_strategy`
+    attribute value should be one of [minallocated, maxloaded, minloaded,
+    order, random]. The following description is from TaskJuggler
+    documentation:
+
+      +--------------+--------------------------------------------------------+
+      | minallocated | Pick the resource that has the smallest allocation     |
+      |              | factor. The allocation factor is calculated from the   |
+      |              | various allocations of the resource across the tasks.  |
+      |              | This is the default setting.)                          |
+      +--------------+--------------------------------------------------------+
+      | maxloaded    | Pick the available resource that has been used the     |
+      |              | most so far.                                           |
+      +--------------+--------------------------------------------------------+
+      | minloaded    | Pick the available resource that has been used the     |
+      |              | least so far.                                          |
+      +--------------+--------------------------------------------------------+
+      | order        | Pick the first available resource from the list.       |
+      +--------------+--------------------------------------------------------+
+      | random       | Pick a random resource from the list.                  |
+      +--------------+--------------------------------------------------------+
+
+    As in TaskJuggler the default for :attr:`.allocation_strategy` attribute is
+    "minallocated".
+
+    Also the allocation of the resources are effected by the
+    :attr:`.persistent_allocation` attribute. The persistent_allocation
+    attribute refers to the ``persistent`` attribute in TJ. The documentation
+    of ``persistent`` in TJ is as follows:
+
+     Specifies that once a resource is picked from the list of alternatives
+     this resource is used for the whole task. This is useful when several
+     alternative resources have been specified. Normally the selected resource
+     can change after each break. A break is an interval of at least one
+     timeslot where no resources were available.
+
+    :attr:`.persistent_allocation` attribute is True by default.
+
+    For a not yet scheduled task the :attr:`.computed_resources` attribute will
+    be the same as the :attr:`.resources` list. After the task is scheduled the
+    content of the :attr:`.computed_resources` will purely come from TJ.
+
+    Updating the resources list will not update the :attr:`.computed_resources`
+    list if the task :attr:`.is_scheduled`.
+
     **Task to Task Relation**
 
     .. note::
@@ -402,8 +481,9 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     Stalker will check if there will be a cycle if one wants to parent a Task
     to a child Task of its own or the dependency relation creates a cycle.
 
-    In Gantt Charts the ``computed_start`` and ``computed_end`` attributes will
-    be used if the task :attr:`.is_scheduled` is True.
+    In Gantt Charts the ``computed_start``, ``computed_end`` and
+    ``computed_resources`` attributes will be used if the task
+    :attr:`.is_scheduled`.
 
     **Task Responsible**
 
@@ -681,6 +761,18 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     :param int priority: It is a number between 0 to 1000 which defines the
       priority of the :class:`.Task`. The higher the value the higher its
       priority. The default value is 500. Mainly used by TaskJuggler.
+
+    :param allocation_strategy: Defines the allocation strategy for resources
+      of a task with alternative resources. Should be one of ['minallocated',
+      'maxloaded', 'minloaded', 'order', 'random'] and the default value is
+      'minallocated'. For more information read the :class:`.Task` class
+      documetation.
+
+    :param persistent_allocation: Specifies that once a resource is picked from
+      the list of alternatives this resource is used for the whole task. The
+      default value is True. For more information read the :class:`.Task` class
+      documetation.
+
     """
     __auto_name__ = False
     __tablename__ = "Tasks"
@@ -817,6 +909,31 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         doc="The list of :class:`.User`\ s assigned to this Task."
     )
 
+    alternative_resources = relationship(
+        "User",
+        secondary="Task_Alternative_Resources",
+        primaryjoin="Tasks.c.id==Task_Alternative_Resources.c.task_id",
+        secondaryjoin="Task_Alternative_Resources.c.resource_id==Users.c.id",
+        backref="alternative_resource_in_tasks",
+        doc="The list of :class:`.User`\ s assigned to this Task as an "
+            "alternative resource."
+    )
+
+    allocation_strategy = Column(
+        Enum(*defaults.allocation_strategy,
+             name='ResourceAllocationStrategy'),
+        default=defaults.allocation_strategy[0],
+        nullable=False,
+        doc="Please read :class:`.Task` class documentation for details."
+    )
+
+    persistent_allocation = Column(
+        Boolean,
+        default=True,
+        nullable=False,
+        doc="Please read :class:`.Task` class documentation for details."
+    )
+
     watchers = relationship(
         'User',
         secondary='Task_Watchers',
@@ -876,6 +993,16 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         """
     )
 
+    _computed_resources = relationship(
+        "User",
+        secondary="Task_Computed_Resources",
+        primaryjoin="Tasks.c.id==Task_Computed_Resources.c.task_id",
+        secondaryjoin="Task_Computed_Resources.c.resource_id==Users.c.id",
+        backref="computed_resource_in_tasks",
+        doc="A list of :class:`.User`\ s computed by TaskJuggler. It is the "
+            "result of scheduling."
+    )
+
     bid_timing = Column(
         Float, nullable=True, default=0,
         doc="""The value of the initial bid of this Task. It is an integer or
@@ -884,7 +1011,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     )
 
     bid_unit = Column(
-        Enum(*defaults.datetime_units, name='TaskBidUnit'),
+        Enum(*defaults.datetime_units, name='TimeUnit'),
         nullable=True,
         doc="""The unit of the initial bid of this Task. It is a string value.
         And should be one of 'min', 'h', 'd', 'w', 'm', 'y'.
@@ -917,6 +1044,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
                  parent=None,
                  depends=None,
                  resources=None,
+                 alternative_resources=None,
                  responsible=None,
                  watchers=None,
                  start=None,
@@ -929,6 +1057,8 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
                  bid_unit=None,
                  is_milestone=False,
                  priority=defaults.task_priority,
+                 allocation_strategy=defaults.allocation_strategy[0],
+                 persistent_allocation=True,
                  **kwargs):
         # temp attribute for remove event
         self._previously_removed_dependent_tasks = []
@@ -977,6 +1107,13 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             resources = []
         self.resources = resources
 
+        if alternative_resources is None:
+            alternative_resources = []
+        self.alternative_resources = alternative_resources
+
+        # for newly created tasks set the computed_resources to resources
+        self.computed_resources = self.resources
+
         if watchers is None:
             watchers = []
         self.watchers = watchers
@@ -993,6 +1130,9 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         if responsible is None:
             responsible = []
         self.responsible = responsible
+
+        self.allocation_strategy = allocation_strategy
+        self.persistent_allocation = persistent_allocation
 
         self.update_status_with_dependent_statuses()
 
@@ -1352,11 +1492,107 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
         if not isinstance(resource, User):
             raise TypeError(
-                "%s.resources should be a list of "
-                "stalker.models.auth.User instances, not %s" %
-                (self.__class__.__name__, resource.__class__.__name__)
+                "%(class)s.resources should be a list of "
+                "stalker.models.auth.User instances, not %(resource_class)s" %
+                {
+                    'class': self.__class__.__name__,
+                    'resource_class': resource.__class__.__name__
+                }
             )
         return resource
+
+    @validates("alternative_resources")
+    def _validate_alternative_resources(self, key, alt_resource):
+        """validates the given alt_resource value
+        """
+        from stalker.models.auth import User
+
+        if not isinstance(alt_resource, User):
+            raise TypeError(
+                "%(class)s.resources should be a list of "
+                "stalker.models.auth.User instances, not "
+                "%(alt_resource_class)s" % {
+                    'class': self.__class__.__name__,
+                    'alt_resource_class': alt_resource.__class__.__name__
+                }
+            )
+        return alt_resource
+
+    @validates("_computed_resources")
+    def _validate_computed_resources(self, key, resource):
+        """validates the computed resources value
+        """
+        from stalker.models.auth import User
+
+        if not isinstance(resource, User):
+            raise TypeError(
+                "%(class)s.computed_resources should be a list of "
+                "stalker.models.auth.User instances, not %(resource_class)s" %
+                {
+                    'class': self.__class__.__name__,
+                    'resource_class': resource.__class__.__name__
+                }
+            )
+        return resource
+
+    def _computed_resources_getter(self):
+        """getter for the _computed_resources attribute
+        """
+        if not self.is_scheduled:
+            self._computed_resources = self.resources
+        return self._computed_resources
+
+    def _computed_resources_setter(self, new_list):
+        """setter for the _computed_resources attribute
+        """
+        self._computed_resources = new_list
+
+    computed_resources = synonym(
+        '_computed_resources',
+        descriptor=property(
+            _computed_resources_getter,
+            _computed_resources_setter
+        )
+    )
+
+    @validates("allocation_strategy")
+    def _validate_allocation_strategy(self, key, strategy):
+        """validates the given allocation_strategy value
+        """
+        if strategy is None:
+            strategy = defaults.allocation_strategy[0]
+
+        if not isinstance(strategy, str):
+            raise TypeError(
+                '%(class)s.allocation_strategy should be one of %(defaults)s, '
+                'not %(strategy_class)s' % {
+                    'class': self.__class__.__name__,
+                    'defaults': defaults.allocation_strategy,
+                    'strategy_class': strategy.__class__.__name__
+                }
+            )
+
+        if strategy not in defaults.allocation_strategy:
+            raise ValueError(
+                '%(class)s.allocation_strategy should be one of %(defaults)s, '
+                'not %(strategy)s' % {
+                    'class': self.__class__.__name__,
+                    'defaults': defaults.allocation_strategy,
+                    'strategy': strategy
+                }
+            )
+
+        return strategy
+
+    @validates("persistent_allocation")
+    def _validate_persistent_allocation(self, key, persistent_allocation):
+        """validates the given persistent_allocation value
+        """
+        if persistent_allocation is None:
+            persistent_allocation = defaults.persistent_allocation
+
+        return bool(persistent_allocation)
+
 
     @validates("watchers")
     def _validate_watchers(self, key, watcher):
@@ -1562,7 +1798,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         """
         from jinja2 import Template
 
-        temp = Template(defaults.tjp_task_template)
+        temp = Template(defaults.tjp_task_template, trim_blocks=True)
         return temp.render({'task': self})
 
     @property
@@ -2378,6 +2614,7 @@ class TaskDependency(Base, ScheduleMixin):
 
     dependency_target = Column(
         Enum(*defaults.task_dependency_targets, name='TaskDependencyTarget'),
+        nullable=False,
         doc="""The dependency target of the relation. The default value is
         "onend", which will create a dependency between two tasks so that the
         depending task will start after the task that it is depending to is
@@ -2484,7 +2721,7 @@ class TaskDependency(Base, ScheduleMixin):
         """TaskJuggler representation of this TaskDependency
         """
         from jinja2 import Template
-        
+
         template_variables = {
             'task': self.task,
             'depends_to': self.depends_to,
@@ -2494,13 +2731,30 @@ class TaskDependency(Base, ScheduleMixin):
             'gap_model': self.gap_model
         }
 
-        temp = Template(defaults.tjp_task_dependency_template)
+        temp = Template(
+            defaults.tjp_task_dependency_template,
+            trim_blocks=True
+        )
         return temp.render(template_variables)
 
 
 # TASK_RESOURCES
 Task_Resources = Table(
     "Task_Resources", Base.metadata,
+    Column("task_id", Integer, ForeignKey("Tasks.id"), primary_key=True),
+    Column("resource_id", Integer, ForeignKey("Users.id"), primary_key=True)
+)
+
+# TASK_ALTERNATIVE_RESOURCES
+Task_Alternative_Resources = Table(
+    "Task_Alternative_Resources", Base.metadata,
+    Column("task_id", Integer, ForeignKey("Tasks.id"), primary_key=True),
+    Column("resource_id", Integer, ForeignKey("Users.id"), primary_key=True)
+)
+
+# TASK_COMPUTED_RESOURCES
+Task_Computed_Resources = Table(
+    "Task_Computed_Resources", Base.metadata,
     Column("task_id", Integer, ForeignKey("Tasks.id"), primary_key=True),
     Column("resource_id", Integer, ForeignKey("Users.id"), primary_key=True)
 )

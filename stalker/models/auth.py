@@ -237,8 +237,10 @@ class Permission(Base):
         """
         return self._class_name
 
-    class_name = synonym('_class_name',
-                         descriptor=property(_class_name_getter))
+    class_name = synonym(
+        '_class_name',
+        descriptor=property(_class_name_getter)
+    )
 
     def _validate_action(self, action):
         """validates the given action value
@@ -844,7 +846,7 @@ class User(Entity, ACLMixin):
         """
         from jinja2 import Template
 
-        temp = Template(defaults.tjp_user_template)
+        temp = Template(defaults.tjp_user_template, trim_blocks=True)
         return temp.render({'user': self})
 
 

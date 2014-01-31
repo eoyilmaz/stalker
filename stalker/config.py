@@ -229,86 +229,118 @@ class Config(object):
             'APP'
         ],
 
+        task_schedule_constraints=['none', 'start', 'end', 'both'],
         task_schedule_models=['effort', 'length', 'duration'],
         task_dependency_gap_models=['length', 'duration'],
         task_dependency_targets=['onend', 'onstart'],
+        allocation_strategy=['minallocated', 'maxloaded', 'minloaded', 'order',
+                             'random'],
+        persistent_allocation=True,
 
-        task_schedule_constraints=['none', 'start', 'end', 'both'],
+        tjp_working_hours_template="""
+{%- macro wh(wh, day) -%}
+{%- if wh[day]|length %}    workinghours {{day}} {% for part in wh[day] -%}
+    {%- if loop.index != 1%}, {% endif -%}
+        {{"%02d"|format(part[0]//60)}}:{{"%02d"|format(part[0]%60)}} - {{"%02d"|format(part[1]//60)}}:{{"%02d"|format(part[1]%60)}}
+    {%- endfor -%}
+{%- else %}    workinghours {{day}} off
+{%- endif -%}
+{%- endmacro -%}
+{{wh(workinghours, 'mon')}}
+{{wh(workinghours, 'tue')}}
+{{wh(workinghours, 'wed')}}
+{{wh(workinghours, 'thu')}}
+{{wh(workinghours, 'fri')}}
+{{wh(workinghours, 'sat')}}
+{{wh(workinghours, 'sun')}}""",
 
-        tjp_working_hours_template="""{% macro wh(wh, day) -%}
-        {%- if wh[day]|length %}    workinghours {{day}} {% for part in wh[day] -%}
-                {%- if loop.index != 1%}, {% endif -%}
-                {{"%02d"|format(part[0]//60)}}:{{"%02d"|format(part[0]%60)}} - {{"%02d"|format(part[1]//60)}}:{{"%02d"|format(part[1]%60)}}
-                {%- endfor -%}
-        {%- else %}    workinghours {{day}} off
-        {%- endif -%}
-        {%- endmacro -%}
-        {{wh(workinghours, 'mon')}}
-        {{wh(workinghours, 'tue')}}
-        {{wh(workinghours, 'wed')}}
-        {{wh(workinghours, 'thu')}}
-        {{wh(workinghours, 'fri')}}
-        {{wh(workinghours, 'sat')}}
-        {{wh(workinghours, 'sun')}}""",
+        tjp_studio_template="""
+project {{ studio.tjp_id }} "{{ studio.name }}" {{ studio.start.date() }} - {{ studio.end.date() }} {
+    timingresolution {{ '%i'|format((studio.timing_resolution.days * 86400 + studio.timing_resolution.seconds)//60|int) }}min
+    now {{ studio.now.strftime('%Y-%m-%d-%H:%M') }}
+    dailyworkinghours {{ studio.daily_working_hours }}
+    weekstartsmonday
+{{ studio.working_hours.to_tjp }}
+    timeformat "%Y-%m-%d"
+    scenario plan "Plan"
+    trackingscenario plan
+}
+""",
 
-        tjp_studio_template="""project {{ studio.tjp_id }} "{{ studio.name }}" {{ studio.start.date() }} - {{ studio.end.date() }} {
-            timingresolution {{ '%i'|format((studio.timing_resolution.days * 86400 + studio.timing_resolution.seconds)//60|int) }}min
-            now {{ studio.now.strftime('%Y-%m-%d-%H:%M') }}
-            dailyworkinghours {{ studio.daily_working_hours }}
-            weekstartsmonday
-        {{ studio.working_hours.to_tjp }}
-            timeformat "%Y-%m-%d"
-            scenario plan "Plan"
-            trackingscenario plan
-        }
-        """,
+        tjp_project_template="""
+task {{project.tjp_id}} "{{project.name}}" {
+    {% for task in project.root_tasks %}
+        {{task.to_tjp}}
+    {%- endfor %}
+}
+""",
 
-        tjp_project_template="""task {{project.tjp_id}} "{{project.name}}" {
-            {% for task in project.root_tasks %}
-                {{task.to_tjp}}
-            {% endfor %}
-        }
-        """,
+        tjp_task_template="""
+task {{task.tjp_id}} "{{task.name}}" {
 
-        tjp_task_template="""task {{task.tjp_id}} "{{task.name}}" {
-        {% if task.priority != 500 -%}priority {{task.priority}}{%- endif %}
-        {%- if task.task_depends_to %}
-            depends {% for depends in task.task_depends_to %}
+    {% if task.priority != 500 -%}
+        priority {{task.priority}}
+    {%- endif %}
+
+    {% if task.task_depends_to %}
+        depends {# #}
+        {%- for depends in task.task_depends_to %}
             {%- if loop.index != 1 %}, {% endif %}{{depends.to_tjp}}
-        {%- endfor -%}
-        {%- endif -%}
-        {%- if task.is_container -%}
-            {%- for child_task in task.children %}
-                {{ child_task.to_tjp }}
-            {%- endfor %}
-        {%- else %}
-            {% if task.resources|length -%}
-            {% if task.schedule_constraint %}
-                {%- if task.schedule_constraint == 1 or task.schedule_constraint == 3 -%}
-                    start {{ task.start.strftime('%Y-%m-%d-%H:%M') }}
-                {%- endif %}
-                {%- if task.schedule_constraint == 2 or task.schedule_constraint == 3 %}
-                    end {{ task.end.strftime('%Y-%m-%d-%H:%M') }}
-                {%- endif -%}
-            {% endif %}
-            {{task.schedule_model}} {{task.schedule_timing}}{{task.schedule_unit}}
-            allocate {% for resource in task.resources -%}
-                {%-if loop.index != 1 %}, {% endif %}{{resource.tjp_id}}{% endfor %}
-            {%- endif -%}
-            {% for time_log in task.time_logs %}
-            booking {{time_log.resource.tjp_id}} {{time_log.start.strftime('%Y-%m-%d-%H:%M:%S')}} +{{'%i'|format(time_log.duration.days*24 + time_log.duration.seconds/3600)}}h { overtime 2 }
-            {%- endfor -%}
-        {% endif %}
-        }
-        """,
-
-        tjp_task_dependency_template='''{{depends_to.tjp_abs_id}} { {{- dependency_target}}{%if gap_timing %} gap{{gap_model}} {{gap_timing}}{{gap_unit -}}{%endif -%}}''',
-
-        tjp_department_template='''resource {{department.tjp_id}} "{{department.name}}" {
-        {%- for resource in department.users %}
-            {{resource.to_tjp}}
         {%- endfor %}
-        }''',
+    {%- endif -%}
+
+    {%- if task.is_container -%}
+        {% for child_task in task.children -%}
+            {{ child_task.to_tjp }}
+        {%- endfor %}
+    {%- else %}
+        {% if task.resources|length %}
+
+            {% if task.schedule_constraint %}
+                {% if task.schedule_constraint == 1 or task.schedule_constraint == 3 %}
+                    start {{ task.start.strftime('%Y-%m-%d-%H:%M') }}
+                {% endif %}
+                {% if task.schedule_constraint == 2 or task.schedule_constraint == 3 -%}
+                    end {{ task.end.strftime('%Y-%m-%d-%H:%M') }}
+                {% endif %}
+            {% endif %}
+
+            {{task.schedule_model}} {{task.schedule_timing}}{{task.schedule_unit}}
+            allocate {# #}
+            {%- for resource in task.resources -%}
+                {%- if loop.index != 1 %}, {% endif %}{{ resource.tjp_id }} {# #}
+                {%- if task.alternative_resources %}{
+                    alternative
+                    {% for alt_res in task.alternative_resources -%}
+                        {%-if loop.index != 1 %}, {% endif %}
+                        {{- alt_res.tjp_id}}
+                    {%- endfor -%}
+                    {# #} select {{task.allocation_strategy}}
+                    {% if task.persistent_allocation -%}
+                        persistent
+{# #}
+                    {%- endif %}
+                }
+                {%- endif %}
+            {%- endfor %}
+        {%- endif %}
+        {% for time_log in task.time_logs %}
+            booking {{time_log.resource.tjp_id}} {{time_log.start.strftime('%Y-%m-%d-%H:%M:%S')}} +{{'%i'|format(time_log.duration.days*24 + time_log.duration.seconds/3600)}}h { overtime 2 }
+        {%- endfor %}
+    {% endif %}
+
+}
+""",
+
+        tjp_task_dependency_template="""{{depends_to.tjp_abs_id}} { {{- dependency_target}}{%if gap_timing %} gap{{gap_model}} {{gap_timing}}{{gap_unit -}}{%endif -%}}""",
+
+        tjp_department_template="""
+resource {{department.tjp_id}} "{{department.name}}" {
+{% for resource in department.users %}
+    {{resource.to_tjp}}
+{% endfor -%}
+}
+""",
 
         tjp_vacation_template='''vacation {{ vacation.start.strftime('%Y-%m-%d-%H:%M:%S') }} - {{ vacation.end.strftime('%Y-%m-%d-%H:%M:%S') }}''',
 
@@ -340,7 +372,7 @@ class Config(object):
         taskreport breakdown "{{csv_file_full_path}}"{
             formats csv
             timeformat "%Y-%m-%d-%H:%M"
-            columns id, start, end
+            columns id, start, end, resources
         }
         """,
 

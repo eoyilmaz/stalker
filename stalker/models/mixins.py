@@ -966,6 +966,9 @@ class ScheduleMixin(object):
 
     Adds attributes like schedule_timing, schedule_unit and schedule_model
     attributes to the mixed in class.
+
+    Use the ``__default_schedule_attr_name__`` attribute to customize the
+    column names.
     """
 
     # some default values that can be overridden in Mixed in classes
@@ -990,6 +993,7 @@ class ScheduleMixin(object):
     @declared_attr
     def schedule_timing(cls):
         return Column(
+            '%s_timing' % cls.__default_schedule_attr_name__,
             Float, nullable=True, default=0,
             doc="""It is the value of the %(attr)s timing. It is a float
             value.
@@ -1005,7 +1009,8 @@ class ScheduleMixin(object):
     @declared_attr
     def schedule_unit(cls):
         return Column(
-            Enum(*defaults.datetime_units, name='TaskScheduleUnit'),
+            '%s_unit' % cls.__default_schedule_attr_name__,
+            Enum(*defaults.datetime_units, name='TimeUnit'),
             nullable=False, default='h',
             doc="""It is the unit of the %(attr)s timing. It is a string
             value. And should be one of 'min', 'h', 'd', 'w', 'm', 'y'.""" %
@@ -1015,8 +1020,10 @@ class ScheduleMixin(object):
     @declared_attr
     def schedule_model(cls):
         return Column(
+            '%s_model' % cls.__default_schedule_attr_name__,
             Enum(*cls.__default_schedule_models__,
-                 name='Task%(attr)sModels' % {
+                 name='%(class)s%(attr)sModel' % {
+                     'class': cls.__name__,
                      'attr': cls.__default_schedule_attr_name__.title()
                  }),
             default=cls.__default_schedule_models__[0], nullable=False,
@@ -1060,6 +1067,7 @@ class ScheduleMixin(object):
     @declared_attr
     def schedule_constraint(cls):
         return Column(
+            '%s_constraint' % cls.__default_schedule_attr_name__,
             Integer,
             default=0,
             nullable=False,

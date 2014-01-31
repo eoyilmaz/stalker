@@ -1582,7 +1582,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
             'schedule_unit': 'h'
         }
         self.test_task9.request_revision(**kw)
-        
+
         self.assertEqual(self.test_task9.status, self.status_hrev)
         self.assertEqual(self.test_task8.status, self.status_drev)
 
@@ -1598,6 +1598,9 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         td = datetime.timedelta
         now = dt.now()
 
+
+        self.test_task3.depends = [self.test_task9]  # will be PREV
+        self.test_task4.depends = [self.test_task9]  # will be HREV
         self.test_task5.depends = [self.test_task9]  # will be STOP
         self.test_task6.depends = [self.test_task9]  # will be OH
         self.test_task8.depends = [self.test_task9]  # will be DREV
@@ -1653,6 +1656,32 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.test_task6.stop()
         self.assertEqual(self.test_task6.status, self.status_stop)
 
+        # now work on task3
+        self.test_task3.create_time_log(
+            resource=self.test_task3.resources[0],
+            start=now + td(hours=5),
+            end=now + td(hours=6)
+        )
+        self.assertEqual(self.test_task3.status, self.status_wip)
+        self.test_task3.request_review()
+        self.assertEqual(self.test_task3.status, self.status_prev)
+
+        # now work on task4
+        self.test_task4.create_time_log(
+            resource=self.test_task4.resources[0],
+            start=now + td(hours=6),
+            end=now + td(hours=7)
+        )
+        self.assertEqual(self.test_task4.status, self.status_wip)
+        reviews = self.test_task4.request_review()
+        self.assertEqual(self.test_task4.status, self.status_prev)
+        for r in reviews:
+            r.request_revision(
+                schedule_timing=1,
+                schedule_unit='h'
+            )
+        self.assertEqual(self.test_task4.status, self.status_hrev)
+
         kw = {
             'reviewer': self.test_user1,
             'description': 'do something uleyn',
@@ -1662,6 +1691,14 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.test_task9.request_revision(**kw)
 
         from stalker import TaskDependency
+        tdep_t3 = TaskDependency.query\
+            .filter_by(task=self.test_task3)\
+            .filter_by(depends_to=self.test_task9)\
+            .first()
+        tdep_t4 = TaskDependency.query\
+            .filter_by(task=self.test_task4)\
+            .filter_by(depends_to=self.test_task9)\
+            .first()
         tdep_t5 = TaskDependency.query\
             .filter_by(task=self.test_task5)\
             .filter_by(depends_to=self.test_task9)\
@@ -1674,9 +1711,13 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
             .filter_by(task=self.test_task8)\
             .filter_by(depends_to=self.test_task9)\
             .first()
+        self.assertIsNotNone(tdep_t3)
+        self.assertIsNotNone(tdep_t4)
         self.assertIsNotNone(tdep_t5)
         self.assertIsNotNone(tdep_t6)
         self.assertIsNotNone(tdep_t8)
+        self.assertEqual(tdep_t3.dependency_target, 'onstart')
+        self.assertEqual(tdep_t4.dependency_target, 'onstart')
         self.assertEqual(tdep_t5.dependency_target, 'onstart')
         self.assertEqual(tdep_t6.dependency_target, 'onstart')
         self.assertEqual(tdep_t8.dependency_target, 'onstart')

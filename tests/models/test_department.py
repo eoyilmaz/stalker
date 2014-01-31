@@ -290,10 +290,15 @@ class DepartmentTester(unittest2.TestCase):
         self.test_user3.id = 1327
         self.test_user4.id = 1328
 
-        expected_tjp = """resource Department_1324 "Test Department" {
-            resource User_1325 "User1"
-            resource User_1326 "User2"
-            resource User_1327 "User3"
-            resource User_1328 "User4"
-        }"""
+        expected_tjp = """
+resource Department_1324 "Test Department" {
+    resource User_1325 "User1"
+    resource User_1326 "User2"
+    resource User_1327 "User3"
+    resource User_1328 "User4"
+}"""
+        # print expected_tjp
+        # print "-----------------"
+        # print self.test_department.to_tjp
+        # self.maxDiff = None
         self.assertEqual(self.test_department.to_tjp, expected_tjp)

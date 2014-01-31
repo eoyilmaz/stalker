@@ -136,5 +136,5 @@ class Department(Entity):
         """outputs a TaskJuggler compatible string
         """
         from jinja2 import Template
-        temp = Template(defaults.tjp_department_template)
+        temp = Template(defaults.tjp_department_template, trim_blocks=True)
         return temp.render({'department': self})

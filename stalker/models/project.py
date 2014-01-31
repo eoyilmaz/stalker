@@ -389,7 +389,8 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         """returns a TaskJuggler compatible string representing this project
         """
         from jinja2 import Template
-        temp = Template(defaults.tjp_project_template)
+        temp = Template(defaults.tjp_project_template, trim_blocks=True,
+                        lstrip_blocks=True)
         return temp.render({'project': self})
 
     @property

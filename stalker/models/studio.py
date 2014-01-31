@@ -318,7 +318,11 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         """
         from jinja2 import Template
 
-        temp = Template(defaults.tjp_studio_template)
+        temp = Template(
+            defaults.tjp_studio_template,
+            trim_blocks=True,
+            lstrip_blocks=True
+        )
         start = time.time()
         rendered_template = temp.render({
             'studio': self,

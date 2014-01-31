@@ -250,12 +250,12 @@ class WorkingHoursTester(unittest2.TestCase):
         wh['sun'] = []
 
         expected_tjp = """    workinghours mon 09:30 - 18:30
-            workinghours tue 09:30 - 18:30
-            workinghours wed 09:30 - 18:30
-            workinghours thu 09:30 - 18:30
-            workinghours fri 09:30 - 18:30
-            workinghours sat off
-            workinghours sun off"""
+    workinghours tue 09:30 - 18:30
+    workinghours wed 09:30 - 18:30
+    workinghours thu 09:30 - 18:30
+    workinghours fri 09:30 - 18:30
+    workinghours sat off
+    workinghours sun off"""
 
         self.assertMultiLineEqual(wh.to_tjp, expected_tjp)
 
@@ -272,12 +272,12 @@ class WorkingHoursTester(unittest2.TestCase):
         wh['sun'] = []
 
         expected_tjp = """    workinghours mon 09:30 - 12:00, 13:00 - 18:30
-            workinghours tue 09:30 - 12:00, 13:00 - 18:30
-            workinghours wed 09:30 - 12:00, 13:00 - 18:30
-            workinghours thu 09:30 - 12:00, 13:00 - 18:30
-            workinghours fri 09:30 - 12:00, 13:00 - 18:30
-            workinghours sat 09:30 - 12:00
-            workinghours sun off"""
+    workinghours tue 09:30 - 12:00, 13:00 - 18:30
+    workinghours wed 09:30 - 12:00, 13:00 - 18:30
+    workinghours thu 09:30 - 12:00, 13:00 - 18:30
+    workinghours fri 09:30 - 12:00, 13:00 - 18:30
+    workinghours sat 09:30 - 12:00
+    workinghours sun off"""
 
         self.assertMultiLineEqual(wh.to_tjp, expected_tjp)
 

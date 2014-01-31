@@ -771,32 +771,33 @@ class StudioTester(unittest2.TestCase):
 
         from jinja2 import Template
 
-        expected_tjp_template = Template("""project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
-            timingresolution 60min
-            now {{ studio.now.strftime('%Y-%m-%d-%H:%M') }}
-            dailyworkinghours 8
-            weekstartsmonday
-            workinghours mon 09:00 - 18:00
-            workinghours tue 09:00 - 18:00
-            workinghours wed 09:00 - 18:00
-            workinghours thu 09:00 - 18:00
-            workinghours fri 09:00 - 18:00
-            workinghours sat 09:00 - 12:00
-            workinghours sun off
-            timeformat "%Y-%m-%d"
-            scenario plan "Plan"
-            trackingscenario plan
-        }
-        """)
+        expected_tjp_template = Template("""
+project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
+    timingresolution 60min
+    now {{ studio.now.strftime('%Y-%m-%d-%H:%M') }}
+    dailyworkinghours 8
+    weekstartsmonday
+    workinghours mon 09:00 - 18:00
+    workinghours tue 09:00 - 18:00
+    workinghours wed 09:00 - 18:00
+    workinghours thu 09:00 - 18:00
+    workinghours fri 09:00 - 18:00
+    workinghours sat 09:00 - 12:00
+    workinghours sun off
+    timeformat "%Y-%m-%d"
+    scenario plan "Plan"
+    trackingscenario plan
+}
+""")
 
         expected_tjp = expected_tjp_template.render({
             'studio': self.test_studio
         })
-        # print '-----------------------------------'
-        # print expected_tjp
-        # print '-----------------------------------'
-        # print self.test_studio.to_tjp
-        # print '-----------------------------------'
+        print '-----------------------------------'
+        print expected_tjp
+        print '-----------------------------------'
+        print self.test_studio.to_tjp
+        print '-----------------------------------'
         self.assertEqual(self.test_studio.to_tjp, expected_tjp)
 
     def test_scheduler_attribute_can_be_set_to_None(self):

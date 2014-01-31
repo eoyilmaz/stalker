@@ -1306,302 +1306,319 @@ class ProjectTestCase(unittest2.TestCase):
     def test_to_tjp_is_working_properly(self):
         """testing if the to_tjp attribute is working properly
         """
-        self.maxDiff = None
         from jinja2 import Template
 
-        expected_tjp_temp = Template("""task Project_33 "Test Project" {
-            
-                task Sequence_34 "Seq1" {
+        expected_tjp_temp = Template("""
+task Project_33 "Test Project" {
         
+task Sequence_34 "Seq1" {
+
+    
             
-            effort 1.0h
-            allocate User_1
-        }
-        
-            
-                task Sequence_35 "Seq2" {
-        
             
             effort 1.0h
-            allocate User_12
-        }
-        
+            allocate User_1             
+}        
+task Sequence_35 "Seq2" {
+
+    
             
-                task Sequence_36 "Seq3" {
-        
-            
-            effort 1.0h
-            allocate User_13
-        }
-        
-            
-                task Sequence_37 "Seq4" {
-        
-                task Task_53 "Test Task 4" {
-        
             
             effort 1.0h
-            allocate User_19
-        }
-        
-                task Task_54 "Test Task 5" {
-        
+            allocate User_12             
+}        
+task Sequence_36 "Seq3" {
+
+    
+            
             
             effort 1.0h
-            allocate User_20
-        }
-        
-                task Task_55 "Test Task 6" {
-        
+            allocate User_13             
+}        
+task Sequence_37 "Seq4" {
+
+    
+    
+task Task_53 "Test Task 4" {
+
+    
+            
             
             effort 1.0h
-            allocate User_21
-        }
-        
-        }
-        
+            allocate User_19             
+}
+task Task_54 "Test Task 5" {
+
+    
             
-                task Sequence_38 "Seq5" {
-        
-                task Task_56 "Test Task 7" {
-        
             
             effort 1.0h
-            allocate User_22
-        }
-        
-                task Task_57 "Test Task 8" {
-        
+            allocate User_20             
+}
+task Task_55 "Test Task 6" {
+
+    
+            
             
             effort 1.0h
-            allocate User_23
-        }
-        
-                task Task_58 "Test Task 9" {
-        
+            allocate User_21             
+}
+}        
+task Sequence_38 "Seq5" {
+
+    
+    
+task Task_56 "Test Task 7" {
+
+    
+            
             
             effort 1.0h
-            allocate User_24
-        }
-        
-        }
-        
+            allocate User_22             
+}
+task Task_57 "Test Task 8" {
+
+    
             
-                task Sequence_39 "Seq6" {
-        
             
-        }
-        
+            effort 1.0h
+            allocate User_23             
+}
+task Task_58 "Test Task 9" {
+
+    
             
-                task Sequence_40 "Seq7" {
-        
             
-        }
-        
+            effort 1.0h
+            allocate User_24             
+}
+}        
+task Sequence_39 "Seq6" {
+
+    
+                        
+}        
+task Sequence_40 "Seq7" {
+
+    
+                        
+}        
+task Shot_41 "{{shot1.name}}" {
+
+    
+    
+task Task_59 "Test Task 10" {
+
+    
             
-                task Shot_41 "{{shot1.name}}" {
-        
-                task Task_59 "Test Task 10" {
-        
             
             effort 10.0h
-            allocate User_25
-        }
-        
-                task Task_60 "Test Task 11" {
-        
+            allocate User_25             
+}
+task Task_60 "Test Task 11" {
+
+    
+            
             
             effort 1.0h
-            allocate User_1, User_12
-        }
-        
-                task Task_61 "Test Task 12" {
-        
+            allocate User_1 , User_12             
+}
+task Task_61 "Test Task 12" {
+
+    
+            
             
             effort 1.0h
-            allocate User_13, User_19
-        }
-        
-        }
-        
+            allocate User_13 , User_19             
+}
+}        
+task Shot_42 "{{shot2.name}}" {
+
+    
+    
+task Task_62 "Test Task 13" {
+
+    
             
-                task Shot_42 "{{shot2.name}}" {
-        
-                task Task_62 "Test Task 13" {
-        
-            
-            effort 1.0h
-            allocate User_20, User_21
-        }
-        
-                task Task_63 "Test Task 14" {
-        
             
             effort 1.0h
-            allocate User_22, User_23
-        }
-        
-                task Task_64 "Test Task 15" {
-        
+            allocate User_20 , User_21             
+}
+task Task_63 "Test Task 14" {
+
+    
+            
             
             effort 1.0h
-            allocate User_24, User_25
-        }
-        
-        }
-        
+            allocate User_22 , User_23             
+}
+task Task_64 "Test Task 15" {
+
+    
             
-                task Shot_43 "{{shot3.name}}" {
-        
-                task Task_65 "Test Task 16" {
-        
             
             effort 1.0h
-            allocate User_1, User_12, User_13
-        }
-        
-                task Task_66 "Test Task 17" {
-        
+            allocate User_24 , User_25             
+}
+}        
+task Shot_43 "{{shot3.name}}" {
+
+    
+    
+task Task_65 "Test Task 16" {
+
+    
+            
             
             effort 1.0h
-            allocate User_19, User_20, User_21
-        }
-        
-                task Task_67 "Test Task 18" {
-        
+            allocate User_1 , User_12 , User_13             
+}
+task Task_66 "Test Task 17" {
+
+    
+            
             
             effort 1.0h
-            allocate User_22, User_23, User_24
-        }
-        
-        }
-        
+            allocate User_19 , User_20 , User_21             
+}
+task Task_67 "Test Task 18" {
+
+    
             
-                task Shot_44 "{{shot4.name}}" {
-        
-                task Task_68 "Test Task 19" {
-        
             
             effort 1.0h
-            allocate User_1, User_12, User_25
-        }
-        
-                task Task_69 "Test Task 20" {
-        
+            allocate User_22 , User_23 , User_24             
+}
+}        
+task Shot_44 "{{shot4.name}}" {
+
+    
+    
+task Task_68 "Test Task 19" {
+
+    
+            
             
             effort 1.0h
-            allocate User_13, User_19, User_20
-        }
-        
-                task Task_70 "Test Task 21" {
-        
+            allocate User_1 , User_12 , User_25             
+}
+task Task_69 "Test Task 20" {
+
+    
+            
             
             effort 1.0h
-            allocate User_21, User_22, User_23
-        }
-        
-        }
-        
+            allocate User_13 , User_19 , User_20             
+}
+task Task_70 "Test Task 21" {
+
+    
             
-                task Asset_45 "Test Asset 1" {
-        
             
             effort 1.0h
-            allocate User_12
-        }
-        
+            allocate User_21 , User_22 , User_23             
+}
+}        
+task Asset_45 "Test Asset 1" {
+
+    
             
-                task Asset_46 "Test Asset 2" {
-        
-            
-        }
-        
-            
-                task Asset_47 "Test Asset 3" {
-        
-            
-        }
-        
-            
-                task Asset_48 "Test Asset 4" {
-        
-                task Task_71 "Test Task 22" {
-        
             
             effort 1.0h
-            allocate User_1, User_24, User_25
-        }
-        
-                task Task_72 "Test Task 23" {
-        
+            allocate User_12             
+}        
+task Asset_46 "Test Asset 2" {
+
+    
+                        
+}        
+task Asset_47 "Test Asset 3" {
+
+    
+                        
+}        
+task Asset_48 "Test Asset 4" {
+
+    
+    
+task Task_71 "Test Task 22" {
+
+    
+            
             
             effort 1.0h
-            allocate User_12, User_13
-        }
-        
-                task Task_73 "Test Task 24" {
-        
+            allocate User_1 , User_24 , User_25             
+}
+task Task_72 "Test Task 23" {
+
+    
+            
             
             effort 1.0h
-            allocate User_19, User_20
-        }
-        
-        }
-        
+            allocate User_12 , User_13             
+}
+task Task_73 "Test Task 24" {
+
+    
             
-                task Asset_49 "Test Asset 5" {
-        
-                task Task_74 "Test Task 25" {
-        
             
             effort 1.0h
-            allocate User_21, User_22
-        }
-        
-                task Task_75 "Test Task 26" {
-        
+            allocate User_19 , User_20             
+}
+}        
+task Asset_49 "Test Asset 5" {
+
+    
+    
+task Task_74 "Test Task 25" {
+
+    
+            
             
             effort 1.0h
-            allocate User_23, User_24
-        }
-        
-                task Task_76 "Test Task 27" {
-        
+            allocate User_21 , User_22             
+}
+task Task_75 "Test Task 26" {
+
+    
+            
             
             effort 1.0h
-            allocate User_1, User_25
-        }
-        
-        }
-        
+            allocate User_23 , User_24             
+}
+task Task_76 "Test Task 27" {
+
+    
             
-                task Task_50 "Test Task 1" {
-        
             
             effort 1.0h
-            allocate User_1
-        }
-        
+            allocate User_1 , User_25             
+}
+}        
+task Task_50 "Test Task 1" {
+
+    
             
-                task Task_51 "Test Task 2" {
-        
-            
-            effort 1.0h
-            allocate User_12
-        }
-        
-            
-                task Task_52 "Test Task 3" {
-        
             
             effort 1.0h
-            allocate User_13
-        }
-        
+            allocate User_1             
+}        
+task Task_51 "Test Task 2" {
+
+    
             
-        }
-        
-""")
+            
+            effort 1.0h
+            allocate User_12             
+}        
+task Task_52 "Test Task 3" {
+
+    
+            
+            
+            effort 1.0h
+            allocate User_13             
+}}""")
         expected_tjp = expected_tjp_temp.render({
             'shot1': self.test_shot1,
             'shot2': self.test_shot2,
@@ -1609,8 +1626,8 @@ class ProjectTestCase(unittest2.TestCase):
             'shot4': self.test_shot4
         })
 
-        print expected_tjp
-        print "-----------------"
+        # print expected_tjp
+        # print "-----------------"
         print self.test_project.to_tjp
 
         self.assertEqual(self.test_project.to_tjp, expected_tjp)
