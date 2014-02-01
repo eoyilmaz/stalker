@@ -15,9 +15,6 @@ from alembic import op
 
 
 def upgrade():
-    # remove unnecessary types
-    op.execute('DROP TYPE IF EXISTS "TaskBidUnit" CASCADE;')
-
     # rename types
     op.execute('ALTER TYPE "TaskScheduleUnit" RENAME TO "TimeUnit";')
 
@@ -31,12 +28,27 @@ def upgrade():
             AS ENUM ('effort', 'length', 'duration');
     """)
 
+    # update the Task column to use the TimeUnit type instead of TaskBidUnit
+    op.execute("""
+        ALTER TABLE "Tasks" ALTER COLUMN bid_unit TYPE "TimeUnit"
+            USING ((bid_unit::text)::"TimeUnit");
+    """)
+
+    # remove unnecessary types
+    op.execute('DROP TYPE IF EXISTS "TaskBidUnit" CASCADE;')
+
 
 def downgrade():
     # add necessary types
     op.execute(
         """CREATE TYPE "TaskBidUnit" AS ENUM
         ('min', 'h', 'd', 'w', 'm', 'y');
+    """)
+
+    # update the Task column to use the TimeUnit type instead of TaskBidUnit
+    op.execute("""
+        ALTER TABLE "Tasks" ALTER COLUMN bid_unit TYPE "TaskBidUnit"
+            USING ((bid_unit::text)::"TaskBidUnit");
     """)
 
     # rename types
@@ -49,4 +61,5 @@ def downgrade():
         DROP TYPE IF EXISTS "TaskDependencyTarget" CASCADE;
         DROP TYPE IF EXISTS "ReviewScheduleModel" CASCADE;
     """)
+
 
