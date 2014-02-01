@@ -23,6 +23,7 @@ import unittest2
 from sqlalchemy import Column, Integer
 
 from stalker import db
+from stalker.db.session import DBSession
 from stalker.models.mixins import ACLMixin
 from stalker.db.declarative import Base
 from stalker.models.auth import Permission
@@ -45,17 +46,15 @@ class ACLMixinTester(unittest2.TestCase):
     def setUpClass(cls):
         """setup the test in class level
         """
-        if db.session:
-            #db.session.remove()
-            db.session.close()
+        DBSession.remove()
+        DBSession.configure()
 
     @classmethod
     def tearDownClass(cls):
         """cleanup the test in class level
         """
-        if db.session:
-            #db.session.remove()
-            db.session.close()
+        DBSession.remove()
+        DBSession.configure()
 
     def setUp(self):
         """setup the test
@@ -75,9 +74,7 @@ class ACLMixinTester(unittest2.TestCase):
     def tearDown(self):
         """clean the test
         """
-        if db.session:
-            #db.session.remove()
-            db.session.close()
+        DBSession.remove()
 
     def test_permission_attribute_accept_Permission_instances_only(self):
         """testing if the permissions attribute accepts only Permission

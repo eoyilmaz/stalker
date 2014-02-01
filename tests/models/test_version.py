@@ -19,10 +19,10 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import unittest2
-from stalker import db, config
-from stalker import (Link, Project, Repository, Asset, Sequence, Shot, Status,
-                     StatusList, Task, Type, Version, FilenameTemplate,
-                     Structure)
+from stalker.db.session import DBSession
+from stalker import (db, config, Link, Project, Repository, Asset, Sequence,
+                     Shot, Status, StatusList, Task, Type, Version, Structure,
+                     FilenameTemplate)
 from stalker.exceptions import CircularDependencyError
 
 defaults = config.Config()
@@ -42,21 +42,18 @@ class VersionTester(unittest2.TestCase):
     def setUpClass(cls):
         """setting up the test in class level
         """
-        if db.session:
-            db.session.close()
+        DBSession.remove()
 
     @classmethod
     def tearDownClass(cls):
         """clean up the test in class level
         """
-        if db.session:
-            db.session.close()
+        DBSession.remove()
 
     def setUp(self):
         """setup the test
         """
-        if db.session:
-            db.session.close()
+        DBSession.remove()
         db.setup()
 
         # statuses
@@ -239,8 +236,7 @@ class VersionTester(unittest2.TestCase):
     def tearDown(self):
         """clean up test
         """
-        if db.session:
-            db.session.close()
+        DBSession.remove()
 
     def test___auto_name__class_attribute_is_set_to_True(self):
         """testing if the __auto_name__ class attribute is set to True for
@@ -403,12 +399,12 @@ class VersionTester(unittest2.TestCase):
         """testing if the version_number attribute is automatically generated
         """
         self.assertEqual(self.test_version.version_number, 1)
-        db.session.add(self.test_version)
-        db.session.commit()
+        DBSession.add(self.test_version)
+        DBSession.commit()
 
         new_version = Version(**self.kwargs)
-        db.session.add(new_version)
-        db.session.commit()
+        DBSession.add(new_version)
+        DBSession.commit()
 
         self.assertEqual(self.test_version.task, new_version.task)
         self.assertEqual(self.test_version.take_name, new_version.take_name)
@@ -416,8 +412,8 @@ class VersionTester(unittest2.TestCase):
         self.assertEqual(new_version.version_number, 2)
 
         new_version = Version(**self.kwargs)
-        db.session.add(new_version)
-        db.session.commit()
+        DBSession.add(new_version)
+        DBSession.commit()
 
         self.assertEqual(self.test_version.task, new_version.task)
         self.assertEqual(self.test_version.take_name, new_version.take_name)
@@ -425,8 +421,8 @@ class VersionTester(unittest2.TestCase):
         self.assertEqual(new_version.version_number, 3)
 
         new_version = Version(**self.kwargs)
-        db.session.add(new_version)
-        db.session.commit()
+        DBSession.add(new_version)
+        DBSession.commit()
 
         self.assertEqual(self.test_version.task, new_version.task)
         self.assertEqual(self.test_version.take_name, new_version.take_name)
@@ -448,8 +444,8 @@ class VersionTester(unittest2.TestCase):
         self.test_version.version_number = -10
         self.assertEqual(self.test_version.version_number, 1)
 
-        db.session.add(self.test_version)
-        db.session.commit()
+        DBSession.add(self.test_version)
+        DBSession.commit()
 
         self.test_version.version_number = -100
         # it should be 1 again
@@ -814,8 +810,8 @@ class VersionTester(unittest2.TestCase):
         )
         self.test_project.structure.templates.append(ft)
         new_version1 = Version(**self.kwargs)
-        db.session.add(new_version1)
-        db.session.commit()
+        DBSession.add(new_version1)
+        DBSession.commit()
         new_version1.update_paths()
 
         self.assertEqual(
@@ -843,8 +839,8 @@ class VersionTester(unittest2.TestCase):
         )
         self.test_project.structure.templates.append(ft)
         new_version1 = Version(**self.kwargs)
-        db.session.add(new_version1)
-        db.session.commit()
+        DBSession.add(new_version1)
+        DBSession.commit()
         new_version1.update_paths()
 
         self.assertEqual(
@@ -974,8 +970,8 @@ class VersionTester(unittest2.TestCase):
         )
         self.test_project.structure.templates.append(ft)
         new_version1 = Version(**self.kwargs)
-        db.session.add(new_version1)
-        db.session.commit()
+        DBSession.add(new_version1)
+        DBSession.commit()
 
         new_version1.update_paths()
         new_version1.extension = '.ma'
@@ -996,24 +992,24 @@ class VersionTester(unittest2.TestCase):
         """testing if the is_latest_published_version is working properly
         """
         new_version1 = Version(**self.kwargs)
-        db.session.add(new_version1)
-        db.session.commit()
+        DBSession.add(new_version1)
+        DBSession.commit()
 
         new_version2 = Version(**self.kwargs)
-        db.session.add(new_version2)
-        db.session.commit()
+        DBSession.add(new_version2)
+        DBSession.commit()
 
         new_version3 = Version(**self.kwargs)
-        db.session.add(new_version3)
-        db.session.commit()
+        DBSession.add(new_version3)
+        DBSession.commit()
 
         new_version4 = Version(**self.kwargs)
-        db.session.add(new_version4)
-        db.session.commit()
+        DBSession.add(new_version4)
+        DBSession.commit()
 
         new_version5 = Version(**self.kwargs)
-        db.session.add(new_version5)
-        db.session.commit()
+        DBSession.add(new_version5)
+        DBSession.commit()
 
         new_version1.is_published = True
         new_version3.is_published = True
@@ -1029,24 +1025,24 @@ class VersionTester(unittest2.TestCase):
         """testing if the is_latest_published_version is working properly
         """
         new_version1 = Version(**self.kwargs)
-        db.session.add(new_version1)
-        db.session.commit()
+        DBSession.add(new_version1)
+        DBSession.commit()
 
         new_version2 = Version(**self.kwargs)
-        db.session.add(new_version2)
-        db.session.commit()
+        DBSession.add(new_version2)
+        DBSession.commit()
 
         new_version3 = Version(**self.kwargs)
-        db.session.add(new_version3)
-        db.session.commit()
+        DBSession.add(new_version3)
+        DBSession.commit()
 
         new_version4 = Version(**self.kwargs)
-        db.session.add(new_version4)
-        db.session.commit()
+        DBSession.add(new_version4)
+        DBSession.commit()
 
         new_version5 = Version(**self.kwargs)
-        db.session.add(new_version5)
-        db.session.commit()
+        DBSession.add(new_version5)
+        DBSession.commit()
 
         new_version1.is_published = True
         new_version3.is_published = True
@@ -1062,24 +1058,24 @@ class VersionTester(unittest2.TestCase):
         """testing equality of two Version instances
         """
         new_version1 = Version(**self.kwargs)
-        db.session.add(new_version1)
-        db.session.commit()
+        DBSession.add(new_version1)
+        DBSession.commit()
 
         new_version2 = Version(**self.kwargs)
-        db.session.add(new_version2)
-        db.session.commit()
+        DBSession.add(new_version2)
+        DBSession.commit()
 
         new_version3 = Version(**self.kwargs)
-        db.session.add(new_version3)
-        db.session.commit()
+        DBSession.add(new_version3)
+        DBSession.commit()
 
         new_version4 = Version(**self.kwargs)
-        db.session.add(new_version4)
-        db.session.commit()
+        DBSession.add(new_version4)
+        DBSession.commit()
 
         new_version5 = Version(**self.kwargs)
-        db.session.add(new_version5)
-        db.session.commit()
+        DBSession.add(new_version5)
+        DBSession.commit()
 
         new_version1.is_published = True
         new_version3.is_published = True
@@ -1103,24 +1099,24 @@ class VersionTester(unittest2.TestCase):
         """testing inequality of two Version instances
         """
         new_version1 = Version(**self.kwargs)
-        db.session.add(new_version1)
-        db.session.commit()
+        DBSession.add(new_version1)
+        DBSession.commit()
 
         new_version2 = Version(**self.kwargs)
-        db.session.add(new_version2)
-        db.session.commit()
+        DBSession.add(new_version2)
+        DBSession.commit()
 
         new_version3 = Version(**self.kwargs)
-        db.session.add(new_version3)
-        db.session.commit()
+        DBSession.add(new_version3)
+        DBSession.commit()
 
         new_version4 = Version(**self.kwargs)
-        db.session.add(new_version4)
-        db.session.commit()
+        DBSession.add(new_version4)
+        DBSession.commit()
 
         new_version5 = Version(**self.kwargs)
-        db.session.add(new_version5)
-        db.session.commit()
+        DBSession.add(new_version5)
+        DBSession.commit()
 
         new_version1.is_published = True
         new_version3.is_published = True
@@ -1198,24 +1194,24 @@ class VersionTester(unittest2.TestCase):
         """testing if the max_version_number attribute is working properly
         """
         new_version1 = Version(**self.kwargs)
-        db.session.add(new_version1)
-        db.session.commit()
+        DBSession.add(new_version1)
+        DBSession.commit()
 
         new_version2 = Version(**self.kwargs)
-        db.session.add(new_version2)
-        db.session.commit()
+        DBSession.add(new_version2)
+        DBSession.commit()
 
         new_version3 = Version(**self.kwargs)
-        db.session.add(new_version3)
-        db.session.commit()
+        DBSession.add(new_version3)
+        DBSession.commit()
 
         new_version4 = Version(**self.kwargs)
-        db.session.add(new_version4)
-        db.session.commit()
+        DBSession.add(new_version4)
+        DBSession.commit()
 
         new_version5 = Version(**self.kwargs)
-        db.session.add(new_version5)
-        db.session.commit()
+        DBSession.add(new_version5)
+        DBSession.commit()
 
         self.assertEqual(new_version5.version_number, 5)
 
@@ -1235,24 +1231,24 @@ class VersionTester(unittest2.TestCase):
         """testing if the last_version attribute is working properly
         """
         new_version1 = Version(**self.kwargs)
-        db.session.add(new_version1)
-        db.session.commit()
+        DBSession.add(new_version1)
+        DBSession.commit()
 
         new_version2 = Version(**self.kwargs)
-        db.session.add(new_version2)
-        db.session.commit()
+        DBSession.add(new_version2)
+        DBSession.commit()
 
         new_version3 = Version(**self.kwargs)
-        db.session.add(new_version3)
-        db.session.commit()
+        DBSession.add(new_version3)
+        DBSession.commit()
 
         new_version4 = Version(**self.kwargs)
-        db.session.add(new_version4)
-        db.session.commit()
+        DBSession.add(new_version4)
+        DBSession.commit()
 
         new_version5 = Version(**self.kwargs)
-        db.session.add(new_version5)
-        db.session.commit()
+        DBSession.add(new_version5)
+        DBSession.commit()
 
         self.assertEqual(new_version5.version_number, 5)
 
@@ -1295,14 +1291,14 @@ class VersionTester(unittest2.TestCase):
             parent=task2,
             status_list=self.test_task_status_list
         )
-        db.session.add_all([task1, task2, task3])
-        db.session.commit()
+        DBSession.add_all([task1, task2, task3])
+        DBSession.commit()
 
         version1 = Version(
             task=task3
         )
-        db.session.add(version1)
-        db.session.commit()
+        DBSession.add(version1)
+        DBSession.commit()
 
         self.assertEqual(
             version1.naming_parents,
@@ -1395,15 +1391,15 @@ class VersionTester(unittest2.TestCase):
             parent=task2,
             status_list=self.test_task_status_list
         )
-        db.session.add_all([task1, task2, task3])
-        db.session.commit()
+        DBSession.add_all([task1, task2, task3])
+        DBSession.commit()
 
         version1 = Version(
             task=task3,
             take_name='Take1'
         )
-        db.session.add(version1)
-        db.session.commit()
+        DBSession.add(version1)
+        DBSession.commit()
 
         self.assertEqual(
             version1.nice_name,

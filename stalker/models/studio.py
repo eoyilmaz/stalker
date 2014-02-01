@@ -25,10 +25,11 @@ import datetime
 from math import ceil
 
 from sqlalchemy import (Column, Integer, ForeignKey, Interval, Boolean,
-                        DateTime, String, PickleType)
+                        DateTime, PickleType)
 from sqlalchemy.orm import validates, relationship, synonym, reconstructor
 
 from stalker import defaults, log
+from stalker.db.session import DBSession
 from stalker.models.entity import SimpleEntity, Entity
 from stalker.models.mixins import DateRangeMixin, WorkingHoursMixin
 from stalker.models.schedulers import SchedulerBase
@@ -430,8 +431,7 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         start = time.time()
 
         # commit before scheduling
-        from stalker import db
-        db.session.commit()
+        DBSession.commit()
 
         result = None
         try:
@@ -453,7 +453,7 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
             if scheduled_by:
                 self.last_scheduled_by = scheduled_by
 
-            db.session.commit()
+            DBSession.commit()
 
         end = time.time()
         logger.debug('scheduling took %s seconds' % (end - start))

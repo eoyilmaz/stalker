@@ -50,9 +50,8 @@ class ConfigTester(unittest2.TestCase):
     def tearDown(self):
         """clean up the test
         """
-        from stalker import db
-        if db.session:
-            db.session.close()
+        from stalker.db import DBSession
+        DBSession.remove()
 
         # and remove the temp directory
         shutil.rmtree(self.temp_config_folder)
@@ -184,6 +183,7 @@ class ConfigTester(unittest2.TestCase):
         """
         import datetime
         from stalker import db, defaults
+        from stalker.db.session import DBSession
         from stalker.models.studio import Studio
 
         db.setup()
@@ -199,8 +199,8 @@ class ConfigTester(unittest2.TestCase):
             name='Test Studio',
             timing_resolution=datetime.timedelta(minutes=15)
         )
-        db.session.add(studio)
-        db.session.commit()
+        DBSession.add(studio)
+        DBSession.commit()
 
         # now check it again
         self.assertEqual(

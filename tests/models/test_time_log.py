@@ -560,11 +560,11 @@ class TimeLogDBTestCase(unittest2.TestCase):
         """testing timeLog prevents auto flush when expanding task
         schedule_timing attribute
         """
-        from stalker import db
+        from stalker.db.session import DBSession
 
         tlog1 = TimeLog(**self.kwargs)
-        db.session.add(tlog1)
-        db.session.commit()
+        DBSession.add(tlog1)
+        DBSession.commit()
 
         # create a new time log
         self.kwargs['start'] = self.kwargs['start'] + self.kwargs['duration']
@@ -617,7 +617,7 @@ class TimeLogDBTestCase(unittest2.TestCase):
         child_task2.parent = parent_task1
         child_task1.parent = parent_task2
 
-        from stalker.db import session
+        from stalker.db.session import DBSession
 
         self.assertEqual(parent_task1.total_logged_seconds, 0)
         self.assertEqual(parent_task2.total_logged_seconds, 0)
@@ -639,8 +639,8 @@ class TimeLogDBTestCase(unittest2.TestCase):
         self.assertEqual(child_task2.total_logged_seconds, 9 * 3600)
 
         # commit changes
-        session.add(tlog1)
-        session.commit()
+        DBSession.add(tlog1)
+        DBSession.commit()
 
         # after commit it should not change
         self.assertEqual(parent_task1.total_logged_seconds, 9 * 3600)
@@ -663,8 +663,8 @@ class TimeLogDBTestCase(unittest2.TestCase):
         self.assertEqual(child_task2.total_logged_seconds, 12 * 3600)
 
         # commit changes
-        session.add(tlog2)
-        session.commit()
+        DBSession.add(tlog2)
+        DBSession.commit()
 
         self.assertEqual(parent_task1.total_logged_seconds, 12 * 3600)
         self.assertEqual(parent_task2.total_logged_seconds, 0)
@@ -685,8 +685,8 @@ class TimeLogDBTestCase(unittest2.TestCase):
         self.assertEqual(child_task2.total_logged_seconds, 12 * 3600)
 
         # commit changes
-        session.add(tlog3)
-        session.commit()
+        DBSession.add(tlog3)
+        DBSession.commit()
 
         self.assertEqual(parent_task1.total_logged_seconds, 21 * 3600)
         self.assertEqual(parent_task2.total_logged_seconds, 9 * 3600)

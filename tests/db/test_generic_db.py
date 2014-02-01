@@ -22,15 +22,13 @@ from stalker import db, User
 from stalker.models.asset import Asset
 from stalker.models.project import Project
 from stalker.models.repository import Repository
+from stalker.db.session import DBSession
 from stalker.models.status import Status, StatusList
 from stalker.models.task import Task
 from stalker.models.type import Type
 
-if db.session:
-    #db.session.remove()
-    db.session.close()
-#session.configure(extension=None)
-
+DBSession.remove()
+DBSession.configure(extension=None)
 db.setup()
 
 status1 = Status(name="Complete", code="CMPLT")
@@ -134,8 +132,8 @@ new_task = Task(
 #new_project.assets.append(new_asset)
 #new_project.assets
 
-db.session.add_all([new_project1, new_project2])
-db.session.commit()
+DBSession.add_all([new_project1, new_project2])
+DBSession.commit()
 
 # uses are now assigned to projects
 assert new_project1.users == []

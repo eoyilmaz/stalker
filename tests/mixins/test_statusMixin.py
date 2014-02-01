@@ -21,7 +21,9 @@
 import unittest2
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy import orm
+
 from stalker import db
+from stalker.db.session import DBSession
 from stalker.models.mixins import StatusMixin
 from stalker.models.status import Status, StatusList
 from stalker.models.entity import SimpleEntity
@@ -97,9 +99,7 @@ class StatusMixinTester(unittest2.TestCase):
     #def tearDown(self):
     #    """clean up the test
     #    """
-    #     if db.session:
-    #         #db.session.remove()
-    #         db.session.close()
+    #    DBSession.remove()
 
     def test_status_list_argument_is_None(self):
         """testing if TypeError is going to be raised when trying to initialize
@@ -386,15 +386,13 @@ class StatusMixinDBTester(unittest2.TestCase):
     def setUpClass(cls):
         """setup test in class level
         """
-        if db.session:
-            db.session.close()
+        DBSession.remove()
 
     @classmethod
     def tearDownClass(cls):
         """clear test in class level
         """
-        if db.session:
-            db.session.close()
+        DBSession.remove()
 
     def setUp(self):
         """setup the test
@@ -405,8 +403,7 @@ class StatusMixinDBTester(unittest2.TestCase):
     def tearDown(self):
         """clean up the test
         """
-        if db.session:
-            db.session.close()
+        DBSession.remove()
 
     def test_status_list_attribute_is_skipped_and_there_is_a_db_setup(self):
         """testing if there will be no error and the status_list attribute is
@@ -426,8 +423,8 @@ class StatusMixinDBTester(unittest2.TestCase):
         )
 
         # add it to the db
-        db.session.add(test_status_list)
-        db.session.commit()
+        DBSession.add(test_status_list)
+        DBSession.commit()
 
         # now try to create a StatusListAutoAddClass without a status_list 
         # argument
@@ -460,8 +457,8 @@ class StatusMixinDBTester(unittest2.TestCase):
         )
 
         # add it to the db
-        db.session.add(test_status_list)
-        db.session.commit()
+        DBSession.add(test_status_list)
+        DBSession.commit()
 
         # now try to create a StatusListAutoAddClass without a status_list 
         # argument

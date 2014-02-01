@@ -22,6 +22,7 @@
 from sqlalchemy import Table, Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship, validates
 
+from stalker.db.session import DBSession
 from stalker.db.declarative import Base
 from stalker.models.entity import Entity
 from stalker.models.mixins import TargetEntityTypeMixin
@@ -210,9 +211,7 @@ class StatusList(Entity, TargetEntityTypeMixin):
     def __getitem__(self, key):
         """the indexing attributes for getting item
         """
-        from stalker import db
-
-        with db.session.no_autoflush:
+        with DBSession.no_autoflush:
             return_item = None
             if isinstance(key, (str, unicode)):
                 for item in self.statuses:

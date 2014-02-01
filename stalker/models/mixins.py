@@ -28,7 +28,7 @@ from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import synonym, relationship, validates
 
 from stalker import defaults
-from stalker import db
+from stalker.db.session import DBSession
 from stalker.db.declarative import Base
 from stalker.log import logging_level
 from stalker.models import make_plural
@@ -184,10 +184,10 @@ class StatusMixin(object):
       .. versionadded:: 0.1.2.a4
 
         The status_list argument now can be skipped or can be None if there
-        is an active database connection (stalker.db.session is not
-        None) and there is a suitable :class:`.StatusList` instance in the
-        database whom :attr:`.StatusList.target_entity_type` attribute is set
-        to the current mixed-in class name.
+        is an active database connection and there is a suitable
+        :class:`.StatusList` instance in the database whom
+        :attr:`.StatusList.target_entity_type` attribute is set to the current
+        mixed-in class name.
 
     :param status: It is a :class:`.Status` instance which shows the current
       status of the statusable object. Integer values are also accepted, which
@@ -269,7 +269,7 @@ class StatusMixin(object):
             # StatusList from the database
 
             # disable autoflush to prevent premature class initialization
-            with db.session.no_autoflush:
+            with DBSession.no_autoflush:
                 try:
                     # try to get a StatusList with the target_entity_type is
                     # matching the class name
@@ -317,7 +317,7 @@ class StatusMixin(object):
         """
         from stalker.models.status import Status, StatusList
 
-        with db.session.no_autoflush:
+        with DBSession.no_autoflush:
             if not isinstance(self.status_list, StatusList):
                 raise TypeError(
                     "Please set the %s.status_list attribute first" %
@@ -326,7 +326,7 @@ class StatusMixin(object):
 
         # it is set to None
         if status is None:
-            with db.session.no_autoflush:
+            with DBSession.no_autoflush:
                 status = self.status_list.statuses[0]
 
         # it is not an instance of status or int

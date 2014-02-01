@@ -26,6 +26,7 @@ import tempfile
 from sqlalchemy.exc import IntegrityError
 
 import stalker
+from stalker.db.session import DBSession
 from stalker import (db, defaults, Asset, Department, SimpleEntity, Entity,
                      ImageFormat, Link, Note, Project, Repository, Review,
                      Sequence, Shot, Status, StatusList, Structure, Tag, Task,
@@ -49,10 +50,7 @@ class DatabaseTester(unittest2.TestCase):
         # just set the default admin creation to true
         # some tests are relying on that
 
-        if db.session:
-            #db.session.remove()
-            db.session.close()
-
+        DBSession.remove()
         defaults.auto_create_admin = True
         defaults.admin_name = "admin"
         defaults.admin_password = "admin"
@@ -64,9 +62,8 @@ class DatabaseTester(unittest2.TestCase):
     def tearDown(self):
         """tearDown the tests
         """
-        if db.session:
-            #db.session.remove()
-            db.session.close()
+        DBSession.remove()
+        # DBSession.close()
 
     def test_creating_a_custom_in_memory_db(self):
         """testing if a custom in-memory sqlite database will be created
@@ -88,8 +85,8 @@ class DatabaseTester(unittest2.TestCase):
         }
 
         new_user = User(**kwargs)
-        db.session.add(new_user)
-        db.session.commit()
+        DBSession.add(new_user)
+        DBSession.commit()
 
         # now check if the newUser is there
         new_user_db = User.query.filter_by(name=kwargs["name"]).first()
@@ -176,8 +173,8 @@ class DatabaseTester(unittest2.TestCase):
         }
 
         entity1 = Entity(**kwargs)
-        db.session.add(entity1)
-        db.session.commit()
+        DBSession.add(entity1)
+        DBSession.commit()
 
         # lets create the second user
         kwargs.update({
@@ -188,10 +185,10 @@ class DatabaseTester(unittest2.TestCase):
         })
 
         user1 = User(**kwargs)
-        db.session.add(user1)
+        DBSession.add(user1)
 
         # expect nothing, this should work without any error
-        db.session.commit()
+        DBSession.commit()
 
     def test_ticket_status_initialization(self):
         """testing if the ticket statuses are correctly created
@@ -254,9 +251,8 @@ class DatabaseTester(unittest2.TestCase):
     def test_permissions_created_for_all_the_classes(self):
         """testing if Permission instances are created for classes in the SOM
         """
-        if db.session:
-            #db.session.remove()
-            db.session.close()
+        DBSession.remove()
+        # DBSession.close()
         db.setup()
         db.init()
 
@@ -295,16 +291,14 @@ class DatabaseTester(unittest2.TestCase):
 
         temp_db_url = 'sqlite:///' + temp_db_full_path
 
-        if db.session:
-            #db.session.remove()
-            db.session.close()
+        DBSession.remove()
+        # DBSession.close()
         db.setup(settings={'sqlalchemy.url': temp_db_url})
         db.init()
 
         # this should not give any error
-        if db.session:
-            #db.session.remove()
-            db.session.close()
+        DBSession.remove()
+        # DBSession.close()
         db.setup(settings={'sqlalchemy.url': temp_db_url})
         db.init()
 
@@ -326,19 +320,18 @@ class DatabaseTester(unittest2.TestCase):
 
         temp_db_url = 'sqlite:///' + temp_db_full_path
 
-        if db.session:
-            #db.session.remove()
-            db.session.close()
+        DBSession.remove()
+        # DBSession.close()
         db.setup(settings={'sqlalchemy.url': temp_db_url})
         db.init()
 
         # this should not give any error
-        # db.session.remove()
+        # DBSession.remove()
         db.setup(settings={'sqlalchemy.url': temp_db_url})
         db.init()
 
         # this should not give any error
-        # db.session.remove()
+        # DBSession.remove()
         db.setup(settings={'sqlalchemy.url': temp_db_url})
         db.init()
 
@@ -389,7 +382,6 @@ class DatabaseTester(unittest2.TestCase):
             'STOP',
             'CMPL'
         ]
-
 
         self.assertEqual(
             len(task_status_list.statuses),
@@ -627,9 +619,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         """setup the test
         """
         # use a normal session instead of a managed one
-        if db.session:
-            #db.session.remove()
-            db.session.close()
+        DBSession.remove()
 
     @classmethod
     def tearDownClass(cls):
@@ -637,9 +627,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         """
         # delete the default test database file
         #os.remove(cls.test_db_file)
-        if db.session:
-            #db.session.remove()
-            db.session.close()
+        DBSession.remove()
 
     def setUp(self):
         """setup the test
@@ -654,9 +642,7 @@ class DatabaseModelsTester(unittest2.TestCase):
     def tearDown(self):
         """tearing down the test
         """
-        if db.session:
-            #db.session.remove()
-            db.session.close()
+        DBSession.remove()
         # restore defaults.timing_resolution
         stalker.defaults.timing_resolution = datetime.timedelta(hours=1)
 
@@ -711,8 +697,8 @@ class DatabaseModelsTester(unittest2.TestCase):
             repository=test_repository,
         )
 
-        db.session.add(test_project)
-        db.session.commit()
+        DBSession.add(test_project)
+        DBSession.commit()
 
         task_status_list = StatusList.query\
             .filter_by(target_entity_type='Task').first()
@@ -732,8 +718,8 @@ class DatabaseModelsTester(unittest2.TestCase):
         test_asset = Asset(**kwargs)
         # logger.debug('test_asset.project : %s' % test_asset.project)
 
-        db.session.add(test_asset)
-        db.session.commit()
+        DBSession.add(test_asset)
+        DBSession.commit()
 
         # logger.debug('test_asset.project (after commit): %s' %
         #              test_asset.project)
@@ -756,8 +742,8 @@ class DatabaseModelsTester(unittest2.TestCase):
             parent=test_asset,
         )
 
-        db.session.add_all([test_task1, test_task2, test_task3])
-        db.session.commit()
+        DBSession.add_all([test_task1, test_task2, test_task3])
+        DBSession.commit()
 
         code = test_asset.code
         created_by = test_asset.created_by
@@ -808,8 +794,8 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(updated_by, test_asset_db.updated_by)
 
         # now test the deletion of the asset class
-        db.session.delete(test_asset_db)
-        db.session.commit()
+        DBSession.delete(test_asset_db)
+        DBSession.commit()
 
         # we should still have the user
         self.assertIsNotNone(
@@ -901,9 +887,8 @@ class DatabaseModelsTester(unittest2.TestCase):
             description=description
         )
 
-        db.session.add(test_time_log)
-        db.session.commit()
-
+        DBSession.add(test_time_log)
+        DBSession.commit()
         tlog_id = test_time_log.id
 
         del test_time_log
@@ -937,8 +922,8 @@ class DatabaseModelsTester(unittest2.TestCase):
             date_created=date_created,
             date_updated=date_updated
         )
-        db.session.add(test_dep)
-        db.session.commit()
+        DBSession.add(test_dep)
+        DBSession.commit()
 
         # create three users, one for lead and two for members
 
@@ -995,10 +980,10 @@ class DatabaseModelsTester(unittest2.TestCase):
         test_dep.lead = user1
         test_dep.members = [user1, user2, user3]
 
-        db.session.add(test_dep)
-        db.session.commit()
+        DBSession.add(test_dep)
+        DBSession.commit()
 
-        self.assertTrue(test_dep in db.session)
+        self.assertTrue(test_dep in DBSession)
 
         created_by = test_dep.created_by
         date_created = test_dep.date_created
@@ -1092,8 +1077,8 @@ class DatabaseModelsTester(unittest2.TestCase):
         )
 
         # persist it to the database
-        db.session.add(test_entity)
-        db.session.commit()
+        DBSession.add(test_entity)
+        DBSession.commit()
 
         # store attributes
         created_by = test_entity.created_by
@@ -1129,8 +1114,8 @@ class DatabaseModelsTester(unittest2.TestCase):
         # delete tests
 
         # Deleting an Entity should also delete the associated notes
-        db.session.delete(test_entity_db)
-        db.session.commit()
+        DBSession.delete(test_entity_db)
+        DBSession.commit()
 
         self.assertItemsEqual([], Note.query.all())
 
@@ -1157,8 +1142,8 @@ class DatabaseModelsTester(unittest2.TestCase):
         #new_type_template2 = FilenameTemplate(**kwargs)
 
         # persist it
-        db.session.add(new_type_template)
-        db.session.commit()
+        DBSession.add(new_type_template)
+        DBSession.commit()
 
         created_by = new_type_template.created_by
         date_created = new_type_template.date_created
@@ -1216,8 +1201,8 @@ class DatabaseModelsTester(unittest2.TestCase):
         im_format = ImageFormat(**kwargs)
 
         # persist it
-        db.session.add(im_format)
-        db.session.commit()
+        DBSession.add(im_format)
+        DBSession.commit()
 
         # store attributes
         created_by = im_format.created_by
@@ -1270,9 +1255,8 @@ class DatabaseModelsTester(unittest2.TestCase):
             email='test@users.com',
             password='secret'
         )
-        db.session.add(user1)
-        db.session.commit()
-
+        DBSession.add(user1)
+        DBSession.commit()
         # create a link Type
         sound_link_type = Type(
             name='Sound',
@@ -1291,8 +1275,8 @@ class DatabaseModelsTester(unittest2.TestCase):
         link1 = Link(**kwargs)
 
         # persist it
-        db.session.add_all([sound_link_type, link1])
-        db.session.commit()
+        DBSession.add_all([sound_link_type, link1])
+        DBSession.commit()
 
         # use it as a task reference
         repo1 = Repository(name='test repo')
@@ -1317,8 +1301,8 @@ class DatabaseModelsTester(unittest2.TestCase):
             status_list=task_statuses
         )
         task1.references.append(link1)
-        db.session.add(task1)
-        db.session.commit()
+        DBSession.add(task1)
+        DBSession.commit()
 
         # store attributes
         created_by = link1.created_by
@@ -1357,8 +1341,8 @@ class DatabaseModelsTester(unittest2.TestCase):
 
         # delete tests
         # Deleting a Link should not delete anything else
-        db.session.delete(link1_db)
-        db.session.commit()
+        DBSession.delete(link1_db)
+        DBSession.commit()
 
         # We still should have the user and the type intact
         self.assertIsNotNone(User.query.get(user1.id))
@@ -1397,8 +1381,8 @@ class DatabaseModelsTester(unittest2.TestCase):
 
         test_entity = Entity(**entity_kwargs)
 
-        db.session.add_all([test_entity, test_note])
-        db.session.commit()
+        DBSession.add_all([test_entity, test_note])
+        DBSession.commit()
 
         # store the attributes
         content = test_note.content
@@ -1451,8 +1435,8 @@ class DatabaseModelsTester(unittest2.TestCase):
 
         group1.users = [user1, user2]
 
-        db.session.add(group1)
-        db.session.commit()
+        DBSession.add(group1)
+        DBSession.commit()
 
         name = group1.name
         users = group1.users
@@ -1540,8 +1524,8 @@ class DatabaseModelsTester(unittest2.TestCase):
             target_entity_type=Project
         )
 
-        db.session.add(project_status_list)
-        db.session.commit()
+        DBSession.add(project_status_list)
+        DBSession.commit()
 
         # create data for mixins
         # Reference Mixin
@@ -1569,9 +1553,9 @@ class DatabaseModelsTester(unittest2.TestCase):
         task_status_list = StatusList.query\
             .filter_by(target_entity_type='Task').first()
 
-        db.session.add(task_status_list)
-        db.session.add_all([ref1, ref2])
-        db.session.commit()
+        DBSession.add(task_status_list)
+        DBSession.add_all([ref1, ref2])
+        DBSession.commit()
 
         working_hours = WorkingHours(
             working_hours={
@@ -1609,8 +1593,8 @@ class DatabaseModelsTester(unittest2.TestCase):
         new_project = Project(**kwargs)
 
         # persist it in the database
-        db.session.add(new_project)
-        db.session.commit()
+        DBSession.add(new_project)
+        DBSession.commit()
 
         task1 = Task(
             name="task1",
@@ -1633,15 +1617,15 @@ class DatabaseModelsTester(unittest2.TestCase):
         new_project._computed_start = dt.now()
         new_project._computed_end = dt.now() + td(10)
 
-        db.session.add_all([task1, task2])
-        db.session.commit()
+        DBSession.add_all([task1, task2])
+        DBSession.commit()
 
         # add tickets
         ticket1 = Ticket(
             project=new_project
         )
-        db.session.add(ticket1)
-        db.session.commit()
+        DBSession.add(ticket1)
+        DBSession.commit()
 
         # store the attributes
         assets = new_project.assets
@@ -1678,7 +1662,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         del new_project
 
         # now get it
-        new_project_db = db.session.query(Project). \
+        new_project_db = DBSession.query(Project). \
             filter_by(name=kwargs["name"]).first()
 
         assert (isinstance(new_project_db, Project))
@@ -1718,8 +1702,8 @@ class DatabaseModelsTester(unittest2.TestCase):
         #
         # Tasks
         # Tickets
-        db.session.delete(new_project_db)
-        db.session.commit()
+        DBSession.delete(new_project_db)
+        DBSession.commit()
 
         # Tasks
         self.assertEqual([], Task.query.all())
@@ -1745,8 +1729,8 @@ class DatabaseModelsTester(unittest2.TestCase):
         repo = Repository(**kwargs)
 
         # save it to database
-        db.session.add(repo)
-        db.session.commit()
+        DBSession.add(repo)
+        DBSession.commit()
 
         # store attributes
         created_by = repo.created_by
@@ -1767,7 +1751,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         del repo
 
         # get it back
-        repo_db = db.session.query(Repository) \
+        repo_db = Repository.query\
             .filter_by(name=kwargs["name"]) \
             .first()
 
@@ -1849,9 +1833,9 @@ class DatabaseModelsTester(unittest2.TestCase):
             scenes=[test_scene],
             status_list=shot_status_list
         )
-        db.session.add_all([shot1, shot2, shot3])
-        db.session.add(test_scene)
-        db.session.commit()
+        DBSession.add_all([shot1, shot2, shot3])
+        DBSession.add(test_scene)
+        DBSession.commit()
 
         # store the attributes
         code = test_scene.code
@@ -1964,9 +1948,9 @@ class DatabaseModelsTester(unittest2.TestCase):
             status_list=shot_status_list
         )
 
-        db.session.add_all([shot1, shot2, shot3])
-        db.session.add(test_sequence)
-        db.session.commit()
+        DBSession.add_all([shot1, shot2, shot3])
+        DBSession.add(test_sequence)
+        DBSession.commit()
 
         # store the attributes
         code = test_sequence.code
@@ -2108,9 +2092,9 @@ class DatabaseModelsTester(unittest2.TestCase):
 
         test_shot = Shot(**shot_kwargs)
 
-        db.session.add(test_shot)
-        db.session.add(test_seq1)
-        db.session.commit()
+        DBSession.add(test_shot)
+        DBSession.add(test_seq1)
+        DBSession.commit()
 
         # store the attributes
         code = test_shot.code
@@ -2175,8 +2159,8 @@ class DatabaseModelsTester(unittest2.TestCase):
         test_simple_entity = SimpleEntity(**kwargs)
 
         # persist it to the database
-        db.session.add(test_simple_entity)
-        db.session.commit()
+        DBSession.add(test_simple_entity)
+        DBSession.commit()
 
         created_by = test_simple_entity.created_by
         date_created = test_simple_entity.date_created
@@ -2192,7 +2176,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         del test_simple_entity
 
         # now try to retrieve it
-        test_simple_entity_db = db.session.query(SimpleEntity) \
+        test_simple_entity_db = SimpleEntity.query\
             .filter(SimpleEntity.name == kwargs["name"]).first()
 
         assert (isinstance(test_simple_entity_db, SimpleEntity))
@@ -2216,8 +2200,8 @@ class DatabaseModelsTester(unittest2.TestCase):
         #self.assertIsNotNone(Link.query.all())
         #
         ## Deleting a SimpleEntity should also delete its thumbnail
-        #db.session.delete(test_simple_entity_DB)
-        #db.session.commit()
+        #DBSession.delete(test_simple_entity_DB)
+        #DBSession.commit()
         #
         #self.assertIsNone(Link.query.all())
 
@@ -2236,8 +2220,8 @@ class DatabaseModelsTester(unittest2.TestCase):
         test_status = Status(**kwargs)
 
         # persist it to the database
-        db.session.add(test_status)
-        db.session.commit()
+        DBSession.add(test_status)
+        DBSession.commit()
 
         # store the attributes
         code = test_status.code
@@ -2255,7 +2239,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         del test_status
 
         # now try to retrieve it
-        test_status_db = db.session.query(Status) \
+        test_status_db = Status.query\
             .filter(Status.name == kwargs["name"]).first()
 
         assert (isinstance(test_status_db, Status))
@@ -2293,8 +2277,8 @@ class DatabaseModelsTester(unittest2.TestCase):
 
         sequence_status_list = StatusList(**kwargs)
 
-        db.session.add(sequence_status_list)
-        db.session.commit()
+        DBSession.add(sequence_status_list)
+        DBSession.commit()
 
         # store the attributes
         created_by = sequence_status_list.created_by
@@ -2339,9 +2323,9 @@ class DatabaseModelsTester(unittest2.TestCase):
         kwargs["name"] = "new Sequence Status List"
         new_sequence_list = StatusList(**kwargs)
 
-        db.session.add(new_sequence_list)
-        self.assertTrue(new_sequence_list in db.session)
-        self.assertRaises(IntegrityError, db.session.commit)
+        DBSession.add(new_sequence_list)
+        self.assertTrue(new_sequence_list in DBSession)
+        self.assertRaises(IntegrityError, DBSession.commit)
 
     def test_persistence_of_Structure(self):
         """testing the persistence of Structure
@@ -2438,8 +2422,8 @@ class DatabaseModelsTester(unittest2.TestCase):
 
         new_structure = Structure(**kwargs)
 
-        db.session.add(new_structure)
-        db.session.commit()
+        DBSession.add(new_structure)
+        DBSession.commit()
 
         # store the attributes
         templates = new_structure.templates
@@ -2457,8 +2441,8 @@ class DatabaseModelsTester(unittest2.TestCase):
         # delete the new_structure
         del new_structure
 
-        new_structure_db = db.session.query(Structure). \
-            filter_by(name=kwargs["name"]).first()
+        new_structure_db = Structure.query\
+            .filter_by(name=kwargs["name"]).first()
 
         assert (isinstance(new_structure_db, Structure))
 
@@ -2478,8 +2462,8 @@ class DatabaseModelsTester(unittest2.TestCase):
         """testing the persistence of Studio
         """
         test_studio = Studio(name='Test Studio')
-        db.session.add(test_studio)
-        db.session.commit()
+        DBSession.add(test_studio)
+        DBSession.commit()
 
         # customize attributes
         test_studio.daily_working_hours = 11
@@ -2526,8 +2510,8 @@ class DatabaseModelsTester(unittest2.TestCase):
             date_updated=date_updated)
 
         # persist it to the database
-        db.session.add(tag)
-        db.session.commit()
+        DBSession.add(tag)
+        DBSession.commit()
 
         # store the attributes
         description = tag.description
@@ -2540,7 +2524,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         del tag
 
         # now try to retrieve it
-        tag_db = db.session.query(Tag).filter_by(name=name).first()
+        tag_db = DBSession.query(Tag).filter_by(name=name).first()
 
         assert (isinstance(tag_db, Tag))
 
@@ -2677,32 +2661,32 @@ class DatabaseModelsTester(unittest2.TestCase):
         version1 = Version(
             task=task1
         )
-        db.session.add(version1)
-        db.session.commit()
+        DBSession.add(version1)
+        DBSession.commit()
 
         version2 = Version(
             task=task1
         )
-        db.session.add(version2)
-        db.session.commit()
+        DBSession.add(version2)
+        DBSession.commit()
 
         version3 = Version(
             task=task2
         )
-        db.session.add(version3)
-        db.session.commit()
+        DBSession.add(version3)
+        DBSession.commit()
 
         version4 = Version(
             task=task2
         )
-        db.session.add(version4)
-        db.session.commit()
+        DBSession.add(version4)
+        DBSession.commit()
 
         version4.inputs = [version2]
         version3.inputs = [version2]
         version2.inputs = [version1]
-        db.session.add(version1)
-        db.session.commit()
+        DBSession.add(version1)
+        DBSession.commit()
 
         # referenes
         ref1 = Link(
@@ -2718,12 +2702,12 @@ class DatabaseModelsTester(unittest2.TestCase):
         task1.references.append(ref1)
         task1.references.append(ref2)
 
-        db.session.add_all([
+        DBSession.add_all([
             task1, child_task1, child_task2, task2, time_log1,
             time_log2, time_log3, user1, user2, version1, version2, version3,
             version4, ref1, ref2
         ])
-        db.session.commit()
+        DBSession.commit()
 
         computed_start = task1.computed_start
         computed_end = task1.computed_end
@@ -2798,8 +2782,8 @@ class DatabaseModelsTester(unittest2.TestCase):
         # Child Tasks
         # TimeLogs
         # Versions
-        db.session.delete(task1_db)
-        db.session.commit()
+        DBSession.delete(task1_db)
+        DBSession.commit()
 
         # Expect to have all child tasks also to be deleted
         self.assertItemsEqual(
@@ -2967,11 +2951,11 @@ class DatabaseModelsTester(unittest2.TestCase):
             schedule_unit='h'
         )
 
-        db.session.add_all([
+        DBSession.add_all([
             task1, child_task1, child_task2, task2, time_log1,
             time_log2, time_log3, user1, user2, rev1
         ])
-        db.session.commit()
+        DBSession.commit()
 
         created_by = rev1.created_by
         date_created = rev1.date_created
@@ -3001,8 +2985,8 @@ class DatabaseModelsTester(unittest2.TestCase):
         # delete tests
 
         # deleting a Review should be fairly simple:
-        db.session.delete(rev1_db)
-        db.session.commit()
+        DBSession.delete(rev1_db)
+        DBSession.commit()
 
         # Expect to have no task is deleted
         self.assertItemsEqual(
@@ -3063,12 +3047,12 @@ class DatabaseModelsTester(unittest2.TestCase):
         note2 = Note(content='This is the content of the note 2')
 
         related_ticket1 = Ticket(project=proj1)
-        db.session.add(related_ticket1)
-        db.session.commit()
+        DBSession.add(related_ticket1)
+        DBSession.commit()
 
         related_ticket2 = Ticket(project=proj1)
-        db.session.add(related_ticket2)
-        db.session.commit()
+        DBSession.add(related_ticket2)
+        DBSession.commit()
 
         # create Tickets
         test_ticket = Ticket(
@@ -3083,8 +3067,8 @@ class DatabaseModelsTester(unittest2.TestCase):
         test_ticket.reassign(user1, user2)
         test_ticket.priority = 'MAJOR'
 
-        db.session.add(test_ticket)
-        db.session.commit()
+        DBSession.add(test_ticket)
+        DBSession.commit()
 
         comments = test_ticket.comments
         created_by = test_ticket.created_by
@@ -3137,8 +3121,8 @@ class DatabaseModelsTester(unittest2.TestCase):
         # ticket
         self.assertItemsEqual(test_ticket_db.logs, logs)
 
-        db.session.delete(test_ticket_db)
-        db.session.commit()
+        DBSession.delete(test_ticket_db)
+        DBSession.commit()
 
         self.assertEqual([], TicketLog.query.all())
 
@@ -3168,8 +3152,8 @@ class DatabaseModelsTester(unittest2.TestCase):
 
         user1 = User(**user_kwargs)
 
-        db.session.add_all([user1, new_department])
-        db.session.commit()
+        DBSession.add_all([user1, new_department])
+        DBSession.commit()
 
         vacation1 = Vacation(
             user=user1,
@@ -3185,8 +3169,8 @@ class DatabaseModelsTester(unittest2.TestCase):
 
         user1.vacations.append(vacation1)
         user1.vacations.append(vacation2)
-        db.session.add(user1)
-        db.session.commit()
+        DBSession.add(user1)
+        DBSession.commit()
 
         # create a test project
         repo1 = Repository(name='Test Repo')
@@ -3219,9 +3203,9 @@ class DatabaseModelsTester(unittest2.TestCase):
             start=dt.now(),
             end=dt.now() + td(1)
         )
-        db.session.add(time_log1)
-        db.session.add(task1)
-        db.session.commit()
+        DBSession.add(time_log1)
+        DBSession.add(task1)
+        DBSession.commit()
 
         # store attributes
         created_by = user1.created_by
@@ -3248,7 +3232,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         # delete new_user
         del user1
 
-        user1_db = db.session.query(User) \
+        user1_db = User.query\
             .filter(User.name == user_kwargs["name"]) \
             .first()
 
@@ -3278,7 +3262,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(updated_by, user1_db.updated_by)
 
         # as the member of a department
-        department_db = db.session.query(Department) \
+        department_db = Department.query\
             .filter(Department.name == dep_kwargs["name"]) \
             .first()
 
@@ -3291,8 +3275,8 @@ class DatabaseModelsTester(unittest2.TestCase):
         )
 
         # deleting a user should also delete its vacations
-        db.session.delete(user1_db)
-        db.session.commit()
+        DBSession.delete(user1_db)
+        DBSession.commit()
 
         self.assertItemsEqual([], Vacation.query.all())
 
@@ -3327,8 +3311,8 @@ class DatabaseModelsTester(unittest2.TestCase):
             end=end
         )
 
-        db.session.add(vacation)
-        db.session.commit()
+        DBSession.add(vacation)
+        DBSession.commit()
 
         name = vacation.name
 
@@ -3391,8 +3375,8 @@ class DatabaseModelsTester(unittest2.TestCase):
         )
 
         # now save it to the database
-        db.session.add(test_version)
-        db.session.commit()
+        DBSession.add(test_version)
+        DBSession.commit()
 
         # create a new version
         test_version_2 = Version(
@@ -3403,8 +3387,8 @@ class DatabaseModelsTester(unittest2.TestCase):
             '/Proj1_Seq1_Sh001_MAIN_Lighting_v001.ma',
             inputs=[test_version]
         )
-        db.session.add(test_version_2)
-        db.session.commit()
+        DBSession.add(test_version_2)
+        DBSession.commit()
 
         created_by = test_version.created_by
         date_created = test_version.date_created
@@ -3448,7 +3432,7 @@ class DatabaseModelsTester(unittest2.TestCase):
 
         # try to delete version and expect the task, user and other versions
         # to be intact
-        db.session.delete(test_version_db)
-        db.session.commit()
+        DBSession.delete(test_version_db)
+        DBSession.commit()
 
         self.assertEqual(test_version_2.inputs, [])

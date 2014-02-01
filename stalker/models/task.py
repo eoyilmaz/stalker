@@ -27,9 +27,9 @@ from sqlalchemy.exc import InvalidRequestError
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship, validates, synonym
 
-from stalker import db
-from stalker.db.declarative import Base
 from stalker import defaults
+from stalker.db.session import DBSession
+from stalker.db.declarative import Base
 from stalker.models import check_circular_dependency
 from stalker.models.entity import Entity
 from stalker.models.auth import User
@@ -173,7 +173,7 @@ class TimeLog(Entity, DateRangeMixin):
             )
 
         # check status
-        with db.session.no_autoflush:
+        with DBSession.no_autoflush:
             WFD = Status.query.filter_by(code='WFD').first()
             RTS = Status.query.filter_by(code='RTS').first()
             WIP = Status.query.filter_by(code='WIP').first()
@@ -224,7 +224,7 @@ class TimeLog(Entity, DateRangeMixin):
             )
 
         # check for overbooking
-        with db.session.no_autoflush:
+        with DBSession.no_autoflush:
             logger.debug('resource.time_logs: %s' % resource.time_logs)
             for time_log in resource.time_logs:
                 logger.debug('time_log       : %s' % time_log)
@@ -1091,7 +1091,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         self.is_complete = False
 
         # update the status
-        with db.session.no_autoflush:
+        with DBSession.no_autoflush:
             WFD = Status.query.filter_by(code='WFD').first()
         self.status = WFD
 
@@ -1158,7 +1158,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
         # TODO: convert this to an event
         # update parents total_logged_second attribute
-        with db.session.no_autoflush:
+        with DBSession.no_autoflush:
             if self.parent:
                 self.parent.total_logged_seconds += time_log.total_seconds
 
@@ -1197,7 +1197,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             return task_depends_to
 
         # check the status of the current task
-        with db.session.no_autoflush:
+        with DBSession.no_autoflush:
             WFD = Status.query.filter_by(code='WFD').first()
             RTS = Status.query.filter_by(code='RTS').first()
             WIP = Status.query.filter_by(code='WIP').first()
@@ -1232,13 +1232,13 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             )
 
         # check for the circular dependency
-        with db.session.no_autoflush:
+        with DBSession.no_autoflush:
             check_circular_dependency(depends, self, 'depends')
             check_circular_dependency(depends, self, 'children')
 
         # check for circular dependency toward the parent, non of the parents
         # should be depending to the given depends_to_task
-        with db.session.no_autoflush:
+        with DBSession.no_autoflush:
             parent = self.parent
             while parent:
                 if parent in depends.depends:
@@ -1257,7 +1257,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
         if self.status == RTS:
 
-            with db.session.no_autoflush:
+            with DBSession.no_autoflush:
                 do_update_status = False
                 if depends.status in [WFD, RTS, WIP, OH, PREV, HREV, DREV, OH]:
                     do_update_status = True
@@ -1352,7 +1352,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
                     (self.__class__.__name__, parent.__class__.__name__)
                 )
 
-            #with db.session.no_autoflush:
+            #with DBSession.no_autoflush:
             # check for cycle
             check_circular_dependency(self, parent, 'children')
             check_circular_dependency(self, parent, 'depends')
@@ -1387,7 +1387,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
                 # use its project as the project
 
                 # to prevent prematurely flush the parent
-                with db.session.no_autoflush:
+                with DBSession.no_autoflush:
                     project = self.parent.project
 
             else:
@@ -1413,7 +1413,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             # check if there is a parent
             if self.parent:
                 # check if given project is matching the parent.project
-                with db.session.no_autoflush:
+                with DBSession.no_autoflush:
                     if self.parent._project != project:
                         # don't go mad again, but warn the user that there is an
                         # ambiguity!!!
@@ -1457,7 +1457,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         """
         # just empty the resources list
         # do it without a flush
-        with db.session.no_autoflush:
+        with DBSession.no_autoflush:
             self.resources = []
 
             # if this is the first ever child we receive
@@ -1760,7 +1760,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     def is_container(self):
         """Returns True if the Task has children Tasks
         """
-        with db.session.no_autoflush:
+        with DBSession.no_autoflush:
             return bool(len(self.children))
 
     @property
@@ -1829,7 +1829,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         :returns int: An integer showing the total seconds spent.
         """
         seconds = 0
-        with db.session.no_autoflush:
+        with DBSession.no_autoflush:
             if self.is_leaf:
                 for time_log in self.time_logs:
                     seconds += time_log.total_seconds
@@ -1890,7 +1890,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         # do it only for container tasks
         if self.is_container:
             # also update the parents
-            with db.session.no_autoflush:
+            with DBSession.no_autoflush:
                 if self.parent:
                     current_value = 0
                     if self._schedule_seconds:
@@ -2052,7 +2052,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         is requested at day 2. Only applicable to leaf tasks.
         """
         # check task status
-        with db.session.no_autoflush:
+        with DBSession.no_autoflush:
             WIP = Status.query.filter_by(code='WIP').first()
             PREV = Status.query.filter_by(code='PREV').first()
 
@@ -2111,7 +2111,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         :type reviewer: class:`.User`
         """
         # check status
-        with db.session.no_autoflush:
+        with DBSession.no_autoflush:
             PREV = Status.query.filter_by(code='PREV').first()
             CMPL = Status.query.filter_by(code='CMPL').first()
 
@@ -2133,17 +2133,17 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         for r in self.reviews:
             if r.status.code == 'NEW':
                 try:
-                    db.session.delete(r)
+                    DBSession.delete(r)
                 except InvalidRequestError:
                     # not persisted yet
-                    db.session.add(r)
+                    DBSession.add(r)
                     reviews_to_be_deleted.append(r)
                     pass
-        db.session.commit()
+        DBSession.commit()
 
         for r in reviews_to_be_deleted:
-            db.session.delete(r)
-        db.session.commit()
+            DBSession.delete(r)
+        DBSession.commit()
         # *********************************************************************
 
         # create a Review instance with the given data
@@ -2163,7 +2163,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         raise a ValueError.
         """
         # check if status is WIP
-        with db.session.no_autoflush:
+        with DBSession.no_autoflush:
             WIP = Status.query.filter_by(code='WIP').first()
             DREV = Status.query.filter_by(code='DREV').first()
             OH = Status.query.filter_by(code='OH').first()
@@ -2205,7 +2205,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         """
 
         # check the status
-        with db.session.no_autoflush:
+        with DBSession.no_autoflush:
             WIP = Status.query.filter_by(code='WIP').first()
             DREV = Status.query.filter_by(code='DREV').first()
             STOP = Status.query.filter_by(code='STOP').first()
@@ -2241,7 +2241,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         applicable to Tasks with status OH.
         """
         # check status
-        with db.session.no_autoflush:
+        with DBSession.no_autoflush:
             WIP = Status.query.filter_by(code='WIP').first()
             OH = Status.query.filter_by(code='OH').first()
             STOP = Status.query.filter_by(code='STOP').first()
@@ -2276,7 +2276,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         # get statuses
         logger.debug('approving task: %s' % self.name)
 
-        with db.session.no_autoflush:
+        with DBSession.no_autoflush:
             PREV = Status.query.filter_by(code='PREV').first()
 
         if self.status != PREV:
@@ -2299,7 +2299,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             # do nothing, its status will be decided by its children
             return
 
-        with db.session.no_autoflush:
+        with DBSession.no_autoflush:
             WFD = Status.query.filter_by(code='WFD').first()
             RTS = Status.query.filter_by(code='RTS').first()
             WIP = Status.query.filter_by(code='WIP').first()
@@ -2370,7 +2370,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
                 group by "Statuses".code
             """ % self.id
 
-            result = db.session.connection().execute(sql_query)
+            result = DBSession.connection().execute(sql_query)
 
             # convert to a binary value
             binary_status = reduce(
@@ -2384,7 +2384,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             logger.debug('using pure Python to query dependency statuses')
             binary_status = 0
             dep_statuses = []
-            # with db.session.no_autoflush:
+            # with DBSession.no_autoflush:
             logger.debug('self.depends in update_status_with_dependent_statuses: %s' % self.depends)
             # for dep in self.depends:
             for dep in dep_list:
@@ -2483,7 +2483,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             group by "Statuses".code
             """ % self.id
 
-            result = db.session.connection().execute(sql_query)
+            result = DBSession.connection().execute(sql_query)
 
             # convert to a binary value
             binary_status = reduce(
@@ -2927,7 +2927,7 @@ def update_task_date_values(task, removed_child, initiator):
     :param initiator: not used
     """
     # update start and end date values of the task
-    with db.session.no_autoflush:
+    with DBSession.no_autoflush:
         start = datetime.datetime.max
         end = datetime.datetime.min
         for child in task.children:

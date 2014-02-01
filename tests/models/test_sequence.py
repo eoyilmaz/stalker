@@ -20,8 +20,8 @@
 
 import unittest2
 
-from stalker import (db, Entity, Link, Project, Repository, Sequence, Status,
-                     StatusList, Task, Type)
+from stalker import (db, defaults, Entity, Link, Project, Repository, Sequence,
+                     Status, StatusList, Task, Type)
 
 
 class SequenceTester(unittest2.TestCase):
@@ -32,7 +32,23 @@ class SequenceTester(unittest2.TestCase):
         """setup the test
         """
         db.setup()
-        db.init()
+        # db.init()
+        # we just need statuses so create them instead of initializing the db
+        db.create_entity_statuses(entity_type='Task',
+                                  status_names=defaults.task_status_names,
+                                  status_codes=defaults.task_status_codes)
+        db.create_entity_statuses(entity_type='Asset',
+                                  status_names=defaults.task_status_names,
+                                  status_codes=defaults.task_status_codes)
+        db.create_entity_statuses(entity_type='Shot',
+                                  status_names=defaults.task_status_names,
+                                  status_codes=defaults.task_status_codes)
+        db.create_entity_statuses(entity_type='Sequence',
+                                  status_names=defaults.task_status_names,
+                                  status_codes=defaults.task_status_codes)
+        db.create_entity_statuses(entity_type='Review',
+                                  status_names=defaults.review_status_names,
+                                  status_codes=defaults.review_status_codes)
 
         # get statuses
         self.status_new = Status.query.filter_by(code='NEW').first()

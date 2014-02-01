@@ -20,8 +20,10 @@
 
 import unittest2
 import datetime
+
 import stalker
-from stalker import db, Type, User
+from stalker.db import DBSession
+from stalker import Type, User
 
 # create a new class deriving from the SimpleEntity
 from stalker.models.entity import SimpleEntity
@@ -661,8 +663,8 @@ class SimpleEntityTester(unittest2.TestCase):
              test_department, test_user]
         )
 
-        db.session.add(new_simple_entity)
-        db.session.commit()
+        DBSession.add(new_simple_entity)
+        DBSession.commit()
 
         # now check if it is added to the database correctly
         del new_simple_entity
@@ -679,8 +681,7 @@ class SimpleEntityTester(unittest2.TestCase):
         self.assertTrue(test_department in new_simple_entity_db.generic_data)
         self.assertTrue(test_user in new_simple_entity_db.generic_data)
 
-        if db.session:
-            db.session.close()
+        DBSession.remove()
 
     def test_thumbnail_argument_is_skipped(self):
         """testing if the thumbnail attribute will be None when the thumbnail

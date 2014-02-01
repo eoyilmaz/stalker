@@ -24,6 +24,7 @@ from sqlalchemy import Column, Integer, ForeignKey
 
 from stalker import db
 from stalker.models.mixins import CodeMixin
+from stalker.db.session import DBSession
 from stalker.models.entity import SimpleEntity
 
 
@@ -62,9 +63,7 @@ class CodeMixinTester(unittest2.TestCase):
     def tearDown(self):
         """clean up the test
         """
-        if db.session:
-            #db.session.remove()
-            db.session.close()
+        DBSession.remove()
 
     def test_code_argument_is_skipped(self):
         """testing if a TypeError will be raised when the code argument is

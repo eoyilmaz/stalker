@@ -22,8 +22,8 @@ import tempfile
 import unittest2
 import datetime
 
-from stalker import db
-from stalker import (Task, Project, User, Status, StatusList, Repository,
+from stalker.db import DBSession
+from stalker import (db, Task, Project, User, Status, StatusList, Repository,
                      Structure, Review)
 
 
@@ -43,7 +43,7 @@ class ReviewTestCase(unittest2.TestCase):
             email='test1@user.com',
             password='secret'
         )
-        db.session.add(self.user1)
+        DBSession.add(self.user1)
 
         self.user2 = User(
             name='Test User 2',
@@ -51,7 +51,7 @@ class ReviewTestCase(unittest2.TestCase):
             email='test2@user.com',
             password='secret'
         )
-        db.session.add(self.user2)
+        DBSession.add(self.user2)
 
         self.user3 = User(
             name='Test User 2',
@@ -59,7 +59,7 @@ class ReviewTestCase(unittest2.TestCase):
             email='test3@user.com',
             password='secret'
         )
-        db.session.add(self.user3)
+        DBSession.add(self.user3)
 
         # Review Statuses
         self.status_new = Status.query.filter_by(code='NEW').first()
@@ -81,7 +81,7 @@ class ReviewTestCase(unittest2.TestCase):
                 self.status_new, self.status_wip, self.status_cmpl
             ]
         )
-        db.session.add(self.project_status_list)
+        DBSession.add(self.project_status_list)
 
         self.temp_path = tempfile.mkdtemp()
         self.repo = Repository(
@@ -90,12 +90,12 @@ class ReviewTestCase(unittest2.TestCase):
             windows_path=self.temp_path,
             osx_path=self.temp_path
         )
-        db.session.add(self.repo)
+        DBSession.add(self.repo)
 
         self.structure = Structure(
             name='Test Project Structure'
         )
-        db.session.add(self.structure)
+        DBSession.add(self.structure)
 
         self.project = Project(
             name='Test Project',
@@ -104,42 +104,42 @@ class ReviewTestCase(unittest2.TestCase):
             status_list=self.project_status_list,
             repository=self.repo
         )
-        db.session.add(self.project)
+        DBSession.add(self.project)
 
         self.task1 = Task(
             name='Test Task 1',
             project=self.project,
             resources=[self.user1]
         )
-        db.session.add(self.task1)
+        DBSession.add(self.task1)
 
         self.task2 = Task(
             name='Test Task 2',
             project=self.project
         )
-        db.session.add(self.task2)
+        DBSession.add(self.task2)
 
         self.task3 = Task(
             name='Test Task 3',
             parent=self.task2,
             resources=[self.user1]
         )
-        db.session.add(self.task3)
+        DBSession.add(self.task3)
 
         self.kwargs = {
             'task': self.task1,
             'reviewer': self.user1
         }
         #self.review = Review(**self.kwargs)
-        #db.session.add(self.review)
+        #DBSession.add(self.review)
 
         # add everything to the db
-        db.session.commit()
+        DBSession.commit()
 
     def tearDown(self):
         """clean up test
         """
-        db.session.close()
+        DBSession.remove()
 
     def test_task_argument_is_skipped(self):
         """testing if a TypeError will be raised when the task argument is

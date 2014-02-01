@@ -23,6 +23,7 @@ import unittest2
 import os
 
 import stalker
+from stalker.db import DBSession
 from stalker import (db, Department, User, Repository, Status, StatusList,
                      Project, Task, TaskJugglerScheduler, Studio)
 
@@ -55,7 +56,7 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
             password='1234',
             departments=[self.test_dep1]
         )
-        db.session.add(self.test_user1)
+        DBSession.add(self.test_user1)
 
         self.test_user2 = User(
             login='user2',
@@ -64,7 +65,7 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
             password='1234',
             departments=[self.test_dep1]
         )
-        db.session.add(self.test_user2)
+        DBSession.add(self.test_user2)
 
         self.test_user3 = User(
             login='user3',
@@ -73,7 +74,7 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
             password='1234',
             departments=[self.test_dep2]
         )
-        db.session.add(self.test_user3)
+        DBSession.add(self.test_user3)
 
         self.test_user4 = User(
             login='user4',
@@ -82,7 +83,7 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
             password='1234',
             departments=[self.test_dep2]
         )
-        db.session.add(self.test_user4)
+        DBSession.add(self.test_user4)
 
         # user with two departments
         self.test_user5 = User(
@@ -92,7 +93,7 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
             password='1234',
             departments=[self.test_dep1, self.test_dep2]
         )
-        db.session.add(self.test_user5)
+        DBSession.add(self.test_user5)
 
         # user with no departments
         self.test_user6 = User(
@@ -101,7 +102,7 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
             email='user6@users.com',
             password='1234'
         )
-        db.session.add(self.test_user6)
+        DBSession.add(self.test_user6)
 
         # repository
         self.test_repo = Repository(
@@ -110,7 +111,7 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
             windows_path='T:/',
             osx_path='/Volumes/T/'
         )
-        db.session.add(self.test_repo)
+        DBSession.add(self.test_repo)
 
         # statuses
         self.test_status1 = Status(name='Status 1', code='STS1')
@@ -118,7 +119,7 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
         self.test_status3 = Status(name='Status 3', code='STS3')
         self.test_status4 = Status(name='Status 4', code='STS4')
         self.test_status5 = Status(name='Status 5', code='STS5')
-        db.session.add_all([self.test_status1,
+        DBSession.add_all([self.test_status1,
                            self.test_status2,
                            self.test_status3,
                            self.test_status4,
@@ -130,7 +131,7 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
             statuses=[self.test_status1, self.test_status2, self.test_status3],
             target_entity_type='Project'
         )
-        db.session.add(self.test_proj_status_list)
+        DBSession.add(self.test_proj_status_list)
 
         # create one project
         self.test_proj1 = Project(
@@ -141,13 +142,13 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
             start=datetime.datetime(2013, 4, 4),
             end=datetime.datetime(2013, 5, 4)
         )
-        db.session.add(self.test_proj1)
+        DBSession.add(self.test_proj1)
         self.test_proj1.now = datetime.datetime(2013, 4, 4)
 
         # create task status list
         self.test_task_status_list = StatusList.query\
             .filter_by(target_entity_type='Task').first()
-        db.session.add(self.test_task_status_list)
+        DBSession.add(self.test_task_status_list)
 
         # create two tasks with the same resources
         self.test_task1 = Task(
@@ -159,7 +160,7 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
             schedule_unit='h',
             status_list=self.test_task_status_list
         )
-        db.session.add(self.test_task1)
+        DBSession.add(self.test_task1)
 
         self.test_task2 = Task(
             name='Task2',
@@ -170,14 +171,13 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
             schedule_unit='h',
             status_list=self.test_task_status_list
         )
-        db.session.add(self.test_task2)
-        db.session.commit()
+        DBSession.add(self.test_task2)
+        DBSession.commit()
 
     def tearDown(self):
         """clean up the test
         """
-        if db.session:
-            db.session.close()
+        DBSession.remove()
 
     def test_tjp_file_is_created(self):
         """testing if the tjp file is correctly created
@@ -305,7 +305,7 @@ task Task_45 "Task2" {
         test_studio = Studio(name='Test Studio',
                              now=datetime.datetime(2013, 4, 16, 0, 0))
         test_studio.daily_working_hours = 9
-        db.session.add(test_studio)
+        DBSession.add(test_studio)
 
         tjp_sched.studio = test_studio
         tjp_sched.schedule()

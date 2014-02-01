@@ -21,14 +21,10 @@
 import unittest2
 import datetime
 
+from stalker.db import DBSession
 from stalker import (db, defaults, Studio, WorkingHours, Project, StatusList,
                      Status, Repository, Asset, Type, User, Shot, Department,
                      Task, TaskJugglerScheduler, SchedulerBase)
-
-# for IDEs to help them in code compilation
-if False:
-    from sqlalchemy.orm import Session
-    assert isinstance(db.session, Session)
 
 
 class DummyScheduler(SchedulerBase):
@@ -62,7 +58,7 @@ class StudioTester(unittest2.TestCase):
             email='user1@users.com',
             password='password'
         )
-        db.session.add(self.test_user1)
+        DBSession.add(self.test_user1)
 
         self.test_user2 = User(
             name='User 2',
@@ -70,7 +66,7 @@ class StudioTester(unittest2.TestCase):
             email='user2@users.com',
             password='password'
         )
-        db.session.add(self.test_user2)
+        DBSession.add(self.test_user2)
 
         self.test_user3 = User(
             name='User 3',
@@ -78,36 +74,36 @@ class StudioTester(unittest2.TestCase):
             email='user3@users.com',
             password='password'
         )
-        db.session.add(self.test_user3)
+        DBSession.add(self.test_user3)
 
         self.test_department1 = Department(
             name='Test Department 1'
         )
-        db.session.add(self.test_department1)
+        DBSession.add(self.test_department1)
 
         self.test_department2 = Department(
             name='Test Department 2'
         )
-        db.session.add(self.test_department2)
+        DBSession.add(self.test_department2)
 
         self.test_status1 = Status(
             name='Status 1',
             code='ST1'
         )
-        db.session.add(self.test_status1)
+        DBSession.add(self.test_status1)
 
         self.test_status2 = Status(
             name='Status 2',
             code='ST2'
         )
-        db.session.add(self.test_status2)
+        DBSession.add(self.test_status2)
 
         self.test_project_status_list1 = StatusList(
             name='Project Statuses',
             statuses=[self.test_status1, self.test_status2],
             target_entity_type=Project
         )
-        db.session.add(self.test_project_status_list1)
+        DBSession.add(self.test_project_status_list1)
 
         self.test_repo = Repository(
             name='Test Repository',
@@ -115,7 +111,7 @@ class StudioTester(unittest2.TestCase):
             linux_path='/mnt/T/',
             osx_path='/Volumes/T/'
         )
-        db.session.add(self.test_repo)
+        DBSession.add(self.test_repo)
 
         # create a couple of projects
         self.test_project1 = Project(
@@ -124,7 +120,7 @@ class StudioTester(unittest2.TestCase):
             status_list=self.test_project_status_list1,
             repository=self.test_repo
         )
-        db.session.add(self.test_project1)
+        DBSession.add(self.test_project1)
 
         self.test_project2 = Project(
             name='Test Project 2',
@@ -132,7 +128,7 @@ class StudioTester(unittest2.TestCase):
             status_list=self.test_project_status_list1,
             repository=self.test_repo
         )
-        db.session.add(self.test_project2)
+        DBSession.add(self.test_project2)
 
         # an inactive project
         self.test_project3 = Project(
@@ -142,7 +138,7 @@ class StudioTester(unittest2.TestCase):
             repository=self.test_repo
         )
         self.test_project3.active = False
-        db.session.add(self.test_project3)
+        DBSession.add(self.test_project3)
 
         # create assets and shots
         self.test_asset_type = Type(
@@ -150,7 +146,7 @@ class StudioTester(unittest2.TestCase):
             code='Char',
             target_entity_type=Asset
         )
-        db.session.add(self.test_asset_type)
+        DBSession.add(self.test_asset_type)
 
         self.test_asset_status_list = \
             StatusList.query.filter_by(target_entity_type='Asset').first()
@@ -161,7 +157,7 @@ class StudioTester(unittest2.TestCase):
             project=self.test_project1,
             type=self.test_asset_type
         )
-        db.session.add(self.test_asset1)
+        DBSession.add(self.test_asset1)
 
         self.test_asset2 = Asset(
             name='Test Asset 2',
@@ -169,7 +165,7 @@ class StudioTester(unittest2.TestCase):
             project=self.test_project2,
             type=self.test_asset_type
         )
-        db.session.add(self.test_asset2)
+        DBSession.add(self.test_asset2)
 
         # shots
         self.test_shot_status_list = \
@@ -181,14 +177,14 @@ class StudioTester(unittest2.TestCase):
             project=self.test_project1,
             status_list=self.test_shot_status_list
         )
-        db.session.add(self.test_shot1)
+        DBSession.add(self.test_shot1)
 
         self.test_shot2 = Shot(
             code='shot2',
             project=self.test_project1,
             status_list=self.test_shot_status_list
         )
-        db.session.add(self.test_shot2)
+        DBSession.add(self.test_shot2)
 
         # for project 2
         self.test_shot3 = Shot(
@@ -196,14 +192,14 @@ class StudioTester(unittest2.TestCase):
             project=self.test_project2,
             status_list=self.test_shot_status_list
         )
-        db.session.add(self.test_shot3)
+        DBSession.add(self.test_shot3)
 
         self.test_shot4 = Shot(
             code='shot4',
             project=self.test_project2,
             status_list=self.test_shot_status_list
         )
-        db.session.add(self.test_shot4)
+        DBSession.add(self.test_shot4)
 
         # for project 3
         self.test_shot5 = Shot(
@@ -211,7 +207,7 @@ class StudioTester(unittest2.TestCase):
             project=self.test_project3,
             status_list=self.test_shot_status_list
         )
-        db.session.add(self.test_shot5)
+        DBSession.add(self.test_shot5)
 
         #########################################################3
         # tasks for projects
@@ -225,7 +221,7 @@ class StudioTester(unittest2.TestCase):
             schedule_timing=10,
             schedule_unit='d'
         )
-        db.session.add(self.test_task1)
+        DBSession.add(self.test_task1)
 
         self.test_task2 = Task(
             name='Project Planing',
@@ -234,7 +230,7 @@ class StudioTester(unittest2.TestCase):
             schedule_timing=10,
             schedule_unit='d'
         )
-        db.session.add(self.test_task2)
+        DBSession.add(self.test_task2)
 
         self.test_task3 = Task(
             name='Project Planing',
@@ -244,7 +240,7 @@ class StudioTester(unittest2.TestCase):
             schedule_timing=5,
             schedule_unit='d'
         )
-        db.session.add(self.test_task3)
+        DBSession.add(self.test_task3)
 
         # for shots
 
@@ -257,7 +253,7 @@ class StudioTester(unittest2.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        db.session.add(self.test_task4)
+        DBSession.add(self.test_task4)
 
         self.test_task5 = Task(
             name='FX',
@@ -268,7 +264,7 @@ class StudioTester(unittest2.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        db.session.add(self.test_task5)
+        DBSession.add(self.test_task5)
 
         self.test_task6 = Task(
             name='Lighting',
@@ -279,7 +275,7 @@ class StudioTester(unittest2.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        db.session.add(self.test_task6)
+        DBSession.add(self.test_task6)
 
         self.test_task7 = Task(
             name='Comp',
@@ -290,7 +286,7 @@ class StudioTester(unittest2.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        db.session.add(self.test_task7)
+        DBSession.add(self.test_task7)
 
         # Shot 2
         self.test_task8 = Task(
@@ -301,7 +297,7 @@ class StudioTester(unittest2.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        db.session.add(self.test_task8)
+        DBSession.add(self.test_task8)
 
         self.test_task9 = Task(
             name='FX',
@@ -312,7 +308,7 @@ class StudioTester(unittest2.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        db.session.add(self.test_task9)
+        DBSession.add(self.test_task9)
 
         self.test_task10 = Task(
             name='Lighting',
@@ -323,7 +319,7 @@ class StudioTester(unittest2.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        db.session.add(self.test_task10)
+        DBSession.add(self.test_task10)
 
         self.test_task11 = Task(
             name='Comp',
@@ -334,7 +330,7 @@ class StudioTester(unittest2.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        db.session.add(self.test_task11)
+        DBSession.add(self.test_task11)
 
         # Shot 3
         self.test_task12 = Task(
@@ -345,7 +341,7 @@ class StudioTester(unittest2.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        db.session.add(self.test_task12)
+        DBSession.add(self.test_task12)
 
         self.test_task13 = Task(
             name='FX',
@@ -356,7 +352,7 @@ class StudioTester(unittest2.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        db.session.add(self.test_task13)
+        DBSession.add(self.test_task13)
 
         self.test_task14 = Task(
             name='Lighting',
@@ -367,7 +363,7 @@ class StudioTester(unittest2.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        db.session.add(self.test_task14)
+        DBSession.add(self.test_task14)
 
         self.test_task15 = Task(
             name='Comp',
@@ -378,7 +374,7 @@ class StudioTester(unittest2.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        db.session.add(self.test_task15)
+        DBSession.add(self.test_task15)
 
         # Shot 4
         self.test_task16 = Task(
@@ -389,7 +385,7 @@ class StudioTester(unittest2.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        db.session.add(self.test_task16)
+        DBSession.add(self.test_task16)
 
         self.test_task17 = Task(
             name='FX',
@@ -400,7 +396,7 @@ class StudioTester(unittest2.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        db.session.add(self.test_task17)
+        DBSession.add(self.test_task17)
 
         self.test_task18 = Task(
             name='Lighting',
@@ -411,7 +407,7 @@ class StudioTester(unittest2.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        db.session.add(self.test_task18)
+        DBSession.add(self.test_task18)
 
         self.test_task19 = Task(
             name='Comp',
@@ -422,7 +418,7 @@ class StudioTester(unittest2.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        db.session.add(self.test_task19)
+        DBSession.add(self.test_task19)
 
         # Shot 5
         self.test_task20 = Task(
@@ -433,7 +429,7 @@ class StudioTester(unittest2.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        db.session.add(self.test_task20)
+        DBSession.add(self.test_task20)
 
         self.test_task21 = Task(
             name='FX',
@@ -444,7 +440,7 @@ class StudioTester(unittest2.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        db.session.add(self.test_task21)
+        DBSession.add(self.test_task21)
 
         self.test_task22 = Task(
             name='Lighting',
@@ -455,7 +451,7 @@ class StudioTester(unittest2.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        db.session.add(self.test_task22)
+        DBSession.add(self.test_task22)
 
         self.test_task23 = Task(
             name='Comp',
@@ -466,7 +462,7 @@ class StudioTester(unittest2.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        db.session.add(self.test_task23)
+        DBSession.add(self.test_task23)
 
         ####################################################3
         # For Assets
@@ -480,7 +476,7 @@ class StudioTester(unittest2.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        db.session.add(self.test_task24)
+        DBSession.add(self.test_task24)
 
         self.test_task25 = Task(
             name='Model',
@@ -491,7 +487,7 @@ class StudioTester(unittest2.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        db.session.add(self.test_task25)
+        DBSession.add(self.test_task25)
 
         self.test_task26 = Task(
             name='LookDev',
@@ -502,7 +498,7 @@ class StudioTester(unittest2.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        db.session.add(self.test_task26)
+        DBSession.add(self.test_task26)
 
         self.test_task27 = Task(
             name='Rig',
@@ -513,7 +509,7 @@ class StudioTester(unittest2.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        db.session.add(self.test_task27)
+        DBSession.add(self.test_task27)
 
         # Asset 2
         self.test_task28 = Task(
@@ -524,7 +520,7 @@ class StudioTester(unittest2.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        db.session.add(self.test_task28)
+        DBSession.add(self.test_task28)
 
         self.test_task29 = Task(
             name='Model',
@@ -535,7 +531,7 @@ class StudioTester(unittest2.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        db.session.add(self.test_task29)
+        DBSession.add(self.test_task29)
 
         self.test_task30 = Task(
             name='LookDev',
@@ -546,7 +542,7 @@ class StudioTester(unittest2.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        db.session.add(self.test_task30)
+        DBSession.add(self.test_task30)
 
         self.test_task31 = Task(
             name='Rig',
@@ -557,7 +553,7 @@ class StudioTester(unittest2.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        db.session.add(self.test_task31)
+        DBSession.add(self.test_task31)
 
         # TODO: Add Milestones
 
@@ -568,14 +564,13 @@ class StudioTester(unittest2.TestCase):
         )
 
         self.test_studio = Studio(**self.kwargs)
-        db.session.add(self.test_studio)
-        db.session.commit()
+        DBSession.add(self.test_studio)
+        DBSession.commit()
 
     def tearDown(self):
         """clean up the test
         """
-        if db.session:
-            db.session.close()
+        DBSession.remove()
 
     def test_working_hours_argument_is_skipped(self):
         """testing if the default working hours will be used when the
@@ -1305,8 +1300,8 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             start=datetime.datetime(2013, 8, 11),
             end=datetime.datetime(2013, 8, 20)
         )
-        db.session.add_all([vacation1, vacation2, vacation3])
-        db.session.commit()
+        DBSession.add_all([vacation1, vacation2, vacation3])
+        DBSession.commit()
 
         self.assertItemsEqual(
             self.test_studio.vacations,
@@ -1345,8 +1340,8 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
     #         name='Test Studio',
     #         timing_resolution=datetime.timedelta(minutes=15)
     #     )
-    #     db.session.add(studio)
-    #     db.session.commit()
+    #     DBSession.add(studio)
+    #     DBSession.commit()
     # 
     #     new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
     #     self.assertEqual(
@@ -1379,8 +1374,8 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
     #         name='Test Studio',
     #         timing_resolution=datetime.timedelta(minutes=15)
     #     )
-    #     db.session.add(studio)
-    #     db.session.commit()
+    #     DBSession.add(studio)
+    #     DBSession.commit()
     # 
     #     new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
     #     self.assertEqual(

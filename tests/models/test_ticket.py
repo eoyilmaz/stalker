@@ -20,9 +20,9 @@
 
 import unittest2
 
-from stalker import db, TicketLog
-from stalker import (Asset, User, Note, Project, Repository, Status,
-                     StatusList, Task, Ticket, Type, Version)
+from stalker.db.session import DBSession
+from stalker import (db, TicketLog, Asset, User, Note, Project, Repository,
+                     Status, StatusList, Task, Ticket, Type, Version, defaults)
 
 from stalker import log
 import logging
@@ -39,10 +39,27 @@ class TicketTester(unittest2.TestCase):
         """set up the test
         """
         # create the db
-        if db.session:
-            db.session.close()
+        DBSession.remove()
         db.setup()
-        db.init()
+        # db.init()
+        # we just need statuses so create them instead of initializing the db
+        db.create_ticket_statuses()
+        db.create_entity_statuses(entity_type='Task',
+                                  status_names=defaults.task_status_names,
+                                  status_codes=defaults.task_status_codes)
+        db.create_entity_statuses(entity_type='Asset',
+                                  status_names=defaults.task_status_names,
+                                  status_codes=defaults.task_status_codes)
+        db.create_entity_statuses(entity_type='Shot',
+                                  status_names=defaults.task_status_names,
+                                  status_codes=defaults.task_status_codes)
+        db.create_entity_statuses(entity_type='Sequence',
+                                  status_names=defaults.task_status_names,
+                                  status_codes=defaults.task_status_codes)
+        db.create_entity_statuses(entity_type='Review',
+                                  status_names=defaults.review_status_names,
+                                  status_codes=defaults.review_status_codes)
+
 
         # create statuses
         self.test_status1 = Status(name='N', code='N')
@@ -149,8 +166,8 @@ class TicketTester(unittest2.TestCase):
         }
 
         self.test_ticket = Ticket(**self.kwargs)
-        db.session.add(self.test_ticket)
-        db.session.commit()
+        DBSession.add(self.test_ticket)
+        DBSession.commit()
 
         # get the Ticket Statuses
         self.status_new = Status.query.filter_by(name='New').first()
@@ -162,16 +179,13 @@ class TicketTester(unittest2.TestCase):
     def tearDown(self):
         """clean up the test
         """
-        if db.session:
-            db.session.close()
+        DBSession.remove()
 
     @classmethod
     def tearDownClass(cls):
         """clean up the test
         """
-        # revert the session back to the normal state
-        if db.session:
-            db.session.close()
+        DBSession.remove()
 
     def test___auto_name__class_attribute_is_set_to_True(self):
         """testing if the __auto_name__ class attribute is set to True for
@@ -222,43 +236,43 @@ class TicketTester(unittest2.TestCase):
         )
 
         p1_t1 = Ticket(project=proj1)
-        db.session.add(p1_t1)
-        db.session.commit()
+        DBSession.add(p1_t1)
+        DBSession.commit()
         self.assertEqual(p1_t1.number, 2)
 
         p1_t2 = Ticket(project=proj1)
-        db.session.add(p1_t2)
-        db.session.commit()
+        DBSession.add(p1_t2)
+        DBSession.commit()
         self.assertEqual(p1_t2.number, 3)
 
         p2_t1 = Ticket(project=proj2)
-        db.session.add(p2_t1)
-        db.session.commit()
+        DBSession.add(p2_t1)
+        DBSession.commit()
         self.assertEqual(p2_t1.number, 4)
 
         p1_t3 = Ticket(project=proj1)
-        db.session.add(p1_t3)
-        db.session.commit()
+        DBSession.add(p1_t3)
+        DBSession.commit()
         self.assertEqual(p1_t3.number, 5)
 
         p3_t1 = Ticket(project=proj3)
-        db.session.add(p3_t1)
-        db.session.commit()
+        DBSession.add(p3_t1)
+        DBSession.commit()
         self.assertEqual(p3_t1.number, 6)
 
         p2_t2 = Ticket(project=proj2)
-        db.session.add(p2_t2)
-        db.session.commit()
+        DBSession.add(p2_t2)
+        DBSession.commit()
         self.assertEqual(p2_t2.number, 7)
 
         p3_t2 = Ticket(project=proj3)
-        db.session.add(p3_t2)
-        db.session.commit()
+        DBSession.add(p3_t2)
+        DBSession.commit()
         self.assertEqual(p3_t2.number, 8)
 
         p2_t3 = Ticket(project=proj2)
-        db.session.add(p2_t3)
-        db.session.commit()
+        DBSession.add(p2_t3)
+        DBSession.commit()
         self.assertEqual(p2_t3.number, 9)
 
     def test_number_attribute_is_read_only(self):
@@ -272,12 +286,12 @@ class TicketTester(unittest2.TestCase):
         """
         # create two new tickets
         ticket1 = Ticket(**self.kwargs)
-        db.session.add(ticket1)
-        db.session.commit()
+        DBSession.add(ticket1)
+        DBSession.commit()
 
         ticket2 = Ticket(**self.kwargs)
-        db.session.add(ticket2)
-        db.session.commit()
+        DBSession.add(ticket2)
+        DBSession.commit()
 
         self.assertEqual(ticket1.number + 1, ticket2.number)
         self.assertEqual(ticket1.number, 2)

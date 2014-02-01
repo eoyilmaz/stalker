@@ -21,7 +21,7 @@
 from sqlalchemy import Column, Integer, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship, validates, synonym
 
-from stalker import db
+from stalker.db.session import DBSession
 from stalker.models.status import Status
 from stalker.models.entity import SimpleEntity
 from stalker.models.mixins import ScheduleMixin, StatusMixin
@@ -129,7 +129,7 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
         self.reviewer = reviewer
 
         # set the status to NEW
-        with db.session.no_autoflush:
+        with DBSession.no_autoflush:
             NEW = Status.query.filter_by(code='NEW').first()
         self.status = NEW
 
@@ -190,8 +190,8 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
         reviews = []
         logger.debug('finding revisions with the same review_number of: %s' %
                      self.review_number)
-        with db.session.no_autoflush:
-            # if self in db.session:
+        with DBSession.no_autoflush:
+            # if self in DBSession:
             #     logger.debug('using SQLAlchemy to get review set')
             #     reviews = Review.query\
             #         .filter_by(task=self.task)\
@@ -223,7 +223,7 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
         self.description = description
 
         # set self status to RREV
-        with db.session.no_autoflush:
+        with DBSession.no_autoflush:
             RREV = Status.query.filter_by(code='RREV').first()
 
             # set self status to RREV
@@ -236,7 +236,7 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
         """Finalizes the review by approving the task
         """
         # set self status to APP
-        with db.session.no_autoflush:
+        with DBSession.no_autoflush:
             APP = Status.query.filter_by(code='APP').first()
             self.status = APP
 
@@ -246,7 +246,7 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
     def finalize_review_set(self):
         """finalizes the current review set Review decisions
         """
-        with db.session.no_autoflush:
+        with DBSession.no_autoflush:
             HREV = Status.query.filter_by(code='HREV').first()
             CMPL = Status.query.filter_by(code='CMPL').first()
 

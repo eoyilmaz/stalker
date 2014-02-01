@@ -22,7 +22,7 @@ import unittest2
 import datetime
 
 from sqlalchemy import Column, Integer, ForeignKey
-from stalker import db
+from stalker.db.session import DBSession
 from stalker.models.mixins import DateRangeMixin
 from stalker.models.entity import SimpleEntity
 
@@ -67,9 +67,8 @@ class ScheduleMixinTester(unittest2.TestCase):
     def tearDown(self):
         """clean up the test
         """
-        if db.session:
-            #db.session.remove()
-            db.session.close()
+        DBSession.remove()
+        # DBSession.close()
 
     def test_mixin_setup_is_working_properly(self):
         """testing if the mixin setup is working properly

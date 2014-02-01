@@ -21,6 +21,7 @@
 import datetime
 import tempfile
 import unittest2
+from stalker.db import DBSession
 from stalker import (db, User, Status, StatusList, Repository, Project, Task,
                      Type, TimeLog)
 from stalker.exceptions import StatusError
@@ -43,7 +44,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
             email='tuser1@test.com',
             password='secret'
         )
-        db.session.add(self.test_user1)
+        DBSession.add(self.test_user1)
 
         self.test_user2 = User(
             name='Test User 2',
@@ -51,7 +52,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
             email='tuser2@test.com',
             password='secret'
         )
-        db.session.add(self.test_user2)
+        DBSession.add(self.test_user2)
 
         # create a couple of tasks
         self.status_wfd = Status.query.filter_by(code='WFD').first()
@@ -70,11 +71,11 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
             statuses=[self.status_wfd, self.status_wip,
                       self.status_cmpl]
         )
-        db.session.add(self.test_project_status_list)
+        DBSession.add(self.test_project_status_list)
 
         self.test_task_statuses = StatusList.query\
             .filter_by(target_entity_type='Task').first()
-        db.session.add(self.test_task_statuses)
+        DBSession.add(self.test_task_statuses)
 
         # repository
         tempdir = tempfile.gettempdir()
@@ -84,7 +85,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
             windows_path=tempdir,
             osx_path=tempdir
         )
-        db.session.add(self.test_repo)
+        DBSession.add(self.test_repo)
 
         # proj1
         self.test_project1 = Project(
@@ -96,7 +97,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
             end=datetime.datetime(2013, 6, 30, 0, 0, 0),
             lead=self.test_user1
         )
-        db.session.add(self.test_project1)
+        DBSession.add(self.test_project1)
 
         # root tasks
         self.test_task1 = Task(
@@ -109,7 +110,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
             schedule_unit='d',
             schedule_model='effort',
         )
-        db.session.add(self.test_task1)
+        DBSession.add(self.test_task1)
 
         self.test_task2 = Task(
             name='Test Task 2',
@@ -121,7 +122,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
             schedule_unit='d',
             schedule_model='effort',
         )
-        db.session.add(self.test_task2)
+        DBSession.add(self.test_task2)
 
         self.test_task3 = Task(
             name='Test Task 3',
@@ -135,7 +136,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
             schedule_unit='d',
             schedule_model='effort',
         )
-        db.session.add(self.test_task3)
+        DBSession.add(self.test_task3)
 
         # children tasks
 
@@ -153,7 +154,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
             schedule_unit='d',
             schedule_model='effort',
         )
-        db.session.add(self.test_task4)
+        DBSession.add(self.test_task4)
 
         self.test_task5 = Task(
             name='Test Task 5',
@@ -167,7 +168,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
             schedule_unit='d',
             schedule_model='effort',
         )
-        db.session.add(self.test_task5)
+        DBSession.add(self.test_task5)
 
         self.test_task6 = Task(
             name='Test Task 6',
@@ -180,7 +181,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
             schedule_unit='d',
             schedule_model='effort',
         )
-        db.session.add(self.test_task6)
+        DBSession.add(self.test_task6)
 
         # children of self.test_task2
         self.test_task7 = Task(
@@ -194,7 +195,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
             schedule_unit='d',
             schedule_model='effort',
         )
-        db.session.add(self.test_task7)
+        DBSession.add(self.test_task7)
 
         self.test_task8 = Task(
             name='Test Task 8',
@@ -207,11 +208,11 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
             schedule_unit='d',
             schedule_model='effort',
         )
-        db.session.add(self.test_task8)
+        DBSession.add(self.test_task8)
 
         self.test_asset_status_list = StatusList.query\
             .filter_by(target_entity_type='Asset').first()
-        db.session.add(self.test_asset_status_list)
+        DBSession.add(self.test_asset_status_list)
 
         # create an asset in between
         from stalker import Asset
@@ -226,7 +227,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
             ),
             status_list=self.test_asset_status_list
         )
-        db.session.add(self.test_asset1)
+        DBSession.add(self.test_asset1)
 
         # new task under asset
         self.test_task9 = Task(
@@ -240,9 +241,8 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
             schedule_unit='d',
             schedule_model='effort',
         )
-        db.session.add(self.test_task9)
-        #db.session.flush()
-        db.session.commit()
+        DBSession.add(self.test_task9)
+        DBSession.commit()
 
         # --------------
         # Task Hierarchy
@@ -844,7 +844,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.test_task1.status = self.status_cmpl
         self.assertEqual(self.test_task1.status, self.status_cmpl)
         # create dependency
-        with db.session.no_autoflush:
+        with DBSession.no_autoflush:
             self.assertRaises(
                 StatusError, self.test_task1.depends.append, self.test_task8
             )

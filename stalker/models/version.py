@@ -269,8 +269,8 @@ class Version(Link):
         # get the latest version
         # and do it with auto flush turned off,
         # or it will find itself and increase the version number unnecessarily
-        from stalker import db
-        with db.session.no_autoflush:
+        from stalker.db.session import DBSession
+        with DBSession.no_autoflush:
             latest_version = self.latest_version
 
         max_version_number = 0

@@ -175,8 +175,8 @@ class Permission(Base):
       group1.permissions.append(permission)
 
       # and persist this information in the database
-      db.session.add(group)
-      db.session.commit()
+      DBSession.add(group)
+      DBSession.commit()
     """
     __tablename__ = 'Permissions'
     __table_args__ = (

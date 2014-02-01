@@ -25,6 +25,7 @@ from sqlalchemy import Column, Integer, ForeignKey
 
 from stalker import db
 from stalker import defaults
+from stalker.db.session import DBSession
 from stalker.models.entity import SimpleEntity
 from stalker.models.mixins import DateRangeMixin
 
@@ -75,9 +76,7 @@ class DateRangeMixinTester(unittest2.TestCase):
     def tearDown(self):
         """clean up the test
         """
-        if db.session:
-            #db.session.remove()
-            db.session.close()
+        DBSession.remove()
         # restore defaults.timing_resolution
         defaults.timing_resolution = datetime.timedelta(hours=1)
 
@@ -515,8 +514,8 @@ class DateRangeMixinTester(unittest2.TestCase):
             name='Test Studio',
             timing_resolution=datetime.timedelta(minutes=5)
         )
-        db.session.add(studio)
-        db.session.commit()
+        DBSession.add(studio)
+        DBSession.commit()
         self.kwargs['start'] = datetime.datetime(2013, 3, 22, 2, 38, 55, 531)
         self.kwargs['end'] = datetime.datetime(2013, 3, 24, 16, 46, 32, 102)
 

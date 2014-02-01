@@ -21,7 +21,7 @@
 import unittest2
 
 from sqlalchemy import Column, Integer, ForeignKey
-from stalker import db
+from stalker.db.session import DBSession
 from stalker import (SimpleEntity, ProjectMixin, Status, StatusList, Type,
                      Project, Repository)
 
@@ -107,9 +107,7 @@ class ProjectMixinTester(unittest2.TestCase):
     def tearDown(self):
         """clean up the test
         """
-        if db.session:
-            #db.session.remove()
-            db.session.close()
+        DBSession.remove()
 
     def test_project_argument_is_skipped(self):
         """testing if a TypeError will be raised when the project argument is
@@ -151,13 +149,3 @@ class ProjectMixinTester(unittest2.TestCase):
         """
         self.test_foo_obj.project = self.test_project2
         self.assertEqual(self.test_foo_obj.project, self.test_project2)
-
-
-
-        #
-        #def test_project_attribute_is_read_only(self):
-        #"""testing if the project attribute is read only
-        #"""
-
-        #self.assertRaises(AttributeError, setattr, self.test_foo_obj,
-        #"project", self.test_project2)

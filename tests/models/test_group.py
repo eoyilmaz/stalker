@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import unittest2
-from stalker import db
+from stalker.db import DBSession
 from stalker.models.auth import User, Group
 
 
@@ -31,17 +31,13 @@ class GroupTester(unittest2.TestCase):
     def setUpClass(cls):
         """sets the test in class level
         """
-        if db.session:
-            #db.session.remove()
-            db.session.close()
+        DBSession.remove()
 
     @classmethod
     def tearDownClass(cls):
         """clear the test in class level
         """
-        if db.session:
-            #db.session.remove()
-            db.session.close()
+        DBSession.remove()
 
     def setUp(self):
         """set up the test in method level

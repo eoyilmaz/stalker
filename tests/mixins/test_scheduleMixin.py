@@ -58,10 +58,8 @@ class ScheduleMixinTestCase(unittest2.TestCase):
         self.test_obj = MixedInClass(**self.kwargs)
 
     def tearDown(self):
-        from stalker import db
-        if db.session:
-            #db.session.remove()
-            db.session.close()
+        from stalker.db.session import DBSession
+        DBSession.remove()
 
     def test_schedule_model_attribute_is_effort_by_default(self):
         """testing if the schedule_model is effort by default

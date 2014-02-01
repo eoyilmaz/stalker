@@ -21,10 +21,11 @@
 import datetime
 import unittest2
 
-from stalker import db, log
-from stalker import (Asset, Entity, ImageFormat, Link, Project, Repository,
+from stalker import log
+from stalker.db.session import DBSession
+from stalker import (db, Asset, Entity, ImageFormat, Link, Project, Repository,
                      Sequence, Shot, Status, StatusList, Structure, Task, Type,
-                     User, db, Ticket)
+                     User, Ticket)
 import logging
 
 logger = logging.getLogger('stalker.models.project')
@@ -39,21 +40,18 @@ class ProjectTestCase(unittest2.TestCase):
     def setUpClass(cls):
         """set up the test for class
         """
-        if db.session:
-            db.session.close()
+        DBSession.remove()
 
     @classmethod
     def tearDownClass(cls):
         """clean up the test
         """
-        if db.session:
-            db.session.close()
+        DBSession.remove()
 
     def tearDown(self):
         """tearDown the tests
         """
-        if db.session:
-            db.session.close()
+        DBSession.remove()
 
     def setUp(self):
         """setup the test
@@ -683,8 +681,8 @@ class ProjectTestCase(unittest2.TestCase):
         # test_task2
         # test_task3
 
-        db.session.add(self.test_project)
-        db.session.commit()
+        DBSession.add(self.test_project)
+        DBSession.commit()
 
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for
@@ -1823,21 +1821,18 @@ class ProjectTicketsTestCase(unittest2.TestCase):
     def setUpClass(cls):
         """set up the test for class
         """
-        if db.session:
-            db.session.close()
+        DBSession.remove()
 
     @classmethod
     def tearDownClass(cls):
         """clean up the test
         """
-        if db.session:
-            db.session.close()
+        DBSession.remove()
 
     def tearDown(self):
         """tearDown the tests
         """
-        if db.session:
-            db.session.close()
+        DBSession.remove()
 
     def setUp(self):
         """setup the test
@@ -2023,7 +2018,7 @@ class ProjectTicketsTestCase(unittest2.TestCase):
         self.test_ticket1 = Ticket(
             project=self.test_project
         )
-        db.session.add(self.test_ticket1)
+        DBSession.add(self.test_ticket1)
         # set it to closed
         self.test_ticket1.resolve()
 
@@ -2031,13 +2026,13 @@ class ProjectTicketsTestCase(unittest2.TestCase):
         self.test_ticket2 = Ticket(
             project=self.test_project
         )
-        db.session.add(self.test_ticket2)
+        DBSession.add(self.test_ticket2)
 
         # create a new ticket and close and then reopen it
         self.test_ticket3 = Ticket(
             project=self.test_project
         )
-        db.session.add(self.test_ticket3)
+        DBSession.add(self.test_ticket3)
         self.test_ticket3.resolve()
         self.test_ticket3.reopen()
 
@@ -2047,20 +2042,20 @@ class ProjectTicketsTestCase(unittest2.TestCase):
         self.test_ticket4 = Ticket(
             project=self.test_project
         )
-        db.session.add(self.test_ticket4)
+        DBSession.add(self.test_ticket4)
 
         # create a new Ticket and close it
         self.test_ticket5 = Ticket(
             project=self.test_project
         )
-        db.session.add(self.test_ticket5)
+        DBSession.add(self.test_ticket5)
         self.test_ticket5.resolve()
 
         # create a new Ticket and close it
         self.test_ticket6 = Ticket(
             project=self.test_project
         )
-        db.session.add(self.test_ticket6)
+        DBSession.add(self.test_ticket6)
         self.test_ticket6.resolve()
 
         # *********************************************************************
@@ -2069,14 +2064,14 @@ class ProjectTicketsTestCase(unittest2.TestCase):
         self.test_ticket7 = Ticket(
             project=self.test_project
         )
-        db.session.add(self.test_ticket7)
+        DBSession.add(self.test_ticket7)
         self.test_ticket7.resolve()
 
         # create a new ticket and close it
         self.test_ticket8 = Ticket(
             project=self.test_project
         )
-        db.session.add(self.test_ticket8)
+        DBSession.add(self.test_ticket8)
         self.test_ticket8.resolve()
 
         # *********************************************************************
@@ -2085,14 +2080,14 @@ class ProjectTicketsTestCase(unittest2.TestCase):
         self.test_ticket9 = Ticket(
             project=self.test_project
         )
-        db.session.add(self.test_ticket9)
+        DBSession.add(self.test_ticket9)
 
         self.test_ticket9.resolve()
 
         # *********************************************************************
 
-        db.session.add(self.test_project)
-        db.session.commit()
+        DBSession.add(self.test_project)
+        DBSession.commit()
 
     def test_tickets_attribute_is_an_empty_list_by_default(self):
         """testing if the Project.tickets is an empty list by default

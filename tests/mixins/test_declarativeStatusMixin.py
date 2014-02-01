@@ -21,7 +21,7 @@
 import unittest2
 
 from sqlalchemy import Column, Integer, ForeignKey
-from stalker import db
+from stalker.db.session import DBSession
 from stalker.models.mixins import StatusMixin
 from stalker.models.status import StatusList, Status
 
@@ -47,7 +47,7 @@ class DeclStatMixB(SimpleEntity, StatusMixin):
                   primary_key=True)
 
     def __init__(self, **kwargs):
-        super(B, self).__init__(**kwargs)
+        super(DeclStatMixB, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)
 
 
@@ -82,9 +82,7 @@ class StatusMixinTester(unittest2.TestCase):
     def tearDown(self):
         """clean up the test
         """
-        if db.session:
-            #db.session.remove()
-            db.session.close()
+        DBSession.remove()
 
     def test_status_list_argument_not_set(self):
         """testing if a TypeError will be raised when the status_list argument
@@ -103,7 +101,6 @@ class StatusMixinTester(unittest2.TestCase):
     def test_status_list_working_properly(self):
         """testing if the status_list attribute is working properly
         """
-
         new_a_ins = DeclStatMixA(
             name="Ozgur",
             status_list=self.test_a_statusList

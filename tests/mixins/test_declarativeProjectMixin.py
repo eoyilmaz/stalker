@@ -20,7 +20,7 @@
 
 import unittest2
 from sqlalchemy import Column, Integer, ForeignKey
-from stalker import db
+from stalker.db.session import DBSession
 from stalker.models.project import Project
 from stalker.models.type import Type
 from stalker.models.status import Status, StatusList
@@ -111,9 +111,7 @@ class ProjectMixinTester(unittest2.TestCase):
     def tearDown(self):
         """clean up the test
         """
-        if db.session:
-            #db.session.remove()
-            db.session.close()
+        DBSession.remove()
 
     def test_project_attribute_is_working_properly(self):
         """testing if the project attribute is working properly

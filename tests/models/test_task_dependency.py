@@ -20,6 +20,8 @@
 
 from sqlalchemy.exc import IntegrityError
 import unittest2
+
+from stalker.db import DBSession
 from stalker import (db, Status, User, Repository, Structure, StatusList,
                      Project, Task, TaskDependency, defaults)
 
@@ -113,12 +115,12 @@ class TaskDependencyTestCase(unittest2.TestCase):
         )
 
         # add everything to db
-        db.session.add_all([
+        DBSession.add_all([
             self.test_project1, self.test_project_status_list, self.test_repo,
             self.test_structure, self.test_task1, self.test_task2,
             self.test_task3, self.test_user1, self.test_user2
         ])
-        db.session.commit()
+        DBSession.commit()
 
         self.kwargs = {
             'task': self.test_task1,
@@ -141,8 +143,8 @@ class TaskDependencyTestCase(unittest2.TestCase):
         """
         self.kwargs.pop('task')
         new_dependency = TaskDependency(**self.kwargs)
-        db.session.add(new_dependency)
-        self.assertRaises(IntegrityError, db.session.commit)
+        DBSession.add(new_dependency)
+        self.assertRaises(IntegrityError, DBSession.commit)
 
     def test_task_argument_is_not_a_task_instance(self):
         """testing if a TypeError will be raised when the task argument value
@@ -179,8 +181,8 @@ class TaskDependencyTestCase(unittest2.TestCase):
         """
         self.kwargs.pop('depends_to')
         new_dependency = TaskDependency(**self.kwargs)
-        db.session.add(new_dependency)
-        self.assertRaises(IntegrityError, db.session.commit)
+        DBSession.add(new_dependency)
+        self.assertRaises(IntegrityError, DBSession.commit)
 
     def test_depends_to_argument_is_not_a_task_instance(self):
         """testing if a TypeError will be raised when the depends_to argument

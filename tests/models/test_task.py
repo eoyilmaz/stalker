@@ -24,10 +24,9 @@ import logging
 import unittest2
 
 from stalker.exceptions import CircularDependencyError
-from stalker import db
-from stalker import defaults
-from stalker import (Entity, Project, Repository, StatusList, Status, Task,
-                     Type, User, TimeLog)
+from stalker.db import DBSession
+from stalker import (db, defaults, Entity, Project, Repository, StatusList,
+                     Status, Task, Type, User, TimeLog)
 from stalker.models.task import CONSTRAIN_END, CONSTRAIN_BOTH
 
 logger = logging.getLogger(__name__)
@@ -179,8 +178,7 @@ class TaskTester(unittest2.TestCase):
     def tearDown(self):
         """run after every test and clean up
         """
-        if db.session:
-            db.session.close()
+        DBSession.remove()
         defaults.timing_resolution = datetime.timedelta(hours=1)
 
     def test___auto_name__class_attribute_is_set_to_False(self):
@@ -1847,14 +1845,14 @@ class TaskTester(unittest2.TestCase):
         """testing if the time_log attribute is working properly
         """
         # add everything to the db just for this test
-        db.session.add_all([
+        DBSession.add_all([
             self.test_project_status_list, self.test_movie_project_type,
             self.test_repository_type, self.test_repository, self.test_user1,
             self.test_user2, self.test_user3, self.test_project1,
             self.test_dependent_task1, self.test_dependent_task2,
             self.test_task
         ])
-        db.session.commit()
+        DBSession.commit()
 
         self.kwargs['depends'] = []
         self.test_task.depends = []
@@ -1896,8 +1894,8 @@ class TaskTester(unittest2.TestCase):
 
         logger.debug('new_task.id : %s' % new_task.id)
 
-        db.session.add_all([new_time_log1, new_time_log2, new_time_log3])
-        db.session.commit()
+        DBSession.add_all([new_time_log1, new_time_log2, new_time_log3])
+        DBSession.commit()
 
         # check if everything is in place
         self.assertIn(new_time_log1, self.test_task.time_logs)
@@ -1913,7 +1911,7 @@ class TaskTester(unittest2.TestCase):
         # there needs to be a database session commit to remove the time_log
         # from the previous tasks time_logs attribute
 
-        db.session.commit()
+        DBSession.commit()
 
         self.assertIn(new_time_log3, self.test_task.time_logs)
         self.assertNotIn(new_time_log3, new_task.time_logs)
@@ -2900,8 +2898,8 @@ class TaskTester(unittest2.TestCase):
         task3.parent = task1
 
         # we need to commit the Session
-        db.session.add_all([task1, task2, task3])
-        db.session.commit()
+        DBSession.add_all([task1, task2, task3])
+        DBSession.commit()
 
         self.assertTrue(task2.is_leaf)
         self.assertTrue(task3.is_leaf)
@@ -2931,8 +2929,8 @@ class TaskTester(unittest2.TestCase):
         task3.parent = task1
 
         # we need to commit the Session
-        db.session.add_all([task1, task2, task3])
-        db.session.commit()
+        DBSession.add_all([task1, task2, task3])
+        DBSession.commit()
 
         self.assertFalse(task2.is_root)
         self.assertFalse(task3.is_root)
@@ -2960,13 +2958,13 @@ class TaskTester(unittest2.TestCase):
         task3 = Task(**self.kwargs)
 
         # we need to commit the Session
-        db.session.add_all([task1, task2, task3])
-        db.session.commit()
+        DBSession.add_all([task1, task2, task3])
+        DBSession.commit()
 
         task2.parent = task1
         task3.parent = task1
 
-        db.session.commit()
+        DBSession.commit()
 
         self.assertFalse(task2.is_container)
         self.assertFalse(task3.is_container)
@@ -3251,12 +3249,12 @@ class TaskTester(unittest2.TestCase):
             status_list=self.task_status_list
         )
 
-        db.session.add_all([task1, task2, task3, task4])
-        db.session.commit()
+        DBSession.add_all([task1, task2, task3, task4])
+        DBSession.commit()
 
         # move task4 dependency to task2
         task4.depends = [task2]
-        db.session.commit()
+        DBSession.commit()
 
     def test_parent_attribute_checks_cycle_on_self(self):
         """Bug ID: None
@@ -4275,23 +4273,23 @@ task Task_5679 "Modeling" {
             project=self.test_task.project,
             links=[self.test_task]
         )
-        db.session.add(new_ticket1)
-        db.session.commit()
+        DBSession.add(new_ticket1)
+        DBSession.commit()
 
         new_ticket2 = Ticket(
             project=self.test_task.project,
             links=[self.test_task]
         )
-        db.session.add(new_ticket2)
-        db.session.commit()
+        DBSession.add(new_ticket2)
+        DBSession.commit()
 
         # add some other tickets
         new_ticket3 = Ticket(
             project=self.test_task.project,
             links=[]
         )
-        db.session.add(new_ticket3)
-        db.session.commit()
+        DBSession.add(new_ticket3)
+        DBSession.commit()
 
         self.assertItemsEqual(
             self.test_task.tickets,
@@ -4315,27 +4313,27 @@ task Task_5679 "Modeling" {
             project=self.test_task.project,
             links=[self.test_task]
         )
-        db.session.add(new_ticket1)
-        db.session.commit()
+        DBSession.add(new_ticket1)
+        DBSession.commit()
 
         new_ticket2 = Ticket(
             project=self.test_task.project,
             links=[self.test_task]
         )
-        db.session.add(new_ticket2)
-        db.session.commit()
+        DBSession.add(new_ticket2)
+        DBSession.commit()
 
         # close this ticket
         new_ticket2.resolve(None, 'fixed')
-        db.session.commit()
+        DBSession.commit()
 
         # add some other tickets
         new_ticket3 = Ticket(
             project=self.test_task.project,
             links=[]
         )
-        db.session.add(new_ticket3)
-        db.session.commit()
+        DBSession.add(new_ticket3)
+        DBSession.commit()
 
         self.assertItemsEqual(
             self.test_task.open_tickets,
