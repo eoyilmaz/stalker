@@ -218,6 +218,7 @@ class StudioTester(unittest2.TestCase):
             name='Project Planing',
             project=self.test_project1,
             resources=[self.test_user1],
+            alternative_resources=[self.test_user2, self.test_user3],
             schedule_timing=10,
             schedule_unit='d'
         )
@@ -227,6 +228,7 @@ class StudioTester(unittest2.TestCase):
             name='Project Planing',
             project=self.test_project2,
             resources=[self.test_user1],
+            alternative_resources=[self.test_user2, self.test_user3],
             schedule_timing=10,
             schedule_unit='d'
         )
@@ -236,6 +238,7 @@ class StudioTester(unittest2.TestCase):
             name='Project Planing',
             project=self.test_project3,
             resources=[self.test_user1],
+            alternative_resources=[self.test_user2, self.test_user3],
             status_list=self.test_task_statuses,
             schedule_timing=5,
             schedule_unit='d'
@@ -249,6 +252,7 @@ class StudioTester(unittest2.TestCase):
             name='Match Move',
             parent=self.test_shot1,
             resources=[self.test_user1],
+            alternative_resources=[self.test_user2, self.test_user3],
             schedule_timing=2,
             schedule_unit='d',
             status_list=self.test_task_statuses
@@ -259,6 +263,7 @@ class StudioTester(unittest2.TestCase):
             name='FX',
             parent=self.test_shot1,
             resources=[self.test_user2],
+            alternative_resources=[self.test_user1, self.test_user3],
             depends=[self.test_task4],
             schedule_timing=2,
             schedule_unit='d',
@@ -270,6 +275,7 @@ class StudioTester(unittest2.TestCase):
             name='Lighting',
             parent=self.test_shot1,
             resources=[self.test_user2],
+            alternative_resources=[self.test_user1, self.test_user3],
             depends=[self.test_task4, self.test_task5],
             schedule_timing=3,
             schedule_unit='d',
@@ -281,6 +287,7 @@ class StudioTester(unittest2.TestCase):
             name='Comp',
             parent=self.test_shot1,
             resources=[self.test_user2],
+            alternative_resources=[self.test_user1, self.test_user3],
             depends=[self.test_task6],
             schedule_timing=3,
             schedule_unit='d',
@@ -293,6 +300,7 @@ class StudioTester(unittest2.TestCase):
             name='Match Move',
             parent=self.test_shot2,
             resources=[self.test_user3],
+            alternative_resources=[self.test_user1, self.test_user2],
             schedule_timing=2,
             schedule_unit='d',
             status_list=self.test_task_statuses
@@ -303,6 +311,7 @@ class StudioTester(unittest2.TestCase):
             name='FX',
             parent=self.test_shot2,
             resources=[self.test_user3],
+            alternative_resources=[self.test_user1, self.test_user2],
             depends=[self.test_task8],
             schedule_timing=2,
             schedule_unit='d',
@@ -314,6 +323,7 @@ class StudioTester(unittest2.TestCase):
             name='Lighting',
             parent=self.test_shot2,
             resources=[self.test_user2],
+            alternative_resources=[self.test_user1, self.test_user3],
             depends=[self.test_task8, self.test_task9],
             schedule_timing=3,
             schedule_unit='d',
@@ -325,6 +335,7 @@ class StudioTester(unittest2.TestCase):
             name='Comp',
             parent=self.test_shot2,
             resources=[self.test_user2],
+            alternative_resources=[self.test_user1, self.test_user3],
             depends=[self.test_task10],
             schedule_timing=4,
             schedule_unit='d',
@@ -337,6 +348,7 @@ class StudioTester(unittest2.TestCase):
             name='Match Move',
             parent=self.test_shot3,
             resources=[self.test_user1],
+            alternative_resources=[self.test_user2, self.test_user3],
             schedule_timing=2,
             schedule_unit='d',
             status_list=self.test_task_statuses
@@ -347,6 +359,7 @@ class StudioTester(unittest2.TestCase):
             name='FX',
             parent=self.test_shot3,
             resources=[self.test_user1],
+            alternative_resources=[self.test_user2, self.test_user3],
             depends=[self.test_task12],
             schedule_timing=2,
             schedule_unit='d',
@@ -358,6 +371,7 @@ class StudioTester(unittest2.TestCase):
             name='Lighting',
             parent=self.test_shot3,
             resources=[self.test_user1],
+            alternative_resources=[self.test_user2, self.test_user3],
             depends=[self.test_task12, self.test_task13],
             schedule_timing=3,
             schedule_unit='d',
@@ -369,6 +383,7 @@ class StudioTester(unittest2.TestCase):
             name='Comp',
             parent=self.test_shot3,
             resources=[self.test_user1],
+            alternative_resources=[self.test_user2, self.test_user3],
             depends=[self.test_task14],
             schedule_timing=4,
             schedule_unit='d',
@@ -381,6 +396,7 @@ class StudioTester(unittest2.TestCase):
             name='Match Move',
             parent=self.test_shot4,
             resources=[self.test_user2],
+            alternative_resources=[self.test_user1, self.test_user3],
             schedule_timing=2,
             schedule_unit='d',
             status_list=self.test_task_statuses
@@ -391,6 +407,7 @@ class StudioTester(unittest2.TestCase):
             name='FX',
             parent=self.test_shot4,
             resources=[self.test_user2],
+            alternative_resources=[self.test_user1, self.test_user3],
             depends=[self.test_task16],
             schedule_timing=2,
             schedule_unit='d',
@@ -402,6 +419,7 @@ class StudioTester(unittest2.TestCase):
             name='Lighting',
             parent=self.test_shot4,
             resources=[self.test_user2],
+            alternative_resources=[self.test_user1, self.test_user3],
             depends=[self.test_task16, self.test_task17],
             schedule_timing=3,
             schedule_unit='d',
@@ -413,6 +431,7 @@ class StudioTester(unittest2.TestCase):
             name='Comp',
             parent=self.test_shot4,
             resources=[self.test_user2],
+            alternative_resources=[self.test_user1, self.test_user3],
             depends=[self.test_task18],
             schedule_timing=4,
             schedule_unit='d',
@@ -425,6 +444,7 @@ class StudioTester(unittest2.TestCase):
             name='Match Move',
             parent=self.test_shot5,
             resources=[self.test_user3],
+            alternative_resources=[self.test_user1, self.test_user2],
             schedule_timing=2,
             schedule_unit='d',
             status_list=self.test_task_statuses
@@ -435,6 +455,7 @@ class StudioTester(unittest2.TestCase):
             name='FX',
             parent=self.test_shot5,
             resources=[self.test_user3],
+            alternative_resources=[self.test_user1, self.test_user2],
             depends=[self.test_task20],
             schedule_timing=2,
             schedule_unit='d',
@@ -446,6 +467,7 @@ class StudioTester(unittest2.TestCase):
             name='Lighting',
             parent=self.test_shot5,
             resources=[self.test_user3],
+            alternative_resources=[self.test_user1, self.test_user2],
             depends=[self.test_task20, self.test_task21],
             schedule_timing=3,
             schedule_unit='d',
@@ -457,6 +479,7 @@ class StudioTester(unittest2.TestCase):
             name='Comp',
             parent=self.test_shot5,
             resources=[self.test_user3],
+            alternative_resources=[self.test_user1, self.test_user2],
             depends=[self.test_task22],
             schedule_timing=4,
             schedule_unit='d',
@@ -472,6 +495,7 @@ class StudioTester(unittest2.TestCase):
             name='Design',
             parent=self.test_asset1,
             resources=[self.test_user1],
+            alternative_resources=[self.test_user2, self.test_user3],
             schedule_timing=10,
             schedule_unit='d',
             status_list=self.test_task_statuses
@@ -483,6 +507,7 @@ class StudioTester(unittest2.TestCase):
             parent=self.test_asset1,
             depends=[self.test_task24],
             resources=[self.test_user1],
+            alternative_resources=[self.test_user2, self.test_user3],
             schedule_timing=15,
             schedule_unit='d',
             status_list=self.test_task_statuses
@@ -494,6 +519,7 @@ class StudioTester(unittest2.TestCase):
             parent=self.test_asset1,
             depends=[self.test_task25],
             resources=[self.test_user1],
+            alternative_resources=[self.test_user2, self.test_user3],
             schedule_timing=10,
             schedule_unit='d',
             status_list=self.test_task_statuses
@@ -505,6 +531,7 @@ class StudioTester(unittest2.TestCase):
             parent=self.test_asset1,
             depends=[self.test_task25],
             resources=[self.test_user1],
+            alternative_resources=[self.test_user2, self.test_user3],
             schedule_timing=10,
             schedule_unit='d',
             status_list=self.test_task_statuses
@@ -516,6 +543,7 @@ class StudioTester(unittest2.TestCase):
             name='Design',
             parent=self.test_asset2,
             resources=[self.test_user2],
+            alternative_resources=[self.test_user1, self.test_user3],
             schedule_timing=10,
             schedule_unit='d',
             status_list=self.test_task_statuses
@@ -527,6 +555,7 @@ class StudioTester(unittest2.TestCase):
             parent=self.test_asset2,
             depends=[self.test_task28],
             resources=[self.test_user2],
+            alternative_resources=[self.test_user1, self.test_user3],
             schedule_timing=15,
             schedule_unit='d',
             status_list=self.test_task_statuses
@@ -538,6 +567,7 @@ class StudioTester(unittest2.TestCase):
             parent=self.test_asset2,
             depends=[self.test_task29],
             resources=[self.test_user2],
+            alternative_resources=[self.test_user1, self.test_user3],
             schedule_timing=10,
             schedule_unit='d',
             status_list=self.test_task_statuses
@@ -549,6 +579,7 @@ class StudioTester(unittest2.TestCase):
             parent=self.test_asset2,
             depends=[self.test_task29],
             resources=[self.test_user2],
+            alternative_resources=[self.test_user1, self.test_user3],
             schedule_timing=10,
             schedule_unit='d',
             status_list=self.test_task_statuses
@@ -840,375 +871,561 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
         # now check the timings of the tasks are all adjusted
 
         # Projects
+        # print "%s:self.test_project1" % self.test_project1.id
+        # print "%s:self.test_project2" % self.test_project2.id
+        # print "%s:self.test_project3" % self.test_project3.id
+        # 
+        # print "%s:self.test_asset1" % self.test_asset1.id
+        # print "%s:self.test_asset2" % self.test_asset2.id
+        # 
+        # print "%s:self.test_shot1.id" % self.test_shot1.id
+        # print "%s:self.test_shot2.id" % self.test_shot2.id
+        # print "%s:self.test_shot3.id" % self.test_shot3.id
+        # print "%s:self.test_shot4.id" % self.test_shot4.id
+        # print "%s:self.test_shot5.id" % self.test_shot5.id
+        # 
+        # print "%s:self.test_task1.id" % self.test_task1.id
+        # print "%s:self.test_task2.id" % self.test_task2.id
+        # print "%s:self.test_task3.id" % self.test_task3.id
+        # print "%s:self.test_task4.id" % self.test_task4.id
+        # print "%s:self.test_task5.id" % self.test_task5.id
+        # print "%s:self.test_task6.id" % self.test_task6.id
+        # print "%s:self.test_task7.id" % self.test_task7.id
+        # print "%s:self.test_task8.id" % self.test_task8.id
+        # print "%s:self.test_task9.id" % self.test_task9.id
+        # 
+        # print "%s:self.test_task10.id" % self.test_task10.id
+        # print "%s:self.test_task11.id" % self.test_task11.id
+        # print "%s:self.test_task12.id" % self.test_task12.id
+        # print "%s:self.test_task13.id" % self.test_task13.id
+        # print "%s:self.test_task14.id" % self.test_task14.id
+        # print "%s:self.test_task15.id" % self.test_task15.id
+        # print "%s:self.test_task16.id" % self.test_task16.id
+        # print "%s:self.test_task17.id" % self.test_task17.id
+        # print "%s:self.test_task18.id" % self.test_task18.id
+        # print "%s:self.test_task19.id" % self.test_task19.id
+        # 
+        # print "%s:self.test_task20.id" % self.test_task20.id
+        # print "%s:self.test_task21.id" % self.test_task21.id
+        # print "%s:self.test_task22.id" % self.test_task22.id
+        # print "%s:self.test_task23.id" % self.test_task23.id
+        # print "%s:self.test_task24.id" % self.test_task24.id
+        # print "%s:self.test_task25.id" % self.test_task25.id
+        # print "%s:self.test_task26.id" % self.test_task26.id
+        # print "%s:self.test_task27.id" % self.test_task27.id
+        # print "%s:self.test_task28.id" % self.test_task28.id
+        # print "%s:self.test_task29.id" % self.test_task29.id
+        # print "%s:self.test_task30.id" % self.test_task30.id
+        # print "%s:self.test_task31.id" % self.test_task31.id
 
-        # Project 1
+        # self.test_project1
         self.assertEqual(
-            self.test_project1.computed_start,
-            datetime.datetime(2013, 4, 16, 9, 0)
+            datetime.datetime(2013, 4, 16, 9, 0),
+            self.test_project1.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 6, 19, 11, 0),
+            self.test_project1.computed_end
         )
 
-        self.assertEqual(
-            self.test_project1.computed_end,
-            datetime.datetime(2013, 7, 31, 13, 0)
+        self.assertItemsEqual(
+            self.test_project1.computed_resources,
+            []
         )
-
-        # Project 2
-        self.assertEqual(
-            self.test_project2.computed_start,
-            datetime.datetime(2013, 4, 16, 9, 0)
-        )
-
-        self.assertEqual(
-            self.test_project1.computed_end,
-            datetime.datetime(2013, 7, 31, 13, 0)
-        )
-
-        # Project 3
-        self.assertIsNone(self.test_project3.computed_start)
-        self.assertIsNone(self.test_project3.computed_end)
 
         # self.test_asset1
         self.assertEqual(
-            self.test_asset1.computed_start,
-            datetime.datetime(2013, 4, 16, 9, 0)
+            datetime.datetime(2013, 4, 16, 9, 0),
+            self.test_asset1.computed_start
         )
         self.assertEqual(
-            self.test_asset1.computed_end,
-            datetime.datetime(2013, 6, 28, 12, 0)
+            datetime.datetime(2013, 5, 17, 10, 0),
+            self.test_asset1.computed_end
         )
 
-        # self.test_asset2
-        self.assertEqual(
-            self.test_asset2.computed_start,
-            datetime.datetime(2013, 4, 16, 9, )
+        self.assertItemsEqual(
+            self.test_asset1.computed_resources,
+            []
         )
-        self.assertEqual(
-            self.test_asset2.computed_end,
-            datetime.datetime(2013, 7, 2, 10, 0)
-        )
-
-        # self.test_shot1
-        self.assertEqual(
-            self.test_shot1.computed_start,
-            datetime.datetime(2013, 4, 26, 17, 0)
-        )
-        self.assertEqual(
-            self.test_shot1.computed_end,
-            datetime.datetime(2013, 7, 31, 13, 0)
-        )
-
-        # self.test_shot2
-        self.assertEqual(
-            self.test_shot2.computed_start,
-            datetime.datetime(2013, 4, 16, 9, 0)
-        )
-        self.assertEqual(
-            self.test_shot2.computed_end,
-            datetime.datetime(2013, 7, 23, 11, 0)
-        )
-
-        # self.test_shot3
-        self.assertEqual(
-            self.test_shot3.computed_start,
-            datetime.datetime(2013, 4, 30, 15, 0)
-        )
-        self.assertEqual(
-            self.test_shot3.computed_end,
-            datetime.datetime(2013, 7, 2, 18, 0)
-        )
-
-        # self.test_shot4
-        self.assertEqual(
-            self.test_shot4.computed_start,
-            datetime.datetime(2013, 6, 4, 14, 0)
-        )
-        self.assertEqual(
-            self.test_shot4.computed_end,
-            datetime.datetime(2013, 7, 26, 16, 0)
-        )
-
-        # self.test_shot5
-        self.assertIsNone(self.test_shot5.computed_start)
-        self.assertIsNone(self.test_shot5.computed_end)
-
-        # self.test_task1
-        self.assertEqual(
-            self.test_task1.computed_start,
-            datetime.datetime(2013, 5, 2, 13, 0)
-        )
-        self.assertEqual(
-            self.test_task1.computed_end,
-            datetime.datetime(2013, 5, 15, 12, 0)
-        )
-
-        # self.test_task2
-        self.assertEqual(
-            self.test_task2.computed_start,
-            datetime.datetime(2013, 5, 15, 12, 0)
-        )
-        self.assertEqual(
-            self.test_task2.computed_end,
-            datetime.datetime(2013, 5, 28, 11, 0)
-        )
-
-        # self.test_task3
-        self.assertIsNone(self.test_task3.computed_start)
-        self.assertIsNone(self.test_task3.computed_end)
-
-        # self.test_task4
-        self.assertEqual(
-            self.test_task4.computed_start,
-            datetime.datetime(2013, 4, 26, 17, 0)
-        )
-        self.assertEqual(
-            self.test_task4.computed_end,
-            datetime.datetime(2013, 4, 30, 15, 0)
-        )
-
-        # self.test_task5
-        self.assertEqual(
-            self.test_task5.computed_start,
-            datetime.datetime(2013, 7, 3, 17, 0)
-        )
-        self.assertEqual(
-            self.test_task5.computed_end,
-            datetime.datetime(2013, 7, 5, 15, 0)
-        )
-
-        # self.test_task6
-        self.assertEqual(
-            self.test_task6.computed_start,
-            datetime.datetime(2013, 7, 15, 9, 0)
-        )
-        self.assertEqual(
-            self.test_task6.computed_end,
-            datetime.datetime(2013, 7, 17, 15, 0)
-        )
-
-        # self.test_task7
-        self.assertEqual(
-            self.test_task7.computed_start,
-            datetime.datetime(2013, 7, 26, 16, 0)
-        )
-        self.assertEqual(
-            self.test_task7.computed_end,
-            datetime.datetime(2013, 7, 31, 13, 0)
-        )
-
-        # self.test_task8
-        self.assertEqual(
-            self.test_task8.computed_start,
-            datetime.datetime(2013, 4, 16, 9, 0)
-        )
-        self.assertEqual(
-            self.test_task8.computed_end,
-            datetime.datetime(2013, 4, 17, 16, 0)
-        )
-
-        # self.test_task9
-        self.assertEqual(
-            self.test_task9.computed_start,
-            datetime.datetime(2013, 4, 17, 16, 0)
-        )
-        self.assertEqual(
-            self.test_task9.computed_end,
-            datetime.datetime(2013, 4, 19, 14, 0)
-        )
-
-        # self.test_task10
-        self.assertEqual(
-            self.test_task10.computed_start,
-            datetime.datetime(2013, 7, 5, 15, 0)
-        )
-        self.assertEqual(
-            self.test_task10.computed_end,
-            datetime.datetime(2013, 7, 10, 12, 0)
-        )
-
-        # self.test_task11
-        self.assertEqual(
-            self.test_task11.computed_start,
-            datetime.datetime(2013, 7, 17, 15, 0)
-        )
-        self.assertEqual(
-            self.test_task11.computed_end,
-            datetime.datetime(2013, 7, 23, 11, 0)
-        )
-
-        # self.test_task12
-        self.assertEqual(
-            self.test_task12.computed_start,
-            datetime.datetime(2013, 4, 30, 15, 0)
-        )
-        self.assertEqual(
-            self.test_task12.computed_end,
-            datetime.datetime(2013, 5, 2, 13, 0)
-        )
-
-        # self.test_task13
-        self.assertEqual(
-            self.test_task13.computed_start,
-            datetime.datetime(2013, 5, 28, 11, 0)
-        )
-        self.assertEqual(
-            self.test_task13.computed_end,
-            datetime.datetime(2013, 5, 29, 18, 0)
-        )
-
-        # self.test_task14
-        self.assertEqual(
-            self.test_task14.computed_start,
-            datetime.datetime(2013, 5, 30, 9, 0)
-        )
-        self.assertEqual(
-            self.test_task14.computed_end,
-            datetime.datetime(2013, 6, 3, 15, 0)
-        )
-
-        # self.test_task15
-        self.assertEqual(
-            self.test_task15.computed_start,
-            datetime.datetime(2013, 6, 3, 15, 0)
-        )
-        self.assertEqual(
-            self.test_task15.computed_end,
-            datetime.datetime(2013, 7, 2, 18, 0)
-        )
-
-        # self.test_task16
-        self.assertEqual(
-            self.test_task16.computed_start,
-            datetime.datetime(2013, 6, 4, 14, 0)
-        )
-        self.assertEqual(
-            self.test_task16.computed_end,
-            datetime.datetime(2013, 6, 6, 12, 0)
-        )
-
-        # self.test_task17
-        self.assertEqual(
-            self.test_task17.computed_start,
-            datetime.datetime(2013, 7, 2, 10, 0)
-        )
-        self.assertEqual(
-            self.test_task17.computed_end,
-            datetime.datetime(2013, 7, 3, 17, 0)
-        )
-
-        # self.test_task18
-        self.assertEqual(
-            self.test_task18.computed_start,
-            datetime.datetime(2013, 7, 10, 12, 0)
-        )
-        self.assertEqual(
-            self.test_task18.computed_end,
-            datetime.datetime(2013, 7, 12, 18, 0)
-        )
-
-        # self.test_task19
-        self.assertEqual(
-            self.test_task19.computed_start,
-            datetime.datetime(2013, 7, 23, 11, 0)
-        )
-        self.assertEqual(
-            self.test_task19.computed_end,
-            datetime.datetime(2013, 7, 26, 16, 0)
-        )
-
-        # self.test_task20
-        self.assertIsNone(self.test_task20.computed_start)
-        self.assertIsNone(self.test_task20.computed_end)
-
-        # self.test_task21
-        self.assertIsNone(self.test_task21.computed_start)
-        self.assertIsNone(self.test_task21.computed_end)
-
-        # self.test_task22
-        self.assertIsNone(self.test_task22.computed_start)
-        self.assertIsNone(self.test_task22.computed_end)
-
-        # self.test_task23
-        self.assertIsNone(self.test_task23.computed_start)
-        self.assertIsNone(self.test_task23.computed_end)
 
         # self.test_task24
         self.assertEqual(
-            self.test_task24.computed_start,
-            datetime.datetime(2013, 4, 16, 9, 0)
+            datetime.datetime(2013, 4, 16, 9, 0),
+            self.test_task24.computed_start
         )
         self.assertEqual(
-            self.test_task24.computed_end,
-            datetime.datetime(2013, 4, 26, 17, 0)
+            datetime.datetime(2013, 4, 26, 17, 0),
+            self.test_task24.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_task24.computed_resources,
+            [self.test_user1]
         )
 
         # self.test_task25
         self.assertEqual(
-            self.test_task25.computed_start,
-            datetime.datetime(2013, 5, 16, 11, 0)
+            datetime.datetime(2013, 4, 16, 9, 0),
+            self.test_task25.computed_start
         )
         self.assertEqual(
-            self.test_task25.computed_end,
-            datetime.datetime(2013, 6, 4, 14, 0)
+            datetime.datetime(2013, 5, 3, 12, 0),
+            self.test_task25.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_task25.computed_resources,
+            [self.test_user3]
         )
 
         # self.test_task26
         self.assertEqual(
-            self.test_task26.computed_start,
-            datetime.datetime(2013, 6, 4, 14, 0)
+            datetime.datetime(2013, 5, 3, 12, 0),
+            self.test_task26.computed_start
         )
         self.assertEqual(
-            self.test_task26.computed_end,
-            datetime.datetime(2013, 6, 17, 13, 0)
+            datetime.datetime(2013, 5, 16, 11, 0),
+            self.test_task26.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_task26.computed_resources,
+            [self.test_user3]
         )
 
         # self.test_task27
         self.assertEqual(
-            self.test_task27.computed_start,
-            datetime.datetime(2013, 6, 17, 13, 0)
+            datetime.datetime(2013, 5, 6, 11, 0),
+            self.test_task27.computed_start
         )
         self.assertEqual(
-            self.test_task27.computed_end,
-            datetime.datetime(2013, 6, 28, 12, 0)
+            datetime.datetime(2013, 5, 17, 10, 0),
+            self.test_task27.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_task27.computed_resources,
+            [self.test_user2]
+        )
+
+        # self.test_shot2
+        self.assertEqual(
+            datetime.datetime(2013, 4, 26, 17, 0),
+            self.test_shot2.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 6, 14, 14, 0),
+            self.test_shot2.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_shot2.computed_resources,
+            []
+        )
+
+        # self.test_task8
+        self.assertEqual(
+            datetime.datetime(2013, 4, 26, 17, 0),
+            self.test_task8.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 4, 30, 15, 0),
+            self.test_task8.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_task8.computed_resources,
+            [self.test_user2]
+        )
+
+        # self.test_task9
+        self.assertEqual(
+            datetime.datetime(2013, 5, 30, 9, 0),
+            self.test_task9.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 5, 31, 16, 0),
+            self.test_task9.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_task9.computed_resources,
+            [self.test_user2]
+        )
+
+        # self.test_task10
+        self.assertEqual(
+            datetime.datetime(2013, 6, 4, 14, 0),
+            self.test_task10.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 6, 7, 11, 0),
+            self.test_task10.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_task10.computed_resources,
+            [self.test_user2]
+        )
+
+        # self.test_task11
+        self.assertEqual(
+            datetime.datetime(2013, 6, 11, 9, 0),
+            self.test_task11.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 6, 14, 14, 0),
+            self.test_task11.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_task11.computed_resources,
+            [self.test_user3]
+        )
+
+        # self.test_shot1
+        self.assertEqual(
+            datetime.datetime(2013, 5, 16, 11, 0),
+            self.test_shot1.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 6, 19, 11, 0),
+            self.test_shot1.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_shot1.computed_resources,
+            []
+        )
+
+        # self.test_task4
+        self.assertEqual(
+            datetime.datetime(2013, 5, 16, 11, 0),
+            self.test_task4.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 5, 17, 18, 0),
+            self.test_task4.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_task4.computed_resources,
+            [self.test_user1]
+        )
+
+        # self.test_task5
+        self.assertEqual(
+            datetime.datetime(2013, 6, 3, 15, 0),
+            self.test_task5.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 6, 5, 13, 0),
+            self.test_task5.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_task5.computed_resources,
+            [self.test_user1]
+        )
+
+        # self.test_task6
+        self.assertEqual(
+            datetime.datetime(2013, 6, 10, 10, 0),
+            self.test_task6.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 6, 12, 16, 0),
+            self.test_task6.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_task6.computed_resources,
+            [self.test_user1]
+        )
+
+        # self.test_task7
+        self.assertEqual(
+            datetime.datetime(2013, 6, 14, 14, 0),
+            self.test_task7.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 6, 19, 11, 0),
+            self.test_task7.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_task7.computed_resources,
+            [self.test_user3]
+        )
+
+        # self.test_task1
+        self.assertEqual(
+            datetime.datetime(2013, 5, 16, 11, 0),
+            self.test_task1.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 5, 29, 10, 0),
+            self.test_task1.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_task1.computed_resources,
+            [self.test_user3]
+        )
+
+        # self.test_project2
+        self.assertEqual(
+            datetime.datetime(2013, 4, 16, 9, 0),
+            self.test_project2.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 6, 18, 12, 0),
+            self.test_project2.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_project2.computed_resources,
+            []
+        )
+
+        # self.test_asset2
+        self.assertEqual(
+            datetime.datetime(2013, 4, 16, 9, 0),
+            self.test_asset2.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 5, 30, 17, 0),
+            self.test_asset2.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_asset2.computed_resources,
+            []
         )
 
         # self.test_task28
         self.assertEqual(
-            self.test_task28.computed_start,
-            datetime.datetime(2013, 4, 16, 9, 0)
+            datetime.datetime(2013, 4, 16, 9, 0),
+            self.test_task28.computed_start
         )
         self.assertEqual(
-            self.test_task28.computed_end,
-            datetime.datetime(2013, 4, 26, 17, 0)
+            datetime.datetime(2013, 4, 26, 17, 0),
+            self.test_task28.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_task28.computed_resources,
+            [self.test_user2]
         )
 
         # self.test_task29
         self.assertEqual(
-            self.test_task29.computed_start,
-            datetime.datetime(2013, 4, 26, 17, 0)
+            datetime.datetime(2013, 4, 26, 17, 0),
+            self.test_task29.computed_start
         )
         self.assertEqual(
-            self.test_task29.computed_end,
-            datetime.datetime(2013, 5, 16, 11, 0)
+            datetime.datetime(2013, 5, 16, 11, 0),
+            self.test_task29.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_task29.computed_resources,
+            [self.test_user1]
         )
 
         # self.test_task30
         self.assertEqual(
-            self.test_task30.computed_start,
-            datetime.datetime(2013, 6, 6, 12, 0)
+            datetime.datetime(2013, 5, 17, 10, 0),
+            self.test_task30.computed_start
         )
         self.assertEqual(
-            self.test_task30.computed_end,
-            datetime.datetime(2013, 6, 19, 11, 0)
+            datetime.datetime(2013, 5, 29, 18, 0),
+            self.test_task30.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_task30.computed_resources,
+            [self.test_user2]
         )
 
         # self.test_task31
         self.assertEqual(
-            self.test_task31.computed_start,
-            datetime.datetime(2013, 6, 19, 11, 0)
+            datetime.datetime(2013, 5, 20, 9, 0),
+            self.test_task31.computed_start
         )
         self.assertEqual(
-            self.test_task31.computed_end,
-            datetime.datetime(2013, 7, 2, 10, 0)
+            datetime.datetime(2013, 5, 30, 17, 0),
+            self.test_task31.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_task31.computed_resources,
+            [self.test_user1]
+        )
+
+        # self.test_shot3
+        self.assertEqual(
+            datetime.datetime(2013, 4, 30, 15, 0),
+            self.test_shot3.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 6, 17, 13, 0),
+            self.test_shot3.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_shot3.computed_resources,
+            []
+        )
+
+        # self.test_task12
+        self.assertEqual(
+            datetime.datetime(2013, 4, 30, 15, 0),
+            self.test_task12.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 5, 2, 13, 0),
+            self.test_task12.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_task12.computed_resources,
+            [self.test_user2]
+        )
+
+        # self.test_task13
+        self.assertEqual(
+            datetime.datetime(2013, 5, 30, 17, 0),
+            self.test_task13.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 6, 3, 15, 0),
+            self.test_task13.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_task13.computed_resources,
+            [self.test_user1]
+        )
+
+        # self.test_task14
+        self.assertEqual(
+            datetime.datetime(2013, 6, 5, 13, 0),
+            self.test_task14.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 6, 10, 10, 0),
+            self.test_task14.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_task14.computed_resources,
+            [self.test_user1]
+        )
+
+        # self.test_task15
+        self.assertEqual(
+            datetime.datetime(2013, 6, 11, 17, 0),
+            self.test_task15.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 6, 17, 13, 0),
+            self.test_task15.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_task15.computed_resources,
+            [self.test_user2]
+        )
+
+        # self.test_shot4
+        self.assertEqual(
+            datetime.datetime(2013, 5, 2, 13, 0),
+            self.test_shot4.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 6, 18, 12, 0),
+            self.test_shot4.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_shot4.computed_resources,
+            []
+        )
+
+        # self.test_task16
+        self.assertEqual(
+            datetime.datetime(2013, 5, 2, 13, 0),
+            self.test_task16.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 5, 6, 11, 0),
+            self.test_task16.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_task16.computed_resources,
+            [self.test_user2]
+        )
+
+        # self.test_task17
+        self.assertEqual(
+            datetime.datetime(2013, 5, 31, 16, 0),
+            self.test_task17.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 6, 4, 14, 0),
+            self.test_task17.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_task17.computed_resources,
+            [self.test_user2]
+        )
+
+        # self.test_task18
+        self.assertEqual(
+            datetime.datetime(2013, 6, 7, 11, 0),
+            self.test_task18.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 6, 11, 17, 0),
+            self.test_task18.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_task18.computed_resources,
+            [self.test_user2]
+        )
+
+        # self.test_task19
+        self.assertEqual(
+            datetime.datetime(2013, 6, 12, 16, 0),
+            self.test_task19.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 6, 18, 12, 0),
+            self.test_task19.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_task19.computed_resources,
+            [self.test_user1]
+        )
+
+        # self.test_task2
+        self.assertEqual(
+            datetime.datetime(2013, 5, 29, 10, 0),
+            self.test_task2.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 6, 10, 18, 0),
+            self.test_task2.computed_end
+        )
+
+        self.assertItemsEqual(
+            self.test_task2.computed_resources,
+            [self.test_user3]
         )
 
     def test_schedule_will_raise_a_RuntimeError_if_is_scheduling_is_True(self):
@@ -1464,3 +1681,165 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
         self.assertNotEqual(res, new_res)
         studio.timing_resolution = new_res
         self.assertEqual(studio.timing_resolution, new_res)
+
+@unittest2.skip
+def csv_to_test_converter():
+    """convert tjp output csv to test case
+    """
+    #!/usr/bin/python
+
+    import re
+    import jinja2
+
+    ids = """28:self.test_user1
+    29:self.test_user2
+    30:self.test_user3
+    38:self.test_project1
+    39:self.test_project2
+    40:self.test_project3
+    41:self.test_asset1
+    42:self.test_asset2
+    43:self.test_shot1
+    44:self.test_shot2
+    45:self.test_shot3
+    46:self.test_shot4
+    47:self.test_shot5
+    48:self.test_task1
+    49:self.test_task2
+    50:self.test_task3
+    51:self.test_task4
+    52:self.test_task5
+    53:self.test_task6
+    54:self.test_task7
+    55:self.test_task8
+    56:self.test_task9
+    57:self.test_task10
+    58:self.test_task11
+    59:self.test_task12
+    60:self.test_task13
+    61:self.test_task14
+    62:self.test_task15
+    63:self.test_task16
+    64:self.test_task17
+    65:self.test_task18
+    66:self.test_task19
+    67:self.test_task20
+    68:self.test_task21
+    69:self.test_task22
+    70:self.test_task23
+    71:self.test_task24
+    72:self.test_task25
+    73:self.test_task26
+    74:self.test_task27
+    75:self.test_task28
+    76:self.test_task29
+    77:self.test_task30
+    78:self.test_task31"""
+
+    ids_to_name = {}
+    for line in ids.split('\n'):
+        id, name = line.split(':')
+        ids_to_name[id] = name
+
+    raw_data = '''"Project_38";"2013-04-16-09:00";"2013-06-19-11:00";""
+    "Project_38.Asset_41";"2013-04-16-09:00";"2013-05-17-10:00";""
+    "Project_38.Asset_41.Task_71";"2013-04-16-09:00";"2013-04-26-17:00";"User 1 (User_28)"
+    "Project_38.Asset_41.Task_72";"2013-04-16-09:00";"2013-05-03-12:00";"User 3 (User_30)"
+    "Project_38.Asset_41.Task_73";"2013-05-03-12:00";"2013-05-16-11:00";"User 3 (User_30)"
+    "Project_38.Asset_41.Task_74";"2013-05-06-11:00";"2013-05-17-10:00";"User 2 (User_29)"
+    "Project_38.Shot_44";"2013-04-26-17:00";"2013-06-14-14:00";""
+    "Project_38.Shot_44.Task_55";"2013-04-26-17:00";"2013-04-30-15:00";"User 2 (User_29)"
+    "Project_38.Shot_44.Task_56";"2013-05-30-09:00";"2013-05-31-16:00";"User 2 (User_29)"
+    "Project_38.Shot_44.Task_57";"2013-06-04-14:00";"2013-06-07-11:00";"User 2 (User_29)"
+    "Project_38.Shot_44.Task_58";"2013-06-11-09:00";"2013-06-14-14:00";"User 3 (User_30)"
+    "Project_38.Shot_43";"2013-05-16-11:00";"2013-06-19-11:00";""
+    "Project_38.Shot_43.Task_51";"2013-05-16-11:00";"2013-05-17-18:00";"User 1 (User_28)"
+    "Project_38.Shot_43.Task_52";"2013-06-03-15:00";"2013-06-05-13:00";"User 1 (User_28)"
+    "Project_38.Shot_43.Task_53";"2013-06-10-10:00";"2013-06-12-16:00";"User 1 (User_28)"
+    "Project_38.Shot_43.Task_54";"2013-06-14-14:00";"2013-06-19-11:00";"User 3 (User_30)"
+    "Project_38.Task_48";"2013-05-16-11:00";"2013-05-29-10:00";"User 3 (User_30)"
+    "Project_39";"2013-04-16-09:00";"2013-06-18-12:00";""
+    "Project_39.Asset_42";"2013-04-16-09:00";"2013-05-30-17:00";""
+    "Project_39.Asset_42.Task_75";"2013-04-16-09:00";"2013-04-26-17:00";"User 2 (User_29)"
+    "Project_39.Asset_42.Task_76";"2013-04-26-17:00";"2013-05-16-11:00";"User 1 (User_28)"
+    "Project_39.Asset_42.Task_77";"2013-05-17-10:00";"2013-05-29-18:00";"User 2 (User_29)"
+    "Project_39.Asset_42.Task_78";"2013-05-20-09:00";"2013-05-30-17:00";"User 1 (User_28)"
+    "Project_39.Shot_45";"2013-04-30-15:00";"2013-06-17-13:00";""
+    "Project_39.Shot_45.Task_59";"2013-04-30-15:00";"2013-05-02-13:00";"User 2 (User_29)"
+    "Project_39.Shot_45.Task_60";"2013-05-30-17:00";"2013-06-03-15:00";"User 1 (User_28)"
+    "Project_39.Shot_45.Task_61";"2013-06-05-13:00";"2013-06-10-10:00";"User 1 (User_28)"
+    "Project_39.Shot_45.Task_62";"2013-06-11-17:00";"2013-06-17-13:00";"User 2 (User_29)"
+    "Project_39.Shot_46";"2013-05-02-13:00";"2013-06-18-12:00";""
+    "Project_39.Shot_46.Task_63";"2013-05-02-13:00";"2013-05-06-11:00";"User 2 (User_29)"
+    "Project_39.Shot_46.Task_64";"2013-05-31-16:00";"2013-06-04-14:00";"User 2 (User_29)"
+    "Project_39.Shot_46.Task_65";"2013-06-07-11:00";"2013-06-11-17:00";"User 2 (User_29)"
+    "Project_39.Shot_46.Task_66";"2013-06-12-16:00";"2013-06-18-12:00";"User 1 (User_28)"
+    "Project_39.Task_49";"2013-05-29-10:00";"2013-06-10-18:00";"User 3 (User_30)"'''
+
+    lines = raw_data.split('\n')
+
+    template_string = """        # {{entity_name}}
+            self.assertEqual(
+                datetime.datetime({{start_date}}),
+                {{entity_name}}.computed_start
+            )
+            self.assertEqual(
+                datetime.datetime({{end_date}}),
+                {{entity_name}}.computed_end
+            )
+            {% if resources %}
+            self.assertItemsEqual(
+                {{entity_name}}.computed_resources,
+                [{% for r in resources -%}
+                {{r}}{% if loop.index != 1%},{% endif %}
+                {%- endfor %}]
+            )
+            {% endif %}
+    """
+
+    rendered_data = []
+    template = jinja2.Template(template_string)
+    for i, line in enumerate(lines):
+        line = re.subn('[\s]+', ' ', line)[0]
+        line = line.replace('"', '')
+
+        data = line.split(';')
+
+        entity_id = data[0].split('_')[-1]
+        entity_name = ids_to_name[entity_id]
+
+        start_date = ', '.join(
+            data[1]
+            .replace(':', '-')
+            .replace('-0', '-')
+            .replace('00', '0')
+            .split('-')
+        )
+
+        end_date = ', '.join(
+            data[2]
+            .replace(':', '-')
+            .replace('-0', '-')
+            .replace('00', '0')
+            .split('-')
+        )
+
+        resource_id = data[3].split('_')[-1][:-1]
+        resource_name = ''
+        if resource_id:
+            resource_name = ids_to_name[resource_id]
+
+        resources = [resource_name]
+
+        #print entity_name, start_date, end_date, resources
+
+        rendered_template = template.render(**{
+            'entity_name': entity_name,
+            'start_date': start_date,
+            'end_date': end_date,
+            'resources': resources
+        })
+        rendered_data.append(rendered_template)
+
+    for r in rendered_data:
+        print r

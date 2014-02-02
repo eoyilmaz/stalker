@@ -155,6 +155,9 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
             name='Task1',
             project=self.test_proj1,
             resources=[self.test_user1, self.test_user2],
+            alternative_resources=[
+                self.test_user3, self.test_user4, self.test_user5
+            ],
             schedule_model=0,
             schedule_timing=50,
             schedule_unit='h',
@@ -166,6 +169,9 @@ class TaskJugglerSchedulerTester(unittest2.TestCase):
             name='Task2',
             project=self.test_proj1,
             resources=[self.test_user1, self.test_user2],
+            alternative_resources=[
+                self.test_user3, self.test_user4, self.test_user5
+            ],
             schedule_model=0,
             schedule_timing=60,
             schedule_unit='h',
@@ -259,7 +265,15 @@ task Task_44 "Task1" {
             
             
             effort 50.0h
-            allocate User_28 , User_30             
+            allocate User_28 {
+                    alternative
+                    User_31, User_33, User_34 select minallocated
+                    persistent
+                }, User_30 {
+                    alternative
+                    User_31, User_33, User_34 select minallocated
+                    persistent
+                }            
 }        
 task Task_45 "Task2" {
 
@@ -267,7 +281,15 @@ task Task_45 "Task2" {
             
             
             effort 60.0h
-            allocate User_28 , User_30             
+            allocate User_28 {
+                    alternative
+                    User_31, User_33, User_34 select minallocated
+                    persistent
+                }, User_30 {
+                    alternative
+                    User_31, User_33, User_34 select minallocated
+                    persistent
+                }            
 }}
         
 
@@ -277,7 +299,8 @@ task Task_45 "Task2" {
             timeformat "%Y-%m-%d-%H:%M"
             columns id, start, end, resources
         }
-        """)
+        
+""")
         expected_tjp_content = expected_tjp_template.render(
             {
                 'stalker': stalker,
@@ -286,9 +309,11 @@ task Task_45 "Task2" {
             }
         )
 
-        self.maxDiff = None
+        # self.maxDiff = None
+        tjp_content = tjp_sched.tjp_content
+        # print tjp_content
         tjp_sched._clean_up()
-        self.assertEqual(tjp_sched.tjp_content, expected_tjp_content)
+        self.assertEqual(tjp_content, expected_tjp_content)
 
     def test_schedule_will_not_work_when_the_studio_attribute_is_None(self):
         """testing if a TypeError will be raised when the studio attribute is
@@ -312,30 +337,37 @@ task Task_45 "Task2" {
 
         # check if the task and project timings are all adjusted
         self.assertEqual(
-            self.test_proj1.computed_start,
-            datetime.datetime(2013, 4, 16, 9, 0)
+            datetime.datetime(2013, 4, 16, 9, 0),
+            self.test_proj1.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 4, 19, 12, 0),
+            self.test_proj1.computed_end
         )
 
         self.assertEqual(
-            self.test_proj1.computed_end,
-            datetime.datetime(2013, 4, 24, 10, 0)
+            datetime.datetime(2013, 4, 16, 9, 0),
+            self.test_task1.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 4, 18, 16, 0),
+            self.test_task1.computed_end
+        )
+        self.assertItemsEqual(
+            [self.test_user5, self.test_user4],
+            self.test_task1.computed_resources
         )
 
         self.assertEqual(
-            self.test_task1.computed_start,
-            datetime.datetime(2013, 4, 19, 12, 0)
+            datetime.datetime(2013, 4, 16, 9, 0),
+            self.test_task2.computed_start
         )
         self.assertEqual(
-            self.test_task1.computed_end,
-            datetime.datetime(2013, 4, 24, 10, 0)
+            datetime.datetime(2013, 4, 19, 12, 0),
+            self.test_task2.computed_end
+        )
+        self.assertItemsEqual(
+            [self.test_user1, self.test_user2],
+            self.test_task2.computed_resources
         )
 
-        self.assertEqual(
-            self.test_task2.computed_start,
-            datetime.datetime(2013, 4, 16, 9, 0)
-        )
-
-        self.assertEqual(
-            self.test_task2.computed_end,
-            datetime.datetime(2013, 4, 19, 12, 0)
-        )

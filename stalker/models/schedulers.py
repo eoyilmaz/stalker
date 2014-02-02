@@ -80,14 +80,90 @@ class SchedulerBase(object):
 class TaskJugglerScheduler(SchedulerBase):
     """This is the main scheduler for Stalker right now.
 
-    Integrates Stalker and TaskJuggler together by using TaskJugglerScheduler
-    to solve the scheduling problem.
+    This class prepares the data for TaskJuggler and let it solve the
+    scheduling problem, and then retrieves the solved date and resource data
+    back.
 
-    TaskJugglerScheduler needs a :class:`.Studio` instance to work with. TJS
+    TaskJugglerScheduler needs a :class:`.Studio` instance to work with, it
     will create a .tjp file and then solve the tasks and restore the
-    computed_start and computed_end dates. Combining all the Projects in one
-    tjp file has a very nice side effect, projects using the same resources
-    will respect their allocations to the resource.
+    computed_start and computed_end dates and the computed_resources
+    attributes for each task.
+
+    Stalker will pass all its data to TaskJuggler by creating a tjp file that
+    TaskJuggler can parse. This tjp file has all the Projects, Tasks, Users,
+    Departments, TimeLogs, Vacations and everything that TJ need for solving
+    the tasks. With every new version of it, Stalker tries to cover more and
+    more TaskJuggler directives.
+
+    .. note::
+       .. versionadded:: 0.2.5
+          Alternative Resources
+
+       Stalker is now able to pass alternative resources to TaskJuggler.
+       Although, per resource alternatives are not yet possible, it will be
+       implemented in future versions of Stalker.
+
+    .. note::
+       .. versionadded:: 0.2.5
+          Task Dependency Relation Attributes
+
+       Stalker now can use 'gapduration', 'gaplength', 'onstart' and 'onend'
+       TaskJuggler directives for each dependent task of a task. Use the
+       TaskDependency instance in Task.task_dependency attribute to control how
+       a particular task is depending to another task.
+
+    .. warning::
+       **Task.computed_resources Attribute Content**
+
+       After the scheduling is finished, TaskJuggler will create a ``csv``
+       report that TaskJugglerScheduler will parse. This csv file contains the
+       ``id``, ``start date``, ``end date`` and ``resources`` data. The
+       resources reported back by TJ will be stored in
+       :attr:`.Task.computed_resources` attribute.
+
+       TaskJuggler will put all the resources who may have entered a
+       :class:`.TimeLog` previously to the csv file. But the resources from the
+       csv file may not be in :attr:`.Task.resources` or
+       :attr:`.Task.alternative_resources` anymore. Because of that,
+       TaskJugglerScheduler will only store the resources those are both in csv
+       file and in :attr:`.Task.resources` or
+       :attr:`.Task.alternative_resources` attributes.
+
+    Stalker will export each Project to tjp as the highest task in the
+    hierarchy and all the projects will be combined in to the same tjp file.
+    Combining all the Projects in one tjp file has a very nice side effect,
+    projects using the same resources will respect their allocations to the
+    resource. So that when a TaskJugglerScheduler instance is used to schedule
+    the project, all projects are scheduled together.
+
+    The following table shows which Stalker data type is converted to which
+    TaskJuggler type:
+    
+      +------------+-------------+
+      | Stalker    | TaskJuggler |
+      +============+=============+
+      | Studio     | Project     |
+      +------------+-------------+
+      | Project    | Task        |
+      +------------+-------------+
+      | Task       | Task        |
+      +------------+-------------+
+      | Asset      | Task        |
+      +------------+-------------+
+      | Shot       | Task        |
+      +------------+-------------+
+      | Sequence   | Task        |
+      +------------+-------------+
+      | Departmemt | Resource    |
+      +------------+-------------+
+      | User       | Resource    |
+      +------------+-------------+
+      | TimeLog    | Booking     |
+      +------------+-------------+
+      | Vacation   | Vacation    |
+      +------------+-------------+
+      
+
     """
 
     def __init__(self, studio=None):
@@ -165,6 +241,7 @@ class TaskJugglerScheduler(SchedulerBase):
         computed end values
         """
         logger.debug('csv_file_full_path : %s' % self.csv_file_full_path)
+        from stalker import User
 
         with open(self.csv_file_full_path, 'r') as self.csv_file:
             csv_content = csv.reader(self.csv_file, delimiter=';')
@@ -184,16 +261,26 @@ class TaskJugglerScheduler(SchedulerBase):
                         data[2],
                         "%Y-%m-%d-%H:%M"
                     )
+
+                    # computed_resources
+                    resources_data = map(
+                        lambda x: x.split('_')[-1].split(')')[0],
+                        data[3].split(',')
+                    )
+                    computed_resources = \
+                        User.query.filter(User.id.in_(resources_data)).all()
+
                     #logger.debug('   start : %s' % start_date)
                     #logger.debug('     end : %s' % end_date)
 
                     entity.computed_start = start_date
                     entity.computed_end = end_date
+                    entity.computed_resources = computed_resources
                     #logger.debug('updated : %s' % entity)
         logger.debug('completed parsing csv file')
 
     def schedule(self):
-        """does the scheduling
+        """Does the scheduling.
         """
         # check the studio attribute
         from stalker import Studio
