@@ -241,7 +241,8 @@ class TaskJugglerScheduler(SchedulerBase):
         computed end values
         """
         logger.debug('csv_file_full_path : %s' % self.csv_file_full_path)
-        from stalker import User
+        from stalker import User #, Task
+        # from stalker.db import DBSession
 
         with open(self.csv_file_full_path, 'r') as self.csv_file:
             csv_content = csv.reader(self.csv_file, delimiter=';')
@@ -250,9 +251,8 @@ class TaskJugglerScheduler(SchedulerBase):
             for data in lines:
                 id_line = data[0]
                 entity_id = int(id_line.split('.')[-1].split('_')[-1])
-                #logger.debug('updating entity with id : %s' % entity_id)
                 entity = Entity.query.filter(Entity.id == entity_id).first()
-                #logger.debug('updating : %s' % entity)
+                # tasks = Task.__table__
                 if entity:
                     start_date = datetime.datetime.strptime(
                         data[1], "%Y-%m-%d-%H:%M"
@@ -270,13 +270,16 @@ class TaskJugglerScheduler(SchedulerBase):
                     computed_resources = \
                         User.query.filter(User.id.in_(resources_data)).all()
 
-                    #logger.debug('   start : %s' % start_date)
-                    #logger.debug('     end : %s' % end_date)
-
                     entity.computed_start = start_date
                     entity.computed_end = end_date
                     entity.computed_resources = computed_resources
-                    #logger.debug('updated : %s' % entity)
+                    # update_statement = tasks.update().values({
+                    #     tasks.c.start: start_date,
+                    #     tasks.c.end: end_date,
+                    #     tasks.c.computed_start: start_date,
+                    #     tasks.c.computed_end: end_date
+                    # }).where(tasks.c.id == entity_id)
+                    # DBSession.connection().execute(update_statement)
         logger.debug('completed parsing csv file')
 
     def schedule(self):

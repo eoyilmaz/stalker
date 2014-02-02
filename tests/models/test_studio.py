@@ -928,11 +928,6 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_project1.computed_end
         )
 
-        self.assertItemsEqual(
-            self.test_project1.computed_resources,
-            []
-        )
-
         # self.test_asset1
         self.assertEqual(
             datetime.datetime(2013, 4, 16, 9, 0),
