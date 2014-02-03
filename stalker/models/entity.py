@@ -120,7 +120,7 @@ class SimpleEntity(Base):
     __auto_name__ = True
     __strictly_typed__ = False
 
-    # TODO: Allow the user to specify the formatting of the name attribute with a Regular Expression (name_formatter)
+    # TODO: Allow the user to specify the formatting of the name attribute with a formatter function
     __name_formatter__ = None
 
     __tablename__ = "SimpleEntities"

@@ -279,7 +279,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
     def test_walk_hierarchy_is_working_properly(self):
         """testing if walk_hierarchy_is_working_properly
         """
-        # TODO: this test should not be placed here
+        # this test should not be placed here
         visited_tasks = []
         expected_result = [
             self.test_task2, self.test_task7, self.test_task8,

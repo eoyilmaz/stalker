@@ -804,13 +804,13 @@ class ReferenceMixin(object):
     def _validate_references(self, key, reference):
         """validates the given reference
         """
-        from stalker.models.entity import SimpleEntity
+        from stalker.models.link import Link
 
         # all the elements should be instance of stalker.models.entity.Entity
-        if not isinstance(reference, SimpleEntity):
+        if not isinstance(reference, Link):
             raise TypeError(
                 "%s.references should be all instances of "
-                "stalker.models.entity.SimpleEntity not %s" %
+                "stalker.models.link.Link not %s" %
                 (self.__class__.__name__, reference.__class__.__name__)
             )
         return reference

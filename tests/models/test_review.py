@@ -338,8 +338,8 @@ class ReviewTestCase(unittest2.TestCase):
             review.reviewer
         )
 
-    # TODO: think about adding tests for the same user is being the reviewer for
-    #       multiple reviews with same level with same task
+    # TODO: add tests for the same user is being the reviewer for all reviews
+    #       at the same level with same task
 
     def test_approve_method_updates_task_status_correctly_for_a_single_responsible_task(self):
         """testing if the Review.approve() method will update the task status

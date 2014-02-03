@@ -241,7 +241,7 @@ class TaskJugglerScheduler(SchedulerBase):
         computed end values
         """
         logger.debug('csv_file_full_path : %s' % self.csv_file_full_path)
-        from stalker import User #, Task
+        from stalker import User  #, Task
         # from stalker.db import DBSession
 
         with open(self.csv_file_full_path, 'r') as self.csv_file:
@@ -296,11 +296,27 @@ class TaskJugglerScheduler(SchedulerBase):
             )
 
         # ********************************************************************
-        # Adjust Studio.start and Studio.end
-        # get the active projects
-        # get root tasks
-        # calculate the earliest start and the latest end
         # TODO: remove the hardcoded datetime
+        #
+        # Adjust Studio.start:
+        # 1- Looking at the earliest TimeLog entry for all of the active
+        #    Projects. If, there are no TimeLogs, use today 0:00.
+        # 2- Update the Studio.start if the project that have the earliest
+        #    TimeLog has been deactivated.
+        #
+        # Adjust Studio.end:
+        # 1- If the Studio.end is None, set it to Studio.start
+        # 2- Add 1 month to Studio.end
+        # 3- Schedule it.
+        # 4- If TaskJuggler complains about that some of the tasks doesn't fit
+        #    in to the time range, or some of the task marked as non scheduled,
+        #    increment the Studio.end by 2 months.
+        # 5- If TaskJuggler complains again then increment 3 months, and then
+        #    5, 8, 13, 21... that is the fibonacci series.
+        # 6- When TaskJuggler is successful on scheduling the projects, reset
+        #    the increment counter, and use this new date until TJ starts to
+        #    complain again.
+        #
         self.studio._start = datetime.datetime(2013, 1, 1)
         self.studio._end = datetime.datetime(2016, 1, 1)
         #for project in self.studio.active_projects:

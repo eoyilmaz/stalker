@@ -56,7 +56,21 @@ class Repository(Entity):
       be a string
     """
 
-    # TODO: Add OpenLDAP support, or at least learn how those stuff works.
+    #
+    # TODO: Add OpenLDAP support.
+    #
+    # In an OpenLDAP Server + AutoFS setup Stalker can create new entries to
+    # OpenLDAP server.
+    #
+    # The AutoFS can be installed to any linux system easily or it is already
+    # installed. OSX has it already. I know nothing about Windows.
+    #
+    # AutoFS can be setup to listen for new mount points from an OpendLDAP
+    # server. Thus it is heavily related with the users system, Stalker
+    # can not do anything about that. The IT should setup workstations.
+    #
+    # But Stalker can connect to the OpenLDAP server and create new entries.
+    #
 
     __auto_name__ = False
     __tablename__ = 'Repositories'

@@ -42,7 +42,6 @@ class RefMixFooClass(SimpleEntity, ReferenceMixin):
 class ReferenceMixinTester(unittest2.TestCase):
     """tests the ReferenceMixin
     """
-    # TODO: Tests are not reflecting the latest design
 
     def setUp(self):
         """setup the test
@@ -96,7 +95,7 @@ class ReferenceMixinTester(unittest2.TestCase):
             self.test_link2,
             self.test_link3,
             self.test_link4,
-            ]
+        ]
 
         self.test_foo_obj = RefMixFooClass(name="Ref Mixin Test")
 
@@ -125,8 +124,8 @@ class ReferenceMixinTester(unittest2.TestCase):
                 test_value
             )
 
-    def test_references_attribute_accepting_only_lists_of_Entity_instances(self):
-        """testing if references attribute accepting only lists with Entity
+    def test_references_attribute_accepting_only_lists_of_Link_instances(self):
+        """testing if references attribute accepting only lists with Link
         instances and derivatives
         """
         test_value = [1, 2.2, ["a reference as list"], "some references"]
@@ -140,9 +139,21 @@ class ReferenceMixinTester(unittest2.TestCase):
         )
 
         # and test if it is accepting a proper list
-        test_value = [self.test_entity1, self.test_entity2, self.test_link1]
+        test_value = [self.test_link1, self.test_link2, self.test_link3]
         self.test_foo_obj.references = test_value
         self.assertItemsEqual(test_value, self.test_foo_obj.references)
+
+    def test_references_attribute_elements_accepts_Links_only(self):
+        """testing if a TypeError will be raised when trying to assign
+        something other than an instance of Link or its derived classes to
+        the references list
+        """
+        self.assertRaises(
+            TypeError,
+            setattr,
+            self.test_foo_obj, 'references',
+            [self.test_entity1, self.test_entity2]
+        )
 
     def test_references_attribute_working_properly(self):
         """testing if references attribute working properly
@@ -150,31 +161,24 @@ class ReferenceMixinTester(unittest2.TestCase):
         self.test_foo_obj.references = self.test_links
         self.assertEqual(self.test_foo_obj.references, self.test_links)
 
-        test_value = [self.test_entity1, self.test_entity2]
+        test_value = [self.test_link1, self.test_link2]
         self.test_foo_obj.references = test_value
         self.assertItemsEqual(self.test_foo_obj.references, test_value)
-
-    def test_references_attribute_elements_accepts_Entity_only(self):
-        """testing if a TypeError will be raised when trying to assign
-        something other than an instance of Entity or its derived classes to
-        the references list
-        """
-        # append
-        self.assertRaises(
-            TypeError,
-            self.test_foo_obj.references.append,
-            0
-        )
 
     def test_references_application_test(self):
         """testing an example of ReferenceMixin usage
         """
         class GreatEntity(SimpleEntity, ReferenceMixin):
-            pass
+            __tablename__ = 'GreatEntities'
+            __mapper_args__ = {
+                "polymorphic_identity": "GreatEntity"
+            }
+            ge_id = Column('id', Integer, ForeignKey('SimpleEntities.id'),
+                           primary_key=True)
 
-        myGreatEntity = GreatEntity(name="Test")
+        my_ge = GreatEntity(name="Test")
         # we should have a references attribute right now
-        var = myGreatEntity.references
+        var = my_ge.references
 
         image_link_type = Type(
             name='Image',
@@ -186,6 +190,6 @@ class ReferenceMixinTester(unittest2.TestCase):
 
         test_value = [new_link]
 
-        myGreatEntity.references = test_value
+        my_ge.references = test_value
 
-        self.assertEqual(myGreatEntity.references, test_value)
+        self.assertEqual(my_ge.references, test_value)
