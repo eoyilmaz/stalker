@@ -63,7 +63,7 @@ Stalker by using the Python prompt like this::
   
   >>> import stalker
   >>> stalker.__version__
-  0.2.0.b6
+  0.2.5
 
 For developers
 ==============
@@ -95,6 +95,11 @@ with an SQLite3 database. But it is much suitable to have a dedicated database
 server in your studio. And it is recommended to use the same kind of database
 backend both in development and production to reduce any compatibility problems
 and any migration headaches.
+
+Although Stalker is mainly tested and developed on SQLite3, the developers of
+Stalker are using it in a studio environment where the main database is
+PosgreSQL, and it is the recommended database for any application based on
+Stalker. But, testing and using Stalker in any other database is encouraged. 
 
 See the `SQLAlchemy documentation`_ for supported databases.
 

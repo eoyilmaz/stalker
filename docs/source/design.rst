@@ -45,7 +45,7 @@ Because the idea behind Stalker was to build an open source library that any
 studio using it can build their own pipeline on top of it, it is designed to
 stay simple and solid at the same time. So the UI and other stuff is ripped off
 from the original Stalker package and moved to another Pyramid web application
-called `Stalker_Pyramid`_.
+called `Stalker Pyramid`_.
 
 .. _`Stalker Pyramid`: https://pypi.python.org/pypi/stalker_pyramid
 

@@ -38,7 +38,7 @@ testing purposes. To be able to get more out of Stalker we should give a proper
 database information. The most basic setup is to use a file based SQLite3
 database::
 
-  db.setup({"sqlalchemy.url": "sqlite:///C:\\studio.db"}) # assumed Windows
+  db.setup({"sqlalchemy.url": "sqlite:///C:/studio.db"}) # assumed Windows
 
 or::
 
