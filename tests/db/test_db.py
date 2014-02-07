@@ -3387,6 +3387,7 @@ class DatabaseModelsTester(unittest2.TestCase):
             '/Proj1_Seq1_Sh001_MAIN_Lighting_v001.ma',
             inputs=[test_version]
         )
+        self.assertEqual(test_version_2.inputs, [test_version])
         DBSession.add(test_version_2)
         DBSession.commit()
 

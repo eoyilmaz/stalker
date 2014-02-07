@@ -30,10 +30,6 @@ Stalker Changes
 * **Update:** Ticket workflow in config is now using the proper status names
   instead of the lower case names of the statuses.
 
-* **Update:** Instead of Sqlalchemy.ORM.ScopedSession Stalker now uses
-  Sqlalchemy.ORM.Session. Also created a query_property() function to mimic the
-  ScopedSession.query_property().
-
 * **New:** Added Task.walk_hierarchy() which iterates over the hierarchy of the
   task. For now it walks in a breadth first fashion.
 
@@ -85,6 +81,8 @@ Stalker Changes
 
 * **Update:** Renamed the "TaskScheduleUnit" enum type name to "TimeUnit"
   in ScheduleMixin.
+
+* **Update:** Version.__repr__ results with a more readable string.
 
 0.2.4
 =====

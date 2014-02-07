@@ -188,6 +188,16 @@ class Version(Link):
         self.parent = parent
         self.created_with = created_with
 
+    def __repr__(self):
+        """the representation of the Version
+        """
+        return "<%(project_code)s_%(nice_name)s_%(version_number)s " \
+               "(%(entity_type)s)>" % {
+            'project_code': self.task.project.code,
+            'nice_name': self.nice_name,
+            'version_number': 'v%s' % ('%s' % self.version_number).zfill(3),
+            'entity_type': self.entity_type}
+
     def _format_take_name(self, take_name):
         """formats the given take_name value
         """

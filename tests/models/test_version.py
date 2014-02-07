@@ -206,7 +206,6 @@ class VersionTester(unittest2.TestCase):
 
         # now create a version for the Task
         self.kwargs = {
-            'name': 'Version1',
             'take_name': 'TestTake',
             'inputs': [self.test_input_link1,
                        self.test_input_link2],
@@ -1469,4 +1468,12 @@ class VersionTester(unittest2.TestCase):
         self.assertEqual(
             version4.nice_name,
             '%s_%s' % (asset2.nice_name, version4.take_name)
+        )
+
+    def test_string_representation_is_a_little_bit_meaningful(self):
+        """testing if the __str__ or __repr__ result is meaningfull
+        """
+        self.assertEqual(
+            '<tp_SH001_Task1_TestTake_v001 (Version)>',
+            '%s' % self.test_version
         )
