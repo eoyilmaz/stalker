@@ -291,6 +291,28 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
 
         self.assertEqual(expected_result, visited_tasks)
 
+    def test_walk_dependencies_is_working_properly(self):
+        """testing if walk_dependencies is working properly
+        """
+        # this test should not be placed here
+        visited_tasks = []
+        expected_result = [
+            self.test_task9, self.test_task6, self.test_task4, self.test_task5,
+            self.test_task8, self.test_task3, self.test_task4, self.test_task8,
+            self.test_task3
+        ]
+
+        # setup dependencies
+        self.test_task9.depends = [self.test_task6]
+        self.test_task6.depends = [self.test_task4, self.test_task5]
+        self.test_task5.depends = [self.test_task4]
+        self.test_task4.depends = [self.test_task8, self.test_task3]
+
+        for task in self.test_task9.walk_dependencies():
+            visited_tasks.append(task)
+
+        self.assertEqual(expected_result, visited_tasks)
+
     # The following tests will test the status changes in dependency changes
 
     # Leaf Tasks - dependency relation changes

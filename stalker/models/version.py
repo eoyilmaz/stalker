@@ -439,12 +439,14 @@ class Version(Link):
         if not vers_template:
             raise RuntimeError(
                 "There are no suitable FilenameTemplate "
-                "(target_entity_type == '%s') defined in the Structure of the "
-                "related Project instance, please create a new "
-                "`stalker.models.template.FilenameTemplate` instance with its "
-                "'target_entity_type' attribute is set to '%s' and assign it "
-                "to the `templates` attribute of the structure of the "
-                "project" % (self.task.entity_type, self.task.entity_type)
+                "(target_entity_type == '%(entity_type)s') defined in the "
+                "Structure of the related Project instance, please create a "
+                "new stalker.models.template.FilenameTemplate instance with "
+                "its 'target_entity_type' attribute is set to "
+                "'%(entity_type)s' and assign it to the `templates` attribute "
+                "of the structure of the project" % {
+                    'entity_type': self.task.entity_type
+                }
             )
 
         self.filename = \
@@ -561,6 +563,24 @@ class Version(Link):
             '_'.join(map(lambda x: x.nice_name, naming_parents)) +
             '_' + self.take_name
         )
+
+    def walk_hierarchy(self, method=0):
+        """Walks the hierarchy of this version
+
+        :param method: The walk method, 0: Depth First, 1: Breadth First
+        """
+        from stalker.models import walk_hierarchy
+        for v in walk_hierarchy(self, 'children', method=method):
+            yield v
+
+    def walk_inputs(self, method=0):
+        """Walks the inputs of this version
+
+        :param method: The walk method, 0: Depth First, 1: Breadth First
+        """
+        from stalker.models import walk_hierarchy
+        for v in walk_hierarchy(self, 'inputs', method=method):
+            yield v
 
 # VERSION INPUTS
 Version_Inputs = Table(

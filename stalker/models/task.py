@@ -2022,14 +2022,23 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             .filter(Ticket.links.contains(self))\
             .filter(Ticket.status != status_closed).all()
 
-    def walk_hierarchy(self):
-        """Walks the hierarchy of this task
+    def walk_hierarchy(self, method=1):
+        """Walks the hierarchy of this task.
+
+        :param method: The walk method, 0: Depth First, 1: Breadth First
         """
-        tasks_to_visit = list([self])
-        while len(tasks_to_visit):
-            current_task = tasks_to_visit.pop(0)
-            tasks_to_visit.extend(current_task.children)
-            yield current_task
+        from stalker.models import walk_hierarchy
+        for t in walk_hierarchy(self, 'children', method=method):
+            yield t
+
+    def walk_dependencies(self, method=1):
+        """Walks the dependencies of this task
+
+        :param method: The walk method, 0: Depth First, 1: Breadth First
+        """
+        from stalker.models import walk_hierarchy
+        for t in walk_hierarchy(self, 'depends', method=method):
+            yield t
 
     # =============
     # ** ACTIONS **

@@ -531,6 +531,226 @@ class DatabaseTester(unittest2.TestCase):
         self.assertItemsEqual(expected_status_names, db_status_names)
         self.assertItemsEqual(expected_status_codes, db_status_codes)
 
+    def test_task_status_initialization_when_there_is_a_Task_status_list(self):
+        """testing if the task statuses are correctly created when there is a
+        StatusList for Task is already created
+        """
+        db.setup()
+
+        task_status_list = StatusList(
+            name='Task Statuses',
+            target_entity_type='Task'
+        )
+        db.DBSession.add(task_status_list)
+        db.DBSession.commit()
+
+        db.init()
+
+        task_status_list = StatusList.query \
+            .filter(StatusList.target_entity_type == 'Task') \
+            .first()
+
+        self.assertTrue(isinstance(task_status_list, StatusList))
+
+        expected_status_names = [
+            'Waiting For Dependency',
+            'Ready To Start',
+            'Work In Progress',
+            'Pending Review',
+            'Has Revision',
+            'Dependency Has Revision',
+            'On Hold',
+            'Stopped',
+            'Completed'
+        ]
+
+        expected_status_codes = [
+            'WFD',
+            'RTS',
+            'WIP',
+            'PREV',
+            'HREV',
+            'DREV',
+            'OH',
+            'STOP',
+            'CMPL'
+        ]
+
+        self.assertEqual(
+            len(task_status_list.statuses),
+            len(expected_status_names)
+        )
+
+        db_status_names = map(lambda x: x.name, task_status_list.statuses)
+        db_status_codes = map(lambda x: x.code, task_status_list.statuses)
+        self.assertItemsEqual(expected_status_names, db_status_names)
+        self.assertItemsEqual(expected_status_codes, db_status_codes)
+
+    def test_asset_status_initialization_when_there_is_a_Asset_status_list(self):
+        """testing if the asset statuses are correctly created when there is a
+        StatusList for Sequence is already created
+        """
+        db.setup()
+
+        asset_status_list = StatusList(
+            name='Asset Statuses',
+            target_entity_type='Asset'
+        )
+        db.DBSession.add(asset_status_list)
+        db.DBSession.commit()
+
+        db.init()
+
+        asset_status_list = StatusList.query \
+            .filter(StatusList.name == 'Asset Statuses') \
+            .first()
+
+        self.assertTrue(isinstance(asset_status_list, StatusList))
+
+        expected_status_names = [
+            'Waiting For Dependency',
+            'Ready To Start',
+            'Work In Progress',
+            'Pending Review',
+            'Has Revision',
+            'Dependency Has Revision',
+            'On Hold',
+            'Stopped',
+            'Completed'
+        ]
+
+        expected_status_codes = [
+            'WFD',
+            'RTS',
+            'WIP',
+            'PREV',
+            'HREV',
+            'DREV',
+            'OH',
+            'STOP',
+            'CMPL'
+        ]
+
+        self.assertEqual(
+            len(asset_status_list.statuses),
+            len(expected_status_names)
+        )
+
+        db_status_names = map(lambda x: x.name, asset_status_list.statuses)
+        db_status_codes = map(lambda x: x.code, asset_status_list.statuses)
+        self.assertItemsEqual(expected_status_names, db_status_names)
+        self.assertItemsEqual(expected_status_codes, db_status_codes)
+
+    def test_shot_status_initialization_when_there_is_a_Shot_status_list(self):
+        """testing if the shot statuses are correctly created when there is a
+        StatusList for Shot is already created
+        """
+        db.setup()
+
+        shot_status_list = StatusList(
+            name='Shot Statuses',
+            target_entity_type='Shot'
+        )
+        db.DBSession.add(shot_status_list)
+        db.DBSession.commit()
+
+        db.init()
+
+        shot_status_list = StatusList.query \
+            .filter(StatusList.name == 'Shot Statuses') \
+            .first()
+
+        self.assertTrue(isinstance(shot_status_list, StatusList))
+
+        expected_status_names = [
+            'Waiting For Dependency',
+            'Ready To Start',
+            'Work In Progress',
+            'Pending Review',
+            'Has Revision',
+            'Dependency Has Revision',
+            'On Hold',
+            'Stopped',
+            'Completed'
+        ]
+
+        expected_status_codes = [
+            'WFD',
+            'RTS',
+            'WIP',
+            'PREV',
+            'HREV',
+            'DREV',
+            'OH',
+            'STOP',
+            'CMPL'
+        ]
+
+        self.assertEqual(
+            len(shot_status_list.statuses),
+            len(expected_status_names)
+        )
+
+        db_status_names = map(lambda x: x.name, shot_status_list.statuses)
+        db_status_codes = map(lambda x: x.code, shot_status_list.statuses)
+        self.assertItemsEqual(expected_status_names, db_status_names)
+        self.assertItemsEqual(expected_status_codes, db_status_codes)
+
+    def test_sequence_status_initialization_when_there_is_a_Sequence_status_list(self):
+        """testing if the sequence statuses are correctly created when there is
+        a StatusList for Sequence is already created
+        """
+        db.setup()
+
+        sequence_status_list = StatusList(
+            name='Sequence Statuses',
+            target_entity_type='Sequence'
+        )
+        db.DBSession.add(sequence_status_list)
+        db.DBSession.commit()
+
+        db.init()
+
+        sequence_status_list = StatusList.query \
+            .filter(StatusList.name == 'Sequence Statuses') \
+            .first()
+
+        self.assertTrue(isinstance(sequence_status_list, StatusList))
+
+        expected_status_names = [
+            'Waiting For Dependency',
+            'Ready To Start',
+            'Work In Progress',
+            'Pending Review',
+            'Has Revision',
+            'Dependency Has Revision',
+            'On Hold',
+            'Stopped',
+            'Completed'
+        ]
+
+        expected_status_codes = [
+            'WFD',
+            'RTS',
+            'WIP',
+            'PREV',
+            'HREV',
+            'DREV',
+            'OH',
+            'STOP',
+            'CMPL'
+        ]
+
+        self.assertEqual(
+            len(sequence_status_list.statuses),
+            len(expected_status_names)
+        )
+
+        db_status_names = map(lambda x: x.name, sequence_status_list.statuses)
+        db_status_codes = map(lambda x: x.code, sequence_status_list.statuses)
+        self.assertItemsEqual(expected_status_names, db_status_names)
+        self.assertItemsEqual(expected_status_codes, db_status_codes)
+
     def test_review_status_initialization(self):
         """testing if the review statuses are correctly created
         """

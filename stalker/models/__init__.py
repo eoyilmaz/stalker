@@ -24,7 +24,7 @@ def make_plural(name):
     """Returns the plural version of the given name argument.
     """
     plural_name = name + "s"
-    
+
     if name[-1] == "y":
         plural_name = name[:-1] + "ies"
     elif name[-2:] == "ch":
@@ -37,26 +37,52 @@ def make_plural(name):
     return plural_name
 
 
+def walk_hierarchy(entity, attr, method=0):
+    """Walks the entity hierarchy over the given attribute and yields the
+    entity.
+
+    It doesn't check for cycle, so if the attribute is not acyclic then this
+    function will not find an exit point.
+
+    The default mode is Depth First Search (DFS), to walk with Breadth First
+    Search (BFS) set the direction to 1.
+
+    :param entity: Starting Entity
+    :param attr: The attribute name to walk over
+    :param method: 0:Depth first or 1:Breadth First
+    :param recursive: If set to False, every node will be visited only
+      once. Default value is True
+    :return:
+    """
+    entity_to_visit = [entity]
+    if not method:  # DFS
+        while len(entity_to_visit):
+            current_entity = entity_to_visit.pop(0)
+            for child in reversed(getattr(current_entity, attr)):
+                entity_to_visit.insert(0, child)
+            yield current_entity
+    else:  # BFS
+        while len(entity_to_visit):
+            current_entity = entity_to_visit.pop(0)
+            entity_to_visit.extend(getattr(current_entity, attr))
+            yield current_entity
+
+
 def check_circular_dependency(entity, other_entity, attr_name):
     """Checks the circular dependency in entity if it has other_entity in its
     dependency attr which is specified with attr_name
     """
-    # check itself
-    if entity is other_entity:
-        raise CircularDependencyError(
-            '%s %s and %s creates a circular dependency' %
-            (entity.__class__.__name__, entity, other_entity)
-        )
-
-    for dependent_entity in getattr(entity, attr_name):
-        if dependent_entity is other_entity:
+    for e in walk_hierarchy(entity, attr_name):
+        if e is other_entity:
             raise CircularDependencyError(
-                '%s %s and %s creates a circular dependency' %
-                (entity.__class__.__name__, entity, other_entity)
+                '%(entity_name)s (%(entity_class)s) and '
+                '%(other_entity_name)s (%(other_entity_class)s) creates a '
+                'circular dependency in their %(attr_name)s attribute' %
+                {
+                    'entity_name': entity.name.__str__,
+                    'entity_class': entity.__class__.__name__,
+                    'other_entity_name': other_entity.__str__,
+                    'other_entity_class': other_entity.__class__.__name__,
+                    'attr_name': attr_name
+                }
             )
-        else:
-            check_circular_dependency(
-                dependent_entity, other_entity, attr_name
-            )
-
-

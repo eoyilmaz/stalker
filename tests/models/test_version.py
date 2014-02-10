@@ -1477,3 +1477,41 @@ class VersionTester(unittest2.TestCase):
             '<tp_SH001_Task1_TestTake_v001 (Version)>',
             '%s' % self.test_version
         )
+
+    def test_walk_hierarchy_is_working_properly_in_DFS_mode(self):
+        """testing if the walk_hierarchy() method is working in DFS mode
+        correctly
+        """
+        v1 = Version(task=self.test_task1)
+        v2 = Version(task=self.test_task1, parent=v1)
+        v3 = Version(task=self.test_task1, parent=v2)
+        v4 = Version(task=self.test_task1, parent=v3)
+        v5 = Version(task=self.test_task1, parent=v1)
+
+        expected_result = [v1, v2, v3, v4, v5]
+        visited_versions = []
+        for v in v1.walk_hierarchy():
+            visited_versions.append(v)
+
+        self.assertEqual(expected_result, visited_versions)
+
+    def test_walk_inputs_is_working_properly_in_DFS_mode(self):
+        """testing if the walk_inputs() method is working in DFS mode correctly
+        """
+        v1 = Version(task=self.test_task1)
+        v2 = Version(task=self.test_task1)
+        v3 = Version(task=self.test_task1)
+        v4 = Version(task=self.test_task1)
+        v5 = Version(task=self.test_task1)
+
+        v5.inputs = [v4]
+        v4.inputs = [v3, v2]
+        v3.inputs = [v1]
+        v2.inputs = [v1]
+
+        expected_result = [v5, v4, v3, v1, v2, v1]
+        visited_versions = []
+        for v in v5.walk_inputs():
+            visited_versions.append(v)
+
+        self.assertEqual(expected_result, visited_versions)

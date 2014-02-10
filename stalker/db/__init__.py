@@ -290,22 +290,25 @@ def create_entity_statuses(entity_type='', status_names=None,
         .filter(StatusList.target_entity_type == entity_type)\
         .first()
 
-    if not status_list:
+    if status_list is None:
         logger.debug('No %s Status List found, creating new!' % entity_type)
         status_list = StatusList(
             name='%s Statuses' % entity_type,
             target_entity_type=entity_type,
-            statuses=statuses,
             created_by=user,
             updated_by=user
         )
-        DBSession.add(status_list)
     else:
-        logger.debug("%s Status List already created" % entity_type)
+        logger.debug("%s Status List already created, updating statuses" %
+                     entity_type)
+
+    status_list.statuses = statuses
+    DBSession.add(status_list)
 
     try:
         DBSession.commit()
-    except IntegrityError:
+    except IntegrityError as e:
+        logger.debug("error in DBSession.commit, rolling back: %s" % e)
         DBSession.rollback()
     else:
         logger.debug("Created %s Statuses successfully" % entity_type)
