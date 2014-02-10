@@ -2,6 +2,38 @@
 Stalker Changes
 ===============
 
+0.2.5.1
+=======
+
+* **Update:** Version.__repr__ results with a more readable string.
+
+* **New:** Added a generalized generator called stalker.models.walk_hierarchy()
+  that walks and yields the entities over the given attribute in DFS or BFS
+  fashion.
+
+* **New:** Added Task.walk_hierarchy() which iterates over the hierarchy of the
+  task. It walks in a breadth first fashion. Use method=0 to walk in depth
+  first.
+
+* **New:** Added Task.walk_dependencies() which iterates over the dependencies
+  of the task. It walks in a breadth first fashion. Use method=0 to walk in
+  depth first.
+
+* **New:** Added Version.walk_hierarchy() which iterates over the hierarchy of
+  the version. It walks in a depth first fashion. Use method=1 to walk in
+  breadth first.
+
+* **New:** Added Version.walk_inputs() which iterates over the inputs of the
+  version. It walks in a depth first fashion. Use method=1 to walk in
+  breath first.
+
+* **Update:** stalker.models.check_circular_dependency() function is now using
+  stalker.models.walk_hierarchy() instead of recursion over itself, which makes
+  it more robust in deep hierarchies.
+
+* **Fix:** db.init() now updates the statuses of already created status lists
+  for Task, Asset, Shot and Sequence classes.
+
 0.2.5
 =====
 
@@ -78,35 +110,6 @@ Stalker Changes
 
 * **Update:** Renamed the "TaskScheduleUnit" enum type name to "TimeUnit"
   in ScheduleMixin.
-
-* **Update:** Version.__repr__ results with a more readable string.
-
-* **New:** Added a generalized generator called stalker.models.walk_hierarchy()
-  that walks and yields the entities over the given attribute in DFS or BFS
-  fashion.
-
-* **New:** Added Task.walk_hierarchy() which iterates over the hierarchy of the
-  task. It walks in a breadth first fashion. Use method=0 to walk in depth
-  first.
-
-* **New:** Added Task.walk_dependencies() which iterates over the dependencies
-  of the task. It walks in a breadth first fashion. Use method=0 to walk in
-  depth first.
-
-* **New:** Added Version.walk_hierarchy() which iterates over the hierarchy of
-  the version. It walks in a depth first fashion. Use method=1 to walk in
-  breadth first.
-
-* **New:** Added Version.walk_inputs() which iterates over the inputs of the
-  version. It walks in a depth first fashion. Use method=1 to walk in
-  breath first.
-
-* **Update:** stalker.models.check_circular_dependency() function is now using
-  stalker.models.walk_hierarchy() instead of recursion over itself, which makes
-  it more robust in deep hierarchies.
-
-* **Fix:** db.init() now updates the statuses of already created status lists
-  for Task, Asset, Shot and Sequence classes.
 
 0.2.4
 =====

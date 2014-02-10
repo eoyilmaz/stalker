@@ -20,12 +20,13 @@
 
 import unittest
 
+
 class TestCase(unittest.TestCase):
     """stalker version of unittest.TestCase
     """
 
     def assetItemsEqual(self, a, b):
-        item_count_equal = len(a)==len(b)
+        item_count_equal = len(a) == len(b)
         r_value = True
         if item_count_equal:
             for item in a:
