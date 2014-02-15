@@ -22,7 +22,7 @@
 #from stalker import User
 
 ## create engine
-#db.setup("sqlite:////tmp/declerative_test.db")
+#db.setup("sqlite:////tmp/declarative_test.db")
 
 #new_user = User(name="ozgur")
 #session.add(new_user)

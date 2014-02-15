@@ -2,6 +2,18 @@
 Stalker Changes
 ===============
 
+0.2.5.2
+=======
+
+* **New:** Task instances now have two new properties called ``path`` and
+  ``absolute_path``. As in Version instances, these are the rendered version
+  of the related FilenameTemplate object in the related Project. The ``path``
+  attribute is Repository root relative and ``absolute_path`` is the absolute
+  path including the OS dependent Repository path.
+
+* **Update:** Updated alembic revision with revision number "433d9caaafab" to
+  also create Statuses introduced with Stalker v0.2.5.
+
 0.2.5.1
 =======
 

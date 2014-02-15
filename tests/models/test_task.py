@@ -20,13 +20,15 @@
 
 import datetime
 import logging
+import tempfile
 
 import unittest2
 
 from stalker.exceptions import CircularDependencyError
 from stalker.db import DBSession
 from stalker import (db, defaults, Entity, Project, Repository, StatusList,
-                     Status, Task, Type, User, TimeLog)
+                     Status, Task, Type, User, TimeLog, FilenameTemplate,
+                     Structure)
 from stalker.models.task import CONSTRAIN_END, CONSTRAIN_BOTH
 
 logger = logging.getLogger(__name__)
@@ -85,7 +87,10 @@ class TaskTester(unittest2.TestCase):
 
         self.test_repository = Repository(
             name="Test Repository",
-            type=self.test_repository_type
+            type=self.test_repository_type,
+            linux_path=tempfile.gettempdir(),
+            windows_path=tempfile.gettempdir(),
+            osx_path=tempfile.gettempdir()
         )
 
         self.test_user1 = User(
@@ -4661,3 +4666,112 @@ task Task_5679 "Modeling" {
         """
         self.test_task.persistent_allocation = False
         self.assertEqual(self.test_task.persistent_allocation, False)
+
+    def test_path_attribute_is_read_only(self):
+        """testing if the path attribute is read only
+        """
+        self.assertRaises(AttributeError, setattr, self.test_task, 'path',
+                          'some_path')
+
+    def test_path_attribute_raises_a_RuntimeError_if_no_FilenameTemplate_found(self):
+        """testing if the path attribute raises a RuntimeError if there is no
+        FilenameTemplate matching the entity_type
+        """
+        self.assertRaises(RuntimeError, getattr, self.test_task, 'path')
+
+    def test_path_attribute_raises_a_RuntimeError_if_no_matching_FilenameTemplate_found(self):
+        """testing if the path attribute raises a RuntimeError if there is no
+        matching FilenameTemplate matching the entity_type
+        """
+        ft = FilenameTemplate(
+            name='Asset Filename Template',
+            target_entity_type='Asset',
+            path='{{project.code}}/{%- for parent_task in parent_tasks -%}'
+                 '{{parent_task.nice_name}}/{%- endfor -%}',
+            filename='{{task.nice_name}}_{{version.take_name}}'
+                     '_v{{"%03d"|format(version.version_number)}}{{extension}}'
+        )
+        structure = Structure(
+            name='Movie Project Structure',
+            templates=[ft]
+        )
+        self.test_project1.structure = structure
+        self.assertRaises(RuntimeError, getattr, self.test_task, 'path')
+
+    def test_path_attribute_is_the_rendered_version_of_the_related_FilenameTemplate_object_in_the_related_project(self):
+        """testing if the path attribute value is the rendered version of the
+        FilenameTemplate matching the class entity_type
+        """
+        ft = FilenameTemplate(
+            name='Task Filename Template',
+            target_entity_type='Task',
+            path='{{project.code}}/{%- for parent_task in parent_tasks -%}'
+                 '{{parent_task.nice_name}}/{%- endfor -%}',
+            filename='{{task.nice_name}}_{{version.take_name}}'
+                     '_v{{"%03d"|format(version.version_number)}}{{extension}}'
+        )
+        structure = Structure(
+            name='Movie Project Structure',
+            templates=[ft]
+        )
+        self.test_project1.structure = structure
+
+        self.assertEqual(
+            'tp1/Modeling/',
+            self.test_task.path
+        )
+
+    def test_absolute_path_attribute_is_read_only(self):
+        """testing if absolute_path is read only
+        """
+        self.assertRaises(AttributeError, setattr, self.test_task,
+                          'absolute_path', 'some_path')
+
+    def test_absolute_path_attribute_raises_a_RuntimeError_if_no_FilenameTemplate_found(self):
+        """testing if the absolute_path attribute raises a RuntimeError if
+        there is no FilenameTemplate matching the entity_type
+        """
+        self.assertRaises(RuntimeError, getattr, self.test_task,
+                          'absolute_path')
+
+    def test_absolute_path_attribute_raises_a_RuntimeError_if_no_matching_FilenameTemplate_found(self):
+        """testing if the absolute_path attribute raises a RuntimeError if
+        there is no matching FilenameTemplate matching the entity_type
+        """
+        ft = FilenameTemplate(
+            name='Asset Filename Template',
+            target_entity_type='Asset',
+            path='{{project.code}}/{%- for parent_task in parent_tasks -%}'
+                 '{{parent_task.nice_name}}/{%- endfor -%}',
+            filename='{{task.nice_name}}_{{version.take_name}}'
+                     '_v{{"%03d"|format(version.version_number)}}{{extension}}'
+        )
+        structure = Structure(
+            name='Movie Project Structure',
+            templates=[ft]
+        )
+        self.test_project1.structure = structure
+        self.assertRaises(RuntimeError, getattr, self.test_task, 'path')
+
+    def test_absolute_path_attribute_is_the_rendered_version_of_the_related_FilenameTemplate_object_in_the_related_project(self):
+        """testing if the absolute_path attribute value is the rendered version
+        of the FilenameTemplate matching the class entity_type
+        """
+        ft = FilenameTemplate(
+            name='Task Filename Template',
+            target_entity_type='Task',
+            path='{{project.code}}/{%- for parent_task in parent_tasks -%}'
+                 '{{parent_task.nice_name}}/{%- endfor -%}',
+            filename='{{task.nice_name}}_{{version.take_name}}'
+                     '_v{{"%03d"|format(version.version_number)}}{{extension}}'
+        )
+        structure = Structure(
+            name='Movie Project Structure',
+            templates=[ft]
+        )
+        self.test_project1.structure = structure
+
+        self.assertEqual(
+            self.test_project1.repository.path + 'tp1/Modeling/',
+            self.test_task.absolute_path
+        )

@@ -7,6 +7,8 @@ Create Date: 2014-01-31 01:51:08.457109
 """
 
 # revision identifiers, used by Alembic.
+import stalker
+
 revision = '433d9caaafab'
 down_revision = '46775e4a3d96'
 
@@ -326,6 +328,57 @@ def upgrade():
     # now drop the data
     op.drop_column(u'Tasks', 'responsible_id')
 
+    # create new Statuses
+    #
+    # 'Waiting For Dependency', 'WFD',
+    # 'Dependency Has Revision','DREV',
+    # 'On Hold',                'OH',
+    # 'Stopped',                'STOP',
+
+    def create_status(name, code):
+        # Insert in to SimpleEntities
+        op.execute(
+            """INSERT INTO "SimpleEntities" (entity_type, name, description,
+created_by_id, updated_by_id, date_created, date_updated, type_id,
+thumbnail_id, html_style, html_class, stalker_version)
+VALUES ('Status', '%(name)s', '', NULL, NULL,
+(SELECT CAST(NOW() at time zone 'utc' AS timestamp)), (SELECT CAST(NOW() at time zone 'utc' AS timestamp)), NULL, NULL,
+'', '', '%(stalker_version)s')""" %
+            {
+                'stalker_version': stalker.__version__,
+                'name': name
+            }
+        )
+
+        # insert in to Entities and Statuses
+        op.execute(
+            """INSERT INTO "Entities" (id)
+VALUES ((
+  SELECT id
+  FROM "SimpleEntities"
+  WHERE "SimpleEntities".name = '%(name)s'
+));
+INSERT INTO "Statuses" (id, code)
+VALUES ((
+  SELECT id
+  FROM "SimpleEntities"
+  WHERE "SimpleEntities".name = '%(name)s'), '%(code)s');""" %
+            {
+                'name': name,
+                'code': code
+            }
+        )
+
+    create_status('Waiting For Dependency', 'WFD')
+    create_status('Dependency Has Revision', 'DREV')
+    create_status('On Hold', 'OH')
+    create_status('Stopped', 'STOP')
+
+    # Update all NEW Tasks to WFD
+    op.execute("""update "Tasks"
+set status_id = (select id from "Statuses" where code='WFD')
+where status_id = (select id from "Statuses" where code='NEW')""")
+
 
 def downgrade():
     """downgrade
@@ -394,3 +447,38 @@ def downgrade():
     op.drop_table('Reviews')
     # will loose all the responsible data, change if you care!
     op.drop_table('Task_Responsible')
+
+    # Update all WFD Tasks to NEW
+    op.execute("""update "Tasks"
+set status_id = (select id from "Statuses" where code='NEW')
+where status_id = (select id from "Statuses" where code='WFD')""")
+
+    # Update all OH Tasks to WIP
+    op.execute("""update "Tasks"
+set status_id = (select id from "Statuses" where code='WIP')
+where status_id = (select id from "Statuses" where code='OH')""")
+
+    # Update all STOP or DREV Tasks to CMPL
+    op.execute("""update "Tasks"
+set status_id = (select id from "Statuses" where code='WIP')
+where status_id in (select id from "Statuses" where code in ('STOP', 'DREV'))""")
+
+    op.execute("""update "Tasks"
+set status_id = (select id from "Statuses" where code='WIP')
+where status_id = (select id from "Statuses" where code='STOP')""")
+
+    # Delete Statuses
+    op.execute("""DELETE FROM "Statuses" WHERE
+    id IN (select id FROM "SimpleEntities" WHERE
+    name IN ('Waiting For Dependency', 'Dependency Has Revision', 'On Hold',
+    'Stopped'))
+    """)
+    op.execute("""DELETE FROM "Entities" WHERE
+    id IN (select id FROM "SimpleEntities" WHERE
+    name IN ('Waiting For Dependency', 'Dependency Has Revision', 'On Hold',
+    'Stopped'))
+    """)
+    op.execute("""DELETE FROM "SimpleEntities" WHERE
+    name IN ('Waiting For Dependency', 'Dependency Has Revision', 'On Hold',
+    'Stopped')
+    """)
