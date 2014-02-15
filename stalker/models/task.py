@@ -20,9 +20,10 @@
 
 import datetime
 import logging
+import os
 
 from sqlalchemy import (Table, Column, Integer, ForeignKey, Boolean, Enum,
-                        DateTime, Float, event, Interval)
+                        DateTime, Float, event)
 from sqlalchemy.exc import InvalidRequestError
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship, validates, synonym
@@ -684,6 +685,25 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
        value. A Task starts with WFD status by default, and updated to RTS if
        it doesn't have any dependencies or all of the dependencies are STOP or
        CMPL.
+
+    .. note::
+       .. versionadded:: 0.2.5.2
+          Task.path and Task.absolute_path properties
+
+          Task instances now have two new properties called :attr:`.path` and
+          :attr:`.absolute_path`\ . The value of these attributes are the
+          rendered version of the related :class:`.FilenameTemplate` which
+          has its target_entity_type attribute set to "Task" (or "Asset",
+          "Shot" or "Sequence" or anything matching to the derived class name,
+          so it can be used in :class:`.Asset`, :class:`.Shot` and
+          :class:`.Sequences` or anything that is derived from Task class) in
+          the :class:`.Project` that this task belongs to. This property has
+          been added to make it easier to write custom template codes for
+          Project :class:`.Structure`\ s.
+
+          The :attr:`.path` attribute is a repository relative path, where as
+          the :attr:`.absolute_path` is the full path and includs the OS
+          dependent repository path.
 
     **Arguments**
 
@@ -2579,6 +2599,84 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         descriptor=property(_review_number_getter),
         doc="returns the _review_number attribute value"
     )
+
+    def _template_variables(self):
+        """variables used in rendering the filename template
+        """
+        # TODO: add test for this template variables
+        from stalker import Shot
+
+        sequences = []
+        scenes = []
+        if isinstance(self, Shot):
+            sequences = self.sequences
+            scenes = self.scenes
+
+        # get the parent tasks
+        task = self
+        parent_tasks = task.parents
+        parent_tasks.append(task)
+
+        kwargs = {
+            'project': self.project,
+            'sequences': sequences,
+            'sequence': self,
+            'scenes': scenes,
+            'shot': self,
+            'asset': self,
+            'task': self,
+            'parent_tasks': parent_tasks,
+            'type': self.type,
+        }
+        return kwargs
+
+    @property
+    def path(self):
+        """the path attribute
+        """
+        kwargs = self._template_variables()
+
+        # get a suitable FilenameTemplate
+        structure = self.project.structure
+
+        from stalker import FilenameTemplate
+
+        vers_template = None
+        if structure:
+            for template in structure.templates:
+                assert isinstance(template, FilenameTemplate)
+                if template._target_entity_type == self.entity_type:
+                    vers_template = template
+                    break
+
+        if not vers_template:
+            raise RuntimeError(
+                "There are no suitable FilenameTemplate "
+                "(target_entity_type == '%(entity_type)s') defined in the "
+                "Structure of the related Project instance, please create a "
+                "new stalker.models.template.FilenameTemplate instance with "
+                "its 'target_entity_type' attribute is set to "
+                "'%(entity_type)s' and assign it to the `templates` attribute "
+                "of the structure of the project" % {
+                    'entity_type': self.entity_type
+                }
+            )
+
+        import jinja2
+
+        return jinja2.Template(vers_template.path).render(**kwargs)
+
+    @property
+    def absolute_path(self):
+        """the absolute_path attribute
+        """
+        project = self.project
+        repo = project.repository
+
+        return os.path.join(
+            repo.path,
+            self.path
+        ).replace('\\', '/')
 
 
 class TaskDependency(Base, ScheduleMixin):
