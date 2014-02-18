@@ -33,7 +33,7 @@ which has PyQt/PySide UIs for applications like Maya, Nuke, Houdini, Eyeon
 Fusion, Photoshop etc.
 
 Source
-======
+------
 
 The latest development version is available in [GitHub
 Stalker](https://github.com/eoyilmaz/stalker) or can be directly cloned with
