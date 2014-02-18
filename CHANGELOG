@@ -2,6 +2,13 @@
 Stalker Changes
 ===============
 
+0.2.5.3
+=======
+
+* **Fix:** Fixed a bug in Task class where trying to remove the dependencies
+  will raise an AttributeError caused by the
+  ``_previously_removed_dependent_tasks`` attribute.
+
 0.2.5.2
 =======
 

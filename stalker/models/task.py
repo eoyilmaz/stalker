@@ -26,7 +26,7 @@ from sqlalchemy import (Table, Column, Integer, ForeignKey, Boolean, Enum,
                         DateTime, Float, event)
 from sqlalchemy.exc import InvalidRequestError
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import relationship, validates, synonym
+from sqlalchemy.orm import relationship, validates, synonym, reconstructor
 
 from stalker import defaults
 from stalker.db.session import DBSession
@@ -1155,6 +1155,13 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         self.persistent_allocation = persistent_allocation
 
         self.update_status_with_dependent_statuses()
+
+    @reconstructor
+    def __init_on_load__(self):
+        """update defaults on load
+        """
+        # temp attribute for remove event
+        self._previously_removed_dependent_tasks = []
 
     def __eq__(self, other):
         """the equality operator
