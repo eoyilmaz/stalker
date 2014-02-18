@@ -1,6 +1,3 @@
-# use glob syntax
-syntax: glob
-
 *~*
 *.pyc
 docs/html/*
@@ -9,24 +6,13 @@ docs/doctrees/*
 docs/source/generated/*
 docs/source/static/stalker_design*.vue
 docs/source/static/design
-stalker/static/dojo*/
-stalker/static/dojox*/
-stalker/static/dijit*/
-stalker/static/util*/
-stalker/static/jquery*/
-stalker/static/dgrid*/
-stalker/static/put-selector/
-stalker/static/xstyle*/
 .coverage
 .DS_Store
 dist/*
 build/*
 stalker.egg-info/*
 upload_to_pypi
-lib/*
-bin/*
 include/*
 local
 *.swp
 stalker.db*
-.git/
