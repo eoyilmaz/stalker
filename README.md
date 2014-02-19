@@ -28,7 +28,7 @@ Stalker as a library has no graphical UI, it is a python library that gives you
 the ability to build your pipeline on top of it. There are other python
 packages like the Open Source Pyramid Web Application
 [Stalker Pyramid](https://code.google.com/p/stalker-pyramid) and the Open
-Source pipeline library [Anima Tools](https://code.google.com/p/anima-tools/)
+Source pipeline library [Anima](https://github.com/eoyilmaz/anima)
 which has PyQt/PySide UIs for applications like Maya, Nuke, Houdini, Eyeon
 Fusion, Photoshop etc.
 
