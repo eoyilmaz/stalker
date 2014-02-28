@@ -1039,11 +1039,13 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     )
 
     _schedule_seconds = Column(
+        "schedule_seconds",
         Integer, nullable=True,
         doc='cache column for schedule_seconds'
     )
 
     _total_logged_seconds = Column(
+        "total_logged_seconds",
         Integer, nullable=True,
         doc='cache column for total_logged_seconds'
     )
@@ -1057,7 +1059,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         created for this task."""
     )
 
-    _review_number = Column(Integer, default=0)
+    _review_number = Column("review_number", Integer, default=0)
 
     def __init__(self,
                  project=None,

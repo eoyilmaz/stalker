@@ -7,6 +7,7 @@ Create Date: 2014-01-31 01:51:08.457109
 """
 
 # revision identifiers, used by Alembic.
+from sqlalchemy.exc import ProgrammingError, IntegrityError
 import stalker
 
 revision = '433d9caaafab'
@@ -54,7 +55,7 @@ def upgrade():
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('task_id', sa.Integer(), nullable=False),
         sa.Column('reviewer_id', sa.Integer(), nullable=False),
-        sa.Column('_review_number', sa.Integer(), nullable=True),
+        sa.Column('review_number', sa.Integer(), nullable=True),
         sa.Column('schedule_timing', sa.Float(), nullable=True),
         sa.Column('schedule_unit', time_unit_enum, nullable=False),
         sa.Column('schedule_constraint', sa.Integer(),
@@ -238,12 +239,7 @@ def upgrade():
         )
     )
     # fill data
-    op.execute("""
-        UPDATE
-           "Task_Dependencies"
-        SET
-            gap_timing = 0
-    """)
+    op.execute("""UPDATE "Task_Dependencies" SET gap_timing = 0""")
 
     # alter column to be nullable false
     op.alter_column(
@@ -257,7 +253,7 @@ def upgrade():
     # Tasks
     op.add_column(
         u'Tasks',
-        sa.Column('_review_number', sa.Integer(), nullable=True)
+        sa.Column('review_number', sa.Integer(), nullable=True)
     )
 
     # *************************************************************************
@@ -271,12 +267,7 @@ def upgrade():
         )
     )
     # fill data
-    op.execute("""
-        UPDATE
-           "Tasks"
-        SET
-            allocation_strategy = 'minallocated'
-    """)
+    op.execute("""UPDATE "Tasks" SET allocation_strategy = 'minallocated'""")
 
     # alter column to be nullable false
     op.alter_column(
@@ -294,12 +285,7 @@ def upgrade():
         sa.Column('persistent_allocation', sa.Boolean(), nullable=True)
     )
     # fill data
-    op.execute("""
-        UPDATE
-           "Tasks"
-        SET
-            persistent_allocation = TRUE
-    """)
+    op.execute("""UPDATE "Tasks" SET persistent_allocation = TRUE""")
 
     # alter column to be nullable false
     op.alter_column(
@@ -353,16 +339,16 @@ VALUES ('Status', '%(name)s', '', NULL, NULL,
         # insert in to Entities and Statuses
         op.execute(
             """INSERT INTO "Entities" (id)
-VALUES ((
-  SELECT id
-  FROM "SimpleEntities"
-  WHERE "SimpleEntities".name = '%(name)s'
-));
-INSERT INTO "Statuses" (id, code)
-VALUES ((
-  SELECT id
-  FROM "SimpleEntities"
-  WHERE "SimpleEntities".name = '%(name)s'), '%(code)s');""" %
+            VALUES ((
+              SELECT id
+              FROM "SimpleEntities"
+              WHERE "SimpleEntities".name = '%(name)s'
+            ));
+            INSERT INTO "Statuses" (id, code)
+            VALUES ((
+              SELECT id
+              FROM "SimpleEntities"
+              WHERE "SimpleEntities".name = '%(name)s'), '%(code)s');""" %
             {
                 'name': name,
                 'code': code
@@ -374,10 +360,153 @@ VALUES ((
     create_status('On Hold', 'OH')
     create_status('Stopped', 'STOP')
 
+    # Review Statuses
+    create_status('Requested Revision', 'RREV')
+    create_status('Approved', 'APP')
+
+    # Add new Task statuses to StatusList
+    def update_status_lists(entity_type, status_code):
+        op.execute("""CREATE OR REPLACE FUNCTION add_status_to_status_list(status_list_id INT, status_id INT) RETURNS VOID AS $$
+        BEGIN
+            INSERT INTO "StatusList_Statuses" (status_list_id, status_id)
+            VALUES (status_list_id, status_id);
+        EXCEPTION WHEN OTHERS THEN
+            -- do nothning
+        END;
+        $$
+        LANGUAGE 'plpgsql';
+        
+        select NULL from add_status_to_status_list(
+            (SELECT id FROM "StatusLists" WHERE target_entity_type = '%(entity_type)s'),
+            (SELECT id FROM "Statuses" WHERE code = '%(status_code)s')
+        );""" % {
+            'entity_type': entity_type,
+            'status_code': status_code
+        })
+
+    # Task
+    for t in ['Task', 'Asset', 'Shot', 'Sequence']:
+        for s in ['WFD', 'RTS', 'WIP', 'OH', 'STOP', 'PREV', 'HREV', 'DREV',
+                  'CMPL']:
+            update_status_lists(t, s)
+
+    # drop function
+    op.execute("drop function add_status_to_status_list(integer, integer);")
+
+    # Remove NEW from Task, Asset, Shot and Sequence StatusList
+    op.execute("""DELETE FROM "StatusList_Statuses"
+WHERE status_list_id = (SELECT id FROM "StatusLists"
+  WHERE target_entity_type = 'Task')
+AND status_id = (SELECT id FROM "Statuses" WHERE "Statuses".code = 'NEW')
+""")
+    op.execute("""DELETE FROM "StatusList_Statuses"
+WHERE status_list_id = (SELECT id FROM "StatusLists"
+WHERE target_entity_type = 'Asset')
+AND status_id = (SELECT id FROM "Statuses" WHERE "Statuses".code = 'NEW')
+""")
+    op.execute("""DELETE FROM "StatusList_Statuses"
+WHERE status_list_id = (SELECT id FROM "StatusLists"
+WHERE target_entity_type = 'Shot')
+AND status_id = (SELECT id FROM "Statuses" WHERE "Statuses".code = 'NEW')
+""")
+    op.execute("""DELETE FROM "StatusList_Statuses"
+WHERE status_list_id = (SELECT id FROM "StatusLists"
+WHERE target_entity_type = 'Sequence')
+AND status_id = (SELECT id FROM "Statuses" WHERE "Statuses".code = 'NEW')
+""")
+
+    # Create Review StatusList
+    # Insert in to SimpleEntities
+    op.execute(
+        """INSERT INTO "SimpleEntities" (entity_type, name, description,
+created_by_id, updated_by_id, date_created, date_updated, type_id,
+thumbnail_id, html_style, html_class, stalker_version)
+VALUES ('StatusList', 'Review Status List', '', NULL, NULL,
+(SELECT CAST(NOW() at time zone 'utc' AS timestamp)),
+(SELECT CAST(NOW() at time zone 'utc' AS timestamp)), NULL, NULL,
+'', '', '%(stalker_version)s')""" %{ 'stalker_version': stalker.__version__})
+
+    # insert in to Entities and StatusLists
+    op.execute(
+        """INSERT INTO "Entities" (id)
+VALUES ((
+  SELECT id
+  FROM "SimpleEntities"
+  WHERE "SimpleEntities".name = 'Review Status List'
+));
+INSERT INTO "StatusLists" (id, target_entity_type)
+VALUES ((
+  SELECT id
+  FROM "SimpleEntities"
+  WHERE "SimpleEntities".name = 'Review Status List'), 'Review');""")
+
+    # Add Review Statues To StatusList_Statuses
+    # Add new Task statuses to StatusList
+    op.execute("""INSERT INTO "StatusList_Statuses" (status_list_id, status_id)
+VALUES
+    ((SELECT id FROM "StatusLists" WHERE target_entity_type = 'Review'),
+    (SELECT id FROM "Statuses" WHERE code = 'NEW')),
+    ((SELECT id FROM "StatusLists" WHERE target_entity_type = 'Review'),
+    (SELECT id FROM "Statuses" WHERE code = 'RREV')),
+    ((SELECT id FROM "StatusLists" WHERE target_entity_type = 'Review'),
+    (SELECT id FROM "Statuses" WHERE code = 'APP'))
+""")
+
     # Update all NEW Tasks to WFD
     op.execute("""update "Tasks"
 set status_id = (select id from "Statuses" where code='WFD')
 where status_id = (select id from "Statuses" where code='NEW')""")
+
+    # Update all PREV Tasks to WIP
+    op.execute("""update "Tasks"
+set status_id = (select id from "Statuses" where code='WIP')
+where status_id = (select id from "Statuses" where code='PREV')""")
+
+    # delete any other status from Task, Asset, Shot and Sequence Status Lists
+    map(lambda x:
+        op.execute("""DELETE FROM "StatusList_Statuses"
+        WHERE status_list_id=(
+          SELECT id
+          FROM "StatusLists"
+          WHERE target_entity_type='%s')
+          AND status_id in (
+            SELECT id
+            FROM "Statuses"
+            WHERE code NOT IN
+            ('WFD', 'RTS', 'WIP', 'OH', 'STOP', 'PREV', 'HREV', 'DREV', 'CMPL')
+        );""" % x), ['Task', 'Asset', 'Shot', 'Sequence']
+    )
+
+    # Update Tasks.review_number to 0 for all tasks
+    op.execute("""update "Tasks" set review_number = 0""")
+
+    # Shots._cut_in -> Shots.cut_in
+    op.alter_column(
+        u'Shots',
+        '_cut_in',
+        new_column_name='cut_in'
+    )
+
+    # Shots._cut_out -> Shots.cut_out
+    op.alter_column(
+        u'Shots',
+        '_cut_out',
+        new_column_name='cut_out'
+    )
+
+    # Tasks._schedule_seconds -> Tasks.schedule_seconds
+    op.alter_column(
+        u'Tasks',
+        '_schedule_seconds',
+        new_column_name='schedule_seconds'
+    )
+
+    # Tasks._total_logged_seconds -> Tasks.total_logged_seconds
+    op.alter_column(
+        u'Tasks',
+        '_total_logged_seconds',
+        new_column_name='total_logged_seconds'
+    )
 
 
 def downgrade():
@@ -416,7 +545,7 @@ def downgrade():
     )
     op.drop_column(u'Tasks', 'persistent_allocation')
     op.drop_column(u'Tasks', 'allocation_strategy')
-    op.drop_column(u'Tasks', '_review_number')
+    op.drop_column(u'Tasks', 'review_number')
     op.alter_column(
         u'Task_Dependencies',
         'depends_to_id',
@@ -468,17 +597,61 @@ set status_id = (select id from "Statuses" where code='WIP')
 where status_id = (select id from "Statuses" where code='STOP')""")
 
     # Delete Statuses
-    op.execute("""DELETE FROM "Statuses" WHERE
+    op.execute("""DELETE FROM "StatusList_Statuses" WHERE
+    status_id IN (
+    select id FROM "SimpleEntities" WHERE
+    name IN ('Waiting For Dependency', 'Dependency Has Revision', 'On Hold',
+    'Stopped', 'Requested Revision', 'Approved'));
+    DELETE FROM "Statuses" WHERE
+      id IN (select id FROM "SimpleEntities" WHERE
+    name IN ('Waiting For Dependency', 'Dependency Has Revision', 'On Hold',
+    'Stopped', 'Requested Revision', 'Approved'));
+    DELETE FROM "Entities" WHERE
     id IN (select id FROM "SimpleEntities" WHERE
     name IN ('Waiting For Dependency', 'Dependency Has Revision', 'On Hold',
-    'Stopped'))
-    """)
-    op.execute("""DELETE FROM "Entities" WHERE
-    id IN (select id FROM "SimpleEntities" WHERE
+    'Stopped', 'Requested Revision', 'Approved'));
+    DELETE FROM "SimpleEntities" WHERE
     name IN ('Waiting For Dependency', 'Dependency Has Revision', 'On Hold',
-    'Stopped'))
+    'Stopped', 'Requested Revision', 'Approved');
     """)
-    op.execute("""DELETE FROM "SimpleEntities" WHERE
-    name IN ('Waiting For Dependency', 'Dependency Has Revision', 'On Hold',
-    'Stopped')
+
+    # Delete Review Status List
+    op.execute("""
+    DELETE FROM "StatusList_Statuses"
+    WHERE status_list_id=(SELECT id FROM "SimpleEntities" WHERE name='Review Status List');
+    DELETE FROM "StatusLists"
+    WHERE id=(SELECT id FROM "SimpleEntities" WHERE name='Review Status List');
+    DELETE FROM "Entities"
+    WHERE id=(SELECT id FROM "SimpleEntities" WHERE name='Review Status List');
+    DELETE FROM "SimpleEntities" WHERE
+    name = 'Review Status List';
     """)
+
+    # column name changes
+    # Shots._cut_in -> Shots.cut_in
+    op.alter_column(
+        u'Shots',
+        'cut_in',
+        new_column_name='_cut_in'
+    )
+
+    # Shots._cut_out -> Shots.cut_out
+    op.alter_column(
+        u'Shots',
+        'cut_out',
+        new_column_name='_cut_out'
+    )
+
+    # Tasks._schedule_seconds -> Tasks.schedule_seconds
+    op.alter_column(
+        u'Tasks',
+        'schedule_seconds',
+        new_column_name='_schedule_seconds'
+    )
+
+    # Tasks._total_logged_seconds -> Tasks.total_logged_seconds
+    op.alter_column(
+        u'Tasks',
+        'total_logged_seconds',
+        new_column_name='_total_logged_seconds'
+    )

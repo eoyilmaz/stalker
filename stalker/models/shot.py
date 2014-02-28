@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 from sqlalchemy import Column, Integer, ForeignKey, Table
-from sqlalchemy.orm import relationship, synonym, validates, reconstructor
+from sqlalchemy.orm import relationship, synonym, validates
 
 from stalker import ImageFormat
 from stalker.db.declarative import Base
@@ -40,7 +40,7 @@ class Shot(Task, CodeMixin):
 
        .. deprecated:: 0.1.2
 
-       Because most of the shots in different projects are going to have
+       Because most of the shots in different projects may going to have
        the same name, which is a kind of a code like SH001, SH012A etc., and
        in Stalker you can not have two entities with the same name if their
        types are also matching, to guarantee all the shots are going to have
@@ -177,8 +177,8 @@ class Shot(Task, CodeMixin):
 
     # the cut_duration attribute is not going to be stored in the database,
     # only the cut_in and cut_out will be enough to calculate the cut_duration
-    _cut_in = Column(Integer)
-    _cut_out = Column(Integer)
+    _cut_in = Column("cut_in", Integer)
+    _cut_out = Column("cut_out", Integer)
 
     def __init__(self,
                  code=None,
@@ -218,13 +218,6 @@ class Shot(Task, CodeMixin):
         self._cut_out = cut_out
 
         self._update_cut_info(cut_in, cut_duration, cut_out)
-
-    @reconstructor
-    def __init_on_load(self):
-        """set cut duration attribute
-        """
-        setattr(self, '_cut_duration', None)
-        self._update_cut_info(self._cut_in, None, self._cut_out)
 
     def __repr__(self):
         """the representation of the Shot
@@ -364,8 +357,11 @@ class Shot(Task, CodeMixin):
 
     @property
     def cut_duration(self):
-        if self._cut_duration is None:
-            self._update_cut_info(self._cutin, None, self._cut_out)
+        try:
+            if self._cut_duration is None:
+                self._update_cut_info(self._cut_in, None, self._cut_out)
+        except AttributeError:
+            self._update_cut_info(self._cut_in, None, self._cut_out)
         return self._cut_duration
 
     @cut_duration.setter

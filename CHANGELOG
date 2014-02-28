@@ -2,6 +2,34 @@
 Stalker Changes
 ===============
 
+0.2.5.4
+=======
+
+* **Update:** The following column names are updated:
+  
+  * ``Tasks._review_number`` to ``Tasks.review_number``
+  * ``Tasks._schedule_seconds`` to ``Tasks.schedule_seconds``
+  * ``Tasks._total_logged_seconds`` to ``Tasks.total_logged_seconds``
+  * ``Reviews._review_number`` to ``Reviews.review_number``
+  * ``Shots._cut_in`` to ``Shots.cut_in``
+  * ``Shots._cut_out`` to ``Shots.cut_out``
+  
+  Also updated alembic migration to create columns with those names.
+
+* **Update:** Updated Alembic revision ``433d9caaafab`` (the one related with
+  stalker 2.5 update) to also include following updates:
+  
+  * Create StatusLists for Tasks, Asset, Shot and Sequences and add all the
+    Statuses in the Task Status Workflow.
+  * Remove ``NEW`` from all of the status lists of Task, Asset, Shot and
+    Sequence.
+  * Update all the ``PREV`` tasks to ``WIP`` to let them use the new Review
+    Workflow.
+  * Update the ``Tasks.review_number`` to 0 for all tasks.
+  * Create StatusLists and Statuses (``NEW``, ``RREV``, ``APP``) for Reviews.
+  * Remove any other status then defined in the Task Status Workflow from Task,
+    Asset, Shot and Sequence status list.
+
 0.2.5.3
 =======
 

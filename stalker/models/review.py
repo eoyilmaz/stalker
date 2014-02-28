@@ -112,7 +112,7 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
         primaryjoin='Reviews.c.reviewer_id==Users.c.id'
     )
 
-    _review_number = Column(Integer, default=1)
+    _review_number = Column("review_number", Integer, default=1)
 
     def __init__(self,
                  task=None,
