@@ -55,6 +55,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         DBSession.add(self.test_user2)
 
         # create a couple of tasks
+        self.status_new = Status.query.filter_by(code='NEW').first()
         self.status_wfd = Status.query.filter_by(code='WFD').first()
         self.status_rts = Status.query.filter_by(code='RTS').first()
         self.status_wip = Status.query.filter_by(code='WIP').first()
@@ -1316,6 +1317,9 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         reviews = self.test_task3.request_review()
         review1 = reviews[0]
         review2 = reviews[1]
+
+        self.assertEqual(review1.status, self.status_new)
+        self.assertEqual(review2.status, self.status_new)
 
         review3 = self.test_task3.request_revision(
             reviewer=self.test_user2,

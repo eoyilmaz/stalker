@@ -2170,18 +2170,18 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         reviews_to_be_deleted = []
         for r in self.reviews:
             if r.status.code == 'NEW':
-                try:
-                    DBSession.delete(r)
-                except InvalidRequestError:
-                    # not persisted yet
-                    DBSession.add(r)
-                    reviews_to_be_deleted.append(r)
-                    pass
-        DBSession.commit()
+                reviews_to_be_deleted.append(r)
 
         for r in reviews_to_be_deleted:
-            DBSession.delete(r)
-        DBSession.commit()
+            logger.debug('removing %s from task.reviews' % r)
+            self.reviews.remove(r)
+            r.task = None
+            try:
+                DBSession.delete(r)
+            except InvalidRequestError:
+                # not persisted yet
+                # do nothing
+                pass
         # *********************************************************************
 
         # create a Review instance with the given data
@@ -2394,42 +2394,42 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             'CMPL': 1
         }
 
-        if self.id:
-            # use pure sql
-            logger.debug('using pure SQL to query dependency statuses')
-            sql_query = """
-                select
-                    "Statuses".code
-                from "Tasks"
-                    join "Task_Dependencies" on "Tasks".id = "Task_Dependencies".task_id
-                    join "Tasks" as "Dependent_Tasks" on "Task_Dependencies".depends_to_id = "Dependent_Tasks".id
-                    join "Statuses" on "Dependent_Tasks".status_id = "Statuses".id
-                where "Tasks".id = %s
-                group by "Statuses".code
-            """ % self.id
-
-            result = DBSession.connection().execute(sql_query)
-
-            # convert to a binary value
-            binary_status = reduce(
-                lambda x, y: x+y,
-                map(lambda x: binary_status_codes[x[0]], result.fetchall()),
-                0
-            )
-
-        else:
-            # task is not committed yet, use Python version
-            logger.debug('using pure Python to query dependency statuses')
-            binary_status = 0
-            dep_statuses = []
-            # with DBSession.no_autoflush:
-            logger.debug('self.depends in update_status_with_dependent_statuses: %s' % self.depends)
-            # for dep in self.depends:
-            for dep in dep_list:
-                # consider every status only once
-                if dep.status not in dep_statuses:
-                    dep_statuses.append(dep.status)
-                    binary_status += binary_status_codes[dep.status.code]
+        # if self.id:
+        #     # use pure sql
+        #     logger.debug('using pure SQL to query dependency statuses')
+        #     sql_query = """
+        #         select
+        #             "Statuses".code
+        #         from "Tasks"
+        #             join "Task_Dependencies" on "Tasks".id = "Task_Dependencies".task_id
+        #             join "Tasks" as "Dependent_Tasks" on "Task_Dependencies".depends_to_id = "Dependent_Tasks".id
+        #             join "Statuses" on "Dependent_Tasks".status_id = "Statuses".id
+        #         where "Tasks".id = %s
+        #         group by "Statuses".code
+        #     """ % self.id
+        # 
+        #     result = DBSession.connection().execute(sql_query)
+        # 
+        #     # convert to a binary value
+        #     binary_status = reduce(
+        #         lambda x, y: x+y,
+        #         map(lambda x: binary_status_codes[x[0]], result.fetchall()),
+        #         0
+        #     )
+        # 
+        # else:
+        # task is not committed yet, use Python version
+        logger.debug('using pure Python to query dependency statuses')
+        binary_status = 0
+        dep_statuses = []
+        # with DBSession.no_autoflush:
+        logger.debug('self.depends in update_status_with_dependent_statuses: %s' % self.depends)
+        # for dep in self.depends:
+        for dep in dep_list:
+            # consider every status only once
+            if dep.status not in dep_statuses:
+                dep_statuses.append(dep.status)
+                binary_status += binary_status_codes[dep.status.code]
 
         logger.debug('status of the task: %s' % self.status.code)
         logger.debug('binary status for dependency statuses: %s' %
@@ -2461,6 +2461,10 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         # also update parent statuses
         self.update_parent_statuses()
 
+        # # also update dependent tasks
+        # for dep in dep_list:
+        #     dep.update_status_with_dependent_statuses()
+
     def update_parent_statuses(self):
         """updates the parent statuses of this task if any
         """
@@ -2470,8 +2474,9 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     def update_status_with_children_statuses(self):
         """updates the task status according to its children statuses
         """
-        logger.debug('setting statuses with child statuses for: %s' %
-                     self.name)
+        logger.debug(
+            'setting statuses with child statuses for: %s' % self.name
+        )
 
         if not self.is_container:
             # do nothing

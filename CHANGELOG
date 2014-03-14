@@ -2,6 +2,13 @@
 Stalker Changes
 ===============
 
+0.2.5.5
+=======
+
+* **Fix:** ``Review.task`` attribute now accepts None but this is mainly done
+  to allow its relation to the ``Task`` instance can be broken when it needs to
+  be deleted without issuing a database commit.
+
 0.2.5.4
 =======
 

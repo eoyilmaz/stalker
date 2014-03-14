@@ -2902,9 +2902,9 @@ class DatabaseModelsTester(unittest2.TestCase):
         DBSession.add(version4)
         DBSession.commit()
 
-        version4.inputs = [version2]
         version3.inputs = [version2]
         version2.inputs = [version1]
+        version2.inputs = [version4]
         DBSession.add(version1)
         DBSession.commit()
 
@@ -2991,9 +2991,9 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(schedule_model, task1_db.schedule_model)
         self.assertEqual(schedule_timing, task1_db.schedule_timing)
         self.assertEqual(schedule_unit, task1_db.schedule_unit)
-        self.assertEqual(version2.inputs, [version1])
+        self.assertEqual(version2.inputs, [version4])
         self.assertEqual(version3.inputs, [version2])
-        self.assertEqual(version4.inputs, [version2])
+        self.assertEqual(version4.inputs, [])
 
         # delete tests
 
@@ -3657,3 +3657,22 @@ class DatabaseModelsTester(unittest2.TestCase):
         DBSession.commit()
 
         self.assertEqual(test_version_2.inputs, [])
+
+        # create a new version append it to version_2.inputs and then delete
+        # version_2
+        test_version_3 = Version(
+            name='version for task modeling',
+            task=test_task,
+            take='MAIN',
+            full_path='M:/Shows/Proj1/Seq1/Shots/SH001/Ligting'
+            '/Proj1_Seq1_Sh001_MAIN_Lighting_v003.ma'
+        )
+        test_version_2.inputs.append(test_version_3)
+        self.assertEqual(test_version_2.inputs, [test_version_3])
+        DBSession.add(test_version_3)
+        DBSession.commit()
+
+        # now delete test_version_3
+        DBSession.delete(test_version_2)
+        DBSession.commit()
+

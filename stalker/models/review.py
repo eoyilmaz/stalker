@@ -140,23 +140,25 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
     def _validate_task(self, key, task):
         """validates the given task value
         """
-        from stalker.models.task import Task
-        if not isinstance(task, Task):
-            raise TypeError(
-                '%s.task should be an instance of stalker.models.task.Task, '
-                'not %s' %
-                (self.__class__.__name__, task.__class__.__name__)
-            )
+        if task is not None:
+            from stalker.models.task import Task
 
-        # is it a leaf task
-        if not task.is_leaf:
-            raise ValueError(
-                'It is only possible to create a review for a leaf tasks, and '
-                '%s is not a leaf task.' % task
-            )
+            if not isinstance(task, Task):
+                raise TypeError(
+                    '%s.task should be an instance of '
+                    'stalker.models.task.Task, not %s' %
+                    (self.__class__.__name__, task.__class__.__name__)
+                )
 
-        # set the review_number of this review instance
-        self._review_number = task.review_number + 1
+            # is it a leaf task
+            if not task.is_leaf:
+                raise ValueError(
+                    'It is only possible to create a review for a leaf tasks, '
+                    'and %s is not a leaf task.' % task
+                )
+
+            # set the review_number of this review instance
+            self._review_number = task.review_number + 1
 
         return task
 
@@ -187,17 +189,9 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
     def review_set(self):
         """returns the Review instances in the same review set
         """
-        reviews = []
         logger.debug('finding revisions with the same review_number of: %s' %
                      self.review_number)
         with DBSession.no_autoflush:
-            # if self in DBSession:
-            #     logger.debug('using SQLAlchemy to get review set')
-            #     reviews = Review.query\
-            #         .filter_by(task=self.task)\
-            #         .filter_by(review_number=self.review_number)\
-            #         .all()
-            # else:
             logger.debug('using raw Python to get review set')
             reviews = []
             rev_num = self.review_number

@@ -141,18 +141,18 @@ class ReviewTestCase(unittest2.TestCase):
         """
         DBSession.remove()
 
-    def test_task_argument_is_skipped(self):
-        """testing if a TypeError will be raised when the task argument is
-        skipped
-        """
-        self.kwargs.pop('task')
-        self.assertRaises(TypeError, Review, **self.kwargs)
+    # def test_task_argument_is_skipped(self):
+    #     """testing if a TypeError will be raised when the task argument is
+    #     skipped
+    #     """
+    #     self.kwargs.pop('task')
+    #     self.assertRaises(TypeError, Review, **self.kwargs)
 
-    def test_task_argument_is_None(self):
-        """testing if a TypeError will be raised when the task argument is None
-        """
-        self.kwargs['task'] = None
-        self.assertRaises(TypeError, Review, **self.kwargs)
+    # def test_task_argument_is_None(self):
+    #     """testing if a TypeError will be raised when the task argument is None
+    #     """
+    #     self.kwargs['task'] = None
+    #     self.assertRaises(TypeError, Review, **self.kwargs)
 
     def test_task_argument_is_not_a_Task_instance(self):
         """testing if a TypeError will be raised when the task argument value
