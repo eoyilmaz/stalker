@@ -2,6 +2,12 @@
 Stalker Changes
 ===============
 
+0.2.6
+=====
+
+* **New:** Added ``stalker.models.wiki.Page`` class, for holding a per Project
+  wiki.
+
 0.2.5.5
 =======
 

@@ -2394,6 +2394,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             'CMPL': 1
         }
 
+        # Keep this part for future reference
         # if self.id:
         #     # use pure sql
         #     logger.debug('using pure SQL to query dependency statuses')

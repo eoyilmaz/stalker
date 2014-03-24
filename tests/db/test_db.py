@@ -32,7 +32,7 @@ from stalker import (db, defaults, Asset, Department, SimpleEntity, Entity,
                      Sequence, Shot, Status, StatusList, Structure, Tag, Task,
                      Type, FilenameTemplate, User, Version, Permission, Group,
                      TimeLog, Ticket, Scene, WorkingHours, Studio, Vacation,
-                     TicketLog)
+                     TicketLog, Page)
 import logging
 from stalker import log
 
@@ -1025,6 +1025,117 @@ class DatabaseModelsTester(unittest2.TestCase):
         # we should still have the project
         self.assertIsNotNone(
             Project.query.filter(Project.id == project.id).first()
+        )
+
+    def test_persistence_of_Page(self):
+        """testing the persistence of Page
+        """
+        test_user = User(
+            name='Test User',
+            login='tu',
+            email='test@user.com',
+            password='secret'
+        )
+
+        status1 = Status(name='On Hold A', code='OHA')
+        status2 = Status(name='Completed A', code='CMPLTA')
+        status3 = Status(name='Work In Progress A', code='WIPA')
+
+        test_repository_type = Type(
+            name='Test Repository Type A',
+            code='trta',
+            target_entity_type=Repository,
+        )
+
+        test_repository = Repository(
+            name='Test Repository A',
+            type=test_repository_type
+        )
+
+        project_status_list = StatusList(
+            name='Project Status List A',
+            statuses=[status1, status2, status3],
+            target_entity_type='Project',
+        )
+
+        commercial_type = Type(
+            name='Commercial A',
+            code='comm',
+            target_entity_type=Project
+        )
+
+        test_project = Project(
+            name='Test Project For Asset Creation',
+            code='TPFAC',
+            status_list=project_status_list,
+            type=commercial_type,
+            repository=test_repository,
+        )
+
+        DBSession.add(test_project)
+        DBSession.commit()
+
+        kwargs = {
+            'title': 'Test Wiki Page',
+            'content': 'This is a test wiki page',
+            'project': test_project,
+            'created_by': test_user
+        }
+
+        test_page = Page(**kwargs)
+
+        DBSession.add(test_page)
+        DBSession.commit()
+
+        created_by = test_page.created_by
+        date_created = test_page.date_created
+        date_updated = test_page.date_updated
+        name = test_page.name
+        nice_name = test_page.nice_name
+        project = test_page.project
+        tags = test_page.tags
+        updated_by = test_page.updated_by
+        title = test_page.title
+        content = test_page.content
+        notes = test_page.notes
+
+        del test_page
+
+        test_page_db = Page.query.filter_by(title=kwargs['title']).one()
+
+        assert (isinstance(test_page_db, Page))
+
+        #self.assertEqual(test_asset, test_asset_DB)
+        self.assertIsNotNone(test_page_db.created_by)
+        self.assertEqual(created_by, test_page_db.created_by)
+        self.assertEqual(date_created, test_page_db.date_created)
+        self.assertEqual(date_updated, test_page_db.date_updated)
+        self.assertEqual(content, test_page_db.content)
+        self.assertEqual(name, test_page_db.name)
+        self.assertEqual(nice_name, test_page_db.nice_name)
+        self.assertEqual(notes, test_page_db.notes)
+        self.assertEqual(project, test_page_db.project)
+        self.assertEqual(tags, test_page_db.tags)
+        self.assertEqual(title, test_page_db.title)
+        self.assertEqual(updated_by, test_page_db.updated_by)
+
+        # now test the deletion of the asset class
+        DBSession.delete(test_page_db)
+        DBSession.commit()
+
+        # we should still have the user
+        self.assertIsNotNone(
+            User.query.filter(User.id == created_by.id).first()
+        )
+
+        # we should still have the project
+        self.assertIsNotNone(
+            Project.query.filter(Project.id == project.id).first()
+        )
+
+        # and we should have our page deleted
+        self.assertIsNone(
+            Page.query.filter(Page.title == kwargs['title']).first()
         )
 
     def test_persistence_of_TimeLog(self):

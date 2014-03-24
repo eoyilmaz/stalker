@@ -298,8 +298,7 @@ class SimpleEntity(Base):
 
         if not isinstance(description, (str, unicode)):
             raise TypeError(
-                '%s.description should be an instance of string or unicode, '
-                'not %s' %
+                '%s.description should be an instance of string, not %s' %
                 (self.__class__.__name__, description.__class__.__name__)
             )
         return description

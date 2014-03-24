@@ -61,4 +61,4 @@ Summary
    stalker.models.type.EntityType
    stalker.models.type.Type
    stalker.models.version.Version
-
+   stalker.models.wiki.Page
