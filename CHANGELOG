@@ -2,6 +2,13 @@
 Stalker Changes
 ===============
 
+0.2.6.2
+=======
+
+* **Fix:** Fixed ``stalker.models.studio.schedule()`` method, and prevented it
+  to call ``DBSession.commit()`` which causes errors if there is a transaction
+  manager.
+
 0.2.6.1
 =======
 

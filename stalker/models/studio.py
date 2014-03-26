@@ -29,7 +29,6 @@ from sqlalchemy import (Column, Integer, ForeignKey, Interval, Boolean,
 from sqlalchemy.orm import validates, relationship, synonym, reconstructor
 
 from stalker import defaults, log
-from stalker.db.session import DBSession
 from stalker.models.entity import SimpleEntity, Entity
 from stalker.models.mixins import DateRangeMixin, WorkingHoursMixin
 from stalker.models.schedulers import SchedulerBase
@@ -422,7 +421,7 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         else:
             # set to self.is_scheduling
             self.is_scheduling = True
-            self.is_scheudling_by = scheduled_by
+            self.is_scheduling_by = scheduled_by
 
         self.scheduling_started_at = datetime.datetime.now()
 
@@ -431,7 +430,7 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         start = time.time()
 
         # commit before scheduling
-        DBSession.commit()
+        #DBSession.commit()
 
         result = None
         try:
@@ -453,7 +452,7 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
             if scheduled_by:
                 self.last_scheduled_by = scheduled_by
 
-            DBSession.commit()
+            #DBSession.commit()
 
         end = time.time()
         logger.debug('scheduling took %s seconds' % (end - start))
