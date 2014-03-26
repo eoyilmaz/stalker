@@ -92,3 +92,15 @@ class StatusError(Exception):
 
     def __str__(self):
         return repr(self.value)
+
+
+class DependencyViolationError(Exception):
+    """Raised when a TimeLog violates the dependency relation betweeen tasks
+    """
+
+    def __init__(self, value=""):
+        super(DependencyViolationError, self).__init__(value)
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)

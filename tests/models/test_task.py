@@ -1723,7 +1723,9 @@ class TaskTester(unittest2.TestCase):
         container task
         """
         self.test_task.status = self.status_rts
-
+        self.test_task.depends = []  # remove dependencies just for make it
+                                     # easy to create time logs after stalker
+                                     # v0.2.6.1
         dt = datetime.datetime
         td = datetime.timedelta
         now = dt.now()
@@ -1737,8 +1739,8 @@ class TaskTester(unittest2.TestCase):
         tlog1 = TimeLog(
             task=self.test_task,
             resource=self.test_task.resources[0],
-            start=now,
-            end=now + td(hours=2)
+            start=now - td(hours=4),
+            end=now - td(hours=2)
         )
 
         self.assertIn(tlog1, self.test_task.time_logs)
@@ -1746,8 +1748,8 @@ class TaskTester(unittest2.TestCase):
         tlog2 = TimeLog(
             task=self.test_task,
             resource=self.test_task.resources[1],
-            start=now,
-            end=now + td(hours=5)
+            start=now - td(hours=4),
+            end=now + td(hours=1)
         )
         self.test_task.parent = parent_task
 

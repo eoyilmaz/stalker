@@ -38,7 +38,7 @@ from stalker.models.mixins import (DateRangeMixin, StatusMixin, ReferenceMixin,
                                    ScheduleMixin)
 from stalker.models.status import Status
 from stalker.exceptions import (OverBookedError, CircularDependencyError,
-                                StatusError)
+                                StatusError, DependencyViolationError)
 from stalker.log import logging_level
 
 logger = logging.getLogger(__name__)
@@ -200,6 +200,34 @@ class TimeLog(Entity, DateRangeMixin):
 
             # adjust task schedule
             self._expand_task_schedule_timing(task)
+
+            # check dependent tasks
+            for task_dependencies in task.task_depends_to:
+                dep_task = task_dependencies.depends_to
+                dependency_target = task_dependencies.dependency_target
+                raise_violation_error = False
+                violation_date = None
+
+                if dependency_target == 'onend':
+                    # time log can not start before the end date of this task
+                    if self.start < dep_task.end:
+                        raise_violation_error = True
+                        violation_date = dep_task.end
+                elif dependency_target == 'onstart':
+                    if self.start < dep_task.start:
+                        raise_violation_error = True
+                        violation_date = dep_task.start
+
+                if raise_violation_error:
+                    raise DependencyViolationError(
+                        'It is not possible to create a TimeLog before '
+                        '%s, which violates the dependency relation of '
+                        '"%s" to "%s"' % (
+                            violation_date,
+                            task.name,
+                            dep_task.name,
+                        )
+                    )
 
         # this may need to be in an external event, it needs to trigger a flush
         # to correctly function

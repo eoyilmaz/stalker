@@ -22,7 +22,8 @@ import unittest2
 import datetime
 from stalker import (Project, Repository, Status, StatusList, Task, TimeLog,
                      User)
-from stalker.exceptions import OverBookedError, StatusError
+from stalker.exceptions import OverBookedError, StatusError, \
+    DependencyViolationError
 
 
 class TimeLogTester(unittest2.TestCase):
@@ -778,8 +779,115 @@ class TimeLogDBTestCase(unittest2.TestCase):
         self.assertEqual(task.status, self.status_cmpl)
         self.assertRaises(StatusError, TimeLog, **self.kwargs)
 
-    def test_time_log_creation_that_violates_dependency_condition(self):
+    def test_time_log_creation_that_violates_dependency_condition_WIP_CMPL_onend(self):
+        """testing if a DependencyViolationError will be raised when the entered
+        TimeLog will violate the dependency relation of the task
+
+            +--------+
+            | Task 1 | ----+
+            |  CMPL  |     |
+            +--------+     |    +--------+
+                           +--->| Task 2 |
+                                |  WIP   |
+                                +--------+
+        """
+        task = self.kwargs['task']
+        task.status = self.status_cmpl
+        task.start = datetime.datetime(2014, 3, 16, 10, 0)
+        task.end = datetime.datetime(2014, 3, 25, 19, 0)
+
+        dep_task = Task(
+            name="test task 2",
+            project=self.test_project,
+            status_list=self.test_task_status_list,
+            schedule_timing=10,
+            schedule_unit='d',
+            depends=[task],
+            resources=[self.test_resource2]
+        )
+
+        # set the dependency target to onend
+        dep_task.task_depends_to[0].dependency_target = 'onend'
+
+        # entering a time log to the dates before 2014-03-25-19-0 should raise
+        # a ValueError
+        with self.assertRaises(DependencyViolationError) as cm:
+            dep_task.create_time_log(
+                self.test_resource2,
+                datetime.datetime(2014, 3, 25, 18, 0),
+                datetime.datetime(2014, 3, 25, 19, 0)
+            )
+
+        self.assertEqual(
+            'It is not possible to create a TimeLog before %s, which violates '
+            'the dependency relation of "%s" to "%s"' % (
+                datetime.datetime(2014, 3, 25, 19, 0),
+                dep_task.name,
+                task.name
+            ),
+            cm.exception.message
+        )
+
+        # and creating a TimeLog after that is possible
+        dep_task.create_time_log(
+            self.test_resource2,
+            datetime.datetime(2014, 3, 25, 19, 0),
+            datetime.datetime(2014, 3, 25, 20, 0)
+        )
+
+    def test_time_log_creation_that_violates_dependency_condition_WIP_CMPL_onstart(self):
         """testing if a ValueError will be raised when the entered TimeLog will
         violate the dependency relation of the task
+
+            +--------+
+          +-| Task 1 |
+          | |  CMPL  |
+          | +--------+          +--------+
+          +-------------------->| Task 2 |
+                                |  WIP   |
+                                +--------+
         """
-        self.fail('test is not implemented yet')
+        task = self.kwargs['task']
+        task.status = self.status_cmpl
+        task.start = datetime.datetime(2014, 3, 16, 10, 0)
+        task.end = datetime.datetime(2014, 3, 25, 19, 0)
+
+        dep_task = Task(
+            name="test task 2",
+            project=self.test_project,
+            status_list=self.test_task_status_list,
+            schedule_timing=10,
+            schedule_unit='d',
+            depends=[task],
+            resources=[self.test_resource2]
+        )
+
+        # set the dependency target to onstart
+        dep_task.task_depends_to[0].dependency_target = 'onstart'
+
+        # entering a time log to the dates before 2014-03-16-10-0 should raise
+        # a ValueError
+        with self.assertRaises(DependencyViolationError) as cm:
+            dep_task.create_time_log(
+                self.test_resource2,
+                datetime.datetime(2014, 3, 16, 9, 0),
+                datetime.datetime(2014, 3, 16, 10, 0)
+            )
+
+        self.assertEqual(
+            'It is not possible to create a TimeLog before %s, which violates '
+            'the dependency relation of "%s" to "%s"' % (
+                datetime.datetime(2014, 3, 16, 10, 0),
+                dep_task.name,
+                task.name
+            ),
+            cm.exception.message
+        )
+
+        # and creating a TimeLog after that is possible
+        dep_task.create_time_log(
+            self.test_resource2,
+            datetime.datetime(2014, 3, 16, 10, 0),
+            datetime.datetime(2014, 3, 16, 10, 0)
+        )
+
