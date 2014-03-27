@@ -263,12 +263,15 @@ class TaskJugglerScheduler(SchedulerBase):
                     )
 
                     # computed_resources
-                    resources_data = map(
-                        lambda x: x.split('_')[-1].split(')')[0],
-                        data[3].split(',')
-                    )
-                    computed_resources = \
-                        User.query.filter(User.id.in_(resources_data)).all()
+                    computed_resources = []
+                    if data[3] != '':
+                        resources_data = map(
+                            lambda x: x.split('_')[-1].split(')')[0],
+                            data[3].split(',')
+                        )
+                        computed_resources = \
+                            User.query\
+                                .filter(User.id.in_(resources_data)).all()
 
                     entity.computed_start = start_date
                     entity.computed_end = end_date

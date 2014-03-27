@@ -8,6 +8,8 @@ Stalker Changes
 * **Fix:** Fixed ``stalker.models.studio.schedule()`` method, and prevented it
   to call ``DBSession.commit()`` which causes errors if there is a transaction
   manager.
+* **Fix:** Fixed ``stalker.models._parse_csv_file()`` method for empty
+  computed resources list.
 
 0.2.6.1
 =======
