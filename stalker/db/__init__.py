@@ -95,10 +95,11 @@ def init():
     # register all Actions available for all SOM classes
     class_names = [
         'Asset', 'TimeLog', 'Department', 'Entity', 'FilenameTemplate',
-        'Group', 'ImageFormat', 'Link', 'Message', 'Note', 'Permission',
-        'Project', 'Repository', 'Review', 'Scene', 'Sequence', 'Shot',
-        'SimpleEntity', 'Status', 'StatusList', 'Structure', 'Studio', 'Tag',
-        'Task', 'Ticket', 'TicketLog', 'Type', 'User', 'Vacation', 'Version']
+        'Group', 'ImageFormat', 'Link', 'Message', 'Note', 'Page',
+        'Permission', 'Project', 'Repository', 'Review', 'Scene', 'Sequence',
+        'Shot', 'SimpleEntity', 'Status', 'StatusList', 'Structure', 'Studio',
+        'Tag', 'Task', 'Ticket', 'TicketLog', 'Type', 'User', 'Vacation',
+        'Version']
 
     for class_name in class_names:
         _temp = __import__(

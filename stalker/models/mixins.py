@@ -651,12 +651,14 @@ class DateRangeMixin(object):
 
     @classmethod
     def round_time(cls, dt):
-        """Round a datetime object to any time laps in seconds.
+        """Round the given datetime object to the defaults.timing_resolution.
 
-        Uses class defaults.timing_resolution as the closest number of seconds
-        to round to.
+        Uses :class:`stalker.defaults.timing_resolution` as the closest number
+        of seconds to round to.
 
-        :param dt: datetime.datetime object, defaults now.
+        :param dt: datetime.datetime object, defaults to now.
+
+        :type dt: datetime.datetime
 
         Based on Thierry Husson's answer in `Stackoverflow`_
 
@@ -668,7 +670,6 @@ class DateRangeMixin(object):
         trs = timing_resolution.days * 86400 + timing_resolution.seconds
 
         # convert to seconds
-        # FIX: using strftime(%s) is dangerous, it uses system time zone
         epoch = datetime.datetime(1970, 1, 1)
         diff = dt - epoch
         diff_in_seconds = diff.days * 86400 + diff.seconds

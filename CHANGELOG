@@ -2,6 +2,14 @@
 Stalker Changes
 ===============
 
+0.2.6.3
+=======
+
+* **Fix:** Added ``Page`` to ``class_names`` in ``db.init()``.
+* **Fix:** Fixed ``TimeLog`` tjp representation to use bot the ``start`` and
+  ``end`` date values instead of the ``start`` and ``duration``. This is much
+  better because it is independent from the timing resolution settings.
+
 0.2.6.2
 =======
 

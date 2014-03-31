@@ -1,6 +1,7 @@
 *~*
 *.pyc
 docs/html/*
+docs/build/*
 docs/latex/*
 docs/doctrees/*
 docs/source/generated/*
