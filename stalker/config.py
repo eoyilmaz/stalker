@@ -325,7 +325,7 @@ task {{task.tjp_id}} "{{task.name}}" {
             {%- endfor %}
         {%- endif %}
         {% for time_log in task.time_logs %}
-            booking {{time_log.resource.tjp_id}} {{time_log.start.strftime('%Y-%m-%d-%H:%M:%S')}}-{{time_log.end.strftime('%Y-%m-%d-%H:%M:%S')}} { overtime 2 }
+            booking {{time_log.resource.tjp_id}} {{time_log.start.strftime('%Y-%m-%d-%H:%M:%S')}} - {{time_log.end.strftime('%Y-%m-%d-%H:%M:%S')}} { overtime 2 }
         {%- endfor %}
     {% endif %}
 
