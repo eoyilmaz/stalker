@@ -9,6 +9,9 @@ Stalker Changes
   set of reviews. It will return the latest set of reviews if ``review_number``
   is skipped or it is None.
 
+* **Update:** Removed ``Task.approve()`` it was making things complex than it
+  should be.
+
 0.2.6.3
 =======
 

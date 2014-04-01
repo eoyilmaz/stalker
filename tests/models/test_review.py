@@ -603,7 +603,10 @@ class ReviewTestCase(unittest2.TestCase):
         self.assertEqual(review1.review_number, 1)
         self.assertEqual(review2.review_number, 1)
         self.assertEqual(review3.review_number, 1)
-        self.task1.approve()
+
+        review1.approve()
+        review2.approve()
+        review3.approve()
 
         review4 = self.task1.request_revision(reviewer=self.user1)
 

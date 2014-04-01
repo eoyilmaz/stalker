@@ -2332,36 +2332,6 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         # and update parents statuses
         self.update_parent_statuses()
 
-    def approve(self, reviewer, description=''):
-        """Approves a PREV task and sets its status to CMPL.
-
-        This method is a shortcut for concluding reviews by deleting non
-        finalized Review instances.
-
-        So it will let the other reviews to be enough to finalize the review
-        set. If there is only one review instance in the current review set,
-        then this will update its reviewer with the supplied user instance and
-        let the task be finalized.
-
-        It will create a new Review instance if all of the open Review
-        instances are still not finalized (Review.status == NEW)
-        """
-        # get statuses
-        logger.debug('approving task: %s' % self.name)
-
-        with DBSession.no_autoflush:
-            PREV = Status.query.filter_by(code='PREV').first()
-
-        if self.status != PREV:
-            raise StatusError(
-                '%s.status should be PREV to let it be approved, not %s' %
-                (self.__class__.__name__, self.status.code)
-            )
-
-        # approve all Reviews
-        #for review in self.reviews:
-        #    review.approve()
-
     def review_set(self, review_number=None):
         """returns the reviews with the given review_number, if review_number
         is skipped it will return the latest set of reviews
