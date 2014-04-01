@@ -23,7 +23,7 @@ import tempfile
 import unittest2
 from stalker.db import DBSession
 from stalker import (db, User, Status, StatusList, Repository, Project, Task,
-                     Type, TimeLog)
+                     Type, TimeLog, Review)
 from stalker.exceptions import StatusError
 
 
@@ -65,6 +65,9 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.status_oh = Status.query.filter_by(code='OH').first()
         self.status_stop = Status.query.filter_by(code='STOP').first()
         self.status_cmpl = Status.query.filter_by(code='CMPL').first()
+
+        self.status_rrev = Status.query.filter_by(code='RREV').first()
+        self.status_app = Status.query.filter_by(code='APP').first()
 
         self.test_project_status_list = StatusList(
             name='Project Statuses',
@@ -3357,7 +3360,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.assertEqual(self.test_task6.status, self.status_rts)
         self.assertEqual(self.test_task1.status, self.status_rts)
 
-    #PREV: 
+    # PREV
     def test_approve_in_PREV_leaf_task_review_instance_statuses_updated_correctly(self):
         """testing if the Review instances values are correctly updated to APP
         when the approve action is used in a PREV leaf task
@@ -3417,3 +3420,359 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         """
         self.test_task9.status = self.status_cmpl
         self.assertRaises(StatusError, self.test_task9.approve)
+
+    def test_approve_will_create_new_review_instance(self):
+        """testing if approve method will return a new Review instance
+        """
+        self.test_task3.status = self.status_wip
+
+        # create reviews automatically
+        reviews = self.test_task3.request_review()
+
+        # check the statuses
+        self.assertEqual(reviews[0].status.code, 'NEW')
+        self.assertEqual(reviews[1].status.code, 'NEW')
+
+        # approve reviews
+        new_review = self.test_task3.approve(
+            reviewer=self.test_user1,
+            description='Test Review'
+        )
+        self.assertIsInstance(new_review, Review)
+
+    def test_approve_will_create_new_review_instance_with_correct_review_number(self):
+        """testing if approve method will return a new Review instance with
+        correct review number
+        """
+        self.test_task3.status = self.status_wip
+
+        # create reviews automatically
+        reviews = self.test_task3.request_review()
+
+        # check the statuses
+        self.assertEqual(reviews[0].status.code, 'NEW')
+        self.assertEqual(reviews[1].status.code, 'NEW')
+
+        # approve reviews
+        new_review = self.test_task3.approve(
+            reviewer=self.test_user1,
+            description='Test Review'
+        )
+        self.assertIsInstance(new_review, Review)
+        self.assertEqual(
+            self.task.review_number,
+            new_review.review_number
+        )
+
+    def test_approve_will_remove_other_new_reviews(self):
+        """testing if approve method will remove other NEW Review instances in
+        the task.reviews
+        """
+        self.test_task3.status = self.status_wip
+
+        # create reviews automatically
+        reviews = self.test_task3.request_review()
+
+        # check the statuses
+        self.assertEqual(reviews[0].status.code, 'NEW')
+        self.assertEqual(reviews[1].status.code, 'NEW')
+
+        # approve reviews
+        new_review = self.test_task3.approve(
+            reviewer=self.test_user1,
+            description='Test Review'
+        )
+        self.assertIsInstance(new_review, Review)
+
+        # other reviews are not in task.reviews any more
+        self.assertNotIn(
+            reviews[0],
+            self.test_task3.reviews
+        )
+        self.assertNotIn(
+            reviews[1],
+            self.test_task3.reviews
+        )
+
+        # now expect the statuses of the reviews to be all app
+        self.assertEqual(reviews[0].task, None)
+        self.assertEqual(reviews[1].task, None)
+
+    def test_approve_will_not_remove_other_app_reviews(self):
+        """testing if approve method will not remove other APP Review instances
+        in the task.reviews
+        """
+        self.test_task3.status = self.status_wip
+
+        # create reviews automatically
+        reviews = self.test_task3.request_review()
+
+        # check the statuses
+        self.assertEqual(reviews[0].status.code, 'NEW')
+        self.assertEqual(reviews[1].status.code, 'NEW')
+
+        # approve one of them
+        reviews[0].approve()
+
+        # approve reviews
+        new_review = self.test_task3.approve(
+            reviewer=self.test_user1,
+            description='Test Review'
+        )
+        self.assertIsInstance(new_review, Review)
+
+        # other reviews are not in task.reviews any more
+        self.assertNotIn(
+            reviews[0],
+            self.test_task3.reviews
+        )
+        self.assertNotIn(
+            reviews[1],
+            self.test_task3.reviews
+        )
+
+        # now expect the statuses of the reviews to be all app
+        self.assertEqual(reviews[0].task, None)
+        self.assertEqual(reviews[1].task, None)
+
+    def test_approve_will_not_remove_other_rrev_reviews(self):
+        """testing if approve method will not remove other RREV Review
+        instances in the task.reviews
+        """
+        self.test_task3.status = self.status_wip
+
+        # create reviews automatically
+        reviews = self.test_task3.request_review()
+
+        # check the statuses
+        self.assertEqual(reviews[0].status.code, 'NEW')
+        self.assertEqual(reviews[1].status.code, 'NEW')
+
+        # rrev one of them
+        reviews[0].request_revision()
+
+        # approve reviews
+        new_review = self.test_task3.approve(
+            reviewer=self.test_user1,
+            description='Test Review'
+        )
+        self.assertIsInstance(new_review, Review)
+
+        # other reviews are not in task.reviews any more
+        self.assertNotIn(
+            reviews[0],
+            self.test_task3.reviews
+        )
+        self.assertNotIn(
+            reviews[1],
+            self.test_task3.reviews
+        )
+
+        # now expect the statuses of the reviews to be all app
+        self.assertEqual(reviews[0].task, None)
+        self.assertEqual(reviews[1].task, None)
+
+    def test_approve_will_not_change_previous_reviews(self):
+        """testing if approve method will not change previous Review instances
+        in the task.reviews
+        """
+        self.test_task3.status = self.status_wip
+
+        # create reviews automatically
+        reviews = self.test_task3.request_review()
+
+        # check the statuses
+        self.assertEqual(reviews[0].status.code, 'NEW')
+        self.assertEqual(reviews[1].status.code, 'NEW')
+
+        # finilize them by requesting a review
+        reviews[0].request_revision()
+        reviews[1].approve()
+
+        # check review statuses
+        self.assertEqual(
+            self.status_rrev,
+            reviews[0].status
+        )
+        self.assertEqual(
+            self.status_app,
+            reviews[1].status
+        )
+
+        # re set the task status to wip
+        self.test_task3.status = self.status_wip
+
+        # re request a new review set
+        reviews2 = self.test_task3.request_review()
+
+        # now while one of them is app
+        reviews2[0].approve()
+        # and the other is new
+        self.assertEqual(reviews2[1].status, self.status_new)
+
+        # use task.approve
+        new_review = self.test_task3.approve(
+            reviewer=self.test_user1,
+            description='Test Review'
+        )
+        self.assertIsInstance(new_review, Review)
+
+        # check if reviews2[1] is not in task.reviews any more
+        self.assertIn(
+            reviews[0],
+            self.test_task3.reviews
+        )
+        self.assertIn(
+            reviews[1],
+            self.test_task3.reviews
+        )
+
+        self.assertIn(
+            reviews2[0],
+            self.test_task3.reviews
+        )
+        self.assertNotIn(
+            reviews2[1],
+            self.test_task3.reviews
+        )
+
+        # and the statuses are not changed
+        self.assertEqual(
+            self.status_rrev,
+            reviews[0].status
+        )
+        self.assertEqual(
+            self.status_app,
+            reviews[1].status
+        )
+
+    def test_review_set_review_number_is_skipped(self):
+        """testing if the latest review set will be returned if the
+        review_number argument is skipped in Task.review_set() method
+        """
+        self.test_task3.status = self.status_wip
+
+        # request a review
+        reviews = self.test_task3.request_review()
+        self.assertEqual(2, len(reviews))
+
+        # check the review_set() method with no review number
+        self.assertEqual(
+            reviews,
+            self.test_task3.review_set()
+        )
+
+        # now finalize the reviews
+        reviews[0].approve()
+        reviews[1].request_revision()
+
+        # task should have been set to hrev
+        self.assertEqual(
+            self.status_hrev,
+            self.test_task3.status
+        )
+
+        # set the status to wip again
+        self.test_task3.status = self.status_wip
+
+        # request a new set of reviews
+        reviews2 = self.test_task3.request_review()
+
+        # confirm that they it is a different set of review
+        self.assertNotEqual(reviews, reviews2)
+
+        # now check if review_set() will return reviews2
+        self.assertEqual(
+            reviews2,
+            self.test_task3.review_set()
+        )
+
+    def test_review_set_review_number_is_not_an_integer(self):
+        """testing if a TypeError will be raised when the review_number
+        argument value is not an integer in Task.review_set() method
+        """
+        with self.assertRaises(TypeError) as cm:
+            self.test_task3.review_set('not an integer')
+
+        self.assertEqual(
+            'review_number argument in Task.review_set should be a positive '
+            'integer, not str',
+            cm.exception.message
+        )
+
+    def test_review_set_review_number_is_a_negative_integer(self):
+        """testing if a ValueError will be raised when the review_number is a
+        negative number
+        """
+        with self.assertRaises(TypeError) as cm:
+            self.test_task3.review_set(-10)
+
+        self.assertEqual(
+            'review_number argument in Task.review_set should be a positive '
+            'integer, not -10',
+            cm.exception.message
+        )
+
+    def test_review_set_review_number_is_zero(self):
+        """testing if a ValueError will be raised when the review_number is
+        zero
+        """
+        with self.assertRaises(TypeError) as cm:
+            self.test_task3.review_set(0)
+
+        self.assertEqual(
+            'review_number argument in Task.review_set should be a positive '
+            'integer, not 0',
+            cm.exception.message
+        )
+
+    def test_review_set_method_is_working_properly(self):
+        """testing if the review_set() method is working properly
+        """
+        self.test_task3.status = self.status_wip
+
+        # request a review
+        reviews = self.test_task3.request_review()
+        self.assertEqual(2, len(reviews))
+
+        # check the review_set() method with no review number
+        self.assertEqual(
+            reviews,
+            self.test_task3.review_set()
+        )
+
+        # now finalize the reviews
+        reviews[0].approve()
+        reviews[1].request_revision()
+
+        # task should have been set to hrev
+        self.assertEqual(
+            self.status_hrev,
+            self.test_task3.status
+        )
+
+        # set the status to wip again
+        self.test_task3.status = self.status_wip
+
+        # request a new set of reviews
+        reviews2 = self.test_task3.request_review()
+
+        # confirm that they it is a different set of review
+        self.assertNotEqual(reviews, reviews2)
+
+        # now check if review_set() will return reviews2
+        self.assertEqual(
+            reviews2,
+            self.test_task3.review_set()
+        )
+
+        # and use a review_number
+        self.assertEqual(
+            reviews,
+            self.test_task3.review_set(1)
+        )
+
+        self.assertEqual(
+            reviews2,
+            self.test_task3.review_set(2)
+        )

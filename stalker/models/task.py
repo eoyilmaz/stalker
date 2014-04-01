@@ -572,7 +572,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
     .. image:: ../../../docs/source/_static/images/Task_Status_Workflow.png
           :width: 637 px
-          :height: 381 px
+          :height: 611 px
           :align: center
 
     The workflow defines the following statuses at described situations:
@@ -697,7 +697,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
        is only allowed to change the dependencies of a WFD and RTS tasks.
 
     .. warning::
-       **Resuming a STOP Task
+       **Resuming a STOP Task**
 
        Resuming a STOP Task will be treated as if a revision has been made to
        that task, and all the statuses of the tasks depending to this
@@ -2332,12 +2332,19 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         # and update parents statuses
         self.update_parent_statuses()
 
-    def approve(self):
+    def approve(self, reviewer, description=''):
         """Approves a PREV task and sets its status to CMPL.
 
-        The approve() method is a shortcut for setting the related Review
-        instances to APP for each Review instances created for each
-        responsible.
+        This method is a shortcut for concluding reviews by deleting non
+        finalized Review instances.
+
+        So it will let the other reviews to be enough to finalize the review
+        set. If there is only one review instance in the current review set,
+        then this will update its reviewer with the supplied user instance and
+        let the task be finalized.
+
+        It will create a new Review instance if all of the open Review
+        instances are still not finalized (Review.status == NEW)
         """
         # get statuses
         logger.debug('approving task: %s' % self.name)
@@ -2352,8 +2359,46 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             )
 
         # approve all Reviews
+        #for review in self.reviews:
+        #    review.approve()
+
+    def review_set(self, review_number=None):
+        """returns the reviews with the given review_number, if review_number
+        is skipped it will return the latest set of reviews
+        """
+
+        review_set = []
+        if review_number is None:
+            if self.status.code == 'PREV':
+                review_number = self.review_number + 1
+            else:
+                review_number = self.review_number
+
+        if not isinstance(review_number, int):
+            raise TypeError(
+                'review_number argument in %(class)s.review_set should be a '
+                'positive integer, not %(review_number_class)s' %
+                {
+                    'class': self.__class__.__name__,
+                    'review_number_class': review_number.__class__.__name__
+                }
+            )
+
+        if review_number < 1:
+            raise TypeError(
+                'review_number argument in %(class)s.review_set should be a '
+                'positive integer, not %(review_number)s' %
+                {
+                    'class': self.__class__.__name__,
+                    'review_number': review_number
+                }
+            )
+
         for review in self.reviews:
-            review.approve()
+            if review.review_number == review_number:
+                review_set.append(review)
+
+        return review_set
 
     def update_status_with_dependent_statuses(self, removing=None):
         """updates the status by looking at the dependent tasks

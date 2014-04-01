@@ -2,6 +2,13 @@
 Stalker Changes
 ===============
 
+0.2.6.4
+=======
+
+* **New:** Added a ``Task.review_set(review_number)`` method to get the desired
+  set of reviews. It will return the latest set of reviews if ``review_number``
+  is skipped or it is None.
+
 0.2.6.3
 =======
 
