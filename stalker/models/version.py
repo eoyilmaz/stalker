@@ -432,7 +432,7 @@ class Version(Link):
         if structure:
             for template in structure.templates:
                 assert isinstance(template, FilenameTemplate)
-                if template._target_entity_type == self.task.entity_type:
+                if template.target_entity_type == self.task.entity_type:
                     vers_template = template
                     break
 

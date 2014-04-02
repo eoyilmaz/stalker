@@ -1515,3 +1515,27 @@ class VersionTester(unittest2.TestCase):
             visited_versions.append(v)
 
         self.assertEqual(expected_result, visited_versions)
+
+    # def test_path_attribute_value_is_calculated_on_init(self):
+    #     """testing if the path attribute value is automatically calculated on
+    #     Version instance initialize
+    #     """
+    #     ft = FilenameTemplate(
+    #         name='Task Filename Template',
+    #         target_entity_type='Task',
+    #         path='{{project.code}}/{%- for p in parent_tasks -%}'
+    #              '{{p.nice_name}}/{%- endfor -%}',
+    #         filename='{{version.nice_name}}_v{{"%03d"|format(version.version_number)}}{{extension}}'
+    #     )
+    #     self.test_project.structure.templates.append(ft)
+    #     db.DBSession.add(self.test_project)
+    #     db.DBSession.commit()
+    # 
+    #     print 'entity_type: %s' % self.test_task1.entity_type
+    # 
+    #     # v1 = Version(task=self.test_task1)
+    #     # self.assertEqual(
+    #     #     'tp/SH001/task1/task1_Main_v001',
+    #     #     v1.path
+    #     # )
+    #     self.fail()
