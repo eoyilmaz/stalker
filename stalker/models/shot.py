@@ -228,7 +228,7 @@ class Shot(Task, CodeMixin):
         """equality operator
         """
         return isinstance(other, Shot) and self.code == other.code and \
-               self.project == other.project
+            self.project == other.project
 
     def _check_code_availability(self, code, project):
         """checks if the given code is available in the given project
@@ -238,6 +238,7 @@ class Shot(Task, CodeMixin):
           shot is a part of
         :return: bool
         """
+        # TODO: try to use SQL Queries instead of Pure Python
         if project and code:
             # the shots are task instances, use project.tasks
             for task in project.tasks:
@@ -285,29 +286,29 @@ class Shot(Task, CodeMixin):
 
         return cut_duration_in
 
-    def _validate_cut_in(self, cut_in_in):
-        """validates the given cut_in_in value
+    def _validate_cut_in(self, cut_in):
+        """validates the given cut_in value
         """
-        if cut_in_in is not None:
-            if not isinstance(cut_in_in, int):
+        if cut_in is not None:
+            if not isinstance(cut_in, int):
                 raise TypeError(
                     "%s.cut_in should be an instance of int, not %s" %
-                    (self.__class__.__name__, cut_in_in.__class__.__name__)
+                    (self.__class__.__name__, cut_in.__class__.__name__)
                 )
 
-        return cut_in_in
+        return cut_in
 
-    def _validate_cut_out(self, cut_out_in):
-        """validates the given cut_out_in value
+    def _validate_cut_out(self, cut_out):
+        """validates the given cut_out value
         """
-        if cut_out_in is not None:
-            if not isinstance(cut_out_in, int):
+        if cut_out is not None:
+            if not isinstance(cut_out, int):
                 raise TypeError(
                     "%s.cut_out should be an instance of int, not %s" %
-                    (self.__class__.__name__, cut_out_in.__class__.__name__)
+                    (self.__class__.__name__, cut_out.__class__.__name__)
                 )
 
-        return cut_out_in
+        return cut_out
 
     @validates('sequences')
     def _validate_sequence(self, key, sequence):
@@ -361,18 +362,19 @@ class Shot(Task, CodeMixin):
             if self._cut_duration is None:
                 self._update_cut_info(self._cut_in, None, self._cut_out)
         except AttributeError:
+            # setattr(self, '_cut_duration', None)
             self._update_cut_info(self._cut_in, None, self._cut_out)
         return self._cut_duration
 
     @cut_duration.setter
     def cut_duration(self, cut_duration_in):
-        self._update_cut_info(self._cut_in, cut_duration_in, self._cut_out)
+        self._update_cut_info(self.cut_in, cut_duration_in, self.cut_out)
 
     def _cut_in_getter(self):
         return self._cut_in
 
     def _cut_in_setter(self, cut_in_in):
-        self._update_cut_info(cut_in_in, self._cut_duration, self._cut_out)
+        self._update_cut_info(cut_in_in, self.cut_duration, self.cut_out)
 
     cut_in = synonym(
         "_cut_in",
@@ -380,30 +382,26 @@ class Shot(Task, CodeMixin):
         doc="""The in frame number that this shot starts.
 
         The default value is 1. When the cut_in is bigger then
-        :attr:`.cut_out`, the
-        :attr:`.cut_out` value is update to
+        :attr:`.cut_out`, the :attr:`.cut_out` value is update to
         :attr:`.cut_in` + 1."""
     )
 
     def _cut_out_getter(self):
         if self._cut_out is None:
-            self._update_cut_info(self._cut_in, self._cut_duration, None)
+            self._update_cut_info(self.cut_in, self.cut_duration, None)
         return self._cut_out
 
     def _cut_out_setter(self, cut_out_in):
-        self._update_cut_info(self._cut_in, self._cut_duration, cut_out_in)
+        self._update_cut_info(self.cut_in, self.cut_duration, cut_out_in)
 
     cut_out = synonym(
         "_cut_out",
         descriptor=property(_cut_out_getter, _cut_out_setter),
         doc="""The out frame number that this shot ends.
 
-        When the :attr:`.cut_out` is set to a value
-        lower than :attr:`.cut_in`,
-        :attr:`.cut_out` will be updated to
-        :attr:`.cut_in` + 1. The default value is
-        :attr:`.cut_in` +
-        :attr:`.cut_duration`."""
+        When the :attr:`.cut_out` is set to a value lower than :attr:`.cut_in`,
+        :attr:`.cut_out` will be updated to :attr:`.cut_in` + 1. The default
+        value is :attr:`.cut_in` + :attr:`.cut_duration`."""
     )
 
 

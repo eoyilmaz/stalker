@@ -128,8 +128,8 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
     )
     is_scheduling_by = relationship(
         'User',
-        primaryjoin='Studios.c.last_scheduled_by_id==Users.c.id',
-        doc='The User who has last scheduled the Studio projects'
+        primaryjoin='Studios.c.is_scheduling_by_id==Users.c.id',
+        doc='The User who is scheduling the Studio projects right now'
     )
     scheduling_started_at = Column(
         DateTime,
@@ -450,9 +450,10 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
 
             # and who has done the scheduling
             if scheduled_by:
+                logger.debug(
+                    'setting last_scheduled_by to : %s' % scheduled_by
+                )
                 self.last_scheduled_by = scheduled_by
-
-            #DBSession.commit()
 
         end = time.time()
         logger.debug('scheduling took %s seconds' % (end - start))
@@ -788,6 +789,11 @@ class WorkingHours(object):
         """setter for daily_working_hours attribute
         """
         self._daily_working_hours = self._validate_daily_working_hours(dwh)
+
+    def split_in_to_working_hours(self, start, end):
+        """splits the given start and end datetime objects in to working hours
+        """
+        raise NotImplementedError()
 
 
 class Vacation(SimpleEntity, DateRangeMixin):

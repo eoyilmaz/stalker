@@ -1468,6 +1468,19 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
         self.test_studio.scheduler = tj_scheduler
         self.test_studio.schedule(scheduled_by=self.test_user1)
 
+        self.assertEqual(self.test_studio.last_scheduled_by, self.test_user1)
+
+        last_schedule_message = self.test_studio.last_schedule_message
+        last_scheduled_at = self.test_studio.last_scheduled_at
+        last_scheduled_by = self.test_studio.last_scheduled_by
+
+        self.assertIsNotNone(last_schedule_message)
+        self.assertIsNotNone(last_scheduled_at)
+        self.assertIsNotNone(last_scheduled_by)
+
+        db.DBSession.add(self.test_studio)
+        db.DBSession.commit()
+
         # delete the studio instance and retrieve it back and check if it has
         # the info
         del self.test_studio
@@ -1479,13 +1492,12 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             datetime.datetime.now() - studio.scheduling_started_at <
             datetime.timedelta(minutes=1)
         )
-        self.assertIsNotNone(studio.last_schedule_message)
-        self.assertTrue(
-            datetime.datetime.now() - studio.last_scheduled_at <
-            datetime.timedelta(minutes=1)
-        )
-        self.assertEqual(studio.last_scheduled_by, self.test_user1)
+        self.assertEqual(last_schedule_message, studio.last_schedule_message)
+        self.assertEqual(last_scheduled_at, studio.last_scheduled_at)
+        self.assertEqual(last_scheduled_by, studio.last_scheduled_by)
+
         self.assertEqual(studio.last_scheduled_by_id, self.test_user1.id)
+        self.assertEqual(studio.last_scheduled_by, self.test_user1)
 
     def test_vacation_attribute_is_read_only(self):
         """testing if the vacation attribute is a read-only attribute

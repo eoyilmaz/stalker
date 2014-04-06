@@ -1407,8 +1407,15 @@ class DatabaseModelsTester(unittest2.TestCase):
             notes=[note1, note2],
         )
 
+        # assign the note1 also to another entity
+        test_entity2 = Entity(
+            name='Test Entity 2',
+            notes=[note1]
+        )
+
         # persist it to the database
         DBSession.add(test_entity)
+        DBSession.add(test_entity2)
         DBSession.commit()
 
         # store attributes
@@ -1448,7 +1455,11 @@ class DatabaseModelsTester(unittest2.TestCase):
         DBSession.delete(test_entity_db)
         DBSession.commit()
 
-        self.assertItemsEqual([], Note.query.all())
+        test_entity2_db = Entity.query.filter_by(name='Test Entity 2').first()
+        self.assertIsInstance(test_entity2_db, Entity)
+
+        self.assertItemsEqual([note1, note2], Note.query.all())
+        self.assertItemsEqual([note1], test_entity2_db.notes)
 
     def test_persistence_of_FilenameTemplate(self):
         """testing the persistence of FilenameTemplate

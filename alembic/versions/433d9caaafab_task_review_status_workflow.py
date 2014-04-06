@@ -375,7 +375,7 @@ VALUES ('Status', '%(name)s', '', NULL, NULL,
         END;
         $$
         LANGUAGE 'plpgsql';
-        
+
         select NULL from add_status_to_status_list(
             (SELECT id FROM "StatusLists" WHERE target_entity_type = '%(entity_type)s'),
             (SELECT id FROM "Statuses" WHERE code = '%(status_code)s')

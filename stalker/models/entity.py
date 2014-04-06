@@ -573,13 +573,13 @@ class Entity(SimpleEntity):
 
     notes = relationship(
         "Note",
-        primaryjoin="Entities.c.id==Notes.c.entity_id",
-        backref="entity",
-        cascade='all, delete-orphan',
+        secondary="Entity_Notes",
+        backref="entities",
+        #cascade='all',
         doc="""All the :class:`.Notes`\ s attached to this entity.
 
         It is a list of :class:`.Note` instances or an
-        empty list, setting it None will raise a TypeError.
+        empty list, setting it to None will raise a TypeError.
         """
     )
 
@@ -644,6 +644,24 @@ Entity_Tags = Table(
         "tag_id",
         Integer,
         ForeignKey("Tags.id"),
+        primary_key=True,
+    )
+)
+
+# Entity Notes
+Entity_Notes = Table(
+    "Entity_Notes", Base.metadata,
+    Column(
+        "entity_id",
+        Integer,
+        ForeignKey("Entities.id"),
+        primary_key=True,
+    ),
+
+    Column(
+        "note_id",
+        Integer,
+        ForeignKey("Notes.id"),
         primary_key=True,
     )
 )

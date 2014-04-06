@@ -2,6 +2,20 @@
 Stalker Changes
 ===============
 
+0.2.6.5
+=======
+
+* **New:** Entity to Note relation is now Many-to-Many. So one Note can now be
+  assigned more than one Entity.
+* **New:** Added alembic revision for ``Entity_Notes`` table creation and data
+  migration from ``Notes`` table to ``Entity_Notes`` table. So all notes are
+  preserved.
+* **Fix:** Fixed ``Shot.cut_duration`` attribute initialization on ``Shot``
+  instances restored from database.
+* **Fix:** Fixed ``Studios.is_scheduling_by`` relationship configuration, which
+  was wrongly referencing the ``Studios.last_scheduled_by_id`` column instead
+  of ``Studios.is_scheduled_by_id`` column.
+
 0.2.6.4
 =======
 

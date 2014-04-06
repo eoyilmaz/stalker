@@ -17,6 +17,8 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+import os
+import tempfile
 
 import unittest2
 from stalker import (db, Asset, Entity, Link, Project, Repository, Scene,
@@ -934,3 +936,141 @@ class ShotTester(unittest2.TestCase):
         Shot class
         """
         self.assertEqual(Shot.__strictly_typed__, False)
+
+
+class ShotDBTestCase(unittest2.TestCase):
+    """Tests stalker.model.shot.Shot class in a DB environment
+    """
+
+    def setUp(self):
+        """set up the test
+        """
+        self.db_path = tempfile.mktemp(suffix='sqlite3')
+
+        db.setup({'sqlalchemy.url': 'sqlite:///%s' % self.db_path})
+        db.init()
+
+        # statuses
+        self.status_new = Status.query.filter_by(code='NEW').first()
+        self.status_wfd = Status.query.filter_by(code='WFD').first()
+        self.status_rts = Status.query.filter_by(code='RTS').first()
+        self.status_wip = Status.query.filter_by(code='WIP').first()
+        self.status_prev = Status.query.filter_by(code='PREV').first()
+        self.status_hrev = Status.query.filter_by(code='HREV').first()
+        self.status_drev = Status.query.filter_by(code='DREV').first()
+        self.status_oh = Status.query.filter_by(code='OH').first()
+        self.status_stop = Status.query.filter_by(code='STOP').first()
+        self.status_cmpl = Status.query.filter_by(code='CMPL').first()
+
+        # status lists
+        self.test_project_status_list = StatusList(
+            name="Project Status List",
+            statuses=[
+                self.status_new,
+                self.status_wip,
+                self.status_cmpl
+            ],
+            target_entity_type=Project,
+        )
+
+        self.test_shot_status_list = \
+            StatusList.query.filter_by(target_entity_type='Shot').first()
+
+        # types
+        self.test_commercial_project_type = Type(
+            name="Commercial Project",
+            code='comm',
+            target_entity_type=Project,
+        )
+
+        self.test_repository_type = Type(
+            name="Test Repository Type",
+            code='test',
+            target_entity_type=Repository
+        )
+
+        # repository
+        self.test_repository = Repository(
+            name="Test Repository",
+            type=self.test_repository_type,
+        )
+
+        # image format
+        self.test_image_format1 = ImageFormat(
+            name='Test Image Format 1',
+            width=1920,
+            height=1080,
+            pixel_aspect=1.0
+        )
+
+        self.test_image_format2 = ImageFormat(
+            name='Test Image Format 2',
+            width=1280,
+            height=720,
+            pixel_aspect=1.0
+        )
+
+        # project and sequences
+        self.test_project1 = Project(
+            name='Test Project1',
+            code='tp1',
+            type=self.test_commercial_project_type,
+            status_list=self.test_project_status_list,
+            repository=self.test_repository,
+            image_format=self.test_image_format1
+        )
+
+        self.test_cut_in_default = 1
+        self.test_cut_duration_default = 1
+        self.test_cut_out_default = 1
+
+        self.kwargs = dict(
+            name='SH123',
+            code='SH123',
+            description='This is a test Shot',
+            project=self.test_project1,
+            cut_in=112,
+            cut_out=149,
+            cut_duration=123,
+            status=0
+        )
+
+        # create a mock shot object
+        self.test_shot = Shot(**self.kwargs)
+        db.DBSession.add(self.test_shot)
+        db.DBSession.commit()
+
+    def tearDown(self):
+        """clean up the tests
+        """
+        os.remove(self.db_path)
+
+    def test_cut_duration_initialization_bug_with_cut_in(self):
+        """testing if the _cut_duration attribute is initialized correctly for
+        a Shot restored from DB
+        """
+        # re connect to the database
+        db.setup({'sqlalchemy.url': 'sqlite:///%s' % self.db_path})
+
+        # retrieve the shot back from DB
+        test_shot_db = Shot.query.filter_by(name=self.kwargs['name']).first()
+        # trying to change the cut_in and cut_out values should not raise any
+        # errors
+        test_shot_db.cut_in = 1
+        db.DBSession.add(test_shot_db)
+        db.DBSession.commit()
+
+    def test_cut_duration_initialization_bug_with_cut_out(self):
+        """testing if the _cut_duration attribute is initialized correctly for
+        a Shot restored from DB
+        """
+        # re connect to the database
+        db.setup({'sqlalchemy.url': 'sqlite:///%s' % self.db_path})
+
+        # retrieve the shot back from DB
+        test_shot_db = Shot.query.filter_by(name=self.kwargs['name']).first()
+        # trying to change the cut_in and cut_out values should not raise any
+        # errors
+        test_shot_db.cut_out = 100
+        db.DBSession.add(test_shot_db)
+        db.DBSession.commit()

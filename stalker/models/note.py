@@ -18,8 +18,8 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-from sqlalchemy import Column, Integer, ForeignKey, String
-from sqlalchemy.orm import validates, synonym
+from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy.orm import synonym
 from stalker.models.entity import SimpleEntity
 
 from stalker.log import logging_level
@@ -49,11 +49,11 @@ class Note(SimpleEntity):
         primary_key=True
     )
 
-    entity_id = Column(
-        "entity_id",
-        Integer,
-        ForeignKey("Entities.id")
-    )
+    # entity_id = Column(
+    #     "entity_id",
+    #     Integer,
+    #     ForeignKey("Entities.id")
+    # )
 
     content = synonym(
         'description',
@@ -72,5 +72,5 @@ class Note(SimpleEntity):
         """the equality operator
         """
         return super(Note, self).__eq__(other) and \
-               isinstance(other, Note) and \
-               self.content == other.content
+            isinstance(other, Note) and \
+            self.content == other.content
