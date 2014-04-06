@@ -86,24 +86,16 @@ class Shot(Task, CodeMixin):
     The :attr:`.cut_out` and :attr:`.cut_duration` attributes effects each
     other. Setting the :attr:`.cut_out` will change the :attr:`.cut_duration`
     and setting the :attr:`.cut_duration` will change the :attr:`.cut_out`
-    value. The default value of the :attr:`.cut_out` attribute is calculated
-    from the :attr:`.cut_in` and :attr:`.cut_duration` attributes. If both
-    :attr:`.cut_out` and :attr:`.cut_duration` arguments are set to None, the
-    :attr:`.cut_duration` defaults to 100 and :attr:`.cut_out` will be set to
+    value. The default value of the :attr:`.cut_duration` attribute is
+    calculated from the :attr:`.cut_in` and :attr:`.cut_out` attributes. If
+    both :attr:`.cut_out` and :attr:`.cut_duration` arguments are set to None,
+    the :attr:`.cut_duration` defaults to 1 and :attr:`.cut_out` will be set to
     :attr:`.cut_in` + :attr:`.cut_duration`. So the priority of the attributes
     are as follows:
 
       :attr:`.cut_in` >
-      :attr:`.cut_duration` >
-      :attr:`.cut_out`
-
-    For still images (which can be also managed by shots) the :attr:`.cut_in`
-    and :attr:`.cut_out` can be set to the same value so the
-    :attr:`.cut_duration` can be set to zero.
-
-    Because Shot is getting its relation to a :class:`.Project` from the passed
-    :class:`.Sequence`, you can skip the ``project`` argument, and if you not
-    the value of the ``project`` argument is not going to be used.
+      :attr:`.cut_out` >
+      :attr:`.cut_duration`
 
     .. note::
 
@@ -131,9 +123,9 @@ class Shot(Task, CodeMixin):
 
     :param int cut_out: The out frame number that this shot ends. If it is
       given as a value lower then the ``cut_in`` parameter, then the
-      :attr:`.cut_out` will be set to the same value with :attr:`.cut_in` and
-      the :attr:`.cut_duration` attribute will be set to 1. Can be skipped. The
-      default value is None.
+      :attr:`.cut_out` will be recalculated from the existent :attr:`.cut_in`
+      :attr:`.cut_duration` attributes. Can be skipped. The default value is
+      None.
 
     :param image_format: The image format of this shot. This is an optional
       variable to differentiate the image format per shot. The default value is
@@ -213,11 +205,8 @@ class Shot(Task, CodeMixin):
 
         self.image_format = image_format
 
-        self._cut_in = cut_in
-        self._cut_duration = cut_duration
-        self._cut_out = cut_out
-
-        self._update_cut_info(cut_in, cut_duration, cut_out)
+        self._cut_in, self._cut_duration, self._cut_out = \
+            self._validate_cut_info(cut_in, cut_duration, cut_out)
 
     def __repr__(self):
         """the representation of the Shot
@@ -251,64 +240,81 @@ class Shot(Task, CodeMixin):
                         )
         return True
 
-    def _update_cut_info(self, cut_in, cut_duration, cut_out):
-        """updates the cut_in, cut_duration and cut_out attributes
+    # def _update_cut_info(self, cut_in, cut_duration, cut_out):
+    #     """updates the cut_in, cut_duration and cut_out attributes
+    #     """
+    #     # validate all the values
+    #     self._cut_in = self._validate_cut_info(cut_in)
+    #     self._cut_duration = self._validate_cut_duration(cut_duration)
+    #     self._cut_out = self._validate_cut_out(cut_out)
+    # 
+    #     if self._cut_in is None:
+    #         self._cut_in = 1
+    # 
+    #     if self._cut_out is not None:
+    #         if self._cut_in > self._cut_out:
+    #             # just update cut_duration
+    #             self._cut_duration = 1
+    # 
+    #     if self._cut_duration is None or self._cut_duration <= 0:
+    #         self._cut_duration = self._cut_out - self._cut_in + 1
+    # 
+    #     self._cut_out = self._cut_in + self._cut_duration - 1
+
+    def _validate_cut_info(self, cut_in, cut_duration, cut_out):
+        """validates the cut values all together
         """
-        # validate all the values
-        self._cut_in = self._validate_cut_in(cut_in)
-        self._cut_duration = self._validate_cut_duration(cut_duration)
-        self._cut_out = self._validate_cut_out(cut_out)
+        logger.debug('cut_in      : %s' % cut_in)
+        logger.debug('cut_duration: %s' % cut_duration)
+        logger.debug('cut_out     : %s' % cut_out)
 
-        if self._cut_in is None:
-            self._cut_in = 1
+        if not isinstance(cut_in, int):
+            logger.debug('cut_in is not an int, setting to None')
+            cut_in = None
 
-        if self._cut_out is not None:
-            if self._cut_in > self._cut_out:
-                # just update cut_duration
-                self._cut_duration = 1
-                #else:
-                #self._cut_o
+        if not isinstance(cut_duration, int):
+            logger.debug('cut_duration is not an int, setting to None')
+            cut_duration = None
 
-        if self._cut_duration is None or self._cut_duration <= 0:
-            self._cut_duration = 1
+        if not isinstance(cut_out, int):
+            logger.debug('cut_out is not an int, setting to None')
+            cut_out = None
 
-        self._cut_out = self._cut_in + self._cut_duration - 1
+        # check cut_in
+        if cut_in is None:
+            # try to calculate the cut_in from cut_out and cut_duration
+            if cut_out is None:
+                # set the defaults
+                cut_in = 1
 
-    def _validate_cut_duration(self, cut_duration_in):
-        """validates the given cut_duration value
-        """
-        if cut_duration_in is not None and \
-                not isinstance(cut_duration_in, int):
-            raise TypeError(
-                "%s.cut_duration should be an instance of int, not %s" %
-                (self.__class__.__name__, cut_duration_in.__class__.__name__)
-            )
+                if cut_duration is None:
+                    # set the defaults
+                    cut_duration = 1
 
-        return cut_duration_in
+                cut_out = cut_in + cut_duration - 1
+            else:
+                if cut_duration is None:
+                    cut_duration = 1
 
-    def _validate_cut_in(self, cut_in):
-        """validates the given cut_in value
-        """
-        if cut_in is not None:
-            if not isinstance(cut_in, int):
-                raise TypeError(
-                    "%s.cut_in should be an instance of int, not %s" %
-                    (self.__class__.__name__, cut_in.__class__.__name__)
-                )
+                cut_in = cut_out - cut_duration + 1
 
-        return cut_in
+        # check cut_out
+        if cut_out is None:
+            if cut_duration is None:
+                cut_duration = 1
 
-    def _validate_cut_out(self, cut_out):
-        """validates the given cut_out value
-        """
-        if cut_out is not None:
-            if not isinstance(cut_out, int):
-                raise TypeError(
-                    "%s.cut_out should be an instance of int, not %s" %
-                    (self.__class__.__name__, cut_out.__class__.__name__)
-                )
+            cut_out = cut_in + cut_duration - 1
 
-        return cut_out
+        if cut_out < cut_in:
+            # check duration
+            if cut_duration is None or cut_duration < 1:
+                cut_duration = 1
+
+            cut_out = cut_in + cut_duration - 1
+
+        cut_duration = cut_out - cut_in + 1
+
+        return cut_in, cut_duration, cut_out
 
     @validates('sequences')
     def _validate_sequence(self, key, sequence):
@@ -358,23 +364,40 @@ class Shot(Task, CodeMixin):
 
     @property
     def cut_duration(self):
-        try:
-            if self._cut_duration is None:
-                self._update_cut_info(self._cut_in, None, self._cut_out)
-        except AttributeError:
-            # setattr(self, '_cut_duration', None)
-            self._update_cut_info(self._cut_in, None, self._cut_out)
+        if not hasattr(self, '_cut_duration'):
+            setattr(self, '_cut_duration', None)
+
+        if self._cut_duration is None:
+            self._cut_in, self._cut_duration, self._cut_out = \
+                self._validate_cut_info(self._cut_in, None, self._cut_out)
         return self._cut_duration
 
     @cut_duration.setter
-    def cut_duration(self, cut_duration_in):
-        self._update_cut_info(self.cut_in, cut_duration_in, self.cut_out)
+    def cut_duration(self, cut_duration):
+        if cut_duration is not None:
+            if isinstance(cut_duration, int):
+                if cut_duration < 1:
+                    # use None for cut_duration and let it be calculated from
+                    # cut_in and cut_out
+                    self._cut_in, self._cut_duration, self._cut_out = \
+                        self._validate_cut_info(self.cut_in, None,
+                                                self.cut_out)
+                else:
+                    # set the end to None
+                    # to make it recalculated
+                    self._cut_in, self._cut_duration, self._cut_out = \
+                        self._validate_cut_info(self.cut_in, cut_duration,
+                                                None)
+        else:
+            self._cut_in, self._cut_duration, self._cut_out = \
+                self._validate_cut_info(self.cut_in, None, self.cut_out)
 
     def _cut_in_getter(self):
         return self._cut_in
 
-    def _cut_in_setter(self, cut_in_in):
-        self._update_cut_info(cut_in_in, self.cut_duration, self.cut_out)
+    def _cut_in_setter(self, cut_in):
+        self._cut_in, self._cut_duration, self._cut_out = \
+            self._validate_cut_info(cut_in, self.cut_duration, self.cut_out)
 
     cut_in = synonym(
         "_cut_in",
@@ -387,12 +410,11 @@ class Shot(Task, CodeMixin):
     )
 
     def _cut_out_getter(self):
-        if self._cut_out is None:
-            self._update_cut_info(self.cut_in, self.cut_duration, None)
         return self._cut_out
 
-    def _cut_out_setter(self, cut_out_in):
-        self._update_cut_info(self.cut_in, self.cut_duration, cut_out_in)
+    def _cut_out_setter(self, cut_out):
+        self._cut_in, self._cut_duration, self._cut_out = \
+            self._validate_cut_info(self.cut_in, self.cut_duration, cut_out)
 
     cut_out = synonym(
         "_cut_out",

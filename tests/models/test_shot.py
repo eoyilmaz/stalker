@@ -487,53 +487,95 @@ class ShotTester(unittest2.TestCase):
         new_shot = Shot(**self.kwargs)
         self.assertEqual(new_shot.cut_in, self.test_cut_in_default)
 
-    def test_cut_in_argument_is_set_to_None_defaults_to_default_value(self):
-        """testing if the cut_in argument is set to None the cut_in attribute
-        is set to default value
+    def test_cut_in_argument_is_set_to_None(self):
+        """testing if the cut_in attribute value will be calculated from the
+        cut_out and cut_duration attribute values if the cut_in argument is
+        None
         """
         self.kwargs["code"] = "SH123A"
         self.kwargs["cut_in"] = None
         new_shot = Shot(**self.kwargs)
-        self.assertEqual(new_shot.cut_in, self.test_cut_in_default)
+        self.assertEqual(
+            self.kwargs['cut_out'],
+            new_shot.cut_out
+        )
+        self.assertEqual(
+            self.kwargs['cut_duration'],
+            new_shot.cut_duration
+        )
+        self.assertEqual(
+            new_shot.cut_out - new_shot.cut_duration + 1,
+            new_shot.cut_in
+        )
 
     def test_cut_in_argument_is_not_integer(self):
-        """testing if a TypeError will be raised when the cut_in argument is
-        not an instance of int
+        """testing if the cut_in value will be calculated from cut_out and
+        cut_duration attributes if the cut_in argument is not an instance of
+        int
         """
         self.kwargs["code"] = "SH123A"
         self.kwargs["cut_in"] = "a string"
-        self.assertRaises(TypeError, Shot, **self.kwargs)
+        new_shot = Shot(**self.kwargs)
+        self.assertEqual(
+            self.kwargs['cut_out'],
+            new_shot.cut_out
+        )
+        self.assertEqual(
+            self.kwargs['cut_duration'],
+            new_shot.cut_duration
+        )
+        self.assertEqual(
+            new_shot.cut_in,
+            new_shot.cut_out - new_shot.cut_duration + 1
+        )
 
     def test_cut_in_attribute_is_not_integer(self):
-        """testing if a TypeError will be used when the cut_in attribute is
-        not an instance of int
+        """testing if the cut_in attribute value will be recalculated from
+        cut_out and cut_duration values if the cut_in attribute is set to a
+        value other than an integer
         """
-        self.assertRaises(
-            TypeError,
-            setattr,
-            self.test_shot,
-            "cut_in",
-            "a string"
+        pre_duration = self.test_shot.cut_duration
+        self.test_shot.cut_in = "a string"
+        self.assertEqual(
+            self.kwargs['cut_out'],
+            self.test_shot.cut_out
+        )
+        self.assertEqual(
+            pre_duration,
+            self.test_shot.cut_duration
+        )
+        self.assertEqual(
+            self.test_shot.cut_out - self.test_shot.cut_duration + 1,
+            self.test_shot.cut_in
         )
 
     def test_cut_in_argument_is_bigger_than_cut_out_argument(self):
-        """testing if the cut_out attribute is updated when the cut_in
-        argument is bigger than cut_out argument
+        """testing if the cut_out attribute is updated when the cut_in argument
+        is bigger than cut_out argument
         """
         self.kwargs["code"] = "SH123A"
         self.kwargs["cut_in"] = self.kwargs["cut_out"] + 10
         new_shot = Shot(**self.kwargs)
-        self.assertEqual(new_shot.cut_out, new_shot.cut_in)
-        self.assertEqual(new_shot.cut_duration, 1)
+        self.assertEqual(
+            self.kwargs['cut_in'] + self.kwargs['cut_duration'] - 1,
+            new_shot.cut_out)
+        self.assertEqual(self.kwargs['cut_duration'], new_shot.cut_duration)
 
     def test_cut_in_attribute_is_bigger_than_cut_out_attribute(self):
-        """testing if the cut_out attribute is updated when the cut_in
-        attribute is bigger than cut_out attribute
+        """testing if the cut_out attribute is recalculated from when the
+        cut_in and cut_duration attribute values if the cut_in attribute is set
+        bigger than cut_out attribute value
         """
+        pre_duration = self.test_shot.cut_out - self.test_shot.cut_in + 1
         self.test_shot.cut_in = self.test_shot.cut_out + 10
-        self.assertEqual(self.test_shot.cut_out,
-                         self.test_shot.cut_in)
-        self.assertEqual(self.test_shot.cut_duration, 1)
+        self.assertEqual(
+            self.test_shot.cut_in + self.test_shot.cut_duration - 1,
+            self.test_shot.cut_out
+        )
+        self.assertEqual(
+            pre_duration,
+            self.test_shot.cut_duration
+        )
 
     def test_cut_out_argument_is_skipped_defaults_to_default_value(self):
         """testing if the cut_out argument is skipped the cut_out attribute
@@ -565,23 +607,44 @@ class ShotTester(unittest2.TestCase):
                          self.test_shot.cut_duration - 1)
 
     def test_cut_out_argument_is_not_integer(self):
-        """testing if a TypeError will be raised when the cut_out argument is
-        not an instance of int
+        """testing if the cut_out attribute value will be calculated from
+        cut_in and cut_duration attribute values if the cut_out argument is not
+        an integer
         """
         self.kwargs["code"] = "SH123A"
         self.kwargs["cut_out"] = "a string"
-        self.assertRaises(TypeError, Shot, **self.kwargs)
+        new_shot = Shot(**self.kwargs)
+        self.assertEqual(
+            self.kwargs['cut_in'],
+            new_shot.cut_in
+        )
+        self.assertEqual(
+            self.kwargs['cut_duration'],
+            new_shot.cut_duration
+        )
+        self.assertEqual(
+            new_shot.cut_in + new_shot.cut_duration - 1,
+            new_shot.cut_out
+        )
 
     def test_cut_out_attribute_is_not_integer(self):
-        """testing if a TypeError will be used when the cut_out attribute is
-        not an instance of int
+        """testing if the cut_out attribute value is going to be recalculated
+        from cut_in and cut_duration attribute values if it is set to a value
+        other than an integer
         """
-        self.assertRaises(
-            TypeError,
-            setattr,
-            self.test_shot,
-            "cut_out",
-            "a string"
+        pre_duration = self.test_shot.cut_duration
+        self.test_shot.cut_out = "a string"
+        self.assertEqual(
+            self.kwargs['cut_in'],
+            self.test_shot.cut_in
+        )
+        self.assertEqual(
+            pre_duration,
+            self.test_shot.cut_duration
+        )
+        self.assertEqual(
+            self.test_shot.cut_in + self.test_shot.cut_duration - 1,
+            self.test_shot.cut_out
         )
 
     def test_cut_out_argument_is_smaller_than_cut_in_argument(self):
@@ -591,17 +654,37 @@ class ShotTester(unittest2.TestCase):
         self.kwargs["code"] = "SH123A"
         self.kwargs["cut_out"] = self.kwargs["cut_in"] - 10
         new_shot = Shot(**self.kwargs)
-        self.assertEqual(new_shot.cut_out, new_shot.cut_in)
-        self.assertEqual(new_shot.cut_duration, 1)
+        self.assertEqual(
+            self.kwargs['cut_in'],
+            new_shot.cut_in
+        )
+        self.assertEqual(
+            self.kwargs['cut_duration'],
+            new_shot.cut_duration
+        )
+        self.assertEqual(
+            new_shot.cut_in + new_shot.cut_duration - 1,
+            new_shot.cut_out
+        )
 
     def test_cut_out_attribute_is_smaller_than_cut_in_attribute(self):
         """testing if the cut_out attribute is updated when it is smaller than
         cut_in attribute
         """
+        pre_duration = self.test_shot.cut_duration
         self.test_shot.cut_out = self.test_shot.cut_in - 10
-        self.assertEqual(self.test_shot.cut_out,
-                         self.test_shot.cut_in)
-        self.assertEqual(self.test_shot.cut_duration, 1)
+        self.assertEqual(
+            self.kwargs['cut_in'],
+            self.test_shot.cut_in
+        )
+        self.assertEqual(
+            pre_duration,
+            self.test_shot.cut_duration
+        )
+        self.assertEqual(
+            self.test_shot.cut_in + self.test_shot.cut_duration - 1,
+            self.test_shot.cut_out
+        )
 
     def test_cut_duration_argument_is_skipped(self):
         """testing if the cut_duration attribute will be calculated from the
@@ -620,27 +703,35 @@ class ShotTester(unittest2.TestCase):
         self.kwargs["code"] = "SH123A"
         self.kwargs["cut_duration"] = None
         new_shot = Shot(**self.kwargs)
-        self.assertEqual(new_shot.cut_duration,
-                         new_shot.cut_out - new_shot.cut_in + 1)
+        self.assertEqual(
+            new_shot.cut_duration,
+            new_shot.cut_out - new_shot.cut_in + 1
+        )
 
     def test_cut_duration_argument_is_not_instance_of_int(self):
-        """testing if a TypeError will be raised when the cut_duration
-        argument is not an instance of int
+        """testing if cut_duration attribute value will be recalculated from
+        cut_in and cut_out attributes if the cut_duration argument is not an
+        instance of int
         """
         self.kwargs["code"] = "SH123A"
         self.kwargs["cut_duration"] = "a string"
-        self.assertRaises(TypeError, Shot, **self.kwargs)
+        new_shot = Shot(**self.kwargs)
+        self.assertEqual(self.kwargs['cut_in'], new_shot.cut_in)
+        self.assertEqual(self.kwargs['cut_out'], new_shot.cut_out)
+        self.assertEqual(
+            new_shot.cut_out - new_shot.cut_in + 1,
+            new_shot.cut_duration
+        )
 
     def test_cut_duration_attribute_is_not_instance_of_int(self):
-        """testing if a TypeError will be raised when the cut_duration
-        attribute is not an instance of int
+        """testing if the cut_duration attribute value will be recalculated
+        from the cut_in and cut_out values if the cut_duration attribute is set
+        to a value which is not an integer
         """
-        self.assertRaises(
-            TypeError,
-            setattr,
-            self.test_shot,
-            "cut_duration",
-            "a string"
+        self.test_shot.cut_duration = "a string"
+        self.assertEqual(
+            self.test_shot.cut_duration,
+            self.test_shot.cut_out - self.test_shot.cut_in + 1
         )
 
     def test_cut_duration_attribute_will_be_updated_when_cut_in_attribute_changed(self):
@@ -676,24 +767,25 @@ class ShotTester(unittest2.TestCase):
         )
 
     def test_cut_duration_attribute_is_zero(self):
-        """testing if the cut_duration attribute will be set to 1 and the
-        cut_out is updated to the same value with cut_in when the cut_duration
-        attribute is set to zero
+        """testing if the cut_duration attribute will be recalculated from
+        cut_in and cut_out values, no matter if it is zero
         """
         self.test_shot.cut_duration = 0
-        self.assertEqual(self.test_shot.cut_out,
-                         self.test_shot.cut_in)
-        self.assertEqual(self.test_shot.cut_duration, 1)
+        self.assertEqual(self.kwargs['cut_in'], self.test_shot.cut_in)
+        self.assertEqual(self.kwargs['cut_out'], self.test_shot.cut_out)
+        self.assertEqual(self.test_shot.cut_duration,
+                         self.test_shot.cut_out - self.test_shot.cut_in + 1)
 
     def test_cut_duration_attribute_is_negative(self):
-        """testing if the cut_duration attribute will be set to 1  and the
-        cut_out is updated to the same value with cut_in when the cut_duration
-        attribute is set to a negative value
+        """testing if the cut_duration attribute will be recalculated from
+        cut_in and cut_out values, no matter if the cut_duration attribute is
+        negative
         """
         self.test_shot.cut_duration = -100
-        self.assertEqual(self.test_shot.cut_out,
-                         self.test_shot.cut_in)
-        self.assertEqual(self.test_shot.cut_duration, 1)
+        self.assertEqual(self.kwargs['cut_in'], self.test_shot.cut_in)
+        self.assertEqual(self.kwargs['cut_out'], self.test_shot.cut_out)
+        self.assertEqual(self.test_shot.cut_duration,
+                         self.test_shot.cut_out - self.test_shot.cut_in + 1)
 
     def test_cut_duration_argument_is_zero_and_cut_out_argument_is_skipped(self):
         """testing if the cut_duration attribute will be set to 1 and the
@@ -721,28 +813,25 @@ class ShotTester(unittest2.TestCase):
         self.assertEqual(new_shot.cut_out, new_shot.cut_in)
 
     def test_cut_duration_argument_is_zero_and_cut_out_argument_is_not_None(self):
-        """testing if the cut_duration attribute is going to be set to 1 and
-        cut_output will be calculated from cut_in and cut_duration when the
-        cut_duration argument is given as zero and there is a cut_out argument
-        given
+        """testing if the cut_duration attribute is going to be recalculated
+        from cut_in and cut_out values, no matter if it is zero
         """
         self.kwargs["code"] = "SH123A"
         self.kwargs["cut_duration"] = 0
         new_shot = Shot(**self.kwargs)
-        self.assertEqual(new_shot.cut_duration, 1)
-        self.assertEqual(new_shot.cut_out, new_shot.cut_in)
+        self.assertEqual(new_shot.cut_duration,
+                         new_shot.cut_out - new_shot.cut_in + 1)
 
     def test_cut_duration_argument_is_negative_and_cut_out_argument_is_not_None(self):
-        """testing if the cut_duration attribute is going to be set to 1 and
-        cut_output will be calculated from cut_in and cut_duration when the
-        cut_duration argument is given as negative and there is a cut_out
-        argument given
+        """testing if the cut_duration attribute value going to be recalculated
+        from the cut_in and cut_out values if both are present, no matter if
+        the cut_duration is negative
         """
         self.kwargs["code"] = "SH123A"
         self.kwargs["cut_duration"] = -100
         new_shot = Shot(**self.kwargs)
-        self.assertEqual(new_shot.cut_duration, 1)
-        self.assertEqual(new_shot.cut_out, new_shot.cut_in)
+        self.assertEqual(new_shot.cut_duration,
+                         new_shot.cut_out - new_shot.cut_in + 1)
 
     def test_image_format_argument_is_skipped(self):
         """testing if the image_format is copied from the Project instance when
@@ -1074,3 +1163,25 @@ class ShotDBTestCase(unittest2.TestCase):
         test_shot_db.cut_out = 100
         db.DBSession.add(test_shot_db)
         db.DBSession.commit()
+
+    def test_cut_values_are_set_correctly(self):
+        """testing if the cut_in attribute is set correctly in db
+        """
+        self.test_shot.cut_in = 100
+        self.assertEqual(self.test_shot.cut_in, 100)
+
+        self.test_shot.cut_out = 153
+        self.assertEqual(self.test_shot.cut_in, 100)
+        self.assertEqual(self.test_shot.cut_out, 153)
+
+        db.DBSession.add(self.test_shot)
+        db.DBSession.commit()
+
+        # re connect to the database
+        db.setup({'sqlalchemy.url': 'sqlite:///%s' % self.db_path})
+
+        # retrieve the shot back from DB
+        test_shot_db = Shot.query.filter_by(name=self.kwargs['name']).first()
+
+        self.assertEqual(test_shot_db.cut_in, 100)
+        self.assertEqual(test_shot_db.cut_out, 153)

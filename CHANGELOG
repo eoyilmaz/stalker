@@ -2,6 +2,17 @@
 Stalker Changes
 ===============
 
+0.2.6.6
+=======
+
+* **Update:** The ``cut_in``, ``cut_out`` and ``cut_duration`` attribute
+  behaviour and the attribute order is updated in ``Shot`` class. So, if three
+  of the values are given, then the ``cut_duration`` attribute value will be
+  calculated from ``cut_in`` and ``cut_out`` attribute values. In any case
+  ``cut_out`` precedes ``cut_duration``, and if none of them given ``cut_in``
+  and ``cut_duration`` values will default to 1 and ``cut_out`` will be
+  calculated by using ``cut_in`` and ``cut_duration``.
+
 0.2.6.5
 =======
 
