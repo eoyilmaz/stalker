@@ -2,6 +2,17 @@
 Stalker Changes
 ===============
 
+0.2.6.7
+=======
+
+* **Update:** ``TaskJugglerScheduler.schedule()`` is now using bulk inserts and
+  updates which is way faster than doing it with pure Python. Use
+  ``parsing_method`` (0: SQL, 1: Python) to choose between SQL or Pure Python
+  implementation. Also updated ``Studio.schedule()`` to take in a
+  ``parsing_method`` parameter. As a side effect of updating with bulk inserts
+  the Project start and end dates are not updated. This will be solved in a
+  later minor version.
+
 0.2.6.6
 =======
 

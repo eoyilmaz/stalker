@@ -70,9 +70,10 @@ class SchedulerBase(object):
         """
         self._studio = self._validate_studio(studio_in)
 
-    def schedule(self):
+    def schedule(self, parsing_method=0):
         """the main scheduling function should be implemented in the
         derivatives
+        :param int parsing_method: An integer value for testing purposes.
         """
         raise NotImplementedError
 
@@ -240,9 +241,97 @@ class TaskJugglerScheduler(SchedulerBase):
         """parses back the csv file and fills the tasks with computes_start and
         computed end values
         """
+        parsing_start = time.time()
         logger.debug('csv_file_full_path : %s' % self.csv_file_full_path)
-        from stalker import User  #, Task
-        # from stalker.db import DBSession
+        from stalker import db, Task
+        from stalker.models.task import Task_Computed_Resources
+
+        entity_ids = []
+        update_data = []
+        update_user_data = []
+
+        with open(self.csv_file_full_path, 'r') as self.csv_file:
+            csv_content = csv.reader(self.csv_file, delimiter=';')
+            lines = [line for line in csv_content]
+            lines.pop(0)
+            for data in lines:
+                id_line = data[0]
+                entity_id = int(id_line.split('.')[-1].split('_')[-1])
+                if entity_id:
+                    entity_ids.append(entity_id)
+                    start_date = datetime.datetime.strptime(
+                        data[1], "%Y-%m-%d-%H:%M"
+                    )
+                    end_date = datetime.datetime.strptime(
+                        data[2],
+                        "%Y-%m-%d-%H:%M"
+                    )
+
+                    # computed_resources
+                    if data[3] != '':
+                        resources_data = map(
+                            lambda x: x.split('_')[-1].split(')')[0],
+                            data[3].split(',')
+                        )
+                        for rid in resources_data:
+                            update_user_data.append({
+                                'task_id': entity_id,
+                                'resource_id': rid
+                            })
+
+                    update_data.append({
+                        'b_id': entity_id,
+                        'start': start_date,
+                        'end': end_date,
+                        'computed_start': start_date,
+                        'computed_end': end_date
+                    })
+
+        from sqlalchemy import bindparam
+
+        # update date values
+        update_statement = Task.__table__.update()\
+            .where(Task.__table__.c.id == bindparam('b_id'))\
+            .values(
+                start=bindparam('start'),
+                end=bindparam('end'),
+                computed_start=bindparam('computed_start'),
+                computed_end=bindparam('computed_end')
+            )
+        db.DBSession.connection().execute(
+            update_statement,
+            update_data
+        )
+
+        # update computed resources data
+        # first delete everything
+        delete_resources_statement = Task_Computed_Resources.delete()
+
+        update_resources_statement = Task_Computed_Resources.insert()\
+            .values(
+                task_id=bindparam('task_id'),
+                resource_id=bindparam('resource_id')
+            )
+
+        db.DBSession.connection().execute(delete_resources_statement)
+        db.DBSession.connection().execute(
+            update_resources_statement,
+            update_user_data
+        )
+
+        parsing_end = time.time()
+        logger.debug(
+            'completed parsing csv file in (SQL): %s seconds' %
+            (parsing_end - parsing_start)
+        )
+
+    def _parse_csv_file_old(self):
+        """parses the csv file and fills the tasks with computes_start and
+        computed_end values using pure Python implementation
+        """
+        parsing_start = time.time()
+        logger.debug('csv_file_full_path : %s' % self.csv_file_full_path)
+        from stalker import User
 
         with open(self.csv_file_full_path, 'r') as self.csv_file:
             csv_content = csv.reader(self.csv_file, delimiter=';')
@@ -252,7 +341,6 @@ class TaskJugglerScheduler(SchedulerBase):
                 id_line = data[0]
                 entity_id = int(id_line.split('.')[-1].split('_')[-1])
                 entity = Entity.query.filter(Entity.id == entity_id).first()
-                # tasks = Task.__table__
                 if entity:
                     start_date = datetime.datetime.strptime(
                         data[1], "%Y-%m-%d-%H:%M"
@@ -270,23 +358,24 @@ class TaskJugglerScheduler(SchedulerBase):
                             data[3].split(',')
                         )
                         computed_resources = \
-                            User.query\
-                                .filter(User.id.in_(resources_data)).all()
+                           User.query\
+                               .filter(User.id.in_(resources_data)).all()
 
                     entity.computed_start = start_date
                     entity.computed_end = end_date
                     entity.computed_resources = computed_resources
-                    # update_statement = tasks.update().values({
-                    #     tasks.c.start: start_date,
-                    #     tasks.c.end: end_date,
-                    #     tasks.c.computed_start: start_date,
-                    #     tasks.c.computed_end: end_date
-                    # }).where(tasks.c.id == entity_id)
-                    # DBSession.connection().execute(update_statement)
-        logger.debug('completed parsing csv file')
 
-    def schedule(self):
+        parsing_end = time.time()
+        logger.debug(
+            'completed parsing csv file in (Python): %s seconds' %
+            (parsing_end - parsing_start)
+        )
+
+    def schedule(self, parsing_method=0):
         """Does the scheduling.
+
+        :param int parsing_method: Choose between SQL (0) or Pure Python (1)
+          parsing. The default is SQL.
         """
         # check the studio attribute
         from stalker import Studio
@@ -321,7 +410,7 @@ class TaskJugglerScheduler(SchedulerBase):
         #    complain again.
         #
         self.studio._start = datetime.datetime(2013, 1, 1)
-        self.studio._end = datetime.datetime(2016, 1, 1)
+        self.studio._end = datetime.datetime(2017, 1, 1)
         #for project in self.studio.active_projects:
         #    for root_task in project.root_tasks:
         #        if root_task.start < self.studio.start:
@@ -360,7 +449,10 @@ class TaskJugglerScheduler(SchedulerBase):
             raise RuntimeError(stderr)
 
         # read back the csv file
-        self._parse_csv_file()
+        if parsing_method == 0:
+            self._parse_csv_file()
+        elif parsing_method == 1:
+            self._parse_csv_file_old()
 
         logger.debug('tj3 return code: %s' % process.returncode)
         logger.debug('tj3 output: %s' % stderr)

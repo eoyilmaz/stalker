@@ -391,12 +391,15 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         """
         return Vacation.query.filter(Vacation.user==None).all()
 
-    def schedule(self, scheduled_by=None):
+    def schedule(self, scheduled_by=None, parsing_method=0):
         """Schedules all the active projects in the studio. Needs a Scheduler,
         so before calling it set a scheduler by using the :attr:`.scheduler`
         attribute.
 
         :param scheduled_by: A User instance who is doing the scheduling.
+        :param parsing_method: Choose between SQL or Python implementation for
+          CSV file parsing. This parameter is for testing purposes and will be
+          removed later on.
         """
         # check the scheduler first
         if self.scheduler is None or \
@@ -434,7 +437,7 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
 
         result = None
         try:
-            result = self.scheduler.schedule()
+            result = self.scheduler.schedule(parsing_method)
         finally:
             # in any case set is_scheduling to False
             self.is_scheduling = False
