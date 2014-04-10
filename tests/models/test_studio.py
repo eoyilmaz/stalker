@@ -919,15 +919,15 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
         # print "%s:self.test_task30.id" % self.test_task30.id
         # print "%s:self.test_task31.id" % self.test_task31.id
 
-        # self.test_project1
-        # self.assertEqual(
-        #     datetime.datetime(2013, 4, 16, 9, 0),
-        #     self.test_project1.computed_start
-        # )
-        # self.assertEqual(
-        #     datetime.datetime(2013, 6, 19, 11, 0),
-        #     self.test_project1.computed_end
-        # )
+        self.test_project1
+        self.assertEqual(
+            datetime.datetime(2013, 4, 16, 9, 0),
+            self.test_project1.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 6, 19, 11, 0),
+            self.test_project1.computed_end
+        )
 
         # self.test_asset1
         self.assertEqual(

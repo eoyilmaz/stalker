@@ -337,14 +337,14 @@ task Task_45 "Task2" {
         db.DBSession.commit()
 
         # check if the task and project timings are all adjusted
-        # self.assertEqual(
-        #     datetime.datetime(2013, 4, 16, 9, 0),
-        #     self.test_proj1.computed_start
-        # )
-        # self.assertEqual(
-        #     datetime.datetime(2013, 4, 19, 12, 0),
-        #     self.test_proj1.computed_end
-        # )
+        self.assertEqual(
+            datetime.datetime(2013, 4, 16, 9, 0),
+            self.test_proj1.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 4, 19, 12, 0),
+            self.test_proj1.computed_end
+        )
 
         self.assertEqual(
             datetime.datetime(2013, 4, 16, 9, 0),

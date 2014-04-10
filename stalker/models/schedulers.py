@@ -243,7 +243,7 @@ class TaskJugglerScheduler(SchedulerBase):
         """
         parsing_start = time.time()
         logger.debug('csv_file_full_path : %s' % self.csv_file_full_path)
-        from stalker import db, Task
+        from stalker import db, Task, Project
         from stalker.models.task import Task_Computed_Resources
 
         entity_ids = []
@@ -300,6 +300,20 @@ class TaskJugglerScheduler(SchedulerBase):
             )
         db.DBSession.connection().execute(
             update_statement,
+            update_data
+        )
+
+        # update project dates
+        update_project_statement = Project.__table__.update()\
+            .where(Project.__table__.c.id == bindparam('b_id'))\
+            .values(
+                start=bindparam('start'),
+                end=bindparam('end'),
+                computed_start=bindparam('computed_start'),
+                computed_end=bindparam('computed_end')
+            )
+        db.DBSession.connection().execute(
+            update_project_statement,
             update_data
         )
 
