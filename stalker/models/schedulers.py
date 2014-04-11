@@ -24,6 +24,7 @@ import tempfile
 import datetime
 import time
 import csv
+import sys
 
 import stalker
 from stalker import defaults
@@ -139,7 +140,7 @@ class TaskJugglerScheduler(SchedulerBase):
 
     The following table shows which Stalker data type is converted to which
     TaskJuggler type:
-    
+
       +------------+-------------+
       | Stalker    | TaskJuggler |
       +============+=============+
@@ -163,8 +164,6 @@ class TaskJugglerScheduler(SchedulerBase):
       +------------+-------------+
       | Vacation   | Vacation    |
       +------------+-------------+
-      
-
     """
 
     def __init__(self, studio=None):
@@ -242,7 +241,13 @@ class TaskJugglerScheduler(SchedulerBase):
         computed end values
         """
         parsing_start = time.time()
+
         logger.debug('csv_file_full_path : %s' % self.csv_file_full_path)
+        if not os.path.exists(self.csv_file_full_path):
+            logger.debug('could not find CSV file, '
+                         'returning without updating db!')
+            return
+
         from stalker import db, Task, Project
         from stalker.models.task import Task_Computed_Resources
 
@@ -453,14 +458,21 @@ class TaskJugglerScheduler(SchedulerBase):
              self.tjp_file_full_path],
             stderr=subprocess.PIPE
         )
-        # wait it to complete
-        process.wait()
 
-        stderr = process.stderr.readlines()
+        # loop until process finishes and capture stderr output
+        stderr_buffer = []
+        while True:
+            stderr = process.stderr.readline()
+
+            if stderr == '' and process.poll() is not None:
+                break
+
+            if stderr != '':
+                stderr_buffer.append(stderr)
 
         if process.returncode:
             # there is an error
-            raise RuntimeError(stderr)
+            raise RuntimeError(stderr_buffer)
 
         # read back the csv file
         if parsing_method == 0:
@@ -469,9 +481,9 @@ class TaskJugglerScheduler(SchedulerBase):
             self._parse_csv_file_old()
 
         logger.debug('tj3 return code: %s' % process.returncode)
-        logger.debug('tj3 output: %s' % stderr)
+        logger.debug('tj3 output: %s' % stderr_buffer)
 
         # remove the tjp file
         #self._clean_up()
 
-        return stderr
+        return stderr_buffer

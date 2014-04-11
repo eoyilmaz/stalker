@@ -2,6 +2,13 @@
 Stalker Changes
 ===============
 
+0.2.6.8
+=======
+
+* **Fix:** Fixed a deadlock in ``TaskJugglerScheduler.schedule()`` method
+  related with the ``Popen.stderr.readlines()`` blocking the TaskJuggler
+  process without being able to read the output buffer.
+
 0.2.6.7
 =======
 
