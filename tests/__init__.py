@@ -32,5 +32,3 @@ class TestCase(unittest.TestCase):
             for item in a:
                 r_value = r_value and item in b
         return item_count_equal and r_value
-    
-     

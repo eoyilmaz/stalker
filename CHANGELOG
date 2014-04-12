@@ -2,6 +2,20 @@
 Stalker Changes
 ===============
 
+0.2.6.9
+=======
+
+* **Update:** ``Studio.is_scheduling`` and ``Studio.is_scheduling_by``
+  attributes will not be updated or checked at the beginning of the
+  ``Studio.schedule()`` method. It is the duty of the user to check those
+  attributes before calling ``Studio.schedule()``. This is done in this way
+  because without being able to do a db commit inside ``Studio.schedule()``
+  method (which is the case with transaction managers which may be used in web
+  applications like **Stalker Pyramid**) it is not possible to persist and thus
+  use those variables. So, to be able to use those attributes meaningfully the
+  user should set them. Those variables will be set to False and None
+  accordingly by the ``Studio.schedule()`` method after the scheduling is done.
+
 0.2.6.8
 =======
 

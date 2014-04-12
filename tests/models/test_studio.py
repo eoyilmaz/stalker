@@ -1424,19 +1424,19 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             [self.test_user3]
         )
 
-    def test_schedule_will_raise_a_RuntimeError_if_is_scheduling_is_True(self):
-        """testing if a RuntimeError will be raised when the schedule method
-        is called and the is_scheduling attribute is True
-        """
-        tj_scheduler = TaskJugglerScheduler()
-        self.test_studio.now = datetime.datetime(2013, 4, 15, 22, 56)
-        self.test_studio.start = datetime.datetime(2013, 4, 15, 22, 56)
-        self.test_studio.end = datetime.datetime(2013, 7, 30, 0, 0)
-
-        self.test_studio.scheduler = tj_scheduler
-        self.test_studio.is_scheduling = True
-        self.test_studio.is_scheduling_by = self.test_user1
-        self.assertRaises(RuntimeError, self.test_studio.schedule)
+    # def test_schedule_will_raise_a_RuntimeError_if_is_scheduling_is_True(self):
+    #     """testing if a RuntimeError will be raised when the schedule method
+    #     is called and the is_scheduling attribute is True
+    #     """
+    #     tj_scheduler = TaskJugglerScheduler()
+    #     self.test_studio.now = datetime.datetime(2013, 4, 15, 22, 56)
+    #     self.test_studio.start = datetime.datetime(2013, 4, 15, 22, 56)
+    #     self.test_studio.end = datetime.datetime(2013, 7, 30, 0, 0)
+    # 
+    #     self.test_studio.scheduler = tj_scheduler
+    #     self.test_studio.is_scheduling = True
+    #     self.test_studio.is_scheduling_by = self.test_user1
+    #     self.assertRaises(RuntimeError, self.test_studio.schedule)
 
     def test_is_scheduling_will_be_False_after_scheduling_is_done(self):
         """testing if the is_scheduling attribute will be back to False when
@@ -1454,6 +1454,10 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
 
         self.test_studio.scheduler = dummy_scheduler
         self.assertFalse(self.test_studio.is_scheduling)
+
+        # with v0.2.6.9 it is now the users duty to set is_scheduling to True
+        self.test_studio.is_scheduling = True
+
         self.test_studio.schedule()
         self.assertFalse(self.test_studio.is_scheduling)
 
