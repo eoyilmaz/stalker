@@ -2527,10 +2527,11 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             logger.debug('not a container returning!')
             return
 
-        WFD = Status.query.filter(Status.code == 'WFD').first()
-        RTS = Status.query.filter(Status.code == 'RTS').first()
-        WIP = Status.query.filter(Status.code == 'WIP').first()
-        CMPL = Status.query.filter(Status.code == 'CMPL').first()
+        with DBSession.no_autoflush:
+            WFD = Status.query.filter(Status.code == 'WFD').first()
+            RTS = Status.query.filter(Status.code == 'RTS').first()
+            WIP = Status.query.filter(Status.code == 'WIP').first()
+            CMPL = Status.query.filter(Status.code == 'CMPL').first()
 
         parent_statuses_lut = [WFD, RTS, WIP, CMPL]
 
@@ -2558,36 +2559,15 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             'CMPL': 1
         }
 
-        if self.id:
-            # use pure sql
-            logger.debug('using pure SQL to query children statuses')
-
-            sql_query = """select
-                "Statuses".code
-            from "Tasks"
-                join "Statuses" on "Tasks".status_id = "Statuses".id
-            where "Tasks".parent_id = %s
-            group by "Statuses".code
-            """ % self.id
-
-            result = DBSession.connection().execute(sql_query)
-
-            # convert to a binary value
-            binary_status = reduce(
-                lambda x, y: x+y,
-                map(lambda x: binary_status_codes[x[0]], result.fetchall()),
-                0
-            )
-        else:
-            # not persisted yet, so use Python
-            logger.debug('using pure Python to query children statuses')
-            binary_status = 0
-            children_statuses = []
-            for child in self.children:
-                # consider every status only once
-                if child.status not in children_statuses:
-                    children_statuses.append(child.status)
-                    binary_status += binary_status_codes[child.status.code]
+        # use Python
+        logger.debug('using pure Python to query children statuses')
+        binary_status = 0
+        children_statuses = []
+        for child in self.children:
+            # consider every status only once
+            if child.status not in children_statuses:
+                children_statuses.append(child.status)
+                binary_status += binary_status_codes[child.status.code]
 
         #
         # I know that the following list seems cryptic but the it shows the

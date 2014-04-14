@@ -2,6 +2,12 @@
 Stalker Changes
 ===============
 
+0.2.6.10
+========
+
+* **Fix:** Fixed an ``autoflush`` issue in
+  ``Task.update_status_with_children_statuses()`` method.
+
 0.2.6.9
 =======
 
