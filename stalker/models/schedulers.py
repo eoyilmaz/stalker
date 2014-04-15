@@ -24,16 +24,16 @@ import tempfile
 import datetime
 import time
 import csv
-import sys
 
 import stalker
 from stalker import defaults
+from stalker.log import logging_level
+
 from stalker.models.entity import Entity
 
 import logging
-
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging_level)
 
 
 class SchedulerBase(object):

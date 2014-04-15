@@ -1059,6 +1059,19 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         self.assertEqual(len(self.test_task3.time_logs), 2)
         self.assertEqual(self.test_task3.total_logged_seconds, 7200)
 
+    def test_create_time_log_returns_time_log_instance(self):
+        """testing if create_time_log returns a TimeLog instance
+        """
+        self.assertEqual(len(self.test_task3.time_logs), 0)
+
+        now = datetime.datetime.now()
+        tl = self.test_task3.create_time_log(
+            resource=self.test_task3.resources[0],
+            start=now,
+            end=now + datetime.timedelta(hours=1)
+        )
+        self.assertIsInstance(tl, TimeLog)
+
     # request_review
     # WFD
     def test_request_review_in_WFD_leaf_task(self):

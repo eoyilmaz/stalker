@@ -2106,8 +2106,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         """
         # all the status checks are now part of TimeLog._validate_task
         # create a TimeLog
-        TimeLog(task=self, resource=resource, start=start, end=end)
-
+        return TimeLog(task=self, resource=resource, start=start, end=end)
         # also updating parent statuses are done in TimeLog._validate_task
 
     def request_review(self):

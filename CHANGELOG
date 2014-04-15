@@ -2,6 +2,12 @@
 Stalker Changes
 ===============
 
+0.2.6.11
+========
+
+* **Update:** ``Task.create_time_log()`` method now returns the created
+  ``TimeLog`` instance.
+
 0.2.6.10
 ========
 

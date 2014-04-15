@@ -413,19 +413,6 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
                 }
             )
 
-        # # check if the studio is already scheduling
-        # if self.is_scheduling:
-        #     raise RuntimeError(
-        #         'The Studio is being scheduled right now by %(user)s, please '
-        #         'wait until the current scheduling is done!' % {
-        #             'user': self.is_scheduling_by.name
-        #         }
-        #     )
-        # else:
-        #     # set to self.is_scheduling
-        #     self.is_scheduling = True
-        #     self.is_scheduling_by = scheduled_by
-
         self.scheduling_started_at = datetime.datetime.now()
 
         # run the scheduler

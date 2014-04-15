@@ -22,13 +22,14 @@ from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship, validates, synonym
 
 from stalker.db.session import DBSession
+from stalker.log import logging_level
 from stalker.models.status import Status
 from stalker.models.entity import SimpleEntity
 from stalker.models.mixins import ScheduleMixin, StatusMixin
 
 import logging
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging_level)
 
 
 class Review(SimpleEntity, ScheduleMixin, StatusMixin):
