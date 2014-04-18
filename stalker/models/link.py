@@ -74,6 +74,7 @@ class Link(Entity):
     __auto_name__ = True
     __tablename__ = "Links"
     __mapper_args__ = {"polymorphic_identity": "Link"}
+
     link_id = Column(
         "id",
         Integer,
@@ -83,7 +84,6 @@ class Link(Entity):
 
     original_filename = Column(String(256))  # this is a limit for most
                                              # filesystems
-
     full_path = Column(
         String,
         doc="""The full path of the url to the link."""

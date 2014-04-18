@@ -329,6 +329,8 @@ task Task_45 "Task2" {
         tjp_sched = TaskJugglerScheduler()
         test_studio = Studio(name='Test Studio',
                              now=datetime.datetime(2013, 4, 16, 0, 0))
+        test_studio.start = datetime.datetime(2013, 4, 16, 0, 0)
+        test_studio.end = datetime.datetime(2013, 4, 30, 0, 0)
         test_studio.daily_working_hours = 9
         DBSession.add(test_studio)
 
@@ -371,4 +373,3 @@ task Task_45 "Task2" {
             [self.test_user1, self.test_user2],
             self.test_task2.computed_resources
         )
-

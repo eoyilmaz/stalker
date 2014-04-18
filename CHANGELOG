@@ -2,6 +2,13 @@
 Stalker Changes
 ===============
 
+0.2.6.12
+========
+
+* **Update:** ``TaskJugglerScheduler.schedule()`` method now uses the
+  ``Studio.start`` and ``Studio.end`` values for the scheduling range instead
+  of the hardcoded dates.
+
 0.2.6.11
 ========
 

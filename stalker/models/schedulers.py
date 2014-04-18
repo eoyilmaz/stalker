@@ -406,41 +406,6 @@ class TaskJugglerScheduler(SchedulerBase):
                 (self.__class__.__name__, self.studio.__class__.__name__)
             )
 
-        # ********************************************************************
-        # TODO: remove the hardcoded datetime
-        #
-        # Adjust Studio.start:
-        # 1- Looking at the earliest TimeLog entry for all of the active
-        #    Projects. If, there are no TimeLogs, use today 0:00.
-        # 2- Update the Studio.start if the project that have the earliest
-        #    TimeLog has been deactivated.
-        #
-        # Adjust Studio.end:
-        # 1- If the Studio.end is None, set it to Studio.start
-        # 2- Add 1 month to Studio.end
-        # 3- Schedule it.
-        # 4- If TaskJuggler complains about that some of the tasks doesn't fit
-        #    in to the time range, or some of the task marked as non scheduled,
-        #    increment the Studio.end by 2 months.
-        # 5- If TaskJuggler complains again then increment 3 months, and then
-        #    5, 8, 13, 21... that is the fibonacci series.
-        # 6- When TaskJuggler is successful on scheduling the projects, reset
-        #    the increment counter, and use this new date until TJ starts to
-        #    complain again.
-        #
-        self.studio._start = datetime.datetime(2013, 1, 1)
-        self.studio._end = datetime.datetime(2017, 1, 1)
-        #for project in self.studio.active_projects:
-        #    for root_task in project.root_tasks:
-        #        if root_task.start < self.studio.start:
-        #            self.studio.start = root_task.start
-        #        if root_task.end > self.studio.end:
-        #            self.studio.end = root_task.end
-
-        # now for safety multiply the duration by 2
-        #self.studio.end = (self.studio.end - self.studio.start) * 5 + \
-        #                  self.studio.start
-
         # create a tjp file
         self._create_tjp_file()
 

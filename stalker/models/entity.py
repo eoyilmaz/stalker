@@ -258,8 +258,6 @@ class SimpleEntity(Base):
         self.description = description
         self.created_by = created_by
         self.updated_by = updated_by
-        date_created = date_created
-        date_updated = date_updated
         if date_created is None:
             date_created = datetime.datetime.now()
         if date_updated is None:
@@ -458,8 +456,8 @@ class SimpleEntity(Base):
         # lower than date_created
         if date_updated_in < self.date_created:
             raise ValueError(
-                "%(class)s.date_updated could not be set to a date before"
-                "%(class)s.date_created, try setting the 'date_created' before"
+                "%(class)s.date_updated could not be set to a date before "
+                "%(class)s.date_created, try setting the 'date_created' first."
                 % {'class': self.__class__.__name__}
             )
         return date_updated_in
