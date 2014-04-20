@@ -857,9 +857,41 @@ class RepositoryTester(unittest2.TestCase):
                                     'Task2/Some_file.ma'
         self.assertFalse(self.test_repo.is_in_repo(test_not_in_path_osx_path))
 
+    def test_make_relative_method_converts_the_given_linux_path_to_relative_to_repo_root(self):
+        """testing if Repository.make_relative() will convert the given Linux
+        path to repository root relative path
+        """
+        # a Linux Path
+        linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
+        result = self.test_repo.make_relative(linux_path)
+        self.assertEqual(
+            result,
+            'Sero/Task1/Task2/Some_file.ma'
+        )
 
+    def test_make_relative_method_converts_the_given_osx_path_to_relative_to_repo_root(self):
+        """testing if Repository.make_relative() will convert the given OSX
+        path to repository root relative path
+        """
+        # an OSX Path
+        osx_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
+        result = self.test_repo.make_relative(osx_path)
+        self.assertEqual(
+            result,
+            'Sero/Task1/Task2/Some_file.ma'
+        )
 
-
-
-
-
+    def test_make_relative_method_converts_the_given_windows_path_to_relative_to_repo_root(self):
+        """testing if Repository.make_relative() will convert the given Windows
+        path to repository root relative path
+        """
+        # a Windows Path
+        windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        self.test_repo.osx_path = 'T:/Stalker_Projects'
+        result = self.test_repo.make_relative(windows_path)
+        self.assertEqual(
+            result,
+            'Sero/Task1/Task2/Some_file.ma'
+        )

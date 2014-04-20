@@ -219,11 +219,20 @@ class Repository(Entity):
         """
         return self._to_path(path, self.path)
 
+    def make_relative(self, path):
+        """makes the given path relative to the repository root
+
+        :param path: The path to be made relative
+        :return: str
+        """
+        path = self.to_native_path(path)
+        return path.replace(self.path, '')
+
     def __eq__(self, other):
         """the equality operator
         """
         return super(Repository, self).__eq__(other) and \
-               isinstance(other, Repository) and \
-               self.linux_path == other.linux_path and \
-               self.osx_path == other.osx_path and \
-               self.windows_path == other.windows_path
+            isinstance(other, Repository) and \
+            self.linux_path == other.linux_path and \
+            self.osx_path == other.osx_path and \
+            self.windows_path == other.windows_path

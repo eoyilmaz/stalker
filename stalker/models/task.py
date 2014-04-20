@@ -2669,7 +2669,10 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
     @property
     def path(self):
-        """the path attribute
+        """The path attribute will generate a path suitable for placing the
+        files under it. It will use the :class:`.FilenameTemplate` class
+        related to the :class:`.Project` :class:`.Structure` with the
+        ``target_entity_type`` is set to the type of this instance.
         """
         kwargs = self._template_variables()
 

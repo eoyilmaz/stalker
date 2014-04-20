@@ -2,6 +2,14 @@
 Stalker Changes
 ===============
 
+0.2.6.13
+========
+
+* **New:** Added ``Repository.make_relative()`` method, which makes the given
+  path to relative to the repository root. It considers that the path is
+  already in the repository. So for now, be careful about not to pass a path
+  outside of the repository.
+
 0.2.6.12
 ========
 
