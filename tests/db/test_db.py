@@ -3179,7 +3179,7 @@ class DatabaseModelsTester(unittest2.TestCase):
             target_entity_type=Project,
         )
 
-        temp_repo_dir = tempfile.gettempdir()
+        temp_repo_dir = tempfile.mkdtemp()
         repo = Repository(
             name='Test Repo',
             linux_path=temp_repo_dir,

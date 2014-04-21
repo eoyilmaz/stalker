@@ -82,7 +82,7 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
         DBSession.add(self.test_task_statuses)
 
         # repository
-        tempdir = tempfile.gettempdir()
+        tempdir = tempfile.mkdtemp()
         self.test_repo = Repository(
             name='Test Repository',
             linux_path=tempdir,

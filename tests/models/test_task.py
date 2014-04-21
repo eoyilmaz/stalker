@@ -88,9 +88,9 @@ class TaskTester(unittest2.TestCase):
         self.test_repository = Repository(
             name="Test Repository",
             type=self.test_repository_type,
-            linux_path=tempfile.gettempdir(),
-            windows_path=tempfile.gettempdir(),
-            osx_path=tempfile.gettempdir()
+            linux_path=tempfile.mkdtemp(),
+            windows_path=tempfile.mkdtemp(),
+            osx_path=tempfile.mkdtemp()
         )
 
         self.test_user1 = User(
