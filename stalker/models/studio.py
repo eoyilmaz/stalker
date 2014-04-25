@@ -28,7 +28,7 @@ from sqlalchemy import (Column, Integer, ForeignKey, Interval, Boolean,
                         DateTime, PickleType)
 from sqlalchemy.orm import validates, relationship, synonym, reconstructor
 
-from stalker import defaults, log
+from stalker import db, defaults, log
 from stalker.models.entity import SimpleEntity, Entity
 from stalker.models.mixins import DateRangeMixin, WorkingHoursMixin
 from stalker.models.schedulers import SchedulerBase
@@ -413,10 +413,11 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
                 }
             )
 
-        self.scheduling_started_at = datetime.datetime.now()
+        with db.DBSession.no_autoflush:
+            self.scheduling_started_at = datetime.datetime.now()
 
-        # run the scheduler
-        self.scheduler.studio = self
+            # run the scheduler
+            self.scheduler.studio = self
         start = time.time()
 
         # commit before scheduling
@@ -427,23 +428,24 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
             result = self.scheduler.schedule(parsing_method)
         finally:
             # in any case set is_scheduling to False
-            self.is_scheduling = False
-            self.is_scheduling_by = None
+            with db.DBSession.no_autoflush:
+                self.is_scheduling = False
+                self.is_scheduling_by = None
 
-            # also store the result
-            # if result:
-            self.last_schedule_message = result
+                # also store the result
+                # if result:
+                self.last_schedule_message = result
 
-            # And the date the schedule is completed
-            # TODO: convert to UTC time
-            self.last_scheduled_at = datetime.datetime.now()
+                # And the date the schedule is completed
+                # TODO: convert to UTC time
+                self.last_scheduled_at = datetime.datetime.now()
 
-            # and who has done the scheduling
-            if scheduled_by:
-                logger.debug(
-                    'setting last_scheduled_by to : %s' % scheduled_by
-                )
-                self.last_scheduled_by = scheduled_by
+                # and who has done the scheduling
+                if scheduled_by:
+                    logger.debug(
+                        'setting last_scheduled_by to : %s' % scheduled_by
+                    )
+                    self.last_scheduled_by = scheduled_by
 
         end = time.time()
         logger.debug('scheduling took %s seconds' % (end - start))

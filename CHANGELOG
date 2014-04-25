@@ -2,6 +2,11 @@
 Stalker Changes
 ===============
 
+0.2.6.14
+========
+
+* **Fix:** Fixed an autoflush problem in ``Studio.schedule()`` method.
+
 0.2.6.13
 ========
 

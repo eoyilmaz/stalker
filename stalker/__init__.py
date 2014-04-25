@@ -23,7 +23,7 @@ Animation and VFX Studios.
 See docs for more information.
 """
 
-__version__ = '0.2.6.13'
+__version__ = '0.2.6.14'
 
 
 # before anything about stalker create the defaults
