@@ -3490,6 +3490,7 @@ class DatabaseModelsTester(unittest2.TestCase):
             "password": "12345",
             "description": "This user has been created for testing purposes",
             "departments": [new_department],
+            'efficiency': 2.5
         }
 
         user1 = User(**user_kwargs)
@@ -3555,6 +3556,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         date_updated = user1.date_updated
         departments = user1.departments
         description = user1.description
+        efficiency = user1.efficiency
         email = user1.email
         last_login = user1.last_login
         login = user1.login
@@ -3587,6 +3589,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(date_updated, user1_db.date_updated)
         self.assertEqual(departments, user1_db.departments)
         self.assertEqual(description, user1_db.description)
+        self.assertEqual(efficiency, user1_db.efficiency)
         self.assertEqual(email, user1_db.email)
         self.assertEqual(last_login, user1_db.last_login)
         self.assertEqual(login, user1_db.login)

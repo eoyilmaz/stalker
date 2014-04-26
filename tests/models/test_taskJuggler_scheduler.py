@@ -245,13 +245,27 @@ project Studio_564 "Test Studio" 2013-04-16 - 2013-06-30 {
 
         # resources
         resource resources "Resources" {
-            resource User_3 "admin"
-            resource User_28 "User1"
-            resource User_30 "User2"
-            resource User_31 "User3"
-            resource User_33 "User4"
-            resource User_34 "User5"
-            resource User_35 "User6"
+            resource User_3 "admin" {
+    efficiency 1.0
+}
+            resource User_28 "User1" {
+    efficiency 1.0
+}
+            resource User_30 "User2" {
+    efficiency 1.0
+}
+            resource User_31 "User3" {
+    efficiency 1.0
+}
+            resource User_33 "User4" {
+    efficiency 1.0
+}
+            resource User_34 "User5" {
+    efficiency 1.0
+}
+            resource User_35 "User6" {
+    efficiency 1.0
+}
         }
 
         # tasks

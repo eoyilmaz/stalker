@@ -24,8 +24,8 @@ import base64
 import datetime
 
 from sqlalchemy import (Table, Column, Integer, ForeignKey, String, DateTime,
-                        Enum)
-from sqlalchemy.orm import relationship, synonym, reconstructor, validates
+                        Enum, Float)
+from sqlalchemy.orm import relationship, synonym, validates
 from sqlalchemy.schema import UniqueConstraint
 
 from stalker import defaults
@@ -272,8 +272,8 @@ class Permission(Base):
         """the equality of two Permissions
         """
         return isinstance(other, Permission) \
-                   and other.access == self.access \
-                   and other.action == self.action \
+            and other.access == self.access \
+            and other.action == self.action \
             and other.class_name == self.class_name
 
     def __ne__(self, other):
@@ -351,12 +351,35 @@ class User(Entity, ACLMixin):
 
        It is now possible to define Vacations per user.
 
-    .. note::
-        .. deprecated 0.2.0: User.sequences_lead
+    :param efficiency:
+      .. versionadded 0.2.7: Resource Efficiency
 
-        User.sequences_lead attribute has been deprecated. Use
-        :attr:`.responsible_of` to query all the :class:`.Task`\ s and
-        derivatives.
+      The efficiency is a multiplier for a user as a resource to a task and
+      defines how much of the time spent for that particular task is counted as
+      an actual effort. The default value is 1.0, lowest possible value is 0.0
+      and there is no upper limit.
+
+      The efficiency of a resource can be used for three purposes. First you
+      can use it as a crude way to model a team. A team of 5 people should have
+      an efficiency of 5.0. Keep in mind that you cannot track the members of
+      the team individually if you use this feature. They always act as a
+      group.
+
+      Another use is to model performance variations between your resources.
+      Again, this is a fairly crude mechanism and should be used with care. A
+      resource that isn't every good at some task might be pretty good at
+      another. This can't be taken into account as the resource efficiency can
+      only set globally for all tasks.
+
+      One another and interesting use is to model the availability of passive
+      resources like a meeting room or a workstation or something that needs to
+      be free for a task to take place but does not contribute to a task as an
+      active resource.
+
+      All resources that do not contribute effort to the task, that is a
+      passive resource, should have an efficiency of 0.0. Again a typical
+      example would be a conference room. It's necessary for a meeting, but it
+      does not contribute any work.
 
     :param email: holds the e-mail of the user, should be in [part1]@[part2]
       format
@@ -530,6 +553,8 @@ class User(Entity, ACLMixin):
         """
     )
 
+    efficiency = Column(Float, default=1.0)
+
     def __init__(
             self,
             name=None,
@@ -538,6 +563,7 @@ class User(Entity, ACLMixin):
             password=None,
             departments=None,
             groups=None,
+            efficiency=1.0,
             **kwargs):
         kwargs['name'] = name
 
@@ -563,6 +589,8 @@ class User(Entity, ACLMixin):
 
         self.last_login = None
 
+        self.efficiency = efficiency
+
     def __repr__(self):
         """return the representation of the current User
         """
@@ -572,10 +600,10 @@ class User(Entity, ACLMixin):
         """the equality operator
         """
         return super(User, self).__eq__(other) and \
-               isinstance(other, User) and \
-               self.email == other.email and \
-               self.login == other.login and \
-               self.name == other.name
+            isinstance(other, User) and \
+            self.email == other.email and \
+            self.login == other.login and \
+            self.name == other.name
 
     def __ne__(self, other):
         """the inequality operator
@@ -671,8 +699,8 @@ class User(Entity, ACLMixin):
     def _validate_last_login(self, key, last_login_in):
         """validates the given last_login argument
         """
-        if not isinstance(last_login_in, datetime.datetime) and \
-                        last_login_in is not None:
+        if not isinstance(last_login_in, datetime.datetime) \
+           and last_login_in is not None:
             raise TypeError(
                 "%s.last_login should be an instance of datetime.datetime or "
                 "None not %s" %
@@ -680,7 +708,8 @@ class User(Entity, ACLMixin):
             )
         return last_login_in
 
-    def _format_login(self, login):
+    @classmethod
+    def _format_login(cls, login):
         """formats the given login value
         """
         # be sure it is a string
@@ -812,6 +841,33 @@ class User(Entity, ACLMixin):
             )
         return vacation
 
+    @validates('efficiency')
+    def _validate_efficiency(self, key, efficiency):
+        """validates the given efficiency value
+        """
+        if efficiency is None:
+            efficiency = 1.0
+
+        if not isinstance(efficiency, (int, float)):
+            raise TypeError(
+                '%(class)s.efficiency should be a float number greater or '
+                'equal to 0.0, not %(efficiency_class)s' % {
+                    'class': self.__class__.__name__,
+                    'efficiency_class': efficiency.__class__.__name__
+                }
+            )
+
+        if efficiency < 0:
+            raise ValueError(
+                '%(class)s.efficiency should be a float number greater or '
+                'equal to 0.0, not %(efficiency)s' % {
+                    'class': self.__class__.__name__,
+                    'efficiency': efficiency
+                }
+            )
+
+        return efficiency
+
     @property
     def tickets(self):
         """The list of :class:`.Ticket`\ s that this user has.
@@ -887,7 +943,7 @@ class LocalSession(object):
     def store_user(self, user):
         """stores the given user instance
 
-        :param user: The user instance. 
+        :param user: The user instance.
         """
         if user:
             self.logged_in_user_id = user.id

@@ -431,6 +431,7 @@ class UserTest(unittest2.TestCase):
                        self.test_group2],
             'created_by': self.test_admin,
             'updated_by': self.test_admin,
+            'efficiency': 1.0
         }
 
         # create a proper user object
@@ -1242,7 +1243,8 @@ class UserTest(unittest2.TestCase):
     def test_to_tjp_is_working_properly(self):
         """testing if the to_tjp property is working properly
         """
-        expected_tjp = 'resource User_82 "Erkan Ozgur Yilmaz"'
+        expected_tjp = \
+            'resource User_82 "Erkan Ozgur Yilmaz" {\n    efficiency 1.0\n}'
         self.assertEqual(expected_tjp, self.test_user.to_tjp)
 
     def test_to_tjp_is_working_properly_for_a_user_with_vacations(self):
@@ -1270,9 +1272,10 @@ class UserTest(unittest2.TestCase):
         )
 
         expected_tjp = """resource User_82 "Erkan Ozgur Yilmaz" {
-            vacation 2013-06-07-00:00:00 - 2013-06-21-00:00:00
-            vacation 2013-07-01-00:00:00 - 2013-07-15-00:00:00
-            }"""
+    efficiency 1.0
+    vacation 2013-06-07-00:00:00 - 2013-06-21-00:00:00
+    vacation 2013-07-01-00:00:00 - 2013-07-15-00:00:00
+}"""
         # print expected_tjp
         # print '---------------'
         # print self.test_user.to_tjp
@@ -1335,4 +1338,129 @@ class UserTest(unittest2.TestCase):
         self.assertIn(
             vac1,
             self.test_user.vacations
+        )
+
+    def test_efficiency_argument_skipped(self):
+        """testing if the efficiency attribute value will be 1.0 if the
+        efficiency argument is skipped
+        """
+        self.kwargs.pop('efficiency')
+        new_user = User(**self.kwargs)
+        self.assertEqual(1.0, new_user.efficiency)
+
+    def test_efficiency_argument_is_None(self):
+        """testing if the efficiency attribute value will be 1.0 if the
+        efficiency argument is None
+        """
+        self.kwargs['efficiency'] = None
+        new_user = User(**self.kwargs)
+        self.assertEqual(1.0, new_user.efficiency)
+
+    def test_efficiency_attribute_is_set_to_None(self):
+        """testing if the efficiency attribute value will be 1.0 if it is set
+        to None
+        """
+        self.test_user.efficiency = 4.0
+        self.test_user.efficiency = None
+        self.assertEqual(1.0, self.test_user.efficiency)
+
+    def test_efficiency_argument_is_not_a_float_or_integer(self):
+        """testing if a TypeError will be raised when the efficiency argument
+        is not a float or integer
+        """
+        self.kwargs['efficiency'] = 'not a float or integer'
+        with self.assertRaises(TypeError) as cm:
+            new_user = User(**self.kwargs)
+
+        self.assertEqual(
+            'User.efficiency should be a float number greater or equal to '
+            '0.0, not str',
+            cm.exception.message
+        )
+
+    def test_efficiency_attribute_is_not_a_float_or_integer(self):
+        """testing if a TypeError will be raised when the efficiency attribute
+        is set to a value other than a float or integer
+        """
+        with self.assertRaises(TypeError) as cm:
+            self.test_user.efficiency = 'not a float or integer'
+
+        self.assertEqual(
+            'User.efficiency should be a float number greater or equal to '
+            '0.0, not str',
+            cm.exception.message
+        )
+
+    def test_efficiency_argument_is_a_negative_float_or_integer(self):
+        """testing if a ValueError will be raised when the efficiency argument
+        is a negative float or integer
+        """
+        self.kwargs['efficiency'] = -1
+        with self.assertRaises(ValueError) as cm:
+            new_user = User(**self.kwargs)
+
+        self.assertEqual(
+            'User.efficiency should be a float number greater or equal to '
+            '0.0, not -1',
+            cm.exception.message
+        )
+
+    def test_efficiency_attribute_is_a_negative_float_or_integer(self):
+        """testing if a ValueError will be raised when the efficiency attribute
+        is set to a negative float or integer
+        """
+        with self.assertRaises(ValueError) as cm:
+            self.test_user.efficiency = -2.0
+
+        self.assertEqual(
+            'User.efficiency should be a float number greater or equal to '
+            '0.0, not -2.0',
+            cm.exception.message
+        )
+
+    def test_efficiency_argument_is_working_properly(self):
+        """testing if the efficiency argument value is correctly passed to the
+        efficiency attribute
+        """
+        # integer value
+        self.kwargs['efficiency'] = 2
+        new_user = User(**self.kwargs)
+        self.assertEqual(
+            2.0,
+            new_user.efficiency
+        )
+
+        # float value
+        self.kwargs['efficiency'] = 2.3
+        new_user = User(**self.kwargs)
+        self.assertEqual(
+            2.3,
+            new_user.efficiency
+        )
+
+    def test_efficiency_attribute_is_working_properly(self):
+        """testing if the efficiency attribute value can correctly be changed
+        """
+        # integer
+        self.assertNotEqual(
+            2,
+            self.test_user.efficiency
+        )
+
+        self.test_user.efficiency = 2
+        self.assertEqual(
+            2.0,
+            self.test_user.efficiency
+        )
+
+        # float
+        self.assertNotEqual(
+            2.3,
+            self.test_user.efficiency
+        )
+
+        self.test_user.efficiency = 2.3
+        self.assertEqual(
+            2.3,
+            self.test_user.efficiency
         )

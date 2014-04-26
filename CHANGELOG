@@ -2,6 +2,12 @@
 Stalker Changes
 ===============
 
+0.2.7
+=====
+
+* **New:** Added ``efficiency`` attribute to ``User`` class. See
+  :class:`.User` documentation for more info.
+
 0.2.6.14
 ========
 

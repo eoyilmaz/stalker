@@ -292,10 +292,18 @@ class DepartmentTester(unittest2.TestCase):
 
         expected_tjp = """
 resource Department_1324 "Test Department" {
-    resource User_1325 "User1"
-    resource User_1326 "User2"
-    resource User_1327 "User3"
-    resource User_1328 "User4"
+    resource User_1325 "User1" {
+    efficiency 1.0
+}
+    resource User_1326 "User2" {
+    efficiency 1.0
+}
+    resource User_1327 "User3" {
+    efficiency 1.0
+}
+    resource User_1328 "User4" {
+    efficiency 1.0
+}
 }"""
         # print expected_tjp
         # print "-----------------"
