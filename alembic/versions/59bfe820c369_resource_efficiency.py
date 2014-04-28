@@ -16,6 +16,8 @@ import sqlalchemy as sa
 
 def upgrade():
     op.add_column('Users', sa.Column('efficiency', sa.Float(), nullable=True))
+    # set default value
+    op.execute('update "Users" set efficiency = 1.0')
 
 
 def downgrade():
