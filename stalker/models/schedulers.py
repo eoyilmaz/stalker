@@ -208,19 +208,283 @@ class TaskJugglerScheduler(SchedulerBase):
         """
         from jinja2 import Template
 
-        template = Template(defaults.tjp_main_template)
+        template = Template(defaults.tjp_main_template2)
 
         start = time.time()
+
+        # use new way of doing it, it will just work with PostgreSQL
+
+        sql_query = """
+select
+    "Tasks".id,
+    tasks.path,
+    coalesce("Tasks".parent_id, "Tasks".project_id) as parent_id,
+    tasks.entity_type,
+    tasks.name,
+    "Tasks".priority,
+    "Tasks".schedule_timing,
+    "Tasks".schedule_unit,
+    "Tasks".schedule_model,
+    "Tasks".allocation_strategy,
+    "Tasks".persistent_allocation,
+    tasks.depth,
+    task_resources.resource_ids,
+    task_alternative_resources.resource_ids as alternative_resource_ids,
+    time_logs.time_log_array,
+    task_dependencies.dependency_info,
+    not exists (
+       select 1
+        from "Tasks" as "Child_Tasks"
+        where "Child_Tasks".parent_id = "Tasks".id
+    ) as is_leaf
+from "Tasks"
+join (
+    with recursive recursive_task(id, parent_id, path_as_text, path, depth) as (
+        select
+            id,
+            parent_id,
+            id::text AS path_as_text,
+            array[project_id] as path,
+            0
+        from "Tasks"
+        where parent_id is NULL
+    union all
+        select
+            task.id,
+            task.parent_id,
+            (parent.path_as_text || '-' || task.id) as path_as_text,
+            (parent.path || task.parent_id) as path,
+            parent.depth + 1 as depth
+        from "Tasks" as task
+        join recursive_task as parent on task.parent_id = parent.id
+    ) select
+        recursive_task.id,
+        recursive_task.parent_id,
+        recursive_task.path_as_text,
+        recursive_task.path,
+        "SimpleEntities".name as name,
+        "SimpleEntities".entity_type,
+        recursive_task.depth
+    from recursive_task
+    join "SimpleEntities" on recursive_task.id = "SimpleEntities".id
+    --order by path_as_text
+) as tasks on "Tasks".id = tasks.id
+
+-- resources
+left outer join (
+    select
+        task_id,
+        array_agg(resource_id) as resource_ids
+    from "Task_Resources"
+    group by task_id
+) as task_resources on "Tasks".id = task_resources.task_id
+
+-- alternative resources
+left outer join (
+    select
+        task_id,
+        array_agg(resource_id) as resource_ids
+    from "Task_Alternative_Resources"
+    group by task_id
+) as task_alternative_resources on "Tasks".id = task_alternative_resources.task_id
+
+-- time logs
+left outer join (
+    select
+        "TimeLogs".task_id,
+        array_agg(('User_' || "TimeLogs".resource_id, to_char("TimeLogs".start, 'YYYY-MM-DD-HH24:MI:00'), to_char("TimeLogs".end, 'YYYY-MM-DD-HH24:MI:00'))) as time_log_array
+    from "TimeLogs"
+    group by task_id
+) as time_logs on "Tasks".id = time_logs.task_id
+
+-- dependencies
+left outer join (
+    select
+        task_id,
+        array_agg((tasks.path_as_text, dependency_target, gap_timing, gap_unit, gap_model)) dependency_info
+    from "Task_Dependencies"
+    join (
+        with recursive recursive_task(id, parent_id, path_as_text) as (
+            select
+                id,
+                parent_id,
+                id::text AS path_as_text
+            from "Tasks"
+            where parent_id is NULL
+        union all
+            select
+                task.id,
+                task.parent_id,
+                (parent.path_as_text || '-' || task.id) as path_as_text
+            from "Tasks" as task
+            join recursive_task as parent on task.parent_id = parent.id
+        ) select
+            recursive_task.id,
+            recursive_task.parent_id,
+            recursive_task.path_as_text
+        from recursive_task
+        join "SimpleEntities" on recursive_task.id = "SimpleEntities".id
+    ) as tasks on "Task_Dependencies".depends_to_id = tasks.id
+    group by task_id
+) as task_dependencies on "Tasks".id = task_dependencies.task_id
+
+--where "Tasks".id = 1261
+
+--order by "Tasks".id
+order by path_as_text"""
+
+        import json
+
+        from stalker import db
+        result = db.DBSession.connection().execute(sql_query)
+
+        # now start jumping around
+        result_buffer = []
+        previous_level = -1
+        num_of_records = 0
+        for r in result.fetchall():
+            # start by appending task tjp id first
+            task_id = r[0]
+            path = r[1]
+            parent_id = r[2]
+            entity_type = r[3]
+            name = r[4]
+            priority = r[5]
+            schedule_timing = r[6]
+            schedule_unit = r[7]
+            schedule_model = r[8]
+            allocation_strategy = r[9]
+            persistent_allocation = r[10]
+            depth = r[11]
+            resource_ids = r[12]
+            alternative_resource_ids = r[13]
+            time_log_array = r[14]
+            dependency_info = r[15]
+            is_leaf = r[16]
+
+            tab = '  ' * depth
+
+            # close the previous level if necessary
+            for i in range(previous_level - depth + 1):
+                i_tab = '  ' * (previous_level - i)
+                result_buffer.append('%s}' % i_tab)
+
+            result_buffer.append(
+                """%(tab)stask Task_%(id)s "%(name)s" {""" % {
+                    'tab': tab,
+                    'id': task_id,
+                    'name': name
+                }
+            )
+
+            # append priority if it is different then 500
+            if priority != 500:
+                result_buffer.append('%s  priority %s' % (tab, priority))
+
+            # append dependency information
+            if dependency_info:
+                dep_buffer = ['%s  depends ' % tab]
+
+                json_data = json.loads(
+                    dependency_info.replace('{', '[')
+                    .replace('}', ']')
+                    .replace('(', '')
+                    .replace(')', '')
+                )  # it is an array of string
+
+                for i, dep in enumerate(json_data):
+                    if i > 0:
+                        dep_buffer.append(', ')
+
+                    dep_full_ids, \
+                    dependency_target, \
+                    gap_timing, \
+                    gap_unit, \
+                    gap_model = dep.split(',')
+
+                    dep_full_path = '.'.join(
+                        map(lambda x: 'Task_%s' % x, dep_full_ids.split('-'))
+                    )
+
+                    dep_string = '%s {%s}' % (dep_full_path, dependency_target)
+
+                    dep_buffer.append(dep_string)
+
+                result_buffer.append(''.join(dep_buffer))
+
+            # append schedule model and timing information
+            # if this is a leaf task and has resources
+            if is_leaf and resource_ids:
+                result_buffer.append(
+                    '%s  %s %s%s' % (
+                        tab, schedule_model, schedule_timing, schedule_unit
+                    )
+                )
+
+                resource_buffer = ['%s  allocate ' % tab]
+                for i, resource_id in enumerate(resource_ids):
+                    if i > 0:
+                        resource_buffer.append(', ')
+                    resource_buffer.append('User_%s' % resource_id)
+
+                # now go through alternatives
+                if alternative_resource_ids:
+                    resource_buffer.append(' { alternative ')
+                    for alt_resource_id in alternative_resource_ids:
+                        if i > 0:
+                            resource_buffer.append(', ')
+                        resource_buffer.append('User_%s' % alt_resource_id)
+
+                    # set the allocation strategy
+                    resource_buffer.append(
+                        ' select %s' % allocation_strategy)
+
+                    # is is persistent
+                    if persistent_allocation:
+                        resource_buffer.append(' persistent')
+                    resource_buffer.append(' }')
+
+                result_buffer.append(''.join(resource_buffer))
+
+                # append any time log information
+                if time_log_array:
+                    json_data = json.loads(
+                        time_log_array.replace('{', '[')
+                        .replace('}', ']')
+                        .replace('(', '')
+                        .replace(')', '')
+                    )  # it is an array of string
+
+                    for tlog in json_data:
+                        user_id, t_start, t_end = tlog.split(',')
+                        result_buffer.append(
+                            '%s  booking %s %s - %s { overtime 2 }' % (
+                                tab, user_id, t_start, t_end
+                            )
+                        )
+
+            previous_level = depth
+            num_of_records += 1
+
+        result_buffer.append('}')
+
+        tasks_buffer = '\n'.join(result_buffer)
+
         self.tjp_content = template.render({
             'stalker': stalker,
             'studio': self.studio,
             'csv_file_name': self.temp_file_name,
             'csv_file_full_path': self.temp_file_full_path,
-            'compute_resources': self.compute_resources
+            'compute_resources': self.compute_resources,
+            'tasks_buffer': tasks_buffer
         })
+
         end = time.time()
         logger.debug(
             'rendering the whole tjp file took : %s seconds' % (end - start)
+        )
+        logger.debug(
+            'total number of records: %s' % num_of_records
         )
 
     def _fill_tjp_file(self):
