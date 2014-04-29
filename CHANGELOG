@@ -2,6 +2,19 @@
 Stalker Changes
 ===============
 
+0.2.7.1
+=======
+
+* **Fix:** Fixed TimeLog output in one line per task in ``Task.to_tjp()``.
+
+* **New:** Added ``TaskJugglerScheduler`` now accepts a new argument called
+  ``compute_resources`` which when set to True will also consider
+  `Task.alternative_resources` attribute and will fill
+  ``Task.computed_resources`` attribute for each Task. With
+  ``TaskJugglerScheduler`` when the total number of Task is around 15k it will
+  take around 7 minutes to generate this data, so by default it is set to
+  False.
+
 0.2.7
 =====
 
@@ -11,7 +24,7 @@ Stalker Changes
 0.2.6.14
 ========
 
-* **Fix:** Fixed an autoflush problem in ``Studio.schedule()`` method.
+* **Fix:** Fixed an **autoflush** problem in ``Studio.schedule()`` method.
 
 0.2.6.13
 ========
@@ -86,11 +99,14 @@ Stalker Changes
 
 * **New:** Entity to Note relation is now Many-to-Many. So one Note can now be
   assigned more than one Entity.
+
 * **New:** Added alembic revision for ``Entity_Notes`` table creation and data
   migration from ``Notes`` table to ``Entity_Notes`` table. So all notes are
   preserved.
+
 * **Fix:** Fixed ``Shot.cut_duration`` attribute initialization on ``Shot``
   instances restored from database.
+
 * **Fix:** Fixed ``Studios.is_scheduling_by`` relationship configuration, which
   was wrongly referencing the ``Studios.last_scheduled_by_id`` column instead
   of ``Studios.is_scheduled_by_id`` column.
@@ -109,6 +125,7 @@ Stalker Changes
 =======
 
 * **Fix:** Added ``Page`` to ``class_names`` in ``db.init()``.
+
 * **Fix:** Fixed ``TimeLog`` tjp representation to use bot the ``start`` and
   ``end`` date values instead of the ``start`` and ``duration``. This is much
   better because it is independent from the timing resolution settings.
@@ -119,6 +136,7 @@ Stalker Changes
 * **Fix:** Fixed ``stalker.models.studio.schedule()`` method, and prevented it
   to call ``DBSession.commit()`` which causes errors if there is a transaction
   manager.
+
 * **Fix:** Fixed ``stalker.models._parse_csv_file()`` method for empty
   computed resources list.
 

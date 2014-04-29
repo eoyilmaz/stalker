@@ -71,10 +71,9 @@ class SchedulerBase(object):
         """
         self._studio = self._validate_studio(studio_in)
 
-    def schedule(self, parsing_method=0):
+    def schedule(self):
         """the main scheduling function should be implemented in the
         derivatives
-        :param int parsing_method: An integer value for testing purposes.
         """
         raise NotImplementedError
 
@@ -164,9 +163,21 @@ class TaskJugglerScheduler(SchedulerBase):
       +------------+-------------+
       | Vacation   | Vacation    |
       +------------+-------------+
+
+    :param bool compute_resources: When set to True it will also consider
+      :attr:`.Task.alternative_resources` attribute and will fill
+      :attr:`.Task.computed_resources` attribute for each Task. With
+      :class:`.TaskJugglerScheduler` when the total number of Task is around
+      15k it will take around 7 minutes to generate this data, so by default it
+      is False.
+    :param int parsing_method: Choose between SQL (0) or Pure Python (1)
+      parsing. The default is SQL.
     """
 
-    def __init__(self, studio=None):
+    def __init__(self,
+                 studio=None,
+                 compute_resources=False,
+                 parsing_method=0):
         super(TaskJugglerScheduler, self).__init__(studio)
 
         self.tjp_content = ''
@@ -180,6 +191,9 @@ class TaskJugglerScheduler(SchedulerBase):
 
         self.csv_file_full_path = None
         self.csv_file = None
+
+        self.compute_resources = compute_resources
+        self.parsing_method = parsing_method
 
     def _create_tjp_file(self):
         """creates the tjp file
@@ -201,7 +215,8 @@ class TaskJugglerScheduler(SchedulerBase):
             'stalker': stalker,
             'studio': self.studio,
             'csv_file_name': self.temp_file_name,
-            'csv_file_full_path': self.temp_file_full_path
+            'csv_file_full_path': self.temp_file_full_path,
+            'compute_resources': self.compute_resources
         })
         end = time.time()
         logger.debug(
@@ -273,16 +288,17 @@ class TaskJugglerScheduler(SchedulerBase):
                     )
 
                     # computed_resources
-                    if data[3] != '':
-                        resources_data = map(
-                            lambda x: x.split('_')[-1].split(')')[0],
-                            data[3].split(',')
-                        )
-                        for rid in resources_data:
-                            update_user_data.append({
-                                'task_id': entity_id,
-                                'resource_id': rid
-                            })
+                    if self.compute_resources:
+                        if data[3] != '':
+                            resources_data = map(
+                                lambda x: x.split('_')[-1].split(')')[0],
+                                data[3].split(',')
+                            )
+                            for rid in resources_data:
+                                update_user_data.append({
+                                    'task_id': entity_id,
+                                    'resource_id': rid
+                                })
 
                     update_data.append({
                         'b_id': entity_id,
@@ -332,11 +348,12 @@ class TaskJugglerScheduler(SchedulerBase):
                 resource_id=bindparam('resource_id')
             )
 
-        db.DBSession.connection().execute(delete_resources_statement)
-        db.DBSession.connection().execute(
-            update_resources_statement,
-            update_user_data
-        )
+        if self.compute_resources:
+            db.DBSession.connection().execute(delete_resources_statement)
+            db.DBSession.connection().execute(
+                update_resources_statement,
+                update_user_data
+            )
 
         parsing_end = time.time()
         logger.debug(
@@ -390,11 +407,8 @@ class TaskJugglerScheduler(SchedulerBase):
             (parsing_end - parsing_start)
         )
 
-    def schedule(self, parsing_method=0):
+    def schedule(self):
         """Does the scheduling.
-
-        :param int parsing_method: Choose between SQL (0) or Pure Python (1)
-          parsing. The default is SQL.
         """
         # check the studio attribute
         from stalker import Studio
@@ -440,9 +454,9 @@ class TaskJugglerScheduler(SchedulerBase):
             raise RuntimeError(stderr_buffer)
 
         # read back the csv file
-        if parsing_method == 0:
+        if self.parsing_method == 0:
             self._parse_csv_file()
-        elif parsing_method == 1:
+        elif self.parsing_method == 1:
             self._parse_csv_file_old()
 
         logger.debug('tj3 return code: %s' % process.returncode)

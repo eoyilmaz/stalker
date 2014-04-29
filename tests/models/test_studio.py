@@ -35,7 +35,7 @@ class DummyScheduler(SchedulerBase):
         SchedulerBase.__init__(self, studio)
         self.callback = callback
 
-    def schedule(self, parsing_method=0):
+    def schedule(self):
         """call the callback function before finishing
         """
         if self.callback:
@@ -856,7 +856,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
         """testing if the schedule method will schedule the tasks with the
         given scheduler
         """
-        tj_scheduler = TaskJugglerScheduler()
+        tj_scheduler = TaskJugglerScheduler(compute_resources=True)
         self.test_studio.now = datetime.datetime(2013, 4, 15, 22, 56)
         self.test_studio.start = datetime.datetime(2013, 4, 15, 22, 56)
         self.test_studio.end = datetime.datetime(2013, 7, 30, 0, 0)

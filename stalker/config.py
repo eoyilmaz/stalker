@@ -326,7 +326,7 @@ task {{task.tjp_id}} "{{task.name}}" {
         {%- endif %}
         {% for time_log in task.time_logs %}
             booking {{time_log.resource.tjp_id}} {{time_log.start.strftime('%Y-%m-%d-%H:%M:%S')}} - {{time_log.end.strftime('%Y-%m-%d-%H:%M:%S')}} { overtime 2 }
-        {%- endfor %}
+        {% endfor %}
     {% endif %}
 
 }
@@ -374,7 +374,7 @@ resource {{department.tjp_id}} "{{department.name}}" {
         taskreport breakdown "{{csv_file_full_path}}"{
             formats csv
             timeformat "%Y-%m-%d-%H:%M"
-            columns id, start, end, resources
+            columns id, start, end {%- if compute_resources %}, resources{% endif %}
         }
         """,
 
