@@ -2,6 +2,15 @@
 Stalker Changes
 ===============
 
+0.2.7.2
+=======
+
+* **Update:** ``TaskJugglerScheduler`` is now 466x faster when dumping all the
+  data to TJP file. So with this new update it is taking only 1.5 seconds to
+  dump ~20k tasks to a valid TJP file where it was around ~10 minutes in
+  previous implementation. The speed enhancements is available only to
+  PostgreSQL dialect for now.
+
 0.2.7.1
 =======
 

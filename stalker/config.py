@@ -391,16 +391,15 @@ resource {{department.tjp_id}} "{{department.name}}" {
         {%- endfor %}
         }
 
-        # tasks
-        {{ tasks_buffer }}
+# tasks
+{{ tasks_buffer }}
 
-        # reports
-        taskreport breakdown "{{csv_file_full_path}}"{
-            formats csv
-            timeformat "%Y-%m-%d-%H:%M"
-            columns id, start, end {%- if compute_resources %}, resources{% endif %}
-        }
-        """,
+# reports
+taskreport breakdown "{{csv_file_full_path}}"{
+    formats csv
+    timeformat "%Y-%m-%d-%H:%M"
+    columns id, start, end {%- if compute_resources %}, resources{% endif %}
+}""",
 
         tj_command='/usr/local/bin/tj3',
 

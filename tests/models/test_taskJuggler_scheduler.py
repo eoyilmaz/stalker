@@ -491,3 +491,444 @@ task Task_45 "Task2" {
             [self.test_user1, self.test_user2],
             self.test_task2.computed_resources
         )
+
+
+class TaskJugglerScheduler_PostGres_Tester(unittest2.TestCase):
+    """tests the stalker.models.scheduler.TaskJugglerScheduler class with
+    PostGreSQL
+    """
+
+    def setUp(self):
+        """set up the test
+        """
+        # we need a database
+        db.setup({
+            'sqlalchemy.url':
+                'postgresql://stalker_admin:stalker@localhost/stalker_test',
+            'sqlalchemy.echo': False
+        })
+        db.init()
+
+        # replace datetime now function
+
+        # create departments
+        self.test_dep1 = Department(name='Dep1')
+        self.test_dep2 = Department(name='Dep2')
+
+        # create resources
+        self.test_user1 = User(
+            login='user1',
+            name='User1',
+            email='user1@users.com',
+            password='1234',
+            departments=[self.test_dep1]
+        )
+        DBSession.add(self.test_user1)
+
+        self.test_user2 = User(
+            login='user2',
+            name='User2',
+            email='user2@users.com',
+            password='1234',
+            departments=[self.test_dep1]
+        )
+        DBSession.add(self.test_user2)
+
+        self.test_user3 = User(
+            login='user3',
+            name='User3',
+            email='user3@users.com',
+            password='1234',
+            departments=[self.test_dep2]
+        )
+        DBSession.add(self.test_user3)
+
+        self.test_user4 = User(
+            login='user4',
+            name='User4',
+            email='user4@users.com',
+            password='1234',
+            departments=[self.test_dep2]
+        )
+        DBSession.add(self.test_user4)
+
+        # user with two departments
+        self.test_user5 = User(
+            login='user5',
+            name='User5',
+            email='user5@users.com',
+            password='1234',
+            departments=[self.test_dep1, self.test_dep2]
+        )
+        DBSession.add(self.test_user5)
+
+        # user with no departments
+        self.test_user6 = User(
+            login='user6',
+            name='User6',
+            email='user6@users.com',
+            password='1234'
+        )
+        DBSession.add(self.test_user6)
+
+        # repository
+        self.test_repo = Repository(
+            name='Test Repository',
+            linux_path='/mnt/T/',
+            windows_path='T:/',
+            osx_path='/Volumes/T/'
+        )
+        DBSession.add(self.test_repo)
+
+        # statuses
+        self.test_status1 = Status(name='Status 1', code='STS1')
+        self.test_status2 = Status(name='Status 2', code='STS2')
+        self.test_status3 = Status(name='Status 3', code='STS3')
+        self.test_status4 = Status(name='Status 4', code='STS4')
+        self.test_status5 = Status(name='Status 5', code='STS5')
+        DBSession.add_all([self.test_status1,
+                           self.test_status2,
+                           self.test_status3,
+                           self.test_status4,
+                           self.test_status5])
+
+        # status lists
+        self.test_proj_status_list = StatusList(
+            name='Project Status List',
+            statuses=[self.test_status1, self.test_status2, self.test_status3],
+            target_entity_type='Project'
+        )
+        DBSession.add(self.test_proj_status_list)
+
+        # create one project
+        self.test_proj1 = Project(
+            name='Test Project 1',
+            code='TP1',
+            repository=self.test_repo,
+            status_list=self.test_proj_status_list,
+            start=datetime.datetime(2013, 4, 4),
+            end=datetime.datetime(2013, 5, 4)
+        )
+        DBSession.add(self.test_proj1)
+        self.test_proj1.now = datetime.datetime(2013, 4, 4)
+
+        # create task status list
+        self.test_task_status_list = StatusList.query\
+            .filter_by(target_entity_type='Task').first()
+        DBSession.add(self.test_task_status_list)
+
+        # create two tasks with the same resources
+        self.test_task1 = Task(
+            name='Task1',
+            project=self.test_proj1,
+            resources=[self.test_user1, self.test_user2],
+            alternative_resources=[
+                self.test_user3, self.test_user4, self.test_user5
+            ],
+            schedule_model=0,
+            schedule_timing=50,
+            schedule_unit='h',
+            status_list=self.test_task_status_list
+        )
+        DBSession.add(self.test_task1)
+
+        self.test_task2 = Task(
+            name='Task2',
+            project=self.test_proj1,
+            resources=[self.test_user1, self.test_user2],
+            alternative_resources=[
+                self.test_user3, self.test_user4, self.test_user5
+            ],
+            schedule_model=0,
+            schedule_timing=60,
+            schedule_unit='h',
+            status_list=self.test_task_status_list
+        )
+        DBSession.add(self.test_task2)
+        DBSession.commit()
+
+    def tearDown(self):
+        """clean up the test
+        """
+        # clean up test database
+        from stalker.db.declarative import Base
+        Base.metadata.drop_all(db.DBSession.connection())
+        DBSession.commit()
+
+    def test_tjp_file_is_created(self):
+        """testing if the tjp file is correctly created
+        """
+        # create the scheduler
+        tjp_sched = TaskJugglerScheduler()
+        tjp_sched.projects = [self.test_proj1]
+
+        tjp_sched._create_tjp_file()
+        tjp_sched._create_tjp_file_content()
+        tjp_sched._fill_tjp_file()
+
+        # check
+        self.assertTrue(os.path.exists(tjp_sched.tjp_file_full_path))
+
+        # clean up the test
+        tjp_sched._clean_up()
+
+    def test_tjp_file_content_is_correct(self):
+        """testing if the tjp file content is correct
+        """
+        tjp_sched = TaskJugglerScheduler()
+        test_studio = Studio(
+            name='Test Studio',
+            timing_resolution=datetime.timedelta(minutes=30)
+        )
+        test_studio.daily_working_hours = 9
+
+        test_studio.id = 564
+        test_studio.start = datetime.datetime(2013, 4, 16, 0, 7)
+        test_studio.end = datetime.datetime(2013, 6, 30, 0, 0)
+        test_studio.now = datetime.datetime(2013, 4, 16, 0, 0)
+        tjp_sched.studio = test_studio
+
+        tjp_sched._create_tjp_file()
+        tjp_sched._create_tjp_file_content()
+
+        import jinja2
+
+        expected_tjp_template = jinja2.Template(
+            """# Generated By Stalker v{{stalker.__version__}}
+        
+project Studio_564 "Test Studio" 2013-04-16 - 2013-06-30 {
+    timingresolution 30min
+    now 2013-04-16-00:00
+    dailyworkinghours 9
+    weekstartsmonday
+    workinghours mon 09:00 - 18:00
+    workinghours tue 09:00 - 18:00
+    workinghours wed 09:00 - 18:00
+    workinghours thu 09:00 - 18:00
+    workinghours fri 09:00 - 18:00
+    workinghours sat off
+    workinghours sun off
+    timeformat "%Y-%m-%d"
+    scenario plan "Plan"
+    trackingscenario plan
+}
+
+        # resources
+        resource resources "Resources" {
+            resource User_3 "admin" {
+    efficiency 1.0
+}
+            resource User_28 "User1" {
+    efficiency 1.0
+}
+            resource User_30 "User2" {
+    efficiency 1.0
+}
+            resource User_31 "User3" {
+    efficiency 1.0
+}
+            resource User_33 "User4" {
+    efficiency 1.0
+}
+            resource User_34 "User5" {
+    efficiency 1.0
+}
+            resource User_35 "User6" {
+    efficiency 1.0
+}
+        }
+
+# tasks
+task Task_43 "TP1" {
+  task Task_44 "Task1" {
+    effort 50.0h
+    allocate User_28 { alternative User_31, User_33, User_34 select minallocated persistent }, User_30 { alternative User_31, User_33, User_34 select minallocated persistent }
+  }
+  task Task_45 "Task2" {
+    effort 60.0h
+    allocate User_28 { alternative User_31, User_33, User_34 select minallocated persistent }, User_30 { alternative User_31, User_33, User_34 select minallocated persistent }
+  }
+}
+
+# reports
+taskreport breakdown "{{csv_path}}"{
+    formats csv
+    timeformat "%Y-%m-%d-%H:%M"
+    columns id, start, end
+}""")
+        expected_tjp_content = expected_tjp_template.render(
+            {
+                'stalker': stalker,
+                'studio': test_studio,
+                'csv_path': tjp_sched.temp_file_full_path
+            }
+        )
+
+        self.maxDiff = None
+        tjp_content = tjp_sched.tjp_content
+        # print tjp_content
+        tjp_sched._clean_up()
+        self.assertEqual(tjp_content, expected_tjp_content)
+
+    def test_schedule_will_not_work_when_the_studio_attribute_is_None(self):
+        """testing if a TypeError will be raised when the studio attribute is
+        None
+        """
+        tjp_sched = TaskJugglerScheduler()
+        tjp_sched.studio = None
+        self.assertRaises(TypeError, tjp_sched.schedule)
+
+    def test_tasks_are_correctly_scheduled(self):
+        """testing if the tasks are correctly scheduled
+        """
+        tjp_sched = TaskJugglerScheduler(compute_resources=True)
+        test_studio = Studio(name='Test Studio',
+                             now=datetime.datetime(2013, 4, 16, 0, 0))
+        test_studio.start = datetime.datetime(2013, 4, 16, 0, 0)
+        test_studio.end = datetime.datetime(2013, 4, 30, 0, 0)
+        test_studio.daily_working_hours = 9
+        DBSession.add(test_studio)
+
+        tjp_sched.studio = test_studio
+        tjp_sched.schedule()
+        db.DBSession.commit()
+
+        # check if the task and project timings are all adjusted
+        self.assertEqual(
+            datetime.datetime(2013, 4, 16, 9, 0),
+            self.test_proj1.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 4, 19, 12, 0),
+            self.test_proj1.computed_end
+        )
+
+        self.assertEqual(
+            datetime.datetime(2013, 4, 16, 9, 0),
+            self.test_task1.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 4, 18, 16, 0),
+            self.test_task1.computed_end
+        )
+        self.assertItemsEqual(
+            [self.test_user5, self.test_user4],
+            self.test_task1.computed_resources
+        )
+
+        self.assertEqual(
+            datetime.datetime(2013, 4, 16, 9, 0),
+            self.test_task2.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 4, 19, 12, 0),
+            self.test_task2.computed_end
+        )
+        self.assertItemsEqual(
+            [self.test_user1, self.test_user2],
+            self.test_task2.computed_resources
+        )
+
+    def test_tasks_are_correctly_scheduled_when_compute_resources_is_False(self):
+        """testing if the tasks are correctly scheduled when the compute
+        resources is False
+        """
+        tjp_sched = TaskJugglerScheduler(compute_resources=False)
+        test_studio = Studio(name='Test Studio',
+                             now=datetime.datetime(2013, 4, 16, 0, 0))
+        test_studio.start = datetime.datetime(2013, 4, 16, 0, 0)
+        test_studio.end = datetime.datetime(2013, 4, 30, 0, 0)
+        test_studio.daily_working_hours = 9
+        DBSession.add(test_studio)
+
+        tjp_sched.studio = test_studio
+        tjp_sched.schedule()
+        db.DBSession.commit()
+
+        # check if the task and project timings are all adjusted
+        self.assertEqual(
+            datetime.datetime(2013, 4, 16, 9, 0),
+            self.test_proj1.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 4, 19, 12, 0),
+            self.test_proj1.computed_end
+        )
+
+        self.assertEqual(
+            datetime.datetime(2013, 4, 16, 9, 0),
+            self.test_task1.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 4, 18, 16, 0),
+            self.test_task1.computed_end
+        )
+        self.assertItemsEqual(
+            self.test_task1.resources,
+            self.test_task1.computed_resources
+        )
+
+        self.assertEqual(
+            datetime.datetime(2013, 4, 16, 9, 0),
+            self.test_task2.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 4, 19, 12, 0),
+            self.test_task2.computed_end
+        )
+        self.assertItemsEqual(
+            self.test_task2.resources,
+            self.test_task2.computed_resources
+        )
+
+    def test_tasks_are_correctly_scheduled_when_compute_resources_is_True(self):
+        """testing if the tasks are correctly scheduled when the compute
+        resources is True
+        """
+        tjp_sched = TaskJugglerScheduler(compute_resources=True)
+        test_studio = Studio(name='Test Studio',
+                             now=datetime.datetime(2013, 4, 16, 0, 0))
+        test_studio.start = datetime.datetime(2013, 4, 16, 0, 0)
+        test_studio.end = datetime.datetime(2013, 4, 30, 0, 0)
+        test_studio.daily_working_hours = 9
+        DBSession.add(test_studio)
+
+        tjp_sched.studio = test_studio
+        tjp_sched.schedule()
+        db.DBSession.commit()
+
+        # check if the task and project timings are all adjusted
+        self.assertEqual(
+            datetime.datetime(2013, 4, 16, 9, 0),
+            self.test_proj1.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 4, 19, 12, 0),
+            self.test_proj1.computed_end
+        )
+
+        self.assertEqual(
+            datetime.datetime(2013, 4, 16, 9, 0),
+            self.test_task1.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 4, 18, 16, 0),
+            self.test_task1.computed_end
+        )
+        self.assertItemsEqual(
+            [self.test_user4, self.test_user5],
+            self.test_task1.computed_resources
+        )
+
+        self.assertEqual(
+            datetime.datetime(2013, 4, 16, 9, 0),
+            self.test_task2.computed_start
+        )
+        self.assertEqual(
+            datetime.datetime(2013, 4, 19, 12, 0),
+            self.test_task2.computed_end
+        )
+        self.assertItemsEqual(
+            [self.test_user1, self.test_user2],
+            self.test_task2.computed_resources
+        )
