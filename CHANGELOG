@@ -2,6 +2,15 @@
 Stalker Changes
 ===============
 
+0.2.7.3
+=======
+
+* **Fix:** Fixed ``Task.update_status_with_dependent_statuses()`` method for a
+  Task where there is no dependency but the status is DREV. Now calling
+  ``Task.update_status_with_dependent_statuses()`` will set the status to RTS
+  if there is no ``TimeLog`` for that task and will set the status to WIP if
+  the task has time logs.
+
 0.2.7.2
 =======
 

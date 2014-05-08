@@ -3326,3 +3326,64 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
             reviews2,
             self.test_task3.review_set(2)
         )
+
+    def test_leaf_DREV_task_with_no_dependency_and_no_timelogs_update_status_with_dependent_statuses_fixes_status(self):
+        """testing if a Task.update_status_with_dependent_statuses() will fix
+        the status of a leaf DREV task with no dependency (something went
+        wrong) to RTS if there is no TimeLog and to WIP if there is a TimeLog
+        """
+        # use task6 and task5
+        self.test_task5.depends = []
+
+        # set the statuses
+        self.test_task5.status = self.status_drev
+
+        self.assertEqual(
+            self.status_drev,
+            self.test_task5.status
+        )
+
+        # fix status with dependencies
+        self.test_task5.update_status_with_dependent_statuses()
+
+        # check the status
+        self.assertEqual(
+            self.status_rts,
+            self.test_task5.status
+        )
+
+    def test_leaf_DREV_task_with_no_dependency_but_with_timelogs_update_status_with_dependent_statuses_fixes_status(self):
+        """testing if a Task.update_status_with_dependent_statuses() will fix
+        the status of a leaf DREV task with no dependency (something went
+        wrong) to RTS if there is no TimeLog and to WIP if there is a TimeLog
+        """
+        # use task6 and task5
+        self.test_task5.depends = []
+
+        # create some time logs for
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+        self.test_task5.create_time_log(
+            resource=self.test_task5.resources[0],
+            start=now,
+            end=now + td(hours=1)
+        )
+
+        # set the statuses
+        self.test_task5.status = self.status_drev
+
+        self.assertEqual(
+            self.status_drev,
+            self.test_task5.status
+        )
+
+        # fix status with dependencies
+        self.test_task5.update_status_with_dependent_statuses()
+
+        # check the status
+        self.assertEqual(
+            self.status_wip,
+            self.test_task5.status
+        )
+

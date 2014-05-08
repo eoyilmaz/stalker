@@ -254,13 +254,14 @@ class TimeLog(Entity, DateRangeMixin):
 
         # check for overbooking
         with DBSession.no_autoflush:
-            logger.debug('resource.time_logs: %s' % resource.time_logs)
+            # TODO: use other logging levels not just DEBUG
+            # logger.debug('resource.time_logs: %s' % resource.time_logs)
             for time_log in resource.time_logs:
-                logger.debug('time_log       : %s' % time_log)
-                logger.debug('time_log.start : %s' % time_log.start)
-                logger.debug('time_log.end   : %s' % time_log.end)
-                logger.debug('self.start     : %s' % self.start)
-                logger.debug('self.end       : %s' % self.end)
+                # logger.debug('time_log       : %s' % time_log)
+                # logger.debug('time_log.start : %s' % time_log.start)
+                # logger.debug('time_log.end   : %s' % time_log.end)
+                # logger.debug('self.start     : %s' % self.start)
+                # logger.debug('self.end       : %s' % self.end)
 
                 if time_log != self:
                     if time_log.start == self.start or \
@@ -2410,6 +2411,11 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             # convert its status from WFD to RTS if necessary
             if self.status == WFD:
                 self.status = RTS
+            elif self.status == DREV:
+                if len(self.time_logs):
+                    self.status = WIP
+                else:
+                    self.status = RTS
             return
 
         #   +--------- WFD
