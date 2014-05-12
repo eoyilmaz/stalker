@@ -52,9 +52,8 @@ class Version(Link):
       in Stalker are used solely for grouping individual versions together.
       Versions with the same ``take_name`` (of the same Task) are numbered
       together. It can be any alphanumeric value (a-zA-Z0-9\_). The default is
-      the string "Main". When skipped or given as None or an empty string then
-      it will use the default value. It can not start with a number. It can not
-      have white spaces.
+      the string "Main". When skipped it will use the default value. It can not
+      start with a number. It can not have white spaces.
 
     :param inputs: A list o :class:`.Link` instances, holding the inputs of the
       current version. It could be a texture for a Maya file or an image

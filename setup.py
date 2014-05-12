@@ -18,7 +18,7 @@ setup(
     name='stalker',
     version='0.2.7.3',
     description='A Production Asset Management (ProdAM) System',
-    long_description=README + '\n\n' + CHANGES,
+    long_description=README,
     classifiers=[
       "Programming Language :: Python",
       "License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)",
@@ -33,7 +33,7 @@ setup(
     ],
     author='Erkan Ozgur Yilmaz',
     author_email='eoyilmaz@gmail.com',
-    url='http://code.google.com/p/stalker/',
+    url='http://github.com/eoyilmaz/stalker',
     keywords=['production', 'asset', 'management', 'vfx', 'animation',
               'maya', 'houdini', 'nuke', 'fusion', 'softimage', 'blender',
               'vue'],
