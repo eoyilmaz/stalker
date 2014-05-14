@@ -98,15 +98,15 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
     __mapper_args__ = {"polymorphic_identity": "FilenameTemplate"}
     filenameTemplate_id = Column("id", Integer, ForeignKey("Entities.id"),
                                  primary_key=True)
-    #    _target_entity_type = Column("target_entity_type", String)
+    #    _target_entity_type = Column("target_entity_type", String(32))
 
     path = Column(
-        String,
+        String(32),
         doc="""The template code for the path of this FilenameTemplate."""
     )
 
     filename = Column(
-        String,
+        String(32),
         doc="""The template code for the file part of the FilenameTemplate."""
     )
 

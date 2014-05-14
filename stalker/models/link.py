@@ -85,7 +85,7 @@ class Link(Entity):
     original_filename = Column(String(256))  # this is a limit for most
                                              # filesystems
     full_path = Column(
-        String,
+        String(32),
         doc="""The full path of the url to the link."""
     )
 

@@ -92,12 +92,12 @@ class Camera(Entity):
 
     camera_id = Column('id', Integer, ForeignKey('Entities.id'),
                        primary_key=True)
-    make = Column(String)
-    model = Column(String)
+    make = Column(String(32))
+    model = Column(String(32))
     aperture_gate = Column(Float(precision=4), default=0)
     horizontal_film_back = Column(Float(presicion=4), default=0)
     vertical_film_back = Column(Float(precision=4), default=0)
-    web_page = Column(String)
+    web_page = Column(String(32))
 
     def __init__(self,
                  make="",
@@ -137,11 +137,11 @@ class Lens(Entity):
 
     lens_id = Column('id', Integer, ForeignKey('Entities.id'),
                      primary_key=True)
-    make = Column(String)
-    model = Column(String)
+    make = Column(String(32))
+    model = Column(String(32))
     min_focal_length = Column(Float(precision=1))
     max_focal_length = Column(Float(precision=1))
-    web_page = Column(String)
+    web_page = Column(String(32))
 
     def __init__(self,
                  make="",

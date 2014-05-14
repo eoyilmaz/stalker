@@ -26,7 +26,7 @@ def upgrade():
             sa.Column('id', sa.Integer, sa.ForeignKey("Entities.id"),
                       primary_key=True),
             sa.Column('original_filename', sa.String(256), nullable=True),
-            sa.Column('full_path', sa.String)
+            sa.Column('full_path', sa.String(32))
         )
 
         links_temp = sa.sql.table(
@@ -34,7 +34,7 @@ def upgrade():
             sa.Column('id', sa.Integer, sa.ForeignKey("Entities.id"),
                       primary_key=True),
             sa.Column('original_filename', sa.String(256), nullable=True),
-            sa.Column('full_path', sa.String)
+            sa.Column('full_path', sa.String(32))
         )
 
         links = sa.sql.table(
@@ -42,7 +42,7 @@ def upgrade():
             sa.Column('id', sa.Integer, sa.ForeignKey("Entities.id"),
                       primary_key=True),
             sa.Column('original_filename', sa.String(256), nullable=True),
-            sa.Column('path', sa.String),
+            sa.Column('path', sa.String(32)),
         )
 
         # copy data from Links.path to Links_Temp.full_path
@@ -68,7 +68,7 @@ def downgrade():
             sa.Column('id', sa.Integer, sa.ForeignKey("Entities.id"),
                       primary_key=True),
             sa.Column('original_filename', sa.String(256), nullable=True),
-            sa.Column('path', sa.String)
+            sa.Column('path', sa.String(32))
         )
 
         links_temp = sa.sql.table(
@@ -76,7 +76,7 @@ def downgrade():
             sa.Column('id', sa.Integer, sa.ForeignKey("Entities.id"),
                       primary_key=True),
             sa.Column('original_filename', sa.String(256), nullable=True),
-            sa.Column('path', sa.String),
+            sa.Column('path', sa.String(32)),
         )
 
         links = sa.sql.table(
@@ -84,7 +84,7 @@ def downgrade():
             sa.Column('id', sa.Integer, sa.ForeignKey("Entities.id"),
                       primary_key=True),
             sa.Column('original_filename', sa.String(256), nullable=True),
-            sa.Column('full_path', sa.String)
+            sa.Column('full_path', sa.String(32))
         )
 
         # copy data from Links.path to Links_Temp.full_path
