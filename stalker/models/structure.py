@@ -132,7 +132,7 @@ class Structure(Entity):
         secondary="Structure_FilenameTemplates"
     )
 
-    custom_template = Column("custom_template", String)
+    custom_template = Column("custom_template", String(32))
 
     def __init__(self, templates=None, custom_template=None, **kwargs):
         super(Structure, self).__init__(**kwargs)

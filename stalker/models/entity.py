@@ -140,7 +140,7 @@ class SimpleEntity(Base):
 
     description = Column(
         "description",
-        String,
+        String(32),
         doc="""Description of this object."""
     )
 
@@ -230,8 +230,8 @@ class SimpleEntity(Base):
         post_update=True
     )
 
-    html_style = Column(String, nullable=True, default='')
-    html_class = Column(String, nullable=True, default='')
+    html_style = Column(String(32), nullable=True, default='')
+    html_class = Column(String(32), nullable=True, default='')
 
     __stalker_version__ = Column("stalker_version", String(256))
 

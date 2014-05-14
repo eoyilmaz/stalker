@@ -44,8 +44,8 @@ class Page(Entity, ProjectMixin):
     page_id = Column('id', Integer, ForeignKey('Entities.id'),
                      primary_key=True)
 
-    title = Column(String)
-    content = Column(String)
+    title = Column(String(32))
+    content = Column(String(32))
 
     def __init__(self, title='', content='', project=None, **kwargs):
         kwargs['project'] = project

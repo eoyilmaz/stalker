@@ -188,7 +188,7 @@ class Permission(Base):
     _access = Column('access', Enum('Allow', 'Deny', name='AccessNames'))
     _action = Column('action',
                      Enum(*defaults.actions, name='ActionNames'))
-    _class_name = Column('class_name', String)
+    _class_name = Column('class_name', String(32))
 
     def __init__(self, access, action, class_name):
         self._access = self._validate_access(access)

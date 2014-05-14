@@ -183,7 +183,7 @@ class Ticket(Entity, StatusMixin):
         """
     )
 
-    summary = Column(String)
+    summary = Column(String(32))
 
     logs = relationship(
         'TicketLog',
