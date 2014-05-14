@@ -21,7 +21,7 @@
 import os
 import logging
 
-from sqlalchemy import Column, Integer, ForeignKey, String
+from sqlalchemy import Column, Integer, ForeignKey, String, Text
 from sqlalchemy.orm import validates
 
 from stalker.models.entity import Entity
@@ -85,7 +85,7 @@ class Link(Entity):
     original_filename = Column(String(256))  # this is a limit for most
                                              # filesystems
     full_path = Column(
-        String,
+        Text,
         doc="""The full path of the url to the link."""
     )
 

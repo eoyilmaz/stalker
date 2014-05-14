@@ -23,7 +23,7 @@ import uuid
 from sqlalchemy.exc import UnboundExecutionError
 from sqlalchemy.orm import synonym, relationship
 from sqlalchemy.orm.mapper import validates
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Text
 from sqlalchemy.schema import ForeignKey, Table
 from sqlalchemy.types import Enum
 
@@ -183,7 +183,7 @@ class Ticket(Entity, StatusMixin):
         """
     )
 
-    summary = Column(String)
+    summary = Column(Text)
 
     logs = relationship(
         'TicketLog',

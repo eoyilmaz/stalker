@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-from sqlalchemy import Column, Integer, ForeignKey, String
+from sqlalchemy import Column, Integer, ForeignKey, String, Text
 from sqlalchemy.orm import validates, synonym
 from stalker import ProjectMixin, Entity
 
@@ -44,8 +44,8 @@ class Page(Entity, ProjectMixin):
     page_id = Column('id', Integer, ForeignKey('Entities.id'),
                      primary_key=True)
 
-    title = Column(String)
-    content = Column(String)
+    title = Column(Text)
+    content = Column(Text)
 
     def __init__(self, title='', content='', project=None, **kwargs):
         kwargs['project'] = project
