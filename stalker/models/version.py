@@ -22,7 +22,8 @@ import os
 import re
 import jinja2
 
-from sqlalchemy import Table, Column, Integer, ForeignKey, String, Boolean
+from sqlalchemy import (Table, Column, Integer, ForeignKey, String, Boolean,
+                        event)
 from sqlalchemy.exc import UnboundExecutionError
 from sqlalchemy.orm import relationship, validates
 

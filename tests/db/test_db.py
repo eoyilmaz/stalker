@@ -834,28 +834,10 @@ class DatabaseModelsTester(unittest2.TestCase):
     object goes to the database, so they need to be real objects.
     """
 
-    @classmethod
-    def setUpClass(cls):
-        """setup the test
-        """
-        # use a normal session instead of a managed one
-        DBSession.remove()
-
-    @classmethod
-    def tearDownClass(cls):
-        """clean up the test
-        """
-        # delete the default test database file
-        #os.remove(cls.test_db_file)
-        DBSession.remove()
-
     def setUp(self):
         """setup the test
         """
         # create a test database, possibly an in memory database
-        self.test_db_file = ":memory:"
-        self.test_db_uri = "sqlite:///" + self.test_db_file
-
         db.setup()
         db.init()
 
@@ -1682,6 +1664,8 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(task1.references[0], link1_db)
 
         # delete tests
+        task1.references.remove(link1_db)
+
         # Deleting a Link should not delete anything else
         DBSession.delete(link1_db)
         DBSession.commit()
@@ -2660,7 +2644,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(updated_by, sequence_status_list_db.updated_by)
 
         # try to create another StatusList for the same target_entity_type
-        # and do not expect an IntegrityError
+        # and do not expect an IntegrityError unless it is committed.
 
         kwargs["name"] = "new Sequence Status List"
         new_sequence_list = StatusList(**kwargs)
@@ -2668,6 +2652,8 @@ class DatabaseModelsTester(unittest2.TestCase):
         DBSession.add(new_sequence_list)
         self.assertTrue(new_sequence_list in DBSession)
         self.assertRaises(IntegrityError, DBSession.commit)
+        # roll it back
+        DBSession.rollback()
 
     def test_persistence_of_Structure(self):
         """testing the persistence of Structure
@@ -2887,11 +2873,6 @@ class DatabaseModelsTester(unittest2.TestCase):
         status4 = Status(name="stat4", code="STS4")
         status5 = Status(name="stat5", code="STS5")
 
-        task_status_list = StatusList.query\
-            .filter_by(target_entity_type='Task').first()
-        asset_status_list = StatusList.query\
-            .filter_by(target_entity_type='Asset').first()
-
         project_status_list = StatusList(
             name="Project Status List",
             statuses=[status1, status2, status3, status4, status5],
@@ -3030,7 +3011,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         DBSession.add(version1)
         DBSession.commit()
 
-        # referenes
+        # references
         ref1 = Link(
             full_path='some_path',
             original_filename='original_filename'
@@ -3124,6 +3105,14 @@ class DatabaseModelsTester(unittest2.TestCase):
         # Child Tasks
         # TimeLogs
         # Versions
+        # TODO: this should be automatically happening
+        task1_db.references = []
+        with DBSession.no_autoflush:
+            for v in task1_db.versions:
+                v.inputs = []
+                for tv in Version.query.filter(Version.inputs.contains(v)):
+                    tv.inputs.remove(v)
+
         DBSession.delete(task1_db)
         DBSession.commit()
 
@@ -3778,6 +3767,11 @@ class DatabaseModelsTester(unittest2.TestCase):
 
         # try to delete version and expect the task, user and other versions
         # to be intact
+        # TODO: this should be automatically happening
+        with DBSession.no_autoflush:
+            v = test_version_db
+            for tv in Version.query.filter(Version.inputs.contains(v)):
+                tv.inputs.remove(v)
         DBSession.delete(test_version_db)
         DBSession.commit()
 
@@ -3801,3 +3795,42 @@ class DatabaseModelsTester(unittest2.TestCase):
         DBSession.delete(test_version_2)
         DBSession.commit()
 
+
+class DatabaseModelsPostgreSQLTester(DatabaseModelsTester):
+    """does the same test sof DatabaseModelsTester in PostgreSQL
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        """setup the tests in class level
+        """
+        cls.config = {
+            'sqlalchemy.url':
+                'postgresql://stalker_admin:stalker@localhost/stalker_test',
+            'sqlalchemy.echo': False
+        }
+        from stalker.db.declarative import Base
+        db.setup(cls.config)
+        Base.metadata.drop_all(db.DBSession.connection())
+        DBSession.commit()
+
+        # restore defaults.timing_resolution
+        stalker.defaults.timing_resolution = datetime.timedelta(hours=1)
+
+    def setUp(self):
+        """setup the test to use the PostgreSQL test database
+        """
+        # we need a database
+        db.setup(self.config)
+        db.init()
+
+    def tearDown(self):
+        """clean up the test
+        """
+        # clean up test database
+        from stalker.db.declarative import Base
+        Base.metadata.drop_all(db.DBSession.connection())
+        DBSession.commit()
+
+        # restore defaults.timing_resolution
+        stalker.defaults.timing_resolution = datetime.timedelta(hours=1)

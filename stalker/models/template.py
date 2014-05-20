@@ -18,7 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-from sqlalchemy import Column, Integer, ForeignKey, String, Text
+from sqlalchemy import Column, Integer, ForeignKey, Text
 from sqlalchemy.orm import validates
 from stalker.models.entity import Entity
 from stalker.models.mixins import TargetEntityTypeMixin
@@ -98,15 +98,14 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
     __mapper_args__ = {"polymorphic_identity": "FilenameTemplate"}
     filenameTemplate_id = Column("id", Integer, ForeignKey("Entities.id"),
                                  primary_key=True)
-    #    _target_entity_type = Column("target_entity_type", String(32))
 
     path = Column(
-        String(1024),
+        Text,
         doc="""The template code for the path of this FilenameTemplate."""
     )
 
     filename = Column(
-        String(1024),
+        Text,
         doc="""The template code for the file part of the FilenameTemplate."""
     )
 

@@ -955,15 +955,17 @@ class TaskStatusWorkflowTestCase(unittest2.TestCase):
 
     # PREV
     def test_create_time_log_in_PREV_leaf_task(self):
-        """testing if a StatusError will be raised when create_time_log is used
-        in a PREV task
+        """testing if there will be no problem to call create_time_log for a
+        PREV task and the status will stay PREV
         """
         self.test_task3.status = self.status_prev
         resource = self.test_task3.resources[0]
         start = datetime.datetime.now()
         end = datetime.datetime.now() + datetime.timedelta(hours=1)
-        self.assertRaises(StatusError, self.test_task3.create_time_log,
-                          resource, start, end)
+        self.assertEqual(self.test_task3.status, self.status_prev)
+        tlog = self.test_task3.create_time_log(resource, start, end)
+        self.assertIsInstance(tlog, TimeLog)
+        self.assertEqual(self.test_task3.status, self.status_prev)
 
     # HREV
     def test_create_time_log_in_HREV_leaf_task(self):

@@ -21,7 +21,8 @@
 import datetime
 import re
 import uuid
-from sqlalchemy import Table, Column, Integer, String, Text, ForeignKey, DateTime
+from sqlalchemy import (Table, Column, Integer, String, Text, ForeignKey,
+                        DateTime)
 from sqlalchemy.orm import relationship, validates
 
 import stalker

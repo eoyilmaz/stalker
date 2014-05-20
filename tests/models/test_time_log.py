@@ -726,13 +726,14 @@ class TimeLogDBTestCase(unittest2.TestCase):
         TimeLog(**self.kwargs)
 
     def test_time_log_creation_for_a_PREV_leaf_task(self):
-        """testing if a StatusError will be raised when a TimeLog instance is
+        """testing if the status will stay at PREV when a TimeLog instance is
         created for a PREV leaf task
         """
         task = self.kwargs['task']
         task.status = self.status_prev
         self.assertEqual(task.status, self.status_prev)
-        self.assertRaises(StatusError, TimeLog, **self.kwargs)
+        tlog = TimeLog(**self.kwargs)
+        self.assertEqual(task.status, self.status_prev)
 
     def test_time_log_creation_for_a_HREV_leaf_task(self):
         """testing if the status will be updated to WIP when a TimeLog instance

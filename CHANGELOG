@@ -2,6 +2,32 @@
 Stalker Changes
 ===============
 
+0.2.7.4
+=======
+
+* **Fix:** Fixed the following columns column type from String to Text:
+
+    * Permissions.class_name
+    * SimpleEntities.description
+    * Links.full_path
+    * Structures.custom_template
+    * FilenameTemplates.path
+    * FilenameTemplates.filename
+    * Tickets.summary
+    * Wiki.title
+    * Wiki.content
+
+  and specified a size for the following columns:
+
+    * SimpleEntities.html_class -> String(32)
+    * SimpleEntities.html_style -> String(32)
+    * FilenameTemplates.target_entity_type -> String(32)
+
+  to be compatible with MySQL.
+
+* **Update:** It is now possible to create TimeLog instances for a Task with
+  PREV status.
+
 0.2.7.3
 =======
 

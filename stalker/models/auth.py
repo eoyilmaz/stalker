@@ -23,7 +23,7 @@ import re
 import base64
 import datetime
 
-from sqlalchemy import (Table, Column, Integer, ForeignKey, String, Text, DateTime,
+from sqlalchemy import (Table, Column, Integer, ForeignKey, String, DateTime,
                         Enum, Float)
 from sqlalchemy.orm import relationship, synonym, validates
 from sqlalchemy.schema import UniqueConstraint

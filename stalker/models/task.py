@@ -185,7 +185,7 @@ class TimeLog(Entity, DateRangeMixin):
             STOP = Status.query.filter_by(code='STOP').first()
             CMPL = Status.query.filter_by(code='CMPL').first()
 
-            if task.status in [WFD, PREV, OH, STOP, CMPL]:
+            if task.status in [WFD, OH, STOP, CMPL]:
                 raise StatusError(
                     '%(task)s is a %(status)s task, and it is not allowed to '
                     'create TimeLogs for a %(status)s task, please supply a '
@@ -3112,13 +3112,6 @@ def removed_a_dependency(task, task_dependent, initiator):
     :param initiator: not used
     """
     # update task status with dependencies
-    logger.debug('inside removed_a_dependency')
-    logger.debug('task                    : %s' % task)
-    logger.debug('task.depends            : %s' % task.depends)
-    logger.debug('task_dependent          : %s' % task_dependent)
-    logger.debug('task_dependent.task  : %s' % task_dependent.task)
-    logger.debug('task_dependent.depends_to: %s' % task_dependent.depends_to)
-    logger.debug('initiator               : %s' % initiator)
     task.update_status_with_dependent_statuses(
         removing=task_dependent.depends_to
     )
