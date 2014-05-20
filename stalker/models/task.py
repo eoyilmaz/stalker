@@ -239,7 +239,6 @@ class TimeLog(Entity, DateRangeMixin):
     def _validate_resource(self, key, resource):
         """validates the given resource value
         """
-
         if resource is None:
             raise TypeError(
                 "%s.resource can not be None" % self.__class__.__name__
@@ -872,7 +871,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         primaryjoin='Tasks.c.parent_id==Tasks.c.id',
         back_populates='parent',
         post_update=True,
-        cascade='all, delete-orphan',
+        cascade='all, delete',
         doc="""Other :class:`Task` instances which are the children of this
         Task instance. This attribute along with the :attr:`.parent` attribute
         is used in creating a DAG hierarchy of tasks.
@@ -1472,22 +1471,24 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             if self.parent:
                 # check if given project is matching the parent.project
                 with DBSession.no_autoflush:
-                    if self.parent._project != project:
+                    if self.parent.project != project:
                         # don't go mad again, but warn the user that there is an
                         # ambiguity!!!
                         import warnings
 
-                        message = 'The supplied parent and the project is not ' \
-                                  'matching in %s, Stalker will use the parent ' \
-                                  'project (%s) as the parent of this %s' % \
-                                  (self,
-                                   self.parent._project,
-                                   self.__class__.__name__)
+                        message = \
+                            'The supplied parent and the project is not ' \
+                            'matching in %s, Stalker will use the parent ' \
+                            'project (%s) as the parent of this %s' % (
+                                self,
+                                self.parent.project,
+                                self.__class__.__name__
+                            )
 
                         warnings.warn(message, RuntimeWarning)
 
                         # use the parent.project
-                        project = self.parent._project
+                        project = self.parent.project
         return project
 
     @validates("priority")

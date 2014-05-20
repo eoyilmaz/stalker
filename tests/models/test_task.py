@@ -44,12 +44,16 @@ class TaskTester(unittest2.TestCase):
         """run once
         """
         defaults.timing_resolution = datetime.timedelta(hours=1)
+        cls.config = {
+            'sqlalchemy.url': 'sqlite://',
+            'sqlalchemy.echo': False
+        }
 
     def setUp(self):
         """run before every test
         """
         # create a new session
-        db.setup()
+        db.setup(self.config)
         db.init()
 
         self.status_wfd = Status.query.filter_by(code="WFD").first()
@@ -2752,8 +2756,21 @@ class TaskTester(unittest2.TestCase):
         self.kwargs['parent'] = self.test_task
         new_task = Task(**self.kwargs)
         self.assertEqual(new_task.parent, self.test_task)
+        db.DBSession.add(new_task)
+        db.DBSession.commit()
+
+        # store the id to be used later
+        id_ = new_task.id
+        self.assertIsNotNone(id_)
+
         new_task.parent = None
         self.assertIsNone(new_task.parent)
+        db.DBSession.commit()
+
+        # we still should have this task
+        t = Task.query.get(id_)
+        self.assertIsNotNone(t)
+        self.assertEqual(t.name, self.kwargs['name'])
 
     def test_parent_argument_is_not_a_Task_instance(self):
         """testing if a TypeError will be raised when the parent argument is
@@ -4777,3 +4794,34 @@ task Task_5679 "Modeling" {
             self.test_project1.repository.path + 'tp1/Modeling/',
             self.test_task.absolute_path
         )
+
+
+class TaskPostgreSQLTester(TaskTester):
+    """tests the Task class with PostgreSQL database
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        """run once
+        """
+        defaults.timing_resolution = datetime.timedelta(hours=1)
+        cls.config = {
+            'sqlalchemy.url':
+                'postgresql://stalker_admin:stalker@localhost/stalker_test',
+            'sqlalchemy.echo': False
+        }
+        # clean up test database
+        db.setup(cls.config)
+        from stalker.db.declarative import Base
+        Base.metadata.drop_all(db.DBSession.connection())
+        DBSession.commit()
+
+    def tearDown(self):
+        """clean up the test
+        """
+        defaults.timing_resolution = datetime.timedelta(hours=1)
+
+        # clean up test database
+        from stalker.db.declarative import Base
+        Base.metadata.drop_all(db.DBSession.connection())
+        DBSession.commit()

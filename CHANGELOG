@@ -2,6 +2,15 @@
 Stalker Changes
 ===============
 
+0.2.7.5
+=======
+
+* **Fix:** Fixed Task parent/child relationship, previously setting the parent
+  of a task to None was cascading a delete operation due to the
+  "all, delete-orphan" setting of the Task parent/child relationship, this is
+  updated to be "all, delete" and it is now safe to set the parent to None
+  without causing the task to be deleted.
+
 0.2.7.4
 =======
 
