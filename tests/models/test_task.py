@@ -1703,24 +1703,24 @@ class TaskTester(unittest2.TestCase):
         now = dt.now()
 
         self.test_task.time_logs = []
-        book1 = TimeLog(
+        tlog1 = TimeLog(
             task=self.test_task,
             resource=self.test_task.resources[0],
             start=now,
             end=now + td(hours=8)
         )
 
-        self.assertIn(book1, self.test_task.time_logs)
+        self.assertIn(tlog1, self.test_task.time_logs)
 
-        book2 = TimeLog(
+        tlog2 = TimeLog(
             task=self.test_task,
             resource=self.test_task.resources[1],
             start=now,
             end=now + td(hours=12)
         )
-        self.assertIn(book2, self.test_task.time_logs)
+        self.assertIn(tlog2, self.test_task.time_logs)
         self.assertEqual(self.test_task.total_logged_seconds, 20 * 3600)
-        self.assertEqual(self.test_task.percent_complete, 100)
+        self.assertEqual(self.test_task.percent_complete, 20.0 / 9.0 * 100.0)
 
     def test_percent_complete_attribute_is_working_properly_for_a_container_task(self):
         """testing if the percent complete attribute is working properly for a
@@ -3055,6 +3055,7 @@ class TaskTester(unittest2.TestCase):
         import warnings
 
         with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
             Task(**self.kwargs)
             self.assertTrue(
                 issubclass(w[-1].category, RuntimeWarning)

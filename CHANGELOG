@@ -2,6 +2,20 @@
 Stalker Changes
 ===============
 
+0.2.7.6
+=======
+
+* **Update:** Removed ``TimeLog._expand_task_schedule_timing()`` method which
+  was automatically adjusting the ``schedule_timing`` and ``schedule_unit`` of
+  a Task to total duration of the TimeLogs of that particular task, thus
+  increasing the schedule info with the entered time logs.
+
+  But it was setting the ``schedule_timing`` to 0 in some certain cases and it
+  was unnecessary because the main purpose of this method was to prevent
+  TaskJuggler to raise any errors related to the inconsistencies between the
+  schedule values and the duration of TimeLogs and TaskJuggler has never given
+  a real error about that situation.
+
 0.2.7.5
 =======
 

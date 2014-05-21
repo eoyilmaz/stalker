@@ -127,32 +127,6 @@ class TimeLog(Entity, DateRangeMixin):
         self.task = task
         self.resource = resource
 
-    def _expand_task_schedule_timing(self, task):
-        """Expands the task schedule timing if necessary
-
-        :param task: The task that is going to be adjusted
-        """
-        # do the schedule_timing expansion here
-        task_remaining_seconds = task.remaining_seconds
-        tlog_total_seconds = self.duration.days * 86400 + self.duration.seconds
-
-        logger.debug('task_remaining_seconds  : %s' % task_remaining_seconds)
-        logger.debug('tlog_total_seconds      : %s' % tlog_total_seconds)
-
-        if task_remaining_seconds < tlog_total_seconds:
-            # expand the task
-            # first convert the task.schedule_timing to seconds
-            # then add the needed seconds to it then convert to least
-            # meaningful time unit
-
-            # do it normally
-            task.schedule_timing, task.schedule_unit = \
-                task.least_meaningful_time_unit(
-                    task.schedule_seconds
-                    + tlog_total_seconds
-                    - task_remaining_seconds
-                )
-
     @validates("task")
     def _validate_task(self, key, task):
         """validates the given task value
@@ -197,9 +171,6 @@ class TimeLog(Entity, DateRangeMixin):
             elif task.status in [RTS, HREV]:
                 # update task status
                 task.status = WIP
-
-            # adjust task schedule
-            self._expand_task_schedule_timing(task)
 
             # check dependent tasks
             for task_dependencies in task.task_depends_to:
