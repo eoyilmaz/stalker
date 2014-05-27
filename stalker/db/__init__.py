@@ -94,7 +94,7 @@ def init():
 
     # register all Actions available for all SOM classes
     class_names = [
-        'Asset', 'TimeLog', 'Department', 'Entity', 'FilenameTemplate',
+        'Asset', 'TimeLog', 'Department', 'Client', 'Entity', 'FilenameTemplate',
         'Group', 'ImageFormat', 'Link', 'Message', 'Note', 'Page',
         'Permission', 'Project', 'Repository', 'Review', 'Scene', 'Sequence',
         'Shot', 'SimpleEntity', 'Status', 'StatusList', 'Structure', 'Studio',
