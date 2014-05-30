@@ -26,7 +26,7 @@ import logging
 from stalker.db.session import DBSession
 from stalker import (db, defaults, Group, Department, Project, Repository,
                      Sequence, Status, StatusList, Task, Type, User, Version,
-                     Ticket, Vacation)
+                     Ticket, Vacation, Client)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -419,6 +419,9 @@ class UserTest(unittest2.TestCase):
             .first()
         self.assertIsNotNone(self.test_admin)
 
+        # create test company
+        self.test_company = Client(name='Test Company')
+
         # create the default values for parameters
         self.kwargs = {
             'name': 'Erkan Ozgur Yilmaz',
@@ -431,7 +434,8 @@ class UserTest(unittest2.TestCase):
                        self.test_group2],
             'created_by': self.test_admin,
             'updated_by': self.test_admin,
-            'efficiency': 1.0
+            'efficiency': 1.0,
+            'company': self.test_company
         }
 
         # create a proper user object
@@ -443,6 +447,7 @@ class UserTest(unittest2.TestCase):
         self.kwargs['name'] = 'some other name'
         self.kwargs['email'] = 'some@other.email'
 
+    
     def tearDown(self):
         """tear down the test
         """
@@ -1244,7 +1249,9 @@ class UserTest(unittest2.TestCase):
         """testing if the to_tjp property is working properly
         """
         expected_tjp = \
-            'resource User_82 "Erkan Ozgur Yilmaz" {\n    efficiency 1.0\n}'
+            'resource User_%s "Erkan Ozgur Yilmaz" {\n    efficiency 1.0\n}' \
+            % self.test_user.id
+
         self.assertEqual(expected_tjp, self.test_user.to_tjp)
 
     def test_to_tjp_is_working_properly_for_a_user_with_vacations(self):
@@ -1271,11 +1278,11 @@ class UserTest(unittest2.TestCase):
             end=datetime.datetime(2013, 7, 15, 0, 0)
         )
 
-        expected_tjp = """resource User_82 "Erkan Ozgur Yilmaz" {
+        expected_tjp = """resource User_%s "Erkan Ozgur Yilmaz" {
     efficiency 1.0
     vacation 2013-06-07-00:00:00 - 2013-06-21-00:00:00
     vacation 2013-07-01-00:00:00 - 2013-07-15-00:00:00
-}"""
+}""" % self.test_user.id
         # print expected_tjp
         # print '---------------'
         # print self.test_user.to_tjp
@@ -1464,3 +1471,57 @@ class UserTest(unittest2.TestCase):
             2.3,
             self.test_user.efficiency
         )
+
+    def test_company_argument_is_skipped(self):
+        """testing if the company attribute will be set to None when the
+        company argument is skipped
+        """
+        try:
+            self.kwargs.pop('company')
+        except KeyError:
+            pass
+        new_user = User(**self.kwargs)
+        self.assertEquals(new_user.company, None)
+
+    def test_company_argument_is_None(self):
+        """testing if the company argument can be set to None
+        """
+        self.kwargs['company'] = None
+        new_user = User(**self.kwargs)
+        self.assertIsNone(new_user.company)
+
+    def test_company_attribute_is_set_to_None(self):
+        """testing if the company attribute can be set to None
+        """
+        self.assertIsNotNone(self.test_user.company)
+        self.test_user.company = None
+        self.assertIsNone(self.test_user.company)
+
+    def test_company_argument_is_not_a_Client_instance(self):
+        """testing if a TypeError will be raised when the company argument is
+        not a Client instance
+        """
+        test_values = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
+
+        for test_value in test_values:
+            self.kwargs["company"] = test_value
+            self.assertRaises(
+                TypeError,
+                User,
+                **self.kwargs
+            )
+
+    def test_company_attribute_is_set_to_a_value_other_than_a_Client_instance(self):
+        """testing if a TypeError will be raised when the company attribute is
+        set to a value other than a Client instance
+        """
+        test_values = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
+
+        for test_value in test_values:
+            self.assertRaises(
+                TypeError,
+                setattr,
+                self.test_user,
+                'company',
+                test_value
+            )

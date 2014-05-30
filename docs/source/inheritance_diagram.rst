@@ -17,6 +17,7 @@ Inheritance Diagram
    stalker.models.auth.RootFactory
    stalker.models.auth.User
    stalker.models.department.Department
+   stalker.models.client.Client
    stalker.models.entity.Entity
    stalker.models.entity.SimpleEntity
    stalker.models.format.ImageFormat

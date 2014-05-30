@@ -21,6 +21,7 @@
 import os
 import shutil
 import datetime
+from stalker.models.client import Client
 import unittest2
 import tempfile
 from sqlalchemy.exc import IntegrityError
@@ -257,7 +258,7 @@ class DatabaseTester(unittest2.TestCase):
         db.init()
 
         class_names = [
-            'Asset', 'Group', 'Permission', 'User', 'Department',
+            'Asset', 'Client', 'Group', 'Permission', 'User', 'Department',
             'SimpleEntity', 'Entity', 'ImageFormat', 'Link', 'Message', 'Note',
             'Page', 'Project', 'Repository', 'Review', 'Scene', 'Sequence',
             'Shot', 'Status', 'StatusList', 'Structure', 'Studio', 'Tag',
@@ -304,7 +305,7 @@ class DatabaseTester(unittest2.TestCase):
 
         # and we still have correct amount of Permissions
         permissions = Permission.query.all()
-        self.assertEqual(len(permissions), 310)
+        self.assertEqual(len(permissions), 320)
 
         # clean the test
         shutil.rmtree(temp_db_path)
@@ -1214,6 +1215,126 @@ class DatabaseModelsTester(unittest2.TestCase):
         self.assertEqual(end, test_time_log_db.end)
         self.assertEqual(user1, test_time_log_db.resource)
         self.assertEqual(test_task, test_time_log_db.task)
+
+    def test_persistence_of_Client(self):
+        """testing the persistence of Client
+        """
+        logger.setLevel(log.logging_level)
+
+        name = "TestClient"
+        description = "this is for testing purposes"
+        created_by = None
+        updated_by = None
+        date_created = datetime.datetime.now()
+        date_updated = datetime.datetime.now()
+
+        test_client = Client(
+            name=name,
+            description=description,
+            created_by=created_by,
+            updated_by=updated_by,
+            date_created=date_created,
+            date_updated=date_updated
+        )
+        DBSession.add(test_client)
+        DBSession.commit()
+
+        # create three users
+
+        # user1
+        user1 = User(
+            name="User1 Test Persistence Department",
+            login='u1tpd',
+            initials='u1tpd',
+            description="this is for testing purposes",
+            created_by=None,
+            updated_by=None,
+            login_name="user1_tp_client",
+            first_name="user1_first_name",
+            last_name="user1_last_name",
+            email="user1@client.com",
+            company=test_client,
+            password="password",
+        )
+
+        # user2
+        user2 = User(
+            name="User2 Test Persistence Client",
+            login='u2tpd',
+            initials='u2tpd',
+            description="this is for testing purposes",
+            created_by=None,
+            updated_by=None,
+            login_name="user2_tp_client",
+            first_name="user2_first_name",
+            last_name="user2_last_name",
+            email="user2@client.com",
+            company=test_client,
+            password="password",
+        )
+
+        # user3
+        user3 = User(
+            name="User3 Test Persistence Client",
+            login='u3tpd',
+            initials='u3tpd',
+            description="this is for testing purposes",
+            created_by=None,
+            updated_by=None,
+            login_name="user3_tp_client",
+            first_name="user3_first_name",
+            last_name="user3_last_name",
+            email="user3@client.com",
+            company=test_client,
+            password="password",
+        )
+
+        DBSession.add(test_client)
+        DBSession.commit()
+
+        self.assertTrue(test_client in DBSession)
+
+        created_by = test_client.created_by
+        date_created = test_client.date_created
+        date_updated = test_client.date_updated
+        description = test_client.description
+        users = test_client.users
+        name = test_client.name
+        nice_name = test_client.nice_name
+        notes = test_client.notes
+        tags = test_client.tags
+        updated_by = test_client.updated_by
+
+        del test_client
+
+        # lets check the data
+        # first get the client from the db
+        client_db = Client.query.filter_by(name=name).first()
+
+        assert (isinstance(client_db, Client))
+
+        self.assertEqual(created_by, client_db.created_by)
+        self.assertEqual(date_created, client_db.date_created)
+        self.assertEqual(date_updated, client_db.date_updated)
+        self.assertEqual(description, client_db.description)
+        self.assertEqual(users, client_db.users)
+        self.assertEqual(name, client_db.name)
+        self.assertEqual(nice_name, client_db.nice_name)
+        self.assertEqual(notes, client_db.notes)
+        self.assertEqual(tags, client_db.tags)
+        self.assertEqual(updated_by, client_db.updated_by)
+
+        # delete the client and expect the users are still there
+        db.DBSession.delete(client_db)
+        db.DBSession.commit()
+
+        user1_db = User.query.filter_by(login='u1tpd').first()
+        user2_db = User.query.filter_by(login='u2tpd').first()
+        user3_db = User.query.filter_by(login='u3tpd').first()
+
+        self.assertIsNotNone(user1_db)
+        self.assertIsNotNone(user2_db)
+        self.assertIsNotNone(user3_db)
 
     def test_persistence_of_Department(self):
         """testing the persistence of Department

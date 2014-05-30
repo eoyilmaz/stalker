@@ -3053,9 +3053,9 @@ class TaskTester(unittest2.TestCase):
         # catching warnings are different then catching exceptions
         #self.assertRaises(RuntimeWarning, Task, **self.kwargs)
         import warnings
+        warnings.simplefilter("always")
 
         with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
             Task(**self.kwargs)
             self.assertTrue(
                 issubclass(w[-1].category, RuntimeWarning)
