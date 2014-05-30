@@ -73,6 +73,11 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
 
     :type lead: :class:`.User`
 
+    :param client: The client which the project is affiliated with. A project can be
+    affiliated with one company only. Default value is None.
+
+    :type client: :class:`.Client`
+
     :param image_format: The output image format of the project. Default
       value is None.
 
@@ -118,6 +123,21 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
     }
 
     active = Column(Boolean, default=True)
+
+    client_id = Column(Integer, ForeignKey("Clients.id"))
+    client = relationship(
+        "Client",
+        primaryjoin="Projects.c.client_id==Clients.c.id",
+        back_populates="projects",
+        uselist=False,
+        doc="""The client company assigning the studio
+        with the project.
+
+        Should be an instance of :class:`.Client`,
+        can also be set to None.
+        """
+    )
+
 
     tasks = relationship(
         'Task',
@@ -200,6 +220,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
                  name=None,
                  code=None,
                  lead=None,
+                 client=None,
                  repository=None,
                  structure=None,
                  image_format=None,
@@ -226,6 +247,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         self.users = users
         self.repository = repository
         self.structure = structure
+        self.client = client
 
         self._sequences = []
         self._assets = []
@@ -282,6 +304,22 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
                     (self.__class__.__name__, lead.__class__.__name__)
                 )
         return lead
+
+    @validates("client")
+    def _validate_client(self, key, client):
+        """validates the given client value
+        """
+        from stalker.models.client import Client
+
+        if client is not None:
+            # the lead should be an instance of User class
+            if not isinstance(client, Client):
+                raise TypeError(
+                    "%s.client should be an instance of "
+                    "stalker.models.auth.Client not %s" %
+                    (self.__class__.__name__, client.__class__.__name__)
+                )
+        return client
 
     @validates("repository")
     def _validate_repository(self, key, repository):

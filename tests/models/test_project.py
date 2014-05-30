@@ -25,7 +25,7 @@ from stalker import log
 from stalker.db.session import DBSession
 from stalker import (db, Asset, Entity, ImageFormat, Link, Project, Repository,
                      Sequence, Shot, Status, StatusList, Structure, Task, Type,
-                     User, Ticket)
+                     User, Ticket, Client)
 import logging
 
 logger = logging.getLogger('stalker.models.project')
@@ -140,6 +140,13 @@ class ProjectTestCase(unittest2.TestCase):
             password="123456"
         )
 
+        self.test_userClient = User(
+            name="User Client",
+            login="userClient",
+            email="user@client.com",
+            password="123456"
+        )
+
         # statuses
         self.status_new = Status(name="New", code="NEW")
         self.status_wfd = Status(name="Waiting For Dependency", code="WFD")
@@ -209,6 +216,10 @@ class ProjectTestCase(unittest2.TestCase):
             name="Commercials Repository",
         )
 
+
+        self.test_client = Client(name='Test Company', users=[self.test_userClient])
+
+
         # create a project object
         self.kwargs = {
             "name": "Test Project",
@@ -224,7 +235,8 @@ class ProjectTestCase(unittest2.TestCase):
             "display_width": 15,
             "start": self.start,
             "end": self.end,
-            "status_list": self.project_status_list
+            "status_list": self.project_status_list,
+            "client": self.test_client
         }
 
         self.test_project = Project(**self.kwargs)
@@ -683,6 +695,7 @@ class ProjectTestCase(unittest2.TestCase):
 
         DBSession.add(self.test_project)
         DBSession.commit()
+
 
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for
@@ -2188,3 +2201,32 @@ class ProjectTicketsTestCase(unittest2.TestCase):
                 self.test_ticket8
             ]
         )
+    
+
+    
+    def test_client_argument_is_given_as_something_other_than_a_client(self):
+        """testing if a TypeError will be raised when the client argument is
+        given as something other than a Client object
+        """
+        test_values = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
+
+        for test_value in test_values:
+            self.kwargs["client"] = test_value
+            self.assertRaises(
+                TypeError,
+                Project,
+                **self.kwargs
+            )
+
+    def test_client_argument_is_skipped(self):
+        """testing if the client attribute will be set to None when the client
+        argument is skipped
+        """
+        self.kwargs['name'] = 'New Project Name'
+        try:
+            self.kwargs.pop('client')
+        except KeyError:
+            pass
+        new_project = Project(**self.kwargs)
+        self.assertEquals(new_project.client, None)
+        
