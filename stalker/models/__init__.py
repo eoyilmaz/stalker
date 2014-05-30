@@ -50,8 +50,6 @@ def walk_hierarchy(entity, attr, method=0):
     :param entity: Starting Entity
     :param attr: The attribute name to walk over
     :param method: 0:Depth first or 1:Breadth First
-    :param recursive: If set to False, every node will be visited only
-      once. Default value is True
     :return:
     """
     entity_to_visit = [entity]
