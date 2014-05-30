@@ -46,7 +46,7 @@ class Status(Entity, CodeMixin):
     lower case form of the given string::
 
       >>> from stalker import Status
-      >>> a_status = Status(name="On Hold", "OH")
+      >>> a_status = Status(name="On Hold", code="OH")
       >>> a_status == "on hold"
       True
       >>> a_status != "complete"
