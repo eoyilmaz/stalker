@@ -57,7 +57,7 @@ Stalker has a very robust object model, which is called
 hierarchy which is both usable right out of the box and also expandable by the
 studios' developers. SOM is actually a little bit more complex than a basic
 possible model, it is designed in this way just to be able to create a simple
-pipeline to be able to build the system on it.
+pipeline to be able to build the system over it.
 
 Lets look at how a simple studio works and try to create our asset management
 concepts around it.
@@ -73,10 +73,10 @@ Furthermore all the Projects, Sequences, Shots or Assets are divided in to
 different :class:`.Task`\ s those need to be done sequentially or in parallel
 to complete that project.
 
-A Task relates to a work, a work is a quantity of time spend or going to be
-spend for that specific task. The time spend on the course of completion of a
-Task can be recorded with :class:`.TimeLog`\ s. TimeLogs shows the time of an
-artist has spent for a certain Task. So it holds information about how much
+A Task relates to a work, a work is a quantity of time spent or going to be
+spend for that specific task. The time spent on the course of completion of a
+Task can be recorded with :class:`.TimeLog`\ s. TimeLogs show the total time
+spent by an artist for a certain Task. So it holds information about how much
 **effort** has been spent to complete a Task.
 
 During the completion of the Task or at the end of the work a **User** creates
@@ -91,8 +91,9 @@ The inheritance diagram of the classes in the SOM is shown below:
 
 .. include:: inheritance_diagram.rst
 
-Stalker is a configurable and expandable system. Both of these features allows
-the system to have a flexible structure.
+Stalker is a configurable and expandable and most importantly it is an
+open source system. All of these features allows the system to have a flexible
+structure.
 
 There are two levels of expansion, the first level is the simplest one, by just
 adding different statuses, different types or these kind of things in
@@ -113,16 +114,15 @@ Features
  2. SQLAlchemy for the database back-end and ORM
 
  3. Uses Jinja2 as the template system for the file and folder naming
-    convention will be used like:
-    
+    convention, it is possible to use templates like:
+
     {repository.path}/{project.code}/Assets/{asset.type.name}/{asset.code}/
-    {asset.name}_{asset.type.name}_v{asset.version.version_number}.{
-    asset.version.extension}
+    {asset.name}_{asset.type.name}_v{version.version_number}.{version.extension}
  
  4. File and folders and file sequences can be uploaded to the server as
     assets, and the server decides where to place the folder or file by using
     the template system.
- 
+
  5. The event system gives full control for every CRUDL (create/insert, read,
     update, delete and list) by giving step like before insert, after insert
     call-backs.
@@ -130,6 +130,12 @@ Features
  6. The messaging system allows the users collaborate efficiently.
 
  7. Has an embedded Ticket system.
+
+ 8. Uses TaskJuggler as the task management backend and supports basic Task
+    attributes.
+
+ 9. Has a predefined workflow for task statuses called Task Status Workflow
+    which manages the statuses of a Task during the project completion.
 
 For usage examples see :ref:`tutorial_toplevel`\ .
 
@@ -207,6 +213,7 @@ Here is the code::
 
   commercial_type = Type(
     name='Commercial',
+    code='COMM',
     target_entity_type='Project'
   )
 
@@ -245,10 +252,10 @@ Here is the code::
   )
 
   # just add the project to the database
-  db.session.add(proj1)
+  db.DBSession.add(proj1)
 
   # and commit the data to database
-  db.session.commit()
+  db.DBSession.commit()
 
 It may seem too much for just creating a Project, but it is for the first time
 only. For a second project, we can use the previous Repository, Structure,
@@ -285,10 +292,10 @@ Because we have a project now lets create a task for this project::
   # created by default when we called db.init() in previous example
 
   # add it to the database
-  db.session.add(task1)
+  db.DBSession.add(task1)
 
   # and commit
-  db.session.commit()
+  db.DBSession.commit()
 
 Now we have created a simple Task and assigned it to the resource1. Lets check
 the status of the Task::
