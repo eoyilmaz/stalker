@@ -134,7 +134,17 @@ def init():
                            status_names=defaults.review_status_names,
                            status_codes=defaults.review_status_codes)
 
+    # create alembic revision table
+    create_alembic_table()
+
     logger.debug('finished initializing the database')
+
+
+def create_alembic_table():
+    """creates the default alembic_revision table and creates the data so that
+    any new database will be considered as the latest version
+    """
+    pass
 
 
 def __create_admin__():
