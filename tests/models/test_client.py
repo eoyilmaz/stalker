@@ -20,10 +20,11 @@
 
 import unittest2
 import datetime
-from stalker import Client, Entity, User, Project, Status, StatusList, Repository
+from stalker import (Client, Entity, User, Project, Status, StatusList,
+                     Repository)
 
 
-class ClientTester(unittest2.TestCase):
+class ClientTestCase(unittest2.TestCase):
     """tests the Client class
     """
 
@@ -73,11 +74,9 @@ class ClientTester(unittest2.TestCase):
             password="admin",
         )
 
-
-
         self.status_new = Status(name="Test status 1", code="Status1")
-        self.status_wip = Status(name="Test status 1", code="Status2")
-        self.status_cmpl = Status(name="Test status 1", code="Status3")
+        self.status_wip = Status(name="Test status 2", code="Status2")
+        self.status_cmpl = Status(name="Test status 3", code="Status3")
 
         self.project_statuses = StatusList(
             name="Project Status List",
@@ -86,12 +85,11 @@ class ClientTester(unittest2.TestCase):
                 self.status_wip,
                 self.status_cmpl
             ],
-            target_entity_type=Project  # you can also use "Project" which is a str
+            target_entity_type='Project'
         )
 
-
         self.test_repo = Repository(
-          name="Test Repository"
+            name="Test Repository"
         )
 
         self.test_project1 = Project(
@@ -101,14 +99,12 @@ class ClientTester(unittest2.TestCase):
             repository=self.test_repo,
         )
 
-
         self.test_project2 = Project(
             name="Test Project 1",
             code='proj2',
             status_list=self.project_statuses,
             repository=self.test_repo,
         )
-
 
         self.test_project3 = Project(
             name="Test Project 1",
@@ -123,7 +119,6 @@ class ClientTester(unittest2.TestCase):
             self.test_project3
 
         ]
-
 
         self.date_created = self.date_updated = datetime.datetime.now()
 
@@ -140,12 +135,6 @@ class ClientTester(unittest2.TestCase):
 
         # create a default client object
         self.test_client = Client(**self.kwargs)
-
-        # assign company
-
-
-
-
 
     def test___auto_name__class_attribute_is_set_to_false(self):
         """testing if the __auto_name__ class attribute is set to False for
@@ -192,7 +181,7 @@ class ClientTester(unittest2.TestCase):
             test_value
         )
 
-    def test_users_attribute_elements_accepts_User_only(self):
+    def test_users_attribute_elements_accepts_user_only(self):
         """testing if a TypeError will be raised when trying to assign
         something other than a User object to the users list
         """
@@ -226,8 +215,9 @@ class ClientTester(unittest2.TestCase):
         """
         test_values = [1, 1.2, "a user"]
         for test_value in test_values:
-            self.assertRaises(TypeError, setattr, self.test_client,
-                              "users", test_value)
+            self.assertRaises(
+                TypeError, setattr, self.test_client, "users", test_value
+            )
 
     def test_users_attribute_defaults_to_empty_list(self):
         """testing if the users attribute defaults to an empty list if the
@@ -241,15 +231,15 @@ class ClientTester(unittest2.TestCase):
         """testing if a TypeError will be raised when the users attribute is
         set to None
         """
-        self.assertRaises(TypeError, setattr, self.test_client, "users",
-                          None)
+        self.assertRaises(TypeError, setattr, self.test_client, "users", None)
 
     def test_members_attribute_is_a_synonym_for_users(self):
         """testing if the members attribute is actually a synonym for the users
         attribute
         """
-        self.assertEqual(self.test_client.users,
-                         self.test_client.members)
+        self.assertEqual(self.test_client.users, self.test_client.members)
+        self.test_client.users.append(self.test_user1)
+        self.assertIn(self.test_user1, self.test_client.members)
 
     def test_projects_argument_accepts_an_empty_list(self):
         """testing if projects argument accepts an empty list
@@ -290,7 +280,6 @@ class ClientTester(unittest2.TestCase):
             test_value
         )
 
-
     def test_projects_attribute_elements_accepts_Project_only(self):
         """testing if a TypeError will be raised when trying to assign
         something other than a Project object to the projects list
@@ -319,7 +308,6 @@ class ClientTester(unittest2.TestCase):
             self.kwargs["projects"] = test_value
             self.assertRaises(TypeError, Project, **self.kwargs)
 
-
     def test_projects_attribute_is_not_iterable(self):
         """testing if a TypeError will be raised when the projects attribute
         is tried to be set to a non-iterable value
@@ -341,14 +329,14 @@ class ClientTester(unittest2.TestCase):
         """testing if a TypeError will be raised when the projects attribute is
         set to None
         """
-        self.assertRaises(TypeError, setattr, self.test_client, "projects",
-                          None)
+        self.assertRaises(
+            TypeError, setattr, self.test_client, "projects", None
+        )
 
     def test_user_remove_also_removes_client_from_user(self):
         """testing if removing an user from the users list also removes the
         client from the users company argument
         """
-
         # check if the user is in the company
         self.assertIs(self.test_client, self.test_user1.company)
 
@@ -361,15 +349,13 @@ class ClientTester(unittest2.TestCase):
         # assign the user back
         self.test_user1.company = self.test_client
 
-        # check if the user is in the companys users list
+        # check if the user is in the companies users list
         self.assertIn(self.test_user1, self.test_client.users)
-
 
     def test_project_remove_also_removes_project_from_client(self):
         """testing if removing an user from the users list also removes the
         client from the users company argument
         """
-
         # check if the project is registered with the client
         self.assertIs(self.test_project1.client, self.test_client)
 
@@ -382,9 +368,8 @@ class ClientTester(unittest2.TestCase):
         # assign the project back
         self.test_client.projects.append(self.test_project1)
 
-        # check if the project is in the companys projects list
+        # check if the project is in the companies projects list
         self.assertIn(self.test_project1, self.test_client.projects)
-
 
     def test_equality(self):
         """testing equality of two Client objects
@@ -421,4 +406,3 @@ class ClientTester(unittest2.TestCase):
         self.assertFalse(dep1 != dep2)
         self.assertTrue(dep1 != dep3)
         self.assertTrue(dep1 != entity1)
-

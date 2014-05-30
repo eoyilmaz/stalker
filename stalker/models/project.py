@@ -73,8 +73,8 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
 
     :type lead: :class:`.User`
 
-    :param client: The client which the project is affiliated with. A project can be
-    affiliated with one company only. Default value is None.
+    :param client: The client which the project is affiliated with. Default
+      value is None.
 
     :type client: :class:`.Client`
 

@@ -140,7 +140,7 @@ class ProjectTestCase(unittest2.TestCase):
             password="123456"
         )
 
-        self.test_userClient = User(
+        self.test_user_client = User(
             name="User Client",
             login="userClient",
             email="user@client.com",
@@ -216,9 +216,10 @@ class ProjectTestCase(unittest2.TestCase):
             name="Commercials Repository",
         )
 
-
-        self.test_client = Client(name='Test Company', users=[self.test_userClient])
-
+        self.test_client = Client(
+            name='Test Company',
+            users=[self.test_user_client]
+        )
 
         # create a project object
         self.kwargs = {
@@ -695,7 +696,6 @@ class ProjectTestCase(unittest2.TestCase):
 
         DBSession.add(self.test_project)
         DBSession.commit()
-
 
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for
@@ -1320,326 +1320,382 @@ class ProjectTestCase(unittest2.TestCase):
         from jinja2 import Template
 
         expected_tjp_temp = Template("""
-task Project_33 "Test Project" {
+task Project_{{project.id}} "Test Project" {
         
-task Sequence_34 "Seq1" {
+task Sequence_{{sequence1.id}} "Seq1" {
 
     
             
             
             effort 1.0h
-            allocate User_1             
+            allocate User_{{user1.id}}             
 }        
-task Sequence_35 "Seq2" {
+task Sequence_{{sequence2.id}} "Seq2" {
 
     
             
             
             effort 1.0h
-            allocate User_12             
+            allocate User_{{user2.id}}             
 }        
-task Sequence_36 "Seq3" {
+task Sequence_{{sequence3.id}} "Seq3" {
 
     
             
             
             effort 1.0h
-            allocate User_13             
+            allocate User_{{user3.id}}             
 }        
-task Sequence_37 "Seq4" {
+task Sequence_{{sequence4.id}} "Seq4" {
 
     
     
-task Task_53 "Test Task 4" {
+task Task_{{task4.id}} "Test Task 4" {
 
     
             
             
             effort 1.0h
-            allocate User_19             
+            allocate User_{{user4.id}}             
 }
-task Task_54 "Test Task 5" {
+task Task_{{task5.id}} "Test Task 5" {
 
     
             
             
             effort 1.0h
-            allocate User_20             
+            allocate User_{{user5.id}}             
 }
-task Task_55 "Test Task 6" {
+task Task_{{task6.id}} "Test Task 6" {
 
     
             
             
             effort 1.0h
-            allocate User_21             
-}
-}        
-task Sequence_38 "Seq5" {
-
-    
-    
-task Task_56 "Test Task 7" {
-
-    
-            
-            
-            effort 1.0h
-            allocate User_22             
-}
-task Task_57 "Test Task 8" {
-
-    
-            
-            
-            effort 1.0h
-            allocate User_23             
-}
-task Task_58 "Test Task 9" {
-
-    
-            
-            
-            effort 1.0h
-            allocate User_24             
+            allocate User_{{user6.id}}             
 }
 }        
-task Sequence_39 "Seq6" {
+task Sequence_{{sequence5.id}} "Seq5" {
+
+    
+    
+task Task_{{task7.id}} "Test Task 7" {
+
+    
+            
+            
+            effort 1.0h
+            allocate User_{{user7.id}}             
+}
+task Task_{{task8.id}} "Test Task 8" {
+
+    
+            
+            
+            effort 1.0h
+            allocate User_{{user8.id}}             
+}
+task Task_{{task9.id}} "Test Task 9" {
+
+    
+            
+            
+            effort 1.0h
+            allocate User_{{user9.id}}             
+}
+}        
+task Sequence_{{sequence6.id}} "Seq6" {
 
     
                         
 }        
-task Sequence_40 "Seq7" {
+task Sequence_{{sequence7.id}} "Seq7" {
 
     
                         
 }        
-task Shot_41 "{{shot1.name}}" {
+task Shot_{{shot1.id}} "{{shot1.name}}" {
 
     
     
-task Task_59 "Test Task 10" {
+task Task_{{task10.id}} "Test Task 10" {
 
     
             
             
             effort 10.0h
-            allocate User_25             
+            allocate User_{{user10.id}}             
 }
-task Task_60 "Test Task 11" {
+task Task_{{task11.id}} "Test Task 11" {
 
     
             
             
             effort 1.0h
-            allocate User_1 , User_12             
+            allocate User_{{user1.id}} , User_{{user2.id}}             
 }
-task Task_61 "Test Task 12" {
+task Task_{{task12.id}} "Test Task 12" {
 
     
             
             
             effort 1.0h
-            allocate User_13 , User_19             
-}
-}        
-task Shot_42 "{{shot2.name}}" {
-
-    
-    
-task Task_62 "Test Task 13" {
-
-    
-            
-            
-            effort 1.0h
-            allocate User_20 , User_21             
-}
-task Task_63 "Test Task 14" {
-
-    
-            
-            
-            effort 1.0h
-            allocate User_22 , User_23             
-}
-task Task_64 "Test Task 15" {
-
-    
-            
-            
-            effort 1.0h
-            allocate User_24 , User_25             
+            allocate User_{{user3.id}} , User_{{user4.id}}             
 }
 }        
-task Shot_43 "{{shot3.name}}" {
+task Shot_{{shot2.id}} "{{shot2.name}}" {
 
     
     
-task Task_65 "Test Task 16" {
+task Task_{{task13.id}} "Test Task 13" {
 
     
             
             
             effort 1.0h
-            allocate User_1 , User_12 , User_13             
+            allocate User_{{user5.id}} , User_{{user6.id}}             
 }
-task Task_66 "Test Task 17" {
+task Task_{{task14.id}} "Test Task 14" {
 
     
             
             
             effort 1.0h
-            allocate User_19 , User_20 , User_21             
+            allocate User_{{user7.id}} , User_{{user8.id}}             
 }
-task Task_67 "Test Task 18" {
+task Task_{{task15.id}} "Test Task 15" {
 
     
             
             
             effort 1.0h
-            allocate User_22 , User_23 , User_24             
-}
-}        
-task Shot_44 "{{shot4.name}}" {
-
-    
-    
-task Task_68 "Test Task 19" {
-
-    
-            
-            
-            effort 1.0h
-            allocate User_1 , User_12 , User_25             
-}
-task Task_69 "Test Task 20" {
-
-    
-            
-            
-            effort 1.0h
-            allocate User_13 , User_19 , User_20             
-}
-task Task_70 "Test Task 21" {
-
-    
-            
-            
-            effort 1.0h
-            allocate User_21 , User_22 , User_23             
+            allocate User_{{user9.id}} , User_{{user10.id}}             
 }
 }        
-task Asset_45 "Test Asset 1" {
+task Shot_{{shot3.id}} "{{shot3.name}}" {
+
+    
+    
+task Task_{{task16.id}} "Test Task 16" {
 
     
             
             
             effort 1.0h
-            allocate User_12             
+            allocate User_{{user1.id}} , User_{{user2.id}} , User_{{user3.id}}             
+}
+task Task_{{task17.id}} "Test Task 17" {
+
+    
+            
+            
+            effort 1.0h
+            allocate User_{{user4.id}} , User_{{user5.id}} , User_{{user6.id}}             
+}
+task Task_{{task18.id}} "Test Task 18" {
+
+    
+            
+            
+            effort 1.0h
+            allocate User_{{user7.id}} , User_{{user8.id}} , User_{{user9.id}}             
+}
 }        
-task Asset_46 "Test Asset 2" {
+task Shot_{{shot4.id}} "{{shot4.name}}" {
+
+    
+    
+task Task_{{task19.id}} "Test Task 19" {
+
+    
+            
+            
+            effort 1.0h
+            allocate User_{{user1.id}} , User_{{user2.id}} , User_{{user10.id}}             
+}
+task Task_{{task20.id}} "Test Task 20" {
+
+    
+            
+            
+            effort 1.0h
+            allocate User_{{user3.id}} , User_{{user4.id}} , User_{{user5.id}}             
+}
+task Task_{{task21.id}} "Test Task 21" {
+
+    
+            
+            
+            effort 1.0h
+            allocate User_{{user6.id}} , User_{{user7.id}} , User_{{user8.id}}             
+}
+}        
+task Asset_{{asset1.id}} "Test Asset 1" {
+
+    
+            
+            
+            effort 1.0h
+            allocate User_{{user2.id}}             
+}        
+task Asset_{{asset2.id}} "Test Asset 2" {
 
     
                         
 }        
-task Asset_47 "Test Asset 3" {
+task Asset_{{asset3.id}} "Test Asset 3" {
 
     
                         
 }        
-task Asset_48 "Test Asset 4" {
+task Asset_{{asset4.id}} "Test Asset 4" {
 
     
     
-task Task_71 "Test Task 22" {
+task Task_{{task22.id}} "Test Task 22" {
 
     
             
             
             effort 1.0h
-            allocate User_1 , User_24 , User_25             
+            allocate User_{{user1.id}} , User_{{user9.id}} , User_{{user10.id}}             
 }
-task Task_72 "Test Task 23" {
+task Task_{{task23.id}} "Test Task 23" {
 
     
             
             
             effort 1.0h
-            allocate User_12 , User_13             
+            allocate User_{{user2.id}} , User_{{user3.id}}             
 }
-task Task_73 "Test Task 24" {
+task Task_{{task24.id}} "Test Task 24" {
 
     
             
             
             effort 1.0h
-            allocate User_19 , User_20             
-}
-}        
-task Asset_49 "Test Asset 5" {
-
-    
-    
-task Task_74 "Test Task 25" {
-
-    
-            
-            
-            effort 1.0h
-            allocate User_21 , User_22             
-}
-task Task_75 "Test Task 26" {
-
-    
-            
-            
-            effort 1.0h
-            allocate User_23 , User_24             
-}
-task Task_76 "Test Task 27" {
-
-    
-            
-            
-            effort 1.0h
-            allocate User_1 , User_25             
+            allocate User_{{user4.id}} , User_{{user5.id}}             
 }
 }        
-task Task_50 "Test Task 1" {
+task Asset_{{asset5.id}} "Test Asset 5" {
+
+    
+    
+task Task_{{task25.id}} "Test Task 25" {
 
     
             
             
             effort 1.0h
-            allocate User_1             
+            allocate User_{{user6.id}} , User_{{user7.id}}             
+}
+task Task_{{task26.id}} "Test Task 26" {
+
+    
+            
+            
+            effort 1.0h
+            allocate User_{{user8.id}} , User_{{user9.id}}             
+}
+task Task_{{task27.id}} "Test Task 27" {
+
+    
+            
+            
+            effort 1.0h
+            allocate User_{{user1.id}} , User_{{user10.id}}             
+}
 }        
-task Task_51 "Test Task 2" {
+task Task_{{task1.id}} "Test Task 1" {
 
     
             
             
             effort 1.0h
-            allocate User_12             
+            allocate User_{{user1.id}}             
 }        
-task Task_52 "Test Task 3" {
+task Task_{{task2.id}} "Test Task 2" {
 
     
             
             
             effort 1.0h
-            allocate User_13             
+            allocate User_{{user2.id}}             
+}        
+task Task_{{task3.id}} "Test Task 3" {
+
+    
+            
+            
+            effort 1.0h
+            allocate User_{{user3.id}}             
 }}""")
         expected_tjp = expected_tjp_temp.render({
+            'project': self.test_project,
+
+            'task1': self.test_task1,
+            'task2': self.test_task2,
+            'task3': self.test_task3,
+            'task4': self.test_task4,
+            'task5': self.test_task5,
+            'task6': self.test_task6,
+            'task7': self.test_task7,
+            'task8': self.test_task8,
+            'task9': self.test_task9,
+            'task10': self.test_task10,
+            'task11': self.test_task11,
+            'task12': self.test_task12,
+            'task13': self.test_task13,
+            'task14': self.test_task14,
+            'task15': self.test_task15,
+            'task16': self.test_task16,
+            'task17': self.test_task17,
+            'task18': self.test_task18,
+            'task19': self.test_task19,
+            'task20': self.test_task20,
+            'task21': self.test_task21,
+            'task22': self.test_task22,
+            'task23': self.test_task23,
+            'task24': self.test_task24,
+            'task25': self.test_task25,
+            'task26': self.test_task26,
+            'task27': self.test_task27,
+
+            'asset1': self.test_asset1,
+            'asset2': self.test_asset2,
+            'asset3': self.test_asset3,
+            'asset4': self.test_asset4,
+            'asset5': self.test_asset5,
+
             'shot1': self.test_shot1,
             'shot2': self.test_shot2,
             'shot3': self.test_shot3,
-            'shot4': self.test_shot4
+            'shot4': self.test_shot4,
+
+            'sequence1': self.test_seq1,
+            'sequence2': self.test_seq2,
+            'sequence3': self.test_seq3,
+            'sequence4': self.test_seq4,
+            'sequence5': self.test_seq5,
+            'sequence6': self.test_seq6,
+            'sequence7': self.test_seq7,
+
+            'user1': self.test_user1,
+            'user2': self.test_user2,
+            'user3': self.test_user3,
+            'user4': self.test_user4,
+            'user5': self.test_user5,
+            'user6': self.test_user6,
+            'user7': self.test_user7,
+            'user8': self.test_user8,
+            'user9': self.test_user9,
+            'user10': self.test_user10,
         })
 
         # print expected_tjp
         # print "-----------------"
-        print self.test_project.to_tjp
+        # print self.test_project.to_tjp
+        # self.maxDiff = None
 
         self.assertEqual(self.test_project.to_tjp, expected_tjp)
 
@@ -1824,6 +1880,75 @@ task Task_52 "Test Task 3" {
 
         self.assertEqual(self.test_project.percent_complete,
                          (1.0 / 44.0 * 100))
+
+    def test_client_argument_is_skipped(self):
+        """testing if the client attribute will be set to None when the client
+        argument is skipped
+        """
+        self.kwargs['name'] = 'New Project Name'
+        try:
+            self.kwargs.pop('client')
+        except KeyError:
+            pass
+        new_project = Project(**self.kwargs)
+        self.assertEquals(new_project.client, None)
+
+    def test_client_argument_is_None(self):
+        """testing if the client argument can be None
+        """
+        self.kwargs['client'] = None
+        new_project = Project(**self.kwargs)
+        self.assertIsNone(new_project.client)
+
+    def test_client_attribute_is_set_to_None(self):
+        """testing if it is possible to set the client attribute to None
+        """
+        self.assertIsNotNone(self.test_project.client)
+        self.test_project.client = None
+        self.assertIsNone(self.test_project.client)
+
+    def test_client_argument_is_given_as_something_other_than_a_client(self):
+        """testing if a TypeError will be raised when the client argument is
+        given as something other than a Client object
+        """
+        test_values = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
+
+        for test_value in test_values:
+            self.kwargs["client"] = test_value
+            self.assertRaises(
+                TypeError,
+                Project,
+                **self.kwargs
+            )
+
+    def test_client_attribute_is_not_a_client_instance(self):
+        """testing if a TypeError will be raised when the client attribute is
+        set to a value other than a Client instance
+        """
+        test_values = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
+
+        for test_value in test_values:
+            self.assertRaises(
+                TypeError,
+                setattr,
+                self.test_project,
+                'client',
+                test_value
+            )
+
+    def test_client_argument_is_working_properly(self):
+        """testing if the client argument value is correctly passed to the
+        client attribute
+        """
+        self.assertEqual(self.test_project.client, self.kwargs['client'])
+
+    def test_client_attribute_is_working_properly(self):
+        """testing if the client attribute value can be updated correctly
+        """
+        new_client = Client(name='New Client')
+        self.assertNotEqual(self.test_project.client, new_client)
+        self.test_project.client = new_client
+        self.assertEqual(self.test_project.client, new_client)
 
 
 class ProjectTicketsTestCase(unittest2.TestCase):
@@ -2201,32 +2326,3 @@ class ProjectTicketsTestCase(unittest2.TestCase):
                 self.test_ticket8
             ]
         )
-    
-
-    
-    def test_client_argument_is_given_as_something_other_than_a_client(self):
-        """testing if a TypeError will be raised when the client argument is
-        given as something other than a Client object
-        """
-        test_values = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
-
-        for test_value in test_values:
-            self.kwargs["client"] = test_value
-            self.assertRaises(
-                TypeError,
-                Project,
-                **self.kwargs
-            )
-
-    def test_client_argument_is_skipped(self):
-        """testing if the client attribute will be set to None when the client
-        argument is skipped
-        """
-        self.kwargs['name'] = 'New Project Name'
-        try:
-            self.kwargs.pop('client')
-        except KeyError:
-            pass
-        new_project = Project(**self.kwargs)
-        self.assertEquals(new_project.client, None)
-        

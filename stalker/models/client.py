@@ -21,10 +21,7 @@
 from sqlalchemy import Table, Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship, validates, synonym
 
-from stalker import defaults
-from stalker.models.auth import User
 from stalker.models.entity import Entity
-from stalker.models.project import Project
 
 from stalker.db.declarative import Base
 
@@ -41,18 +38,18 @@ class Client(Entity):
 
       * The users of the client
       * The projects affiliated with the client
-      * and all the other things those are inherited from the AuditEntity class
+      * and all the other things those are inherited from the Entity class
 
     Two Client object considered the same if they have the same name.
 
     so creating a client object needs the following parameters:
 
-    :param users: it can be an empty list, so one client can be created
+    :param users: It can be an empty list, so one client can be created
       without any user in it. But this parameter should be a list of User
       objects.
 
-    :type users: list of :class:`.Client`\ s
-    
+    :type users: list of :class:`.User`\ s
+
     :param projects: it can be an empty list, so one client can be created
       without any project in it. But this parameter should be a list of Project
       objects.
@@ -72,33 +69,30 @@ class Client(Entity):
 
     users = relationship(
         "User",
-        secondary='Client_Users',
+        primaryjoin='Users.c.company_id==Clients.c.id',
         back_populates="company",
         doc="""List of users representing the employees of this client.""",
     )
 
     projects = relationship(
         "Project",
-        secondary='Client_Projects',
+        primaryjoin='Projects.c.client_id==Clients.c.id',
         back_populates="client",
         doc="""List of projects affiliated with this client.""",
     )
 
-
     members = synonym('users')
-
 
     def __init__(
             self,
             users=None,
             projects=None,
             **kwargs):
-
-
         super(Client, self).__init__(**kwargs)
 
         if users is None:
             users = []
+
         if projects is None:
             projects = []
 
@@ -113,7 +107,7 @@ class Client(Entity):
 
     @validates("users")
     def _validate_users(self, key, user):
-        """validates the given user attribute
+        """validates the given user value
         """
         from stalker.models.auth import User
 
@@ -138,19 +132,3 @@ class Client(Entity):
                 (self.__class__.__name__, project.__class__.__name__)
             )
         return project
-
-
-
-
-
-Client_Users = Table(
-    'Client_Users', Base.metadata,
-    Column('uid', Integer, ForeignKey('Users.id'), primary_key=True),
-    Column('did', Integer, ForeignKey('Clients.id'), primary_key=True)
-)
-
-Client_Projects = Table(
-    'Client_Projects', Base.metadata,
-    Column('uid', Integer, ForeignKey('Projects.id'), primary_key=True),
-    Column('did', Integer, ForeignKey('Clients.id'), primary_key=True)
-)

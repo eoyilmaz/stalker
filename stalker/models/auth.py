@@ -452,11 +452,9 @@ class User(Entity, ACLMixin):
         primaryjoin="Users.c.company_id==Clients.c.id",
         back_populates="users",
         uselist=False,
-        doc="""The client company which the user is affiliated
-        with.
+        doc="""The client company which the user is affiliated with.
 
-        Should be an instance of :class:`.Client`,
-        can also be set to None.
+        Should be an instance of :class:`.Client`, can also be set to None.
         """
     )
 
