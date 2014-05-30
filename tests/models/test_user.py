@@ -26,7 +26,7 @@ import logging
 from stalker.db.session import DBSession
 from stalker import (db, defaults, Group, Department, Project, Repository,
                      Sequence, Status, StatusList, Task, Type, User, Version,
-                     Ticket, Vacation)
+                     Ticket, Vacation, Client)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -419,6 +419,9 @@ class UserTest(unittest2.TestCase):
             .first()
         self.assertIsNotNone(self.test_admin)
 
+        # create test company
+        self.test_company = Client(name='Test Company')
+
         # create the default values for parameters
         self.kwargs = {
             'name': 'Erkan Ozgur Yilmaz',
@@ -431,7 +434,8 @@ class UserTest(unittest2.TestCase):
                        self.test_group2],
             'created_by': self.test_admin,
             'updated_by': self.test_admin,
-            'efficiency': 1.0
+            'efficiency': 1.0,
+            'company': self.test_company
         }
 
         # create a proper user object
@@ -443,6 +447,7 @@ class UserTest(unittest2.TestCase):
         self.kwargs['name'] = 'some other name'
         self.kwargs['email'] = 'some@other.email'
 
+    
     def tearDown(self):
         """tear down the test
         """
@@ -1464,3 +1469,29 @@ class UserTest(unittest2.TestCase):
             2.3,
             self.test_user.efficiency
         )
+
+
+    def test_client_argument_is_given_as_something_other_than_a_client(self):
+        """testing if a TypeError will be raised when the client argument is
+        given as something other than a Client object
+        """
+        test_values = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
+
+        for test_value in test_values:
+            self.kwargs["company"] = test_value
+            self.assertRaises(
+                TypeError,
+                User,
+                **self.kwargs
+            )
+
+    def test_company_argument_is_skipped(self):
+        """testing if the company attribute will be set to None when the company
+        argument is skipped
+        """
+        try:
+            self.kwargs.pop('company')
+        except KeyError:
+            pass
+        new_user = User(**self.kwargs)
+        self.assertEquals(new_user.company, None)

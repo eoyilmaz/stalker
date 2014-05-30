@@ -393,6 +393,11 @@ class User(Entity, ACLMixin):
 
     :type login: str, unicode
 
+    :param company: The client which the user is affiliated with. A user can be
+    affiliated with one company only. Default value is None.
+
+    :type company: :class:`.Client`
+
     :param departments: It is the departments that the user is a part of. It
       should be a list of Department objects. One user can be listed in
       multiple departments.
@@ -439,6 +444,20 @@ class User(Entity, ACLMixin):
         back_populates="members",
         doc="""A list of :class:`.Department`\ s that
         this user is a part of""",
+    )
+
+    company_id = Column(Integer, ForeignKey("Clients.id"))
+    company = relationship(
+        "Client",
+        primaryjoin="Users.c.company_id==Clients.c.id",
+        back_populates="users",
+        uselist=False,
+        doc="""The client company which the user is affiliated
+        with.
+
+        Should be an instance of :class:`.Client`,
+        can also be set to None.
+        """
     )
 
     email = Column(
@@ -562,6 +581,7 @@ class User(Entity, ACLMixin):
             email=None,
             password=None,
             departments=None,
+            company=None,
             groups=None,
             efficiency=1.0,
             **kwargs):
@@ -574,6 +594,8 @@ class User(Entity, ACLMixin):
         if departments is None:
             departments = []
         self.departments = departments
+
+        self.company = company
 
         self.email = email
 
@@ -646,6 +668,22 @@ class User(Entity, ACLMixin):
                 (self.__class__.__name__, department.__class__.__name__)
             )
         return department
+
+    @validates("company")
+    def _validate_company(self, key, client):
+        """validates the given company value
+        """
+        from stalker.models.client import Client
+
+        if client is not None:
+          if not isinstance(client, Client):
+              raise TypeError(
+                  "%s.client should be instance of "
+                  "stalker.models.client.Client not %s" %
+                  (self.__class__.__name__, client.__class__.__name__)
+              )
+        return client
+
 
     @validates("email")
     def _validate_email(self, key, email_in):
