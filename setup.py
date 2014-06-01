@@ -11,12 +11,11 @@ requires = [
     'alembic',
     'jinja2',
     'unittest2',
-    'mocker',
 ]
 
 setup(
     name='stalker',
-    version='0.2.7.6',
+    version='0.2.8.a1',
     description='A Production Asset Management (ProdAM) System',
     long_description=README,
     classifiers=[

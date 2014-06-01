@@ -20,9 +20,33 @@
 
 import unittest2
 import platform
-import mocker
 
 from stalker import Repository, Tag
+
+
+class PlatformPatcher(object):
+    """patches given callable
+    """
+
+    def __init__(self):
+        self.callable = None
+        self.original = None
+
+    def patch(self, desired_result):
+        """
+        """
+        self.original = platform.system
+
+        def f():
+            return desired_result
+
+        platform.system = f
+
+    def restore(self):
+        """restores the given callable_
+        """
+        if self.original:
+            platform.system = self.original
 
 
 class RepositoryTester(unittest2.TestCase):
@@ -32,6 +56,8 @@ class RepositoryTester(unittest2.TestCase):
     def setUp(self):
         """setup the test
         """
+        self.patcher = PlatformPatcher()
+
         # create a couple of test tags
         self.test_tag1 = Tag(name="test tag 1")
         self.test_tag2 = Tag(name="test tag 2")
@@ -46,6 +72,11 @@ class RepositoryTester(unittest2.TestCase):
         }
 
         self.test_repo = Repository(**self.kwargs)
+
+    def tearDown(self):
+        """clean up test
+        """
+        self.patcher.restore()
 
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for
@@ -173,35 +204,20 @@ class RepositoryTester(unittest2.TestCase):
     def test_path_returns_properly_for_windows(self):
         """testing if path returns the correct value for the os
         """
-        m1 = mocker.Mocker()
-        o = m1.replace(platform.system)
-        o()
-        m1.result("Windows")
-        m1.replay()
+        self.patcher.patch('Windows')
         self.assertEqual(self.test_repo.path, self.test_repo.windows_path)
-        m1.restore()
 
     def test_path_returns_properly_for_linux(self):
         """testing if path returns the correct value for the os
         """
-        m1 = mocker.Mocker()
-        o = m1.replace(platform.system)
-        o()
-        m1.result("Linux")
-        m1.replay()
+        self.patcher.patch('Linux')
         self.assertEqual(self.test_repo.path, self.test_repo.linux_path)
-        m1.restore()
 
     def test_path_returns_properly_for_osx(self):
         """testing if path returns the correct value for the os
         """
-        m1 = mocker.Mocker()
-        o = m1.replace(platform.system)
-        o()
-        m1.result("Darwin")
-        m1.replay()
+        self.patcher.patch('Darwin')
         self.assertEqual(self.test_repo.path, self.test_repo.osx_path)
-        m1.restore()
 
     def test_equality(self):
         """testing the equality of two repositories
@@ -637,11 +653,7 @@ class RepositoryTester(unittest2.TestCase):
         """testing if the to_native_path returns the native version of the
         given linux path
         """
-        m1 = mocker.Mocker()
-        o = m1.replace(platform.system)
-        o()
-        m1.result("Linux")
-        m1.replay()
+        self.patcher.patch('Linux')
 
         self.test_repo.windows_path = 'T:/Stalker_Projects'
         self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
@@ -654,17 +666,12 @@ class RepositoryTester(unittest2.TestCase):
             self.test_repo.to_native_path(test_linux_path),
             test_linux_path
         )
-        m1.restore()
 
     def test_to_native_path_returns_the_native_version_of_the_given_windows_path(self):
         """testing if the to_native_path returns the native version of the
         given windows path
         """
-        m1 = mocker.Mocker()
-        o = m1.replace(platform.system)
-        o()
-        m1.result("Linux")
-        m1.replay()
+        self.patcher.patch('Linux')
 
         self.test_repo.windows_path = 'T:/Stalker_Projects'
         self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
@@ -676,17 +683,12 @@ class RepositoryTester(unittest2.TestCase):
             self.test_repo.to_native_path(test_windows_path),
             '/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
         )
-        m1.restore()
 
     def test_to_native_path_returns_the_native_version_of_the_given_osx_path(self):
         """testing if the to_native_path returns the native version of the
         given osx path
         """
-        m1 = mocker.Mocker()
-        o = m1.replace(platform.system)
-        o()
-        m1.result("Linux")
-        m1.replay()
+        self.patcher.patch('Linux')
 
         self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
         self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
@@ -698,17 +700,12 @@ class RepositoryTester(unittest2.TestCase):
             self.test_repo.to_native_path(test_osx_path),
             test_linux_path
         )
-        m1.restore()
 
     def test_to_native_path_returns_the_native_version_of_the_given_reverse_windows_path(self):
         """testing if the to_native_path returns the native version of the
         given reverse windows path
         """
-        m1 = mocker.Mocker()
-        o = m1.replace(platform.system)
-        o()
-        m1.result("Linux")
-        m1.replay()
+        self.patcher.patch('Linux')
 
         self.test_repo.windows_path = 'T:/Stalker_Projects'
         self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
@@ -720,17 +717,12 @@ class RepositoryTester(unittest2.TestCase):
             self.test_repo.to_native_path(test_windows_path_reverse),
             test_linux_path
         )
-        m1.restore()
 
     def test_to_native_path_returns_the_native_version_of_the_given_reverse_linux_path(self):
         """testing if the to_native_path returns the native version of the
         given reverse linux path
         """
-        m1 = mocker.Mocker()
-        o = m1.replace(platform.system)
-        o()
-        m1.result("Linux")
-        m1.replay()
+        self.patcher.patch('Linux')
 
         self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
         test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/' \
@@ -741,17 +733,12 @@ class RepositoryTester(unittest2.TestCase):
             self.test_repo.to_native_path(test_linux_path_reverse),
             test_linux_path
         )
-        m1.restore()
 
     def test_to_native_path_returns_the_native_version_of_the_given_reverse_osx_path(self):
         """testing if the to_native_path returns the native version of the
         given reverse osx path
         """
-        m1 = mocker.Mocker()
-        o = m1.replace(platform.system)
-        o()
-        m1.result("Linux")
-        m1.replay()
+        self.patcher.patch('Linux')
 
         self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
         self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
@@ -763,7 +750,6 @@ class RepositoryTester(unittest2.TestCase):
             self.test_repo.to_native_path(test_osx_path_reverse),
             test_linux_path
         )
-        m1.restore()
 
     def test_to_native_path_raises_TypeError_if_path_is_None(self):
         """testing if to_native_path raises TypeError if path is None

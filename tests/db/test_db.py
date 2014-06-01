@@ -58,13 +58,17 @@ class DatabaseTester(unittest2.TestCase):
 
         self.test_database_uri = "sqlite:///:memory:"
 
-        self._createdDB = False
+        self.files_to_remove = []
 
     def tearDown(self):
         """tearDown the tests
         """
         DBSession.remove()
-        # DBSession.close()
+        for f in self.files_to_remove:
+            if os.path.isdir(f):
+                os.rmdir(f)
+            elif os.path.isfile(f):
+                os.remove(f)
 
     def test_creating_a_custom_in_memory_db(self):
         """testing if a custom in-memory sqlite database will be created
@@ -818,6 +822,22 @@ class DatabaseTester(unittest2.TestCase):
             'status_names': ['A', 'B']
         }
         self.assertRaises(ValueError, create_entity_statuses, **kwargs)
+
+    def test_initialization_of_alembic_version_table(self):
+        """testing if the db.init() will also create a table called
+        alembic_version
+        """
+        temp_db_path = os.path.join(tempfile.mkdtemp(), 'stalker.db')
+        self.files_to_remove.append(temp_db_path)
+        db.setup({
+            'sqlalchemy.url':
+                'sqlite:///%s' % temp_db_path
+        })
+        db.init()
+        sql_query = 'select version_num from "alembic_version"'
+        version_num = \
+            db.DBSession.connection().execute(sql_query).fetchone()[0]
+        self.assertEqual('182f44ce5f07', version_num)
 
 
 class DatabaseModelsTester(unittest2.TestCase):

@@ -2,6 +2,18 @@
 Stalker Changes
 ===============
 
+0.2.8.a1
+========
+
+* **New:** Added a new class called ``Client`` which can be used to track down
+  information about the clients of ``Projects``. Also added ``Project.client``
+  and ``User.company`` attributes which are referencing a Client instance
+  allowing to add clients as normal users.
+
+* **New:** ``db.init()`` now creates ``alembic_version`` table and stamps the
+  most recent version number to that table allowing newly initialized databases
+  to be considered in head revision.
+
 0.2.7.6
 =======
 

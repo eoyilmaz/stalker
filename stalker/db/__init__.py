@@ -141,10 +141,33 @@ def init():
 
 
 def create_alembic_table():
-    """creates the default alembic_revision table and creates the data so that
+    """creates the default alembic_version table and creates the data so that
     any new database will be considered as the latest version
     """
-    pass
+    logger.debug('creating alembic_version table')
+    import os
+    from alembic.config import Config
+    from alembic import command
+
+    # load the default config
+    here = os.path.dirname(__file__)
+
+    alembic_cfg = Config(
+        os.path.normpath(
+            os.path.join(here, '../..', "alembic.ini")
+        )
+    )
+
+    # but use the session url
+    alembic_cfg.set_main_option(
+        "sqlalchemy.url",
+        str(DBSession.connection().engine.url)
+    )
+
+    # stamp version number
+    command.stamp(alembic_cfg, "head")
+
+    logger.debug('alembic_version table is created and initialized')
 
 
 def __create_admin__():
