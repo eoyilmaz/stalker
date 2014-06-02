@@ -93,6 +93,12 @@ class SimpleEntity(Base):
       could not again have white spaces at the beginning and at the end of the
       string, again any given objects will be converted to strings
 
+    :param str generic_text: A string or unicode attribute that holds any
+      text based information that should be affiliated with this entity, it
+      could be an empty string, and it could not again have white spaces at the
+      beginning and at the end of the string, again any given objects will be
+      converted to strings
+
     :param created_by: The :class:`.User` who has created
       this object
 
@@ -219,6 +225,12 @@ class SimpleEntity(Base):
         '''
     )
 
+    generic_text = Column(
+        "generic_text",
+        Text,
+        doc="""This attribute can hold any text."""
+    )
+
     thumbnail_id = Column(
         'thumbnail_id',
         Integer,
@@ -240,6 +252,7 @@ class SimpleEntity(Base):
             self,
             name=None,
             description="",
+            generic_text="",
             type=None,
             created_by=None,
             updated_by=None,
@@ -268,6 +281,7 @@ class SimpleEntity(Base):
         self.date_updated = date_updated
         self.type = type
         self.thumbnail = thumbnail
+        self.generic_text = generic_text
         self.html_style = html_style
         self.html_class = html_class
         self.__stalker_version__ = stalker.__version__
@@ -301,6 +315,20 @@ class SimpleEntity(Base):
                 (self.__class__.__name__, description.__class__.__name__)
             )
         return description
+
+    @validates("generic_text")
+    def _validate_description(self, key, generic_text):
+        """validates the given generic_text value
+        """
+        if generic_text is None:
+            generic_text = ""
+
+        if not isinstance(generic_text, (str, unicode)):
+            raise TypeError(
+                '%s.generic_text should be an instance of string, not %s' %
+                (self.__class__.__name__, generic_text.__class__.__name__)
+            )
+        return generic_text
 
     @validates("name")
     def _validate_name(self, key, name):

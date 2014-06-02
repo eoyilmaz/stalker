@@ -24,6 +24,7 @@ import datetime
 from stalker.models.client import Client
 import unittest2
 import tempfile
+import json
 from sqlalchemy.exc import IntegrityError
 
 import stalker
@@ -2620,7 +2621,12 @@ class DatabaseModelsTester(unittest2.TestCase):
             "description": "this is for testing purposes",
             'thumbnail': thumbnail,
             'html_style': 'width: 100px; color: purple',
-            'html_class': 'purple'
+            'html_class': 'purple',
+            'generic_text': json.dumps({
+                'some_string': 'hello world' 
+                }, 
+                sort_keys=True ),
+
         }
 
         test_simple_entity = SimpleEntity(**kwargs)
@@ -2638,6 +2644,7 @@ class DatabaseModelsTester(unittest2.TestCase):
         updated_by = test_simple_entity.updated_by
         html_style = test_simple_entity.html_style
         html_class = test_simple_entity.html_class
+        generic_text = test_simple_entity.generic_text
         __stalker_version__ = test_simple_entity.__stalker_version__
 
         del test_simple_entity
@@ -2662,7 +2669,9 @@ class DatabaseModelsTester(unittest2.TestCase):
                          test_simple_entity_db.__stalker_version__)
         self.assertIsNotNone(thumbnail)
         self.assertEqual(thumbnail, test_simple_entity_db.thumbnail)
-
+        self.assertIsNotNone(generic_text)
+        self.assertEqual(generic_text, test_simple_entity_db.generic_text)
+        
         ## delete tests
         #self.assertIsNotNone(Link.query.all())
         #

@@ -20,6 +20,7 @@
 
 import unittest2
 import datetime
+import json
 
 import stalker
 from stalker.db import DBSession
@@ -46,6 +47,10 @@ class SimpleEntityTester(unittest2.TestCase):
             login="testuser",
             email="test@user.com",
             password="test"
+            'generic_text': json.dumps({
+                'Phone number': '123' 
+                }, 
+                sort_keys=True ),
         )
 
         self.date_created = datetime.datetime(2010, 10, 21, 3, 8, 0)
@@ -60,6 +65,10 @@ class SimpleEntityTester(unittest2.TestCase):
             "updated_by": self.test_user,
             "date_created": self.date_created,
             "date_updated": self.date_updated,
+            'generic_text': json.dumps({
+                'Phone number': '123' 
+                }, 
+                sort_keys=True ),
         }
 
         # create a proper SimpleEntity to use it later in the tests
@@ -234,6 +243,37 @@ class SimpleEntityTester(unittest2.TestCase):
         self.assertRaises(TypeError, setattr, self.test_simple_entity,
                           'description', ["a description"])
 
+    def test_generic_text_argument_None(self):
+        """testing if generic_text proeprty will be convertod to an empty string
+        if None is given as the generic_text argument
+        """
+        self.kwargs["generic_text"] = None
+        new_simple_entity = SimpleEntity(**self.kwargs)
+
+        self.assertEqual(new_simple_entity.generic_text, "")
+
+    def test_generic_text_attribute_None(self):
+        """testing if generic_text attribute will be converted to an empty
+        string if None is given as the generic_text attribute
+        """
+
+        self.test_simple_entity.generic_text = None
+        self.assertEqual(self.test_simple_entity.generic_text, "")
+
+    def test_generic_text_argument_is_not_a_string_or_unicode(self):
+        """testing if a TypeError will be raised when the generic_text argument
+        value is not a string or unicode
+        """
+        self.kwargs['generic_text'] = {'a': 'generic_text'}
+        self.assertRaises(TypeError, SimpleEntity, **self.kwargs)
+
+    def test_generic_text_attribute_is_not_a_string_or_unicode(self):
+        """testing if a TypeError will be raised when the generic_text attribute
+        value is set to a value other than a string or unicide
+        """
+        self.assertRaises(TypeError, setattr, self.test_simple_entity,
+                          'generic_text', ["a generic_text"])
+        
     def test_equality(self):
         """testing the equality of two simple entities
         """
