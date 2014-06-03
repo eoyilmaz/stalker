@@ -240,28 +240,8 @@ class Shot(Task, CodeMixin):
                         )
         return True
 
-    # def _update_cut_info(self, cut_in, cut_duration, cut_out):
-    #     """updates the cut_in, cut_duration and cut_out attributes
-    #     """
-    #     # validate all the values
-    #     self._cut_in = self._validate_cut_info(cut_in)
-    #     self._cut_duration = self._validate_cut_duration(cut_duration)
-    #     self._cut_out = self._validate_cut_out(cut_out)
-    # 
-    #     if self._cut_in is None:
-    #         self._cut_in = 1
-    # 
-    #     if self._cut_out is not None:
-    #         if self._cut_in > self._cut_out:
-    #             # just update cut_duration
-    #             self._cut_duration = 1
-    # 
-    #     if self._cut_duration is None or self._cut_duration <= 0:
-    #         self._cut_duration = self._cut_out - self._cut_in + 1
-    # 
-    #     self._cut_out = self._cut_in + self._cut_duration - 1
-
-    def _validate_cut_info(self, cut_in, cut_duration, cut_out):
+    @classmethod
+    def _validate_cut_info(cls, cut_in, cut_duration, cut_out):
         """validates the cut values all together
         """
         logger.debug('cut_in      : %s' % cut_in)
@@ -439,4 +419,3 @@ Shot_Scenes = Table(
     Column('shot_id', Integer, ForeignKey('Shots.id'), primary_key=True),
     Column('scene_id', Integer, ForeignKey('Scenes.id'), primary_key=True)
 )
-

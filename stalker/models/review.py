@@ -80,7 +80,6 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
     __auto_name__ = True
     __tablename__ = 'Reviews'
     __table_args__ = (
-        #UniqueConstraint('task_id', '_review_number', 'reviewer_id', name='uix_1'),
         {"extend_existing": True}
     )
 
@@ -131,8 +130,8 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
 
         # set the status to NEW
         with DBSession.no_autoflush:
-            NEW = Status.query.filter_by(code='NEW').first()
-        self.status = NEW
+            new = Status.query.filter_by(code='NEW').first()
+        self.status = new
 
         # set the review_number
         self._review_number = self.task.review_number + 1
@@ -170,7 +169,7 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
         from stalker.models.auth import User
         if not isinstance(reviewer, User):
             raise TypeError(
-                '%s.reviwer should be set to a stalker.models.auth.User '
+                '%s.reviewer should be set to a stalker.models.auth.User '
                 'instance, not %s' % (self.__class__.__name__,
                                       reviewer.__class__.__name__))
         return reviewer
@@ -219,10 +218,10 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
 
         # set self status to RREV
         with DBSession.no_autoflush:
-            RREV = Status.query.filter_by(code='RREV').first()
+            rrev = Status.query.filter_by(code='RREV').first()
 
             # set self status to RREV
-            self.status = RREV
+            self.status = rrev
 
         # call finalize_review_set
         self.finalize_review_set()
@@ -232,8 +231,8 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
         """
         # set self status to APP
         with DBSession.no_autoflush:
-            APP = Status.query.filter_by(code='APP').first()
-            self.status = APP
+            app = Status.query.filter_by(code='APP').first()
+            self.status = app
 
         # call finalize review_set
         self.finalize_review_set()
@@ -242,8 +241,8 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
         """finalizes the current review set Review decisions
         """
         with DBSession.no_autoflush:
-            HREV = Status.query.filter_by(code='HREV').first()
-            CMPL = Status.query.filter_by(code='CMPL').first()
+            hrev = Status.query.filter_by(code='HREV').first()
+            cmpl = Status.query.filter_by(code='CMPL').first()
 
         # check if all the reviews are finalized
         if self.is_finalized():
@@ -268,10 +267,10 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
 
                 self.task.schedule_timing = timing
                 self.task.schedule_unit = unit
-                self.task.status = HREV
+                self.task.status = hrev
             else:
                 # approve the task
-                self.task.status = CMPL
+                self.task.status = cmpl
                 # update task parent statuses
 
             self.task.update_parent_statuses()
@@ -290,4 +289,4 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
                 dep.update_parent_statuses()
 
         else:
-            logger.debug('not all reviews are finilized yet!')
+            logger.debug('not all reviews are finalized yet!')

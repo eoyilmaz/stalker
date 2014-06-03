@@ -224,124 +224,123 @@ class TaskJugglerScheduler(SchedulerBase):
                 'select id, code from "Projects"'
             ).fetchall()
 
-            sql_query = """
-                select
-                    "Tasks".id,
-                    tasks.path,
-                    coalesce("Tasks".parent_id, "Tasks".project_id) as parent_id,
-                    tasks.entity_type,
-                    tasks.name,
-                    "Tasks".priority,
-                    "Tasks".schedule_timing,
-                    "Tasks".schedule_unit,
-                    "Tasks".schedule_model,
-                    "Tasks".allocation_strategy,
-                    "Tasks".persistent_allocation,
-                    tasks.depth,
-                    task_resources.resource_ids,
-                    task_alternative_resources.resource_ids as alternative_resource_ids,
-                    time_logs.time_log_array,
-                    task_dependencies.dependency_info,
-                    not exists (
-                       select 1
-                        from "Tasks" as "Child_Tasks"
-                        where "Child_Tasks".parent_id = "Tasks".id
-                    ) as is_leaf
-                from "Tasks"
-                join (
-                    with recursive recursive_task(id, parent_id, path_as_text, path, depth) as (
-                        select
-                            id,
-                            parent_id,
-                            id::text as path_as_text,
-                            array[project_id] as path,
-                            0
-                        from "Tasks"
-                        where parent_id is NULL and project_id = %(id)s
-                    union all
-                        select
-                            task.id,
-                            task.parent_id,
-                            (parent.path_as_text || '-' || task.id) as path_as_text,
-                            (parent.path || task.parent_id) as path,
-                            parent.depth + 1 as depth
-                        from "Tasks" as task
-                        join recursive_task as parent on task.parent_id = parent.id
-                    ) select
-                        recursive_task.id,
-                        recursive_task.parent_id,
-                        recursive_task.path_as_text,
-                        recursive_task.path,
-                        "SimpleEntities".name as name,
-                        "SimpleEntities".entity_type,
-                        recursive_task.depth
-                    from recursive_task
-                    join "SimpleEntities" on recursive_task.id = "SimpleEntities".id
-                    --order by path_as_text
-                ) as tasks on "Tasks".id = tasks.id
+            sql_query = """select
+    "Tasks".id,
+    tasks.path,
+    coalesce("Tasks".parent_id, "Tasks".project_id) as parent_id,
+    tasks.entity_type,
+    tasks.name,
+    "Tasks".priority,
+    "Tasks".schedule_timing,
+    "Tasks".schedule_unit,
+    "Tasks".schedule_model,
+    "Tasks".allocation_strategy,
+    "Tasks".persistent_allocation,
+    tasks.depth,
+    task_resources.resource_ids,
+    task_alternative_resources.resource_ids as alternative_resource_ids,
+    time_logs.time_log_array,
+    task_dependencies.dependency_info,
+    not exists (
+       select 1
+        from "Tasks" as "Child_Tasks"
+        where "Child_Tasks".parent_id = "Tasks".id
+    ) as is_leaf
+from "Tasks"
+join (
+    with recursive recursive_task(id, parent_id, path_as_text, path, depth) as (
+        select
+            id,
+            parent_id,
+            id::text as path_as_text,
+            array[project_id] as path,
+            0
+        from "Tasks"
+        where parent_id is NULL and project_id = %(id)s
+    union all
+        select
+            task.id,
+            task.parent_id,
+            (parent.path_as_text || '-' || task.id) as path_as_text,
+            (parent.path || task.parent_id) as path,
+            parent.depth + 1 as depth
+        from "Tasks" as task
+        join recursive_task as parent on task.parent_id = parent.id
+    ) select
+        recursive_task.id,
+        recursive_task.parent_id,
+        recursive_task.path_as_text,
+        recursive_task.path,
+        "SimpleEntities".name as name,
+        "SimpleEntities".entity_type,
+        recursive_task.depth
+    from recursive_task
+    join "SimpleEntities" on recursive_task.id = "SimpleEntities".id
+    --order by path_as_text
+) as tasks on "Tasks".id = tasks.id
 
-                -- resources
-                left outer join (
-                    select
-                        task_id,
-                        array_agg(resource_id) as resource_ids
-                    from "Task_Resources"
-                    group by task_id
-                ) as task_resources on "Tasks".id = task_resources.task_id
+-- resources
+left outer join (
+    select
+        task_id,
+        array_agg(resource_id) as resource_ids
+    from "Task_Resources"
+    group by task_id
+) as task_resources on "Tasks".id = task_resources.task_id
 
-                -- alternative resources
-                left outer join (
-                    select
-                        task_id,
-                        array_agg(resource_id) as resource_ids
-                    from "Task_Alternative_Resources"
-                    group by task_id
-                ) as task_alternative_resources on "Tasks".id = task_alternative_resources.task_id
+-- alternative resources
+left outer join (
+    select
+        task_id,
+        array_agg(resource_id) as resource_ids
+    from "Task_Alternative_Resources"
+    group by task_id
+) as task_alternative_resources on "Tasks".id = task_alternative_resources.task_id
 
-                -- time logs
-                left outer join (
-                    select
-                        "TimeLogs".task_id,
-                        array_agg(('User_' || "TimeLogs".resource_id, to_char("TimeLogs".start, 'YYYY-MM-DD-HH24:MI:00'), to_char("TimeLogs".end, 'YYYY-MM-DD-HH24:MI:00'))) as time_log_array
-                    from "TimeLogs"
-                    group by task_id
-                ) as time_logs on "Tasks".id = time_logs.task_id
+-- time logs
+left outer join (
+    select
+        "TimeLogs".task_id,
+        array_agg(('User_' || "TimeLogs".resource_id, to_char("TimeLogs".start, 'YYYY-MM-DD-HH24:MI:00'), to_char("TimeLogs".end, 'YYYY-MM-DD-HH24:MI:00'))) as time_log_array
+    from "TimeLogs"
+    group by task_id
+) as time_logs on "Tasks".id = time_logs.task_id
 
-                -- dependencies
-                left outer join (
-                    select
-                        task_id,
-                        array_agg((tasks.alt_path, dependency_target, gap_timing, gap_unit, gap_model)) dependency_info
-                    from "Task_Dependencies"
-                    join (
-                        with recursive recursive_task(id, parent_id, alt_path) as (
-                            select
-                                id,
-                                parent_id,
-                                project_id::text as alt_path
-                            from "Tasks"
-                            where parent_id is NULL
-                        union all
-                            select
-                                task.id,
-                                task.parent_id,
-                                (parent.alt_path || '-' || task.parent_id) as alt_path
-                            from "Tasks" as task
-                            join recursive_task as parent on task.parent_id = parent.id
-                        ) select
-                            recursive_task.id,
-                            recursive_task.parent_id,
-                            recursive_task.alt_path || '-' || recursive_task.id as alt_path
-                        from recursive_task
-                        join "SimpleEntities" on recursive_task.id = "SimpleEntities".id
-                    ) as tasks on "Task_Dependencies".depends_to_id = tasks.id
-                    group by task_id
-                ) as task_dependencies on "Tasks".id = task_dependencies.task_id
+-- dependencies
+left outer join (
+    select
+        task_id,
+        array_agg((tasks.alt_path, dependency_target, gap_timing, gap_unit, gap_model)) dependency_info
+    from "Task_Dependencies"
+    join (
+        with recursive recursive_task(id, parent_id, alt_path) as (
+            select
+                id,
+                parent_id,
+                project_id::text as alt_path
+            from "Tasks"
+            where parent_id is NULL
+        union all
+            select
+                task.id,
+                task.parent_id,
+                (parent.alt_path || '-' || task.parent_id) as alt_path
+            from "Tasks" as task
+            join recursive_task as parent on task.parent_id = parent.id
+        ) select
+            recursive_task.id,
+            recursive_task.parent_id,
+            recursive_task.alt_path || '-' || recursive_task.id as alt_path
+        from recursive_task
+        join "SimpleEntities" on recursive_task.id = "SimpleEntities".id
+    ) as tasks on "Task_Dependencies".depends_to_id = tasks.id
+    group by task_id
+) as task_dependencies on "Tasks".id = task_dependencies.task_id
 
-                --where "Tasks".id = 43853
+--where "Tasks".id = 43853
 
-                --order by "Tasks".id
-                order by path_as_text"""
+--order by "Tasks".id
+order by path_as_text"""
 
             result_buffer = []
             num_of_records = 0
@@ -362,9 +361,9 @@ class TaskJugglerScheduler(SchedulerBase):
                 for r in result.fetchall():
                     # start by appending task tjp id first
                     task_id = r[0]
-                    path = r[1]
-                    parent_id = r[2]
-                    entity_type = r[3]
+                    # path = r[1]
+                    # parent_id = r[2]
+                    # entity_type = r[3]
                     name = r[4]
                     priority = r[5]
                     schedule_timing = r[6]
@@ -415,10 +414,10 @@ class TaskJugglerScheduler(SchedulerBase):
                                 dep_buffer.append(', ')
 
                             dep_full_ids, \
-                            dependency_target, \
-                            gap_timing, \
-                            gap_unit, \
-                            gap_model = dep.split(',')
+                                dependency_target, \
+                                gap_timing, \
+                                gap_unit, \
+                                gap_model = dep.split(',')
 
                             dep_full_path = '.'.join(
                                 map(lambda x: 'Task_%s' % x,
@@ -699,8 +698,8 @@ class TaskJugglerScheduler(SchedulerBase):
                             data[3].split(',')
                         )
                         computed_resources = \
-                           User.query\
-                               .filter(User.id.in_(resources_data)).all()
+                            User.query\
+                            .filter(User.id.in_(resources_data)).all()
 
                     entity.computed_start = start_date
                     entity.computed_end = end_date

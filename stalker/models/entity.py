@@ -127,7 +127,8 @@ class SimpleEntity(Base):
     __auto_name__ = True
     __strictly_typed__ = False
 
-    # TODO: Allow the user to specify the formatting of the name attribute with a formatter function
+    # TODO: Allow the user to specify the formatting of the name attribute with
+    #       a formatter function
     __name_formatter__ = None
 
     __tablename__ = "SimpleEntities"
@@ -184,13 +185,15 @@ class SimpleEntity(Base):
     date_created = Column(
         DateTime,
         default=datetime.datetime.now(),
-        doc="""A :class:`datetime.datetime` instance showing the creation date and time of this object."""
+        doc="""A :class:`datetime.datetime` instance showing the creation date
+        and time of this object."""
     )
 
     date_updated = Column(
         DateTime,
         default=datetime.datetime.now(),
-        doc="""A :class:`datetime.datetime` instance showing the update date and time of this object."""
+        doc="""A :class:`datetime.datetime` instance showing the update date
+        and time of this object."""
         ,
     )
 
@@ -218,8 +221,10 @@ class SimpleEntity(Base):
     generic_data = relationship(
         'SimpleEntity',
         secondary='SimpleEntity_GenericData',
-        primaryjoin='SimpleEntities.c.id==SimpleEntity_GenericData.c.simple_entity_id',
-        secondaryjoin='SimpleEntity_GenericData.c.other_simple_entity_id==SimpleEntities.c.id',
+        primaryjoin='SimpleEntities.c.id=='
+                    'SimpleEntity_GenericData.c.simple_entity_id',
+        secondaryjoin='SimpleEntity_GenericData.c.other_simple_entity_id=='
+                      'SimpleEntities.c.id',
         post_update=True,
         doc='''This attribute can hold any kind of data which exists in SOM.
         '''
@@ -337,8 +342,8 @@ class SimpleEntity(Base):
         if self.__auto_name__:
             if name is None or name == '':
                 # generate a uuid4
-                name = self.__class__.__name__ + '_' + \
-                       uuid.uuid4().urn.split(':')[2]
+                name = '%s_%s' % (self.__class__.__name__,
+                                  uuid.uuid4().urn.split(':')[2])
 
         # it is None
         if name is None:
@@ -365,7 +370,8 @@ class SimpleEntity(Base):
 
         return name
 
-    def _format_name(self, name_in):
+    @classmethod
+    def _format_name(cls, name_in):
         """formats the name_in value
         """
         # remove unnecessary characters from the string
@@ -376,7 +382,8 @@ class SimpleEntity(Base):
 
         return name_in
 
-    def _format_nice_name(self, nice_name_in):
+    @classmethod
+    def _format_nice_name(cls, nice_name_in):
         """formats the given nice name
         """
         # remove unnecessary characters from the string
@@ -544,7 +551,7 @@ class SimpleEntity(Base):
         """
         if html_style is None:
             html_style = ''
-        if not isinstance(html_style, basestring):
+        if not isinstance(html_style, str):
             raise TypeError(
                 '%s.html_style should be an instance of basestring, not %s' %
                 (self.__class__.__name__, html_style.__class__.__name__)
@@ -557,7 +564,7 @@ class SimpleEntity(Base):
         """
         if html_class is None:
             html_class = ''
-        if not isinstance(html_class, basestring):
+        if not isinstance(html_class, str):
             raise TypeError(
                 '%s.html_class should be an instance of basestring, not %s' %
                 (self.__class__.__name__, html_class.__class__.__name__)
@@ -654,8 +661,8 @@ class Entity(SimpleEntity):
     def __eq__(self, other):
         """the equality operator
         """
-        return super(Entity, self).__eq__(other) and \
-               isinstance(other, Entity)
+        return super(Entity, self).__eq__(other) \
+            and isinstance(other, Entity)
 
 # Entity Tags
 Entity_Tags = Table(

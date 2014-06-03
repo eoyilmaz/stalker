@@ -22,8 +22,7 @@ import os
 import re
 import jinja2
 
-from sqlalchemy import (Table, Column, Integer, ForeignKey, String, Boolean,
-                        event)
+from sqlalchemy import Table, Column, Integer, ForeignKey, String, Boolean
 from sqlalchemy.exc import UnboundExecutionError
 from sqlalchemy.orm import relationship, validates
 
@@ -192,34 +191,31 @@ class Version(Link):
         """the representation of the Version
         """
         return "<%(project_code)s_%(nice_name)s_%(version_number)s " \
-               "(%(entity_type)s)>" % {
-            'project_code': self.task.project.code,
-            'nice_name': self.nice_name,
-            'version_number': 'v%s' % ('%s' % self.version_number).zfill(3),
-            'entity_type': self.entity_type}
+               "(%(entity_type)s)>" % \
+               {
+                   'project_code': self.task.project.code,
+                   'nice_name': self.nice_name,
+                   'version_number':
+                   'v%s' % ('%s' % self.version_number).zfill(3),
+                   'entity_type': self.entity_type
+               }
 
-    def _format_take_name(self, take_name):
+    @classmethod
+    def _format_take_name(cls, take_name):
         """formats the given take_name value
         """
-        logger.debug("-------------------------------------")
-        logger.debug("take_name : %s" % take_name)
-
         # remove unnecessary characters
         take_name = re.sub(
             r"([^a-zA-Z0-9\s_\-]+)", r"", take_name
         ).strip()
-        logger.debug("take_name : %s" % take_name)
 
         # replace empty spaces with underscores
         take_name = re.sub(r'[\s]+', '_', take_name)
-        logger.debug("take_name : %s" % take_name)
 
         # replace multiple underscores with only one
         take_name = re.sub(r'([_]+)', r'_', take_name)
-        logger.debug("take_name : %s" % take_name)
 
         take_name = re.sub(r"^[^a-zA-Z0-9]+", r"", take_name)
-        logger.debug("take_name : %s" % take_name)
 
         return take_name
 
@@ -328,19 +324,19 @@ class Version(Link):
         return task
 
     @validates("inputs")
-    def _validate_inputs(self, key, input):
-        """validates the given output
+    def _validate_inputs(self, key, input_):
+        """validates the given input value
         """
         from stalker.models.link import Link
 
-        if not isinstance(input, Link):
+        if not isinstance(input_, Link):
             raise TypeError(
                 "All elements in %s.inputs should be all "
                 "stalker.models.link.Link instances not %s" %
-                (self.__class__.__name__, input.__class__.__name__)
+                (self.__class__.__name__, input_.__class__.__name__)
             )
 
-        return input
+        return input_
 
     @validates("outputs")
     def _validate_outputs(self, key, output):
@@ -396,7 +392,6 @@ class Version(Link):
         if isinstance(self.task, Shot):
             sequences = self.task.sequences
             scenes = self.task.scenes
-            shot = self.task
 
         # get the parent tasks
         task = self.task
@@ -497,11 +492,11 @@ class Version(Link):
 
         :return: :class:`.Version`
         """
-        return Version.query \
-            .filter(Version.task == self.task) \
-            .filter(Version.take_name == self.take_name) \
-            .filter(Version.is_published == True) \
-            .order_by(Version.version_number.desc()) \
+        return Version.query\
+            .filter_by(task=self.task)\
+            .filter_by(take_name=self.take_name)\
+            .filter_by(is_published=True)\
+            .order_by(Version.version_number.desc())\
             .first()
 
     @validates('created_with')

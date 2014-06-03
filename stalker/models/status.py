@@ -177,7 +177,7 @@ class StatusList(Entity, TargetEntityTypeMixin):
     statuses = relationship(
         "Status",
         secondary="StatusList_Statuses",
-        doc="""list of :class:`.Status` objects, showing the possible statuses"""
+        doc="List of :class:`.Status` objects, showing the possible statuses"
     )
 
     def __init__(self, statuses=None, target_entity_type=None, **kwargs):
@@ -238,7 +238,7 @@ class StatusList(Entity, TargetEntityTypeMixin):
         return len(self.statuses)
 
 
-# Statuslist_Statuses Table
+# StatusList_Statuses Table
 StatusList_Statuses = Table(
     "StatusList_Statuses", Base.metadata,
     Column(
@@ -254,4 +254,3 @@ StatusList_Statuses = Table(
         primary_key=True
     )
 )
-

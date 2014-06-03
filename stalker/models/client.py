@@ -18,12 +18,10 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-from sqlalchemy import Table, Column, Integer, ForeignKey
+from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship, validates, synonym
 
 from stalker.models.entity import Entity
-
-from stalker.db.declarative import Base
 
 from stalker.log import logging_level
 import logging

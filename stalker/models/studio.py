@@ -362,14 +362,14 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         """returns all the active projects in the studio
         """
         from stalker import Project
-        return Project.query.filter(Project.active==True).all()
+        return Project.query.filter_by(active=True).all()
 
     @property
     def inactive_projects(self):
         """return all the inactive projects in the studio
         """
         from stalker import Project
-        return Project.query.filter(Project.active==False).all()
+        return Project.query.filter_by(active=False).all()
 
     @property
     def departments(self):

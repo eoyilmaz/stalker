@@ -44,7 +44,9 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
     Here is an example::
 
         p1 = Project(name="Test Project") # shortened for this example
-        s1 = Structure(name="Commercial Project Structure") # shortened for this example
+
+        # shortened for this example
+        s1 = Structure(name="Commercial Project Structure")
 
         # this is going to be used by Stalker to decide the :stalker:`.Link`
         # :stalker:`.Link.filename` and :stalker:`.Link.path` (which is the way

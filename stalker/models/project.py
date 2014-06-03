@@ -138,7 +138,6 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         """
     )
 
-
     tasks = relationship(
         'Task',
         primaryjoin='Tasks.c.project_id==Projects.c.id',
@@ -373,7 +372,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         from stalker.models.task import Task
 
         return Task.query \
-            .filter(Task._project == self) \
+            .filter(Task.project == self) \
             .filter(Task.parent == None) \
             .all()
 
@@ -448,7 +447,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
                 task.update_schedule_info()
             total_logged_seconds += task.total_logged_seconds
 
-        logger.debug('project.total_logged_seconds     : %s' % total_logged_seconds)
+        logger.debug('project.total_logged_seconds: %s' % total_logged_seconds)
 
         return total_logged_seconds
 
@@ -463,7 +462,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
                 task.update_schedule_info()
             schedule_seconds += task.schedule_seconds
 
-        logger.debug('project.schedule_seconds     : %s' % schedule_seconds)
+        logger.debug('project.schedule_seconds: %s' % schedule_seconds)
 
         return schedule_seconds
 

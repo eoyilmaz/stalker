@@ -251,8 +251,10 @@ class TimeLog(Entity, DateRangeMixin):
             self.resource is other.resource and self.start == other.start and \
             self.end == other.end and self.name == other.name
 
-# TODO: Consider contracting a Task with TimeLogs, what will happen when the task has logged in time
-# TODO: Check, what happens when a task has TimeLogs and will have child task later on, will it be ok with TJ
+# TODO: Consider contracting a Task with TimeLogs, what will happen when the
+#       task has logged in time
+# TODO: Check, what happens when a task has TimeLogs and will have child task
+#       later on, will it be ok with TJ
 
 
 def update_task_dates(func):
@@ -306,19 +308,22 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     The following codes are a couple of examples for creating Task instances::
 
       # with a project instance
-      >>> task1 = Task(name='Schedule', project=proj1)
+      >>> from stalker import Project
+      >>> project1 = Project(name='Test Project 1')  # simplified
+      >>> task1 = Task(name='Schedule', project=project1)
 
       # with a parent task
       >>> task2 = Task(name='Documentation', parent=task1)
 
       # or both
-      >>> task3 = Task(name='Test', project=proj1, parent=task1)
+      >>> task3 = Task(name='Test', project=project1, parent=task1)
 
       # this will create a RuntimeWarning
-      >>> task4 = Task(name='Test', project=proj2, parent=task1)
+      >>> project2 = Project(name='Test Project 2')
+      >>> task4 = Task(name='Test', project=project2, parent=task1)
       # task1 is not a # task of proj2
 
-      >>> assert task4.project == proj1
+      >>> assert task4.project == project1
       # Stalker uses the task1.project for task4
 
       # this will also create a RuntimeError
@@ -1113,8 +1118,8 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
         # update the status
         with DBSession.no_autoflush:
-            WFD = Status.query.filter_by(code='WFD').first()
-        self.status = WFD
+            wfd = Status.query.filter_by(code='WFD').first()
+        self.status = wfd
 
         if depends is None:
             depends = []
@@ -1226,26 +1231,26 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
         # check the status of the current task
         with DBSession.no_autoflush:
-            WFD = Status.query.filter_by(code='WFD').first()
-            RTS = Status.query.filter_by(code='RTS').first()
-            WIP = Status.query.filter_by(code='WIP').first()
-            PREV = Status.query.filter_by(code='PREV').first()
-            HREV = Status.query.filter_by(code='HREV').first()
-            DREV = Status.query.filter_by(code='DREV').first()
-            OH = Status.query.filter_by(code='OH').first()
-            STOP = Status.query.filter_by(code='STOP').first()
-            CMPL = Status.query.filter_by(code='CMPL').first()
+            wfd = Status.query.filter_by(code='WFD').first()
+            rts = Status.query.filter_by(code='RTS').first()
+            wip = Status.query.filter_by(code='WIP').first()
+            prev = Status.query.filter_by(code='PREV').first()
+            hrev = Status.query.filter_by(code='HREV').first()
+            drev = Status.query.filter_by(code='DREV').first()
+            oh = Status.query.filter_by(code='OH').first()
+            stop = Status.query.filter_by(code='STOP').first()
+            cmpl = Status.query.filter_by(code='CMPL').first()
 
-            if self.status in [WIP, PREV, HREV, DREV, OH, STOP, CMPL]:
+            if self.status in [wip, prev, hrev, drev, oh, stop, cmpl]:
                 raise StatusError(
-                    'This is a %(status)s task and it is not allowed to change '
-                    'the dependencies of a %(status)s task' % {
+                    'This is a %(status)s task and it is not allowed to '
+                    'change the dependencies of a %(status)s task' % {
                         'status': self.status.code
                     }
                 )
 
         if self.is_container:
-            if self.status == CMPL:
+            if self.status == cmpl:
                 raise StatusError(
                     'This is a %(status)s container task and it is not '
                     'allowed to change the dependency in %(status)s container '
@@ -1283,15 +1288,15 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         # CMPL or STOP, this will be done by the approve or stop action in the
         # dependent task it self
 
-        if self.status == RTS:
+        if self.status == rts:
 
             with DBSession.no_autoflush:
                 do_update_status = False
-                if depends.status in [WFD, RTS, WIP, OH, PREV, HREV, DREV, OH]:
+                if depends.status in [wfd, rts, wip, oh, prev, hrev, drev, oh]:
                     do_update_status = True
 
             if do_update_status:
-                self.status = WFD
+                self.status = wfd
 
         return task_depends_to
 
@@ -1372,7 +1377,6 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         """validates the given parent value
         """
         if parent is not None:
-            # if it is not a Task instance, go mad (cildir!!)
             if not isinstance(parent, Task):
                 raise TypeError(
                     '%s.parent should be an instance of '
@@ -1443,8 +1447,8 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
                 # check if given project is matching the parent.project
                 with DBSession.no_autoflush:
                     if self.parent.project != project:
-                        # don't go mad again, but warn the user that there is an
-                        # ambiguity!!!
+                        # don't go mad again, but warn the user that there is
+                        # an ambiguity!!!
                         import warnings
 
                         message = \
@@ -1623,7 +1627,6 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
         return bool(persistent_allocation)
 
-
     @validates("watchers")
     def _validate_watchers(self, key, watcher):
         """validates the given watcher value
@@ -1701,7 +1704,8 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
         return bid_unit
 
-    def _expand_dates(self, task, start, end):
+    @classmethod
+    def _expand_dates(cls, task, start, end):
         """extends the given tasks date values with the given start and end
         values
         """
@@ -1709,10 +1713,8 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         if task:
             if task.start > start:
                 task.start = start
-                #logger.debug('start is updated to : %s' % start)
             if task.end < end:
                 task.end = end
-                #logger.debug('end is updated to   : %s' % end)
 
     @validates('computed_start')
     def _validate_computed_start(self, key, computed_start):
@@ -2091,10 +2093,10 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         """
         # check task status
         with DBSession.no_autoflush:
-            WIP = Status.query.filter_by(code='WIP').first()
-            PREV = Status.query.filter_by(code='PREV').first()
+            wip = Status.query.filter_by(code='WIP').first()
+            prev = Status.query.filter_by(code='PREV').first()
 
-        if self.status != WIP:
+        if self.status != wip:
             raise StatusError(
                 '%(task)s (id:%(id)s) is a %(status)s task, and %(status)s '
                 'tasks are not suitable for requesting a review, please '
@@ -2122,7 +2124,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             )
 
         # update the status to PREV
-        self.status = PREV
+        self.status = prev
 
         # no need to update parent or dependent task statuses
         return reviews
@@ -2150,10 +2152,10 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         """
         # check status
         with DBSession.no_autoflush:
-            PREV = Status.query.filter_by(code='PREV').first()
-            CMPL = Status.query.filter_by(code='CMPL').first()
+            prev = Status.query.filter_by(code='PREV').first()
+            cmpl = Status.query.filter_by(code='CMPL').first()
 
-        if self.status not in [PREV, CMPL]:
+        if self.status not in [prev, cmpl]:
             raise StatusError(
                 '%(task)s (id: %(id)s) is a %(status)s task, and it is not '
                 'suitable for requesting a revision, please supply a PREV or '
@@ -2165,7 +2167,8 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             )
 
         # *********************************************************************
-        # TODO: I don't like this part, find another way to delete them directly
+        # TODO: I don't like this part, find another way to delete them
+        #       directly
         # find other NEW Reviews and delete them
         reviews_to_be_deleted = []
         for r in self.reviews:
@@ -2202,11 +2205,11 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         """
         # check if status is WIP
         with DBSession.no_autoflush:
-            WIP = Status.query.filter_by(code='WIP').first()
-            DREV = Status.query.filter_by(code='DREV').first()
-            OH = Status.query.filter_by(code='OH').first()
+            wip = Status.query.filter_by(code='WIP').first()
+            drev = Status.query.filter_by(code='DREV').first()
+            oh = Status.query.filter_by(code='OH').first()
 
-        if self.status not in [WIP, DREV, OH]:
+        if self.status not in [wip, drev, oh]:
             raise StatusError(
                 '%(task)s (id:%(id)s) is a %(status)s task, only WIP or DREV '
                 'tasks can be set to On Hold' % {
@@ -2216,7 +2219,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
                 }
             )
         # update the status to OH
-        self.status = OH
+        self.status = oh
 
         # set the priority to 0
         self.priority = 0
@@ -2244,14 +2247,14 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
         # check the status
         with DBSession.no_autoflush:
-            WIP = Status.query.filter_by(code='WIP').first()
-            DREV = Status.query.filter_by(code='DREV').first()
-            STOP = Status.query.filter_by(code='STOP').first()
+            wip = Status.query.filter_by(code='WIP').first()
+            drev = Status.query.filter_by(code='DREV').first()
+            stop = Status.query.filter_by(code='STOP').first()
 
-        if self.status not in [WIP, DREV, STOP]:
+        if self.status not in [wip, drev, stop]:
             raise StatusError(
-                '%(task)s (id:%(id)s)is a %(status)s task and it is not possible'
-                'to stop a %(status)s task.' % {
+                '%(task)s (id:%(id)s)is a %(status)s task and it is not '
+                'possible to stop a %(status)s task.' % {
                     'task': self.name,
                     'id': self.id,
                     'status': self.status.code
@@ -2259,7 +2262,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             )
 
         # set the status
-        self.status = STOP
+        self.status = stop
 
         # clamp schedule values
         self.schedule_timing, self.schedule_unit = \
@@ -2280,11 +2283,11 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         """
         # check status
         with DBSession.no_autoflush:
-            WIP = Status.query.filter_by(code='WIP').first()
-            OH = Status.query.filter_by(code='OH').first()
-            STOP = Status.query.filter_by(code='STOP').first()
+            wip = Status.query.filter_by(code='WIP').first()
+            oh = Status.query.filter_by(code='OH').first()
+            stop = Status.query.filter_by(code='STOP').first()
 
-        if self.status not in [OH, STOP]:
+        if self.status not in [oh, stop]:
             raise StatusError(
                 '%(task)s (id:%(id)s) is a %(status)s task, and it is not '
                 'suitable to be resumed, please supply an OH or STOP task' %
@@ -2296,7 +2299,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             )
         else:
             # set to WIP
-            self.status = WIP
+            self.status = wip
 
         # now update the status with dependencies
         self.update_status_with_dependent_statuses()
@@ -2353,15 +2356,15 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             return
 
         with DBSession.no_autoflush:
-            WFD = Status.query.filter_by(code='WFD').first()
-            RTS = Status.query.filter_by(code='RTS').first()
-            WIP = Status.query.filter_by(code='WIP').first()
-            PREV = Status.query.filter_by(code='PREV').first()
-            HREV = Status.query.filter_by(code='HREV').first()
-            DREV = Status.query.filter_by(code='DREV').first()
-            OH = Status.query.filter_by(code='OH').first()
-            STOP = Status.query.filter_by(code='STOP').first()
-            CMPL = Status.query.filter_by(code='CMPL').first()
+            wfd = Status.query.filter_by(code='WFD').first()
+            rts = Status.query.filter_by(code='RTS').first()
+            wip = Status.query.filter_by(code='WIP').first()
+            # prev = Status.query.filter_by(code='PREV').first()
+            hrev = Status.query.filter_by(code='HREV').first()
+            drev = Status.query.filter_by(code='DREV').first()
+            # oh = Status.query.filter_by(code='OH').first()
+            # stop = Status.query.filter_by(code='STOP').first()
+            cmpl = Status.query.filter_by(code='CMPL').first()
 
         if removing:
             self._previously_removed_dependent_tasks.append(removing)
@@ -2381,13 +2384,13 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         if not dep_list:
             # doesn't have any dependency
             # convert its status from WFD to RTS if necessary
-            if self.status == WFD:
-                self.status = RTS
-            elif self.status == DREV:
+            if self.status == wfd:
+                self.status = rts
+            elif self.status == drev:
                 if len(self.time_logs):
-                    self.status = WIP
+                    self.status = wip
                 else:
-                    self.status = RTS
+                    self.status = rts
             return
 
         #   +--------- WFD
@@ -2428,23 +2431,26 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         #         where "Tasks".id = %s
         #         group by "Statuses".code
         #     """ % self.id
-        # 
+        #
         #     result = DBSession.connection().execute(sql_query)
-        # 
+        #
         #     # convert to a binary value
         #     binary_status = reduce(
         #         lambda x, y: x+y,
         #         map(lambda x: binary_status_codes[x[0]], result.fetchall()),
         #         0
         #     )
-        # 
+        #
         # else:
         # task is not committed yet, use Python version
         logger.debug('using pure Python to query dependency statuses')
         binary_status = 0
         dep_statuses = []
         # with DBSession.no_autoflush:
-        logger.debug('self.depends in update_status_with_dependent_statuses: %s' % self.depends)
+        logger.debug(
+            'self.depends in update_status_with_dependent_statuses: %s' %
+            self.depends
+        )
         # for dep in self.depends:
         for dep in dep_list:
             # consider every status only once
@@ -2462,19 +2468,19 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
         status = self.status
         if work_alone:
-            if self.status == WFD:
-                status = RTS
-            elif self.status == DREV:
-                status = WIP
+            if self.status == wfd:
+                status = rts
+            elif self.status == drev:
+                status = wip
         else:
-            if self.status == RTS:
-                status = WFD
-            elif self.status == WIP:
-                status = DREV
-            elif self.status == HREV:
-                status = DREV
-            elif self.status == CMPL:
-                status = DREV
+            if self.status == rts:
+                status = wfd
+            elif self.status == wip:
+                status = drev
+            elif self.status == hrev:
+                status = drev
+            elif self.status == cmpl:
+                status = drev
 
         logger.debug('setting status from %s to %s: ' % (self.status, status))
         self.status = status
@@ -2505,12 +2511,12 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             return
 
         with DBSession.no_autoflush:
-            WFD = Status.query.filter(Status.code == 'WFD').first()
-            RTS = Status.query.filter(Status.code == 'RTS').first()
-            WIP = Status.query.filter(Status.code == 'WIP').first()
-            CMPL = Status.query.filter(Status.code == 'CMPL').first()
+            wfd = Status.query.filter(Status.code == 'WFD').first()
+            rts = Status.query.filter(Status.code == 'RTS').first()
+            wip = Status.query.filter(Status.code == 'WIP').first()
+            cmpl = Status.query.filter(Status.code == 'CMPL').first()
 
-        parent_statuses_lut = [WFD, RTS, WIP, CMPL]
+        parent_statuses_lut = [wfd, rts, wip, cmpl]
 
         #   +--------- WFD
         #   |+-------- RTS
@@ -2663,7 +2669,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         if structure:
             for template in structure.templates:
                 assert isinstance(template, FilenameTemplate)
-                if template._target_entity_type == self.entity_type:
+                if template.target_entity_type == self.entity_type:
                     vers_template = template
                     break
 
@@ -2906,8 +2912,9 @@ Task_Responsible = Table(
 # *****************************************************************************
 # TimeLog updates the owner tasks parents total_logged_seconds attribute
 # with new duration
-@event.listens_for(TimeLog._start, 'set')
-def update_time_log_task_parents_for_start(tlog, new_start, old_start, initiator):
+@event.listens_for(TimeLog.start, 'set')
+def update_time_log_task_parents_for_start(
+        tlog, new_start, old_start, initiator):
     """Updates the parent task of the task related to the time_log when the
     new_start or end values are changed
 
@@ -2924,7 +2931,7 @@ def update_time_log_task_parents_for_start(tlog, new_start, old_start, initiator
         __update_total_logged_seconds__(tlog, new_duration, old_duration)
 
 
-@event.listens_for(TimeLog._end, 'set')
+@event.listens_for(TimeLog.end, 'set')
 def update_time_log_task_parents_for_end(tlog, new_end, old_end, initiator):
     """Updates the parent task of the task related to the time_log when the
     start or new_end values are changed
@@ -3014,8 +3021,8 @@ def update_parents_schedule_seconds_with_schedule_unit(
     new_schedule_unit attribute is updated on a task
 
     :param task: The base task that the schedule unit is updated of
-    :param new_schedule_unit: a string with a value of 'min', 'h', 'd', 'w', 'm' or
-      'y' showing the timing unit.
+    :param new_schedule_unit: a string with a value of 'min', 'h', 'd', 'w',
+      'm' or 'y' showing the timing unit.
     :param old_schedule_unit: the old value of new_schedule_unit
     :param initiator: not used
     :return: None

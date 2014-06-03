@@ -75,4 +75,4 @@ class Asset(Task, CodeMixin):
         """the equality operator
         """
         return super(Asset, self).__eq__(other) and \
-               isinstance(other, Asset) and self.type == other.type
+            isinstance(other, Asset) and self.type == other.type

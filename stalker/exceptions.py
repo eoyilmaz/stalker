@@ -60,15 +60,6 @@ class CircularDependencyError(Exception):
         return repr(self.value)
 
 
-#class CycleError(Exception):
-#    """Raised when there is a cycle in parent child relation in tasks
-#    """
-#    
-#    def __init__(self, value=''):
-#        super(CycleError, self).__init__(value)
-#        self.value = value
-
-
 class OverBookedError(Exception):
     """Raised when a resource is booked more than once for the same time period
     """
@@ -95,7 +86,7 @@ class StatusError(Exception):
 
 
 class DependencyViolationError(Exception):
-    """Raised when a TimeLog violates the dependency relation betweeen tasks
+    """Raised when a TimeLog violates the dependency relation between tasks
     """
 
     def __init__(self, value=""):

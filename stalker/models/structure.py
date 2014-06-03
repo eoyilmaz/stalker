@@ -32,7 +32,7 @@ logger.setLevel(logging_level)
 
 
 class Structure(Entity):
-    """Holds data about how the physical files are arranged in the :class:`.Repository`.
+    """Defines folder structures for :class:`.Projects`.
 
     Structures are generally owned by :class:`.Project` objects. Whenever a
     :class:`.Project` is physically created, project folders are created by
@@ -147,9 +147,9 @@ class Structure(Entity):
         """the equality operator
         """
         return super(Structure, self).__eq__(other) and \
-               isinstance(other, Structure) and \
-               self.templates == other.templates and \
-               self.custom_template == other.custom_template
+            isinstance(other, Structure) and \
+            self.templates == other.templates and \
+            self.custom_template == other.custom_template
 
     @validates("custom_template")
     def _validate_custom_template(self, key, custom_template_in):
@@ -184,7 +184,7 @@ class Structure(Entity):
 
         return template_in
 
-# Structure_Filenametemplates Table
+# Structure_FilenameTemplates Table
 Structure_FilenameTemplates = Table(
     "Structure_FilenameTemplates", Base.metadata,
     Column("structure_id", Integer, ForeignKey("Structures.id"),
@@ -192,4 +192,3 @@ Structure_FilenameTemplates = Table(
     Column("filenametemplate_id", Integer, ForeignKey("FilenameTemplates.id"),
            primary_key=True)
 )
-

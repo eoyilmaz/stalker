@@ -77,7 +77,7 @@ class Config(object):
 
         version_take_name="Main",
 
-        actions=['Create', 'Read', 'Update', 'Delete', 'List'],  #CRUDL
+        actions=['Create', 'Read', 'Update', 'Delete', 'List'],  # CRUDL
 
         # Tickets
         ticket_label="Ticket",
@@ -187,11 +187,11 @@ class Config(object):
 
         datetime_units_to_timedelta_kwargs={
             'min': {'name': 'minutes', 'multiplier': 1},
-            'h'  : {'name': 'hours'  , 'multiplier': 1},
-            'd'  : {'name': 'days'   , 'multiplier': 1},
-            'w'  : {'name': 'weeks'  , 'multiplier': 1},
-            'm'  : {'name': 'days'   , 'multiplier': 30},
-            'y'  : {'name': 'days'   , 'multiplier': 365}
+            'h': {'name': 'hours', 'multiplier': 1},
+            'd': {'name': 'days', 'multiplier': 1},
+            'w': {'name': 'weeks', 'multiplier': 1},
+            'm': {'name': 'days', 'multiplier': 30},
+            'y': {'name': 'days', 'multiplier': 365}
         },
 
         task_status_names=[
@@ -472,10 +472,10 @@ taskreport breakdown "{{csv_file_full_path}}"{
 
     def _parse_settings(self):
         # for now just use $STALKER_PATH
-        ENV_KEY = "STALKER_PATH"
+        env_key = "STALKER_PATH"
 
         # try to get the environment variable
-        if ENV_KEY not in os.environ:
+        if env_key not in os.environ:
             # don't do anything
             logger.debug("no environment key found for user settings")
         else:
@@ -483,7 +483,7 @@ taskreport breakdown "{{csv_file_full_path}}"{
 
             resolved_path = os.path.expanduser(
                 os.path.join(
-                    os.environ[ENV_KEY],
+                    os.environ[env_key],
                     "config.py"
                 )
             )
@@ -504,14 +504,15 @@ taskreport breakdown "{{csv_file_full_path}}"{
 
             try:
                 logger.debug("importing user config")
-                execfile(resolved_path, self.user_config)
+                with open(resolved_path) as f:
+                    exec(f.read(), self.user_config)
             except IOError:
                 logger.warning("The $STALKER_PATH: %s doesn't exists! "
                                "skipping user config" % resolved_path)
-            except SyntaxError, err:
+            except SyntaxError as e:
                 raise RuntimeError(
                     "There is a syntax error in your configuration file: %s" %
-                    str(err)
+                    str(e)
                 )
             finally:
                 # append the data to the current settings

@@ -49,24 +49,24 @@ def create_secondary_table(
 
     # use the given class_name and the class_table
     if not secondary_table_name:
-        secondary_table_name = \
-            primary_cls_name + "_" + plural_secondary_cls_name
+        secondary_table_name = '%s_%s' % (primary_cls_name,
+                                          plural_secondary_cls_name)
 
     # check if the table is already defined
     if secondary_table_name not in Base.metadata:
         secondary_table = Table(
             secondary_table_name, Base.metadata,
             Column(
-                primary_cls_name.lower() + "_id",
+                '%s_id' % primary_cls_name.lower(),
                 Integer,
-                ForeignKey(primary_cls_table_name + ".id"),
+                ForeignKey('%s.id' % primary_cls_table_name),
                 primary_key=True,
             ),
 
             Column(
-                secondary_cls_name.lower() + "_id",
+                '%s_id' % secondary_cls_name.lower(),
                 Integer,
-                ForeignKey(secondary_cls_table_name + ".id"),
+                ForeignKey('%s.id' % secondary_cls_table_name),
                 primary_key=True,
             )
         )
@@ -100,13 +100,13 @@ class TargetEntityTypeMixin(object):
       :class:`.Project` instances. You can not assign it to any other class
       which accepts a :class:`.Type` instance.
 
-    To control the mixed-in class behaviour add these class variables to the 
+    To control the mixed-in class behaviour add these class variables to the
     mixed in class:
 
-      __nullable_target__ : controls if the target_entity_type can be 
+      __nullable_target__ : controls if the target_entity_type can be
                             nullable or not. Default is False.
 
-      __unique_target__ : controls if the target_entity_type should be 
+      __unique_target__ : controls if the target_entity_type should be
                           unique, so there is only one object for one type.
                           Default is False.
     """
@@ -209,7 +209,6 @@ class StatusMixin(object):
     def __init__(self, status=None, status_list=None, **kwargs):
         self.status_list = status_list
         self.status = status
-        # logger.debug('%s.status: %s' % (self.__class__.__name__, status))
 
     @declared_attr
     def status_id(cls):
@@ -282,7 +281,7 @@ class StatusMixin(object):
 
         # if it is still None
         if status_list is None:
-            # there is no db so raise an error because there is no way 
+            # there is no db so raise an error because there is no way
             # to get an appropriate StatusList
             raise TypeError(
                 "%s instances can not be initialized without a "
@@ -692,7 +691,7 @@ class DateRangeMixin(object):
 
 
 class ProjectMixin(object):
-    """Gives the ability to connect to a :class:`.Project` to the mixed in object.
+    """Allows connecting a :class:`.Project` to the mixed in object.
 
     :param project: A :class:`.Project` instance holding the project which this
       object is related to. It can not be None, or anything other than a
@@ -726,9 +725,9 @@ class ProjectMixin(object):
 
         return relationship(
             "Project",
-            primaryjoin= \
-                cls.__tablename__ + ".c.project_id==Projects.c.id",
-            post_update=True, # for project itself
+            primaryjoin=
+            cls.__tablename__ + ".c.project_id==Projects.c.id",
+            post_update=True,  # for project itself
             uselist=False,
             backref=backref,
             doc=doc
@@ -869,7 +868,7 @@ class ACLMixin(object):
         'Add_Project' permission.
         """
         return [(perm.access,
-                 self.__class__.__name__ + ':' + self.name,
+                 '%s:%s' % (self.__class__.__name__, self.name),
                  perm.action + '_' + perm.class_name)
                 for perm in self.permissions]
 
@@ -880,7 +879,7 @@ class CodeMixin(object):
     .. versionadded:: 0.2.0
 
       The code attribute of the SimpleEntity is now introduced as a separate
-      mixin. To let it be used by the classes it is really needed. 
+      mixin. To let it be used by the classes it is really needed.
 
     The CodeMixin just adds a new field called ``code``. It is a very simple
     attribute and is used for simplifying long names (like Project.name etc.).
@@ -893,10 +892,7 @@ class CodeMixin(object):
       not be None.
     """
 
-    def __init__(
-            self,
-            code=None,
-            **kwargs):
+    def __init__(self, code=None, **kwargs):
         logger.debug('code: %s' % code)
         self.code = code
 

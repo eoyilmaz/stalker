@@ -49,7 +49,7 @@ CANTFIX = 'cantfix'
 
 
 class Ticket(Entity, StatusMixin):
-    """Tickets are the way of reporting errors or asking for changes in Stalker.
+    """Tickets are the way of reporting errors or asking for changes.
 
     The Stalker Ticketing system is based on Trac Basic Workflow. For more
     information please visit `Trac Workflow`_
@@ -176,7 +176,8 @@ class Ticket(Entity, StatusMixin):
         'Ticket',
         secondary='Ticket_Related_Tickets',
         primaryjoin='Tickets.c.id==Ticket_Related_Tickets.c.ticket_id',
-        secondaryjoin='Ticket_Related_Tickets.c.related_ticket_id==Tickets.c.id',
+        secondaryjoin='Ticket_Related_Tickets.c.related_ticket_id=='
+                      'Tickets.c.id',
         doc="""A list of other Ticket instances which are related
         to this one. Can be used to related Tickets to point to a common
         problem. The Ticket itself can not be assigned to this list
@@ -278,7 +279,8 @@ class Ticket(Entity, StatusMixin):
         descriptor=property(_project_getter)
     )
 
-    def _maximum_number(self):
+    @classmethod
+    def _maximum_number(cls):
         """returns the maximum available number from the database
 
         :return: integer
@@ -423,16 +425,16 @@ class Ticket(Entity, StatusMixin):
         """the equality operator
         """
         return super(Ticket, self).__eq__(other) and \
-               isinstance(other, Ticket) and \
-               other.name == self.name and \
-               other.number == self.number and \
-               other.status == self.status and \
-               other.logs == self.logs and \
-               other.priority == self.priority
+            isinstance(other, Ticket) and \
+            other.name == self.name and \
+            other.number == self.number and \
+            other.status == self.status and \
+            other.logs == self.logs and \
+            other.priority == self.priority
 
 
 class TicketLog(SimpleEntity):
-    """A class to hold :class:`.Ticket`\ .\ :attr:`.Ticket.status` change operations.
+    """Holds :class:`.Ticket`\ .\ :attr:`.Ticket.status` change operations.
 
     :param ticket: An instance of :class:`.Ticket` which the subject to the
       operation.

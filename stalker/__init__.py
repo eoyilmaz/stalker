@@ -23,7 +23,7 @@ Animation and VFX Studios.
 See docs for more information.
 """
 
-__version__ = '0.2.8.1'
+__version__ = '0.2.8.a1'
 
 
 # before anything about stalker create the defaults
@@ -59,7 +59,6 @@ from stalker.models.ticket import Ticket, TicketLog
 from stalker.models.type import Type, EntityType
 from stalker.models.version import Version
 from stalker.models.wiki import Page
-from stalker.models.auth import group_finder
 
 import logging
 
