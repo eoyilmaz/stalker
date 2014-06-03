@@ -23,14 +23,14 @@ import pickle
 import shutil
 import tempfile
 import datetime
-import unittest2
+import unittest
 
 from stalker import defaults, db, User
 from stalker.db import DBSession
 from stalker.models.auth import LocalSession
 
 
-class LocalSessionTester(unittest2.TestCase):
+class LocalSessionTester(unittest.TestCase):
     """tests LocalSession class
     """
 

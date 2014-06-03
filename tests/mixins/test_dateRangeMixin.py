@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import datetime
-import unittest2
+import unittest
 
 from sqlalchemy import Column, Integer, ForeignKey
 
@@ -50,7 +50,7 @@ class DateRangeMixFooMixedInClass(SimpleEntity, DateRangeMixin):
         DateRangeMixin.__init__(self, **kwargs)
 
 
-class DateRangeMixinTester(unittest2.TestCase):
+class DateRangeMixinTester(unittest.TestCase):
     """Tests the DateRangeMixin
     """
 

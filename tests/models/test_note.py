@@ -18,11 +18,11 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest2
+import unittest
 from stalker import Note
 
 
-class NoteTester(unittest2.TestCase):
+class NoteTester(unittest.TestCase):
     """tests  the Note class
     """
 

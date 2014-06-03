@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import datetime
-import unittest2
+import unittest
 
 from stalker import log
 from stalker.db.session import DBSession
@@ -32,7 +32,7 @@ logger = logging.getLogger('stalker.models.project')
 logger.setLevel(log.logging_level)
 
 
-class ProjectTestCase(unittest2.TestCase):
+class ProjectTestCase(unittest.TestCase):
     """tests the Project class
     """
 
@@ -1951,7 +1951,7 @@ task Task_{{task3.id}} "Test Task 3" {
         self.assertEqual(self.test_project.client, new_client)
 
 
-class ProjectTicketsTestCase(unittest2.TestCase):
+class ProjectTicketsTestCase(unittest.TestCase):
     """tests the Project <-> Ticket relation
     """
 

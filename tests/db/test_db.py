@@ -22,7 +22,7 @@ import os
 import shutil
 import datetime
 from stalker.models.client import Client
-import unittest2
+import unittest
 import tempfile
 import json
 from sqlalchemy.exc import IntegrityError
@@ -42,7 +42,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
 
 
-class DatabaseTester(unittest2.TestCase):
+class DatabaseTester(unittest.TestCase):
     """tests the database and connection to the database
     """
 
@@ -841,7 +841,7 @@ class DatabaseTester(unittest2.TestCase):
         self.assertEqual('5999269aad30', version_num)
 
 
-class DatabaseModelsTester(unittest2.TestCase):
+class DatabaseModelsTester(unittest.TestCase):
     """tests the database model
 
     NOTE TO OTHER DEVELOPERS:

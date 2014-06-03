@@ -18,7 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest2
+import unittest
 from stalker import Structure, FilenameTemplate, Type
 
 
@@ -35,7 +35,7 @@ class Link(object):
     pass
 
 
-class StructureTester(unittest2.TestCase):
+class StructureTester(unittest.TestCase):
     """tests the stalker.models.structure.Structure class
     """
 

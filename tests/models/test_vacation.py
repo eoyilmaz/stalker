@@ -19,13 +19,13 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import datetime
-import unittest2
+import unittest
 
 from stalker import User, Type
 from stalker.models.studio import Vacation
 
 
-class VacationTestCase(unittest2.TestCase):
+class VacationTestCase(unittest.TestCase):
     """tests the stalker.models.studio.Vacation class
     """
 

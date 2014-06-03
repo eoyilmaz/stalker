@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import datetime
-import unittest2
+import unittest
 import os
 
 import stalker
@@ -28,7 +28,7 @@ from stalker import (db, Department, User, Repository, Status, StatusList,
                      Project, Task, TaskJugglerScheduler, Studio)
 
 
-class TaskJugglerSchedulerTester(unittest2.TestCase):
+class TaskJugglerSchedulerTester(unittest.TestCase):
     """tests the stalker.models.scheduler.TaskJugglerScheduler class
     """
 

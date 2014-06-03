@@ -18,7 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest2
+import unittest
 import datetime
 
 from stalker.db import DBSession
@@ -42,7 +42,7 @@ class DummyScheduler(SchedulerBase):
             self.callback()
 
 
-class StudioTester(unittest2.TestCase):
+class StudioTester(unittest.TestCase):
     """tests the stalker.models.studio.Studio class
     """
 
@@ -1694,7 +1694,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
         studio.timing_resolution = new_res
         self.assertEqual(studio.timing_resolution, new_res)
 
-@unittest2.skip
+@unittest.skip
 def csv_to_test_converter():
     """convert tjp output csv to test case
     """

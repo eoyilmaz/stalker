@@ -19,12 +19,12 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 
-import unittest2
+import unittest
 
 from stalker.models.auth import Permission
 
 
-class PermissionTester(unittest2.TestCase):
+class PermissionTester(unittest.TestCase):
     """tests the stalker.models.auth.Permission class
     """
 

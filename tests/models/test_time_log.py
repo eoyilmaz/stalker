@@ -18,7 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest2
+import unittest
 import datetime
 from stalker import (Project, Repository, Status, StatusList, Task, TimeLog,
                      User)
@@ -26,7 +26,7 @@ from stalker.exceptions import OverBookedError, StatusError, \
     DependencyViolationError
 
 
-class TimeLogTester(unittest2.TestCase):
+class TimeLogTester(unittest.TestCase):
     """tests the TimeLog class
     """
 
@@ -478,7 +478,7 @@ class TimeLogTester(unittest2.TestCase):
         self.test_resource2.time_logs.append(time_log1)
 
 
-class TimeLogDBTestCase(unittest2.TestCase):
+class TimeLogDBTestCase(unittest.TestCase):
     """Tests database interaction of TimeLog instances
     """
 

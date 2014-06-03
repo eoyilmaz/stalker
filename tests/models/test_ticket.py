@@ -18,7 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest2
+import unittest
 
 from stalker.db.session import DBSession
 from stalker import (db, TicketLog, Asset, User, Note, Project, Repository,
@@ -31,7 +31,7 @@ logger = logging.getLogger("stalker.models.ticket")
 logger.setLevel(log.logging_level)
 
 
-class TicketTester(unittest2.TestCase):
+class TicketTester(unittest.TestCase):
     """Tests the :class:`~stalker.models.ticket.Ticket` class
     """
 

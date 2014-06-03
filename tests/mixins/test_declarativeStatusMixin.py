@@ -18,7 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest2
+import unittest
 
 from sqlalchemy import Column, Integer, ForeignKey
 from stalker.db.session import DBSession
@@ -51,7 +51,7 @@ class DeclStatMixB(SimpleEntity, StatusMixin):
         StatusMixin.__init__(self, **kwargs)
 
 
-class StatusMixinTester(unittest2.TestCase):
+class StatusMixinTester(unittest.TestCase):
     """tests StatusMixin
     """
 

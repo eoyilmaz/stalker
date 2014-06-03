@@ -20,14 +20,14 @@
 
 import datetime
 import tempfile
-import unittest2
+import unittest
 from stalker.db import DBSession
 from stalker import (db, User, Status, StatusList, Repository, Project, Task,
                      Type, TimeLog, Review)
 from stalker.exceptions import StatusError
 
 
-class TaskStatusWorkflowTestCase(unittest2.TestCase):
+class TaskStatusWorkflowTestCase(unittest.TestCase):
     """tests the Task Status Workflow
     """
 

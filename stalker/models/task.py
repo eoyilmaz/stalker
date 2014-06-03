@@ -2912,7 +2912,7 @@ Task_Responsible = Table(
 # *****************************************************************************
 # TimeLog updates the owner tasks parents total_logged_seconds attribute
 # with new duration
-@event.listens_for(TimeLog.start, 'set')
+@event.listens_for(TimeLog._start, 'set')
 def update_time_log_task_parents_for_start(
         tlog, new_start, old_start, initiator):
     """Updates the parent task of the task related to the time_log when the
@@ -2931,7 +2931,7 @@ def update_time_log_task_parents_for_start(
         __update_total_logged_seconds__(tlog, new_duration, old_duration)
 
 
-@event.listens_for(TimeLog.end, 'set')
+@event.listens_for(TimeLog._end, 'set')
 def update_time_log_task_parents_for_end(tlog, new_end, old_end, initiator):
     """Updates the parent task of the task related to the time_log when the
     start or new_end values are changed

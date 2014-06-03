@@ -19,11 +19,11 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 import os
 
-import unittest2
+import unittest
 from stalker import Type, Link
 
 
-class LinkTester(unittest2.TestCase):
+class LinkTester(unittest.TestCase):
     """tests the :class:`stalker.models.link.Link` class
     """
 

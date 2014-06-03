@@ -19,14 +19,14 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 from sqlalchemy.exc import IntegrityError
-import unittest2
+import unittest
 
 from stalker.db import DBSession
 from stalker import (db, Status, User, Repository, Structure, StatusList,
                      Project, Task, TaskDependency, defaults)
 
 
-class TaskDependencyTestCase(unittest2.TestCase):
+class TaskDependencyTestCase(unittest.TestCase):
     """tests the TaskDependency class
     """
 

@@ -22,7 +22,7 @@ import os
 import shutil
 import tempfile
 import datetime
-import unittest2
+import unittest
 import logging
 import stalker
 
@@ -30,7 +30,7 @@ logger = logging.getLogger("stalker")
 logger.setLevel(logging.DEBUG)
 
 
-class ConfigTester(unittest2.TestCase):
+class ConfigTester(unittest.TestCase):
     """test the system configuration
     """
 

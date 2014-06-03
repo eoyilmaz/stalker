@@ -22,7 +22,7 @@ import datetime
 import logging
 import tempfile
 
-import unittest2
+import unittest
 
 from stalker.exceptions import CircularDependencyError
 from stalker.db import DBSession
@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-class TaskTester(unittest2.TestCase):
+class TaskTester(unittest.TestCase):
     """Tests the stalker.models.task.Task class
     """
 

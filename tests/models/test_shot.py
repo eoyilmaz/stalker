@@ -20,13 +20,13 @@
 import os
 import tempfile
 
-import unittest2
+import unittest
 from stalker import (db, Asset, Entity, Link, Project, Repository, Scene,
                      Sequence, Shot, Status, StatusList, Task, Type,
                      ImageFormat)
 
 
-class ShotTester(unittest2.TestCase):
+class ShotTester(unittest.TestCase):
     """Tests the Shot class
     """
 
@@ -1027,7 +1027,7 @@ class ShotTester(unittest2.TestCase):
         self.assertEqual(Shot.__strictly_typed__, False)
 
 
-class ShotDBTestCase(unittest2.TestCase):
+class ShotDBTestCase(unittest.TestCase):
     """Tests stalker.model.shot.Shot class in a DB environment
     """
 

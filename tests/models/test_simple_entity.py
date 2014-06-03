@@ -18,7 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest2
+import unittest
 import datetime
 import json
 
@@ -34,7 +34,7 @@ class NewClass(SimpleEntity):
     __strictly_typed__ = True
 
 
-class SimpleEntityTester(unittest2.TestCase):
+class SimpleEntityTester(unittest.TestCase):
     """testing the SimpleEntity class
     """
 

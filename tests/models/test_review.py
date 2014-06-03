@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import tempfile
-import unittest2
+import unittest
 import datetime
 
 from stalker.db import DBSession
@@ -27,7 +27,7 @@ from stalker import (db, Task, Project, User, Status, StatusList, Repository,
                      Structure, Review)
 
 
-class ReviewTestCase(unittest2.TestCase):
+class ReviewTestCase(unittest.TestCase):
     """tests the stalker.models.review.Review class
     """
 

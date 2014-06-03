@@ -18,11 +18,11 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest2
+import unittest
 from stalker import Entity, Note, Tag, User
 
 
-class EntityTester(unittest2.TestCase):
+class EntityTester(unittest.TestCase):
     """tests the Entity class
     """
 

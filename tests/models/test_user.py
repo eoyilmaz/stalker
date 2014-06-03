@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 
-import unittest2
+import unittest
 import datetime
 import logging
 
@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-class UserTest(unittest2.TestCase):
+class UserTest(unittest.TestCase):
     """Tests the user class
     """
 

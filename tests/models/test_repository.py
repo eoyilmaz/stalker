@@ -18,7 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest2
+import unittest
 import platform
 
 from stalker import Repository, Tag
@@ -49,7 +49,7 @@ class PlatformPatcher(object):
             platform.system = self.original
 
 
-class RepositoryTester(unittest2.TestCase):
+class RepositoryTester(unittest.TestCase):
     """tests the Repository class
     """
 

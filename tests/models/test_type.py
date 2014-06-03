@@ -18,11 +18,11 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest2
+import unittest
 from stalker import Entity, Type
 
 
-class TypeTester(unittest2.TestCase):
+class TypeTester(unittest.TestCase):
     """Tests Type class
     """
 
