@@ -37,12 +37,12 @@ def upgrade():
       )""")
 
     # now drop the entity_id column
-    op.drop_column(u'Notes', 'entity_id')
+    op.drop_column('Notes', 'entity_id')
 
 
 def downgrade():
     op.add_column(
-        u'Notes',
+        'Notes',
         sa.Column('entity_id', sa.INTEGER(), nullable=True)
     )
 

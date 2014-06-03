@@ -15,10 +15,14 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    op.drop_column('Versions', u'status_list_id')
-    op.drop_column('Versions', u'status_id')
+    op.drop_column('Versions', 'status_list_id')
+    op.drop_column('Versions', 'status_id')
 
 
 def downgrade():
-    op.add_column('Versions', sa.Column(u'status_id', sa.INTEGER(), nullable=False))
-    op.add_column('Versions', sa.Column(u'status_list_id', sa.INTEGER(), nullable=False))
+    op.add_column(
+        'Versions', sa.Column('status_id', sa.INTEGER(), nullable=False)
+    )
+    op.add_column(
+        'Versions', sa.Column('status_list_id', sa.INTEGER(), nullable=False)
+    )

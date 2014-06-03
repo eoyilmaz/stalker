@@ -27,30 +27,53 @@ def upgrade():
     except sa.exc.OperationalError:
         pass
 
-    op.drop_table(u'Asset_References')
-    op.drop_table(u'Shot_References')
-    op.drop_table(u'Sequence_References')
+    op.drop_table('Asset_References')
+    op.drop_table('Shot_References')
+    op.drop_table('Sequence_References')
+
 
 def downgrade():
-    op.create_table(u'Sequence_References',
-        sa.Column(u'sequence_id', sa.INTEGER(), autoincrement=False, nullable=False),
-        sa.Column(u'link_id', sa.INTEGER(), autoincrement=False, nullable=False),
-        sa.ForeignKeyConstraint(['link_id'], [u'Links.id'], name=u'Sequence_References_link_id_fkey'),
-        sa.ForeignKeyConstraint(['sequence_id'], [u'Sequences.id'], name=u'Sequence_References_sequence_id_fkey'),
-        sa.PrimaryKeyConstraint(u'sequence_id', u'link_id', name=u'Sequence_References_pkey')
+    op.create_table(
+        'Sequence_References',
+        sa.Column(
+            'sequence_id', sa.INTEGER(), autoincrement=False, nullable=False
+        ),
+        sa.Column(
+            'link_id', sa.INTEGER(), autoincrement=False, nullable=False
+        ),
+        sa.ForeignKeyConstraint(
+            ['link_id'], ['Links.id'],
+            name='Sequence_References_link_id_fkey'),
+        sa.ForeignKeyConstraint(
+            ['sequence_id'], ['Sequences.id'],
+            name='Sequence_References_sequence_id_fkey'
+        ),
+        sa.PrimaryKeyConstraint(
+            'sequence_id', 'link_id', name='Sequence_References_pkey'
+        )
     )
-    op.create_table(u'Shot_References',
-        sa.Column(u'shot_id', sa.INTEGER(), autoincrement=False, nullable=False),
-        sa.Column(u'link_id', sa.INTEGER(), autoincrement=False, nullable=False),
-        sa.ForeignKeyConstraint(['link_id'], [u'Links.id'], name=u'Shot_References_link_id_fkey'),
-        sa.ForeignKeyConstraint(['shot_id'], [u'Shots.id'], name=u'Shot_References_shot_id_fkey'),
-        sa.PrimaryKeyConstraint(u'shot_id', u'link_id', name=u'Shot_References_pkey')
+    op.create_table('Shot_References',
+                    sa.Column('shot_id', sa.INTEGER(), autoincrement=False,
+                              nullable=False),
+                    sa.Column('link_id', sa.INTEGER(), autoincrement=False,
+                              nullable=False),
+                    sa.ForeignKeyConstraint(['link_id'], ['Links.id'],
+                                            name='Shot_References_link_id_fkey'),
+                    sa.ForeignKeyConstraint(['shot_id'], ['Shots.id'],
+                                            name='Shot_References_shot_id_fkey'),
+                    sa.PrimaryKeyConstraint('shot_id', 'link_id',
+                                            name='Shot_References_pkey')
     )
-    op.create_table(u'Asset_References',
-        sa.Column(u'asset_id', sa.INTEGER(), autoincrement=False, nullable=False),
-        sa.Column(u'link_id', sa.INTEGER(), autoincrement=False, nullable=False),
-        sa.ForeignKeyConstraint(['asset_id'], [u'Assets.id'], name=u'Asset_References_asset_id_fkey'),
-        sa.ForeignKeyConstraint(['link_id'], [u'Links.id'], name=u'Asset_References_link_id_fkey'),
-        sa.PrimaryKeyConstraint(u'asset_id', u'link_id', name=u'Asset_References_pkey')
+    op.create_table('Asset_References',
+                    sa.Column('asset_id', sa.INTEGER(), autoincrement=False,
+                              nullable=False),
+                    sa.Column('link_id', sa.INTEGER(), autoincrement=False,
+                              nullable=False),
+                    sa.ForeignKeyConstraint(['asset_id'], ['Assets.id'],
+                                            name='Asset_References_asset_id_fkey'),
+                    sa.ForeignKeyConstraint(['link_id'], ['Links.id'],
+                                            name='Asset_References_link_id_fkey'),
+                    sa.PrimaryKeyConstraint('asset_id', 'link_id',
+                                            name='Asset_References_pkey')
     )
     op.drop_table('Task_References')

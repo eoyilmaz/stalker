@@ -16,22 +16,22 @@ import sqlalchemy as sa
 
 def upgrade():
     try:
-        op.drop_table(u'User_Vacations')
+        op.drop_table('User_Vacations')
     except sa.exc.OperationalError:
         pass
 
 
 def downgrade():
     op.create_table(
-        u'User_Vacations',
-        sa.Column(u'user_id', sa.INTEGER(), autoincrement=False,
+        'User_Vacations',
+        sa.Column('user_id', sa.INTEGER(), autoincrement=False,
                   nullable=False),
-        sa.Column(u'vacation_id', sa.INTEGER(),
+        sa.Column('vacation_id', sa.INTEGER(),
                   autoincrement=False, nullable=False),
-        sa.ForeignKeyConstraint(['user_id'], [u'Users.id'],
-                                name=u'User_Vacations_user_id_fkey'),
-        sa.ForeignKeyConstraint(['vacation_id'], [u'Vacations.id'],
-                                name=u'User_Vacations_vacation_id_fkey'),
-        sa.PrimaryKeyConstraint(u'user_id', u'vacation_id',
-                                name=u'User_Vacations_pkey')
+        sa.ForeignKeyConstraint(['user_id'], ['Users.id'],
+                                name='User_Vacations_user_id_fkey'),
+        sa.ForeignKeyConstraint(['vacation_id'], ['Vacations.id'],
+                                name='User_Vacations_vacation_id_fkey'),
+        sa.PrimaryKeyConstraint('user_id', 'vacation_id',
+                                name='User_Vacations_pkey')
     )

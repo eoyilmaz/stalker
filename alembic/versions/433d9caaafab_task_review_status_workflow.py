@@ -107,46 +107,46 @@ def upgrade():
 
     # EntityTypes
     op.add_column(
-        u'EntityTypes',
+        'EntityTypes',
         sa.Column('dateable', sa.Boolean(), nullable=True)
     )
 
     # Projects
-    op.drop_column(u'Projects', 'timing_resolution')
+    op.drop_column('Projects', 'timing_resolution')
 
     # Studios
     op.add_column(
-        u'Studios',
+        'Studios',
         sa.Column('is_scheduling', sa.Boolean(), nullable=True)
     )
     op.add_column(
-        u'Studios',
+        'Studios',
         sa.Column('is_scheduling_by_id', sa.Integer(), nullable=True)
     )
     op.add_column(
-        u'Studios',
+        'Studios',
         sa.Column('last_schedule_message', sa.PickleType(), nullable=True)
     )
     op.add_column(
-        u'Studios',
+        'Studios',
         sa.Column('last_scheduled_at', sa.DateTime(), nullable=True)
     )
     op.add_column(
-        u'Studios',
+        'Studios',
         sa.Column('last_scheduled_by_id', sa.Integer(), nullable=True)
     )
     op.add_column(
-        u'Studios',
+        'Studios',
         sa.Column('scheduling_started_at', sa.DateTime(), nullable=True)
     )
-    op.drop_column(u'Studios', 'daily_working_hours')
+    op.drop_column('Studios', 'daily_working_hours')
 
     # Task Dependencies
 
     # *************************************************************************
     # dependency_target - onend by default
     op.add_column(
-        u'Task_Dependencies',
+        'Task_Dependencies',
         sa.Column(
             'dependency_target',
             task_dependency_target_enum,
@@ -163,7 +163,7 @@ def upgrade():
 
     # alter column to be nullable false
     op.alter_column(
-        u'Task_Dependencies',
+        'Task_Dependencies',
         'dependency_target',
         existing_nullable=True,
         nullable=False
@@ -171,7 +171,7 @@ def upgrade():
     # *************************************************************************
 
     op.alter_column(
-        u'Task_Dependencies',
+        'Task_Dependencies',
         'depends_to_task_id',
         new_column_name='depends_to_id'
     )
@@ -179,7 +179,7 @@ def upgrade():
     # *************************************************************************
     # gap_constraint column - 0 by default
     op.add_column(
-        u'Task_Dependencies',
+        'Task_Dependencies',
         sa.Column('gap_constraint', sa.Integer(), nullable=True)
     )
     # fill data
@@ -192,7 +192,7 @@ def upgrade():
 
     # alter column to be nullable false
     op.alter_column(
-        u'Task_Dependencies',
+        'Task_Dependencies',
         'gap_constraint',
         existing_nullable=True,
         nullable=False
@@ -202,7 +202,7 @@ def upgrade():
     # *************************************************************************
     # gap_model - length by default
     op.add_column(
-        u'Task_Dependencies',
+        'Task_Dependencies',
         sa.Column(
             'gap_model', task_dependency_gap_model,
             nullable=True
@@ -218,7 +218,7 @@ def upgrade():
 
     # alter column to be nullable false
     op.alter_column(
-        u'Task_Dependencies',
+        'Task_Dependencies',
         'gap_model',
         existing_nullable=True,
         nullable=False
@@ -228,11 +228,11 @@ def upgrade():
     # *************************************************************************
     # gap_timing - 0 by default
     op.add_column(
-        u'Task_Dependencies',
+        'Task_Dependencies',
         sa.Column('gap_timing', sa.Float(), nullable=True)
     )
     op.add_column(
-        u'Task_Dependencies',
+        'Task_Dependencies',
         sa.Column(
             'gap_unit', time_unit_enum,
             nullable=True
@@ -243,7 +243,7 @@ def upgrade():
 
     # alter column to be nullable false
     op.alter_column(
-        u'Task_Dependencies',
+        'Task_Dependencies',
         'gap_timing',
         existing_nullable=True,
         nullable=False
@@ -252,14 +252,14 @@ def upgrade():
 
     # Tasks
     op.add_column(
-        u'Tasks',
+        'Tasks',
         sa.Column('review_number', sa.Integer(), nullable=True)
     )
 
     # *************************************************************************
     # allocation_strategy - minallocated by default
     op.add_column(
-        u'Tasks',
+        'Tasks',
         sa.Column(
             'allocation_strategy',
             resource_allocation_strategy_enum,
@@ -271,7 +271,7 @@ def upgrade():
 
     # alter column to be nullable false
     op.alter_column(
-        u'Tasks',
+        'Tasks',
         'allocation_strategy',
         existing_nullable=True,
         nullable=False
@@ -281,7 +281,7 @@ def upgrade():
     # *************************************************************************
     # persistent_allocation - True by default
     op.add_column(
-        u'Tasks',
+        'Tasks',
         sa.Column('persistent_allocation', sa.Boolean(), nullable=True)
     )
     # fill data
@@ -289,19 +289,19 @@ def upgrade():
 
     # alter column to be nullable false
     op.alter_column(
-        u'Tasks',
+        'Tasks',
         'persistent_allocation',
         existing_nullable=True,
         nullable=False
     )
     # *************************************************************************
 
-    op.drop_column(u'Tasks', 'timing_resolution')
+    op.drop_column('Tasks', 'timing_resolution')
 
-    op.drop_column(u'TimeLogs', 'timing_resolution')
+    op.drop_column('TimeLogs', 'timing_resolution')
     op.create_unique_constraint(None, 'Users', ['login'])
 
-    op.drop_column(u'Vacations', 'timing_resolution')
+    op.drop_column('Vacations', 'timing_resolution')
 
     # before dropping responsible_id column from the Tasks table
     # move the data to the Task_Responsible table
@@ -312,7 +312,7 @@ def upgrade():
     )
 
     # now drop the data
-    op.drop_column(u'Tasks', 'responsible_id')
+    op.drop_column('Tasks', 'responsible_id')
 
     # create new Statuses
     #
@@ -482,28 +482,28 @@ where status_id = (select id from "Statuses" where code='PREV')""")
 
     # Shots._cut_in -> Shots.cut_in
     op.alter_column(
-        u'Shots',
+        'Shots',
         '_cut_in',
         new_column_name='cut_in'
     )
 
     # Shots._cut_out -> Shots.cut_out
     op.alter_column(
-        u'Shots',
+        'Shots',
         '_cut_out',
         new_column_name='cut_out'
     )
 
     # Tasks._schedule_seconds -> Tasks.schedule_seconds
     op.alter_column(
-        u'Tasks',
+        'Tasks',
         '_schedule_seconds',
         new_column_name='schedule_seconds'
     )
 
     # Tasks._total_logged_seconds -> Tasks.total_logged_seconds
     op.alter_column(
-        u'Tasks',
+        'Tasks',
         '_total_logged_seconds',
         new_column_name='total_logged_seconds'
     )
@@ -513,16 +513,16 @@ def downgrade():
     """downgrade
     """
     op.add_column(
-        u'Vacations',
+        'Vacations',
         sa.Column('timing_resolution', postgresql.INTERVAL(), nullable=True)
     )
     #op.drop_constraint(None, 'Users')
     op.add_column(
-        u'TimeLogs',
+        'TimeLogs',
         sa.Column('timing_resolution', postgresql.INTERVAL(), nullable=True)
     )
     op.add_column(
-        u'Tasks',
+        'Tasks',
         sa.Column('responsible_id', sa.INTEGER(), nullable=True)
     )
 
@@ -540,37 +540,37 @@ def downgrade():
     """)
 
     op.add_column(
-        u'Tasks',
+        'Tasks',
         sa.Column('timing_resolution', postgresql.INTERVAL(), nullable=True)
     )
-    op.drop_column(u'Tasks', 'persistent_allocation')
-    op.drop_column(u'Tasks', 'allocation_strategy')
-    op.drop_column(u'Tasks', 'review_number')
+    op.drop_column('Tasks', 'persistent_allocation')
+    op.drop_column('Tasks', 'allocation_strategy')
+    op.drop_column('Tasks', 'review_number')
     op.alter_column(
-        u'Task_Dependencies',
+        'Task_Dependencies',
         'depends_to_id',
         new_column_name='depends_to_task_id'
     )
-    op.drop_column(u'Task_Dependencies', 'gap_unit')
-    op.drop_column(u'Task_Dependencies', 'gap_timing')
-    op.drop_column(u'Task_Dependencies', 'gap_model')
-    op.drop_column(u'Task_Dependencies', 'gap_constraint')
-    op.drop_column(u'Task_Dependencies', 'dependency_target')
+    op.drop_column('Task_Dependencies', 'gap_unit')
+    op.drop_column('Task_Dependencies', 'gap_timing')
+    op.drop_column('Task_Dependencies', 'gap_model')
+    op.drop_column('Task_Dependencies', 'gap_constraint')
+    op.drop_column('Task_Dependencies', 'dependency_target')
     op.add_column(
-        u'Studios',
+        'Studios',
         sa.Column('daily_working_hours', sa.INTEGER(), nullable=True)
     )
-    op.drop_column(u'Studios', 'scheduling_started_at')
-    op.drop_column(u'Studios', 'last_scheduled_by_id')
-    op.drop_column(u'Studios', 'last_scheduled_at')
-    op.drop_column(u'Studios', 'last_schedule_message')
-    op.drop_column(u'Studios', 'is_scheduling_by_id')
-    op.drop_column(u'Studios', 'is_scheduling')
+    op.drop_column('Studios', 'scheduling_started_at')
+    op.drop_column('Studios', 'last_scheduled_by_id')
+    op.drop_column('Studios', 'last_scheduled_at')
+    op.drop_column('Studios', 'last_schedule_message')
+    op.drop_column('Studios', 'is_scheduling_by_id')
+    op.drop_column('Studios', 'is_scheduling')
     op.add_column(
-        u'Projects',
+        'Projects',
         sa.Column('timing_resolution', postgresql.INTERVAL(), nullable=True)
     )
-    op.drop_column(u'EntityTypes', 'dateable')
+    op.drop_column('EntityTypes', 'dateable')
     op.drop_table('Task_Alternative_Resources')
     op.drop_table('Task_Computed_Resources')
     op.drop_table('Reviews')
@@ -630,28 +630,28 @@ where status_id = (select id from "Statuses" where code='STOP')""")
     # column name changes
     # Shots._cut_in -> Shots.cut_in
     op.alter_column(
-        u'Shots',
+        'Shots',
         'cut_in',
         new_column_name='_cut_in'
     )
 
     # Shots._cut_out -> Shots.cut_out
     op.alter_column(
-        u'Shots',
+        'Shots',
         'cut_out',
         new_column_name='_cut_out'
     )
 
     # Tasks._schedule_seconds -> Tasks.schedule_seconds
     op.alter_column(
-        u'Tasks',
+        'Tasks',
         'schedule_seconds',
         new_column_name='_schedule_seconds'
     )
 
     # Tasks._total_logged_seconds -> Tasks.total_logged_seconds
     op.alter_column(
-        u'Tasks',
+        'Tasks',
         'total_logged_seconds',
         new_column_name='_total_logged_seconds'
     )

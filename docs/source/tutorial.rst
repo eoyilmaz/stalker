@@ -676,15 +676,15 @@ while calculating its ``path`` and ``filename`` attributes. Lets create a
   vers1.update_paths()
 
   # check the path and filename
-  print vers1.path                # u'FC/SH001/comp'
-  print vers1.filename            # u'SH001_comp_Main_v001'
-  print vers1.full_path           # u'FC/SH001/comp/SH001_comp_Main_v001'
+  print vers1.path                # 'FC/SH001/comp'
+  print vers1.filename            # 'SH001_comp_Main_v001'
+  print vers1.full_path           # 'FC/SH001/comp/SH001_comp_Main_v001'
 
   # now the absolute values, values with repository root
   # because I'm running this code in a Linux laptop, my results are using the
   # linux path of the repository
-  print vers1.absolute_path       # u'/mnt/M/commercials/FC/SH001/comp'
-  print vers1.absolute_full_path  # u'/mnt/M/commercials/FC/SH001/comp/SH001_comp_Main_v001'
+  print vers1.absolute_path       # '/mnt/M/commercials/FC/SH001/comp'
+  print vers1.absolute_full_path  # '/mnt/M/commercials/FC/SH001/comp/SH001_comp_Main_v001'
 
   # check the version_number
   print ver1. version_number      # 1
@@ -718,7 +718,7 @@ Lets create another version for the same task and see what happens::
                         # paths on Version.__init__()
 
   print vers2.version_number  # 2
-  print vers2.filename        # u'SH001_comp_Main_v002'
+  print vers2.filename        # 'SH001_comp_Main_v002'
 
   # before creating a new version commit this one to db
   db.DBSession.commit()
@@ -728,7 +728,7 @@ Lets create another version for the same task and see what happens::
   vers3.update_paths()
 
   print vers3.version_number  # 3
-  print vers3.filename        # u'SH001_comp_Main_v002'
+  print vers3.filename        # 'SH001_comp_Main_v002'
 
 Isn't that nice, Stalker increments the version number automatically.
 

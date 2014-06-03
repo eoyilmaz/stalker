@@ -55,8 +55,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Stalker'
-copyright = u'2009-2014, Stalker authors and contributors'
+project = 'Stalker'
+copyright = '2009-2014, Stalker authors and contributors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -219,8 +219,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    ('contents', 'Stalker.tex', u'Stalker Documentation',
-     u'Erkan Ozgur Yilmaz', 'manual'),
+    ('contents', 'Stalker.tex', 'Stalker Documentation',
+     'Erkan Ozgur Yilmaz', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -252,8 +252,8 @@ latex_preamble = '\setcounter{tocdepth}{3}'
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'stalker', u'Stalker Documentation',
-     [u'Erkan Ozgur Yilmaz'], 1)
+    ('index', 'stalker', 'Stalker Documentation',
+     ['Erkan Ozgur Yilmaz'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -266,8 +266,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    ('index', 'Stalker', u'Stalker Documentation',
-     u'Erkan Ozgur Yilmaz', 'Stalker', 'One line description of project.',
+    ('index', 'Stalker', 'Stalker Documentation',
+     'Erkan Ozgur Yilmaz', 'Stalker', 'One line description of project.',
      'Miscellaneous'),
 ]
 
@@ -287,10 +287,10 @@ texinfo_documents = [
 # -- Options for Epub output ----------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = u'Stalker'
-epub_author = u'Erkan Ozgur Yilmaz'
-epub_publisher = u'Erkan Ozgur Yilmaz'
-epub_copyright = u'2014, Erkan Ozgur Yilmaz'
+epub_title = 'Stalker'
+epub_author = 'Erkan Ozgur Yilmaz'
+epub_publisher = 'Erkan Ozgur Yilmaz'
+epub_copyright = '2014, Erkan Ozgur Yilmaz'
 
 # The basename for the epub file. It defaults to the project name.
 #epub_basename = u'Stalker'

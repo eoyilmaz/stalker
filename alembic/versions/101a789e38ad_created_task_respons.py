@@ -16,7 +16,7 @@ import sqlalchemy as sa
 
 def upgrade():
     try:
-        op.drop_column('Sequences', u'lead_id')
+        op.drop_column('Sequences', 'lead_id')
         op.add_column('Tasks',
                       sa.Column('responsible_id', sa.Integer(), nullable=True))
     except sa.exc.OperationalError:
@@ -27,6 +27,6 @@ def downgrade():
     try:
         op.drop_column('Tasks', 'responsible_id')
         op.add_column('Sequences',
-                      sa.Column(u'lead_id', sa.INTEGER(), nullable=True))
+                      sa.Column('lead_id', sa.INTEGER(), nullable=True))
     except sa.exc.OperationalError:
         pass

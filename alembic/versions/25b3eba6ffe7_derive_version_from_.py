@@ -23,7 +23,7 @@ logger.setLevel(logging.DEBUG)
 
 def upgrade():
     try:
-        op.drop_column('Versions', u'source_file_id')
+        op.drop_column('Versions', 'source_file_id')
     except (sa.exc.OperationalError, sa.exc.InternalError):
         # SQLite doesnt support it
         pass
@@ -83,7 +83,10 @@ def upgrade():
         # and rename the new table to the old one
         op.rename_table('Versions_New', 'Versions')
 
+
 def downgrade():
-    op.add_column('Versions', sa.Column(u'source_file_id', sa.INTEGER(), nullable=True))
+    op.add_column(
+        'Versions', sa.Column('source_file_id', sa.INTEGER(), nullable=True)
+    )
     op.create_foreign_key(None, "Versions", "Entities", ["id"], ["id"])
 
