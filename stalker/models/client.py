@@ -97,11 +97,11 @@ class Client(Entity):
         self.users = users
         self.projects = projects
 
-    def __eq__(self, other):
-        """the equality operator
-        """
-        return super(Client, self).__eq__(other) and \
-            isinstance(other, Client)
+    # def __eq__(self, other):
+    #     """the equality operator
+    #     """
+    #     return super(Client, self).__eq__(other) and \
+    #         isinstance(other, Client)
 
     @validates("users")
     def _validate_users(self, key, user):

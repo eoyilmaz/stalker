@@ -589,11 +589,11 @@ class WorkingHours(object):
         self._daily_working_hours = None
         self.daily_working_hours = daily_working_hours
 
-    def __eq__(self, other):
-        """equality test
-        """
-        return isinstance(other, WorkingHours) and \
-            other.working_hours == self.working_hours
+    # def __eq__(self, other):
+    #     """equality test
+    #     """
+    #     return isinstance(other, WorkingHours) and \
+    #         other.working_hours == self.working_hours
 
     def __getitem__(self, item):
         if isinstance(item, int):

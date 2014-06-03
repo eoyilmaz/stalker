@@ -213,11 +213,11 @@ class Shot(Task, CodeMixin):
         """
         return "<%s (%s, %s)>" % (self.entity_type, self.name, self.code)
 
-    def __eq__(self, other):
-        """equality operator
-        """
-        return isinstance(other, Shot) and self.code == other.code and \
-            self.project == other.project
+    # def __eq__(self, other):
+    #     """equality operator
+    #     """
+    #     return isinstance(other, Shot) and self.code == other.code and \
+    #         self.project == other.project
 
     def _check_code_availability(self, code, project):
         """checks if the given code is available in the given project

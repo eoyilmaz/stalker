@@ -71,8 +71,8 @@ class Asset(Task, CodeMixin):
         CodeMixin.__init__(self, **kwargs)
         ReferenceMixin.__init__(self, **kwargs)
 
-    def __eq__(self, other):
-        """the equality operator
-        """
-        return super(Asset, self).__eq__(other) and \
-            isinstance(other, Asset) and self.type == other.type
+    # def __eq__(self, other):
+    #     """the equality operator
+    #     """
+    #     return super(Asset, self).__eq__(other) and \
+    #         isinstance(other, Asset) and self.type == other.type

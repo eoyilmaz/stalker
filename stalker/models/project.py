@@ -258,11 +258,11 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
 
         self.active = True
 
-    def __eq__(self, other):
-        """the equality operator
-        """
-        return super(Project, self).__eq__(other) and \
-            isinstance(other, Project)
+    # def __eq__(self, other):
+    #     """the equality operator
+    #     """
+    #     return super(Project, self).__eq__(other) and \
+    #         isinstance(other, Project)
 
     @validates("fps")
     def _validate_fps(self, key, fps):

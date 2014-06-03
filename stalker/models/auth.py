@@ -201,18 +201,18 @@ class Permission(Base):
 
     action = synonym('_action', descriptor=property(_action_getter))
 
-    def __eq__(self, other):
-        """the equality of two Permissions
-        """
-        return isinstance(other, Permission) \
-            and other.access == self.access \
-            and other.action == self.action \
-            and other.class_name == self.class_name
-
-    def __ne__(self, other):
-        """the inequality of two Permissions
-        """
-        return not self.__eq__(other)
+    # def __eq__(self, other):
+    #     """the equality of two Permissions
+    #     """
+    #     return isinstance(other, Permission) \
+    #         and other.access == self.access \
+    #         and other.action == self.action \
+    #         and other.class_name == self.class_name
+    # 
+    # def __ne__(self, other):
+    #     """the inequality of two Permissions
+    #     """
+    #     return not self.__eq__(other)
 
 
 class Group(Entity, ACLMixin):
@@ -549,19 +549,19 @@ class User(Entity, ACLMixin):
         """
         return "<%s ('%s') (User)>" % (self.name, self.login)
 
-    def __eq__(self, other):
-        """the equality operator
-        """
-        return super(User, self).__eq__(other) and \
-            isinstance(other, User) and \
-            self.email == other.email and \
-            self.login == other.login and \
-            self.name == other.name
-
-    def __ne__(self, other):
-        """the inequality operator
-        """
-        return not self.__eq__(other)
+    # def __eq__(self, other):
+    #     """the equality operator
+    #     """
+    #     return super(User, self).__eq__(other) and \
+    #         isinstance(other, User) and \
+    #         self.email == other.email and \
+    #         self.login == other.login and \
+    #         self.name == other.name
+    # 
+    # def __ne__(self, other):
+    #     """the inequality operator
+    #     """
+    #     return not self.__eq__(other)
 
     @validates("login")
     def _validate_login(self, key, login):

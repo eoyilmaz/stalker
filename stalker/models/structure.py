@@ -143,13 +143,13 @@ class Structure(Entity):
         self.templates = templates
         self.custom_template = custom_template
 
-    def __eq__(self, other):
-        """the equality operator
-        """
-        return super(Structure, self).__eq__(other) and \
-            isinstance(other, Structure) and \
-            self.templates == other.templates and \
-            self.custom_template == other.custom_template
+    # def __eq__(self, other):
+    #     """the equality operator
+    #     """
+    #     return super(Structure, self).__eq__(other) and \
+    #         isinstance(other, Structure) and \
+    #         self.templates == other.templates and \
+    #         self.custom_template == other.custom_template
 
     @validates("custom_template")
     def _validate_custom_template(self, key, custom_template_in):

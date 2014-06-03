@@ -86,7 +86,7 @@ class Scene(Entity, ProjectMixin, CodeMixin):
             )
         return shot
 
-    def __eq__(self, other):
-        """the equality operator
-        """
-        return isinstance(other, Scene) and super(Scene, self).__eq__(other)
+    # def __eq__(self, other):
+    #     """the equality operator
+    #     """
+    #     return isinstance(other, Scene) and super(Scene, self).__eq__(other)

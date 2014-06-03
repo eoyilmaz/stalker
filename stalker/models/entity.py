@@ -296,16 +296,16 @@ class SimpleEntity(Base):
         """
         return "<%s (%s)>" % (self.name, self.entity_type)
 
-    def __eq__(self, other):
-        """the equality operator
-        """
-        return isinstance(other, SimpleEntity) and \
-            self.name == other.name
-
-    def __ne__(self, other):
-        """the inequality operator
-        """
-        return not self.__eq__(other)
+    # def __eq__(self, other):
+    #     """the equality operator
+    #     """
+    #     return isinstance(other, SimpleEntity) and \
+    #         self.name == other.name
+    # 
+    # def __ne__(self, other):
+    #     """the inequality operator
+    #     """
+    #     return not self.__eq__(other)
 
     @validates("description")
     def _validate_description(self, key, description):
@@ -658,11 +658,11 @@ class Entity(SimpleEntity):
             )
         return tag
 
-    def __eq__(self, other):
-        """the equality operator
-        """
-        return super(Entity, self).__eq__(other) \
-            and isinstance(other, Entity)
+    # def __eq__(self, other):
+    #     """the equality operator
+    #     """
+    #     return super(Entity, self).__eq__(other) \
+    #         and isinstance(other, Entity)
 
 # Entity Tags
 Entity_Tags = Table(

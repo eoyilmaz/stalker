@@ -197,11 +197,11 @@ class ImageFormat(Entity):
         """
         return float(self.width) / float(self.height) * self.pixel_aspect
 
-    def __eq__(self, other):
-        """the equality operator
-        """
-        return super(ImageFormat, self).__eq__(other) and \
-            isinstance(other, ImageFormat) and \
-            self.width == other.width and \
-            self.height == other.height and \
-            self.pixel_aspect == other.pixel_aspect
+    # def __eq__(self, other):
+    #     """the equality operator
+    #     """
+    #     return super(ImageFormat, self).__eq__(other) and \
+    #         isinstance(other, ImageFormat) and \
+    #         self.width == other.width and \
+    #         self.height == other.height and \
+    #         self.pixel_aspect == other.pixel_aspect
