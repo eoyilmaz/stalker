@@ -82,7 +82,7 @@ class NoteTester(unittest2.TestCase):
         self.test_note.content = ""
 
     def test_content_argument_is_set_to_something_other_than_a_string(self):
-        """testing if a TypeEror will be raised when trying to set the content
+        """testing if a TypeError will be raised when trying to set the content
         argument to something other than a string or unicode
         """
         test_values = [1, 1.24, ["content"], {"a": "Content"}]
@@ -111,9 +111,7 @@ class NoteTester(unittest2.TestCase):
         """
         new_content = "This is my new content for the note, and I expect it to\
         work fine when I assign it to a Note object"
-
         self.test_note.content = new_content
-
         self.assertEqual(self.test_note.content, new_content)
 
     def test_equality_operator(self):
