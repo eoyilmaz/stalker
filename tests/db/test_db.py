@@ -838,7 +838,7 @@ class DatabaseTester(unittest2.TestCase):
         sql_query = 'select version_num from "alembic_version"'
         version_num = \
             db.DBSession.connection().execute(sql_query).fetchone()[0]
-        self.assertEqual('182f44ce5f07', version_num)
+        self.assertEqual('5999269aad30', version_num)
 
 
 class DatabaseModelsTester(unittest2.TestCase):

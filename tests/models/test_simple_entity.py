@@ -46,11 +46,13 @@ class SimpleEntityTester(unittest2.TestCase):
             name="Test User",
             login="testuser",
             email="test@user.com",
-            password="test"
-            'generic_text': json.dumps({
-                'Phone number': '123' 
-                }, 
-                sort_keys=True ),
+            password="test",
+            generic_text=json.dumps(
+                {
+                    'Phone number': '123'
+                },
+                sort_keys=True
+            ),
         )
 
         self.date_created = datetime.datetime(2010, 10, 21, 3, 8, 0)
@@ -65,10 +67,12 @@ class SimpleEntityTester(unittest2.TestCase):
             "updated_by": self.test_user,
             "date_created": self.date_created,
             "date_updated": self.date_updated,
-            'generic_text': json.dumps({
-                'Phone number': '123' 
-                }, 
-                sort_keys=True ),
+            'generic_text': json.dumps(
+                {
+                    'Phone number': '123'
+                },
+                sort_keys=True
+            ),
         }
 
         # create a proper SimpleEntity to use it later in the tests
@@ -244,8 +248,8 @@ class SimpleEntityTester(unittest2.TestCase):
                           'description', ["a description"])
 
     def test_generic_text_argument_None(self):
-        """testing if generic_text proeprty will be convertod to an empty string
-        if None is given as the generic_text argument
+        """testing if generic_text property will be converted to an empty
+        string if None is given as the generic_text argument
         """
         self.kwargs["generic_text"] = None
         new_simple_entity = SimpleEntity(**self.kwargs)
@@ -269,11 +273,11 @@ class SimpleEntityTester(unittest2.TestCase):
 
     def test_generic_text_attribute_is_not_a_string_or_unicode(self):
         """testing if a TypeError will be raised when the generic_text attribute
-        value is set to a value other than a string or unicide
+        value is set to a value other than a string or unicode
         """
         self.assertRaises(TypeError, setattr, self.test_simple_entity,
                           'generic_text', ["a generic_text"])
-        
+
     def test_equality(self):
         """testing the equality of two simple entities
         """
@@ -620,7 +624,7 @@ class SimpleEntityTester(unittest2.TestCase):
             self.kwargs["type"] = test_value
             self.assertRaises(TypeError, NewClass, **self.kwargs)
 
-    def test___stalker_version__attribute_is_automatically_set_to_the_current_task_Stalker(self):
+    def test___stalker_version__attribute_is_automatically_set_to_the_current_Stalker_version(self):
         """testing if the __stalker_version__ is automatically set to the
         current version for the newly created SimpleEntities
         """

@@ -317,7 +317,7 @@ class SimpleEntity(Base):
         return description
 
     @validates("generic_text")
-    def _validate_description(self, key, generic_text):
+    def _validate_generic_text(self, key, generic_text):
         """validates the given generic_text value
         """
         if generic_text is None:

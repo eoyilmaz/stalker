@@ -49,12 +49,6 @@ class Note(SimpleEntity):
         primary_key=True
     )
 
-    # entity_id = Column(
-    #     "entity_id",
-    #     Integer,
-    #     ForeignKey("Entities.id")
-    # )
-
     content = synonym(
         'description',
         doc="""The content of this :class:`.Note` instance.
