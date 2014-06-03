@@ -3381,14 +3381,14 @@ class TaskTester(unittest.TestCase):
         self.test_task.bid_unit = None
         self.assertEqual(self.test_task.bid_unit, 'h')
 
-    def test_bid_unit_argument_is_not_a_string_or_unicode(self):
+    def test_bid_unit_argument_is_not_a_string(self):
         """testing if a TypeError will be raised when the bid_hour argument is
-        not a strign or unicode
+        not a string
         """
         self.kwargs['bid_unit'] = 10
         self.assertRaises(TypeError, Task, **self.kwargs)
 
-    def test_bid_unit_attribute_is_not_a_string_or_unicode(self):
+    def test_bid_unit_attribute_is_not_a_string(self):
         """testing if a TypeError will be raised when the bid_unit attribute is
         set to a value which is not an integer
         """

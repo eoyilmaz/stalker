@@ -71,11 +71,7 @@ class StatusTest(unittest.TestCase):
         self.assertTrue(a_status == self.kwargs["name"])
         self.assertTrue(a_status == self.kwargs["name"].lower())
         self.assertTrue(a_status == self.kwargs["name"].upper())
-        self.assertTrue(a_status == unicode(self.kwargs["name"]))
-        self.assertTrue(a_status == unicode(self.kwargs["name"].lower()))
-        self.assertTrue(a_status == unicode(self.kwargs["name"].upper()))
         self.assertFalse(a_status == "another name")
-        self.assertFalse(a_status == u"another name")
 
     def test_status_and_string_equality_in_status_code(self):
         """testing a status can be compared with a string and returns True if
@@ -85,9 +81,6 @@ class StatusTest(unittest.TestCase):
         self.assertTrue(a_status == self.kwargs["code"])
         self.assertTrue(a_status == self.kwargs["code"].lower())
         self.assertTrue(a_status == self.kwargs["code"].upper())
-        self.assertTrue(a_status == unicode(self.kwargs["code"]))
-        self.assertTrue(a_status == unicode(self.kwargs["code"].lower()))
-        self.assertTrue(a_status == unicode(self.kwargs["code"].upper()))
 
     def test_inequality(self):
         """testing inequality of two statuses
@@ -114,11 +107,7 @@ class StatusTest(unittest.TestCase):
         self.assertFalse(a_status != self.kwargs["name"])
         self.assertFalse(a_status != self.kwargs["name"].lower())
         self.assertFalse(a_status != self.kwargs["name"].upper())
-        self.assertFalse(a_status != unicode(self.kwargs["name"]))
-        self.assertFalse(a_status != unicode(self.kwargs["name"].lower()))
-        self.assertFalse(a_status != unicode(self.kwargs["name"].upper()))
         self.assertTrue(a_status != "another name")
-        self.assertTrue(a_status != u"another name")
 
     def test_status_and_string_inequality_in_status_code(self):
         """testing a status can be compared with a string and returns False if
@@ -128,6 +117,3 @@ class StatusTest(unittest.TestCase):
         self.assertFalse(a_status != self.kwargs["code"])
         self.assertFalse(a_status != self.kwargs["code"].lower())
         self.assertFalse(a_status != self.kwargs["code"].upper())
-        self.assertFalse(a_status != unicode(self.kwargs["code"]))
-        self.assertFalse(a_status != unicode(self.kwargs["code"].lower()))
-        self.assertFalse(a_status != unicode(self.kwargs["code"].upper()))

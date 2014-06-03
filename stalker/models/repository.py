@@ -100,10 +100,9 @@ class Repository(Entity):
     def _validate_linux_path(self, key, linux_path_in):
         """validates the given linux path
         """
-        if not isinstance(linux_path_in, (str, unicode)):
+        if not isinstance(linux_path_in, str):
             raise TypeError(
-                "%s.linux_path should be an instance of string or unicode not "
-                "%s" %
+                "%s.linux_path should be an instance of string not %s" %
                 (self.__class__.__name__, linux_path_in.__class__.__name__)
             )
 
@@ -115,10 +114,10 @@ class Repository(Entity):
     def _validate_osx_path(self, key, osx_path_in):
         """validates the given osx path
         """
-        if not isinstance(osx_path_in, (str, unicode)):
+        if not isinstance(osx_path_in, str):
             raise TypeError(
-                "%s.osx_path should be an instance of string or unicode not %s"
-                % (self.__class__.__name__, osx_path_in.__class__.__name__)
+                "%s.osx_path should be an instance of string not %s" %
+                (self.__class__.__name__, osx_path_in.__class__.__name__)
             )
 
         osx_path_in = os.path.normpath(osx_path_in) + '/'
@@ -129,10 +128,9 @@ class Repository(Entity):
     def _validate_windows_path(self, key, windows_path_in):
         """validates the given windows path
         """
-        if not isinstance(windows_path_in, (str, unicode)):
+        if not isinstance(windows_path_in, str):
             raise TypeError(
-                "%s.windows_path should be an instance of string or unicode "
-                "not %s" %
+                "%s.windows_path should be an instance of string not %s" %
                 (self.__class__.__name__, windows_path_in.__class__.__name__)
             )
 
@@ -174,8 +172,8 @@ class Repository(Entity):
         if path is None:
             raise TypeError('path can not be None')
 
-        if not isinstance(path, (str, unicode)):
-            raise TypeError('path should be a string or unicode')
+        if not isinstance(path, str):
+            raise TypeError('path should be a string')
 
         path = path.replace('\\', '/')
 

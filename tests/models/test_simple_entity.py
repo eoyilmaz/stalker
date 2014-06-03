@@ -151,9 +151,9 @@ class SimpleEntityTester(unittest.TestCase):
         self.test_simple_entity.name = ''
         self.assertTrue(self.test_simple_entity)
 
-    def test_name_argument_is_not_a_string_or_unicode_instance_or_None(self):
+    def test_name_argument_is_not_a_string_instance_or_None(self):
         """testing if a TypeError will be raised when the name argument is not
-        a string or unicode or None
+        a string or None
         """
         test_values = [
             12132,
@@ -165,9 +165,9 @@ class SimpleEntityTester(unittest.TestCase):
             self.kwargs["name"] = test_value
             self.assertRaises(TypeError, SimpleEntity, **self.kwargs)
 
-    def test_name_attribute_is_not_string_or_unicode_or_None(self):
-        """testing if a TypeError will be raised when the name attribute is
-        not a string or unicode or None
+    def test_name_attribute_is_not_string_or_None(self):
+        """testing if a TypeError will be raised when the name attribute is not
+        a string or None
         """
         test_values = [
             12132, [1, "name"], {"a": "name"}
@@ -233,16 +233,16 @@ class SimpleEntityTester(unittest.TestCase):
         self.test_simple_entity.description = None
         self.assertEqual(self.test_simple_entity.description, "")
 
-    def test_description_argument_is_not_a_string_or_unicode(self):
+    def test_description_argument_is_not_a_string(self):
         """testing if a TypeError will be raised when the description argument
-        value is not a string or unicode
+        value is not a string
         """
         self.kwargs['description'] = {'a': 'description'}
         self.assertRaises(TypeError, SimpleEntity, **self.kwargs)
 
-    def test_description_attribute_is_not_a_string_or_unicode(self):
+    def test_description_attribute_is_not_a_string(self):
         """testing if a TypeError will be raised when the description attribute
-        value is set to a value other than a string or unicide
+        value is set to a value other than a string
         """
         self.assertRaises(TypeError, setattr, self.test_simple_entity,
                           'description', ["a description"])
@@ -264,16 +264,16 @@ class SimpleEntityTester(unittest.TestCase):
         self.test_simple_entity.generic_text = None
         self.assertEqual(self.test_simple_entity.generic_text, "")
 
-    def test_generic_text_argument_is_not_a_string_or_unicode(self):
+    def test_generic_text_argument_is_not_a_string(self):
         """testing if a TypeError will be raised when the generic_text argument
-        value is not a string or unicode
+        value is not a string
         """
         self.kwargs['generic_text'] = {'a': 'generic_text'}
         self.assertRaises(TypeError, SimpleEntity, **self.kwargs)
 
-    def test_generic_text_attribute_is_not_a_string_or_unicode(self):
-        """testing if a TypeError will be raised when the generic_text attribute
-        value is set to a value other than a string or unicode
+    def test_generic_text_attribute_is_not_a_string(self):
+        """testing if a TypeError will be raised when the generic_text
+        attribute value is set to a value other than a string
         """
         self.assertRaises(TypeError, setattr, self.test_simple_entity,
                           'generic_text', ["a generic_text"])

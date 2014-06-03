@@ -249,7 +249,7 @@ class DatabaseTester(unittest.TestCase):
 
     def test_register_raise_TypeError_for_wrong_class_name_argument(self):
         """testing if a TypeError will be raised if the class_name argument is
-        not an instance of type or str or unicode
+        not an instance of type or str
         """
         db.setup()
         self.assertRaises(TypeError, db.register, 23425)

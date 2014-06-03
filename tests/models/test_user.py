@@ -459,9 +459,8 @@ class UserTest(unittest.TestCase):
         """
         self.assertFalse(User.__auto_name__)
 
-    def test_email_argument_accepting_only_string_or_unicode(self):
-        """testing if email argument accepting only string or unicode
-        values
+    def test_email_argument_accepting_only_string(self):
+        """testing if email argument accepting only string values
         """
         # try to create a new user with wrong attribute
         test_values = [1, 1.3, ["an email"], {"an": "email"}]
@@ -470,11 +469,10 @@ class UserTest(unittest.TestCase):
             self.kwargs["email"] = test_value
             self.assertRaises(TypeError, User, **self.kwargs)
 
-    def test_email_attribute_accepting_only_string_or_unicode(self):
-        """testing if email attribute accepting only string or unicode
-        values
+    def test_email_attribute_accepting_only_string(self):
+        """testing if email attribute accepting only string values
         """
-        # try to assign something else than a string or unicode
+        # try to assign something else than a string
         test_value = 1
 
         self.assertRaises(

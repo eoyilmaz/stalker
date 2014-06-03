@@ -85,8 +85,7 @@ class RepositoryTester(unittest.TestCase):
         self.assertFalse(Repository.__auto_name__)
 
     def test_linux_path_argument_accepts_only_strings(self):
-        """testing if linux_path argument accepts only string or unicode
-        values
+        """testing if linux_path argument accepts only string values
         """
         test_values = [123123, 123.1231, [], {}]
         for test_value in test_values:
@@ -94,8 +93,7 @@ class RepositoryTester(unittest.TestCase):
             self.assertRaises(TypeError, Repository, **self.kwargs)
 
     def test_linux_path_attribute_accepts_only_strings(self):
-        """testing if linux_path attribute accepts only string or unicode
-        values
+        """testing if linux_path attribute accepts only string values
         """
         test_values = [123123, 123.1231, [], {}]
         for test_value in test_values:
@@ -124,8 +122,7 @@ class RepositoryTester(unittest.TestCase):
         self.assertEqual(self.test_repo.linux_path, expected_value)
 
     def test_windows_path_argument_accepts_only_strings(self):
-        """testing if windows_path argument accepts only string or unicode
-        values
+        """testing if windows_path argument accepts only string values
         """
         test_values = [123123, 123.1231, [], {}]
         for test_value in test_values:
@@ -133,8 +130,7 @@ class RepositoryTester(unittest.TestCase):
             self.assertRaises(TypeError, Repository, **self.kwargs)
 
     def test_windows_path_attribute_accepts_only_strings(self):
-        """testing if windows_path attribute accepts only string or unicode
-        values
+        """testing if windows_path attribute accepts only string values
         """
         test_values = [123123, 123.1231, [], {}]
         for test_value in test_values:
@@ -163,8 +159,7 @@ class RepositoryTester(unittest.TestCase):
         self.assertEqual(self.test_repo.windows_path, expected_value)
 
     def test_osx_path_argument_accepts_only_strings(self):
-        """testing if osx_path argument accepts only string or unicode
-        values
+        """testing if osx_path argument accepts only string values
         """
         test_values = [123123, 123.1231, [], {}]
         for test_value in test_values:
@@ -172,8 +167,7 @@ class RepositoryTester(unittest.TestCase):
             self.assertRaises(TypeError, Repository, **self.kwargs)
 
     def test_osx_path_attribute_accepts_only_strings(self):
-        """testing if osx_path attribute accepts only string or unicode
-        values
+        """testing if osx_path attribute accepts only string values
         """
         test_values = [123123, 123.1231, [], {}]
         for test_value in test_values:

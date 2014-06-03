@@ -77,9 +77,9 @@ class SimpleEntity(Base):
        attribute can be skipped. For derived classes use the ``__auto_name__``
        class attribute to control auto naming behaviour.
 
-    :param string name: A string or unicode value that holds the name of this
-      entity.  It should not contain any white space at the beginning and at
-      the end of the string. Valid characters are [a-zA-Z0-9\_/S].
+    :param string name: A string value that holds the name of this entity.
+      It should not contain any white space at the beginning and at the end of
+      the string. Valid characters are [a-zA-Z0-9\_/S].
 
       Advanced::
 
@@ -88,16 +88,16 @@ class SimpleEntity(Base):
         Stalker will automatically generate a uuid4 sequence for the name
         attribute.
 
-    :param str description: A string or unicode attribute that holds the
-      description of this entity object, it could be an empty string, and it
-      could not again have white spaces at the beginning and at the end of the
-      string, again any given objects will be converted to strings
+    :param str description: A string attribute that holds the description of
+      this entity object, it could be an empty string, and it could not again
+      have white spaces at the beginning and at the end of the string,
+      again any given objects will be converted to strings
 
-    :param str generic_text: A string or unicode attribute that holds any
-      text based information that should be affiliated with this entity, it
-      could be an empty string, and it could not again have white spaces at the
-      beginning and at the end of the string, again any given objects will be
-      converted to strings
+    :param str generic_text: A string attribute that holds any text based
+      information that should be affiliated with this entity, it could be an
+      empty string, and it could not again have white spaces at the beginning
+      and at the end of the string, again any given objects will be converted
+      to strings.
 
     :param created_by: The :class:`.User` who has created
       this object
@@ -314,7 +314,7 @@ class SimpleEntity(Base):
         if description is None:
             description = ""
 
-        if not isinstance(description, (str, unicode)):
+        if not isinstance(description, str):
             raise TypeError(
                 '%s.description should be an instance of string, not %s' %
                 (self.__class__.__name__, description.__class__.__name__)
@@ -328,7 +328,7 @@ class SimpleEntity(Base):
         if generic_text is None:
             generic_text = ""
 
-        if not isinstance(generic_text, (str, unicode)):
+        if not isinstance(generic_text, str):
             raise TypeError(
                 '%s.generic_text should be an instance of string, not %s' %
                 (self.__class__.__name__, generic_text.__class__.__name__)
@@ -351,9 +351,9 @@ class SimpleEntity(Base):
                 "%s.name can not be None" % self.__class__.__name__
             )
 
-        if not isinstance(name, (str, unicode)):
+        if not isinstance(name, str):
             raise TypeError(
-                "%s.name should be an instance of string or unicode not %s" %
+                "%s.name should be an instance of string not %s" %
                 (self.__class__.__name__, name.__class__.__name__)
             )
 

@@ -83,7 +83,7 @@ class NoteTester(unittest.TestCase):
 
     def test_content_argument_is_set_to_something_other_than_a_string(self):
         """testing if a TypeError will be raised when trying to set the content
-        argument to something other than a string or unicode
+        argument to something other than a string
         """
         test_values = [1, 1.24, ["content"], {"a": "Content"}]
 
@@ -93,7 +93,7 @@ class NoteTester(unittest.TestCase):
 
     def test_content_attribute_is_set_to_something_other_than_a_string(self):
         """testing if a TypeError will be raised when trying to set the
-        content attribute to something other than a string or unicode
+        content attribute to something other than a string
         """
         test_values = [1, 1.24, ["content"], {"a": "Content"}]
 

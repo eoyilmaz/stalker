@@ -343,9 +343,9 @@ class Ticket(Entity, StatusMixin):
         """
         if summary is None:
             summary = ''
-        if not isinstance(summary, (str, unicode)):
+        if not isinstance(summary, str):
             raise TypeError(
-                '%s.summary should be an instance of str or unicode, not %s' %
+                '%s.summary should be an instance of str, not %s' %
                 (self.__class__.__name__, summary.__class__.__name__)
             )
         return summary

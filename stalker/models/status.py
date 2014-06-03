@@ -41,9 +41,9 @@ class Status(Entity, CodeMixin):
     No extra parameters, use the *code* attribute to give a short name for the
     status.
 
-    A Status object can be compared with a string or unicode value and it will
-    return if the lower case name or lower case code of the status matches the
-    lower case form of the given string::
+    A Status object can be compared with a string value and it will return if
+    the lower case name or lower case code of the status matches the lower case
+    form of the given string::
 
       >>> from stalker import Status
       >>> a_status = Status(name="On Hold", code="OH")
@@ -84,7 +84,7 @@ class Status(Entity, CodeMixin):
     def __eq__(self, other):
         """the equality operator
         """
-        if isinstance(other, (str, unicode)):
+        if isinstance(other, str):
             return self.name.lower() == other.lower() or \
                 self.code.lower() == other.lower()
         else:
@@ -213,7 +213,7 @@ class StatusList(Entity, TargetEntityTypeMixin):
         """
         with DBSession.no_autoflush:
             return_item = None
-            if isinstance(key, (str, unicode)):
+            if isinstance(key, str):
                 for item in self.statuses:
                     if item == key:
                         return_item = item

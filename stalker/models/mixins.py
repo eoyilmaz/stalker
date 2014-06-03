@@ -915,7 +915,7 @@ class CodeMixin(object):
         if code is None:
             raise TypeError("%s.code cannot be None" % self.__class__.__name__)
 
-        if not isinstance(code, (str, unicode)):
+        if not isinstance(code, str):
             raise TypeError(
                 '%s.code should be a string not %s' %
                 (self.__class__.__name__, code.__class__.__name__)
@@ -1139,7 +1139,7 @@ class ScheduleMixin(object):
                 'model_class': schedule_model.__class__.__name__
             }
 
-        if not isinstance(schedule_model, (str, unicode)):
+        if not isinstance(schedule_model, str):
             raise TypeError(error_message)
 
         if schedule_model not in self.__default_schedule_models__:
@@ -1154,7 +1154,7 @@ class ScheduleMixin(object):
         if schedule_unit is None:
             schedule_unit = self.__default_schedule_unit__
 
-        if not isinstance(schedule_unit, (str, unicode)):
+        if not isinstance(schedule_unit, str):
             raise TypeError(
                 '%(class)s.%(attr)s_unit should be a string value one of '
                 '%(defaults)s showing the unit of the %(attr)s timing of this '

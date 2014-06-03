@@ -129,9 +129,9 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
         if path_in is None:
             path_in = ""
 
-        if not isinstance(path_in, (str, unicode)):
+        if not isinstance(path_in, str):
             raise TypeError(
-                "%s.path attribute should be string or unicode not %s" %
+                "%s.path attribute should be string not %s" %
                 (self.__class__.__name__, path_in.__class__.__name__)
             )
 
@@ -145,9 +145,9 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
         if filename_in is None:
             filename_in = ""
 
-        if not isinstance(filename_in, (str, unicode)):
+        if not isinstance(filename_in, str):
             raise TypeError(
-                "%s.filename attribute should be string or unicode not %s" %
+                "%s.filename attribute should be string not %s" %
                 (self.__class__.__name__, filename_in.__class__.__name__)
             )
 

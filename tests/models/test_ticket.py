@@ -734,19 +734,19 @@ class TicketTester(unittest.TestCase):
         self.test_ticket.summary = None
         self.assertEqual(self.test_ticket.summary, '')
 
-    def test_summary_argument_is_not_a_string_or_unicode_instance(self):
+    def test_summary_argument_is_not_a_string(self):
         """testing if a TypeError will be raised when the summary argument
-        value is not a string or unicode
+        value is not a string
         """
         self.kwargs['summary'] = ['not a string instance']
         self.assertRaises(TypeError, Ticket, self.kwargs)
 
-    def test_summary_attribute_is_set_to_a_value_other_than_a_string_or_unicode(self):
+    def test_summary_attribute_is_set_to_a_value_other_than_a_string(self):
         """testing if the summary attribute is set to a value other than a
-        string or unicode
+        string
         """
         self.assertRaises(TypeError, setattr, self.test_ticket, 'summary',
-                          ['not a string or unicode'])
+                          ['not a string'])
 
     def test_summary_argument_is_working_properly(self):
         """testing if the summary argument value is passed to summary attribute

@@ -504,10 +504,9 @@ class Version(Link):
         """validates the given created_with value
         """
         if created_with is not None:
-            if not isinstance(created_with, (str, unicode)):
+            if not isinstance(created_with, str):
                 raise TypeError(
-                    '%s.created_with should be an instance of str or unicode, '
-                    'not %s' %
+                    '%s.created_with should be an instance of str, not %s' %
                     (self.__class__.__name__, created_with.__class__.__name__)
                 )
         return created_with

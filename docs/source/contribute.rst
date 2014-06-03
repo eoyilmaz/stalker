@@ -117,9 +117,9 @@ rules, and there are some extra rules as listed below:
              """checks the name attribute
              """
              
-             if name == "" or not isinstance(name, (str, unicode) ):
+             if name == "" or not isinstance(name, str):
                  raise(ValueError("the name shouldn't be empty and it should \
-                     be a str or unicode"))
+                     be a str"))
                  
                  return name.title()
    
@@ -143,9 +143,9 @@ rules, and there are some extra rules as listed below:
          """checks the name attribute
          """
          
-         if name == "" or not isinstance(name, (str, unicode) ):
+         if name == "" or not isinstance(name, str):
              raise(ValueError("the name shouldn't be empty and it should be a \
-             str or unicode"))
+             str"))
          
          return name.title()
    

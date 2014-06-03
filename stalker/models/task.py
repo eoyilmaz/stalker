@@ -1680,7 +1680,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         if bid_unit is None:
             bid_unit = 'h'
 
-        if not isinstance(bid_unit, (str, unicode)):
+        if not isinstance(bid_unit, str):
             raise TypeError(
                 '%(class)s.bid_unit should be a string value one of %(units)s '
                 'showing the unit of the bid timing of this %(class)s, not '

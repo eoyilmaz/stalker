@@ -92,7 +92,7 @@ class StatusListTest(unittest.TestCase):
         """
         #------------------------------------------------------
         # every element should be an object derived from Status
-        a_fake_status_list = [1, 2, "a string", u"a unicode", 4.5]
+        a_fake_status_list = [1, 2, "a string", 4.5]
 
         self.kwargs["statuses"] = a_fake_status_list
 

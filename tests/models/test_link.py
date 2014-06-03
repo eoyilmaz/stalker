@@ -89,7 +89,7 @@ class LinkTester(unittest.TestCase):
 
     def test_full_path_argument_is_not_a_string(self):
         """testing if a TypeError will be raised when the full_path argument is
-        not a string or unicode instance
+        not a string
         """
         test_values = [1, 1.1, ['a path'], {'a': 'path'}]
 
@@ -99,7 +99,7 @@ class LinkTester(unittest.TestCase):
 
     def test_full_path_attribute_is_not_a_string(self):
         """testing if a TypeError will be raised when the full_path attribute
-        is not a string or unicode instance
+        is not a string instance
         """
         test_values = [1, 1.1, ['a path'], {'a': 'path'}]
 
@@ -157,9 +157,9 @@ class LinkTester(unittest.TestCase):
         filename = os.path.basename(self.test_link.full_path)
         self.assertEqual(self.test_link.original_filename, filename)
 
-    def test_original_filename_argument_accepts_string_or_unicode_only(self):
-        """testing if original_filename argument accepts string or unicode only
-        and raises TypeError for other types
+    def test_original_filename_argument_accepts_string_only(self):
+        """testing if original_filename argument accepts string only and raises
+        TypeError for other types
         """
         test_values = [1, 1.1, ['a original_filename'],
                        {'a': 'original_filename'}]
@@ -167,9 +167,9 @@ class LinkTester(unittest.TestCase):
             self.kwargs['original_filename'] = test_value
             self.assertRaises(TypeError, Link, **self.kwargs)
 
-    def test_original_filename_attribute_accepts_string_or_unicode_only(self):
-        """testing if original_filename attribute accepts string or unicode
-        only and raises TypeError for other types
+    def test_original_filename_attribute_accepts_string_only(self):
+        """testing if original_filename attribute accepts string only and
+        raises TypeError for other types
         """
         test_values = [1, 1.1, ['a original_filename'],
                        {'a': 'original_filename'}]

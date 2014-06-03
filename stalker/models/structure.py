@@ -158,7 +158,7 @@ class Structure(Entity):
         if custom_template_in is None:
             custom_template_in = ""
 
-        if not isinstance(custom_template_in, (str, unicode)):
+        if not isinstance(custom_template_in, str):
             raise TypeError(
                 "%s.custom_template should be a string not %s" %
                 (

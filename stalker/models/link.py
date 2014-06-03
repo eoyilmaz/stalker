@@ -101,10 +101,9 @@ class Link(Entity):
         if full_path is None:
             full_path = ''
 
-        if not isinstance(full_path, (str, unicode)):
+        if not isinstance(full_path, str):
             raise TypeError(
-                "%s.full_path should be an instance of string or unicode not "
-                "%s" %
+                "%s.full_path should be an instance of string not %s" %
                 (self.__class__.__name__, full_path.__class__.__name__)
             )
 
@@ -121,11 +120,13 @@ class Link(Entity):
         if original_filename == '':
             original_filename = filename_from_path
 
-        if not isinstance(original_filename, (str, unicode)):
+        if not isinstance(original_filename, str):
             raise TypeError(
-                '%s.original_filename should be an instance of str or '
-                'unicode and not %s' %
-                (self.__class__.__name__, original_filename.__class__.__name__)
+                '%s.original_filename should be an instance of str and not '
+                '%s' % (
+                    self.__class__.__name__,
+                    original_filename.__class__.__name__
+                )
             )
 
         return original_filename
@@ -154,9 +155,9 @@ class Link(Entity):
                 '%s.path can not be set to None' % self.__class__.__name__
             )
 
-        if not isinstance(path, (str, unicode)):
+        if not isinstance(path, str):
             raise TypeError(
-                '%s.path should be an instance of str or unicode, not %s' %
+                '%s.path should be an instance of str, not %s' %
                 (self.__class__.__name__, path.__class__.__name__)
             )
 
@@ -184,9 +185,9 @@ class Link(Entity):
         if filename is None:
             filename = ''
 
-        if not isinstance(filename, (str, unicode)):
+        if not isinstance(filename, str):
             raise TypeError(
-                '%s.filename should be an instance of str or unicode, not %s' %
+                '%s.filename should be an instance of str, not %s' %
                 (self.__class__.__name__, filename.__class__.__name__)
             )
 
@@ -209,10 +210,12 @@ class Link(Entity):
         if extension is None:
             extension = ''
 
-        if not isinstance(extension, (str, unicode)):
+        if not isinstance(extension, str):
             raise TypeError(
-                '%s.extension should be an instance of str or unicode, not %s'
-                % (self.__class__.__name__, extension.__class__.__name__)
+                '%s.extension should be an instance of str, not %s' % (
+                    self.__class__.__name__,
+                    extension.__class__.__name__
+                )
             )
 
         if extension != '':

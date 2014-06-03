@@ -132,11 +132,12 @@ class Permission(Base):
     def _validate_access(self, access):
         """validates the given access value
         """
-        if not isinstance(access, (str, unicode)):
+        if not isinstance(access, str):
             raise TypeError(
-                '%s.access should be an instance of str or unicode '
-                'not %s' % (self.__class__.__name__,
-                            access.__class__.__name__)
+                '%s.access should be an instance of str not %s' % (
+                    self.__class__.__name__,
+                    access.__class__.__name__
+                )
             )
 
         if access not in ['Allow', 'Deny']:
@@ -157,10 +158,9 @@ class Permission(Base):
     def _validate_class_name(self, class_name):
         """validates the given class_name value
         """
-        if not isinstance(class_name, (str, unicode)):
+        if not isinstance(class_name, str):
             raise TypeError(
-                '%s.class_name should be an instance of str or '
-                'unicode not %s' %
+                '%s.class_name should be an instance of str not %s' %
                 (self.__class__.__name__, class_name.__class__.__name__)
             )
 
@@ -180,10 +180,9 @@ class Permission(Base):
         """validates the given action value
         """
 
-        if not isinstance(action, (str, unicode)):
+        if not isinstance(action, str):
             raise TypeError(
-                '%s.action should be an instance of str or unicode '
-                'not %s' %
+                '%s.action should be an instance of str not %s' %
                 (self.__class__.__name__, action.__class__.__name__)
             )
 
@@ -318,14 +317,14 @@ class User(Entity, ACLMixin):
     :param email: holds the e-mail of the user, should be in [part1]@[part2]
       format
 
-    :type email: str, unicode
+    :type email: str
 
     :param login: This is the login name of the user, it should be all lower
-      case. Giving a string or unicode that has uppercase letters, it will be
-      converted to lower case. It can not be an empty string or None and it can
-      not contain any white space inside.
+      case. Giving a string that has uppercase letters, it will be converted to
+      lower case. It can not be an empty string or None and it can not contain
+      any white space inside.
 
-    :type login: str, unicode
+    :type login: str
 
     :param company: The client which the user is affiliated with. A user can be
     affiliated with one company only. Default value is None.
@@ -343,7 +342,7 @@ class User(Entity, ACLMixin):
       password with a raw password use :meth:`.check_password` and to set the
       password you can use the :attr:`.password` property directly.
 
-    :type password: str, unicode
+    :type password: str
 
     :param groups: It is a list of :class:`.Group` instances that this user
       belongs to.
@@ -396,7 +395,7 @@ class User(Entity, ACLMixin):
         String(256),
         unique=True,
         nullable=False,
-        doc="""email of the user, accepts strings or unicode"""
+        doc="email of the user, accepts string"
     )
 
     password = Column(
@@ -620,11 +619,10 @@ class User(Entity, ACLMixin):
     def _validate_email(self, key, email_in):
         """validates the given email value
         """
-        # check if email_in is an instance of string or unicode
-        if not isinstance(email_in, (str, unicode)):
+        # check if email_in is an instance of string
+        if not isinstance(email_in, str):
             raise TypeError(
-                "%s.email should be an instance of string or "
-                "unicode not %s" %
+                "%s.email should be an instance of str not %s" %
                 (self.__class__.__name__, email_in.__class__.__name__)
             )
         return self._validate_email_format(email_in)
