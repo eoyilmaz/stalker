@@ -17,6 +17,7 @@ Features:
  * Can be connected to all the major 3d animation packages like Maya, Houdini,
    Nuke, Softimage, Vue, Blender etc. and any application that has a Python
    API.
+ * Python 2.6+ and Python 3.0+ compatible.
 
 Stalker is build over these other OpenSource projects:
  * Python
