@@ -706,8 +706,8 @@ class ProjectTestCase(unittest.TestCase):
     def test_setup_is_working_correctly(self):
         """testing if the setup is done correctly
         """
-        self.assertIsInstance(self.test_project_type, Type)
-        self.assertIsInstance(self.test_project_type2, Type)
+        self.assertTrue(isinstance(self.test_project_type, Type))
+        self.assertTrue(isinstance(self.test_project_type2, Type))
 
     def test_lead_argument_is_given_as_None(self):
         """testing if no error will be raised when the lead arguments is given
@@ -715,7 +715,7 @@ class ProjectTestCase(unittest.TestCase):
         """
         self.kwargs["lead"] = None
         new_project = Project(**self.kwargs)
-        self.assertIsInstance(new_project, Project)
+        self.assertTrue(isinstance(new_project, Project))
 
     def test_lead_attribute_is_set_to_None(self):
         """testing if no error will be raised when the lead attribute is set to
@@ -803,7 +803,7 @@ class ProjectTestCase(unittest.TestCase):
         # and a proper image format
         self.kwargs["image_format"] = self.test_image_format
         new_project = Project(**self.kwargs)
-        self.assertIsInstance(new_project, Project)
+        self.assertTrue(isinstance(new_project, Project))
 
     def test_image_format_attribute_accepts_ImageFormat_only(self):
         """testing if a TypeError will be raised when the image_format
@@ -921,7 +921,7 @@ class ProjectTestCase(unittest.TestCase):
         test_value = 1
         self.kwargs["fps"] = test_value
         new_project = Project(**self.kwargs)
-        self.assertIsInstance(new_project.fps, float)
+        self.assertTrue(isinstance(new_project.fps, float))
         self.assertEqual(new_project.fps, float(test_value))
 
     def test_fps_attribute_float_conversion_2(self):
@@ -930,7 +930,7 @@ class ProjectTestCase(unittest.TestCase):
         """
         test_value = 1
         self.test_project.fps = test_value
-        self.assertIsInstance(self.test_project.fps, float)
+        self.assertTrue(isinstance(self.test_project.fps, float))
         self.assertEqual(self.test_project.fps, float(test_value))
 
     def test_fps_argument_is_zero(self):
@@ -1028,7 +1028,7 @@ class ProjectTestCase(unittest.TestCase):
         """
         self.kwargs["structure"] = None
         new_project = Project(**self.kwargs)
-        self.assertIsInstance(new_project, Project)
+        self.assertTrue(isinstance(new_project, Project))
 
     def test_structure_attribute_is_None(self):
         """testing if nothing happens when the structure attribute is set to
@@ -1297,7 +1297,10 @@ class ProjectTestCase(unittest.TestCase):
                                 self.test_user2,
                                 self.test_user3]
         new_proj = Project(**self.kwargs)
-        self.assertItemsEqual(self.kwargs['users'], new_proj.users)
+        self.assertEqual(
+            sorted(self.kwargs['users'], key=lambda x: x.name),
+            sorted(new_proj.users, key=lambda x: x.name)
+        )
 
     def test_users_attribute_is_working_properly(self):
         """testing if the users attribute is working properly
@@ -1306,7 +1309,10 @@ class ProjectTestCase(unittest.TestCase):
                  self.test_user2,
                  self.test_user3]
         self.test_project.users = users
-        self.assertItemsEqual(users, self.test_project.users)
+        self.assertEqual(
+            sorted(users, key=lambda x: x.name),
+            sorted(self.test_project.users, key=lambda x: x.name)
+        )
 
     def test_tjp_id_is_working_properly(self):
         """testing if the tjp_id attribute is working properly
@@ -2256,11 +2262,13 @@ class ProjectTicketsTestCase(unittest.TestCase):
         self.assertTrue(len(self.test_project.tickets) > 0)
 
         # now check for exact items
-        self.assertItemsEqual(
-            self.test_project.tickets,
-            [self.test_ticket1, self.test_ticket2, self.test_ticket3,
-             self.test_ticket4, self.test_ticket5, self.test_ticket6,
-             self.test_ticket7, self.test_ticket8, self.test_ticket9]
+        self.assertEqual(
+            sorted(self.test_project.tickets, key=lambda x: x.name),
+            sorted([
+                self.test_ticket1, self.test_ticket2, self.test_ticket3,
+                self.test_ticket4, self.test_ticket5, self.test_ticket6,
+                self.test_ticket7, self.test_ticket8, self.test_ticket9
+            ], key=lambda x: x.name)
         )
 
     def test_open_tickets_attribute_returns_all_open_tickets_owned_by_this_user(self):
@@ -2294,9 +2302,9 @@ class ProjectTicketsTestCase(unittest.TestCase):
         self.assertTrue(len(self.test_project.open_tickets) > 0)
 
         # now check for exact items
-        self.assertItemsEqual(
-            self.test_project.open_tickets,
-            [
+        self.assertEqual(
+            sorted(self.test_project.open_tickets, key=lambda x: x.name),
+            sorted([
                 self.test_ticket1,
                 self.test_ticket2,
                 self.test_ticket3,
@@ -2305,7 +2313,7 @@ class ProjectTicketsTestCase(unittest.TestCase):
                 self.test_ticket6,
                 self.test_ticket7,
                 self.test_ticket8
-            ]
+            ], key=lambda x: x.name)
         )
 
         # close a couple of them
@@ -2316,13 +2324,13 @@ class ProjectTicketsTestCase(unittest.TestCase):
         self.test_ticket3.resolve(self.test_user1, CANTFIX)
 
         # new check again
-        self.assertItemsEqual(
-            self.test_project.open_tickets,
-            [
+        self.assertEqual(
+            sorted(self.test_project.open_tickets, key=lambda x: x.name),
+            sorted([
                 self.test_ticket4,
                 self.test_ticket5,
                 self.test_ticket6,
                 self.test_ticket7,
                 self.test_ticket8
-            ]
+            ], key=lambda x: x.name)
         )

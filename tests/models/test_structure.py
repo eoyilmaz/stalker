@@ -147,7 +147,7 @@ class StructureTester(unittest.TestCase):
         """
         self.kwargs.pop("templates")
         new_structure = Structure(**self.kwargs)
-        self.assertIsInstance(new_structure, Structure)
+        self.assertTrue(isinstance(new_structure, Structure))
 
     def test_templates_argument_can_be_None(self):
         """testing if no error will be raised when the templates argument is
@@ -155,7 +155,7 @@ class StructureTester(unittest.TestCase):
         """
         self.kwargs["templates"] = None
         new_structure = Structure(**self.kwargs)
-        self.assertIsInstance(new_structure, Structure)
+        self.assertTrue(isinstance(new_structure, Structure))
 
     def test_templates_attribute_cannot_be_set_to_None(self):
         """testing if a TypeError will be raised when the templates attribute
@@ -192,7 +192,7 @@ class StructureTester(unittest.TestCase):
         # test the correct value
         self.kwargs["templates"] = self.test_templates
         new_structure = Structure(**self.kwargs)
-        self.assertIsInstance(new_structure, Structure)
+        self.assertTrue(isinstance(new_structure, Structure))
 
     def test_templates_attribute_accpets_only_list_of_FilenameTemplate_instances(self):
         """testing if a TypeError will be raised when the templates attribute

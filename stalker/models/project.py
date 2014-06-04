@@ -258,11 +258,16 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
 
         self.active = True
 
-    # def __eq__(self, other):
-    #     """the equality operator
-    #     """
-    #     return super(Project, self).__eq__(other) and \
-    #         isinstance(other, Project)
+    def __eq__(self, other):
+        """the equality operator
+        """
+        return super(Project, self).__eq__(other) and \
+            isinstance(other, Project)
+
+    def __hash__(self):
+        """the overridden __hash__ method
+        """
+        return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)
 
     @validates("fps")
     def _validate_fps(self, key, fps):

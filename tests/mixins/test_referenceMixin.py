@@ -141,7 +141,10 @@ class ReferenceMixinTester(unittest.TestCase):
         # and test if it is accepting a proper list
         test_value = [self.test_link1, self.test_link2, self.test_link3]
         self.test_foo_obj.references = test_value
-        self.assertItemsEqual(test_value, self.test_foo_obj.references)
+        self.assertEqual(
+            sorted(test_value, key=lambda x: x.name),
+            sorted(self.test_foo_obj.references, key=lambda x: x.name)
+        )
 
     def test_references_attribute_elements_accepts_Links_only(self):
         """testing if a TypeError will be raised when trying to assign
@@ -163,7 +166,10 @@ class ReferenceMixinTester(unittest.TestCase):
 
         test_value = [self.test_link1, self.test_link2]
         self.test_foo_obj.references = test_value
-        self.assertItemsEqual(self.test_foo_obj.references, test_value)
+        self.assertEqual(
+            sorted(self.test_foo_obj.references, key=lambda x: x.name),
+            sorted(test_value, key=lambda x: x.name)
+        )
 
     def test_references_application_test(self):
         """testing an example of ReferenceMixin usage

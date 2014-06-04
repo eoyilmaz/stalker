@@ -29,7 +29,7 @@ shooting. The Camera class should hold these information:
  * The make of the camera
  * The model of the camera
  * specifications like:
-   * aperture gate 
+   * aperture gate
    * horizontal film back size
    * vertical film back size
    * cropping factor
@@ -84,7 +84,7 @@ class Camera(Entity):
 
     :param vertical_film_back: the vertical length of the film back
 
-    :param web_page: the web page of the camera    
+    :param web_page: the web page of the camera
     """
 
     __tablename__ = 'Cameras'

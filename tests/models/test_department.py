@@ -101,7 +101,7 @@ class DepartmentTester(unittest.TestCase):
         # this should work without raising any error
         self.kwargs["members"] = []
         new_dep = Department(**self.kwargs)
-        self.assertIsInstance(new_dep, Department)
+        self.assertTrue(isinstance(new_dep, Department))
 
     def test_members_attribute_accepts_an_empty_list(self):
         """testing if members attribute accepts an empty list

@@ -50,7 +50,7 @@ class NoteTester(unittest.TestCase):
         """
         self.kwargs.pop("content")
         new_note = Note(**self.kwargs)
-        self.assertIsInstance(new_note, Note)
+        self.assertTrue(isinstance(new_note, Note))
 
     def test_content_argument_is_set_to_None(self):
         """testing if nothing is going to happen when content argument is given
@@ -58,7 +58,7 @@ class NoteTester(unittest.TestCase):
         """
         self.kwargs["content"] = None
         new_note = Note(**self.kwargs)
-        self.assertIsInstance(new_note, Note)
+        self.assertTrue(isinstance(new_note, Note))
 
     def test_content_attribute_is_set_to_None(self):
         """testing if nothing is going to happen when content attribute is set

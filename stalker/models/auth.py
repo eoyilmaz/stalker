@@ -18,7 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 import os
-import pickle
+import json
 import re
 import base64
 import datetime
@@ -201,18 +201,18 @@ class Permission(Base):
 
     action = synonym('_action', descriptor=property(_action_getter))
 
-    # def __eq__(self, other):
-    #     """the equality of two Permissions
-    #     """
-    #     return isinstance(other, Permission) \
-    #         and other.access == self.access \
-    #         and other.action == self.action \
-    #         and other.class_name == self.class_name
-    # 
-    # def __ne__(self, other):
-    #     """the inequality of two Permissions
-    #     """
-    #     return not self.__eq__(other)
+    def __eq__(self, other):
+        """the equality of two Permissions
+        """
+        return isinstance(other, Permission) \
+            and other.access == self.access \
+            and other.action == self.action \
+            and other.class_name == self.class_name
+
+    def __ne__(self, other):
+        """the inequality of two Permissions
+        """
+        return not self.__eq__(other)
 
 
 class Group(Entity, ACLMixin):
@@ -267,6 +267,11 @@ class Group(Entity, ACLMixin):
             )
 
         return user
+
+    def __hash__(self):
+        """the overridden __hash__ method
+        """
+        return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)
 
 
 class User(Entity, ACLMixin):
@@ -549,19 +554,19 @@ class User(Entity, ACLMixin):
         """
         return "<%s ('%s') (User)>" % (self.name, self.login)
 
-    # def __eq__(self, other):
-    #     """the equality operator
-    #     """
-    #     return super(User, self).__eq__(other) and \
-    #         isinstance(other, User) and \
-    #         self.email == other.email and \
-    #         self.login == other.login and \
-    #         self.name == other.name
-    # 
-    # def __ne__(self, other):
-    #     """the inequality operator
-    #     """
-    #     return not self.__eq__(other)
+    def __eq__(self, other):
+        """the equality operator
+        """
+        return super(User, self).__eq__(other) and \
+            isinstance(other, User) and \
+            self.email == other.email and \
+            self.login == other.login and \
+            self.name == other.name
+
+    def __hash__(self):
+        """the overridden __hash__ method
+        """
+        return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)
 
     @validates("login")
     def _validate_login(self, key, login):
@@ -712,7 +717,7 @@ class User(Entity, ACLMixin):
             raise ValueError("raw_password can not be empty string")
 
         # mangle the password
-        return base64.encodestring(password_in)
+        return base64.b64encode(password_in.encode('utf-8'))
 
     def check_password(self, raw_password):
         """Checks the given raw_password.
@@ -723,7 +728,8 @@ class User(Entity, ACLMixin):
         Checks the given raw password with the given encrypted password.
         Handles the encryption process behind the scene.
         """
-        return self.password == base64.encodestring(str(raw_password))
+        return self.password == \
+            base64.b64encode(bytes(raw_password.encode('utf-8')))
 
     @validates("groups")
     def _validate_groups(self, key, group):
@@ -888,16 +894,59 @@ class LocalSession(object):
         self.session_data = None
         self.load()
 
+    @classmethod
+    def default_json_serializer(cls, obj):
+        """default serializer for json data
+        """
+        if isinstance(obj, datetime.datetime):
+            return cls.datetime_to_millis(obj)
+        elif isinstance(obj, User):
+            return User.id
+        elif isinstance(obj, int):
+            return obj
+
+    @classmethod
+    def datetime_to_millis(cls, dt):
+        """Default JSON serializer for datetime objects.
+
+        code is based on the answer of Jay Taylor in
+        http://stackoverflow.com/questions/11875770/how-to-overcome-datetime-datetime-not-json-serializable-in-python
+
+        :param dt: datetime.datetime instance
+        """
+        import calendar
+
+        if isinstance(dt, datetime.datetime):
+            if dt.utcoffset() is not None:
+                obj = dt - dt.utcoffset()
+        millis = int(
+            calendar.timegm(dt.timetuple()) * 1000 +
+            dt.microsecond / 1000
+        )
+        return millis
+
+    @classmethod
+    def millis_to_datetime(cls, millis):
+        """
+        :param int millis: an int value showing the millis from unix EPOCH
+        :return:
+        """
+        epoch = datetime.datetime(1970, 1, 1)
+        return epoch + datetime.timedelta(milliseconds=millis)
+
     def load(self):
         """loads the data from the saved local session
         """
         try:
-            with open(LocalSession.session_file_full_path(), 'rb') as s:
+            with open(LocalSession.session_file_full_path(), 'r') as s:
                 # try:
-                unpickled_object = pickle.load(s)
-                if unpickled_object.valid_to > datetime.datetime.now():
+                json_object = json.load(s)
+                valid_to = self.millis_to_datetime(json_object.get('valid_to'))
+                if valid_to > datetime.datetime.now():
                     # fill __dict__ with the loaded one
-                    self.__dict__ = unpickled_object.__dict__
+                    self.valid_to = valid_to
+                    self.logged_in_user_id = \
+                        json_object.get('logged_in_user_id')
         except IOError:
             pass
 
@@ -918,9 +967,12 @@ class LocalSession(object):
     def save(self):
         """remembers the data in user local file system
         """
-        self.valid_to = datetime.datetime.now() + datetime.timedelta(10)
+        self.valid_to = datetime.datetime.now() + datetime.timedelta(days=10)
         # serialize self
-        dumped_data = pickle.dumps(self)
+        dumped_data = json.dumps({
+            'valid_to': self.valid_to,
+            'logged_in_user_id': self.logged_in_user_id
+        }, default=self.default_json_serializer)
         logger.debug('dumped session data : %s' % dumped_data)
         self._write_data(dumped_data)
 
@@ -958,8 +1010,8 @@ class LocalSession(object):
             # dir exists
             pass
         finally:
-            with open(file_full_path, 'wb') as data_file:
-                data_file.writelines(data)
+            with open(file_full_path, 'w') as data_file:
+                data_file.write(data)
 
 
 # USER_PERMISSIONGROUPS

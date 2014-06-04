@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import unittest
-from stalker import (Asset, Entity, Project, Repository, Sequence, Status,
+from stalker import (db, Asset, Entity, Project, Repository, Sequence, Status,
                      StatusList, Task, Type, Link, Shot)
 
 
@@ -30,169 +30,141 @@ class AssetTester(unittest.TestCase):
     def setUp(self):
         """setup the test
         """
-        # statuses
-        self.test_data_status_complete = Status(
-            name="Complete",
-            code="CMPLT",
-        )
+        db.setup()
+        db.init()
 
-        self.test_data_status_wip = Status(
-            name="Work In Progress",
-            code="WIP",
-        )
+        # statuses
+        self.status_wip = Status.query.filter_by(code='WIP').first()
+        self.status_cmpl = Status.query.filter_by(code='CMPL').first()
 
         # status lists
-        self.test_data_project_status_list = StatusList(
+        self.project_status_list = StatusList(
             name="Project Status List",
             target_entity_type=Project,
             statuses=[
-                self.test_data_status_complete,
-                self.test_data_status_wip
+                self.status_cmpl,
+                self.status_wip
             ]
         )
 
-        self.test_data_task_status_list = StatusList(
-            name="Task Status List",
-            target_entity_type=Task,
-            statuses=[
-                self.test_data_status_complete,
-                self.test_data_status_wip
-            ]
-        )
+        self.task_status_list = \
+            StatusList.query.filter_by(target_entity_type='Task').first()
 
-        self.test_data_asset_status_list = StatusList(
-            name="Asset Status List",
-            target_entity_type=Asset,
-            statuses=[
-                self.test_data_status_complete,
-                self.test_data_status_wip
-            ]
-        )
+        self.asset_status_list = \
+            StatusList.query.filter_by(target_entity_type='Asset').first()
 
-        self.test_data_shot_status_list = StatusList(
-            name="Shot Status List",
-            target_entity_type=Shot,
-            statuses=[
-                self.test_data_status_complete,
-                self.test_data_status_wip
-            ]
-        )
+        self.shot_status_list = \
+            StatusList.query.filter_by(target_entity_type='Shot').first()
 
-        self.test_data_sequence_status_list = StatusList(
-            name="Sequence Status List",
-            target_entity_type=Sequence,
-            statuses=[
-                self.test_data_status_complete,
-                self.test_data_status_wip
-            ]
-        )
+        self.sequence_status_list = \
+            StatusList.query.filter_by(target_entity_type='Sequence').first()
 
         # types
-        self.test_data_commmercial_project = Type(
+        self.commmercial_project_type = Type(
             name="Commercial Project",
             code='commproj',
             target_entity_type=Project,
         )
 
-        self.test_data_asset_type1 = Type(
+        self.asset_type1 = Type(
             name="Character",
             code='char',
             target_entity_type=Asset
         )
 
-        self.test_data_asset_type2 = Type(
+        self.asset_type2 = Type(
             name="Environment",
             code='env',
             target_entity_type=Asset
         )
 
-        self.test_data_repository_type = Type(
+        self.repository_type = Type(
             name="Test Repository Type",
             code='testrepo',
             target_entity_type=Repository,
         )
 
         # repository
-        self.test_data_repository = Repository(
+        self.repository = Repository(
             name="Test Repository",
-            type=self.test_data_repository_type,
+            type=self.repository_type,
         )
 
         # project
-        self.test_data_project1 = Project(
+        self.project1 = Project(
             name="Test Project1",
             code='tp1',
-            type=self.test_data_commmercial_project,
-            status_list=self.test_data_project_status_list,
-            repository=self.test_data_repository,
+            type=self.commmercial_project_type,
+            status_list=self.project_status_list,
+            repository=self.repository,
         )
 
         # sequence
-        self.test_data_sequence = Sequence(
+        self.seq1 = Sequence(
             name="Test Sequence",
             code='tseq',
-            project=self.test_data_project1,
-            status_list=self.test_data_sequence_status_list,
+            project=self.project1,
+            status_list=self.sequence_status_list,
         )
 
         # shots
-        self.test_data_shot1 = Shot(
+        self.shot1 = Shot(
             code="TestSH001",
-            status_list=self.test_data_shot_status_list,
-            project=self.test_data_project1,
-            sequences=[self.test_data_sequence],
+            status_list=self.shot_status_list,
+            project=self.project1,
+            sequences=[self.seq1],
         )
 
-        self.test_data_shot2 = Shot(
+        self.shot2 = Shot(
             code="TestSH002",
-            status_list=self.test_data_shot_status_list,
-            project=self.test_data_project1,
-            sequences=[self.test_data_sequence],
+            status_list=self.shot_status_list,
+            project=self.project1,
+            sequences=[self.seq1],
         )
 
-        self.test_data_shot3 = Shot(
+        self.shot3 = Shot(
             code="TestSH003",
-            status_list=self.test_data_shot_status_list,
-            project=self.test_data_project1,
-            sequences=[self.test_data_sequence],
+            status_list=self.shot_status_list,
+            project=self.project1,
+            sequences=[self.seq1],
         )
 
-        self.test_data_shot4 = Shot(
+        self.shot4 = Shot(
             code="TestSH004",
-            status_list=self.test_data_shot_status_list,
-            project=self.test_data_project1,
-            sequences=[self.test_data_sequence],
+            status_list=self.shot_status_list,
+            project=self.project1,
+            sequences=[self.seq1],
         )
 
         self.kwargs = {
             "name": "Test Asset",
             'code': 'ta',
             "description": "This is a test Asset object",
-            "project": self.test_data_project1,
-            "type": self.test_data_asset_type1,
+            "project": self.project1,
+            "type": self.asset_type1,
             "status": 0,
-            "status_list": self.test_data_asset_status_list,
+            "status_list": self.asset_status_list,
         }
 
-        self.test_data_test_asset = Asset(**self.kwargs)
+        self.asset1 = Asset(**self.kwargs)
 
         # tasks
-        self.test_data_task1 = Task(
+        self.task1 = Task(
             name="Task1",
-            parent=self.test_data_test_asset,
-            status_list=self.test_data_task_status_list
+            parent=self.asset1,
+            status_list=self.task_status_list
         )
 
-        self.test_data_task2 = Task(
+        self.task2 = Task(
             name="Task2",
-            parent=self.test_data_test_asset,
-            status_list=self.test_data_task_status_list
+            parent=self.asset1,
+            status_list=self.task_status_list
         )
 
-        self.test_data_task3 = Task(
+        self.task3 = Task(
             name="Task3",
-            parent=self.test_data_test_asset,
-            status_list=self.test_data_task_status_list
+            parent=self.asset1,
+            status_list=self.task_status_list
         )
 
     def test___auto_name__class_attribute_is_set_to_False(self):
@@ -210,7 +182,7 @@ class AssetTester(unittest.TestCase):
 
         new_entity1 = Entity(**self.kwargs)
 
-        self.kwargs["type"] = self.test_data_asset_type2
+        self.kwargs["type"] = self.asset_type2
         new_asset3 = Asset(**self.kwargs)
 
         self.kwargs["name"] = "another name"
@@ -231,7 +203,7 @@ class AssetTester(unittest.TestCase):
 
         new_entity1 = Entity(**self.kwargs)
 
-        self.kwargs["type"] = self.test_data_asset_type2
+        self.kwargs["type"] = self.asset_type2
         new_asset3 = Asset(**self.kwargs)
 
         self.kwargs["name"] = "another name"
@@ -279,13 +251,8 @@ class AssetTester(unittest.TestCase):
     def test_StatusMixin_initialization(self):
         """testing if the StatusMixin part is initialized correctly
         """
-
-        status1 = Status(name="On Hold", code="OH")
-        status2 = Status(name="Complete", code="CMPLT")
-
-        status_list = StatusList(name="Project Statuses",
-                                 statuses=[status1, status2],
-                                 target_entity_type=Asset)
+        status_list = \
+            StatusList.query.filter_by(target_entity_type='Asset').first()
 
         self.kwargs["code"] = "SH12314"
         self.kwargs["status"] = 0
@@ -299,20 +266,6 @@ class AssetTester(unittest.TestCase):
         """testing if the TaskMixin part is initialized correctly
         """
 
-        status1 = Status(name="On Hold", code="OH")
-
-        task_status_list = StatusList(
-            name="Task Statuses",
-            statuses=[status1],
-            target_entity_type=Task
-        )
-
-        project_status_list = StatusList(
-            name="Project Statuses",
-            statuses=[status1],
-            target_entity_type=Project,
-        )
-
         commercial_project_type = Type(
             name="Commercial",
             code='comm',
@@ -323,8 +276,8 @@ class AssetTester(unittest.TestCase):
             name="Commercial",
             code='COM',
             type=commercial_project_type,
-            status_list=project_status_list,
-            repository=self.test_data_repository,
+            status_list=self.project_status_list,
+            repository=self.repository,
         )
 
         character_asset_type = Type(
@@ -333,40 +286,34 @@ class AssetTester(unittest.TestCase):
             target_entity_type=Asset
         )
 
-        asset_status_list = StatusList(
-            name="Asset Status List",
-            statuses=[status1],
-            target_entity_type=Asset
-        )
-
         new_asset = Asset(
             name="test asset",
             type=character_asset_type,
             code="tstasset",
-            status_list=asset_status_list,
             project=new_project,
         )
 
         task1 = Task(
             name="Modeling",
-            status_list=task_status_list,
             parent=new_asset
         )
 
         task2 = Task(
             name="Lighting",
-            status_list=task_status_list,
             parent=new_asset
         )
 
         tasks = [task1, task2]
 
-        self.assertItemsEqual(new_asset.tasks, tasks)
+        self.assertEqual(
+            sorted(new_asset.tasks, key=lambda x: x.name),
+            sorted(tasks, key=lambda x: x.name)
+        )
 
     def test_plural_class_name(self):
         """testing the default plural name of the Asset class
         """
-        self.assertEqual(self.test_data_test_asset.plural_class_name, "Assets")
+        self.assertEqual(self.asset1.plural_class_name, "Assets")
 
     def test___strictly_typed___is_True(self):
         """testing if the __strictly_typed__ class attribute is True

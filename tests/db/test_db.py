@@ -396,8 +396,14 @@ class DatabaseTester(unittest.TestCase):
 
         db_status_names = map(lambda x: x.name, task_status_list.statuses)
         db_status_codes = map(lambda x: x.code, task_status_list.statuses)
-        self.assertItemsEqual(expected_status_names, db_status_names)
-        self.assertItemsEqual(expected_status_codes, db_status_codes)
+        self.assertEqual(
+            sorted(expected_status_names),
+            sorted(db_status_names)
+        )
+        self.assertEqual(
+            sorted(expected_status_codes),
+            sorted(db_status_codes)
+        )
 
     def test_asset_status_initialization(self):
         """testing if the asset statuses are correctly created
@@ -442,8 +448,14 @@ class DatabaseTester(unittest.TestCase):
 
         db_status_names = map(lambda x: x.name, asset_status_list.statuses)
         db_status_codes = map(lambda x: x.code, asset_status_list.statuses)
-        self.assertItemsEqual(expected_status_names, db_status_names)
-        self.assertItemsEqual(expected_status_codes, db_status_codes)
+        self.assertEqual(
+            sorted(expected_status_names),
+            sorted(db_status_names)
+        )
+        self.assertEqual(
+            sorted(expected_status_codes),
+            sorted(db_status_codes)
+        )
 
     def test_shot_status_initialization(self):
         """testing if the shot statuses are correctly created
@@ -488,8 +500,14 @@ class DatabaseTester(unittest.TestCase):
 
         db_status_names = map(lambda x: x.name, shot_status_list.statuses)
         db_status_codes = map(lambda x: x.code, shot_status_list.statuses)
-        self.assertItemsEqual(expected_status_names, db_status_names)
-        self.assertItemsEqual(expected_status_codes, db_status_codes)
+        self.assertEqual(
+            sorted(expected_status_names),
+            sorted(db_status_names)
+        )
+        self.assertEqual(
+            sorted(expected_status_codes),
+            sorted(db_status_codes)
+        )
 
     def test_sequence_status_initialization(self):
         """testing if the sequence statuses are correctly created
@@ -534,8 +552,14 @@ class DatabaseTester(unittest.TestCase):
 
         db_status_names = map(lambda x: x.name, sequence_status_list.statuses)
         db_status_codes = map(lambda x: x.code, sequence_status_list.statuses)
-        self.assertItemsEqual(expected_status_names, db_status_names)
-        self.assertItemsEqual(expected_status_codes, db_status_codes)
+        self.assertEqual(
+            sorted(expected_status_names),
+            sorted(db_status_names)
+        )
+        self.assertEqual(
+            sorted(expected_status_codes),
+            sorted(db_status_codes)
+        )
 
     def test_task_status_initialization_when_there_is_a_Task_status_list(self):
         """testing if the task statuses are correctly created when there is a
@@ -589,8 +613,14 @@ class DatabaseTester(unittest.TestCase):
 
         db_status_names = map(lambda x: x.name, task_status_list.statuses)
         db_status_codes = map(lambda x: x.code, task_status_list.statuses)
-        self.assertItemsEqual(expected_status_names, db_status_names)
-        self.assertItemsEqual(expected_status_codes, db_status_codes)
+        self.assertEqual(
+            sorted(expected_status_names),
+            sorted(db_status_names)
+        )
+        self.assertEqual(
+            sorted(expected_status_codes),
+            sorted(db_status_codes)
+        )
 
     def test_asset_status_initialization_when_there_is_a_Asset_status_list(self):
         """testing if the asset statuses are correctly created when there is a
@@ -644,8 +674,14 @@ class DatabaseTester(unittest.TestCase):
 
         db_status_names = map(lambda x: x.name, asset_status_list.statuses)
         db_status_codes = map(lambda x: x.code, asset_status_list.statuses)
-        self.assertItemsEqual(expected_status_names, db_status_names)
-        self.assertItemsEqual(expected_status_codes, db_status_codes)
+        self.assertEqual(
+            sorted(expected_status_names),
+            sorted(db_status_names)
+        )
+        self.assertEqual(
+            sorted(expected_status_codes),
+            sorted(db_status_codes)
+        )
 
     def test_shot_status_initialization_when_there_is_a_Shot_status_list(self):
         """testing if the shot statuses are correctly created when there is a
@@ -699,8 +735,14 @@ class DatabaseTester(unittest.TestCase):
 
         db_status_names = map(lambda x: x.name, shot_status_list.statuses)
         db_status_codes = map(lambda x: x.code, shot_status_list.statuses)
-        self.assertItemsEqual(expected_status_names, db_status_names)
-        self.assertItemsEqual(expected_status_codes, db_status_codes)
+        self.assertEqual(
+            sorted(expected_status_names),
+            sorted(db_status_names)
+        )
+        self.assertEqual(
+            sorted(expected_status_codes),
+            sorted(db_status_codes)
+        )
 
     def test_sequence_status_initialization_when_there_is_a_Sequence_status_list(self):
         """testing if the sequence statuses are correctly created when there is
@@ -754,8 +796,14 @@ class DatabaseTester(unittest.TestCase):
 
         db_status_names = map(lambda x: x.name, sequence_status_list.statuses)
         db_status_codes = map(lambda x: x.code, sequence_status_list.statuses)
-        self.assertItemsEqual(expected_status_names, db_status_names)
-        self.assertItemsEqual(expected_status_codes, db_status_codes)
+        self.assertEqual(
+            sorted(expected_status_names),
+            sorted(db_status_names)
+        )
+        self.assertEqual(
+            sorted(expected_status_codes),
+            sorted(db_status_codes)
+        )
 
     def test_review_status_initialization(self):
         """testing if the review statuses are correctly created
@@ -788,8 +836,14 @@ class DatabaseTester(unittest.TestCase):
 
         db_status_names = map(lambda x: x.name, review_status_list.statuses)
         db_status_codes = map(lambda x: x.code, review_status_list.statuses)
-        self.assertItemsEqual(expected_status_names, db_status_names)
-        self.assertItemsEqual(expected_status_codes, db_status_codes)
+        self.assertEqual(
+            sorted(expected_status_names),
+            sorted(db_status_names)
+        )
+        self.assertEqual(
+            sorted(expected_status_codes),
+            sorted(db_status_codes)
+        )
 
     def test___create_entity_statuses_no_entity_type_supplied(self):
         """testing db.__create_entity_statuses() will raise a ValueError when
@@ -1568,7 +1622,10 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(description, test_entity_db.description)
         self.assertEqual(name, test_entity_db.name)
         self.assertEqual(nice_name, test_entity_db.nice_name)
-        self.assertItemsEqual(notes, [note1, note2])
+        self.assertEqual(
+            sorted(notes, key=lambda x: x.name),
+            sorted([note1, note2], key=lambda x: x.name)
+        )
         self.assertEqual(notes, test_entity_db.notes)
         self.assertEqual(tags, test_entity_db.tags)
         self.assertEqual(updated_by, test_entity_db.updated_by)
@@ -1580,10 +1637,16 @@ class DatabaseModelsTester(unittest.TestCase):
         DBSession.commit()
 
         test_entity2_db = Entity.query.filter_by(name='Test Entity 2').first()
-        self.assertIsInstance(test_entity2_db, Entity)
+        self.assertTrue(isinstance(test_entity2_db, Entity))
 
-        self.assertItemsEqual([note1, note2], Note.query.all())
-        self.assertItemsEqual([note1], test_entity2_db.notes)
+        self.assertEqual(
+            sorted([note1, note2], key=lambda x: x.name),
+            sorted(Note.query.all(), key=lambda x: x.name)
+        )
+        self.assertEqual(
+            sorted([note1], key=lambda x: x.name),
+            sorted(test_entity2_db.notes, key=lambda x: x.name)
+        )
 
     def test_persistence_of_FilenameTemplate(self):
         """testing the persistence of FilenameTemplate
@@ -2671,7 +2734,7 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(thumbnail, test_simple_entity_db.thumbnail)
         self.assertIsNotNone(generic_text)
         self.assertEqual(generic_text, test_simple_entity_db.generic_text)
-        
+
         ## delete tests
         #self.assertIsNotNone(Link.query.all())
         #
@@ -3229,13 +3292,16 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(name, task1_db.name)
         self.assertEqual(parent, task1_db.parent)
         self.assertEqual(priority, task1_db.priority)
-        self.assertItemsEqual(resources, [])  # it is a parent task, no child
-        self.assertItemsEqual(resources, task1_db.resources)
+        self.assertEqual(resources, [])  # it is a parent task, no child
+        self.assertEqual(resources, task1_db.resources)
         self.assertEqual(start, task1_db.start)
         self.assertEqual(status, task1_db.status)
         self.assertEqual(status_list, task1_db.status_list)
         self.assertEqual(tags, task1_db.tags)
-        self.assertItemsEqual(tasks, task1_db.tasks)
+        self.assertEqual(
+            sorted(tasks, key=lambda x: x.name),
+            sorted(task1_db.tasks, key=lambda x: x.name)
+        )
         self.assertEqual(tasks, [child_task1, child_task2])
         self.assertEqual(type_, task1_db.type)
         self.assertEqual(updated_by, task1_db.updated_by)
@@ -3267,22 +3333,22 @@ class DatabaseModelsTester(unittest.TestCase):
         DBSession.commit()
 
         # Expect to have all child tasks also to be deleted
-        self.assertItemsEqual(
-            [asset1, task2],
-            Task.query.all()
+        self.assertEqual(
+            sorted([asset1, task2], key=lambda x: x.name),
+            sorted(Task.query.all(), key=lambda x: x.name)
         )
 
         # Expect to have time logs related to this task are deleted
-        self.assertItemsEqual(
+        self.assertEqual(
             [time_log3],
             TimeLog.query.all()
         )
 
         # We still should have the users intact
         admin = User.query.filter_by(name='admin').first()
-        self.assertItemsEqual(
-            [user1, user2, user3, admin],
-            User.query.all()
+        self.assertEqual(
+            sorted([user1, user2, user3, admin], key=lambda x: x.name),
+            sorted(User.query.all(), key=lambda x: x.name)
         )
 
         # When updating the test to include deletion, the test task became a
@@ -3293,8 +3359,8 @@ class DatabaseModelsTester(unittest.TestCase):
         del task2
 
         another_task_db = Task.query.get(id_)
-        self.assertItemsEqual(resources, [user1])
-        self.assertItemsEqual(resources, another_task_db.resources)
+        self.assertEqual(resources, [user1])
+        self.assertEqual(resources, another_task_db.resources)
 
         self.assertEqual(version3.inputs, [])
         self.assertEqual(version4.inputs, [])
@@ -3470,9 +3536,12 @@ class DatabaseModelsTester(unittest.TestCase):
         DBSession.commit()
 
         # Expect to have no task is deleted
-        self.assertItemsEqual(
-            [asset1, task1, task2, child_task1, child_task2],
-            Task.query.all()
+        self.assertEqual(
+            sorted(
+                [asset1, task1, task2, child_task1, child_task2],
+                key=lambda x: x.name
+            ),
+            sorted(Task.query.all(), key=lambda x: x.name)
         )
 
     def test_persistence_of_Ticket(self):
@@ -3600,7 +3669,10 @@ class DatabaseModelsTester(unittest.TestCase):
         # delete tests
         # Deleting a Ticket should also delete all the logs related to the
         # ticket
-        self.assertItemsEqual(test_ticket_db.logs, logs)
+        self.assertEqual(
+            sorted(test_ticket_db.logs, key=lambda x: x.name),
+            sorted(logs, key=lambda x: x.name)
+        )
 
         DBSession.delete(test_ticket_db)
         DBSession.commit()
@@ -3741,7 +3813,10 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(projects_lead, user1_db.projects_lead)
         self.assertEqual(tags, user1_db.tags)
         self.assertEqual(tasks, user1_db.tasks)
-        self.assertItemsEqual(vacations, user1_db.vacations)
+        self.assertEqual(
+            sorted(vacations, key=lambda x: x.name),
+            sorted(user1_db.vacations, key=lambda x: x.name)
+        )
         self.assertEqual(watching, user1_db.watching)
         self.assertEqual(updated_by, user1_db.updated_by)
 
@@ -3753,19 +3828,19 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(user1_db, department_db.members[0])
 
         # delete tests
-        self.assertItemsEqual(
-            [vacation1, vacation2],
-            Vacation.query.all()
+        self.assertEqual(
+            sorted([vacation1, vacation2], key=lambda x: x.name),
+            sorted(Vacation.query.all(), key=lambda x: x.name)
         )
 
         # deleting a user should also delete its vacations
         DBSession.delete(user1_db)
         DBSession.commit()
 
-        self.assertItemsEqual([], Vacation.query.all())
+        self.assertEqual([], Vacation.query.all())
 
         # deleting a user should also delete the time logs
-        self.assertItemsEqual([], TimeLog.query.all())
+        self.assertEqual([], TimeLog.query.all())
 
     def test_persistence_of_Vacation(self):
         """testing the persistence of Vacation instances

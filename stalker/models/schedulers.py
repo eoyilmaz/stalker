@@ -747,10 +747,10 @@ order by path_as_text"""
         while True:
             stderr = process.stderr.readline()
 
-            if stderr == '' and process.poll() is not None:
+            if stderr == b'' and process.poll() is not None:
                 break
 
-            if stderr != '':
+            if stderr != b'':
                 stderr_buffer.append(stderr)
 
         if process.returncode:

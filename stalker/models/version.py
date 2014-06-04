@@ -511,14 +511,19 @@ class Version(Link):
                 )
         return created_with
 
-    # def __eq__(self, other):
-    #     """checks equality of two version instances
-    #     """
-    #     return super(Version, self).__eq__(other) and \
-    #         isinstance(other, Version) and \
-    #         self.task == other.task and \
-    #         self.take_name == other.take_name and \
-    #         self.version_number == other.version_number
+    def __eq__(self, other):
+        """checks equality of two version instances
+        """
+        return super(Version, self).__eq__(other) and \
+            isinstance(other, Version) and \
+            self.task == other.task and \
+            self.take_name == other.take_name and \
+            self.version_number == other.version_number
+
+    def __hash__(self):
+        """the overridden __hash__ method
+        """
+        return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)
 
     @property
     def naming_parents(self):

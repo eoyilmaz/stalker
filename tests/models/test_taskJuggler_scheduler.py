@@ -376,9 +376,9 @@ task Task_45 "Task2" {
             datetime.datetime(2013, 4, 18, 16, 0),
             self.test_task1.computed_end
         )
-        self.assertItemsEqual(
-            [self.test_user5, self.test_user4],
-            self.test_task1.computed_resources
+        self.assertEqual(
+            sorted([self.test_user5, self.test_user4], key=lambda x: x.name),
+            sorted(self.test_task1.computed_resources, key=lambda x: x.name)
         )
 
         self.assertEqual(
@@ -389,9 +389,9 @@ task Task_45 "Task2" {
             datetime.datetime(2013, 4, 19, 12, 0),
             self.test_task2.computed_end
         )
-        self.assertItemsEqual(
-            [self.test_user1, self.test_user2],
-            self.test_task2.computed_resources
+        self.assertEqual(
+            sorted([self.test_user1, self.test_user2], key=lambda x: x.name),
+            sorted(self.test_task2.computed_resources, key=lambda x: x.name)
         )
 
     def test_tasks_are_correctly_scheduled_when_compute_resources_is_False(self):
@@ -428,9 +428,9 @@ task Task_45 "Task2" {
             datetime.datetime(2013, 4, 18, 16, 0),
             self.test_task1.computed_end
         )
-        self.assertItemsEqual(
-            self.test_task1.resources,
-            self.test_task1.computed_resources
+        self.assertEqual(
+            sorted(self.test_task1.resources, key=lambda x: x.name),
+            sorted(self.test_task1.computed_resources, key=lambda x: x.name)
         )
 
         self.assertEqual(
@@ -441,9 +441,9 @@ task Task_45 "Task2" {
             datetime.datetime(2013, 4, 19, 12, 0),
             self.test_task2.computed_end
         )
-        self.assertItemsEqual(
-            self.test_task2.resources,
-            self.test_task2.computed_resources
+        self.assertEqual(
+            sorted(self.test_task2.resources, key=lambda x: x.name),
+            sorted(self.test_task2.computed_resources, key=lambda x: x.name)
         )
 
     def test_tasks_are_correctly_scheduled_when_compute_resources_is_True(self):
@@ -480,9 +480,9 @@ task Task_45 "Task2" {
             datetime.datetime(2013, 4, 18, 16, 0),
             self.test_task1.computed_end
         )
-        self.assertItemsEqual(
-            [self.test_user4, self.test_user5],
-            self.test_task1.computed_resources
+        self.assertEqual(
+            sorted([self.test_user4, self.test_user5], key=lambda x: x.name),
+            sorted(self.test_task1.computed_resources, key=lambda x: x.name)
         )
 
         self.assertEqual(
@@ -493,9 +493,9 @@ task Task_45 "Task2" {
             datetime.datetime(2013, 4, 19, 12, 0),
             self.test_task2.computed_end
         )
-        self.assertItemsEqual(
-            [self.test_user1, self.test_user2],
-            self.test_task2.computed_resources
+        self.assertEqual(
+            sorted([self.test_user1, self.test_user2], key=lambda x: x.name),
+            sorted(self.test_task2.computed_resources, key=lambda x: x.name)
         )
 
 

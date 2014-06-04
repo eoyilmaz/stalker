@@ -224,10 +224,15 @@ class Link(Entity):
 
         self.filename = os.path.splitext(self.filename)[0] + extension
 
-    # def __eq__(self, other):
-    #     """the equality operator
-    #     """
-    #     return super(Link, self).__eq__(other) and \
-    #         isinstance(other, Link) and \
-    #         self.full_path == other.full_path and \
-    #         self.type == other.type
+    def __eq__(self, other):
+        """the equality operator
+        """
+        return super(Link, self).__eq__(other) and \
+            isinstance(other, Link) and \
+            self.full_path == other.full_path and \
+            self.type == other.type
+
+    def __hash__(self):
+        """the overridden __hash__ method
+        """
+        return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)

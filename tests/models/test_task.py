@@ -3963,9 +3963,9 @@ task Task_5679 "Modeling" {
                 }            
 }
 }"""
-        print t1.to_tjp
-        print '---------------------------------'
-        print expected_tjp
+        # print(t1.to_tjp)
+        # print('---------------------------------')
+        # print(expected_tjp)
         self.assertMultiLineEqual(t1.to_tjp, expected_tjp)
 
     def test_to_tjp_schedule_constraint_is_reflected_in_tjp_file(self):
@@ -4066,10 +4066,10 @@ task Task_5679 "Modeling" {
                 }            
 }
 }"""
-        print t1.to_tjp
-        print '-----------------------'
-        print expected_tjp
-        print '-----------------------'
+        print(t1.to_tjp)
+        print('-----------------------')
+        print(expected_tjp)
+        print('-----------------------')
         self.assertMultiLineEqual(t1.to_tjp, expected_tjp)
 
     def test_is_scheduled_is_a_read_only_attribute(self):
@@ -4316,9 +4316,9 @@ task Task_5679 "Modeling" {
         DBSession.add(new_ticket3)
         DBSession.commit()
 
-        self.assertItemsEqual(
-            self.test_task.tickets,
-            [new_ticket1, new_ticket2]
+        self.assertEqual(
+            sorted(self.test_task.tickets, key=lambda x: x.name),
+            sorted([new_ticket1, new_ticket2], key=lambda x: x.name)
         )
 
     def test_open_tickets_attribute_is_a_read_only_property(self):
@@ -4360,7 +4360,7 @@ task Task_5679 "Modeling" {
         DBSession.add(new_ticket3)
         DBSession.commit()
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_task.open_tickets,
             [new_ticket1]
         )
@@ -4470,24 +4470,26 @@ task Task_5679 "Modeling" {
         """testing if the alternative_resources argument value is correctly
         passed to the alternative_resources attribute
         """
-        self.assertItemsEqual(
-            [self.test_user3, self.test_user4, self.test_user5],
-            self.test_task.alternative_resources
+        self.assertEqual(
+            sorted([self.test_user3, self.test_user4, self.test_user5],
+                   key=lambda x: x.name),
+            sorted(self.test_task.alternative_resources, key=lambda x: x.name)
         )
 
     def test_alternative_resources_attribute_is_working_properly(self):
         """testing if the alternative_resources attribute value can be
         correctly set
         """
-        self.assertItemsEqual(
-            self.test_task.alternative_resources,
-            [self.test_user3, self.test_user4, self.test_user5]
+        self.assertEqual(
+            sorted(self.test_task.alternative_resources, key=lambda x: x.name),
+            sorted([self.test_user3, self.test_user4, self.test_user5],
+                   key=lambda x: x.name)
         )
         alternative_resources = [self.test_user4, self.test_user5]
         self.test_task.alternative_resources = alternative_resources
-        self.assertItemsEqual(
-            alternative_resources,
-            self.test_task.alternative_resources
+        self.assertEqual(
+            sorted(alternative_resources, key=lambda x: x.name),
+            sorted(self.test_task.alternative_resources, key=lambda x: x.name)
         )
 
     def test_allocation_strategy_argument_is_skipped(self):
@@ -4581,7 +4583,10 @@ task Task_5679 "Modeling" {
         self.assertNotEqual(self.test_task.resources, test_value)
         self.assertNotEqual(self.test_task.computed_resources, test_value)
         self.test_task.resources = test_value
-        self.assertItemsEqual(self.test_task.computed_resources, test_value)
+        self.assertEqual(
+            sorted(self.test_task.computed_resources, key=lambda x: x.name),
+            sorted(test_value, key=lambda x: x.name)
+        )
 
     def test_computed_resources_attribute_value_will_be_updated_with_resources_attribute_if_is_scheduled_is_False_remove(self):
         """testing if the computed_resources attribute will be updated with the
@@ -4593,7 +4598,10 @@ task Task_5679 "Modeling" {
         self.assertNotEqual(self.test_task.resources, test_value)
         self.assertNotEqual(self.test_task.computed_resources, test_value)
         self.test_task.resources = test_value
-        self.assertItemsEqual(self.test_task.computed_resources, test_value)
+        self.assertEqual(
+            sorted(self.test_task.computed_resources, key=lambda x: x.name),
+            sorted(test_value, key=lambda x: x.name)
+        )
 
     def test_computed_resources_attribute_value_will_not_be_updated_with_resources_attribute_if_is_scheduled_is_True(self):
         """testing if the computed_resources attribute will be not be updated

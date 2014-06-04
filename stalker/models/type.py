@@ -85,17 +85,16 @@ class Type(Entity, TargetEntityTypeMixin, CodeMixin):
         #CodeMixin.__init__(self, **kwargs)
         self.code = code
 
-    # def __eq__(self, other):
-    #     """the equality operator
-    #     """
-    #     return super(Type, self).__eq__(other) and isinstance(other, Type) \
-    #         and self.target_entity_type == other.target_entity_type
+    def __eq__(self, other):
+        """the equality operator
+        """
+        return super(Type, self).__eq__(other) and isinstance(other, Type) \
+            and self.target_entity_type == other.target_entity_type
 
-    # def __ne__(self, other):
-    #     """the inequality operator
-    #     """
-    # 
-    #     return not self.__eq__(other)
+    def __hash__(self):
+        """the overridden __hash__ method
+        """
+        return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)
 
 
 class EntityType(Base):

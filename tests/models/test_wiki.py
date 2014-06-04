@@ -92,7 +92,7 @@ class PageTester(unittest.TestCase):
 
         self.assertEqual(
             'Page.title can not be empty',
-            cm.exception.message
+            str(cm.exception)
         )
 
     def test_title_argument_is_None(self):
@@ -105,7 +105,7 @@ class PageTester(unittest.TestCase):
 
         self.assertEqual(
             'Page.title should be a string, not NoneType',
-            cm.exception.message
+            str(cm.exception)
         )
 
     def test_title_attribute_is_set_to_None(self):
@@ -117,7 +117,7 @@ class PageTester(unittest.TestCase):
 
         self.assertEqual(
             'Page.title should be a string, not NoneType',
-            cm.exception.message
+            str(cm.exception)
         )
 
     def test_title_argument_is_an_empty_string(self):
@@ -130,7 +130,7 @@ class PageTester(unittest.TestCase):
 
         self.assertEqual(
             'Page.title can not be empty',
-            cm.exception.message
+            str(cm.exception)
         )
 
     def test_title_attribute_is_set_to_empty_string(self):
@@ -142,7 +142,7 @@ class PageTester(unittest.TestCase):
 
         self.assertEqual(
             'Page.title can not be empty',
-            cm.exception.message
+            str(cm.exception)
         )
 
     def test_title_argument_is_not_a_string(self):
@@ -155,7 +155,7 @@ class PageTester(unittest.TestCase):
 
         self.assertEqual(
             'Page.title should be a string, not int',
-            cm.exception.message
+            str(cm.exception)
         )
 
     def test_title_attribute_is_not_a_string(self):
@@ -167,7 +167,7 @@ class PageTester(unittest.TestCase):
 
         self.assertEqual(
             'Page.title should be a string, not int',
-            cm.exception.message
+            str(cm.exception)
         )
 
     def test_title_argument_is_working_properly(self):
@@ -237,7 +237,7 @@ class PageTester(unittest.TestCase):
 
         self.assertEqual(
             'Page.content should be a string, not int',
-            cm.exception.message
+            str(cm.exception)
         )
 
     def test_content_attribute_is_set_to_a_value_other_than_a_string(self):
@@ -248,7 +248,7 @@ class PageTester(unittest.TestCase):
             self.test_page.content = ['not', 'a', 'string']
         self.assertEqual(
             'Page.content should be a string, not list',
-            cm.exception.message
+            str(cm.exception)
         )
 
     def test_content_argument_is_working_properly(self):

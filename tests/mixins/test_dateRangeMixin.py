@@ -130,7 +130,7 @@ class DateRangeMixinTester(unittest.TestCase):
             self.test_foo_obj.start,
             datetime.datetime(2013, 3, 22, 15, 00)
         )
-        self.assertIsInstance(self.test_foo_obj.start, datetime.datetime)
+        self.assertTrue(isinstance(self.test_foo_obj.start, datetime.datetime))
 
     def test_start_attribute_works_properly(self):
         """testing if the start properly is working properly
@@ -373,7 +373,7 @@ class DateRangeMixinTester(unittest.TestCase):
 
         new_foo_entity = DateRangeMixFooMixedInClass(**self.kwargs)
 
-        self.assertIsInstance(new_foo_entity.start, datetime.datetime)
+        self.assertTrue(isinstance(new_foo_entity.start, datetime.datetime))
         # can not check for start, just don't want to strugle with the round
         # thing
         #self.assertEqual(new_foo_entity.start,
@@ -480,7 +480,7 @@ class DateRangeMixinTester(unittest.TestCase):
         new_foo_entity = DateRangeMixFooMixedInClass(**self.kwargs)
 
         # just check if it is an instance of datetime.datetime
-        self.assertIsInstance(new_foo_entity.start, datetime.datetime)
+        self.assertTrue(isinstance(new_foo_entity.start, datetime.datetime))
         # can not check for start
         #self.assertEqual(new_foo_entity.start,
         #                 datetime.datetime(2013, 3, 22, 15, 30))

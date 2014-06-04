@@ -421,16 +421,21 @@ class Ticket(Entity, StatusMixin):
         """
         self.resolution = ''
 
-    # def __eq__(self, other):
-    #     """the equality operator
-    #     """
-    #     return super(Ticket, self).__eq__(other) and \
-    #         isinstance(other, Ticket) and \
-    #         other.name == self.name and \
-    #         other.number == self.number and \
-    #         other.status == self.status and \
-    #         other.logs == self.logs and \
-    #         other.priority == self.priority
+    def __eq__(self, other):
+        """the equality operator
+        """
+        return super(Ticket, self).__eq__(other) and \
+            isinstance(other, Ticket) and \
+            other.name == self.name and \
+            other.number == self.number and \
+            other.status == self.status and \
+            other.logs == self.logs and \
+            other.priority == self.priority
+
+    def __hash__(self):
+        """the overridden __hash__ method
+        """
+        return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)
 
 
 class TicketLog(SimpleEntity):

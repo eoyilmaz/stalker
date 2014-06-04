@@ -278,7 +278,10 @@ class SequenceTester(unittest.TestCase):
 
         tasks = [task1, task2]
 
-        self.assertItemsEqual(new_sequence.tasks, tasks)
+        self.assertEqual(
+            sorted(new_sequence.tasks, key=lambda x: x.name),
+            sorted(tasks, key=lambda x: x.name)
+        )
 
     def test_ProjectMixin_initialization(self):
         """testing if the ProjectMixin part is initialized correctly

@@ -85,8 +85,8 @@ t3_v1.update_paths()
 t3_v1.extension = '.ma'
 
 # you should see that all are in the same folder
-print t2_v1.absolute_full_path
-print t3_v1.absolute_full_path
+print(t2_v1.absolute_full_path)
+print(t3_v1.absolute_full_path)
 
 #
 # Lets create a second Project that use some other folder structure
@@ -162,4 +162,4 @@ comp_v1 = Version(task=comp, take_name='Test')
 comp_v1.update_paths()
 comp_v1.extension = '.ma'
 
-print comp_v1.absolute_full_path  # as you see it is in a proper shot folder
+print(comp_v1.absolute_full_path)  # as you see it is in a proper shot folder

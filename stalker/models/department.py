@@ -98,11 +98,16 @@ class Department(Entity):
         self.members = members
         self.lead = lead
 
-    # def __eq__(self, other):
-    #     """the equality operator
-    #     """
-    #     return super(Department, self).__eq__(other) and \
-    #         isinstance(other, Department)
+    def __eq__(self, other):
+        """the equality operator
+        """
+        return super(Department, self).__eq__(other) and \
+            isinstance(other, Department)
+
+    def __hash__(self):
+        """the overridden __hash__ method
+        """
+        return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)
 
     @validates("members")
     def _validate_members(self, key, member):

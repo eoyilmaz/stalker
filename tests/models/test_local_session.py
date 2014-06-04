@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+import json
 
 import os
 import pickle
@@ -167,7 +168,15 @@ class LocalSessionTester(unittest.TestCase):
             datetime.datetime.now() - datetime.timedelta(10)
 
         # pickle the data
-        local_session._write_data(pickle.dumps(local_session, -1))
+        data = json.dumps(
+            {
+                'valid_to': local_session.valid_to,
+                'logged_in_user_id': -1
+            },
+            default=local_session.default_json_serializer
+        )
+        print('data: %s' % data)
+        local_session._write_data(data)
 
         # now get it back with a new local_session
         local_session2 = LocalSession()

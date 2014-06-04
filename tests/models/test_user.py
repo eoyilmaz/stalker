@@ -447,7 +447,6 @@ class UserTest(unittest.TestCase):
         self.kwargs['name'] = 'some other name'
         self.kwargs['email'] = 'some@other.email'
 
-    
     def tearDown(self):
         """tear down the test
         """
@@ -509,7 +508,7 @@ class UserTest(unittest.TestCase):
             self.assertRaises(ValueError, User, **self.kwargs)
 
     def test_email_attribute_format(self):
-        """testing if given an email in wrong format will raise a ValueError 
+        """testing if given an email in wrong format will raise a ValueError
         """
         test_values = [
             "an email in no format",
@@ -518,7 +517,8 @@ class UserTest(unittest.TestCase):
             "@",
             "eoyilmaz@",
             "eoyilmaz@some.compony@com",
-            ]
+        ]
+
         # any of these email values should raise a ValueError
         for value in test_values:
             self.assertRaises(
@@ -621,7 +621,7 @@ class UserTest(unittest.TestCase):
             (" eRkAn", "erkan"),
             (" eRkan ozGur", "erkanozgur"),
             ("213 e.ozgur", "eozgur"),
-            ]
+        ]
 
         for valuePair in test_values:
             # set the input and expect the expected output
@@ -747,7 +747,7 @@ class UserTest(unittest.TestCase):
         empty list
         """
         self.kwargs['departments'] = []
-        new_user = User(**self.kwargs)
+        User(**self.kwargs)
 
     def test_departments_attribute_is_an_empty_list(self):
         """testing if the departments attribute can be set to an empty list
@@ -790,8 +790,10 @@ class UserTest(unittest.TestCase):
         """
         # try to set and get the same value back
         self.test_user.departments = [self.test_department2]
-        self.assertItemsEqual(self.test_user.departments,
-                              [self.test_department2])
+        self.assertEqual(
+            sorted(self.test_user.departments, key=lambda x: x.name),
+            sorted([self.test_department2], key=lambda x: x.name)
+        )
 
     def test_departments_attribute_supports_appending(self):
         """testing if departments attribute supports appending
@@ -799,8 +801,11 @@ class UserTest(unittest.TestCase):
         self.test_user.departments = []
         self.test_user.departments.append(self.test_department1)
         self.test_user.departments.append(self.test_department2)
-        self.assertItemsEqual(self.test_user.departments,
-                              [self.test_department1, self.test_department2])
+        self.assertEqual(
+            sorted(self.test_user.departments, key=lambda x: x.name),
+            sorted([self.test_department1, self.test_department2],
+                   key=lambda x: x.name)
+        )
 
     def test_password_argument_being_None(self):
         """testing if a TypeError will be raised when trying to assign None
@@ -833,8 +838,8 @@ class UserTest(unittest.TestCase):
         """
         test_password = "a new test password"
         self.kwargs["password"] = test_password
-        aNew_user = User(**self.kwargs)
-        self.assertNotEquals(aNew_user.password, test_password)
+        new_user = User(**self.kwargs)
+        self.assertNotEquals(new_user.password, test_password)
 
     def test_password_attribute_being_scrambled(self):
         """testing if password is scrambled when trying to store it
@@ -859,6 +864,7 @@ class UserTest(unittest.TestCase):
 
         # check if check_password returns False
         self.assertFalse(self.test_user.check_password("wrong pass"))
+        self.fail('')
 
     def test_groups_argument_for_None(self):
         """testing if the groups attribute will be an empty list
@@ -959,7 +965,10 @@ class UserTest(unittest.TestCase):
         """
         test_list = [self.test_project1, self.test_project2]
         self.test_user.projects = test_list
-        self.assertItemsEqual(test_list, self.test_user.projects)
+        self.assertEqual(
+            sorted(test_list, key=lambda x: x.name),
+            sorted(self.test_user.projects, key=lambda x: x.name)
+        )
         self.test_user.projects.append(self.test_project3)
         self.assertIn(self.test_project3, self.test_user.projects)
         # also check the backref
@@ -1166,9 +1175,10 @@ class UserTest(unittest.TestCase):
         self.assertTrue(len(self.test_user.tickets) > 0)
 
         # now check for exact items
-        self.assertItemsEqual(
-            self.test_user.tickets,
-            [self.test_ticket2, self.test_ticket3, self.test_ticket4]
+        self.assertEqual(
+            sorted(self.test_user.tickets, key=lambda x: x.name),
+            sorted([self.test_ticket2, self.test_ticket3, self.test_ticket4],
+                   key=lambda x: x.name)
         )
 
     def test_open_tickets_attribute_returns_all_open_tickets_owned_by_this_user(self):
@@ -1204,9 +1214,9 @@ class UserTest(unittest.TestCase):
         self.assertTrue(len(self.test_user.open_tickets) > 0)
 
         # now check for exact items
-        self.assertItemsEqual(
-            self.test_user.open_tickets,
-            [
+        self.assertEqual(
+            sorted(self.test_user.open_tickets, key=lambda x: x.name),
+            sorted([
                 self.test_ticket1,
                 self.test_ticket2,
                 self.test_ticket3,
@@ -1215,27 +1225,26 @@ class UserTest(unittest.TestCase):
                 self.test_ticket6,
                 self.test_ticket7,
                 self.test_ticket8,
-            ]
+            ], key=lambda x: x.name)
         )
 
         # close a couple of them
-        from stalker.models.ticket import (FIXED, CANTFIX, WONTFIX, DUPLICATE,
-                                           WORKSFORME, INVALID)
+        from stalker.models.ticket import FIXED, CANTFIX, INVALID
 
         self.test_ticket1.resolve(self.test_user, FIXED)
         self.test_ticket2.resolve(self.test_user, INVALID)
         self.test_ticket3.resolve(self.test_user, CANTFIX)
 
         # new check again
-        self.assertItemsEqual(
-            self.test_user.open_tickets,
-            [
+        self.assertEqual(
+            sorted(self.test_user.open_tickets, key=lambda x: x.name),
+            sorted([
                 self.test_ticket4,
                 self.test_ticket5,
                 self.test_ticket6,
                 self.test_ticket7,
                 self.test_ticket8
-            ]
+            ], key=lambda x: x.name)
         )
 
     def test_tjp_id_is_working_properly(self):
@@ -1262,14 +1271,14 @@ class UserTest(unittest.TestCase):
             target_entity_type='Vacation'
         )
 
-        vac1 = Vacation(
+        Vacation(
             user=self.test_user,
             type=personal_vacation,
             start=datetime.datetime(2013, 6, 7, 0, 0),
             end=datetime.datetime(2013, 6, 21, 0, 0)
         )
 
-        vac2 = Vacation(
+        Vacation(
             user=self.test_user,
             type=personal_vacation,
             start=datetime.datetime(2013, 7, 1, 0, 0),
@@ -1281,9 +1290,11 @@ class UserTest(unittest.TestCase):
     vacation 2013-06-07-00:00:00 - 2013-06-21-00:00:00
     vacation 2013-07-01-00:00:00 - 2013-07-15-00:00:00
 }""" % self.test_user.id
+
         # print expected_tjp
         # print '---------------'
         # print self.test_user.to_tjp
+
         self.assertEqual(
             expected_tjp,
             self.test_user.to_tjp
@@ -1375,12 +1386,12 @@ class UserTest(unittest.TestCase):
         """
         self.kwargs['efficiency'] = 'not a float or integer'
         with self.assertRaises(TypeError) as cm:
-            new_user = User(**self.kwargs)
+            User(**self.kwargs)
 
         self.assertEqual(
             'User.efficiency should be a float number greater or equal to '
             '0.0, not str',
-            cm.exception.message
+            str(cm.exception)
         )
 
     def test_efficiency_attribute_is_not_a_float_or_integer(self):
@@ -1393,7 +1404,7 @@ class UserTest(unittest.TestCase):
         self.assertEqual(
             'User.efficiency should be a float number greater or equal to '
             '0.0, not str',
-            cm.exception.message
+            str(cm.exception)
         )
 
     def test_efficiency_argument_is_a_negative_float_or_integer(self):
@@ -1402,12 +1413,12 @@ class UserTest(unittest.TestCase):
         """
         self.kwargs['efficiency'] = -1
         with self.assertRaises(ValueError) as cm:
-            new_user = User(**self.kwargs)
+            User(**self.kwargs)
 
         self.assertEqual(
             'User.efficiency should be a float number greater or equal to '
             '0.0, not -1',
-            cm.exception.message
+            str(cm.exception)
         )
 
     def test_efficiency_attribute_is_a_negative_float_or_integer(self):
@@ -1420,7 +1431,7 @@ class UserTest(unittest.TestCase):
         self.assertEqual(
             'User.efficiency should be a float number greater or equal to '
             '0.0, not -2.0',
-            cm.exception.message
+            str(cm.exception)
         )
 
     def test_efficiency_argument_is_working_properly(self):

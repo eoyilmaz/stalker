@@ -148,7 +148,7 @@ class ClientTestCase(unittest.TestCase):
         # this should work without raising any error
         self.kwargs["users"] = []
         new_dep = Client(**self.kwargs)
-        self.assertIsInstance(new_dep, Client)
+        self.assertTrue(isinstance(new_dep, Client))
 
     def test_users_attribute_accepts_an_empty_list(self):
         """testing if users attribute accepts an empty list
@@ -247,7 +247,7 @@ class ClientTestCase(unittest.TestCase):
         # this should work without raising any error
         self.kwargs["projects"] = []
         new_dep = Client(**self.kwargs)
-        self.assertIsInstance(new_dep, Client)
+        self.assertTrue(isinstance(new_dep, Client))
 
     def test_projects_attribute_accepts_an_empty_list(self):
         """testing if projects attribute accepts an empty list

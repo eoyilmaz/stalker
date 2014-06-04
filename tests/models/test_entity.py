@@ -75,7 +75,7 @@ class EntityTester(unittest.TestCase):
         """
         self.kwargs.pop("notes")
         new_entity = Entity(**self.kwargs)
-        self.assertIsInstance(new_entity, Entity)
+        self.assertTrue(isinstance(new_entity, Entity))
 
     def test_notes_argument_is_set_to_None(self):
         """testing if the notes attribute will be set to an empty list when the
@@ -160,7 +160,7 @@ class EntityTester(unittest.TestCase):
         self.kwargs.pop("tags")
         # this should work without errors
         new_entity = Entity(**self.kwargs)
-        self.assertIsInstance(new_entity, Entity)
+        self.assertTrue(isinstance(new_entity, Entity))
 
     def test_tags_argument_being_initialized_as_an_empty_list(self):
         """testing if nothing happens when tags argument an empty list

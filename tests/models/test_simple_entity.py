@@ -529,7 +529,7 @@ class SimpleEntityTester(unittest.TestCase):
         """
         self.kwargs["type"] = None
         new_simple_entity = SimpleEntity(**self.kwargs)
-        self.assertIsInstance(new_simple_entity, SimpleEntity)
+        self.assertTrue(isinstance(new_simple_entity, SimpleEntity))
 
     def test_type_attribute_is_set_to_None(self):
         """testing if nothing will be happened when the type attribute is set
@@ -554,7 +554,7 @@ class SimpleEntityTester(unittest.TestCase):
         self.kwargs["type"] = self.test_type
         # no error is expected
         new_simple_entity = SimpleEntity(**self.kwargs)
-        self.assertIsInstance(new_simple_entity, SimpleEntity)
+        self.assertTrue(isinstance(new_simple_entity, SimpleEntity))
 
     def test_type_attribute_accepts_only_Type_instances(self):
         """testing if a TypeError will be raised when the given type attribute
@@ -590,7 +590,7 @@ class SimpleEntityTester(unittest.TestCase):
 
         # create a new instance and skip the Type attribute and expect a
         # TypeError
-        if self.kwargs.has_key("type"):
+        if "type" in self.kwargs:
             self.kwargs.pop("type")
 
         self.assertRaises(TypeError, NewClass, **self.kwargs)

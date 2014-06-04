@@ -20,6 +20,7 @@
 
 import unittest
 import datetime
+import logging
 
 from stalker.db import DBSession
 from stalker import (db, defaults, Studio, WorkingHours, Project, StatusList,
@@ -45,6 +46,13 @@ class DummyScheduler(SchedulerBase):
 class StudioTester(unittest.TestCase):
     """tests the stalker.models.studio.Studio class
     """
+
+    @classmethod
+    def setUpClass(cls):
+        """setup once
+        """
+        logger = logging.getLogger('stalker.models.schedulers')
+        logger.setLevel(logging.DEBUG)
 
     def setUp(self):
         """setup the test
@@ -647,9 +655,12 @@ class StudioTester(unittest.TestCase):
     def test_projects_attribute_is_working_properly(self):
         """testing if the projects attribute is working properly
         """
-        self.assertItemsEqual(
-            self.test_studio.projects,
-            [self.test_project1, self.test_project2, self.test_project3]
+        self.assertEqual(
+            sorted(self.test_studio.projects, key=lambda x: x.name),
+            sorted(
+                [self.test_project1, self.test_project2, self.test_project3],
+                key=lambda x: x.name
+            )
         )
 
     def test_active_projects_attribute_is_read_only(self):
@@ -661,9 +672,10 @@ class StudioTester(unittest.TestCase):
     def test_active_projects_attribute_is_working_properly(self):
         """testing if the active_projects attribute is working properly
         """
-        self.assertItemsEqual(
-            self.test_studio.active_projects,
-            [self.test_project1, self.test_project2]
+        self.assertEqual(
+            sorted(self.test_studio.active_projects, key=lambda x: x.name),
+            sorted([self.test_project1, self.test_project2],
+                   key=lambda x: x.name)
         )
 
     def test_inactive_projects_attribute_is_read_only(self):
@@ -675,9 +687,9 @@ class StudioTester(unittest.TestCase):
     def test_inactive_projects_attribute_is_working_properly(self):
         """testing if the inactive_projects attribute is working properly
         """
-        self.assertItemsEqual(
-            self.test_studio.inactive_projects,
-            [self.test_project3]
+        self.assertEqual(
+            sorted(self.test_studio.inactive_projects, key=lambda x: x.name),
+            sorted([self.test_project3], key=lambda x: x.name)
         )
 
     def test_departments_attribute_is_read_only(self):
@@ -692,9 +704,11 @@ class StudioTester(unittest.TestCase):
         # don't forget admins department
         db.init()
         admins_dep = Department.query.filter_by(name='admins').first()
-        self.assertItemsEqual(self.test_studio.departments,
-                              [self.test_department1, self.test_department2,
-                               admins_dep])
+        self.assertEqual(
+            sorted(self.test_studio.departments, key=lambda x: x.name),
+            sorted([self.test_department1, self.test_department2, admins_dep],
+                   key=lambda x: x.name)
+        )
 
     def test_users_attribute_is_read_only(self):
         """testing if the users attribute is a read only attribute
@@ -708,9 +722,10 @@ class StudioTester(unittest.TestCase):
         # don't forget the admin
         admin = User.query.filter_by(name='admin').first()
 
-        self.assertItemsEqual(
-            self.test_studio.users,
-            [admin, self.test_user1, self.test_user2, self.test_user3]
+        self.assertEqual(
+            sorted(self.test_studio.users, key=lambda x: x.name),
+            sorted([admin, self.test_user1, self.test_user2, self.test_user3],
+                   key=lambda x: x.name)
         )
 
     def test_to_tjp_attribute_is_read_only(self):
@@ -819,11 +834,11 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
         expected_tjp = expected_tjp_template.render({
             'studio': self.test_studio
         })
-        print '-----------------------------------'
-        print expected_tjp
-        print '-----------------------------------'
-        print self.test_studio.to_tjp
-        print '-----------------------------------'
+        # print('-----------------------------------')
+        # print(expected_tjp)
+        # print('-----------------------------------')
+        # print(self.test_studio.to_tjp)
+        # print('-----------------------------------')
         self.assertEqual(self.test_studio.to_tjp, expected_tjp)
 
     def test_scheduler_attribute_can_be_set_to_None(self):
@@ -919,7 +934,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
         # print "%s:self.test_task30.id" % self.test_task30.id
         # print "%s:self.test_task31.id" % self.test_task31.id
 
-        self.test_project1
+        # self.test_project1
         self.assertEqual(
             datetime.datetime(2013, 4, 16, 9, 0),
             self.test_project1.computed_start
@@ -939,7 +954,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_asset1.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_asset1.computed_resources,
             []
         )
@@ -954,7 +969,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_task24.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_task24.computed_resources,
             [self.test_user1]
         )
@@ -969,7 +984,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_task25.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_task25.computed_resources,
             [self.test_user3]
         )
@@ -984,7 +999,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_task26.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_task26.computed_resources,
             [self.test_user3]
         )
@@ -999,7 +1014,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_task27.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_task27.computed_resources,
             [self.test_user2]
         )
@@ -1014,7 +1029,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_shot2.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_shot2.computed_resources,
             []
         )
@@ -1029,7 +1044,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_task8.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_task8.computed_resources,
             [self.test_user2]
         )
@@ -1044,7 +1059,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_task9.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_task9.computed_resources,
             [self.test_user2]
         )
@@ -1059,7 +1074,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_task10.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_task10.computed_resources,
             [self.test_user2]
         )
@@ -1074,7 +1089,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_task11.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_task11.computed_resources,
             [self.test_user3]
         )
@@ -1089,7 +1104,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_shot1.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_shot1.computed_resources,
             []
         )
@@ -1104,7 +1119,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_task4.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_task4.computed_resources,
             [self.test_user1]
         )
@@ -1119,7 +1134,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_task5.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_task5.computed_resources,
             [self.test_user1]
         )
@@ -1134,7 +1149,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_task6.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_task6.computed_resources,
             [self.test_user1]
         )
@@ -1149,7 +1164,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_task7.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_task7.computed_resources,
             [self.test_user3]
         )
@@ -1164,7 +1179,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_task1.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_task1.computed_resources,
             [self.test_user3]
         )
@@ -1179,7 +1194,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
         #     self.test_project2.computed_end
         # )
 
-        # self.assertItemsEqual(
+        # self.assertEqual(
         #     self.test_project2.computed_resources,
         #     []
         # )
@@ -1194,7 +1209,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_asset2.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_asset2.computed_resources,
             []
         )
@@ -1209,7 +1224,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_task28.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_task28.computed_resources,
             [self.test_user2]
         )
@@ -1224,7 +1239,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_task29.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_task29.computed_resources,
             [self.test_user1]
         )
@@ -1239,7 +1254,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_task30.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_task30.computed_resources,
             [self.test_user2]
         )
@@ -1254,7 +1269,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_task31.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_task31.computed_resources,
             [self.test_user1]
         )
@@ -1269,7 +1284,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_shot3.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_shot3.computed_resources,
             []
         )
@@ -1284,7 +1299,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_task12.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_task12.computed_resources,
             [self.test_user2]
         )
@@ -1299,7 +1314,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_task13.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_task13.computed_resources,
             [self.test_user1]
         )
@@ -1314,7 +1329,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_task14.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_task14.computed_resources,
             [self.test_user1]
         )
@@ -1329,7 +1344,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_task15.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_task15.computed_resources,
             [self.test_user2]
         )
@@ -1344,7 +1359,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_shot4.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_shot4.computed_resources,
             []
         )
@@ -1359,7 +1374,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_task16.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_task16.computed_resources,
             [self.test_user2]
         )
@@ -1374,7 +1389,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_task17.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_task17.computed_resources,
             [self.test_user2]
         )
@@ -1389,7 +1404,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_task18.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_task18.computed_resources,
             [self.test_user2]
         )
@@ -1404,7 +1419,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_task19.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_task19.computed_resources,
             [self.test_user1]
         )
@@ -1419,7 +1434,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
             self.test_task2.computed_end
         )
 
-        self.assertItemsEqual(
+        self.assertEqual(
             self.test_task2.computed_resources,
             [self.test_user3]
         )
@@ -1532,9 +1547,9 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
         DBSession.add_all([vacation1, vacation2, vacation3])
         DBSession.commit()
 
-        self.assertItemsEqual(
-            self.test_studio.vacations,
-            [vacation1, vacation2]
+        self.assertEqual(
+            sorted(self.test_studio.vacations, key=lambda x: x.name),
+            sorted([vacation1, vacation2], key=lambda x: x.name)
         )
 
     def test_timing_resolution_argument_skipped(self):
@@ -1694,6 +1709,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
         studio.timing_resolution = new_res
         self.assertEqual(studio.timing_resolution, new_res)
 
+
 @unittest.skip
 def csv_to_test_converter():
     """convert tjp output csv to test case
@@ -1750,8 +1766,8 @@ def csv_to_test_converter():
 
     ids_to_name = {}
     for line in ids.split('\n'):
-        id, name = line.split(':')
-        ids_to_name[id] = name
+        id_, name = line.split(':')
+        ids_to_name[id_] = name
 
     raw_data = '''"Project_38";"2013-04-16-09:00";"2013-06-19-11:00";""
     "Project_38.Asset_41";"2013-04-16-09:00";"2013-05-17-10:00";""
@@ -1800,11 +1816,11 @@ def csv_to_test_converter():
                 {{entity_name}}.computed_end
             )
             {% if resources %}
-            self.assertItemsEqual(
-                {{entity_name}}.computed_resources,
-                [{% for r in resources -%}
+            self.assertEqual(
+                sorted({{entity_name}}.computed_resources, key=lambda x: x.name),
+                soretd([{% for r in resources -%}
                 {{r}}{% if loop.index != 1%},{% endif %}
-                {%- endfor %}]
+                {%- endfor %}], key=lambda x: x.name)
             )
             {% endif %}
     """
@@ -1854,4 +1870,4 @@ def csv_to_test_converter():
         rendered_data.append(rendered_template)
 
     for r in rendered_data:
-        print r
+        print(r)

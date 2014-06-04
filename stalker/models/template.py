@@ -153,11 +153,16 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
 
         return filename_in
 
-    # def __eq__(self, other):
-    #     """checks the equality of the given object to this one
-    #     """
-    #     return super(FilenameTemplate, self).__eq__(other) and \
-    #         isinstance(other, FilenameTemplate) and \
-    #         self.target_entity_type == other.target_entity_type and \
-    #         self.path == other.path and \
-    #         self.filename == other.filename
+    def __eq__(self, other):
+        """checks the equality of the given object to this one
+        """
+        return super(FilenameTemplate, self).__eq__(other) and \
+            isinstance(other, FilenameTemplate) and \
+            self.target_entity_type == other.target_entity_type and \
+            self.path == other.path and \
+            self.filename == other.filename
+
+    def __hash__(self):
+        """the overridden __hash__ method
+        """
+        return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)

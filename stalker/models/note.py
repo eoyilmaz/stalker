@@ -62,9 +62,14 @@ class Note(SimpleEntity):
         super(Note, self).__init__(**kwargs)
         self.content = content
 
-    # def __eq__(self, other):
-    #     """the equality operator
-    #     """
-    #     return super(Note, self).__eq__(other) and \
-    #         isinstance(other, Note) and \
-    #         self.content == other.content
+    def __eq__(self, other):
+        """the equality operator
+        """
+        return super(Note, self).__eq__(other) and \
+            isinstance(other, Note) and \
+            self.content == other.content
+
+    def __hash__(self):
+        """the overridden __hash__ method
+        """
+        return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)

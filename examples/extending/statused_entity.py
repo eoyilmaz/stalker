@@ -40,4 +40,3 @@ class NewStatusedEntity(SimpleEntity, StatusMixin):
 
 # voila now we have introduced a new type to the SOM and also mixed it with a
 # StatusMixin
-

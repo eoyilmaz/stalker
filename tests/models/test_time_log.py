@@ -820,13 +820,13 @@ class TimeLogDBTestCase(unittest.TestCase):
             )
 
         self.assertEqual(
-            'It is not possible to create a TimeLog before %s, which violates '
-            'the dependency relation of "%s" to "%s"' % (
+            '\'It is not possible to create a TimeLog before %s, which '
+            'violates the dependency relation of "%s" to "%s"\'' % (
                 datetime.datetime(2014, 3, 25, 19, 0),
                 dep_task.name,
                 task.name
             ),
-            cm.exception.message
+            str(cm.exception)
         )
 
         # and creating a TimeLog after that is possible
@@ -876,13 +876,13 @@ class TimeLogDBTestCase(unittest.TestCase):
             )
 
         self.assertEqual(
-            'It is not possible to create a TimeLog before %s, which violates '
-            'the dependency relation of "%s" to "%s"' % (
+            '\'It is not possible to create a TimeLog before %s, which '
+            'violates the dependency relation of "%s" to "%s"\'' % (
                 datetime.datetime(2014, 3, 16, 10, 0),
                 dep_task.name,
                 task.name
             ),
-            cm.exception.message
+            str(cm.exception)
         )
 
         # and creating a TimeLog after that is possible

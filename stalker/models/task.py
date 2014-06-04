@@ -244,12 +244,12 @@ class TimeLog(Entity, DateRangeMixin):
                         )
         return resource
 
-    # def __eq__(self, other):
-    #     """equality of TimeLog instances
-    #     """
-    #     return isinstance(other, TimeLog) and self.task is other.task and \
-    #         self.resource is other.resource and self.start == other.start and \
-    #         self.end == other.end and self.name == other.name
+    def __eq__(self, other):
+        """equality of TimeLog instances
+        """
+        return isinstance(other, TimeLog) and self.task is other.task and \
+            self.resource is other.resource and self.start == other.start and \
+            self.end == other.end and self.name == other.name
 
 # TODO: Consider contracting a Task with TimeLogs, what will happen when the
 #       task has logged in time
@@ -1169,13 +1169,18 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         # temp attribute for remove event
         self._previously_removed_dependent_tasks = []
 
-    # def __eq__(self, other):
-    #     """the equality operator
-    #     """
-    #     return super(Task, self).__eq__(other) and isinstance(other, Task) \
-    #         and self.project == other.project and self.parent == other.parent \
-    #         and self.depends == other.depends and self.start == other.start \
-    #         and self.end == other.end and self.resources == other.resources
+    def __eq__(self, other):
+        """the equality operator
+        """
+        return super(Task, self).__eq__(other) and isinstance(other, Task) \
+            and self.project == other.project and self.parent == other.parent \
+            and self.depends == other.depends and self.start == other.start \
+            and self.end == other.end and self.resources == other.resources
+
+    def __hash__(self):
+        """the overridden __hash__ method
+        """
+        return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)
 
     @validates("time_logs")
     def _validate_time_logs(self, key, time_log):

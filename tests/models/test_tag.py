@@ -48,7 +48,7 @@ class TagTest(unittest.TestCase):
         """
         # this should work without any error
         tag = Tag(**self.kwargs)
-        self.assertIsInstance(tag, Tag)
+        self.assertTrue(isinstance(tag, Tag))
 
     def test_equality(self):
         """testing the equality of two Tags

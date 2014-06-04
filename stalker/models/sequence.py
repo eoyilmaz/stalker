@@ -83,8 +83,13 @@ class Sequence(Task, CodeMixin):
             )
         return shot
 
-    # def __eq__(self, other):
-    #     """the equality operator
-    #     """
-    #     return isinstance(other, Sequence) and \
-    #         super(Sequence, self).__eq__(other)
+    def __eq__(self, other):
+        """the equality operator
+        """
+        return isinstance(other, Sequence) and \
+            super(Sequence, self).__eq__(other)
+
+    def __hash__(self):
+        """the overridden __hash__ method
+        """
+        return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)

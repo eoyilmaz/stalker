@@ -309,9 +309,9 @@ class TicketTester(unittest.TestCase):
         ]
 
         new_ticket = Ticket(**self.kwargs)
-        self.assertItemsEqual(
-            self.kwargs['links'],
-            new_ticket.links
+        self.assertEqual(
+            sorted(self.kwargs['links'], key=lambda x: x.name),
+            sorted(new_ticket.links, key=lambda x: x.name)
         )
 
     def test_links_attribute_accepts_anything_derived_from_SimpleEntity(self):
@@ -326,7 +326,10 @@ class TicketTester(unittest.TestCase):
             self.test_version
         ]
         self.test_ticket.links = links
-        self.assertItemsEqual(links, self.test_ticket.links)
+        self.assertEqual(
+            sorted(links, key=lambda x: x.name),
+            sorted(self.test_ticket.links, key=lambda x: x.name)
+        )
 
     def test_related_tickets_attribute_is_an_empty_list_on_init(self):
         """testing if the related_tickets attribute is an empty list on init
@@ -690,7 +693,7 @@ class TicketTester(unittest.TestCase):
         self.test_ticket.resolve(resolution='fixed')
         self.assertEqual(self.test_ticket.resolution, 'fixed')
         ticket_log = self.test_ticket.reopen()
-        self.assertIsInstance(ticket_log, TicketLog)
+        self.assertTrue(isinstance(ticket_log, TicketLog))
         self.assertEqual(self.test_ticket.resolution, '')
 
     def test_reassign_will_set_the_owner(self):
@@ -699,7 +702,7 @@ class TicketTester(unittest.TestCase):
         self.assertEqual(self.test_ticket.status, self.status_new)
         self.assertNotEqual(self.test_ticket.owner, self.test_user)
         ticket_log = self.test_ticket.reassign(assign_to=self.test_user)
-        self.assertIsInstance(ticket_log, TicketLog)
+        self.assertTrue(isinstance(ticket_log, TicketLog))
         self.assertEqual(self.test_ticket.owner, self.test_user)
 
     def test_accept_will_set_the_owner(self):
@@ -708,7 +711,7 @@ class TicketTester(unittest.TestCase):
         self.assertEqual(self.test_ticket.status, self.status_new)
         self.assertNotEqual(self.test_ticket.owner, self.test_user)
         ticket_log = self.test_ticket.accept(created_by=self.test_user)
-        self.assertIsInstance(ticket_log, TicketLog)
+        self.assertTrue(isinstance(ticket_log, TicketLog))
         self.assertEqual(self.test_ticket.owner, self.test_user)
 
     def test_summary_argument_skipped(self):

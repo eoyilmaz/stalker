@@ -23,7 +23,7 @@ import tempfile
 import unittest
 from stalker.db import DBSession
 from stalker import (db, User, Status, StatusList, Repository, Project, Task,
-                     Type, TimeLog, Review)
+                     Type, TimeLog)
 from stalker.exceptions import StatusError
 
 
@@ -964,7 +964,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         end = datetime.datetime.now() + datetime.timedelta(hours=1)
         self.assertEqual(self.test_task3.status, self.status_prev)
         tlog = self.test_task3.create_time_log(resource, start, end)
-        self.assertIsInstance(tlog, TimeLog)
+        self.assertTrue(isinstance(tlog, TimeLog))
         self.assertEqual(self.test_task3.status, self.status_prev)
 
     # HREV
@@ -1072,7 +1072,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
             start=now,
             end=now + datetime.timedelta(hours=1)
         )
-        self.assertIsInstance(tl, TimeLog)
+        self.assertTrue(isinstance(tl, TimeLog))
 
     # request_review
     # WFD
@@ -1110,8 +1110,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_wip
         reviews = self.test_task3.request_review()
         self.assertEqual(len(reviews), 2)
-        self.assertIsInstance(reviews[0], Review)
-        self.assertIsInstance(reviews[1], Review)
+        self.assertTrue(isinstance(reviews[0], Review))
+        self.assertTrue(isinstance(reviews[1], Review))
 
     # WIP: review instances review_number is correct
     def test_request_review_in_WIP_leaf_task_review_instances_review_number(self):
@@ -1367,7 +1367,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
             schedule_unit='w'
         )
         from stalker import Review
-        self.assertIsInstance(new_review, Review)
+        self.assertTrue(isinstance(new_review, Review))
 
     #HREV
     def test_request_revision_in_HREV_leaf_task(self):
@@ -3249,7 +3249,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.assertEqual(
             'review_number argument in Task.review_set should be a positive '
             'integer, not str',
-            cm.exception.message
+            str(cm.exception)
         )
 
     def test_review_set_review_number_is_a_negative_integer(self):
@@ -3262,7 +3262,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.assertEqual(
             'review_number argument in Task.review_set should be a positive '
             'integer, not -10',
-            cm.exception.message
+            str(cm.exception)
         )
 
     def test_review_set_review_number_is_zero(self):
@@ -3275,7 +3275,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.assertEqual(
             'review_number argument in Task.review_set should be a positive '
             'integer, not 0',
-            cm.exception.message
+            str(cm.exception)
         )
 
     def test_review_set_method_is_working_properly(self):

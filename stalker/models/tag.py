@@ -44,12 +44,12 @@ class Tag(SimpleEntity):
     def __init__(self, **kwargs):
         super(Tag, self).__init__(**kwargs)
 
-    # def __eq__(self, other):
-    #     """the equality operator
-    #     """
-    #     return super(Tag, self).__eq__(other) and isinstance(other, Tag)
+    def __eq__(self, other):
+        """the equality operator
+        """
+        return super(Tag, self).__eq__(other) and isinstance(other, Tag)
 
-    # def __ne__(self, other):
-    #     """the inequality operator
-    #     """
-    #     return not self.__eq__(other)
+    def __hash__(self):
+        """the overridden __hash__ method
+        """
+        return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)

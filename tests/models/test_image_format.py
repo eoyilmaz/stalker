@@ -80,7 +80,7 @@ class ImageFormatTest(unittest.TestCase):
         # the given floats should be converted to integer
         self.kwargs["width"] = 1920.0
         an_image_format = ImageFormat(**self.kwargs)
-        self.assertIsInstance(an_image_format.width, int)
+        self.assertTrue(isinstance(an_image_format.width, int))
 
     def test_width_attribute_float_to_int_conversion(self):
         """testing the width attribute against being converted to int
@@ -88,7 +88,7 @@ class ImageFormatTest(unittest.TestCase):
         """
         # the given floats should be converted to integer
         self.test_image_format.width = 1920.0
-        self.assertIsInstance(self.test_image_format.width, int)
+        self.assertTrue(isinstance(self.test_image_format.width, int))
 
     def test_width_argument_being_zero(self):
         """testing if a ValueError will be raised when the width argument is
@@ -148,8 +148,7 @@ class ImageFormatTest(unittest.TestCase):
         self.kwargs["height"] = 1080.0
         an_image_format = ImageFormat(**self.kwargs)
 
-        self.assertIsInstance(an_image_format.height, int)
-
+        self.assertTrue(isinstance(an_image_format.height, int))
 
     def test_height_attribute_float_to_int_conversion(self):
         """testing the height attribute given as float being converted to int
@@ -157,7 +156,7 @@ class ImageFormatTest(unittest.TestCase):
         """
         # also test the attribute for this
         self.test_image_format.height = 1080.0
-        self.assertIsInstance(self.test_image_format.height, int)
+        self.assertTrue(isinstance(self.test_image_format.height, int))
 
     def test_height_argument_being_zero(self):
         """testing if a ValueError will be raised when the height argument is
@@ -190,7 +189,9 @@ class ImageFormatTest(unittest.TestCase):
     def test_device_aspect_attribute_float(self):
         """testing the if device aspect ratio is calculated as a float value
         """
-        self.assertIsInstance(self.test_image_format.device_aspect, float)
+        self.assertTrue(
+            isinstance(self.test_image_format.device_aspect, float)
+        )
 
     def test_device_aspect_ratio_correctly_calculated(self):
         """testing if the device aspect ratio is correctly calculated
@@ -290,7 +291,7 @@ class ImageFormatTest(unittest.TestCase):
         # the returned pixel aspect ratio should be a float
         self.kwargs["pixel_aspect"] = 1
         an_image_format = ImageFormat(**self.kwargs)
-        self.assertIsInstance(an_image_format.pixel_aspect, float)
+        self.assertTrue(isinstance(an_image_format.pixel_aspect, float))
 
     def test_pixel_aspect_argument_zero(self):
         """testing if a ValueError will be raised when the pixel_aspect
@@ -346,7 +347,7 @@ class ImageFormatTest(unittest.TestCase):
         imf = ImageFormat(**self.kwargs)
 
         # and the default value should be a float instance
-        self.assertIsInstance(imf.print_resolution, float)
+        self.assertTrue(isinstance(imf.print_resolution, float))
 
     def test_print_resolution_argument_accepts_int_float_only(self):
         """testing if a TypeError will be raised when the print_resolution
@@ -360,11 +361,11 @@ class ImageFormatTest(unittest.TestCase):
 
         self.kwargs["print_resolution"] = 300
         imf = ImageFormat(**self.kwargs)
-        self.assertIsInstance(imf.print_resolution, float)
+        self.assertTrue(isinstance(imf.print_resolution, float))
 
         self.kwargs["print_resolution"] = 300.0
         imf = ImageFormat(**self.kwargs)
-        self.assertIsInstance(imf.print_resolution, float)
+        self.assertTrue(isinstance(imf.print_resolution, float))
 
     def test_print_resolution_argument_zero(self):
         """testing if a ValueError will be raised when the print_resolution

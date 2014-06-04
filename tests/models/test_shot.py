@@ -253,7 +253,7 @@ class ShotTester(unittest.TestCase):
         # this should not raise a ValueError
         self.kwargs["code"] = "DifferentCode"
         new_shot2 = Shot(**self.kwargs)
-        self.assertIsInstance(new_shot2, Shot)
+        self.assertTrue(isinstance(new_shot2, Shot))
 
     def test_project_attribute_is_read_only(self):
         """testing if the project attribute is read only
@@ -355,7 +355,10 @@ class ShotTester(unittest.TestCase):
         self.kwargs['sequences'] = seqs
         new_shot = Shot(**self.kwargs)
 
-        self.assertItemsEqual(new_shot.sequences, seqs)
+        self.assertEqual(
+            sorted(new_shot.sequences, key=lambda x: x.name),
+            sorted(seqs, key=lambda x: x.name)
+        )
 
     def test_sequences_attribute_is_working_properly(self):
         """testing if the sequences attribute is working properly
@@ -388,7 +391,10 @@ class ShotTester(unittest.TestCase):
         new_shot.sequences.append(seq3)
 
         seqs = [seq1, seq2, seq3]
-        self.assertItemsEqual(new_shot.sequences, seqs)
+        self.assertEqual(
+            sorted(new_shot.sequences, key=lambda x: x.name),
+            sorted(seqs, key=lambda x: x.name)
+        )
 
     def test_scenes_argument_is_skipped(self):
         """testing if the scenes attribute will be an empty list when the
@@ -458,7 +464,10 @@ class ShotTester(unittest.TestCase):
         self.kwargs['scenes'] = seqs
         new_shot = Shot(**self.kwargs)
 
-        self.assertItemsEqual(new_shot.scenes, seqs)
+        self.assertEqual(
+            sorted(new_shot.scenes, key=lambda x: x.name),
+            sorted(seqs, key=lambda x: x.name)
+        )
 
     def test_scenes_attribute_is_working_properly(self):
         """testing if the scenes attribute is working properly
@@ -476,7 +485,10 @@ class ShotTester(unittest.TestCase):
         new_shot.scenes.append(sce3)
 
         seqs = [sce1, sce2, sce3]
-        self.assertItemsEqual(new_shot.scenes, seqs)
+        self.assertEqual(
+            sorted(new_shot.scenes, key=lambda x: x.name),
+            sorted(seqs, key=lambda x: x.name)
+        )
 
     def test_cut_in_argument_is_skipped_defaults_to_default_value(self):
         """testing if the cut_in argument is skipped the cut_in argument will
@@ -1004,7 +1016,10 @@ class ShotTester(unittest.TestCase):
 
         tasks = [task1, task2]
 
-        self.assertItemsEqual(new_shot.tasks, tasks)
+        self.assertEqual(
+            sorted(new_shot.tasks, key=lambda x: x.name),
+            sorted(tasks, key=lambda x: x.name)
+        )
 
     def test__repr__(self):
         """testing the represantation of Shot

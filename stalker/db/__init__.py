@@ -107,7 +107,7 @@ def init():
             globals(),
             locals(),
             [class_name],
-            -1
+            0
         )
         class_ = eval("_temp." + class_name)
         register(class_)

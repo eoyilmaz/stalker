@@ -61,7 +61,7 @@ class FilenameTemplateTester(unittest.TestCase):
         self.kwargs.pop("type")
         # no errors
         ft = FilenameTemplate(**self.kwargs)
-        self.assertIsInstance(ft, FilenameTemplate)
+        self.assertTrue(isinstance(ft, FilenameTemplate))
 
     def test_target_entity_type_argument_is_skipped(self):
         """testing if a TypeError will be raised when the target_entity_type
@@ -103,7 +103,7 @@ class FilenameTemplateTester(unittest.TestCase):
         """
         self.kwargs.pop("path")
         ft = FilenameTemplate(**self.kwargs)
-        self.assertIsInstance(ft, FilenameTemplate)
+        self.assertTrue(isinstance(ft, FilenameTemplate))
 
     def test_path_argument_skipped_path_attribute_is_empty_string(self):
         """testing if the path attribute is an empty string if the
@@ -127,7 +127,7 @@ class FilenameTemplateTester(unittest.TestCase):
         """
         self.kwargs["path"] = ""
         ft = FilenameTemplate(**self.kwargs)
-        self.assertIsInstance(ft, FilenameTemplate)
+        self.assertTrue(isinstance(ft, FilenameTemplate))
 
     def test_path_attribute_is_empty_string(self):
         """testing if nothing happens when the path attribute is set to
@@ -156,7 +156,7 @@ class FilenameTemplateTester(unittest.TestCase):
         """
         self.kwargs.pop("filename")
         ft = FilenameTemplate(**self.kwargs)
-        self.assertIsInstance(ft, FilenameTemplate)
+        self.assertTrue(isinstance(ft, FilenameTemplate))
 
     def test_filename_argument_skipped_filename_attribute_is_empty_string(self):
         """testing if the filename attribute is an empty string if the
@@ -180,7 +180,7 @@ class FilenameTemplateTester(unittest.TestCase):
         """
         self.kwargs["filename"] = ""
         ft = FilenameTemplate(**self.kwargs)
-        self.assertIsInstance(ft, FilenameTemplate)
+        self.assertTrue(isinstance(ft, FilenameTemplate))
 
     def test_filename_attribute_is_empty_string(self):
         """testing if nothing happens when the filename attribute is set to

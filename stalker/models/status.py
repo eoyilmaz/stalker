@@ -81,20 +81,20 @@ class Status(Entity, CodeMixin):
         super(Status, self).__init__(**kwargs)
         self.code = code
 
-    # def __eq__(self, other):
-    #     """the equality operator
-    #     """
-    #     if isinstance(other, str):
-    #         return self.name.lower() == other.lower() or \
-    #             self.code.lower() == other.lower()
-    #     else:
-    #         return super(Status, self).__eq__(other) and \
-    #             isinstance(other, Status)
-    # 
-    # def __hash__(self):
-    #     """overridden __hash__ method
-    #     """
-    #     return hash(self.code.lower())
+    def __eq__(self, other):
+        """the equality operator
+        """
+        if isinstance(other, str):
+            return self.name.lower() == other.lower() or \
+                self.code.lower() == other.lower()
+        else:
+            return super(Status, self).__eq__(other) and \
+                isinstance(other, Status)
+
+    def __hash__(self):
+        """the overridden __hash__ method
+        """
+        return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)
 
 
 class StatusList(Entity, TargetEntityTypeMixin):
@@ -205,13 +205,18 @@ class StatusList(Entity, TargetEntityTypeMixin):
             )
         return status
 
-    # def __eq__(self, other):
-    #     """the equality operator
-    #     """
-    #     return super(StatusList, self).__eq__(other) and \
-    #         isinstance(other, StatusList) and \
-    #         self.statuses == other.statuses and \
-    #         self.target_entity_type == other.target_entity_type
+    def __eq__(self, other):
+        """the equality operator
+        """
+        return super(StatusList, self).__eq__(other) and \
+            isinstance(other, StatusList) and \
+            self.statuses == other.statuses and \
+            self.target_entity_type == other.target_entity_type
+
+    def __hash__(self):
+        """the overridden __hash__ method
+        """
+        return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)
 
     def __getitem__(self, key):
         """the indexing attributes for getting item
