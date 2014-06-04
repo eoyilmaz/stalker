@@ -17,7 +17,7 @@ import sqlalchemy as sa
 def upgrade():
     op.add_column(
         'SimpleEntities',
-        sa.Column('generic_text', sa.Text(), nullable=False)
+        sa.Column('generic_text', sa.Text())
     )
 
 
