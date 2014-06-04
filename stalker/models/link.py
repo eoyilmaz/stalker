@@ -136,6 +136,9 @@ class Link(Entity):
         """formats the path to internal format, which is Linux forward slashes
         for path separation
         """
+        if not isinstance(path, str):
+            path = path.encode('utf-8')
+
         return path.replace("\\", "/")
 
     @property
