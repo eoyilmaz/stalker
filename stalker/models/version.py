@@ -444,12 +444,28 @@ class Version(Link):
                 }
             )
 
-        self.filename = \
-            jinja2.Template(vers_template.filename)\
-            .render(**kwargs).encode('utf-8')
-        self.path = \
-            jinja2.Template(vers_template.path)\
-            .render(**kwargs).encode('utf-8')
+        temp_filename = \
+            jinja2.Template(vers_template.filename).render(**kwargs)
+
+        if not isinstance(temp_filename, str):
+            # it is
+            # byte for python3
+            # or
+            # unicode for python2
+            temp_filename = temp_filename.encode('utf-8')
+
+        temp_path = \
+            jinja2.Template(vers_template.path).render(**kwargs)
+
+        if not isinstance(temp_path, str):
+            # it is
+            # byte for python3
+            # or
+            # unicode for python2
+            temp_path = temp_path.encode('utf-8')
+
+        self.filename = temp_filename
+        self.path = temp_path
 
     @property
     def absolute_full_path(self):
