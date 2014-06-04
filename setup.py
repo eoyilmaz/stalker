@@ -14,11 +14,13 @@ requires = [
 
 setup(
     name='stalker',
-    version='0.2.8.a1',
+    version='0.2.8.a2',
     description='A Production Asset Management (ProdAM) System',
     long_description=README,
     classifiers=[
         "Programming Language :: Python",
+        "Programming Language :: Python :: 2.6",
+        "Programming Language :: Python :: 3.0",
         "License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)",
         "Operating System :: OS Independent",
         "Development Status :: 5 - Production/Stable",

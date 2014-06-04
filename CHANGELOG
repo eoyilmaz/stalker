@@ -2,8 +2,10 @@
 Stalker Changes
 ===============
 
-0.2.8.a1
-========
+0.2.8
+=====
+
+* **Update:** Stalker is now Python3 compatible.
 
 * **New:** Added a new class called ``Client`` which can be used to track down
   information about the clients of ``Projects``. Also added ``Project.client``
