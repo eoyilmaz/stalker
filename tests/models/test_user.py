@@ -864,7 +864,6 @@ class UserTest(unittest.TestCase):
 
         # check if check_password returns False
         self.assertFalse(self.test_user.check_password("wrong pass"))
-        self.fail('')
 
     def test_groups_argument_for_None(self):
         """testing if the groups attribute will be an empty list

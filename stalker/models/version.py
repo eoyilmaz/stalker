@@ -445,8 +445,11 @@ class Version(Link):
             )
 
         self.filename = \
-            jinja2.Template(vers_template.filename).render(**kwargs)
-        self.path = jinja2.Template(vers_template.path).render(**kwargs)
+            jinja2.Template(vers_template.filename)\
+            .render(**kwargs).encode('utf-8')
+        self.path = \
+            jinja2.Template(vers_template.path)\
+            .render(**kwargs).encode('utf-8')
 
     @property
     def absolute_full_path(self):
