@@ -223,7 +223,8 @@ class VersionTester(unittest.TestCase):
             ('  take_name', 'take_name'),
             ('take_name   ', 'take_name'),
             ('   take   name   ', 'take_name'),
-            ('TakeName', 'TakeName')
+            ('TakeName', 'TakeName'),
+            ('Take___Name', 'Take___Name'),
         ]
 
         # and the Version

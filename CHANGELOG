@@ -16,6 +16,9 @@ Stalker Changes
   most recent version number to that table allowing newly initialized databases
   to be considered in head revision.
 
+* **Fix:** Fixed ``Version._format_take_name()`` method. It is now possible to
+  use multiple underscore characters in ``Version.take_name`` attribute.
+
 0.2.7.6
 =======
 

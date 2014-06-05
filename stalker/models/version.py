@@ -213,8 +213,9 @@ class Version(Link):
         take_name = re.sub(r'[\s]+', '_', take_name)
 
         # replace multiple underscores with only one
-        take_name = re.sub(r'([_]+)', r'_', take_name)
+        # take_name = re.sub(r'([_]+)', r'_', take_name)
 
+        # remove any non allowed characters from the start
         take_name = re.sub(r"^[^a-zA-Z0-9]+", r"", take_name)
 
         return take_name
