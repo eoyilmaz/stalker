@@ -155,9 +155,6 @@ def create_alembic_table():
 
     version_num = '5999269aad30'
 
-    logger.debug('creating alembic_version table with version_num: %s' %
-                 version_num)
-
     from sqlalchemy import Table, Column, Text
 
     table_name = 'alembic_version'
@@ -165,6 +162,8 @@ def create_alembic_table():
     conn = DBSession.connection()
     engine = conn.engine
     if not engine.dialect.has_table(conn, table_name):
+        logger.debug('creating alembic_version table with version_num: %s' %
+                     version_num)
         table = Table(
             table_name, Base.metadata,
             Column('version_num', Text)
