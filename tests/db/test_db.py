@@ -913,6 +913,8 @@ class DatabaseTester(unittest.TestCase):
         db.DBSession.remove()
         db.setup(db_config)
         db.init()
+        db.init()
+        db.init()
 
         version_nums = \
             db.DBSession.connection().execute(sql_query).fetchall()

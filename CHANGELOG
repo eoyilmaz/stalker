@@ -2,6 +2,12 @@
 Stalker Changes
 ===============
 
+0.2.8.2
+=======
+
+* **Fix:** Fixed ``stalker.db.create_alembic_table()`` again to prevent extra
+  row insertion.
+
 0.2.8.1.1
 =========
 

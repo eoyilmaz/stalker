@@ -162,15 +162,13 @@ def create_alembic_table():
 
     table_name = 'alembic_version'
 
-    def do_create():
-        return Table(
+    conn = DBSession.connection()
+    engine = conn.engine
+    if not engine.dialect.has_table(conn, table_name):
+        table = Table(
             table_name, Base.metadata,
             Column('version_num', Text)
         )
-
-    if table_name not in Base.metadata:
-        table = do_create()
-        engine = DBSession.connection().engine
         Base.metadata.create_all(engine)
         ins = table.insert().values(version_num=version_num)
         DBSession.connection().execute(ins)
