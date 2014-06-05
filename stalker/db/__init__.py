@@ -175,6 +175,8 @@ def create_alembic_table():
         ins = table.insert().values(version_num=version_num)
         DBSession.connection().execute(ins)
         DBSession.commit()
+    else:
+        logger.debug('alembic_version table is already there!')
 
     logger.debug('alembic_version table is created and initialized')
 
