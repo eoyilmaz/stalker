@@ -14,7 +14,7 @@ requires = [
 
 setup(
     name='stalker',
-    version='0.2.8.a2',
+    version='0.2.8',
     description='A Production Asset Management (ProdAM) System',
     long_description=README,
     classifiers=[
