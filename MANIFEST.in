@@ -1,4 +1,4 @@
-include *.txt *.ini *.cfg *.rst
+include *.ini *.cfg
 
 include CHANGELOG
 include TODO
@@ -8,6 +8,8 @@ include MANIFEST.in
 include COPYING
 include COPYING.LESSER
 include doTests
+include alembic.ini
+
 recursive-include alembic *
 recursive-include docs *
 recursive-include examples *

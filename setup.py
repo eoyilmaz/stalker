@@ -14,7 +14,7 @@ requires = [
 
 setup(
     name='stalker',
-    version='0.2.8',
+    version='0.2.8.1',
     description='A Production Asset Management (ProdAM) System',
     long_description=README,
     classifiers=[
@@ -39,6 +39,15 @@ setup(
               'vue'],
     packages=find_packages(),
     include_package_data=True,
+    data_files=[
+        ('', [
+            'COPYING',
+            'COPYING.LESSER',
+            'INSTALL',
+            'MANIFEST.in',
+            'README'
+        ]),
+    ],
     zip_safe=True,
     test_suite='stalker',
     install_requires=requires,

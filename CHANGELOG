@@ -2,6 +2,14 @@
 Stalker Changes
 ===============
 
+0.2.8.1
+=======
+
+* **Fix:** Fixed ``stalker.db.create_alembic_table()`` function, it is not
+  using the ``alembic`` library anymore to create the ``alembic_version``
+  table, which was the proper way of doing it but it created a lot of problems
+  when Stalker is installed as a package.
+
 0.2.8
 =====
 

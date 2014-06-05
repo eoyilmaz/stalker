@@ -144,28 +144,31 @@ def create_alembic_table():
     """creates the default alembic_version table and creates the data so that
     any new database will be considered as the latest version
     """
-    logger.debug('creating alembic_version table')
-    import os
-    from alembic.config import Config
-    from alembic import command
+    # Now, this is not the correct way of doing, there is a proper way of doing
+    # it and it is explained nicely in the Alembic library documentation.
+    #
+    # But it is simply not working when Stalker is installed as a package.
+    #
+    # So as a workaround here we are doing it manually
+    # don't forget to update the version_num (and the corresponding test
+    # whenever a new alembic revision is created)
 
-    # load the default config
-    here = os.path.dirname(__file__)
+    version_num = '5999269aad30'
 
-    alembic_cfg = Config(
-        os.path.normpath(
-            os.path.join(here, '../..', "alembic.ini")
-        )
+    logger.debug('creating alembic_version table with version_num: %s' %
+                 version_num)
+
+    from sqlalchemy import Table, Column, Text
+    alembic_version_table = Table(
+        'alembic_version', Base.metadata,
+        Column('version_num', Text)
     )
 
-    # but use the session url
-    alembic_cfg.set_main_option(
-        "sqlalchemy.url",
-        str(DBSession.connection().engine.url)
-    )
+    engine = DBSession.connection().engine
+    Base.metadata.create_all(engine)
 
-    # stamp version number
-    command.stamp(alembic_cfg, "head")
+    ins = alembic_version_table.insert().values(version_num=version_num)
+    DBSession.connection().execute(ins)
 
     logger.debug('alembic_version table is created and initialized')
 
