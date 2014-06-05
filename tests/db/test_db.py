@@ -894,6 +894,32 @@ class DatabaseTester(unittest.TestCase):
             db.DBSession.connection().execute(sql_query).fetchone()[0]
         self.assertEqual('5999269aad30', version_num)
 
+    def test_initialization_of_alembic_version_table_multiple_times(self):
+        """testing if the db.create_alembic_table() will handle initializing
+        the table multiple times
+        """
+        temp_db_path = os.path.join(tempfile.mkdtemp(), 'stalker.db')
+        self.files_to_remove.append(temp_db_path)
+        db_config = {'sqlalchemy.url': 'sqlite:///%s' % temp_db_path}
+
+        db.setup(db_config)
+        db.init()
+
+        sql_query = 'select version_num from "alembic_version"'
+        version_num = \
+            db.DBSession.connection().execute(sql_query).fetchone()[0]
+        self.assertEqual('5999269aad30', version_num)
+
+        db.DBSession.remove()
+        db.setup(db_config)
+        db.init()
+
+        version_nums = \
+            db.DBSession.connection().execute(sql_query).fetchall()
+
+        # no additional version is created
+        self.assertEqual(1, len(version_nums))
+
 
 class DatabaseModelsTester(unittest.TestCase):
     """tests the database model

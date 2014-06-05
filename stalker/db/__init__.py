@@ -159,16 +159,22 @@ def create_alembic_table():
                  version_num)
 
     from sqlalchemy import Table, Column, Text
-    alembic_version_table = Table(
-        'alembic_version', Base.metadata,
-        Column('version_num', Text)
-    )
 
-    engine = DBSession.connection().engine
-    Base.metadata.create_all(engine)
+    table_name = 'alembic_version'
 
-    ins = alembic_version_table.insert().values(version_num=version_num)
-    DBSession.connection().execute(ins)
+    def do_create():
+        return Table(
+            table_name, Base.metadata,
+            Column('version_num', Text)
+        )
+
+    if table_name not in Base.metadata:
+        table = do_create()
+        engine = DBSession.connection().engine
+        Base.metadata.create_all(engine)
+        ins = table.insert().values(version_num=version_num)
+        DBSession.connection().execute(ins)
+        DBSession.commit()
 
     logger.debug('alembic_version table is created and initialized')
 
