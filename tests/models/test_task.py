@@ -36,160 +36,156 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-class TaskTester(unittest.TestCase):
+class TaskTestCase(unittest.TestCase):
     """Tests the stalker.models.task.Task class
     """
+
+    config = {
+        'sqlalchemy.url': 'sqlite://',
+        'sqlalchemy.echo': False
+    }
 
     @classmethod
     def setUpClass(cls):
         """run once
         """
         defaults.timing_resolution = datetime.timedelta(hours=1)
-        cls.config = {
-            'sqlalchemy.url': 'sqlite://',
-            'sqlalchemy.echo': False
-        }
 
-    # def setUp(self):
-    #     """run before every test
-    #     """
-        self = cls
         # create a new session
-        db.setup(self.config)
+        db.setup(cls.config)
         db.init()
 
-        self.status_wfd = Status.query.filter_by(code="WFD").first()
-        self.status_rts = Status.query.filter_by(code="RTS").first()
-        self.status_wip = Status.query.filter_by(code="WIP").first()
-        self.status_prev = Status.query.filter_by(code="PREV").first()
-        self.status_hrev = Status.query.filter_by(code="HREV").first()
-        self.status_drev = Status.query.filter_by(code="DREV").first()
-        self.status_oh = Status.query.filter_by(code="OH").first()
-        self.status_stop = Status.query.filter_by(code="STOP").first()
-        self.status_cmpl = Status.query.filter_by(code="CMPL").first()
+        cls.status_wfd = Status.query.filter_by(code="WFD").first()
+        cls.status_rts = Status.query.filter_by(code="RTS").first()
+        cls.status_wip = Status.query.filter_by(code="WIP").first()
+        cls.status_prev = Status.query.filter_by(code="PREV").first()
+        cls.status_hrev = Status.query.filter_by(code="HREV").first()
+        cls.status_drev = Status.query.filter_by(code="DREV").first()
+        cls.status_oh = Status.query.filter_by(code="OH").first()
+        cls.status_stop = Status.query.filter_by(code="STOP").first()
+        cls.status_cmpl = Status.query.filter_by(code="CMPL").first()
 
-        self.task_status_list = StatusList.query\
+        cls.task_status_list = StatusList.query\
             .filter_by(target_entity_type='Task').first()
 
-        self.test_project_status_list = StatusList(
+        cls.test_project_status_list = StatusList(
             name="Project Statuses",
-            statuses=[self.status_wip,
-                      self.status_prev,
-                      self.status_cmpl],
+            statuses=[cls.status_wip,
+                      cls.status_prev,
+                      cls.status_cmpl],
             target_entity_type=Project,
         )
 
-        self.test_movie_project_type = Type(
+        cls.test_movie_project_type = Type(
             name="Movie Project",
             code='movie',
             target_entity_type=Project,
         )
 
-        self.test_repository_type = Type(
+        cls.test_repository_type = Type(
             name="Test Repository Type",
             code='test',
             target_entity_type=Repository,
         )
 
-        self.test_repository = Repository(
+        cls.test_repository = Repository(
             name="Test Repository",
-            type=self.test_repository_type,
+            type=cls.test_repository_type,
             linux_path=tempfile.mkdtemp(),
             windows_path=tempfile.mkdtemp(),
             osx_path=tempfile.mkdtemp()
         )
 
-        self.test_user1 = User(
+        cls.test_user1 = User(
             name="User1",
             login="user1",
             email="user1@user1.com",
             password="1234"
         )
 
-        self.test_user2 = User(
+        cls.test_user2 = User(
             name="User2",
             login="user2",
             email="user2@user2.com",
             password="1234"
         )
 
-        self.test_user3 = User(
+        cls.test_user3 = User(
             name="User3",
             login="user3",
             email="user3@user3.com",
             password="1234"
         )
 
-        self.test_user4 = User(
+        cls.test_user4 = User(
             name="User4",
             login="user4",
             email="user4@user4.com",
             password="1234"
         )
 
-        self.test_user5 = User(
+        cls.test_user5 = User(
             name="User5",
             login="user5",
             email="user5@user5.com",
             password="1234"
         )
 
-        self.test_project1 = Project(
+        cls.test_project1 = Project(
             name="Test Project1",
             code='tp1',
-            type=self.test_movie_project_type,
-            status_list=self.test_project_status_list,
-            repository=self.test_repository,
-            lead=self.test_user1
+            type=cls.test_movie_project_type,
+            status_list=cls.test_project_status_list,
+            repository=cls.test_repository,
+            lead=cls.test_user1
         )
 
-        self.test_dependent_task1 = Task(
+        cls.test_dependent_task1 = Task(
             name="Dependent Task1",
-            project=self.test_project1,
-            status_list=self.task_status_list,
+            project=cls.test_project1,
+            status_list=cls.task_status_list,
         )
 
-        self.test_dependent_task2 = Task(
+        cls.test_dependent_task2 = Task(
             name="Dependent Task2",
-            project=self.test_project1,
-            status_list=self.task_status_list,
+            project=cls.test_project1,
+            status_list=cls.task_status_list,
         )
 
-        self.kwargs = {
+        cls.kwargs = {
             'name': 'Modeling',
             'description': 'A Modeling Task',
-            'project': self.test_project1,
+            'project': cls.test_project1,
             'priority': 500,
-            'responsible': [self.test_user1],
-            'resources': [self.test_user1, self.test_user2],
-            'alternative_resources': [self.test_user3, self.test_user4,
-                                      self.test_user5],
+            'responsible': [cls.test_user1],
+            'resources': [cls.test_user1, cls.test_user2],
+            'alternative_resources': [cls.test_user3, cls.test_user4,
+                                      cls.test_user5],
             'allocation_strategy': 'minloaded',
             'persistent_allocation': True,
-            'watchers': [self.test_user3],
+            'watchers': [cls.test_user3],
             'bid_timing': 4,
             'bid_unit': 'd',
             'schedule_timing': 1,
             'schedule_unit': 'd',
             'start': datetime.datetime(2013, 4, 8, 13, 0),
             'end': datetime.datetime(2013, 4, 8, 18, 0),
-            'depends': [self.test_dependent_task1,
-                        self.test_dependent_task2],
+            'depends': [cls.test_dependent_task1,
+                        cls.test_dependent_task2],
             'time_logs': [],
             'versions': [],
             'is_milestone': False,
             'status': 0,
-            'status_list': self.task_status_list,
+            'status_list': cls.task_status_list,
         }
 
         # create a test Task
-        #self.test_task = Task(**self.kwargs)
         DBSession.add_all([
-            self.test_project_status_list, self.test_movie_project_type,
-            self.test_repository_type, self.test_repository, self.test_user1,
-            self.test_user2, self.test_user3, self.test_user4,
-            self.test_user5, self.test_project1, self.test_dependent_task1,
-            self.test_dependent_task2,
+            cls.test_project_status_list, cls.test_movie_project_type,
+            cls.test_repository_type, cls.test_repository, cls.test_user1,
+            cls.test_user2, cls.test_user3, cls.test_user4,
+            cls.test_user5, cls.test_project1, cls.test_dependent_task1,
+            cls.test_dependent_task2,
         ])
         DBSession.commit()
 
@@ -207,7 +203,7 @@ class TaskTester(unittest.TestCase):
         DBSession.commit()
 
     @classmethod
-    def tearDownClass(self):
+    def tearDownClass(cls):
         """run only once
         """
         DBSession.remove()
@@ -409,6 +405,9 @@ class TaskTester(unittest.TestCase):
             email="test1@test.com",
             password="test1"
         )
+        DBSession.add(new_user1)
+        DBSession.commit()
+        self.data_created.append(new_user1)
 
         new_user2 = User(
             name="test2",
@@ -416,6 +415,9 @@ class TaskTester(unittest.TestCase):
             email="test2@test.com",
             password="test2"
         )
+        DBSession.add(new_user2)
+        DBSession.commit()
+        self.data_created.append(new_user1)
 
         # assign it to a newly created task
         kwargs = copy.copy(self.kwargs)
@@ -436,6 +438,9 @@ class TaskTester(unittest.TestCase):
         # now append the new resource
         new_task.resources.append(new_user1)
         self.assertIn(new_task, new_user1.tasks)
+
+        # clean up test
+        new_task.resources = []
 
     def test_resources_attribute_backreferences_to_User(self):
         """testing if the User instances passed with the resources argument
@@ -3163,12 +3168,18 @@ class TaskTester(unittest.TestCase):
         set to a value which is not in stalker.config.Config.datetime_units.
         """
         new_task = Task(**self.kwargs)
+        DBSession.add(new_task)
+        DBSession.commit()
+        self.data_created.append(new_task)
         self.assertRaises(ValueError, setattr, new_task, 'bid_unit', 'sys')
 
     def test_tjp_id_is_a_read_only_attribute(self):
         """testing if the tjp_id attribute is a read only attribute
         """
         new_task = Task(**self.kwargs)
+        DBSession.add(new_task)
+        DBSession.commit()
+        self.data_created.append(new_task)
         self.assertRaises(AttributeError, setattr, new_task, 'tjp_id',
                           'some value')
 
@@ -3902,7 +3913,6 @@ task Task_%(t2_id)s "Modeling" {
         # print(t1.to_tjp)
         # print('-----------------------')
         # print(expected_tjp)
-        # print('-----------------------')
         self.assertMultiLineEqual(t1.to_tjp, expected_tjp)
 
     def test_is_scheduled_is_a_read_only_attribute(self):
@@ -4721,6 +4731,8 @@ task Task_%(t2_id)s "Modeling" {
         with self.assertRaises(RuntimeError):
             new_task.path
 
+        self.test_project1.structure = None
+
     def test_path_attribute_is_the_rendered_version_of_the_related_FilenameTemplate_object_in_the_related_project(self):
         """testing if the path attribute value is the rendered version of the
         FilenameTemplate matching the class entity_type
@@ -4753,6 +4765,7 @@ task Task_%(t2_id)s "Modeling" {
         self.test_project1.structure = structure
 
         self.assertEqual('tp1/Modeling/', new_task.path)
+        self.test_project1.structure = None
 
     def test_absolute_path_attribute_is_read_only(self):
         """testing if absolute_path is read only
@@ -4802,6 +4815,8 @@ task Task_%(t2_id)s "Modeling" {
         with self.assertRaises(RuntimeError):
             new_task.path
 
+        self.test_project1.structure = None
+
     def test_absolute_path_attribute_is_the_rendered_version_of_the_related_FilenameTemplate_object_in_the_related_project(self):
         """testing if the absolute_path attribute value is the rendered version
         of the FilenameTemplate matching the class entity_type
@@ -4837,34 +4852,43 @@ task Task_%(t2_id)s "Modeling" {
             self.test_project1.repository.path + 'tp1/Modeling/',
             new_task.absolute_path
         )
+        self.test_project1.structure = None
 
 
-class TaskPostgreSQLTester(TaskTester):
+class TaskPostgreSQLTestCase(TaskTestCase):
     """tests the Task class with PostgreSQL database
     """
+
+    config = {
+        'sqlalchemy.url':
+            'postgresql://stalker_admin:stalker@localhost/stalker_test',
+        'sqlalchemy.echo': False
+    }
 
     @classmethod
     def setUpClass(cls):
         """run once
         """
         defaults.timing_resolution = datetime.timedelta(hours=1)
-        cls.config = {
-            'sqlalchemy.url':
-                'postgresql://stalker_admin:stalker@localhost/stalker_test',
-            'sqlalchemy.echo': False
-        }
-        # clean up test database
-        db.setup(cls.config)
-        from stalker.db.declarative import Base
-        Base.metadata.drop_all(db.DBSession.connection())
-        DBSession.commit()
 
-    def tearDown(self):
+        # # clean up test database
+        db.setup(cls.config)
+        #db.init()
+
+        from stalker.db.declarative import Base
+        Base.metadata.drop_all(DBSession.connection())
+
+        DBSession.commit()
+        super(TaskPostgreSQLTestCase, cls).setUpClass()
+
+    @classmethod
+    def tearDownClass(cls):
         """clean up the test
         """
-        defaults.timing_resolution = datetime.timedelta(hours=1)
-
         # clean up test database
         from stalker.db.declarative import Base
         Base.metadata.drop_all(db.DBSession.connection())
         DBSession.commit()
+        DBSession.remove()
+
+        defaults.timing_resolution = datetime.timedelta(hours=1)
