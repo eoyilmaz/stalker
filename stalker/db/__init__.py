@@ -163,22 +163,15 @@ def create_alembic_table():
     engine = conn.engine
 
     # check if the table is already there
-    if engine.dialect.has_table(conn, table_name):
-        table = Table(
-            table_name, Base.metadata,
-            Column('version_num', Text),
-            extend_existing=True
-        )
-    else:
+    table = Table(
+        table_name, Base.metadata,
+        Column('version_num', Text),
+        extend_existing=True
+    )
+    if not engine.dialect.has_table(conn, table_name):
         logger.debug('creating alembic_version table')
 
         # create the table no matter if it exists or not we need it either way
-        table = Table(
-            table_name, Base.metadata,
-            Column('version_num', Text),
-            extend_existing=True
-        )
-
         Base.metadata.create_all(engine)
 
     # first try to query the version value

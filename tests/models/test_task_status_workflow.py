@@ -31,78 +31,82 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
     """tests the Task Status Workflow
     """
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         """setup the test
         """
         db.setup({'sqlalchemy.url': 'sqlite:///:memory:'})
         db.init()
 
         # test users
-        self.test_user1 = User(
+        cls.test_user1 = User(
             name='Test User 1',
             login='tuser1',
             email='tuser1@test.com',
             password='secret'
         )
-        DBSession.add(self.test_user1)
+        DBSession.add(cls.test_user1)
 
-        self.test_user2 = User(
+        cls.test_user2 = User(
             name='Test User 2',
             login='tuser2',
             email='tuser2@test.com',
             password='secret'
         )
-        DBSession.add(self.test_user2)
+        DBSession.add(cls.test_user2)
 
         # create a couple of tasks
-        self.status_new = Status.query.filter_by(code='NEW').first()
-        self.status_wfd = Status.query.filter_by(code='WFD').first()
-        self.status_rts = Status.query.filter_by(code='RTS').first()
-        self.status_wip = Status.query.filter_by(code='WIP').first()
-        self.status_prev = Status.query.filter_by(code='PREV').first()
-        self.status_hrev = Status.query.filter_by(code='HREV').first()
-        self.status_drev = Status.query.filter_by(code='DREV').first()
-        self.status_oh = Status.query.filter_by(code='OH').first()
-        self.status_stop = Status.query.filter_by(code='STOP').first()
-        self.status_cmpl = Status.query.filter_by(code='CMPL').first()
+        cls.status_new = Status.query.filter_by(code='NEW').first()
+        cls.status_wfd = Status.query.filter_by(code='WFD').first()
+        cls.status_rts = Status.query.filter_by(code='RTS').first()
+        cls.status_wip = Status.query.filter_by(code='WIP').first()
+        cls.status_prev = Status.query.filter_by(code='PREV').first()
+        cls.status_hrev = Status.query.filter_by(code='HREV').first()
+        cls.status_drev = Status.query.filter_by(code='DREV').first()
+        cls.status_oh = Status.query.filter_by(code='OH').first()
+        cls.status_stop = Status.query.filter_by(code='STOP').first()
+        cls.status_cmpl = Status.query.filter_by(code='CMPL').first()
 
-        self.status_rrev = Status.query.filter_by(code='RREV').first()
-        self.status_app = Status.query.filter_by(code='APP').first()
+        cls.status_rrev = Status.query.filter_by(code='RREV').first()
+        cls.status_app = Status.query.filter_by(code='APP').first()
 
-        self.test_project_status_list = StatusList(
+        cls.test_project_status_list = StatusList(
             name='Project Statuses',
             target_entity_type='Project',
-            statuses=[self.status_wfd, self.status_wip,
-                      self.status_cmpl]
+            statuses=[cls.status_wfd, cls.status_wip,
+                      cls.status_cmpl]
         )
-        DBSession.add(self.test_project_status_list)
+        DBSession.add(cls.test_project_status_list)
 
-        self.test_task_statuses = StatusList.query\
+        cls.test_task_statuses = StatusList.query\
             .filter_by(target_entity_type='Task').first()
-        DBSession.add(self.test_task_statuses)
+        DBSession.add(cls.test_task_statuses)
 
         # repository
         tempdir = tempfile.mkdtemp()
-        self.test_repo = Repository(
+        cls.test_repo = Repository(
             name='Test Repository',
             linux_path=tempdir,
             windows_path=tempdir,
             osx_path=tempdir
         )
-        DBSession.add(self.test_repo)
+        DBSession.add(cls.test_repo)
 
         # proj1
-        self.test_project1 = Project(
+        cls.test_project1 = Project(
             name='Test Project 1',
             code='TProj1',
-            status_list=self.test_project_status_list,
-            repository=self.test_repo,
+            status_list=cls.test_project_status_list,
+            repository=cls.test_repo,
             start=datetime.datetime(2013, 6, 20, 0, 0, 0),
             end=datetime.datetime(2013, 6, 30, 0, 0, 0),
-            lead=self.test_user1
+            lead=cls.test_user1
         )
-        DBSession.add(self.test_project1)
+        DBSession.add(cls.test_project1)
 
+    def setUp(self):
+        """set up before every test
+        """
         # root tasks
         self.test_task1 = Task(
             name='Test Task 1',
@@ -279,6 +283,30 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
             self.test_task7, self.test_task8, self.test_task9,
             self.test_asset1
         ]
+
+        self.data_created = [
+            self.test_task1, self.test_task2, self.test_task3,
+            self.test_task4, self.test_task5, self.test_task6,
+            self.test_task7, self.test_task8, self.test_task9,
+            self.test_asset1
+        ]
+
+    def tearDown(self):
+        """run after every test and clean up
+        """
+        DBSession.commit()
+        for data in self.data_created:
+            if data in DBSession:
+                DBSession.delete(data)
+        DBSession.commit()
+
+    @classmethod
+    def tearDownClass(cls):
+        """run only once
+        """
+        from stalker import defaults
+        DBSession.remove()
+        defaults.timing_resolution = datetime.timedelta(hours=1)
 
     def test_walk_hierarchy_is_working_properly(self):
         """testing if walk_hierarchy_is_working_properly
@@ -609,6 +637,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.assertRaises(
             StatusError, self.test_task3.depends.append, self.test_task8
         )
+        DBSession.rollback()
 
     def test_leaf_PREV_task_dependency_can_not_be_updated(self):
         """testing if it is not possible to update the dependencies of a PREV
@@ -622,6 +651,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.assertRaises(
             StatusError, self.test_task3.depends.append, self.test_task8
         )
+        DBSession.rollback()
 
     def test_leaf_HREV_task_dependency_can_not_be_updated(self):
         """testing if it is not possible to update the dependencies of a HREV
@@ -635,6 +665,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.assertRaises(
             StatusError, self.test_task3.depends.append, self.test_task8
         )
+        DBSession.rollback()
 
     def test_leaf_DREV_task_dependency_can_not_be_updated(self):
         """testing if it is not possible to update the dependencies of a DREV
@@ -648,6 +679,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.assertRaises(
             StatusError, self.test_task3.depends.append, self.test_task8
         )
+        DBSession.rollback()
 
     def test_leaf_OH_task_dependency_can_not_be_updated(self):
         """testing if it is not possible to update the dependencies of a OH
@@ -661,6 +693,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.assertRaises(
             StatusError, self.test_task3.depends.append, self.test_task8
         )
+        DBSession.rollback()
 
     def test_leaf_STOP_task_dependency_can_not_be_updated(self):
         """testing if it is not possible to update the dependencies of a STOP
@@ -674,6 +707,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.assertRaises(
             StatusError, self.test_task3.depends.append, self.test_task8
         )
+        DBSession.rollback()
 
     def test_leaf_CMPL_task_dependency_can_not_be_updated(self):
         """testing if it is not possible to update the dependencies of a CMPL
@@ -687,6 +721,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.assertRaises(
             StatusError, self.test_task3.depends.append, self.test_task8
         )
+        DBSession.rollback()
 
     # dependencies of containers
     # container Tasks - dependency relation changes
@@ -861,6 +896,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.assertRaises(
             StatusError, self.test_task1.depends.append, self.test_task8
         )
+        DBSession.rollback()
 
     def test_container_CMPL_task_dependency_can_not_be_updated(self):
         """testing if it is not possible to update the dependencies of a CMPL
@@ -874,6 +910,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
             self.assertRaises(
                 StatusError, self.test_task1.depends.append, self.test_task8
             )
+        DBSession.rollback()
 
     #
     # Action Tests
@@ -891,6 +928,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         end = datetime.datetime.now() + datetime.timedelta(hours=1)
         self.assertRaises(StatusError, self.test_task3.create_time_log,
                           resource, start, end)
+        DBSession.rollback()
 
     # RTS: status updated to WIP
     def test_create_time_log_in_RTS_leaf_task_status_updated_to_WIP(self):
@@ -1002,6 +1040,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         end = datetime.datetime.now() + datetime.timedelta(hours=1)
         self.assertRaises(StatusError, self.test_task9.create_time_log,
                           resource, start, end)
+        DBSession.rollback()
 
     # STOP
     def test_create_time_log_in_STOP_leaf_task(self):
@@ -1014,6 +1053,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         end = datetime.datetime.now() + datetime.timedelta(hours=1)
         self.assertRaises(StatusError, self.test_task9.create_time_log,
                           resource, start, end)
+        DBSession.rollback()
 
     # CMPL
     def test_create_time_log_in_CMPL_leaf_task(self):
@@ -1024,8 +1064,9 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         resource = self.test_task9.resources[0]
         start = datetime.datetime.now()
         end = datetime.datetime.now() + datetime.timedelta(hours=1)
-        self.assertRaises(StatusError, self.test_task9.create_time_log,
-                          resource, start, end)
+        with self.assertRaises(StatusError):
+            self.test_task9.create_time_log(resource, start, end)
+        DBSession.rollback()
 
     # On Container Task
     def test_create_time_log_on_container_task(self):
@@ -1082,6 +1123,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_wfd
         self.assertRaises(StatusError, self.test_task3.request_review)
+        DBSession.rollback()
 
     # RTS
     def test_request_review_in_RTS_leaf_task(self):
@@ -1090,6 +1132,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_rts
         self.assertRaises(StatusError, self.test_task3.request_review)
+        DBSession.rollback()
 
     # WIP: status updated to PREV
     def test_request_review_in_WIP_leaf_task_status_updated_to_PREV(self):
@@ -1159,6 +1202,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_prev
         self.assertRaises(StatusError, self.test_task3.request_review)
+        DBSession.rollback()
 
     # HREV
     def test_request_review_in_HREV_leaf_task(self):
@@ -1167,6 +1211,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_hrev
         self.assertRaises(StatusError, self.test_task3.request_review)
+        DBSession.rollback()
 
     # DREV
     def test_request_review_in_DREV_leaf_task(self):
@@ -1175,6 +1220,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_drev
         self.assertRaises(StatusError, self.test_task3.request_review)
+        DBSession.rollback()
 
     # OH
     def test_request_review_in_OH_leaf_task(self):
@@ -1183,6 +1229,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_oh
         self.assertRaises(StatusError, self.test_task3.request_review)
+        DBSession.rollback()
 
     # STOP
     def test_request_review_in_STOP_leaf_task(self):
@@ -1191,6 +1238,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_stop
         self.assertRaises(StatusError, self.test_task3.request_review)
+        DBSession.rollback()
 
     # CMPL
     def test_request_review_in_CMPL_leaf_task(self):
@@ -1199,6 +1247,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_cmpl
         self.assertRaises(StatusError, self.test_task3.request_review)
+        DBSession.rollback()
 
     #request_revision
     #WFD
@@ -1208,6 +1257,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_wfd
         self.assertRaises(StatusError, self.test_task3.request_revision)
+        DBSession.rollback()
 
     #RTS
     def test_request_revision_in_RTS_leaf_task(self):
@@ -1216,6 +1266,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_rts
         self.assertRaises(StatusError, self.test_task3.request_revision)
+        DBSession.rollback()
 
     #WIP
     def test_request_revision_in_WIP_leaf_task(self):
@@ -1224,6 +1275,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_wip
         self.assertRaises(StatusError, self.test_task3.request_revision)
+        DBSession.rollback()
 
     #PREV: Status updated to HREV
     def test_request_revision_in_PREV_leaf_task_status_updated_to_HREV(self):
@@ -1382,6 +1434,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
             'schedule_unit': 'h'
         }
         self.assertRaises(StatusError, self.test_task3.request_revision, **kw)
+        DBSession.rollback()
 
     #OH
     def test_request_revision_in_OH_leaf_task(self):
@@ -1396,6 +1449,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
             'schedule_unit': 'h'
         }
         self.assertRaises(StatusError, self.test_task3.request_revision, **kw)
+        DBSession.rollback()
 
     #STOP
     def test_request_revision_in_STOP_leaf_task(self):
@@ -1410,6 +1464,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
             'schedule_unit': 'h'
         }
         self.assertRaises(StatusError, self.test_task3.request_revision, **kw)
+        DBSession.rollback()
 
     #CMPL: status update
     def test_request_revision_in_CMPL_leaf_task_status_updated_to_HREV(self):
@@ -1642,7 +1697,6 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         td = datetime.timedelta
         now = dt.now()
 
-
         self.test_task3.depends = [self.test_task9]  # will be PREV
         self.test_task4.depends = [self.test_task9]  # will be HREV
         self.test_task5.depends = [self.test_task9]  # will be STOP
@@ -1718,6 +1772,10 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         )
         self.assertEqual(self.test_task4.status, self.status_wip)
         reviews = self.test_task4.request_review()
+        DBSession.add_all(reviews)
+        DBSession.commit()
+        self.data_created.extend(reviews)
+
         self.assertEqual(self.test_task4.status, self.status_prev)
         for r in reviews:
             r.request_revision(
@@ -1825,6 +1883,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_rts
         self.assertRaises(StatusError, self.test_task3.hold)
+        DBSession.rollback()
 
     # WIP: Status updated to OH
     def test_hold_in_WIP_leaf_task_status(self):
@@ -1861,6 +1920,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_prev
         self.assertRaises(StatusError, self.test_task3.hold)
+        DBSession.rollback()
 
     # HREV
     def test_hold_in_HREV_leaf_task(self):
@@ -1869,6 +1929,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_hrev
         self.assertRaises(StatusError, self.test_task3.hold)
+        DBSession.rollback()
 
     # DREV: Status updated to OH
     def test_hold_in_DREV_leaf_task_status_updated_to_OH(self):
@@ -1914,6 +1975,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_stop
         self.assertRaises(StatusError, self.test_task3.hold)
+        DBSession.rollback()
 
     # CMPL
     def test_hold_in_CMPL_leaf_task(self):
@@ -1922,6 +1984,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_cmpl
         self.assertRaises(StatusError, self.test_task3.hold)
+        DBSession.rollback()
 
     # stop
     # WFD
@@ -1931,6 +1994,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_wfd
         self.assertRaises(StatusError, self.test_task3.stop)
+        DBSession.rollback()
 
     # RTS
     def test_stop_in_RTS_leaf_task(self):
@@ -1939,6 +2003,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_rts
         self.assertRaises(StatusError, self.test_task3.stop)
+        DBSession.rollback()
 
     # WIP: Status Test
     def test_stop_in_WIP_leaf_task_status_is_updated_to_STOP(self):
@@ -2092,6 +2157,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_prev
         self.assertRaises(StatusError, self.test_task3.stop)
+        DBSession.rollback()
 
     # HREV
     def test_stop_in_HREV_leaf_task(self):
@@ -2100,6 +2166,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_hrev
         self.assertRaises(StatusError, self.test_task3.stop)
+        DBSession.rollback()
 
     # DREV: Status Test
     def test_stop_in_DREV_leaf_task_status_is_updated_to_STOP(self):
@@ -2236,6 +2303,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_oh
         self.assertRaises(StatusError, self.test_task3.stop)
+        DBSession.rollback()
 
     # STOP
     def test_stop_in_STOP_leaf_task(self):
@@ -2253,6 +2321,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_cmpl
         self.assertRaises(StatusError, self.test_task3.stop)
+        DBSession.rollback()
 
     # resume
     # WFD
@@ -2262,6 +2331,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_wfd
         self.assertRaises(StatusError, self.test_task3.resume)
+        DBSession.rollback()
 
     # RTS
     def test_resume_in_RTS_leaf_task(self):
@@ -2270,6 +2340,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_rts
         self.assertRaises(StatusError, self.test_task3.resume)
+        DBSession.rollback()
 
     # WIP
     def test_resume_in_WIP_leaf_task(self):
@@ -2278,6 +2349,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_wip
         self.assertRaises(StatusError, self.test_task3.resume)
+        DBSession.rollback()
 
     # PREV
     def test_resume_in_PREV_leaf_task(self):
@@ -2286,6 +2358,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_prev
         self.assertRaises(StatusError, self.test_task3.resume)
+        DBSession.rollback()
 
     # HREV
     def test_resume_in_HREV_leaf_task(self):
@@ -2294,6 +2367,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_hrev
         self.assertRaises(StatusError, self.test_task3.resume)
+        DBSession.rollback()
 
     # DREV
     def test_resume_in_DREV_leaf_task(self):
@@ -2302,6 +2376,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_drev
         self.assertRaises(StatusError, self.test_task3.resume)
+        DBSession.rollback()
 
     # OH: no dependency -> WIP
     def test_resume_in_OH_leaf_task_with_no_dependencies(self):
