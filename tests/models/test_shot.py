@@ -211,6 +211,8 @@ class ShotTester(unittest.TestCase):
 
         # create a mock shot object
         self.test_shot = Shot(**self.kwargs)
+        db.DBSession.add(self.test_project1)
+        db.DBSession.commit()
 
     def test___auto_name__class_attribute_is_set_to_True(self):
         """testing if the __auto_name__ class attribute is set to True for Shot
@@ -1200,3 +1202,13 @@ class ShotDBTestCase(unittest.TestCase):
 
         self.assertEqual(test_shot_db.cut_in, 100)
         self.assertEqual(test_shot_db.cut_out, 153)
+
+    # def test_hash_value(self):
+    #     """testing if the hash value is correctly calculated
+    #     """
+    #     self.assertEqual(
+    #         hash(self.test_shot),
+    #         hash(self.test_shot.id) +
+    #         2 * hash(self.test_shot.name) +
+    #         3 * hash(self.test_shot.entity_type)
+    #     )

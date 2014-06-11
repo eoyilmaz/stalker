@@ -665,52 +665,6 @@ order by path_as_text"""
             (parsing_end - parsing_start)
         )
 
-    def _parse_csv_file_old(self):
-        """parses the csv file and fills the tasks with computes_start and
-        computed_end values using pure Python implementation
-        """
-        parsing_start = time.time()
-        logger.debug('csv_file_full_path : %s' % self.csv_file_full_path)
-        from stalker import User
-
-        with open(self.csv_file_full_path, 'r') as self.csv_file:
-            csv_content = csv.reader(self.csv_file, delimiter=';')
-            lines = [line for line in csv_content]
-            lines.pop(0)
-            for data in lines:
-                id_line = data[0]
-                entity_id = int(id_line.split('.')[-1].split('_')[-1])
-                entity = Entity.query.filter(Entity.id == entity_id).first()
-                if entity:
-                    start_date = datetime.datetime.strptime(
-                        data[1], "%Y-%m-%d-%H:%M"
-                    )
-                    end_date = datetime.datetime.strptime(
-                        data[2],
-                        "%Y-%m-%d-%H:%M"
-                    )
-
-                    # computed_resources
-                    computed_resources = []
-                    if data[3] != '':
-                        resources_data = map(
-                            lambda x: x.split('_')[-1].split(')')[0],
-                            data[3].split(',')
-                        )
-                        computed_resources = \
-                            User.query\
-                            .filter(User.id.in_(resources_data)).all()
-
-                    entity.computed_start = start_date
-                    entity.computed_end = end_date
-                    entity.computed_resources = computed_resources
-
-        parsing_end = time.time()
-        logger.debug(
-            'completed parsing csv file in (Python): %s seconds' %
-            (parsing_end - parsing_start)
-        )
-
     def schedule(self):
         """Does the scheduling.
         """

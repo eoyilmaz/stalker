@@ -257,21 +257,6 @@ class TimeLog(Entity, DateRangeMixin):
 #       later on, will it be ok with TJ
 
 
-def update_task_dates(func):
-    """decorator that updates the date after the function finishes its job
-    """
-    def wrap(*args, **kwargs):
-        # call the function as usual
-        rvalue = func(*args, **kwargs)
-        # update the dates
-        task_class = args[0]
-        args[0]._validate_dates(task_class.start, task_class.end, None)
-        return rvalue
-
-    # return decorated function
-    return wrap
-
-
 class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     """Manages Task related data.
 
@@ -786,6 +771,19 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
       priority of the :class:`.Task`. The higher the value the higher its
       priority. The default value is 500. Mainly used by TaskJuggler.
 
+      Higher priority tasks will be scheduled to an early date or at least will
+      tried to be scheduled to an early date then a lower priority task (a task
+      that is using the same resources).
+
+      In complex projects, a task with a lower priority task may steal
+      resources from a higher priority task, this is due to the internals of
+      TaskJuggler, it tries to increase the resource utilization by letting the
+      lower priority task to be completed earlier than the higher priority
+      task. This is done in that way if the lower priority task is dependent of
+      more important tasks (tasks in critical path or tasks with critical
+      resources). Read TaskJuggler documentation for more information on how
+      TaskJuggler schedules tasks.
+
     :param allocation_strategy: Defines the allocation strategy for resources
       of a task with alternative resources. Should be one of ['minallocated',
       'maxloaded', 'minloaded', 'order', 'random'] and the default value is
@@ -869,19 +867,6 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         Milestones doesn't need any duration, any effort and any resources. It
         is used to create meaningful dependencies between the critical stages
         of the project.
-        """
-    )
-
-    # TODO: is_complete should look to Task.status, but it is may be faster to
-    #       query in this way, judge later
-    is_complete = Column(
-        Boolean,
-        doc="""A bool value showing if this task is completed or not.
-
-        There is a good article_ about why not to use an attribute called
-        ``percent_complete`` to measure how much the task is completed.
-
-        .. _article: http://www.pmhut.com/how-percent-complete-is-that-task-again
         """
     )
 
@@ -1114,7 +1099,6 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         self.versions = []
 
         self.is_milestone = is_milestone
-        self.is_complete = False
 
         # update the status
         with DBSession.no_autoflush:
@@ -1180,7 +1164,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     def __hash__(self):
         """the overridden __hash__ method
         """
-        return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)
+        return super(Task, self).__hash__()
 
     @validates("time_logs")
     def _validate_time_logs(self, key, time_log):
@@ -1216,12 +1200,6 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
                 )
             )
         return review
-
-    @validates("is_complete")
-    def _validate_is_complete(self, key, complete_in):
-        """validates the given complete value
-        """
-        return bool(complete_in)
 
     @validates("task_depends_to")
     def _validate_task_depends_to(self, key, task_depends_to):
@@ -1372,6 +1350,18 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     def _validate_is_milestone(self, key, is_milestone):
         """validates the given milestone value
         """
+        if is_milestone is None:
+            is_milestone = False
+
+        if not isinstance(is_milestone, bool):
+            raise TypeError(
+                '%(class)s.is_milestone should be a bool value (True or '
+                'False), not %(is_milestone_class)s' % {
+                    'class': self.__class__.__name__,
+                    'is_milestone_class': is_milestone.__class__.__name__
+                }
+            )
+
         if is_milestone:
             self.resources = []
 
@@ -1475,20 +1465,24 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     def _validate_priority(self, key, priority):
         """validates the given priority value
         """
-        try:
-            priority = int(priority)
-        except (ValueError, TypeError):
-            pass
-
-        if not isinstance(priority, int):
+        if priority is None:
             priority = defaults.task_priority
+
+        if not isinstance(priority, (int, float)):
+            raise TypeError(
+                '%(class)s.priority should be an integer value between 0 and '
+                '1000, not %(priority_class)s' % {
+                    'class': self.__class__.__name__,
+                    'priority_class': priority.__class__.__name__
+                }
+            )
 
         if priority < 0:
             priority = 0
         elif priority > 1000:
             priority = 1000
 
-        return priority
+        return int(priority)
 
     @validates('children')
     def _validate_children(self, key, child):
@@ -1601,7 +1595,8 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         if strategy is None:
             strategy = defaults.allocation_strategy[0]
 
-        if not isinstance(strategy, str):
+        from stalker import __string_types__
+        if not isinstance(strategy, __string_types__):
             raise TypeError(
                 '%(class)s.allocation_strategy should be one of %(defaults)s, '
                 'not %(strategy_class)s' % {
@@ -1685,7 +1680,8 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         if bid_unit is None:
             bid_unit = 'h'
 
-        if not isinstance(bid_unit, str):
+        from stalker import __string_types__
+        if not isinstance(bid_unit, __string_types__):
             raise TypeError(
                 '%(class)s.bid_unit should be a string value one of %(units)s '
                 'showing the unit of the bid timing of this %(class)s, not '
@@ -2833,7 +2829,8 @@ class TaskDependency(Base, ScheduleMixin):
         if dep_target is None:
             dep_target = defaults.task_dependency_targets[0]
 
-        if not isinstance(dep_target, str):
+        from stalker import __string_types__
+        if not isinstance(dep_target, __string_types__):
             raise TypeError(
                 '%s.dependency_target should be a string with a value one of '
                 '%s, not %s' % (

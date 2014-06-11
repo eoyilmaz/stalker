@@ -136,3 +136,13 @@ class TypeTester(unittest.TestCase):
         """
         self.assertEqual(self.test_type.target_entity_type,
                          self.kwargs["target_entity_type"])
+
+    def test_hash_value(self):
+        """testing if the hash value is correctly calculated
+        """
+        self.assertEqual(
+            hash(self.test_type),
+            hash(self.test_type.id) +
+            2 * hash(self.test_type.name) +
+            3 * hash(self.test_type.entity_type)
+        )

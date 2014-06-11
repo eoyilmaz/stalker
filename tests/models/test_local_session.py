@@ -236,3 +236,7 @@ class LocalSessionTester(unittest.TestCase):
                 )
             )
         )
+
+        # delete a second time
+        # this should not raise an OSError
+        local_session.delete()

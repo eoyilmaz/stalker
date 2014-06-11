@@ -26,7 +26,7 @@ Whenever stalker.db or something under it imported, the
 import logging
 
 from sqlalchemy import engine_from_config
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, InvalidRequestError
 
 from stalker import defaults
 from stalker.db.declarative import Base
@@ -161,20 +161,39 @@ def create_alembic_table():
 
     conn = DBSession.connection()
     engine = conn.engine
-    if not engine.dialect.has_table(conn, table_name):
-        logger.debug('creating alembic_version table with version_num: %s' %
-                     version_num)
+
+    # check if the table is already there
+    if engine.dialect.has_table(conn, table_name):
+        table = Base.metadata.tables[table_name]
+    else:
+        logger.debug('creating alembic_version table')
+
+        # create the table no matter if it exists or not we need it either way
         table = Table(
             table_name, Base.metadata,
-            Column('version_num', Text)
+            Column('version_num', Text),
+            extend_existing=True
         )
+
         Base.metadata.create_all(engine)
+
+    # first try to query the version value
+    sql_query = 'select version_num from "alembic_version"'
+    try:
+        version_num = \
+            DBSession.connection().execute(sql_query).fetchone()[0]
+    except TypeError:
+        logger.debug('inserting %s to alembic_version table' % version_num)
+        # the table is there but there is no value so insert it
         ins = table.insert().values(version_num=version_num)
         DBSession.connection().execute(ins)
         DBSession.commit()
         logger.debug('alembic_version table is created and initialized')
     else:
-        logger.debug('alembic_version table is already there!')
+        # the value is there do not touch the table
+        logger.debug(
+            'alembic_version table is already there, not doing anything!'
+        )
 
 
 def __create_admin__():

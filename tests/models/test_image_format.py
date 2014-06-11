@@ -444,3 +444,13 @@ class ImageFormatTest(unittest.TestCase):
         """
         self.assertTrue(self.test_image_format.plural_class_name,
                         "ImageFormats")
+
+    # def test_hash_value(self):
+    #     """testing if the hash value is correctly calculated
+    #     """
+    #     self.assertEqual(
+    #         hash(self.test_image_format),
+    #         hash(self.test_image_format.id) +
+    #         2 * hash(self.test_image_format.name) +
+    #         3 * hash(self.test_image_format.entity_type)
+    #     )

@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
 import os
 
 import re
@@ -448,7 +449,8 @@ class Version(Link):
         temp_filename = \
             jinja2.Template(vers_template.filename).render(**kwargs)
 
-        if not isinstance(temp_filename, str):
+        from stalker import __string_types__
+        if not isinstance(temp_filename, __string_types__):
             # it is
             # byte for python3
             # or
@@ -458,7 +460,7 @@ class Version(Link):
         temp_path = \
             jinja2.Template(vers_template.path).render(**kwargs)
 
-        if not isinstance(temp_path, str):
+        if not isinstance(temp_path, __string_types__):
             # it is
             # byte for python3
             # or
@@ -524,7 +526,8 @@ class Version(Link):
         """validates the given created_with value
         """
         if created_with is not None:
-            if not isinstance(created_with, str):
+            from stalker import __string_types__
+            if not isinstance(created_with, __string_types__):
                 raise TypeError(
                     '%s.created_with should be an instance of str, not %s' %
                     (self.__class__.__name__, created_with.__class__.__name__)
@@ -543,7 +546,7 @@ class Version(Link):
     def __hash__(self):
         """the overridden __hash__ method
         """
-        return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)
+        return super(Version, self).__hash__()
 
     @property
     def naming_parents(self):

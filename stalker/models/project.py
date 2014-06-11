@@ -20,13 +20,10 @@
 
 import logging
 
-import warnings
 from sqlalchemy import (Column, Integer, ForeignKey, Float, Boolean, Table)
 from sqlalchemy.orm import relationship, validates
 
-from stalker import User
 from stalker import defaults
-from stalker.db import session
 from stalker.db.declarative import Base
 from stalker.models.entity import Entity
 from stalker.models.mixins import (StatusMixin, DateRangeMixin, ReferenceMixin,
@@ -267,7 +264,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
     def __hash__(self):
         """the overridden __hash__ method
         """
-        return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)
+        return super(Project, self).__hash__()
 
     @validates("fps")
     def _validate_fps(self, key, fps):
@@ -301,6 +298,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         """validates the given lead_in value
         """
         if lead is not None:
+            from stalker import User
             if not isinstance(lead, User):
                 raise TypeError(
                     "%s.lead should be an instance of "
@@ -313,10 +311,8 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
     def _validate_client(self, key, client):
         """validates the given client value
         """
-        from stalker.models.client import Client
-
         if client is not None:
-            # the lead should be an instance of User class
+            from stalker.models.client import Client
             if not isinstance(client, Client):
                 raise TypeError(
                     "%s.client should be an instance of "
@@ -362,6 +358,8 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
     def _validate_users(self, key, user_in):
         """validates the given users_in value
         """
+        from stalker.models.auth import User
+
         if not isinstance(user_in, User):
             raise TypeError(
                 '%s.users should be all stalker.models.auth.User instances, '
@@ -388,17 +386,9 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         # use joins over the session.query
         from stalker.models.asset import Asset
 
-        if session is not None:
-            return Asset.query \
-                .join(Asset.project) \
-                .filter(Project.name == self.name) \
-                .all()
-        else:
-            warnings.warn("There is no database setup, the users can not "
-                          "be queried from this state, please use "
-                          "stalker.db.setup() to setup a database",
-                          RuntimeWarning)
-            return []
+        return Asset.query \
+            .filter(Asset.project == self) \
+            .all()
 
     @property
     def sequences(self):
@@ -407,11 +397,9 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         # sequences are tasks, use self.tasks
         from stalker.models.sequence import Sequence
 
-        sequences = []
-        for task in self.tasks:
-            if isinstance(task, Sequence):
-                sequences.append(task)
-        return sequences
+        return Sequence.query \
+            .filter(Sequence.project == self) \
+            .all()
 
     @property
     def shots(self):
@@ -420,11 +408,9 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         # shots are tasks, use self.tasks
         from stalker.models.shot import Shot
 
-        shots = []
-        for task in self.tasks:
-            if isinstance(task, Shot):
-                shots.append(task)
-        return shots
+        return Shot.query \
+            .filter(Shot.project == self) \
+            .all()
 
     @property
     def to_tjp(self):

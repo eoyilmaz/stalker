@@ -52,4 +52,4 @@ class Tag(SimpleEntity):
     def __hash__(self):
         """the overridden __hash__ method
         """
-        return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)
+        return super(Tag, self).__hash__()

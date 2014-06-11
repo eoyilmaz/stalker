@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
 import os
 import json
 import re
@@ -132,7 +133,8 @@ class Permission(Base):
     def _validate_access(self, access):
         """validates the given access value
         """
-        if not isinstance(access, str):
+        from stalker import __string_types__
+        if not isinstance(access, __string_types__):
             raise TypeError(
                 '%s.access should be an instance of str not %s' % (
                     self.__class__.__name__,
@@ -158,7 +160,8 @@ class Permission(Base):
     def _validate_class_name(self, class_name):
         """validates the given class_name value
         """
-        if not isinstance(class_name, str):
+        from stalker import __string_types__
+        if not isinstance(class_name, __string_types__):
             raise TypeError(
                 '%s.class_name should be an instance of str not %s' %
                 (self.__class__.__name__, class_name.__class__.__name__)
@@ -179,8 +182,8 @@ class Permission(Base):
     def _validate_action(self, action):
         """validates the given action value
         """
-
-        if not isinstance(action, str):
+        from stalker import __string_types__
+        if not isinstance(action, __string_types__):
             raise TypeError(
                 '%s.action should be an instance of str not %s' %
                 (self.__class__.__name__, action.__class__.__name__)
@@ -208,11 +211,6 @@ class Permission(Base):
             and other.access == self.access \
             and other.action == self.action \
             and other.class_name == self.class_name
-
-    def __ne__(self, other):
-        """the inequality of two Permissions
-        """
-        return not self.__eq__(other)
 
 
 class Group(Entity, ACLMixin):
@@ -271,7 +269,7 @@ class Group(Entity, ACLMixin):
     def __hash__(self):
         """the overridden __hash__ method
         """
-        return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)
+        return super(Group, self).__hash__()
 
 
 class User(Entity, ACLMixin):
@@ -566,7 +564,7 @@ class User(Entity, ACLMixin):
     def __hash__(self):
         """the overridden __hash__ method
         """
-        return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)
+        return super(User, self).__hash__()
 
     @validates("login")
     def _validate_login(self, key, login):
@@ -625,7 +623,8 @@ class User(Entity, ACLMixin):
         """validates the given email value
         """
         # check if email_in is an instance of string
-        if not isinstance(email_in, str):
+        from stalker import __string_types__
+        if not isinstance(email_in, __string_types__):
             raise TypeError(
                 "%s.email should be an instance of str not %s" %
                 (self.__class__.__name__, email_in.__class__.__name__)
@@ -918,7 +917,7 @@ class LocalSession(object):
 
         if isinstance(dt, datetime.datetime):
             if dt.utcoffset() is not None:
-                obj = dt - dt.utcoffset()
+                dt = dt - dt.utcoffset()
         millis = int(
             calendar.timegm(dt.timetuple()) * 1000 +
             dt.microsecond / 1000

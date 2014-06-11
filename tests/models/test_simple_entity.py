@@ -894,3 +894,10 @@ class SimpleEntityTester(unittest.TestCase):
         test_value = 'purple'
         self.test_simple_entity.html_class = test_value
         self.assertEqual(self.test_simple_entity.html_class, test_value)
+
+    def test_to_tjp_wil_raise_a_not_implemented_error(self):
+        """testing if calling to_tjp() method will raise a
+        NotImplementedError
+        """
+        with self.assertRaises(NotImplementedError):
+            self.test_simple_entity.to_tjp()

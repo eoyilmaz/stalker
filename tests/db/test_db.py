@@ -882,11 +882,10 @@ class DatabaseTester(unittest.TestCase):
         """testing if the db.init() will also create a table called
         alembic_version
         """
-        temp_db_path = os.path.join(tempfile.mkdtemp(), 'stalker.db')
+        temp_db_path = os.path.join(tempfile.mktemp(suffix='.db'))
         self.files_to_remove.append(temp_db_path)
         db.setup({
-            'sqlalchemy.url':
-                'sqlite:///%s' % temp_db_path
+            'sqlalchemy.url': 'sqlite:///%s' % temp_db_path
         })
         db.init()
         sql_query = 'select version_num from "alembic_version"'
@@ -902,6 +901,7 @@ class DatabaseTester(unittest.TestCase):
         self.files_to_remove.append(temp_db_path)
         db_config = {'sqlalchemy.url': 'sqlite:///%s' % temp_db_path}
 
+        db.DBSession.remove()
         db.setup(db_config)
         db.init()
 
@@ -3280,7 +3280,6 @@ class DatabaseModelsTester(unittest.TestCase):
         date_updated = task1.date_updated
         duration = task1.duration
         end = task1.end
-        is_complete = task1.is_complete
         is_milestone = task1.is_milestone
         name = task1.name
         parent = task1.parent
@@ -3315,7 +3314,6 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(date_updated, task1_db.date_updated)
         self.assertEqual(duration, task1_db.duration)
         self.assertEqual(end, task1_db.end)
-        self.assertEqual(is_complete, task1_db.is_complete)
         self.assertEqual(is_milestone, task1_db.is_milestone)
         self.assertEqual(name, task1_db.name)
         self.assertEqual(parent, task1_db.parent)

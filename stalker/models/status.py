@@ -18,7 +18,6 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-
 from sqlalchemy import Table, Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship, validates
 
@@ -84,7 +83,8 @@ class Status(Entity, CodeMixin):
     def __eq__(self, other):
         """the equality operator
         """
-        if isinstance(other, str):
+        from stalker import __string_types__
+        if isinstance(other, __string_types__):
             return self.name.lower() == other.lower() or \
                 self.code.lower() == other.lower()
         else:
@@ -94,7 +94,7 @@ class Status(Entity, CodeMixin):
     def __hash__(self):
         """the overridden __hash__ method
         """
-        return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)
+        return super(Status, self).__hash__()
 
 
 class StatusList(Entity, TargetEntityTypeMixin):
@@ -216,14 +216,15 @@ class StatusList(Entity, TargetEntityTypeMixin):
     def __hash__(self):
         """the overridden __hash__ method
         """
-        return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)
+        return super(StatusList, self).__hash__()
 
     def __getitem__(self, key):
         """the indexing attributes for getting item
         """
         with DBSession.no_autoflush:
             return_item = None
-            if isinstance(key, str):
+            from stalker import __string_types__
+            if isinstance(key, __string_types__):
                 for item in self.statuses:
                     if item == key:
                         return_item = item
@@ -235,7 +236,7 @@ class StatusList(Entity, TargetEntityTypeMixin):
     def __setitem__(self, key, value):
         """the indexing attributes for setting item
         """
-        self.statuses[key] = self._validate_status(value)
+        self.statuses[key] = value
 
     def __delitem__(self, key):
         """the indexing attributes for deleting item

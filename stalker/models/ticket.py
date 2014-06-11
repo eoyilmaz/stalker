@@ -343,7 +343,9 @@ class Ticket(Entity, StatusMixin):
         """
         if summary is None:
             summary = ''
-        if not isinstance(summary, str):
+
+        from stalker import __string_types__
+        if not isinstance(summary, __string_types__):
             raise TypeError(
                 '%s.summary should be an instance of str, not %s' %
                 (self.__class__.__name__, summary.__class__.__name__)
@@ -435,7 +437,7 @@ class Ticket(Entity, StatusMixin):
     def __hash__(self):
         """the overridden __hash__ method
         """
-        return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)
+        return super(Ticket, self).__hash__()
 
 
 class TicketLog(SimpleEntity):

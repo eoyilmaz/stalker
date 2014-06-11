@@ -601,16 +601,18 @@ class WorkingHours(object):
         return hash(self.working_hours)
 
     def __getitem__(self, item):
+        from stalker import __string_types__
         if isinstance(item, int):
             return self._wh[defaults.day_order[item]]
-        elif isinstance(item, str):
+        elif isinstance(item, __string_types__):
             return self._wh[item]
 
     def __setitem__(self, key, value):
         self._validate_wh_value(value)
+        from stalker import __string_types__
         if isinstance(key, int):
             self._wh[defaults.day_order[key]] = value
-        elif isinstance(key, str):
+        elif isinstance(key, __string_types__):
             # check if key is in
             if key not in defaults.day_order:
                 raise KeyError(

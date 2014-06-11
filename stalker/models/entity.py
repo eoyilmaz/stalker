@@ -319,7 +319,8 @@ class SimpleEntity(Base):
         if description is None:
             description = ""
 
-        if not isinstance(description, str):
+        from stalker import __string_types__
+        if not isinstance(description, __string_types__):
             raise TypeError(
                 '%s.description should be an instance of string, not %s' %
                 (self.__class__.__name__, description.__class__.__name__)
@@ -333,7 +334,8 @@ class SimpleEntity(Base):
         if generic_text is None:
             generic_text = ""
 
-        if not isinstance(generic_text, str):
+        from stalker import __string_types__
+        if not isinstance(generic_text, __string_types__):
             raise TypeError(
                 '%s.generic_text should be an instance of string, not %s' %
                 (self.__class__.__name__, generic_text.__class__.__name__)
@@ -356,7 +358,8 @@ class SimpleEntity(Base):
                 "%s.name can not be None" % self.__class__.__name__
             )
 
-        if not isinstance(name, str):
+        from stalker import __string_types__
+        if not isinstance(name, __string_types__):
             raise TypeError(
                 "%s.name should be an instance of string not %s" %
                 (self.__class__.__name__, name.__class__.__name__)
@@ -556,7 +559,9 @@ class SimpleEntity(Base):
         """
         if html_style is None:
             html_style = ''
-        if not isinstance(html_style, str):
+
+        from stalker import __string_types__
+        if not isinstance(html_style, __string_types__):
             raise TypeError(
                 '%s.html_style should be an instance of basestring, not %s' %
                 (self.__class__.__name__, html_style.__class__.__name__)
@@ -569,7 +574,9 @@ class SimpleEntity(Base):
         """
         if html_class is None:
             html_class = ''
-        if not isinstance(html_class, str):
+
+        from stalker import __string_types__
+        if not isinstance(html_class, __string_types__):
             raise TypeError(
                 '%s.html_class should be an instance of basestring, not %s' %
                 (self.__class__.__name__, html_class.__class__.__name__)
@@ -672,7 +679,7 @@ class Entity(SimpleEntity):
     def __hash__(self):
         """the overridden __hash__ method
         """
-        return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)
+        return super(Entity, self).__hash__()
 
 # Entity Tags
 Entity_Tags = Table(

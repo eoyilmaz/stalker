@@ -23,7 +23,16 @@ Animation and VFX Studios.
 See docs for more information.
 """
 
-__version__ = '0.2.8.2'
+__version__ = '0.2.8.3'
+
+
+import sys
+
+__string_types__ = []
+if sys.version_info[0] >= 3:  # Python 3
+    __string_types__ = tuple([str])
+else:  # Python 2
+    __string_types__ = tuple([str, unicode])
 
 
 # before anything about stalker create the defaults

@@ -200,12 +200,12 @@ class StatusListTest(unittest.TestCase):
         # first try indexing
 
         # this shouldn't raise a TypeError
-        status1 = self.test_status_list[0]
+        status = Status(name="Pending Review", code="PRev")
 
-        #self.test_status_list[-1] = status1
+        self.test_status_list[0] = status
 
         # check the equality
-        self.assertEqual(self.test_status_list.statuses[0], status1)
+        self.assertEqual(self.test_status_list.statuses[0], status)
 
     def test_indexing_del(self):
         """testing indexing of statuses in the statusList, del

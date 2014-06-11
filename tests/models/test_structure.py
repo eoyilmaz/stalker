@@ -244,3 +244,13 @@ class StructureTester(unittest.TestCase):
         """testing the plural name of Structure class
         """
         self.assertTrue(self.test_structure.plural_class_name, "Structures")
+
+    # def test_hash_value(self):
+    #     """testing if the hash value is correctly calculated
+    #     """
+    #     self.assertEqual(
+    #         hash(self.test_structure),
+    #         hash(self.test_structure.id) +
+    #         2 * hash(self.test_structure.name) +
+    #         3 * hash(self.test_structure.entity_type)
+    #     )

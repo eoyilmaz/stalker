@@ -100,7 +100,8 @@ class Repository(Entity):
     def _validate_linux_path(self, key, linux_path_in):
         """validates the given linux path
         """
-        if not isinstance(linux_path_in, str):
+        from stalker import __string_types__
+        if not isinstance(linux_path_in, __string_types__):
             raise TypeError(
                 "%s.linux_path should be an instance of string not %s" %
                 (self.__class__.__name__, linux_path_in.__class__.__name__)
@@ -114,7 +115,8 @@ class Repository(Entity):
     def _validate_osx_path(self, key, osx_path_in):
         """validates the given osx path
         """
-        if not isinstance(osx_path_in, str):
+        from stalker import __string_types__
+        if not isinstance(osx_path_in, __string_types__):
             raise TypeError(
                 "%s.osx_path should be an instance of string not %s" %
                 (self.__class__.__name__, osx_path_in.__class__.__name__)
@@ -128,7 +130,8 @@ class Repository(Entity):
     def _validate_windows_path(self, key, windows_path_in):
         """validates the given windows path
         """
-        if not isinstance(windows_path_in, str):
+        from stalker import __string_types__
+        if not isinstance(windows_path_in, __string_types__):
             raise TypeError(
                 "%s.windows_path should be an instance of string not %s" %
                 (self.__class__.__name__, windows_path_in.__class__.__name__)
@@ -172,7 +175,8 @@ class Repository(Entity):
         if path is None:
             raise TypeError('path can not be None')
 
-        if not isinstance(path, str):
+        from stalker import __string_types__
+        if not isinstance(path, __string_types__):
             raise TypeError('path should be a string')
 
         path = path.replace('\\', '/')
@@ -238,4 +242,4 @@ class Repository(Entity):
     def __hash__(self):
         """the overridden __hash__ method
         """
-        return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)
+        return super(Repository, self).__hash__()

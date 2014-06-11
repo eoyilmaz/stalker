@@ -101,7 +101,8 @@ class Link(Entity):
         if full_path is None:
             full_path = ''
 
-        if not isinstance(full_path, str):
+        from stalker import __string_types__
+        if not isinstance(full_path, __string_types__):
             raise TypeError(
                 "%s.full_path should be an instance of string not %s" %
                 (self.__class__.__name__, full_path.__class__.__name__)
@@ -120,7 +121,8 @@ class Link(Entity):
         if original_filename == '':
             original_filename = filename_from_path
 
-        if not isinstance(original_filename, str):
+        from stalker import __string_types__
+        if not isinstance(original_filename, __string_types__):
             raise TypeError(
                 '%s.original_filename should be an instance of str and not '
                 '%s' % (
@@ -158,7 +160,8 @@ class Link(Entity):
                 '%s.path can not be set to None' % self.__class__.__name__
             )
 
-        if not isinstance(path, str):
+        from stalker import __string_types__
+        if not isinstance(path, __string_types__):
             raise TypeError(
                 '%s.path should be an instance of str, not %s' %
                 (self.__class__.__name__, path.__class__.__name__)
@@ -188,7 +191,8 @@ class Link(Entity):
         if filename is None:
             filename = ''
 
-        if not isinstance(filename, str):
+        from stalker import __string_types__
+        if not isinstance(filename, __string_types__):
             raise TypeError(
                 '%s.filename should be an instance of str, not %s' %
                 (self.__class__.__name__, filename.__class__.__name__)
@@ -213,7 +217,8 @@ class Link(Entity):
         if extension is None:
             extension = ''
 
-        if not isinstance(extension, str):
+        from stalker import __string_types__
+        if not isinstance(extension, __string_types__):
             raise TypeError(
                 '%s.extension should be an instance of str, not %s' % (
                     self.__class__.__name__,
@@ -238,4 +243,4 @@ class Link(Entity):
     def __hash__(self):
         """the overridden __hash__ method
         """
-        return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)
+        return super(Link, self).__hash__()

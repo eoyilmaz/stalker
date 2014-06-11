@@ -129,7 +129,8 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
         if path_in is None:
             path_in = ""
 
-        if not isinstance(path_in, str):
+        from stalker import __string_types__
+        if not isinstance(path_in, __string_types__):
             raise TypeError(
                 "%s.path attribute should be string not %s" %
                 (self.__class__.__name__, path_in.__class__.__name__)
@@ -145,7 +146,8 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
         if filename_in is None:
             filename_in = ""
 
-        if not isinstance(filename_in, str):
+        from stalker import __string_types__
+        if not isinstance(filename_in, __string_types__):
             raise TypeError(
                 "%s.filename attribute should be string not %s" %
                 (self.__class__.__name__, filename_in.__class__.__name__)
@@ -165,4 +167,4 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
     def __hash__(self):
         """the overridden __hash__ method
         """
-        return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)
+        return super(FilenameTemplate, self).__hash__()

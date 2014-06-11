@@ -60,7 +60,8 @@ class Page(Entity, ProjectMixin):
     def _validate_title(self, key, title):
         """validates the given title value
         """
-        if not isinstance(title, str):
+        from stalker import __string_types__
+        if not isinstance(title, __string_types__):
             raise TypeError(
                 '%(class)s.title should be a string, not %(title_class)s' %
                 {
@@ -86,7 +87,8 @@ class Page(Entity, ProjectMixin):
         if content is None:
             content = ''
 
-        if not isinstance(content, str):
+        from stalker import __string_types__
+        if not isinstance(content, __string_types__):
             raise TypeError(
                 '%(class)s.content should be a string, not %(content_class)s' %
                 {

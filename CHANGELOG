@@ -2,6 +2,14 @@
 Stalker Changes
 ===============
 
+0.2.8.3
+=======
+
+* **Fix:** Fixed str/unicode errors due to the code written for Python3
+  compatibility.
+* **Update:** Removed ``Task.is_complete`` attribute. Use the status "CMPL"
+  instead of this attribute.
+
 0.2.8.2
 =======
 

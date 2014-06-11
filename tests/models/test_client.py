@@ -406,3 +406,11 @@ class ClientTestCase(unittest.TestCase):
         self.assertFalse(dep1 != dep2)
         self.assertTrue(dep1 != dep3)
         self.assertTrue(dep1 != entity1)
+
+    # def test_hash_value(self):
+    #     """testing if the hash value is correctly calculated
+    #     """
+    #     self.assertEqual(
+    #         hash(self.test_client),
+    #         self.test_client.__hash__()
+    #     )

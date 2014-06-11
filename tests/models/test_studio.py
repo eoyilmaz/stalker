@@ -796,6 +796,16 @@ class StudioTester(unittest.TestCase):
         expected_now = datetime.datetime(2013, 4, 15, 21, 0)
         self.assertEqual(self.test_studio.now, expected_now)
 
+    def test_now_attribute_is_working_properly_case2(self):
+        """testing if the now attribute is working properly
+        """
+        self.test_studio._now = None
+        expected_now = Studio.round_time(datetime.datetime.now())
+        self.assertEqual(
+            self.test_studio.now,
+            expected_now
+        )
+
     def test_to_tjp_attribute_is_working_properly(self):
         """testing if the to_tjp attribute is working properly
         """

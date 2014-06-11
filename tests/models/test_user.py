@@ -1533,3 +1533,37 @@ class UserTest(unittest.TestCase):
                 'company',
                 test_value
             )
+
+    def test_watching_attribute_is_a_list_of_other_values_than_Task(self):
+        """testing if a TypeError will be raised when the watching attribute is
+        set to a list of other values than a Task
+        """
+        with self.assertRaises(TypeError) as cm:
+            self.test_user.watching = ['not', 1, 'list of tasks']
+
+        self.assertEqual(
+            str(cm.exception),
+            'Any element in User.watching should be an instance of '
+            'stalker.models.task.Task not str'
+        )
+
+    def test_watching_attribute_is_working_properly(self):
+        """testing if the watching attribute is working properly
+        """
+        test_value = [self.test_task1, self.test_task2]
+        self.assertEqual(self.test_user.watching, [])
+        self.test_user.watching = test_value
+        self.assertEqual(
+            sorted(test_value, key=lambda x: x.name),
+            sorted(self.test_user.watching, key=lambda x: x.name)
+        )
+
+    # def test_hash_value(self):
+    #     """testing if the hash value is correctly calculated
+    #     """
+    #     self.assertEqual(
+    #         hash(self.test_user),
+    #         hash(self.test_user.id) +
+    #         2 * hash(self.test_user.name) +
+    #         3 * hash(self.test_user.entity_type)
+    #     )

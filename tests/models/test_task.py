@@ -173,7 +173,6 @@ class TaskTester(unittest.TestCase):
             'end': datetime.datetime(2013, 4, 8, 18, 0),
             'depends': [self.test_dependent_task1,
                         self.test_dependent_task2],
-            'is_complete': False,
             'time_logs': [],
             'versions': [],
             'is_milestone': False,
@@ -219,26 +218,26 @@ class TaskTester(unittest.TestCase):
         self.test_task.priority = None
         self.assertEqual(self.test_task.priority, defaults.task_priority)
 
-    def test_priority_argument_any_given_other_value_then_integer_will_default_to_task_priority(self):
-        """testing if any other value then an positive integer for priority
-        argument will default the priority attribute to task_priority.
+    def test_priority_is_not_an_integer_or_float(self):
+        """testing if a TypeError will be raised when the priority argument is
+        anything but an integer or float.
         """
-        test_values = ["a324", None, []]
+        test_values = ["a324", []]
 
         for test_value in test_values:
             self.kwargs["priority"] = test_value
-            new_task = Task(**self.kwargs)
-            self.assertEqual(new_task.priority, defaults.task_priority)
+            with self.assertRaises(TypeError):
+                Task(**self.kwargs)
 
-    def test_priority_attribute_any_given_other_value_then_integer_will_default_to_task_priority(self):
-        """testing if any other value then an positive integer for priority
-        attribute will default it to task_priority.
+    def test_priority_attribute_it_not_an_integer_or_float(self):
+        """testing if a TypeError will be raised if the priority attribute is
+        set to anything but an integer or float
         """
-        test_values = ["a324", None, []]
+        test_values = ["a324", []]
 
         for test_value in test_values:
-            self.test_task.priority = test_value
-            self.assertEqual(self.test_task.priority, defaults.task_priority)
+            with self.assertRaises(TypeError):
+                self.test_task.priority = test_value
 
     def test_priority_argument_is_negative(self):
         """testing if the priority argument is given as a negative value will
@@ -1669,21 +1668,6 @@ class TaskTester(unittest.TestCase):
         self.assertIn(task_b, task_a.depends)
         self.assertIn(task_c, task_a.depends)
 
-    def test_is_complete_attribute_is_None(self):
-        """testing if the is_complete attribute will be False when set to None
-        """
-        self.test_task.is_complete = None
-        self.assertEqual(self.test_task.is_complete, False)
-
-    def test_is_complete_attribute_evaluates_the_given_value_to_a_bool(self):
-        """testing if the is_complete attribute is evaluated correctly to a
-        bool value when set to anything other than a bool value.
-        """
-        test_values = [1, 0, 1.2, "A string", "", [], [1]]
-        for test_value in test_values:
-            self.test_task.is_complete = test_value
-            self.assertEqual(self.test_task.is_complete, bool(test_value))
-
     def test_percent_complete_attribute_is_read_only(self):
         """testing if the percent_complete attribute is a read-only attribute
         """
@@ -1793,26 +1777,25 @@ class TaskTester(unittest.TestCase):
         self.test_task.is_milestone = None
         self.assertEqual(self.test_task.is_milestone, False)
 
-    def test_is_milestone_argument_evaluates_the_given_value_to_a_bool(self):
-        """testing if the is_milestone attribute is evaluated correctly to a
-        bool value when the is_milestone argument is anything other than a bool
-        value.
+    def test_is_milestone_argument_is_not_a_bool(self):
+        """testing if a TypeError will be raised when the is_milestone argument
+        is anything other than a bool
         """
         test_values = [1, 0, 1.2, "A string", "", [], [1]]
         for i, test_value in enumerate(test_values):
             self.kwargs["name"] = "test" + str(i)
             self.kwargs["is_milestone"] = test_value
-            new_task = Task(**self.kwargs)
-            self.assertEqual(new_task.is_milestone, bool(test_value))
+            with self.assertRaises(TypeError):
+                Task(**self.kwargs)
 
-    def test_is_milestone_attribute_evaluates_the_given_value_to_a_bool(self):
-        """testing if the is_milestone attribute is evaluated correctly to a
-        bool value when set to anything other than a bool value.
+    def test_is_milestone_attribute_is_not_a_bool(self):
+        """testing if a TypeError will be raised when the is_milestone
+        attribute is set to anything other than a bool value
         """
         test_values = [1, 0, 1.2, "A string", "", [], [1]]
         for test_value in test_values:
-            self.test_task.is_milestone = test_value
-            self.assertEqual(self.test_task.is_milestone, bool(test_value))
+            with self.assertRaises(TypeError):
+                self.test_task.is_milestone = test_value
 
     def test_is_milestone_argument_makes_the_resources_list_an_empty_list(self):
         """testing if the resources will be an empty list when the is_milestone

@@ -154,7 +154,7 @@ class Structure(Entity):
     def __hash__(self):
         """the overridden __hash__ method
         """
-        return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)
+        return super(Structure, self).__hash__()
 
     @validates("custom_template")
     def _validate_custom_template(self, key, custom_template_in):
@@ -163,7 +163,8 @@ class Structure(Entity):
         if custom_template_in is None:
             custom_template_in = ""
 
-        if not isinstance(custom_template_in, str):
+        from stalker import __string_types__
+        if not isinstance(custom_template_in, __string_types__):
             raise TypeError(
                 "%s.custom_template should be a string not %s" %
                 (

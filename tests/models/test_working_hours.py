@@ -535,3 +535,13 @@ class WorkingHoursTester(unittest.TestCase):
         """
         wh = WorkingHours()
         self.assertRaises(ValueError, setattr, wh, 'daily_working_hours', 25)
+
+    def test_split_in_to_working_hours_is_not_implemented_yet(self):
+        """testing if a NotimplementedError will be raised when the
+        split_in_to_working_hours() method is called
+        """
+        with self.assertRaises(NotImplementedError):
+            wh = WorkingHours()
+            start = datetime.datetime.now()
+            end = start + datetime.timedelta(days=10)
+            wh.split_in_to_working_hours(start, end)
