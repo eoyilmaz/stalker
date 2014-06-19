@@ -138,7 +138,8 @@ class Link(Entity):
         """formats the path to internal format, which is Linux forward slashes
         for path separation
         """
-        if not isinstance(path, str):
+        from stalker import __string_types__
+        if not isinstance(path, __string_types__):
             path = path.encode('utf-8')
 
         return path.replace("\\", "/")

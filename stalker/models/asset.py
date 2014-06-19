@@ -81,4 +81,3 @@ class Asset(Task, CodeMixin):
         """the overridden __hash__ method
         """
         return super(Asset, self).__hash__()
-

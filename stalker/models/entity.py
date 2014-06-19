@@ -365,7 +365,7 @@ class SimpleEntity(Base):
                 (self.__class__.__name__, name.__class__.__name__)
             )
 
-        name = self._format_name(str(name))
+        name = self._format_name(name)
 
         # it is empty
         if name == "":

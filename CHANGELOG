@@ -2,6 +2,11 @@
 Stalker Changes
 ===============
 
+0.2.8.4
+=======
+
+* **Fix:** Fixed ``SimpleEntity._validate_name()`` method for unicode strings.
+
 0.2.8.3
 =======
 
