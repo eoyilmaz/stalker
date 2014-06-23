@@ -60,7 +60,7 @@ class AssetTester(unittest.TestCase):
             StatusList.query.filter_by(target_entity_type='Sequence').first()
 
         # types
-        self.commmercial_project_type = Type(
+        self.commercial_project_type = Type(
             name="Commercial Project",
             code='commproj',
             target_entity_type=Project,
@@ -94,7 +94,7 @@ class AssetTester(unittest.TestCase):
         self.project1 = Project(
             name="Test Project1",
             code='tp1',
-            type=self.commmercial_project_type,
+            type=self.commercial_project_type,
             status_list=self.project_status_list,
             repository=self.repository,
         )

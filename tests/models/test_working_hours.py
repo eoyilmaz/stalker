@@ -257,7 +257,7 @@ class WorkingHoursTester(unittest.TestCase):
     workinghours sat off
     workinghours sun off"""
 
-        self.assertMultiLineEqual(wh.to_tjp, expected_tjp)
+        self.assertEqual(wh.to_tjp, expected_tjp)
 
     def test_to_tjp_attribute_is_working_properly_for_multiple_work_hour_ranges(self):
         """testing if the to_tjp property is working properly
@@ -279,7 +279,7 @@ class WorkingHoursTester(unittest.TestCase):
     workinghours sat 09:30 - 12:00
     workinghours sun off"""
 
-        self.assertMultiLineEqual(wh.to_tjp, expected_tjp)
+        self.assertEqual(wh.to_tjp, expected_tjp)
 
     def test_weekly_working_hours_attribute_is_read_only(self):
         """testing if the weekly_working_hours is a read-only attribute
@@ -473,7 +473,7 @@ class WorkingHoursTester(unittest.TestCase):
         """
         wh = WorkingHours()
         self.assertRaises(TypeError, setattr, wh, 'daily_working_hours',
-                          'not an intger')
+                          'not an integer')
 
     def test_daily_working_hours_argument_is_working_fine(self):
         """testing if the daily working hours argument value is correctly

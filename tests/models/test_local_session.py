@@ -116,7 +116,7 @@ class LocalSessionTester(unittest.TestCase):
         DBSession.add(new_user)
         DBSession.commit()
 
-        self.assertIsNotNone(new_user.id)
+        self.assertTrue(new_user.id is not None)
 
         # save it to the local storage
         local_session = LocalSession()
@@ -154,7 +154,7 @@ class LocalSessionTester(unittest.TestCase):
         DBSession.add(new_user)
         DBSession.commit()
 
-        self.assertIsNotNone(new_user.id)
+        self.assertTrue(new_user.id is not None)
 
         # save it to the local storage
         local_session = LocalSession()
@@ -185,10 +185,10 @@ class LocalSessionTester(unittest.TestCase):
             local_session2.logged_in_user_id, None
         )
 
-        self.assertIsNone(local_session2.logged_in_user)
+        self.assertTrue(local_session2.logged_in_user is None)
 
     def test_delete_will_delete_the_session_cache(self):
-        """testing if the LocalSession.delete() will delete the currect cache
+        """testing if the LocalSession.delete() will delete the current cache
         file
         """
         # create a new user
@@ -203,7 +203,7 @@ class LocalSessionTester(unittest.TestCase):
         DBSession.add(new_user)
         DBSession.commit()
 
-        self.assertIsNotNone(new_user.id)
+        self.assertTrue(new_user.id is not None)
 
         # save it to the local storage
         local_session = LocalSession()

@@ -94,7 +94,7 @@ def init():
 
     # register all Actions available for all SOM classes
     class_names = [
-        'Asset', 'TimeLog', 'Client', 'Department', 'Entity',
+        'Asset', 'TimeLog', 'Client', 'Daily', 'Department', 'Entity',
         'FilenameTemplate', 'Group', 'ImageFormat', 'Link', 'Message', 'Note',
         'Page', 'Permission', 'Project', 'Repository', 'Review', 'Scene',
         'Sequence', 'Shot', 'SimpleEntity', 'Status', 'StatusList',
@@ -118,21 +118,38 @@ def init():
 
     # create statuses
     create_ticket_statuses()
-    create_entity_statuses(entity_type='Task',
-                           status_names=defaults.task_status_names,
-                           status_codes=defaults.task_status_codes)
-    create_entity_statuses(entity_type='Asset',
-                           status_names=defaults.task_status_names,
-                           status_codes=defaults.task_status_codes)
-    create_entity_statuses(entity_type='Shot',
-                           status_names=defaults.task_status_names,
-                           status_codes=defaults.task_status_codes)
-    create_entity_statuses(entity_type='Sequence',
-                           status_names=defaults.task_status_names,
-                           status_codes=defaults.task_status_codes)
-    create_entity_statuses(entity_type='Review',
-                           status_names=defaults.review_status_names,
-                           status_codes=defaults.review_status_codes)
+
+    # create statuses for Tickets
+    create_entity_statuses(
+        entity_type='Daily',
+        status_names=defaults.daily_status_names,
+        status_codes=defaults.daily_status_codes
+    )
+    create_entity_statuses(
+        entity_type='Task',
+        status_names=defaults.task_status_names,
+        status_codes=defaults.task_status_codes
+    )
+    create_entity_statuses(
+        entity_type='Asset',
+        status_names=defaults.task_status_names,
+        status_codes=defaults.task_status_codes
+    )
+    create_entity_statuses(
+        entity_type='Shot',
+        status_names=defaults.task_status_names,
+        status_codes=defaults.task_status_codes
+    )
+    create_entity_statuses(
+        entity_type='Sequence',
+        status_names=defaults.task_status_names,
+        status_codes=defaults.task_status_codes
+    )
+    create_entity_statuses(
+        entity_type='Review',
+        status_names=defaults.review_status_names,
+        status_codes=defaults.review_status_codes
+    )
 
     # create alembic revision table
     create_alembic_table()

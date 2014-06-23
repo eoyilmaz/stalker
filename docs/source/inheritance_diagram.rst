@@ -36,6 +36,8 @@ Inheritance Diagram
    stalker.models.project.Project
    stalker.models.repository.Repository
    stalker.models.review.Review
+   stalker.models.review.Daily
+   stalker.models.review.DailyLink
    stalker.models.scene.Scene
    stalker.models.schedulers.SchedulerBase
    stalker.models.schedulers.TaskJugglerScheduler

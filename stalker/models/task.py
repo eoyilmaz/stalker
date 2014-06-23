@@ -2709,7 +2709,7 @@ class TaskDependency(Base, ScheduleMixin):
     """
 
     __default_schedule_attr_name__ = 'gap'  # used in docstrings coming from
-                                    # ScheduleMixin
+                                            # ScheduleMixin
     __default_schedule_models__ = defaults.task_dependency_gap_models
     __default_schedule_timing__ = 0
     __default_schedule_unit__ = 'h'
@@ -2800,7 +2800,7 @@ class TaskDependency(Base, ScheduleMixin):
             # trust to the session for checking the task
             if not isinstance(task, Task):
                 raise TypeError(
-                    '%s.task can should be and instance of '
+                    '%s.task should be and instance of '
                     'stalker.models.task.Task, not %s' % (
                         self.__class__.__name__, task.__class__.__name__
                     )

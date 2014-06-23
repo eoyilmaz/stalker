@@ -267,7 +267,7 @@ class ShotTester(unittest.TestCase):
         """testing if the current shot is going to be added to the Project, so
         the Project.shots list will contain the current shot
         """
-        self.assertIn(self.test_shot, self.test_shot.project.shots)
+        self.assertTrue(self.test_shot in self.test_shot.project.shots)
 
     def test_project_argument_is_working_properly(self):
         """testing if the project argument is working properly

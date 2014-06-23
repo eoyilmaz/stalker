@@ -377,14 +377,14 @@ class TicketTester(unittest.TestCase):
         self.test_ticket.comments.append(note1)
         self.test_ticket.comments.append(note2)
 
-        self.assertIn(note1, self.test_ticket.notes)
-        self.assertIn(note2, self.test_ticket.notes)
+        self.assertTrue(note1 in self.test_ticket.notes)
+        self.assertTrue(note2 in self.test_ticket.notes)
 
         self.test_ticket.notes.remove(note1)
-        self.assertNotIn(note1, self.test_ticket.comments)
+        self.assertFalse(note1 in self.test_ticket.comments)
 
         self.test_ticket.notes.remove(note2)
-        self.assertNotIn(note2, self.test_ticket.comments)
+        self.assertFalse(note2 in self.test_ticket.comments)
 
     def test_reported_by_attribute_is_synonym_of_created_by(self):
         """testing if the reported_by attribute is a synonym for the created_by
@@ -497,7 +497,7 @@ class TicketTester(unittest.TestCase):
         self.test_ticket.status = self.status_closed
         self.assertEqual(self.test_ticket.status, self.status_closed)
         ticket_log = self.test_ticket.resolve()
-        self.assertIsNone(ticket_log)
+        self.assertTrue(ticket_log is None)
         self.assertEqual(self.test_ticket.status, self.status_closed)
 
     ## reopen ##
@@ -508,7 +508,7 @@ class TicketTester(unittest.TestCase):
         self.test_ticket.status = self.status_new
         self.assertEqual(self.test_ticket.status, self.status_new)
         ticket_log = self.test_ticket.reopen()
-        self.assertIsNone(ticket_log)
+        self.assertTrue(ticket_log is None)
         self.assertEqual(self.test_ticket.status, self.status_new)
 
     def test_reopen_method_will_not_change_the_status_from_Accepted_to_anything(self):
@@ -518,7 +518,7 @@ class TicketTester(unittest.TestCase):
         self.test_ticket.status = self.status_accepted
         self.assertEqual(self.test_ticket.status, self.status_accepted)
         ticket_log = self.test_ticket.reopen()
-        self.assertIsNone(ticket_log)
+        self.assertTrue(ticket_log is None)
         self.assertEqual(self.test_ticket.status, self.status_accepted)
 
     def test_reopen_method_will_not_change_the_status_from_Assigned_to_anything(self):
@@ -528,7 +528,7 @@ class TicketTester(unittest.TestCase):
         self.test_ticket.status = self.status_assigned
         self.assertEqual(self.test_ticket.status, self.status_assigned)
         ticket_log = self.test_ticket.reopen()
-        self.assertIsNone(ticket_log)
+        self.assertTrue(ticket_log is None)
         self.assertEqual(self.test_ticket.status, self.status_assigned)
 
     def test_reopen_method_will_not_change_the_status_from_Reopened_to_anything(self):
@@ -538,7 +538,7 @@ class TicketTester(unittest.TestCase):
         self.test_ticket.status = self.status_reopened
         self.assertEqual(self.test_ticket.status, self.status_reopened)
         ticket_log = self.test_ticket.reopen()
-        self.assertIsNone(ticket_log)
+        self.assertTrue(ticket_log is None)
         self.assertEqual(self.test_ticket.status, self.status_reopened)
 
     def test_reopen_method_will_change_the_status_from_Closed_to_Reopened(self):
@@ -610,7 +610,7 @@ class TicketTester(unittest.TestCase):
         self.test_ticket.status = self.status_closed
         self.assertEqual(self.test_ticket.status, self.status_closed)
         ticket_log = self.test_ticket.accept()
-        self.assertIsNone(ticket_log)
+        self.assertTrue(ticket_log is None)
         self.assertEqual(self.test_ticket.status, self.status_closed)
 
     ## reassign ##
@@ -670,7 +670,7 @@ class TicketTester(unittest.TestCase):
         self.test_ticket.status = self.status_closed
         self.assertEqual(self.test_ticket.status, self.status_closed)
         ticket_log = self.test_ticket.reassign()
-        self.assertIsNone(ticket_log)
+        self.assertTrue(ticket_log is None)
         self.assertEqual(self.test_ticket.status, self.status_closed)
 
     def test_resolve_method_will_set_the_resolution(self):

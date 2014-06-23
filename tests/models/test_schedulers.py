@@ -42,7 +42,7 @@ class SchedulerBaseTester(unittest.TestCase):
         """
         self.kwargs.pop('studio')
         new_scheduler_base = SchedulerBase(**self.kwargs)
-        self.assertIsNone(new_scheduler_base.studio)
+        self.assertTrue(new_scheduler_base.studio is None)
 
     def test_studio_argument_is_None(self):
         """testing if the studio attribute will be None if the studio argument
@@ -50,13 +50,13 @@ class SchedulerBaseTester(unittest.TestCase):
         """
         self.kwargs['studio'] = None
         new_scheduler_base = SchedulerBase(**self.kwargs)
-        self.assertIsNone(new_scheduler_base.studio)
+        self.assertTrue(new_scheduler_base.studio is None)
 
     def test_studio_attribute_is_None(self):
         """testing if the studio argument can be set to None
         """
         self.test_scheduler_base.studio = None
-        self.assertIsNone(self.test_scheduler_base.studio)
+        self.assertTrue(self.test_scheduler_base.studio is None)
 
     def test_studio_argument_is_not_a_Studio_instance(self):
         """testing if a TypeError will be raised when the studio argument is

@@ -170,7 +170,7 @@ class TimeLogTester(unittest.TestCase):
         new_time_log = TimeLog(**self.kwargs)
 
         # now check if the new_time_log is in task.time_logs
-        self.assertIn(new_time_log, new_task.time_logs)
+        self.assertTrue(new_time_log in new_task.time_logs)
 
     def test_task_attribute_updates_backref(self):
         """testing if the Task given with the task attribute is updated
@@ -185,7 +185,7 @@ class TimeLogTester(unittest.TestCase):
         )
 
         self.test_time_log.task = new_task
-        self.assertIn(self.test_time_log, new_task.time_logs)
+        self.assertTrue(self.test_time_log in new_task.time_logs)
 
     def test_resource_argument_is_skipped(self):
         """testing if a TypeError will be raised when the resource argument is

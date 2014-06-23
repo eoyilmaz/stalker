@@ -109,7 +109,7 @@ class ReferenceMixinTester(unittest.TestCase):
         """
         self.test_foo_obj.references = []
 
-    def test_references_attribute_only_accepts_listlike_objects(self):
+    def test_references_attribute_only_accepts_list_like_objects(self):
         """testing if references attribute accepts only list-like objects,
         (objects with __setitem__, __getitem__ methods
         """

@@ -123,9 +123,8 @@ class VacationTestCase(unittest.TestCase):
         """testing if the user argument back populates vacations attribute of
         the User instance
         """
-        self.assertIn(
-            self.test_vacation,
-            self.kwargs['user'].vacations
+        self.assertTrue(
+            self.test_vacation in self.kwargs['user'].vacations
         )
 
     def test_user_attribute_back_populates_vacations_attribute(self):
@@ -140,7 +139,7 @@ class VacationTestCase(unittest.TestCase):
         )
 
         self.test_vacation.user = new_user
-        self.assertIn(self.test_vacation, new_user.vacations)
+        self.assertTrue(self.test_vacation in new_user.vacations)
 
     def test_to_tjp_attribute_is_a_read_only_property(self):
         """testing if the to_tjp is a read-only attribute

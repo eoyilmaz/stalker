@@ -417,7 +417,7 @@ class UserTest(unittest.TestCase):
         #)
         self.test_admin = User.query.filter_by(name=defaults.admin_name) \
             .first()
-        self.assertIsNotNone(self.test_admin)
+        self.assertTrue(self.test_admin is not None)
 
         # create test company
         self.test_company = Client(name='Test Company')
@@ -765,7 +765,7 @@ class UserTest(unittest.TestCase):
             1,
             1.0,
             ["a department"],
-            {"a": "deparment"}
+            {"a": "department"}
         ]
 
         self.kwargs["departments"] = test_values
@@ -969,11 +969,11 @@ class UserTest(unittest.TestCase):
             sorted(self.test_user.projects, key=lambda x: x.name)
         )
         self.test_user.projects.append(self.test_project3)
-        self.assertIn(self.test_project3, self.test_user.projects)
+        self.assertTrue(self.test_project3 in self.test_user.projects)
         # also check the backref
-        self.assertIn(self.test_user, self.test_project1.users)
-        self.assertIn(self.test_user, self.test_project2.users)
-        self.assertIn(self.test_user, self.test_project3.users)
+        self.assertTrue(self.test_user in self.test_project1.users)
+        self.assertTrue(self.test_user in self.test_project2.users)
+        self.assertTrue(self.test_user in self.test_project3.users)
 
     def test_projects_lead_attribute_None(self):
         """testing if a TypeError will be raised when the project_lead
@@ -1343,16 +1343,14 @@ class UserTest(unittest.TestCase):
             end=datetime.datetime(2013, 6, 10)
         )
 
-        self.assertNotIn(
-            vac1,
-            self.test_user.vacations
+        self.assertFalse(
+            vac1 in self.test_user.vacations
         )
 
         self.test_user.vacations.append(vac1)
 
-        self.assertIn(
-            vac1,
-            self.test_user.vacations
+        self.assertTrue(
+            vac1 in self.test_user.vacations
         )
 
     def test_efficiency_argument_skipped(self):
@@ -1496,14 +1494,14 @@ class UserTest(unittest.TestCase):
         """
         self.kwargs['company'] = None
         new_user = User(**self.kwargs)
-        self.assertIsNone(new_user.company)
+        self.assertTrue(new_user.company is None)
 
     def test_company_attribute_is_set_to_None(self):
         """testing if the company attribute can be set to None
         """
-        self.assertIsNotNone(self.test_user.company)
+        self.assertTrue(self.test_user.company is not None)
         self.test_user.company = None
-        self.assertIsNone(self.test_user.company)
+        self.assertTrue(self.test_user.company is None)
 
     def test_company_argument_is_not_a_Client_instance(self):
         """testing if a TypeError will be raised when the company argument is

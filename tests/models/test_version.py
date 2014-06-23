@@ -391,9 +391,9 @@ class VersionTester(unittest.TestCase):
             status_list=self.test_task_status_list,
         )
 
-        self.assertIsNot(self.test_version.task, new_task)
+        self.assertTrue(self.test_version.task is not new_task)
         self.test_version.task = new_task
-        self.assertIs(self.test_version.task, new_task)
+        self.assertTrue(self.test_version.task is new_task)
 
     def test_version_number_attribute_is_automatically_generated(self):
         """testing if the version_number attribute is automatically generated
@@ -505,13 +505,13 @@ class VersionTester(unittest.TestCase):
         self.kwargs.pop('inputs')
         new_version = Version(**self.kwargs)
 
-        self.assertNotIn(self.test_input_link1, new_version.inputs)
-        self.assertNotIn(self.test_input_link2, new_version.inputs)
+        self.assertFalse(self.test_input_link1 in new_version.inputs)
+        self.assertFalse(self.test_input_link2 in new_version.inputs)
 
         new_version.inputs = [self.test_input_link1, self.test_input_link2]
 
-        self.assertIn(self.test_input_link1, new_version.inputs)
-        self.assertIn(self.test_input_link2, new_version.inputs)
+        self.assertTrue(self.test_input_link1 in new_version.inputs)
+        self.assertTrue(self.test_input_link2 in new_version.inputs)
 
     def test_outputs_argument_is_skipped(self):
         """testing if the outputs attribute will be an empty list when the
@@ -558,13 +558,13 @@ class VersionTester(unittest.TestCase):
         self.kwargs.pop('outputs')
         new_version = Version(**self.kwargs)
 
-        self.assertNotIn(self.test_output_link1, new_version.outputs)
-        self.assertNotIn(self.test_output_link2, new_version.outputs)
+        self.assertFalse(self.test_output_link1 in new_version.outputs)
+        self.assertFalse(self.test_output_link2 in new_version.outputs)
 
         new_version.outputs = [self.test_output_link1, self.test_output_link2]
 
-        self.assertIn(self.test_output_link1, new_version.outputs)
-        self.assertIn(self.test_output_link2, new_version.outputs)
+        self.assertTrue(self.test_output_link1 in new_version.outputs)
+        self.assertTrue(self.test_output_link2 in new_version.outputs)
 
     def test_is_published_attribute_is_False_by_default(self):
         """testing if the is_published attribute is False by default
@@ -589,7 +589,7 @@ class VersionTester(unittest.TestCase):
         except KeyError:
             pass
         new_version = Version(**self.kwargs)
-        self.assertIsNone(new_version.parent)
+        self.assertTrue(new_version.parent is None)
 
     def test_parent_argument_is_None(self):
         """testing if the parent attribute will be None if the parent argument
@@ -597,14 +597,14 @@ class VersionTester(unittest.TestCase):
         """
         self.kwargs['parent'] = None
         new_version = Version(**self.kwargs)
-        self.assertIsNone(new_version.parent)
+        self.assertTrue(new_version.parent is None)
 
     def test_parent_attribute_is_None(self):
         """testing if the parent attribute value will be None if it is set to
         None
         """
         self.test_version.parent = None
-        self.assertIsNone(self.test_version.parent)
+        self.assertTrue(self.test_version.parent is None)
 
     def test_parent_argument_is_not_a_Version_instance(self):
         """testing if a TypeError will be raised when the parent argument is
@@ -642,7 +642,7 @@ class VersionTester(unittest.TestCase):
         """
         self.kwargs['parent'] = self.test_version
         new_version = Version(**self.kwargs)
-        self.assertIn(new_version, self.test_version.children)
+        self.assertTrue(new_version in self.test_version.children)
 
     def test_parent_attribute_updates_the_children_attribute(self):
         """testing if the parent attribute updates the children attribute of
@@ -652,7 +652,7 @@ class VersionTester(unittest.TestCase):
         new_version = Version(**self.kwargs)
         self.assertNotEqual(new_version.parent, self.test_version)
         new_version.parent = self.test_version
-        self.assertIn(new_version, self.test_version.children)
+        self.assertTrue(new_version in self.test_version.children)
 
     def test_parent_attribute_will_not_allow_circular_dependencies(self):
         """testing if a CircularDependency will be raised when the given
@@ -704,11 +704,11 @@ class VersionTester(unittest.TestCase):
         self.kwargs['parent'] = None
         new_version1 = Version(**self.kwargs)
         self.test_version.children = [new_version1]
-        self.assertIn(new_version1, self.test_version.children)
+        self.assertTrue(new_version1 in self.test_version.children)
 
         new_version2 = Version(**self.kwargs)
         self.test_version.children.append(new_version2)
-        self.assertIn(new_version2, self.test_version.children)
+        self.assertTrue(new_version2 in self.test_version.children)
 
     def test_children_attribute_updates_parent_attribute(self):
         """testing if the children attribute updates the parent attribute of

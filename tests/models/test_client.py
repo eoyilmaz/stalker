@@ -239,7 +239,7 @@ class ClientTestCase(unittest.TestCase):
         """
         self.assertEqual(self.test_client.users, self.test_client.members)
         self.test_client.users.append(self.test_user1)
-        self.assertIn(self.test_user1, self.test_client.members)
+        self.assertTrue(self.test_user1 in self.test_client.members)
 
     def test_projects_argument_accepts_an_empty_list(self):
         """testing if projects argument accepts an empty list
@@ -338,38 +338,38 @@ class ClientTestCase(unittest.TestCase):
         client from the users company argument
         """
         # check if the user is in the company
-        self.assertIs(self.test_client, self.test_user1.company)
+        self.assertTrue(self.test_client is self.test_user1.company)
 
         # now remove the user from the company
         self.test_client.users.remove(self.test_user1)
 
         # now check if company is not in users departments anymore
-        self.assertIsNot(self.test_client, self.test_user1.company)
+        self.assertFalse(self.test_client is self.test_user1.company)
 
         # assign the user back
         self.test_user1.company = self.test_client
 
         # check if the user is in the companies users list
-        self.assertIn(self.test_user1, self.test_client.users)
+        self.assertTrue(self.test_user1 in self.test_client.users)
 
     def test_project_remove_also_removes_project_from_client(self):
         """testing if removing an user from the users list also removes the
         client from the users company argument
         """
         # check if the project is registered with the client
-        self.assertIs(self.test_project1.client, self.test_client)
+        self.assertTrue(self.test_project1.client is self.test_client)
 
         # now remove the project from the client
         self.test_client.projects.remove(self.test_project1)
 
         # now check if project no longer belongs to client
-        self.assertIsNot(self.test_project1, self.test_client.projects)
+        self.assertFalse(self.test_project1 is self.test_client.projects)
 
         # assign the project back
         self.test_client.projects.append(self.test_project1)
 
         # check if the project is in the companies projects list
-        self.assertIn(self.test_project1, self.test_client.projects)
+        self.assertTrue(self.test_project1 in self.test_client.projects)
 
     def test_equality(self):
         """testing equality of two Client objects

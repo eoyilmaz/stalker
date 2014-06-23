@@ -95,7 +95,7 @@ class SceneTester(unittest.TestCase):
             "project": self.test_project,
         }
 
-        # the test seuqence
+        # the test sequence
         self.test_scene = Scene(**self.kwargs)
 
     def test___auto_name__class_attribute_is_set_to_False(self):

@@ -234,7 +234,7 @@ class ScheduleMixinTestCase(unittest.TestCase):
 
     def test_schedule_timing_argument_is_None(self):
         """testing if the schedule_timing attribute will be equal to the
-        stalker.config.Config.timing_resolutio.seconds/3600 if the
+        stalker.config.Config.timing_resolution.seconds/3600 if the
         schedule_timing argument is None
         """
         self.kwargs["schedule_timing"] = None
@@ -398,7 +398,7 @@ class ScheduleMixinTestCase(unittest.TestCase):
             ['effort', 1, 'm', 648000],
             ['effort', 1, 'y', 8424000],
 
-            # lenth values
+            # length values
             ['length', 1, 'min', 60],
             ['length', 1, 'h', 3600],
             ['length', 1, 'd', 32400],
@@ -445,7 +445,7 @@ class ScheduleMixinTestCase(unittest.TestCase):
             ['effort', 1, 'm', 648000],
             ['effort', 1, 'y', 8424000],
 
-            # lenth values
+            # length values
             ['length', 1, 'min', 60],
             ['length', 1, 'h', 3600],
             ['length', 1, 'd', 32400],

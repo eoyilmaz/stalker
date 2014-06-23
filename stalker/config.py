@@ -229,6 +229,15 @@ class Config(object):
             'APP'
         ],
 
+        daily_status_names=[
+            'Open',
+            'Closed'
+        ],
+        daily_status_codes=[
+            'OPEN',
+            'CLS'
+        ],
+
         task_schedule_constraints=['none', 'start', 'end', 'both'],
         task_schedule_models=['effort', 'length', 'duration'],
         task_dependency_gap_models=['length', 'duration'],

@@ -75,7 +75,7 @@ class ImageFormatTest(unittest.TestCase):
 
     def test_width_argument_float_to_int_conversion(self):
         """testing for width argument is given as a float and converted to int
-        successfuly
+        successfully
         """
         # the given floats should be converted to integer
         self.kwargs["width"] = 1920.0
@@ -231,7 +231,7 @@ class ImageFormatTest(unittest.TestCase):
 
     def test_device_aspect_attribute_updates(self):
         """testing if the device_aspect_ratio attribute is updated when any of
-        the witdh, height or pixel_aspect attributes are changed
+        the width, height or pixel_aspect attributes are changed
         """
         # just changing one of the width or height should be causing an update
         # in device_aspect
@@ -262,7 +262,7 @@ class ImageFormatTest(unittest.TestCase):
     def test_device_aspect_attribute_write_protected(self):
         """testing if device_aspect attribute is write protected
         """
-        # the device aspect should be write propetected
+        # the device aspect should be write protected
         self.assertRaises(AttributeError,
                           setattr, self.test_image_format, "device_aspect", 10)
 

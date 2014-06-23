@@ -217,7 +217,7 @@ class SimpleEntityTester(unittest.TestCase):
         )
 
     def test_description_argument_None(self):
-        """testing if description proeprty will be convertod to an empty string
+        """testing if description property will be converted to an empty string
         if None is given as the description argument
         """
         self.kwargs["description"] = None
@@ -293,7 +293,7 @@ class SimpleEntityTester(unittest.TestCase):
         self.assertFalse(se1 == se3)
 
     def test_inequality(self):
-        """testing the inequality of two simple entites
+        """testing the inequality of two simple entities
         """
         # create two simple entities with same parameters and check for
         # equality
@@ -737,14 +737,14 @@ class SimpleEntityTester(unittest.TestCase):
             pass
 
         new_simple_entity = SimpleEntity(**self.kwargs)
-        self.assertIsNone(new_simple_entity.thumbnail)
+        self.assertTrue(new_simple_entity.thumbnail is None)
 
     def test_thumbnail_argument_is_None(self):
         """testing if the thumbnail argument can be None
         """
         self.kwargs['thumbnail'] = None
         new_simple_entity = SimpleEntity(**self.kwargs)
-        self.assertIsNone(new_simple_entity.thumbnail)
+        self.assertTrue(new_simple_entity.thumbnail is None)
 
     def test_thumbnail_attribute_is_None(self):
         """testing if the thumbnail attribute can be set to None

@@ -1400,9 +1400,9 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
 
         # now check if the review instances are not in task3.reviews list
         # anymore
-        self.assertNotIn(review1, self.test_task3.reviews)
-        self.assertNotIn(review2, self.test_task3.reviews)
-        self.assertIn(review3, self.test_task3.reviews)
+        self.assertFalse(review1 in self.test_task3.reviews)
+        self.assertFalse(review2 in self.test_task3.reviews)
+        self.assertTrue(review3 in self.test_task3.reviews)
 
     #PREV: Review instances statuses are updated
     def test_request_revision_in_PREV_leaf_task_new_review_instance_is_created(self):
@@ -1644,7 +1644,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         now = dt.now()
 
         self.test_task8.depends = [self.test_task9]
-        self.assertIn(self.test_task9, self.test_task8.depends)
+        self.assertTrue(self.test_task9 in self.test_task8.depends)
 
         self.test_task9.status = self.status_rts
         self.test_task9.create_time_log(
@@ -1702,9 +1702,9 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task5.depends = [self.test_task9]  # will be STOP
         self.test_task6.depends = [self.test_task9]  # will be OH
         self.test_task8.depends = [self.test_task9]  # will be DREV
-        self.assertIn(self.test_task9, self.test_task5.depends)
-        self.assertIn(self.test_task9, self.test_task6.depends)
-        self.assertIn(self.test_task9, self.test_task8.depends)
+        self.assertTrue(self.test_task9 in self.test_task5.depends)
+        self.assertTrue(self.test_task9 in self.test_task6.depends)
+        self.assertTrue(self.test_task9 in self.test_task8.depends)
 
         self.test_task9.status = self.status_rts
         self.test_task9.create_time_log(
@@ -1813,11 +1813,11 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
             .filter_by(task=self.test_task8)\
             .filter_by(depends_to=self.test_task9)\
             .first()
-        self.assertIsNotNone(tdep_t3)
-        self.assertIsNotNone(tdep_t4)
-        self.assertIsNotNone(tdep_t5)
-        self.assertIsNotNone(tdep_t6)
-        self.assertIsNotNone(tdep_t8)
+        self.assertTrue(tdep_t3 is not None)
+        self.assertTrue(tdep_t4 is not None)
+        self.assertTrue(tdep_t5 is not None)
+        self.assertTrue(tdep_t6 is not None)
+        self.assertTrue(tdep_t8 is not None)
         self.assertEqual(tdep_t3.dependency_target, 'onstart')
         self.assertEqual(tdep_t4.dependency_target, 'onstart')
         self.assertEqual(tdep_t5.dependency_target, 'onstart')

@@ -165,7 +165,7 @@ class ConfigTester(unittest.TestCase):
         """
         # now create a config.py file and fill it with the desired values
         # like database_file_name = "test_value.db"
-        # but do a syntax error on purpose, like forgetting the last quato sign
+        # but do a syntax error on purpose, like forgetting the last quote sign
         test_value = ".test_value.db"
         config_file = open(self.config_full_path, "w")
         config_file.writelines(["#-*- coding: utf-8 -*-\n",

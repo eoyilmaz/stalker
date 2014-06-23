@@ -282,7 +282,7 @@ class ReviewTestCase(unittest.TestCase):
         self.assertRaises(TypeError, setattr, review, 'reviewer', None)
 
     def test_reviewer_argument_is_not_a_User_instance(self):
-        """testing if a TeypeError will be raised when the reviewer argument is
+        """testing if a TypeError will be raised when the reviewer argument is
         not a User instance
         """
         self.kwargs['reviewer'] = 'not a user instance'
@@ -435,7 +435,7 @@ class ReviewTestCase(unittest.TestCase):
         review2 = reviews[1]
 
         review1.request_revision()
-        # one requst review should be enough to set the status to hrev,
+        # one request review should be enough to set the status to hrev,
         # note that this is another tests duty to check
         self.assertEqual(
             self.status_prev,

@@ -254,22 +254,22 @@ project Studio_564 "Test Studio" 2013-04-16 - 2013-06-30 {
             resource User_3 "admin" {
     efficiency 1.0
 }
-            resource User_28 "User1" {
+            resource User_{{user1.id}} "User1" {
     efficiency 1.0
 }
-            resource User_30 "User2" {
+            resource User_{{user2.id}} "User2" {
     efficiency 1.0
 }
-            resource User_31 "User3" {
+            resource User_{{user3.id}} "User3" {
     efficiency 1.0
 }
-            resource User_33 "User4" {
+            resource User_{{user4.id}} "User4" {
     efficiency 1.0
 }
-            resource User_34 "User5" {
+            resource User_{{user5.id}} "User5" {
     efficiency 1.0
 }
-            resource User_35 "User6" {
+            resource User_{{user6.id}} "User6" {
     efficiency 1.0
 }
         }
@@ -277,37 +277,37 @@ project Studio_564 "Test Studio" 2013-04-16 - 2013-06-30 {
         # tasks
         
             
-task Project_43 "Test Project 1" {
+task Project_{{proj.id}} "Test Project 1" {
         
-task Task_44 "Task1" {
+task Task_{{task1.id}} "Task1" {
 
     
             
             
             effort 50.0h
-            allocate User_28 {
+            allocate User_{{user1.id}} {
                     alternative
-                    User_31, User_33, User_34 select minallocated
+                    User_{{user3.id}}, User_{{user4.id}}, User_{{user5.id}} select minallocated
                     persistent
-                }, User_30 {
+                }, User_{{user2.id}} {
                     alternative
-                    User_31, User_33, User_34 select minallocated
+                    User_{{user3.id}}, User_{{user4.id}}, User_{{user5.id}} select minallocated
                     persistent
                 }            
 }        
-task Task_45 "Task2" {
+task Task_{{task2.id}} "Task2" {
 
     
             
             
             effort 60.0h
-            allocate User_28 {
+            allocate User_{{user1.id}} {
                     alternative
-                    User_31, User_33, User_34 select minallocated
+                    User_{{user3.id}}, User_{{user4.id}}, User_{{user5.id}} select minallocated
                     persistent
-                }, User_30 {
+                }, User_{{user2.id}} {
                     alternative
-                    User_31, User_33, User_34 select minallocated
+                    User_{{user3.id}}, User_{{user4.id}}, User_{{user5.id}} select minallocated
                     persistent
                 }            
 }}
@@ -325,11 +325,20 @@ task Task_45 "Task2" {
             {
                 'stalker': stalker,
                 'studio': test_studio,
-                'csv_path': tjp_sched.temp_file_full_path
+                'csv_path': tjp_sched.temp_file_full_path,
+                'user1': self.test_user1,
+                'user2': self.test_user2,
+                'user3': self.test_user3,
+                'user4': self.test_user4,
+                'user5': self.test_user5,
+                'user6': self.test_user6,
+                'proj': self.test_proj1,
+                'task1': self.test_task1,
+                'task2': self.test_task2,
             }
         )
 
-        # self.maxDiff = None
+        self.maxDiff = None
         tjp_content = tjp_sched.tjp_content
         # print tjp_content
         tjp_sched._clean_up()
@@ -573,35 +582,35 @@ project Studio_564 "Test Studio" 2013-04-16 - 2013-06-30 {
             resource User_3 "admin" {
     efficiency 1.0
 }
-            resource User_28 "User1" {
+            resource User_{{user1.id}} "User1" {
     efficiency 1.0
 }
-            resource User_30 "User2" {
+            resource User_{{user2.id}} "User2" {
     efficiency 1.0
 }
-            resource User_31 "User3" {
+            resource User_{{user3.id}} "User3" {
     efficiency 1.0
 }
-            resource User_33 "User4" {
+            resource User_{{user4.id}} "User4" {
     efficiency 1.0
 }
-            resource User_34 "User5" {
+            resource User_{{user5.id}} "User5" {
     efficiency 1.0
 }
-            resource User_35 "User6" {
+            resource User_{{user6.id}} "User6" {
     efficiency 1.0
 }
         }
 
 # tasks
-task Task_43 "TP1" {
-  task Task_44 "Task1" {
+task Task_{{proj1.id}} "TP1" {
+  task Task_{{task1.id}} "Task1" {
     effort 50.0h
-    allocate User_28 { alternative User_31, User_33, User_34 select minallocated persistent }, User_30 { alternative User_31, User_33, User_34 select minallocated persistent }
+    allocate User_{{user1.id}} { alternative User_{{user3.id}}, User_{{user4.id}}, User_{{user5.id}} select minallocated persistent }, User_{{user2.id}} { alternative User_{{user3.id}}, User_{{user4.id}}, User_{{user5.id}} select minallocated persistent }
   }
-  task Task_45 "Task2" {
+  task Task_{{task2.id}} "Task2" {
     effort 60.0h
-    allocate User_28 { alternative User_31, User_33, User_34 select minallocated persistent }, User_30 { alternative User_31, User_33, User_34 select minallocated persistent }
+    allocate User_{{user1.id}} { alternative User_{{user3.id}}, User_{{user4.id}}, User_{{user5.id}} select minallocated persistent }, User_{{user2.id}} { alternative User_{{user3.id}}, User_{{user4.id}}, User_{{user5.id}} select minallocated persistent }
   }
 }
 
@@ -615,7 +624,16 @@ taskreport breakdown "{{csv_path}}"{
             {
                 'stalker': stalker,
                 'studio': test_studio,
-                'csv_path': tjp_sched.temp_file_full_path
+                'csv_path': tjp_sched.temp_file_full_path,
+                'user1': self.test_user1,
+                'user2': self.test_user2,
+                'user3': self.test_user3,
+                'user4': self.test_user4,
+                'user5': self.test_user5,
+                'user6': self.test_user6,
+                'proj1': self.test_proj1,
+                'task1': self.test_task1,
+                'task2': self.test_task2,
             }
         )
 

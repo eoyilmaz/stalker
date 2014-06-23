@@ -23,7 +23,7 @@ Animation and VFX Studios.
 See docs for more information.
 """
 
-__version__ = '0.2.8.4'
+__version__ = '0.2.9'
 
 
 import sys
@@ -52,7 +52,7 @@ from stalker.models.mixins import (ProjectMixin, ReferenceMixin,
                                    WorkingHoursMixin, ScheduleMixin)
 from stalker.models.note import Note
 from stalker.models.project import Project
-from stalker.models.review import Review
+from stalker.models.review import Review, Daily, DailyLink
 from stalker.models.repository import Repository
 from stalker.models.scene import Scene
 from stalker.models.schedulers import SchedulerBase, TaskJugglerScheduler

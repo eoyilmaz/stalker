@@ -374,7 +374,7 @@ class DateRangeMixinTester(unittest.TestCase):
         new_foo_entity = DateRangeMixFooMixedInClass(**self.kwargs)
 
         self.assertTrue(isinstance(new_foo_entity.start, datetime.datetime))
-        # can not check for start, just don't want to strugle with the round
+        # can not check for start, just don't want to struggle with the round
         # thing
         #self.assertEqual(new_foo_entity.start,
         #                 datetime.datetime(2013, 3, 22, 15, 30))
@@ -534,14 +534,14 @@ class DateRangeMixinTester(unittest.TestCase):
         class
         """
         new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
-        self.assertIsNone(new_foo_obj.computed_start, None)
+        self.assertTrue(new_foo_obj.computed_start is None)
 
     def test_computed_end_is_None_for_a_non_scheduled_class(self):
         """testing if the computed_end attribute is None for a non scheduled
         class
         """
         new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
-        self.assertIsNone(new_foo_obj.computed_end, None)
+        self.assertTrue(new_foo_obj.computed_end is None)
 
     def test_computed_duration_attribute_is_None_if_there_is_no_computed_start_and_no_computed_end(self):
         """testing if the computed_start attribute is None if there is no
@@ -550,7 +550,7 @@ class DateRangeMixinTester(unittest.TestCase):
         new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
         new_foo_obj.computed_start = None
         new_foo_obj.computed_end = None
-        self.assertIsNone(new_foo_obj.computed_duration)
+        self.assertTrue(new_foo_obj.computed_duration is None)
 
     def test_computed_duration_attribute_is_None_if_there_is_computed_start_but_no_computed_end(self):
         """testing if the computed_start attribute is None if there is
@@ -559,7 +559,7 @@ class DateRangeMixinTester(unittest.TestCase):
         new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
         new_foo_obj.computed_start = datetime.datetime.now()
         new_foo_obj.computed_end = None
-        self.assertIsNone(new_foo_obj.computed_duration)
+        self.assertTrue(new_foo_obj.computed_duration is None)
 
     def test_computed_duration_attribute_is_None_if_there_is_no_computed_start_but_computed_end(self):
         """testing if the computed_start attribute is None if there is no
@@ -568,7 +568,7 @@ class DateRangeMixinTester(unittest.TestCase):
         new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
         new_foo_obj.computed_start = None
         new_foo_obj.computed_end = datetime.datetime.now()
-        self.assertIsNone(new_foo_obj.computed_duration)
+        self.assertTrue(new_foo_obj.computed_duration is None)
 
     def test_computed_duration_attribute_is_calculated_correctly_when_there_are_both_computed_start_and_computed_end(self):
         """testing if the computed_duration is calculated correctly when there

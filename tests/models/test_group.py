@@ -117,7 +117,7 @@ class GroupTester(unittest.TestCase):
         new_group = Group(**self.kwargs)
 
         for user in self.kwargs['users']:
-            self.assertIn(new_group, user.groups)
+            self.assertTrue(new_group in user.groups)
 
     def test_users_attribute_updates_the_groups_attribute_in_the_given_User_instances(self):
         """testing if the Users given with the users attribute will have the
@@ -127,4 +127,4 @@ class GroupTester(unittest.TestCase):
         new_group = Group(**self.kwargs)
         new_group.users = test_users
         for user in test_users:
-            self.assertIn(new_group, user.groups)
+            self.assertTrue(new_group in user.groups)

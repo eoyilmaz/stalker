@@ -1504,9 +1504,9 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
         last_scheduled_at = self.test_studio.last_scheduled_at
         last_scheduled_by = self.test_studio.last_scheduled_by
 
-        self.assertIsNotNone(last_schedule_message)
-        self.assertIsNotNone(last_scheduled_at)
-        self.assertIsNotNone(last_scheduled_by)
+        self.assertTrue(last_schedule_message is not None)
+        self.assertTrue(last_scheduled_at is not None)
+        self.assertTrue(last_scheduled_by is not None)
 
         db.DBSession.add(self.test_studio)
         db.DBSession.commit()

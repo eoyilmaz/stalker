@@ -299,7 +299,7 @@ class TaskTestCase(unittest.TestCase):
         self.assertEqual(new_task.priority, 1000)
 
     def test_priority_argument_is_float(self):
-        """testing if float numbers for prority argument will be converted to
+        """testing if float numbers for priority argument will be converted to
         integer
         """
         kwargs = copy.copy(self.kwargs)
@@ -428,16 +428,16 @@ class TaskTestCase(unittest.TestCase):
         self.data_created.append(new_task)
 
         # now check if the user has the task in its tasks list
-        self.assertIn(new_task, new_user1.tasks)
+        self.assertTrue(new_task in new_user1.tasks)
 
         # now change the resources list
         new_task.resources = [new_user2]
-        self.assertIn(new_task, new_user2.tasks)
-        self.assertNotIn(new_task, new_user1.tasks)
+        self.assertTrue(new_task in new_user2.tasks)
+        self.assertFalse(new_task in new_user1.tasks)
 
         # now append the new resource
         new_task.resources.append(new_user1)
-        self.assertIn(new_task, new_user1.tasks)
+        self.assertTrue(new_task in new_user1.tasks)
 
         # clean up test
         new_task.resources = []
@@ -461,7 +461,7 @@ class TaskTestCase(unittest.TestCase):
         new_task.resources = [new_user]
 
         # now check if the user has the task in its tasks list
-        self.assertIn(new_task, new_user.tasks)
+        self.assertTrue(new_task in new_user.tasks)
 
     def test_resources_attribute_will_clear_itself_from_the_previous_Users(self):
         """testing if the resources attribute is updated will clear itself from
@@ -509,19 +509,19 @@ class TaskTestCase(unittest.TestCase):
         self.data_created.append(new_task)
 
         # now check if the user has the task in its tasks list
-        self.assertIn(new_task, new_user1.tasks)
-        self.assertIn(new_task, new_user2.tasks)
+        self.assertTrue(new_task in new_user1.tasks)
+        self.assertTrue(new_task in new_user2.tasks)
 
         # now update the resources list
         new_task.resources = [new_user3, new_user4]
 
         # now check if the new resources has the task in their tasks attribute
-        self.assertIn(new_task, new_user3.tasks)
-        self.assertIn(new_task, new_user4.tasks)
+        self.assertTrue(new_task in new_user3.tasks)
+        self.assertTrue(new_task in new_user4.tasks)
 
         # and if it is not in the previous users tasks
-        self.assertNotIn(new_task, new_user1.tasks)
-        self.assertNotIn(new_task, new_user2.tasks)
+        self.assertFalse(new_task in new_user1.tasks)
+        self.assertFalse(new_task in new_user2.tasks)
 
     def test_watchers_argument_is_skipped(self):
         """testing if the watchers attribute will be an empty list when the
@@ -646,16 +646,16 @@ class TaskTestCase(unittest.TestCase):
         self.data_created.append(new_task)
 
         # now check if the user has the task in its tasks list
-        self.assertIn(new_task, new_user1.watching)
+        self.assertTrue(new_task in new_user1.watching)
 
         # now change the watchers list
         new_task.watchers = [new_user2]
-        self.assertIn(new_task, new_user2.watching)
-        self.assertNotIn(new_task, new_user1.watching)
+        self.assertTrue(new_task in new_user2.watching)
+        self.assertFalse(new_task in new_user1.watching)
 
         # now append the new user
         new_task.watchers.append(new_user1)
-        self.assertIn(new_task, new_user1.watching)
+        self.assertTrue(new_task in new_user1.watching)
 
     def test_watchers_attribute_back_references_to_User(self):
         """testing if the User instances passed with the watchers argument will
@@ -681,7 +681,7 @@ class TaskTestCase(unittest.TestCase):
         self.data_created.append(new_task)
 
         # now check if the user has the task in its watching list
-        self.assertIn(new_task, new_user.watching)
+        self.assertTrue(new_task in new_user.watching)
 
     def test_watchers_attribute_will_clear_itself_from_the_previous_Users(self):
         """testing if the watchers attribute is updated will clear itself from
@@ -738,20 +738,20 @@ class TaskTestCase(unittest.TestCase):
         self.data_created.append(new_task)
 
         # now check if the user has the task in its watching list
-        self.assertIn(new_task, new_user1.watching)
-        self.assertIn(new_task, new_user2.watching)
+        self.assertTrue(new_task in new_user1.watching)
+        self.assertTrue(new_task in new_user2.watching)
 
         # now update the watchers list
         new_task.watchers = [new_user3, new_user4]
 
         # now check if the new watchers has the task in their watching
         # attribute
-        self.assertIn(new_task, new_user3.watching)
-        self.assertIn(new_task, new_user4.watching)
+        self.assertTrue(new_task in new_user3.watching)
+        self.assertTrue(new_task in new_user4.watching)
 
         # and if it is not in the previous users watching list
-        self.assertNotIn(new_task, new_user1.watching)
-        self.assertNotIn(new_task, new_user2.watching)
+        self.assertFalse(new_task in new_user1.watching)
+        self.assertFalse(new_task in new_user2.watching)
 
     def test_depends_argument_is_skipped_depends_attribute_is_empty_list(self):
         """testing if the depends attribute is an empty list when the depends
@@ -935,8 +935,8 @@ class TaskTestCase(unittest.TestCase):
         task_b.parent = task_a
         task_a.parent = task_c
 
-        self.assertIn(task_b, task_a.children)
-        self.assertIn(task_a, task_c.children)
+        self.assertTrue(task_b in task_a.children)
+        self.assertTrue(task_a in task_c.children)
 
         self.assertRaises(CircularDependencyError, setattr, task_b, 'depends',
                           [task_a])
@@ -956,8 +956,8 @@ class TaskTestCase(unittest.TestCase):
         kwargs['depends'] = [task_a, task_b]
         task_c = Task(**kwargs)
 
-        self.assertIn(task_a, task_c.depends)
-        self.assertIn(task_b, task_c.depends)
+        self.assertTrue(task_a in task_c.depends)
+        self.assertTrue(task_b in task_c.depends)
         self.assertEqual(len(task_c.depends), 2)
 
     def test_depends_attribute_is_working_properly(self):
@@ -974,8 +974,8 @@ class TaskTestCase(unittest.TestCase):
         task_a.depends = [task_b]
         task_a.depends.append(task_c)
 
-        self.assertIn(task_b, task_a.depends)
-        self.assertIn(task_c, task_a.depends)
+        self.assertTrue(task_b in task_a.depends)
+        self.assertTrue(task_c in task_a.depends)
 
     def test_percent_complete_attribute_is_read_only(self):
         """testing if the percent_complete attribute is a read-only attribute
@@ -1013,7 +1013,7 @@ class TaskTestCase(unittest.TestCase):
         DBSession.commit()
         self.data_created.append(tlog1)
 
-        self.assertIn(tlog1, new_task.time_logs)
+        self.assertTrue(tlog1 in new_task.time_logs)
 
         tlog2 = TimeLog(
             task=new_task,
@@ -1025,7 +1025,7 @@ class TaskTestCase(unittest.TestCase):
         DBSession.commit()
         self.data_created.append(tlog2)
 
-        self.assertIn(tlog2, new_task.time_logs)
+        self.assertTrue(tlog2 in new_task.time_logs)
         self.assertEqual(new_task.total_logged_seconds, 20 * 3600)
         self.assertEqual(new_task.percent_complete, 20.0 / 9.0 * 100.0)
         DBSession.commit()
@@ -1065,7 +1065,7 @@ class TaskTestCase(unittest.TestCase):
         DBSession.commit()
         self.data_created.append(tlog1)
 
-        self.assertIn(tlog1, new_task.time_logs)
+        self.assertTrue(tlog1 in new_task.time_logs)
 
         tlog2 = TimeLog(
             task=new_task,
@@ -1079,7 +1079,7 @@ class TaskTestCase(unittest.TestCase):
 
         new_task.parent = parent_task
 
-        self.assertIn(tlog2, new_task.time_logs)
+        self.assertTrue(tlog2 in new_task.time_logs)
         self.assertEqual(new_task.total_logged_seconds, 7 * 3600)
         self.assertEqual(new_task.schedule_seconds, 9 * 3600)
         self.assertAlmostEqual(
@@ -1252,23 +1252,23 @@ class TaskTestCase(unittest.TestCase):
         DBSession.commit()
 
         # check if everything is in place
-        self.assertIn(new_time_log1, new_task1.time_logs)
-        self.assertIn(new_time_log2, new_task1.time_logs)
-        self.assertIn(new_time_log3, new_task2.time_logs)
+        self.assertTrue(new_time_log1 in new_task1.time_logs)
+        self.assertTrue(new_time_log2 in new_task1.time_logs)
+        self.assertTrue(new_time_log3 in new_task2.time_logs)
 
-        # now move the time_log to test_task
+        # now move the time_log to test_task1
         new_task1.time_logs.append(new_time_log3)
 
-        # check if new_time_log3 is in test_task
-        self.assertIn(new_time_log3, new_task1.time_logs)
+        # check if new_time_log3 is in test_task1
+        self.assertTrue(new_time_log3 in new_task1.time_logs)
 
         # there needs to be a database session commit to remove the time_log
         # from the previous tasks time_logs attribute
 
         DBSession.commit()
 
-        self.assertIn(new_time_log3, new_task1.time_logs)
-        self.assertNotIn(new_time_log3, new_task2.time_logs)
+        self.assertTrue(new_time_log3 in new_task1.time_logs)
+        self.assertFalse(new_time_log3 in new_task2.time_logs)
 
     def test_total_logged_seconds_is_the_sum_of_all_time_logs(self):
         """testing if the total_logged_seconds is the sum of all time_logs in
@@ -1299,7 +1299,7 @@ class TaskTestCase(unittest.TestCase):
         DBSession.commit()
         self.data_created.append(tlog1)
 
-        self.assertIn(tlog1, new_task.time_logs)
+        self.assertTrue(tlog1 in new_task.time_logs)
 
         tlog2 = TimeLog(
             task=new_task,
@@ -1311,7 +1311,7 @@ class TaskTestCase(unittest.TestCase):
         DBSession.commit()
         self.data_created.append(tlog2)
 
-        self.assertIn(tlog2, new_task.time_logs)
+        self.assertTrue(tlog2 in new_task.time_logs)
         self.assertEqual(new_task.total_logged_seconds, 20 * 3600)
 
     def test_total_logged_seconds_is_the_sum_of_all_time_logs_of_children_for_a_container_task(self):
@@ -1350,7 +1350,7 @@ class TaskTestCase(unittest.TestCase):
         DBSession.commit()
         self.data_created.append(tlog1)
 
-        self.assertIn(tlog1, new_task.time_logs)
+        self.assertTrue(tlog1 in new_task.time_logs)
 
         tlog2 = TimeLog(
             task=new_task,
@@ -1362,7 +1362,7 @@ class TaskTestCase(unittest.TestCase):
         DBSession.commit()
         self.data_created.append(tlog2)
 
-        self.assertIn(tlog2, new_task.time_logs)
+        self.assertTrue(tlog2 in new_task.time_logs)
         self.assertEqual(new_task.total_logged_seconds, 20 * 3600)
         self.assertEqual(parent_task.total_logged_seconds, 20 * 3600)
 
@@ -1419,7 +1419,7 @@ class TaskTestCase(unittest.TestCase):
         parent_task2.children.append(child)
         self.assertEqual(parent_task2.total_logged_seconds, 10 * 3600)
 
-        # self.test_task.parent = parent_task
+        # self.test_task1.parent = parent_task
         parent_task1.children.append(new_task)
         self.assertEqual(parent_task1.total_logged_seconds, 0)
 
@@ -1437,7 +1437,7 @@ class TaskTestCase(unittest.TestCase):
         DBSession.commit()
         self.data_created.append(tlog2)
 
-        self.assertIn(tlog2, new_task.time_logs)
+        self.assertTrue(tlog2 in new_task.time_logs)
         self.assertEqual(new_task.total_logged_seconds, 8 * 3600)
         self.assertEqual(parent_task1.total_logged_seconds, 8 * 3600)
         self.assertEqual(parent_task2.total_logged_seconds, 18 * 3600)
@@ -2374,15 +2374,15 @@ class TaskTestCase(unittest.TestCase):
 
         # store the id to be used later
         id_ = new_task2.id
-        self.assertIsNotNone(id_)
+        self.assertTrue(id_ is not None)
 
         new_task2.parent = None
-        self.assertIsNone(new_task2.parent)
+        self.assertTrue(new_task2.parent is None)
         db.DBSession.commit()
 
         # we still should have this task
         t = Task.query.get(id_)
-        self.assertIsNotNone(t)
+        self.assertTrue(t is not None)
         self.assertEqual(t.name, kwargs['name'])
 
     def test_parent_argument_is_not_a_Task_instance(self):
@@ -2551,14 +2551,14 @@ class TaskTestCase(unittest.TestCase):
         DBSession.commit()
         self.data_created.append(task3)
 
-        self.assertNotIn(task2, task1.children)
-        self.assertNotIn(task3, task1.children)
+        self.assertFalse(task2 in task1.children)
+        self.assertFalse(task3 in task1.children)
 
         task1.children.append(task2)
-        self.assertIn(task2, task1.children)
+        self.assertTrue(task2 in task1.children)
 
         task3.parent = task1
-        self.assertIn(task3, task1.children)
+        self.assertTrue(task3 in task1.children)
 
     def test_is_leaf_attribute_is_read_only(self):
         """testing if the is_leaf attribute is a read only attribute
@@ -3055,7 +3055,7 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**self.kwargs)
         self.data_created.append(new_task)
         new_task.bid_timing = None
-        self.assertIsNone(new_task.bid_timing)
+        self.assertTrue(new_task.bid_timing is None)
 
     def test_bid_timing_argument_is_not_an_integer_or_float(self):
         """testing if a TypeError will be raised when the bid_timing argument
@@ -3655,7 +3655,7 @@ task Task_%(t2_id)s "Modeling" {
         # print(t1.to_tjp)
         # print('---------------------------------')
         # print(expected_tjp)
-        self.assertMultiLineEqual(t1.to_tjp, expected_tjp)
+        self.assertEqual(t1.to_tjp, expected_tjp)
 
     def test_to_tjp_attribute_is_working_properly_for_a_container_task_with_dependency(self):
         """testing if the to_tjp attribute is working properly for a container
@@ -3789,7 +3789,7 @@ task Task_%(t2_id)s "Modeling" {
         # print(t1.to_tjp)
         # print('---------------------------------')
         # print(expected_tjp)
-        self.assertMultiLineEqual(t1.to_tjp, expected_tjp)
+        self.assertEqual(t1.to_tjp, expected_tjp)
 
     def test_to_tjp_schedule_constraint_is_reflected_in_tjp_file(self):
         """testing if the schedule_constraint is reflected in the tjp file
@@ -3913,7 +3913,7 @@ task Task_%(t2_id)s "Modeling" {
         # print(t1.to_tjp)
         # print('-----------------------')
         # print(expected_tjp)
-        self.assertMultiLineEqual(t1.to_tjp, expected_tjp)
+        self.assertEqual(t1.to_tjp, expected_tjp)
 
     def test_is_scheduled_is_a_read_only_attribute(self):
         """testing if the is_scheduled is a read-only attribute

@@ -226,19 +226,19 @@ class DepartmentTester(unittest.TestCase):
         department from the users department argument
         """
         # check if the user is in the department
-        self.assertIn(self.test_department, self.test_user1.departments)
+        self.assertTrue(self.test_department in self.test_user1.departments)
 
         # now remove the user from the department
         self.test_department.members.remove(self.test_user1)
 
         # now check if department is not in users departments anymore
-        self.assertNotIn(self.test_department, self.test_user1.departments)
+        self.assertFalse(self.test_department in self.test_user1.departments)
 
         # assign the user back
         self.test_user1.departments.append(self.test_department)
 
         # check if the user is in the department
-        self.assertIn(self.test_user1, self.test_department.members)
+        self.assertTrue(self.test_user1 in self.test_department.members)
 
     def test_equality(self):
         """testing equality of two Department objects

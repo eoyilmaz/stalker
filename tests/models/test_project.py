@@ -775,7 +775,7 @@ class ProjectTestCase(unittest.TestCase):
         """
         self.kwargs.pop("image_format")
         new_project = Project(**self.kwargs)
-        self.assertIsNone(new_project.image_format)
+        self.assertTrue(new_project.image_format is None)
 
     def test_image_format_argument_is_None(self):
         """testing if nothing is going to happen when the image_format is set
@@ -783,7 +783,7 @@ class ProjectTestCase(unittest.TestCase):
         """
         self.kwargs["image_format"] = None
         new_project = Project(**self.kwargs)
-        self.assertIsNone(new_project.image_format)
+        self.assertTrue(new_project.image_format is None)
 
     def test_image_format_attribute_is_set_to_None(self):
         """testing if nothing will happen when the image_format attribute is
@@ -1169,53 +1169,53 @@ class ProjectTestCase(unittest.TestCase):
         """
         # test if we are going to get all the Tasks for project.tasks
         self.assertEqual(len(self.test_project.tasks), 43)
-        self.assertIn(self.test_task1, self.test_project.tasks)
-        self.assertIn(self.test_task2, self.test_project.tasks)
-        self.assertIn(self.test_task3, self.test_project.tasks)
-        self.assertIn(self.test_task4, self.test_project.tasks)
-        self.assertIn(self.test_task5, self.test_project.tasks)
-        self.assertIn(self.test_task6, self.test_project.tasks)
-        self.assertIn(self.test_task7, self.test_project.tasks)
-        self.assertIn(self.test_task8, self.test_project.tasks)
-        self.assertIn(self.test_task9, self.test_project.tasks)
-        self.assertIn(self.test_task10, self.test_project.tasks)
-        self.assertIn(self.test_task11, self.test_project.tasks)
-        self.assertIn(self.test_task12, self.test_project.tasks)
-        self.assertIn(self.test_task13, self.test_project.tasks)
-        self.assertIn(self.test_task14, self.test_project.tasks)
-        self.assertIn(self.test_task15, self.test_project.tasks)
-        self.assertIn(self.test_task16, self.test_project.tasks)
-        self.assertIn(self.test_task17, self.test_project.tasks)
-        self.assertIn(self.test_task18, self.test_project.tasks)
-        self.assertIn(self.test_task19, self.test_project.tasks)
-        self.assertIn(self.test_task20, self.test_project.tasks)
-        self.assertIn(self.test_task21, self.test_project.tasks)
-        self.assertIn(self.test_task22, self.test_project.tasks)
-        self.assertIn(self.test_task23, self.test_project.tasks)
-        self.assertIn(self.test_task24, self.test_project.tasks)
-        self.assertIn(self.test_task25, self.test_project.tasks)
-        self.assertIn(self.test_task26, self.test_project.tasks)
-        self.assertIn(self.test_task27, self.test_project.tasks)
+        self.assertTrue(self.test_task1 in self.test_project.tasks)
+        self.assertTrue(self.test_task2 in self.test_project.tasks)
+        self.assertTrue(self.test_task3 in self.test_project.tasks)
+        self.assertTrue(self.test_task4 in self.test_project.tasks)
+        self.assertTrue(self.test_task5 in self.test_project.tasks)
+        self.assertTrue(self.test_task6 in self.test_project.tasks)
+        self.assertTrue(self.test_task7 in self.test_project.tasks)
+        self.assertTrue(self.test_task8 in self.test_project.tasks)
+        self.assertTrue(self.test_task9 in self.test_project.tasks)
+        self.assertTrue(self.test_task10 in self.test_project.tasks)
+        self.assertTrue(self.test_task11 in self.test_project.tasks)
+        self.assertTrue(self.test_task12 in self.test_project.tasks)
+        self.assertTrue(self.test_task13 in self.test_project.tasks)
+        self.assertTrue(self.test_task14 in self.test_project.tasks)
+        self.assertTrue(self.test_task15 in self.test_project.tasks)
+        self.assertTrue(self.test_task16 in self.test_project.tasks)
+        self.assertTrue(self.test_task17 in self.test_project.tasks)
+        self.assertTrue(self.test_task18 in self.test_project.tasks)
+        self.assertTrue(self.test_task19 in self.test_project.tasks)
+        self.assertTrue(self.test_task20 in self.test_project.tasks)
+        self.assertTrue(self.test_task21 in self.test_project.tasks)
+        self.assertTrue(self.test_task22 in self.test_project.tasks)
+        self.assertTrue(self.test_task23 in self.test_project.tasks)
+        self.assertTrue(self.test_task24 in self.test_project.tasks)
+        self.assertTrue(self.test_task25 in self.test_project.tasks)
+        self.assertTrue(self.test_task26 in self.test_project.tasks)
+        self.assertTrue(self.test_task27 in self.test_project.tasks)
 
         # assets, sequences and shots are also Tasks
-        self.assertIn(self.test_seq1, self.test_project.tasks)
-        self.assertIn(self.test_seq2, self.test_project.tasks)
-        self.assertIn(self.test_seq3, self.test_project.tasks)
-        self.assertIn(self.test_seq4, self.test_project.tasks)
-        self.assertIn(self.test_seq5, self.test_project.tasks)
-        self.assertIn(self.test_seq6, self.test_project.tasks)
-        self.assertIn(self.test_seq7, self.test_project.tasks)
+        self.assertTrue(self.test_seq1 in self.test_project.tasks)
+        self.assertTrue(self.test_seq2 in self.test_project.tasks)
+        self.assertTrue(self.test_seq3 in self.test_project.tasks)
+        self.assertTrue(self.test_seq4 in self.test_project.tasks)
+        self.assertTrue(self.test_seq5 in self.test_project.tasks)
+        self.assertTrue(self.test_seq6 in self.test_project.tasks)
+        self.assertTrue(self.test_seq7 in self.test_project.tasks)
 
-        self.assertIn(self.test_asset1, self.test_project.tasks)
-        self.assertIn(self.test_asset2, self.test_project.tasks)
-        self.assertIn(self.test_asset3, self.test_project.tasks)
-        self.assertIn(self.test_asset4, self.test_project.tasks)
-        self.assertIn(self.test_asset5, self.test_project.tasks)
+        self.assertTrue(self.test_asset1 in self.test_project.tasks)
+        self.assertTrue(self.test_asset2 in self.test_project.tasks)
+        self.assertTrue(self.test_asset3 in self.test_project.tasks)
+        self.assertTrue(self.test_asset4 in self.test_project.tasks)
+        self.assertTrue(self.test_asset5 in self.test_project.tasks)
 
-        self.assertIn(self.test_shot1, self.test_project.tasks)
-        self.assertIn(self.test_shot2, self.test_project.tasks)
-        self.assertIn(self.test_shot3, self.test_project.tasks)
-        self.assertIn(self.test_shot4, self.test_project.tasks)
+        self.assertTrue(self.test_shot1 in self.test_project.tasks)
+        self.assertTrue(self.test_shot2 in self.test_project.tasks)
+        self.assertTrue(self.test_shot3 in self.test_project.tasks)
+        self.assertTrue(self.test_shot4 in self.test_project.tasks)
 
     def test_root_tasks_attribute_returns_the_Tasks_instances_with_no_parent_in_this_project(self):
         """testing if the root_tasks attribute returns a list of Task instances
@@ -1224,29 +1224,29 @@ class ProjectTestCase(unittest.TestCase):
         # test if we are going to get all the Tasks for project.tasks
         root_tasks = self.test_project.root_tasks
         self.assertEqual(len(root_tasks), 19)
-        self.assertIn(self.test_task1, root_tasks)
-        self.assertIn(self.test_task2, root_tasks)
-        self.assertIn(self.test_task3, root_tasks)
+        self.assertTrue(self.test_task1 in root_tasks)
+        self.assertTrue(self.test_task2 in root_tasks)
+        self.assertTrue(self.test_task3 in root_tasks)
 
         # assets, sequences and shots are also Tasks
-        self.assertIn(self.test_seq1, root_tasks)
-        self.assertIn(self.test_seq2, root_tasks)
-        self.assertIn(self.test_seq3, root_tasks)
-        self.assertIn(self.test_seq4, root_tasks)
-        self.assertIn(self.test_seq5, root_tasks)
-        self.assertIn(self.test_seq6, root_tasks)
-        self.assertIn(self.test_seq7, root_tasks)
+        self.assertTrue(self.test_seq1 in root_tasks)
+        self.assertTrue(self.test_seq2 in root_tasks)
+        self.assertTrue(self.test_seq3 in root_tasks)
+        self.assertTrue(self.test_seq4 in root_tasks)
+        self.assertTrue(self.test_seq5 in root_tasks)
+        self.assertTrue(self.test_seq6 in root_tasks)
+        self.assertTrue(self.test_seq7 in root_tasks)
 
-        self.assertIn(self.test_asset1, root_tasks)
-        self.assertIn(self.test_asset2, root_tasks)
-        self.assertIn(self.test_asset3, root_tasks)
-        self.assertIn(self.test_asset4, root_tasks)
-        self.assertIn(self.test_asset5, root_tasks)
+        self.assertTrue(self.test_asset1 in root_tasks)
+        self.assertTrue(self.test_asset2 in root_tasks)
+        self.assertTrue(self.test_asset3 in root_tasks)
+        self.assertTrue(self.test_asset4 in root_tasks)
+        self.assertTrue(self.test_asset5 in root_tasks)
 
-        self.assertIn(self.test_shot1, root_tasks)
-        self.assertIn(self.test_shot2, root_tasks)
-        self.assertIn(self.test_shot3, root_tasks)
-        self.assertIn(self.test_shot4, root_tasks)
+        self.assertTrue(self.test_shot1 in root_tasks)
+        self.assertTrue(self.test_shot2 in root_tasks)
+        self.assertTrue(self.test_shot3 in root_tasks)
+        self.assertTrue(self.test_shot4 in root_tasks)
 
     def test_users_argument_is_skipped(self):
         """testing if the users attribute will be an empty list when the users
@@ -1904,14 +1904,14 @@ task Task_{{task3.id}} "Test Task 3" {
         """
         self.kwargs['client'] = None
         new_project = Project(**self.kwargs)
-        self.assertIsNone(new_project.client)
+        self.assertTrue(new_project.client is None)
 
     def test_client_attribute_is_set_to_None(self):
         """testing if it is possible to set the client attribute to None
         """
-        self.assertIsNotNone(self.test_project.client)
+        self.assertFalse(self.test_project.client is None)
         self.test_project.client = None
-        self.assertIsNone(self.test_project.client)
+        self.assertTrue(self.test_project.client is None)
 
     def test_client_argument_is_given_as_something_other_than_a_client(self):
         """testing if a TypeError will be raised when the client argument is

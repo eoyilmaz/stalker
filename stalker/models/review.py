@@ -18,16 +18,20 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
+import logging
+
 from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship, validates, synonym
 
+from stalker.db import Base
 from stalker.db.session import DBSession
 from stalker.log import logging_level
+from stalker.models.entity import Entity, SimpleEntity
+from stalker.models.link import Link
 from stalker.models.status import Status
-from stalker.models.entity import SimpleEntity
-from stalker.models.mixins import ScheduleMixin, StatusMixin
+from stalker.models.mixins import ScheduleMixin, StatusMixin, ProjectMixin
 
-import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
@@ -290,3 +294,159 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
 
         else:
             logger.debug('not all reviews are finalized yet!')
+
+
+class Daily(Entity, StatusMixin, ProjectMixin):
+    """Manages data related to **Dailies**.
+
+    Dailies are sessions where outputs of a group of tasks are reviewed all
+    together by the resources and responsible of those tasks.
+
+    The main purpose of a ``Daily`` is to gather a group of :class:`.Link`
+    instances and introduce a simple way of presenting them as a group.
+
+    :class:`.Note`\ s created during a Daily session can be directly stored
+    both in the :class:`.Link` and the :class:`.Daily` instances and a *join*
+    will reveal which :class:`.Note` is created in which :class:`.Daily`.
+    """
+
+    __auto_name__ = False
+    __tablename__ = 'Dailies'
+    __mapper_args__ = {"polymorphic_identity": "Daily"}
+
+    daily_id = Column(
+        "id",
+        Integer,
+        ForeignKey("Entities.id"),
+        primary_key=True,
+    )
+
+    links = association_proxy(
+        'link_relations',
+        'link',
+        creator=lambda n: DailyLink(link=n)
+    )
+
+    link_relations = relationship(
+        'DailyLink',
+        back_populates='daily',
+        cascade='all, delete-orphan',
+        primaryjoin='Dailies.c.id==Daily_Links.c.daily_id'
+    )
+
+    def __init__(self, links=None, **kwargs):
+        super(Daily, self).__init__(**kwargs)
+        StatusMixin.__init__(self, **kwargs)
+        ProjectMixin.__init__(self, **kwargs)
+
+        if links is None:
+            links = []
+
+        self.links = links
+
+    @property
+    def versions(self):
+        """returns a list of :class:`.Version` instances that this Daily is
+        related to (through the outputs of the versions)
+        """
+        from stalker import Version
+        return Version.query\
+            .join(Version.outputs)\
+            .join(DailyLink)\
+            .join(Daily)\
+            .filter(Daily.id == self.id)\
+            .all()
+
+    @property
+    def tasks(self):
+        """returns a list of :class:`.Task` instances that this Daily is
+        related to (through the outputs of the versions)
+        """
+        from stalker import Task, Version
+        return Task.query\
+            .join(Task.versions)\
+            .join(Version.outputs)\
+            .join(DailyLink)\
+            .join(Daily)\
+            .filter(Daily.id == self.id)\
+            .all()
+
+
+class DailyLink(Base):
+    """The association object used in Daily-to-Link relation
+    """
+
+    __tablename__ = 'Daily_Links'
+
+    daily_id = Column(Integer, ForeignKey('Dailies.id'), primary_key=True)
+    daily = relationship(
+        Daily,
+        back_populates='link_relations',
+        primaryjoin='DailyLink.daily_id==Daily.daily_id',
+    )
+
+    link_id = Column(Integer, ForeignKey('Links.id'), primary_key=True)
+    link = relationship(
+        Link,
+        primaryjoin='DailyLink.link_id==Link.link_id',
+        doc="""stalker.models.link.Link instances related to the Daily
+        instance.
+
+        Attach the same :class:`.Link`\ s that are linked as an output to a
+        certain :class:`.Version`\ s instance to this attribute.
+
+        This attribute is an **association_proxy** so and the real attribute
+        that the data is related to is the :attr:`.link_relations` attribute.
+
+        You can use the :attr:`.link_relations` attribute to change the
+        ``rank`` attribute of the :class:`.DailyLink` instance (which is the
+        returned data), thus change the order of the ``Links``.
+
+        This is done in that way to be able to store the order of the links in
+        this Daily instance.
+        """
+    )
+
+    # may used for sorting
+    rank = Column(Integer, default=0)
+
+    def __init__(self, daily=None, link=None, rank=0):
+        super(DailyLink, self).__init__()
+
+        self.daily = daily
+        self.link = link
+        self.rank = rank
+
+    @validates('link')
+    def _validate_link(self, key, link):
+        """validates the given link instance
+        """
+        from stalker import Link
+        if link is not None:
+            if not isinstance(link, Link):
+                raise TypeError(
+                    '%(class)s.link should be an instance of '
+                    'stalker.models.link.Link instance, not %(link_class)s' % {
+                        'class': self.__class__.__name__,
+                        'link_class': link.__class__.__name__
+                    }
+                )
+
+        return link
+
+    @validates('daily')
+    def _validate_daily(self, key, daily):
+        """validates the given daily instance
+        """
+        if daily is not None:
+            if not isinstance(daily, Daily):
+                raise TypeError(
+                    '%(class)s.daily should be an instance of '
+                    'stalker.models.review.Daily instance, not '
+                    '%(daily_class)s' % {
+                        'class': self.__class__.__name__,
+                        'daily_class': daily.__class__.__name__
+                    }
+                )
+
+        return daily
