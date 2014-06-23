@@ -395,7 +395,7 @@ class SimpleEntity(Base):
         """formats the given nice name
         """
         # remove unnecessary characters from the string
-        nice_name_in = str(nice_name_in).strip()
+        nice_name_in = nice_name_in.strip()
         nice_name_in = re.sub(r'([^a-zA-Z0-9\s_\-]+)', '',
                               nice_name_in).strip()
 
