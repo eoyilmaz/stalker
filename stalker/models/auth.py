@@ -683,9 +683,6 @@ class User(Entity, ACLMixin):
     def _format_login(cls, login):
         """formats the given login value
         """
-        # be sure it is a string
-        login = str(login)
-
         # strip white spaces from start and end
         login = login.strip()
 

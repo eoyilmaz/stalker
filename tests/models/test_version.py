@@ -282,35 +282,26 @@ class VersionTester(unittest.TestCase):
         self.assertRaises(ValueError, setattr, self.test_version, 'take_name',
                           '')
 
-    def test_take_name_argument_is_not_a_string_will_be_converted_to_one(self):
-        """testing if the given take_name argument is not a string will be
-        converted to a proper string
+    def test_take_name_argument_is_not_a_string(self):
+        """testing if a TypeError will be raised when the given take_name
+        argument is not a string
         """
-        test_values = [
-            (1, '1'),
-            (1.2, '12'),
-            (['a list'], 'a_list'),
-            ({'a': 'dict'}, 'a_dict')]
+        test_values = [1, 1.2, ['a list'], {'a': 'dict'}]
 
         for test_value in test_values:
-            self.kwargs['take_name'] = test_value[0]
-            new_version = Version(**self.kwargs)
+            self.kwargs['take_name'] = test_value
+            with self.assertRaises(TypeError):
+                Version(**self.kwargs)
 
-            self.assertEqual(new_version.take_name, test_value[1])
-
-    def test_take_name_attribute_is_not_a_string_will_be_converted_to_one(self):
-        """testing if the given take_name attribute is not a string will be
-        converted to a proper string
+    def test_take_name_attribute_is_not_a_string(self):
+        """testing if a TypeError will be raised when take_name attribute is
+        set to a value other than a string
         """
-        test_values = [
-            (1, '1'),
-            (1.2, '12'),
-            (['a list'], 'a_list'),
-            ({'a': 'dict'}, 'a_dict')]
+        test_values = [1, 1.2, ['a list'], {'a': 'dict'}]
 
         for test_value in test_values:
-            self.test_version.take_name = test_value[0]
-            self.assertEqual(self.test_version.take_name, test_value[1])
+            with self.assertRaises(TypeError):
+                self.test_version.take_name = test_value
 
     def test_take_name_argument_is_formatted_to_empty_string(self):
         """testing if a ValueError will be raised when the take_name argument

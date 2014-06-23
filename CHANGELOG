@@ -11,6 +11,9 @@ Stalker Changes
 * **New:** Added a new status list for ``Daily`` class which contains two
   statuses called "Open" and "Closed".
 
+* **Update:** Setting the ``Version.take_name`` to a value other than a string
+  will now raise a ``TypeError``.
+
 0.2.8.4
 =======
 

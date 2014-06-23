@@ -225,13 +225,18 @@ class Version(Link):
     def _validate_take_name(self, key, take_name):
         """validates the given take_name value
         """
-        if take_name is None:
+        from stalker import __string_types__
+
+        if not isinstance(take_name, __string_types__):
             raise TypeError(
-                "%s.take_name can not be None, please give a proper string" %
-                self.__class__.__name__
+                "%(class)s.take_name should be a string, not "
+                "%(take_name_class)s" % {
+                    'class': self.__class__.__name__,
+                    'take_name_class': take_name.__class__.__name__
+                }
             )
 
-        take_name = self._format_take_name(str(take_name))
+        take_name = self._format_take_name(take_name)
 
         if take_name == "":
             raise ValueError(

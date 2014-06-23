@@ -137,17 +137,17 @@ class TargetEntityTypeMixin(object):
                 self.__class__.__name__
             )
 
-        if str(target_entity_type_in) == "":
+        # check if it is a class
+        if isinstance(target_entity_type_in, type):
+            target_entity_type_in = target_entity_type_in.__name__
+
+        if target_entity_type_in == "":
             raise ValueError(
                 "%s.target_entity_type can not be empty" %
                 self.__class__.__name__
             )
 
-        # check if it is a class
-        if isinstance(target_entity_type_in, type):
-            target_entity_type_in = target_entity_type_in.__name__
-
-        return str(target_entity_type_in)
+        return target_entity_type_in
 
     def _target_entity_type_getter(self):
         return self._target_entity_type
