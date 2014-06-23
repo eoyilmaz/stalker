@@ -2,6 +2,13 @@
 Stalker Changes
 ===============
 
+0.2.9.1
+=======
+
+* **New:** As usual, after a new release, fixed a bug in
+  ``stalker.db.create_entity_statuses()`` caused by the behavioral change of
+  the ``map`` built-in function in Python 3.
+
 0.2.9
 =====
 

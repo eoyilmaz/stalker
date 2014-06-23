@@ -170,7 +170,7 @@ def create_alembic_table():
     # don't forget to update the version_num (and the corresponding test
     # whenever a new alembic revision is created)
 
-    version_num = '5999269aad30'
+    version_num = '2e4a3813ae76'
 
     from sqlalchemy import Table, Column, Text
 
@@ -345,7 +345,10 @@ def create_entity_statuses(entity_type='', status_names=None,
     logger.debug("Creating %s Statuses" % entity_type)
 
     statuses = Status.query.filter(Status.name.in_(status_names)).all()
-    status_names_in_db = map(lambda x: x.name, statuses)
+    logger.debug('status_names: %s' % status_names)
+    logger.debug('statuses: %s' % statuses)
+    status_names_in_db = list(map(lambda x: x.name, statuses))
+    logger.debug('statuses_names_in_db: %s' % status_names_in_db)
 
     for name, code in zip(status_names, status_codes):
         if name not in status_names_in_db:
@@ -358,6 +361,10 @@ def create_entity_statuses(entity_type='', status_names=None,
             )
             statuses.append(new_status)
             DBSession.add(new_status)
+        else:
+            logger.debug(
+                'Status %s (%s) is already created skipping!' % (name, code)
+            )
 
     # create the Status List
     status_list = StatusList.query\

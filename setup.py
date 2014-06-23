@@ -2,6 +2,8 @@ import os
 
 from setuptools import setup, find_packages
 
+import stalker
+
 here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README')).read()
 CHANGES = open(os.path.join(here, 'CHANGELOG')).read()
@@ -14,7 +16,7 @@ requires = [
 
 setup(
     name='stalker',
-    version='0.2.9',
+    version=stalker.__version__,
     description='A Production Asset Management (ProdAM) System',
     long_description=README,
     classifiers=[
