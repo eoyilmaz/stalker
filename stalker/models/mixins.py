@@ -708,8 +708,8 @@ class ProjectMixin(object):
         return Column(
             "project_id",
             Integer,
-            ForeignKey("Projects.id", use_alter=True, name="project_x_id"),
-            #ForeignKey("Projects.id"),
+            #ForeignKey("Projects.id", use_alter=True, name="project_x_id"),
+            ForeignKey("Projects.id"),
             # cannot use nullable cause a Project object needs
             # insert itself as the project and it needs post_update
             # thus nullable should be True
