@@ -192,7 +192,7 @@ def create_alembic_table():
         Base.metadata.create_all(engine)
 
     # first try to query the version value
-    sql_query = 'select version_num from "alembic_version"'
+    sql_query = 'select version_num from alembic_version'
     try:
         version_num = \
             DBSession.connection().execute(sql_query).fetchone()[0]
