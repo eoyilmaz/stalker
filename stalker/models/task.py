@@ -2666,15 +2666,15 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
         from stalker import FilenameTemplate
 
-        vers_template = None
+        task_template = None
         if structure:
             for template in structure.templates:
                 assert isinstance(template, FilenameTemplate)
                 if template.target_entity_type == self.entity_type:
-                    vers_template = template
+                    task_template = template
                     break
 
-        if not vers_template:
+        if not task_template:
             raise RuntimeError(
                 "There are no suitable FilenameTemplate "
                 "(target_entity_type == '%(entity_type)s') defined in the "
@@ -2689,7 +2689,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
         import jinja2
 
-        return jinja2.Template(vers_template.path).render(**kwargs)
+        return jinja2.Template(task_template.path).render(**kwargs)
 
     @property
     def absolute_path(self):
