@@ -2,6 +2,11 @@
 Stalker Changes
 ===============
 
+0.2.9.2
+=======
+
+* **Fix:** Fixed MySQL initialization problem in ``stalker.db.init()``.
+
 0.2.9.1
 =======
 
