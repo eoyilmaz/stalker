@@ -576,41 +576,45 @@ order by path_as_text"""
 
         with open(self.csv_file_full_path, 'r') as self.csv_file:
             csv_content = csv.reader(self.csv_file, delimiter=';')
+
             lines = [line for line in csv_content]
             lines.pop(0)
-            for data in lines:
-                id_line = data[0]
-                entity_id = int(id_line.split('.')[-1].split('_')[-1])
-                if entity_id:
-                    entity_ids.append(entity_id)
-                    start_date = datetime.datetime.strptime(
-                        data[1], "%Y-%m-%d-%H:%M"
-                    )
-                    end_date = datetime.datetime.strptime(
-                        data[2],
-                        "%Y-%m-%d-%H:%M"
-                    )
 
-                    # computed_resources
-                    if self.compute_resources:
-                        if data[3] != '':
-                            resources_data = map(
-                                lambda x: x.split('_')[-1].split(')')[0],
-                                data[3].split(',')
-                            )
-                            for rid in resources_data:
-                                update_user_data.append({
-                                    'task_id': entity_id,
-                                    'resource_id': rid
-                                })
+        for data in lines:
+            id_line = data[0]
 
-                    update_data.append({
-                        'b_id': entity_id,
-                        'start': start_date,
-                        'end': end_date,
-                        'computed_start': start_date,
-                        'computed_end': end_date
-                    })
+            entity_id = int(id_line.split('.')[-1].split('_')[-1])
+
+            if entity_id:
+                entity_ids.append(entity_id)
+                start_date = datetime.datetime.strptime(
+                    data[1], "%Y-%m-%d-%H:%M"
+                )
+                end_date = datetime.datetime.strptime(
+                    data[2],
+                    "%Y-%m-%d-%H:%M"
+                )
+
+                # computed_resources
+                if self.compute_resources:
+                    if data[3] != '':
+                        resources_data = map(
+                            lambda x: x.split('_')[-1].split(')')[0],
+                            data[3].split(',')
+                        )
+                        for rid in resources_data:
+                            update_user_data.append({
+                                'task_id': entity_id,
+                                'resource_id': rid
+                            })
+
+                update_data.append({
+                    'b_id': entity_id,
+                    'start': start_date,
+                    'end': end_date,
+                    'computed_start': start_date,
+                    'computed_end': end_date
+                })
 
         from sqlalchemy import bindparam
 

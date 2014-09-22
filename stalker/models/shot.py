@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 from sqlalchemy import Column, Integer, ForeignKey, Table
-from sqlalchemy.orm import relationship, synonym, validates
+from sqlalchemy.orm import relationship, synonym, validates, reconstructor
 
 from stalker import ImageFormat
 from stalker.db.declarative import Base
@@ -82,6 +82,18 @@ class Shot(Task, CodeMixin):
 
     Two shots with the same :attr:`.code` can not be assigned to the same
     :class:`.Sequence`.
+
+
+    .. note::
+
+       .. versionadded:: 0.2.10
+
+       Simplified the implementation of :attr:`.cut_in`, :attr:`.cut_out` and
+       :attr:`.cut_duration` attributes. The :attr:`.cut_duration` is always
+       the difference between :attr:`.cut_in` and :attr:`.cut_out` and its
+       value is only be calculated when it is requested. This greatly
+       simplifies the implementation of :attr:`.cut_in` and :attr:`.cut_out`
+       attributes.
 
     The :attr:`.cut_out` and :attr:`.cut_duration` attributes effects each
     other. Setting the :attr:`.cut_out` will change the :attr:`.cut_duration`
@@ -169,17 +181,46 @@ class Shot(Task, CodeMixin):
 
     # the cut_duration attribute is not going to be stored in the database,
     # only the cut_in and cut_out will be enough to calculate the cut_duration
-    _cut_in = Column("cut_in", Integer)
-    _cut_out = Column("cut_out", Integer)
+    cut_in = Column(
+        Integer,
+        doc="The start frame of this shot. It is the start frame of the "
+            "playback range in the application (Maya, Nuke etc.).",
+        default=1
+    )
+    cut_out = Column(
+        Integer,
+        doc="The end frame of this shot. It is the end frame of the "
+            "playback range in the application (Maya, Nuke etc.).",
+        default=1
+    )
+
+    source_in = Column(
+        Integer,
+        doc="The start frame of the used range, should be in between"
+            ":attr:`.cut_in` and :attr:`.cut_out`"
+    )
+    source_out = Column(
+        Integer,
+        doc="The end frame of the used range, should be in between"
+            ":attr:`.cut_in and :attr:`.cut_out`"
+    )
+    record_in = Column(
+        Integer,
+        doc="The start frame in the Editors timeline specifying the start "
+            "frame general placement of this shot."
+    )
+    #record_out = Column(Integer)
 
     def __init__(self,
                  code=None,
                  project=None,
                  sequences=None,
                  scenes=None,
-                 cut_in=1,
+                 cut_in=None,
                  cut_out=None,
-                 cut_duration=None,
+                 source_in=None,
+                 source_out=None,
+                 record_in=None,
                  image_format=None,
                  **kwargs):
 
@@ -187,8 +228,7 @@ class Shot(Task, CodeMixin):
         kwargs['project'] = project
         kwargs['code'] = code
 
-        # check for the code and project before ProjectMixin
-        self._check_code_availability(code, project)
+        self._updating_cut_in_cut_out = False
 
         super(Shot, self).__init__(**kwargs)
         ReferenceMixin.__init__(self, **kwargs)
@@ -205,8 +245,38 @@ class Shot(Task, CodeMixin):
 
         self.image_format = image_format
 
-        self._cut_in, self._cut_duration, self._cut_out = \
-            self._validate_cut_info(cut_in, cut_duration, cut_out)
+        if cut_in is None:
+            if cut_out is not None:
+                cut_in = cut_out
+
+        if cut_out is None:
+            if cut_in is not None:
+                cut_out = cut_in
+
+        # if both are None set them to default values
+        if cut_in is None and cut_out is None:
+            cut_in = 1
+            cut_out = 1
+
+        self.cut_in = cut_in
+        self.cut_out = cut_out
+
+        if source_in is None:
+            source_in = self.cut_in
+
+        if source_out is None:
+            source_out = self.cut_out
+
+        self.source_in = source_in
+        self.source_out = source_out
+        self.record_in = record_in
+
+    @reconstructor
+    def __init_on_load__(self):
+        """initialize on DB load
+        """
+        super(Shot, self).__init_on_load__()
+        self._updating_cut_in_cut_out = False
 
     def __repr__(self):
         """the representation of the Shot
@@ -224,7 +294,8 @@ class Shot(Task, CodeMixin):
         """
         return super(Shot, self).__hash__()
 
-    def _check_code_availability(self, code, project):
+    @classmethod
+    def _check_code_availability(cls, code, project):
         """checks if the given code is available in the given project
 
         :param code: the code string
@@ -232,74 +303,192 @@ class Shot(Task, CodeMixin):
           shot is a part of
         :return: bool
         """
-        # TODO: try to use SQL Queries instead of Pure Python
         if project and code:
-            # the shots are task instances, use project.tasks
-            for task in project.tasks:
-                if isinstance(task, Shot):
-                    shot = task
-                    if shot.code == code:
-                        raise ValueError(
-                            "The given project already has a Shot with a code "
-                            "of %s" % self.code
-                        )
+            from stalker import db
+            with db.DBSession.no_autoflush:
+                return Shot.query\
+                           .filter(Shot.project == project)\
+                           .filter(Shot.code == code)\
+                           .first() is None
         return True
 
-    @classmethod
-    def _validate_cut_info(cls, cut_in, cut_duration, cut_out):
-        """validates the cut values all together
+    @validates('cut_in')
+    def _validate_cut_in(self, key, cut_in):
+        """validates the cut_in value
         """
-        logger.debug('cut_in      : %s' % cut_in)
-        logger.debug('cut_duration: %s' % cut_duration)
-        logger.debug('cut_out     : %s' % cut_out)
-
         if not isinstance(cut_in, int):
-            logger.debug('cut_in is not an int, setting to None')
-            cut_in = None
+            raise TypeError(
+                '%(class)s.cut_in should be an int, not %(cut_in_class)s' % {
+                    'class': self.__class__.__name__,
+                    'cut_in_class': cut_in.__class__.__name__
+                }
+            )
 
-        if not isinstance(cut_duration, int):
-            logger.debug('cut_duration is not an int, setting to None')
-            cut_duration = None
+        if self.cut_out is not None and not self._updating_cut_in_cut_out:
+            if cut_in > self.cut_out:
+                # lock the attribute update
+                self._updating_cut_in_cut_out = True
+                self.cut_out = cut_in
+                self._updating_cut_in_cut_out = False
 
+        return cut_in
+
+    @validates('cut_out')
+    def _validate_cut_out(self, key, cut_out):
+        """validates the cut_out value
+        """
         if not isinstance(cut_out, int):
-            logger.debug('cut_out is not an int, setting to None')
-            cut_out = None
+            raise TypeError(
+                '%(class)s.cut_out should be an int, not %(cut_out_class)s' % {
+                    'class': self.__class__.__name__,
+                    'cut_out_class': cut_out.__class__.__name__
+                }
+            )
 
-        # check cut_in
-        if cut_in is None:
-            # try to calculate the cut_in from cut_out and cut_duration
-            if cut_out is None:
-                # set the defaults
-                cut_in = 1
+        if self.cut_in is not None and not self._updating_cut_in_cut_out:
+            if cut_out < self.cut_in:
+                # lock the attribute update
+                self._updating_cut_in_cut_out = True
+                self.cut_in = cut_out
+                self._updating_cut_in_cut_out = False
 
-                if cut_duration is None:
-                    # set the defaults
-                    cut_duration = 1
+        return cut_out
 
-                cut_out = cut_in + cut_duration - 1
-            else:
-                if cut_duration is None:
-                    cut_duration = 1
+    @validates('source_in')
+    def _validate_source_in(self, key, source_in):
+        """validates the source_in value
+        """
+        if not isinstance(source_in, int):
+            raise TypeError(
+                '%(class)s.source_in should be an int, not '
+                '%(source_in_class)s' % {
+                    'class': self.__class__.__name__,
+                    'source_in_class': source_in.__class__.__name__
+                }
+            )
 
-                cut_in = cut_out - cut_duration + 1
+        if source_in < self.cut_in:
+            raise ValueError(
+                '%(class)s.source_in can not be smaller than '
+                '%(class)s.cut_in, cut_in: %(cut_in)s where as '
+                'source_in: %(source_in)s' % {
+                    'class': self.__class__.__name__,
+                    'cut_in': self.cut_in,
+                    'source_in': source_in
+                }
+            )
 
-        # check cut_out
-        if cut_out is None:
-            if cut_duration is None:
-                cut_duration = 1
+        if source_in > self.cut_out:
+            raise ValueError(
+                '%(class)s.source_in can not be bigger than '
+                '%(class)s.cut_out, cut_out: %(cut_out)s where as '
+                'source_in: %(source_in)s' % {
+                    'class': self.__class__.__name__,
+                    'cut_out': self.cut_out,
+                    'source_in': source_in
+                }
+            )
 
-            cut_out = cut_in + cut_duration - 1
+        if self.source_out:
+            if source_in > self.source_out:
+                raise ValueError(
+                    '%(class)s.source_in can not be bigger than '
+                    '%(class)s.source_out, source_in: %(source_in)s where '
+                    'as source_out: %(source_out)s' % {
+                        'class': self.__class__.__name__,
+                        'source_out': self.source_out,
+                        'source_in': source_in
+                    }
+                )
 
-        if cut_out < cut_in:
-            # check duration
-            if cut_duration is None or cut_duration < 1:
-                cut_duration = 1
+        return source_in
 
-            cut_out = cut_in + cut_duration - 1
+    @validates('source_out')
+    def _validate_source_out(self, key, source_out):
+        """validates the source_out value
+        """
+        if not isinstance(source_out, int):
+            raise TypeError(
+                '%(class)s.source_out should be an int, not '
+                '%(source_out_class)s' % {
+                    'class': self.__class__.__name__,
+                    'source_out_class': source_out.__class__.__name__
+                }
+            )
 
-        cut_duration = cut_out - cut_in + 1
+        if source_out < self.cut_in:
+            raise ValueError(
+                '%(class)s.source_out can not be smaller than '
+                '%(class)s.cut_in, cut_in: %(cut_in)s where as '
+                'source_out: %(source_out)s' % {
+                    'class': self.__class__.__name__,
+                    'cut_in': self.cut_in,
+                    'source_out': source_out
+                }
+            )
 
-        return cut_in, cut_duration, cut_out
+        if source_out > self.cut_out:
+            raise ValueError(
+                '%(class)s.source_out can not be bigger than '
+                '%(class)s.cut_out, cut_out: %(cut_out)s where as '
+                'source_out: %(source_out)s' % {
+                    'class': self.__class__.__name__,
+                    'cut_out': self.cut_out,
+                    'source_out': source_out
+                }
+            )
+
+        if self.source_in:
+            if source_out < self.source_in:
+                raise ValueError(
+                    '%(class)s.source_out can not be smaller than '
+                    '%(class)s.source_in, source_in: %(source_in)s where '
+                    'as source_out: %(source_out)s' % {
+                        'class': self.__class__.__name__,
+                        'source_in': self.source_in,
+                        'source_out': source_out
+                    }
+                )
+
+        return source_out
+
+    # @validates('record_in')
+    # def _validate_record_in(self, key, record_in):
+    #     """validates the given record_in value
+    #     """
+    #     # we don't really care about the record in value right now.
+    #     # it can be set to anything
+    #     return record_in
+
+    @property
+    def cut_duration(self):
+        """getter for the cut_duration property
+        """
+        return self.cut_out - self.cut_in + 1
+
+    @cut_duration.setter
+    def cut_duration(self, cut_duration):
+        """setter for the cut_duration property
+        """
+        if not isinstance(cut_duration, int):
+            raise TypeError(
+                '%(class)s.cut_duration should be a positive integer value, '
+                'not %(cut_duration_class)s' % {
+                    'class': self.__class__.__name__,
+                    'cut_duration_class': cut_duration.__class__.__name__
+                }
+            )
+
+        if cut_duration < 1:
+            raise ValueError(
+                '%(class)s.cut_duration can not be set to zero or a negative '
+                'value' % {
+                    'class': self.__class__.__name__
+                }
+            )
+
+        # always extend or contract the shot from end
+        self.cut_out = self.cut_in + cut_duration - 1
 
     @validates('sequences')
     def _validate_sequence(self, key, sequence):
@@ -347,69 +536,20 @@ class Shot(Task, CodeMixin):
 
         return imf
 
-    @property
-    def cut_duration(self):
-        if not hasattr(self, '_cut_duration'):
-            setattr(self, '_cut_duration', None)
+    @validates('code')
+    def _validate_code(self, key, code):
+        """validates the given code attribute
+        """
+        code = super(Shot, self)._validate_code(key, code)
 
-        if self._cut_duration is None:
-            self._cut_in, self._cut_duration, self._cut_out = \
-                self._validate_cut_info(self._cut_in, None, self._cut_out)
-        return self._cut_duration
+        # check code uniqueness
+        if code != self.code:
+            if not self._check_code_availability(code, self.project):
+                raise ValueError(
+                    'There is a Shot with the same code: %s' % code
+                )
 
-    @cut_duration.setter
-    def cut_duration(self, cut_duration):
-        if cut_duration is not None:
-            if isinstance(cut_duration, int):
-                if cut_duration < 1:
-                    # use None for cut_duration and let it be calculated from
-                    # cut_in and cut_out
-                    self._cut_in, self._cut_duration, self._cut_out = \
-                        self._validate_cut_info(self.cut_in, None,
-                                                self.cut_out)
-                else:
-                    # set the end to None
-                    # to make it recalculated
-                    self._cut_in, self._cut_duration, self._cut_out = \
-                        self._validate_cut_info(self.cut_in, cut_duration,
-                                                None)
-        else:
-            self._cut_in, self._cut_duration, self._cut_out = \
-                self._validate_cut_info(self.cut_in, None, self.cut_out)
-
-    def _cut_in_getter(self):
-        return self._cut_in
-
-    def _cut_in_setter(self, cut_in):
-        self._cut_in, self._cut_duration, self._cut_out = \
-            self._validate_cut_info(cut_in, self.cut_duration, self.cut_out)
-
-    cut_in = synonym(
-        "_cut_in",
-        descriptor=property(_cut_in_getter, _cut_in_setter),
-        doc="""The in frame number that this shot starts.
-
-        The default value is 1. When the cut_in is bigger then
-        :attr:`.cut_out`, the :attr:`.cut_out` value is update to
-        :attr:`.cut_in` + 1."""
-    )
-
-    def _cut_out_getter(self):
-        return self._cut_out
-
-    def _cut_out_setter(self, cut_out):
-        self._cut_in, self._cut_duration, self._cut_out = \
-            self._validate_cut_info(self.cut_in, self.cut_duration, cut_out)
-
-    cut_out = synonym(
-        "_cut_out",
-        descriptor=property(_cut_out_getter, _cut_out_setter),
-        doc="""The out frame number that this shot ends.
-
-        When the :attr:`.cut_out` is set to a value lower than :attr:`.cut_in`,
-        :attr:`.cut_out` will be updated to :attr:`.cut_in` + 1. The default
-        value is :attr:`.cut_in` + :attr:`.cut_duration`."""
-    )
+        return code
 
 
 Shot_Sequences = Table(

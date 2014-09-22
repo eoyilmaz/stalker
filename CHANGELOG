@@ -2,6 +2,13 @@
 Stalker Changes
 ===============
 
+0.2.10
+======
+
+* **New:** It is now possible to track the Edit information per Shot using the
+  newly introduced ``source_in``, ``source_out`` and ``record_in`` along with
+  existent ``cut_in`` and ``cut_out`` attributes.
+
 0.2.9.2
 =======
 
