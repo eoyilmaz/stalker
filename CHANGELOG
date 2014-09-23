@@ -2,6 +2,14 @@
 Stalker Changes
 ===============
 
+0.2.10.1
+========
+
+* **Fix:** Fixed a bug where for a WIP Task with no time logs (apparently
+  something went wrong) and no dependencies using
+  ``Task.update_status_with_dependent_statuses()`` will convert the status to
+  RTS.
+
 0.2.10
 ======
 

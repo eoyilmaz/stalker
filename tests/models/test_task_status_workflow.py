@@ -2386,7 +2386,11 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_oh
         self.test_task3.depends = []
         self.test_task3.resume()
-        self.assertEqual(self.test_task3.status, self.status_wip)
+        # no time logs so it will return back to rts
+        # the test is wrong in the first place (no way to turn a task with no
+        # time logs in to a OH task),
+        # but checks a situation that the system needs to be more robust
+        self.assertEqual(self.test_task3.status, self.status_rts)
 
     # OH: WIP dependencies -> DREV
     def test_resume_in_OH_leaf_task_with_WIP_dependencies(self):
@@ -2786,7 +2790,11 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_stop
         self.test_task3.depends = []
         self.test_task3.resume()
-        self.assertEqual(self.test_task3.status, self.status_wip)
+        # no time logs so it will return back to rts
+        # the test is wrong in the first place (no way to turn a task with no
+        # time logs in to a OH task),
+        # but checks a situation that the system needs to be more robust
+        self.assertEqual(self.test_task3.status, self.status_rts)
 
     # STOP: WIP dependencies -> DREV
     def test_resume_in_STOP_leaf_task_with_WIP_dependencies(self):
@@ -3464,3 +3472,30 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
             self.test_task5.status
         )
 
+    def test_leaf_WIP_task_with_no_dependency_and_no_timelogs_update_status_with_dependent_statuses_fixes_status(self):
+        """testing if a Task.update_status_with_dependent_statuses() will fix
+        the status of a leaf WIP task with no dependency (something went
+        wrong) to RTS if there is no TimeLog and to WIP if there is a TimeLog
+        """
+        # use task6 and task5
+        self.test_task5.depends = []
+
+        # check if there is no time logs
+        self.assertEqual(self.test_task5.time_logs, [])
+
+        # set the statuses
+        self.test_task5.status = self.status_wip
+
+        self.assertEqual(
+            self.status_wip,
+            self.test_task5.status
+        )
+
+        # fix status with dependencies
+        self.test_task5.update_status_with_dependent_statuses()
+
+        # check the status
+        self.assertEqual(
+            self.status_rts,
+            self.test_task5.status
+        )

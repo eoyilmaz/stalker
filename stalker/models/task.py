@@ -2387,7 +2387,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             # convert its status from WFD to RTS if necessary
             if self.status == wfd:
                 self.status = rts
-            elif self.status == drev:
+            elif self.status in [wip, drev]:
                 if len(self.time_logs):
                     self.status = wip
                 else:
