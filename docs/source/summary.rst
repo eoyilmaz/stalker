@@ -20,7 +20,6 @@ Summary
    stalker.models.auth.Group
    stalker.models.auth.LocalSession
    stalker.models.auth.Permission
-   stalker.models.auth.RootFactory
    stalker.models.auth.User
    stalker.models.department.Department
    stalker.models.client.Client
