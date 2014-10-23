@@ -364,7 +364,7 @@ order by path_as_text"""
                     # path = r[1]
                     # parent_id = r[2]
                     # entity_type = r[3]
-                    name = r[4]
+                    #name = r[4]
                     priority = r[5]
                     schedule_timing = r[6]
                     schedule_unit = r[7]
@@ -386,10 +386,9 @@ order by path_as_text"""
                         result_buffer.append('%s}' % i_tab)
 
                     result_buffer.append(
-                        """%(tab)stask Task_%(id)s "%(name)s" {""" % {
+                        """%(tab)stask Task_%(id)s "Task_%(id)s" {""" % {
                             'tab': tab,
-                            'id': task_id,
-                            'name': name
+                            'id': task_id
                         }
                     )
 
