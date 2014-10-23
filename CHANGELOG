@@ -2,6 +2,19 @@
 Stalker Changes
 ===============
 
+0.2.10.2
+========
+
+* **Fix:** Fixed a bug in
+  ``stalker.models.schedulers.TaskJugglerScheduler._create_tjp_file_content()``
+  caused by non-ascii task names.
+
+* **Fix:** Removed the residual ``RootFactory`` class reference from
+  documentation.
+
+* **New:** Added to new functions called ``utc_to_local`` and ``local_to_utc``
+  for UTC to Local time and vice versa conversion.
+
 0.2.10.1
 ========
 
