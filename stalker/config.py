@@ -285,7 +285,7 @@ task {{project.tjp_id}} "{{project.name}}" {
 """,
 
         tjp_task_template="""
-task {{task.tjp_id}} "{{task.name}}" {
+task {{task.tjp_id}} "{{task.tjp_id}}" {
 
     {% if task.priority != 500 -%}
         priority {{task.priority}}

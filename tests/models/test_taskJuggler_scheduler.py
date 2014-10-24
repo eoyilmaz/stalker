@@ -604,11 +604,11 @@ project Studio_564 "Test Studio" 2013-04-16 - 2013-06-30 {
 
 # tasks
 task Task_{{proj1.id}} "TP1" {
-  task Task_{{task1.id}} "Task1" {
+  task Task_{{task1.id}} "Task_46" {
     effort 50.0h
     allocate User_{{user1.id}} { alternative User_{{user3.id}}, User_{{user4.id}}, User_{{user5.id}} select minallocated persistent }, User_{{user2.id}} { alternative User_{{user3.id}}, User_{{user4.id}}, User_{{user5.id}} select minallocated persistent }
   }
-  task Task_{{task2.id}} "Task2" {
+  task Task_{{task2.id}} "Task_47" {
     effort 60.0h
     allocate User_{{user1.id}} { alternative User_{{user3.id}}, User_{{user4.id}}, User_{{user5.id}} select minallocated persistent }, User_{{user2.id}} { alternative User_{{user3.id}}, User_{{user4.id}}, User_{{user5.id}} select minallocated persistent }
   }
