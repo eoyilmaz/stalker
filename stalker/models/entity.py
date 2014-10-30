@@ -396,7 +396,7 @@ class SimpleEntity(Base):
         """
         # remove unnecessary characters from the string
         nice_name_in = nice_name_in.strip()
-        nice_name_in = re.sub(r'([^a-zA-Z0-9\s_\-]+)', '',
+        nice_name_in = re.sub(r'([^a-zA-Z0-9\s_\-@]+)', '',
                               nice_name_in).strip()
 
         # remove all the characters which are not alphabetic from the start of

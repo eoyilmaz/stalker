@@ -1390,7 +1390,7 @@ class VersionTester(unittest.TestCase):
 
         version1 = Version(
             task=task3,
-            take_name='Take1'
+            take_name='Take1@Main'
         )
         DBSession.add(version1)
         DBSession.commit()

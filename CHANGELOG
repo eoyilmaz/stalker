@@ -2,6 +2,11 @@
 Stalker Changes
 ===============
 
+0.2.10.4
+========
+
+* **New:** '@' character is now allowed in Entity nice name.
+
 0.2.10.3
 ========
 
