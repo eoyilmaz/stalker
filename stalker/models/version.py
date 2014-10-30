@@ -207,7 +207,7 @@ class Version(Link):
         """
         # remove unnecessary characters
         take_name = re.sub(
-            r"([^a-zA-Z0-9\s_\-]+)", r"", take_name
+            r"([^a-zA-Z0-9\s_\-@]+)", r"", take_name
         ).strip()
 
         # replace empty spaces with underscores

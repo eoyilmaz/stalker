@@ -520,10 +520,16 @@ have created at the beginning of this tutorial::
   from stalker import TaskJugglerScheduler
 
   my_studio.scheduler = TaskJugglerScheduler()
-  my_studio.schedule(scheduled_by=me)
+  my_studio.duration = datetime.timedelta(days=365)  # we are setting the
+  my_studio.schedule(scheduled_by=me)                # duration to 1 year just
+                                                     # to be sure that TJ3
+                                                     # will not complain
+                                                     # about the project is not
+                                                     # fitting in to the time
+                                                     # frame.
 
 This should take a little while depending to your projects size (around 1-2
-seconds for this tutorial, but around ~10 min for a project with 5000+ tasks).
+seconds for this tutorial, but around ~15 min for a project with 15000+ tasks).
 
 When it is finished all of your tasks now have their ``computed_start`` and
 ``computed_end`` values filled with proper data. Now check the start and end

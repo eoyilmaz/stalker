@@ -1328,7 +1328,7 @@ class ProjectTestCase(unittest.TestCase):
         expected_tjp_temp = Template("""
 task Project_{{project.id}} "Test Project" {
         
-task Sequence_{{sequence1.id}} "Seq1" {
+task Sequence_{{sequence1.id}} "Sequence_{{sequence1.id}}" {
 
     
             
@@ -1336,7 +1336,7 @@ task Sequence_{{sequence1.id}} "Seq1" {
             effort 1.0h
             allocate User_{{user1.id}}             
 }        
-task Sequence_{{sequence2.id}} "Seq2" {
+task Sequence_{{sequence2.id}} "Sequence_{{sequence2.id}}" {
 
     
             
@@ -1344,7 +1344,7 @@ task Sequence_{{sequence2.id}} "Seq2" {
             effort 1.0h
             allocate User_{{user2.id}}             
 }        
-task Sequence_{{sequence3.id}} "Seq3" {
+task Sequence_{{sequence3.id}} "Sequence_{{sequence3.id}}" {
 
     
             
@@ -1352,11 +1352,11 @@ task Sequence_{{sequence3.id}} "Seq3" {
             effort 1.0h
             allocate User_{{user3.id}}             
 }        
-task Sequence_{{sequence4.id}} "Seq4" {
+task Sequence_{{sequence4.id}} "Sequence_{{sequence4.id}}" {
 
     
     
-task Task_{{task4.id}} "Test Task 4" {
+task Task_{{task4.id}} "Task_{{task4.id}}" {
 
     
             
@@ -1364,7 +1364,7 @@ task Task_{{task4.id}} "Test Task 4" {
             effort 1.0h
             allocate User_{{user4.id}}             
 }
-task Task_{{task5.id}} "Test Task 5" {
+task Task_{{task5.id}} "Task_{{task5.id}}" {
 
     
             
@@ -1372,7 +1372,7 @@ task Task_{{task5.id}} "Test Task 5" {
             effort 1.0h
             allocate User_{{user5.id}}             
 }
-task Task_{{task6.id}} "Test Task 6" {
+task Task_{{task6.id}} "Task_{{task6.id}}" {
 
     
             
@@ -1381,11 +1381,11 @@ task Task_{{task6.id}} "Test Task 6" {
             allocate User_{{user6.id}}             
 }
 }        
-task Sequence_{{sequence5.id}} "Seq5" {
+task Sequence_{{sequence5.id}} "Sequence_{{sequence5.id}}" {
 
     
     
-task Task_{{task7.id}} "Test Task 7" {
+task Task_{{task7.id}} "Task_{{task7.id}}" {
 
     
             
@@ -1393,7 +1393,7 @@ task Task_{{task7.id}} "Test Task 7" {
             effort 1.0h
             allocate User_{{user7.id}}             
 }
-task Task_{{task8.id}} "Test Task 8" {
+task Task_{{task8.id}} "Task_{{task8.id}}" {
 
     
             
@@ -1401,7 +1401,7 @@ task Task_{{task8.id}} "Test Task 8" {
             effort 1.0h
             allocate User_{{user8.id}}             
 }
-task Task_{{task9.id}} "Test Task 9" {
+task Task_{{task9.id}} "Task_{{task9.id}}" {
 
     
             
@@ -1410,21 +1410,21 @@ task Task_{{task9.id}} "Test Task 9" {
             allocate User_{{user9.id}}             
 }
 }        
-task Sequence_{{sequence6.id}} "Seq6" {
+task Sequence_{{sequence6.id}} "Sequence_{{sequence6.id}}" {
 
     
                         
 }        
-task Sequence_{{sequence7.id}} "Seq7" {
+task Sequence_{{sequence7.id}} "Sequence_{{sequence7.id}}" {
 
     
                         
 }        
-task Shot_{{shot1.id}} "{{shot1.name}}" {
+task Shot_{{shot1.id}} "Shot_{{shot1.id}}" {
 
     
     
-task Task_{{task10.id}} "Test Task 10" {
+task Task_{{task10.id}} "Task_{{task10.id}}" {
 
     
             
@@ -1432,7 +1432,7 @@ task Task_{{task10.id}} "Test Task 10" {
             effort 10.0h
             allocate User_{{user10.id}}             
 }
-task Task_{{task11.id}} "Test Task 11" {
+task Task_{{task11.id}} "Task_{{task11.id}}" {
 
     
             
@@ -1440,7 +1440,7 @@ task Task_{{task11.id}} "Test Task 11" {
             effort 1.0h
             allocate User_{{user1.id}} , User_{{user2.id}}             
 }
-task Task_{{task12.id}} "Test Task 12" {
+task Task_{{task12.id}} "Task_{{task12.id}}" {
 
     
             
@@ -1449,11 +1449,11 @@ task Task_{{task12.id}} "Test Task 12" {
             allocate User_{{user3.id}} , User_{{user4.id}}             
 }
 }        
-task Shot_{{shot2.id}} "{{shot2.name}}" {
+task Shot_{{shot2.id}} "Shot_{{shot2.id}}" {
 
     
     
-task Task_{{task13.id}} "Test Task 13" {
+task Task_{{task13.id}} "Task_{{task13.id}}" {
 
     
             
@@ -1461,7 +1461,7 @@ task Task_{{task13.id}} "Test Task 13" {
             effort 1.0h
             allocate User_{{user5.id}} , User_{{user6.id}}             
 }
-task Task_{{task14.id}} "Test Task 14" {
+task Task_{{task14.id}} "Task_{{task14.id}}" {
 
     
             
@@ -1469,7 +1469,7 @@ task Task_{{task14.id}} "Test Task 14" {
             effort 1.0h
             allocate User_{{user7.id}} , User_{{user8.id}}             
 }
-task Task_{{task15.id}} "Test Task 15" {
+task Task_{{task15.id}} "Task_{{task15.id}}" {
 
     
             
@@ -1478,11 +1478,11 @@ task Task_{{task15.id}} "Test Task 15" {
             allocate User_{{user9.id}} , User_{{user10.id}}             
 }
 }        
-task Shot_{{shot3.id}} "{{shot3.name}}" {
+task Shot_{{shot3.id}} "Shot_{{shot3.id}}" {
 
     
     
-task Task_{{task16.id}} "Test Task 16" {
+task Task_{{task16.id}} "Task_{{task16.id}}" {
 
     
             
@@ -1490,7 +1490,7 @@ task Task_{{task16.id}} "Test Task 16" {
             effort 1.0h
             allocate User_{{user1.id}} , User_{{user2.id}} , User_{{user3.id}}             
 }
-task Task_{{task17.id}} "Test Task 17" {
+task Task_{{task17.id}} "Task_{{task17.id}}" {
 
     
             
@@ -1498,7 +1498,7 @@ task Task_{{task17.id}} "Test Task 17" {
             effort 1.0h
             allocate User_{{user4.id}} , User_{{user5.id}} , User_{{user6.id}}             
 }
-task Task_{{task18.id}} "Test Task 18" {
+task Task_{{task18.id}} "Task_{{task18.id}}" {
 
     
             
@@ -1507,11 +1507,11 @@ task Task_{{task18.id}} "Test Task 18" {
             allocate User_{{user7.id}} , User_{{user8.id}} , User_{{user9.id}}             
 }
 }        
-task Shot_{{shot4.id}} "{{shot4.name}}" {
+task Shot_{{shot4.id}} "Shot_{{shot4.id}}" {
 
     
     
-task Task_{{task19.id}} "Test Task 19" {
+task Task_{{task19.id}} "Task_{{task19.id}}" {
 
     
             
@@ -1519,7 +1519,7 @@ task Task_{{task19.id}} "Test Task 19" {
             effort 1.0h
             allocate User_{{user1.id}} , User_{{user2.id}} , User_{{user10.id}}             
 }
-task Task_{{task20.id}} "Test Task 20" {
+task Task_{{task20.id}} "Task_{{task20.id}}" {
 
     
             
@@ -1527,7 +1527,7 @@ task Task_{{task20.id}} "Test Task 20" {
             effort 1.0h
             allocate User_{{user3.id}} , User_{{user4.id}} , User_{{user5.id}}             
 }
-task Task_{{task21.id}} "Test Task 21" {
+task Task_{{task21.id}} "Task_{{task21.id}}" {
 
     
             
@@ -1536,7 +1536,7 @@ task Task_{{task21.id}} "Test Task 21" {
             allocate User_{{user6.id}} , User_{{user7.id}} , User_{{user8.id}}             
 }
 }        
-task Asset_{{asset1.id}} "Test Asset 1" {
+task Asset_{{asset1.id}} "Asset_{{asset1.id}}" {
 
     
             
@@ -1544,21 +1544,21 @@ task Asset_{{asset1.id}} "Test Asset 1" {
             effort 1.0h
             allocate User_{{user2.id}}             
 }        
-task Asset_{{asset2.id}} "Test Asset 2" {
+task Asset_{{asset2.id}} "Asset_{{asset2.id}}" {
 
     
                         
 }        
-task Asset_{{asset3.id}} "Test Asset 3" {
+task Asset_{{asset3.id}} "Asset_{{asset3.id}}" {
 
     
                         
 }        
-task Asset_{{asset4.id}} "Test Asset 4" {
+task Asset_{{asset4.id}} "Asset_{{asset4.id}}" {
 
     
     
-task Task_{{task22.id}} "Test Task 22" {
+task Task_{{task22.id}} "Task_{{task22.id}}" {
 
     
             
@@ -1566,7 +1566,7 @@ task Task_{{task22.id}} "Test Task 22" {
             effort 1.0h
             allocate User_{{user1.id}} , User_{{user9.id}} , User_{{user10.id}}             
 }
-task Task_{{task23.id}} "Test Task 23" {
+task Task_{{task23.id}} "Task_{{task23.id}}" {
 
     
             
@@ -1574,7 +1574,7 @@ task Task_{{task23.id}} "Test Task 23" {
             effort 1.0h
             allocate User_{{user2.id}} , User_{{user3.id}}             
 }
-task Task_{{task24.id}} "Test Task 24" {
+task Task_{{task24.id}} "Task_{{task24.id}}" {
 
     
             
@@ -1583,11 +1583,11 @@ task Task_{{task24.id}} "Test Task 24" {
             allocate User_{{user4.id}} , User_{{user5.id}}             
 }
 }        
-task Asset_{{asset5.id}} "Test Asset 5" {
+task Asset_{{asset5.id}} "Asset_{{asset5.id}}" {
 
     
     
-task Task_{{task25.id}} "Test Task 25" {
+task Task_{{task25.id}} "Task_{{task25.id}}" {
 
     
             
@@ -1595,7 +1595,7 @@ task Task_{{task25.id}} "Test Task 25" {
             effort 1.0h
             allocate User_{{user6.id}} , User_{{user7.id}}             
 }
-task Task_{{task26.id}} "Test Task 26" {
+task Task_{{task26.id}} "Task_{{task26.id}}" {
 
     
             
@@ -1603,7 +1603,7 @@ task Task_{{task26.id}} "Test Task 26" {
             effort 1.0h
             allocate User_{{user8.id}} , User_{{user9.id}}             
 }
-task Task_{{task27.id}} "Test Task 27" {
+task Task_{{task27.id}} "Task_{{task27.id}}" {
 
     
             
@@ -1612,7 +1612,7 @@ task Task_{{task27.id}} "Test Task 27" {
             allocate User_{{user1.id}} , User_{{user10.id}}             
 }
 }        
-task Task_{{task1.id}} "Test Task 1" {
+task Task_{{task1.id}} "Task_{{task1.id}}" {
 
     
             
@@ -1620,7 +1620,7 @@ task Task_{{task1.id}} "Test Task 1" {
             effort 1.0h
             allocate User_{{user1.id}}             
 }        
-task Task_{{task2.id}} "Test Task 2" {
+task Task_{{task2.id}} "Task_{{task2.id}}" {
 
     
             
@@ -1628,7 +1628,7 @@ task Task_{{task2.id}} "Test Task 2" {
             effort 1.0h
             allocate User_{{user2.id}}             
 }        
-task Task_{{task3.id}} "Test Task 3" {
+task Task_{{task3.id}} "Task_{{task3.id}}" {
 
     
             

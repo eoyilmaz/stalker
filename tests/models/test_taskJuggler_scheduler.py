@@ -279,7 +279,7 @@ project Studio_564 "Test Studio" 2013-04-16 - 2013-06-30 {
             
 task Project_{{proj.id}} "Test Project 1" {
         
-task Task_{{task1.id}} "Task1" {
+task Task_{{task1.id}} "Task_{{task1.id}}" {
 
     
             
@@ -295,7 +295,7 @@ task Task_{{task1.id}} "Task1" {
                     persistent
                 }            
 }        
-task Task_{{task2.id}} "Task2" {
+task Task_{{task2.id}} "Task_{{task2.id}}" {
 
     
             

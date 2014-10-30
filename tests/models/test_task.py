@@ -3271,7 +3271,7 @@ class TaskTestCase(unittest.TestCase):
         self.data_created.append(t1)
 
         expected_tjp = """
-task Task_%(t1_id)s "Modeling" {
+task Task_%(t1_id)s "Task_%(t1_id)s" {
 
     
             depends Project_%(project1_id)s.Task_%(dep_t1_id)s {onend}, Project_%(project1_id)s.Task_%(dep_t2_id)s {onend}        
@@ -3342,7 +3342,7 @@ task Task_%(t1_id)s "Modeling" {
 
         # self.maxDiff = None
         expected_tjp = """
-task Task_%(new_task2_id)s "Modeling" {
+task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
 
     
             depends Project_%(project1_id)s.Task_%(new_task_id)s.Task_%(dep_task1_id)s {onend}, Project_%(project1_id)s.Task_%(new_task_id)s.Task_%(dep_task2_id)s {onend}        
@@ -3424,7 +3424,7 @@ task Task_%(new_task2_id)s "Modeling" {
         tdep2.gap_model = 'duration'
 
         expected_tjp = """
-task Task_%(new_task2_id)s "Modeling" {
+task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
 
     
             depends Project_%(project1_id)s.Task_%(new_task_id)s.Task_%(dep_task1_id)s {onstart gaplength 2d}, Project_%(project1_id)s.Task_%(new_task_id)s.Task_%(dep_task2_id)s {onend gapduration 4d}        
@@ -3511,7 +3511,7 @@ task Task_%(new_task2_id)s "Modeling" {
         tdep2.gap_model = 'duration'
 
         expected_tjp = """
-task Task_%(new_task2_id)s "Modeling" {
+task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
 
     
             depends Project_%(project1_id)s.Task_%(new_task1_id)s.Task_%(dep_task1_id)s {onstart gaplength 2d}, Project_%(project1_id)s.Task_%(new_task1_id)s.Task_%(dep_task2_id)s {onend gapduration 4d}        
@@ -3586,27 +3586,11 @@ task Task_%(new_task2_id)s "Modeling" {
         self.data_created.append(t2)
 
         expected_tjp = """
-task Task_%(t1_id)s "Modeling" {
+task Task_%(t1_id)s "Task_%(t1_id)s" {
 
     
     
-task Task_%(dep_task1_id)s "Modeling" {
-
-    
-            
-            
-            effort 1.0d
-            allocate User_%(user1_id)s {
-                    alternative
-                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
-                    persistent
-                }, User_%(user2_id)s {
-                    alternative
-                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
-                    persistent
-                }            
-}
-task Task_%(dep_task2_id)s "Modeling" {
+task Task_%(dep_task1_id)s "Task_%(dep_task1_id)s" {
 
     
             
@@ -3622,7 +3606,23 @@ task Task_%(dep_task2_id)s "Modeling" {
                     persistent
                 }            
 }
-task Task_%(t2_id)s "Modeling" {
+task Task_%(dep_task2_id)s "Task_%(dep_task2_id)s" {
+
+    
+            
+            
+            effort 1.0d
+            allocate User_%(user1_id)s {
+                    alternative
+                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
+                    persistent
+                }, User_%(user2_id)s {
+                    alternative
+                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
+                    persistent
+                }            
+}
+task Task_%(t2_id)s "Task_%(t2_id)s" {
 
     
             depends Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task1_id)s {onend}, Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task2_id)s {onend}        
@@ -3719,11 +3719,11 @@ task Task_%(t2_id)s "Modeling" {
         self.data_created.append(t2)
 
         expected_tjp = """
-task Task_%(t1_id)s "Modeling" {
+task Task_%(t1_id)s "Task_%(t1_id)s" {
 
     priority 888
             depends Project_%(project1_id)s.Task_%(t0_id)s {onend}
-task Task_%(dep_task1_id)s "Modeling" {
+task Task_%(dep_task1_id)s "Task_%(dep_task1_id)s" {
 
     
             
@@ -3739,7 +3739,7 @@ task Task_%(dep_task1_id)s "Modeling" {
                     persistent
                 }            
 }
-task Task_%(dep_task2_id)s "Modeling" {
+task Task_%(dep_task2_id)s "Task_%(dep_task2_id)s" {
 
     
             
@@ -3755,7 +3755,7 @@ task Task_%(dep_task2_id)s "Modeling" {
                     persistent
                 }            
 }
-task Task_%(t2_id)s "Modeling" {
+task Task_%(t2_id)s "Task_%(t2_id)s" {
 
     
             depends Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task1_id)s {onend}, Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task2_id)s {onend}        
@@ -3842,27 +3842,11 @@ task Task_%(t2_id)s "Modeling" {
         self.data_created.append(t2)
 
         expected_tjp = """
-task Task_%(t1_id)s "Modeling" {
+task Task_%(t1_id)s "Task_%(t1_id)s" {
 
     
     
-task Task_%(dep_task1_id)s "Modeling" {
-
-    
-            
-            
-            effort 1.0d
-            allocate User_%(user1_id)s {
-                    alternative
-                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
-                    persistent
-                }, User_%(user2_id)s {
-                    alternative
-                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
-                    persistent
-                }            
-}
-task Task_%(dep_task2_id)s "Modeling" {
+task Task_%(dep_task1_id)s "Task_%(dep_task1_id)s" {
 
     
             
@@ -3878,7 +3862,23 @@ task Task_%(dep_task2_id)s "Modeling" {
                     persistent
                 }            
 }
-task Task_%(t2_id)s "Modeling" {
+task Task_%(dep_task2_id)s "Task_%(dep_task2_id)s" {
+
+    
+            
+            
+            effort 1.0d
+            allocate User_%(user1_id)s {
+                    alternative
+                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
+                    persistent
+                }, User_%(user2_id)s {
+                    alternative
+                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
+                    persistent
+                }            
+}
+task Task_%(t2_id)s "Task_%(t2_id)s" {
 
     
             depends Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task1_id)s {onend}, Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task2_id)s {onend}        

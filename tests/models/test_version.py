@@ -225,6 +225,7 @@ class VersionTester(unittest.TestCase):
             ('   take   name   ', 'take_name'),
             ('TakeName', 'TakeName'),
             ('Take___Name', 'Take___Name'),
+            ('Take@Name', 'Take@Name'),
         ]
 
         # and the Version
@@ -964,13 +965,15 @@ class VersionTester(unittest.TestCase):
         DBSession.add(new_version1)
         DBSession.commit()
 
+        new_version1.take_name = 'TestTake@BBOX'
+
         new_version1.update_paths()
         new_version1.extension = '.ma'
         self.assertEqual(new_version1.extension, '.ma')
 
         self.assertEqual(
             new_version1.absolute_full_path,
-            '/mnt/T/tp/SH001/Task1/Task1_TestTake_v001.ma'
+            '/mnt/T/tp/SH001/Task1/Task1_TestTake@BBOX_v001.ma'
         )
 
     def test_latest_published_version_is_read_only(self):
