@@ -1565,3 +1565,99 @@ class UserTest(unittest.TestCase):
     #         2 * hash(self.test_user.name) +
     #         3 * hash(self.test_user.entity_type)
     #     )
+
+    def test_rate_argument_is_skipped(self):
+        """testing if the rate attribute will be 0 when the rate argument is
+        skipped
+        """
+        if 'rate' in self.kwargs:
+            self.kwargs.pop('rate')
+
+        new_user = User(**self.kwargs)
+        self.assertEqual(new_user.rate, 0)
+
+    def test_rate_argument_is_none(self):
+        """testing if the rate attribute will be 0 when the rate argument is
+        None
+        """
+        self.kwargs['rate'] = None
+        new_user = User(**self.kwargs)
+        self.assertEqual(new_user.rate, 0)
+
+    def test_rate_attribute_is_set_to_none(self):
+        """testing if the rate will be set to 0 if it is set to None
+        """
+        self.assertNotEqual(self.test_user.rate, None)
+
+        self.test_user.rate = None
+        self.assertEqual(self.test_user.rate, 0)
+
+    def test_rate_argument_is_not_a_float_or_integer_value(self):
+        """testing if a TypeError will be raised when the rate argument is not
+        an integer or float value
+        """
+        self.kwargs['rate'] = 'some string'
+        with self.assertRaises(TypeError) as cm:
+            User(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'User.rate should be a float number greater or equal to 0.0, not '
+            'str'
+        )
+
+    def test_rate_attribute_is_not_a_float_or_integer_value(self):
+        """testing if a TypeError will be raised when the rate attribute is set
+        to a value other than an integer or float
+        """
+        with self.assertRaises(TypeError) as cm:
+            self.test_user.rate = 'some string'
+
+        self.assertEqual(
+            str(cm.exception),
+            'User.rate should be a float number greater or equal to 0.0, not '
+            'str'
+        )
+
+    def test_rate_argument_is_a_negative_number(self):
+        """testing if a ValueError will be raised when the rate argument is a
+        negative value
+        """
+        self.kwargs['rate'] = -1
+        with self.assertRaises(ValueError) as cm:
+            User(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'User.rate should be a float number greater or equal to 0.0, not '
+            '-1'
+        )
+
+    def test_rate_attribute_is_set_to_a_negative_number(self):
+        """testing if a ValueError will be raised when the rate attribute is
+        set to a negative number
+        """
+        with self.assertRaises(ValueError) as cm:
+            self.test_user.rate = -1
+
+        self.assertEqual(
+            str(cm.exception),
+            'User.rate should be a float number greater or equal to 0.0, not '
+            '-1'
+        )
+
+    def test_rate_argument_is_working_properly(self):
+        """testing if the rate argument is working properly
+        """
+        test_value = 102.3
+        self.kwargs['rate'] = test_value
+        new_user = User(**self.kwargs)
+        self.assertEqual(new_user.rate, test_value)
+
+    def test_rate_attribute_is_working_properly(self):
+        """testing if rate attribute is working properly
+        """
+        test_value = 212.5
+        self.assertNotEqual(self.test_user.rate, test_value)
+        self.test_user.rate = test_value
+        self.assertEqual(self.test_user.rate, test_value)

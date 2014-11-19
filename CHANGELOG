@@ -2,6 +2,12 @@
 Stalker Changes
 ===============
 
+0.2.11
+======
+
+* **New:** User instances now have a new attribute called ``rate`` to track
+  their cost as a resource.
+
 0.2.10.5
 ========
 

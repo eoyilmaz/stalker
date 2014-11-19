@@ -287,8 +287,20 @@ class User(Entity, ACLMixin):
 
        It is now possible to define Vacations per user.
 
+    .. note::
+       .. versionadded 0.2.7: Resource Efficiency
+
+    .. note::
+       .. versionadded 0.2.11:
+
+          Users not have a :attr:`.rate` attribute.
+
+    :param rate:
+       For future usage a rate attribute is added to the User to record the
+       daily cost of this user as a resource. It should be either 0 or a
+       positive integer or float value. Default is 0.
+
     :param efficiency:
-      .. versionadded 0.2.7: Resource Efficiency
 
       The efficiency is a multiplier for a user as a resource to a task and
       defines how much of the time spent for that particular task is counted as
@@ -508,6 +520,8 @@ class User(Entity, ACLMixin):
 
     efficiency = Column(Float, default=1.0)
 
+    rate = Column(Float, default=0.0)
+
     def __init__(
             self,
             name=None,
@@ -518,6 +532,7 @@ class User(Entity, ACLMixin):
             company=None,
             groups=None,
             efficiency=1.0,
+            rate=0.0,
             **kwargs):
         kwargs['name'] = name
 
@@ -544,8 +559,8 @@ class User(Entity, ACLMixin):
         self.tasks = []
 
         self.last_login = None
-
         self.efficiency = efficiency
+        self.rate = rate
 
     def __repr__(self):
         """return the representation of the current User
@@ -836,6 +851,33 @@ class User(Entity, ACLMixin):
             )
 
         return efficiency
+
+    @validates('rate')
+    def _validate_rate(self, key, rate):
+        """validates the given rate value
+        """
+        if rate is None:
+            rate = 0.0
+
+        if not isinstance(rate, (int, float)):
+            raise TypeError(
+                '%(class)s.rate should be a float number greater or '
+                'equal to 0.0, not %(rate_class)s' % {
+                    'class': self.__class__.__name__,
+                    'rate_class': rate.__class__.__name__
+                }
+            )
+
+        if rate < 0:
+            raise ValueError(
+                '%(class)s.rate should be a float number greater or '
+                'equal to 0.0, not %(rate)s' % {
+                    'class': self.__class__.__name__,
+                    'rate': rate
+                }
+            )
+
+        return rate
 
     @property
     def tickets(self):
