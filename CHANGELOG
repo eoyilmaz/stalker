@@ -2,6 +2,11 @@
 Stalker Changes
 ===============
 
+0.2.10.5
+========
+
+* **Update:** TaskJuggler output is now written to debug output once per line.
+
 0.2.10.4
 ========
 

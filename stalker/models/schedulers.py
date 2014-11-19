@@ -708,7 +708,12 @@ order by path_as_text"""
                 break
 
             if stderr != b'':
+                stderr = stderr.strip()
                 stderr_buffer.append(stderr)
+                logger.debug(stderr.strip())
+
+        # flatten the buffer
+        stderr_buffer = '\n'.join(stderr_buffer)
 
         if process.returncode:
             # there is an error
@@ -718,7 +723,6 @@ order by path_as_text"""
         self._parse_csv_file()
 
         logger.debug('tj3 return code: %s' % process.returncode)
-        logger.debug('tj3 output: %s' % stderr_buffer)
 
         # remove the tjp file
         #self._clean_up()
