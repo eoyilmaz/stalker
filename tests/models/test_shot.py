@@ -247,7 +247,7 @@ class ShotTester(unittest.TestCase):
         """
         # lets try to assign the shot to the same sequence2 which has another
         # shot with the same code
-        #self.kwargs['project'] = self.test_project1
+        #self.kwargs['project'] = self.test_project
         self.assertEqual(
             self.kwargs['code'],
             self.test_shot.code

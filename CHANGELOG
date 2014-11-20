@@ -7,6 +7,8 @@ Stalker Changes
 
 * **New:** User instances now have a new attribute called ``rate`` to track
   their cost as a resource.
+* **New:** Added two new classes called ``Budget`` and ``BudgetEntry`` to
+  record Project budgets in a simple way.
 
 0.2.10.5
 ========

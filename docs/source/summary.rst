@@ -21,6 +21,8 @@ Summary
    stalker.models.auth.LocalSession
    stalker.models.auth.Permission
    stalker.models.auth.User
+   stalker.models.budget.Budget
+   stalker.models.budget.BudgetEntry
    stalker.models.department.Department
    stalker.models.client.Client
    stalker.models.entity.Entity

@@ -31,12 +31,13 @@ from sqlalchemy.exc import IntegrityError
 import stalker
 from stalker.db.session import DBSession
 from stalker import log
-from stalker import (db, defaults, Asset, Client, Daily, DailyLink, Department,
-                     Entity, FilenameTemplate, Group, ImageFormat, Link, Note,
-                     Page, Permission, Project, Repository, Review, Scene,
-                     Sequence, Shot, SimpleEntity, Status, StatusList,
-                     Structure, Studio, Tag, Task, Ticket, TicketLog, TimeLog,
-                     Type, User, Vacation, Version, WorkingHours)
+from stalker import (db, defaults, Asset, Budget, BudgetEntry, Client, Daily,
+                     DailyLink, Department, Entity, FilenameTemplate, Group,
+                     ImageFormat, Link, Note, Page, Permission, Project,
+                     Repository, Review, Scene, Sequence, Shot, SimpleEntity,
+                     Status, StatusList, Structure, Studio, Tag, Task, Ticket,
+                     TicketLog, TimeLog, Type, User, Vacation, Version,
+                     WorkingHours)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
@@ -1137,6 +1138,131 @@ class DatabaseModelsTester(unittest.TestCase):
         # we should still have the project
         self.assertTrue(
             Project.query.filter(Project.id == project.id).first() is not None
+        )
+
+    def test_persistence_of_Budget_and_BudgetEntry(self):
+        """testing the persistence of Budget and BudgetEntry classes
+        """
+        test_user = User(
+            name='Test User',
+            login='tu',
+            email='test@user.com',
+            password='secret'
+        )
+
+        status1 = Status.query.filter_by(code='NEW').first()
+        status2 = Status.query.filter_by(code='WIP').first()
+        status3 = Status.query.filter_by(code='CMPL').first()
+
+        test_repository_type = Type(
+            name='Test Repository Type A',
+            code='trta',
+            target_entity_type=Repository,
+        )
+
+        test_repository = Repository(
+            name='Test Repository A',
+            type=test_repository_type
+        )
+
+        project_status_list = StatusList(
+            name='Project Status List A',
+            statuses=[status1, status2, status3],
+            target_entity_type='Project',
+        )
+
+        commercial_type = Type(
+            name='Commercial A',
+            code='comm',
+            target_entity_type=Project
+        )
+
+        test_project = Project(
+            name='Test Project For Asset Creation',
+            code='TPFAC',
+            status_list=project_status_list,
+            type=commercial_type,
+            repository=test_repository,
+        )
+
+        DBSession.add(test_project)
+        DBSession.commit()
+
+        kwargs = {
+            'name': 'Test Budget',
+            'project': test_project,
+            'created_by': test_user
+        }
+
+        test_budget = Budget(**kwargs)
+
+        DBSession.add(test_budget)
+        DBSession.commit()
+
+        # create some entries
+        entry1 = BudgetEntry(budget=test_budget, amount=5.0)
+        entry2 = BudgetEntry(budget=test_budget, amount=1.0)
+
+        DBSession.add_all([entry1, entry2])
+        DBSession.commit()
+
+        created_by = test_budget.created_by
+        date_created = test_budget.date_created
+        date_updated = test_budget.date_updated
+        name = test_budget.name
+        nice_name = test_budget.nice_name
+        project = test_budget.project
+        tags = test_budget.tags
+        updated_by = test_budget.updated_by
+        notes = test_budget.notes
+        entries = test_budget.entries
+
+        del test_budget
+
+        test_budget_db = Budget.query.filter_by(name=kwargs['name']).one()
+
+        assert (isinstance(test_budget_db, Budget))
+
+        #self.assertEqual(test_asset, test_asset_DB)
+        self.assertTrue(test_budget_db.created_by is not None)
+        self.assertEqual(created_by, test_budget_db.created_by)
+        self.assertEqual(date_created, test_budget_db.date_created)
+        self.assertEqual(date_updated, test_budget_db.date_updated)
+        self.assertEqual(name, test_budget_db.name)
+        self.assertEqual(nice_name, test_budget_db.nice_name)
+        self.assertEqual(notes, test_budget_db.notes)
+        self.assertEqual(project, test_budget_db.project)
+        self.assertEqual(tags, test_budget_db.tags)
+        self.assertEqual(updated_by, test_budget_db.updated_by)
+        self.assertEqual(entries, test_budget_db.entries)
+
+        # and we should have our entries intact
+        self.assertTrue(
+            BudgetEntry.query.all() != []
+        )
+
+        # now test the deletion of the asset class
+        DBSession.delete(test_budget_db)
+        DBSession.commit()
+
+        # we should still have the user
+        self.assertTrue(
+            User.query.filter(User.id == created_by.id).first() is not None
+        )
+
+        # we should still have the project
+        self.assertTrue(
+            Project.query.filter(Project.id == project.id).first() is not None
+        )
+
+        # and we should have our page deleted
+        self.assertTrue(
+            Budget.query.filter(Budget.name == kwargs['name']).first() is None
+        )
+
+        # and we should have our entries deleted
+        self.assertTrue(
+            BudgetEntry.query.all() == []
         )
 
     def test_persistence_of_Page(self):

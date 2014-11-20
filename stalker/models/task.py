@@ -807,7 +807,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     )
 
     project_id = Column(
-        'project_id', Integer, ForeignKey('Projects.id'), nullable=True,
+        'project_id', Integer, ForeignKey('Projects.id'),
         doc="""The id of the owner :class:`.Project` of this Task. This
         attribute is mainly used by **SQLAlchemy** to map a :class:`.Project`
         instance to a Task.

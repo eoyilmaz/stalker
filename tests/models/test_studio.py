@@ -897,7 +897,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
         # now check the timings of the tasks are all adjusted
 
         # Projects
-        # print "%s:self.test_project1" % self.test_project1.id
+        # print "%s:self.test_project" % self.test_project.id
         # print "%s:self.test_project2" % self.test_project2.id
         # print "%s:self.test_project3" % self.test_project3.id
         # 
@@ -944,7 +944,7 @@ project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
         # print "%s:self.test_task30.id" % self.test_task30.id
         # print "%s:self.test_task31.id" % self.test_task31.id
 
-        # self.test_project1
+        # self.test_project
         self.assertEqual(
             datetime.datetime(2013, 4, 16, 9, 0),
             self.test_project1.computed_start
@@ -1732,7 +1732,7 @@ def csv_to_test_converter():
     ids = """28:self.test_user1
     29:self.test_user2
     30:self.test_user3
-    38:self.test_project1
+    38:self.test_project
     39:self.test_project2
     40:self.test_project3
     41:self.test_asset1
