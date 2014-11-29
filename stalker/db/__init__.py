@@ -170,7 +170,7 @@ def create_alembic_table():
     # don't forget to update the version_num (and the corresponding test
     # whenever a new alembic revision is created)
 
-    version_num = '409d2d73ca30'
+    version_num = '856e70016b2'
 
     from sqlalchemy import Table, Column, Text
 
