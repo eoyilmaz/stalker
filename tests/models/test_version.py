@@ -775,7 +775,7 @@ class VersionTester(unittest.TestCase):
         # |         +-+ Fine Modeling (Task)
         # |           |
         # |           +-> Version 1 (Version): Fine_Modeling_Main_v001.ma
-        # |                                  Assets/Sero/Modeling/Body_Modeling/Fine_Modeling/Fine_Modeling_Main_v001.ma
+        # |                                  Assets/Characters/Sero/Modeling/Body_Modeling/Fine_Modeling/Fine_Modeling_Main_v001.ma
         # |
         # +-+ Shots (Task)
         #   |

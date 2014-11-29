@@ -264,7 +264,7 @@ class Config(object):
 {{wh(workinghours, 'sun')}}""",
 
         tjp_studio_template="""
-project {{ studio.tjp_id }} "{{ studio.name }}" {{ studio.start.date() }} - {{ studio.end.date() }} {
+project {{ studio.tjp_id }} "{{ studio.tjp_id }}" {{ studio.start.date() }} - {{ studio.end.date() }} {
     timingresolution {{ '%i'|format((studio.timing_resolution.days * 86400 + studio.timing_resolution.seconds)//60|int) }}min
     now {{ studio.now.strftime('%Y-%m-%d-%H:%M') }}
     dailyworkinghours {{ studio.daily_working_hours }}
@@ -277,7 +277,7 @@ project {{ studio.tjp_id }} "{{ studio.name }}" {{ studio.start.date() }} - {{ s
 """,
 
         tjp_project_template="""
-task {{project.tjp_id}} "{{project.name}}" {
+task {{project.tjp_id}} "{{project.tjp_id}}" {
     {% for task in project.root_tasks %}
         {{task.to_tjp}}
     {%- endfor %}
@@ -344,7 +344,7 @@ task {{task.tjp_id}} "{{task.tjp_id}}" {
         tjp_task_dependency_template="""{{depends_to.tjp_abs_id}} { {{- dependency_target}}{%if gap_timing %} gap{{gap_model}} {{gap_timing}}{{gap_unit -}}{%endif -%}}""",
 
         tjp_department_template="""
-resource {{department.tjp_id}} "{{department.name}}" {
+resource {{department.tjp_id}} "{{department.tjp_id}}" {
 {% for resource in department.users %}
     {{resource.to_tjp}}
 {% endfor -%}
@@ -353,7 +353,7 @@ resource {{department.tjp_id}} "{{department.name}}" {
 
         tjp_vacation_template='''vacation {{ vacation.start.strftime('%Y-%m-%d-%H:%M:%S') }} - {{ vacation.end.strftime('%Y-%m-%d-%H:%M:%S') }}''',
 
-        tjp_user_template='''resource {{user.tjp_id}} "{{user.name}}" {
+        tjp_user_template='''resource {{user.tjp_id}} "{{user.tjp_id}}" {
     efficiency {{user.efficiency}}
 {% if user.vacations %}
 {% for vacation in user.vacations %}

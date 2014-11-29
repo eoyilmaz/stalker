@@ -26,6 +26,7 @@ import datetime
 
 from sqlalchemy import (Table, Column, Integer, ForeignKey, String, DateTime,
                         Enum, Float)
+from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship, synonym, validates
 from sqlalchemy.schema import UniqueConstraint
 
@@ -237,7 +238,7 @@ class Group(Entity, ACLMixin):
 
     users = relationship(
         "User",
-        secondary="User_Groups",
+        secondary="Group_Users",
         back_populates="groups",
         doc="""Users in this group.
 
@@ -341,11 +342,6 @@ class User(Entity, ACLMixin):
 
     :type login: str
 
-    :param company: The client which the user is affiliated with. A user can be
-    affiliated with one company only. Default value is None.
-
-    :type company: :class:`.Client`
-
     :param departments: It is the departments that the user is a part of. It
       should be a list of Department objects. One user can be listed in
       multiple departments.
@@ -369,11 +365,6 @@ class User(Entity, ACLMixin):
 
     :type tasks: list of :class:`.Task`\ s
 
-    :param projects_lead: it is a list of Project objects that this user is the
-      leader of, it is for back referencing purposes.
-
-    :type projects_lead: list of :class:`.Project`\ s
-
     :param last_login: it is a datetime.datetime object holds the last login
       date of the user (not implemented yet)
 
@@ -386,24 +377,32 @@ class User(Entity, ACLMixin):
     user_id = Column("id", Integer, ForeignKey("Entities.id"),
                      primary_key=True)
 
-    departments = relationship(
-        "Department",
-        secondary='User_Departments',
-        back_populates="members",
-        doc="""A list of :class:`.Department`\ s that
-        this user is a part of""",
+    departments = association_proxy(
+        'department_role',
+        'department',
+        creator=lambda d: create_department_user(d)
     )
 
-    company_id = Column(Integer, ForeignKey("Clients.id"))
-    company = relationship(
-        "Client",
-        primaryjoin="Users.c.company_id==Clients.c.id",
-        back_populates="users",
-        uselist=False,
-        doc="""The client company which the user is affiliated with.
+    department_role = relationship(
+        'DepartmentUser',
+        back_populates='user',
+        cascade='all, delete-orphan',
+        primaryjoin='Users.c.id==Department_Users.c.uid',
+        doc="""A list of :class:`.Department`\ s that
+        this user is a part of"""
+    )
 
-        Should be an instance of :class:`.Client`, can also be set to None.
-        """
+    companies = association_proxy(
+        'company_role',
+        'client',
+        creator=lambda n: create_client_user(n)
+    )
+
+    company_role = relationship(
+        "ClientUser",
+        back_populates="user",
+        primaryjoin="Users.c.id==Client_Users.c.uid",
+        doc="""A list of :class:`.Client`\ s that this user is a part of."""
     )
 
     email = Column(
@@ -441,7 +440,7 @@ class User(Entity, ACLMixin):
 
     groups = relationship(
         'Group',
-        secondary='User_Groups',
+        secondary='Group_Users',
         back_populates='users',
         doc="""Permission groups that this users is a member of.
 
@@ -449,21 +448,17 @@ class User(Entity, ACLMixin):
         """
     )
 
-    projects = relationship(
-        'Project',
-        secondary='Project_Users',
-        back_populates='users'
+    projects = association_proxy(
+        'project_role',
+        'project',
+        creator=lambda p: create_project_user(p)
     )
 
-    projects_lead = relationship(
-        "Project",
-        primaryjoin="Projects.c.lead_id==Users.c.id",
-        #uselist=True,
-        back_populates="lead",
-        doc=""":class:`.Project`\ s lead by this user.
-
-        It is a list of :class:`.Project` instances.
-        """
+    project_role = relationship(
+        'ProjectUser',
+        back_populates='user',
+        cascade='all, delete-orphan',
+        primaryjoin='Users.c.id==Project_Users.c.user_id'
     )
 
     tasks = relationship(
@@ -529,7 +524,7 @@ class User(Entity, ACLMixin):
             email=None,
             password=None,
             departments=None,
-            company=None,
+            companies=None,
             groups=None,
             efficiency=1.0,
             rate=0.0,
@@ -542,9 +537,17 @@ class User(Entity, ACLMixin):
 
         if departments is None:
             departments = []
+
+        # from stalker import DepartmentUser
+        # for department in departments:
+        #     self.department_role.append(
+        #         DepartmentUser(user=self, department=department)
+        #     )
         self.departments = departments
 
-        self.company = company
+        if companies is None:
+            companies = []
+        self.companies = companies
 
         self.email = email
 
@@ -555,7 +558,6 @@ class User(Entity, ACLMixin):
             groups = []
         self.groups = groups
 
-        self.projects_lead = []
         self.tasks = []
 
         self.last_login = None
@@ -603,36 +605,6 @@ class User(Entity, ACLMixin):
 
         return login
 
-    @validates("departments")
-    def _validate_department(self, key, department):
-        """validates the given department value
-        """
-        from stalker.models.department import Department
-
-        # check if it is instance of Department object
-        if not isinstance(department, Department):
-            raise TypeError(
-                "%s.department should be instance of "
-                "stalker.models.department.Department not %s" %
-                (self.__class__.__name__, department.__class__.__name__)
-            )
-        return department
-
-    @validates("company")
-    def _validate_company(self, key, client):
-        """validates the given company value
-        """
-        from stalker.models.client import Client
-
-        if client is not None:
-            if not isinstance(client, Client):
-                raise TypeError(
-                    "%s.client should be instance of "
-                    "stalker.models.client.Client not %s" %
-                    (self.__class__.__name__, client.__class__.__name__)
-                )
-        return client
-
     @validates("email")
     def _validate_email(self, key, email_in):
         """validates the given email value
@@ -649,7 +621,6 @@ class User(Entity, ACLMixin):
     def _validate_email_format(self, email_in):
         """formats the email
         """
-
         # split the mail from @ sign
         splits = email_in.split("@")
         len_splits = len(splits)
@@ -754,20 +725,6 @@ class User(Entity, ACLMixin):
             )
 
         return group
-
-    @validates("projects_lead")
-    def _validate_projects_lead(self, key, project):
-        """validates the given projects_lead attribute
-        """
-        from stalker.models.project import Project
-
-        if not isinstance(project, Project):
-            raise TypeError(
-                "Any element in %s.projects_lead should be a"
-                "stalker.models.project.Project instance not %s" %
-                (self.__class__.__name__, project.__class__.__name__)
-            )
-        return project
 
     @validates("tasks")
     def _validate_tasks(self, key, task):
@@ -1052,16 +1009,62 @@ class LocalSession(object):
                 data_file.write(data)
 
 
-# USER_PERMISSIONGROUPS
-User_Groups = Table(
-    "User_Groups", Base.metadata,
+class Role(Entity):
+    """Defines a User role.
+
+    .. versionadded 0.2.11: Roles
+
+    When :class:`.User`\ s are assigned to a
+    :class:`.Client`/:class:`.Department`, they also can be assigned to a role
+    for that client/department.
+
+    Also, because Users can be assigned to multiple clients/departments they
+    can have different roles for each of this clients/departments.
+
+    The duty of this class is to defined different roles that can be reused
+    when required. So one can defined a **Lead** role and then assign a User to
+    a department with its role is set to "lead". This essentially generalizes
+    the previous implementation of now removed *Department.lead* attribute.
+    """
+    __auto_name__ = False
+    __tablename__ = 'Roles'
+    __mapper_args__ = {"polymorphic_identity": "Role"}
+
+    role_id = Column(
+        'id',
+        Integer,
+        ForeignKey('Entities.id'),
+        primary_key=True
+    )
+
+    def __init__(self, **kwargs):
+        super(Role, self).__init__(**kwargs)
+
+
+def create_department_user(department):
+    """helper function to create DepartmentUser instance on association proxy
+    """
+    from stalker.models.department import DepartmentUser
+    return DepartmentUser(department=department)
+
+
+def create_client_user(client):
+    """helper function to create ClientUser instance on association proxy
+    """
+    from stalker.models.client import ClientUser
+    return ClientUser(client=client)
+
+
+def create_project_user(project):
+    """helper function to create ProjectUser instance on association proxy
+    """
+    from stalker.models.project import ProjectUser
+    return ProjectUser(project=project)
+
+
+# Group_Users
+Group_Users = Table(
+    "Group_Users", Base.metadata,
     Column("uid", Integer, ForeignKey("Users.id"), primary_key=True),
     Column("gid", Integer, ForeignKey("Groups.id"), primary_key=True)
-)
-
-# USER_DEPARTMENTS
-User_Departments = Table(
-    'User_Departments', Base.metadata,
-    Column('uid', Integer, ForeignKey('Users.id'), primary_key=True),
-    Column('did', Integer, ForeignKey('Departments.id'), primary_key=True)
 )

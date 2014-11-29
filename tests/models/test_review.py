@@ -100,7 +100,6 @@ class ReviewTestCase(unittest.TestCase):
         self.project = Project(
             name='Test Project',
             code='TP',
-            lead=self.user1,
             status_list=self.project_status_list,
             repository=self.repo
         )
@@ -109,13 +108,15 @@ class ReviewTestCase(unittest.TestCase):
         self.task1 = Task(
             name='Test Task 1',
             project=self.project,
-            resources=[self.user1]
+            resources=[self.user1],
+            responsible=[self.user2]
         )
         DBSession.add(self.task1)
 
         self.task2 = Task(
             name='Test Task 2',
-            project=self.project
+            project=self.project,
+            responsible=[self.user1]
         )
         DBSession.add(self.task2)
 

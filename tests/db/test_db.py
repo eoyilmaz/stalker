@@ -20,6 +20,7 @@
 
 import os
 import shutil
+import copy
 import datetime
 import unittest
 import tempfile
@@ -1045,7 +1046,8 @@ class DatabaseModelsTester(unittest.TestCase):
             'type': asset_type,
             'project': test_project,
             'status_list': asset_status_list,
-            'created_by': test_user
+            'created_by': test_user,
+            'responsible': [test_user]
         }
 
         test_asset = Asset(**kwargs)
@@ -1178,8 +1180,8 @@ class DatabaseModelsTester(unittest.TestCase):
         )
 
         test_project = Project(
-            name='Test Project For Asset Creation',
-            code='TPFAC',
+            name='Test Project For Budget Creation',
+            code='TPFBC',
             status_list=project_status_list,
             type=commercial_type,
             repository=test_repository,
@@ -1445,7 +1447,8 @@ class DatabaseModelsTester(unittest.TestCase):
             end=end,
             resources=[user1, user2],
             project=proj1,
-            status_list=task_status_list
+            status_list=task_status_list,
+            responsible=[user1]
         )
 
         test_time_log = TimeLog(
@@ -1508,7 +1511,7 @@ class DatabaseModelsTester(unittest.TestCase):
             first_name="user1_first_name",
             last_name="user1_last_name",
             email="user1@client.com",
-            company=test_client,
+            companies=[test_client],
             password="password",
         )
 
@@ -1524,7 +1527,7 @@ class DatabaseModelsTester(unittest.TestCase):
             first_name="user2_first_name",
             last_name="user2_last_name",
             email="user2@client.com",
-            company=test_client,
+            companies=[test_client],
             password="password",
         )
 
@@ -1540,7 +1543,7 @@ class DatabaseModelsTester(unittest.TestCase):
             first_name="user3_first_name",
             last_name="user3_last_name",
             email="user3@client.com",
-            company=test_client,
+            companies=[test_client],
             password="password",
         )
 
@@ -1553,7 +1556,7 @@ class DatabaseModelsTester(unittest.TestCase):
         date_created = test_client.date_created
         date_updated = test_client.date_updated
         description = test_client.description
-        users = test_client.users
+        users = [u for u in test_client.users]
         name = test_client.name
         nice_name = test_client.nice_name
         notes = test_client.notes
@@ -1604,6 +1607,13 @@ class DatabaseModelsTester(unittest.TestCase):
             statuses=[status_new, status_wip, status_cmpl]
         )
 
+        test_user1 = User(
+            name='User1',
+            login='user1',
+            email='user1@user1.com',
+            password='12345'
+        )
+
         test_repo = Repository(name='Test Repository')
 
         test_project = Project(
@@ -1615,15 +1625,18 @@ class DatabaseModelsTester(unittest.TestCase):
 
         test_task1 = Task(
             name='Test Task 1',
-            project=test_project
+            project=test_project,
+            responsible=[test_user1]
         )
         test_task2 = Task(
             name='Test Task 2',
-            project=test_project
+            project=test_project,
+            responsible=[test_user1]
         )
         test_task3 = Task(
             name='Test Task 3',
-            project=test_project
+            project=test_project,
+            responsible=[test_user1]
         )
 
         test_version1 = Version(task=test_task1)
@@ -1744,7 +1757,7 @@ class DatabaseModelsTester(unittest.TestCase):
         DBSession.add(test_dep)
         DBSession.commit()
 
-        # create three users, one for lead and two for members
+        # create three users, one for lead and two for users
 
         # user1
         user1 = User(
@@ -1758,7 +1771,7 @@ class DatabaseModelsTester(unittest.TestCase):
             first_name="user1_first_name",
             last_name="user1_last_name",
             email="user1@department.com",
-            department=test_dep,
+            departments=[test_dep],
             password="password",
         )
 
@@ -1774,12 +1787,12 @@ class DatabaseModelsTester(unittest.TestCase):
             first_name="user2_first_name",
             last_name="user2_last_name",
             email="user2@department.com",
-            department=test_dep,
+            departments=[test_dep],
             password="password",
         )
 
         # user3
-        # create three users, one for lead and two for members
+        # create three users, one for lead and two for users
         user3 = User(
             name="User3 Test Persistence Department",
             login='u3tpd',
@@ -1791,13 +1804,12 @@ class DatabaseModelsTester(unittest.TestCase):
             first_name="user3_first_name",
             last_name="user3_last_name",
             email="user3@department.com",
-            department=test_dep,
+            departments=[test_dep],
             password="password",
         )
 
-        # add as the members and the lead
-        test_dep.lead = user1
-        test_dep.members = [user1, user2, user3]
+        # add as the users
+        test_dep.users = [user1, user2, user3]
 
         DBSession.add(test_dep)
         DBSession.commit()
@@ -1808,8 +1820,7 @@ class DatabaseModelsTester(unittest.TestCase):
         date_created = test_dep.date_created
         date_updated = test_dep.date_updated
         description = test_dep.description
-        lead = test_dep.lead
-        members = test_dep.members
+        users = [u for u in test_dep.users]
         name = test_dep.name
         nice_name = test_dep.nice_name
         notes = test_dep.notes
@@ -1828,8 +1839,7 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(date_created, test_dep_db.date_created)
         self.assertEqual(date_updated, test_dep_db.date_updated)
         self.assertEqual(description, test_dep_db.description)
-        self.assertEqual(lead, test_dep_db.lead)
-        self.assertEqual(members, test_dep_db.members)
+        self.assertEqual(users, test_dep_db.users)
         self.assertEqual(name, test_dep_db.name)
         self.assertEqual(nice_name, test_dep_db.nice_name)
         self.assertEqual(notes, test_dep_db.notes)
@@ -2134,12 +2144,15 @@ class DatabaseModelsTester(unittest.TestCase):
         )
         task_statuses = StatusList.query\
             .filter_by(target_entity_type='Task').first()
+
         task1 = Task(
             name='Test Task',
             project=project1,
-            status_list=task_statuses
+            status_list=task_statuses,
+            responsible=[user1]
         )
         task1.references.append(link1)
+
         DBSession.add(task1)
         DBSession.commit()
 
@@ -2415,7 +2428,6 @@ class DatabaseModelsTester(unittest.TestCase):
             'name': 'Test Project',
             'code': 'TP',
             'description': 'This is a project object for testing purposes',
-            'lead': lead,
             'image_format': image_format,
             'fps': 25,
             'type': project_type,
@@ -2442,7 +2454,8 @@ class DatabaseModelsTester(unittest.TestCase):
             status_list=task_status_list,
             status=0,
             project=new_project,
-            resources=[user1, user2]
+            resources=[user1, user2],
+            responsible=[user1]
         )
 
         task2 = Task(
@@ -2450,7 +2463,8 @@ class DatabaseModelsTester(unittest.TestCase):
             status_list=task_status_list,
             status=0,
             project=new_project,
-            resources=[user3]
+            resources=[user3],
+            responsible=[user1]
         )
 
         dt = datetime.datetime
@@ -2480,7 +2494,6 @@ class DatabaseModelsTester(unittest.TestCase):
         fps = new_project.fps
         image_format = new_project.image_format
         is_stereoscopic = new_project.is_stereoscopic
-        lead = new_project.lead
         name = new_project.name
         nice_name = new_project.nice_name
         notes = new_project.notes
@@ -2495,7 +2508,7 @@ class DatabaseModelsTester(unittest.TestCase):
         tasks = new_project.tasks
         type_ = new_project.type
         updated_by = new_project.updated_by
-        users = new_project.users
+        users = [user for user in new_project.users]
         computed_start = new_project.computed_start
         computed_end = new_project.computed_end
 
@@ -2521,7 +2534,6 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(fps, new_project_db.fps)
         self.assertEqual(image_format, new_project_db.image_format)
         self.assertEqual(is_stereoscopic, new_project_db.is_stereoscopic)
-        self.assertEqual(lead, new_project_db.lead)
         self.assertEqual(name, new_project_db.name)
         self.assertEqual(nice_name, new_project_db.nice_name)
         self.assertEqual(notes, new_project_db.notes)
@@ -2632,6 +2644,13 @@ class DatabaseModelsTester(unittest.TestCase):
             name="Commercial Repository"
         )
 
+        user1 = User(
+            name="User1",
+            login="user1",
+            email="user1@user.com",
+            password="1234",
+        )
+
         commercial_project_type = Type(
             name='Commercial Project',
             code='commproj',
@@ -2660,19 +2679,22 @@ class DatabaseModelsTester(unittest.TestCase):
             code='SH001',
             project=test_project1,
             scenes=[test_scene],
-            status_list=shot_status_list
+            status_list=shot_status_list,
+            responsible=[user1]
         )
         shot2 = Shot(
             code='SH002',
             project=test_project1,
             scenes=[test_scene],
-            status_list=shot_status_list
+            status_list=shot_status_list,
+            responsible=[user1]
         )
         shot3 = Shot(
             code='SH003',
             project=test_project1,
             scenes=[test_scene],
-            status_list=shot_status_list
+            status_list=shot_status_list,
+            responsible=[user1]
         )
         DBSession.add_all([shot1, shot2, shot3])
         DBSession.add(test_scene)
@@ -2740,6 +2762,13 @@ class DatabaseModelsTester(unittest.TestCase):
             target_entity_type=Project
         )
 
+        lead = User(
+            name="lead",
+            login="lead",
+            email="lead@lead.com",
+            password="password"
+        )
+
         test_project1 = Project(
             name='Test Project',
             code='TP',
@@ -2748,23 +2777,16 @@ class DatabaseModelsTester(unittest.TestCase):
             repository=repo1,
         )
 
-        lead = User(
-            name="lead",
-            login="lead",
-            email="lead@lead.com",
-            password="password"
-        )
-
         kwargs = {
             'name': 'Test Sequence',
             'code': 'TS',
             'description': 'this is a test sequence',
             'project': test_project1,
-            'lead': lead,
             'status_list': sequence_status_list,
             'schedule_model': 'effort',
             'schedule_timing': 50,
-            'schedule_unit': 'd'
+            'schedule_unit': 'd',
+            'responsible': [lead],
         }
 
         test_sequence = Sequence(**kwargs)
@@ -2774,19 +2796,22 @@ class DatabaseModelsTester(unittest.TestCase):
             code='SH001',
             project=test_project1,
             sequences=[test_sequence],
-            status_list=shot_status_list
+            status_list=shot_status_list,
+            responsible=[lead]
         )
         shot2 = Shot(
             code='SH002',
             project=test_project1,
             sequences=[test_sequence],
-            status_list=shot_status_list
+            status_list=shot_status_list,
+            responsible=[lead]
         )
         shot3 = Shot(
             code='SH003',
             project=test_project1,
             sequence=test_sequence,
-            status_list=shot_status_list
+            status_list=shot_status_list,
+            responsible=[lead]
         )
 
         DBSession.add_all([shot1, shot2, shot3])
@@ -2879,6 +2904,13 @@ class DatabaseModelsTester(unittest.TestCase):
             name="Commercial Repository"
         )
 
+        lead = User(
+            name="lead",
+            login="lead",
+            email="lead@lead.com",
+            password="password"
+        )
+
         test_project1 = Project(
             name='Test project',
             code='tp',
@@ -2887,20 +2919,13 @@ class DatabaseModelsTester(unittest.TestCase):
             repository=repo1,
         )
 
-        lead = User(
-            name="lead",
-            login="lead",
-            email="lead@lead.com",
-            password="password"
-        )
-
         kwargs = {
             'name': "Test Sequence 1",
             'code': 'tseq1',
             'description': 'this is a test sequence',
             'project': test_project1,
-            'lead': lead,
             'status_list': sequence_status_list,
+            'responsible': [lead]
         }
 
         test_seq1 = Sequence(**kwargs)
@@ -2928,7 +2953,8 @@ class DatabaseModelsTester(unittest.TestCase):
             'sequences': [test_seq1, test_seq2],
             'scenes': [test_sce1, test_sce2],
             'status': 0,
-            'status_list': shot_status_list
+            'status_list': shot_status_list,
+            'responsible': [lead]
         }
 
         test_shot = Shot(**shot_kwargs)
@@ -3398,6 +3424,27 @@ class DatabaseModelsTester(unittest.TestCase):
         status4 = Status(name="stat4", code="STS4")
         status5 = Status(name="stat5", code="STS5")
 
+        user1 = User(
+            name="User1",
+            login="user1",
+            email="user1@user.com",
+            password="1234",
+        )
+
+        user2 = User(
+            name="User2",
+            login="user2",
+            email="user2@user.com",
+            password="1234",
+        )
+
+        user3 = User(
+            name="User3",
+            login="user3",
+            email="user3@user.com",
+            password="1234",
+        )
+
         project_status_list = StatusList(
             name="Project Status List",
             statuses=[status1, status2, status3, status4, status5],
@@ -3429,27 +3476,7 @@ class DatabaseModelsTester(unittest.TestCase):
             code='char1',
             type=char_asset_type,
             project=project1,
-        )
-
-        user1 = User(
-            name="User1",
-            login="user1",
-            email="user1@user.com",
-            password="1234",
-        )
-
-        user2 = User(
-            name="User2",
-            login="user2",
-            email="user2@user.com",
-            password="1234",
-        )
-
-        user3 = User(
-            name="User3",
-            login="user3",
-            email="user3@user.com",
-            password="1234",
+            responsible=[user1]
         )
 
         task1 = Task(
@@ -3476,7 +3503,8 @@ class DatabaseModelsTester(unittest.TestCase):
         task2 = Task(
             name='Another Task',
             project=project1,
-            resources=[user1]
+            resources=[user1],
+            responsible=[user2]
         )
 
         # time logs
@@ -3702,27 +3730,6 @@ class DatabaseModelsTester(unittest.TestCase):
             osx_path=temp_repo_dir,
         )
 
-        project1 = Project(
-            name='Tests Project',
-            code='tp',
-            status_list=project_status_list,
-            repository=repo,
-        )
-
-        char_asset_type = Type(
-            name='Character Asset',
-            code='char',
-            target_entity_type=Asset
-        )
-
-        asset1 = Asset(
-            name='Char1',
-            code='char1',
-            status_list=asset_status_list,
-            type=char_asset_type,
-            project=project1,
-        )
-
         user1 = User(
             name="User1",
             login="user1",
@@ -3742,6 +3749,28 @@ class DatabaseModelsTester(unittest.TestCase):
             login="user3",
             email="user3@user.com",
             password="1234",
+        )
+
+        project1 = Project(
+            name='Tests Project',
+            code='tp',
+            status_list=project_status_list,
+            repository=repo,
+        )
+
+        char_asset_type = Type(
+            name='Character Asset',
+            code='char',
+            target_entity_type=Asset
+        )
+
+        asset1 = Asset(
+            name='Char1',
+            code='char1',
+            status_list=asset_status_list,
+            type=char_asset_type,
+            project=project1,
+            responsible=[user1]
         )
 
         task1 = Task(
@@ -4058,6 +4087,7 @@ class DatabaseModelsTester(unittest.TestCase):
             project=project1,
             status_list=task_statuses,
             resources=[user1],
+            responsible=[user1]
         )
         dt = datetime.datetime
         td = datetime.timedelta
@@ -4075,7 +4105,7 @@ class DatabaseModelsTester(unittest.TestCase):
         created_by = user1.created_by
         date_created = user1.date_created
         date_updated = user1.date_updated
-        departments = user1.departments
+        departments = [dep for dep in user1.departments]
         description = user1.description
         efficiency = user1.efficiency
         email = user1.email
@@ -4086,8 +4116,7 @@ class DatabaseModelsTester(unittest.TestCase):
         notes = user1.notes
         password = user1.password
         groups = user1.groups
-        projects = user1.projects
-        projects_lead = user1.projects_lead
+        projects = [project for project in user1.projects]
         tags = user1.tags
         tasks = user1.tasks
         watching = user1.watching
@@ -4120,7 +4149,6 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(password, user1_db.password)
         self.assertEqual(groups, user1_db.groups)
         self.assertEqual(projects, user1_db.projects)
-        self.assertEqual(projects_lead, user1_db.projects_lead)
         self.assertEqual(tags, user1_db.tags)
         self.assertEqual(tasks, user1_db.tasks)
         self.assertEqual(
@@ -4135,7 +4163,7 @@ class DatabaseModelsTester(unittest.TestCase):
             .filter(Department.name == dep_kwargs["name"]) \
             .first()
 
-        self.assertEqual(user1_db, department_db.members[0])
+        self.assertEqual(user1_db, department_db.users[0])
 
         # delete tests
         self.assertEqual(
@@ -4224,7 +4252,10 @@ class DatabaseModelsTester(unittest.TestCase):
             name='Modeling',
             project=test_project,
             status_list=StatusList.query
-            .filter_by(target_entity_type='Task').first()
+            .filter_by(target_entity_type='Task').first(),
+            responsible=[
+                User(name='user1', login='user1', email='u@u', password='12')
+            ]
         )
 
         # create a new version

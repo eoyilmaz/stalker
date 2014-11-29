@@ -136,20 +136,21 @@ class TaskTestCase(unittest.TestCase):
             code='tp1',
             type=cls.test_movie_project_type,
             status_list=cls.test_project_status_list,
-            repository=cls.test_repository,
-            lead=cls.test_user1
+            repository=cls.test_repository
         )
 
         cls.test_dependent_task1 = Task(
             name="Dependent Task1",
             project=cls.test_project1,
             status_list=cls.task_status_list,
+            responsible=[cls.test_user1]
         )
 
         cls.test_dependent_task2 = Task(
             name="Dependent Task2",
             project=cls.test_project1,
             status_list=cls.task_status_list,
+            responsible=[cls.test_user1]
         )
 
         cls.kwargs = {
@@ -2968,7 +2969,8 @@ class TaskTestCase(unittest.TestCase):
             name='Cekimler',
             start=datetime.datetime(2013, 4, 1),
             end=datetime.datetime(2013, 5, 6),
-            status_list=self.task_status_list
+            status_list=self.task_status_list,
+            responsible=[self.test_user1]
         )
 
         task2 = Task(
@@ -3017,7 +3019,8 @@ class TaskTestCase(unittest.TestCase):
             name='Cekimler',
             start=datetime.datetime(2013, 4, 1),
             end=datetime.datetime(2013, 5, 6),
-            status_list=self.task_status_list
+            status_list=self.task_status_list,
+            responsible=[self.test_user1]
         )
         DBSession.add(task1)
         DBSession.commit()
@@ -3996,35 +3999,59 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
             [t1, t2]
         )
 
-    def test_responsible_argument_is_skipped(self):
-        """testing if the responsible argument can be skipped, then it will use
-        the parents responsible or project.lead
+    def test_responsible_argument_is_skipped_for_a_root_task(self):
+        """testing if the responsible list will be an empty list if a root task
+        have no responsible set
         """
         kwargs = copy.copy(self.kwargs)
         kwargs.pop('responsible')
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.responsible, [new_task.project.lead])
 
-    def test_responsible_argument_is_None(self):
-        """testing if the responsible argument can be None, where it will use
-        the project lead as the responsible
+        self.assertEqual(new_task.responsible, [])
+
+    def test_responsible_argument_is_skipped_for_a_non_root_task(self):
+        """testing if the parent tasks responsible will be used if the
+        responsible argument is skipped for a non-root task
+        """
+        kwargs = copy.copy(self.kwargs)
+        kwargs['name'] = 'Root Task'
+        root_task = Task(**kwargs)
+        self.assertEqual(root_task.responsible, [self.test_user1])
+
+        kwargs.pop('responsible')
+        kwargs['parent'] = root_task
+        kwargs['name'] = 'Child Task'
+
+        new_task = Task(**kwargs)
+
+        self.assertEqual(new_task.responsible, root_task.responsible)
+
+    def test_responsible_argument_is_None_for_a_root_task(self):
+        """testing if a RuntimeError will be raised if the responsible argument
+        is None for a root task
         """
         kwargs = copy.copy(self.kwargs)
         kwargs['responsible'] = None
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
-        self.data_created.append(new_task)
-        self.assertEqual(new_task.responsible, [new_task.project.lead])
 
-    def test_responsible_attribute_is_set_to_None(self):
-        """testing if a TypeError will be raised when the responsible attribute
-        is set to None
+        self.assertEqual(new_task.responsible, [])
+
+    def test_responsible_argument_is_none_for_a_non_root_task(self):
+        """testing if the parent tasks responsible will be used if the
+        responsible argument is None for a non-root task
         """
         kwargs = copy.copy(self.kwargs)
+        kwargs['name'] = 'Root Task'
+        root_task = Task(**kwargs)
+        self.assertEqual(root_task.responsible, [self.test_user1])
+
+        kwargs['responsible'] = None
+        kwargs['parent'] = root_task
+        kwargs['name'] = 'Child Task'
+
         new_task = Task(**kwargs)
 
-        self.assertRaises(TypeError, setattr, new_task, 'responsible', None)
+        self.assertEqual(new_task.responsible, root_task.responsible)
 
     def test_responsible_argument_not_a_list_instance(self):
         """testing if a TypeError will be raised when the responsible argument
@@ -4032,8 +4059,13 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """
         kwargs = copy.copy(self.kwargs)
         kwargs['responsible'] = 'not a list'
-        with self.assertRaises(TypeError):
-            new_task = Task(**kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Task(**kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: str is not list-like'
+        )
 
     def test_responsible_attribute_not_a_list_instance(self):
         """testing if a TypeError will be raised when the responsible attribute
@@ -4042,8 +4074,13 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
 
-        with self.assertRaises(TypeError):
+        with self.assertRaises(TypeError) as cm:
             new_task.responsible = 'not a list of users'
+
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: str is not list-like'
+        )
 
     def test_responsible_argument_is_not_a_list_of_User_instance(self):
         """testing if a TypeError will be raised if the responsible argument
@@ -4052,8 +4089,14 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         kwargs['responsible'] = ['not a user instance']
 
-        with self.assertRaises(TypeError):
-            new_task = Task(**kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Task(**kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Task.responsible should be a list of stalker.models.auth.User '
+            'instances, not str'
+        )
 
     def test_responsible_attribute_is_set_to_something_other_than_a_list_of_User_instance(self):
         """testing if a TypeError will be raised if the responsible attribute
@@ -4062,8 +4105,14 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
 
-        with self.assertRaises(TypeError):
+        with self.assertRaises(TypeError) as cm:
             new_task.responsible = ['not a user instance']
+
+        self.assertEqual(
+            str(cm.exception),
+            'Task.responsible should be a list of stalker.models.auth.User '
+            'instances, not str'
+        )
 
     def test_responsible_argument_is_None_or_skipped_responsible_attribute_comes_from_parents(self):
         """testing if the responsible argument is None or skipped then the
@@ -4075,14 +4124,14 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
 
         kwargs['responsible'] = None
 
+        kwargs['parent'] = new_task
         new_task1 = Task(**kwargs)
-        new_task1.parent = new_task
 
+        kwargs['parent'] = new_task1
         new_task2 = Task(**kwargs)
-        new_task2.parent = new_task1
 
+        kwargs['parent'] = new_task2
         new_task3 = Task(**kwargs)
-        new_task3.parent = new_task2
 
         self.assertEqual(new_task1.responsible, [self.test_user1])
         self.assertEqual(new_task2.responsible, [self.test_user1])
@@ -4101,14 +4150,14 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
 
+        kwargs['parent'] = new_task
         new_task1 = Task(**kwargs)
-        new_task1.parent = new_task
 
+        kwargs['parent'] = new_task1
         new_task2 = Task(**kwargs)
-        new_task2.parent = new_task1
 
+        kwargs['parent'] = new_task2
         new_task3 = Task(**kwargs)
-        new_task3.parent = new_task2
 
         new_task1.responsible = []
         new_task2.responsible = []
@@ -4123,42 +4172,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         self.assertEqual(new_task1.responsible, [self.test_user2])
         self.assertEqual(new_task2.responsible, [self.test_user1])
         self.assertEqual(new_task3.responsible, [self.test_user1])
-
-    def test_responsible_attribute_value_comes_from_project_if_no_parent_exists(self):
-        """testing if the responsible attribute value comes from project.lead
-        attribute if there are no parents
-        """
-        kwargs = copy.copy(self.kwargs)
-        new_task = Task(**kwargs)
-
-        new_task.responsible = []
-        self.test_project1.lead = self.test_user3
-
-        self.assertEqual(new_task.responsible, [self.test_user3])
-
-    def test_responsible_attribute_value_comes_from_project_if_parents_doesnt_have_a_responsible(self):
-        """testing if the responsible attribute value comes from the
-        project.lead attribute if parents doesn't have a responsible
-        """
-        # create two new tasks
-        kwargs = copy.copy(self.kwargs)
-        kwargs['responsible'] = None
-
-        new_task = Task(**kwargs)
-
-        new_task1 = Task(**kwargs)
-        new_task1.parent = new_task
-
-        new_task2 = Task(**kwargs)
-        new_task2.parent = new_task1
-
-        new_task1.responsible = []
-        new_task2.responsible = []
-        new_task.responsible = []
-        self.test_project1.lead = self.test_user2
-
-        self.assertEqual(new_task1.responsible, [self.test_user2])
-        self.assertEqual(new_task2.responsible, [self.test_user2])
 
     def test_computed_start_also_sets_start(self):
         """testing if computed_start also sets the start value of the task

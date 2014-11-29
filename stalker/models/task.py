@@ -148,6 +148,7 @@ class TimeLog(Entity, DateRangeMixin):
             )
 
         # check status
+        logger.debug('checking task status!')
         with DBSession.no_autoflush:
             WFD = Status.query.filter_by(code='WFD').first()
             RTS = Status.query.filter_by(code='RTS').first()
@@ -170,9 +171,11 @@ class TimeLog(Entity, DateRangeMixin):
                 )
             elif task.status in [RTS, HREV]:
                 # update task status
+                logger.debug('updating task status to WIP!')
                 task.status = WIP
 
             # check dependent tasks
+            logger.debug('checking dependent task statuses')
             for task_dependencies in task.task_depends_to:
                 dep_task = task_dependencies.depends_to
                 dependency_target = task_dependencies.dependency_target
@@ -383,9 +386,9 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
        When TaskJuggler computes the resources, the returned list may contain
        resources which are not in the :attr:`.resources` nor in
        :attr:`.alternative_resources` list anymore. Stalker will silently
-       filter those resources and will only store resources (
-       in :attr:`.computed_resources`) those are still
-       available as a direct or alternative resource to that particular task.
+       filter those resources and will only store resources (in
+       :attr:`.computed_resources`) those are still available as a direct or
+       alternative resource to that particular task.
 
     The selection strategy of the alternative resource is defined by the
     :attr:`.allocation_strategy` attribute. The `allocation_strategy`
@@ -418,11 +421,11 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     attribute refers to the ``persistent`` attribute in TJ. The documentation
     of ``persistent`` in TJ is as follows:
 
-     Specifies that once a resource is picked from the list of alternatives
-     this resource is used for the whole task. This is useful when several
-     alternative resources have been specified. Normally the selected resource
-     can change after each break. A break is an interval of at least one
-     timeslot where no resources were available.
+      Specifies that once a resource is picked from the list of alternatives
+      this resource is used for the whole task. This is useful when several
+      alternative resources have been specified. Normally the selected resource
+      can change after each break. A break is an interval of at least one
+      timeslot where no resources were available.
 
     :attr:`.persistent_allocation` attribute is True by default.
 
@@ -488,10 +491,9 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     Tasks have a **responsible** which is a list of :class:`.User` instances
     who are responsible of the assigned task and all the hierarchy under it.
 
-    If a task doesn't have any user assigned to its responsible attribute,
-    then it will start to look to its parents until it can find a task with a
-    responsible or there are no parent left, meaning the responsible is the
-    :class:`.Project.lead` of the related :class:`.Project`.
+    If a task doesn't have any responsible, it will start looking to its
+    parent tasks and will return the responsible of its parent and it will be
+    an empty list if non of its parents has a responsible.
 
     You can create complex responsibility chains for different branches of
     Tasks.
@@ -726,6 +728,11 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
       :class:`.Task` without any resource can not be scheduled.
 
     :type resources: [:class:`.User`]
+
+    :param responsible: A list of :class:`.User` instances that is responsible
+      of this task.
+
+    :type responsible: [:class:`.User`]
 
     :param watchers: A list of :class:`.User` those are added this Task
       instance to their watchlist.
@@ -1994,12 +2001,8 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
                 if parent.responsible:
                     return parent.responsible
 
-        # use the project lead
-        if self.project.lead:
-            return [self.project.lead]
-        else:
-            # no project lead, strange, return an empty list
-            return []
+        # so parents do not have a responsible
+        return []
 
     def _responsible_setter(self, responsible):
         """sets the responsible attribute
@@ -2010,13 +2013,13 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
     @validates('_responsible')
     def _validate_responsible(self, key, responsible):
-        """validates the given responsible value
+        """validates the given responsible value (each responsible)
         """
         from stalker.models.auth import User
         if not isinstance(responsible, User):
             raise TypeError(
-                '%s.responsible should be an instance of '
-                'stalker.models.auth.User, not %s' %
+                '%s.responsible should be a list of '
+                'stalker.models.auth.User instances, not %s' %
                 (self.__class__.__name__, responsible.__class__.__name__)
             )
         return responsible
@@ -2029,10 +2032,9 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             doc="""The responsible of this task.
 
             This attribute will return the responsible of this task which is a
-            :class:`.User` instance. If there is no
-            responsible set for this task, then it will try to find a
-            responsible in its parents and will return the project.lead if it
-            can not find anybody.
+            list of :class:`.User` instances. If there is no responsible set
+            for this task, then it will try to find a responsible in its
+            parents.
             """
         )
     )
@@ -2737,7 +2739,7 @@ class TaskDependency(Base, ScheduleMixin):
         primary_key=True
     )
 
-    # task_id
+    # task
     task = relationship(
         Task,
         back_populates='task_depends_to',

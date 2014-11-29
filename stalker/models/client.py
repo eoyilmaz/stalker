@@ -19,7 +19,9 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 from sqlalchemy import Column, Integer, ForeignKey
-from sqlalchemy.orm import relationship, validates, synonym
+from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.orm import relationship, validates
+from stalker.db import Base
 
 from stalker.models.entity import Entity
 
@@ -55,6 +57,7 @@ class Client(Entity):
     :type projects: :param type: list of :class:`.Project`\ s
 
     """
+
     __auto_name__ = False
     __tablename__ = "Clients"
     __mapper_args__ = {"polymorphic_identity": "Client"}
@@ -65,11 +68,18 @@ class Client(Entity):
         primary_key=True
     )
 
-    users = relationship(
-        "User",
-        primaryjoin='Users.c.company_id==Clients.c.id',
-        back_populates="company",
-        doc="""List of users representing the employees of this client.""",
+    users = association_proxy(
+        'user_role',
+        'user',
+        creator=lambda n: ClientUser(user=n)
+    )
+
+    user_role = relationship(
+        "ClientUser",
+        back_populates="client",
+        cascade='all, delete-orphan',
+        primaryjoin='Clients.c.id==Client_Users.c.cid',
+        doc="""List of users representing the members of this client."""
     )
 
     projects = relationship(
@@ -78,8 +88,6 @@ class Client(Entity):
         back_populates="client",
         doc="""List of projects affiliated with this client.""",
     )
-
-    members = synonym('users')
 
     def __init__(
             self,
@@ -108,20 +116,6 @@ class Client(Entity):
         """
         return super(Client, self).__hash__()
 
-    @validates("users")
-    def _validate_users(self, key, user):
-        """validates the given user value
-        """
-        from stalker.models.auth import User
-
-        if not isinstance(user, User):
-            raise TypeError(
-                "Every element in the %s.users list should be an instance "
-                "of stalker.models.auth.User not %s" %
-                (self.__class__.__name__, user.__class__.__name__)
-            )
-        return user
-
     @validates("projects")
     def _validate_projects(self, key, project):
         """validates the given project attribute
@@ -135,3 +129,106 @@ class Client(Entity):
                 (self.__class__.__name__, project.__class__.__name__)
             )
         return project
+
+    def to_tjp(self):
+        return ''
+
+
+class ClientUser(Base):
+    """The association object used in Client-to-User relation
+
+    :param client: The client which the user is affiliated with.
+
+    :type client: :class:`.Client`
+
+    :param user: A :class:`.User` instance.
+
+    :type user: :class:`.User`
+
+    """
+
+    __tablename__ = 'Client_Users'
+
+    user_id = Column(
+        'uid',
+        Integer,
+        ForeignKey('Users.id'),
+        primary_key=True
+    )
+
+    user = relationship(
+        'User',
+        back_populates='company_role',
+        primaryjoin='ClientUser.user_id==User.user_id'
+    )
+
+    client_id = Column(
+        'cid',
+        Integer,
+        ForeignKey('Clients.id'),
+        primary_key=True
+    )
+
+    client = relationship(
+        'Client',
+        back_populates='user_role',
+        primaryjoin='ClientUser.client_id==Client.client_id',
+    )
+
+    role_id = Column(
+        'rid',
+        Integer,
+        ForeignKey('Roles.id'),
+        nullable=True
+    )
+
+    role = relationship(
+        'Role',
+        primaryjoin='ClientUser.role_id==Role.role_id'
+    )
+
+    def __init__(self, client=None, user=None, role=None):
+        self.user = user
+        self.client = client
+        self.role = role
+
+    @validates("client")
+    def _validate_client(self, key, client):
+        """validates the given client value
+        """
+        if client is not None:
+            if not isinstance(client, Client):
+                raise TypeError(
+                    "%s.client should be instance of "
+                    "stalker.models.client.Client, not %s" %
+                    (self.__class__.__name__, client.__class__.__name__)
+                )
+        return client
+
+    @validates("user")
+    def _validate_user(self, key, user):
+        """validates the given user value
+        """
+        if user is not None:
+            from stalker.models.auth import User
+            if not isinstance(user, User):
+                raise TypeError(
+                    "%s.user should be an instance of "
+                    "stalker.models.auth.User, not %s" %
+                    (self.__class__.__name__, user.__class__.__name__)
+                )
+        return user
+
+    @validates('role')
+    def _validate_role(self, key, role):
+        """validates the given role instance
+        """
+        if role is not None:
+            from stalker import Role
+            if not isinstance(role, Role):
+                raise TypeError(
+                    '%s.role should be a'
+                    'stalker.models.auth.Role instance, not %s' %
+                    (self.__class__.__name__, role.__class__.__name__)
+                )
+        return role

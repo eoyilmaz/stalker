@@ -348,13 +348,13 @@ order by path_as_text"""
             # run it per project
             for pr in project_ids:
                 p_id = pr[0]
-                p_code = pr[1]
+                #p_code = pr[1]
 
                 sql_query_pp = sql_query % {'id': p_id}
                 result = db.DBSession.connection().execute(sql_query_pp)
 
                 # start by adding the project first
-                result_buffer.append('task Task_%s "%s" {' % (p_id, p_code))
+                result_buffer.append('task Project_%s "Project_%s" {' % (p_id, p_id))
 
                 # now start jumping around
                 previous_level = 0

@@ -92,7 +92,6 @@ class TaskDependencyTestCase(unittest.TestCase):
         self.test_project1 = Project(
             name='Test Project 1',
             code='TP1',
-            lead=self.test_user1,
             repository=self.test_repo,
             structure=self.test_structure,
             status_list=self.test_project_status_list

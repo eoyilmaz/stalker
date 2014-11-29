@@ -20,7 +20,7 @@
 
 import unittest
 import datetime
-from stalker import Department, Entity, User
+from stalker import db, Department, Entity, User
 
 
 class DepartmentTester(unittest.TestCase):
@@ -30,6 +30,11 @@ class DepartmentTester(unittest.TestCase):
     def setUp(self):
         """lets setup the tests
         """
+        db.setup()  # uses in memory sqlite db
+        db.init()
+
+        self.test_admin = User.query.filter_by(login="admin").first()
+
         # create a couple of test users
         self.test_user1 = User(
             name="User1",
@@ -37,6 +42,7 @@ class DepartmentTester(unittest.TestCase):
             email="user1@test.com",
             password="123456",
         )
+        db.DBSession.add(self.test_user1)
 
         self.test_user2 = User(
             name="User2",
@@ -44,6 +50,7 @@ class DepartmentTester(unittest.TestCase):
             email="user2@test.com",
             password="123456",
         )
+        db.DBSession.add(self.test_user2)
 
         self.test_user3 = User(
             name="User3",
@@ -51,6 +58,7 @@ class DepartmentTester(unittest.TestCase):
             email="user3@test.com",
             password="123456",
         )
+        db.DBSession.add(self.test_user3)
 
         self.test_user4 = User(
             name="User4",
@@ -58,20 +66,22 @@ class DepartmentTester(unittest.TestCase):
             email="user4@test.com",
             password="123456",
         )
+        db.DBSession.add(self.test_user4)
 
-        self.members_list = [
+        self.test_user5 = User(
+            name="User5",
+            login="user5",
+            email="user5@test.com",
+            password="123456",
+        )
+        db.DBSession.add(self.test_user5)
+
+        self.users_list = [
             self.test_user1,
             self.test_user2,
             self.test_user3,
             self.test_user4
         ]
-
-        self.test_admin = User(
-            name="admin",
-            login="admin",
-            email="admin@test.com",
-            password="admin",
-        )
 
         self.date_created = self.date_updated = datetime.datetime.now()
 
@@ -82,12 +92,13 @@ class DepartmentTester(unittest.TestCase):
             "updated_by": self.test_admin,
             "date_created": self.date_created,
             "date_updated": self.date_updated,
-            "members": self.members_list,
-            "lead": self.test_user1
+            "users": self.users_list
         }
 
         # create a default department object
         self.test_department = Department(**self.kwargs)
+        db.DBSession.add(self.test_department)
+        db.DBSession.commit()
 
     def test___auto_name__class_attribute_is_set_to_false(self):
         """testing if the __auto_name__ class attribute is set to False for
@@ -95,25 +106,25 @@ class DepartmentTester(unittest.TestCase):
         """
         self.assertFalse(Department.__auto_name__)
 
-    def test_members_argument_accepts_an_empty_list(self):
-        """testing if members argument accepts an empty list
+    def test_users_argument_accepts_an_empty_list(self):
+        """testing if users argument accepts an empty list
         """
         # this should work without raising any error
-        self.kwargs["members"] = []
+        self.kwargs["users"] = []
         new_dep = Department(**self.kwargs)
         self.assertTrue(isinstance(new_dep, Department))
 
-    def test_members_attribute_accepts_an_empty_list(self):
-        """testing if members attribute accepts an empty list
+    def test_users_attribute_accepts_an_empty_list(self):
+        """testing if users attribute accepts an empty list
         """
         # this should work without raising any error
-        self.test_department.members = []
+        self.test_department.users = []
 
-    def test_members_argument_accepts_only_a_list_of_user_objects(self):
-        """testing if members argument accepts only a list of user objects
+    def test_users_argument_accepts_only_a_list_of_user_objects(self):
+        """testing if users argument accepts only a list of user objects
         """
         test_value = [1, 2.3, [], {}]
-        self.kwargs["members"] = test_value
+        self.kwargs["users"] = test_value
         # this should raise a TypeError
         self.assertRaises(
             TypeError,
@@ -121,8 +132,8 @@ class DepartmentTester(unittest.TestCase):
             **self.kwargs
         )
 
-    def test_members_attribute_accepts_only_a_list_of_user_objects(self):
-        """testing if members attribute accepts only a list of user objects
+    def test_users_attribute_accepts_only_a_list_of_user_objects(self):
+        """testing if users attribute accepts only a list of user objects
         """
         test_value = [1, 2.3, [], {}]
         # this should raise a TypeError
@@ -130,115 +141,83 @@ class DepartmentTester(unittest.TestCase):
             TypeError,
             setattr,
             self.test_department,
-            "members",
+            "users",
             test_value
         )
 
-    def test_members_attribute_elements_accepts_User_only(self):
+    def test_users_attribute_elements_accepts_User_only(self):
         """testing if a TypeError will be raised when trying to assign
-        something other than a User object to the members list
+        something other than a User object to the users list
         """
         # append
         self.assertRaises(
             TypeError,
-            self.test_department.members.append,
+            self.test_department.users.append,
             0
         )
 
         # __setitem__
         self.assertRaises(
             TypeError,
-            self.test_department.members.__setitem__,
+            self.test_department.users.__setitem__,
             0,
             0
         )
 
-    def test_members_argument_is_not_iterable(self):
-        """testing if a TypeError will be raised when the given members
+    def test_users_argument_is_not_iterable(self):
+        """testing if a TypeError will be raised when the given users
         argument is not an instance of list
         """
         test_values = [1, 1.2, "a user"]
         for test_value in test_values:
-            self.kwargs["members"] = test_value
+            self.kwargs["users"] = test_value
             self.assertRaises(TypeError, Department, **self.kwargs)
 
-    def test_members_attribute_is_not_iterable(self):
-        """testing if a TypeError will be raised when the members attribute
+    def test_users_attribute_is_not_iterable(self):
+        """testing if a TypeError will be raised when the users attribute
         is tried to be set to a non-iterable value
         """
         test_values = [1, 1.2, "a user"]
         for test_value in test_values:
             self.assertRaises(TypeError, setattr, self.test_department,
-                              "members", test_value)
+                              "users", test_value)
 
-    def test_members_attribute_defaults_to_empty_list(self):
-        """testing if the members attribute defaults to an empty list if the
-         members argument is skipped
+    def test_users_attribute_defaults_to_empty_list(self):
+        """testing if the users attribute defaults to an empty list if the
+         users argument is skipped
         """
-        self.kwargs.pop("members")
+        self.kwargs.pop("users")
         new_department = Department(**self.kwargs)
-        self.assertEqual(new_department.members, [])
+        self.assertEqual(new_department.users, [])
 
-    def test_members_attribute_set_to_None(self):
-        """testing if a TypeError will be raised when the members attribute is
+    def test_users_attribute_set_to_None(self):
+        """testing if a TypeError will be raised when the users attribute is
         set to None
         """
-        self.assertRaises(TypeError, setattr, self.test_department, "members",
+        self.assertRaises(TypeError, setattr, self.test_department, "users",
                           None)
 
-    def test_users_attribute_is_a_synonym_for_members(self):
-        """testing if the users attribute is actually a synonym for the members
-        attribute
+    def test_user_role_attribute(self):
+        """testing the automatic generation of the DepartmentUser class
         """
-        self.assertEqual(self.test_department.members,
-                         self.test_department.users)
+        # assign a user to a department and search for a DepartmentUser
+        # representing that relation
+        from stalker import DepartmentUser
+        db.DBSession.commit()
+        with db.DBSession.no_autoflush:
+            self.test_department.users.append(self.test_user5)
 
-    def test_lead_argument_accepts_only_user_objects(self):
-        """testing if lead argument accepts only user objects
-        """
-        test_values = ["", 1, 2.3, [], {}]
-        # all of the above values should raise an TypeError
-        for test_value in test_values:
-            self.kwargs["lead"] = test_value
-            self.assertRaises(
-                TypeError,
-                Department,
-                **self.kwargs
-            )
+        dus = DepartmentUser.query\
+            .filter(DepartmentUser.user == self.test_user5)\
+            .filter(DepartmentUser.department == self.test_department)\
+            .all()
 
-    def test_lead_attribute_accepts_only_User_instances(self):
-        """testing if a TypeError will be raised when the lead attribute
-        is not User instance
-        """
-        test_values = ["", 1, 2.3, [], {}]
-        # all of the above values should raise an TypeError
-        for test_value in test_values:
-            self.assertRaises(
-                TypeError,
-                setattr,
-                self.test_department,
-                "lead",
-                test_value
-            )
-
-    def test_member_remove_also_removes_department_from_user(self):
-        """testing if removing an user from the members list also removes the
-        department from the users department argument
-        """
-        # check if the user is in the department
-        self.assertTrue(self.test_department in self.test_user1.departments)
-
-        # now remove the user from the department
-        self.test_department.members.remove(self.test_user1)
-
-        # now check if department is not in users departments anymore
-        self.assertFalse(self.test_department in self.test_user1.departments)
-
-        # assign the user back
-        self.test_user1.departments.append(self.test_department)
-
-        # check if the user is in the department
-        self.assertTrue(self.test_user1 in self.test_department.members)
+        self.assertTrue(len(dus) > 0)
+        du = dus[0]
+        self.assertTrue(isinstance(du, DepartmentUser))
+        self.assertEqual(du.department, self.test_department)
+        self.assertEqual(du.user, self.test_user5)
+        self.assertEqual(du.role, None)
 
     def test_equality(self):
         """testing equality of two Department objects
@@ -247,8 +226,7 @@ class DepartmentTester(unittest.TestCase):
         dep2 = Department(**self.kwargs)
 
         entity_kwargs = self.kwargs.copy()
-        entity_kwargs.pop("members")
-        entity_kwargs.pop("lead")
+        entity_kwargs.pop("users")
         entity1 = Entity(**entity_kwargs)
 
         self.kwargs["name"] = "Animation"
@@ -265,8 +243,7 @@ class DepartmentTester(unittest.TestCase):
         dep2 = Department(**self.kwargs)
 
         entity_kwargs = self.kwargs.copy()
-        entity_kwargs.pop("members")
-        entity_kwargs.pop("lead")
+        entity_kwargs.pop("users")
         entity1 = Entity(**entity_kwargs)
 
         self.kwargs["name"] = "Animation"
@@ -279,29 +256,23 @@ class DepartmentTester(unittest.TestCase):
     def test_tjp_id_is_working_properly(self):
         """testing if the tjp_is working properly
         """
-        self.assertEqual(self.test_department.tjp_id, 'Department_None')
+        self.assertEqual(self.test_department.tjp_id, 'Department_35')
 
     def test_to_tjp_is_working_properly(self):
         """testing if the to_tjp property is working properly
         """
-        self.test_department.id = 1324
-        self.test_user1.id = 1325
-        self.test_user2.id = 1326
-        self.test_user3.id = 1327
-        self.test_user4.id = 1328
-
         expected_tjp = """
-resource Department_1324 "Test Department" {
-    resource User_1325 "User1" {
+resource Department_35 "Department_35" {
+    resource User_30 "User_30" {
     efficiency 1.0
 }
-    resource User_1326 "User2" {
+    resource User_31 "User_31" {
     efficiency 1.0
 }
-    resource User_1327 "User3" {
+    resource User_32 "User_32" {
     efficiency 1.0
 }
-    resource User_1328 "User4" {
+    resource User_33 "User_33" {
     efficiency 1.0
 }
 }"""

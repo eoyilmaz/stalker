@@ -26,7 +26,7 @@ Whenever stalker.db or something under it imported, the
 import logging
 
 from sqlalchemy import engine_from_config
-from sqlalchemy.exc import IntegrityError, InvalidRequestError
+from sqlalchemy.exc import IntegrityError
 
 from stalker import defaults
 from stalker.db.declarative import Base

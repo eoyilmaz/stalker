@@ -226,7 +226,6 @@ class ProjectTestCase(unittest.TestCase):
             "name": "Test Project",
             'code': 'tp',
             "description": "This is a project object for testing purposes",
-            "lead": self.test_lead,
             "image_format": self.test_image_format,
             "fps": 25,
             "type": self.test_project_type,
@@ -265,7 +264,8 @@ class ProjectTestCase(unittest.TestCase):
             code='Seq1',
             project=self.test_project,
             status_list=self.sequence_status_list,
-            resources=[self.test_user1]
+            resources=[self.test_user1],
+            responsible=[self.test_user1]
         )
 
         self.test_seq2 = Sequence(
@@ -273,7 +273,8 @@ class ProjectTestCase(unittest.TestCase):
             code='Seq2',
             project=self.test_project,
             status_list=self.sequence_status_list,
-            resources=[self.test_user2]
+            resources=[self.test_user2],
+            responsible=[self.test_user2]
         )
 
         self.test_seq3 = Sequence(
@@ -281,7 +282,8 @@ class ProjectTestCase(unittest.TestCase):
             code='Seq3',
             project=self.test_project,
             status_list=self.sequence_status_list,
-            resources=[self.test_user3]
+            resources=[self.test_user3],
+            responsible=[self.test_user1]
         )
 
         # sequences with tasks
@@ -290,6 +292,7 @@ class ProjectTestCase(unittest.TestCase):
             code='Seq4',
             project=self.test_project,
             status_list=self.sequence_status_list,
+            responsible=[self.test_user1]
         )
 
         self.test_seq5 = Sequence(
@@ -297,6 +300,7 @@ class ProjectTestCase(unittest.TestCase):
             code='Seq5',
             project=self.test_project,
             status_list=self.sequence_status_list,
+            responsible=[self.test_user1]
         )
 
         # sequences without tasks but with shots
@@ -305,6 +309,7 @@ class ProjectTestCase(unittest.TestCase):
             code='Seq6',
             project=self.test_project,
             status_list=self.sequence_status_list,
+            responsible=[self.test_user1]
         )
 
         self.test_seq7 = Sequence(
@@ -312,6 +317,7 @@ class ProjectTestCase(unittest.TestCase):
             code='Seq7',
             project=self.test_project,
             status_list=self.sequence_status_list,
+            responsible=[self.test_user1]
         )
 
         # shot status list
@@ -337,6 +343,7 @@ class ProjectTestCase(unittest.TestCase):
             project=self.test_project,
             sequences=[self.test_seq6],
             status_list=self.shot_status_list,
+            responsible=[self.test_lead],
         )
 
         self.test_shot2 = Shot(
@@ -344,6 +351,7 @@ class ProjectTestCase(unittest.TestCase):
             project=self.test_project,
             sequences=[self.test_seq6],
             status_list=self.shot_status_list,
+            responsible=[self.test_lead],
         )
 
         self.test_shot3 = Shot(
@@ -351,6 +359,7 @@ class ProjectTestCase(unittest.TestCase):
             project=self.test_project,
             sequences=[self.test_seq7],
             status_list=self.shot_status_list,
+            responsible=[self.test_lead],
         )
 
         self.test_shot4 = Shot(
@@ -358,6 +367,7 @@ class ProjectTestCase(unittest.TestCase):
             project=self.test_project,
             sequences=[self.test_seq7],
             status_list=self.shot_status_list,
+            responsible=[self.test_lead],
         )
 
         # asset status list
@@ -391,7 +401,8 @@ class ProjectTestCase(unittest.TestCase):
             type=self.asset_type,
             project=self.test_project,
             status_list=self.asset_status_list,
-            resources=[self.test_user2]
+            resources=[self.test_user2],
+            responsible=[self.test_lead],
         )
 
         self.test_asset2 = Asset(
@@ -400,6 +411,7 @@ class ProjectTestCase(unittest.TestCase):
             type=self.asset_type,
             project=self.test_project,
             status_list=self.asset_status_list,
+            responsible=[self.test_lead],
         )
 
         self.test_asset3 = Asset(
@@ -408,6 +420,7 @@ class ProjectTestCase(unittest.TestCase):
             type=self.asset_type,
             project=self.test_project,
             status_list=self.asset_status_list,
+            responsible=[self.test_lead],
         )
 
         # assets with tasks
@@ -417,6 +430,7 @@ class ProjectTestCase(unittest.TestCase):
             type=self.asset_type,
             project=self.test_project,
             status_list=self.asset_status_list,
+            responsible=[self.test_lead],
         )
 
         self.test_asset5 = Asset(
@@ -708,54 +722,6 @@ class ProjectTestCase(unittest.TestCase):
         """
         self.assertTrue(isinstance(self.test_project_type, Type))
         self.assertTrue(isinstance(self.test_project_type2, Type))
-
-    def test_lead_argument_is_given_as_None(self):
-        """testing if no error will be raised when the lead arguments is given
-        as None
-        """
-        self.kwargs["lead"] = None
-        new_project = Project(**self.kwargs)
-        self.assertTrue(isinstance(new_project, Project))
-
-    def test_lead_attribute_is_set_to_None(self):
-        """testing if no error will be raised when the lead attribute is set to
-        None
-        """
-        self.test_project.lead = None
-
-    def test_lead_argument_is_given_as_something_other_than_a_user(self):
-        """testing if a TypeError will be raised when the lead argument is
-        given as something other than a User object
-        """
-        test_values = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
-
-        for test_value in test_values:
-            self.kwargs["lead"] = test_value
-            self.assertRaises(
-                TypeError,
-                Project,
-                **self.kwargs
-            )
-
-    def test_lead_attribute_is_set_to_something_other_than_a_user(self):
-        """testing if a TypeError will be raised when the lead attribute is set
-        to something other than a User object
-        """
-        test_values = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
-        for test_value in test_values:
-            self.assertRaises(
-                TypeError,
-                setattr,
-                self.test_project,
-                "lead",
-                test_value
-            )
-
-    def test_lead_attribute_works_properly(self):
-        """testing if the lead attribute works properly
-        """
-        self.test_project.lead = self.test_user1
-        self.assertEqual(self.test_project.lead, self.test_user1)
 
     def test_sequences_attribute_is_read_only(self):
         """testing if the sequence attribute is read-only
@@ -1326,7 +1292,7 @@ class ProjectTestCase(unittest.TestCase):
         from jinja2 import Template
 
         expected_tjp_temp = Template("""
-task Project_{{project.id}} "Test Project" {
+task Project_{{project.id}} "Project_{{project.id}}" {
         
 task Sequence_{{sequence1.id}} "Sequence_{{sequence1.id}}" {
 
@@ -2136,7 +2102,6 @@ class ProjectTicketsTestCase(unittest.TestCase):
             "name": "Test Project",
             'code': 'tp',
             "description": "This is a project object for testing purposes",
-            "lead": self.test_lead,
             "image_format": self.test_image_format,
             "fps": 25,
             "type": self.test_project_type,

@@ -171,29 +171,40 @@ class UserTest(unittest.TestCase):
         self.task_status_list = StatusList.query\
             .filter_by(target_entity_type='Task').first()
 
+        self.test_lead = User(
+            name='lead',
+            login='lead',
+            email='lead@lead.com',
+            password='12345'
+        )
+
         # a couple of tasks
         self.test_task1 = Task(
             name="Test Task 1",
             status_list=self.task_status_list,
             project=self.test_project1,
+            responsible=[self.test_lead]
         )
 
         self.test_task2 = Task(
             name="Test Task 2",
             status_list=self.task_status_list,
             project=self.test_project1,
+            responsible=[self.test_lead]
         )
 
         self.test_task3 = Task(
             name="Test Task 3",
             status_list=self.task_status_list,
             project=self.test_project2,
+            responsible=[self.test_lead]
         )
 
         self.test_task4 = Task(
             name="Test Task 4",
             status_list=self.task_status_list,
             project=self.test_project3,
+            responsible=[self.test_lead]
         )
 
         DBSession.add_all([
@@ -435,7 +446,7 @@ class UserTest(unittest.TestCase):
             'created_by': self.test_admin,
             'updated_by': self.test_admin,
             'efficiency': 1.0,
-            'company': self.test_company
+            'companies': [self.test_company]
         }
 
         # create a proper user object
@@ -975,69 +986,6 @@ class UserTest(unittest.TestCase):
         self.assertTrue(self.test_user in self.test_project2.users)
         self.assertTrue(self.test_user in self.test_project3.users)
 
-    def test_projects_lead_attribute_None(self):
-        """testing if a TypeError will be raised when the project_lead
-        attribute is set to None
-        """
-        self.assertRaises(TypeError, setattr, self.test_user, "projects_lead",
-                          None)
-
-    def test_projects_lead_attribute_accepts_empty_list(self):
-        """testing if projects_lead attribute accepts an empty list
-        """
-
-        # this should work without any problem
-        self.test_user.projects_lead = []
-
-    def test_projects_lead_attribute_accepts_only_lists(self):
-        """testing if a TypeError will be raised when trying to assign a list
-        of other objects than a list of Project objects to the
-        projects_lead attribute
-        """
-        test_values = ["a project", 123123, {}, 12.2132]
-        for test_value in test_values:
-            self.assertRaises(
-                TypeError,
-                setattr,
-                self.test_user,
-                "projects_lead",
-                test_value
-            )
-
-    def test_projects_lead_attribute_accepts_only_list_of_project_obj(self):
-        """testing if a TypeError will be raised when trying to assign a list
-        of other object than a list of Project objects to the
-        projects_lead attribute
-        """
-        test_value = ["a project", 123123, [], {}, 12.2132]
-        self.assertRaises(
-            TypeError,
-            setattr,
-            self.test_user,
-            "projects_lead",
-            test_value
-        )
-
-    def test_projects_lead_attribute_working_properly(self):
-        """testing if the projects_lead attribute is working properly
-        """
-        projects_lead = [self.test_project1,
-                         self.test_project2,
-                         self.test_project3]
-        self.test_user.projects_lead = projects_lead
-        self.assertEqual(self.test_user.projects_lead, projects_lead)
-
-    def test_projects_lead_attribute_elements_accepts_Project_only(self):
-        """testing if a TypeError will be raised when trying to assign
-        something other than a Project object to the projects_lead list
-        """
-        # append
-        self.assertRaises(
-            TypeError,
-            self.test_user.projects_lead.append,
-            0
-        )
-
     def test_tasks_attribute_None(self):
         """testing if a TypeError will be raised when the tasks attribute is
         set to None
@@ -1255,8 +1203,8 @@ class UserTest(unittest.TestCase):
         """testing if the to_tjp property is working properly
         """
         expected_tjp = \
-            'resource User_%s "Erkan Ozgur Yilmaz" {\n    efficiency 1.0\n}' \
-            % self.test_user.id
+            'resource User_%s "User_%s" {\n    efficiency 1.0\n}' % \
+            (self.test_user.id, self.test_user.id)
 
         self.assertEqual(expected_tjp, self.test_user.to_tjp)
 
@@ -1284,11 +1232,11 @@ class UserTest(unittest.TestCase):
             end=datetime.datetime(2013, 7, 15, 0, 0)
         )
 
-        expected_tjp = """resource User_%s "Erkan Ozgur Yilmaz" {
+        expected_tjp = """resource User_%s "User_%s" {
     efficiency 1.0
     vacation 2013-06-07-00:00:00 - 2013-06-21-00:00:00
     vacation 2013-07-01-00:00:00 - 2013-07-15-00:00:00
-}""" % self.test_user.id
+}""" % (self.test_user.id, self.test_user.id)
 
         # print expected_tjp
         # print '---------------'
@@ -1478,59 +1426,73 @@ class UserTest(unittest.TestCase):
             self.test_user.efficiency
         )
 
-    def test_company_argument_is_skipped(self):
-        """testing if the company attribute will be set to None when the
-        company argument is skipped
+    def test_companies_argument_is_skipped(self):
+        """testing if the companies attribute will be set to an empty list when
+        the company argument is skipped
         """
-        try:
-            self.kwargs.pop('company')
-        except KeyError:
-            pass
+        self.kwargs.pop('companies')
         new_user = User(**self.kwargs)
-        self.assertEquals(new_user.company, None)
+        self.assertEquals(new_user.companies, [])
 
-    def test_company_argument_is_None(self):
-        """testing if the company argument can be set to None
+    def test_companies_argument_is_None(self):
+        """testing if the companies argument is set to None the companies
+        attribute will be an empty list
         """
-        self.kwargs['company'] = None
+        self.kwargs['companies'] = None
         new_user = User(**self.kwargs)
-        self.assertTrue(new_user.company is None)
+        self.assertTrue(new_user.companies == [])
 
-    def test_company_attribute_is_set_to_None(self):
-        """testing if the company attribute can be set to None
+    def test_companies_attribute_is_set_to_None(self):
+        """testing if a the companies attribute will be an empty list if it is
+        set to None
         """
-        self.assertTrue(self.test_user.company is not None)
-        self.test_user.company = None
-        self.assertTrue(self.test_user.company is None)
+        self.assertTrue(self.test_user.companies is not None)
+        with self.assertRaises(TypeError) as cm:
+            self.test_user.companies = None
+        self.assertEqual(
+            str(cm.exception),
+            "'NoneType' object is not iterable"
+        )
 
-    def test_company_argument_is_not_a_Client_instance(self):
-        """testing if a TypeError will be raised when the company argument is
-        not a Client instance
+    def test_companies_argument_is_not_a_list(self):
+        """testing if a TypeError will be raised if the companies argument is
+        not a list
         """
-        test_values = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
+        self.kwargs['companies'] = 'not a list of clients'
+        with self.assertRaises(TypeError) as cm:
+            User(**self.kwargs)
 
-        for test_value in test_values:
-            self.kwargs["company"] = test_value
-            self.assertRaises(
-                TypeError,
-                User,
-                **self.kwargs
-            )
+        self.assertEqual(
+            str(cm.exception),
+            'ClientUser.client should be instance of '
+            'stalker.models.client.Client, not str'
+        )
 
-    def test_company_attribute_is_set_to_a_value_other_than_a_Client_instance(self):
-        """testing if a TypeError will be raised when the company attribute is
-        set to a value other than a Client instance
+    def test_companies_argument_is_not_a_list_of_client_instances(self):
+        """testing if a TypeError will be raised when the companies argument is
+        not a list of Client instances
         """
-        test_values = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
+        test_value = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
+        self.kwargs["companies"] = test_value
+        self.assertRaises(
+            TypeError,
+            User,
+            **self.kwargs
+        )
 
-        for test_value in test_values:
-            self.assertRaises(
-                TypeError,
-                setattr,
-                self.test_user,
-                'company',
-                test_value
-            )
+    def test_companies_attribute_is_set_to_a_value_other_than_a_list_of_client_instances(self):
+        """testing if a TypeError will be raised when the companies attribute
+        is set to a value other than a list of Client instances
+        """
+        test_value = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
+        with self.assertRaises(TypeError) as cm:
+            self.test_user.companies = test_value
+
+        self.assertEqual(
+            str(cm.exception),
+            'ClientUser.client should be instance of '
+            'stalker.models.client.Client, not int'
+        )
 
     def test_watching_attribute_is_a_list_of_other_values_than_Task(self):
         """testing if a TypeError will be raised when the watching attribute is

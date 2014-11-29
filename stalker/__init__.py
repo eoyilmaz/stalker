@@ -38,11 +38,11 @@ else:  # Python 2
 # before anything about stalker create the defaults
 from stalker.config import defaults
 
-from stalker.models.auth import Group, Permission, User, LocalSession
+from stalker.models.auth import Group, Permission, User, LocalSession, Role
 from stalker.models.asset import Asset
 from stalker.models.budget import Budget, BudgetEntry
 from stalker.models.client import Client
-from stalker.models.department import Department
+from stalker.models.department import Department, DepartmentUser
 from stalker.models.entity import SimpleEntity, Entity
 from stalker.models.format import ImageFormat
 from stalker.models.link import Link

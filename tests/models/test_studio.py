@@ -823,7 +823,7 @@ class StudioTester(unittest.TestCase):
         from jinja2 import Template
 
         expected_tjp_template = Template("""
-project Studio_{{ studio.id }} "Studio" 2013-04-15 - 2013-06-30 {
+project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
     timingresolution 60min
     now {{ studio.now.strftime('%Y-%m-%d-%H:%M') }}
     dailyworkinghours 8

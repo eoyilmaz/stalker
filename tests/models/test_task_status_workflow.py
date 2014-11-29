@@ -100,7 +100,6 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
             repository=cls.test_repo,
             start=datetime.datetime(2013, 6, 20, 0, 0, 0),
             end=datetime.datetime(2013, 6, 30, 0, 0, 0),
-            lead=cls.test_user1
         )
         DBSession.add(cls.test_project1)
 
@@ -111,6 +110,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task1 = Task(
             name='Test Task 1',
             project=self.test_project1,
+            responsible=[self.test_user1],
             status_list=self.test_task_statuses,
             start=datetime.datetime(2013, 6, 20, 0, 0),
             end=datetime.datetime(2013, 6, 30, 0, 0),
@@ -123,6 +123,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task2 = Task(
             name='Test Task 2',
             project=self.test_project1,
+            responsible=[self.test_user1],
             status_list=self.test_task_statuses,
             start=datetime.datetime(2013, 6, 20, 0, 0),
             end=datetime.datetime(2013, 6, 30, 0, 0),

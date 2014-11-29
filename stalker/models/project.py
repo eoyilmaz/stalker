@@ -21,6 +21,7 @@
 import logging
 
 from sqlalchemy import (Column, Integer, ForeignKey, Float, Boolean, Table)
+from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship, validates
 
 from stalker import defaults
@@ -66,10 +67,6 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
     To manage all the studio projects at once (schedule them at once please use
     :class:`.Studio`).
 
-    :param lead: The lead of the project. Default value is None.
-
-    :type lead: :class:`.User`
-
     :param client: The client which the project is affiliated with. Default
       value is None.
 
@@ -111,12 +108,12 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
 
     __auto_name__ = False
     __tablename__ = "Projects"
-    project_id_local = Column("id", Integer, ForeignKey("Entities.id"),
-                              primary_key=True)
+    project_id = Column("id", Integer, ForeignKey("Entities.id"),
+                        primary_key=True)
 
     __mapper_args__ = {
         "polymorphic_identity": "Project",
-        "inherit_condition": project_id_local == Entity.entity_id
+        "inherit_condition": project_id == Entity.entity_id
     }
 
     active = Column(Boolean, default=True)
@@ -142,22 +139,17 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         cascade="all, delete-orphan"
     )
 
-    users = relationship(
-        'User',
-        secondary='Project_Users',
-        back_populates='projects'
+    users = association_proxy(
+        'user_role',
+        'user',
+        creator=lambda n: ProjectUser(user=n)
     )
 
-    lead_id = Column(Integer, ForeignKey("Users.id"))
-    lead = relationship(
-        "User",
-        primaryjoin="Projects.c.lead_id==Users.c.id",
-        back_populates="projects_lead",
-        doc="""The lead of the project.
-
-        Should be an instance of :class:`.User`,
-        also can set to None.
-        """
+    user_role = relationship(
+        'ProjectUser',
+        back_populates='project',
+        cascade='all, delete-orphan',
+        primaryjoin='Projects.c.id==Project_Users.c.project_id'
     )
 
     repository_id = Column(Integer, ForeignKey("Repositories.id"))
@@ -215,7 +207,6 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
     def __init__(self,
                  name=None,
                  code=None,
-                 lead=None,
                  client=None,
                  repository=None,
                  structure=None,
@@ -237,7 +228,6 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         DateRangeMixin.__init__(self, **kwargs)
         #CodeMixin.__init__(self, **kwargs)
 
-        self.lead = lead
         if users is None:
             users = []
         self.users = users
@@ -292,20 +282,6 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
                 (self.__class__.__name__, image_format.__class__.__name__)
             )
         return image_format
-
-    @validates("lead")
-    def _validate_lead(self, key, lead):
-        """validates the given lead_in value
-        """
-        if lead is not None:
-            from stalker import User
-            if not isinstance(lead, User):
-                raise TypeError(
-                    "%s.lead should be an instance of "
-                    "stalker.models.auth.User, not %s" %
-                    (self.__class__.__name__, lead.__class__.__name__)
-                )
-        return lead
 
     @validates("client")
     def _validate_client(self, key, client):
@@ -485,8 +461,93 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
 
 
 # PROJECT_USERS
-Project_Users = Table(
-    'Project_Users', Base.metadata,
-    Column('user_id', Integer, ForeignKey('Users.id'), primary_key=True),
-    Column('project_id', Integer, ForeignKey('Projects.id'), primary_key=True)
-)
+class ProjectUser(Base):
+    """The association object used in User-to-Project relation
+    """
+
+    __tablename__ = 'Project_Users'
+
+    user_id = Column(
+        'user_id',
+        Integer,
+        ForeignKey('Users.id'),
+        primary_key=True
+    )
+
+    user = relationship(
+        'User',
+        back_populates='project_role',
+        primaryjoin='ProjectUser.user_id==User.user_id'
+    )
+
+    project_id = Column(
+        'project_id',
+        Integer,
+        ForeignKey('Projects.id'),
+        primary_key=True
+    )
+
+    project = relationship(
+        'Project',
+        back_populates='user_role',
+        primaryjoin='ProjectUser.project_id==Project.project_id'
+    )
+
+    role_id = Column(
+        'rid',
+        Integer,
+        ForeignKey('Roles.id'),
+        nullable=True
+    )
+
+    role = relationship(
+        'Role',
+        primaryjoin='ProjectUser.role_id==Role.role_id'
+    )
+
+    def __init__(self, project=None, user=None, role=None):
+        self.user = user
+        self.project = project
+        self.role = role
+
+    @validates("user")
+    def _validate_user(self, key, user):
+        """validates the given user value
+        """
+        if user is not None:
+            from stalker.models.auth import User
+            if not isinstance(user, User):
+                raise TypeError(
+                    "%s.user should be a stalker.models.auth.User instance, "
+                    "not %s" %
+                    (self.__class__.__name__, user.__class__.__name__)
+                )
+        return user
+
+    @validates("project")
+    def _validate_project(self, key, project):
+        """validates the given project value
+        """
+        if project is not None:
+            # check if it is instance of Project object
+            if not isinstance(project, Project):
+                raise TypeError(
+                    "%s.project should be a "
+                    "stalker.models.project.Project instance, not %s" %
+                    (self.__class__.__name__, project.__class__.__name__)
+                )
+        return project
+
+    @validates('role')
+    def _validate_role(self, key, role):
+        """validates the given role instance
+        """
+        if role is not None:
+            from stalker import Role
+            if not isinstance(role, Role):
+                raise TypeError(
+                    '%s.role should be a'
+                    'stalker.models.auth.Role instance, not %s' %
+                    (self.__class__.__name__, role.__class__.__name__)
+                )
+        return role

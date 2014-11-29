@@ -121,8 +121,7 @@ class BudgetTestBase(unittest.TestCase):
             code='tp1',
             type=self.test_movie_project_type,
             status_list=self.test_project_status_list,
-            repository=self.test_repository,
-            lead=self.test_user1
+            repository=self.test_repository
         )
 
         self.kwargs = {

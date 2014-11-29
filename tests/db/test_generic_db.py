@@ -76,22 +76,6 @@ asset_status_list = StatusList(
     target_entity_type=Asset
 )
 
-new_asset1 = Asset(
-    name="test asset",
-    code='ta',
-    type=character_asset_type,
-    project=new_project1,
-    status_list=asset_status_list
-)
-
-new_asset2 = Asset(
-    name="test",
-    code='t',
-    type=character_asset_type,
-    project=new_project2,
-    status_list=asset_status_list
-)
-
 new_user1 = User(
     name="Test1",
     login="testuser1",
@@ -104,6 +88,24 @@ new_user2 = User(
     login="testuser2",
     email="testuser2@test.com",
     password="1234"
+)
+
+new_asset1 = Asset(
+    name="test asset",
+    code='ta',
+    type=character_asset_type,
+    project=new_project1,
+    status_list=asset_status_list,
+    responsible=[new_user1]
+)
+
+new_asset2 = Asset(
+    name="test",
+    code='t',
+    type=character_asset_type,
+    project=new_project2,
+    status_list=asset_status_list,
+    responsible=[new_user1]
 )
 
 task_status_list = StatusList(
@@ -119,7 +121,7 @@ new_task = Task(
     status_list=task_status_list
 )
 
-new_task = Task(
+new_task2 = Task(
     name="Task 2",
     resources=[new_user2],
     parent=new_asset2,

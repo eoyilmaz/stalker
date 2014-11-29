@@ -20,7 +20,7 @@
 
 import unittest
 from stalker import (db, Asset, Entity, Project, Repository, Sequence, Status,
-                     StatusList, Task, Type, Link, Shot)
+                     StatusList, Task, Type, Link, Shot, User)
 
 
 class AssetTester(unittest.TestCase):
@@ -32,6 +32,21 @@ class AssetTester(unittest.TestCase):
         """
         db.setup()
         db.init()
+
+        # users
+        self.test_user1 = User(
+            name='User1',
+            login='user1',
+            password='12345',
+            email='user1@user1.com'
+        )
+
+        self.test_user2 = User(
+            name='User2',
+            login='user2',
+            password='12345',
+            email='user2@user2.com'
+        )
 
         # statuses
         self.status_wip = Status.query.filter_by(code='WIP').first()
@@ -105,6 +120,7 @@ class AssetTester(unittest.TestCase):
             code='tseq',
             project=self.project1,
             status_list=self.sequence_status_list,
+            responsible=[self.test_user1]
         )
 
         # shots
@@ -113,6 +129,7 @@ class AssetTester(unittest.TestCase):
             status_list=self.shot_status_list,
             project=self.project1,
             sequences=[self.seq1],
+            responsible=[self.test_user1]
         )
 
         self.shot2 = Shot(
@@ -120,6 +137,7 @@ class AssetTester(unittest.TestCase):
             status_list=self.shot_status_list,
             project=self.project1,
             sequences=[self.seq1],
+            responsible=[self.test_user1]
         )
 
         self.shot3 = Shot(
@@ -127,6 +145,7 @@ class AssetTester(unittest.TestCase):
             status_list=self.shot_status_list,
             project=self.project1,
             sequences=[self.seq1],
+            responsible=[self.test_user1]
         )
 
         self.shot4 = Shot(
@@ -134,6 +153,7 @@ class AssetTester(unittest.TestCase):
             status_list=self.shot_status_list,
             project=self.project1,
             sequences=[self.seq1],
+            responsible=[self.test_user1]
         )
 
         self.kwargs = {
@@ -144,6 +164,7 @@ class AssetTester(unittest.TestCase):
             "type": self.asset_type1,
             "status": 0,
             "status_list": self.asset_status_list,
+            'responsible': [self.test_user1]
         }
 
         self.asset1 = Asset(**self.kwargs)
@@ -291,6 +312,7 @@ class AssetTester(unittest.TestCase):
             type=character_asset_type,
             code="tstasset",
             project=new_project,
+            responsible=[self.test_user1]
         )
 
         task1 = Task(

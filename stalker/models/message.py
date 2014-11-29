@@ -62,3 +62,4 @@ class Message(Entity, StatusMixin):
 
     def __init__(self, **kwargs):
         super(Message, self).__init__(**kwargs)
+        StatusMixin.__init__(self, **kwargs)

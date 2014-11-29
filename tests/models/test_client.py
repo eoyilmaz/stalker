@@ -233,14 +233,6 @@ class ClientTestCase(unittest.TestCase):
         """
         self.assertRaises(TypeError, setattr, self.test_client, "users", None)
 
-    def test_members_attribute_is_a_synonym_for_users(self):
-        """testing if the members attribute is actually a synonym for the users
-        attribute
-        """
-        self.assertEqual(self.test_client.users, self.test_client.members)
-        self.test_client.users.append(self.test_user1)
-        self.assertTrue(self.test_user1 in self.test_client.members)
-
     def test_projects_argument_accepts_an_empty_list(self):
         """testing if projects argument accepts an empty list
         """
@@ -335,26 +327,26 @@ class ClientTestCase(unittest.TestCase):
 
     def test_user_remove_also_removes_client_from_user(self):
         """testing if removing an user from the users list also removes the
-        client from the users company argument
+        client from the users companies attribute
         """
         # check if the user is in the company
-        self.assertTrue(self.test_client is self.test_user1.company)
+        self.assertTrue(self.test_client in self.test_user1.companies)
 
         # now remove the user from the company
         self.test_client.users.remove(self.test_user1)
 
-        # now check if company is not in users departments anymore
-        self.assertFalse(self.test_client is self.test_user1.company)
+        # now check if company is not in users companies anymore
+        self.assertFalse(self.test_client in self.test_user1.companies)
 
         # assign the user back
-        self.test_user1.company = self.test_client
+        self.test_user1.companies.append(self.test_client)
 
         # check if the user is in the companies users list
         self.assertTrue(self.test_user1 in self.test_client.users)
 
     def test_project_remove_also_removes_project_from_client(self):
         """testing if removing an user from the users list also removes the
-        client from the users company argument
+        client from the users companies attribute
         """
         # check if the project is registered with the client
         self.assertTrue(self.test_project1.client is self.test_client)
