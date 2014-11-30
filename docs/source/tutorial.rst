@@ -67,7 +67,6 @@ your python shell and open up a new and fresh one).
 
 Lets continue by creating a :class:`.Studio` for our self::
 
-  import datetime
   from stalker import Studio
   my_studio = Studio(
       name='My Great Studio'
@@ -112,7 +111,7 @@ or we can do it by using the User instance::
 
 Even if you didn't do the latter, when you run::
 
-  print me.departments
+  print(me.departments)
   # you should get something like
   # [<TDs (Department)>]
 
@@ -135,7 +134,7 @@ departments, then getting the second one (the first department is always the
 "admins" which is created by default) and getting its first members name::
 
   all_departments = Department.query.all()
-  print all_departments
+  print(all_departments)
   # This should print something like
   # [<admins (Department)>, <TDs (Department)>]
   # "admins" department is created by default
@@ -145,7 +144,7 @@ departments, then getting the second one (the first department is always the
 
   all_users = tds.users  # Department.users is a synonym for Department.members
                          # they are essentially the same attribute
-  print all_users[0]
+  print(all_users[0])
   # this should print
   # <Erkan Ozgur Yilmaz ('eoyilmaz') (User)>
 
@@ -223,7 +222,7 @@ workstations/render farmers::
   
   # and the repository itself
   commercial_repo = Repository(
-    name="Commercial Repository"
+      name="Commercial Repository"
   )
 
 :class:`.Repository` class will be explained in detail in upcoming sections.
@@ -250,14 +249,14 @@ Lets enter more information about this new project::
   product bla bla bla..."""
 
   new_project.image_format = ImageFormat(
-    name="HD 1080",
-    width=1920,
-    height=1080
+      name="HD 1080",
+      width=1920,
+      height=1080
   )
 
   new_project.fps = 25
   new_project.end = datetime.date(2014, 5, 15)
-  new_project.lead = me
+  new_project.users.append(me)
 
 Lets save all the new data to the database::
 
@@ -296,20 +295,20 @@ And a Sequence generally has :class:`.Shot`\ s::
   from stalker import Shot
 
   sh001 = Shot(
-    name='SH001',
-    code='SH001',
-    project=new_project
-    sequences=[seq1]
+      name='SH001',
+      code='SH001',
+      project=new_project,
+      sequences=[seq1]
   )
   sh002 = Shot(
-    code='SH002',
-    project=new_project
-    sequences=[seq1]
+      code='SH002',
+      project=new_project,
+      sequences=[seq1]
   )
   sh003 = Shot(
-    code='SH003',
-    project=new_project
-    sequences=[seq1]
+      code='SH003',
+      project=new_project,
+      sequences=[seq1]
   )
 
 send them to the database::
@@ -339,9 +338,9 @@ So far we just created some simple data. What about updating them. Let say that
 we created a new shot with wrong info::
 
   sh004 = Shot(
-    code='SH004',
-    project=new_project
-    sequences=[seq1]
+      code='SH004',
+      project=new_project,
+      sequences=[seq1]
   )
   db.DBSession.add(sh004)
   db.DBSession.commit()
@@ -372,7 +371,7 @@ If you don't close your python session, your variable are still going to
 contain the data but they do not exist in the database anymore::
 
   wrong_shot = Shot.query.filter_by(code="SH005").first()
-  print wrong_shot
+  print(wrong_shot)
   # should print None
 
 for more info about update and delete options (like cascades) in SQLAlchemy
@@ -527,6 +526,7 @@ have created at the beginning of this tutorial::
                                                      # about the project is not
                                                      # fitting in to the time
                                                      # frame.
+  db.DBSession.commit()  # to reflect the change
 
 This should take a little while depending to your projects size (around 1-2
 seconds for this tutorial, but around ~15 min for a project with 15000+ tasks).
@@ -535,20 +535,20 @@ When it is finished all of your tasks now have their ``computed_start`` and
 ``computed_end`` values filled with proper data. Now check the start and end
 values::
 
-  print previs.computed_start    # 2014-04-02 16:00:00
-  print previs.computed_end      # 2014-04-15 15:00:00
+  print(previs.computed_start)     # 2014-04-02 16:00:00
+  print(previs.computed_end)       # 2014-04-15 15:00:00
 
-  print matchmove.computed_start # 2014-04-15 15:00:00
-  print matchmove.computed_end   # 2014-04-17 13:00:00
+  print(matchmove.computed_start)  # 2014-04-15 15:00:00
+  print(matchmove.computed_end)    # 2014-04-17 13:00:00
 
-  print anim.computed_start      # 2014-04-17 13:00:00
-  print anim.computed_end        # 2014-04-23 17:00:00
+  print(anim.computed_start)       # 2014-04-17 13:00:00
+  print(anim.computed_end)         # 2014-04-23 17:00:00
   
-  print lighting.computed_start  # 2014-04-23 17:00:00
-  print lighting.computed_end    # 2014-04-24 11:00:00
+  print(lighting.computed_start)   # 2014-04-23 17:00:00
+  print(lighting.computed_end)     # 2014-04-24 11:00:00
 
-  print comp.computed_start      # 2014-04-24 11:00:00
-  print comp.computed_end        # 2014-04-24 17:00:00
+  print(comp.computed_start)       # 2014-04-24 11:00:00
+  print(comp.computed_end)         # 2014-04-24 17:00:00
 
 The dates are probably going to be different in your computer. But as you see
 Stalker has computed the start and end date values for each of the tasks. They
@@ -561,10 +561,10 @@ in `TaskJuggler`_ documentation.
 For a last thing you can check the ``to_tjp`` values of each data we have
 created for now, so try running::
 
-  print my_studio.to_tjp
-  print me.to_tjp
-  print comp.to_tjp
-  print new_project.to_tjp
+  print(my_studio.to_tjp)
+  print(me.to_tjp)
+  print(comp.to_tjp)
+  print(new_project.to_tjp)
 
 If you are familiar with TaskJuggler, you should recognize the output of each
 ``to_tjp`` variable. So essentially Stalker is mapping all of its data to a
@@ -609,19 +609,19 @@ systems::
 
   commercial_repo.linux_path   = "/mnt/M/commercials"
   commercial_repo.osx_path     = "/Volumes/M/commercials"
-  commercial_repo.windows_path = "M:/commercials" # you can use reverse slashes
-                                                  # (\\) if you want
+  commercial_repo.windows_path = "M:/commercials"  # you can use reverse
+                                                   # slashes (\\) if you want
 
 And if you ask for the path to a repository object it will always give the
 correct answer according to your operating system::
 
-  print repo1.path
+  print(commercial_repo.path)
   # under Windows outputs:
   # M:/commercials
-  # 
+  #
   # in Linux and variants:
-  # /mnt/M/commercials 
-  # 
+  # /mnt/M/commercials
+  #
   # and in OSX:
   # /Volumes/M/commercials
 
@@ -651,10 +651,10 @@ and filename::
   from stalker import FilenameTemplate
 
   task_template = FilenameTemplate(
-    name='Task Template for Commercials',
-    target_entity_type='Task',
-    path='{{project.code}}/{%- for p in parent_tasks -%}{{p.nice_name}}/{%- endfor -%}'
-    filename='{{version.nice_name}}_v{{"%03d"|format(version.version_number)}}'
+      name='Task Template for Commercials',
+      target_entity_type='Task',
+      path='{{project.code}}/{%- for p in parent_tasks -%}{{p.nice_name}}/{%- endfor -%}',
+      filename='{{version.nice_name}}_v{{"%03d"|format(version.version_number)}}'
   )
 
   # and append it to our project structure
@@ -675,25 +675,25 @@ while calculating its ``path`` and ``filename`` attributes. Lets create a
   from stalker import Version
   
   vers1 = Version(
-    task=comp
+      task=comp
   )
 
   # we need to update the paths
   vers1.update_paths()
 
   # check the path and filename
-  print vers1.path                # 'FC/SH001/comp'
-  print vers1.filename            # 'SH001_comp_Main_v001'
-  print vers1.full_path           # 'FC/SH001/comp/SH001_comp_Main_v001'
+  print(vers1.path)                # 'FC/SH001/comp'
+  print(vers1.filename)            # 'SH001_comp_Main_v001'
+  print(vers1.full_path)           # 'FC/SH001/comp/SH001_comp_Main_v001'
 
   # now the absolute values, values with repository root
   # because I'm running this code in a Linux laptop, my results are using the
   # linux path of the repository
-  print vers1.absolute_path       # '/mnt/M/commercials/FC/SH001/comp'
-  print vers1.absolute_full_path  # '/mnt/M/commercials/FC/SH001/comp/SH001_comp_Main_v001'
+  print(vers1.absolute_path)       # '/mnt/M/commercials/FC/SH001/comp'
+  print(vers1.absolute_full_path)  # '/mnt/M/commercials/FC/SH001/comp/SH001_comp_Main_v001'
 
   # check the version_number
-  print ver1. version_number      # 1
+  print(vers1.version_number)      # 1
 
   # commit to database
   db.DBSession.commit()
@@ -723,18 +723,18 @@ Lets create another version for the same task and see what happens::
                         # Stalker, so Stalker will automatically update the
                         # paths on Version.__init__()
 
-  print vers2.version_number  # 2
-  print vers2.filename        # 'SH001_comp_Main_v002'
+  print(vers2.version_number)  # 2
+  print(vers2.filename)        # 'SH001_comp_Main_v002'
 
   # before creating a new version commit this one to db
   db.DBSession.commit()
 
   # now create a new version
-  vers3 = Version(task=commp)
+  vers3 = Version(task=comp)
   vers3.update_paths()
 
-  print vers3.version_number  # 3
-  print vers3.filename        # 'SH001_comp_Main_v002'
+  print(vers3.version_number)  # 3
+  print(vers3.filename)        # 'SH001_comp_Main_v002'
 
 Isn't that nice, Stalker increments the version number automatically.
 
