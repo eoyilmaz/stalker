@@ -2474,7 +2474,18 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
             if self.status == wfd:
                 status = rts
             elif self.status == drev:
-                status = wip
+                status = hrev
+                # Expand task timing with the timing resolution if there is no
+                # time left for this task
+                if self.total_logged_seconds == self.schedule_seconds:
+                    total_seconds = \
+                        self.schedule_seconds \
+                        + defaults.timing_resolution.seconds
+                    timing, unit = \
+                        self.least_meaningful_time_unit(total_seconds)
+                    self.schedule_timing = timing
+                    self.schedule_unit = unit
+
         else:
             if self.status == rts:
                 status = wfd

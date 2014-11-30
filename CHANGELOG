@@ -7,26 +7,44 @@ Stalker Changes
 
 * **New:** User instances now have a new attribute called ``rate`` to track
   their cost as a resource.
+
 * **New:** Added two new classes called ``Budget`` and ``BudgetEntry`` to
   record Project budgets in a simple way.
+
 * **New:** Added a new class called **Role** to manage user roles in different
   Departments, Clients and Projects.
+
 * **New:** User and Department relation is updated to include the role of the
   user in that department in a more flexible way by using the newly introduced
   Role class and some association proxy tricks.
+
 * **New:** Also updated the User to Project relation to include the role of the
   user in that Project by using an associated Role class.
+
 * **Update:** Department.members attribute is renamed to **users** (and removed
   the *synonym* property).
+
 * **Update:** Removed ``Project.lead`` attribute use ``Role`` instead.
+
 * **Update:** Removed ``Department.lead`` attribute use ``Role`` instead.
+
 * **Update:** Because the ``Project.lead`` attribute is removed, it is now
   possible to have tasks with no responsible.
+
 * **Update:** Client to User relation is updated to use an association proxy
   which makes it possible to set a Role for each User for each Client it is
   assigned to.
+
 * **Update:** Renamed User.company to User.companies as the relation is now
   able to handle more than one Client instances for the User company.
+
+* **Update:** Task Status Workflow has been updated to convert the status of a
+  DREV task to HREV instead of WIP when the dependent tasks has been set to
+  CMPL. Also the timing of the task is expanded by the value of
+  ``stalker.defaults.timing_resolution`` if it doesn't have any effort left
+  (generally true for CMPL tasks) to allow the resource to review and decide if
+  he/she needs more time to do any update on the task and also give a chance of
+  setting the Task status to WIP by creating a time log.
 
 0.2.10.5
 ========

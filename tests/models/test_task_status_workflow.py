@@ -2075,8 +2075,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.assertEqual(self.test_task9.status, self.status_rts)
 
     # WIP: Dependency Status: DREV -> WIP
-    def test_stop_in_WIP_leaf_task_status_from_DREV_to_WIP(self):
-        """testing if the dependent task status updated from DREV to WIP when
+    def test_stop_in_WIP_leaf_task_status_from_DREV_to_HREV(self):
+        """testing if the dependent task status updated from DREV to HREV when
         the stop action is used in a WIP leaf task
         """
         # create a couple TimeLogs
@@ -2121,7 +2121,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
 
         self.test_task8.status = self.status_wip
         self.test_task8.stop()
-        self.assertEqual(self.test_task9.status, self.status_wip)
+        self.assertEqual(self.test_task9.status, self.status_hrev)
 
     # WIP: parent statuses
     def test_stop_in_DREV_leaf_task_check_parent_status(self):
@@ -2266,7 +2266,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.assertEqual(self.test_task9.status, self.status_rts)
 
     # DREV: Dependency Status: DREV -> WIP
-    def test_stop_in_DREV_leaf_task_dependent_task_status_updated_from_DREV_to_WIP(self):
+    def test_stop_in_DREV_leaf_task_dependent_task_status_updated_from_DREV_to_HREV(self):
         """testing if the dependent task statuses are updated correctly when
         the stop action is used in a DREV leaf task
         """
@@ -2295,7 +2295,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         )
         self.test_task8.status = self.status_wip
         self.test_task8.stop()
-        self.assertEqual(self.test_task9.status, self.status_wip)
+        self.assertEqual(self.test_task9.status, self.status_hrev)
 
     # OH
     def test_stop_in_OH_leaf_task(self):

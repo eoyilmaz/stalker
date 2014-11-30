@@ -127,6 +127,39 @@ class ReviewTestCase(unittest.TestCase):
         )
         DBSession.add(self.task3)
 
+        self.task4 = Task(
+            name='Test Task 4',
+            project=self.project,
+            resources=[self.user1],
+            depends=[self.task3],
+            responsible=[self.user2],
+            schedule_timing=2,
+            schedule_unit='h'
+        )
+        DBSession.add(self.task4)
+
+        self.task5 = Task(
+            name='Test Task 5',
+            project=self.project,
+            resources=[self.user2],
+            depends=[self.task3],
+            responsible=[self.user2],
+            schedule_timing=2,
+            schedule_unit='h'
+        )
+        DBSession.add(self.task5)
+
+        self.task6 = Task(
+            name='Test Task 6',
+            project=self.project,
+            resources=[self.user3],
+            depends=[self.task3],
+            responsible=[self.user2],
+            schedule_timing=2,
+            schedule_unit='h'
+        )
+        DBSession.add(self.task6)
+
         self.kwargs = {
             'task': self.task1,
             'reviewer': self.user1
@@ -417,6 +450,189 @@ class ReviewTestCase(unittest.TestCase):
         self.assertEqual(
             self.task2.status, self.status_cmpl
         )
+
+    def test_approve_method_updates_task_dependent_statuses(self):
+        """testing if approve method will also update the task dependent
+        statuses
+        """
+        self.task3.status = self.status_rts
+        now = datetime.datetime.now()
+        td = datetime.timedelta
+        self.task3.create_time_log(
+            resource=self.task3.resources[0],
+            start=now,
+            end=now + td(hours=1)
+        )
+
+        reviews = self.task3.request_review()
+        self.assertEqual(
+            self.task3.status, self.status_prev
+        )
+
+        review1 = reviews[0]
+        review1.approve()
+
+        self.assertEqual(
+            self.task3.status, self.status_cmpl
+        )
+
+        self.assertEqual(
+            self.task4.status, self.status_rts
+        )
+
+        self.assertEqual(
+            self.task5.status, self.status_rts
+        )
+
+        self.assertEqual(
+            self.task6.status, self.status_rts
+        )
+
+        # create time logs for task4 to make it wip
+        self.task4.create_time_log(
+            resource=self.task4.resources[0],
+            start=now + td(hours=1),
+            end=now + td(hours=2),
+        )
+
+        self.assertEqual(self.task4.status, self.status_wip)
+
+        # now request revision to task3
+        self.task3.request_revision(reviewer=self.task3.responsible[0])
+
+        # check statuses of task4 and task4
+        self.assertEqual(self.task4.status, self.status_drev)
+        self.assertEqual(self.task5.status, self.status_wfd)
+        self.assertEqual(self.task6.status, self.status_wfd)
+
+        # now approve task3
+        reviews = self.task3.review_set()
+        for rev in reviews:
+            rev.approve()
+
+        # check the task statuses again
+        self.assertEqual(self.task4.status, self.status_hrev)
+        self.assertEqual(self.task5.status, self.status_rts)
+        self.assertEqual(self.task5.status, self.status_rts)
+
+    def test_approve_method_updates_task_dependent_timings(self):
+        """testing if approve method will also update the task dependent
+        timings for DREV tasks with no effort left
+        """
+        self.task3.status = self.status_rts
+        now = datetime.datetime.now()
+        td = datetime.timedelta
+        self.task3.create_time_log(
+            resource=self.task3.resources[0],
+            start=now,
+            end=now + td(hours=1)
+        )
+
+        reviews = self.task3.request_review()
+        self.assertEqual(
+            self.task3.status, self.status_prev
+        )
+
+        review1 = reviews[0]
+        review1.approve()
+
+        self.assertEqual(
+            self.task3.status, self.status_cmpl
+        )
+
+        self.assertEqual(
+            self.task4.status, self.status_rts
+        )
+
+        self.assertEqual(
+            self.task5.status, self.status_rts
+        )
+
+        self.assertEqual(
+            self.task6.status, self.status_rts
+        )
+
+        # create time logs for task4 and task5 to make them wip
+        self.task4.create_time_log(
+            resource=self.task4.resources[0],
+            start=now + td(hours=1),
+            end=now + td(hours=2),
+        )
+
+        self.task5.create_time_log(
+            resource=self.task5.resources[0],
+            start=now + td(hours=1),
+            end=now + td(hours=2),
+        )
+
+        # no time log for task6
+
+        self.assertEqual(self.task4.status, self.status_wip)
+        self.assertEqual(self.task5.status, self.status_wip)
+        self.assertEqual(self.task6.status, self.status_rts)
+
+        # now request revision to task3
+        self.task3.request_revision(reviewer=self.task3.responsible[0])
+
+        # check statuses of task4 and task4
+        self.assertEqual(self.task4.status, self.status_drev)
+        self.assertEqual(self.task5.status, self.status_drev)
+        self.assertEqual(self.task6.status, self.status_wfd)
+
+        # TODO: add a new dependent task with schedule_model is not 'effort'
+        # enter a new time log for task4 to complete its allowed time
+        self.task4.create_time_log(
+            resource=self.task4.resources[0],
+            start=now + td(hours=2),
+            end=now + td(hours=3),
+        )
+
+        # the task should have not effort left
+        self.assertEqual(
+            self.task4.schedule_seconds,
+            self.task4.total_logged_seconds
+        )
+
+        # task5 should have an extra time
+        self.assertEqual(
+            self.task5.schedule_seconds,
+            self.task5.total_logged_seconds + 3600
+        )
+
+        # task6 should be intact
+        self.assertEqual(
+            self.task6.total_logged_seconds,
+            0
+        )
+
+        # now approve task3
+        reviews = self.task3.review_set()
+        for rev in reviews:
+            rev.approve()
+
+        # check the task statuses again
+        self.assertEqual(self.task4.status, self.status_hrev)
+        self.assertEqual(self.task5.status, self.status_hrev)
+        self.assertEqual(self.task6.status, self.status_rts)
+
+        # and check if task4 is expanded by the timing resolution
+        self.assertEqual(
+            self.task4.schedule_seconds,
+            self.task4.total_logged_seconds + 3600
+        )
+
+        # and task5 still has 1 hours
+        self.assertEqual(
+            self.task4.schedule_seconds,
+            self.task4.total_logged_seconds + 3600
+        )
+
+        # and task6 intact
+        self.assertEqual(
+            self.task6.total_logged_seconds,
+            0
+        )
+
 
     def test_approve_method_updates_task_status_correctly_for_a_multi_responsible_task_when_one_approve(self):
         """testing if the Review.approve() method will update the task status

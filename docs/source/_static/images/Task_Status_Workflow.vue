@@ -1,18 +1,18 @@
-<!-- Tufts VUE 3.2.1 concept-map (Task_Status_Workflow_v005.vue) 2014-01-22 -->
+<!-- Tufts VUE 3.2.2 concept-map (Task_Status_Workflow_v006.vue) 2014-11-29 -->
 <!-- Tufts VUE: http://vue.tufts.edu/ -->
-<!-- Do Not Remove: VUE mapping @version(1.1) jar:file:/usr/share/vue/VUE.jar!/tufts/vue/resources/lw_mapping_1_1.xml -->
-<!-- Do Not Remove: Saved date Wed Jan 22 23:26:32 EET 2014 by eoyilmaz on platform Linux 3.12.8-300.fc20.x86_64 in JVM 1.7.0_45-b18 -->
-<!-- Do Not Remove: Saving version @(#)VUE: built May 18 2013 at 1507 by tomadm on Linux 2.6.18-348.2.1.el5 i386 JVM 1.6.0_41-b02(bits=32) -->
+<!-- Do Not Remove: VUE mapping @version(1.1) jar:file:/home/eoyilmaz/.local/share/vue/VUE.jar!/tufts/vue/resources/lw_mapping_1_1.xml -->
+<!-- Do Not Remove: Saved date Sat Nov 29 07:11:04 EET 2014 by eoyilmaz on platform Linux 3.16.7-200.fc20.x86_64 in JVM 1.7.0_45-b18 -->
+<!-- Do Not Remove: Saving version @(#)VUE: built May 23 2013 at 2146 by tomadm on Linux 2.6.18-348.2.1.el5 i386 JVM 1.7.0_21-b11(bits=32) -->
 <?xml version="1.0" encoding="US-ASCII"?>
 <LW-MAP xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="none" ID="0"
-    label="Task_Status_Workflow_v005.vue" created="1388347735325"
+    label="Task_Status_Workflow_v006.vue" created="1388347735325"
     x="0.0" y="0.0" width="1.4E-45" height="1.4E-45" strokeWidth="0.0" autoSized="false">
-    <resource referenceCreated="1390425992659" size="33459"
-        spec="/home/eoyilmaz/Documents/development/stalker/stalker/docs/source/_static/images/Task_Status_Workflow_v005.vue"
+    <resource referenceCreated="1417237864407" size="35145"
+        spec="/home/eoyilmaz/Documents/development/stalker/stalker/docs/source/_static/images/Task_Status_Workflow_v006.vue"
         type="1" xsi:type="URLResource">
-        <title>Task_Status_Workflow_v005.vue</title>
-        <property key="File" value="/home/eoyilmaz/Documents/development/stalker/stalker/docs/source/_static/images/Task_Status_Workflow_v005.vue"/>
+        <title>Task_Status_Workflow_v006.vue</title>
+        <property key="File" value="/home/eoyilmaz/Documents/development/stalker/stalker/docs/source/_static/images/Task_Status_Workflow_v006.vue"/>
     </resource>
     <fillColor>#FFFFFF</fillColor>
     <strokeColor>#404040</strokeColor>
@@ -280,19 +280,19 @@
         <ctrlPoint0 x="1220.275" y="373.5583" xsi:type="point"/>
     </child>
     <child ID="54" label="task.depends[*].approve" layerID="1"
-        created="1389987236672" x="822.6396" y="248.92041"
-        width="181.06439" height="179.59073" strokeWidth="3.0"
+        created="1389987236672" x="857.70386" y="293.70032"
+        width="152.49811" height="126.148285" strokeWidth="3.0"
         strokeStyle="4" autoSized="false" controlCount="1"
         arrowState="2" xsi:type="link">
         <strokeColor>#EA2218</strokeColor>
         <textColor>#404040</textColor>
         <font>Arial-plain-11</font>
         <URIString>http://vue.tufts.edu/rdf/resource/a1b6ceda7f0000013b244fea6bf684bb</URIString>
-        <point1 x="1002.204" y="427.01114"/>
-        <point2 x="859.46497" y="250.42041"/>
+        <point1 x="1003.224" y="418.3486"/>
+        <point2 x="1008.70197" y="295.20032"/>
         <ID1 xsi:type="node">48</ID1>
-        <ID2 xsi:type="node">9</ID2>
-        <ctrlPoint0 x="832.44476" y="427.53494" xsi:type="point"/>
+        <ID2 xsi:type="node">13</ID2>
+        <ctrlPoint0 x="827.44476" y="378.53494" xsi:type="point"/>
     </child>
     <child ID="59" label="task.depends[*].request_revision" layerID="1"
         created="1390041848192" x="864.2536" y="243.94739" width="159.0"
@@ -512,10 +512,10 @@
   &lt;head style="color: #404040" color="#404040"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-size: 11; margin-right: 0px; margin-bottom: 0px; margin-top: 0px; font-family: Arial; color: #404040; margin-left: 0px }
-        ol { font-size: 11; vertical-align: middle; margin-top: 6; list-style-position: outside; font-family: Arial; margin-left: 30 }
-        p { margin-right: 0; margin-bottom: 0; margin-top: 0; color: #404040; margin-left: 0 }
-        ul { font-size: 11; vertical-align: middle; margin-top: 6; list-style-position: outside; font-family: Arial; margin-left: 30 }
+        body { font-size: 11; font-family: Arial; margin-left: 0px; margin-right: 0px; margin-top: 0px; color: #404040; margin-bottom: 0px }
+        ol { font-size: 11; font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; margin-top: 6 }
+        p { margin-left: 0; margin-right: 0; margin-top: 0; color: #404040; margin-bottom: 0 }
+        ul { font-size: 11; font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -540,10 +540,10 @@
   &lt;head style="color: #404040" color="#404040"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { font-size: 11; margin-right: 0px; margin-bottom: 0px; margin-top: 0px; font-family: Arial; color: #404040; margin-left: 0px }
-        ol { font-size: 11; vertical-align: middle; margin-top: 6; list-style-position: outside; font-family: Arial; margin-left: 30 }
-        p { margin-right: 0; margin-bottom: 0; margin-top: 0; color: #404040; margin-left: 0 }
-        ul { font-size: 11; vertical-align: middle; margin-top: 6; list-style-position: outside; font-family: Arial; margin-left: 30 }
+        body { font-size: 11; font-family: Arial; margin-left: 0px; margin-right: 0px; margin-top: 0px; color: #404040; margin-bottom: 0px }
+        ol { font-size: 11; font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; margin-top: 6 }
+        p { margin-left: 0; margin-right: 0; margin-top: 0; color: #404040; margin-bottom: 0 }
+        ul { font-size: 11; font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -619,7 +619,7 @@
         y="0.0" width="1.4E-45" height="1.4E-45" strokeWidth="0.0" autoSized="false">
         <URIString>http://vue.tufts.edu/rdf/resource/400bcd5c39fad37c2b0b7e543d00aadd</URIString>
     </layer>
-    <userZoom>1.5</userZoom>
+    <userZoom>0.18608259875672808</userZoom>
     <userOrigin x="377.86865" y="-133.60693"/>
     <presentationBackground>#202020</presentationBackground>
     <PathwayList currentPathway="0" revealerIndex="-1">
@@ -673,5 +673,5 @@
     <date>2013-12-29</date>
     <modelVersion>6</modelVersion>
     <saveLocation>/home/eoyilmaz/Documents/development/stalker/stalker/docs/source/_static/images</saveLocation>
-    <saveFile>/home/eoyilmaz/Documents/development/stalker/stalker/docs/source/_static/images/Task_Status_Workflow_v005.vue</saveFile>
+    <saveFile>/home/eoyilmaz/Documents/development/stalker/stalker/docs/source/_static/images/Task_Status_Workflow_v006.vue</saveFile>
 </LW-MAP>
