@@ -900,16 +900,16 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         # print "%s:self.test_project" % self.test_project.id
         # print "%s:self.test_project2" % self.test_project2.id
         # print "%s:self.test_project3" % self.test_project3.id
-        # 
+        #
         # print "%s:self.test_asset1" % self.test_asset1.id
         # print "%s:self.test_asset2" % self.test_asset2.id
-        # 
+        #
         # print "%s:self.test_shot1.id" % self.test_shot1.id
         # print "%s:self.test_shot2.id" % self.test_shot2.id
         # print "%s:self.test_shot3.id" % self.test_shot3.id
         # print "%s:self.test_shot4.id" % self.test_shot4.id
         # print "%s:self.test_shot5.id" % self.test_shot5.id
-        # 
+        #
         # print "%s:self.test_task1.id" % self.test_task1.id
         # print "%s:self.test_task2.id" % self.test_task2.id
         # print "%s:self.test_task3.id" % self.test_task3.id
@@ -919,7 +919,7 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         # print "%s:self.test_task7.id" % self.test_task7.id
         # print "%s:self.test_task8.id" % self.test_task8.id
         # print "%s:self.test_task9.id" % self.test_task9.id
-        # 
+        #
         # print "%s:self.test_task10.id" % self.test_task10.id
         # print "%s:self.test_task11.id" % self.test_task11.id
         # print "%s:self.test_task12.id" % self.test_task12.id
@@ -930,7 +930,7 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         # print "%s:self.test_task17.id" % self.test_task17.id
         # print "%s:self.test_task18.id" % self.test_task18.id
         # print "%s:self.test_task19.id" % self.test_task19.id
-        # 
+        #
         # print "%s:self.test_task20.id" % self.test_task20.id
         # print "%s:self.test_task21.id" % self.test_task21.id
         # print "%s:self.test_task22.id" % self.test_task22.id
@@ -1449,7 +1449,296 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
             [self.test_user3]
         )
 
-    # def test_schedule_will_raise_a_RuntimeError_if_is_scheduling_is_True(self):
+    def test_schedule_will_schedule_only_the_tasks_of_the_given_projects_with_the_given_scheduler(self):
+        """testing if the schedule method will schedule the tasks of the given
+        projects with the given scheduler
+        """
+        # create a dummy Project to schedule
+        dummy_project = Project(
+            name='Dummy Project',
+            code='DP',
+            repository=self.test_repo
+        )
+
+        dt1 = Task(
+            name='Dummy Task 1',
+            project=dummy_project,
+            schedule_timing=4,
+            schedule_unit='h',
+            resources=[self.test_user1]
+        )
+
+        dt2 = Task(
+            name='Dummy Task 2',
+            project=dummy_project,
+            schedule_timing=4,
+            schedule_unit='h',
+            resources=[self.test_user2]
+        )
+        db.DBSession.add_all([dummy_project, dt1, dt2])
+        db.DBSession.commit()
+
+        tj_scheduler = TaskJugglerScheduler(
+            compute_resources=True,
+            projects=[dummy_project]
+        )
+
+        self.test_studio.now = datetime.datetime(2013, 4, 15, 22, 56)
+        self.test_studio.start = datetime.datetime(2013, 4, 15, 22, 56)
+        self.test_studio.end = datetime.datetime(2013, 7, 30, 0, 0)
+
+        self.test_studio.scheduler = tj_scheduler
+        self.test_studio.schedule()
+        db.DBSession.commit()
+
+        # now check the timings of the tasks are all adjusted
+        self.assertEqual(
+            dt1.computed_start,
+            datetime.datetime(2013, 4, 16, 9, 0)
+        )
+        self.assertEqual(
+            dt1.computed_end,
+            datetime.datetime(2013, 4, 16, 13, 0)
+        )
+
+        self.assertEqual(
+            dt2.computed_start,
+            datetime.datetime(2013, 4, 16, 9, 0)
+        )
+        self.assertEqual(
+            dt2.computed_end,
+            datetime.datetime(2013, 4, 16, 13, 0)
+        )
+
+        # self.test_project
+        self.assertEqual(self.test_project1.computed_start, None)
+        self.assertEqual(self.test_project1.computed_end, None)
+
+        # self.test_asset1
+        self.assertEqual(self.test_asset1.computed_start, None)
+        self.assertEqual(self.test_asset1.computed_end, None)
+
+        self.assertEqual(self.test_asset1.computed_resources,
+                         self.test_asset1.resources)
+
+        # self.test_task24
+        self.assertEqual(self.test_task24.computed_start, None)
+        self.assertEqual(self.test_task24.computed_end, None)
+
+        self.assertEqual(self.test_task24.computed_resources,
+                         self.test_task24.resources)
+
+        # self.test_task25
+        self.assertEqual(self.test_task25.computed_start, None)
+        self.assertEqual(self.test_task25.computed_end, None)
+
+        self.assertEqual(self.test_task25.computed_resources,
+                         self.test_task25.resources)
+
+        # self.test_task26
+        self.assertEqual(self.test_task26.computed_start, None)
+        self.assertEqual(self.test_task26.computed_end, None)
+
+        self.assertEqual(self.test_task26.computed_resources,
+                         self.test_task26.resources)
+
+        # self.test_task27
+        self.assertEqual(self.test_task27.computed_start, None)
+        self.assertEqual(self.test_task27.computed_end, None)
+
+        self.assertEqual(self.test_task27.computed_resources,
+                         self.test_task27.resources)
+
+        # self.test_shot2
+        self.assertEqual(self.test_shot2.computed_start, None)
+        self.assertEqual(self.test_shot2.computed_end, None)
+
+        self.assertEqual(self.test_shot2.computed_resources,
+                         self.test_shot2.resources)
+
+        # self.test_task8
+        self.assertEqual(self.test_task8.computed_start, None)
+        self.assertEqual(self.test_task8.computed_end, None)
+
+        self.assertEqual(self.test_task8.computed_resources,
+                         self.test_task8.resources)
+
+        # self.test_task9
+        self.assertEqual(self.test_task9.computed_start, None)
+        self.assertEqual(self.test_task9.computed_end, None)
+
+        self.assertEqual(self.test_task9.computed_resources,
+                         self.test_task9.resources)
+
+        # self.test_task10
+        self.assertEqual(self.test_task10.computed_start, None)
+        self.assertEqual(self.test_task10.computed_end, None)
+
+        self.assertEqual(self.test_task10.computed_resources,
+                         self.test_task10.resources)
+
+        # self.test_task11
+        self.assertEqual(self.test_task11.computed_start, None)
+        self.assertEqual(self.test_task11.computed_end, None)
+
+        self.assertEqual(self.test_task11.computed_resources,
+                         self.test_task11.resources)
+
+        # self.test_shot1
+        self.assertEqual(self.test_shot1.computed_start, None)
+        self.assertEqual(self.test_shot1.computed_end, None)
+
+        self.assertEqual(self.test_shot1.computed_resources,
+                         self.test_shot1.resources)
+
+        # self.test_task4
+        self.assertEqual(self.test_task4.computed_start, None)
+        self.assertEqual(self.test_task4.computed_end, None)
+
+        self.assertEqual(self.test_task4.computed_resources,
+                         self.test_task4.resources)
+
+        # self.test_task5
+        self.assertEqual(self.test_task5.computed_start, None)
+        self.assertEqual(self.test_task5.computed_end, None)
+
+        self.assertEqual(self.test_task5.computed_resources,
+                         self.test_task5.resources)
+
+        # self.test_task6
+        self.assertEqual(self.test_task6.computed_start, None)
+        self.assertEqual(self.test_task6.computed_end, None)
+
+        self.assertEqual(self.test_task6.computed_resources,
+                         self.test_task6.resources)
+
+        # self.test_task7
+        self.assertEqual(self.test_task7.computed_start, None)
+        self.assertEqual(self.test_task7.computed_end, None)
+
+        self.assertEqual(self.test_task7.computed_resources,
+                         self.test_task7.resources)
+
+        # self.test_task1
+        self.assertEqual(self.test_task1.computed_start, None)
+        self.assertEqual(self.test_task1.computed_end, None)
+
+        self.assertEqual(self.test_task1.computed_resources,
+                         self.test_task1.resources)
+
+        # self.test_asset2
+        self.assertEqual(self.test_asset2.computed_start, None)
+        self.assertEqual(self.test_asset2.computed_end, None)
+
+        self.assertEqual(self.test_asset2.computed_resources,
+                         self.test_asset2.resources)
+
+        # self.test_task28
+        self.assertEqual(self.test_task28.computed_start, None)
+        self.assertEqual(self.test_task28.computed_end, None)
+
+        self.assertEqual(self.test_task28.computed_resources,
+                         self.test_task28.resources)
+
+        # self.test_task29
+        self.assertEqual(self.test_task29.computed_start, None)
+        self.assertEqual(self.test_task29.computed_end, None)
+
+        self.assertEqual(self.test_task29.computed_resources,
+                         self.test_task29.resources)
+
+        # self.test_task30
+        self.assertEqual(self.test_task30.computed_start, None)
+        self.assertEqual(self.test_task30.computed_end, None)
+
+        self.assertEqual(self.test_task30.computed_resources,
+                         self.test_task30.resources)
+
+        # self.test_task31
+        self.assertEqual(self.test_task31.computed_start, None)
+        self.assertEqual(self.test_task31.computed_end, None)
+
+        self.assertEqual(self.test_task31.computed_resources,
+                         self.test_task31.resources)
+
+        # self.test_shot3
+        self.assertEqual(self.test_shot3.computed_start, None)
+        self.assertEqual(self.test_shot3.computed_end, None)
+
+        self.assertEqual(self.test_shot3.computed_resources,
+                         self.test_shot3.resources)
+
+        # self.test_task12
+        self.assertEqual(self.test_task12.computed_start, None)
+        self.assertEqual(self.test_task12.computed_end, None)
+
+        self.assertEqual(self.test_task12.computed_resources,
+                         self.test_task12.resources)
+
+        # self.test_task13
+        self.assertEqual(self.test_task13.computed_start, None)
+        self.assertEqual(self.test_task13.computed_end, None)
+
+        self.assertEqual(self.test_task13.computed_resources,
+                         self.test_task13.resources)
+
+        # self.test_task14
+        self.assertEqual(self.test_task14.computed_start, None)
+        self.assertEqual(self.test_task14.computed_end, None)
+
+        self.assertEqual(self.test_task14.computed_resources,
+                         self.test_task14.resources)
+
+        # self.test_task15
+        self.assertEqual(self.test_task15.computed_start, None)
+        self.assertEqual(self.test_task15.computed_end, None)
+
+        self.assertEqual(self.test_task15.computed_resources,
+                         self.test_task15.resources)
+
+        # self.test_shot4
+        self.assertEqual(self.test_shot4.computed_start, None)
+        self.assertEqual(self.test_shot4.computed_end, None)
+
+        self.assertEqual(self.test_shot4.computed_resources,
+                         self.test_shot4.resources)
+
+        # self.test_task16
+        self.assertEqual(self.test_task16.computed_start, None)
+        self.assertEqual(self.test_task16.computed_end, None)
+
+        self.assertEqual(self.test_task16.computed_resources,
+                         self.test_task16.resources)
+
+        # self.test_task17
+        self.assertEqual(self.test_task17.computed_start, None)
+        self.assertEqual(self.test_task17.computed_end, None)
+
+        self.assertEqual(self.test_task17.computed_resources,
+                         self.test_task17.resources)
+
+        # self.test_task18
+        self.assertEqual(self.test_task18.computed_start, None)
+        self.assertEqual(self.test_task18.computed_end, None)
+
+        self.assertEqual(self.test_task18.computed_resources,
+                         self.test_task18.resources)
+
+        # self.test_task19
+        self.assertEqual(self.test_task19.computed_start, None)
+        self.assertEqual(self.test_task19.computed_end, None)
+
+        self.assertEqual(self.test_task19.computed_resources,
+                         self.test_task19.resources)
+
+        # self.test_task2
+        self.assertEqual(self.test_task2.computed_start, None)
+        self.assertEqual(self.test_task2.computed_end, None)
+
+        self.assertEqual(self.test_task2.computed_resources,
+                         self.test_task2.resources)
+
+# def test_schedule_will_raise_a_RuntimeError_if_is_scheduling_is_True(self):
     #     """testing if a RuntimeError will be raised when the schedule method
     #     is called and the is_scheduling attribute is True
     #     """
@@ -1457,7 +1746,7 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
     #     self.test_studio.now = datetime.datetime(2013, 4, 15, 22, 56)
     #     self.test_studio.start = datetime.datetime(2013, 4, 15, 22, 56)
     #     self.test_studio.end = datetime.datetime(2013, 7, 30, 0, 0)
-    # 
+    #
     #     self.test_studio.scheduler = tj_scheduler
     #     self.test_studio.is_scheduling = True
     #     self.test_studio.is_scheduling_by = self.test_user1

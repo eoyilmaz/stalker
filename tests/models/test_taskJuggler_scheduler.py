@@ -507,6 +507,192 @@ task Task_{{task2.id}} "Task_{{task2.id}}" {
             sorted(self.test_task2.computed_resources, key=lambda x: x.name)
         )
 
+    def test_tasks_of_given_projects_are_correctly_scheduled(self):
+        """testing if the tasks of given projects are correctly scheduled
+        """
+        # create a dummy project
+        # create a dummy Project to schedule
+        dummy_project = Project(
+            name='Dummy Project',
+            code='DP',
+            repository=self.test_repo
+        )
+
+        dt1 = Task(
+            name='Dummy Task 1',
+            project=dummy_project,
+            schedule_timing=4,
+            schedule_unit='h',
+            resources=[self.test_user1]
+        )
+
+        dt2 = Task(
+            name='Dummy Task 2',
+            project=dummy_project,
+            schedule_timing=4,
+            schedule_unit='h',
+            resources=[self.test_user2]
+        )
+        db.DBSession.add_all([dummy_project, dt1, dt2])
+        db.DBSession.commit()
+
+        tjp_sched = TaskJugglerScheduler(compute_resources=True,
+                                         projects=[dummy_project])
+        test_studio = Studio(name='Test Studio',
+                             now=datetime.datetime(2013, 4, 16, 0, 0))
+        test_studio.start = datetime.datetime(2013, 4, 16, 0, 0)
+        test_studio.end = datetime.datetime(2013, 4, 30, 0, 0)
+        test_studio.daily_working_hours = 9
+        DBSession.add(test_studio)
+        db.DBSession.commit()
+
+        tjp_sched.studio = test_studio
+        tjp_sched.schedule()
+        db.DBSession.commit()
+
+        # check if the task and project timings are all adjusted
+        self.assertEqual(self.test_proj1.computed_start, None)
+        self.assertEqual(self.test_proj1.computed_end, None)
+
+        self.assertEqual(self.test_task1.computed_start, None)
+        self.assertEqual(self.test_task1.computed_end, None)
+        self.assertEqual(self.test_task1.computed_resources,
+                         [self.test_user1, self.test_user2])
+
+        self.assertEqual(self.test_task2.computed_start, None)
+        self.assertEqual(self.test_task2.computed_end, None)
+        self.assertEqual(self.test_task2.computed_resources,
+                         [self.test_user1, self.test_user2])
+
+        self.assertEqual(dt1.computed_start,
+                         datetime.datetime(2013, 4, 16, 9, 0))
+        self.assertEqual(dt1.computed_end,
+                         datetime.datetime(2013, 4, 16, 13, 0))
+
+        self.assertEqual(dt2.computed_start,
+                         datetime.datetime(2013, 4, 16, 9, 0))
+        self.assertEqual(dt2.computed_end,
+                         datetime.datetime(2013, 4, 16, 13, 0))
+
+    def test_projects_argument_is_skipped(self):
+        """testing if the projects attribute will be an empty list if the
+        projects argument is skipped
+        """
+        tjp_sched = TaskJugglerScheduler(compute_resources=True)
+        self.assertEqual(tjp_sched.projects, [])
+
+    def test_projects_argument_is_None(self):
+        """testing if the projects attribute will be an empty list if the
+        projects argument is None
+        """
+        tjp_sched = TaskJugglerScheduler(compute_resources=True, projects=None)
+        self.assertEqual(tjp_sched.projects, [])
+
+    def test_projects_attribute_is_set_to_None(self):
+        """testing if the projects attribute will be an empty list if it is set
+        to None
+        """
+        tjp_sched = TaskJugglerScheduler(compute_resources=True)
+        tjp_sched.projects = None
+        self.assertEqual(tjp_sched.projects, [])
+
+    def test_projects_argument_is_not_a_list(self):
+        """testing if a TypeError will be raised when the projects argument
+        value is not a list
+        """
+        with self.assertRaises(TypeError) as cm:
+            TaskJugglerScheduler(compute_resources=True,
+                                 projects='not a list of projects')
+
+        self.assertEqual(
+            str(cm.exception),
+            'TaskJugglerScheduler.projects should be a list of '
+            'stalker.models.project.Project instances, not str'
+        )
+
+    def test_projects_attribute_is_not_a_list(self):
+        """testing if a TypeError will be raised when the projects attribute
+        is set to something else than a list
+        """
+        tjp = TaskJugglerScheduler(compute_resources=True)
+        with self.assertRaises(TypeError) as cm:
+            tjp.projects = 'not a list of projects'
+
+        self.assertEqual(
+            str(cm.exception),
+            'TaskJugglerScheduler.projects should be a list of '
+            'stalker.models.project.Project instances, not str'
+        )
+
+    def test_projects_argument_is_not_a_list_of_all_projects(self):
+        """testing if a TypeError will be raised when the elements in the
+        projects argument is not all Project instances
+        """
+        with self.assertRaises(TypeError) as cm:
+            TaskJugglerScheduler(compute_resources=True,
+                                 projects=['not', 1, [], 'of', 'projects'])
+
+        self.assertEqual(
+            str(cm.exception),
+            'TaskJugglerScheduler.projects should be a list of '
+            'stalker.models.project.Project instances, not str'
+        )
+
+    def test_projects_attribute_is_not_list_of_all_projects(self):
+        """testing if a TypeError will be raised when the elements in the
+        projects attribute is not all Project instances
+        """
+        tjp = TaskJugglerScheduler(compute_resources=True)
+        with self.assertRaises(TypeError) as cm:
+            tjp.projects = ['not', 1, [], 'of', 'projects']
+
+        self.assertEqual(
+            str(cm.exception),
+            'TaskJugglerScheduler.projects should be a list of '
+            'stalker.models.project.Project instances, not str'
+        )
+
+    def test_projects_argument_is_working_properly(self):
+        """testing if the projects argument value is correctly passed to the
+        projects attribute
+        """
+        dp1 = Project(
+            name='Dummy Project',
+            code='DP',
+            repository=self.test_repo
+        )
+
+        dp2 = Project(
+            name='Dummy Project',
+            code='DP',
+            repository=self.test_repo
+        )
+
+        tjp = TaskJugglerScheduler(compute_resources=True,
+                                   projects=[dp1, dp2])
+
+        self.assertEqual(tjp.projects, [dp1, dp2])
+
+    def test_projects_attribute_is_working_properly(self):
+        """testing if the projects attribute is working properly
+        """
+        dp1 = Project(
+            name='Dummy Project',
+            code='DP',
+            repository=self.test_repo
+        )
+
+        dp2 = Project(
+            name='Dummy Project',
+            code='DP',
+            repository=self.test_repo
+        )
+
+        tjp = TaskJugglerScheduler(compute_resources=True)
+        tjp.projects = [dp1, dp2]
+
+        self.assertEqual(tjp.projects, [dp1, dp2])
+
 
 class TaskJugglerScheduler_PostgreSQL_Tester(TaskJugglerSchedulerTester):
     """tests the stalker.models.scheduler.TaskJugglerScheduler class with
@@ -528,13 +714,26 @@ class TaskJugglerScheduler_PostgreSQL_Tester(TaskJugglerSchedulerTester):
         Base.metadata.drop_all(db.DBSession.connection())
         DBSession.commit()
 
+    def setUp(self):
+        """set up
+        """
+        from stalker.db.declarative import Base
+        Base.metadata.drop_all(db.DBSession.connection())
+        DBSession.commit()
+
+        super(TaskJugglerScheduler_PostgreSQL_Tester, self).setUp()
+
     def tearDown(self):
         """clean up the test
         """
         # clean up test database
         from stalker.db.declarative import Base
         Base.metadata.drop_all(db.DBSession.connection())
-        DBSession.commit()
+        from sqlalchemy.exc import ProgrammingError
+        try:
+            DBSession.commit()
+        except ProgrammingError:
+            DBSession.rollback()
 
     def test_tjp_file_content_is_correct(self):
         """testing if the tjp file content is correct

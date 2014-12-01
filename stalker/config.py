@@ -375,7 +375,7 @@ resource {{department.tjp_id}} "{{department.tjp_id}}" {
         }
 
         # tasks
-        {% for project in studio.active_projects %}
+        {% for project in projects %}
             {{project.to_tjp}}
         {% endfor %}
 

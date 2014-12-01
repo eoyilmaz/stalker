@@ -29,8 +29,6 @@ import stalker
 from stalker import defaults
 from stalker.log import logging_level
 
-from stalker.models.entity import Entity
-
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
@@ -177,7 +175,8 @@ class TaskJugglerScheduler(SchedulerBase):
     def __init__(self,
                  studio=None,
                  compute_resources=False,
-                 parsing_method=0):
+                 parsing_method=0,
+                 projects=None):
         super(TaskJugglerScheduler, self).__init__(studio)
 
         self.tjp_content = ''
@@ -194,6 +193,9 @@ class TaskJugglerScheduler(SchedulerBase):
 
         self.compute_resources = compute_resources
         self.parsing_method = parsing_method
+
+        self._projects = []
+        self.projects = projects
 
     def _create_tjp_file(self):
         """creates the tjp file
@@ -220,9 +222,12 @@ class TaskJugglerScheduler(SchedulerBase):
         if engine.dialect.name == 'postgresql':
             template = Template(defaults.tjp_main_template2)
 
-            project_ids = db.DBSession.connection().execute(
-                'select id, code from "Projects"'
-            ).fetchall()
+            if not self.projects:
+                project_ids = db.DBSession.connection().execute(
+                    'select id, code from "Projects"'
+                ).fetchall()
+            else:
+                project_ids = [[project.id] for project in self.projects]
 
             sql_query = """select
     "Tasks".id,
@@ -336,8 +341,6 @@ left outer join (
     ) as tasks on "Task_Dependencies".depends_to_id = tasks.id
     group by task_id
 ) as task_dependencies on "Tasks".id = task_dependencies.task_id
-
---where "Tasks".id = 43853
 
 --order by "Tasks".id
 order by path_as_text"""
@@ -513,9 +516,15 @@ order by path_as_text"""
             # fallback to the previous implementation
             template = Template(defaults.tjp_main_template)
 
+            if self.projects:
+                projects = self.projects
+            else:
+                projects = self.studio.active_projects
+
             self.tjp_content = template.render({
                 'stalker': stalker,
                 'studio': self.studio,
+                'projects': projects,
                 'csv_file_name': self.temp_file_name,
                 'csv_file_full_path': self.temp_file_full_path,
                 'compute_resources': self.compute_resources
@@ -725,6 +734,48 @@ order by path_as_text"""
         logger.debug('tj3 return code: %s' % process.returncode)
 
         # remove the tjp file
-        #self._clean_up()
+        self._clean_up()
 
         return stderr_buffer
+
+    def _validate_projects(self, projects):
+        """validates the given projects value
+        """
+        if projects is None:
+            projects = []
+
+        msg = '%(class)s.projects should be a list of ' \
+            'stalker.models.project.Project instances, not ' \
+            '%(projects_class)s'
+
+        if not isinstance(projects, list):
+            raise TypeError(
+                msg % {
+                    'class': self.__class__.__name__,
+                    'projects_class': projects.__class__.__name__
+                }
+            )
+
+        from stalker import Project
+        for item in projects:
+            if not isinstance(item, Project):
+                raise TypeError(
+                    msg % {
+                        'class': self.__class__.__name__,
+                        'projects_class': item.__class__.__name__
+                    }
+                )
+
+        return projects
+
+    @property
+    def projects(self):
+        """getter for the _project attribute
+        """
+        return self._projects
+
+    @projects.setter
+    def projects(self, projects):
+        """setter for the _project attribute
+        """
+        self._projects = self._validate_projects(projects)

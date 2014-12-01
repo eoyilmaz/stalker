@@ -46,6 +46,9 @@ Stalker Changes
   he/she needs more time to do any update on the task and also give a chance of
   setting the Task status to WIP by creating a time log.
 
+* **New:** It is now possible to schedule only a desired set of projects by
+  passing a **projects** argument to the TaskJugglerScheduler.
+
 0.2.10.5
 ========
 
