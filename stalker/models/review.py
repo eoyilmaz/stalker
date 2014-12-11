@@ -264,13 +264,15 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
 
             self.task._review_number += 1
             if revise_task:
-                # revise the task
-                logger.debug('total_seconds including reviews: %s' %
-                             total_seconds)
-                timing, unit = self.least_meaningful_time_unit(total_seconds)
+                # revise the task timing if the task needs more time
+                if total_seconds > self.task.schedule_seconds:
+                    logger.debug('total_seconds including reviews: %s' %
+                                 total_seconds)
+                    timing, unit = \
+                        self.least_meaningful_time_unit(total_seconds)
 
-                self.task.schedule_timing = timing
-                self.task.schedule_unit = unit
+                    self.task.schedule_timing = timing
+                    self.task.schedule_unit = unit
                 self.task.status = hrev
             else:
                 # approve the task

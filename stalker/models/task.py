@@ -2089,10 +2089,12 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
 
     def request_review(self):
         """Creates and returns Review instances for each of the responsible of
-        this task and sets the task status to PREV. Also calling this method
-        will cap the schedule timing of this task to current time spent on it.
-        Thus a task with 4 days of effort can be capped to 2 days if a review
-        is requested at day 2. Only applicable to leaf tasks.
+        this task and sets the task status to PREV.
+
+        .. versionadded:: 0.2.0
+          Request review will not cap the timing of this task anymore.
+
+        Only applicable to leaf tasks.
         """
         # check task status
         with DBSession.no_autoflush:
@@ -2109,11 +2111,6 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
                     'status': self.status.code
                 }
             )
-        # crop the timing to the current schedule timing
-        timing, unit = \
-            self.least_meaningful_time_unit(self.total_logged_seconds)
-        self.schedule_timing = timing
-        self.schedule_unit = unit
 
         # create Review instances for each Responsible of this task
         from stalker.models.review import Review

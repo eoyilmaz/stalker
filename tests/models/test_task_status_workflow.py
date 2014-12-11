@@ -1316,8 +1316,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
             schedule_timing=schedule_timing,
             schedule_unit=schedule_unit
         )
-        self.assertEqual(self.test_task3.schedule_timing, 4)
-        self.assertEqual(self.test_task3.schedule_unit, 'h')
+        self.assertEqual(self.test_task3.schedule_timing, 10)
+        self.assertEqual(self.test_task3.schedule_unit, 'd')
 
     #PREV: Schedule info update also consider RREV Reviews
     def test_request_revision_in_PREV_leaf_task_schedule_info_update_also_considers_other_RREV_reviews_with_same_review_number(self):
@@ -1375,8 +1375,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         )
 
         # the final timing should be 12 hours
-        self.assertEqual(self.test_task3.schedule_timing, 12)
-        self.assertEqual(self.test_task3.schedule_unit, 'h')
+        self.assertEqual(self.test_task3.schedule_timing, 10)
+        self.assertEqual(self.test_task3.schedule_unit, 'd')
 
     #PREV: Review instances statuses are updated
     def test_request_revision_in_PREV_leaf_task_review_instances_are_deleted(self):
@@ -1519,8 +1519,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
             'schedule_unit': 'h'
         }
         review3 = self.test_task3.request_revision(**kw)
-        self.assertEqual(self.test_task3.schedule_unit, 'h')
-        self.assertEqual(self.test_task3.schedule_timing, 6)
+        self.assertEqual(self.test_task3.schedule_unit, 'd')
+        self.assertEqual(self.test_task3.schedule_timing, 10)
 
     #CMPL: parent status update
     def test_request_revision_in_CMPL_leaf_task_parent_status_updated_to_WIP(self):

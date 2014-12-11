@@ -49,6 +49,11 @@ Stalker Changes
 * **New:** It is now possible to schedule only a desired set of projects by
   passing a **projects** argument to the TaskJugglerScheduler.
 
+* **New:** Task.request_review() and Review.finalize() will not cap the timing
+  of the task until it is approved and also Review.finalize() will extend the
+  timing of the task if the total timing of the given revisions are not fitting
+  in to the left timing.
+
 0.2.10.5
 ========
 

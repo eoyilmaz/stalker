@@ -633,7 +633,6 @@ class ReviewTestCase(unittest.TestCase):
             0
         )
 
-
     def test_approve_method_updates_task_status_correctly_for_a_multi_responsible_task_when_one_approve(self):
         """testing if the Review.approve() method will update the task status
         correctly for a task with multiple responsible
@@ -752,6 +751,9 @@ class ReviewTestCase(unittest.TestCase):
         timing values correctly for a Task with multiple responsible
         """
         self.task1.responsible = [self.user1, self.user2]
+        self.task1.schedule_timing = 3
+        self.task1.schedule_unit = 'h'
+
         self.assertEqual(
             self.status_rts,
             self.task1.status
@@ -798,6 +800,126 @@ class ReviewTestCase(unittest.TestCase):
 
         # check the timing values
         self.assertEqual(self.task1.schedule_timing, 8)
+        self.assertEqual(self.task1.schedule_unit, 'h')
+
+    def test_request_revision_method_updates_task_timing_correctly_for_a_multi_responsible_task_with_exactly_the_same_amount_of_schedule_timing_as_the_given_revision_timing(self):
+        """testing if the Review.request_revision() method will update the task
+        timing values for a Task with multiple responsible and has the same
+        amount of schedule timing left with the given revision without
+        expanding the task more then the total amount of revision requested.
+        """
+        self.task1.responsible = [self.user1, self.user2]
+        self.task1.schedule_timing = 8
+        self.task1.schedule_unit = 'h'
+
+        self.assertEqual(
+            self.status_rts,
+            self.task1.status
+        )
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+        # create 1 hour time log
+        self.task1.create_time_log(
+            resource=self.user1,
+            start=now,
+            end=now + td(hours=1)
+        )
+
+        # we should have 7 hours left
+
+        # first reviewer requests a revision
+        reviews = self.task1.request_review()
+
+        self.assertEqual(len(reviews), 2)
+
+        review1 = reviews[0]
+        review2 = reviews[1]
+
+        review1.request_revision(
+            schedule_timing=2,
+            schedule_unit='h',
+            description='do some 2 hours extra work'
+        )
+        self.assertEqual(
+            self.status_prev,
+            self.task1.status
+        )
+
+        # first reviewer
+        review2.request_revision(
+            schedule_timing=5,
+            schedule_unit='h',
+            description='do some 5 hours extra work'
+        )
+
+        self.assertEqual(
+            self.status_hrev,
+            self.task1.status
+        )
+
+        # check the timing values
+        self.assertEqual(self.task1.schedule_timing, 8)
+        self.assertEqual(self.task1.schedule_unit, 'h')
+
+    def test_request_revision_method_updates_task_timing_correctly_for_a_multi_responsible_task_with_more_schedule_timing_then_given_revision_timing(self):
+        """testing if the Review.request_revision() method will update the task
+        timing values for a Task with multiple responsible and still has more
+        schedule timing then the given revision without expanding the task more
+        then the total amount of revision requested.
+        """
+        self.task1.responsible = [self.user1, self.user2]
+        self.task1.schedule_timing = 100
+        self.task1.schedule_unit = 'h'
+
+        self.assertEqual(
+            self.status_rts,
+            self.task1.status
+        )
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+        # create 1 hour time log
+        self.task1.create_time_log(
+            resource=self.user1,
+            start=now,
+            end=now + td(hours=1)
+        )
+
+        # we should have 8 hours left
+
+        # first reviewer requests a revision
+        reviews = self.task1.request_review()
+
+        self.assertEqual(len(reviews), 2)
+
+        review1 = reviews[0]
+        review2 = reviews[1]
+
+        review1.request_revision(
+            schedule_timing=2,
+            schedule_unit='h',
+            description='do some 2 hours extra work'
+        )
+        self.assertEqual(
+            self.status_prev,
+            self.task1.status
+        )
+
+        # first reviewer
+        review2.request_revision(
+            schedule_timing=5,
+            schedule_unit='h',
+            description='do some 5 hours extra work'
+        )
+
+        self.assertEqual(
+            self.status_hrev,
+            self.task1.status
+        )
+
+        # check the timing values
+        self.assertEqual(self.task1.schedule_timing, 100)
         self.assertEqual(self.task1.schedule_unit, 'h')
 
     def test_review_set_property_return_all_the_revision_instances_with_same_review_number(self):
