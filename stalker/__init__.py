@@ -41,7 +41,7 @@ from stalker.config import defaults
 from stalker.models.auth import Group, Permission, User, LocalSession, Role
 from stalker.models.asset import Asset
 from stalker.models.budget import Budget, BudgetEntry
-from stalker.models.client import Client
+from stalker.models.client import Client, ClientUser
 from stalker.models.department import Department, DepartmentUser
 from stalker.models.entity import SimpleEntity, Entity
 from stalker.models.format import ImageFormat

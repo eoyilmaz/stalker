@@ -26,6 +26,7 @@ Summary
    stalker.models.department.Department
    stalker.models.department.DepartmentUser
    stalker.models.client.Client
+   stalker.models.client.ClientUser
    stalker.models.entity.Entity
    stalker.models.entity.SimpleEntity
    stalker.models.format.ImageFormat

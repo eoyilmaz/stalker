@@ -7,6 +7,8 @@ Stalker Changes
 
 * **Fix:** Fixed importing of ``ProjectUser`` directly from ``stalker``
   namespace.
+* **Fix:** Fixed importing of ``ClientUser`` directly from ``stalker``
+  namespace.
 
 0.2.11
 ======
