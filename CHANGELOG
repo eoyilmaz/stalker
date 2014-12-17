@@ -2,6 +2,12 @@
 Stalker Changes
 ===============
 
+0.2.12.dev
+==========
+
+* **Fix:** Fixed importing of ``ProjectUser`` directly from ``stalker``
+  namespace.
+
 0.2.11
 ======
 

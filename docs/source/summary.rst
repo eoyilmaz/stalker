@@ -24,6 +24,7 @@ Summary
    stalker.models.budget.Budget
    stalker.models.budget.BudgetEntry
    stalker.models.department.Department
+   stalker.models.department.DepartmentUser
    stalker.models.client.Client
    stalker.models.entity.Entity
    stalker.models.entity.SimpleEntity
@@ -41,6 +42,7 @@ Summary
    stalker.models.mixins.WorkingHoursMixin
    stalker.models.note.Note
    stalker.models.project.Project
+   stalker.models.project.ProjectUser
    stalker.models.repository.Repository
    stalker.models.review.Review
    stalker.models.review.Daily
