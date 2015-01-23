@@ -354,8 +354,8 @@ class DAGMixinDBTestCase(unittest.TestCase):
         """
         db.DBSession.remove()
 
-    def test_db_committing_data(self):
-        """testing if committing and retrieving data back
+    def test_committing_data(self):
+        """testing committing and retrieving data back
         """
         d1 = DAGMixinFooMixedInClass(**self.kwargs)
         d2 = DAGMixinFooMixedInClass(**self.kwargs)
@@ -366,6 +366,7 @@ class DAGMixinDBTestCase(unittest.TestCase):
         d2.children = [d4]
 
         db.DBSession.add_all([d1, d2, d3, d4])
+        db.DBSession.commit()
 
         del d1, d2, d3, d4
 
@@ -376,3 +377,23 @@ class DAGMixinDBTestCase(unittest.TestCase):
         self.assertTrue(isinstance(all_data[1], DAGMixinFooMixedInClass))
         self.assertTrue(isinstance(all_data[2], DAGMixinFooMixedInClass))
         self.assertTrue(isinstance(all_data[3], DAGMixinFooMixedInClass))
+
+    def test_deleting_data(self):
+        """testing deleting data
+        """
+        d1 = DAGMixinFooMixedInClass(**self.kwargs)
+        d2 = DAGMixinFooMixedInClass(**self.kwargs)
+        d3 = DAGMixinFooMixedInClass(**self.kwargs)
+        d4 = DAGMixinFooMixedInClass(**self.kwargs)
+
+        d1.children = [d2, d3]
+        d2.children = [d4]
+
+        db.DBSession.add_all([d1, d2, d3, d4])
+        db.DBSession.commit()
+
+        db.DBSession.delete(d1)
+        db.DBSession.commit()
+
+        all_data = DAGMixinFooMixedInClass.query.all()
+        self.assertEqual(len(all_data), 0)
