@@ -31,7 +31,7 @@ from stalker import defaults
 from stalker.db.session import DBSession
 from stalker.db.declarative import Base
 from stalker.log import logging_level
-from stalker.models import make_plural
+from stalker.models import make_plural, check_circular_dependency
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
@@ -1324,3 +1324,136 @@ class ScheduleMixin(object):
         return self.to_seconds(
             self.schedule_timing, self.schedule_unit, self.schedule_model
         )
+
+
+class DAGMixin(object):
+    """Creates a parent/child or a directed acyclic graph (DAG) relation on the
+    mixed in class by introducing two new attributes called parent and
+    children.
+
+    Please set the ``__id_column__`` attribute to the id column of the mixed in
+    class to be able to use this mixin::
+
+      class MixedInClass(SomeBaseClass, DAGMixin):
+
+          id = Column('id', Integer, primary_key=True)
+          __id_column__ = id
+    """
+
+    @declared_attr
+    def parent_id(cls):
+        return Column(
+            'parent_id',
+            Integer,
+            ForeignKey('%s.id' % cls.__tablename__)
+        )
+
+    @declared_attr
+    def parent(cls):
+        return relationship(
+            cls.__name__,
+            remote_side=[cls.__id_column__],
+            primaryjoin='%(ct)s.c.parent_id==%(ct)s.c.id' % {
+                'ct': cls.__tablename__
+            },
+            back_populates='children',
+            post_update=True,
+            doc="""A :class:`%(c)s` instance which is the parent of this %(c)s.
+            In Stalker it is possible to create a hierarchy of %(c)s.
+            """ % {
+                'c': cls.__name__
+            }
+        )
+
+    @declared_attr
+    def children(cls):
+        return relationship(
+            cls.__name__,
+            primaryjoin='%(ct)s.c.id==%(ct)s.c.parent_id' % {
+                'ct': cls.__tablename__
+            },
+            back_populates='parent',
+            post_update=True,
+            cascade='all, delete',
+            doc="""Other :class:`Budget` instances which are the children of this
+            one. This attribute along with the :attr:`.parent` attribute is used in
+            creating a DAG hierarchy of tasks.
+            """
+        )
+
+    def __init__(self, parent=None, **kwargs):
+        self.parent = parent
+
+    @validates('parent')
+    def _validate_parent(self, key, parent):
+        """validates the given parent value
+        """
+        if parent is not None:
+            if not isinstance(parent, self.__class__):
+                raise TypeError(
+                    '%(cls)s.parent should be an instance of %(cls)s class or '
+                    'derivative, not %(parent_cls)s' % {
+                        'cls': self.__class__.__name__,
+                        'parent_cls': parent.__class__.__name__
+                    }
+                )
+            check_circular_dependency(self, parent, 'children')
+
+        return parent
+
+    @validates('children')
+    def _validate_children(self, key, child):
+        """validates the given child
+        """
+        if not isinstance(child, self.__class__):
+            raise TypeError(
+                '%(cls)s.children should be a list of %(cls)s (or '
+                'derivative) instances, not %(child_cls)s' % {
+                    'cls': self.__class__.__name__,
+                    'child_cls': child.__class__.__name__
+                }
+            )
+
+        return child
+
+    @property
+    def is_root(self):
+        """Returns True if the Task has no parent
+        """
+        return not bool(self.parent)
+
+    @property
+    def is_container(self):
+        """Returns True if the Task has children Tasks
+        """
+        with DBSession.no_autoflush:
+            return bool(len(self.children))
+
+    @property
+    def is_leaf(self):
+        """Returns True if the Task has no children Tasks
+        """
+        return not self.is_container
+
+    @property
+    def parents(self):
+        """Returns all of the parents of this mixed in class starting from the
+        root
+        """
+        parents = []
+        entity = self.parent
+        while entity:
+            parents.append(entity)
+            entity = entity.parent
+        parents.reverse()
+        return parents
+
+    def walk_hierarchy(self, method=1):
+        """Walks the hierarchy of this task.
+
+        :param method: The walk method, 0: Depth First, 1: Breadth First
+        """
+        from stalker.models import walk_hierarchy
+        for c in walk_hierarchy(self, 'children', method=method):
+            yield c
+
