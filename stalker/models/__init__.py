@@ -77,11 +77,11 @@ def check_circular_dependency(entity, other_entity, attr_name):
             raise CircularDependencyError(
                 '%(entity_name)s (%(entity_class)s) and '
                 '%(other_entity_name)s (%(other_entity_class)s) creates a '
-                'circular dependency in their %(attr_name)s attribute' %
+                'circular dependency in their "%(attr_name)s" attribute' %
                 {
-                    'entity_name': entity.name.__str__,
+                    'entity_name': entity,
                     'entity_class': entity.__class__.__name__,
-                    'other_entity_name': other_entity.__str__,
+                    'other_entity_name': other_entity,
                     'other_entity_class': other_entity.__class__.__name__,
                     'attr_name': attr_name
                 }

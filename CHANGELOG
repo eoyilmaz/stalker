@@ -7,8 +7,24 @@ Stalker Changes
 
 * **Fix:** Fixed importing of ``ProjectUser`` directly from ``stalker``
   namespace.
+
 * **Fix:** Fixed importing of ``ClientUser`` directly from ``stalker``
   namespace.
+
+* **New:** Added two new columns to the ``BudgetEntry`` class to allow more
+  detailed info to be hold.
+
+* **New:** Added a new Mixin called ``DAGMixin`` to create parent/child
+  relation between mixed in class.
+
+* **Update:** The ``Task`` class is now mixed with the ``DAGMixin``, so all the
+  parent/child relation is coming from the DAGMixin.
+
+* **New:** Added a new class called ``Good`` to hold details about the
+  commercial items/services sold in the Studio.
+
+* **New:** Added a new class called ``PriceList`` to create price lists from
+  Goods.
 
 0.2.11
 ======

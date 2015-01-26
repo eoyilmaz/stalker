@@ -23,6 +23,8 @@ Summary
    stalker.models.auth.User
    stalker.models.budget.Budget
    stalker.models.budget.BudgetEntry
+   stalker.models.budget.Good
+   stalker.models.budget.PriceList
    stalker.models.department.Department
    stalker.models.department.DepartmentUser
    stalker.models.client.Client

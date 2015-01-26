@@ -94,12 +94,13 @@ def init():
 
     # register all Actions available for all SOM classes
     class_names = [
-        'Asset', 'Client', 'Daily', 'Department', 'Entity', 'FilenameTemplate',
-        'Group', 'ImageFormat', 'Link', 'Message', 'Note', 'Page',
-        'Permission', 'Project', 'Repository', 'Review', 'Role', 'Scene',
-        'Sequence', 'Shot', 'SimpleEntity', 'Status', 'StatusList',
-        'Structure', 'Studio', 'Tag', 'Task', 'Ticket', 'TicketLog', 'TimeLog',
-        'Type', 'User', 'Vacation', 'Version'
+        'Asset', 'Budget', 'BudgetEntry', 'Client', 'Daily', 'Department',
+        'Entity', 'FilenameTemplate', 'Good', 'Group', 'ImageFormat', 'Link',
+        'Message', 'Note', 'Page', 'Permission', 'PriceList', 'Project',
+        'Repository', 'Review', 'Role', 'Scene', 'Sequence', 'Shot',
+        'SimpleEntity', 'Status', 'StatusList', 'Structure', 'Studio', 'Tag',
+        'Task', 'Ticket', 'TicketLog', 'TimeLog', 'Type', 'User', 'Vacation',
+        'Version'
     ]
 
     for class_name in class_names:

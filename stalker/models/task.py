@@ -35,7 +35,7 @@ from stalker.models import check_circular_dependency
 from stalker.models.entity import Entity
 from stalker.models.auth import User
 from stalker.models.mixins import (DateRangeMixin, StatusMixin, ReferenceMixin,
-                                   ScheduleMixin)
+                                   ScheduleMixin, DAGMixin)
 from stalker.models.status import Status
 from stalker.exceptions import (OverBookedError, CircularDependencyError,
                                 StatusError, DependencyViolationError)
@@ -260,7 +260,8 @@ class TimeLog(Entity, DateRangeMixin):
 #       later on, will it be ok with TJ
 
 
-class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
+class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin,
+           DAGMixin):
     """Manages Task related data.
 
     **Introduction**
@@ -800,7 +801,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
     :param persistent_allocation: Specifies that once a resource is picked from
       the list of alternatives this resource is used for the whole task. The
       default value is True. For more information read the :class:`.Task` class
-      documetation.
+      documentation.
 
     """
     __auto_name__ = False
@@ -812,6 +813,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         SQLAlchemy to map this Task in relationships.
         """
     )
+    __id_column__ = 'task_id'
 
     project_id = Column(
         'project_id', Integer, ForeignKey('Projects.id'),
@@ -826,37 +828,6 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         back_populates='tasks',
         uselist=False,
         post_update=True,
-    )
-
-    parent_id = Column(
-        'parent_id', Integer, ForeignKey('Tasks.id'),
-        doc="""The id of the parent Task. Used by SQLAlchemy to map the
-        :attr:`.parent` attr.
-        """
-    )
-    parent = relationship(
-        'Task',
-        remote_side=[task_id],
-        primaryjoin='Tasks.c.parent_id==Tasks.c.id',
-        back_populates='children',
-        post_update=True,
-        doc="""A :class:`Task` instance which is the parent of this task.
-
-        In Stalker it is possible to create a hierarchy of Tasks to comply
-        with the need of the studio pipeline.
-        """
-    )
-
-    children = relationship(
-        'Task',
-        primaryjoin='Tasks.c.parent_id==Tasks.c.id',
-        back_populates='parent',
-        post_update=True,
-        cascade='all, delete',
-        doc="""Other :class:`Task` instances which are the children of this
-        Task instance. This attribute along with the :attr:`.parent` attribute
-        is used in creating a DAG hierarchy of tasks.
-        """
     )
 
     tasks = synonym(
@@ -1097,9 +1068,12 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         DateRangeMixin.__init__(self, **kwargs)
         ScheduleMixin.__init__(self, **kwargs)
 
+        kwargs['parent'] = parent
+        DAGMixin.__init__(self, **kwargs)
+
         self._review_number = 0
 
-        self.parent = parent
+        # self.parent = parent
         self._project = project
 
         self.time_logs = []
@@ -1789,37 +1763,6 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin):
         Project of a Task it is defined when the Task is created.
         """
     )
-
-    @property
-    def is_root(self):
-        """Returns True if the Task has no parent
-        """
-        return not bool(self.parent)
-
-    @property
-    def is_container(self):
-        """Returns True if the Task has children Tasks
-        """
-        with DBSession.no_autoflush:
-            return bool(len(self.children))
-
-    @property
-    def is_leaf(self):
-        """Returns True if the Task has no children Tasks
-        """
-        return not self.is_container
-
-    @property
-    def parents(self):
-        """Returns all of the parents of this Task starting from the root
-        """
-        parents = []
-        task = self.parent
-        while task:
-            parents.append(task)
-            task = task.parent
-        parents.reverse()
-        return parents
 
     @property
     def tjp_abs_id(self):

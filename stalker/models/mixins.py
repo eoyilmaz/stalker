@@ -1352,7 +1352,7 @@ class DAGMixin(object):
     def parent(cls):
         return relationship(
             cls.__name__,
-            remote_side=[cls.__id_column__],
+            remote_side=[getattr(cls, cls.__id_column__)],
             primaryjoin='%(ct)s.c.parent_id==%(ct)s.c.id' % {
                 'ct': cls.__tablename__
             },

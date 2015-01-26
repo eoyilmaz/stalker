@@ -2409,8 +2409,8 @@ class TaskTestCase(unittest.TestCase):
         # Tasks, there is no parent nor child.
 
     def test_parent_attribute_creates_a_cycle(self):
-        """testing if a CycleError will be raised if a child class is tried to
-        be set as a parent.
+        """testing if a CycleError will be raised if a child is tried to be set
+        as the parent.
         """
         kwargs = copy.copy(self.kwargs)
         new_task1 = Task(**kwargs)

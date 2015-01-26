@@ -20,7 +20,6 @@
 
 import os
 import shutil
-import copy
 import datetime
 import unittest
 import tempfile
@@ -33,12 +32,12 @@ import stalker
 from stalker.db.session import DBSession
 from stalker import log
 from stalker import (db, defaults, Asset, Budget, BudgetEntry, Client, Daily,
-                     DailyLink, Department, Entity, FilenameTemplate, Group,
-                     ImageFormat, Link, Note, Page, Permission, Project,
-                     Repository, Review, Scene, Sequence, Shot, SimpleEntity,
-                     Status, StatusList, Structure, Studio, Tag, Task, Ticket,
-                     TicketLog, TimeLog, Type, User, Vacation, Version,
-                     WorkingHours)
+                     DailyLink, Department, Entity, FilenameTemplate, Good,
+                     Group, ImageFormat, Link, Note, Page, Permission,
+                     PriceList, Project, Repository, Review, Scene, Sequence,
+                     Shot, SimpleEntity, Status, StatusList, Structure, Studio,
+                     Tag, Task, Ticket, TicketLog, TimeLog, Type, User,
+                     Vacation, Version, WorkingHours)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
@@ -290,12 +289,13 @@ class DatabaseTester(unittest.TestCase):
         db.init()
 
         class_names = [
-            'Asset', 'Client', 'Group', 'Permission', 'User', 'Department',
-            'SimpleEntity', 'Entity', 'ImageFormat', 'Link', 'Message', 'Note',
-            'Page', 'Project', 'Repository', 'Review', 'Role', 'Scene',
-            'Sequence', 'Shot', 'Status', 'StatusList', 'Structure', 'Studio',
-            'Tag', 'TimeLog', 'Task', 'FilenameTemplate', 'Ticket',
-            'TicketLog', 'Type', 'Vacation', 'Version', 'Daily'
+            'Asset', 'Budget', 'BudgetEntry', 'Client', 'Good', 'Group',
+            'Permission', 'User', 'Department', 'SimpleEntity', 'Entity',
+            'ImageFormat', 'Link', 'Message', 'Note', 'Page', 'Project',
+            'PriceList', 'Repository', 'Review', 'Role', 'Scene', 'Sequence',
+            'Shot', 'Status', 'StatusList', 'Structure', 'Studio', 'Tag',
+            'TimeLog', 'Task', 'FilenameTemplate', 'Ticket', 'TicketLog',
+            'Type', 'Vacation', 'Version', 'Daily'
         ]
 
         permission_db = Permission.query.all()
@@ -337,7 +337,7 @@ class DatabaseTester(unittest.TestCase):
 
         # and we still have correct amount of Permissions
         permissions = Permission.query.all()
-        self.assertEqual(len(permissions), 340)
+        self.assertEqual(len(permissions), 380)
 
         # clean the test
         shutil.rmtree(temp_db_path)
@@ -2266,6 +2266,25 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(nice_name, test_note_db.nice_name)
         self.assertEqual(updated_by, test_note_db.updated_by)
 
+    def test_persistence_of_Good(self):
+        """testing hte persistence of Good
+        """
+
+        g1 = Good(
+            name='Test Good 1'
+        )
+
+        DBSession.add(g1)
+        DBSession.commit()
+
+        name = g1.name
+
+        del g1
+
+        g1_db = Good.query.first()
+
+        self.assertEqual(g1_db.name, name)
+
     def test_persistence_of_Group(self):
         """testing the persistence of Group
         """
@@ -2300,6 +2319,48 @@ class DatabaseModelsTester(unittest.TestCase):
 
         self.assertEqual(name, group_db.name)
         self.assertEqual(users, group_db.users)
+
+    def test_persistence_of_PriceList(self):
+        """testing the persistence of PriceList
+        """
+        g1 = Good(name='Test Good 1')
+        g2 = Good(name='Test Good 2')
+        g3 = Good(name='Test Good 3')
+
+        p = PriceList(
+            name='Test Price List',
+            goods=[g1, g2, g3]
+        )
+
+        db.DBSession.add_all([p, g1, g2, g3])
+        db.DBSession.commit()
+
+        del p
+
+        p_db = PriceList.query.first()
+
+        self.assertEqual(p_db.name, 'Test Price List')
+        self.assertEqual(p_db.goods, [g1, g2, g3])
+
+        db.DBSession.delete(p_db)
+        db.DBSession.commit()
+
+        # we should still have goods
+        self.assertTrue(g1 is not None)
+        self.assertTrue(g2 is not None)
+        self.assertTrue(g3 is not None)
+
+        g1_db = Good.query.filter_by(name='Test Good 1').first()
+        self.assertTrue(g1_db is not None)
+        self.assertEqual(g1_db.name, 'Test Good 1')
+
+        g2_db = Good.query.filter_by(name='Test Good 2').first()
+        self.assertTrue(g2_db is not None)
+        self.assertEqual(g2_db.name, 'Test Good 2')
+
+        g3_db = Good.query.filter_by(name='Test Good 3').first()
+        self.assertTrue(g3_db is not None)
+        self.assertEqual(g3_db.name, 'Test Good 3')
 
     def test_persistence_of_Project(self):
         """testing the persistence of Project

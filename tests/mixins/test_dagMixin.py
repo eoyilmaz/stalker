@@ -42,7 +42,7 @@ class DAGMixinFooMixedInClass(SimpleEntity, DAGMixin):
         ForeignKey("SimpleEntities.id"),
         primary_key=True
     )
-    __id_column__ = dagMixinFooMixedInClass_id
+    __id_column__ = 'dagMixinFooMixedInClass_id'
 
     def __init__(self, **kwargs):
         super(DAGMixinFooMixedInClass, self).__init__(**kwargs)
