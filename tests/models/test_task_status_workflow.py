@@ -319,7 +319,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
             self.test_asset1, self.test_task9
         ]
 
-        for task in self.test_task2.walk_hierarchy():
+        for task in self.test_task2.walk_hierarchy(method=1):
             visited_tasks.append(task)
 
         self.assertEqual(expected_result, visited_tasks)

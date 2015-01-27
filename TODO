@@ -1,6 +1,11 @@
 TODO
 ====
 
+* Auto history generation.
+
+  Automatically record all kind of CRUD actions to create a history for any
+  attribute present in an entity.
+
 * SCM Integration:
 
   The repository can be a local path, and the project can be managed with an
@@ -48,13 +53,13 @@ TODO
   needed to initialize a class. A simple solution is to repeat all the 
   parameters of the inherited class in the __init__ of the child class.
 
+DONE:
+=====
+
 * Test CRUD:
   
   The database tests should test if all the Create, Read, Update and Delete
   operations are happening properly.
-
-DONE:
-=====
 
 * Plural name:
 

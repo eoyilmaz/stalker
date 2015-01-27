@@ -1448,7 +1448,7 @@ class DAGMixin(object):
         parents.reverse()
         return parents
 
-    def walk_hierarchy(self, method=1):
+    def walk_hierarchy(self, method=0):
         """Walks the hierarchy of this task.
 
         :param method: The walk method, 0: Depth First, 1: Breadth First

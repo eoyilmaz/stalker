@@ -2,8 +2,20 @@
 Stalker Changes
 ===============
 
-0.2.12.dev
-==========
+0.2.12.1.dev
+============
+
+* **Update:** ``Version`` class is now mixed with the ``DAGMixin``, so all the
+  parent/child relation is coming from the DAGMixin.
+
+* **Update:** ``DAGMixin.walk_hierarchy()`` is updated to walk the hierarchy in
+  ``Depth First`` mode by default (method=0) instead of ``Breadth First`` mode
+  (method=1).
+
+* **Fix:** Fixed ``alembic_revision`` on database initialization.
+
+0.2.12
+======
 
 * **Fix:** Fixed importing of ``ProjectUser`` directly from ``stalker``
   namespace.

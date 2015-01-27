@@ -31,7 +31,7 @@ from stalker.db.declarative import Base
 from stalker.models import check_circular_dependency
 from stalker.models.link import Link
 
-from stalker import defaults
+from stalker import defaults, DAGMixin
 
 from stalker.log import logging_level
 import logging
@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
 
-class Version(Link):
+class Version(Link, DAGMixin):
     """Holds information about the created versions (files) for a class:`.Task`
 
     A :class:`.Version` holds information about the
@@ -87,6 +87,9 @@ class Version(Link):
 
     version_id = Column("id", Integer, ForeignKey("Links.id"),
                         primary_key=True)
+
+    __id_column__ = 'version_id'
+
     task_id = Column(Integer, ForeignKey("Tasks.id"), nullable=False)
     task = relationship(
         "Task",
@@ -110,25 +113,6 @@ class Version(Link):
         nullable=False,
         doc="""The :attr:`.version_number` attribute is read-only.
         Trying to change it will produce an AttributeError.
-        """
-    )
-
-    parent_id = Column('parent_id', Integer, ForeignKey('Versions.id'))
-    parent = relationship(
-        'Version',
-        remote_side=[version_id],
-        primaryjoin='Versions.c.parent_id==Versions.c.id',
-        back_populates='children',
-        post_update=True
-    )
-
-    children = relationship(
-        'Version',
-        primaryjoin='Versions.c.parent_id==Versions.c.id',
-        back_populates='parent',
-        post_update=True,
-        doc="""The children :class:`.Version` instances which are derived from
-        this particular Version instance.
         """
     )
 
@@ -171,6 +155,8 @@ class Version(Link):
         kwargs['full_path'] = full_path
         super(Version, self).__init__(**kwargs)
 
+        DAGMixin.__init__(self, parent=parent)
+
         self.take_name = take_name
         self.task = task
         self.version_number = None
@@ -185,7 +171,6 @@ class Version(Link):
 
         self.is_published = False
 
-        self.parent = parent
         self.created_with = created_with
 
     def __repr__(self):
@@ -359,35 +344,6 @@ class Version(Link):
             )
 
         return output
-
-    @validates('parent')
-    def _validate_parent(self, key, parent):
-        """validates the given parent value
-        """
-        if parent is not None:
-            if not isinstance(parent, Version):
-                raise TypeError(
-                    '%s.parent should be a stalker.models.version.Version '
-                    'instance, not %s' %
-                    (self.__class__.__name__, parent.__class__.__name__)
-                )
-
-        # check for CircularDependency
-        check_circular_dependency(self, parent, 'children')
-
-        return parent
-
-    @validates('children')
-    def _validate_children(self, key, child):
-        """validates the given child value
-        """
-        if not isinstance(child, Version):
-            raise TypeError(
-                'All elements in %s.children should be a '
-                'stalker.models.version.Version instance, not %s' %
-                (self.__class__.__name__, child.__class__.__name__)
-            )
-        return child
 
     def _template_variables(self):
         """variables used in rendering the filename template
@@ -590,15 +546,6 @@ class Version(Link):
             '_'.join(map(lambda x: x.nice_name, naming_parents)) +
             '_' + self.take_name
         )
-
-    def walk_hierarchy(self, method=0):
-        """Walks the hierarchy of this version
-
-        :param method: The walk method, 0: Depth First, 1: Breadth First
-        """
-        from stalker.models import walk_hierarchy
-        for v in walk_hierarchy(self, 'children', method=method):
-            yield v
 
     def walk_inputs(self, method=0):
         """Walks the inputs of this version

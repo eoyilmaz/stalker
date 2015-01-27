@@ -2000,15 +2000,6 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin,
             .filter(Ticket.links.contains(self))\
             .filter(Ticket.status != status_closed).all()
 
-    def walk_hierarchy(self, method=1):
-        """Walks the hierarchy of this task.
-
-        :param method: The walk method, 0: Depth First, 1: Breadth First
-        """
-        from stalker.models import walk_hierarchy
-        for t in walk_hierarchy(self, 'children', method=method):
-            yield t
-
     def walk_dependencies(self, method=1):
         """Walks the dependencies of this task
 
