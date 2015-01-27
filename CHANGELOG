@@ -2,8 +2,8 @@
 Stalker Changes
 ===============
 
-0.2.12.1.dev
-============
+0.2.12.1
+========
 
 * **Update:** ``Version`` class is now mixed with the ``DAGMixin``, so all the
   parent/child relation is coming from the DAGMixin.
