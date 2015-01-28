@@ -172,7 +172,7 @@ def create_alembic_table():
     # don't forget to update the version_num (and the corresponding test
     # whenever a new alembic revision is created)
 
-    version_num = '1c9c9c28c102'
+    version_num = '2252e51506de'
 
     from sqlalchemy import Table, Column, Text
 
@@ -221,7 +221,7 @@ def __create_admin__():
     # check if there is already an admin in the database
     admin = User.query.filter_by(name=defaults.admin_name).first()
     if admin:
-        #there should be an admin user do nothing
+        # there should be an admin user do nothing
         logger.debug("there is an admin already")
         return
 

@@ -150,7 +150,7 @@ class VersionTester(unittest.TestCase):
             code='tp',
             type=self.test_project_type,
             status_list=self.test_project_status_list,
-            repository=self.test_repo,
+            repositories=[self.test_repo],
             structure=self.test_structure
         )
 
@@ -955,8 +955,10 @@ class VersionTester(unittest.TestCase):
         ft = FilenameTemplate(
             name='Task Filename Template',
             target_entity_type='Task',
-            path='{{project.code}}/{%- for parent_task in parent_tasks -%}'
-                 '{{parent_task.nice_name}}/{%- endfor -%}',
+            path='{{project.repositories[0].path}}/{{project.code}}/'
+                 '{%- for parent_task in parent_tasks -%}'
+                 '{{parent_task.nice_name}}/'
+                 '{%- endfor -%}',
             filename='{{task.nice_name}}_{{version.take_name}}'
                      '_v{{"%03d"|format(version.version_number)}}{{extension}}'
         )

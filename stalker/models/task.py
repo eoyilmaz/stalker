@@ -2640,7 +2640,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin,
         """the absolute_path attribute
         """
         project = self.project
-        repo = project.repository
+        repo = project.repositories[0]
 
         return os.path.join(
             repo.path,

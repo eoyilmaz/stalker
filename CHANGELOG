@@ -2,6 +2,12 @@
 Stalker Changes
 ===============
 
+0.2.13.dev.multi_repository
+===========================
+
+* **New:** ``Project`` instances can now have multiple repositories. Thus the
+  ``repository`` attribute is renamed to ``repositories``.
+
 0.2.12.1
 ========
 

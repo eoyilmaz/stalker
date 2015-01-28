@@ -49,6 +49,33 @@ class Version(Link, DAGMixin):
     :class:`.Task` then the information is hold in the
     :class:`.Version` instance.
 
+    .. versionadded: 0.2.13
+
+       After Stalker 0.2.13 the :attr:`.path` become an absolute path which is
+       not anymore merged with the project repository in anyway.
+
+    .. warning:
+
+       For projects those are created prior to Stalker version 0.2.13 and that
+       has a :class:`.Structure` with :class:`.FilenameTemplate` that doesn't
+       include the repository info, it is suggested to update the related
+       ``FilenameTemplate``\ s to include a the repository info manually.
+
+       Example:
+         pre 0.2.13 setup:
+
+         FilenameTemplate with path attribute is set to:
+
+           {{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}
+
+         Update to:
+
+           {{project.repository.path}}/{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}
+
+         Or, lets have a setup with environment variables:
+
+           $REPO{{project.repository.id}}/{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}
+
     :param str take_name: A short string holding the current take name. Takes
       in Stalker are used solely for grouping individual versions together.
       Versions with the same ``take_name`` (of the same Task) are numbered
@@ -438,27 +465,24 @@ class Version(Link, DAGMixin):
 
         :return: str
         """
-        project = self.task.project
-        repo = project.repository
-
-        return os.path.join(
-            repo.path,
-            self.full_path
+        return os.path.normpath(
+            os.path.expandvars(
+                self.full_path
+            )
         ).replace('\\', '/')
 
     @property
     def absolute_path(self):
-        """Returns the absolute path of this version including the repository
-        path of the related project
+        """Returns the absolute path.
+
+        Due to the changes in the project.repository
 
         :return: str
         """
-        project = self.task.project
-        repo = project.repository
-
-        return os.path.join(
-            repo.path,
-            self.path
+        return os.path.normpath(
+            os.path.expandvars(
+                self.path
+            )
         ).replace('\\', '/')
 
     def is_latest_published_version(self):

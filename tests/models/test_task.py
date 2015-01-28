@@ -136,7 +136,7 @@ class TaskTestCase(unittest.TestCase):
             code='tp1',
             type=cls.test_movie_project_type,
             status_list=cls.test_project_status_list,
-            repository=cls.test_repository
+            repositories=[cls.test_repository]
         )
 
         cls.test_dependent_task1 = Task(
@@ -4842,8 +4842,10 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         ft = FilenameTemplate(
             name='Task Filename Template',
             target_entity_type='Task',
-            path='{{project.code}}/{%- for parent_task in parent_tasks -%}'
-                 '{{parent_task.nice_name}}/{%- endfor -%}',
+            path='{{project.repository.path}}/{{project.code}}/'
+                 '{%- for parent_task in parent_tasks -%}'
+                 '{{parent_task.nice_name}}/'
+                 '{%- endfor -%}',
             filename='{{task.nice_name}}_{{version.take_name}}'
                      '_v{{"%03d"|format(version.version_number)}}{{extension}}'
         )
@@ -4862,7 +4864,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         self.test_project1.structure = structure
 
         self.assertEqual(
-            self.test_project1.repository.path + 'tp1/Modeling/',
+            '%s/tp1/Modeling/' % self.test_project1.repositories[0].path,
             new_task.absolute_path
         )
         self.test_project1.structure = None

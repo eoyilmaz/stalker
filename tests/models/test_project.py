@@ -212,8 +212,12 @@ class ProjectTestCase(unittest.TestCase):
             type=self.test_structure_type2,
         )
 
-        self.test_repo = Repository(
-            name="Commercials Repository",
+        self.test_repo1 = Repository(
+            name="Commercials Repository 1",
+        )
+
+        self.test_repo2 = Repository(
+            name="Commercials Repository 2",
         )
 
         self.test_client = Client(
@@ -230,7 +234,7 @@ class ProjectTestCase(unittest.TestCase):
             "fps": 25,
             "type": self.test_project_type,
             "structure": self.test_project_structure,
-            "repository": self.test_repo,
+            "repositories": [self.test_repo1, self.test_repo2],
             "is_stereoscopic": False,
             "display_width": 15,
             "start": self.start,
@@ -924,40 +928,112 @@ class ProjectTestCase(unittest.TestCase):
         """
         self.assertRaises(ValueError, setattr, self.test_project, 'fps', -1)
 
-    def test_repository_argument_is_skipped(self):
-        """testing if a TypeError will be raised when the repository argument
-        is skipped
+    def test_repositories_argument_is_skipped(self):
+        """testing if the repositories attribute will be an empty list if the
+        repositories argument is skipped
         """
-        self.kwargs.pop("repository")
-        self.assertRaises(TypeError, Project, **self.kwargs)
+        self.kwargs.pop("repositories")
+        p = Project(**self.kwargs)
+        self.assertEqual(p.repositories, [])
 
-    def test_repository_argument_is_None(self):
-        """testing if a TypeError will be raised when the repository argument
-        is given as None.
+    def test_repositories_argument_is_None(self):
+        """testing if a the repositories attribute will be an empty list if the
+        repositories argument is None.
         """
-        self.kwargs["repository"] = None
-        self.assertRaises(TypeError, Project, **self.kwargs)
+        self.kwargs["repositories"] = None
+        p = Project(**self.kwargs)
+        self.assertEqual(p.repositories, [])
 
-        #def test_repository_attribute_is_set_to_None(self):
-        #"""testing if nothing happens when setting the repository attribute to
-        #None
-        #"""
-        #self.test_project.repository = None
-
-    def test_repository_argument_is_non_Repository_object(self):
-        """testing if a TypeError will be raised when the repository argument
-        is given as something other than a Repository object
+    def test_repositories_attribute_is_set_to_None(self):
+        """testing if a TypeError will be raised when the repositories
+        attribute is set to None
         """
-        test_values = [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
-        for test_value in test_values:
-            self.kwargs["repository"] = test_value
-            self.assertRaises(TypeError, Project, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            self.test_project.repositories = None
 
-    def test_repository_attribute_is_working_properly(self):
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: None is not list-like'
+        )
+
+    def test_repositories_argument_is_not_a_list(self):
+        """testing if a TypeError will be raised when the repositories argument
+        value is not a list
+        """
+        self.kwargs['repositories'] = 'not a list'
+        with self.assertRaises(TypeError) as cm:
+            Project(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: str is not list-like'
+        )
+
+    def test_repositories_attribute_is_not_a_list(self):
+        """testing if a TypeError will be raised when the repositories
+        attribute is set to a value other than a list
+        """
+        with self.assertRaises(TypeError) as cm:
+            self.test_project.repositories = 'not a list'
+
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: str is not list-like'
+        )
+
+    def test_repositories_argument_is_not_a_list_of_repository_instances(self):
+        """testing if a TypeError will be raised if the repositories argument
+        value is a list of objects which are not Repository instances
+        """
+        self.kwargs['repositories'] = ['not', 1, 'list', 'of', Repository,
+                                       'instances']
+        with self.assertRaises(TypeError) as cm:
+            Project(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Project.repositories should be a list of '
+            'stalker.models.repository.Repository instances or derivatives, '
+            'not str'
+        )
+
+    def test_repositories_attribute_is_not_a_list_of_repository_instances(self):
+        """testing if a TypeError will be raised if the repositories attribute
+        is set to a list that contains objects other than Repository instances
+        """
+        with self.assertRaises(TypeError) as cm:
+            self.test_project.repositories = ['not', 1, 'list', 'of',
+                                              Repository, 'instances']
+
+        self.assertEqual(
+            str(cm.exception),
+            'Project.repositories should be a list of '
+            'stalker.models.repository.Repository instances or derivatives, '
+            'not str'
+        )
+
+    def test_repositories_argument_is_working_properly(self):
+        """testing if the repositories argument value is properly passed to the
+        repositories attribute value
+        """
+        self.assertEqual(
+            self.test_project.repositories,
+            self.kwargs['repositories']
+        )
+
+    def test_repositories_attribute_is_working_properly(self):
         """testing if the repository attribute is working properly
         """
-        new_project = Project(**self.kwargs)
-        self.assertEqual(new_project.repository, self.kwargs["repository"])
+        new_repo1 = Repository(
+            name='Some Random Repo',
+            linux_path='/mnt/S/random/repo',
+            windows_path='S:/random/repo',
+            osx_path='/Volumes/S/random/repo'
+        )
+
+        self.assertTrue(self.test_project.repositories != [new_repo1])
+        self.test_project.repositories = [new_repo1]
+        self.assertTrue(self.test_project.repositories == [new_repo1])
 
     def test_is_stereoscopic_argument_skipped(self):
         """testing if is_stereoscopic will set the is_stereoscopic attribute to

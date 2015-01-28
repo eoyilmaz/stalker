@@ -111,7 +111,7 @@ class AssetTester(unittest.TestCase):
             code='tp1',
             type=self.commercial_project_type,
             status_list=self.project_status_list,
-            repository=self.repository,
+            repositories=[self.repository],
         )
 
         # sequence

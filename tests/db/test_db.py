@@ -919,7 +919,7 @@ class DatabaseTester(unittest.TestCase):
         sql_query = 'select version_num from "alembic_version"'
         version_num = \
             db.DBSession.connection().execute(sql_query).fetchone()[0]
-        self.assertEqual('1c9c9c28c102', version_num)
+        self.assertEqual('2252e51506de', version_num)
 
     def test_initialization_of_alembic_version_table_multiple_times(self):
         """testing if the db.create_alembic_table() will handle initializing
@@ -936,7 +936,7 @@ class DatabaseTester(unittest.TestCase):
         sql_query = 'select version_num from "alembic_version"'
         version_num = \
             db.DBSession.connection().execute(sql_query).fetchone()[0]
-        self.assertEqual('1c9c9c28c102', version_num)
+        self.assertEqual('2252e51506de', version_num)
 
         db.DBSession.remove()
         db.setup(db_config)
@@ -2493,7 +2493,7 @@ class DatabaseModelsTester(unittest.TestCase):
             'fps': 25,
             'type': project_type,
             'structure': project_structure,
-            'repository': repo,
+            'repositories': [repo],
             'is_stereoscopic': False,
             'display_width': 1.0,
             'start': start,
@@ -2559,7 +2559,7 @@ class DatabaseModelsTester(unittest.TestCase):
         nice_name = new_project.nice_name
         notes = new_project.notes
         references = new_project.references
-        repository = new_project.repository
+        repositories = new_project.repositories
         sequences = new_project.sequences
         start = new_project.start
         status = new_project.status
@@ -2599,7 +2599,7 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(nice_name, new_project_db.nice_name)
         self.assertEqual(notes, new_project_db.notes)
         self.assertEqual(references, new_project_db.references)
-        self.assertEqual(repository, new_project_db.repository)
+        self.assertEqual(repositories, new_project_db.repositories)
         self.assertEqual(sequences, new_project_db.sequences)
         self.assertEqual(start, new_project_db.start)
         self.assertEqual(status, new_project_db.status)

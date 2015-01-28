@@ -35,6 +35,23 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
 
+Project_Repositories = Table(
+    'Project_Repositories', Base.metadata,
+    Column(
+        'project_id',
+        Integer,
+        ForeignKey('Projects.id'),
+        primary_key=True
+    ),
+    Column(
+        'repo_id',
+        Integer,
+        ForeignKey('Repositories.id'),
+        primary_key=True
+    )
+)
+
+
 class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
     """All the information about a Project in Stalker is hold in this class.
 
@@ -67,6 +84,18 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
     To manage all the studio projects at once (schedule them at once please use
     :class:`.Studio`).
 
+    .. versionadded:: 0.2.13
+       Multiple Repositories per Project
+
+       Starting with v0.2.13 Project instances can have multiple Repositories,
+       which allows the project files to be placed in more than one repository
+       according to the need of the studio pipeline. One great advantage of
+       having multiple repositories is to be able to place Published versions
+       in to another repository which is placed on to a faster server.
+
+       Also the :attr:`.repositories` attribute is not a read-only attribute
+       anymore.
+
     :param client: The client which the project is affiliated with. Default
       value is None.
 
@@ -89,10 +118,11 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
 
     :type structure: :class:`.Structure`
 
-    :param repository: The repository that the project files are going to be
-      stored in. You can not create a project without specifying the repository
-      argument and passing a :class:`.Repository` to it. Default value is None
-      which raises a TypeError.
+    :param repositories: A list of :class:`.Repository` instances that the
+      project files are going to be stored in. You can not create a project
+      without specifying the repositories argument and passing a
+      :class:`.Repository` to it. Default value is None which raises a
+      TypeError.
 
     :type repository: :class:`.Repository`.
 
@@ -152,15 +182,14 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         primaryjoin='Projects.c.id==Project_Users.c.project_id'
     )
 
-    repository_id = Column(Integer, ForeignKey("Repositories.id"))
-    repository = relationship(
+    repositories = relationship(
         "Repository",
-        primaryjoin="Project.repository_id==Repository.repository_id",
-        doc="""The :class:`.Repository` that this project should reside.
+        secondary='Project_Repositories',
+        primaryjoin='Projects.c.id==Project_Repositories.c.project_id',
+        secondaryjoin='Project_Repositories.c.repo_id==Repositories.c.id',
+        doc="""The :class:`.Repository` that this project files should reside.
 
-        Should be an instance of :class:`.Repository`\ . It is a read-only
-        attribute. So it is not possible to change the repository of one
-        project.
+        Should be a list of :class:`.Repository`\ instances.
         """
     )
 
@@ -208,7 +237,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
                  name=None,
                  code=None,
                  client=None,
-                 repository=None,
+                 repositories=None,
                  structure=None,
                  image_format=None,
                  fps=25.0,
@@ -226,12 +255,15 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         ReferenceMixin.__init__(self, **kwargs)
         StatusMixin.__init__(self, **kwargs)
         DateRangeMixin.__init__(self, **kwargs)
-        #CodeMixin.__init__(self, **kwargs)
 
         if users is None:
             users = []
         self.users = users
-        self.repository = repository
+
+        if repositories is None:
+            repositories = []
+        self.repositories = repositories
+
         self.structure = structure
         self.client = client
 
@@ -297,16 +329,17 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
                 )
         return client
 
-    @validates("repository")
-    def _validate_repository(self, key, repository):
-        """validates the given repository_in value
+    @validates("repositories")
+    def _validate_repositories(self, key, repository):
+        """validates the given repository value
         """
         from stalker.models.repository import Repository
 
         if not isinstance(repository, Repository):
             raise TypeError(
-                "%s.repository should be an instance of "
-                "stalker.models.repository.Repository, not %s" %
+                "%s.repositories should be a list of "
+                "stalker.models.repository.Repository instances or "
+                "derivatives, not %s" %
                 (self.__class__.__name__, repository.__class__.__name__)
             )
         return repository
@@ -458,6 +491,17 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
             .filter(Ticket.project == self) \
             .filter(Status.code != 'CLS') \
             .all()
+
+    @property
+    def repository(self):
+        """compatibility attribute for pre v0.2.13 systems. Returns the first
+        repository instance in the project.repositories attribute if there is
+        any or None
+        """
+        if self.repositories:
+            return self.repositories[0]
+        else:
+            return None
 
 
 # PROJECT_USERS
