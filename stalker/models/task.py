@@ -2639,12 +2639,10 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin,
     def absolute_path(self):
         """the absolute_path attribute
         """
-        project = self.project
-        repo = project.repositories[0]
-
-        return os.path.join(
-            repo.path,
-            self.path
+        return os.path.normpath(
+            os.path.expandvars(
+                self.path
+            )
         ).replace('\\', '/')
 
 

@@ -23,7 +23,7 @@ Animation and VFX Studios.
 See docs for more information.
 """
 
-__version__ = '0.2.13.dev'
+__version__ = '0.2.13.dev.1'
 
 
 import sys
