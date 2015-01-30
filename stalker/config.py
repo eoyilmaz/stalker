@@ -56,7 +56,7 @@ class Config(object):
         # Storage for uploaded files
         server_side_storage_path=os.path.expanduser('~/Stalker_Storage'),
 
-        repo_env_var_template='$REPO%(id)s',
+        repo_env_var_template='REPO%(id)s',
 
         #
         # Tells Stalker to create an admin by default
