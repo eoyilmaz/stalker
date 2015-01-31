@@ -877,14 +877,15 @@ class RepositoryTester(unittest.TestCase):
         )
 
 
-class RepositoryDTester(unittest.TestCase):
+class RepositoryDBTester(unittest.TestCase):
     """tests Repository DB relation
     """
 
-    def test_creating_and_committing_repository_instace_will_create_env_var(self):
-        """testing if an environment variable will be 
+    def test_creating_and_committing_a_new_repository_instance_will_create_env_var(self):
+        """testing if an environment variable will be created when a new
+        repository is created
         """
-        from stalker import db
+        from stalker import db, defaults
         db.setup({'sqlalchemy.url': 'sqlite:///:memory:'})
 
         repo = Repository(name='Test Repo')
@@ -892,4 +893,6 @@ class RepositoryDTester(unittest.TestCase):
         db.DBSession.commit()
 
         import os
-        self.assertTrue('REPO%s' % repo.id in os.environ)
+        self.assertTrue(
+            defaults.repo_env_var_template % {'id': repo.id} in os.environ
+        )
