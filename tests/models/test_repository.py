@@ -875,3 +875,21 @@ class RepositoryTester(unittest.TestCase):
             result,
             'Sero/Task1/Task2/Some_file.ma'
         )
+
+
+class RepositoryDTester(unittest.TestCase):
+    """tests Repository DB relation
+    """
+
+    def test_creating_and_committing_repository_instace_will_create_env_var(self):
+        """testing if an environment variable will be 
+        """
+        from stalker import db
+        db.setup({'sqlalchemy.url': 'sqlite:///:memory:'})
+
+        repo = Repository(name='Test Repo')
+        db.DBSession.add(repo)
+        db.DBSession.commit()
+
+        import os
+        self.assertTrue('REPO%s' % repo.id in os.environ)

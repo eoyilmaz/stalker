@@ -20,8 +20,9 @@
 
 import os
 import platform
-from sqlalchemy import Column, Integer, ForeignKey, String
+from sqlalchemy import event, Column, Integer, ForeignKey, String
 from sqlalchemy.orm import validates
+from stalker import defaults
 from stalker.models.entity import Entity
 
 from stalker.log import logging_level
@@ -243,3 +244,11 @@ class Repository(Entity):
         """the overridden __hash__ method
         """
         return super(Repository, self).__hash__()
+
+
+@event.listens_for(Repository, 'after_insert')
+def receive_after_insert(mapper, connection, repo):
+    """listen for the 'after_insert' event
+    """
+    logger.debug('auto creating env var for Repository with id: %s' % repo.id)
+    os.environ[defaults.repo_env_var_template % {'id': repo.id}] = repo.path

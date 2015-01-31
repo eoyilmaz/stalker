@@ -950,6 +950,51 @@ class DatabaseTester(unittest.TestCase):
         # no additional version is created
         self.assertEqual(1, len(version_nums))
 
+    def test_initialization_of_repo_environment_variables(self):
+        """testing if the db.create_repo_env_vars() will create environment
+        variables for each repository in the system
+        """
+        temp_db_path = os.path.join(tempfile.mkdtemp(), 'stalker.db')
+        self.files_to_remove.append(temp_db_path)
+        db_config = {'sqlalchemy.url': 'sqlite:///%s' % temp_db_path}
+
+        db.DBSession.remove()
+        db.setup(db_config)
+        db.init()
+
+        # create a couple of repositories
+        repo1 = Repository(name='Repo1')
+        repo2 = Repository(name='Repo2')
+        repo3 = Repository(name='Repo3')
+
+        all_repos = [repo1, repo2, repo3]
+        db.DBSession.add_all(all_repos)
+        db.DBSession.commit()
+
+        # remove any auto created repo vars
+        for repo in all_repos:
+            try:
+                os.environ.pop('REPO%s' % repo.id)
+            except KeyError:
+                pass
+
+        # check if all removed
+        for repo in all_repos:
+            # check if environment vars are created
+            self.assertFalse('REPO%s' % repo.id in os.environ)
+
+        # remove db connection
+        db.DBSession.remove()
+
+        # reconnect
+        db.setup(db_config)
+
+        all_repos = Repository.query.all()
+
+        for repo in all_repos:
+            # check if environment vars are created
+            self.assertTrue('REPO%s' % repo.id in os.environ)
+
 
 class DatabaseModelsTester(unittest.TestCase):
     """tests the database model

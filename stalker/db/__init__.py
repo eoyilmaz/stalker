@@ -73,6 +73,9 @@ def setup(settings=None):
     # update defaults
     update_defaults_with_studio()
 
+    # create repo env variables
+    create_repo_vars()
+
 
 def update_defaults_with_studio():
     """updates the default values from Studio instance if a database and a
@@ -157,6 +160,19 @@ def init():
     create_alembic_table()
 
     logger.debug('finished initializing the database')
+
+
+def create_repo_vars():
+    """creates environment variables for all of the repositories in the current
+    database
+    """
+    # get all the repositories
+    import os
+    from stalker import defaults, Repository
+    all_repos = Repository.query.all()
+    for repo in all_repos:
+        os.environ[defaults.repo_env_var_template % {'id': repo.id}] = \
+            repo.path
 
 
 def create_alembic_table():

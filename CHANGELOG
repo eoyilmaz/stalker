@@ -8,6 +8,13 @@ Stalker Changes
 * **New:** ``Project`` instances can now have multiple repositories. Thus the
   ``repository`` attribute is renamed to ``repositories``.
 
+* **New:** ``stalker.db.init()`` now automatically creates environment
+  variables for each repository in the database.
+
+* **New:** Added a new ``after_insert`` which listens ``Repository`` instance
+  ``insert``s to automatically add environment variables for the newly inserted
+  repositories.
+
 0.2.12.1
 ========
 
