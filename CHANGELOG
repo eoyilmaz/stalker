@@ -15,6 +15,9 @@ Stalker Changes
   ``insert``s to automatically add environment variables for the newly inserted
   repositories.
 
+* **Update:** ``Repository.make_relative()`` now handles paths with environment
+  variables.
+
 0.2.12.1
 ========
 

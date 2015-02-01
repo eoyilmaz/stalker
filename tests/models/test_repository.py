@@ -876,6 +876,24 @@ class RepositoryTester(unittest.TestCase):
             'Sero/Task1/Task2/Some_file.ma'
         )
 
+    def test_make_relative_method_converts_the_given_path_with_env_variable_to_native_path(self):
+        """testing if Repository.make_relative() will convert the given path
+        with environment variable to repository root relative path
+        """
+        from stalker import db
+        db.setup()
+        db.DBSession.add(self.test_repo)
+        db.DBSession.commit()
+
+        # so we should have the env var to be configured
+        # now create a path with env var
+        path = '$REPO%s/Sero/Task1/Task2/Some_file.ma' % self.test_repo.id
+        result = self.test_repo.make_relative(path)
+        self.assertEqual(
+            result,
+            'Sero/Task1/Task2/Some_file.ma'
+        )
+
 
 class RepositoryDBTester(unittest.TestCase):
     """tests Repository DB relation

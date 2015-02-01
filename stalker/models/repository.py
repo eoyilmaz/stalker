@@ -180,7 +180,8 @@ class Repository(Entity):
         if not isinstance(path, __string_types__):
             raise TypeError('path should be a string')
 
-        path = path.replace('\\', '/')
+        # expand all variables
+        path = os.path.expandvars(os.path.expanduser(path)).replace('\\', '/')
 
         if path.startswith(self.windows_path):
             return path.replace(self.windows_path, replace_with)
@@ -188,6 +189,7 @@ class Repository(Entity):
             return path.replace(self.linux_path, replace_with)
         elif path.startswith(self.osx_path):
             return path.replace(self.osx_path, replace_with)
+
         return path
 
     def to_linux_path(self, path):
@@ -229,7 +231,7 @@ class Repository(Entity):
         :return: str
         """
         path = self.to_native_path(path)
-        return path.replace(self.path, '')
+        return os.path.relpath(path, self.path).replace('\\', '/')
 
     def __eq__(self, other):
         """the equality operator

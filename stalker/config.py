@@ -500,18 +500,15 @@ taskreport breakdown "{{csv_file_full_path}}"{
             )
 
             # using `while` is not safe to expand variables
-            # do the expansion for 5 times which is complex enough
-            # and I don't (hopefully) expect anybody to use
-            # more than 5 level deep environment variables
-            resolved_path = os.path.expandvars(
-                os.path.expandvars(
-                    os.path.expandvars(
-                        os.path.expandvars(
-                            resolved_path
-                        )
-                    )
+            # so expand vars for 100 times which already is ridiculously
+            # complex
+            max_recursion = 100
+            i = 0
+            while '$' in resolved_path and i < max_recursion:
+                resolved_path = os.path.expandvars(
+                    resolved_path
                 )
-            )
+                i += 1
 
             try:
                 logger.debug("importing user config")
