@@ -178,6 +178,7 @@ class TaskJugglerSchedulerTester(unittest.TestCase):
             alternative_resources=[
                 self.test_user3, self.test_user4, self.test_user5
             ],
+            depends=[self.test_task1],
             schedule_model=0,
             schedule_timing=60,
             schedule_unit='h',
@@ -298,7 +299,7 @@ task Task_{{task1.id}} "Task_{{task1.id}}" {
 task Task_{{task2.id}} "Task_{{task2.id}}" {
 
     
-            
+            depends Project_{{proj.id}}.Task_{{task1.id}} {onend}        
             
             effort 60.0h
             allocate User_{{user1.id}} {
@@ -373,7 +374,7 @@ task Task_{{task2.id}} "Task_{{task2.id}}" {
             self.test_proj1.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 4, 19, 12, 0),
+            datetime.datetime(2013, 4, 24, 10, 0),
             self.test_proj1.computed_end
         )
 
@@ -386,20 +387,20 @@ task Task_{{task2.id}} "Task_{{task2.id}}" {
             self.test_task1.computed_end
         )
         self.assertEqual(
-            sorted([self.test_user5, self.test_user4], key=lambda x: x.name),
+            sorted([self.test_user1, self.test_user2], key=lambda x: x.name),
             sorted(self.test_task1.computed_resources, key=lambda x: x.name)
         )
 
         self.assertEqual(
-            datetime.datetime(2013, 4, 16, 9, 0),
+            datetime.datetime(2013, 4, 18, 16, 0),
             self.test_task2.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 4, 19, 12, 0),
+            datetime.datetime(2013, 4, 24, 10, 0),
             self.test_task2.computed_end
         )
         self.assertEqual(
-            sorted([self.test_user1, self.test_user2], key=lambda x: x.name),
+            sorted([self.test_user4, self.test_user5], key=lambda x: x.name),
             sorted(self.test_task2.computed_resources, key=lambda x: x.name)
         )
 
@@ -425,7 +426,7 @@ task Task_{{task2.id}} "Task_{{task2.id}}" {
             self.test_proj1.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 4, 19, 12, 0),
+            datetime.datetime(2013, 4, 24, 10, 0),
             self.test_proj1.computed_end
         )
 
@@ -443,11 +444,11 @@ task Task_{{task2.id}} "Task_{{task2.id}}" {
         )
 
         self.assertEqual(
-            datetime.datetime(2013, 4, 16, 9, 0),
+            datetime.datetime(2013, 4, 18, 16, 0),
             self.test_task2.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 4, 19, 12, 0),
+            datetime.datetime(2013, 4, 24, 10, 0),
             self.test_task2.computed_end
         )
         self.assertEqual(
@@ -477,7 +478,7 @@ task Task_{{task2.id}} "Task_{{task2.id}}" {
             self.test_proj1.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 4, 19, 12, 0),
+            datetime.datetime(2013, 4, 24, 10, 0),
             self.test_proj1.computed_end
         )
 
@@ -490,20 +491,20 @@ task Task_{{task2.id}} "Task_{{task2.id}}" {
             self.test_task1.computed_end
         )
         self.assertEqual(
-            sorted([self.test_user4, self.test_user5], key=lambda x: x.name),
+            sorted([self.test_user1, self.test_user2], key=lambda x: x.name),
             sorted(self.test_task1.computed_resources, key=lambda x: x.name)
         )
 
         self.assertEqual(
-            datetime.datetime(2013, 4, 16, 9, 0),
+            datetime.datetime(2013, 4, 18, 16, 0),
             self.test_task2.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 4, 19, 12, 0),
+            datetime.datetime(2013, 4, 24, 10, 0),
             self.test_task2.computed_end
         )
         self.assertEqual(
-            sorted([self.test_user1, self.test_user2], key=lambda x: x.name),
+            sorted([self.test_user4, self.test_user5], key=lambda x: x.name),
             sorted(self.test_task2.computed_resources, key=lambda x: x.name)
         )
 
@@ -808,6 +809,7 @@ task Project_{{proj1.id}} "Project_{{proj1.id}}" {
     allocate User_{{user1.id}} { alternative User_{{user3.id}}, User_{{user4.id}}, User_{{user5.id}} select minallocated persistent }, User_{{user2.id}} { alternative User_{{user3.id}}, User_{{user4.id}}, User_{{user5.id}} select minallocated persistent }
   }
   task Task_{{task2.id}} "Task_{{task2.id}}" {
+    depends Project_{{proj1.id}}.Task_{{task1.id}} {onend}
     effort 60.0h
     allocate User_{{user1.id}} { alternative User_{{user3.id}}, User_{{user4.id}}, User_{{user5.id}} select minallocated persistent }, User_{{user2.id}} { alternative User_{{user3.id}}, User_{{user4.id}}, User_{{user5.id}} select minallocated persistent }
   }

@@ -18,6 +18,9 @@ Stalker Changes
 * **Update:** ``Repository.make_relative()`` now handles paths with environment
   variables.
 
+* **Fix:** Fixed ``TaskJugglerScheduler`` to correctly generate task absolute
+  paths for PostgreSQL DB.
+
 0.2.12.1
 ========
 

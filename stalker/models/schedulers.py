@@ -425,6 +425,8 @@ order by path_as_text"""
                                 map(lambda x: 'Task_%s' % x,
                                     dep_full_ids.split('-'))
                             )
+                            # fix for Project id
+                            dep_full_path = 'Project_%s' % dep_full_path[5:]
 
                             dep_string = '%s {%s}' % (
                                 dep_full_path, dependency_target)
