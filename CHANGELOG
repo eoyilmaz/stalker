@@ -21,6 +21,17 @@ Stalker Changes
 * **Fix:** Fixed ``TaskJugglerScheduler`` to correctly generate task absolute
   paths for PostgreSQL DB.
 
+* **New:** ``Repository.path`` is now writable and sets the correct path
+  (``linux_path``, ``windows_path``, or ``osx_path``) according to the current
+  system.
+
+* **New:** Setting either of the ``Repository.path``,
+  ``Repository.linux_path``, ``Repository.windows_path``,
+  ``Repository.osx_path`` attributes will update the related environment
+  variable if the system and attribute are matching to each other, setting the
+  ``linux_path`` on Linux or setting the ``windows_path`` on Windows or setting
+  the ``osx_path`` on OSX will update the environment variable.
+
 0.2.12.1
 ========
 

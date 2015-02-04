@@ -98,53 +98,76 @@ class Repository(Entity):
         self.osx_path = osx_path
 
     @validates("linux_path")
-    def _validate_linux_path(self, key, linux_path_in):
+    def _validate_linux_path(self, key, linux_path):
         """validates the given linux path
         """
         from stalker import __string_types__
-        if not isinstance(linux_path_in, __string_types__):
+        if not isinstance(linux_path, __string_types__):
             raise TypeError(
                 "%s.linux_path should be an instance of string not %s" %
-                (self.__class__.__name__, linux_path_in.__class__.__name__)
+                (self.__class__.__name__, linux_path.__class__.__name__)
             )
 
-        linux_path_in = os.path.normpath(linux_path_in) + '/'
+        linux_path = os.path.normpath(linux_path) + '/'
 
-        return linux_path_in.replace("\\", "/")
+        linux_path = linux_path.replace("\\", "/")
+
+        if self.id is not None and platform.system() == "Linux":
+            # update the environment variable
+            os.environ[defaults.repo_env_var_template % {'id': self.id}] = \
+                linux_path
+
+        return linux_path
 
     @validates("osx_path")
-    def _validate_osx_path(self, key, osx_path_in):
+    def _validate_osx_path(self, key, osx_path):
         """validates the given osx path
         """
         from stalker import __string_types__
-        if not isinstance(osx_path_in, __string_types__):
+        if not isinstance(osx_path, __string_types__):
             raise TypeError(
                 "%s.osx_path should be an instance of string not %s" %
-                (self.__class__.__name__, osx_path_in.__class__.__name__)
+                (self.__class__.__name__, osx_path.__class__.__name__)
             )
 
-        osx_path_in = os.path.normpath(osx_path_in) + '/'
+        osx_path = os.path.normpath(osx_path) + '/'
 
-        return osx_path_in.replace("\\", "/")
+        osx_path = osx_path.replace("\\", "/")
+
+        if self.id is not None and platform.system() == "Darwin":
+            # update the environment variable
+            os.environ[defaults.repo_env_var_template % {'id': self.id}] = \
+                osx_path
+
+        return osx_path
+
 
     @validates("windows_path")
-    def _validate_windows_path(self, key, windows_path_in):
+    def _validate_windows_path(self, key, windows_path):
         """validates the given windows path
         """
         from stalker import __string_types__
-        if not isinstance(windows_path_in, __string_types__):
+        if not isinstance(windows_path, __string_types__):
             raise TypeError(
                 "%s.windows_path should be an instance of string not %s" %
-                (self.__class__.__name__, windows_path_in.__class__.__name__)
+                (self.__class__.__name__, windows_path.__class__.__name__)
             )
 
-        windows_path_in = os.path.normpath(windows_path_in) + '/'
+        windows_path = os.path.normpath(windows_path) + '/'
 
-        return windows_path_in.replace("\\", "/")
+        windows_path = windows_path.replace("\\", "/")
+
+        if self.id is not None and platform.system() == "Windows":
+            # update the environment variable
+            os.environ[defaults.repo_env_var_template % {'id': self.id}] = \
+                windows_path
+
+        return windows_path
 
     @property
     def path(self):
-        """The path for the current os"""
+        """Returns the path for the current os
+        """
         # return the proper value according to the current os
         platform_system = platform.system()
 
@@ -154,6 +177,20 @@ class Repository(Entity):
             return self.windows_path
         elif platform_system == "Darwin":
             return self.osx_path
+
+    @path.setter
+    def path(self, path):
+        """Sets the path for the current os
+        """
+        # return the proper value according to the current os
+        platform_system = platform.system()
+
+        if platform_system == "Linux":
+            self.linux_path = path
+        elif platform_system == "Windows":
+            self.windows_path = path
+        elif platform_system == "Darwin":
+            self.osx_path = path
 
     def is_in_repo(self, path):
         """Returns True or False depending of the given is in this repo or not
@@ -254,3 +291,6 @@ def receive_after_insert(mapper, connection, repo):
     """
     logger.debug('auto creating env var for Repository with id: %s' % repo.id)
     os.environ[defaults.repo_env_var_template % {'id': repo.id}] = repo.path
+
+
+#@event.listens_for

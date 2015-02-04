@@ -84,7 +84,7 @@ new_project = Project(
     name="Fancy Commercial",
     code='FC',
     status_list=project_statuses,
-    repository=commercial_repo,
+    repositories=[commercial_repo],
 )
 
 import datetime
@@ -281,7 +281,7 @@ from stalker import FilenameTemplate
 task_template = FilenameTemplate(
     name='Task Template for Commercials',
     target_entity_type='Task',
-    path='{{project.code}}/{%- for p in parent_tasks -%}{{p.nice_name}}/{%- endfor -%}',
+    path='$REPO{{project.repository.id}}/{{project.code}}/{%- for p in parent_tasks -%}{{p.nice_name}}/{%- endfor -%}',
     filename='{{version.nice_name}}_v{{"%03d"|format(version.version_number)}}'
 )
 
@@ -301,10 +301,9 @@ vers1 = Version(
 vers1.update_paths()
 
 # check the path and filename
-print(vers1.path)                # 'FC/SH001/comp'
+print(vers1.path)                # '$REPO33/FC/SH001/comp'
 print(vers1.filename)            # 'SH001_comp_Main_v001'
-print(vers1.full_path)           # 'FC/SH001/comp/SH001_comp_Main_v001'
-
+print(vers1.full_path)           # '$REPO33/FC/SH001/comp/SH001_comp_Main_v001'
 # now the absolute values, values with repository root
 # because I'm running this code in a Linux laptop, my results are using the
 # linux path of the repository
@@ -361,4 +360,3 @@ References
 References/Movies
 References/Images
 """
-

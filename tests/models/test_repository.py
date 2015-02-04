@@ -213,6 +213,39 @@ class RepositoryTester(unittest.TestCase):
         self.patcher.patch('Darwin')
         self.assertEqual(self.test_repo.path, self.test_repo.osx_path)
 
+    def test_path_attribute_sets_correct_path_for_windows(self):
+        """testing if path property sets the correct attribute in windows
+        """
+        self.patcher.patch('Windows')
+        test_value = 'S:/Projects/'
+        self.assertNotEqual(self.test_repo.path, test_value)
+        self.assertNotEqual(self.test_repo.windows_path, test_value)
+        self.test_repo.path = test_value
+        self.assertEqual(self.test_repo.windows_path, test_value)
+        self.assertEqual(self.test_repo.path, test_value)
+
+    def test_path_attribute_sets_correct_path_for_linux(self):
+        """testing if path property sets the correct attribute in linux
+        """
+        self.patcher.patch('Linux')
+        test_value = '/mnt/S/Projects/'
+        self.assertNotEqual(self.test_repo.path, test_value)
+        self.assertNotEqual(self.test_repo.linux_path, test_value)
+        self.test_repo.path = test_value
+        self.assertEqual(self.test_repo.linux_path, test_value)
+        self.assertEqual(self.test_repo.path, test_value)
+
+    def test_path_attribute_sets_correct_path_for_osx(self):
+        """testing if path property sets the correct attribute in osx
+        """
+        self.patcher.patch('Darwin')
+        test_value = '/Volumes/S/Projects/'
+        self.assertNotEqual(self.test_repo.path, test_value)
+        self.assertNotEqual(self.test_repo.osx_path, test_value)
+        self.test_repo.path = test_value
+        self.assertEqual(self.test_repo.osx_path, test_value)
+        self.assertEqual(self.test_repo.path, test_value)
+
     def test_equality(self):
         """testing the equality of two repositories
         """
@@ -899,6 +932,16 @@ class RepositoryDBTester(unittest.TestCase):
     """tests Repository DB relation
     """
 
+    def setUp(self):
+        """set the test up
+        """
+        self.patcher = PlatformPatcher()
+
+    def tearDown(self):
+        """clean the test down
+        """
+        self.patcher.restore()
+
     def test_creating_and_committing_a_new_repository_instance_will_create_env_var(self):
         """testing if an environment variable will be created when a new
         repository is created
@@ -906,11 +949,213 @@ class RepositoryDBTester(unittest.TestCase):
         from stalker import db, defaults
         db.setup({'sqlalchemy.url': 'sqlite:///:memory:'})
 
-        repo = Repository(name='Test Repo')
+        repo = Repository(
+            name='Test Repo',
+            linux_path='/mnt/T',
+            osx_path='/Volumes/T',
+            windows_path='T:/'
+        )
         db.DBSession.add(repo)
         db.DBSession.commit()
 
         import os
         self.assertTrue(
             defaults.repo_env_var_template % {'id': repo.id} in os.environ
+        )
+        self.assertEqual(
+            os.environ[defaults.repo_env_var_template % {'id': repo.id}],
+            repo.path
+        )
+
+    def test_updating_a_repository_will_update_repo_path(self):
+        """testing if the environment variable will be updated when the
+        repository path is updated
+        """
+        from stalker import db, defaults
+        db.setup({'sqlalchemy.url': 'sqlite:///:memory:'})
+
+        repo = Repository(
+            name='Test Repo',
+            linux_path='/mnt/T',
+            osx_path='/Volumes/T',
+            windows_path='T:/'
+        )
+        db.DBSession.add(repo)
+        db.DBSession.commit()
+
+        import os
+        self.assertTrue(
+            defaults.repo_env_var_template % {'id': repo.id} in os.environ
+        )
+
+        # now update the repository
+        test_value = '/mnt/S/'
+        repo.path = test_value
+
+        # expect the environment variable is also updated
+        self.assertEqual(
+            os.environ[defaults.repo_env_var_template % {'id': repo.id}],
+            test_value
+        )
+
+    def test_updating_windows_path_only_update_repo_path_if_on_windows(self):
+        """testing if updating the windows path will only update the path if
+        the system is windows
+        """
+        self.patcher.patch('Linux')
+
+        from stalker import db, defaults
+        db.setup({'sqlalchemy.url': 'sqlite:///:memory:'})
+
+        repo = Repository(
+            name='Test Repo',
+            linux_path='/mnt/T',
+            osx_path='/Volumes/T',
+            windows_path='T:/'
+        )
+        db.DBSession.add(repo)
+        db.DBSession.commit()
+
+        import os
+        self.assertTrue(
+            defaults.repo_env_var_template % {'id': repo.id} in os.environ
+        )
+
+        # now update the repository
+        test_value = 'S:/'
+        repo.windows_path = test_value
+
+        # expect the environment variable not updated
+        self.assertNotEqual(
+            os.environ[defaults.repo_env_var_template % {'id': repo.id}],
+            test_value
+        )
+        self.assertEqual(
+            os.environ[defaults.repo_env_var_template % {'id': repo.id}],
+            repo.linux_path
+        )
+
+        # make it windows
+        self.patcher.patch('Windows')
+
+        # now update the repository
+        test_value = 'S:/'
+        repo.windows_path = test_value
+
+        # expect the environment variable not updated
+        self.assertEqual(
+            os.environ[defaults.repo_env_var_template % {'id': repo.id}],
+            test_value
+        )
+        self.assertEqual(
+            os.environ[defaults.repo_env_var_template % {'id': repo.id}],
+            repo.windows_path
+        )
+
+    def test_updating_osx_path_only_update_repo_path_if_on_osx(self):
+        """testing if updating the osx path will only update the path if the
+        system is osx
+        """
+        self.patcher.patch('Windows')
+
+        from stalker import db, defaults
+        db.setup({'sqlalchemy.url': 'sqlite:///:memory:'})
+
+        repo = Repository(
+            name='Test Repo',
+            linux_path='/mnt/T',
+            osx_path='/Volumes/T',
+            windows_path='T:/'
+        )
+        db.DBSession.add(repo)
+        db.DBSession.commit()
+
+        import os
+        self.assertTrue(
+            defaults.repo_env_var_template % {'id': repo.id} in os.environ
+        )
+
+        # now update the repository
+        test_value = '/Volumes/S/'
+        repo.osx_path = test_value
+
+        # expect the environment variable not updated
+        self.assertNotEqual(
+            os.environ[defaults.repo_env_var_template % {'id': repo.id}],
+            test_value
+        )
+        self.assertEqual(
+            os.environ[defaults.repo_env_var_template % {'id': repo.id}],
+            repo.windows_path
+        )
+
+        # make it osx
+        self.patcher.patch('Darwin')
+
+        # now update the repository
+        test_value = '/Volumes/S/'
+        repo.osx_path = test_value
+
+        # expect the environment variable not updated
+        self.assertEqual(
+            os.environ[defaults.repo_env_var_template % {'id': repo.id}],
+            test_value
+        )
+        self.assertEqual(
+            os.environ[defaults.repo_env_var_template % {'id': repo.id}],
+            repo.osx_path
+        )
+
+    def test_updating_linux_path_only_update_repo_path_if_on_linux(self):
+        """testing if updating the linux path will only update the path if the
+        system is linux
+        """
+        self.patcher.patch('Darwin')
+
+        from stalker import db, defaults
+        db.setup({'sqlalchemy.url': 'sqlite:///:memory:'})
+
+        repo = Repository(
+            name='Test Repo',
+            linux_path='/mnt/T',
+            osx_path='/Volumes/T',
+            windows_path='T:/'
+        )
+        db.DBSession.add(repo)
+        db.DBSession.commit()
+
+        import os
+        self.assertTrue(
+            defaults.repo_env_var_template % {'id': repo.id} in os.environ
+        )
+
+        # now update the repository
+        test_value = '/mnt/S/'
+        repo.linux_path = test_value
+
+        # expect the environment variable not updated
+        self.assertNotEqual(
+            os.environ[defaults.repo_env_var_template % {'id': repo.id}],
+            test_value
+        )
+        self.assertEqual(
+            os.environ[defaults.repo_env_var_template % {'id': repo.id}],
+            repo.osx_path
+        )
+
+        # make it linux
+        self.patcher.patch('Linux')
+
+        # now update the repository
+        test_value = '/mnt/S/'
+        repo.linux_path = test_value
+
+        # expect the environment variable not updated
+        self.assertEqual(
+            os.environ[defaults.repo_env_var_template % {'id': repo.id}],
+            test_value
+        )
+        self.assertEqual(
+            os.environ[defaults.repo_env_var_template % {'id': repo.id}],
+            repo.linux_path
         )

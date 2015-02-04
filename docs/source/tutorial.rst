@@ -233,7 +233,7 @@ So::
       name="Fancy Commercial",
       code='FC',
       status_list=project_statuses,
-      repository=commercial_repo,
+      repositories=[commercial_repo],
   )
 
 So we have created our project now.
@@ -643,6 +643,18 @@ structure to Stalker we use a :class:`.Structure` instance::
   # now assign this structure to our project
   new_project.structure = commercial_project_structure
 
+.. versionadded:: 0.2.13
+
+   Starting with Stalker version 0.2.13 :class:`.Project` instances can have
+   **multiple** :class:`.Repository` instances attached. So you can create
+   complex templates where you can for example store published versions on a
+   different server/network share or you can setup so the outputs of a version
+   (like the rendered files) are stored on a different server, and etc.
+
+   *The following examples are updated in a simple way and examples showing*
+   *the advantage of having multiple repositories will be added on later*
+   *versions.*
+
 Now we have created a very simple structure instance, but we still need to
 create :class:`.FilenameTemplate` instances for Tasks which then will be used
 by the :class:`.Version` instances to generate a consistent and meaningful path
@@ -653,7 +665,7 @@ and filename::
   task_template = FilenameTemplate(
       name='Task Template for Commercials',
       target_entity_type='Task',
-      path='{{project.code}}/{%- for p in parent_tasks -%}{{p.nice_name}}/{%- endfor -%}',
+      path='$REPO{{project.repository.id}}/{{project.code}}/{%- for p in parent_tasks -%}{{p.nice_name}}/{%- endfor -%}',
       filename='{{version.nice_name}}_v{{"%03d"|format(version.version_number)}}'
   )
 
@@ -669,8 +681,18 @@ entities in our :class:`.Repository`.
 
 The data entered both to the ``path`` and ``filename`` arguments are `Jinja2`_
 directives. The :class:`.Version` class knows how to render these templates
-while calculating its ``path`` and ``filename`` attributes. Lets create a
-:class:`.Version` instance for one of our tasks::
+while calculating its ``path`` and ``filename`` attributes.
+
+Also, if you noticed we have used an environment variable "$REPO" along with
+the id of the first repository in the project "{{project.repository.id}}"
+(attention! ``project.repository`` always shows the first repository in the
+project), this is a new feature introduced with Stalker version 0.2.13. Stalker
+creates environment variables on runtime for each of the repository whenever a
+repository is created and inserted in to the DB or it will create environment
+variables for already existing repositories upon a successful database
+connection.
+
+Lets create a :class:`.Version` instance for one of our tasks::
 
   from stalker import Version
   
@@ -682,9 +704,9 @@ while calculating its ``path`` and ``filename`` attributes. Lets create a
   vers1.update_paths()
 
   # check the path and filename
-  print(vers1.path)                # 'FC/SH001/comp'
+  print(vers1.path)                # '$REPO33/FC/SH001/comp'
   print(vers1.filename)            # 'SH001_comp_Main_v001'
-  print(vers1.full_path)           # 'FC/SH001/comp/SH001_comp_Main_v001'
+  print(vers1.full_path)           # '$REPO33/FC/SH001/comp/SH001_comp_Main_v001'
 
   # now the absolute values, values with repository root
   # because I'm running this code in a Linux laptop, my results are using the
