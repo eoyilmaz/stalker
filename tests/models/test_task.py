@@ -4869,6 +4869,98 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         )
         self.test_project1.structure = None
 
+    def test_good_argument_is_skipped(self):
+        """testing if the good attribute will be None if good argument is
+        skipped
+        """
+        kwargs = copy.copy(self.kwargs)
+        try:
+            kwargs.pop('good')
+        except KeyError:
+            pass
+
+        new_task = Task(**kwargs)
+        self.data_created.append(new_task)
+        db.DBSession.add(new_task)
+        db.DBSession.commit()
+        self.assertEqual(new_task.good, None)
+
+    def test_good_argument_is_None(self):
+        """testing if the good attribute will be None if good argument is None
+        """
+        kwargs = copy.copy(self.kwargs)
+        kwargs['good'] = None
+        new_task = Task(**kwargs)
+        self.data_created.append(new_task)
+        db.DBSession.add(new_task)
+        db.DBSession.commit()
+        self.assertEqual(new_task.good, None)
+
+    def test_good_attribute_is_None(self):
+        """testing if it is possible to set the good attribute to None
+        """
+        from stalker import Good
+        kwargs = copy.copy(self.kwargs)
+        kwargs['good'] = Good(name='Some Good')
+        new_task = Task(**kwargs)
+        self.data_created.append(new_task)
+        self.data_created.append(kwargs['good'])
+        db.DBSession.add(new_task)
+        db.DBSession.commit()
+        self.assertNotEqual(new_task.good, None)
+        new_task.good = None
+        self.assertEqual(new_task.good, None)
+
+    def test_good_argument_is_not_a_good_instance(self):
+        """testing if a TypeError will be raised when the good argument value
+        is not a Good instance
+        """
+        kwargs = copy.copy(self.kwargs)
+        kwargs['good'] = 'not a good instance'
+        with self.assertRaises(TypeError) as cm:
+            Task(**kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Task.good should be a stalker.models.budget.Good instance, not '
+            'str'
+        )
+
+    def test_good_attribute_is_not_a_good_instance(self):
+        """testing if a TypeError will be raised when the good attribute is not
+        set to a Good instance
+        """
+        new_task = Task(**self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            new_task.good = 'not a good instance'
+
+        self.assertEqual(
+            str(cm.exception),
+            'Task.good should be a stalker.models.budget.Good instance, not '
+            'str'
+        )
+
+    def test_good_argument_is_working_properly(self):
+        """testing if the good argument value is properly passed to the good
+        attribute
+        """
+        kwargs = copy.copy(self.kwargs)
+        from stalker import Good
+        new_good = Good(name='Some Good')
+        kwargs['good'] = new_good
+        new_task = Task(**kwargs)
+        self.assertEqual(new_task.good, new_good)
+
+    def test_good_attribute_is_working_properly(self):
+        """testing if the good attribute value can be correctly set
+        """
+        from stalker import Good
+        new_good = Good(name='Some Good')
+        new_task = Task(**self.kwargs)
+        self.assertNotEqual(new_task.good, new_good)
+        new_task.good = new_good
+        self.assertEqual(new_task.good, new_good)
+
 
 class TaskPostgreSQLTestCase(TaskTestCase):
     """tests the Task class with PostgreSQL database

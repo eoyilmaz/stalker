@@ -32,6 +32,8 @@ Stalker Changes
   ``linux_path`` on Linux or setting the ``windows_path`` on Windows or setting
   the ``osx_path`` on OSX will update the environment variable.
 
+* **New:** Added ``Task.good`` attribute to easily connect tasks to ``Good``s.
+
 0.2.12.1
 ========
 

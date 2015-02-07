@@ -697,6 +697,18 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin,
           the :attr:`.absolute_path` is the full path and includs the OS
           dependent repository path.
 
+    .. versionadded: 0.2.13
+
+       Task to :class:`.Good` relation. It is now possible to define the
+       related Good to this task, to be able to filter tasks that are related
+       to the same :class:`.Good`.
+
+       Its main purpose of existence is to be able to generate
+       :class:`.BugdetEntry` instances from the tasks that are related to the
+       same :class:`.Good` and because the Goods are defining the cost and MSRP
+       of different things, it is possible to create BudgetEntries and thus
+       :class;`.Budget`\ s with this information.
+
     **Arguments**
 
     :param project: A Task which doesn't have a parent (a root task) should be
@@ -802,6 +814,9 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin,
       the list of alternatives this resource is used for the whole task. The
       default value is True. For more information read the :class:`.Task` class
       documentation.
+
+    :param good: It is possible to attach a good to this Task to be able to
+      filter and group them later on.
 
     """
     __auto_name__ = False
@@ -1028,6 +1043,15 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin,
 
     _review_number = Column("review_number", Integer, default=0)
 
+    good_id = Column(Integer, ForeignKey('Goods.id'))
+
+    good = relationship(
+        'Good',
+        primaryjoin='Tasks.c.good_id==Goods.c.id',
+        uselist=False,
+        post_update=True,
+    )
+
     def __init__(self,
                  project=None,
                  parent=None,
@@ -1048,6 +1072,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin,
                  priority=defaults.task_priority,
                  allocation_strategy=defaults.allocation_strategy[0],
                  persistent_allocation=True,
+                 good=None,
                  **kwargs):
         # temp attribute for remove event
         self._previously_removed_dependent_tasks = []
@@ -1126,6 +1151,8 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin,
         self.persistent_allocation = persistent_allocation
 
         self.update_status_with_dependent_statuses()
+
+        self.good = good
 
     @reconstructor
     def __init_on_load__(self):
@@ -2008,6 +2035,18 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin,
         from stalker.models import walk_hierarchy
         for t in walk_hierarchy(self, 'depends', method=method):
             yield t
+
+    @validates('good')
+    def _validate_good(self, key, good):
+        """validates the given good value
+        """
+        from stalker import Good
+        if good is not None and not isinstance(good, Good):
+            raise TypeError(
+                '%s.good should be a stalker.models.budget.Good instance, not '
+                '%s' % (self.__class__.__name__, good.__class__.__name__)
+            )
+        return good
 
     # =============
     # ** ACTIONS **
