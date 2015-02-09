@@ -34,6 +34,21 @@ Stalker Changes
 
 * **New:** Added ``Task.good`` attribute to easily connect tasks to ``Good``s.
 
+* **New:** Added new methods to ``Repository`` to help managing paths:
+
+  * ``Repository.find_repo()`` to find a repo from a given path. This is a
+    class method so it can be directly used with the Repository class.
+  * ``Repository.to_os_independent_path()`` to convert the given path to a OS
+    independent path which uses environment variables. Again this is a class
+    method too so it can be directly used with the Repository class.
+  * ``Repository.env_var`` a new property that returns the related environment
+    variable name of a repo instance. This is an instance property::
+
+    # with default settings
+    repo  = Repository(...)
+    repo.env_var  # should print something like "REPO131" which will be used
+                  # in paths as "$REPO131"
+
 0.2.12.1
 ========
 

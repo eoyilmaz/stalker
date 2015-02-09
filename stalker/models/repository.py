@@ -274,6 +274,50 @@ class Repository(Entity):
         path = self.to_native_path(path)
         return os.path.relpath(path, self.path).replace('\\', '/')
 
+    @classmethod
+    def find_repo(cls, path):
+        """returns the repository from the given path
+
+        :param str path: path in a repository
+        :return: stalker.models.repository.Repository
+        """
+        # path could be using environment variables so expand them
+        path = os.path.expandvars(path)
+
+        # first find the repository
+        repos = Repository.query.all()
+        found_repo = None
+        for repo in repos:
+            if path.startswith(repo.path) \
+               or path.startswith(repo.windows_path) \
+               or path.startswith(repo.linux_path) \
+               or path.startswith(repo.osx_path):
+                found_repo = repo
+                break
+        return found_repo
+
+    @classmethod
+    def to_os_independent_path(cls, path):
+        """Replaces the part of the given path with repository environment
+        variable which makes the given path OS independent.
+
+        :param path: path to make OS independent
+        :return:
+        """
+        # find the related repo
+        repo = cls.find_repo(path)
+
+        if repo:
+            return '$%s/%s' % (repo.env_var, repo.make_relative(path))
+        else:
+            return path
+
+    @property
+    def env_var(self):
+        """returns the env var of this repo
+        """
+        return defaults.repo_env_var_template % {'id': self.id}
+
     def __eq__(self, other):
         """the equality operator
         """

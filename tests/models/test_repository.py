@@ -964,10 +964,7 @@ class RepositoryTester(unittest.TestCase):
         """testing if Repository.make_relative() will convert the given path
         with environment variable to repository root relative path
         """
-        from stalker import db
-        db.setup()
-        db.DBSession.add(self.test_repo)
-        db.DBSession.commit()
+        self.test_repo.id = 1
 
         # so we should have the env var to be configured
         # now create a path with env var
@@ -976,6 +973,99 @@ class RepositoryTester(unittest.TestCase):
         self.assertEqual(
             result,
             'Sero/Task1/Task2/Some_file.ma'
+        )
+
+    def test_to_os_independent_path_is_working_properly(self):
+        """testing if to_os_independent_path class method is working properly
+        """
+        from stalker import db
+        db.setup()
+
+        db.DBSession.add(self.test_repo)
+        db.DBSession.commit()
+
+        relative_part = 'some/path/to/a/file.ma'
+        test_path = '%s/%s' % (self.test_repo.path, relative_part)
+        self.assertEqual(
+            Repository.to_os_independent_path(test_path),
+            '$REPO%s/%s' % (self.test_repo.id, relative_part)
+        )
+
+    def test_find_repo_is_working_properly(self):
+        """testing if the find_repo class method is working properly
+        """
+        from stalker import db
+        db.setup()
+
+        db.DBSession.add(self.test_repo)
+        db.DBSession.commit()
+
+        # add some other repositories
+        new_repo1 = Repository(
+            name='New Repository',
+            linux_path='/mnt/T/Projects',
+            osx_path='/Volumes/T/Projects',
+            windows_path='T:/Projects'
+        )
+        db.DBSession.add(new_repo1)
+        db.DBSession.commit()
+
+        test_path = '%s/some/path/to/a/file.ma' % self.test_repo.path
+        self.assertEqual(
+            Repository.find_repo(test_path),
+            self.test_repo
+        )
+
+        test_path = '%s/some/path/to/a/file.ma' % new_repo1.windows_path
+        self.assertEqual(
+            Repository.find_repo(test_path),
+            new_repo1
+        )
+
+    def test_find_repo_is_working_properly_with_env_vars(self):
+        """testing if the find_repo class method is working properly with paths
+        containing env vars
+        """
+        from stalker import db
+        db.setup()
+
+        db.DBSession.add(self.test_repo)
+        db.DBSession.commit()
+
+        # add some other repositories
+        new_repo1 = Repository(
+            name='New Repository',
+            linux_path='/mnt/T/Projects',
+            osx_path='/Volumes/T/Projects',
+            windows_path='T:/Projects'
+        )
+        db.DBSession.add(new_repo1)
+        db.DBSession.commit()
+
+        test_path = '$REPO%s/some/path/to/a/file.ma' % self.test_repo.id
+        self.assertEqual(
+            Repository.find_repo(test_path),
+            self.test_repo
+        )
+
+        test_path = '$REPO%s/some/path/to/a/file.ma' % new_repo1.id
+        self.assertEqual(
+            Repository.find_repo(test_path),
+            new_repo1
+        )
+
+    def test_env_var_property_is_working_properly(self):
+        """testing if the env_var property is working properly
+        """
+        from stalker import db
+        db.setup()
+
+        db.DBSession.add(self.test_repo)
+        db.DBSession.commit()
+
+        self.assertEqual(
+            self.test_repo.env_var,
+            'REPO1'
         )
 
 
