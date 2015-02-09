@@ -429,6 +429,22 @@ class RepositoryTester(unittest.TestCase):
             test_linux_path
         )
 
+    def test_to_linux_path_returns_the_linux_version_of_the_given_path_with_env_vars(self):
+        """testing if the to_linux_path returns the linux version of the given
+        path which contains env vars
+        """
+        import os
+        self.test_repo.id = 1
+        self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
+        os.environ['REPO1'] = '/mnt/T/Stalker_Projects'
+        test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/' \
+                          'Some_file.ma'
+        test_path_with_env_var = '$REPO1/Sero/Task1/Task2/Some_file.ma'
+        self.assertEqual(
+            self.test_repo.to_linux_path(test_path_with_env_var),
+            test_linux_path
+        )
+
     def test_to_linux_path_raises_TypeError_if_path_is_None(self):
         """testing if to_linux_path raises TypeError if path is None
         """
@@ -516,6 +532,23 @@ class RepositoryTester(unittest.TestCase):
                                 'Task1\\Task2\\Some_file.ma'
         self.assertEqual(
             self.test_repo.to_windows_path(test_osx_path_reverse),
+            test_windows_path
+        )
+
+    def test_to_windows_path_returns_the_windows_version_of_the_given_path_with_env_vars(self):
+        """testing if the to_windows_path returns the windows version of the
+        given path which contains env vars
+        """
+        import os
+        self.test_repo.id = 1
+        self.test_repo.windows_path = 'T:/Stalker_Projects'
+        self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
+        os.environ['REPO1'] = self.test_repo.linux_path
+        test_windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/' \
+                            'Some_file.ma'
+        test_path_with_env_var = '$REPO1/Sero/Task1/Task2/Some_file.ma'
+        self.assertEqual(
+            self.test_repo.to_windows_path(test_path_with_env_var),
             test_windows_path
         )
 
@@ -664,6 +697,24 @@ class RepositoryTester(unittest.TestCase):
         self.assertEqual(
             self.test_repo.to_osx_path(test_osx_path_reverse),
             test_osx_path
+        )
+
+    def test_to_osx_path_returns_the_osx_version_of_the_given_path_with_env_vars(self):
+        """testing if the to_osx_path returns the osx version of the given path
+        which contains env vars
+        """
+        import os
+        self.test_repo.id = 1
+        self.test_repo.windows_path = 'T:/Stalker_Projects'
+        self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
+        self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
+        os.environ['REPO1'] = self.test_repo.windows_path
+        test_windows_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/' \
+                            'Some_file.ma'
+        test_path_with_env_var = '$REPO1/Sero/Task1/Task2/Some_file.ma'
+        self.assertEqual(
+            self.test_repo.to_osx_path(test_path_with_env_var),
+            test_windows_path
         )
 
     def test_to_osx_path_raises_TypeError_if_path_is_None(self):

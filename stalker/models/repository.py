@@ -218,7 +218,11 @@ class Repository(Entity):
             raise TypeError('path should be a string')
 
         # expand all variables
-        path = os.path.expandvars(os.path.expanduser(path)).replace('\\', '/')
+        path = os.path.normpath(
+            os.path.expandvars(
+                os.path.expanduser(path)
+            )
+        ).replace('\\', '/')
 
         if path.startswith(self.windows_path):
             return path.replace(self.windows_path, replace_with)

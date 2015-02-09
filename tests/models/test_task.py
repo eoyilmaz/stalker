@@ -2052,7 +2052,7 @@ class TaskTestCase(unittest.TestCase):
         """
         new_task = Task(**self.kwargs)
         with self.assertRaises(AttributeError):
-            new_task.remaining_seconds = 2342
+            setattr(new_task, 'remaining_seconds', 2342)
 
     def test_remaining_seconds_is_working_properly(self):
         """testing if the remaining hours is working properly
@@ -4777,7 +4777,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
 
         self.test_project1.structure = structure
 
-        self.assertEqual('tp1/Modeling/', new_task.path)
+        self.assertEqual('tp1/Modeling', new_task.path)
         self.test_project1.structure = None
 
     def test_absolute_path_attribute_is_read_only(self):
@@ -4785,7 +4785,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """
         new_task = Task(**self.kwargs)
         with self.assertRaises(AttributeError):
-            new_task.absolute_path = 'some_path'
+            setattr(new_task, 'absolute_path', 'some_path')
 
     def test_absolute_path_attribute_raises_a_RuntimeError_if_no_FilenameTemplate_found(self):
         """testing if the absolute_path attribute raises a RuntimeError if
@@ -4793,7 +4793,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """
         new_task = Task(**self.kwargs)
         with self.assertRaises(RuntimeError):
-            new_task.absolute_path
+            path = new_task.absolute_path
 
     def test_absolute_path_attribute_raises_a_RuntimeError_if_no_matching_FilenameTemplate_found(self):
         """testing if the absolute_path attribute raises a RuntimeError if
@@ -4826,7 +4826,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
 
         self.test_project1.structure = structure
         with self.assertRaises(RuntimeError):
-            new_task.path
+            path = new_task.path
 
         self.test_project1.structure = None
 
@@ -4863,8 +4863,11 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
 
         self.test_project1.structure = structure
 
+        import os
         self.assertEqual(
-            '%s/tp1/Modeling/' % self.test_project1.repositories[0].path,
+            os.path.normpath(
+                '%s/tp1/Modeling' % self.test_project1.repositories[0].path
+            ),
             new_task.absolute_path
         )
         self.test_project1.structure = None

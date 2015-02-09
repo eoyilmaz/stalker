@@ -2672,7 +2672,9 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin,
 
         import jinja2
 
-        return jinja2.Template(task_template.path).render(**kwargs)
+        return os.path.normpath(
+            jinja2.Template(task_template.path).render(**kwargs)
+        )
 
     @property
     def absolute_path(self):
