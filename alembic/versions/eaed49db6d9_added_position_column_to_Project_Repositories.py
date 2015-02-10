@@ -17,15 +17,10 @@ import sqlalchemy as sa
 def upgrade():
     with op.batch_alter_table('Project_Repositories', schema=None) as batch_op:
         batch_op.add_column(sa.Column('position', sa.Integer(), nullable=True))
-        batch_op.add_column(
-            sa.Column('repository_id', sa.Integer(), nullable=False))
-        batch_op.drop_column('repo_id')
+        batch_op.alter_column('repo_id', new_column_name='repository_id')
 
 
 def downgrade():
     with op.batch_alter_table('Project_Repositories', schema=None) as batch_op:
-        batch_op.add_column(
-            sa.Column('repo_id', sa.INTEGER(), autoincrement=False,
-                      nullable=False))
-        batch_op.drop_column('repository_id')
+        batch_op.alter_column('repository_id', new_column_name='repo_id')
         batch_op.drop_column('position')
