@@ -1494,6 +1494,68 @@ class UserTest(unittest.TestCase):
             'stalker.models.client.Client, not int'
         )
 
+    def test_companies_attribute_is_working_properly(self):
+        """from issue #27
+        """
+        new_companies = []
+        c1 = Client(name='Company X')
+        c2 = Client(name='Company Y')
+        c3 = Client(name='Company Z')
+        db.DBSession.add_all([c1, c2, c3])
+        db.DBSession.commit()
+
+        c1 = Client.query.filter_by(name='Company X').first()
+        c2 = Client.query.filter_by(name='Company Y').first()
+        c3 = Client.query.filter_by(name='Company Z').first()
+
+        user = User(name='test_user', password='1234', email='a@a.com',
+                    login='test_user', clients=[c3])
+        db.DBSession.commit()
+
+        new_companies.append(c1)
+        new_companies.append(c2)
+        user.companies = new_companies
+        db.DBSession.commit()
+
+        self.assertTrue(c1 in user.companies)
+        self.assertTrue(c2 in user.companies)
+        self.assertTrue(c3 not in user.companies)
+
+    def test_companies_attribute_is_working_properly_2(self):
+        """from issue #27
+        """
+        c1 = Client(name='Company X')
+        c2 = Client(name='Company Y')
+        c3 = Client(name='Company Z')
+
+        user = User(
+            name='Fredrik',
+            login='fredrik',
+            email='f@f.f',
+            password='pass',
+            companies=[c1, c2, c3]
+        )
+
+        db.DBSession.add(user)
+
+        self.assertTrue(c1 in db.DBSession)
+        self.assertTrue(c2 in db.DBSession)
+        self.assertTrue(c3 in db.DBSession)
+
+        db.DBSession.commit()
+
+        c1 = Client(name='New Company X')
+        c2 = Client(name='New Company Y')
+        c3 = Client(name='New Company Z')
+
+        db.DBSession.add_all([c1, c2, c3])
+        db.DBSession.commit()
+
+        user = User.query.filter_by(name='Fredrik').first()
+        user.companies = [c1, c2, c3]
+
+        db.DBSession.commit()
+
     def test_watching_attribute_is_a_list_of_other_values_than_Task(self):
         """testing if a TypeError will be raised when the watching attribute is
         set to a list of other values than a Task

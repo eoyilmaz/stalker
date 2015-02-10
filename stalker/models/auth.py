@@ -401,6 +401,7 @@ class User(Entity, ACLMixin):
     company_role = relationship(
         "ClientUser",
         back_populates="user",
+        cascade='all, delete-orphan',
         primaryjoin="Users.c.id==Client_Users.c.uid",
         doc="""A list of :class:`.Client`\ s that this user is a part of."""
     )

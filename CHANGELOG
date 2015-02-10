@@ -50,6 +50,11 @@ Stalker Changes
     repo.env_var  # should print something like "REPO131" which will be used
                   # in paths as "$REPO131"
 
+* **Fix:** Fixed ``User.company_role`` attribute which is a relationship to
+  the ``ClienUser`` to cascade ``all, delete-orphan`` to prevent
+  AssertionErrors when a Client instance is removed from the ``User.companies``
+  collection.
+
 0.2.12.1
 ========
 
