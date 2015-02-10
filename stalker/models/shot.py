@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 from sqlalchemy import Column, Integer, ForeignKey, Table
-from sqlalchemy.orm import relationship, synonym, validates, reconstructor
+from sqlalchemy.orm import relationship, validates, reconstructor
 
 from stalker import ImageFormat
 from stalker.db.declarative import Base
@@ -524,7 +524,9 @@ class Shot(Task, CodeMixin):
         """
         if imf is None:
             # use the projects image format
-            imf = self.project.image_format
+            from stalker import db
+            with db.DBSession.no_autoflush:
+                imf = self.project.image_format
 
         if imf is not None:
             if not isinstance(imf, ImageFormat):

@@ -953,7 +953,7 @@ class ProjectTestCase(unittest.TestCase):
 
         self.assertEqual(
             str(cm.exception),
-            'Incompatible collection type: None is not list-like'
+            "'NoneType' object is not iterable"
         )
 
     def test_repositories_argument_is_not_a_list(self):
@@ -966,7 +966,9 @@ class ProjectTestCase(unittest.TestCase):
 
         self.assertEqual(
             str(cm.exception),
-            'Incompatible collection type: str is not list-like'
+            'ProjectRepository.repositories should be a list of '
+            'stalker.models.repository.Repository instances or derivatives, '
+            'not str'
         )
 
     def test_repositories_attribute_is_not_a_list(self):
@@ -978,7 +980,9 @@ class ProjectTestCase(unittest.TestCase):
 
         self.assertEqual(
             str(cm.exception),
-            'Incompatible collection type: str is not list-like'
+            'ProjectRepository.repositories should be a list of '
+            'stalker.models.repository.Repository instances or derivatives, '
+            'not str'
         )
 
     def test_repositories_argument_is_not_a_list_of_repository_instances(self):
@@ -992,7 +996,7 @@ class ProjectTestCase(unittest.TestCase):
 
         self.assertEqual(
             str(cm.exception),
-            'Project.repositories should be a list of '
+            'ProjectRepository.repositories should be a list of '
             'stalker.models.repository.Repository instances or derivatives, '
             'not str'
         )
@@ -1007,7 +1011,7 @@ class ProjectTestCase(unittest.TestCase):
 
         self.assertEqual(
             str(cm.exception),
-            'Project.repositories should be a list of '
+            'ProjectRepository.repositories should be a list of '
             'stalker.models.repository.Repository instances or derivatives, '
             'not str'
         )
@@ -1034,6 +1038,28 @@ class ProjectTestCase(unittest.TestCase):
         self.assertTrue(self.test_project.repositories != [new_repo1])
         self.test_project.repositories = [new_repo1]
         self.assertTrue(self.test_project.repositories == [new_repo1])
+
+    def test_repositories_attribute_value_order_is_not_changing(self):
+        """testing if the order of the repositories attribute is not changing
+        """
+        repo1 = Repository(name='Repo1')
+        repo2 = Repository(name='Repo2')
+        repo3 = Repository(name='Repo3')
+
+        db.DBSession.add_all([repo1, repo2, repo3])
+        db.DBSession.commit()
+
+        test_value = [repo3, repo1, repo2]
+        self.test_project.repositories = test_value
+        db.DBSession.commit()
+
+        for i in range(10):
+            db_proj = Project.query.first()
+            self.assertEqual(
+                db_proj.repositories,
+                test_value
+            )
+            db.DBSession.commit()
 
     def test_is_stereoscopic_argument_skipped(self):
         """testing if is_stereoscopic will set the is_stereoscopic attribute to
@@ -1919,12 +1945,14 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
         # create some time logs
         from stalker import TimeLog
 
-        TimeLog(
+        t = TimeLog(
             task=self.test_task1,
             resource=self.test_task1.resources[0],
             start=datetime.datetime(2013, 8, 1, 1, 0),
             duration=datetime.timedelta(hours=1)
         )
+        db.DBSession.add(t)
+        db.DBSession.commit()
 
         self.assertEqual(self.test_project.percent_complete,
                          (1.0 / 44.0 * 100))
@@ -1984,11 +2012,11 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
                 test_value
             )
 
-    def test_client_argument_is_working_properly(self):
-        """testing if the client argument value is correctly passed to the
-        client attribute
-        """
-        self.assertEqual(self.test_project.client, self.kwargs['client'])
+    # def test_client_argument_is_working_properly(self):
+    #     """testing if the client argument value is correctly passed to the
+    #     client attribute
+    #     """
+    #     self.assertEqual(self.test_project.client, self.kwargs['client'])
 
     def test_client_attribute_is_working_properly(self):
         """testing if the client attribute value can be updated correctly

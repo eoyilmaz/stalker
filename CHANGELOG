@@ -6,7 +6,8 @@ Stalker Changes
 ==========
 
 * **New:** ``Project`` instances can now have multiple repositories. Thus the
-  ``repository`` attribute is renamed to ``repositories``.
+  ``repository`` attribute is renamed to ``repositories``. And the order of the
+  items in the ``repositories`` attribute is restored correctly.
 
 * **New:** ``stalker.db.init()`` now automatically creates environment
   variables for each repository in the database.

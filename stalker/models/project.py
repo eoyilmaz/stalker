@@ -20,8 +20,9 @@
 
 import logging
 
-from sqlalchemy import (Column, Integer, ForeignKey, Float, Boolean, Table)
+from sqlalchemy import Column, Integer, ForeignKey, Float, Boolean
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.orm import relationship, validates
 
 from stalker import defaults
@@ -35,21 +36,63 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
 
-Project_Repositories = Table(
-    'Project_Repositories', Base.metadata,
-    Column(
-        'project_id',
+class ProjectRepository(Base):
+    """The association object for Project to Repository instances
+    """
+    __tablename__ = 'Project_Repositories'
+
+    project_id = Column(
         Integer,
         ForeignKey('Projects.id'),
         primary_key=True
-    ),
-    Column(
-        'repo_id',
+    )
+
+    project = relationship(
+        'Project',
+        back_populates='repositories_proxy',
+        primaryjoin='Project.project_id==ProjectRepository.project_id',
+    )
+
+    repository_id = Column(
         Integer,
         ForeignKey('Repositories.id'),
         primary_key=True
     )
-)
+
+    repository = relationship(
+        'Repository',
+        primaryjoin=
+        'ProjectRepository.repository_id==Repository.repository_id',
+    )
+
+    position = Column(Integer)
+
+    def __init__(self, project=None, repository=None, position=None):
+        self.project = project
+        self.repository = repository
+        self.position = position
+
+    @validates('project')
+    def _validate_project(self, key, project):
+        """validates the given project value
+        """
+        return project
+
+    @validates("repository")
+    def _validate_repository(self, key, repository):
+        """validates the given repository value
+        """
+        if repository is not None:
+            from stalker.models.repository import Repository
+            if not isinstance(repository, Repository):
+                raise TypeError(
+                    "%s.repositories should be a list of "
+                    "stalker.models.repository.Repository instances or "
+                    "derivatives, not %s" %
+                    (self.__class__.__name__, repository.__class__.__name__)
+                )
+
+        return repository
 
 
 class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
@@ -179,18 +222,28 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         'ProjectUser',
         back_populates='project',
         cascade='all, delete-orphan',
+        cascade_backrefs=False,
         primaryjoin='Projects.c.id==Project_Users.c.project_id'
     )
 
-    repositories = relationship(
-        "Repository",
-        secondary='Project_Repositories',
+    repositories_proxy = relationship(
+        'ProjectRepository',
+        back_populates='project',
+        cascade='all, delete-orphan',
+        cascade_backrefs=False,
+        order_by='ProjectRepository.position',
         primaryjoin='Projects.c.id==Project_Repositories.c.project_id',
-        secondaryjoin='Project_Repositories.c.repo_id==Repositories.c.id',
+        collection_class=ordering_list('position'),
         doc="""The :class:`.Repository` that this project files should reside.
 
         Should be a list of :class:`.Repository`\ instances.
         """
+    )
+
+    repositories = association_proxy(
+        'repositories_proxy',
+        'repository',
+        creator=lambda n: ProjectRepository(repository=n)
     )
 
     structure_id = Column(Integer, ForeignKey("Structures.id"))
@@ -329,21 +382,6 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
                 )
         return client
 
-    @validates("repositories")
-    def _validate_repositories(self, key, repository):
-        """validates the given repository value
-        """
-        from stalker.models.repository import Repository
-
-        if not isinstance(repository, Repository):
-            raise TypeError(
-                "%s.repositories should be a list of "
-                "stalker.models.repository.Repository instances or "
-                "derivatives, not %s" %
-                (self.__class__.__name__, repository.__class__.__name__)
-            )
-        return repository
-
     @validates("structure")
     def _validate_structure(self, key, structure_in):
         """validates the given structure_in value
@@ -381,12 +419,13 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
     def root_tasks(self):
         """returns a list of Tasks which have no parent
         """
-        from stalker.models.task import Task
+        from stalker import db, Task
 
-        return Task.query \
-            .filter(Task.project == self) \
-            .filter(Task.parent == None) \
-            .all()
+        with db.DBSession.no_autoflush:
+            return Task.query \
+                .filter(Task.project == self) \
+                .filter(Task.parent == None) \
+                .all()
 
     @property
     def assets(self):
@@ -521,6 +560,7 @@ class ProjectUser(Base):
     user = relationship(
         'User',
         back_populates='project_role',
+        cascade_backrefs=False,
         primaryjoin='ProjectUser.user_id==User.user_id'
     )
 
@@ -534,6 +574,7 @@ class ProjectUser(Base):
     project = relationship(
         'Project',
         back_populates='user_role',
+        cascade_backrefs=False,
         primaryjoin='ProjectUser.project_id==Project.project_id'
     )
 
@@ -546,6 +587,7 @@ class ProjectUser(Base):
 
     role = relationship(
         'Role',
+        cascade_backrefs=False,
         primaryjoin='ProjectUser.role_id==Role.role_id'
     )
 
