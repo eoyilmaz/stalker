@@ -2,8 +2,8 @@
 Stalker Changes
 ===============
 
-0.2.13.dev
-==========
+0.2.13
+======
 
 * **New:** ``Project`` instances can now have multiple repositories. Thus the
   ``repository`` attribute is renamed to ``repositories``. And the order of the
