@@ -19,6 +19,13 @@ def upgrade():
         batch_op.add_column(sa.Column('position', sa.Integer(), nullable=True))
         batch_op.alter_column('repo_id', new_column_name='repository_id')
 
+    # insert 0s as the position value
+    op.execute(
+        """update "Project_Repositories"
+        set position=0
+        """
+    )
+
 
 def downgrade():
     with op.batch_alter_table('Project_Repositories', schema=None) as batch_op:
