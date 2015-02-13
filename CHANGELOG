@@ -2,6 +2,13 @@
 Stalker Changes
 ===============
 
+0.2.13.1
+========
+
+* **Fix:** Fixed a bug in ``Review.finalize_review_set()`` which causes Task
+  instances to not to get any status update if the revised task is a second
+  degree dependee to that particular task.
+
 0.2.13
 ======
 

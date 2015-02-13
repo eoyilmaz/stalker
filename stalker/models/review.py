@@ -27,6 +27,7 @@ from sqlalchemy.orm import relationship, validates, synonym
 from stalker.db import Base
 from stalker.db.session import DBSession
 from stalker.log import logging_level
+from stalker.models import walk_hierarchy
 from stalker.models.entity import Entity, SimpleEntity
 from stalker.models.link import Link
 from stalker.models.status import Status
@@ -281,16 +282,22 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
 
             self.task.update_parent_statuses()
 
+            from stalker import TaskDependency
             # update dependent task statuses
-            for tdep in self.task.task_dependent_of:
-                dep = tdep.task
+
+            for dep in walk_hierarchy(self.task, 'dependent_of', method=1):
+                logger.debug('current TaskDependency object: %s' % dep)
                 dep.update_status_with_dependent_statuses()
                 if dep.status.code in ['HREV', 'PREV', 'DREV', 'OH', 'STOP']:
                     # for tasks that are still be able to continue to work,
                     # change the dependency_target to "onstart" to allow
                     # the two of the tasks to work together and still let the
                     # TJ to be able to schedule the tasks correctly
-                    tdep.dependency_target = 'onstart'
+                    tdeps = TaskDependency.query\
+                        .filter_by(depends_to=dep).all()
+                    for tdep in tdeps:
+                        tdep.dependency_target = 'onstart'
+
                 # also update the status of parents of dependencies
                 dep.update_parent_statuses()
 

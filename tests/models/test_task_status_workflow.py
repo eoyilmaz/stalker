@@ -1698,6 +1698,13 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         td = datetime.timedelta
         now = dt.now()
 
+        # remove any TaskDependency instances
+        from stalker import TaskDependency
+        for i in TaskDependency.query.all():
+            db.DBSession.delete(i)
+
+        db.DBSession.commit()
+
         self.test_task3.depends = [self.test_task9]  # will be PREV
         self.test_task4.depends = [self.test_task9]  # will be HREV
         self.test_task5.depends = [self.test_task9]  # will be STOP
@@ -1867,6 +1874,117 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.assertEqual(self.test_task9.status, self.status_drev)
         self.assertEqual(self.test_asset1.status, self.status_wip)
         self.assertEqual(self.test_task7.status, self.status_wip)
+
+    def test_request_revision_in_deeper_dependency_setup(self):
+        """testing if all of the dependent task statuses are updated to DREV
+        properly
+        """
+        # create a couple TimeLogs
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+
+        # remove any TaskDependency instances
+        from stalker import TaskDependency
+        for i in TaskDependency.query.all():
+            db.DBSession.delete(i)
+
+        db.DBSession.commit()
+
+        self.test_task5.depends = []
+        self.test_task6.depends = [self.test_task5]
+        self.test_task3.depends = [self.test_task6]
+        self.test_task8.depends = [self.test_task3]
+        self.test_task9.depends = [self.test_task8]
+
+        self.test_task5.update_status_with_dependent_statuses()
+        self.test_task6.update_status_with_dependent_statuses()
+        self.test_task3.update_status_with_dependent_statuses()
+        self.test_task8.update_status_with_dependent_statuses()
+        self.test_task9.update_status_with_dependent_statuses()
+
+        self.assertEqual(self.test_task5.status, self.status_rts)
+        self.assertEqual(self.test_task6.status, self.status_wfd)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        self.assertEqual(self.test_task3.status, self.status_wfd)
+        db.DBSession.commit()
+
+        # complete each of them first
+        # test_task5
+        self.test_task5.create_time_log(
+            self.test_task5.resources[0],
+            now - td(hours=1),
+            now
+        )
+        self.test_task5.schedule_timing = 1
+        self.test_task5.schedule_unit = 'h'
+        self.test_task5.status = self.status_cmpl
+
+        # test_task6
+        self.test_task6.status = self.status_rts
+        self.test_task6.create_time_log(
+            self.test_task6.resources[0],
+            now,
+            now + td(hours=1)
+        )
+        self.test_task6.schedule_timing = 1
+        self.test_task6.schedule_unit = 'h'
+        self.test_task6.status = self.status_cmpl
+
+        # test_task3
+        self.test_task3.status = self.status_rts
+        self.test_task3.create_time_log(
+            self.test_task3.resources[0],
+            now + td(hours=1),
+            now + td(hours=2)
+        )
+        self.test_task3.schedule_timing = 1
+        self.test_task3.schedule_unit = 'h'
+        self.test_task3.status = self.status_cmpl
+
+        # test_task8
+        self.test_task8.status = self.status_rts
+        self.test_task8.create_time_log(
+            self.test_task8.resources[0],
+            now + td(hours=2),
+            now + td(hours=3)
+        )
+        self.test_task8.schedule_timing = 1
+        self.test_task8.schedule_unit = 'h'
+        self.test_task8.status = self.status_cmpl
+
+        # test_task9
+        self.test_task9.status = self.status_rts
+        self.test_task9.create_time_log(
+            self.test_task9.resources[0],
+            now + td(hours=3),
+            now + td(hours=4)
+        )
+        self.test_task9.schedule_timing = 1
+        self.test_task9.schedule_unit = 'h'
+        self.test_task9.status = self.status_cmpl
+
+        # now request a revision to the first task (test_task6)
+        # and expect all of the task dependency targets to be turned
+        # in to "onstart"
+        self.test_task6.request_revision(
+            self.test_user1
+        )
+
+        self.assertEqual(
+            self.test_task6.task_depends_to[0].dependency_target, 'onend'
+        )
+        self.assertEqual(
+            self.test_task3.task_depends_to[0].dependency_target, 'onstart'
+        )
+        self.assertEqual(
+            self.test_task8.task_depends_to[0].dependency_target, 'onstart'
+        )
+        self.assertEqual(
+            self.test_task9.task_depends_to[0].dependency_target, 'onstart'
+        )
+
 
     # hold
     # WFD
