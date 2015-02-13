@@ -2,6 +2,13 @@
 Stalker Changes
 ===============
 
+0.2.14
+======
+
+* **Update:** Support for DB backends other than Postgresql has been dropped.
+  This is done in that way to greatly benefit from a code that is highly
+  optimized only for one DB backend.
+
 0.2.13
 ======
 

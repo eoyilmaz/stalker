@@ -44,7 +44,8 @@ class Config(object):
         # for possible parameters
         #
         database_engine_settings={
-            "sqlalchemy.url": "sqlite:///:memory:",
+            "sqlalchemy.url":
+                "postgresql:///stalker_admin:stalker@localhost/stalker",
             "sqlalchemy.echo": False,
         },
 

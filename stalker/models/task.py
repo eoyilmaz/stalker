@@ -24,6 +24,7 @@ import os
 
 from sqlalchemy import (Table, Column, Integer, ForeignKey, Boolean, Enum,
                         DateTime, Float, event)
+from sqlalchemy.dialects.postgresql import ExcludeConstraint
 from sqlalchemy.exc import InvalidRequestError
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship, validates, synonym, reconstructor
@@ -87,6 +88,11 @@ class TimeLog(Entity, DateRangeMixin):
     """
     __auto_name__ = True
     __tablename__ = "TimeLogs"
+    __table_args__ = (
+        ExcludeConstraint(
+            ('resource_id', '='), ('start', '&&'), ('end', '&&')
+        ),
+    )
     __mapper_args__ = {"polymorphic_identity": "TimeLog"}
     time_log_id = Column("id", Integer, ForeignKey("Entities.id"),
                          primary_key=True)
