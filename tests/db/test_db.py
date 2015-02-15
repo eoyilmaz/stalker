@@ -920,7 +920,7 @@ class DatabaseTester(unittest.TestCase):
         sql_query = 'select version_num from "alembic_version"'
         version_num = \
             db.DBSession.connection().execute(sql_query).fetchone()[0]
-        self.assertEqual('eaed49db6d9', version_num)
+        self.assertEqual('39d3c16ff005', version_num)
 
     def test_initialization_of_alembic_version_table_multiple_times(self):
         """testing if the db.create_alembic_table() will handle initializing
@@ -937,7 +937,7 @@ class DatabaseTester(unittest.TestCase):
         sql_query = 'select version_num from "alembic_version"'
         version_num = \
             db.DBSession.connection().execute(sql_query).fetchone()[0]
-        self.assertEqual('eaed49db6d9', version_num)
+        self.assertEqual('39d3c16ff005', version_num)
 
         db.DBSession.remove()
         db.setup(db_config)
