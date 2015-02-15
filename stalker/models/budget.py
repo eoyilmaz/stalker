@@ -252,15 +252,17 @@ class Budget(Entity, ProjectMixin, DAGMixin):
 
 
 class BudgetEntry(Entity):
-    """Manages budget entries in a budget
+    """Manages entries in a Budget.
 
-    With budget entries one can manage project budget costs. Each entry shows
-    one component of a bigger budget.
+    With BudgetEntries one can manage project budget entries one by one. Each
+    entry shows one component of a bigger budget. Entries are generally a
+    reflection of a :class:`.Good` instance and shows how many of that Good has
+    been included in this Budget, and what was the discounted price of that
+    Good.
 
-    :param float cost: This should be the direct copy of the Good.cost that
-      this item is related to.
-    :param float msrp: Again this should be the direct copy of the Good.msrp
-      that this item is related to.
+    :param budget: The :class:`.Budget` that this entry is a part of.
+    :param good: Stores a :class:`.Good` instance to carry all the
+      cost/msrp/unit data from.
     :param float price: The decided price of this entry. This is generally
       bigger than the cost and should be also bigger than msrp but the person
       that is editing the the budget which this entry is related to can decide
@@ -270,9 +272,6 @@ class BudgetEntry(Entity):
       price of this entry. It can be the same number of the :attr:`.price`
       multiplied by the :attr:`.amount` or can be something else that reflects
       the reality. Generally it is for calculating the "service" cost/profit.
-    :param str unit: The unit of this budget entry. Nothing so important for
-      now. Just a text like "$/hour". Stalker doesn't do any unit conversions
-      for now.
     :param float amount: Defines the amount of :class:`Good` that is in
       consideration for this entry.
     """
@@ -289,7 +288,6 @@ class BudgetEntry(Entity):
     )
 
     budget_id = Column(
-        'budget_id',
         Integer,
         ForeignKey('Budgets.id')
     )
@@ -298,6 +296,17 @@ class BudgetEntry(Entity):
         'Budget',
         primaryjoin='BudgetEntries.c.budget_id==Budgets.c.id',
         back_populates='entries',
+        uselist=False
+    )
+
+    good_id = Column(
+        Integer,
+        ForeignKey('Goods.id')
+    )
+
+    good = relationship(
+        'Good',
+        primaryjoin='BudgetEntries.c.good_id==Goods.c.id',
         uselist=False
     )
 
@@ -312,30 +321,23 @@ class BudgetEntry(Entity):
 
     def __init__(self,
                  budget=None,
-                 cost=0,
-                 msrp=0,
+                 good=None,
                  price=0,
                  realized_total=0,
-                 unit='',
                  amount=0.0,
                  **kwargs):
         super(BudgetEntry, self).__init__(**kwargs)
 
         self.budget = budget
-        self.cost = cost
-        self.msrp = msrp
+        self.good = good
+        self.cost = good.cost
+        self.msrp = good.msrp
+        self.unit = good.unit
 
         self.price = price
         self.realized_total = realized_total
 
         self.amount = amount
-        self.unit = unit
-
-    @property
-    def total(self):
-        """returns the total cost of this entry
-        """
-        return self.amount * self.cost
 
     @validates('budget')
     def _validate_budget(self, key, budget):
@@ -446,3 +448,17 @@ class BudgetEntry(Entity):
             )
 
         return float(amount)
+
+    @validates('good')
+    def _validate_good(self, key, good):
+        """validates the given good value
+        """
+        if not isinstance(good, Good):
+            raise TypeError(
+                '%s.good should be a stalker.models.budget.Good instance, '
+                'not %s' % (
+                    self.__class__.__name__, good.__class__.__name__
+                )
+            )
+
+        return good

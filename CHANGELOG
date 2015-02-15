@@ -2,6 +2,15 @@
 Stalker Changes
 ===============
 
+0.2.13.2
+========
+
+* **New:** Removed ``msrp``, ``cost`` and ``unit`` arguments from
+  ``BudgetEntry.__init__()`` and added a new ``good`` argument to get all of
+  the data from the related ``Good`` instance. But the ``msrp``, ``cost`` and
+  ``unit`` attributes of ``BudgetEntry`` class are still there to store the
+  values that may not correlate with the related ``Good`` in future.
+
 0.2.13.1
 ========
 

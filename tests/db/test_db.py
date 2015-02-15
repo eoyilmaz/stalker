@@ -1247,9 +1247,13 @@ class DatabaseModelsTester(unittest.TestCase):
         DBSession.add(test_budget)
         DBSession.commit()
 
+        good = Good(name='Some Good', cost=9, msrp=10, unit='$/hour')
+        DBSession.add(good)
+        DBSession.commit()
+
         # create some entries
-        entry1 = BudgetEntry(budget=test_budget, amount=5.0)
-        entry2 = BudgetEntry(budget=test_budget, amount=1.0)
+        entry1 = BudgetEntry(budget=test_budget, good=good, amount=5.0)
+        entry2 = BudgetEntry(budget=test_budget, good=good, amount=1.0)
 
         DBSession.add_all([entry1, entry2])
         DBSession.commit()
@@ -1312,6 +1316,10 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertTrue(
             BudgetEntry.query.all() == []
         )
+
+        # we still should have the good
+        good_db = Good.query.filter(Good.name == 'Some Good').first()
+        self.assertTrue(good_db is not None)
 
     def test_persistence_of_Page(self):
         """testing the persistence of Page
