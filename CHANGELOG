@@ -2,6 +2,13 @@
 Stalker Changes
 ===============
 
+0.2.13.3
+========
+
+* **Fix:** Fixed a bug in ``Review.finalize_review_set()`` for tasks that are
+  sent to review and still have some extra time were not clamped to their total
+  logged seconds when the review set is all approved.
+
 0.2.13.2
 ========
 

@@ -633,6 +633,45 @@ class ReviewTestCase(unittest.TestCase):
             0
         )
 
+    def test_approve_method_updates_task_timings(self):
+        """testing if approve method will also update the task timings
+        """
+        self.task3.status = self.status_rts
+        now = datetime.datetime.now()
+        td = datetime.timedelta
+
+        self.task3.schedule_timing = 2
+        self.task3.schedule_unit = 'h'
+
+        self.task3.create_time_log(
+            resource=self.task3.resources[0],
+            start=now,
+            end=now + td(hours=1)
+        )
+
+        reviews = self.task3.request_review()
+        self.assertEqual(
+            self.task3.status, self.status_prev
+        )
+
+        self.assertNotEqual(
+            self.task3.total_logged_seconds,
+            self.task3.schedule_seconds
+        )
+
+        review1 = reviews[0]
+        review1.approve()
+
+        self.assertEqual(
+            self.task3.status, self.status_cmpl
+        )
+
+        self.assertEqual(
+            self.task3.total_logged_seconds,
+            self.task3.schedule_seconds
+        )
+
+
     def test_approve_method_updates_task_status_correctly_for_a_multi_responsible_task_when_one_approve(self):
         """testing if the Review.approve() method will update the task status
         correctly for a task with multiple responsible

@@ -263,14 +263,14 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
                     total_seconds += review.schedule_seconds
                     revise_task = True
 
+            timing, unit = self.least_meaningful_time_unit(total_seconds)
             self.task._review_number += 1
             if revise_task:
                 # revise the task timing if the task needs more time
                 if total_seconds > self.task.schedule_seconds:
-                    logger.debug('total_seconds including reviews: %s' %
-                                 total_seconds)
-                    timing, unit = \
-                        self.least_meaningful_time_unit(total_seconds)
+                    logger.debug(
+                        'total_seconds including reviews: %s' % total_seconds
+                    )
 
                     self.task.schedule_timing = timing
                     self.task.schedule_unit = unit
@@ -278,8 +278,12 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
             else:
                 # approve the task
                 self.task.status = cmpl
-                # update task parent statuses
 
+                # also clamp the schedule timing
+                self.task.schedule_timing = timing
+                self.task.schedule_unit = unit
+
+            # update task parent statuses
             self.task.update_parent_statuses()
 
             from stalker import TaskDependency

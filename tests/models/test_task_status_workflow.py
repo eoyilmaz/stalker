@@ -1518,9 +1518,9 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
             'schedule_timing': 4,
             'schedule_unit': 'h'
         }
-        review3 = self.test_task3.request_revision(**kw)
-        self.assertEqual(self.test_task3.schedule_unit, 'd')
-        self.assertEqual(self.test_task3.schedule_timing, 10)
+        self.test_task3.request_revision(**kw)
+        self.assertEqual(self.test_task3.schedule_unit, 'h')
+        self.assertEqual(self.test_task3.schedule_timing, 6)
 
     #CMPL: parent status update
     def test_request_revision_in_CMPL_leaf_task_parent_status_updated_to_WIP(self):
