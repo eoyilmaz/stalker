@@ -1031,12 +1031,198 @@ class TaskTestCase(unittest.TestCase):
         self.assertEqual(new_task.percent_complete, 20.0 / 9.0 * 100.0)
         DBSession.commit()
 
+    def test_percent_complete_attribute_is_working_properly_for_a_duration_based_leaf_task_1(self):
+        """testing if the percent_complete attribute is working properly for a
+        duration based leaf task
+
+          #########
+                     ^
+                     |
+                    now
+        """
+        kwargs = copy.copy(self.kwargs)
+        kwargs['depends'] = []
+        kwargs['schedule_model'] = 'duration'
+
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+
+        new_task = Task(**kwargs)
+
+        new_task.computed_start = now - td(days=2)
+        new_task.computed_end = now - td(days=1)
+
+        DBSession.add(new_task)
+        DBSession.commit()
+        self.data_created.append(new_task)
+
+        self.assertEqual(new_task.percent_complete, 100)
+        DBSession.commit()
+
+    def test_percent_complete_attribute_is_working_properly_for_a_duration_based_leaf_task_2(self):
+        """testing if the percent_complete attribute is working properly for a
+        duration based leaf task
+
+          #########
+                  ^
+                  |
+                 now
+        """
+        kwargs = copy.copy(self.kwargs)
+        kwargs['depends'] = []
+        kwargs['schedule_model'] = 'duration'
+
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+
+        new_task = Task(**kwargs)
+        new_task.start = now - td(days=1)
+        new_task.end = now
+
+        DBSession.add(new_task)
+        DBSession.commit()
+        self.data_created.append(new_task)
+
+        self.assertEqual(new_task.percent_complete, 100)
+        DBSession.commit()
+
+    def test_percent_complete_attribute_is_working_properly_for_a_duration_based_leaf_task_3(self):
+        """testing if the percent_complete attribute is working properly for a
+        duration based leaf task
+
+          #########
+              ^
+              |
+             now
+        """
+        kwargs = copy.copy(self.kwargs)
+        kwargs['depends'] = []
+        kwargs['schedule_model'] = 'duration'
+
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+
+        new_task = Task(**kwargs)
+        new_task.start = now - td(hours=12)
+        new_task.end = now + td(hours=12)
+
+        DBSession.add(new_task)
+        DBSession.commit()
+        self.data_created.append(new_task)
+
+        # it should be somewhere around 50%
+        # due to the timing resolution we can not know it exactly
+        # and I don't want to patch datetime.datetime.now()
+        # this is a very simple test
+        self.assertAlmostEqual(
+            new_task.percent_complete,
+            50,
+            delta=5
+        )
+        DBSession.commit()
+
+    def test_percent_complete_attribute_is_working_properly_for_a_duration_based_leaf_task_4(self):
+        """testing if the percent_complete attribute is working properly for a
+        duration based leaf task
+
+              #########
+              ^
+              |
+             now
+        """
+        kwargs = copy.copy(self.kwargs)
+        kwargs['depends'] = []
+        kwargs['schedule_model'] = 'duration'
+
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+
+        new_task = Task(**kwargs)
+        new_task.computed_start = now
+        new_task.computed_end = now + td(days=1)
+
+        DBSession.add(new_task)
+        DBSession.commit()
+        self.data_created.append(new_task)
+
+        self.assertAlmostEqual(
+            new_task.percent_complete,
+            0,
+            delta=5
+        )
+        DBSession.commit()
+
+    def test_percent_complete_attribute_is_working_properly_for_a_duration_based_leaf_task_5(self):
+        """testing if the percent_complete attribute is working properly for a
+        duration based leaf task
+
+             #########
+           ^
+           |
+          now
+        """
+        kwargs = copy.copy(self.kwargs)
+        kwargs['depends'] = []
+        kwargs['schedule_model'] = 'duration'
+
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+
+        new_task = Task(**kwargs)
+        new_task.computed_start = now + td(days=1)
+        new_task.computed_end = now + td(days=2)
+
+        DBSession.add(new_task)
+        DBSession.commit()
+        self.data_created.append(new_task)
+
+        self.assertEqual(new_task.percent_complete, 0)
+        DBSession.commit()
+
+    def test_percent_complete_attribute_is_not_using_any_time_logs_for_a_duration_task(self):
+        """testing if the percent_complete attribute does not use any time log
+        information if the task is a duration based task
+        """
+        kwargs = copy.copy(self.kwargs)
+        kwargs['depends'] = []
+        kwargs['schedule_model'] = 'duration'
+
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now()
+
+        new_task = Task(**kwargs)
+        new_task.computed_start = now + td(days=1)
+        new_task.computed_end = now + td(days=2)
+
+        DBSession.add(new_task)
+        DBSession.commit()
+        self.data_created.append(new_task)
+
+        tlog1 = TimeLog(
+            task=new_task,
+            resource=new_task.resources[0],
+            start=now + td(days=1),
+            end=now + td(days=2)
+        )
+        DBSession.add(tlog1)
+        DBSession.commit()
+        self.data_created.append(tlog1)
+
+        self.assertEqual(new_task.percent_complete, 0)
+        DBSession.commit()
+
     def test_percent_complete_attribute_is_working_properly_for_a_container_task(self):
         """testing if the percent complete attribute is working properly for a
         container task
         """
         kwargs = copy.copy(self.kwargs)
-        kwargs['depends'] = []  # remove dependencies just for make it
+        kwargs['depends'] = []  # remove dependencies just to make it
                                 # easy to create time logs after stalker
                                 # v0.2.6.1
 
@@ -4177,8 +4363,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """testing if computed_start also sets the start value of the task
         """
         kwargs = copy.copy(self.kwargs)
-        new_task = Task(**kwargs)
-
         new_task1 = Task(**kwargs)
         test_value = datetime.datetime(2013, 8, 2, 13, 0)
         self.assertNotEqual(new_task1.start, test_value)
@@ -4659,7 +4843,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """
         kwargs = copy.copy(self.kwargs)
 
-        test_value = 'not a bool'    
+        test_value = 'not a bool'
         kwargs['persistent_allocation'] = test_value
         new_task1 = Task(**kwargs)
         self.assertEqual(bool(test_value), new_task1.persistent_allocation)

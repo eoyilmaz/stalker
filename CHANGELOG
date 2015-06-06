@@ -2,6 +2,16 @@
 Stalker Changes
 ===============
 
+0.2.14.a1
+=========
+
+* **New:** Introducing ``TaskGroups`` that lets you group tasks together even
+  if they are in different places on the project task hierarchy.
+
+* **Update:** ``Task.percent_complete`` is now correctly calculated for a
+  ``Duration`` based task by using the ``Task.start`` and ``Task.end``
+  attribute values.
+
 0.2.13.3
 ========
 

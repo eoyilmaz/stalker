@@ -567,7 +567,7 @@ order by path_as_text"""
 
     def _parse_csv_file(self):
         """parses back the csv file and fills the tasks with computes_start and
-        computed end values
+        computed_end values
         """
         parsing_start = time.time()
 
@@ -658,15 +658,15 @@ order by path_as_text"""
 
         # update computed resources data
         # first delete everything
-        delete_resources_statement = Task_Computed_Resources.delete()
-
-        update_resources_statement = Task_Computed_Resources.insert()\
-            .values(
-                task_id=bindparam('task_id'),
-                resource_id=bindparam('resource_id')
-            )
-
         if self.compute_resources:
+            delete_resources_statement = Task_Computed_Resources.delete()
+
+            update_resources_statement = Task_Computed_Resources.insert()\
+                .values(
+                    task_id=bindparam('task_id'),
+                    resource_id=bindparam('resource_id')
+                )
+
             db.DBSession.connection().execute(delete_resources_statement)
             db.DBSession.connection().execute(
                 update_resources_statement,
