@@ -382,7 +382,7 @@ resource {{department.tjp_id}} "{{department.tjp_id}}" {
         {% endfor %}
 
         # reports
-        taskreport breakdown "{{csv_file_full_path}}"{
+        taskreport breakdown "{{csv_file_name}}"{
             formats csv
             timeformat "%Y-%m-%d-%H:%M"
             columns id, start, end {%- if compute_resources %}, resources{% endif %}
@@ -406,13 +406,13 @@ resource {{department.tjp_id}} "{{department.tjp_id}}" {
 {{ tasks_buffer }}
 
 # reports
-taskreport breakdown "{{csv_file_full_path}}"{
+taskreport breakdown "{{csv_file_name}}"{
     formats csv
     timeformat "%Y-%m-%d-%H:%M"
     columns id, start, end {%- if compute_resources %}, resources{% endif %}
 }""",
 
-        tj_command='/usr/local/bin/tj3',
+        tj_command='tj3' if os.name == 'nt' else '/usr/local/bin/tj3',
 
         path_template='{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}',
         filename_template='{{task.entity_type}}_{{task.id}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}',
