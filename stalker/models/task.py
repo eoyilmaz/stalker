@@ -2962,7 +2962,8 @@ def update_time_log_task_parents_for_end(tlog, new_end, old_end, initiator):
     :return: None
     """
     logger.debug('received set event for new_end in target : %s' % tlog)
-    if tlog.start and old_end and new_end:
+    if tlog.start and isinstance(old_end, datetime.datetime) \
+       and isinstance(new_end, datetime.datetime):
         old_duration = old_end - tlog.start
         new_duration = new_end - tlog.start
         __update_total_logged_seconds__(tlog, new_duration, old_duration)
