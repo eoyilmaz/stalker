@@ -20,7 +20,6 @@
 import json
 
 import os
-import pickle
 import shutil
 import tempfile
 import datetime
