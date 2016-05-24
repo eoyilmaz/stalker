@@ -23,6 +23,7 @@ Inheritance Diagram
    stalker.models.department.DepartmentUser
    stalker.models.client.Client
    stalker.models.entity.Entity
+   stalker.models.entity.EntityGroup
    stalker.models.entity.SimpleEntity
    stalker.models.format.ImageFormat
    stalker.models.link.Link

@@ -822,8 +822,31 @@ class UserTest(unittest.TestCase):
         """testing if a TypeError will be raised when trying to assign None
         to the password argument
         """
-        self.kwargs["password"] = None
-        self.assertRaises(TypeError, User, **self.kwargs)
+        import copy
+        kwargs = copy.copy(self.kwargs)
+        kwargs["password"] = None
+        with self.assertRaises(TypeError) as cm:
+            User(**kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'User.password cannot be None'
+        )
+
+    def test_password_argument_is_an_empty_string(self):
+        """testing if a ValueError will be raised the password argument is an
+        empty string
+        """
+        import copy
+        kwargs = copy.copy(self.kwargs)
+        kwargs["password"] = ''
+        with self.assertRaises(ValueError) as cm:
+            User(**kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'User.password can not be an empty string'
+        )
 
     def test_password_attribute_being_None(self):
         """testing if a TypeError will be raised when tyring to assign None to

@@ -23,10 +23,10 @@ Animation and VFX Studios.
 See docs for more information.
 """
 
-__version__ = '0.2.13.3'
-
-
 import sys
+
+__version__ = '0.2.14'
+
 
 __string_types__ = []
 if sys.version_info[0] >= 3:  # Python 3
@@ -43,7 +43,7 @@ from stalker.models.asset import Asset
 from stalker.models.budget import Budget, BudgetEntry, Good, PriceList
 from stalker.models.client import Client, ClientUser
 from stalker.models.department import Department, DepartmentUser
-from stalker.models.entity import SimpleEntity, Entity
+from stalker.models.entity import SimpleEntity, Entity, EntityGroup
 from stalker.models.format import ImageFormat
 from stalker.models.link import Link
 from stalker.models.message import Message

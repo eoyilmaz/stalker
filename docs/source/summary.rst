@@ -30,6 +30,7 @@ Summary
    stalker.models.client.Client
    stalker.models.client.ClientUser
    stalker.models.entity.Entity
+   stalker.models.entity.EntityGroup
    stalker.models.entity.SimpleEntity
    stalker.models.format.ImageFormat
    stalker.models.link.Link

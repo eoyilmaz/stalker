@@ -505,7 +505,15 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin,
     :attr:`.schedule_seconds` and :attr:`.total_logged_seconds` attributes.
     For a parent task, the calculation is based on the total
     :attr:`.schedule_seconds` and :attr:`.total_logged_seconds` attributes of
-    their children. Even tough, the percent_complete attribute of a task is
+    their children.
+
+    .. versionadded:: 0.2.14
+       Because duration tasks do not need time logs there is no way to
+       calculate the percent complete by using the time logs. And Percent
+       Complete on a duration task is calculated directly from the
+       :attr:`.start` and :attr:`.end` and ``datetime.datetime.now()``.
+
+    Even tough, the percent_complete attribute of a task is
     100% the task may not be considered as completed, because it may not be
     reviewed and approved by the responsible yet.
 
@@ -1950,7 +1958,33 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin,
             if self.total_logged_seconds is None or \
                self.schedule_seconds is None:
                 self.update_schedule_info()
-        return self.total_logged_seconds / float(self.schedule_seconds) * 100
+        else:
+            if self.schedule_model == 'duration':
+                logger.debug('calculating percent_complete from duration')
+                now = datetime.datetime.now()  # TODO: use utc-0
+                if self.end <= now:
+                    return 100.0
+                elif self.start >= now:
+                    return 0.0
+                else:
+                    past = now - self.start
+                    logger.debug('now        : %s' % now)
+                    logger.debug('self.start : %s' % self.start)
+                    logger.debug('now - self.start: %s' % past)
+                    logger.debug('past.days: %s' % past.days)
+                    logger.debug('past.seconds: %s' % past.seconds)
+                    past_as_seconds = \
+                        past.days * 86400.0 + past.seconds
+                    logger.debug('past_as_seconds : %s' % past_as_seconds)
+
+                    total = self.end - self.start
+                    total_as_seconds = \
+                        total.days * 86400.0 + total.seconds
+                    logger.debug('total_as_seconds: %s' % total_as_seconds)
+
+                    return past_as_seconds / float(total_as_seconds) * 100.0
+
+        return self.total_logged_seconds / float(self.schedule_seconds) * 100.0
 
     @property
     def remaining_seconds(self):
@@ -2674,7 +2708,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin,
 
         return os.path.normpath(
             jinja2.Template(task_template.path).render(**kwargs)
-        )
+        ).replace('\\', '/')
 
     @property
     def absolute_path(self):
@@ -2928,7 +2962,8 @@ def update_time_log_task_parents_for_end(tlog, new_end, old_end, initiator):
     :return: None
     """
     logger.debug('received set event for new_end in target : %s' % tlog)
-    if tlog.start and old_end and new_end:
+    if tlog.start and isinstance(old_end, datetime.datetime) \
+       and isinstance(new_end, datetime.datetime):
         old_duration = old_end - tlog.start
         new_duration = new_end - tlog.start
         __update_total_logged_seconds__(tlog, new_duration, old_duration)

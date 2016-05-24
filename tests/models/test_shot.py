@@ -1140,7 +1140,7 @@ class ShotDBTestCase(unittest.TestCase):
     def setUp(self):
         """set up the test
         """
-        self.db_path = tempfile.mktemp(suffix='sqlite3')
+        self.db_path = tempfile.mktemp(suffix='.sqlite3')
 
         db.setup({'sqlalchemy.url': 'sqlite:///%s' % self.db_path})
         db.init()
@@ -1238,7 +1238,10 @@ class ShotDBTestCase(unittest.TestCase):
     def tearDown(self):
         """clean up the tests
         """
-        os.remove(self.db_path)
+        try:
+            os.remove(self.db_path)
+        except WindowsError:
+            pass
 
     def test_cut_duration_initialization_bug_with_cut_in(self):
         """testing if the _cut_duration attribute is initialized correctly for

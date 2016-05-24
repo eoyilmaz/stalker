@@ -621,7 +621,6 @@ class Entity(SimpleEntity):
         "Note",
         secondary="Entity_Notes",
         backref="entities",
-        #cascade='all',
         doc="""All the :class:`.Notes`\ s attached to this entity.
 
         It is a list of :class:`.Note` instances or an
@@ -681,6 +680,67 @@ class Entity(SimpleEntity):
         """
         return super(Entity, self).__hash__()
 
+
+class EntityGroup(Entity):
+    """Groups a wide variety of objects together to let one easily reach them.
+
+    :class:`.EntityGroup` helps grouping different types of entities together
+    to let one easily reach to them.
+    """
+
+    __auto_name__ = True
+    __tablename__ = "EntityGroups"
+    __mapper_args__ = {"polymorphic_identity": "EntityGroup"}
+    entity_group_id = Column("id", Integer, ForeignKey("Entities.id"),
+                             primary_key=True)
+
+    entities = relationship(
+        "SimpleEntity",
+        secondary="EntityGroup_Entities",
+        # primaryjoin='EntityGroups.c.id=='
+        #             'EntityGroup_Entities.c.entity_group_id',
+        # secondaryjoin='EntityGroup_Entities.c.other_entity_id=='
+        #               'SimpleEntities.c.id',
+        post_update=True,
+        backref="entity_groups",
+        doc="""All the :class:`.SimpleEntity`s grouped in this EntityGroup.
+        """
+    )
+
+    def __init__(self, entities=None, **kwargs):
+        super(Entity, self).__init__(**kwargs)
+
+        if entities is None:
+            entities = []
+
+        self.entities = entities
+
+    @validates('entities')
+    def _validate_entities(self, key, entity):
+        """validates the given entity value
+        """
+        if not isinstance(entity, SimpleEntity):
+            raise TypeError(
+                '%s.entities should be a list of SimpleEntities, not %s' % (
+                    self.__class__.__name__,
+                    entity.__class__.__name__
+                )
+            )
+
+        return entity
+
+    def __eq__(self, other):
+        """the equality operator
+        """
+        return super(SimpleEntity, self).__eq__(other) \
+            and isinstance(other, EntityGroup)
+
+    def __hash__(self):
+        """the overridden __hash__ method
+        """
+        return super(SimpleEntity, self).__hash__()
+
+
 # Entity Tags
 Entity_Tags = Table(
     "Entity_Tags", Base.metadata,
@@ -728,6 +788,23 @@ SimpleEntity_GenericData = Table(
     ),
     Column(
         'other_simple_entity_id',
+        Integer,
+        ForeignKey('SimpleEntities.id'),
+        primary_key=True
+    )
+)
+
+# EntityGroup Entities
+EntityGroup_Entities = Table(
+    'EntityGroup_Entities', Base.metadata,
+    Column(
+        'entity_group_id',
+        Integer,
+        ForeignKey('EntityGroups.id'),
+        primary_key=True
+    ),
+    Column(
+        'other_entity_id',
         Integer,
         ForeignKey('SimpleEntities.id'),
         primary_key=True

@@ -98,12 +98,12 @@ def init():
     # register all Actions available for all SOM classes
     class_names = [
         'Asset', 'Budget', 'BudgetEntry', 'Client', 'Daily', 'Department',
-        'Entity', 'FilenameTemplate', 'Good', 'Group', 'ImageFormat', 'Link',
-        'Message', 'Note', 'Page', 'Permission', 'PriceList', 'Project',
-        'Repository', 'Review', 'Role', 'Scene', 'Sequence', 'Shot',
-        'SimpleEntity', 'Status', 'StatusList', 'Structure', 'Studio', 'Tag',
-        'Task', 'Ticket', 'TicketLog', 'TimeLog', 'Type', 'User', 'Vacation',
-        'Version'
+        'Entity', 'EntityGroup', 'FilenameTemplate', 'Good', 'Group',
+        'ImageFormat', 'Link', 'Message', 'Note', 'Page', 'Permission',
+        'PriceList', 'Project', 'Repository', 'Review', 'Role', 'Scene',
+        'Sequence', 'Shot', 'SimpleEntity', 'Status', 'StatusList',
+        'Structure', 'Studio', 'Tag', 'Task', 'Ticket', 'TicketLog', 'TimeLog',
+        'Type', 'User', 'Vacation', 'Version'
     ]
 
     for class_name in class_names:
@@ -188,7 +188,7 @@ def create_alembic_table():
     # don't forget to update the version_num (and the corresponding test
     # whenever a new alembic revision is created)
 
-    version_num = '39d3c16ff005'
+    version_num = '258985128aff'
 
     from sqlalchemy import Table, Column, Text
 

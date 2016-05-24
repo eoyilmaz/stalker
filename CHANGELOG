@@ -2,6 +2,32 @@
 Stalker Changes
 ===============
 
+0.2.14
+======
+
+* **Fix:** Fixed ``Task.path`` to always return a path with forward slashes.
+
+* **New:** Introducing ``EntityGroups`` that lets one to group a bunch of
+ ``SimpleEntity``s together, it can be used in grouping tasks even if they are
+ in different places on the project task hierarchy or even in different
+ projects.
+
+* **Update:** ``Task.percent_complete`` is now correctly calculated for a
+  ``Duration`` based task by using the ``Task.start`` and ``Task.end``
+  attribute values.
+
+* **Fix:** Fixed ``stalker.models.task.update_time_log_task_parents_for_end()``
+  event to work with SQLAlchemy v1.0.
+
+* **New:** Added an option called ``__dag_cascade__`` to the ``DAGMixin`` to
+  control cascades on mixed in class. The default value is "all, delete".
+  Change it to "save-update, merge" if you don't want the children also be
+  deleted when the parent is deleted.
+
+* **Fix:** Fixed a bug in ``Version`` class that occurs when a version instance
+  that is a parent of other version instances is deleted, the child versions
+  are also deleted (fixed through DAGMixin class).
+
 0.2.13.3
 ========
 

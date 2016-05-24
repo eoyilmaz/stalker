@@ -153,9 +153,11 @@ class Repository(Entity):
                 (self.__class__.__name__, windows_path.__class__.__name__)
             )
 
-        windows_path = os.path.normpath(windows_path) + '/'
-
+        windows_path = os.path.normpath(windows_path)
         windows_path = windows_path.replace("\\", "/")
+
+        if not windows_path.endswith('/'):
+            windows_path += '/'
 
         if self.id is not None and platform.system() == "Windows":
             # update the environment variable
