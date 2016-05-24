@@ -697,7 +697,10 @@ class User(Entity, ACLMixin):
             )
 
         if password_in == "":
-            raise ValueError("raw_password can not be empty string")
+            raise ValueError(
+                "%s.password can not be an empty string" %
+                self.__class__.__name__
+            )
 
         # mangle the password
         return base64.b64encode(password_in.encode('utf-8'))

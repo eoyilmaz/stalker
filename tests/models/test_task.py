@@ -1078,8 +1078,8 @@ class TaskTestCase(unittest.TestCase):
         now = dt.now()
 
         new_task = Task(**kwargs)
-        new_task.start = now - td(days=1)
-        new_task.end = now
+        new_task.start = now - td(days=1, hours=1)
+        new_task.end = now - td(hours=1)
 
         DBSession.add(new_task)
         DBSession.commit()
@@ -5051,7 +5051,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         self.assertEqual(
             os.path.normpath(
                 '%s/tp1/Modeling' % self.test_project1.repositories[0].path
-            ),
+            ).replace('\\', '/'),
             new_task.absolute_path
         )
         self.test_project1.structure = None

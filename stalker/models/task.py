@@ -2708,7 +2708,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin,
 
         return os.path.normpath(
             jinja2.Template(task_template.path).render(**kwargs)
-        )
+        ).replace('\\', '/')
 
     @property
     def absolute_path(self):

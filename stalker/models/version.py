@@ -28,7 +28,6 @@ from sqlalchemy.exc import UnboundExecutionError
 from sqlalchemy.orm import relationship, validates
 
 from stalker.db.declarative import Base
-from stalker.models import check_circular_dependency
 from stalker.models.link import Link
 
 from stalker import defaults, DAGMixin
@@ -111,6 +110,8 @@ class Version(Link, DAGMixin):
     __auto_name__ = True
     __tablename__ = "Versions"
     __mapper_args__ = {"polymorphic_identity": "Version"}
+
+    __dag_cascade__ = "save-update, merge"
 
     version_id = Column("id", Integer, ForeignKey("Links.id"),
                         primary_key=True)

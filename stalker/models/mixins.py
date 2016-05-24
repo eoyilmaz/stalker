@@ -638,7 +638,6 @@ class DateRangeMixin(object):
     def computed_end(cls):
         return Column('computed_end', DateTime)
 
-
     @property
     def computed_duration(self):
         """returns the computed_duration as the difference of computed_start
@@ -1338,7 +1337,11 @@ class DAGMixin(object):
 
           id = Column('id', Integer, primary_key=True)
           __id_column__ = id
+
+    Use the :attr:``.__dag_cascade__`` to control the cascade behaviour.
     """
+
+    __dag_cascade__ = 'all, delete'
 
     @declared_attr
     def parent_id(cls):
@@ -1374,7 +1377,7 @@ class DAGMixin(object):
             },
             back_populates='parent',
             post_update=True,
-            cascade='all, delete',
+            cascade=cls.__dag_cascade__,
             doc="""Other :class:`Budget` instances which are the children of this
             one. This attribute along with the :attr:`.parent` attribute is used in
             creating a DAG hierarchy of tasks.

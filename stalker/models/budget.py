@@ -264,10 +264,10 @@ class BudgetEntry(Entity):
     :param good: Stores a :class:`.Good` instance to carry all the
       cost/msrp/unit data from.
     :param float price: The decided price of this entry. This is generally
-      bigger than the cost and should be also bigger than msrp but the person
-      that is editing the the budget which this entry is related to can decide
-      to do a discount on this entry and give a different price. This attribute
-      holds the proposed final price.
+      bigger than the :attr:`.cost` and should be also bigger than
+      :attr:`.msrp` but the person that is editing the budget which this entry
+      is related to can decide to do a discount on this entry and give a
+      different price. This attribute holds the proposed final price.
     :param float realized_total: This attribute is for holding the realized
       price of this entry. It can be the same number of the :attr:`.price`
       multiplied by the :attr:`.amount` or can be something else that reflects
