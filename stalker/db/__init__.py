@@ -118,8 +118,9 @@ def init():
         register(class_)
 
     # create the admin if needed
+    admin = None
     if defaults.auto_create_admin:
-        __create_admin__()
+        admin = __create_admin__()
 
     # create statuses
     create_ticket_statuses()
@@ -128,32 +129,38 @@ def init():
     create_entity_statuses(
         entity_type='Daily',
         status_names=defaults.daily_status_names,
-        status_codes=defaults.daily_status_codes
+        status_codes=defaults.daily_status_codes,
+        user=admin
     )
     create_entity_statuses(
         entity_type='Task',
         status_names=defaults.task_status_names,
-        status_codes=defaults.task_status_codes
+        status_codes=defaults.task_status_codes,
+        user=admin
     )
     create_entity_statuses(
         entity_type='Asset',
         status_names=defaults.task_status_names,
-        status_codes=defaults.task_status_codes
+        status_codes=defaults.task_status_codes,
+        user=admin
     )
     create_entity_statuses(
         entity_type='Shot',
         status_names=defaults.task_status_names,
-        status_codes=defaults.task_status_codes
+        status_codes=defaults.task_status_codes,
+        user=admin
     )
     create_entity_statuses(
         entity_type='Sequence',
         status_names=defaults.task_status_names,
-        status_codes=defaults.task_status_codes
+        status_codes=defaults.task_status_codes,
+        user=admin
     )
     create_entity_statuses(
         entity_type='Review',
         status_names=defaults.review_status_names,
-        status_codes=defaults.review_status_codes
+        status_codes=defaults.review_status_codes,
+        user=admin
     )
 
     # create alembic revision table
@@ -179,8 +186,8 @@ def create_alembic_table():
     """creates the default alembic_version table and creates the data so that
     any new database will be considered as the latest version
     """
-    # Now, this is not the correct way of doing, there is a proper way of doing
-    # it and it is explained nicely in the Alembic library documentation.
+    # Now, this is not the correct way of doing this, there is a proper way of
+    # doing it and it is explained nicely in the Alembic library documentation.
     #
     # But it is simply not working when Stalker is installed as a package.
     #
@@ -290,6 +297,8 @@ def __create_admin__():
 
     DBSession.add(admin)
     DBSession.commit()
+
+    return admin
 
 
 def create_ticket_statuses():

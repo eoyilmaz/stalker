@@ -241,12 +241,17 @@ class DatabaseTester(unittest.TestCase):
             'Closed'
         ]
 
-        print(daily_status_list.statuses)
-
         self.assertEqual(len(daily_status_list.statuses),
                          len(expected_status_names))
+
+        from stalker import User
+        admin = User.query.filter(User.name == 'admin').first()
         for status in daily_status_list.statuses:
             self.assertTrue(status.name in expected_status_names)
+            # check if the created_by and updated_by attributes
+            # are set to admin
+            self.assertEqual(status.created_by, admin)
+            self.assertEqual(status.updated_by, admin)
 
     def test_register_creates_suitable_Permissions(self):
         """testing if stalker.db.register is able to create suitable
@@ -435,6 +440,15 @@ class DatabaseTester(unittest.TestCase):
             sorted(db_status_codes)
         )
 
+        # check if the created_by and updated_by attributes are correctly set
+        # to the admin
+        from stalker import User
+        admin = User.query.filter(User.name == 'admin').first()
+        for status in task_status_list.statuses:
+            self.assertEqual(status.created_by, admin)
+            self.assertEqual(status.updated_by, admin)
+
+
     def test_asset_status_initialization(self):
         """testing if the asset statuses are correctly created
         """
@@ -590,6 +604,13 @@ class DatabaseTester(unittest.TestCase):
             sorted(expected_status_codes),
             sorted(db_status_codes)
         )
+        # check if the created_by and updated_by attributes are correctly set
+        # to admin
+        from stalker import User
+        admin = User.query.filter(User.name == 'admin').first()
+        for status in sequence_status_list.statuses:
+            self.assertEqual(status.created_by, admin)
+            self.assertEqual(status.updated_by, admin)
 
     def test_task_status_initialization_when_there_is_a_Task_status_list(self):
         """testing if the task statuses are correctly created when there is a
@@ -652,6 +673,15 @@ class DatabaseTester(unittest.TestCase):
             sorted(db_status_codes)
         )
 
+        # check if the created_by and updated_by attributes are correctly set
+        # to the admin
+        from stalker import User
+        admin = User.query.filter(User.name == 'admin').first()
+        for status in task_status_list.statuses:
+            self.assertEqual(status.created_by, admin)
+            self.assertEqual(status.updated_by, admin)
+
+
     def test_asset_status_initialization_when_there_is_an_Asset_status_list(self):
         """testing if the asset statuses are correctly created when there is a
         StatusList for Sequence is already created
@@ -712,6 +742,14 @@ class DatabaseTester(unittest.TestCase):
             sorted(expected_status_codes),
             sorted(db_status_codes)
         )
+
+        # check if the created_by and updated_by attributes are correctly set
+        # to the admin
+        from stalker import User
+        admin = User.query.filter(User.name == 'admin').first()
+        for status in asset_status_list.statuses:
+            self.assertEqual(status.created_by, admin)
+            self.assertEqual(status.updated_by, admin)
 
     def test_shot_status_initialization_when_there_is_a_Shot_status_list(self):
         """testing if the shot statuses are correctly created when there is a
@@ -774,6 +812,14 @@ class DatabaseTester(unittest.TestCase):
             sorted(db_status_codes)
         )
 
+        # check if the created_by and updated_by attributes are correctly set
+        # to the admin
+        from stalker import User
+        admin = User.query.filter(User.name == 'admin').first()
+        for status in shot_status_list.statuses:
+            self.assertEqual(status.created_by, admin)
+            self.assertEqual(status.updated_by, admin)
+
     def test_sequence_status_initialization_when_there_is_a_Sequence_status_list(self):
         """testing if the sequence statuses are correctly created when there is
         a StatusList for Sequence is already created
@@ -835,6 +881,14 @@ class DatabaseTester(unittest.TestCase):
             sorted(db_status_codes)
         )
 
+        # check if the created_by and updated_by attributes are correctly set
+        # to the admin
+        from stalker import User
+        admin = User.query.filter(User.name == 'admin').first()
+        for status in sequence_status_list.statuses:
+            self.assertEqual(status.created_by, admin)
+            self.assertEqual(status.updated_by, admin)
+
     def test_review_status_initialization(self):
         """testing if the review statuses are correctly created
         """
@@ -874,6 +928,14 @@ class DatabaseTester(unittest.TestCase):
             sorted(expected_status_codes),
             sorted(db_status_codes)
         )
+
+        # check if the created_by and updated_by attributes are correctly set
+        # to the admin
+        from stalker import User
+        admin = User.query.filter(User.name == 'admin').first()
+        for status in review_status_list.statuses:
+            self.assertEqual(status.created_by, admin)
+            self.assertEqual(status.updated_by, admin)
 
     def test___create_entity_statuses_no_entity_type_supplied(self):
         """testing db.__create_entity_statuses() will raise a ValueError when

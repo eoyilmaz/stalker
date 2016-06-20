@@ -102,7 +102,7 @@ class Ticket(Entity, StatusMixin):
     automatically filled accordingly. For newly created Tickets the status of
     the ticket is ``NEW`` and can be changed to other statuses as follows:
 
-        Status -> Action -> New Status
+        Status   -> Action   -> New Status
 
         NEW      -> resolve  -> CLOSED
         NEW      -> accept   -> ACCEPTED
