@@ -1014,6 +1014,42 @@ class DatabaseTester(unittest.TestCase):
         # no additional version is created
         self.assertEqual(1, len(version_nums))
 
+    def test_alembic_version_mismatch(self):
+        """testing if the db.init() will raise a ValueError if the alembic
+        version of the database is not equal to the alembic_version of the
+        current Stalker release
+        """
+        temp_db_path = os.path.join(tempfile.mktemp(suffix='.db'))
+        self.files_to_remove.append(temp_db_path)
+        config = {'sqlalchemy.url': 'sqlite:///%s' % temp_db_path}
+        db.setup(config)
+        db.init()
+
+        # now change the alembic_version
+        sql = "update alembic_version set version_num = 'some_random_number'"
+        db.DBSession.connection().execute(sql)
+        db.DBSession.commit()
+
+        # check if it is updated correctly
+        sql = "select version_num from alembic_version"
+        result = db.DBSession.connection().execute(sql).fetchone()
+        self.assertEqual(
+            result[0], 'some_random_number'
+        )
+
+        # close the connection
+        db.DBSession.connection().close()
+        db.DBSession.remove()
+
+        # re-setup
+        with self.assertRaises(ValueError) as cm:
+            db.setup(config)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Please update the database to version: %s' % db.alembic_version
+        )
+
     def test_initialization_of_repo_environment_variables(self):
         """testing if the db.create_repo_env_vars() will create environment
         variables for each repository in the system

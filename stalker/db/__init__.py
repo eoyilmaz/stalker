@@ -26,7 +26,7 @@ Whenever stalker.db or something under it imported, the
 import logging
 
 from sqlalchemy import engine_from_config
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, OperationalError, ProgrammingError
 
 from stalker import defaults
 from stalker.db.declarative import Base
@@ -35,6 +35,8 @@ from stalker.log import logging_level
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
+
+alembic_version = '258985128aff'
 
 
 def setup(settings=None):
@@ -65,6 +67,10 @@ def setup(settings=None):
         bind=engine,
         extension=None
     )
+
+    # check alembic versions of the database
+    # and raise an error if it is not matching with the system
+    check_alembic_version()
 
     # create the database
     logger.debug("creating the tables")
@@ -182,6 +188,35 @@ def create_repo_vars():
             repo.path
 
 
+def get_alembic_version():
+    """returns the alembic version of the database
+    """
+    # try to query the version value
+    conn = DBSession.connection()
+    engine = conn.engine
+    if engine.dialect.has_table(conn, 'alembic_version'):
+        sql_query = 'select version_num from alembic_version'
+        try:
+            return DBSession.connection().execute(sql_query).fetchone()[0]
+        except (OperationalError, ProgrammingError, TypeError):
+            DBSession.rollback()
+            return None
+    else:
+        return None
+
+
+def check_alembic_version():
+    """checks the alembic version of the database and raise a ValueError if it
+    is not matching with this version of Stalker
+    """
+    current_alembic_version = get_alembic_version()
+    print ('current_alembic_version: %s' % current_alembic_version)
+    if current_alembic_version and current_alembic_version != alembic_version:
+        raise ValueError(
+            'Please update the database to version: %s' % alembic_version
+        )
+
+
 def create_alembic_table():
     """creates the default alembic_version table and creates the data so that
     any new database will be considered as the latest version
@@ -195,7 +230,7 @@ def create_alembic_table():
     # don't forget to update the version_num (and the corresponding test
     # whenever a new alembic revision is created)
 
-    version_num = '258985128aff'
+    version_num = alembic_version
 
     from sqlalchemy import Table, Column, Text
 

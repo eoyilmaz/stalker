@@ -2,6 +2,18 @@
 Stalker Changes
 ===============
 
+0.2.15.dev
+==========
+
+* **New:** ``db.setup()`` now checks for ``alembic_version`` before setting up
+  a connection to the database and raises a ``ValueError`` if the database
+  alembic version is not matching the current implementation of Stalker.
+
+* **Fix:** ``db.init()`` sets the ``created_by`` and ``updated_by``
+  attributes to ``admin`` user if there is one while creating entity statuses.
+
+* **New:** Created ``create_sdist.cmd`` and ``upload_to_pypi.cmd`` for Windows.
+
 0.2.14
 ======
 
