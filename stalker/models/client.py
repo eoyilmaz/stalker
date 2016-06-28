@@ -82,11 +82,17 @@ class Client(Entity):
         doc="""List of users representing the members of this client."""
     )
 
-    projects = relationship(
-        "Project",
-        primaryjoin='Projects.c.client_id==Clients.c.id',
-        back_populates="client",
-        doc="""List of projects affiliated with this client.""",
+    projects = association_proxy(
+        'project_role',
+        'project',
+        creator=lambda p: create_project_client(p)
+    )
+
+    project_role = relationship(
+        'ProjectClient',
+        back_populates='client',
+        cascade='all, delete-orphan',
+        primaryjoin='Clients.c.id==Project_Clients.c.client_id'
     )
 
     def __init__(
@@ -115,20 +121,6 @@ class Client(Entity):
         """the overridden __hash__ method
         """
         return super(Client, self).__hash__()
-
-    @validates("projects")
-    def _validate_projects(self, key, project):
-        """validates the given project attribute
-        """
-        from stalker.models.project import Project
-
-        if not isinstance(project, Project):
-            raise TypeError(
-                "Every element in the %s.projects list should be an instance "
-                "of stalker.models.project.Project not %s" %
-                (self.__class__.__name__, project.__class__.__name__)
-            )
-        return project
 
     def to_tjp(self):
         return ''
@@ -227,8 +219,15 @@ class ClientUser(Base):
             from stalker import Role
             if not isinstance(role, Role):
                 raise TypeError(
-                    '%s.role should be a'
+                    '%s.role should be a '
                     'stalker.models.auth.Role instance, not %s' %
                     (self.__class__.__name__, role.__class__.__name__)
                 )
         return role
+
+
+def create_project_client(project):
+    """helper function to create ProjectClient instance on association proxy
+    """
+    from stalker.models.project import ProjectClient
+    return ProjectClient(project=project)

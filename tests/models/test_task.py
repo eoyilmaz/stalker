@@ -4102,6 +4102,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         # print(t1.to_tjp)
         # print('-----------------------')
         # print(expected_tjp)
+        self.maxDiff = None
         self.assertEqual(t1.to_tjp, expected_tjp)
 
     def test_is_scheduled_is_a_read_only_attribute(self):

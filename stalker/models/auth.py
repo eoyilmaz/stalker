@@ -374,8 +374,12 @@ class User(Entity, ACLMixin):
     __tablename__ = "Users"
     __mapper_args__ = {"polymorphic_identity": "User"}
 
-    user_id = Column("id", Integer, ForeignKey("Entities.id"),
-                     primary_key=True)
+    user_id = Column(
+        "id",
+        Integer,
+        ForeignKey("Entities.id"),
+        primary_key=True
+    )
 
     departments = association_proxy(
         'department_role',
@@ -757,20 +761,6 @@ class User(Entity, ACLMixin):
                 (self.__class__.__name__, task.__class__.__name__)
             )
         return task
-
-    @validates('projects')
-    def _validate_projects(self, key, project):
-        """validates the given project instance
-        """
-        from stalker import Project
-
-        if not isinstance(project, Project):
-            raise TypeError(
-                '%s.projects should a list of stalker.models.project.Project '
-                'instances, not %s' %
-                (self.__class__.__name__, project.__class__.__name__)
-            )
-        return project
 
     @validates('vacations')
     def _validate_vacations(self, key, vacation):

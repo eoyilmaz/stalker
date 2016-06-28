@@ -200,7 +200,7 @@ class DepartmentUser(Base):
             from stalker import Role
             if not isinstance(role, Role):
                 raise TypeError(
-                    '%s.role should be a'
+                    '%s.role should be a '
                     'stalker.models.auth.Role instance, not %s' %
                     (self.__class__.__name__, role.__class__.__name__)
                 )

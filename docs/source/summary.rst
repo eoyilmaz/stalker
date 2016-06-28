@@ -46,6 +46,7 @@ Summary
    stalker.models.mixins.WorkingHoursMixin
    stalker.models.note.Note
    stalker.models.project.Project
+   stalker.models.project.ProjectClient
    stalker.models.project.ProjectRepository
    stalker.models.project.ProjectUser
    stalker.models.repository.Repository

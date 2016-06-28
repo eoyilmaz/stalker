@@ -978,20 +978,39 @@ class UserTest(unittest.TestCase):
         """testing if a TypeError will be raised when the projects attribute is
         set to None
         """
-        self.assertRaises(TypeError, setattr, self.test_user, 'projects', None)
+        with self.assertRaises(TypeError) as cm:
+            self.test_user.projects = None
+
+        self.assertEqual(
+            str(cm.exception),
+            "'NoneType' object is not iterable"
+        )
 
     def test_projects_attribute_is_set_to_a_value_which_is_not_a_list(self):
         """testing if the projects attribute is accepting lists only
         """
-        self.assertRaises(TypeError, setattr, self.test_user, 'projects',
-                          'not a list')
+        with self.assertRaises(TypeError) as cm:
+            self.test_user.projects = 'not a list'
+
+        self.assertEqual(
+            str(cm.exception),
+            'ProjectUser.project should be a stalker.models.project.Project '
+            'instance, not str'
+        )
 
     def test_projects_attribute_is_set_to_list_of_other_objects_than_Project_instances(self):
         """testing if a TypeError will be raised when the projects attribute is
         set to a value which is a list of other values than Projects instances
         """
-        self.assertRaises(TypeError, setattr, self.test_user, 'projects',
-                          ['not', 'a', 'list', 'of', 'projects', 32])
+        with self.assertRaises(TypeError) as cm:
+            self.test_user.projects = \
+                ['not', 'a', 'list', 'of', 'projects', 32]
+
+        self.assertEqual(
+            str(cm.exception),
+            'ProjectUser.project should be a stalker.models.project.Project '
+            'instance, not str'
+        )
 
     def test_projects_attribute_is_working_properly(self):
         """testing if the projects attribute is working properly

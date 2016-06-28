@@ -1,14 +1,14 @@
-<!-- Tufts VUE 3.3.0 concept-map (stalker_design.vue) 2016-03-29 -->
+<!-- Tufts VUE 3.3.0 concept-map (stalker_design.vue) 2016-06-21 -->
 <!-- Tufts VUE: http://vue.tufts.edu/ -->
 <!-- Do Not Remove: VUE mapping @version(1.1) jar:file:/C:/Program%20Files%20(x86)/VUE/VUE.jar!/tufts/vue/resources/lw_mapping_1_1.xml -->
-<!-- Do Not Remove: Saved date Tue Mar 29 00:05:29 EEST 2016 by eoyilmaz on platform Windows 8 6.2 in JVM 1.7.0_21-b11 -->
+<!-- Do Not Remove: Saved date Tue Jun 21 16:17:16 EEST 2016 by eoyilmaz on platform Windows 8 6.2 in JVM 1.7.0_21-b11 -->
 <!-- Do Not Remove: Saving version @(#)VUE: built October 8 2015 at 1658 by tomadm on Linux 2.6.32-504.23.4.el6.x86_64 i386 JVM 1.7.0_21-b11(bits=32) -->
 <?xml version="1.0" encoding="US-ASCII"?>
 <LW-MAP xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="none" ID="0"
     label="stalker_design.vue" created="0" x="0.0" y="0.0"
     width="12530.668" height="3563.2" strokeWidth="0.0" autoSized="false">
-    <resource referenceCreated="1459199129089" size="508984"
+    <resource referenceCreated="1466515036680" size="518574"
         spec="C:\Users\eoyilmaz\Documents\development\stalker\stalker\docs\source\_static\images\stalker_design.vue"
         type="1" xsi:type="URLResource">
         <title>stalker_design.vue</title>
@@ -1942,10 +1942,10 @@
   &lt;head&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -1970,10 +1970,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -2486,10 +2486,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -2527,10 +2527,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -2583,10 +2583,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -2636,10 +2636,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -2688,10 +2688,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -2786,10 +2786,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 11; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 11 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 11 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 11; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 11; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 11; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -2837,10 +2837,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -2890,10 +2890,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 11; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 11 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 11 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 11; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 11; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 11; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -2945,10 +2945,10 @@
   &lt;head&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -2997,10 +2997,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -3060,10 +3060,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 11; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 11 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 11 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 11; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 11; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 11; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -3111,10 +3111,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -3500,10 +3500,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -3878,10 +3878,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -3907,10 +3907,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -3936,10 +3936,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -4292,10 +4292,10 @@
   &lt;head&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -4473,10 +4473,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -4699,10 +4699,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -4735,10 +4735,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -4782,10 +4782,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -4818,10 +4818,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -4909,10 +4909,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -4981,10 +4981,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -5032,10 +5032,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -5074,10 +5074,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -5122,10 +5122,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -5164,10 +5164,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -5214,10 +5214,10 @@
   &lt;head&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -5252,10 +5252,10 @@
   &lt;head&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -5352,10 +5352,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -5393,10 +5393,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -5970,10 +5970,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -6418,10 +6418,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -6714,10 +6714,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -7593,10 +7593,10 @@
   &lt;head&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -7631,10 +7631,10 @@
   &lt;head&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -7700,10 +7700,10 @@
   &lt;head&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -8586,10 +8586,10 @@
   &lt;head style="color: #000000" color="#000000"&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -8912,10 +8912,10 @@
   &lt;head&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     
@@ -8950,10 +8950,10 @@
   &lt;head&gt;
     &lt;style type="text/css"&gt;
       &lt;!--
-        body { margin-left: 0px; color: #000000; margin-top: 0px; font-family: Arial; margin-right: 0px; font-size: 12; margin-bottom: 0px }
-        ol { margin-left: 30; margin-top: 6; font-family: Arial; vertical-align: middle; list-style-position: outside; font-size: 12 }
-        p { margin-left: 0; color: #000000; margin-top: 0; margin-right: 0; margin-bottom: 0 }
-        ul { margin-left: 30; margin-top: 6; vertical-align: middle; font-family: Arial; list-style-position: outside; font-size: 12 }
+        body { font-family: Arial; margin-left: 0px; color: #000000; font-size: 12; margin-right: 0px; margin-top: 0px; margin-bottom: 0px }
+        ol { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
+        p { margin-left: 0; color: #000000; margin-right: 0; margin-top: 0; margin-bottom: 0 }
+        ul { font-family: Arial; margin-left: 30; vertical-align: middle; list-style-position: outside; font-size: 12; margin-top: 6 }
       --&gt;
     &lt;/style&gt;
     

@@ -681,7 +681,6 @@ class DatabaseTester(unittest.TestCase):
             self.assertEqual(status.created_by, admin)
             self.assertEqual(status.updated_by, admin)
 
-
     def test_asset_status_initialization_when_there_is_an_Asset_status_list(self):
         """testing if the asset statuses are correctly created when there is a
         StatusList for Sequence is already created
@@ -983,7 +982,7 @@ class DatabaseTester(unittest.TestCase):
         sql_query = 'select version_num from "alembic_version"'
         version_num = \
             db.DBSession.connection().execute(sql_query).fetchone()[0]
-        self.assertEqual('258985128aff', version_num)
+        self.assertEqual('f2005d1fbadc', version_num)
 
     def test_initialization_of_alembic_version_table_multiple_times(self):
         """testing if the db.create_alembic_table() will handle initializing
@@ -1000,7 +999,7 @@ class DatabaseTester(unittest.TestCase):
         sql_query = 'select version_num from "alembic_version"'
         version_num = \
             db.DBSession.connection().execute(sql_query).fetchone()[0]
-        self.assertEqual('258985128aff', version_num)
+        self.assertEqual('f2005d1fbadc', version_num)
 
         db.DBSession.remove()
         db.setup(db_config)
@@ -1095,11 +1094,76 @@ class DatabaseTester(unittest.TestCase):
             # check if environment vars are created
             self.assertTrue('REPO%s' % repo.id in os.environ)
 
+    def test_db_init_with_studio_instance(self):
+        """testing db.init() using existing Studio instance for config values
+        """
+        temp_db_path = os.path.join(tempfile.mkdtemp(), 'stalker.db')
+        self.files_to_remove.append(temp_db_path)
+        db_config = {'sqlalchemy.url': 'sqlite:///%s' % temp_db_path}
+
+        from stalker import db
+        db.DBSession.remove()
+        db.setup(db_config)
+        db.init()
+
+        # check the defaults
+        from stalker import defaults
+        self.assertNotEqual(defaults.daily_working_hours, 8)
+        self.assertNotEqual(defaults.weekly_working_days, 4)
+        self.assertNotEqual(defaults.weekly_working_hours, 32)
+        self.assertNotEqual(defaults.yearly_working_days, 180)
+        self.assertNotEqual(defaults.timing_resolution,
+                            datetime.timedelta(minutes=5))
+
+        from stalker import Studio, WorkingHours
+
+        # check no studio
+        studios = Studio.query.all()
+        self.assertEqual(studios, [])
+
+        wh = WorkingHours(
+            working_hours={
+                'mon': [[10 * 60, 18 * 60]],
+                'tue': [[10 * 60, 18 * 60]],
+                'wed': [[10 * 60, 18 * 60]],
+                'thu': [[10 * 60, 18 * 60]],
+                'fri': [],
+                'sat': [],
+                'sun': [],
+            }
+        )
+        wh.daily_working_hours = 8
+
+        test_studio = Studio(
+            name='Test Studio',
+        )
+        test_studio.working_hours = wh
+        test_studio.timing_resolution = datetime.timedelta(minutes=5)
+
+        from stalker import db
+        db.DBSession.add(test_studio)
+        db.DBSession.commit()
+
+        # remove everything
+        db.DBSession.connection().close()
+        db.DBSession.remove()
+
+        # re-init db
+        db.setup(db_config)
+
+        # and expect the defaults to be updated with studio defaults
+        self.assertEqual(defaults.daily_working_hours, 8)
+        self.assertEqual(defaults.weekly_working_days, 4)
+        self.assertEqual(defaults.weekly_working_hours, 32)
+        self.assertEqual(defaults.yearly_working_days, 209)
+        self.assertEqual(defaults.timing_resolution,
+                         datetime.timedelta(minutes=5))
+
 
 class DatabaseModelsTester(unittest.TestCase):
     """tests the database model
 
-    NOTE TO OTHER DEVELOPERS:
+    NOTE TO DEVELOPERS:
 
     Most of the tests in this TestCase uses parts of the system which are
     tested but probably not tested while running the individual tests.

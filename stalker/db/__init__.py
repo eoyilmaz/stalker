@@ -36,7 +36,7 @@ from stalker.log import logging_level
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
-alembic_version = '258985128aff'
+alembic_version = 'f2005d1fbadc'
 
 
 def setup(settings=None):
@@ -210,7 +210,7 @@ def check_alembic_version():
     is not matching with this version of Stalker
     """
     current_alembic_version = get_alembic_version()
-    print ('current_alembic_version: %s' % current_alembic_version)
+    logger.debug('current_alembic_version: %s' % current_alembic_version)
     if current_alembic_version and current_alembic_version != alembic_version:
         raise ValueError(
             'Please update the database to version: %s' % alembic_version
@@ -540,5 +540,3 @@ def register(class_):
         DBSession.commit()
     except IntegrityError:
         DBSession.rollback()
-    # else:
-    #     DBSession.flush()

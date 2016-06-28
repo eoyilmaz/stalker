@@ -2,8 +2,8 @@
 Stalker Changes
 ===============
 
-0.2.15.dev
-==========
+0.2.15
+======
 
 * **New:** ``db.setup()`` now checks for ``alembic_version`` before setting up
   a connection to the database and raises a ``ValueError`` if the database
@@ -13,6 +13,14 @@ Stalker Changes
   attributes to ``admin`` user if there is one while creating entity statuses.
 
 * **New:** Created ``create_sdist.cmd`` and ``upload_to_pypi.cmd`` for Windows.
+
+* **New:** ``Project`` to ``Client`` relation is now a many-to-many relation,
+  thus it is possible to set multiple Clients for each project with each client
+  having their own roles in a specific project.
+
+* **Update:** ``ScheduleMixin.schedule_timing`` attribute is now Nullable.
+
+* **Update:** ``ScheduleMixin.schedule_unit`` attribute is now Nullable.
 
 0.2.14
 ======

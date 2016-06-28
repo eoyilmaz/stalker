@@ -25,7 +25,7 @@ See docs for more information.
 
 import sys
 
-__version__ = '0.2.15.dev'
+__version__ = '0.2.15'
 
 
 __string_types__ = []
@@ -52,7 +52,8 @@ from stalker.models.mixins import (ProjectMixin, ReferenceMixin,
                                    TargetEntityTypeMixin, CodeMixin,
                                    WorkingHoursMixin, ScheduleMixin, DAGMixin)
 from stalker.models.note import Note
-from stalker.models.project import Project, ProjectUser
+from stalker.models.project import (Project, ProjectUser, ProjectClient,
+                                    ProjectRepository)
 from stalker.models.review import Review, Daily, DailyLink
 from stalker.models.repository import Repository
 from stalker.models.scene import Scene

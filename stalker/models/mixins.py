@@ -1008,7 +1008,7 @@ class ScheduleMixin(object):
         return Column(
             '%s_unit' % cls.__default_schedule_attr_name__,
             Enum(*defaults.datetime_units, name='TimeUnit'),
-            nullable=False, default='h',
+            nullable=True, default='h',
             doc="""It is the unit of the %(attr)s timing. It is a string
             value. And should be one of 'min', 'h', 'd', 'w', 'm', 'y'.""" %
                 {'attr': cls.__default_schedule_attr_name__}
