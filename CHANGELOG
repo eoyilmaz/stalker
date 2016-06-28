@@ -2,6 +2,13 @@
 Stalker Changes
 ===============
 
+0.2.15.1
+========
+
+* **Fix:** Fixed alembic revision (f2005d1fbadc), it will now drop any existing
+  constraints before re-creating them. And the downgrade function will not
+  remove the constraints.
+
 0.2.15
 ======
 
