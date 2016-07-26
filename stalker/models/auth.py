@@ -639,19 +639,19 @@ class User(Entity, ACLMixin):
 
         if len_splits < 2:
             raise ValueError(
-                "check the formatting %s.email, there are no @ sign" %
+                "check the formatting of %s.email, there is no @ sign" %
                 self.__class__.__name__
             )
 
         if splits[0] == "":
             raise ValueError(
-                "check the formatting %s.email, the name part is missing" %
+                "check the formatting of %s.email, the name part is missing" %
                 self.__class__.__name__
             )
 
         if splits[1] == "":
             raise ValueError(
-                "check the %s.email formatting, the domain part is missing" %
+                "check the formatting %s.email, the domain part is missing" %
                 self.__class__.__name__
             )
 

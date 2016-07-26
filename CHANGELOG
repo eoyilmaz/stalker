@@ -2,6 +2,14 @@
 Stalker Changes
 ===============
 
+0.2.15.2
+========
+
+* **Fix:** Fixed a typo in the error message in
+  ``User._validate_email_format()`` method.
+* **Fix:** Fixed a query-invoked auto-flush problem in
+  ``Task.update_parent_statuses()`` method.
+
 0.2.15.1
 ========
 

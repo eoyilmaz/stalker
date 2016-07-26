@@ -2513,8 +2513,11 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin,
     def update_parent_statuses(self):
         """updates the parent statuses of this task if any
         """
-        if self.parent:
-            self.parent.update_status_with_children_statuses()
+        # prevent query-invoked auto-flush
+        from stalker import db
+        with db.DBSession.no_autoflush:
+            if self.parent:
+                self.parent.update_status_with_children_statuses()
 
     def update_status_with_children_statuses(self):
         """updates the task status according to its children statuses
