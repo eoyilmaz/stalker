@@ -2,6 +2,12 @@
 Stalker Changes
 ===============
 
+0.2.16.1
+========
+
+* **Fix:** As usual after a new release that changes database schema, fixed the
+  corresponding Alembic revision (92257ba439e1).
+
 0.2.16
 ======
 
