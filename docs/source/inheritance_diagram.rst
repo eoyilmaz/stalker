@@ -14,6 +14,7 @@ Inheritance Diagram
    stalker.models.auth.Group
    stalker.models.auth.LocalSession
    stalker.models.auth.Permission
+   stalker.models.auth.Role
    stalker.models.auth.User
    stalker.models.budget.Budget
    stalker.models.budget.BudgetEntry

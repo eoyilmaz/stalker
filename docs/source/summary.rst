@@ -19,6 +19,7 @@ Summary
    stalker.models.asset.Asset
    stalker.models.auth.Group
    stalker.models.auth.LocalSession
+   stalker.models.auth.Role
    stalker.models.auth.Permission
    stalker.models.auth.User
    stalker.models.budget.Budget

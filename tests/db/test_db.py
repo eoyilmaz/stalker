@@ -982,7 +982,7 @@ class DatabaseTester(unittest.TestCase):
         sql_query = 'select version_num from "alembic_version"'
         version_num = \
             db.DBSession.connection().execute(sql_query).fetchone()[0]
-        self.assertEqual('f2005d1fbadc', version_num)
+        self.assertEqual('92257ba439e1', version_num)
 
     def test_initialization_of_alembic_version_table_multiple_times(self):
         """testing if the db.create_alembic_table() will handle initializing
@@ -999,7 +999,7 @@ class DatabaseTester(unittest.TestCase):
         sql_query = 'select version_num from "alembic_version"'
         version_num = \
             db.DBSession.connection().execute(sql_query).fetchone()[0]
-        self.assertEqual('f2005d1fbadc', version_num)
+        self.assertEqual('92257ba439e1', version_num)
 
         db.DBSession.remove()
         db.setup(db_config)
@@ -1382,6 +1382,12 @@ class DatabaseModelsTester(unittest.TestCase):
             target_entity_type='Project',
         )
 
+        budget_status_list = StatusList(
+            name='Budget Statuses',
+            statuses=[status1, status2, status3],
+            target_entity_type='Budget'
+        )
+
         commercial_type = Type(
             name='Commercial A',
             code='comm',
@@ -1402,7 +1408,9 @@ class DatabaseModelsTester(unittest.TestCase):
         kwargs = {
             'name': 'Test Budget',
             'project': test_project,
-            'created_by': test_user
+            'created_by': test_user,
+            'status_list': budget_status_list,
+            'status': status1
         }
 
         test_budget = Budget(**kwargs)
@@ -1431,6 +1439,7 @@ class DatabaseModelsTester(unittest.TestCase):
         updated_by = test_budget.updated_by
         notes = test_budget.notes
         entries = test_budget.entries
+        status = test_budget.status
 
         del test_budget
 
@@ -1450,6 +1459,7 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(tags, test_budget_db.tags)
         self.assertEqual(updated_by, test_budget_db.updated_by)
         self.assertEqual(entries, test_budget_db.entries)
+        self.assertEqual(status, status1)
 
         # and we should have our entries intact
         self.assertTrue(

@@ -11,6 +11,7 @@ Table of Contents
     tutorial.rst
     design.rst
     configure.rst
+    upgrade_db.rst
     contribute.rst
     roadmap.rst
     changelog.rst

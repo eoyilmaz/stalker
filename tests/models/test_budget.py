@@ -50,6 +50,16 @@ class BudgetTestBase(unittest.TestCase):
         self.status_stop = Status.query.filter_by(code="STOP").first()
         self.status_cmpl = Status.query.filter_by(code="CMPL").first()
 
+        self.status_new = Status.query.filter_by(code='NEW').first()
+        self.status_app = Status.query.filter_by(code='APP').first()
+
+        self.budget_status_list = StatusList(
+            name='Budget Statuses',
+            target_entity_type='Budget',
+            statuses=[self.status_new, self.status_prev, self.status_app]
+        )
+        db.DBSession.add(self.budget_status_list)
+
         self.task_status_list = StatusList.query\
             .filter_by(target_entity_type='Task').first()
 
@@ -177,6 +187,25 @@ class BudgetTestCase(BudgetTestBase):
         self.assertEqual(
             self.test_budget.entries,
             [entry1, entry2]
+        )
+
+    def test_statuses_is_working_properly(self):
+        """testing if Budget accepts statuses
+        """
+        self.test_budget.status = self.status_new
+        self.assertEqual(
+            self.test_budget.status,
+            self.status_new
+        )
+        self.test_budget.status = self.status_prev
+        self.assertEqual(
+            self.test_budget.status,
+            self.status_prev
+        )
+        self.test_budget.status = self.status_app
+        self.assertEqual(
+            self.test_budget.status,
+            self.status_app
         )
 
 

@@ -23,7 +23,7 @@ from sqlalchemy.orm import relationship, validates
 from stalker.db import Base
 
 from stalker.models.entity import Entity
-from stalker.models.mixins import ProjectMixin, DAGMixin
+from stalker.models.mixins import ProjectMixin, DAGMixin, StatusMixin
 
 
 class Good(Entity):
@@ -204,7 +204,7 @@ PriceList_Goods = Table(
 )
 
 
-class Budget(Entity, ProjectMixin, DAGMixin):
+class Budget(Entity, ProjectMixin, DAGMixin, StatusMixin):
     """Manages project budgets
 
     Budgets manager :class:`.Project` budgets. You can create entries as
@@ -235,6 +235,7 @@ class Budget(Entity, ProjectMixin, DAGMixin):
         super(Budget, self).__init__(**kwargs)
         ProjectMixin.__init__(self, **kwargs)
         DAGMixin.__init__(self, **kwargs)
+        StatusMixin.__init__(self, **kwargs)
 
     @validates('entries')
     def _validate_entry(self, key, entry):

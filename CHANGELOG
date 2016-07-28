@@ -2,6 +2,13 @@
 Stalker Changes
 ===============
 
+0.2.16
+======
+
+* **New:** ``Budget`` instances are now statusable.
+* **Update:** Updated documentation to include database migration instructions
+  with Alembic.
+
 0.2.15.2
 ========
 
