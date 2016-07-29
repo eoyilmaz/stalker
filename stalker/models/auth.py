@@ -246,13 +246,18 @@ class Group(Entity, ACLMixin):
         """
     )
 
-    def __init__(self, name='', users=None, **kwargs):
+    def __init__(self, name='', users=None, permissions=None, **kwargs):
         if users is None:
             users = []
+
+        if permissions is None:
+            permissions = []
+
         kwargs.update({'name': name})
         super(Group, self).__init__(**kwargs)
 
         self.users = users
+        self.permissions = permissions
 
     @validates('users')
     def _validate_users(self, key, user):

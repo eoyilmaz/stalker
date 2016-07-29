@@ -128,3 +128,23 @@ class GroupTester(unittest.TestCase):
         new_group.users = test_users
         for user in test_users:
             self.assertTrue(new_group in user.groups)
+
+    def test_permissions_argument_is_working_properly(self):
+        """testing if permissions can be added to the Group on __init__()
+        """
+        # create a couple of permissions
+        from stalker import Permission
+        perm1 = Permission('Allow', 'Create', 'User')
+        perm2 = Permission('Allow', 'Read', 'User')
+        perm3 = Permission('Deny',  'Delete', 'User')
+
+        new_group = Group(
+            name='Test Group',
+            users=[self.test_user1, self.test_user2],
+            permissions=[perm1, perm2, perm3]
+        )
+
+        self.assertEqual(
+            new_group.permissions,
+            [perm1, perm2, perm3]
+        )

@@ -2,6 +2,12 @@
 Stalker Changes
 ===============
 
+0.2.16.2
+========
+
+* **New:** ``Group`` permissions can now be set on ``__init__()`` with the
+  ``permissions`` argument.
+
 0.2.16.1
 ========
 

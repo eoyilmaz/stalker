@@ -25,7 +25,7 @@ See docs for more information.
 
 import sys
 
-__version__ = '0.2.16.1'
+__version__ = '0.2.16.2'
 
 
 __string_types__ = []
