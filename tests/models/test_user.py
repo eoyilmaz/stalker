@@ -23,7 +23,6 @@ import unittest
 import datetime
 import logging
 
-from stalker.db.session import DBSession
 from stalker import (db, defaults, Group, Department, Project, Repository,
                      Sequence, Status, StatusList, Task, Type, User, Version,
                      Ticket, Vacation, Client)
@@ -35,18 +34,6 @@ logger.setLevel(logging.DEBUG)
 class UserTest(unittest.TestCase):
     """Tests the user class
     """
-
-    @classmethod
-    def setUpClass(cls):
-        """set up the test for class
-        """
-        DBSession.remove()
-
-    @classmethod
-    def tearDownClass(cls):
-        """clean up the test
-        """
-        DBSession.remove()
 
     def setUp(self):
         """setup the test
@@ -68,7 +55,7 @@ class UserTest(unittest.TestCase):
             name="Test Department 3"
         )
 
-        DBSession.add_all([
+        db.DBSession.add_all([
             self.test_department1,
             self.test_department2,
             self.test_department3
@@ -85,33 +72,27 @@ class UserTest(unittest.TestCase):
             name="Test Group 3"
         )
 
-        DBSession.add_all([
+        db.DBSession.add_all([
             self.test_group1,
             self.test_group2,
             self.test_group3
         ])
+        db.DBSession.commit()
 
         # a couple of statuses
-        self.test_status1 = Status(name="Completed", code="CMPLT")
-        self.test_status2 = Status(name="Work In Progress", code="WIP")
-        self.test_status3 = Status(name="Waiting To Start", code="WTS")
-        self.test_status4 = Status(name="Pending Review", code="PRev")
-
-        DBSession.add_all([
-            self.test_status1,
-            self.test_status2,
-            self.test_status3,
-            self.test_status4
-        ])
+        self.status_cmpl = Status.query.filter(Status.code == 'CMPL').first()
+        self.status_wip = Status.query.filter(Status.code == "WIP").first()
+        self.status_rts = Status.query.filter(Status.code == "RTS").first()
+        self.status_prev = Status.query.filter(Status.code == "PREV").first()
 
         # a project status list
         self.project_status_list = StatusList(
             name="Project Status List",
             statuses=[
-                self.test_status1,
-                self.test_status2,
-                self.test_status3,
-                self.test_status4
+                self.status_cmpl,
+                self.status_wip,
+                self.status_rts,
+                self.status_prev
             ],
             target_entity_type=Project,
         )
@@ -161,7 +142,7 @@ class UserTest(unittest.TestCase):
             repository=self.test_repository,
         )
 
-        DBSession.add_all([
+        db.DBSession.add_all([
             self.test_project1,
             self.test_project2,
             self.test_project3
@@ -207,7 +188,7 @@ class UserTest(unittest.TestCase):
             responsible=[self.test_lead]
         )
 
-        DBSession.add_all([
+        db.DBSession.add_all([
             self.test_task1,
             self.test_task2,
             self.test_task3,
@@ -219,76 +200,76 @@ class UserTest(unittest.TestCase):
             task=self.test_task1,
             full_path='some/path'
         )
-        DBSession.add(self.test_version1)
+        db.DBSession.add(self.test_version1)
 
         self.test_version2 = Version(
             task=self.test_task1,
             full_path='some/path'
         )
-        DBSession.add(self.test_version2)
+        db.DBSession.add(self.test_version2)
 
         self.test_version3 = Version(
             task=self.test_task1,
             full_path='some/path'
         )
-        DBSession.add(self.test_version3)
+        db.DBSession.add(self.test_version3)
 
         # for task2
         self.test_version4 = Version(
             task=self.test_task2,
             full_path='some/path'
         )
-        DBSession.add(self.test_version4)
+        db.DBSession.add(self.test_version4)
 
         self.test_version5 = Version(
             task=self.test_task2,
             full_path='some/path'
         )
-        DBSession.add(self.test_version5)
+        db.DBSession.add(self.test_version5)
 
         self.test_version6 = Version(
             task=self.test_task2,
             full_path='some/path'
         )
-        DBSession.add(self.test_version6)
+        db.DBSession.add(self.test_version6)
 
         # for task3
         self.test_version7 = Version(
             task=self.test_task3,
             full_path='some/path'
         )
-        DBSession.add(self.test_version7)
+        db.DBSession.add(self.test_version7)
 
         self.test_version8 = Version(
             task=self.test_task3,
             full_path='some/path'
         )
-        DBSession.add(self.test_version8)
+        db.DBSession.add(self.test_version8)
 
         self.test_version9 = Version(
             task=self.test_task3,
             full_path='some/path'
         )
-        DBSession.add(self.test_version9)
+        db.DBSession.add(self.test_version9)
 
         # for task4
         self.test_version10 = Version(
             task=self.test_task4,
             full_path='some/path'
         )
-        DBSession.add(self.test_version10)
+        db.DBSession.add(self.test_version10)
 
         self.test_version11 = Version(
             task=self.test_task4,
             full_path='some/path'
         )
-        DBSession.add(self.test_version11)
+        db.DBSession.add(self.test_version11)
 
         self.test_version12 = Version(
             task=self.test_task4,
             full_path='some/path'
         )
-        DBSession.add(self.test_version12)
+        db.DBSession.add(self.test_version12)
 
         # *********************************************************************
         # Tickets
@@ -302,7 +283,7 @@ class UserTest(unittest.TestCase):
             project=self.test_project1,
             links=[self.test_version1],
         )
-        DBSession.add(self.test_ticket1)
+        db.DBSession.add(self.test_ticket1)
         # set it to closed
         self.test_ticket1.resolve()
 
@@ -311,14 +292,14 @@ class UserTest(unittest.TestCase):
             project=self.test_project1,
             links=[self.test_version1],
         )
-        DBSession.add(self.test_ticket2)
+        db.DBSession.add(self.test_ticket2)
 
         # create a new ticket and close and then reopen it
         self.test_ticket3 = Ticket(
             project=self.test_project1,
             links=[self.test_version1],
         )
-        DBSession.add(self.test_ticket3)
+        db.DBSession.add(self.test_ticket3)
         self.test_ticket3.resolve()
         self.test_ticket3.reopen()
 
@@ -329,14 +310,14 @@ class UserTest(unittest.TestCase):
             project=self.test_project1,
             links=[self.test_version2],
         )
-        DBSession.add(self.test_ticket4)
+        db.DBSession.add(self.test_ticket4)
 
         # create a new Ticket and close it
         self.test_ticket5 = Ticket(
             project=self.test_project1,
             links=[self.test_version2],
         )
-        DBSession.add(self.test_ticket5)
+        db.DBSession.add(self.test_ticket5)
         self.test_ticket5.resolve()
 
         # create a new Ticket and close it
@@ -344,7 +325,7 @@ class UserTest(unittest.TestCase):
             project=self.test_project1,
             links=[self.test_version3],
         )
-        DBSession.add(self.test_ticket6)
+        db.DBSession.add(self.test_ticket6)
         self.test_ticket6.resolve()
 
         # *********************************************************************
@@ -354,7 +335,7 @@ class UserTest(unittest.TestCase):
             project=self.test_project1,
             links=[self.test_version3],
         )
-        DBSession.add(self.test_ticket7)
+        db.DBSession.add(self.test_ticket7)
         self.test_ticket7.resolve()
 
         # create a new ticket and close it
@@ -362,7 +343,7 @@ class UserTest(unittest.TestCase):
             project=self.test_project1,
             links=[self.test_version3],
         )
-        DBSession.add(self.test_ticket8)
+        db.DBSession.add(self.test_ticket8)
         self.test_ticket8.resolve()
 
         # *********************************************************************
@@ -372,7 +353,7 @@ class UserTest(unittest.TestCase):
             project=self.test_project1,
             links=[self.test_version4],
         )
-        DBSession.add(self.test_ticket9)
+        db.DBSession.add(self.test_ticket9)
 
         self.test_ticket9.resolve()
 
@@ -412,7 +393,7 @@ class UserTest(unittest.TestCase):
             status_list=self.sequence_status_list
         )
 
-        DBSession.add_all([
+        db.DBSession.add_all([
             self.test_sequence1,
             self.test_sequence2,
             self.test_sequence3,
@@ -451,8 +432,8 @@ class UserTest(unittest.TestCase):
 
         # create a proper user object
         self.test_user = User(**self.kwargs)
-        DBSession.add(self.test_user)
-        DBSession.commit()
+        db.DBSession.add(self.test_user)
+        db.DBSession.commit()
 
         # just change the kwargs for other tests
         self.kwargs['name'] = 'some other name'
@@ -461,7 +442,7 @@ class UserTest(unittest.TestCase):
     def tearDown(self):
         """tear down the test
         """
-        DBSession.remove()
+        db.DBSession.remove()
 
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for
@@ -548,14 +529,15 @@ class UserTest(unittest.TestCase):
         self.kwargs['login'] = 'test_user1'
         self.kwargs['email'] = test_email
         user1 = User(**self.kwargs)
-        DBSession.add(user1)
-        DBSession.commit()
+        db.DBSession.add(user1)
+        db.DBSession.commit()
 
         self.kwargs['login'] = 'test_user2'
         user2 = User(**self.kwargs)
-        DBSession.add(user2)
+        db.DBSession.add(user2)
 
-        self.assertRaises(Exception, DBSession.commit)
+        with self.assertRaises(Exception) as cm:
+            db.DBSession.commit()
 
     def test_email_attribute_is_working_properly(self):
         """testing if email attribute works properly
@@ -675,15 +657,15 @@ class UserTest(unittest.TestCase):
         self.kwargs['login'] = test_login
         self.kwargs['email'] = "test1@email.com"
         user1 = User(**self.kwargs)
-        DBSession.add(user1)
-        DBSession.commit()
+        db.DBSession.add(user1)
+        db.DBSession.commit()
 
         self.kwargs['email'] = "test2@email.com"
 
         user2 = User(**self.kwargs)
-        DBSession.add(user2)
+        db.DBSession.add(user2)
 
-        self.assertRaises(Exception, DBSession.commit)
+        self.assertRaises(Exception, db.DBSession.commit)
 
     def test_login_argument_is_working_properly(self):
         """testing if the login argument is working properly
@@ -1015,6 +997,7 @@ class UserTest(unittest.TestCase):
     def test_projects_attribute_is_working_properly(self):
         """testing if the projects attribute is working properly
         """
+        self.test_user.rate = 102.0
         test_list = [self.test_project1, self.test_project2]
         self.test_user.projects = test_list
         self.assertEqual(
@@ -1023,7 +1006,7 @@ class UserTest(unittest.TestCase):
         )
         self.test_user.projects.append(self.test_project3)
         self.assertTrue(self.test_project3 in self.test_user.projects)
-        # also check the backref
+        # also check the back ref
         self.assertTrue(self.test_user in self.test_project1.users)
         self.assertTrue(self.test_user in self.test_project2.users)
         self.assertTrue(self.test_user in self.test_project3.users)

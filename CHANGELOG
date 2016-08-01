@@ -2,6 +2,13 @@
 Stalker Changes
 ===============
 
+0.2.16.3
+========
+
+* **New:** ``ProjectUser`` now also holds a new field called ``rate``. The
+  default value is equal to the ``ProjectUser.user.rate``. It is a way to hold
+  the rate of a user on a specific project.
+
 0.2.16.2
 ========
 
@@ -18,6 +25,7 @@ Stalker Changes
 ======
 
 * **New:** ``Budget`` instances are now statusable.
+
 * **Update:** Updated documentation to include database migration instructions
   with Alembic.
 
@@ -26,6 +34,7 @@ Stalker Changes
 
 * **Fix:** Fixed a typo in the error message in
   ``User._validate_email_format()`` method.
+
 * **Fix:** Fixed a query-invoked auto-flush problem in
   ``Task.update_parent_statuses()`` method.
 

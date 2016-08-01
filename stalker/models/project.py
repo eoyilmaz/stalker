@@ -573,10 +573,14 @@ class ProjectUser(Base):
         primaryjoin='ProjectUser.role_id==Role.role_id'
     )
 
+    rate = Column(Float, default=0.0)
+
     def __init__(self, project=None, user=None, role=None):
         self.user = user
         self.project = project
         self.role = role
+        if self.user:
+            self.rate = user.rate
 
     @validates("user")
     def _validate_user(self, key, user):
@@ -590,6 +594,10 @@ class ProjectUser(Base):
                     "not %s" %
                     (self.__class__.__name__, user.__class__.__name__)
                 )
+
+            # also update rate attribute
+            self.rate = user.rate
+
         return user
 
     @validates("project")
@@ -619,6 +627,33 @@ class ProjectUser(Base):
                     (self.__class__.__name__, role.__class__.__name__)
                 )
         return role
+
+    @validates('rate')
+    def _validate_rate(self, key, rate):
+        """validates the given rate value
+        """
+        if rate is None:
+            rate = 0.0
+
+        if not isinstance(rate, (int, float)):
+            raise TypeError(
+                '%(class)s.rate should be a float number greater or '
+                'equal to 0.0, not %(rate_class)s' % {
+                    'class': self.__class__.__name__,
+                    'rate_class': rate.__class__.__name__
+                }
+            )
+
+        if rate < 0:
+            raise ValueError(
+                '%(class)s.rate should be a float number greater or '
+                'equal to 0.0, not %(rate)s' % {
+                    'class': self.__class__.__name__,
+                    'rate': rate
+                }
+            )
+
+        return rate
 
 
 class ProjectClient(Base):

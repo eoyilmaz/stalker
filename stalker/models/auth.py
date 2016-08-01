@@ -98,9 +98,9 @@ class Permission(Base):
 
       # get the permissions for the Project class
       project_permissions = Permission.query\
-          .filter(Actions.access='Allow')\
-          .filter(Actions.action='Create')\
-          .filter(Actions.class_name='Project')\
+          .filter(Permission.access='Allow')\
+          .filter(Permission.action='Create')\
+          .filter(Permission.class_name='Project')\
           .first()
 
       # now we have the permission specifying the allowance of creating a

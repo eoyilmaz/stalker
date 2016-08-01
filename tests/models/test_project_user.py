@@ -91,3 +91,37 @@ class ProjectUserTestCase(unittest.TestCase):
             'ProjectUser.role should be a stalker.models.auth.Role instance, '
             'not str'
         )
+
+    def test_rate_attribute_is_copied_from_user(self):
+        """testing if the rate attribute value is copied from the user on init
+        """
+        self.test_user1.rate = 100.0
+        project_user1 = ProjectUser(
+            project=self.test_project,
+            user=self.test_user1,
+            role=self.test_role
+        )
+        self.assertEqual(self.test_user1.rate, project_user1.rate)
+
+    def test_rate_attribute_initialization_through_user(self):
+        """testing of rate attribute initialization through user.projects
+        attribute
+        """
+        self.test_user1.rate = 102.0
+        self.test_user1.projects = [self.test_project]
+        self.assertEqual(
+            self.test_project.user_role[0].rate,
+            self.test_user1.rate
+        )
+
+    def test_rate_attribute_initialization_through_project(self):
+        """testing of rate attribute initialization through project.users
+        attribute
+        """
+        self.test_user1.rate = 102.0
+        self.test_project.users = [self.test_user1]
+
+        self.assertEqual(
+            self.test_project.user_role[0].rate,
+            self.test_user1.rate
+        )
