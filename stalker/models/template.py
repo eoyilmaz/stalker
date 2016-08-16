@@ -54,9 +54,8 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
         f1 = FilenameTemplate(
             name="Asset Version Template",
             target_entity_type="Asset",
-            target_entity_type="Asset",
-            path="{{project.code}}/Assets/{{asset.type.code}}/{{asset.code}}/{{task.type.code}}",
-            filename="{{asset.code}}_{{version.take_name}}_{{task.type.code}}_v{{'%03d'|version.version_number}}{{link.extension}}"
+            path='$REPO{{project.repository.id}}/{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}",
+            filename="{{version.nice_name}}_v{{"%03d"|format(version.version_number)}}"
         )
 
         s1.templates.append(f1)
@@ -64,7 +63,7 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
 
         # now because we have defined a FilenameTemplate for Assets,
         # Stalker is now able to produce a path and a filename for any Version
-        # related to this asset.
+        # related to an asset in this project.
 
     :param str target_entity_type: The class name that this FilenameTemplate
       is designed for. You can also pass the class itself. So both of the
@@ -80,13 +79,13 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
       given item. It is relative to the repository root. A typical example
       could be::
 
-        asset_path = "{{project.code}}/ASSETS/{{asset.code}}/{{task.code}}/"
+        '$REPO{{project.repository.id}}/{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}"
 
     :param str filename: A `Jinja2`_ template code which specifies the file
       name of the given item. It is relative to the
       :attr:`.FilenameTemplate.path`. A typical example could be::
 
-        asset_filename = "{{asset.code}}_{{version.take}}_{{task.code}}_v"{{'%03d'|format(version.version)}}{{version.extension}}"
+        '{{version.nice_name}}_v{{"%03d"|format(version.version_number)}}'
 
       Could be set to an empty string or None, the default value is None.
 

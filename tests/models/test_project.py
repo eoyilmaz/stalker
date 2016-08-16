@@ -36,23 +36,6 @@ class ProjectTestCase(unittest.TestCase):
     """tests the Project class
     """
 
-    @classmethod
-    def setUpClass(cls):
-        """set up the test for class
-        """
-        DBSession.remove()
-
-    @classmethod
-    def tearDownClass(cls):
-        """clean up the test
-        """
-        DBSession.remove()
-
-    def tearDown(self):
-        """tearDown the tests
-        """
-        DBSession.remove()
-
     def setUp(self):
         """setup the test
         """

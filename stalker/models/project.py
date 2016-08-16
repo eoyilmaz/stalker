@@ -308,7 +308,6 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         # a projects project should be self
         # initialize the project argument to self
         kwargs['project'] = self
-
         kwargs['name'] = name
 
         super(Project, self).__init__(**kwargs)
@@ -316,6 +315,8 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         ReferenceMixin.__init__(self, **kwargs)
         StatusMixin.__init__(self, **kwargs)
         DateRangeMixin.__init__(self, **kwargs)
+
+        self.code = code
 
         if users is None:
             users = []
@@ -337,7 +338,6 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         self.image_format = image_format
         self.fps = fps
         self.is_stereoscopic = bool(is_stereoscopic)
-        self.code = code
 
         self.active = True
 
