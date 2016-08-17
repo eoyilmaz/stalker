@@ -825,7 +825,7 @@ taskreport breakdown "{{csv_path}}"{
             {
                 'stalker': stalker,
                 'studio': test_studio,
-                'csv_path': tjp_sched.temp_file_full_path,
+                'csv_path': tjp_sched.temp_file_name,
                 'user1': self.test_user1,
                 'user2': self.test_user2,
                 'user3': self.test_user3,

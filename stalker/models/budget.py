@@ -231,6 +231,13 @@ class Budget(Entity, ProjectMixin, DAGMixin, StatusMixin):
         cascade="all, delete-orphan"
     )
 
+    invoices = relationship(
+        'Invoice',
+        primaryjoin='Invoices.c.budget_id==Budgets.c.id',
+        uselist=True,
+        cascade="all, delete-orphan"
+    )
+
     def __init__(self, **kwargs):
         super(Budget, self).__init__(**kwargs)
         ProjectMixin.__init__(self, **kwargs)
@@ -463,3 +470,137 @@ class BudgetEntry(Entity):
             )
 
         return good
+
+
+class Invoice(Entity):
+    """Holds information about invoices
+
+    Invoices are part of :class:`.Budgets`. The main purpose of invoices are
+    to track the :class:`.Payment`\ s. It is a very primitive entity. It is
+    by no means designed to hold real financial information (at least for now).
+
+    :param client: The :class:`.Client` instance that shows the payer for
+      this invoice.
+    :type client: :class:`.Client`
+    :param budget: The :class:`.Budget` instance that owns this invoice.
+    :type budget: :class:`.Budget`
+    :param int float amount: The amount of this invoice. Without the
+      :attr:`.Invoice.unit` attribute it is meaningless. This can not be
+      skipped.
+    :param str unit: The unit of the issued amount. This can not be skipped.
+    """
+
+    __auto_name__ = True
+    __tablename__ = "Invoices"
+    __mapper_args__ = {"polymorphic_identity": "Invoice"}
+
+    invoice_id = Column(
+        "id",
+        Integer,
+        ForeignKey("Entities.id"),
+        primary_key=True
+    )
+
+    budget_id = Column(
+        Integer,
+        ForeignKey('Budgets.id')
+    )
+
+    budget = relationship(
+        'Budget',
+        primaryjoin='Invoices.c.budget_id==Budgets.c.id',
+        back_populates='invoices',
+        uselist=False
+    )
+
+    client_id = Column(
+        Integer,
+        ForeignKey('Clients.id')
+    )
+
+    client = relationship(
+        'Client',
+        primaryjoin='Invoices.c.client_id==Clients.c.id',
+        uselist=False
+    )
+
+    amount = Column(Float, default=0.0)
+    unit = Column(String(64))
+
+    def __init__(
+            self,
+            budget=None,
+            client=None,
+            amount=0,
+            unit=None,
+            **kwargs):
+        super(Invoice, self).__init__(**kwargs)
+        self.budget = budget
+        self.client = client
+        self.amount = amount
+        self.unit = unit
+
+    @validates('budget')
+    def _validate_budget(self, key, budget):
+        """validates the given budget value
+        """
+        if not isinstance(budget, Budget):
+            raise TypeError(
+                '%s.budget should be a Budget instance, not %s' % (
+                    self.__class__.__name__,
+                    budget.__class__.__name__
+                )
+            )
+        return budget
+
+    @validates('client')
+    def _validate_client(self, key, client):
+        """validates the given client value
+        """
+        from stalker import Client
+        if not isinstance(client, Client):
+            raise TypeError(
+                '%s.client should be a Client instance, not %s' % (
+                    self.__class__.__name__,
+                    client.__class__.__name__
+                )
+            )
+        return client
+
+    @validates('amount')
+    def _validate_amount(self, key, amount):
+        """validates the given amount value
+        """
+        if not isinstance(amount, (int, float)):
+            raise TypeError(
+                '%s.amount should be a non-zero positive integer or float, '
+                'not %s' % (
+                    self.__class__.__name__,
+                    amount.__class__.__name__
+                )
+            )
+
+        if amount == 0:
+            raise ValueError(
+                '%s.amount cannot be zero' % self.__class__.__name__
+            )
+        elif amount < 0:
+            raise ValueError(
+                '%s.amount cannot be negative' % self.__class__.__name__
+            )
+
+        return amount
+
+    @validates('unit')
+    def _validate_unit(self, key, unit):
+        """validates the given unit value
+        """
+        from stalker import __string_types__
+        if not isinstance(unit, __string_types__):
+            raise TypeError(
+                '%s.unit should be a string, not %s' % (
+                    self.__class__.__name__,
+                    unit.__class__.__name__
+                )
+            )
+        return unit

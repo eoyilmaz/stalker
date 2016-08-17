@@ -982,7 +982,7 @@ class DatabaseTester(unittest.TestCase):
         sql_query = 'select version_num from "alembic_version"'
         version_num = \
             db.DBSession.connection().execute(sql_query).fetchone()[0]
-        self.assertEqual('92257ba439e1', version_num)
+        self.assertEqual('ea28a39ba3f5', version_num)
 
     def test_initialization_of_alembic_version_table_multiple_times(self):
         """testing if the db.create_alembic_table() will handle initializing
@@ -999,7 +999,7 @@ class DatabaseTester(unittest.TestCase):
         sql_query = 'select version_num from "alembic_version"'
         version_num = \
             db.DBSession.connection().execute(sql_query).fetchone()[0]
-        self.assertEqual('92257ba439e1', version_num)
+        self.assertEqual('ea28a39ba3f5', version_num)
 
         db.DBSession.remove()
         db.setup(db_config)
@@ -1493,6 +1493,156 @@ class DatabaseModelsTester(unittest.TestCase):
         # we still should have the good
         good_db = Good.query.filter(Good.name == 'Some Good').first()
         self.assertTrue(good_db is not None)
+
+    def test_persistence_of_Invoice(self):
+        """testing the persistence of Invoice instances
+        """
+        test_user = User(
+            name='Test User',
+            login='tu',
+            email='test@user.com',
+            password='secret'
+        )
+
+        status1 = Status.query.filter_by(code='NEW').first()
+        status2 = Status.query.filter_by(code='WIP').first()
+        status3 = Status.query.filter_by(code='CMPL').first()
+
+        test_repository_type = Type(
+            name='Test Repository Type A',
+            code='trta',
+            target_entity_type=Repository,
+        )
+
+        test_repository = Repository(
+            name='Test Repository A',
+            type=test_repository_type
+        )
+
+        project_status_list = StatusList(
+            name='Project Status List A',
+            statuses=[status1, status2, status3],
+            target_entity_type='Project',
+        )
+
+        budget_status_list = StatusList(
+            name='Budget Statuses',
+            statuses=[status1, status2, status3],
+            target_entity_type='Budget'
+        )
+
+        commercial_type = Type(
+            name='Commercial A',
+            code='comm',
+            target_entity_type=Project
+        )
+
+        from stalker import Client
+        test_client = Client(name='Test Client')
+        DBSession.add(test_client)
+
+        test_project = Project(
+            name='Test Project For Budget Creation',
+            code='TPFBC',
+            status_list=project_status_list,
+            type=commercial_type,
+            repository=test_repository,
+            clients=[test_client]
+        )
+
+        DBSession.add(test_project)
+        DBSession.commit()
+
+        test_budget = Budget(
+            name='Test Budget',
+            project=test_project,
+            created_by=test_user,
+            status_list=budget_status_list,
+            status=status1
+        )
+
+        DBSession.add(test_budget)
+        DBSession.commit()
+
+        good = Good(name='Some Good', cost=9, msrp=10, unit='$/hour')
+        DBSession.add(good)
+        DBSession.commit()
+
+        # create some entries
+        entry1 = BudgetEntry(budget=test_budget, good=good, amount=5.0)
+        entry2 = BudgetEntry(budget=test_budget, good=good, amount=1.0)
+
+        DBSession.add_all([entry1, entry2])
+        DBSession.commit()
+
+        # create an invoice
+        from stalker import Invoice
+        test_invoice = Invoice(
+            created_by=test_user,
+            budget=test_budget,
+            client=test_client,
+            amount=1232.4,
+            unit='TRY'
+        )
+        db.DBSession.add(test_invoice)
+
+        created_by = test_invoice.created_by
+        date_created = test_invoice.date_created
+        date_updated = test_invoice.date_updated
+        name = test_invoice.name
+        nice_name = test_invoice.nice_name
+        tags = test_invoice.tags
+        notes = test_invoice.notes
+        updated_by = test_invoice.updated_by
+
+        budget = test_budget
+        client = test_client
+        amount = 1232.4
+        unit = 'TRY'
+
+        del test_budget
+
+        test_invoice_db = Invoice.query\
+            .filter(Invoice.name == name)\
+            .first()
+
+        assert(isinstance(test_invoice_db, Invoice))
+
+        self.assertEqual(test_user, test_invoice_db.created_by)
+        self.assertEqual(created_by, test_invoice_db.created_by)
+        self.assertEqual(date_created, test_invoice_db.date_created)
+        self.assertEqual(date_updated, test_invoice_db.date_updated)
+        self.assertEqual(name, test_invoice_db.name)
+        self.assertEqual(nice_name, test_invoice_db.nice_name)
+        self.assertEqual(notes, test_invoice_db.notes)
+        self.assertEqual(tags, test_invoice_db.tags)
+        self.assertEqual(updated_by, test_invoice_db.updated_by)
+
+        self.assertEqual(budget, test_invoice_db.budget)
+        self.assertEqual(client, test_invoice_db.client)
+        self.assertEqual(amount, test_invoice_db.amount)
+        self.assertEqual(unit, test_invoice_db.unit)
+
+        # now test the deletion of the invoice instance
+        DBSession.delete(test_invoice_db)
+        DBSession.commit()
+
+        # we should still have the budget
+        self.assertEqual(
+            Budget.query.filter(Budget.id == budget.id).first(),
+            budget
+        )
+
+        # we should still have the client
+        self.assertEqual(
+            Client.query.filter(Client.id == client.id).first(),
+            client
+        )
+
+        # and we should have the invoice deleted
+        self.assertIsNone(
+            Invoice.query.filter(Invoice.name == test_invoice_db.name).first()
+        )
 
     def test_persistence_of_Page(self):
         """testing the persistence of Page

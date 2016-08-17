@@ -9,6 +9,8 @@ Stalker Changes
   default value is equal to the ``ProjectUser.user.rate``. It is a way to hold
   the rate of a user on a specific project.
 
+* **New:** Added the ``Invoice`` class.
+
 0.2.16.2
 ========
 
