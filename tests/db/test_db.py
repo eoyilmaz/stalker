@@ -300,7 +300,8 @@ class DatabaseTester(unittest.TestCase):
             'Project', 'PriceList', 'Repository', 'Review', 'Role', 'Scene',
             'Sequence', 'Shot', 'Status', 'StatusList', 'Structure', 'Studio',
             'Tag', 'TimeLog', 'Task', 'FilenameTemplate', 'Ticket',
-            'TicketLog', 'Type', 'Vacation', 'Version', 'Daily'
+            'TicketLog', 'Type', 'Vacation', 'Version', 'Daily', 'Invoice',
+            'Payment',
         ]
 
         permission_db = Permission.query.all()
@@ -342,7 +343,7 @@ class DatabaseTester(unittest.TestCase):
 
         # and we still have correct amount of Permissions
         permissions = Permission.query.all()
-        self.assertEqual(len(permissions), 390)
+        self.assertEqual(len(permissions), 410)
 
         # clean the test
         db.DBSession.remove()
@@ -447,7 +448,6 @@ class DatabaseTester(unittest.TestCase):
         for status in task_status_list.statuses:
             self.assertEqual(status.created_by, admin)
             self.assertEqual(status.updated_by, admin)
-
 
     def test_asset_status_initialization(self):
         """testing if the asset statuses are correctly created
@@ -1600,7 +1600,7 @@ class DatabaseModelsTester(unittest.TestCase):
         amount = 1232.4
         unit = 'TRY'
 
-        del test_budget
+        del test_invoice
 
         test_invoice_db = Invoice.query\
             .filter(Invoice.name == name)\
@@ -1642,6 +1642,162 @@ class DatabaseModelsTester(unittest.TestCase):
         # and we should have the invoice deleted
         self.assertIsNone(
             Invoice.query.filter(Invoice.name == test_invoice_db.name).first()
+        )
+
+    def test_persistence_of_Payment(self):
+        """testing the persistence of Payment instances
+        """
+        test_user = User(
+            name='Test User',
+            login='tu',
+            email='test@user.com',
+            password='secret'
+        )
+
+        status1 = Status.query.filter_by(code='NEW').first()
+        status2 = Status.query.filter_by(code='WIP').first()
+        status3 = Status.query.filter_by(code='CMPL').first()
+
+        test_repository_type = Type(
+            name='Test Repository Type A',
+            code='trta',
+            target_entity_type=Repository,
+        )
+
+        test_repository = Repository(
+            name='Test Repository A',
+            type=test_repository_type
+        )
+
+        project_status_list = StatusList(
+            name='Project Status List A',
+            statuses=[status1, status2, status3],
+            target_entity_type='Project',
+        )
+
+        budget_status_list = StatusList(
+            name='Budget Statuses',
+            statuses=[status1, status2, status3],
+            target_entity_type='Budget'
+        )
+
+        commercial_type = Type(
+            name='Commercial A',
+            code='comm',
+            target_entity_type=Project
+        )
+
+        from stalker import Client
+        test_client = Client(name='Test Client')
+        DBSession.add(test_client)
+
+        test_project = Project(
+            name='Test Project For Budget Creation',
+            code='TPFBC',
+            status_list=project_status_list,
+            type=commercial_type,
+            repository=test_repository,
+            clients=[test_client]
+        )
+
+        DBSession.add(test_project)
+        DBSession.commit()
+
+        test_budget = Budget(
+            name='Test Budget',
+            project=test_project,
+            created_by=test_user,
+            status_list=budget_status_list,
+            status=status1
+        )
+
+        DBSession.add(test_budget)
+        DBSession.commit()
+
+        good = Good(name='Some Good', cost=9, msrp=10, unit='$/hour')
+        DBSession.add(good)
+        DBSession.commit()
+
+        # create some entries
+        entry1 = BudgetEntry(budget=test_budget, good=good, amount=5.0)
+        entry2 = BudgetEntry(budget=test_budget, good=good, amount=1.0)
+
+        DBSession.add_all([entry1, entry2])
+        DBSession.commit()
+
+        # create an invoice
+        from stalker import Invoice
+        test_invoice = Invoice(
+            created_by=test_user,
+            budget=test_budget,
+            client=test_client,
+            amount=1232.4,
+            unit='TRY'
+        )
+        db.DBSession.add(test_invoice)
+
+        from stalker import Payment
+        test_payment = Payment(
+            created_by=test_user,
+            invoice=test_invoice,
+            amount=123.4,
+            unit='TRY'
+        )
+
+        created_by = test_payment.created_by
+        date_created = test_payment.date_created
+        date_updated = test_payment.date_updated
+        name = test_payment.name
+        nice_name = test_payment.nice_name
+        tags = test_payment.tags
+        notes = test_payment.notes
+        updated_by = test_payment.updated_by
+
+        invoice = test_invoice
+        amount = 123.4
+        unit = 'TRY'
+
+        del test_payment
+
+        test_payment_db = Payment.query\
+            .filter(Payment.name == name)\
+            .first()
+
+        assert(isinstance(test_payment_db, Payment))
+
+        self.assertEqual(test_user, test_payment_db.created_by)
+        self.assertEqual(created_by, test_payment_db.created_by)
+        self.assertEqual(date_created, test_payment_db.date_created)
+        self.assertEqual(date_updated, test_payment_db.date_updated)
+        self.assertEqual(name, test_payment_db.name)
+        self.assertEqual(nice_name, test_payment_db.nice_name)
+        self.assertEqual(notes, test_payment_db.notes)
+        self.assertEqual(tags, test_payment_db.tags)
+        self.assertEqual(updated_by, test_payment_db.updated_by)
+
+        self.assertEqual(invoice, test_payment_db.invoice)
+        self.assertEqual(amount, test_payment_db.amount)
+        self.assertEqual(unit, test_payment_db.unit)
+
+        # now test the deletion of the invoice instance
+        DBSession.delete(test_payment_db)
+        DBSession.commit()
+
+        # we should still have the budget
+        self.assertEqual(
+            Budget.query.filter(Budget.id == test_budget.id).first(),
+            test_budget
+        )
+
+        # we should still have the Invoice
+        self.assertEqual(
+            Invoice.query.filter(Invoice.id == test_invoice.id).first(),
+            test_invoice
+        )
+
+        # and we should have the payment deleted
+        self.assertIsNone(
+            Payment.query.filter(Payment.name == test_payment_db.name).first()
         )
 
     def test_persistence_of_Page(self):

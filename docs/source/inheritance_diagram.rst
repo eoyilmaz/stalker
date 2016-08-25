@@ -19,6 +19,8 @@ Inheritance Diagram
    stalker.models.budget.Budget
    stalker.models.budget.BudgetEntry
    stalker.models.budget.Good
+   stalker.models.budget.Invoice
+   stalker.models.budget.Payment
    stalker.models.budget.PriceList
    stalker.models.department.Department
    stalker.models.department.DepartmentUser

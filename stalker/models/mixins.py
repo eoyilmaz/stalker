@@ -1460,3 +1460,63 @@ class DAGMixin(object):
         for c in walk_hierarchy(self, 'children', method=method):
             yield c
 
+
+class AmountMixin(object):
+    """Adds ``amount`` attribute to the mixed in class.
+
+    :param int float amount:
+    """
+
+    def __init__(self, amount=0, **kwargs):
+        self.amount = amount
+
+    @declared_attr
+    def amount(cls):
+        return Column(Float, default=0.0)
+
+    @validates('amount')
+    def _validate_amount(self, key, amount):
+        """validates the given amount value
+        """
+        if amount is None:
+            amount = 0.0
+
+        if not isinstance(amount, (int, float)):
+            raise TypeError(
+                '%s.amount should be a number, not %s' % (
+                    self.__class__.__name__, amount.__class__.__name__
+                )
+            )
+
+        return float(amount)
+
+
+class UnitMixin(object):
+    """Adds ``unit`` attribute to the mixed in class.
+
+    :param str unit:
+    """
+
+    def __init__(self, unit='', **kwargs):
+        self.unit = unit
+
+    @declared_attr
+    def unit(cls):
+        return Column(String(64))
+
+    @validates('unit')
+    def _validate_unit(self, key, unit):
+        """validates the given unit value
+        """
+        if unit is None:
+            unit = ''
+
+        from stalker import __string_types__
+        if not isinstance(unit, __string_types__):
+            raise TypeError(
+                '%s.unit should be a string, not %s' % (
+                    self.__class__.__name__, unit.__class__.__name__
+                )
+            )
+
+        return unit

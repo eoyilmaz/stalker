@@ -105,9 +105,9 @@ def init():
     class_names = [
         'Asset', 'Budget', 'BudgetEntry', 'Client', 'Daily', 'Department',
         'Entity', 'EntityGroup', 'FilenameTemplate', 'Good', 'Group',
-        'ImageFormat', 'Link', 'Message', 'Note', 'Page', 'Permission',
-        'PriceList', 'Project', 'Repository', 'Review', 'Role', 'Scene',
-        'Sequence', 'Shot', 'SimpleEntity', 'Status', 'StatusList',
+        'ImageFormat', 'Invoice', 'Link', 'Message', 'Note', 'Page', 'Payment',
+        'Permission', 'PriceList', 'Project', 'Repository', 'Review', 'Role',
+        'Scene', 'Sequence', 'Shot', 'SimpleEntity', 'Status', 'StatusList',
         'Structure', 'Studio', 'Tag', 'Task', 'Ticket', 'TicketLog', 'TimeLog',
         'Type', 'User', 'Vacation', 'Version'
     ]

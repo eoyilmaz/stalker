@@ -1,4 +1,4 @@
-"""empty message
+"""Budget is now statusable
 
 Revision ID: 92257ba439e1
 Revises: f2005d1fbadc

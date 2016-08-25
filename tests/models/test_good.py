@@ -319,7 +319,7 @@ class GoodTestCase(unittest.TestCase):
 
         self.assertEqual(
             str(cm.exception),
-            'Good.unit should be a str, not int'
+            'Good.unit should be a string, not int'
         )
 
     def test_unit_attribute_is_not_a_string(self):
@@ -332,7 +332,7 @@ class GoodTestCase(unittest.TestCase):
 
         self.assertEqual(
             str(cm.exception),
-            'Good.unit should be a str, not int'
+            'Good.unit should be a string, not int'
         )
 
     def test_unit_argument_is_working_properly(self):

@@ -1,4 +1,4 @@
-"""empty message
+"""Added Project_Users.rate
 
 Revision ID: d8421de6a206
 Revises: ea28a39ba3f5
@@ -21,4 +21,6 @@ def upgrade():
 
 
 def downgrade():
-    op.drop_column('Project_Users', 'rate')
+    op.execute("""
+      ALTER TABLE public."Project_Users" DROP COLUMN IF EXISTS rate;
+    """)

@@ -11,6 +11,15 @@ Stalker Changes
 
 * **New:** Added the ``Invoice`` class.
 
+* **New:** Added the ``Payment`` class.
+
+* **New:** Added two simple mixins ``AmountMixin`` and ``UnitMixin``.
+
+* **Update:** ``Good`` class is now mixed in with the new ``UnitMixin`` class.
+
+* **Update:** ``BudgetEntry`` class is now mixed in with the new
+  ``AmountMixin`` and ``UnitMixin`` classes.
+
 0.2.16.2
 ========
 

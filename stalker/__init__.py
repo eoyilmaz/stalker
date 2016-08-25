@@ -40,7 +40,8 @@ from stalker.config import defaults
 
 from stalker.models.auth import Group, Permission, User, LocalSession, Role
 from stalker.models.asset import Asset
-from stalker.models.budget import Budget, BudgetEntry, Good, PriceList, Invoice
+from stalker.models.budget import (Budget, BudgetEntry, Good, PriceList,
+                                   Invoice, Payment)
 from stalker.models.client import Client, ClientUser
 from stalker.models.department import Department, DepartmentUser
 from stalker.models.entity import SimpleEntity, Entity, EntityGroup
@@ -50,7 +51,8 @@ from stalker.models.message import Message
 from stalker.models.mixins import (ProjectMixin, ReferenceMixin,
                                    DateRangeMixin, StatusMixin,
                                    TargetEntityTypeMixin, CodeMixin,
-                                   WorkingHoursMixin, ScheduleMixin, DAGMixin)
+                                   WorkingHoursMixin, ScheduleMixin, DAGMixin,
+                                   AmountMixin, UnitMixin)
 from stalker.models.note import Note
 from stalker.models.project import (Project, ProjectUser, ProjectClient,
                                     ProjectRepository)

@@ -399,10 +399,15 @@ task Task_{{task2.id}} "Task_{{task2.id}}" {
             datetime.datetime(2013, 4, 24, 10, 0),
             self.test_task2.computed_end
         )
-        self.assertEqual(
-            sorted([self.test_user4, self.test_user5], key=lambda x: x.name),
-            sorted(self.test_task2.computed_resources, key=lambda x: x.name)
-        )
+
+        self.assertEqual(2, len(self.test_task2.computed_resources))
+
+        possible_resources = [
+            self.test_user2, self.test_user3,
+            self.test_user4, self.test_user5
+        ]
+        for r in self.test_task2.computed_resources:
+            self.assertIn(r, possible_resources)
 
     def test_tasks_are_correctly_scheduled_when_compute_resources_is_False(self):
         """testing if the tasks are correctly scheduled when the compute
@@ -503,10 +508,12 @@ task Task_{{task2.id}} "Task_{{task2.id}}" {
             datetime.datetime(2013, 4, 24, 10, 0),
             self.test_task2.computed_end
         )
-        self.assertEqual(
-            sorted([self.test_user4, self.test_user5], key=lambda x: x.name),
-            sorted(self.test_task2.computed_resources, key=lambda x: x.name)
-        )
+        possible_resources = [
+            self.test_user2, self.test_user3,
+            self.test_user4, self.test_user5
+        ]
+        for r in self.test_task2.computed_resources:
+            self.assertIn(r, possible_resources)
 
     def test_tasks_of_given_projects_are_correctly_scheduled(self):
         """testing if the tasks of given projects are correctly scheduled

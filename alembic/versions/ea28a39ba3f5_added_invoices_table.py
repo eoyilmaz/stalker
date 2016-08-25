@@ -1,4 +1,4 @@
-"""empty message
+"""Added Invoices table
 
 Revision ID: ea28a39ba3f5
 Revises: 92257ba439e1

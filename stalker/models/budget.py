@@ -23,10 +23,11 @@ from sqlalchemy.orm import relationship, validates
 from stalker.db import Base
 
 from stalker.models.entity import Entity
-from stalker.models.mixins import ProjectMixin, DAGMixin, StatusMixin
+from stalker.models.mixins import (ProjectMixin, DAGMixin, StatusMixin,
+                                   AmountMixin, UnitMixin)
 
 
-class Good(Entity):
+class Good(Entity, UnitMixin):
     """Manages commercial items that is served by the Studio.
 
     A Studio can define service prices or items that's been sold by the Studio
@@ -69,9 +70,9 @@ class Good(Entity):
 
     def __init__(self, cost=0.0, msrp=0.0, unit='', **kwargs):
         super(Good, self).__init__(**kwargs)
+        UnitMixin.__init__(self, unit=unit)
         self.cost = cost
         self.msrp = msrp
-        self.unit = unit
 
     @validates('cost')
     def _validate_cost(self, key, cost):
@@ -118,24 +119,6 @@ class Good(Entity):
             )
 
         return msrp
-
-    @validates('unit')
-    def _validate_unit(self, key, unit):
-        """validates the given unit value
-        """
-        if unit is None:
-            unit = ''
-
-        from stalker import __string_types__
-        if not isinstance(unit, __string_types__):
-            raise TypeError(
-                '%s.unit should be a str, not %s' % (
-                    self.__class__.__name__,
-                    unit.__class__.__name__
-                )
-            )
-
-        return unit
 
 
 class PriceList(Entity):
@@ -259,7 +242,7 @@ class Budget(Entity, ProjectMixin, DAGMixin, StatusMixin):
         return entry
 
 
-class BudgetEntry(Entity):
+class BudgetEntry(Entity, AmountMixin, UnitMixin):
     """Manages entries in a Budget.
 
     With BudgetEntries one can manage project budget entries one by one. Each
@@ -324,9 +307,6 @@ class BudgetEntry(Entity):
     price = Column(Float, default=0.0)
     realized_total = Column(Float, default=0.0)
 
-    unit = Column(String(64))
-    amount = Column(Float, default=0.0)
-
     def __init__(self,
                  budget=None,
                  good=None,
@@ -340,12 +320,15 @@ class BudgetEntry(Entity):
         self.good = good
         self.cost = good.cost
         self.msrp = good.msrp
-        self.unit = good.unit
+
+        kwargs['unit'] = good.unit
+        kwargs['amount'] = amount
+
+        AmountMixin.__init__(self, **kwargs)
+        UnitMixin.__init__(self, **kwargs)
 
         self.price = price
         self.realized_total = realized_total
-
-        self.amount = amount
 
     @validates('budget')
     def _validate_budget(self, key, budget):
@@ -424,39 +407,6 @@ class BudgetEntry(Entity):
 
         return float(realized_total)
 
-    @validates('unit')
-    def _validate_unit(self, key, unit):
-        """validates the given unit value
-        """
-        if unit is None:
-            unit = ''
-
-        from stalker import __string_types__
-        if not isinstance(unit, __string_types__):
-            raise TypeError(
-                '%s.unit should be a string, not %s' % (
-                    self.__class__.__name__, unit.__class__.__name__
-                )
-            )
-
-        return unit
-
-    @validates('amount')
-    def _validate_amount(self, key, amount):
-        """validates the given amount value
-        """
-        if amount is None:
-            amount = 0.0
-
-        if not isinstance(amount, (int, float)):
-            raise TypeError(
-                '%s.amount should be a number, not %s' % (
-                    self.__class__.__name__, amount.__class__.__name__
-                )
-            )
-
-        return float(amount)
-
     @validates('good')
     def _validate_good(self, key, good):
         """validates the given good value
@@ -472,7 +422,7 @@ class BudgetEntry(Entity):
         return good
 
 
-class Invoice(Entity):
+class Invoice(Entity, AmountMixin, UnitMixin):
     """Holds information about invoices
 
     Invoices are part of :class:`.Budgets`. The main purpose of invoices are
@@ -524,8 +474,12 @@ class Invoice(Entity):
         uselist=False
     )
 
-    amount = Column(Float, default=0.0)
-    unit = Column(String(64))
+    payments = relationship(
+        'Payment',
+        primaryjoin='Payments.c.invoice_id==Invoices.c.id',
+        uselist=True,
+        cascade="all, delete-orphan"
+    )
 
     def __init__(
             self,
@@ -535,10 +489,10 @@ class Invoice(Entity):
             unit=None,
             **kwargs):
         super(Invoice, self).__init__(**kwargs)
+        AmountMixin.__init__(self, amount=amount)
+        UnitMixin.__init__(self, unit=unit)
         self.budget = budget
         self.client = client
-        self.amount = amount
-        self.unit = unit
 
     @validates('budget')
     def _validate_budget(self, key, budget):
@@ -567,40 +521,56 @@ class Invoice(Entity):
             )
         return client
 
-    @validates('amount')
-    def _validate_amount(self, key, amount):
-        """validates the given amount value
+
+class Payment(Entity, AmountMixin, UnitMixin):
+    """Holds information about the payments.
+
+    Each payment should be related with an :class:`.Invoice` instance. Use the
+    :attr:`.type` attribute to diversify payments (ex. "Advance").
+
+    :param invoice: The :class:`.Invoice` instance that this payment is related
+      to. This can not be skipped.
+    :type invoice: :class:`.Invoice`
+    """
+
+    __auto_name__ = True
+    __tablename__ = "Payments"
+    __mapper_args__ = {"polymorphic_identity": "Payment"}
+
+    payment_id = Column(
+        "id",
+        Integer,
+        ForeignKey("Entities.id"),
+        primary_key=True
+    )
+
+    invoice_id = Column(
+        Integer,
+        ForeignKey('Invoices.id')
+    )
+
+    invoice = relationship(
+        'Invoice',
+        primaryjoin='Payments.c.invoice_id==Invoices.c.id',
+        back_populates='payments',
+        uselist=False
+    )
+
+    def __init__(self, invoice=None, amount=0, unit=None, **kwargs):
+        super(Payment, self).__init__(**kwargs)
+        AmountMixin.__init__(self, amount=amount)
+        UnitMixin.__init__(self, unit=unit)
+        self.invoice = invoice
+
+    @validates('invoice')
+    def _validate_invoice(self, key, invoice):
+        """validates the invoice value
         """
-        if not isinstance(amount, (int, float)):
+        if not isinstance(invoice, Invoice):
             raise TypeError(
-                '%s.amount should be a non-zero positive integer or float, '
-                'not %s' % (
+                '%s.invoice should be an Invoice instance, not %s' % (
                     self.__class__.__name__,
-                    amount.__class__.__name__
+                    invoice.__class__.__name__
                 )
             )
-
-        if amount == 0:
-            raise ValueError(
-                '%s.amount cannot be zero' % self.__class__.__name__
-            )
-        elif amount < 0:
-            raise ValueError(
-                '%s.amount cannot be negative' % self.__class__.__name__
-            )
-
-        return amount
-
-    @validates('unit')
-    def _validate_unit(self, key, unit):
-        """validates the given unit value
-        """
-        from stalker import __string_types__
-        if not isinstance(unit, __string_types__):
-            raise TypeError(
-                '%s.unit should be a string, not %s' % (
-                    self.__class__.__name__,
-                    unit.__class__.__name__
-                )
-            )
-        return unit
+        return invoice
