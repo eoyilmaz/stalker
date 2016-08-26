@@ -2,6 +2,11 @@
 Stalker Changes
 ===============
 
+0.2.16.4
+========
+
+* **Fix:** Fixed alembic revision.
+
 0.2.16.3
 ========
 

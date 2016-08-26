@@ -1,7 +1,7 @@
 """Added Project_Users.rate
 
 Revision ID: d8421de6a206
-Revises: ea28a39ba3f5
+Revises: 92257ba439e1
 Create Date: 2016-08-17 19:27:00.358000
 
 """
