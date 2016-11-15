@@ -36,7 +36,7 @@ from stalker.log import logging_level
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
-alembic_version = '255ee1f9c7b3'
+alembic_version = 'f16651477e64'
 
 
 def setup(settings=None):
@@ -103,13 +103,13 @@ def init():
 
     # register all Actions available for all SOM classes
     class_names = [
-        'Asset', 'Budget', 'BudgetEntry', 'Client', 'Daily', 'Department',
-        'Entity', 'EntityGroup', 'FilenameTemplate', 'Good', 'Group',
-        'ImageFormat', 'Invoice', 'Link', 'Message', 'Note', 'Page', 'Payment',
-        'Permission', 'PriceList', 'Project', 'Repository', 'Review', 'Role',
-        'Scene', 'Sequence', 'Shot', 'SimpleEntity', 'Status', 'StatusList',
-        'Structure', 'Studio', 'Tag', 'Task', 'Ticket', 'TicketLog', 'TimeLog',
-        'Type', 'User', 'Vacation', 'Version'
+        'Asset', 'AuthenticationLog', 'Budget', 'BudgetEntry', 'Client',
+        'Daily', 'Department', 'Entity', 'EntityGroup', 'FilenameTemplate',
+        'Good', 'Group', 'ImageFormat', 'Invoice', 'Link', 'Message', 'Note',
+        'Page', 'Payment', 'Permission', 'PriceList', 'Project', 'Repository',
+        'Review', 'Role', 'Scene', 'Sequence', 'Shot', 'SimpleEntity',
+        'Status', 'StatusList', 'Structure', 'Studio', 'Tag', 'Task', 'Ticket',
+        'TicketLog', 'TimeLog', 'Type', 'User', 'Vacation', 'Version'
     ]
 
     for class_name in class_names:

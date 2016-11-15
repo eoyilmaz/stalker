@@ -33,12 +33,16 @@ from sqlalchemy.schema import UniqueConstraint
 from stalker import defaults
 from stalker.db.declarative import Base
 from stalker.models.mixins import ACLMixin
-from stalker.models.entity import Entity
+from stalker.models.entity import Entity, SimpleEntity
 from stalker.log import logging_level
 
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
+
+
+LOGIN = 'login'
+LOGOUT = 'logout'
 
 
 class Permission(Base):
@@ -431,13 +435,6 @@ class User(Entity, ACLMixin):
         """
     )
 
-    last_login = Column(
-        DateTime,
-        doc="""The last login time of this user.
-
-        It is an instance of datetime.datetime class."""
-    )
-
     login = Column(
         String(256),
         nullable=False,
@@ -445,6 +442,16 @@ class User(Entity, ACLMixin):
         doc="""The login name of the user.
 
         Can not be empty.
+        """
+    )
+
+    authentication_logs = relationship(
+        "AuthenticationLog",
+        primaryjoin="AuthenticationLogs.c.uid==Users.c.id",
+        back_populates="user",
+        cascade='all, delete-orphan',
+        doc="""A list of :class:`.AuthenticationLog` instances which holds the
+        login/logout info for this :class:`.User`.
         """
     )
 
@@ -1067,3 +1074,101 @@ Group_Users = Table(
     Column("uid", Integer, ForeignKey("Users.id"), primary_key=True),
     Column("gid", Integer, ForeignKey("Groups.id"), primary_key=True)
 )
+
+
+class AuthenticationLog(SimpleEntity):
+    """Keeps track of login/logout dates and the action (login or logout).
+    """
+
+    __auto_name__ = True
+    __tablename__ = "AuthenticationLogs"
+    __mapper_args__ = {"polymorphic_identity": "AuthenticationLog"}
+
+    info_id = Column(
+        'id',
+        Integer,
+        ForeignKey('SimpleEntities.id'),
+        primary_key=True
+    )
+
+    user_id = Column(
+        'uid',
+        Integer,
+        ForeignKey('Users.id'),
+        nullable=False
+    )
+
+    user = relationship(
+        'User',
+        primaryjoin='AuthenticationLogs.c.uid==Users.c.id',
+        uselist=False,
+        back_populates='authentication_logs',
+        doc="The :class:`.User` instance that this AuthenticationLog is "
+        "created for"
+    )
+
+    action = Column(
+        'action',
+        Enum(LOGIN, LOGOUT, name='ActionNames'),
+        nullable=False
+    )
+
+    date = Column(
+        DateTime,
+        nullable=False
+    )
+
+    def __init__(self, user=None, date=None, action=LOGIN, **kwargs):
+        super(AuthenticationLog, self).__init__(**kwargs)
+        self.user = user
+        self.date = date
+        self.action = action
+
+    @validates('user')
+    def __validate_user__(self, key, user):
+        """validates the given user argument value
+        """
+        if not isinstance(user, User):
+            raise TypeError(
+                '%s.user should be a User instance, not %s' % (
+                    self.__class__.__name__,
+                    user.__class__.__name__
+                )
+            )
+
+        return user
+
+    @validates('action')
+    def __validate_action__(self, key, action):
+        """validates the given action argument value
+        """
+        if action is None:
+            import copy
+            action = copy.copy(LOGIN)
+
+        if action not in [LOGIN, LOGOUT]:
+            raise ValueError(
+                '%s.action should be one of "login" or "logout", not "%s"' % (
+                    self.__class__.__name__,
+                    action
+                )
+            )
+
+        return action
+
+    @validates('date')
+    def __validate_date__(self, key, date):
+        """validates the given date value
+        """
+        if date is None:
+            date = datetime.datetime.now()
+
+        if not isinstance(date, datetime.datetime):
+            raise TypeError(
+                '%s.date should be a "datetime.datetime" instance, not %s' % (
+                    self.__class__.__name__,
+                    date.__class__.__name__
+                )
+            )
+
+        return date

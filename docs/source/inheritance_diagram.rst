@@ -11,6 +11,7 @@ Inheritance Diagram
    stalker.exceptions.OverBookedError
    stalker.exceptions.StatusError
    stalker.models.asset.Asset
+   stalker.models.auth.AuthenticationLog
    stalker.models.auth.Group
    stalker.models.auth.LocalSession
    stalker.models.auth.Permission

@@ -25,7 +25,7 @@ See docs for more information.
 
 import sys
 
-__version__ = '0.2.16.4'
+__version__ = '0.2.17'
 
 
 __string_types__ = []
@@ -38,7 +38,8 @@ else:  # Python 2
 # before anything about stalker create the defaults
 from stalker.config import defaults
 
-from stalker.models.auth import Group, Permission, User, LocalSession, Role
+from stalker.models.auth import (Group, Permission, User, LocalSession, Role,
+                                 AuthenticationLog)
 from stalker.models.asset import Asset
 from stalker.models.budget import (Budget, BudgetEntry, Good, PriceList,
                                    Invoice, Payment)

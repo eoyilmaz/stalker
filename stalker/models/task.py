@@ -88,6 +88,7 @@ class TimeLog(Entity, DateRangeMixin):
     __auto_name__ = True
     __tablename__ = "TimeLogs"
     __mapper_args__ = {"polymorphic_identity": "TimeLog"}
+
     time_log_id = Column("id", Integer, ForeignKey("Entities.id"),
                          primary_key=True)
     task_id = Column(
@@ -110,6 +111,9 @@ class TimeLog(Entity, DateRangeMixin):
         back_populates="time_logs",
         doc="""The :class:`.User` instance that this time_log is created for"""
     )
+
+    # TODO: Create a Constraint to prevent TimeLogs to be entered to the same
+    #       or intersecting dates for the same resource.
 
     def __init__(
             self,
@@ -1059,6 +1063,13 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin,
         uselist=False,
         post_update=True,
     )
+
+    # TODO: Add ``unmanaged`` attribute for Asset management only tasks.
+    #
+    # Some tasks are created for asset management purposes only and doesn't
+    # need TimeLogs to be entered. Create an attribute called ``unmanaged`` and
+    # and set it to False by default, and if its True don't include it in the
+    # TaskJuggler project. And do not track its status.
 
     def __init__(self,
                  project=None,

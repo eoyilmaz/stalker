@@ -17,6 +17,7 @@ Summary
    stalker.exceptions.StatusError
    stalker.models
    stalker.models.asset.Asset
+   stalker.models.auth.AuthenticationLog
    stalker.models.auth.Group
    stalker.models.auth.LocalSession
    stalker.models.auth.Role

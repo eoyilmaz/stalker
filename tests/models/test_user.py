@@ -686,29 +686,6 @@ class UserTest(unittest.TestCase):
         # nothing should happen
         self.test_user.last_login = None
 
-    def test_last_login_attribute_accepts_only_datetime_instance_or_None(self):
-        """testing if a TypeError will be raised for values other than
-        datetime.datetime instances tried to be assigned to last_login
-        attribute
-        """
-        test_values = [1, 2.3, "login time", ["last login time"],
-                       {"a last": "login time"}]
-        for test_value in test_values:
-            self.assertRaises(
-                TypeError,
-                setattr,
-                self.test_user,
-                "last_login",
-                test_value
-            )
-
-    def test_last_login_attribute_works_properly(self):
-        """testing if the last_login attribute works properly
-        """
-        test_value = datetime.datetime.now()
-        self.test_user.last_login = test_value
-        self.assertEqual(self.test_user.last_login, test_value)
-
     def test_departments_argument_is_skipped(self):
         """testing if a User can be created without a Department instance
         """

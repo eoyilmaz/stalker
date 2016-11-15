@@ -294,14 +294,14 @@ class DatabaseTester(unittest.TestCase):
         db.init()
 
         class_names = [
-            'Asset', 'Budget', 'BudgetEntry', 'Client', 'Good', 'Group',
-            'Permission', 'User', 'Department', 'SimpleEntity', 'Entity',
-            'EntityGroup', 'ImageFormat', 'Link', 'Message', 'Note', 'Page',
-            'Project', 'PriceList', 'Repository', 'Review', 'Role', 'Scene',
-            'Sequence', 'Shot', 'Status', 'StatusList', 'Structure', 'Studio',
-            'Tag', 'TimeLog', 'Task', 'FilenameTemplate', 'Ticket',
-            'TicketLog', 'Type', 'Vacation', 'Version', 'Daily', 'Invoice',
-            'Payment',
+            'Asset', 'AuthenticationLog', 'Budget', 'BudgetEntry', 'Client',
+            'Good', 'Group', 'Permission', 'User', 'Department',
+            'SimpleEntity', 'Entity', 'EntityGroup', 'ImageFormat', 'Link',
+            'Message', 'Note', 'Page', 'Project', 'PriceList', 'Repository',
+            'Review', 'Role', 'Scene', 'Sequence', 'Shot', 'Status',
+            'StatusList', 'Structure', 'Studio', 'Tag', 'TimeLog', 'Task',
+            'FilenameTemplate', 'Ticket', 'TicketLog', 'Type', 'Vacation',
+            'Version', 'Daily', 'Invoice', 'Payment',
         ]
 
         permission_db = Permission.query.all()
@@ -343,7 +343,7 @@ class DatabaseTester(unittest.TestCase):
 
         # and we still have correct amount of Permissions
         permissions = Permission.query.all()
-        self.assertEqual(len(permissions), 410)
+        self.assertEqual(len(permissions), 420)
 
         # clean the test
         db.DBSession.remove()
@@ -982,7 +982,7 @@ class DatabaseTester(unittest.TestCase):
         sql_query = 'select version_num from "alembic_version"'
         version_num = \
             db.DBSession.connection().execute(sql_query).fetchone()[0]
-        self.assertEqual('ea28a39ba3f5', version_num)
+        self.assertEqual('f16651477e64', version_num)
 
     def test_initialization_of_alembic_version_table_multiple_times(self):
         """testing if the db.create_alembic_table() will handle initializing
@@ -999,7 +999,7 @@ class DatabaseTester(unittest.TestCase):
         sql_query = 'select version_num from "alembic_version"'
         version_num = \
             db.DBSession.connection().execute(sql_query).fetchone()[0]
-        self.assertEqual('ea28a39ba3f5', version_num)
+        self.assertEqual('f16651477e64', version_num)
 
         db.DBSession.remove()
         db.setup(db_config)
@@ -4835,7 +4835,7 @@ class DatabaseModelsTester(unittest.TestCase):
         description = user1.description
         efficiency = user1.efficiency
         email = user1.email
-        last_login = user1.last_login
+        authentication_logs = user1.authentication_logs
         login = user1.login
         name = user1.name
         nice_name = user1.nice_name
@@ -4867,7 +4867,7 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(description, user1_db.description)
         self.assertEqual(efficiency, user1_db.efficiency)
         self.assertEqual(email, user1_db.email)
-        self.assertEqual(last_login, user1_db.last_login)
+        self.assertEqual(authentication_logs, user1_db.authentication_logs)
         self.assertEqual(login, user1_db.login)
         self.assertEqual(name, user1_db.name)
         self.assertEqual(nice_name, user1_db.nice_name)
@@ -4905,6 +4905,74 @@ class DatabaseModelsTester(unittest.TestCase):
 
         # deleting a user should also delete the time logs
         self.assertEqual([], TimeLog.query.all())
+
+    def test_persistence_of_AuthenticationLog(self):
+        """testing the persistence of AuthenticationLog
+        """
+        import datetime
+        from stalker import User, AuthenticationLog
+        from stalker import db
+        user1 = User(
+            name='Test User 1',
+            login='tuser1',
+            email='tuser1@users.com',
+            password='sosecret'
+        )
+        db.DBSession.add(user1)
+        db.DBSession.commit()
+
+        from stalker.models.auth import LOGIN, LOGOUT
+        al1 = AuthenticationLog(
+            user=user1,
+            action=LOGIN,
+            date=datetime.datetime.now()
+        )
+
+        al2 = AuthenticationLog(
+            user=user1,
+            action=LOGOUT,
+            date=datetime.datetime.now() + datetime.timedelta(minutes=10)
+        )
+
+        db.DBSession.add_all([al1, al2])
+        db.DBSession.commit()
+
+        al1_id = al1.id
+        action = al1.action
+        date = al1.date
+
+        del al1
+
+        al1_from_db = AuthenticationLog.query.get(al1_id)
+
+        self.assertEqual(al1_from_db.user, user1)
+        self.assertEqual(al1_from_db.date, date)
+        self.assertEqual(al1_from_db.action, action)
+
+        # check if users data is also updated
+        self.assertEqual(
+            sorted(user1.authentication_logs),
+            sorted([al1_from_db, al2])
+        )
+
+        # delete tests
+        db.DBSession.delete(al1_from_db)
+        db.DBSession.commit()
+
+        # check the user still exists
+        user1_from_db = User.query.get(user1.id)
+        self.assertIsNotNone(user1_from_db)
+
+        # check if the other log is still there
+        al2_from_db = AuthenticationLog.query.get(al2.id)
+        self.assertIsNotNone(al2_from_db)
+
+        # delete the other AuhenticationLog
+        db.DBSession.delete(al2_from_db)
+
+        # check if the user is still there
+        user1_from_db = User.query.get(user1.id)
+        self.assertIsNotNone(user1_from_db)
 
     def test_persistence_of_Vacation(self):
         """testing the persistence of Vacation instances
