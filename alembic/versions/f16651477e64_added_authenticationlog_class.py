@@ -22,7 +22,7 @@ def upgrade():
         sa.Column('uid', sa.Integer(), nullable=False),
         sa.Column(
             'action',
-            sa.Enum('login', 'logout', name='ActionNames'),
+            sa.Enum('login', 'logout', name='AuthenticationActions'),
             nullable=False
         ),
         sa.Column('date', sa.DateTime(), nullable=False),

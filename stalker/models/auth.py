@@ -127,7 +127,7 @@ class Permission(Base):
     id = Column(Integer, primary_key=True)
     _access = Column('access', Enum('Allow', 'Deny', name='AccessNames'))
     _action = Column('action',
-                     Enum(*defaults.actions, name='ActionNames'))
+                     Enum(*defaults.actions, name='AuthenticationActions'))
     _class_name = Column('class_name', String(32))
 
     def __init__(self, access, action, class_name):
