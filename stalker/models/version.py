@@ -585,7 +585,12 @@ class Version(Link, DAGMixin):
 Version_Inputs = Table(
     "Version_Inputs", Base.metadata,
     Column("version_id", Integer, ForeignKey("Versions.id"), primary_key=True),
-    Column("link_id", Integer, ForeignKey("Links.id"), primary_key=True)
+    Column(
+        "link_id",
+        Integer,
+        ForeignKey("Links.id", onupdate="CASCADE", ondelete="CASCADE"),
+        primary_key=True
+    )
 )
 
 # VERSION_OUTPUTS

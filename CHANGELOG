@@ -2,6 +2,14 @@
 Stalker Changes
 ===============
 
+0.2.17.2
+========
+
+* **Fix:** Fixed ``Version_Inputs`` table to correctly take care of
+  ``DELETE``s on the ``Versions`` table. So now it is possible to delete a
+  ``Version`` instance without first cleaning the ``Link`` instances that is
+  related to that ``Version`` instance.
+
 0.2.17.1
 ========
 
