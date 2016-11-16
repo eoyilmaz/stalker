@@ -1084,7 +1084,7 @@ class AuthenticationLog(SimpleEntity):
     __tablename__ = "AuthenticationLogs"
     __mapper_args__ = {"polymorphic_identity": "AuthenticationLog"}
 
-    info_id = Column(
+    log_id = Column(
         'id',
         Integer,
         ForeignKey('SimpleEntities.id'),

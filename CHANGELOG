@@ -10,6 +10,9 @@ Stalker Changes
   ``Version`` instance without first cleaning the ``Link`` instances that is
   related to that ``Version`` instance.
 
+* **Update:** Changed the ``id`` attribute name from ``info_id`` to ``log_id``
+  in ``AuthenticationLog`` class.
+
 0.2.17.1
 ========
 
