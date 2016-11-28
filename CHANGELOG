@@ -2,12 +2,168 @@
 Stalker Changes
 ===============
 
-0.2.14
+0.2.18
 ======
 
 * **Update:** Support for DB backends other than Postgresql has been dropped.
-  This is done in that way to greatly benefit from a code that is highly
-  optimized only for one DB backend.
+  This is done to greatly benefit from a code that is highly optimized only
+  for one DB backend.
+
+0.2.17.2
+========
+
+* **Fix:** Fixed ``Version_Inputs`` table to correctly take care of
+  ``DELETE``s on the ``Versions`` table. So now it is possible to delete a
+  ``Version`` instance without first cleaning the ``Link`` instances that is
+  related to that ``Version`` instance.
+
+* **Update:** Changed the ``id`` attribute name from ``info_id`` to ``log_id``
+  in ``AuthenticationLog`` class.
+
+* **Update:** Started moving towards PostgreSQL only implementation. Merged the
+  ``DatabaseModelTester`` class and ``DatabaseModelsPostgreSQLTester`` class.
+
+* **Fix:** Fixed an autoflush issue in
+  ``stalker.models.review.Review.finalize_review_set()``.
+
+0.2.17.1
+========
+
+* **Fix:** Fixed alembic revision
+
+0.2.17
+======
+
+* **New:** Added ``AuthenticationLog`` class to hold user login/logout info.
+* **New:** Added ``stalker.testing`` module to simplify testing setup.
+
+0.2.16.4
+========
+
+* **Fix:** Fixed alembic revision.
+
+0.2.16.3
+========
+
+* **New:** ``ProjectUser`` now also holds a new field called ``rate``. The
+  default value is equal to the ``ProjectUser.user.rate``. It is a way to hold
+  the rate of a user on a specific project.
+
+* **New:** Added the ``Invoice`` class.
+
+* **New:** Added the ``Payment`` class.
+
+* **New:** Added two simple mixins ``AmountMixin`` and ``UnitMixin``.
+
+* **Update:** ``Good`` class is now mixed in with the new ``UnitMixin`` class.
+
+* **Update:** ``BudgetEntry`` class is now mixed in with the new
+  ``AmountMixin`` and ``UnitMixin`` classes.
+
+0.2.16.2
+========
+
+* **New:** ``Group`` permissions can now be set on ``__init__()`` with the
+  ``permissions`` argument.
+
+0.2.16.1
+========
+
+* **Fix:** As usual after a new release that changes database schema, fixed the
+  corresponding Alembic revision (92257ba439e1).
+
+0.2.16
+======
+
+* **New:** ``Budget`` instances are now statusable.
+
+* **Update:** Updated documentation to include database migration instructions
+  with Alembic.
+
+0.2.15.2
+========
+
+* **Fix:** Fixed a typo in the error message in
+  ``User._validate_email_format()`` method.
+
+* **Fix:** Fixed a query-invoked auto-flush problem in
+  ``Task.update_parent_statuses()`` method.
+
+0.2.15.1
+========
+
+* **Fix:** Fixed alembic revision (f2005d1fbadc), it will now drop any existing
+  constraints before re-creating them. And the downgrade function will not
+  remove the constraints.
+
+0.2.15
+======
+
+* **New:** ``db.setup()`` now checks for ``alembic_version`` before setting up
+  a connection to the database and raises a ``ValueError`` if the database
+  alembic version is not matching the current implementation of Stalker.
+
+* **Fix:** ``db.init()`` sets the ``created_by`` and ``updated_by``
+  attributes to ``admin`` user if there is one while creating entity statuses.
+
+* **New:** Created ``create_sdist.cmd`` and ``upload_to_pypi.cmd`` for Windows.
+
+* **New:** ``Project`` to ``Client`` relation is now a many-to-many relation,
+  thus it is possible to set multiple Clients for each project with each client
+  having their own roles in a specific project.
+
+* **Update:** ``ScheduleMixin.schedule_timing`` attribute is now Nullable.
+
+* **Update:** ``ScheduleMixin.schedule_unit`` attribute is now Nullable.
+
+0.2.14
+======
+
+* **Fix:** Fixed ``Task.path`` to always return a path with forward slashes.
+
+* **New:** Introducing ``EntityGroups`` that lets one to group a bunch of
+ ``SimpleEntity``s together, it can be used in grouping tasks even if they are
+ in different places on the project task hierarchy or even in different
+ projects.
+
+* **Update:** ``Task.percent_complete`` is now correctly calculated for a
+  ``Duration`` based task by using the ``Task.start`` and ``Task.end``
+  attribute values.
+
+* **Fix:** Fixed ``stalker.models.task.update_time_log_task_parents_for_end()``
+  event to work with SQLAlchemy v1.0.
+
+* **New:** Added an option called ``__dag_cascade__`` to the ``DAGMixin`` to
+  control cascades on mixed in class. The default value is "all, delete".
+  Change it to "save-update, merge" if you don't want the children also be
+  deleted when the parent is deleted.
+
+* **Fix:** Fixed a bug in ``Version`` class that occurs when a version instance
+  that is a parent of other version instances is deleted, the child versions
+  are also deleted (fixed through DAGMixin class).
+
+0.2.13.3
+========
+
+* **Fix:** Fixed a bug in ``Review.finalize_review_set()`` for tasks that are
+  sent to review and still have some extra time were not clamped to their total
+  logged seconds when the review set is all approved.
+
+0.2.13.2
+========
+
+* **New:** Removed ``msrp``, ``cost`` and ``unit`` arguments from
+  ``BudgetEntry.__init__()`` and added a new ``good`` argument to get all of
+  the data from the related ``Good`` instance. But the ``msrp``, ``cost`` and
+  ``unit`` attributes of ``BudgetEntry`` class are still there to store the
+  values that may not correlate with the related ``Good`` in future.
+
+0.2.13.1
+========
+
+* **Fix:** Fixed a bug in ``Review.finalize_review_set()`` which causes Task
+  instances to not to get any status update if the revised task is a second
+  degree dependee to that particular task.
 
 0.2.13
 ======

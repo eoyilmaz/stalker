@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2014 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -18,9 +18,9 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import datetime
 import logging
 
+import pytz
 from sqlalchemy import (Table, Column, String, Integer, ForeignKey, Interval,
                         DateTime, PickleType, Float, Enum)
 from sqlalchemy.exc import UnboundExecutionError
@@ -28,10 +28,8 @@ from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import synonym, relationship, validates
 
 from stalker import defaults
-from stalker.db.session import DBSession
 from stalker.db.declarative import Base
 from stalker.log import logging_level
-from stalker.models import make_plural, check_circular_dependency
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
@@ -45,6 +43,7 @@ def create_secondary_table(
         secondary_table_name=None):
     """creates any secondary table
     """
+    from stalker.models import make_plural
     plural_secondary_cls_name = make_plural(secondary_cls_name)
 
     # use the given class_name and the class_table
@@ -268,7 +267,8 @@ class StatusMixin(object):
             # StatusList from the database
 
             # disable autoflush to prevent premature class initialization
-            with DBSession.no_autoflush:
+            from stalker import db
+            with db.DBSession.no_autoflush:
                 try:
                     # try to get a StatusList with the target_entity_type is
                     # matching the class name
@@ -315,8 +315,8 @@ class StatusMixin(object):
         """validates the given status value
         """
         from stalker.models.status import Status, StatusList
-
-        with DBSession.no_autoflush:
+        from stalker import db
+        with db.DBSession.no_autoflush:
             if not isinstance(self.status_list, StatusList):
                 raise TypeError(
                     "Please set the %s.status_list attribute first" %
@@ -325,7 +325,7 @@ class StatusMixin(object):
 
         # it is set to None
         if status is None:
-            with DBSession.no_autoflush:
+            with db.DBSession.no_autoflush:
                 status = self.status_list.statuses[0]
 
         # it is not an instance of status or int
@@ -392,7 +392,7 @@ class DateRangeMixin(object):
     +-------+-----+----------+----------------------------------------+
     | start | end | duration | DEFAULTS                               |
     +=======+=====+==========+========================================+
-    |       |     |          | start = datetime.datetime.now()        |
+    |       |     |          | start = datetime.datetime.now(pytz.utc)|
     |       |     |          |                                        |
     |       |     |          | duration = datetime.timedelta(days=10) |
     |       |     |          |                                        |
@@ -414,7 +414,7 @@ class DateRangeMixin(object):
     |       |     |          |                                        |
     |       |     |          | start = end - duration                 |
     +-------+-----+----------+----------------------------------------+
-    |       |     |    X     | start = datetime.datetime.now()        |
+    |       |     |    X     | start = datetime.datetime.now(pytz.utc)|
     |       |     |          |                                        |
     |       |     |          | end = start + duration                 |
     +-------+-----+----------+----------------------------------------+
@@ -439,7 +439,7 @@ class DateRangeMixin(object):
       any condition if the start is available then the value will be
       preserved. If start passes the end the end is also changed
       to a date to keep the timedelta between dates. The default value is
-      datetime.datetime.now()
+      datetime.datetime.now(pytz.utc)
 
     :type start: :class:`datetime.datetime`
 
@@ -469,7 +469,7 @@ class DateRangeMixin(object):
 
     @declared_attr
     def _end(cls):
-        return Column("end", DateTime)
+        return Column("end", DateTime(timezone=True))
 
     def _end_getter(self):
         """The date that the entity should be delivered.
@@ -498,7 +498,7 @@ class DateRangeMixin(object):
 
     @declared_attr
     def _start(cls):
-        return Column("start", DateTime)
+        return Column("start", DateTime(timezone=True))
 
     def _start_getter(self):
         """The date that this entity should start.
@@ -510,7 +510,7 @@ class DateRangeMixin(object):
         :attr:`.DateRangeMixin.duration` value fixed.
         :attr:`.DateRangeMixin.start` should be an instance of
         class:`datetime.datetime` and the default value is
-        :func:`datetime.datetime.now()`
+        :func:`datetime.datetime.now(pytz.utc)`
         """
         return self._start
 
@@ -537,6 +537,7 @@ class DateRangeMixin(object):
 
     def _duration_setter(self, duration_in):
         if duration_in is not None:
+            import datetime
             if isinstance(duration_in, datetime.timedelta):
                 # set the end to None
                 # to make it recalculated
@@ -572,6 +573,7 @@ class DateRangeMixin(object):
         # logger.debug('end      : %s' % end)
         # logger.debug('duration : %s' % duration)
 
+        import datetime
         if not isinstance(start, datetime.datetime):
             start = None
 
@@ -586,7 +588,7 @@ class DateRangeMixin(object):
             # try to calculate the start from end and duration
             if end is None:
                 # set the defaults
-                start = datetime.datetime.now()
+                start = datetime.datetime.now(pytz.utc)
 
                 if duration is None:
                     # set the defaults
@@ -632,12 +634,11 @@ class DateRangeMixin(object):
 
     @declared_attr
     def computed_start(cls):
-        return Column('computed_start', DateTime)
+        return Column('computed_start', DateTime(timezone=True))
 
     @declared_attr
     def computed_end(cls):
-        return Column('computed_end', DateTime)
-
+        return Column('computed_end', DateTime(timezone=True))
 
     @property
     def computed_duration(self):
@@ -669,7 +670,10 @@ class DateRangeMixin(object):
         trs = timing_resolution.days * 86400 + timing_resolution.seconds
 
         # convert to seconds
-        epoch = datetime.datetime(1970, 1, 1)
+        import datetime
+        import pytz
+        epoch = datetime.datetime(1970, 1, 1, tzinfo=pytz.utc)
+
         diff = dt - epoch
         diff_in_seconds = diff.days * 86400 + diff.seconds
         return epoch + datetime.timedelta(
@@ -1009,7 +1013,7 @@ class ScheduleMixin(object):
         return Column(
             '%s_unit' % cls.__default_schedule_attr_name__,
             Enum(*defaults.datetime_units, name='TimeUnit'),
-            nullable=False, default='h',
+            nullable=True, default='h',
             doc="""It is the unit of the %(attr)s timing. It is a string
             value. And should be one of 'min', 'h', 'd', 'w', 'm', 'y'.""" %
                 {'attr': cls.__default_schedule_attr_name__}
@@ -1338,7 +1342,11 @@ class DAGMixin(object):
 
           id = Column('id', Integer, primary_key=True)
           __id_column__ = id
+
+    Use the :attr:``.__dag_cascade__`` to control the cascade behaviour.
     """
+
+    __dag_cascade__ = 'all, delete'
 
     @declared_attr
     def parent_id(cls):
@@ -1374,7 +1382,7 @@ class DAGMixin(object):
             },
             back_populates='parent',
             post_update=True,
-            cascade='all, delete',
+            cascade=cls.__dag_cascade__,
             doc="""Other :class:`Budget` instances which are the children of this
             one. This attribute along with the :attr:`.parent` attribute is used in
             creating a DAG hierarchy of tasks.
@@ -1397,6 +1405,8 @@ class DAGMixin(object):
                         'parent_cls': parent.__class__.__name__
                     }
                 )
+
+            from stalker.models import check_circular_dependency
             check_circular_dependency(self, parent, 'children')
 
         return parent
@@ -1426,7 +1436,8 @@ class DAGMixin(object):
     def is_container(self):
         """Returns True if the Task has children Tasks
         """
-        with DBSession.no_autoflush:
+        from stalker import db
+        with db.DBSession.no_autoflush:
             return bool(len(self.children))
 
     @property
@@ -1457,3 +1468,63 @@ class DAGMixin(object):
         for c in walk_hierarchy(self, 'children', method=method):
             yield c
 
+
+class AmountMixin(object):
+    """Adds ``amount`` attribute to the mixed in class.
+
+    :param int float amount:
+    """
+
+    def __init__(self, amount=0, **kwargs):
+        self.amount = amount
+
+    @declared_attr
+    def amount(cls):
+        return Column(Float, default=0.0)
+
+    @validates('amount')
+    def _validate_amount(self, key, amount):
+        """validates the given amount value
+        """
+        if amount is None:
+            amount = 0.0
+
+        if not isinstance(amount, (int, float)):
+            raise TypeError(
+                '%s.amount should be a number, not %s' % (
+                    self.__class__.__name__, amount.__class__.__name__
+                )
+            )
+
+        return float(amount)
+
+
+class UnitMixin(object):
+    """Adds ``unit`` attribute to the mixed in class.
+
+    :param str unit:
+    """
+
+    def __init__(self, unit='', **kwargs):
+        self.unit = unit
+
+    @declared_attr
+    def unit(cls):
+        return Column(String(64))
+
+    @validates('unit')
+    def _validate_unit(self, key, unit):
+        """validates the given unit value
+        """
+        if unit is None:
+            unit = ''
+
+        from stalker import __string_types__
+        if not isinstance(unit, __string_types__):
+            raise TypeError(
+                '%s.unit should be a string, not %s' % (
+                    self.__class__.__name__, unit.__class__.__name__
+                )
+            )
+
+        return unit

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2014 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -18,12 +18,10 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest
 
 from sqlalchemy import Column, Integer, ForeignKey
-from stalker.db.session import DBSession
-from stalker.models.mixins import StatusMixin
-from stalker.models.status import StatusList, Status
+from stalker import StatusMixin, StatusList, Status
+from stalker.testing import UnitTestBase
 
 # create a new mixed in SimpleEntity
 from stalker.models.entity import SimpleEntity
@@ -51,13 +49,15 @@ class DeclStatMixB(SimpleEntity, StatusMixin):
         StatusMixin.__init__(self, **kwargs)
 
 
-class StatusMixinTester(unittest.TestCase):
+class StatusMixinTester(UnitTestBase):
     """tests StatusMixin
     """
 
     def setUp(self):
         """setup the test
         """
+        super(StatusMixinTester, self).setUp()
+
         self.test_stat1 = Status(name="On Hold", code="OH")
         self.test_stat2 = Status(name="Work In Progress", code="WIP")
         self.test_stat3 = Status(name="Approved", code="APP")
@@ -78,11 +78,6 @@ class StatusMixinTester(unittest.TestCase):
             "name": "ozgur",
             "status_list": self.test_a_statusList
         }
-
-    def tearDown(self):
-        """clean up the test
-        """
-        DBSession.remove()
 
     def test_status_list_argument_not_set(self):
         """testing if a TypeError will be raised when the status_list argument

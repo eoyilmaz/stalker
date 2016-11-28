@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2014 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -23,10 +23,12 @@ import datetime
 import logging
 import tempfile
 
-import unittest
+
+import pytz
 
 from stalker.exceptions import CircularDependencyError
 from stalker.db import DBSession
+from stalker.testing import UnitTestBase
 from stalker import (db, defaults, Entity, Project, Repository, StatusList,
                      Status, Task, Type, User, TimeLog, FilenameTemplate,
                      Structure)
@@ -36,179 +38,149 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-class TaskTestCase(unittest.TestCase):
+class TaskTestCase(UnitTestBase):
     """Tests the stalker.models.task.Task class
     """
 
-    config = {
-        'sqlalchemy.url': 'sqlite://',
-        'sqlalchemy.echo': False
-    }
-
-    @classmethod
-    def setUpClass(cls):
+    def setUp(self):
         """run once
         """
-        defaults.timing_resolution = datetime.timedelta(hours=1)
+        super(TaskTestCase, self).setUp()
 
-        # create a new session
-        db.setup(cls.config)
-        db.init()
+        self.status_wfd = Status.query.filter_by(code="WFD").first()
+        self.status_rts = Status.query.filter_by(code="RTS").first()
+        self.status_wip = Status.query.filter_by(code="WIP").first()
+        self.status_prev = Status.query.filter_by(code="PREV").first()
+        self.status_hrev = Status.query.filter_by(code="HREV").first()
+        self.status_drev = Status.query.filter_by(code="DREV").first()
+        self.status_oh = Status.query.filter_by(code="OH").first()
+        self.status_stop = Status.query.filter_by(code="STOP").first()
+        self.status_cmpl = Status.query.filter_by(code="CMPL").first()
 
-        cls.status_wfd = Status.query.filter_by(code="WFD").first()
-        cls.status_rts = Status.query.filter_by(code="RTS").first()
-        cls.status_wip = Status.query.filter_by(code="WIP").first()
-        cls.status_prev = Status.query.filter_by(code="PREV").first()
-        cls.status_hrev = Status.query.filter_by(code="HREV").first()
-        cls.status_drev = Status.query.filter_by(code="DREV").first()
-        cls.status_oh = Status.query.filter_by(code="OH").first()
-        cls.status_stop = Status.query.filter_by(code="STOP").first()
-        cls.status_cmpl = Status.query.filter_by(code="CMPL").first()
-
-        cls.task_status_list = StatusList.query\
+        self.task_status_list = StatusList.query\
             .filter_by(target_entity_type='Task').first()
 
-        cls.test_project_status_list = StatusList(
+        self.test_project_status_list = StatusList(
             name="Project Statuses",
-            statuses=[cls.status_wip,
-                      cls.status_prev,
-                      cls.status_cmpl],
+            statuses=[self.status_wip,
+                      self.status_prev,
+                      self.status_cmpl],
             target_entity_type=Project,
         )
 
-        cls.test_movie_project_type = Type(
+        self.test_movie_project_type = Type(
             name="Movie Project",
             code='movie',
             target_entity_type=Project,
         )
 
-        cls.test_repository_type = Type(
+        self.test_repository_type = Type(
             name="Test Repository Type",
             code='test',
             target_entity_type=Repository,
         )
 
-        cls.test_repository = Repository(
+        self.test_repository = Repository(
             name="Test Repository",
-            type=cls.test_repository_type,
+            type=self.test_repository_type,
             linux_path=tempfile.mkdtemp(),
             windows_path=tempfile.mkdtemp(),
             osx_path=tempfile.mkdtemp()
         )
 
-        cls.test_user1 = User(
+        self.test_user1 = User(
             name="User1",
             login="user1",
             email="user1@user1.com",
             password="1234"
         )
 
-        cls.test_user2 = User(
+        self.test_user2 = User(
             name="User2",
             login="user2",
             email="user2@user2.com",
             password="1234"
         )
 
-        cls.test_user3 = User(
+        self.test_user3 = User(
             name="User3",
             login="user3",
             email="user3@user3.com",
             password="1234"
         )
 
-        cls.test_user4 = User(
+        self.test_user4 = User(
             name="User4",
             login="user4",
             email="user4@user4.com",
             password="1234"
         )
 
-        cls.test_user5 = User(
+        self.test_user5 = User(
             name="User5",
             login="user5",
             email="user5@user5.com",
             password="1234"
         )
 
-        cls.test_project1 = Project(
+        self.test_project1 = Project(
             name="Test Project1",
             code='tp1',
-            type=cls.test_movie_project_type,
-            status_list=cls.test_project_status_list,
-            repositories=[cls.test_repository]
+            type=self.test_movie_project_type,
+            status_list=self.test_project_status_list,
+            repositories=[self.test_repository]
         )
 
-        cls.test_dependent_task1 = Task(
+        self.test_dependent_task1 = Task(
             name="Dependent Task1",
-            project=cls.test_project1,
-            status_list=cls.task_status_list,
-            responsible=[cls.test_user1]
+            project=self.test_project1,
+            status_list=self.task_status_list,
+            responsible=[self.test_user1]
         )
 
-        cls.test_dependent_task2 = Task(
+        self.test_dependent_task2 = Task(
             name="Dependent Task2",
-            project=cls.test_project1,
-            status_list=cls.task_status_list,
-            responsible=[cls.test_user1]
+            project=self.test_project1,
+            status_list=self.task_status_list,
+            responsible=[self.test_user1]
         )
 
-        cls.kwargs = {
+        self.kwargs = {
             'name': 'Modeling',
             'description': 'A Modeling Task',
-            'project': cls.test_project1,
+            'project': self.test_project1,
             'priority': 500,
-            'responsible': [cls.test_user1],
-            'resources': [cls.test_user1, cls.test_user2],
-            'alternative_resources': [cls.test_user3, cls.test_user4,
-                                      cls.test_user5],
+            'responsible': [self.test_user1],
+            'resources': [self.test_user1, self.test_user2],
+            'alternative_resources': [self.test_user3, self.test_user4,
+                                      self.test_user5],
             'allocation_strategy': 'minloaded',
             'persistent_allocation': True,
-            'watchers': [cls.test_user3],
+            'watchers': [self.test_user3],
             'bid_timing': 4,
             'bid_unit': 'd',
             'schedule_timing': 1,
             'schedule_unit': 'd',
-            'start': datetime.datetime(2013, 4, 8, 13, 0),
-            'end': datetime.datetime(2013, 4, 8, 18, 0),
-            'depends': [cls.test_dependent_task1,
-                        cls.test_dependent_task2],
+            'start': datetime.datetime(2013, 4, 8, 13, 0, tzinfo=pytz.utc),
+            'end': datetime.datetime(2013, 4, 8, 18, 0, tzinfo=pytz.utc),
+            'depends': [self.test_dependent_task1,
+                        self.test_dependent_task2],
             'time_logs': [],
             'versions': [],
             'is_milestone': False,
             'status': 0,
-            'status_list': cls.task_status_list,
+            'status_list': self.task_status_list,
         }
 
         # create a test Task
         DBSession.add_all([
-            cls.test_project_status_list, cls.test_movie_project_type,
-            cls.test_repository_type, cls.test_repository, cls.test_user1,
-            cls.test_user2, cls.test_user3, cls.test_user4,
-            cls.test_user5, cls.test_project1, cls.test_dependent_task1,
-            cls.test_dependent_task2,
+            self.test_project_status_list, self.test_movie_project_type,
+            self.test_repository_type, self.test_repository, self.test_user1,
+            self.test_user2, self.test_user3, self.test_user4,
+            self.test_user5, self.test_project1, self.test_dependent_task1,
+            self.test_dependent_task2,
         ])
         DBSession.commit()
-
-    def setUp(self):
-        """setup test
-        """
-        self.data_created = []
-
-    def tearDown(self):
-        """run after every test and clean up
-        """
-        for data in self.data_created:
-            if data in DBSession:
-                DBSession.delete(data)
-        DBSession.commit()
-
-    @classmethod
-    def tearDownClass(cls):
-        """run only once
-        """
-        DBSession.remove()
-        defaults.timing_resolution = datetime.timedelta(hours=1)
 
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for
@@ -408,7 +380,6 @@ class TaskTestCase(unittest.TestCase):
         )
         DBSession.add(new_user1)
         DBSession.commit()
-        self.data_created.append(new_user1)
 
         new_user2 = User(
             name="test2",
@@ -418,7 +389,6 @@ class TaskTestCase(unittest.TestCase):
         )
         DBSession.add(new_user2)
         DBSession.commit()
-        self.data_created.append(new_user1)
 
         # assign it to a newly created task
         kwargs = copy.copy(self.kwargs)
@@ -426,7 +396,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         # now check if the user has the task in its tasks list
         self.assertTrue(new_task in new_user1.tasks)
@@ -498,7 +467,6 @@ class TaskTestCase(unittest.TestCase):
         )
         DBSession.add_all([new_user1, new_user2, new_user3, new_user4])
         DBSession.commit()
-        self.data_created.extend([new_user1, new_user2, new_user3, new_user4])
 
         # now add the 1 and 2 to the resources with the resources argument
         # assign it to a newly created task
@@ -507,7 +475,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         # now check if the user has the task in its tasks list
         self.assertTrue(new_task in new_user1.tasks)
@@ -533,7 +500,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
         self.assertEqual(new_task.watchers, [])
 
     def test_watchers_argument_is_None(self):
@@ -545,7 +511,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
         self.assertEqual(new_task.watchers, [])
 
     def test_watchers_attribute_is_None(self):
@@ -555,7 +520,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**self.kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
         self.assertRaises(TypeError, setattr, new_task, "watchers", None)
 
     def test_watchers_argument_is_not_list(self):
@@ -573,7 +537,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**self.kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
         self.assertRaises(
             TypeError, setattr, new_task, "watchers", "a resource"
         )
@@ -593,7 +556,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**self.kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         test_values = ["a", "list", "of", "watchers", self.test_user1]
 
@@ -606,7 +568,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**self.kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         test_value = [self.test_user1]
 
@@ -626,7 +587,6 @@ class TaskTestCase(unittest.TestCase):
         )
         DBSession.add(new_user1)
         DBSession.commit()
-        self.data_created.append(new_user1)
 
         new_user2 = User(
             name="new_user2",
@@ -636,7 +596,6 @@ class TaskTestCase(unittest.TestCase):
         )
         DBSession.add(new_user2)
         DBSession.commit()
-        self.data_created.append(new_user2)
 
         # assign it to a newly created task
         kwargs = copy.copy(self.kwargs)
@@ -644,7 +603,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         # now check if the user has the task in its tasks list
         self.assertTrue(new_task in new_user1.watching)
@@ -671,7 +629,6 @@ class TaskTestCase(unittest.TestCase):
         )
         DBSession.add(new_user)
         DBSession.commit()
-        self.data_created.append(new_user)
 
         # assign it to a newly created task
         kwargs = copy.copy(self.kwargs)
@@ -679,7 +636,6 @@ class TaskTestCase(unittest.TestCase):
         new_task.watchers = [new_user]
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         # now check if the user has the task in its watching list
         self.assertTrue(new_task in new_user.watching)
@@ -697,7 +653,6 @@ class TaskTestCase(unittest.TestCase):
         )
         DBSession.add(new_user1)
         DBSession.commit()
-        self.data_created.append(new_user1)
 
         new_user2 = User(
             name="new_user2",
@@ -707,7 +662,6 @@ class TaskTestCase(unittest.TestCase):
         )
         DBSession.add(new_user2)
         DBSession.commit()
-        self.data_created.append(new_user2)
 
         new_user3 = User(
             name="new_user3",
@@ -717,7 +671,6 @@ class TaskTestCase(unittest.TestCase):
         )
         DBSession.add(new_user3)
         DBSession.commit()
-        self.data_created.append(new_user3)
 
         new_user4 = User(
             name="new_user4",
@@ -727,7 +680,6 @@ class TaskTestCase(unittest.TestCase):
         )
         DBSession.add(new_user4)
         DBSession.commit()
-        self.data_created.append(new_user4)
 
         # now add the 1 and 2 to the watchers with the watchers argument
         # assign it to a newly created task
@@ -736,7 +688,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         # now check if the user has the task in its watching list
         self.assertTrue(new_task in new_user1.watching)
@@ -899,11 +850,9 @@ class TaskTestCase(unittest.TestCase):
         kwargs['depends'] = None
         kwargs['name'] = 'T1'
         t1 = Task(**kwargs)
-        self.data_created.append(t1)
 
         kwargs['name'] = 'T3'
         t3 = Task(**kwargs)
-        self.data_created.append(t3)
 
         t3.depends.append(t1)
         DBSession.commit()
@@ -970,7 +919,6 @@ class TaskTestCase(unittest.TestCase):
         task_a = Task(**kwargs)
         task_b = Task(**kwargs)
         task_c = Task(**kwargs)
-        #self.data_created.extend([task_a, task_b, task_c])
 
         task_a.depends = [task_b]
         task_a.depends.append(task_c)
@@ -997,11 +945,10 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         new_task.time_logs = []
         tlog1 = TimeLog(
@@ -1012,7 +959,6 @@ class TaskTestCase(unittest.TestCase):
         )
         DBSession.add(tlog1)
         DBSession.commit()
-        self.data_created.append(tlog1)
 
         self.assertTrue(tlog1 in new_task.time_logs)
 
@@ -1024,11 +970,189 @@ class TaskTestCase(unittest.TestCase):
         )
         DBSession.add(tlog2)
         DBSession.commit()
-        self.data_created.append(tlog2)
 
         self.assertTrue(tlog2 in new_task.time_logs)
         self.assertEqual(new_task.total_logged_seconds, 20 * 3600)
         self.assertEqual(new_task.percent_complete, 20.0 / 9.0 * 100.0)
+        DBSession.commit()
+
+    def test_percent_complete_attribute_is_working_properly_for_a_duration_based_leaf_task_1(self):
+        """testing if the percent_complete attribute is working properly for a
+        duration based leaf task
+
+          #########
+                     ^
+                     |
+                    now
+        """
+        kwargs = copy.copy(self.kwargs)
+        kwargs['depends'] = []
+        kwargs['schedule_model'] = 'duration'
+
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now(pytz.utc)
+
+        new_task = Task(**kwargs)
+
+        new_task.computed_start = now - td(days=2)
+        new_task.computed_end = now - td(days=1)
+
+        DBSession.add(new_task)
+        DBSession.commit()
+
+        self.assertEqual(new_task.percent_complete, 100)
+        DBSession.commit()
+
+    def test_percent_complete_attribute_is_working_properly_for_a_duration_based_leaf_task_2(self):
+        """testing if the percent_complete attribute is working properly for a
+        duration based leaf task
+
+          #########
+                  ^
+                  |
+                 now
+        """
+        kwargs = copy.copy(self.kwargs)
+        kwargs['depends'] = []
+        kwargs['schedule_model'] = 'duration'
+
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now(pytz.utc)
+
+        new_task = Task(**kwargs)
+        new_task.start = now - td(days=1, hours=1)
+        new_task.end = now - td(hours=1)
+
+        DBSession.add(new_task)
+        DBSession.commit()
+
+        self.assertEqual(new_task.percent_complete, 100)
+        DBSession.commit()
+
+    def test_percent_complete_attribute_is_working_properly_for_a_duration_based_leaf_task_3(self):
+        """testing if the percent_complete attribute is working properly for a
+        duration based leaf task
+
+          #########
+              ^
+              |
+             now
+        """
+        kwargs = copy.copy(self.kwargs)
+        kwargs['depends'] = []
+        kwargs['schedule_model'] = 'duration'
+
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now(pytz.utc)
+
+        new_task = Task(**kwargs)
+        new_task.start = now - td(hours=12)
+        new_task.end = now + td(hours=12)
+
+        DBSession.add(new_task)
+        DBSession.commit()
+
+        # it should be somewhere around 50%
+        # due to the timing resolution we can not know it exactly
+        # and I don't want to patch datetime.datetime.now(pytz.utc)
+        # this is a very simple test
+        self.assertAlmostEqual(
+            new_task.percent_complete,
+            50,
+            delta=5
+        )
+        DBSession.commit()
+
+    def test_percent_complete_attribute_is_working_properly_for_a_duration_based_leaf_task_4(self):
+        """testing if the percent_complete attribute is working properly for a
+        duration based leaf task
+
+              #########
+              ^
+              |
+             now
+        """
+        kwargs = copy.copy(self.kwargs)
+        kwargs['depends'] = []
+        kwargs['schedule_model'] = 'duration'
+
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now(pytz.utc)
+
+        new_task = Task(**kwargs)
+        new_task.computed_start = now
+        new_task.computed_end = now + td(days=1)
+
+        DBSession.add(new_task)
+        DBSession.commit()
+
+        self.assertAlmostEqual(
+            new_task.percent_complete,
+            0,
+            delta=5
+        )
+        DBSession.commit()
+
+    def test_percent_complete_attribute_is_working_properly_for_a_duration_based_leaf_task_5(self):
+        """testing if the percent_complete attribute is working properly for a
+        duration based leaf task
+
+             #########
+           ^
+           |
+          now
+        """
+        kwargs = copy.copy(self.kwargs)
+        kwargs['depends'] = []
+        kwargs['schedule_model'] = 'duration'
+
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now(pytz.utc)
+
+        new_task = Task(**kwargs)
+        new_task.computed_start = now + td(days=1)
+        new_task.computed_end = now + td(days=2)
+
+        DBSession.add(new_task)
+        DBSession.commit()
+
+        self.assertEqual(new_task.percent_complete, 0)
+        DBSession.commit()
+
+    def test_percent_complete_attribute_is_not_using_any_time_logs_for_a_duration_task(self):
+        """testing if the percent_complete attribute does not use any time log
+        information if the task is a duration based task
+        """
+        kwargs = copy.copy(self.kwargs)
+        kwargs['depends'] = []
+        kwargs['schedule_model'] = 'duration'
+
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now(pytz.utc)
+
+        new_task = Task(**kwargs)
+        new_task.computed_start = now + td(days=1)
+        new_task.computed_end = now + td(days=2)
+
+        DBSession.add(new_task)
+        DBSession.commit()
+
+        tlog1 = TimeLog(
+            task=new_task,
+            resource=new_task.resources[0],
+            start=now + td(days=1),
+            end=now + td(days=2)
+        )
+        DBSession.add(tlog1)
+        DBSession.commit()
+
+        self.assertEqual(new_task.percent_complete, 0)
         DBSession.commit()
 
     def test_percent_complete_attribute_is_working_properly_for_a_container_task(self):
@@ -1036,7 +1160,7 @@ class TaskTestCase(unittest.TestCase):
         container task
         """
         kwargs = copy.copy(self.kwargs)
-        kwargs['depends'] = []  # remove dependencies just for make it
+        kwargs['depends'] = []  # remove dependencies just to make it
                                 # easy to create time logs after stalker
                                 # v0.2.6.1
 
@@ -1044,11 +1168,10 @@ class TaskTestCase(unittest.TestCase):
         new_task.status = self.status_rts
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         defaults.timing_resolution = td(hours=1)
         defaults.daily_working_hours = 9
@@ -1064,7 +1187,6 @@ class TaskTestCase(unittest.TestCase):
         )
         DBSession.add(tlog1)
         DBSession.commit()
-        self.data_created.append(tlog1)
 
         self.assertTrue(tlog1 in new_task.time_logs)
 
@@ -1076,7 +1198,6 @@ class TaskTestCase(unittest.TestCase):
         )
         DBSession.add(tlog2)
         DBSession.commit()
-        self.data_created.append(tlog2)
 
         new_task.parent = parent_task
 
@@ -1154,7 +1275,6 @@ class TaskTestCase(unittest.TestCase):
         kwargs["is_milestone"] = True
         kwargs["resources"] = [self.test_user1, self.test_user2]
         new_task = Task(**kwargs)
-        self.data_created.append(new_task)
         DBSession.commit()
 
         self.assertEqual(new_task.resources, [])
@@ -1165,7 +1285,6 @@ class TaskTestCase(unittest.TestCase):
         """
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
-        self.data_created.append(new_task)
         DBSession.add(new_task)
         DBSession.commit()
 
@@ -1206,10 +1325,9 @@ class TaskTestCase(unittest.TestCase):
 
         DBSession.add(new_task1)
         DBSession.commit()
-        self.data_created.append(new_task1)
         self.assertEqual(new_task1.depends, [])
 
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(pytz.utc)
         dt = datetime.timedelta
 
         new_time_log1 = TimeLog(
@@ -1218,7 +1336,6 @@ class TaskTestCase(unittest.TestCase):
             start=now + dt(100),
             end=now + dt(101)
         )
-        self.data_created.append(new_time_log1)
 
         new_time_log2 = TimeLog(
             task=new_task1,
@@ -1226,14 +1343,12 @@ class TaskTestCase(unittest.TestCase):
             start=now + dt(101),
             end=now + dt(102)
         )
-        self.data_created.append(new_time_log2)
 
         # create a new task
         kwargs['name'] = 'New Task'
         new_task2 = Task(**kwargs)
         DBSession.add(new_task2)
         DBSession.commit()
-        self.data_created.append(new_task2)
 
         # create a new TimeLog for that task
         new_time_log3 = TimeLog(
@@ -1242,7 +1357,6 @@ class TaskTestCase(unittest.TestCase):
             start=now + dt(102),
             end=now + dt(103)
         )
-        self.data_created.append(new_time_log3)
         logger.debug('Task.query.get(37): %s' % Task.query.get(37))
 
         self.assertEqual(new_task2.depends, [])
@@ -1281,13 +1395,12 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         new_task.depends = []
 
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         new_task.time_logs = []
         tlog1 = TimeLog(
@@ -1298,7 +1411,6 @@ class TaskTestCase(unittest.TestCase):
         )
         DBSession.add(tlog1)
         DBSession.commit()
-        self.data_created.append(tlog1)
 
         self.assertTrue(tlog1 in new_task.time_logs)
 
@@ -1310,7 +1422,6 @@ class TaskTestCase(unittest.TestCase):
         )
         DBSession.add(tlog2)
         DBSession.commit()
-        self.data_created.append(tlog2)
 
         self.assertTrue(tlog2 in new_task.time_logs)
         self.assertEqual(new_task.total_logged_seconds, 20 * 3600)
@@ -1325,18 +1436,16 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         kwargs.pop('schedule_timing')
         kwargs.pop('schedule_unit')
         parent_task = Task(**kwargs)
         DBSession.add(parent_task)
         DBSession.commit()
-        self.data_created.append(parent_task)
 
         new_task.parent = parent_task
 
@@ -1349,7 +1458,6 @@ class TaskTestCase(unittest.TestCase):
         )
         DBSession.add(tlog1)
         DBSession.commit()
-        self.data_created.append(tlog1)
 
         self.assertTrue(tlog1 in new_task.time_logs)
 
@@ -1361,7 +1469,6 @@ class TaskTestCase(unittest.TestCase):
         )
         DBSession.add(tlog2)
         DBSession.commit()
-        self.data_created.append(tlog2)
 
         self.assertTrue(tlog2 in new_task.time_logs)
         self.assertEqual(new_task.total_logged_seconds, 20 * 3600)
@@ -1377,11 +1484,10 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         kwargs.pop('schedule_timing')
         kwargs.pop('schedule_unit')
@@ -1389,20 +1495,17 @@ class TaskTestCase(unittest.TestCase):
         parent_task1 = Task(**kwargs)
         DBSession.add(parent_task1)
         DBSession.commit()
-        self.data_created.append(parent_task1)
         self.assertEqual(parent_task1.total_logged_seconds, 0)
 
         parent_task2 = Task(**kwargs)
         DBSession.add(parent_task2)
         DBSession.commit()
-        self.data_created.append(parent_task2)
         self.assertEqual(parent_task2.total_logged_seconds, 0)
 
         # create some other child
         child = Task(**kwargs)
         DBSession.add(child)
         DBSession.commit()
-        self.data_created.append(child)
 
         self.assertEqual(child.total_logged_seconds, 0)
         # create a TimeLog for that child
@@ -1414,7 +1517,6 @@ class TaskTestCase(unittest.TestCase):
         )
         DBSession.add(tlog1)
         DBSession.commit()
-        self.data_created.append(tlog1)
 
         self.assertEqual(child.total_logged_seconds, 10 * 3600)
         parent_task2.children.append(child)
@@ -1436,7 +1538,6 @@ class TaskTestCase(unittest.TestCase):
         )
         DBSession.add(tlog2)
         DBSession.commit()
-        self.data_created.append(tlog2)
 
         self.assertTrue(tlog2 in new_task.time_logs)
         self.assertEqual(new_task.total_logged_seconds, 8 * 3600)
@@ -1451,7 +1552,6 @@ class TaskTestCase(unittest.TestCase):
         )
         DBSession.add(tlog3)
         DBSession.commit()
-        self.data_created.append(tlog3)
 
         self.assertEqual(new_task.total_logged_seconds, 20 * 3600)
         self.assertEqual(parent_task1.total_logged_seconds, 20 * 3600)
@@ -1467,21 +1567,18 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         parent_task = Task(**kwargs)
         DBSession.add(parent_task)
         DBSession.commit()
-        self.data_created.append(parent_task)
 
         child_task = Task(**kwargs)
         DBSession.add(child_task)
         DBSession.commit()
-        self.data_created.append(child_task)
 
         parent_task.children.append(child_task)
 
@@ -1493,7 +1590,6 @@ class TaskTestCase(unittest.TestCase):
         )
         DBSession.add(tlog1)
         DBSession.commit()
-        self.data_created.append(tlog1)
 
         self.assertEqual(
             parent_task.total_logged_seconds, 8 * 60 * 60
@@ -1518,7 +1614,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         self.assertEqual(new_task.schedule_seconds, 10 * 3600)
 
@@ -1527,7 +1622,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         self.assertEqual(
             new_task.schedule_seconds,
@@ -1539,7 +1633,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         self.assertEqual(
             new_task.schedule_seconds,
@@ -1551,7 +1644,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         self.assertEqual(
             new_task.schedule_seconds,
@@ -1563,7 +1655,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         self.assertAlmostEqual(
             new_task.schedule_seconds,
@@ -1588,7 +1679,6 @@ class TaskTestCase(unittest.TestCase):
         )
         DBSession.add(studio)
         DBSession.commit()
-        self.data_created.append(studio)
 
         kwargs['schedule_model'] = 'effort'
 
@@ -1597,7 +1687,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         self.assertEqual(new_task.schedule_seconds, 10 * 3600)
 
@@ -1606,7 +1695,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         self.assertEqual(
             new_task.schedule_seconds,
@@ -1618,7 +1706,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         self.assertEqual(
             new_task.schedule_seconds,
@@ -1630,7 +1717,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         self.assertEqual(
             new_task.schedule_seconds,
@@ -1642,7 +1728,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         self.assertAlmostEqual(
             new_task.schedule_seconds,
@@ -1660,7 +1745,6 @@ class TaskTestCase(unittest.TestCase):
         parent_task = Task(**kwargs)
         DBSession.add(parent_task)
         DBSession.commit()
-        self.data_created.append(parent_task)
 
         kwargs['schedule_model'] = 'effort'
 
@@ -1669,7 +1753,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         self.assertEqual(new_task.schedule_seconds, 10 * 3600)
         new_task.parent = parent_task
@@ -1680,7 +1763,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         self.assertEqual(
             new_task.schedule_seconds,
@@ -1697,7 +1779,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         self.assertEqual(
             new_task.schedule_seconds,
@@ -1715,7 +1796,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         self.assertEqual(
             new_task.schedule_seconds,
@@ -1734,7 +1814,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         self.assertAlmostEqual(
             new_task.schedule_seconds,
@@ -1761,7 +1840,6 @@ class TaskTestCase(unittest.TestCase):
         parent_task = Task(**kwargs)
         DBSession.add(parent_task)
         DBSession.commit()
-        self.data_created.append(parent_task)
 
         kwargs['schedule_model'] = 'effort'
 
@@ -1770,7 +1848,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         self.assertEqual(new_task.schedule_seconds, 10 * 3600)
         new_task.parent = parent_task
@@ -1793,7 +1870,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         self.assertEqual(
             new_task.schedule_seconds,
@@ -1810,7 +1886,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         self.assertEqual(
             new_task.schedule_seconds,
@@ -1828,7 +1903,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         self.assertEqual(
             new_task.schedule_seconds,
@@ -1847,7 +1921,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         self.assertAlmostEqual(
             new_task.schedule_seconds,
@@ -1877,14 +1950,12 @@ class TaskTestCase(unittest.TestCase):
         parent_task1 = Task(**kwargs)
         DBSession.add(parent_task1)
         DBSession.commit()
-        self.data_created.append(parent_task1)
 
         self.assertEqual(parent_task1.schedule_seconds, 9 * 3600)
 
         parent_task2 = Task(**kwargs)
         DBSession.add(parent_task2)
         DBSession.commit()
-        self.data_created.append(parent_task2)
 
         self.assertEqual(parent_task2.schedule_seconds, 9 * 3600)
         parent_task2.schedule_timing = 5
@@ -1899,7 +1970,6 @@ class TaskTestCase(unittest.TestCase):
         child_task = Task(**kwargs)
         DBSession.add(child_task)
         DBSession.commit()
-        self.data_created.append(child_task)
 
         child_task.schedule_timing = 10
         child_task.schedule_unit = 'h'
@@ -1914,7 +1984,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         self.assertEqual(new_task.schedule_seconds, 10 * 3600)
         new_task.parent = parent_task1
@@ -1940,7 +2009,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         self.assertEqual(
             new_task.schedule_seconds,
@@ -1962,7 +2030,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         self.assertEqual(
             new_task.schedule_seconds,
@@ -1993,7 +2060,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         self.assertEqual(
             new_task.schedule_seconds,
@@ -2019,7 +2085,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         self.assertAlmostEqual(
             new_task.schedule_seconds,
@@ -2062,7 +2127,7 @@ class TaskTestCase(unittest.TestCase):
 
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt(2013, 4, 19, 10, 0)
+        now = dt(2013, 4, 19, 10, 0, tzinfo=pytz.utc)
 
         kwargs['schedule_model'] = 'effort'
 
@@ -2072,7 +2137,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         # create a time_log of 2 hours
         tlog1 = TimeLog(
@@ -2083,7 +2147,6 @@ class TaskTestCase(unittest.TestCase):
         )
         DBSession.add(tlog1)
         DBSession.commit()
-        self.data_created.append(tlog1)
 
         # check
         self.assertEqual(
@@ -2097,7 +2160,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         # create a time_log of 5 days
         tlog2 = TimeLog(
@@ -2108,7 +2170,6 @@ class TaskTestCase(unittest.TestCase):
         )
         DBSession.add(tlog2)
         DBSession.commit()
-        self.data_created.append(tlog2)
 
         # check
         self.assertEqual(
@@ -2125,7 +2186,6 @@ class TaskTestCase(unittest.TestCase):
         )
         DBSession.add(tlog3)
         DBSession.commit()
-        self.data_created.append(tlog3)
 
         self.assertEqual(
             new_task.remaining_seconds,
@@ -2138,7 +2198,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         # create a time_log of 2 hours
         tlog4 = TimeLog(
@@ -2149,7 +2208,6 @@ class TaskTestCase(unittest.TestCase):
         )
         DBSession.add(tlog4)
         DBSession.commit()
-        self.data_created.append(tlog4)
         new_task.time_logs.append(tlog4)
 
         # check
@@ -2167,7 +2225,6 @@ class TaskTestCase(unittest.TestCase):
         )
         DBSession.add(tlog5)
         DBSession.commit()
-        self.data_created.append(tlog5)
         new_task.time_logs.append(tlog5)
 
         # check
@@ -2182,7 +2239,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         # create a time_log of 1 months or 30 days, remaining_seconds can be
         # negative
@@ -2194,7 +2250,6 @@ class TaskTestCase(unittest.TestCase):
         )
         DBSession.add(tlog6)
         DBSession.commit()
-        self.data_created.append(tlog6)
         new_task.time_logs.append(tlog6)
 
         # check
@@ -2209,7 +2264,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         # create a time_log of 1 months or 30 days, remaining_seconds can be
         # negative
@@ -2221,7 +2275,6 @@ class TaskTestCase(unittest.TestCase):
         )
         DBSession.add(tlog8)
         DBSession.commit()
-        self.data_created.append(tlog8)
 
         new_task.time_logs.append(tlog8)
 
@@ -2371,7 +2424,6 @@ class TaskTestCase(unittest.TestCase):
         self.assertEqual(new_task2.parent, new_task1)
         db.DBSession.add_all([new_task1, new_task2])
         db.DBSession.commit()
-        self.data_created.extend([new_task1, new_task2])
 
         # store the id to be used later
         id_ = new_task2.id
@@ -2471,7 +2523,6 @@ class TaskTestCase(unittest.TestCase):
         task_c = Task(**kwargs)
         DBSession.add_all([task_a, task_b, task_c])
         DBSession.commit()
-        self.data_created.extend([task_a, task_b, task_c])
 
         kwargs['depends'] = [task_a, task_b, task_c]
         kwargs['parent'] = task_a
@@ -2491,7 +2542,6 @@ class TaskTestCase(unittest.TestCase):
         task_d = Task(**kwargs)
         DBSession.add_all([task_a, task_b, task_c])
         DBSession.commit()
-        self.data_created.extend([task_a, task_b, task_c, task_d])
 
         task_d.depends = [task_a, task_b, task_c]
 
@@ -2504,7 +2554,6 @@ class TaskTestCase(unittest.TestCase):
         """testing if the children attribute is an empty list by default
         """
         new_task = Task(**self.kwargs)
-        self.data_created.append(new_task)
         self.assertEqual(new_task.children, [])
 
     def test_children_attribute_is_set_to_None(self):
@@ -2512,7 +2561,6 @@ class TaskTestCase(unittest.TestCase):
         set to None
         """
         new_task = Task(**self.kwargs)
-        self.data_created.append(new_task)
         self.assertRaises(TypeError, setattr, new_task, 'children', None)
 
     def test_children_attribute_accepts_Tasks_only(self):
@@ -2520,7 +2568,6 @@ class TaskTestCase(unittest.TestCase):
         children attribute is not a Task instance
         """
         new_task = Task(**self.kwargs)
-        self.data_created.append(new_task)
         self.assertRaises(TypeError, setattr, new_task, 'children',
                           'no task')
 
@@ -2531,26 +2578,22 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         kwargs['parent'] = new_task
         kwargs['name'] = 'Task 1'
         task1 = Task(**kwargs)
         DBSession.add(task1)
         DBSession.commit()
-        self.data_created.append(task1)
 
         kwargs['name'] = 'Task 2'
         task2 = Task(**kwargs)
         DBSession.add(task2)
         DBSession.commit()
-        self.data_created.append(task2)
 
         kwargs['name'] = 'Task 3'
         task3 = Task(**kwargs)
         DBSession.add(task3)
         DBSession.commit()
-        self.data_created.append(task3)
 
         self.assertFalse(task2 in task1.children)
         self.assertFalse(task3 in task1.children)
@@ -2566,7 +2609,6 @@ class TaskTestCase(unittest.TestCase):
         """
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
-        self.data_created.append(new_task)
         DBSession.commit()
         self.assertRaises(AttributeError, setattr, new_task, 'is_leaf', True)
 
@@ -2576,20 +2618,16 @@ class TaskTestCase(unittest.TestCase):
         """
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
-        self.data_created.append(new_task)
 
         kwargs['parent'] = new_task
         kwargs['name'] = 'Task 1'
         task1 = Task(**kwargs)
-        self.data_created.append(task1)
 
         kwargs['name'] = 'Task 2'
         task2 = Task(**kwargs)
-        self.data_created.append(task2)
 
         kwargs['name'] = 'Task 3'
         task3 = Task(**kwargs)
-        self.data_created.append(task3)
 
         task2.parent = task1
         task3.parent = task1
@@ -2609,7 +2647,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         self.assertRaises(AttributeError, setattr, new_task, 'is_root',
                           True)
@@ -2620,20 +2657,16 @@ class TaskTestCase(unittest.TestCase):
         """
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
-        self.data_created.append(new_task)
 
         kwargs['parent'] = new_task
         kwargs['name'] = 'Task 1'
         task1 = Task(**kwargs)
-        self.data_created.append(task1)
 
         kwargs['name'] = 'Task 2'
         task2 = Task(**kwargs)
-        self.data_created.append(task2)
 
         kwargs['name'] = 'Task 3'
         task3 = Task(**kwargs)
-        self.data_created.append(task3)
 
         task2.parent = task1
         task3.parent = task1
@@ -2654,7 +2687,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         self.assertRaises(
             AttributeError, setattr, new_task, 'is_container', False
@@ -2666,20 +2698,16 @@ class TaskTestCase(unittest.TestCase):
         """
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
-        self.data_created.append(new_task)
 
         kwargs['parent'] = new_task
         kwargs['name'] = 'Task 1'
         task1 = Task(**kwargs)
-        self.data_created.append(task1)
 
         kwargs['name'] = 'Task 2'
         task2 = Task(**kwargs)
-        self.data_created.append(task2)
 
         kwargs['name'] = 'Task 3'
         task3 = Task(**kwargs)
-        self.data_created.append(task3)
 
         # we need to commit the Session
         DBSession.add_all([task1, task2, task3])
@@ -2796,7 +2824,7 @@ class TaskTestCase(unittest.TestCase):
         kwargs.pop('schedule_unit')
         kwargs['schedule_constraint'] = CONSTRAIN_BOTH
 
-        now = datetime.datetime(2013, 3, 22, 15, 0)
+        now = datetime.datetime(2013, 3, 22, 15, 0, tzinfo=pytz.utc)
         dt = datetime.timedelta
 
         # task1
@@ -2863,7 +2891,7 @@ class TaskTestCase(unittest.TestCase):
         """
         kwargs = copy.copy(self.kwargs)
 
-        kwargs['start'] = datetime.datetime(2013, 4, 17, 0, 0)
+        kwargs['start'] = datetime.datetime(2013, 4, 17, 0, 0, tzinfo=pytz.utc)
         kwargs.pop('end')
         kwargs['schedule_timing'] = 10
         kwargs['schedule_unit'] = 'h'
@@ -2871,7 +2899,7 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         self.assertEqual(
             new_task.end,
-            datetime.datetime(2013, 4, 17, 10, 0)
+            datetime.datetime(2013, 4, 17, 10, 0, tzinfo=pytz.utc)
         )
 
         kwargs['schedule_timing'] = 5
@@ -2879,7 +2907,7 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         self.assertEqual(
             new_task.end,
-            datetime.datetime(2013, 4, 22, 0, 0)
+            datetime.datetime(2013, 4, 22, 0, 0, tzinfo=pytz.utc)
         )
 
     def test_start_value_is_calculated_with_the_schedule_timing_and_schedule_unit_if_schedule_constraint_is_set_to_end(self):
@@ -2889,8 +2917,8 @@ class TaskTestCase(unittest.TestCase):
         """
         kwargs = copy.copy(self.kwargs)
 
-        kwargs['start'] = datetime.datetime(2013, 4, 17, 0, 0)
-        kwargs['end'] = datetime.datetime(2013, 4, 18, 0, 0)
+        kwargs['start'] = datetime.datetime(2013, 4, 17, 0, 0, tzinfo=pytz.utc)
+        kwargs['end'] = datetime.datetime(2013, 4, 18, 0, 0, tzinfo=pytz.utc)
         kwargs['schedule_constraint'] = CONSTRAIN_END
         kwargs['schedule_timing'] = 10
         kwargs['schedule_unit'] = 'd'
@@ -2898,11 +2926,11 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         self.assertEqual(
             new_task.end,
-            datetime.datetime(2013, 4, 18, 0, 0)
+            datetime.datetime(2013, 4, 18, 0, 0, tzinfo=pytz.utc)
         )
         self.assertEqual(
             new_task.start,
-            datetime.datetime(2013, 4, 8, 0, 0)
+            datetime.datetime(2013, 4, 8, 0, 0, tzinfo=pytz.utc)
         )
 
     def test_start_and_end_values_are_not_touched_if_the_schedule_constraint_is_set_to_both(self):
@@ -2912,8 +2940,8 @@ class TaskTestCase(unittest.TestCase):
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
 
-        kwargs['start'] = datetime.datetime(2013, 4, 17, 0, 0)
-        kwargs['end'] = datetime.datetime(2013, 4, 27, 0, 0)
+        kwargs['start'] = datetime.datetime(2013, 4, 17, 0, 0, tzinfo=pytz.utc)
+        kwargs['end'] = datetime.datetime(2013, 4, 27, 0, 0, tzinfo=pytz.utc)
         kwargs['schedule_constraint'] = CONSTRAIN_BOTH
         kwargs['schedule_timing'] = 100
         kwargs['schedule_unit'] = 'd'
@@ -2921,11 +2949,11 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**kwargs)
         self.assertEqual(
             new_task.start,
-            datetime.datetime(2013, 4, 17, 0, 0)
+            datetime.datetime(2013, 4, 17, 0, 0, tzinfo=pytz.utc)
         )
         self.assertEqual(
             new_task.end,
-            datetime.datetime(2013, 4, 27, 0, 0)
+            datetime.datetime(2013, 4, 27, 0, 0, tzinfo=pytz.utc)
         )
 
     def test_level_attribute_is_a_read_only_property(self):
@@ -2967,8 +2995,8 @@ class TaskTestCase(unittest.TestCase):
         task1 = Task(
             project=self.test_project1,
             name='Cekimler',
-            start=datetime.datetime(2013, 4, 1),
-            end=datetime.datetime(2013, 5, 6),
+            start=datetime.datetime(2013, 4, 1, tzinfo=pytz.utc),
+            end=datetime.datetime(2013, 5, 6, tzinfo=pytz.utc),
             status_list=self.task_status_list,
             responsible=[self.test_user1]
         )
@@ -2976,8 +3004,8 @@ class TaskTestCase(unittest.TestCase):
         task2 = Task(
             parent=task1,
             name='Supervising Shootings Part1',
-            start=datetime.datetime(2013, 4, 1),
-            end=datetime.datetime(2013, 4, 11),
+            start=datetime.datetime(2013, 4, 1, tzinfo=pytz.utc),
+            end=datetime.datetime(2013, 4, 11, tzinfo=pytz.utc),
             status_list=self.task_status_list
         )
 
@@ -2985,8 +3013,8 @@ class TaskTestCase(unittest.TestCase):
             parent=task1,
             name='Supervising Shootings Part2',
             depends=[task2],
-            start=datetime.datetime(2013, 4, 12),
-            end=datetime.datetime(2013, 4, 16),
+            start=datetime.datetime(2013, 4, 12, tzinfo=pytz.utc),
+            end=datetime.datetime(2013, 4, 16, tzinfo=pytz.utc),
             status_list=self.task_status_list
         )
 
@@ -2994,12 +3022,11 @@ class TaskTestCase(unittest.TestCase):
             parent=task1,
             name='Supervising Shootings Part3',
             depends=[task3],
-            start=datetime.datetime(2013, 4, 12),
-            end=datetime.datetime(2013, 4, 17),
+            start=datetime.datetime(2013, 4, 12, tzinfo=pytz.utc),
+            end=datetime.datetime(2013, 4, 17, tzinfo=pytz.utc),
             status_list=self.task_status_list
         )
 
-        self.data_created.extend([task1, task2, task3, task4])
 
         DBSession.add_all([task1, task2, task3, task4])
         DBSession.commit()
@@ -3017,8 +3044,8 @@ class TaskTestCase(unittest.TestCase):
         task1 = Task(
             project=self.test_project1,
             name='Cekimler',
-            start=datetime.datetime(2013, 4, 1),
-            end=datetime.datetime(2013, 5, 6),
+            start=datetime.datetime(2013, 4, 1, tzinfo=pytz.utc),
+            end=datetime.datetime(2013, 5, 6, tzinfo=pytz.utc),
             status_list=self.task_status_list,
             responsible=[self.test_user1]
         )
@@ -3056,7 +3083,6 @@ class TaskTestCase(unittest.TestCase):
         """testing if the bid_timing attribute can be set to None
         """
         new_task = Task(**self.kwargs)
-        self.data_created.append(new_task)
         new_task.bid_timing = None
         self.assertTrue(new_task.bid_timing is None)
 
@@ -3073,7 +3099,6 @@ class TaskTestCase(unittest.TestCase):
         is set to a value which is not an integer or float
         """
         new_task = Task(**self.kwargs)
-        self.data_created.append(new_task)
         self.assertRaises(TypeError, setattr, new_task, 'bid_timing', '10d')
 
     def test_bid_timing_argument_is_working_properly(self):
@@ -3088,7 +3113,6 @@ class TaskTestCase(unittest.TestCase):
         """testing if the bid_timning attribute is working properly
         """
         new_task = Task(**self.kwargs)
-        self.data_created.append(new_task)
         test_value = 23
         new_task.bid_timing = test_value
         self.assertEqual(new_task.bid_timing, test_value)
@@ -3101,7 +3125,6 @@ class TaskTestCase(unittest.TestCase):
         kwargs['schedule_unit'] = 'd'
         kwargs.pop('bid_unit')
         new_task = Task(**kwargs)
-        self.data_created.append(new_task)
         self.assertEqual(new_task.schedule_unit, kwargs['schedule_unit'])
         self.assertEqual(new_task.bid_unit, new_task.schedule_unit)
 
@@ -3120,7 +3143,6 @@ class TaskTestCase(unittest.TestCase):
         """testing if the bid_unit attribute can be set to default value of 'h'
         """
         new_task = Task(**self.kwargs)
-        self.data_created.append(new_task)
         new_task.bid_unit = None
         self.assertEqual(new_task.bid_unit, 'h')
 
@@ -3137,7 +3159,6 @@ class TaskTestCase(unittest.TestCase):
         set to a value which is not an integer
         """
         new_task = Task(**self.kwargs)
-        self.data_created.append(new_task)
         self.assertRaises(TypeError, setattr, new_task, 'bid_unit', 10)
 
     def test_bid_unit_argument_is_working_properly(self):
@@ -3146,7 +3167,6 @@ class TaskTestCase(unittest.TestCase):
         kwargs = copy.copy(self.kwargs)
         kwargs['bid_unit'] = 'h'
         new_task = Task(**kwargs)
-        self.data_created.append(new_task)
         self.assertEqual(new_task.bid_unit, kwargs['bid_unit'])
 
     def test_bid_unit_attribute_is_working_properly(self):
@@ -3154,7 +3174,6 @@ class TaskTestCase(unittest.TestCase):
         """
         test_value = 'h'
         new_task = Task(**self.kwargs)
-        self.data_created.append(new_task)
         new_task.bid_unit = test_value
         self.assertEqual(new_task.bid_unit, test_value)
 
@@ -3173,7 +3192,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**self.kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
         self.assertRaises(ValueError, setattr, new_task, 'bid_unit', 'sys')
 
     def test_tjp_id_is_a_read_only_attribute(self):
@@ -3182,7 +3200,6 @@ class TaskTestCase(unittest.TestCase):
         new_task = Task(**self.kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
         self.assertRaises(AttributeError, setattr, new_task, 'tjp_id',
                           'some value')
 
@@ -3237,7 +3254,6 @@ class TaskTestCase(unittest.TestCase):
         t3.parent = t2
         DBSession.add_all([t1, t2, t3])
         DBSession.commit()
-        self.data_created.extend([t1, t2, t3])
 
         self.assertEqual(
             t3.tjp_abs_id,
@@ -3263,7 +3279,6 @@ class TaskTestCase(unittest.TestCase):
         dep_t2 = Task(**kwargs)
         DBSession.add_all([dep_t1, dep_t2])
         DBSession.commit()
-        self.data_created.extend([dep_t1, dep_t2])
 
         kwargs['depends'] = [dep_t1, dep_t2]
         kwargs['name'] = 'Modeling'
@@ -3271,7 +3286,6 @@ class TaskTestCase(unittest.TestCase):
         t1 = Task(**kwargs)
         DBSession.add(t1)
         DBSession.commit()
-        self.data_created.append(t1)
 
         expected_tjp = """
 task Task_%(t1_id)s "Task_%(t1_id)s" {
@@ -3315,7 +3329,6 @@ task Task_%(t1_id)s "Task_%(t1_id)s" {
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         kwargs['parent'] = new_task
         kwargs['depends'] = []
@@ -3323,12 +3336,10 @@ task Task_%(t1_id)s "Task_%(t1_id)s" {
         dep_task1 = Task(**kwargs)
         DBSession.add(dep_task1)
         DBSession.commit()
-        self.data_created.append(dep_task1)
 
         dep_task2 = Task(**kwargs)
         DBSession.add(dep_task2)
         DBSession.commit()
-        self.data_created.append(dep_task2)
 
         kwargs['name'] = 'Modeling'
         kwargs['schedule_timing'] = 1003
@@ -3341,7 +3352,6 @@ task Task_%(t1_id)s "Task_%(t1_id)s" {
         new_task2 = Task(**kwargs)
         DBSession.add(new_task2)
         DBSession.commit()
-        self.data_created.append(new_task2)
 
         # self.maxDiff = None
         expected_tjp = """
@@ -3386,7 +3396,6 @@ task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         kwargs['parent'] = new_task
         kwargs['depends'] = []
@@ -3394,12 +3403,10 @@ task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
         dep_task1 = Task(**kwargs)
         DBSession.add(dep_task1)
         DBSession.commit()
-        self.data_created.append(dep_task1)
 
         dep_task2 = Task(**kwargs)
         DBSession.add(dep_task2)
         DBSession.commit()
-        self.data_created.append(dep_task2)
 
         kwargs['name'] = 'Modeling'
         kwargs['schedule_timing'] = 1003
@@ -3411,7 +3418,6 @@ task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
         new_task2 = Task(**kwargs)
         DBSession.add(new_task2)
         DBSession.commit()
-        self.data_created.append(new_task2)
 
         # modify dependency attributes
         tdep1 = new_task2.task_depends_to[0]
@@ -3469,7 +3475,6 @@ task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
         new_task1 = Task(**kwargs)
         DBSession.add(new_task1)
         DBSession.commit()
-        self.data_created.append(new_task1)
 
         kwargs['parent'] = new_task1
         kwargs['depends'] = []
@@ -3477,12 +3482,10 @@ task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
         dep_task1 = Task(**kwargs)
         DBSession.add(dep_task1)
         DBSession.commit()
-        self.data_created.append(dep_task1)
 
         dep_task2 = Task(**kwargs)
         DBSession.add(dep_task2)
         DBSession.commit()
-        self.data_created.append(dep_task2)
 
         kwargs['name'] = 'Modeling'
         kwargs['schedule_timing'] = 1003
@@ -3498,7 +3501,6 @@ task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
         new_task2 = Task(**kwargs)
         DBSession.add(new_task2)
         DBSession.commit()
-        self.data_created.append(new_task2)
 
         # modify dependency attributes
         tdep1 = new_task2.task_depends_to[0]
@@ -3561,19 +3563,16 @@ task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
         t1 = Task(**kwargs)
         DBSession.add(t1)
         DBSession.commit()
-        self.data_created.append(t1)
 
         kwargs['parent'] = t1
 
         dep_task1 = Task(**kwargs)
         DBSession.add(dep_task1)
         DBSession.commit()
-        self.data_created.append(dep_task1)
 
         dep_task2 = Task(**kwargs)
         DBSession.add(dep_task2)
         DBSession.commit()
-        self.data_created.append(dep_task2)
 
         kwargs['name'] = 'Modeling'
         kwargs['schedule_timing'] = 1
@@ -3586,7 +3585,6 @@ task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
         t2 = Task(**kwargs)
         DBSession.add(t2)
         DBSession.commit()
-        self.data_created.append(t2)
 
         expected_tjp = """
 task Task_%(t1_id)s "Task_%(t1_id)s" {
@@ -3674,7 +3672,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         t0 = Task(**kwargs)
         DBSession.add(t0)
         DBSession.commit()
-        self.data_created.append(t0)
 
         kwargs['depends'] = [t0]
         kwargs['name'] = 'Modeling'
@@ -3683,7 +3680,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         t1.priority = 888
         DBSession.add(t1)
         DBSession.commit()
-        self.data_created.append(t1)
 
         kwargs['parent'] = t1
         kwargs['depends'] = []
@@ -3692,13 +3688,11 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         dep_task1.depends = []
         DBSession.add(dep_task1)
         DBSession.commit()
-        self.data_created.append(dep_task1)
 
         dep_task2 = Task(**kwargs)
         dep_task1.depends = []
         DBSession.add(dep_task2)
         DBSession.commit()
-        self.data_created.append(dep_task2)
 
         kwargs['name'] = 'Modeling'
         kwargs['schedule_timing'] = 1
@@ -3719,7 +3713,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         t2 = Task(**kwargs)
         DBSession.add(t2)
         DBSession.commit()
-        self.data_created.append(t2)
 
         expected_tjp = """
 task Task_%(t1_id)s "Task_%(t1_id)s" {
@@ -3806,19 +3799,16 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         t1 = Task(**kwargs)
         DBSession.add(t1)
         DBSession.commit()
-        self.data_created.append(t1)
 
         kwargs['parent'] = t1
 
         dep_task1 = Task(**kwargs)
         DBSession.add(dep_task1)
         DBSession.commit()
-        self.data_created.append(dep_task1)
 
         dep_task2 = Task(**kwargs)
         DBSession.add(dep_task2)
         DBSession.commit()
-        self.data_created.append(dep_task2)
 
         kwargs['name'] = 'Modeling'
         kwargs['schedule_timing'] = 1
@@ -3826,8 +3816,8 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs['schedule_model'] = 'effort'
         kwargs['depends'] = [dep_task1, dep_task2]
         kwargs['schedule_constraint'] = 3
-        kwargs['start'] = datetime.datetime(2013, 5, 3, 14, 0)
-        kwargs['end'] = datetime.datetime(2013, 5, 4, 14, 0)
+        kwargs['start'] = datetime.datetime(2013, 5, 3, 14, 0, tzinfo=pytz.utc)
+        kwargs['end'] = datetime.datetime(2013, 5, 4, 14, 0, tzinfo=pytz.utc)
 
         self.test_user1.name = 'Test User 1'
         self.test_user1.login = 'testuser1'
@@ -3842,7 +3832,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         t2 = Task(**kwargs)
         DBSession.add(t2)
         DBSession.commit()
-        self.data_created.append(t2)
 
         expected_tjp = """
 task Task_%(t1_id)s "Task_%(t1_id)s" {
@@ -3885,8 +3874,8 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
 
     
             depends Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task1_id)s {onend}, Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task2_id)s {onend}        
-                                                start 2013-05-03-14:00
-                                end 2013-05-04-14:00
+                                                start 2013-05-03-17:00
+                                end 2013-05-04-17:00
                             
             effort 1.0d
             allocate User_%(user1_id)s {
@@ -3913,9 +3902,10 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
             'dep_task1_id': dep_task1.id,
             'dep_task2_id': dep_task2.id
         }
-        # print(t1.to_tjp)
-        # print('-----------------------')
-        # print(expected_tjp)
+        print(t1.to_tjp)
+        print('-----------------------')
+        print(expected_tjp)
+        self.maxDiff = None
         self.assertEqual(t1.to_tjp, expected_tjp)
 
     def test_is_scheduled_is_a_read_only_attribute(self):
@@ -3925,7 +3915,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         self.assertRaises(
             AttributeError, setattr, new_task, 'is_scheduled', True
@@ -3939,11 +3928,10 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
-        new_task.computed_start = datetime.datetime.now()
+        new_task.computed_start = datetime.datetime.now(pytz.utc)
         new_task.computed_end = \
-            datetime.datetime.now() + datetime.timedelta(10)
+            datetime.datetime.now(pytz.utc) + datetime.timedelta(10)
         self.assertTrue(new_task.is_scheduled)
 
     def test_is_scheduled_is_false_if_one_of_computed_start_and_computed_end_is_None(self):
@@ -3954,13 +3942,12 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         new_task.computed_start = None
-        new_task.computed_end = datetime.datetime.now()
+        new_task.computed_end = datetime.datetime.now(pytz.utc)
         self.assertFalse(new_task.is_scheduled)
 
-        new_task.computed_start = datetime.datetime.now()
+        new_task.computed_start = datetime.datetime.now(pytz.utc)
         new_task.computed_end = None
         self.assertFalse(new_task.is_scheduled)
 
@@ -3971,7 +3958,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         self.assertRaises(
             AttributeError,
@@ -4177,10 +4163,8 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """testing if computed_start also sets the start value of the task
         """
         kwargs = copy.copy(self.kwargs)
-        new_task = Task(**kwargs)
-
         new_task1 = Task(**kwargs)
-        test_value = datetime.datetime(2013, 8, 2, 13, 0)
+        test_value = datetime.datetime(2013, 8, 2, 13, 0, tzinfo=pytz.utc)
         self.assertNotEqual(new_task1.start, test_value)
         new_task1.computed_start = test_value
         self.assertEqual(new_task1.computed_start, test_value)
@@ -4193,7 +4177,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         new_task = Task(**kwargs)
 
         new_task1 = Task(**kwargs)
-        test_value = datetime.datetime(2013, 8, 2, 13, 0)
+        test_value = datetime.datetime(2013, 8, 2, 13, 0, tzinfo=pytz.utc)
         self.assertNotEqual(new_task1.end, test_value)
         new_task1.computed_end = test_value
         self.assertEqual(new_task1.computed_end, test_value)
@@ -4218,7 +4202,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         from stalker import Ticket
         # create ticket statuses
@@ -4230,7 +4213,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         )
         DBSession.add(new_ticket1)
         DBSession.commit()
-        self.data_created.append(new_ticket1)
 
         new_ticket2 = Ticket(
             project=new_task.project,
@@ -4238,7 +4220,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         )
         DBSession.add(new_ticket2)
         DBSession.commit()
-        self.data_created.append(new_ticket2)
 
         # add some other tickets
         new_ticket3 = Ticket(
@@ -4247,7 +4228,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         )
         DBSession.add(new_ticket3)
         DBSession.commit()
-        self.data_created.append(new_ticket3)
 
         self.assertEqual(
             sorted(new_task.tickets, key=lambda x: x.name),
@@ -4271,7 +4251,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         new_task = Task(**kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         from stalker import Ticket
         # create ticket statuses
@@ -4283,7 +4262,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         )
         DBSession.add(new_ticket1)
         DBSession.commit()
-        self.data_created.append(new_ticket1)
 
         new_ticket2 = Ticket(
             project=new_task.project,
@@ -4291,7 +4269,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         )
         DBSession.add(new_ticket2)
         DBSession.commit()
-        self.data_created.append(new_ticket2)
 
         # close this ticket
         new_ticket2.resolve(None, 'fixed')
@@ -4304,7 +4281,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         )
         DBSession.add(new_ticket3)
         DBSession.commit()
-        self.data_created.append(new_ticket3)
 
         self.assertEqual(
             new_task.open_tickets,
@@ -4377,7 +4353,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         kwargs.pop('alternative_resources')
         new_task = Task(**kwargs)
-        self.data_created.append(new_task)
         self.assertEqual(new_task.alternative_resources, [])
 
     def test_alternative_resources_argument_is_None(self):
@@ -4394,7 +4369,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         attribute is set to None
         """
         new_task = Task(**self.kwargs)
-        self.data_created.append(new_task)
         self.assertRaises(TypeError, setattr, new_task,
                           'alternative_resources', None)
 
@@ -4411,7 +4385,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         attribute is set to a value other than a list
         """
         new_task = Task(**self.kwargs)
-        self.data_created.append(new_task)
         self.assertRaises(TypeError, setattr, new_task,
                           'alternative_resources', self.test_user3)
 
@@ -4428,7 +4401,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         alternative_resources attribute are not all User instances
         """
         new_task = Task(**self.kwargs)
-        self.data_created.append(new_task)
         self.assertRaises(TypeError, setattr, new_task,
                           'alternative_resources', ['not', 1, 'user'])
 
@@ -4437,7 +4409,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         passed to the alternative_resources attribute
         """
         new_task = Task(**self.kwargs)
-        self.data_created.append(new_task)
         self.assertEqual(
             sorted([self.test_user3, self.test_user4, self.test_user5],
                    key=lambda x: x.name),
@@ -4449,7 +4420,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         correctly set
         """
         new_task = Task(**self.kwargs)
-        self.data_created.append(new_task)
         self.assertEqual(
             sorted(new_task.alternative_resources, key=lambda x: x.name),
             sorted([self.test_user3, self.test_user4, self.test_user5],
@@ -4487,7 +4457,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         allocation_strategy when it is set to None
         """
         new_task = Task(**self.kwargs)
-        self.data_created.append(new_task)
         new_task.allocation_strategy = None
         self.assertEqual(new_task.allocation_strategy,
                          defaults.allocation_strategy[0])
@@ -4505,7 +4474,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         attribute is set to a value other then a string
         """
         new_task = Task(**self.kwargs)
-        self.data_created.append(new_task)
         self.assertRaises(TypeError, setattr, new_task,
                           'allocation_strategy', 234)
 
@@ -4524,7 +4492,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         maxloaded, minloaded, order, random]
         """
         new_task = Task(**self.kwargs)
-        self.data_created.append(new_task)
         self.assertRaises(ValueError, setattr, new_task,
                           'allocation_strategy', 'not in the list')
 
@@ -4543,7 +4510,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         set
         """
         new_task = Task(**self.kwargs)
-        self.data_created.append(new_task)
 
         test_value = defaults.allocation_strategy[1]
         self.assertNotEqual(new_task.allocation_strategy, test_value)
@@ -4557,7 +4523,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
-        self.data_created.append(new_task)
+        db.DBSession.commit()
 
         self.assertFalse(new_task.is_scheduled)
         self.assertEqual(new_task.resources, new_task.computed_resources)
@@ -4568,7 +4534,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
-        self.data_created.append(new_task)
 
         self.assertFalse(new_task.is_scheduled)
         test_value = [self.test_user3, self.test_user5]
@@ -4587,7 +4552,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
-        self.data_created.append(new_task)
 
         self.assertFalse(new_task.is_scheduled)
         test_value = [self.test_user3, self.test_user5]
@@ -4605,7 +4569,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
-        self.data_created.append(new_task)
 
         self.assertFalse(new_task.is_scheduled)
         test_value = [self.test_user3, self.test_user5]
@@ -4616,7 +4579,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         # been done
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         self.assertFalse(new_task.is_scheduled)
         new_task.computed_start = now
@@ -4659,7 +4622,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """
         kwargs = copy.copy(self.kwargs)
 
-        test_value = 'not a bool'    
+        test_value = 'not a bool'
         kwargs['persistent_allocation'] = test_value
         new_task1 = Task(**kwargs)
         self.assertEqual(bool(test_value), new_task1.persistent_allocation)
@@ -4721,7 +4684,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """
         new_task = Task(**self.kwargs)
         with self.assertRaises(RuntimeError):
-            new_task.path
+            a = new_task.path
 
     def test_path_attribute_raises_a_RuntimeError_if_no_matching_FilenameTemplate_found(self):
         """testing if the path attribute raises a RuntimeError if there is no
@@ -4742,7 +4705,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         )
         self.test_project1.structure = structure
         with self.assertRaises(RuntimeError):
-            new_task.path
+            a = new_task.path
 
         self.test_project1.structure = None
 
@@ -4753,7 +4716,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         new_task = Task(**self.kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         ft = FilenameTemplate(
             name='Task Filename Template',
@@ -4765,7 +4727,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         )
         DBSession.add(ft)
         DBSession.commit()
-        self.data_created.append(ft)
 
         structure = Structure(
             name='Movie Project Structure',
@@ -4773,7 +4734,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         )
         DBSession.add(structure)
         DBSession.commit()
-        self.data_created.append(structure)
 
         self.test_project1.structure = structure
 
@@ -4802,7 +4762,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         new_task = Task(**self.kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         ft = FilenameTemplate(
             name='Asset Filename Template',
@@ -4814,7 +4773,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         )
         DBSession.add(ft)
         DBSession.commit()
-        self.data_created.append(ft)
 
         structure = Structure(
             name='Movie Project Structure',
@@ -4822,7 +4780,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         )
         DBSession.add(structure)
         DBSession.commit()
-        self.data_created.append(structure)
 
         self.test_project1.structure = structure
         with self.assertRaises(RuntimeError):
@@ -4837,7 +4794,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         new_task = Task(**self.kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.data_created.append(new_task)
 
         ft = FilenameTemplate(
             name='Task Filename Template',
@@ -4851,7 +4807,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         )
         DBSession.add(ft)
         DBSession.commit()
-        self.data_created.append(ft)
 
         structure = Structure(
             name='Movie Project Structure',
@@ -4859,7 +4814,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         )
         DBSession.add(structure)
         DBSession.commit()
-        self.data_created.append(structure)
 
         self.test_project1.structure = structure
 
@@ -4867,7 +4821,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         self.assertEqual(
             os.path.normpath(
                 '%s/tp1/Modeling' % self.test_project1.repositories[0].path
-            ),
+            ).replace('\\', '/'),
             new_task.absolute_path
         )
         self.test_project1.structure = None
@@ -4883,7 +4837,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
             pass
 
         new_task = Task(**kwargs)
-        self.data_created.append(new_task)
         db.DBSession.add(new_task)
         db.DBSession.commit()
         self.assertEqual(new_task.good, None)
@@ -4894,7 +4847,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         kwargs['good'] = None
         new_task = Task(**kwargs)
-        self.data_created.append(new_task)
         db.DBSession.add(new_task)
         db.DBSession.commit()
         self.assertEqual(new_task.good, None)
@@ -4906,8 +4858,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         kwargs['good'] = Good(name='Some Good')
         new_task = Task(**kwargs)
-        self.data_created.append(new_task)
-        self.data_created.append(kwargs['good'])
         db.DBSession.add(new_task)
         db.DBSession.commit()
         self.assertNotEqual(new_task.good, None)
@@ -4963,42 +4913,3 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         self.assertNotEqual(new_task.good, new_good)
         new_task.good = new_good
         self.assertEqual(new_task.good, new_good)
-
-
-class TaskPostgreSQLTestCase(TaskTestCase):
-    """tests the Task class with PostgreSQL database
-    """
-
-    config = {
-        'sqlalchemy.url':
-            'postgresql://stalker_admin:stalker@localhost/stalker_test',
-        'sqlalchemy.echo': False
-    }
-
-    @classmethod
-    def setUpClass(cls):
-        """run once
-        """
-        defaults.timing_resolution = datetime.timedelta(hours=1)
-
-        # # clean up test database
-        db.setup(cls.config)
-        #db.init()
-
-        from stalker.db.declarative import Base
-        Base.metadata.drop_all(DBSession.connection())
-
-        DBSession.commit()
-        super(TaskPostgreSQLTestCase, cls).setUpClass()
-
-    @classmethod
-    def tearDownClass(cls):
-        """clean up the test
-        """
-        # clean up test database
-        from stalker.db.declarative import Base
-        Base.metadata.drop_all(db.DBSession.connection())
-        DBSession.commit()
-        DBSession.remove()
-
-        defaults.timing_resolution = datetime.timedelta(hours=1)

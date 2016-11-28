@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2014 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -93,7 +93,7 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
     :param now: The now attribute overrides the TaskJugglers ``now`` attribute
       allowing the user to schedule the projects as if the scheduling is done
       on that date. The default value is the rounded value of
-      datetime.datetime.now().
+      datetime.datetime.now(pytz.utc).
 
     :type now: datetime.datetime
 
@@ -132,13 +132,13 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         doc='The User who is scheduling the Studio projects right now'
     )
     scheduling_started_at = Column(
-        DateTime,
+        DateTime(timezone=True),
         doc='Stores when the current scheduling is started at, it is a good '
             'measure for measuring if the last schedule is not correctly '
             'finished'
     )
     last_scheduled_at = Column(
-        DateTime,
+        DateTime(timezone=True),
         doc='Stores the last schedule date'
     )
     last_scheduled_by_id = Column(
@@ -277,7 +277,8 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         """validates the given now_in value
         """
         if now_in is None:
-            now_in = datetime.datetime.now()
+            import pytz
+            now_in = datetime.datetime.now(pytz.utc)
 
         if not isinstance(now_in, datetime.datetime):
             raise TypeError(
@@ -292,11 +293,14 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
     def now(self):
         """now getter
         """
+        import pytz
         try:
             if self._now is None:
-                self._now = self.round_time(datetime.datetime.now())
+                self._now = self.round_time(datetime.datetime.now(pytz.utc))
         except AttributeError:
-            setattr(self, '_now', self.round_time(datetime.datetime.now()))
+            setattr(
+                self, '_now', self.round_time(datetime.datetime.now(pytz.utc))
+            )
         return self._now
 
     @now.setter
@@ -410,8 +414,9 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
                 }
             )
 
+        import pytz
         with db.DBSession.no_autoflush:
-            self.scheduling_started_at = datetime.datetime.now()
+            self.scheduling_started_at = datetime.datetime.now(pytz.utc)
 
             # run the scheduler
             self.scheduler.studio = self
@@ -434,8 +439,7 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
                 self.last_schedule_message = result
 
                 # And the date the schedule is completed
-                # TODO: convert to UTC time
-                self.last_scheduled_at = datetime.datetime.now()
+                self.last_scheduled_at = datetime.datetime.now(pytz.utc)
 
                 # and who has done the scheduling
                 if scheduled_by:

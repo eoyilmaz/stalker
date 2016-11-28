@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2014 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -23,10 +23,11 @@ from sqlalchemy.orm import relationship, validates
 from stalker.db import Base
 
 from stalker.models.entity import Entity
-from stalker.models.mixins import ProjectMixin, DAGMixin
+from stalker.models.mixins import (ProjectMixin, DAGMixin, StatusMixin,
+                                   AmountMixin, UnitMixin)
 
 
-class Good(Entity):
+class Good(Entity, UnitMixin):
     """Manages commercial items that is served by the Studio.
 
     A Studio can define service prices or items that's been sold by the Studio
@@ -69,9 +70,9 @@ class Good(Entity):
 
     def __init__(self, cost=0.0, msrp=0.0, unit='', **kwargs):
         super(Good, self).__init__(**kwargs)
+        UnitMixin.__init__(self, unit=unit)
         self.cost = cost
         self.msrp = msrp
-        self.unit = unit
 
     @validates('cost')
     def _validate_cost(self, key, cost):
@@ -118,24 +119,6 @@ class Good(Entity):
             )
 
         return msrp
-
-    @validates('unit')
-    def _validate_unit(self, key, unit):
-        """validates the given unit value
-        """
-        if unit is None:
-            unit = ''
-
-        from stalker import __string_types__
-        if not isinstance(unit, __string_types__):
-            raise TypeError(
-                '%s.unit should be a str, not %s' % (
-                    self.__class__.__name__,
-                    unit.__class__.__name__
-                )
-            )
-
-        return unit
 
 
 class PriceList(Entity):
@@ -204,7 +187,7 @@ PriceList_Goods = Table(
 )
 
 
-class Budget(Entity, ProjectMixin, DAGMixin):
+class Budget(Entity, ProjectMixin, DAGMixin, StatusMixin):
     """Manages project budgets
 
     Budgets manager :class:`.Project` budgets. You can create entries as
@@ -231,10 +214,18 @@ class Budget(Entity, ProjectMixin, DAGMixin):
         cascade="all, delete-orphan"
     )
 
+    invoices = relationship(
+        'Invoice',
+        primaryjoin='Invoices.c.budget_id==Budgets.c.id',
+        uselist=True,
+        cascade="all, delete-orphan"
+    )
+
     def __init__(self, **kwargs):
         super(Budget, self).__init__(**kwargs)
         ProjectMixin.__init__(self, **kwargs)
         DAGMixin.__init__(self, **kwargs)
+        StatusMixin.__init__(self, **kwargs)
 
     @validates('entries')
     def _validate_entry(self, key, entry):
@@ -251,28 +242,27 @@ class Budget(Entity, ProjectMixin, DAGMixin):
         return entry
 
 
-class BudgetEntry(Entity):
-    """Manages budget entries in a budget
+class BudgetEntry(Entity, AmountMixin, UnitMixin):
+    """Manages entries in a Budget.
 
-    With budget entries one can manage project budget costs. Each entry shows
-    one component of a bigger budget.
+    With BudgetEntries one can manage project budget entries one by one. Each
+    entry shows one component of a bigger budget. Entries are generally a
+    reflection of a :class:`.Good` instance and shows how many of that Good has
+    been included in this Budget, and what was the discounted price of that
+    Good.
 
-    :param float cost: This should be the direct copy of the Good.cost that
-      this item is related to.
-    :param float msrp: Again this should be the direct copy of the Good.msrp
-      that this item is related to.
+    :param budget: The :class:`.Budget` that this entry is a part of.
+    :param good: Stores a :class:`.Good` instance to carry all the
+      cost/msrp/unit data from.
     :param float price: The decided price of this entry. This is generally
-      bigger than the cost and should be also bigger than msrp but the person
-      that is editing the the budget which this entry is related to can decide
-      to do a discount on this entry and give a different price. This attribute
-      holds the proposed final price.
+      bigger than the :attr:`.cost` and should be also bigger than
+      :attr:`.msrp` but the person that is editing the budget which this entry
+      is related to can decide to do a discount on this entry and give a
+      different price. This attribute holds the proposed final price.
     :param float realized_total: This attribute is for holding the realized
       price of this entry. It can be the same number of the :attr:`.price`
       multiplied by the :attr:`.amount` or can be something else that reflects
       the reality. Generally it is for calculating the "service" cost/profit.
-    :param str unit: The unit of this budget entry. Nothing so important for
-      now. Just a text like "$/hour". Stalker doesn't do any unit conversions
-      for now.
     :param float amount: Defines the amount of :class:`Good` that is in
       consideration for this entry.
     """
@@ -289,7 +279,6 @@ class BudgetEntry(Entity):
     )
 
     budget_id = Column(
-        'budget_id',
         Integer,
         ForeignKey('Budgets.id')
     )
@@ -301,41 +290,45 @@ class BudgetEntry(Entity):
         uselist=False
     )
 
+    good_id = Column(
+        Integer,
+        ForeignKey('Goods.id')
+    )
+
+    good = relationship(
+        'Good',
+        primaryjoin='BudgetEntries.c.good_id==Goods.c.id',
+        uselist=False
+    )
+
     cost = Column(Float, default=0.0)
     msrp = Column(Float, default=0.0)
 
     price = Column(Float, default=0.0)
     realized_total = Column(Float, default=0.0)
 
-    unit = Column(String(64))
-    amount = Column(Float, default=0.0)
-
     def __init__(self,
                  budget=None,
-                 cost=0,
-                 msrp=0,
+                 good=None,
                  price=0,
                  realized_total=0,
-                 unit='',
                  amount=0.0,
                  **kwargs):
         super(BudgetEntry, self).__init__(**kwargs)
 
         self.budget = budget
-        self.cost = cost
-        self.msrp = msrp
+        self.good = good
+        self.cost = good.cost
+        self.msrp = good.msrp
+
+        kwargs['unit'] = good.unit
+        kwargs['amount'] = amount
+
+        AmountMixin.__init__(self, **kwargs)
+        UnitMixin.__init__(self, **kwargs)
 
         self.price = price
         self.realized_total = realized_total
-
-        self.amount = amount
-        self.unit = unit
-
-    @property
-    def total(self):
-        """returns the total cost of this entry
-        """
-        return self.amount * self.cost
 
     @validates('budget')
     def _validate_budget(self, key, budget):
@@ -414,35 +407,170 @@ class BudgetEntry(Entity):
 
         return float(realized_total)
 
-    @validates('unit')
-    def _validate_unit(self, key, unit):
-        """validates the given unit value
+    @validates('good')
+    def _validate_good(self, key, good):
+        """validates the given good value
         """
-        if unit is None:
-            unit = ''
-
-        from stalker import __string_types__
-        if not isinstance(unit, __string_types__):
+        if not isinstance(good, Good):
             raise TypeError(
-                '%s.unit should be a string, not %s' % (
-                    self.__class__.__name__, unit.__class__.__name__
+                '%s.good should be a stalker.models.budget.Good instance, '
+                'not %s' % (
+                    self.__class__.__name__, good.__class__.__name__
                 )
             )
 
-        return unit
+        return good
 
-    @validates('amount')
-    def _validate_amount(self, key, amount):
-        """validates the given amount value
+
+class Invoice(Entity, AmountMixin, UnitMixin):
+    """Holds information about invoices
+
+    Invoices are part of :class:`.Budgets`. The main purpose of invoices are
+    to track the :class:`.Payment`\ s. It is a very primitive entity. It is
+    by no means designed to hold real financial information (at least for now).
+
+    :param client: The :class:`.Client` instance that shows the payer for
+      this invoice.
+    :type client: :class:`.Client`
+    :param budget: The :class:`.Budget` instance that owns this invoice.
+    :type budget: :class:`.Budget`
+    :param int float amount: The amount of this invoice. Without the
+      :attr:`.Invoice.unit` attribute it is meaningless. This can not be
+      skipped.
+    :param str unit: The unit of the issued amount. This can not be skipped.
+    """
+
+    __auto_name__ = True
+    __tablename__ = "Invoices"
+    __mapper_args__ = {"polymorphic_identity": "Invoice"}
+
+    invoice_id = Column(
+        "id",
+        Integer,
+        ForeignKey("Entities.id"),
+        primary_key=True
+    )
+
+    budget_id = Column(
+        Integer,
+        ForeignKey('Budgets.id')
+    )
+
+    budget = relationship(
+        'Budget',
+        primaryjoin='Invoices.c.budget_id==Budgets.c.id',
+        back_populates='invoices',
+        uselist=False
+    )
+
+    client_id = Column(
+        Integer,
+        ForeignKey('Clients.id')
+    )
+
+    client = relationship(
+        'Client',
+        primaryjoin='Invoices.c.client_id==Clients.c.id',
+        uselist=False
+    )
+
+    payments = relationship(
+        'Payment',
+        primaryjoin='Payments.c.invoice_id==Invoices.c.id',
+        uselist=True,
+        cascade="all, delete-orphan"
+    )
+
+    def __init__(
+            self,
+            budget=None,
+            client=None,
+            amount=0,
+            unit=None,
+            **kwargs):
+        super(Invoice, self).__init__(**kwargs)
+        AmountMixin.__init__(self, amount=amount)
+        UnitMixin.__init__(self, unit=unit)
+        self.budget = budget
+        self.client = client
+
+    @validates('budget')
+    def _validate_budget(self, key, budget):
+        """validates the given budget value
         """
-        if amount is None:
-            amount = 0.0
-
-        if not isinstance(amount, (int, float)):
+        if not isinstance(budget, Budget):
             raise TypeError(
-                '%s.amount should be a number, not %s' % (
-                    self.__class__.__name__, amount.__class__.__name__
+                '%s.budget should be a Budget instance, not %s' % (
+                    self.__class__.__name__,
+                    budget.__class__.__name__
                 )
             )
+        return budget
 
-        return float(amount)
+    @validates('client')
+    def _validate_client(self, key, client):
+        """validates the given client value
+        """
+        from stalker import Client
+        if not isinstance(client, Client):
+            raise TypeError(
+                '%s.client should be a Client instance, not %s' % (
+                    self.__class__.__name__,
+                    client.__class__.__name__
+                )
+            )
+        return client
+
+
+class Payment(Entity, AmountMixin, UnitMixin):
+    """Holds information about the payments.
+
+    Each payment should be related with an :class:`.Invoice` instance. Use the
+    :attr:`.type` attribute to diversify payments (ex. "Advance").
+
+    :param invoice: The :class:`.Invoice` instance that this payment is related
+      to. This can not be skipped.
+    :type invoice: :class:`.Invoice`
+    """
+
+    __auto_name__ = True
+    __tablename__ = "Payments"
+    __mapper_args__ = {"polymorphic_identity": "Payment"}
+
+    payment_id = Column(
+        "id",
+        Integer,
+        ForeignKey("Entities.id"),
+        primary_key=True
+    )
+
+    invoice_id = Column(
+        Integer,
+        ForeignKey('Invoices.id')
+    )
+
+    invoice = relationship(
+        'Invoice',
+        primaryjoin='Payments.c.invoice_id==Invoices.c.id',
+        back_populates='payments',
+        uselist=False
+    )
+
+    def __init__(self, invoice=None, amount=0, unit=None, **kwargs):
+        super(Payment, self).__init__(**kwargs)
+        AmountMixin.__init__(self, amount=amount)
+        UnitMixin.__init__(self, unit=unit)
+        self.invoice = invoice
+
+    @validates('invoice')
+    def _validate_invoice(self, key, invoice):
+        """validates the invoice value
+        """
+        if not isinstance(invoice, Invoice):
+            raise TypeError(
+                '%s.invoice should be an Invoice instance, not %s' % (
+                    self.__class__.__name__,
+                    invoice.__class__.__name__
+                )
+            )
+        return invoice

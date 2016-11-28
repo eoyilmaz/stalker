@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2014 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -18,14 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest
-from stalker.db.session import DBSession
-from stalker import (db, config, Link, Project, Repository, Asset, Sequence,
-                     Shot, Status, StatusList, Task, Type, Version, Structure,
-                     FilenameTemplate)
-from stalker.exceptions import CircularDependencyError
-
-defaults = config.Config()
+from stalker.testing import UnitTestBase
 
 import logging
 from stalker import log
@@ -34,27 +27,16 @@ logger = logging.getLogger('stalker.models.version.Version')
 logger.setLevel(log.logging_level)
 
 
-class VersionTester(unittest.TestCase):
+class VersionTester(UnitTestBase):
     """tests stalker.models.version.Version class
     """
-
-    @classmethod
-    def setUpClass(cls):
-        """setting up the test in class level
-        """
-        DBSession.remove()
-
-    @classmethod
-    def tearDownClass(cls):
-        """clean up the test in class level
-        """
-        DBSession.remove()
 
     def setUp(self):
         """setup the test
         """
-        DBSession.remove()
-        db.setup()
+        super(VersionTester, self).setUp()
+
+        from stalker import db, Status, StatusList
 
         # statuses
         self.test_status1 = Status(name='Status1', code='STS1')
@@ -73,7 +55,7 @@ class VersionTester(unittest.TestCase):
                 self.test_status4,
                 self.test_status5,
             ],
-            target_entity_type=Project,
+            target_entity_type='Project',
         )
 
         self.test_sequence_status_list = StatusList(
@@ -85,7 +67,7 @@ class VersionTester(unittest.TestCase):
                 self.test_status4,
                 self.test_status5,
             ],
-            target_entity_type=Sequence,
+            target_entity_type='Sequence',
         )
 
         self.test_shot_status_list = StatusList(
@@ -97,7 +79,7 @@ class VersionTester(unittest.TestCase):
                 self.test_status4,
                 self.test_status5,
             ],
-            target_entity_type=Shot,
+            target_entity_type='Shot',
         )
 
         self.test_task_status_list = StatusList(
@@ -109,7 +91,7 @@ class VersionTester(unittest.TestCase):
                 self.test_status4,
                 self.test_status5,
             ],
-            target_entity_type=Task,
+            target_entity_type='Task',
         )
 
         self.test_version_status_list = StatusList(
@@ -121,10 +103,11 @@ class VersionTester(unittest.TestCase):
                 self.test_status4,
                 self.test_status5,
             ],
-            target_entity_type=Version,
+            target_entity_type='Version',
         )
 
         # repository
+        from stalker import Repository, Type
         self.test_repo = Repository(
             name='Test Repository',
             linux_path='/mnt/T/',
@@ -136,15 +119,17 @@ class VersionTester(unittest.TestCase):
         self.test_project_type = Type(
             name='Test',
             code='test',
-            target_entity_type=Project,
+            target_entity_type='Project',
         )
 
         # create a structure
+        from stalker import Structure
         self.test_structure = Structure(
             name='Test Project Structure'
         )
 
         # create a project
+        from stalker import Project
         self.test_project = Project(
             name='Test Project',
             code='tp',
@@ -155,6 +140,7 @@ class VersionTester(unittest.TestCase):
         )
 
         # create a sequence
+        from stalker import Sequence
         self.test_sequence = Sequence(
             name='Test Sequence',
             code='SEQ1',
@@ -163,6 +149,7 @@ class VersionTester(unittest.TestCase):
         )
 
         # create a shot
+        from stalker import Shot
         self.test_shot1 = Shot(
             name='SH001',
             code='SH001',
@@ -172,6 +159,7 @@ class VersionTester(unittest.TestCase):
         )
 
         # create a group of Tasks for the shot
+        from stalker import Task
         self.test_task1 = Task(
             name='Task1',
             parent=self.test_shot1,
@@ -179,6 +167,7 @@ class VersionTester(unittest.TestCase):
         )
 
         # a Link for the input file
+        from stalker import Link
         self.test_input_link1 = Link(
             name='Input Link 1',
             full_path='/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/'
@@ -229,20 +218,17 @@ class VersionTester(unittest.TestCase):
         ]
 
         # and the Version
+        from stalker import Version
         self.test_version = Version(**self.kwargs)
 
         # set the published to False
         self.test_version.is_published = False
 
-    def tearDown(self):
-        """clean up test
-        """
-        DBSession.remove()
-
     def test___auto_name__class_attribute_is_set_to_True(self):
         """testing if the __auto_name__ class attribute is set to True for
         Version class
         """
+        from stalker import Version
         self.assertTrue(Version.__auto_name__)
 
     def test_take_name_argument_is_skipped_defaults_to_default_value(self):
@@ -250,6 +236,7 @@ class VersionTester(unittest.TestCase):
         going to be set to the default value which is
         stalker.conf.defaults.DEFAULT_VERSION_TAKE_NAME
         """
+        from stalker import defaults, Version
         self.kwargs.pop('take_name')
         new_version = Version(**self.kwargs)
         self.assertEqual(new_version.take_name,
@@ -259,6 +246,7 @@ class VersionTester(unittest.TestCase):
         """testing if a TypeError will be raised when the take_name argument is
         None
         """
+        from stalker import Version
         self.kwargs['take_name'] = None
         self.assertRaises(TypeError, Version, **self.kwargs)
 
@@ -273,6 +261,7 @@ class VersionTester(unittest.TestCase):
         """testing if a ValueError will be raised when the take_name argument
         is given as an empty string
         """
+        from stalker import Version
         self.kwargs['take_name'] = ''
         self.assertRaises(ValueError, Version, **self.kwargs)
 
@@ -280,13 +269,19 @@ class VersionTester(unittest.TestCase):
         """testing if a ValueError will be raised when the take_name attribute
         is set to an empty string
         """
-        self.assertRaises(ValueError, setattr, self.test_version, 'take_name',
-                          '')
+        with self.assertRaises(ValueError) as cm:
+            self.test_version.take_name = ''
+
+        self.assertEqual(
+            str(cm.exception),
+            'Error Message'
+        )
 
     def test_take_name_argument_is_not_a_string(self):
         """testing if a TypeError will be raised when the given take_name
         argument is not a string
         """
+        from stalker import Version
         test_values = [1, 1.2, ['a list'], {'a': 'dict'}]
 
         for test_value in test_values:
@@ -308,8 +303,15 @@ class VersionTester(unittest.TestCase):
         """testing if a ValueError will be raised when the take_name argument
         string is formatted to an empty string
         """
+        from stalker import Version
         self.kwargs['take_name'] = '##$½#$'
-        self.assertRaises(ValueError, Version, **self.kwargs)
+        with self.assertRaises(ValueError) as cm:
+            v = Version(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Error Message'
+        )
 
     def test_take_name_attribute_is_formatted_to_empty_string(self):
         """testing if a ValueError will be raised when the take_name argument
@@ -321,6 +323,7 @@ class VersionTester(unittest.TestCase):
     def test_take_name_argument_is_formatted_correctly(self):
         """testing if the take_name argument value is formatted correctly
         """
+        from stalker import Version
         for test_value in self.take_name_test_values:
             self.kwargs['take_name'] = test_value[0]
             new_version = Version(**self.kwargs)
@@ -343,13 +346,22 @@ class VersionTester(unittest.TestCase):
         """testing if a TypeError will be raised when the task argument
         is skipped
         """
+        from stalker import Version
         self.kwargs.pop('task')
-        self.assertRaises(TypeError, Version, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Version(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Error Message'
+        )
 
     def test_task_argument_is_None(self):
         """testing if a TypeError will be raised when the task argument
         is None
         """
+        from stalker import Version
+
         self.kwargs['task'] = None
         self.assertRaises(TypeError, Version, **self.kwargs)
 
@@ -357,26 +369,44 @@ class VersionTester(unittest.TestCase):
         """testing if a TypeError will be raised when the task attribute
         is None
         """
-        self.assertRaises(TypeError, setattr, self.test_version,
-                          'task', None)
+        with self.assertRaises(TypeError) as cm:
+            self.test_version.task = None
+
+        self.assertEqual(
+            str(cm.exception),
+            'Error Message'
+        )
 
     def test_task_argument_is_not_a_Task(self):
         """testing if a TypeError will be raised when the task argument
         is not a Task instance
         """
+        from stalker import Version
         self.kwargs['task'] = 'a task'
-        self.assertRaises(TypeError, Version, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Version(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Error Message'
+        )
 
     def test_task_attribute_is_not_a_Task(self):
         """testing if a TypeError will be raised when the task attribute
         is not a Task instance
         """
-        self.assertRaises(TypeError, setattr, self.test_version, 'task',
-                          'a task')
+        with self.assertRaises(TypeError) as cm:
+            self.test_version.task = 'a task'
+
+        self.assertEqual(
+            str(cm.exception),
+            'Error Message'
+        )
 
     def test_task_attribute_is_working_properly(self):
         """testing if the task attribute is working properly
         """
+        from stalker import Task
         new_task = Task(
             name='New Test Task',
             parent=self.test_shot1,
@@ -390,13 +420,14 @@ class VersionTester(unittest.TestCase):
     def test_version_number_attribute_is_automatically_generated(self):
         """testing if the version_number attribute is automatically generated
         """
+        from stalker import db, Version
         self.assertEqual(self.test_version.version_number, 1)
-        DBSession.add(self.test_version)
-        DBSession.commit()
+        db.DBSession.add(self.test_version)
+        db.DBSession.commit()
 
         new_version = Version(**self.kwargs)
-        DBSession.add(new_version)
-        DBSession.commit()
+        db.DBSession.add(new_version)
+        db.DBSession.commit()
 
         self.assertEqual(self.test_version.task, new_version.task)
         self.assertEqual(self.test_version.take_name, new_version.take_name)
@@ -404,8 +435,8 @@ class VersionTester(unittest.TestCase):
         self.assertEqual(new_version.version_number, 2)
 
         new_version = Version(**self.kwargs)
-        DBSession.add(new_version)
-        DBSession.commit()
+        db.DBSession.add(new_version)
+        db.DBSession.commit()
 
         self.assertEqual(self.test_version.task, new_version.task)
         self.assertEqual(self.test_version.take_name, new_version.take_name)
@@ -413,8 +444,8 @@ class VersionTester(unittest.TestCase):
         self.assertEqual(new_version.version_number, 3)
 
         new_version = Version(**self.kwargs)
-        DBSession.add(new_version)
-        DBSession.commit()
+        db.DBSession.add(new_version)
+        db.DBSession.commit()
 
         self.assertEqual(self.test_version.task, new_version.task)
         self.assertEqual(self.test_version.take_name, new_version.take_name)
@@ -430,14 +461,15 @@ class VersionTester(unittest.TestCase):
         """testing if the version_number attribute will be set to a correct
         unique value when it is set to a lower number then it should be
         """
+        from stalker import db, Version
         self.test_version.version_number = -1
         self.assertEqual(self.test_version.version_number, 1)
 
         self.test_version.version_number = -10
         self.assertEqual(self.test_version.version_number, 1)
 
-        DBSession.add(self.test_version)
-        DBSession.commit()
+        db.DBSession.add(self.test_version)
+        db.DBSession.commit()
 
         self.test_version.version_number = -100
         # it should be 1 again
@@ -456,6 +488,7 @@ class VersionTester(unittest.TestCase):
         """testing if the inputs attribute will be an empty list when the
         inputs argument is skipped
         """
+        from stalker import Version
         self.kwargs.pop('inputs')
         new_version = Version(**self.kwargs)
         self.assertEqual(new_version.inputs, [])
@@ -464,6 +497,7 @@ class VersionTester(unittest.TestCase):
         """testing if the inputs attribute will be an empty list when the
         inputs argument is None
         """
+        from stalker import Version
         self.kwargs['inputs'] = None
         new_version = Version(**self.kwargs)
         self.assertEqual(new_version.inputs, [])
@@ -472,28 +506,46 @@ class VersionTester(unittest.TestCase):
         """testing if a TypeError will be raised when the inputs argument is
         set to None
         """
-        self.assertRaises(TypeError, setattr, self.test_version, 'inputs',
-                          None)
+        with self.assertRaises(TypeError) as cm:
+            self.test_version.inputs = None
+
+        self.assertEqual(
+            str(cm.exception),
+            'Error Message'
+        )
 
     def test_inputs_argument_is_not_a_list_of_Link_instances(self):
         """testing if a TypeError will be raised when the inputs attribute is
         set to something other than a Link instance
         """
+        from stalker import Version
         test_value = [132, '231123']
         self.kwargs['inputs'] = test_value
-        self.assertRaises(TypeError, Version, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Version(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Error Message'
+        )
 
     def test_inputs_attribute_is_not_a_list_of_Link_instances(self):
         """testing if a TypeError will be raised when the inputs attribute is
         set to something other than a Link instance
         """
         test_value = [132, '231123']
-        self.assertRaises(TypeError, setattr, self.test_version, 'inputs',
-                          test_value)
+        with self.assertRaises(TypeError) as cm:
+            self.test_version.inputs = test_value
+
+        self.assertEqual(
+            str(cm.exception),
+            'Error Message'
+        )
 
     def test_inputs_attribute_is_working_properly(self):
         """testing if the inputs attribute is working properly
         """
+        from stalker import Version
         self.kwargs.pop('inputs')
         new_version = Version(**self.kwargs)
 
@@ -509,6 +561,7 @@ class VersionTester(unittest.TestCase):
         """testing if the outputs attribute will be an empty list when the
         outputs argument is skipped
         """
+        from stalker import Version
         self.kwargs.pop('outputs')
         new_version = Version(**self.kwargs)
         self.assertEqual(new_version.outputs, [])
@@ -517,6 +570,7 @@ class VersionTester(unittest.TestCase):
         """testing if the outputs attribute will be an empty list when the
         outputs argument is None
         """
+        from stalker import Version
         self.kwargs['outputs'] = None
         new_version = Version(**self.kwargs)
         self.assertEqual(new_version.outputs, [])
@@ -525,16 +579,28 @@ class VersionTester(unittest.TestCase):
         """testing if a TypeError will be raised when the outputs argument is
         set to None
         """
-        self.assertRaises(TypeError, setattr, self.test_version, 'outputs',
-                          None)
+        with self.assertRaises(TypeError) as cm:
+            self.test_version.outputs = None
+
+        self.assertEqual(
+            str(cm.exception),
+            'Error Message'
+        )
 
     def test_outputs_argument_is_not_a_list_of_Link_instances(self):
         """testing if a TypeError will be raised when the outputs attribute is
         set to something other than a Link instance
         """
+        from stalker import Version
         test_value = [132, '231123']
         self.kwargs['outputs'] = test_value
-        self.assertRaises(TypeError, Version, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Version(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Error Message'
+        )
 
     def test_outputs_attribute_is_not_a_list_of_Link_instances(self):
         """testing if a TypeError will be raised when the outputs attribute is

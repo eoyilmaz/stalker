@@ -11,18 +11,23 @@ Inheritance Diagram
    stalker.exceptions.OverBookedError
    stalker.exceptions.StatusError
    stalker.models.asset.Asset
+   stalker.models.auth.AuthenticationLog
    stalker.models.auth.Group
    stalker.models.auth.LocalSession
    stalker.models.auth.Permission
+   stalker.models.auth.Role
    stalker.models.auth.User
    stalker.models.budget.Budget
    stalker.models.budget.BudgetEntry
    stalker.models.budget.Good
+   stalker.models.budget.Invoice
+   stalker.models.budget.Payment
    stalker.models.budget.PriceList
    stalker.models.department.Department
    stalker.models.department.DepartmentUser
    stalker.models.client.Client
    stalker.models.entity.Entity
+   stalker.models.entity.EntityGroup
    stalker.models.entity.SimpleEntity
    stalker.models.format.ImageFormat
    stalker.models.link.Link
@@ -38,6 +43,7 @@ Inheritance Diagram
    stalker.models.mixins.WorkingHoursMixin
    stalker.models.note.Note
    stalker.models.project.Project
+   stalker.models.project.ProjectClient
    stalker.models.project.ProjectRepository
    stalker.models.project.ProjectUser
    stalker.models.repository.Repository

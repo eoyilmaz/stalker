@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2014 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -22,20 +22,26 @@ import tempfile
 import unittest
 import datetime
 
+import pytz
+
 from stalker.db import DBSession
+from stalker.testing import UnitTestBase
 from stalker import (db, Task, Project, User, Status, StatusList, Repository,
                      Structure, Review)
 
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
-class ReviewTestCase(unittest.TestCase):
+
+class ReviewTestCase(UnitTestBase):
     """tests the stalker.models.review.Review class
     """
 
     def setUp(self):
         """set up the test
         """
-        db.setup()
-        db.init()
+        super(ReviewTestCase, self).setUp()
 
         self.user1 = User(
             name='Test User 1',
@@ -62,18 +68,19 @@ class ReviewTestCase(unittest.TestCase):
         DBSession.add(self.user3)
 
         # Review Statuses
-        self.status_new = Status.query.filter_by(code='NEW').first()
-        self.status_rrev = Status.query.filter_by(code='RREV').first()
-        self.status_app = Status.query.filter_by(code='APP').first()
+        with DBSession.no_autoflush:
+            self.status_new = Status.query.filter_by(code='NEW').first()
+            self.status_rrev = Status.query.filter_by(code='RREV').first()
+            self.status_app = Status.query.filter_by(code='APP').first()
 
-        # Task Statuses
-        self.status_wfd = Status.query.filter_by(code='WFD').first()
-        self.status_rts = Status.query.filter_by(code='RTS').first()
-        self.status_wip = Status.query.filter_by(code='WIP').first()
-        self.status_prev = Status.query.filter_by(code='PREV').first()
-        self.status_hrev = Status.query.filter_by(code='HREV').first()
-        self.status_drev = Status.query.filter_by(code='DREV').first()
-        self.status_cmpl = Status.query.filter_by(code='CMPL').first()
+            # Task Statuses
+            self.status_wfd = Status.query.filter_by(code='WFD').first()
+            self.status_rts = Status.query.filter_by(code='RTS').first()
+            self.status_wip = Status.query.filter_by(code='WIP').first()
+            self.status_prev = Status.query.filter_by(code='PREV').first()
+            self.status_hrev = Status.query.filter_by(code='HREV').first()
+            self.status_drev = Status.query.filter_by(code='DREV').first()
+            self.status_cmpl = Status.query.filter_by(code='CMPL').first()
 
         self.project_status_list = StatusList(
             target_entity_type='Project',
@@ -125,7 +132,9 @@ class ReviewTestCase(unittest.TestCase):
             parent=self.task2,
             resources=[self.user1]
         )
+        logger.debug('self.task3.start 1: %s' % self.task3.start)
         DBSession.add(self.task3)
+        logger.debug('self.task3.start 2: %s' % self.task3.start)
 
         self.task4 = Task(
             name='Test Task 4',
@@ -137,6 +146,7 @@ class ReviewTestCase(unittest.TestCase):
             schedule_unit='h'
         )
         DBSession.add(self.task4)
+        logger.debug('self.task3.start 2: %s' % self.task3.start)
 
         self.task5 = Task(
             name='Test Task 5',
@@ -168,12 +178,19 @@ class ReviewTestCase(unittest.TestCase):
         #DBSession.add(self.review)
 
         # add everything to the db
+        logger.debug('self.task3.start 3 : %s' % self.task3.start)
         DBSession.commit()
 
-    def tearDown(self):
-        """clean up test
-        """
-        DBSession.remove()
+        logger.debug('self.task1.start 4: %s' % self.task1.start)
+        logger.debug('self.task2.start 4: %s' % self.task2.start)
+        logger.debug('self.task3.start 4: %s' % self.task3.start)
+        logger.debug('self.task4.start 4: %s' % self.task4.start)
+        logger.debug('self.task5.start 4: %s' % self.task5.start)
+
+    # def tearDown(self):
+    #     """clean up test
+    #     """
+    #     DBSession.remove()
 
     # def test_task_argument_is_skipped(self):
     #     """testing if a TypeError will be raised when the task argument is
@@ -198,7 +215,7 @@ class ReviewTestCase(unittest.TestCase):
     # def test_task_attribute_is_read_only(self):
     #     """testing if a the task attribute is read only
     #     """
-    #     now = datetime.datetime.now()
+    #     now = datetime.datetime.now(pytz.utc)
     #     self.task1.create_time_log(
     #         resource=self.task1.resources[0],
     #         start=now,
@@ -227,7 +244,7 @@ class ReviewTestCase(unittest.TestCase):
         """testing if the task argument value is passed to the task argument
         properly
         """
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(pytz.utc)
         self.task1.create_time_log(
             resource=self.task1.resources[0],
             start=now,
@@ -268,7 +285,7 @@ class ReviewTestCase(unittest.TestCase):
         other
         """
         self.task1.responsible = [self.user1, self.user2, self.user3]
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(pytz.utc)
         self.task1.create_time_log(
             resource=self.task1.resources[0],
             start=now,
@@ -398,7 +415,7 @@ class ReviewTestCase(unittest.TestCase):
         """
         self.task1.responsible = [self.user1, self.user2]
 
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(pytz.utc)
         self.task1.create_time_log(
             resource=self.user1,
             start=now,
@@ -427,7 +444,7 @@ class ReviewTestCase(unittest.TestCase):
         """testing if approve method will also update the task parent status
         """
         self.task3.status = self.status_rts
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(pytz.utc)
         td = datetime.timedelta
         self.task3.create_time_log(
             resource=self.task3.resources[0],
@@ -456,8 +473,9 @@ class ReviewTestCase(unittest.TestCase):
         statuses
         """
         self.task3.status = self.status_rts
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(pytz.utc)
         td = datetime.timedelta
+        logger.debug('self.task3.start  : %s' % self.task3.start)
         self.task3.create_time_log(
             resource=self.task3.resources[0],
             start=now,
@@ -468,9 +486,14 @@ class ReviewTestCase(unittest.TestCase):
         self.assertEqual(
             self.task3.status, self.status_prev
         )
-
+        logger.debug('A: code is here 1')
         review1 = reviews[0]
+        logger.debug('self.task3.start  : %s' % self.task3.start)
+        logger.debug('review1.task.start: %s' % review1.task.start)
+
+        logger.debug('A: code is here 2')
         review1.approve()
+        logger.debug('A: code is here 3')
 
         self.assertEqual(
             self.task3.status, self.status_cmpl
@@ -520,7 +543,7 @@ class ReviewTestCase(unittest.TestCase):
         timings for DREV tasks with no effort left
         """
         self.task3.status = self.status_rts
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(pytz.utc)
         td = datetime.timedelta
         self.task3.create_time_log(
             resource=self.task3.resources[0],
@@ -633,12 +656,51 @@ class ReviewTestCase(unittest.TestCase):
             0
         )
 
+    def test_approve_method_updates_task_timings(self):
+        """testing if approve method will also update the task timings
+        """
+        self.task3.status = self.status_rts
+        now = datetime.datetime.now(pytz.utc)
+        td = datetime.timedelta
+
+        self.task3.schedule_timing = 2
+        self.task3.schedule_unit = 'h'
+
+        self.task3.create_time_log(
+            resource=self.task3.resources[0],
+            start=now,
+            end=now + td(hours=1)
+        )
+
+        reviews = self.task3.request_review()
+        self.assertEqual(
+            self.task3.status, self.status_prev
+        )
+
+        self.assertNotEqual(
+            self.task3.total_logged_seconds,
+            self.task3.schedule_seconds
+        )
+
+        review1 = reviews[0]
+        review1.approve()
+
+        self.assertEqual(
+            self.task3.status, self.status_cmpl
+        )
+
+        self.assertEqual(
+            self.task3.total_logged_seconds,
+            self.task3.schedule_seconds
+        )
+
+
     def test_approve_method_updates_task_status_correctly_for_a_multi_responsible_task_when_one_approve(self):
         """testing if the Review.approve() method will update the task status
         correctly for a task with multiple responsible
         """
         self.task1.responsible = [self.user1, self.user2]
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(pytz.utc)
         td = datetime.timedelta
         self.task1.create_time_log(
             resource=self.task1.resources[0],
@@ -670,7 +732,7 @@ class ReviewTestCase(unittest.TestCase):
         status correctly to HREV for a Task with only one responsible
         """
         self.task1.responsible = [self.user1]
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(pytz.utc)
         self.task1.create_time_log(
             resource=self.task1.resources[0],
             start=now,
@@ -690,7 +752,7 @@ class ReviewTestCase(unittest.TestCase):
         task status correctly for a Task with multiple responsible
         """
         self.task1.responsible = [self.user1, self.user2]
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(pytz.utc)
         self.task1.create_time_log(
             resource=self.task1.resources[0],
             start=now,
@@ -720,7 +782,7 @@ class ReviewTestCase(unittest.TestCase):
         task status correctly for a Task with multiple responsible
         """
         self.task1.responsible = [self.user1, self.user2]
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(pytz.utc)
         self.task1.create_time_log(
             resource=self.task1.resources[0],
             start=now,
@@ -760,7 +822,7 @@ class ReviewTestCase(unittest.TestCase):
         )
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
         # create 1 hour time log
         self.task1.create_time_log(
             resource=self.user1,
@@ -818,7 +880,7 @@ class ReviewTestCase(unittest.TestCase):
         )
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
         # create 1 hour time log
         self.task1.create_time_log(
             resource=self.user1,
@@ -878,7 +940,7 @@ class ReviewTestCase(unittest.TestCase):
         )
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
         # create 1 hour time log
         self.task1.create_time_log(
             resource=self.user1,
@@ -927,7 +989,7 @@ class ReviewTestCase(unittest.TestCase):
         the same task with the same review_number
         """
         self.task1.responsible = [self.user1, self.user2, self.user3]
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(pytz.utc)
         self.task1.create_time_log(
             resource=self.user1,
             start=now,

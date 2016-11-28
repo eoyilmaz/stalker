@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2014 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -139,10 +139,18 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
        Also the :attr:`.repositories` attribute is not a read-only attribute
        anymore.
 
-    :param client: The client which the project is affiliated with. Default
-      value is None.
+    .. versionadded:: 0.2.15
+       Multiple Clients per Project
 
-    :type client: :class:`.Client`
+       It is now possible to attach multiple :class:`.Client` instances to one
+       :class:`.Project` allowing to hold complex Projects to Client relations
+       by using the :attr:`.ProjectClient.role` attribute of the
+       :class:`.ProjectClient` class.
+
+    :param clients: The clients which the project is affiliated with. Default
+      value is an empty list.
+
+    :type client: [:class:`.Client`]
 
     :param image_format: The output image format of the project. Default
       value is None.
@@ -191,18 +199,18 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
 
     active = Column(Boolean, default=True)
 
-    client_id = Column(Integer, ForeignKey("Clients.id"))
-    client = relationship(
-        "Client",
-        primaryjoin="Projects.c.client_id==Clients.c.id",
-        back_populates="projects",
-        uselist=False,
-        doc="""The client company assigning the studio
-        with the project.
+    clients = association_proxy(
+        'client_role',
+        'client',
+        creator=lambda n: ProjectClient(client=n)
+    )
 
-        Should be an instance of :class:`.Client`,
-        can also be set to None.
-        """
+    client_role = relationship(
+        'ProjectClient',
+        back_populates='project',
+        cascade='all, delete-orphan',
+        cascade_backrefs=False,
+        primaryjoin='Projects.c.id==Project_Clients.c.project_id'
     )
 
     tasks = relationship(
@@ -289,7 +297,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
     def __init__(self,
                  name=None,
                  code=None,
-                 client=None,
+                 clients=None,
                  repositories=None,
                  structure=None,
                  image_format=None,
@@ -300,7 +308,6 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         # a projects project should be self
         # initialize the project argument to self
         kwargs['project'] = self
-
         kwargs['name'] = name
 
         super(Project, self).__init__(**kwargs)
@@ -308,6 +315,8 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         ReferenceMixin.__init__(self, **kwargs)
         StatusMixin.__init__(self, **kwargs)
         DateRangeMixin.__init__(self, **kwargs)
+
+        self.code = code
 
         if users is None:
             users = []
@@ -318,7 +327,10 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         self.repositories = repositories
 
         self.structure = structure
-        self.client = client
+
+        if clients is None:
+            clients = []
+        self.clients = clients
 
         self._sequences = []
         self._assets = []
@@ -326,7 +338,6 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         self.image_format = image_format
         self.fps = fps
         self.is_stereoscopic = bool(is_stereoscopic)
-        self.code = code
 
         self.active = True
 
@@ -368,20 +379,6 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
             )
         return image_format
 
-    @validates("client")
-    def _validate_client(self, key, client):
-        """validates the given client value
-        """
-        if client is not None:
-            from stalker.models.client import Client
-            if not isinstance(client, Client):
-                raise TypeError(
-                    "%s.client should be an instance of "
-                    "stalker.models.auth.Client not %s" %
-                    (self.__class__.__name__, client.__class__.__name__)
-                )
-        return client
-
     @validates("structure")
     def _validate_structure(self, key, structure_in):
         """validates the given structure_in value
@@ -400,20 +397,6 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
     @validates('is_stereoscopic')
     def _validate_is_stereoscopic(self, key, is_stereoscopic_in):
         return bool(is_stereoscopic_in)
-
-    @validates('users')
-    def _validate_users(self, key, user_in):
-        """validates the given users_in value
-        """
-        from stalker.models.auth import User
-
-        if not isinstance(user_in, User):
-            raise TypeError(
-                '%s.users should be all stalker.models.auth.User instances, '
-                'not %s' %
-                (self.__class__.__name__, user_in.__class__.__name__)
-            )
-        return user_in
 
     @property
     def root_tasks(self):
@@ -543,7 +526,6 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
             return None
 
 
-# PROJECT_USERS
 class ProjectUser(Base):
     """The association object used in User-to-Project relation
     """
@@ -591,10 +573,14 @@ class ProjectUser(Base):
         primaryjoin='ProjectUser.role_id==Role.role_id'
     )
 
+    rate = Column(Float, default=0.0)
+
     def __init__(self, project=None, user=None, role=None):
         self.user = user
         self.project = project
         self.role = role
+        if self.user:
+            self.rate = user.rate
 
     @validates("user")
     def _validate_user(self, key, user):
@@ -608,6 +594,10 @@ class ProjectUser(Base):
                     "not %s" %
                     (self.__class__.__name__, user.__class__.__name__)
                 )
+
+            # also update rate attribute
+            self.rate = user.rate
+
         return user
 
     @validates("project")
@@ -632,7 +622,129 @@ class ProjectUser(Base):
             from stalker import Role
             if not isinstance(role, Role):
                 raise TypeError(
-                    '%s.role should be a'
+                    '%s.role should be a '
+                    'stalker.models.auth.Role instance, not %s' %
+                    (self.__class__.__name__, role.__class__.__name__)
+                )
+        return role
+
+    @validates('rate')
+    def _validate_rate(self, key, rate):
+        """validates the given rate value
+        """
+        if rate is None:
+            rate = 0.0
+
+        if not isinstance(rate, (int, float)):
+            raise TypeError(
+                '%(class)s.rate should be a float number greater or '
+                'equal to 0.0, not %(rate_class)s' % {
+                    'class': self.__class__.__name__,
+                    'rate_class': rate.__class__.__name__
+                }
+            )
+
+        if rate < 0:
+            raise ValueError(
+                '%(class)s.rate should be a float number greater or '
+                'equal to 0.0, not %(rate)s' % {
+                    'class': self.__class__.__name__,
+                    'rate': rate
+                }
+            )
+
+        return rate
+
+
+class ProjectClient(Base):
+    """The association object used in Client-to-Project relation
+    """
+
+    __tablename__ = 'Project_Clients'
+
+    client_id = Column(
+        'client_id',
+        Integer,
+        ForeignKey('Clients.id'),
+        primary_key=True
+    )
+
+    client = relationship(
+        'Client',
+        back_populates='project_role',
+        cascade_backrefs=False,
+        primaryjoin='Project_Clients.c.client_id==Clients.c.id'
+    )
+
+    project_id = Column(
+        'project_id',
+        Integer,
+        ForeignKey('Projects.id'),
+        primary_key=True
+    )
+
+    project = relationship(
+        'Project',
+        back_populates='client_role',
+        cascade_backrefs=False,
+        primaryjoin='ProjectClient.project_id==Project.project_id'
+    )
+
+    role_id = Column(
+        'rid',
+        Integer,
+        ForeignKey('Roles.id'),
+        nullable=True
+    )
+
+    role = relationship(
+        'Role',
+        cascade_backrefs=False,
+        primaryjoin='ProjectClient.role_id==Role.role_id'
+    )
+
+    def __init__(self, project=None, client=None, role=None):
+        self.client = client
+        self.project = project
+        self.role = role
+
+    @validates("client")
+    def _validate_client(self, key, client):
+        """validates the given client value
+        """
+        if client is not None:
+            from stalker.models.client import Client
+            if not isinstance(client, Client):
+                raise TypeError(
+                    "%s.client should be an instance of "
+                    "stalker.models.auth.Client not %s" %
+                    (self.__class__.__name__, client.__class__.__name__)
+                )
+        return client
+
+    @validates("project")
+    def _validate_project(self, key, project):
+        """validates the given project value
+        """
+        if project is not None:
+            # check if it is instance of Project object
+            if not isinstance(project, Project):
+                raise TypeError(
+                    "%s.project should be a "
+                    "stalker.models.project.Project instance, not %s" %
+                    (self.__class__.__name__, project.__class__.__name__)
+                )
+        return project
+
+    @validates('role')
+    def _validate_role(self, key, role):
+        """validates the given role instance
+        """
+        if role is not None:
+            from stalker import Role
+            if not isinstance(role, Role):
+                raise TypeError(
+                    '%s.role should be a '
                     'stalker.models.auth.Role instance, not %s' %
                     (self.__class__.__name__, role.__class__.__name__)
                 )

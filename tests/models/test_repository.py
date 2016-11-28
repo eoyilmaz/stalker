@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2014 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -342,6 +342,16 @@ class RepositoryTester(unittest.TestCase):
         self.test_repo.windows_path = r"M:\Projects"
         self.assertFalse("\\" in self.test_repo.windows_path)
         self.assertEqual(self.test_repo.windows_path, "M:/Projects/")
+
+    def test_windows_path_with_more_than_one_slashes_converted_to_single_slash(self):
+        """testing if the windows_path is set with more than one slashes is
+        converted to single slash
+        """
+        self.test_repo.windows_path = r'M://'
+        self.assertEqual(self.test_repo.windows_path, 'M:/')
+
+        self.test_repo.windows_path = r'M://////////'
+        self.assertEqual(self.test_repo.windows_path, 'M:/')
 
     def test_to_linux_path_returns_the_linux_version_of_the_given_windows_path(self):
         """testing if the to_linux_path returns the linux version of the given
@@ -928,6 +938,8 @@ class RepositoryTester(unittest.TestCase):
         # a Linux Path
         linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
         self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
+        self.test_repo.windows_path = 'T:/Stalker_Projects'
+        self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
         result = self.test_repo.make_relative(linux_path)
         self.assertEqual(
             result,

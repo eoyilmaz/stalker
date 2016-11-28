@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2014 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -21,6 +21,8 @@
 import datetime
 import unittest
 
+import pytz
+
 from stalker import log
 from stalker.db.session import DBSession
 from stalker import (db, Asset, Entity, ImageFormat, Link, Project, Repository,
@@ -36,23 +38,6 @@ class ProjectTestCase(unittest.TestCase):
     """tests the Project class
     """
 
-    @classmethod
-    def setUpClass(cls):
-        """set up the test for class
-        """
-        DBSession.remove()
-
-    @classmethod
-    def tearDownClass(cls):
-        """clean up the test
-        """
-        DBSession.remove()
-
-    def tearDown(self):
-        """tearDown the tests
-        """
-        DBSession.remove()
-
     def setUp(self):
         """setup the test
         """
@@ -60,7 +45,7 @@ class ProjectTestCase(unittest.TestCase):
         #db.init()  # for tickets
 
         # create test objects
-        self.start = datetime.date.today()
+        self.start = datetime.datetime(2016, 11, 17, tzinfo=pytz.utc)
         self.end = self.start + datetime.timedelta(days=20)
 
         self.test_lead = User(
@@ -240,7 +225,7 @@ class ProjectTestCase(unittest.TestCase):
             "start": self.start,
             "end": self.end,
             "status_list": self.project_status_list,
-            "client": self.test_client
+            "clients": [self.test_client]
         }
 
         self.test_project = Project(**self.kwargs)
@@ -1209,7 +1194,8 @@ class ProjectTestCase(unittest.TestCase):
         """testing if the DateRangeMixin part is initialized correctly
         """
         start = \
-            datetime.datetime(2013, 3, 22, 4, 0) + datetime.timedelta(days=25)
+            datetime.datetime(2013, 3, 22, 4, 0, tzinfo=pytz.utc) \
+            + datetime.timedelta(days=25)
         end = start + datetime.timedelta(days=12)
 
         self.kwargs["start"] = start
@@ -1816,7 +1802,7 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
         TimeLog(
             task=self.test_task1,
             resource=self.test_task1.resources[0],
-            start=datetime.datetime(2013, 8, 1, 1, 0),
+            start=datetime.datetime(2013, 8, 1, 1, 0, tzinfo=pytz.utc),
             duration=datetime.timedelta(hours=1)
         )
         self.assertEqual(self.test_project.total_logged_seconds, 3600)
@@ -1825,7 +1811,7 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
         TimeLog(
             task=self.test_seq1,
             resource=self.test_seq1.resources[0],
-            start=datetime.datetime(2013, 8, 1, 2, 0),
+            start=datetime.datetime(2013, 8, 1, 2, 0, tzinfo=pytz.utc),
             duration=datetime.timedelta(hours=1)
         )
         self.assertEqual(self.test_project.total_logged_seconds, 7200)
@@ -1834,7 +1820,7 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
         TimeLog(
             task=self.test_task10,
             resource=self.test_task10.resources[0],
-            start=datetime.datetime(2013, 8, 1, 3, 0),
+            start=datetime.datetime(2013, 8, 1, 3, 0, tzinfo=pytz.utc),
             duration=datetime.timedelta(hours=3)
         )
         self.assertEqual(self.test_project.total_logged_seconds, 18000)
@@ -1843,7 +1829,7 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
         TimeLog(
             task=self.test_asset1,
             resource=self.test_asset1.resources[0],
-            start=datetime.datetime(2013, 8, 1, 6, 0),
+            start=datetime.datetime(2013, 8, 1, 6, 0, tzinfo=pytz.utc),
             duration=datetime.timedelta(hours=10)
         )
         self.assertEqual(self.test_project.total_logged_seconds, 15 * 3600)
@@ -1948,7 +1934,7 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
         t = TimeLog(
             task=self.test_task1,
             resource=self.test_task1.resources[0],
-            start=datetime.datetime(2013, 8, 1, 1, 0),
+            start=datetime.datetime(2013, 8, 1, 1, 0, tzinfo=pytz.utc),
             duration=datetime.timedelta(hours=1)
         )
         db.DBSession.add(t)
@@ -1957,47 +1943,52 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
         self.assertEqual(self.test_project.percent_complete,
                          (1.0 / 44.0 * 100))
 
-    def test_client_argument_is_skipped(self):
-        """testing if the client attribute will be set to None when the client
-        argument is skipped
+    def test_clients_argument_is_skipped(self):
+        """testing if the clients attribute will be set to None when the
+        clients argument is skipped
         """
         self.kwargs['name'] = 'New Project Name'
         try:
-            self.kwargs.pop('client')
+            self.kwargs.pop('clients')
         except KeyError:
             pass
         new_project = Project(**self.kwargs)
-        self.assertEquals(new_project.client, None)
+        self.assertEquals(new_project.clients, [])
 
-    def test_client_argument_is_None(self):
-        """testing if the client argument can be None
+    def test_clients_argument_is_None(self):
+        """testing if the clients argument can be None
         """
-        self.kwargs['client'] = None
+        self.kwargs['clients'] = None
         new_project = Project(**self.kwargs)
-        self.assertTrue(new_project.client is None)
+        self.assertTrue(new_project.clients == [])
 
-    def test_client_attribute_is_set_to_None(self):
-        """testing if it is possible to set the client attribute to None
+    def test_clients_attribute_is_set_to_None(self):
+        """testing if it a TypeError will be raised when the clients attribute
+        is set to None
         """
-        self.assertFalse(self.test_project.client is None)
-        self.test_project.client = None
-        self.assertTrue(self.test_project.client is None)
+        with self.assertRaises(TypeError) as cm:
+            self.test_project.clients = None
 
-    def test_client_argument_is_given_as_something_other_than_a_client(self):
+        self.assertEqual(
+            str(cm.exception),
+            "'NoneType' object is not iterable"
+        )
+
+    def test_clients_argument_is_given_as_something_other_than_a_client(self):
         """testing if a TypeError will be raised when the client argument is
         given as something other than a Client object
         """
         test_values = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
 
         for test_value in test_values:
-            self.kwargs["client"] = test_value
+            self.kwargs["clients"] = test_value
             self.assertRaises(
                 TypeError,
                 Project,
                 **self.kwargs
             )
 
-    def test_client_attribute_is_not_a_client_instance(self):
+    def test_clients_attribute_is_not_a_client_instance(self):
         """testing if a TypeError will be raised when the client attribute is
         set to a value other than a Client instance
         """
@@ -2008,7 +1999,7 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
                 TypeError,
                 setattr,
                 self.test_project,
-                'client',
+                'clients',
                 test_value
             )
 
@@ -2018,13 +2009,13 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
     #     """
     #     self.assertEqual(self.test_project.client, self.kwargs['client'])
 
-    def test_client_attribute_is_working_properly(self):
-        """testing if the client attribute value can be updated correctly
+    def test_clients_attribute_is_working_properly(self):
+        """testing if the clients attribute value can be updated correctly
         """
         new_client = Client(name='New Client')
-        self.assertNotEqual(self.test_project.client, new_client)
-        self.test_project.client = new_client
-        self.assertEqual(self.test_project.client, new_client)
+        self.assertNotEqual(self.test_project.clients, [new_client])
+        self.test_project.clients = [new_client]
+        self.assertEqual(self.test_project.clients, [new_client])
 
 
 class ProjectTicketsTestCase(unittest.TestCase):
@@ -2055,7 +2046,7 @@ class ProjectTicketsTestCase(unittest.TestCase):
         db.init()  # for tickets
 
         # create test objects
-        self.start = datetime.date.today()
+        self.start = datetime.datetime(2016, 11, 17, tzinfo=pytz.utc)
         self.end = self.start + datetime.timedelta(days=20)
 
         self.test_lead = User(

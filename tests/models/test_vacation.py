@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2014 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -20,6 +20,8 @@
 
 import datetime
 import unittest
+
+import pytz
 
 from stalker import User, Type
 from stalker.models.studio import Vacation
@@ -56,8 +58,8 @@ class VacationTestCase(unittest.TestCase):
         self.kwargs = {
             'user': self.test_user,
             'type': self.personal_vacation,
-            'start': datetime.datetime(2013, 6, 6, 10, 0),
-            'end': datetime.datetime(2013, 6, 10, 19, 0)
+            'start': datetime.datetime(2013, 6, 6, 10, 0, tzinfo=pytz.utc),
+            'end': datetime.datetime(2013, 6, 10, 19, 0, tzinfo=pytz.utc)
         }
 
         self.test_vacation = Vacation(**self.kwargs)

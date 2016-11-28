@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2014 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -26,7 +26,7 @@ Whenever stalker.db or something under it imported, the
 import logging
 
 from sqlalchemy import engine_from_config
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, OperationalError, ProgrammingError
 
 from stalker import defaults
 from stalker.db.declarative import Base
@@ -35,6 +35,8 @@ from stalker.log import logging_level
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
+
+alembic_version = 'f16651477e64'
 
 
 def setup(settings=None):
@@ -65,6 +67,10 @@ def setup(settings=None):
         bind=engine,
         extension=None
     )
+
+    # check alembic versions of the database
+    # and raise an error if it is not matching with the system
+    check_alembic_version()
 
     # create the database
     logger.debug("creating the tables")
@@ -97,13 +103,13 @@ def init():
 
     # register all Actions available for all SOM classes
     class_names = [
-        'Asset', 'Budget', 'BudgetEntry', 'Client', 'Daily', 'Department',
-        'Entity', 'FilenameTemplate', 'Good', 'Group', 'ImageFormat', 'Link',
-        'Message', 'Note', 'Page', 'Permission', 'PriceList', 'Project',
-        'Repository', 'Review', 'Role', 'Scene', 'Sequence', 'Shot',
-        'SimpleEntity', 'Status', 'StatusList', 'Structure', 'Studio', 'Tag',
-        'Task', 'Ticket', 'TicketLog', 'TimeLog', 'Type', 'User', 'Vacation',
-        'Version'
+        'Asset', 'AuthenticationLog', 'Budget', 'BudgetEntry', 'Client',
+        'Daily', 'Department', 'Entity', 'EntityGroup', 'FilenameTemplate',
+        'Good', 'Group', 'ImageFormat', 'Invoice', 'Link', 'Message', 'Note',
+        'Page', 'Payment', 'Permission', 'PriceList', 'Project', 'Repository',
+        'Review', 'Role', 'Scene', 'Sequence', 'Shot', 'SimpleEntity',
+        'Status', 'StatusList', 'Structure', 'Studio', 'Tag', 'Task', 'Ticket',
+        'TicketLog', 'TimeLog', 'Type', 'User', 'Vacation', 'Version'
     ]
 
     for class_name in class_names:
@@ -118,8 +124,9 @@ def init():
         register(class_)
 
     # create the admin if needed
+    admin = None
     if defaults.auto_create_admin:
-        __create_admin__()
+        admin = __create_admin__()
 
     # create statuses
     create_ticket_statuses()
@@ -128,32 +135,38 @@ def init():
     create_entity_statuses(
         entity_type='Daily',
         status_names=defaults.daily_status_names,
-        status_codes=defaults.daily_status_codes
+        status_codes=defaults.daily_status_codes,
+        user=admin
     )
     create_entity_statuses(
         entity_type='Task',
         status_names=defaults.task_status_names,
-        status_codes=defaults.task_status_codes
+        status_codes=defaults.task_status_codes,
+        user=admin
     )
     create_entity_statuses(
         entity_type='Asset',
         status_names=defaults.task_status_names,
-        status_codes=defaults.task_status_codes
+        status_codes=defaults.task_status_codes,
+        user=admin
     )
     create_entity_statuses(
         entity_type='Shot',
         status_names=defaults.task_status_names,
-        status_codes=defaults.task_status_codes
+        status_codes=defaults.task_status_codes,
+        user=admin
     )
     create_entity_statuses(
         entity_type='Sequence',
         status_names=defaults.task_status_names,
-        status_codes=defaults.task_status_codes
+        status_codes=defaults.task_status_codes,
+        user=admin
     )
     create_entity_statuses(
         entity_type='Review',
         status_names=defaults.review_status_names,
-        status_codes=defaults.review_status_codes
+        status_codes=defaults.review_status_codes,
+        user=admin
     )
 
     # create alembic revision table
@@ -175,12 +188,41 @@ def create_repo_vars():
             repo.path
 
 
+def get_alembic_version():
+    """returns the alembic version of the database
+    """
+    # try to query the version value
+    conn = DBSession.connection()
+    engine = conn.engine
+    if engine.dialect.has_table(conn, 'alembic_version'):
+        sql_query = 'select version_num from alembic_version'
+        try:
+            return DBSession.connection().execute(sql_query).fetchone()[0]
+        except (OperationalError, ProgrammingError, TypeError):
+            DBSession.rollback()
+            return None
+    else:
+        return None
+
+
+def check_alembic_version():
+    """checks the alembic version of the database and raise a ValueError if it
+    is not matching with this version of Stalker
+    """
+    current_alembic_version = get_alembic_version()
+    logger.debug('current_alembic_version: %s' % current_alembic_version)
+    if current_alembic_version and current_alembic_version != alembic_version:
+        raise ValueError(
+            'Please update the database to version: %s' % alembic_version
+        )
+
+
 def create_alembic_table():
     """creates the default alembic_version table and creates the data so that
     any new database will be considered as the latest version
     """
-    # Now, this is not the correct way of doing, there is a proper way of doing
-    # it and it is explained nicely in the Alembic library documentation.
+    # Now, this is not the correct way of doing this, there is a proper way of
+    # doing it and it is explained nicely in the Alembic library documentation.
     #
     # But it is simply not working when Stalker is installed as a package.
     #
@@ -188,7 +230,7 @@ def create_alembic_table():
     # don't forget to update the version_num (and the corresponding test
     # whenever a new alembic revision is created)
 
-    version_num = 'eaed49db6d9'
+    version_num = alembic_version
 
     from sqlalchemy import Table, Column, Text
 
@@ -290,6 +332,8 @@ def __create_admin__():
 
     DBSession.add(admin)
     DBSession.commit()
+
+    return admin
 
 
 def create_ticket_statuses():
@@ -496,5 +540,3 @@ def register(class_):
         DBSession.commit()
     except IntegrityError:
         DBSession.rollback()
-    # else:
-    #     DBSession.flush()

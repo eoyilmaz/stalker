@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2014 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -23,10 +23,10 @@ Animation and VFX Studios.
 See docs for more information.
 """
 
-__version__ = '0.2.14.dev'
-
-
 import sys
+
+__version__ = '0.2.17.1'
+
 
 __string_types__ = []
 if sys.version_info[0] >= 3:  # Python 3
@@ -38,21 +38,25 @@ else:  # Python 2
 # before anything about stalker create the defaults
 from stalker.config import defaults
 
-from stalker.models.auth import Group, Permission, User, LocalSession, Role
+from stalker.models.auth import (Group, Permission, User, LocalSession, Role,
+                                 AuthenticationLog)
 from stalker.models.asset import Asset
-from stalker.models.budget import Budget, BudgetEntry, Good, PriceList
+from stalker.models.budget import (Budget, BudgetEntry, Good, PriceList,
+                                   Invoice, Payment)
 from stalker.models.client import Client, ClientUser
 from stalker.models.department import Department, DepartmentUser
-from stalker.models.entity import SimpleEntity, Entity
+from stalker.models.entity import SimpleEntity, Entity, EntityGroup
 from stalker.models.format import ImageFormat
 from stalker.models.link import Link
 from stalker.models.message import Message
-from stalker.models.mixins import (ProjectMixin, ReferenceMixin,
-                                   DateRangeMixin, StatusMixin,
-                                   TargetEntityTypeMixin, CodeMixin,
-                                   WorkingHoursMixin, ScheduleMixin, DAGMixin)
+from stalker.models.mixins import (ACLMixin, AmountMixin, CodeMixin, DAGMixin,
+                                   DateRangeMixin, ProjectMixin,
+                                   ReferenceMixin, ScheduleMixin, StatusMixin,
+                                   TargetEntityTypeMixin, UnitMixin,
+                                   WorkingHoursMixin)
 from stalker.models.note import Note
-from stalker.models.project import Project, ProjectUser
+from stalker.models.project import (Project, ProjectUser, ProjectClient,
+                                    ProjectRepository)
 from stalker.models.review import Review, Daily, DailyLink
 from stalker.models.repository import Repository
 from stalker.models.scene import Scene

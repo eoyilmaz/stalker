@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2014 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -102,7 +102,7 @@ class Ticket(Entity, StatusMixin):
     automatically filled accordingly. For newly created Tickets the status of
     the ticket is ``NEW`` and can be changed to other statuses as follows:
 
-        Status -> Action -> New Status
+        Status   -> Action   -> New Status
 
         NEW      -> resolve  -> CLOSED
         NEW      -> accept   -> ACCEPTED

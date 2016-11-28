@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2014 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -19,13 +19,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import unittest
-import datetime
-import logging
-
-from stalker.db import DBSession
-from stalker import (db, defaults, Studio, WorkingHours, Project, StatusList,
-                     Status, Repository, Asset, Type, User, Shot, Department,
-                     Task, TaskJugglerScheduler, SchedulerBase)
+from stalker.testing import UnitTestBase
+from stalker import SchedulerBase
 
 
 class DummyScheduler(SchedulerBase):
@@ -43,22 +38,16 @@ class DummyScheduler(SchedulerBase):
             self.callback()
 
 
-class StudioTester(unittest.TestCase):
+class StudioTester(UnitTestBase):
     """tests the stalker.models.studio.Studio class
     """
-
-    @classmethod
-    def setUpClass(cls):
-        """setup once
-        """
-        logger = logging.getLogger('stalker.models.schedulers')
-        logger.setLevel(logging.DEBUG)
 
     def setUp(self):
         """setup the test
         """
-        db.setup()
-        db.init()
+        super(StudioTester, self).setUp()
+
+        from stalker import db, User
 
         self.test_user1 = User(
             name='User 1',
@@ -66,7 +55,7 @@ class StudioTester(unittest.TestCase):
             email='user1@users.com',
             password='password'
         )
-        DBSession.add(self.test_user1)
+        db.DBSession.add(self.test_user1)
 
         self.test_user2 = User(
             name='User 2',
@@ -74,7 +63,7 @@ class StudioTester(unittest.TestCase):
             email='user2@users.com',
             password='password'
         )
-        DBSession.add(self.test_user2)
+        db.DBSession.add(self.test_user2)
 
         self.test_user3 = User(
             name='User 3',
@@ -82,61 +71,67 @@ class StudioTester(unittest.TestCase):
             email='user3@users.com',
             password='password'
         )
-        DBSession.add(self.test_user3)
+        db.DBSession.add(self.test_user3)
 
+        from stalker import Department
         self.test_department1 = Department(
             name='Test Department 1'
         )
-        DBSession.add(self.test_department1)
+        db.DBSession.add(self.test_department1)
 
         self.test_department2 = Department(
             name='Test Department 2'
         )
-        DBSession.add(self.test_department2)
+        db.DBSession.add(self.test_department2)
 
+        from stalker import Status
         self.test_status1 = Status(
             name='Status 1',
             code='ST1'
         )
-        DBSession.add(self.test_status1)
+        db.DBSession.add(self.test_status1)
 
         self.test_status2 = Status(
             name='Status 2',
             code='ST2'
         )
-        DBSession.add(self.test_status2)
+        db.DBSession.add(self.test_status2)
 
+        from stalker import StatusList
         self.test_project_status_list1 = StatusList(
             name='Project Statuses',
             statuses=[self.test_status1, self.test_status2],
-            target_entity_type=Project
+            target_entity_type='Project'
         )
-        DBSession.add(self.test_project_status_list1)
+        db.DBSession.add(self.test_project_status_list1)
 
+        from stalker import Repository
         self.test_repo = Repository(
             name='Test Repository',
             windows_path='T:/',
             linux_path='/mnt/T/',
             osx_path='/Volumes/T/'
         )
-        DBSession.add(self.test_repo)
+        db.DBSession.add(self.test_repo)
 
         # create a couple of projects
+        from stalker import Project
         self.test_project1 = Project(
             name='Test Project 1',
             code='TP1',
             status_list=self.test_project_status_list1,
             repository=self.test_repo
         )
-        DBSession.add(self.test_project1)
+        db.DBSession.add(self.test_project1)
 
+        from stalker import Project
         self.test_project2 = Project(
             name='Test Project 2',
             code='TP2',
             status_list=self.test_project_status_list1,
             repository=self.test_repo
         )
-        DBSession.add(self.test_project2)
+        db.DBSession.add(self.test_project2)
 
         # an inactive project
         self.test_project3 = Project(
@@ -146,26 +141,28 @@ class StudioTester(unittest.TestCase):
             repository=self.test_repo
         )
         self.test_project3.active = False
-        DBSession.add(self.test_project3)
+        db.DBSession.add(self.test_project3)
 
         # create assets and shots
+        from stalker import Type
         self.test_asset_type = Type(
             name='Character',
             code='Char',
-            target_entity_type=Asset
+            target_entity_type='Asset'
         )
-        DBSession.add(self.test_asset_type)
+        db.DBSession.add(self.test_asset_type)
 
         self.test_asset_status_list = \
             StatusList.query.filter_by(target_entity_type='Asset').first()
 
+        from stalker import Asset, Shot, Task
         self.test_asset1 = Asset(
             name='Test Asset 1',
             code='TA1',
             project=self.test_project1,
             type=self.test_asset_type
         )
-        DBSession.add(self.test_asset1)
+        db.DBSession.add(self.test_asset1)
 
         self.test_asset2 = Asset(
             name='Test Asset 2',
@@ -173,7 +170,7 @@ class StudioTester(unittest.TestCase):
             project=self.test_project2,
             type=self.test_asset_type
         )
-        DBSession.add(self.test_asset2)
+        db.DBSession.add(self.test_asset2)
 
         # shots
         self.test_shot_status_list = \
@@ -185,14 +182,14 @@ class StudioTester(unittest.TestCase):
             project=self.test_project1,
             status_list=self.test_shot_status_list
         )
-        DBSession.add(self.test_shot1)
+        db.DBSession.add(self.test_shot1)
 
         self.test_shot2 = Shot(
             code='shot2',
             project=self.test_project1,
             status_list=self.test_shot_status_list
         )
-        DBSession.add(self.test_shot2)
+        db.DBSession.add(self.test_shot2)
 
         # for project 2
         self.test_shot3 = Shot(
@@ -200,14 +197,14 @@ class StudioTester(unittest.TestCase):
             project=self.test_project2,
             status_list=self.test_shot_status_list
         )
-        DBSession.add(self.test_shot3)
+        db.DBSession.add(self.test_shot3)
 
         self.test_shot4 = Shot(
             code='shot4',
             project=self.test_project2,
             status_list=self.test_shot_status_list
         )
-        DBSession.add(self.test_shot4)
+        db.DBSession.add(self.test_shot4)
 
         # for project 3
         self.test_shot5 = Shot(
@@ -215,9 +212,9 @@ class StudioTester(unittest.TestCase):
             project=self.test_project3,
             status_list=self.test_shot_status_list
         )
-        DBSession.add(self.test_shot5)
+        db.DBSession.add(self.test_shot5)
 
-        #########################################################3
+        #########################################################
         # tasks for projects
         self.test_task_statuses = \
             StatusList.query.filter_by(target_entity_type='Task').first()
@@ -230,7 +227,7 @@ class StudioTester(unittest.TestCase):
             schedule_timing=10,
             schedule_unit='d'
         )
-        DBSession.add(self.test_task1)
+        db.DBSession.add(self.test_task1)
 
         self.test_task2 = Task(
             name='Project Planing',
@@ -240,7 +237,7 @@ class StudioTester(unittest.TestCase):
             schedule_timing=10,
             schedule_unit='d'
         )
-        DBSession.add(self.test_task2)
+        db.DBSession.add(self.test_task2)
 
         self.test_task3 = Task(
             name='Project Planing',
@@ -251,7 +248,7 @@ class StudioTester(unittest.TestCase):
             schedule_timing=5,
             schedule_unit='d'
         )
-        DBSession.add(self.test_task3)
+        db.DBSession.add(self.test_task3)
 
         # for shots
 
@@ -265,7 +262,7 @@ class StudioTester(unittest.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        DBSession.add(self.test_task4)
+        db.DBSession.add(self.test_task4)
 
         self.test_task5 = Task(
             name='FX',
@@ -277,7 +274,7 @@ class StudioTester(unittest.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        DBSession.add(self.test_task5)
+        db.DBSession.add(self.test_task5)
 
         self.test_task6 = Task(
             name='Lighting',
@@ -289,7 +286,7 @@ class StudioTester(unittest.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        DBSession.add(self.test_task6)
+        db.DBSession.add(self.test_task6)
 
         self.test_task7 = Task(
             name='Comp',
@@ -301,7 +298,7 @@ class StudioTester(unittest.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        DBSession.add(self.test_task7)
+        db.DBSession.add(self.test_task7)
 
         # Shot 2
         self.test_task8 = Task(
@@ -313,7 +310,7 @@ class StudioTester(unittest.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        DBSession.add(self.test_task8)
+        db.DBSession.add(self.test_task8)
 
         self.test_task9 = Task(
             name='FX',
@@ -325,7 +322,7 @@ class StudioTester(unittest.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        DBSession.add(self.test_task9)
+        db.DBSession.add(self.test_task9)
 
         self.test_task10 = Task(
             name='Lighting',
@@ -337,7 +334,7 @@ class StudioTester(unittest.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        DBSession.add(self.test_task10)
+        db.DBSession.add(self.test_task10)
 
         self.test_task11 = Task(
             name='Comp',
@@ -349,7 +346,7 @@ class StudioTester(unittest.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        DBSession.add(self.test_task11)
+        db.DBSession.add(self.test_task11)
 
         # Shot 3
         self.test_task12 = Task(
@@ -361,7 +358,7 @@ class StudioTester(unittest.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        DBSession.add(self.test_task12)
+        db.DBSession.add(self.test_task12)
 
         self.test_task13 = Task(
             name='FX',
@@ -373,7 +370,7 @@ class StudioTester(unittest.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        DBSession.add(self.test_task13)
+        db.DBSession.add(self.test_task13)
 
         self.test_task14 = Task(
             name='Lighting',
@@ -385,7 +382,7 @@ class StudioTester(unittest.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        DBSession.add(self.test_task14)
+        db.DBSession.add(self.test_task14)
 
         self.test_task15 = Task(
             name='Comp',
@@ -397,7 +394,7 @@ class StudioTester(unittest.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        DBSession.add(self.test_task15)
+        db.DBSession.add(self.test_task15)
 
         # Shot 4
         self.test_task16 = Task(
@@ -409,7 +406,7 @@ class StudioTester(unittest.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        DBSession.add(self.test_task16)
+        db.DBSession.add(self.test_task16)
 
         self.test_task17 = Task(
             name='FX',
@@ -421,7 +418,7 @@ class StudioTester(unittest.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        DBSession.add(self.test_task17)
+        db.DBSession.add(self.test_task17)
 
         self.test_task18 = Task(
             name='Lighting',
@@ -433,7 +430,7 @@ class StudioTester(unittest.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        DBSession.add(self.test_task18)
+        db.DBSession.add(self.test_task18)
 
         self.test_task19 = Task(
             name='Comp',
@@ -445,7 +442,7 @@ class StudioTester(unittest.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        DBSession.add(self.test_task19)
+        db.DBSession.add(self.test_task19)
 
         # Shot 5
         self.test_task20 = Task(
@@ -457,7 +454,7 @@ class StudioTester(unittest.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        DBSession.add(self.test_task20)
+        db.DBSession.add(self.test_task20)
 
         self.test_task21 = Task(
             name='FX',
@@ -469,7 +466,7 @@ class StudioTester(unittest.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        DBSession.add(self.test_task21)
+        db.DBSession.add(self.test_task21)
 
         self.test_task22 = Task(
             name='Lighting',
@@ -481,7 +478,7 @@ class StudioTester(unittest.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        DBSession.add(self.test_task22)
+        db.DBSession.add(self.test_task22)
 
         self.test_task23 = Task(
             name='Comp',
@@ -493,9 +490,9 @@ class StudioTester(unittest.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        DBSession.add(self.test_task23)
+        db.DBSession.add(self.test_task23)
 
-        ####################################################3
+        ####################################################
         # For Assets
 
         # Asset 1
@@ -508,7 +505,7 @@ class StudioTester(unittest.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        DBSession.add(self.test_task24)
+        db.DBSession.add(self.test_task24)
 
         self.test_task25 = Task(
             name='Model',
@@ -520,7 +517,7 @@ class StudioTester(unittest.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        DBSession.add(self.test_task25)
+        db.DBSession.add(self.test_task25)
 
         self.test_task26 = Task(
             name='LookDev',
@@ -532,7 +529,7 @@ class StudioTester(unittest.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        DBSession.add(self.test_task26)
+        db.DBSession.add(self.test_task26)
 
         self.test_task27 = Task(
             name='Rig',
@@ -544,7 +541,7 @@ class StudioTester(unittest.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        DBSession.add(self.test_task27)
+        db.DBSession.add(self.test_task27)
 
         # Asset 2
         self.test_task28 = Task(
@@ -556,7 +553,7 @@ class StudioTester(unittest.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        DBSession.add(self.test_task28)
+        db.DBSession.add(self.test_task28)
 
         self.test_task29 = Task(
             name='Model',
@@ -568,7 +565,7 @@ class StudioTester(unittest.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        DBSession.add(self.test_task29)
+        db.DBSession.add(self.test_task29)
 
         self.test_task30 = Task(
             name='LookDev',
@@ -580,7 +577,7 @@ class StudioTester(unittest.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        DBSession.add(self.test_task30)
+        db.DBSession.add(self.test_task30)
 
         self.test_task31 = Task(
             name='Rig',
@@ -592,24 +589,20 @@ class StudioTester(unittest.TestCase):
             schedule_unit='d',
             status_list=self.test_task_statuses
         )
-        DBSession.add(self.test_task31)
+        db.DBSession.add(self.test_task31)
 
         # TODO: Add Milestones
-
+        import datetime
         self.kwargs = dict(
             name='Studio',
             daily_working_hours=8,
             timing_resolution=datetime.timedelta(hours=1)
         )
 
+        from stalker import Studio
         self.test_studio = Studio(**self.kwargs)
-        DBSession.add(self.test_studio)
-        DBSession.commit()
-
-    def tearDown(self):
-        """clean up the test
-        """
-        DBSession.remove()
+        db.DBSession.add(self.test_studio)
+        db.DBSession.commit()
 
     def test_working_hours_argument_is_skipped(self):
         """testing if the default working hours will be used when the
@@ -621,6 +614,7 @@ class StudioTester(unittest.TestCase):
         except KeyError:
             pass
 
+        from stalker import Studio, WorkingHours
         new_studio = Studio(**self.kwargs)
         self.assertEqual(new_studio.working_hours, WorkingHours())
 
@@ -630,6 +624,7 @@ class StudioTester(unittest.TestCase):
         """
         self.kwargs['name'] = 'New Studio'
         self.kwargs['working_hours'] = None
+        from stalker import Studio, WorkingHours
         new_studio = Studio(**self.kwargs)
         self.assertEqual(new_studio.working_hours, WorkingHours())
 
@@ -637,6 +632,7 @@ class StudioTester(unittest.TestCase):
         """testing if a WorkingHour instance will be created with the default
         values if the working_hours attribute is set to None
         """
+        from stalker import WorkingHours
         self.test_studio.working_horus = None
         self.assertEqual(self.test_studio.working_hours, WorkingHours())
 
@@ -701,9 +697,9 @@ class StudioTester(unittest.TestCase):
     def test_departments_attribute_is_working_properly(self):
         """testing if the departments attribute is working properly
         """
-        # don't forget admins department
-        db.init()
+        from stalker import Department
         admins_dep = Department.query.filter_by(name='admins').first()
+        self.assertIsNotNone(admins_dep)
         self.assertEqual(
             sorted(self.test_studio.departments, key=lambda x: x.name),
             sorted([self.test_department1, self.test_department2, admins_dep],
@@ -720,6 +716,7 @@ class StudioTester(unittest.TestCase):
         """testing if the users attribute is working properly
         """
         # don't forget the admin
+        from stalker import User
         admin = User.query.filter_by(name='admin').first()
 
         self.assertEqual(
@@ -736,40 +733,59 @@ class StudioTester(unittest.TestCase):
 
     def test_now_argument_is_skipped(self):
         """testing if the now attribute will use the rounded
-        datetime.datetime.now value when the now argument is skipped
+        datetime.datetime.now(pytz.utc) value when the now argument is skipped
         """
         try:
             self.kwargs.pop('now')
         except KeyError:
             pass
 
+        import datetime
+        import pytz
+        from stalker import Studio
         new_studio = Studio(**self.kwargs)
-        self.assertEqual(new_studio.now,
-                         new_studio.round_time(datetime.datetime.now()))
+        self.assertEqual(
+            new_studio.now,
+            new_studio.round_time(
+                datetime.datetime.now(pytz.utc)
+            )
+        )
 
     def test_now_argument_is_None(self):
         """testing if the now attribute will use the rounded
-        datetime.datetime.now value when the now argument is None
+        datetime.datetime.now(pytz.utc) value when the now argument is None
         """
+        import datetime
+        import pytz
+        from stalker import Studio
         self.kwargs['now'] = None
         new_studio = Studio(**self.kwargs)
-        self.assertEqual(new_studio.now,
-                         new_studio.round_time(datetime.datetime.now()))
+        self.assertEqual(
+            new_studio.now,
+            new_studio.round_time(
+                datetime.datetime.now(pytz.utc)
+            )
+        )
 
     def test_now_attribute_is_None(self):
         """testing if the now attribute will be equal to the rounded value of
-        datetime.datetime.now() if it is set to None
+        datetime.datetime.now(pytz.utc) if it is set to None
         """
+        import pytz
+        import datetime
         self.test_studio.now = None
         self.assertEqual(
             self.test_studio.now,
-            self.test_studio.round_time(datetime.datetime.now())
+            self.test_studio.round_time(
+                datetime.datetime.now(pytz.utc)
+            )
         )
 
     def test_now_argument_is_not_a_datetime_instance(self):
         """testing if a TypeError will be raised when the now argument is not
         a datetime.datetime instance
         """
+        from stalker import Studio
         self.kwargs['now'] = 'not a datetime instance'
         self.assertRaises(TypeError, Studio, **self.kwargs)
 
@@ -784,23 +800,36 @@ class StudioTester(unittest.TestCase):
         """testing if the now argument value is passed to the now attribute
         properly
         """
-        self.kwargs['now'] = datetime.datetime(2013, 4, 15, 21, 9)
-        expected_now = datetime.datetime(2013, 4, 15, 21, 0)
+        import datetime
+        import pytz
+        from stalker import Studio
+        self.kwargs['now'] = \
+            datetime.datetime(2013, 4, 15, 21, 9, tzinfo=pytz.utc)
+        expected_now = \
+            datetime.datetime(2013, 4, 15, 21, 0, tzinfo=pytz.utc)
         new_studio = Studio(**self.kwargs)
         self.assertEqual(new_studio.now, expected_now)
 
     def test_now_attribute_is_working_properly(self):
         """testing if the now attribute is working properly
         """
-        self.test_studio.now = datetime.datetime(2013, 4, 15, 21, 11)
-        expected_now = datetime.datetime(2013, 4, 15, 21, 0)
+        import datetime
+        import pytz
+        self.test_studio.now = \
+            datetime.datetime(2013, 4, 15, 21, 11, tzinfo=pytz.utc)
+        expected_now = \
+            datetime.datetime(2013, 4, 15, 21, 0, tzinfo=pytz.utc)
         self.assertEqual(self.test_studio.now, expected_now)
 
     def test_now_attribute_is_working_properly_case2(self):
         """testing if the now attribute is working properly
         """
+        import datetime
+        import pytz
+        from stalker import Studio
         self.test_studio._now = None
-        expected_now = Studio.round_time(datetime.datetime.now())
+        expected_now = \
+            Studio.round_time(datetime.datetime.now(pytz.utc))
         self.assertEqual(
             self.test_studio.now,
             expected_now
@@ -809,9 +838,12 @@ class StudioTester(unittest.TestCase):
     def test_to_tjp_attribute_is_working_properly(self):
         """testing if the to_tjp attribute is working properly
         """
-        self.test_studio.start = datetime.datetime(2013, 4, 15, 17, 40)
-        self.test_studio.end = datetime.datetime(2013, 6, 30, 17, 40)
-        now = self.test_studio.round_time(datetime.datetime.now())
+        import datetime
+        import pytz
+        self.test_studio.start = \
+            datetime.datetime(2013, 4, 15, 17, 40, tzinfo=pytz.utc)
+        self.test_studio.end = \
+            datetime.datetime(2013, 6, 30, 17, 40, tzinfo=pytz.utc)
         self.test_studio.working_hours[0] = [[540, 1080]]
         self.test_studio.working_hours[1] = [[540, 1080]]
         self.test_studio.working_hours[2] = [[540, 1080]]
@@ -866,6 +898,7 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
     def test_scheduler_attribute_is_working_properly(self):
         """testing if the scheduler attribute is working properly
         """
+        from stalker import TaskJugglerScheduler
         tj_s = TaskJugglerScheduler()
         self.test_studio.scheduler = tj_s
         self.assertEqual(self.test_studio.scheduler, tj_s)
@@ -881,10 +914,16 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         """testing if the schedule method will schedule the tasks with the
         given scheduler
         """
+        import datetime
+        import pytz
+        from stalker import db, TaskJugglerScheduler
         tj_scheduler = TaskJugglerScheduler(compute_resources=True)
-        self.test_studio.now = datetime.datetime(2013, 4, 15, 22, 56)
-        self.test_studio.start = datetime.datetime(2013, 4, 15, 22, 56)
-        self.test_studio.end = datetime.datetime(2013, 7, 30, 0, 0)
+        self.test_studio.now = \
+            datetime.datetime(2013, 4, 15, 22, 56, tzinfo=pytz.utc)
+        self.test_studio.start = \
+            datetime.datetime(2013, 4, 15, 22, 56, tzinfo=pytz.utc)
+        self.test_studio.end = \
+            datetime.datetime(2013, 7, 30, 0, 0, tzinfo=pytz.utc)
 
         # just to be sure that it is not creating any issue on schedule
         self.test_task25.task_depends_to[0].dependency_target = 'onstart'
@@ -946,21 +985,21 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_project
         self.assertEqual(
-            datetime.datetime(2013, 4, 16, 9, 0),
+            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc),
             self.test_project1.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 19, 11, 0),
+            datetime.datetime(2013, 6, 19, 11, 0, tzinfo=pytz.utc),
             self.test_project1.computed_end
         )
 
         # self.test_asset1
         self.assertEqual(
-            datetime.datetime(2013, 4, 16, 9, 0),
+            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc),
             self.test_asset1.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 5, 17, 10, 0),
+            datetime.datetime(2013, 5, 17, 10, 0, tzinfo=pytz.utc),
             self.test_asset1.computed_end
         )
 
@@ -971,11 +1010,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_task24
         self.assertEqual(
-            datetime.datetime(2013, 4, 16, 9, 0),
+            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc),
             self.test_task24.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 4, 26, 17, 0),
+            datetime.datetime(2013, 4, 26, 17, 0, tzinfo=pytz.utc),
             self.test_task24.computed_end
         )
 
@@ -986,11 +1025,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_task25
         self.assertEqual(
-            datetime.datetime(2013, 4, 16, 9, 0),
+            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc),
             self.test_task25.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 5, 3, 12, 0),
+            datetime.datetime(2013, 5, 3, 12, 0, tzinfo=pytz.utc),
             self.test_task25.computed_end
         )
 
@@ -1001,11 +1040,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_task26
         self.assertEqual(
-            datetime.datetime(2013, 5, 3, 12, 0),
+            datetime.datetime(2013, 5, 3, 12, 0, tzinfo=pytz.utc),
             self.test_task26.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 5, 16, 11, 0),
+            datetime.datetime(2013, 5, 16, 11, 0, tzinfo=pytz.utc),
             self.test_task26.computed_end
         )
 
@@ -1016,11 +1055,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_task27
         self.assertEqual(
-            datetime.datetime(2013, 5, 6, 11, 0),
+            datetime.datetime(2013, 5, 6, 11, 0, tzinfo=pytz.utc),
             self.test_task27.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 5, 17, 10, 0),
+            datetime.datetime(2013, 5, 17, 10, 0, tzinfo=pytz.utc),
             self.test_task27.computed_end
         )
 
@@ -1031,11 +1070,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_shot2
         self.assertEqual(
-            datetime.datetime(2013, 4, 26, 17, 0),
+            datetime.datetime(2013, 4, 26, 17, 0, tzinfo=pytz.utc),
             self.test_shot2.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 14, 14, 0),
+            datetime.datetime(2013, 6, 14, 14, 0, tzinfo=pytz.utc),
             self.test_shot2.computed_end
         )
 
@@ -1046,11 +1085,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_task8
         self.assertEqual(
-            datetime.datetime(2013, 4, 26, 17, 0),
+            datetime.datetime(2013, 4, 26, 17, 0, tzinfo=pytz.utc),
             self.test_task8.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 4, 30, 15, 0),
+            datetime.datetime(2013, 4, 30, 15, 0, tzinfo=pytz.utc),
             self.test_task8.computed_end
         )
 
@@ -1061,11 +1100,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_task9
         self.assertEqual(
-            datetime.datetime(2013, 5, 30, 9, 0),
+            datetime.datetime(2013, 5, 30, 9, 0, tzinfo=pytz.utc),
             self.test_task9.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 5, 31, 16, 0),
+            datetime.datetime(2013, 5, 31, 16, 0, tzinfo=pytz.utc),
             self.test_task9.computed_end
         )
 
@@ -1076,11 +1115,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_task10
         self.assertEqual(
-            datetime.datetime(2013, 6, 4, 14, 0),
+            datetime.datetime(2013, 6, 4, 14, 0, tzinfo=pytz.utc),
             self.test_task10.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 7, 11, 0),
+            datetime.datetime(2013, 6, 7, 11, 0, tzinfo=pytz.utc),
             self.test_task10.computed_end
         )
 
@@ -1091,11 +1130,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_task11
         self.assertEqual(
-            datetime.datetime(2013, 6, 11, 9, 0),
+            datetime.datetime(2013, 6, 11, 9, 0, tzinfo=pytz.utc),
             self.test_task11.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 14, 14, 0),
+            datetime.datetime(2013, 6, 14, 14, 0, tzinfo=pytz.utc),
             self.test_task11.computed_end
         )
 
@@ -1106,11 +1145,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_shot1
         self.assertEqual(
-            datetime.datetime(2013, 5, 16, 11, 0),
+            datetime.datetime(2013, 5, 16, 11, 0, tzinfo=pytz.utc),
             self.test_shot1.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 19, 11, 0),
+            datetime.datetime(2013, 6, 19, 11, 0, tzinfo=pytz.utc),
             self.test_shot1.computed_end
         )
 
@@ -1121,11 +1160,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_task4
         self.assertEqual(
-            datetime.datetime(2013, 5, 16, 11, 0),
+            datetime.datetime(2013, 5, 16, 11, 0, tzinfo=pytz.utc),
             self.test_task4.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 5, 17, 18, 0),
+            datetime.datetime(2013, 5, 17, 18, 0, tzinfo=pytz.utc),
             self.test_task4.computed_end
         )
 
@@ -1136,11 +1175,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_task5
         self.assertEqual(
-            datetime.datetime(2013, 6, 3, 15, 0),
+            datetime.datetime(2013, 6, 3, 15, 0, tzinfo=pytz.utc),
             self.test_task5.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 5, 13, 0),
+            datetime.datetime(2013, 6, 5, 13, 0, tzinfo=pytz.utc),
             self.test_task5.computed_end
         )
 
@@ -1151,11 +1190,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_task6
         self.assertEqual(
-            datetime.datetime(2013, 6, 10, 10, 0),
+            datetime.datetime(2013, 6, 10, 10, 0, tzinfo=pytz.utc),
             self.test_task6.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 12, 16, 0),
+            datetime.datetime(2013, 6, 12, 16, 0, tzinfo=pytz.utc),
             self.test_task6.computed_end
         )
 
@@ -1166,11 +1205,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_task7
         self.assertEqual(
-            datetime.datetime(2013, 6, 14, 14, 0),
+            datetime.datetime(2013, 6, 14, 14, 0, tzinfo=pytz.utc),
             self.test_task7.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 19, 11, 0),
+            datetime.datetime(2013, 6, 19, 11, 0, tzinfo=pytz.utc),
             self.test_task7.computed_end
         )
 
@@ -1181,11 +1220,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_task1
         self.assertEqual(
-            datetime.datetime(2013, 5, 16, 11, 0),
+            datetime.datetime(2013, 5, 16, 11, 0, tzinfo=pytz.utc),
             self.test_task1.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 5, 29, 10, 0),
+            datetime.datetime(2013, 5, 29, 10, 0, tzinfo=pytz.utc),
             self.test_task1.computed_end
         )
 
@@ -1196,11 +1235,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_project2
         # self.assertEqual(
-        #     datetime.datetime(2013, 4, 16, 9, 0),
+        #     datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc),
         #     self.test_project2.computed_start
         # )
         # self.assertEqual(
-        #     datetime.datetime(2013, 6, 18, 12, 0),
+        #     datetime.datetime(2013, 6, 18, 12, 0, tzinfo=pytz.utc),
         #     self.test_project2.computed_end
         # )
 
@@ -1211,11 +1250,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_asset2
         self.assertEqual(
-            datetime.datetime(2013, 4, 16, 9, 0),
+            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc),
             self.test_asset2.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 5, 30, 17, 0),
+            datetime.datetime(2013, 5, 30, 17, 0, tzinfo=pytz.utc),
             self.test_asset2.computed_end
         )
 
@@ -1226,11 +1265,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_task28
         self.assertEqual(
-            datetime.datetime(2013, 4, 16, 9, 0),
+            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc),
             self.test_task28.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 4, 26, 17, 0),
+            datetime.datetime(2013, 4, 26, 17, 0, tzinfo=pytz.utc),
             self.test_task28.computed_end
         )
 
@@ -1241,11 +1280,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_task29
         self.assertEqual(
-            datetime.datetime(2013, 4, 26, 17, 0),
+            datetime.datetime(2013, 4, 26, 17, 0, tzinfo=pytz.utc),
             self.test_task29.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 5, 16, 11, 0),
+            datetime.datetime(2013, 5, 16, 11, 0, tzinfo=pytz.utc),
             self.test_task29.computed_end
         )
 
@@ -1256,11 +1295,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_task30
         self.assertEqual(
-            datetime.datetime(2013, 5, 17, 10, 0),
+            datetime.datetime(2013, 5, 17, 10, 0, tzinfo=pytz.utc),
             self.test_task30.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 5, 29, 18, 0),
+            datetime.datetime(2013, 5, 29, 18, 0, tzinfo=pytz.utc),
             self.test_task30.computed_end
         )
 
@@ -1271,11 +1310,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_task31
         self.assertEqual(
-            datetime.datetime(2013, 5, 20, 9, 0),
+            datetime.datetime(2013, 5, 20, 9, 0, tzinfo=pytz.utc),
             self.test_task31.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 5, 30, 17, 0),
+            datetime.datetime(2013, 5, 30, 17, 0, tzinfo=pytz.utc),
             self.test_task31.computed_end
         )
 
@@ -1286,11 +1325,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_shot3
         self.assertEqual(
-            datetime.datetime(2013, 4, 30, 15, 0),
+            datetime.datetime(2013, 4, 30, 15, 0, tzinfo=pytz.utc),
             self.test_shot3.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 17, 13, 0),
+            datetime.datetime(2013, 6, 17, 13, 0, tzinfo=pytz.utc),
             self.test_shot3.computed_end
         )
 
@@ -1301,11 +1340,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_task12
         self.assertEqual(
-            datetime.datetime(2013, 4, 30, 15, 0),
+            datetime.datetime(2013, 4, 30, 15, 0, tzinfo=pytz.utc),
             self.test_task12.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 5, 2, 13, 0),
+            datetime.datetime(2013, 5, 2, 13, 0, tzinfo=pytz.utc),
             self.test_task12.computed_end
         )
 
@@ -1316,11 +1355,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_task13
         self.assertEqual(
-            datetime.datetime(2013, 5, 30, 17, 0),
+            datetime.datetime(2013, 5, 30, 17, 0, tzinfo=pytz.utc),
             self.test_task13.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 3, 15, 0),
+            datetime.datetime(2013, 6, 3, 15, 0, tzinfo=pytz.utc),
             self.test_task13.computed_end
         )
 
@@ -1331,11 +1370,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_task14
         self.assertEqual(
-            datetime.datetime(2013, 6, 5, 13, 0),
+            datetime.datetime(2013, 6, 5, 13, 0, tzinfo=pytz.utc),
             self.test_task14.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 10, 10, 0),
+            datetime.datetime(2013, 6, 10, 10, 0, tzinfo=pytz.utc),
             self.test_task14.computed_end
         )
 
@@ -1346,11 +1385,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_task15
         self.assertEqual(
-            datetime.datetime(2013, 6, 11, 17, 0),
+            datetime.datetime(2013, 6, 11, 17, 0, tzinfo=pytz.utc),
             self.test_task15.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 17, 13, 0),
+            datetime.datetime(2013, 6, 17, 13, 0, tzinfo=pytz.utc),
             self.test_task15.computed_end
         )
 
@@ -1361,11 +1400,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_shot4
         self.assertEqual(
-            datetime.datetime(2013, 5, 2, 13, 0),
+            datetime.datetime(2013, 5, 2, 13, 0, tzinfo=pytz.utc),
             self.test_shot4.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 18, 12, 0),
+            datetime.datetime(2013, 6, 18, 12, 0, tzinfo=pytz.utc),
             self.test_shot4.computed_end
         )
 
@@ -1376,11 +1415,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_task16
         self.assertEqual(
-            datetime.datetime(2013, 5, 2, 13, 0),
+            datetime.datetime(2013, 5, 2, 13, 0, tzinfo=pytz.utc),
             self.test_task16.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 5, 6, 11, 0),
+            datetime.datetime(2013, 5, 6, 11, 0, tzinfo=pytz.utc),
             self.test_task16.computed_end
         )
 
@@ -1391,11 +1430,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_task17
         self.assertEqual(
-            datetime.datetime(2013, 5, 31, 16, 0),
+            datetime.datetime(2013, 5, 31, 16, 0, tzinfo=pytz.utc),
             self.test_task17.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 4, 14, 0),
+            datetime.datetime(2013, 6, 4, 14, 0, tzinfo=pytz.utc),
             self.test_task17.computed_end
         )
 
@@ -1406,11 +1445,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_task18
         self.assertEqual(
-            datetime.datetime(2013, 6, 7, 11, 0),
+            datetime.datetime(2013, 6, 7, 11, 0, tzinfo=pytz.utc),
             self.test_task18.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 11, 17, 0),
+            datetime.datetime(2013, 6, 11, 17, 0, tzinfo=pytz.utc),
             self.test_task18.computed_end
         )
 
@@ -1421,11 +1460,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_task19
         self.assertEqual(
-            datetime.datetime(2013, 6, 12, 16, 0),
+            datetime.datetime(2013, 6, 12, 16, 0, tzinfo=pytz.utc),
             self.test_task19.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 18, 12, 0),
+            datetime.datetime(2013, 6, 18, 12, 0, tzinfo=pytz.utc),
             self.test_task19.computed_end
         )
 
@@ -1436,11 +1475,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_task2
         self.assertEqual(
-            datetime.datetime(2013, 5, 29, 10, 0),
+            datetime.datetime(2013, 5, 29, 10, 0, tzinfo=pytz.utc),
             self.test_task2.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 10, 18, 0),
+            datetime.datetime(2013, 6, 10, 18, 0, tzinfo=pytz.utc),
             self.test_task2.computed_end
         )
 
@@ -1453,6 +1492,7 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         """testing if the schedule method will schedule the tasks of the given
         projects with the given scheduler
         """
+        from stalker import db, Project, Task, TaskJugglerScheduler
         # create a dummy Project to schedule
         dummy_project = Project(
             name='Dummy Project',
@@ -1483,9 +1523,14 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
             projects=[dummy_project]
         )
 
-        self.test_studio.now = datetime.datetime(2013, 4, 15, 22, 56)
-        self.test_studio.start = datetime.datetime(2013, 4, 15, 22, 56)
-        self.test_studio.end = datetime.datetime(2013, 7, 30, 0, 0)
+        import datetime
+        import pytz
+        self.test_studio.now = \
+            datetime.datetime(2013, 4, 15, 22, 56, tzinfo=pytz.utc)
+        self.test_studio.start = \
+            datetime.datetime(2013, 4, 15, 22, 56, tzinfo=pytz.utc)
+        self.test_studio.end = \
+            datetime.datetime(2013, 7, 30, 0, 0, tzinfo=pytz.utc)
 
         self.test_studio.scheduler = tj_scheduler
         self.test_studio.schedule()
@@ -1494,20 +1539,20 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         # now check the timings of the tasks are all adjusted
         self.assertEqual(
             dt1.computed_start,
-            datetime.datetime(2013, 4, 16, 9, 0)
+            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc)
         )
         self.assertEqual(
             dt1.computed_end,
-            datetime.datetime(2013, 4, 16, 13, 0)
+            datetime.datetime(2013, 4, 16, 13, 0, tzinfo=pytz.utc)
         )
 
         self.assertEqual(
             dt2.computed_start,
-            datetime.datetime(2013, 4, 16, 9, 0)
+            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc)
         )
         self.assertEqual(
             dt2.computed_end,
-            datetime.datetime(2013, 4, 16, 13, 0)
+            datetime.datetime(2013, 4, 16, 13, 0, tzinfo=pytz.utc)
         )
 
         # self.test_project
@@ -1738,28 +1783,19 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         self.assertEqual(self.test_task2.computed_resources,
                          self.test_task2.resources)
 
-# def test_schedule_will_raise_a_RuntimeError_if_is_scheduling_is_True(self):
-    #     """testing if a RuntimeError will be raised when the schedule method
-    #     is called and the is_scheduling attribute is True
-    #     """
-    #     tj_scheduler = TaskJugglerScheduler()
-    #     self.test_studio.now = datetime.datetime(2013, 4, 15, 22, 56)
-    #     self.test_studio.start = datetime.datetime(2013, 4, 15, 22, 56)
-    #     self.test_studio.end = datetime.datetime(2013, 7, 30, 0, 0)
-    #
-    #     self.test_studio.scheduler = tj_scheduler
-    #     self.test_studio.is_scheduling = True
-    #     self.test_studio.is_scheduling_by = self.test_user1
-    #     self.assertRaises(RuntimeError, self.test_studio.schedule)
-
     def test_is_scheduling_will_be_False_after_scheduling_is_done(self):
         """testing if the is_scheduling attribute will be back to False when
         the scheduling is finished
         """
+        import datetime
+        import pytz
         # use a dummy scheduler
-        self.test_studio.now = datetime.datetime(2013, 4, 15, 22, 56)
-        self.test_studio.start = datetime.datetime(2013, 4, 15, 22, 56)
-        self.test_studio.end = datetime.datetime(2013, 7, 30, 0, 0)
+        self.test_studio.now = \
+            datetime.datetime(2013, 4, 15, 22, 56, tzinfo=pytz.utc)
+        self.test_studio.start = \
+            datetime.datetime(2013, 4, 15, 22, 56, tzinfo=pytz.utc)
+        self.test_studio.end = \
+            datetime.datetime(2013, 7, 30, 0, 0, tzinfo=pytz.utc)
 
         def callback():
             self.assertTrue(self.test_studio.is_scheduling)
@@ -1779,10 +1815,16 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         """testing if the schedule method will store the schedule info in
         database
         """
+        import datetime
+        import pytz
+        from stalker import db, Studio, TaskJugglerScheduler
         tj_scheduler = TaskJugglerScheduler()
-        self.test_studio.now = datetime.datetime(2013, 4, 15, 22, 56)
-        self.test_studio.start = datetime.datetime(2013, 4, 15, 22, 56)
-        self.test_studio.end = datetime.datetime(2013, 7, 30, 0, 0)
+        self.test_studio.now = \
+            datetime.datetime(2013, 4, 15, 22, 56, tzinfo=pytz.utc)
+        self.test_studio.start = \
+            datetime.datetime(2013, 4, 15, 22, 56, tzinfo=pytz.utc)
+        self.test_studio.end = \
+            datetime.datetime(2013, 7, 30, 0, 0, tzinfo=pytz.utc)
 
         self.test_studio.scheduler = tj_scheduler
         self.test_studio.schedule(scheduled_by=self.test_user1)
@@ -1808,7 +1850,7 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         self.assertFalse(studio.is_scheduling)
         self.assertTrue(
-            datetime.datetime.now() - studio.scheduling_started_at <
+            datetime.datetime.now(pytz.utc) - studio.scheduling_started_at <
             datetime.timedelta(minutes=1)
         )
         self.assertEqual(last_schedule_message, studio.last_schedule_message)
@@ -1828,23 +1870,25 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         """Testing if the vacation attribute is returning the Vacation
         instances with no user set.
         """
-        from stalker.models.studio import Vacation
+        import datetime
+        import pytz
+        from stalker import db, Vacation
 
         vacation1 = Vacation(
-            start=datetime.datetime(2013, 8, 2),
-            end=datetime.datetime(2013, 8, 10)
+            start=datetime.datetime(2013, 8, 2, tzinfo=pytz.utc),
+            end=datetime.datetime(2013, 8, 10, tzinfo=pytz.utc)
         )
         vacation2 = Vacation(
-            start=datetime.datetime(2013, 8, 11),
-            end=datetime.datetime(2013, 8, 20)
+            start=datetime.datetime(2013, 8, 11, tzinfo=pytz.utc),
+            end=datetime.datetime(2013, 8, 20, tzinfo=pytz.utc)
         )
         vacation3 = Vacation(
             user=self.test_user1,
-            start=datetime.datetime(2013, 8, 11),
-            end=datetime.datetime(2013, 8, 20)
+            start=datetime.datetime(2013, 8, 11, tzinfo=pytz.utc),
+            end=datetime.datetime(2013, 8, 20, tzinfo=pytz.utc)
         )
-        DBSession.add_all([vacation1, vacation2, vacation3])
-        DBSession.commit()
+        db.DBSession.add_all([vacation1, vacation2, vacation3])
+        db.DBSession.commit()
 
         self.assertEqual(
             sorted(self.test_studio.vacations, key=lambda x: x.name),
@@ -1856,6 +1900,7 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         default value from the defaults.timing_resolution if timing_resolution
         argument is skipped
         """
+        from stalker import defaults, Studio
         try:
             self.kwargs.pop('timing_resolution')
         except KeyError:
@@ -1867,36 +1912,12 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
             defaults.timing_resolution
         )
 
-    # def test_timing_resolution_argument_skipped_Studio_is_present(self):
-    #     """testing if the timing_resolution attribute will be set to the Studio
-    #     timing resolution if timing_resolution argument is skipped and there is
-    #     a Studio instance
-    #     """
-    #     try:
-    #         self.kwargs.pop('timing_resolution')
-    #     except KeyError:
-    #         pass
-    # 
-    #     from stalker import Studio
-    #     db.setup({'sqlalchemy.url': 'sqlite:///:memory:'})
-    #     studio = Studio(
-    #         name='Test Studio',
-    #         timing_resolution=datetime.timedelta(minutes=15)
-    #     )
-    #     DBSession.add(studio)
-    #     DBSession.commit()
-    # 
-    #     new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
-    #     self.assertEqual(
-    #         new_foo_obj.timing_resolution,
-    #         studio.timing_resolution
-    #     )
-
     def test_timing_resolution_argument_is_None(self):
         """testing if the timing_resolution attribute will be set to the
         default value from the default.timing_resolution if timing_resolution
         argument is None
         """
+        from stalker import defaults, Studio
         self.kwargs['timing_resolution'] = None
         studio = Studio(**self.kwargs)
         self.assertEqual(
@@ -1904,32 +1925,12 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
             defaults.timing_resolution
         )
 
-    # def test_timing_resolution_argument_is_None_Studio_is_present(self):
-    #     """testing if the timing_resolution attribute will be set to the
-    #     default value from the Studio.timing_resolution if timing_resolution
-    #     argument is None and there is a Studio
-    #     """
-    #     self.kwargs['timing_resolution'] = None
-    # 
-    #     from stalker import Studio
-    #     db.setup({'sqlalchemy.url': 'sqlite:///:memory:'})
-    #     studio = Studio(
-    #         name='Test Studio',
-    #         timing_resolution=datetime.timedelta(minutes=15)
-    #     )
-    #     DBSession.add(studio)
-    #     DBSession.commit()
-    # 
-    #     new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
-    #     self.assertEqual(
-    #         new_foo_obj.timing_resolution,
-    #         studio.timing_resolution
-    #     )
-
     def test_timing_resolution_attribute_is_set_to_None(self):
         """testing if the timing_resolution attribute will be set to the
         default value from the defaults.timing_resolution if it is set to None
         """
+        import datetime
+        from stalker import defaults, Studio
         self.kwargs['timing_resolution'] = datetime.timedelta(minutes=5)
         studio = Studio(**self.kwargs)
         # check start conditions
@@ -1943,39 +1944,11 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
             defaults.timing_resolution
         )
 
-    # def test_timing_resolution_attribute_is_set_to_None_Studio_is_present(self):
-    #     """testing if the timing_resolution attribute will be set to the
-    #     default value from the Studio.timing_resolution if it is set to None
-    #     and there is a Studio instance
-    #     """
-    #     from stalker import Studio
-    #     db.setup({'sqlalchemy.url': 'sqlite:///:memory:'})
-    #     studio = Studio(
-    #         name='Test Studio',
-    #         resolution=datetime.timedelta(minutes=15)
-    #     )
-    #     session.add(studio)
-    #     session.commit()
-    # 
-    #     self.kwargs['timing_resolution'] = datetime.timedelta(minutes=5)
-    #     new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
-    #     # check start conditions
-    #     self.assertEqual(new_foo_obj.timing_resolution,
-    #                      self.kwargs['timing_resolution'])
-    #     new_foo_obj.timing_resolution = None
-    #     self.assertEqual(
-    #         studio.timing_resolution,
-    #         datetime.timedelta(minutes=15)
-    #     )
-    #     self.assertEqual(
-    #         new_foo_obj.timing_resolution,
-    #         studio.timing_resolution
-    #     )
-
     def test_timing_resolution_argument_is_not_a_timedelta_instance(self):
         """testing if a TypeError will be raised when the timing_resolution
         argument is not a datetime.timedelta instance
         """
+        from stalker import Studio
         self.kwargs['timing_resolution'] = 'not a timedelta instance'
         self.assertRaises(TypeError, Studio, **self.kwargs)
 
@@ -1983,6 +1956,7 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         """testing if a TypeError will be raised when the timing_resolution
         attribute is not a datetime.timedelta instance
         """
+        from stalker import Studio
         new_foo_obj = Studio(**self.kwargs)
         self.assertRaises(TypeError, setattr, new_foo_obj, 'timing_resolution',
                           'not a timedelta instance')
@@ -1991,6 +1965,8 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         """testing if the timing_resolution argument value is passed to
         timing_resolution attribute correctly
         """
+        import datetime
+        from stalker import Studio
         self.kwargs['timing_resolution'] = datetime.timedelta(minutes=5)
         studio = Studio(**self.kwargs)
         self.assertEqual(
@@ -2001,6 +1977,8 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
     def test_timing_resolution_attribute_is_working_properly(self):
         """testing if the timing_resolution attribute is working properly
         """
+        import datetime
+        from stalker import Studio
         studio = Studio(**self.kwargs)
         res = studio
         new_res = datetime.timedelta(hours=1, minutes=30)
@@ -2013,8 +1991,6 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 def csv_to_test_converter():
     """convert tjp output csv to test case
     """
-    #!/usr/bin/python
-
     import re
     import jinja2
 
@@ -2107,11 +2083,11 @@ def csv_to_test_converter():
 
     template_string = """        # {{entity_name}}
             self.assertEqual(
-                datetime.datetime({{start_date}}),
+                datetime.datetime({{start_date}}, tzinfo=pytz.utc),
                 {{entity_name}}.computed_start
             )
             self.assertEqual(
-                datetime.datetime({{end_date}}),
+                datetime.datetime({{end_date}}, tzinfo=pytz.utc),
                 {{entity_name}}.computed_end
             )
             {% if resources %}
@@ -2158,7 +2134,7 @@ def csv_to_test_converter():
 
         resources = [resource_name]
 
-        #print entity_name, start_date, end_date, resources
+        # print entity_name, start_date, end_date, resources
 
         rendered_template = template.render(**{
             'entity_name': entity_name,

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2014 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -21,6 +21,8 @@
 import unittest
 import datetime
 import json
+
+import pytz
 
 import stalker
 from stalker.db import DBSession
@@ -55,7 +57,8 @@ class SimpleEntityTester(unittest.TestCase):
             ),
         )
 
-        self.date_created = datetime.datetime(2010, 10, 21, 3, 8, 0)
+        self.date_created = \
+            datetime.datetime(2010, 10, 21, 3, 8, 0, tzinfo=pytz.utc)
         self.date_updated = self.date_created
 
         self.kwargs = {
@@ -408,7 +411,7 @@ class SimpleEntityTester(unittest.TestCase):
         test_value = "a string date time 2010-10-26 etc."
 
         # be sure that the test_value is not an instance of datetime.datetime
-        self.assertFalse(isinstance(test_value, datetime.datetime))
+        self.assertNotIsInstance(test_value, datetime.datetime)
 
         self.assertRaises(
             TypeError,
@@ -426,7 +429,7 @@ class SimpleEntityTester(unittest.TestCase):
         # try to set something else and expect a TypeError
         test_value = "a string date time 2010-10-26 etc."
         # be sure that the test_value is not an instance of datetime.datetime
-        self.assertFalse(isinstance(test_value, datetime.datetime))
+        self.assertNotIsInstance(test_value, datetime.datetime)
         self.assertRaises(
             TypeError,
             setattr,
@@ -455,7 +458,7 @@ class SimpleEntityTester(unittest.TestCase):
         test_value = "a string date time 2010-10-26 etc."
 
         # be sure that the test_value is not an instance of datetime.datetime
-        self.assertFalse(isinstance(test_value, datetime.datetime))
+        self.assertNotIsInstance(test_value, datetime.datetime)
 
         self.assertRaises(
             TypeError,
@@ -473,7 +476,7 @@ class SimpleEntityTester(unittest.TestCase):
         test_value = "a string date time 2010-10-26 etc."
 
         # be sure that the test_value is not an instance of datetime.datetime
-        self.assertFalse(isinstance(test_value, datetime.datetime))
+        self.assertNotIsInstance(test_value, datetime.datetime)
 
         self.assertRaises(
             TypeError,
@@ -498,7 +501,7 @@ class SimpleEntityTester(unittest.TestCase):
     def test_date_updated_attribute_is_working_properly(self):
         """testing if the date_updated attribute is working properly
         """
-        test_value = datetime.datetime.now()
+        test_value = datetime.datetime.now(pytz.utc)
         self.test_simple_entity.date_updated = test_value
         self.assertEqual(self.test_simple_entity.date_updated, test_value)
 
@@ -506,8 +509,10 @@ class SimpleEntityTester(unittest.TestCase):
         """testing if a ValueError is going to be raised when trying to set the
         date_updated to a time before date_created
         """
-        self.kwargs["date_created"] = datetime.datetime(2000, 1, 1, 1, 1, 1)
-        self.kwargs["date_updated"] = datetime.datetime(1990, 1, 1, 1, 1, 1)
+        self.kwargs["date_created"] = \
+            datetime.datetime(2000, 1, 1, 1, 1, 1, tzinfo=pytz.utc)
+        self.kwargs["date_updated"] = \
+            datetime.datetime(1990, 1, 1, 1, 1, 1, tzinfo=pytz.utc)
 
         # create a new entity with these dates
         # and expect a ValueError

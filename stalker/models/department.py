@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2014 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -200,7 +200,7 @@ class DepartmentUser(Base):
             from stalker import Role
             if not isinstance(role, Role):
                 raise TypeError(
-                    '%s.role should be a'
+                    '%s.role should be a '
                     'stalker.models.auth.Role instance, not %s' %
                     (self.__class__.__name__, role.__class__.__name__)
                 )

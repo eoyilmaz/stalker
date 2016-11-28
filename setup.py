@@ -12,6 +12,7 @@ requires = [
     'sqlalchemy>=0.8',
     'alembic',
     'jinja2',
+    'pytz'
 ]
 
 setup(

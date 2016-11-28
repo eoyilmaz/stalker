@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2014 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -24,6 +24,8 @@ import tempfile
 import datetime
 import time
 import csv
+
+import pytz
 
 import stalker
 from stalker import defaults
@@ -201,6 +203,7 @@ class TaskJugglerScheduler(SchedulerBase):
         """creates the tjp file
         """
         self.temp_file_full_path = tempfile.mktemp(prefix='Stalker_')
+        self.temp_file_path = os.path.dirname(self.temp_file_full_path)
         self.temp_file_name = os.path.basename(self.temp_file_full_path)
         self.tjp_file_full_path = self.temp_file_full_path + ".tjp"
         self.csv_file_full_path = self.temp_file_full_path + ".csv"
@@ -567,7 +570,7 @@ order by path_as_text"""
 
     def _parse_csv_file(self):
         """parses back the csv file and fills the tasks with computes_start and
-        computed end values
+        computed_end values
         """
         parsing_start = time.time()
 
@@ -604,6 +607,10 @@ order by path_as_text"""
                     data[2],
                     "%Y-%m-%d-%H:%M"
                 )
+
+                # implement time zone info
+                start_date = start_date.replace(tzinfo=pytz.utc)
+                end_date = end_date.replace(tzinfo=pytz.utc)
 
                 # computed_resources
                 if self.compute_resources:
@@ -658,15 +665,15 @@ order by path_as_text"""
 
         # update computed resources data
         # first delete everything
-        delete_resources_statement = Task_Computed_Resources.delete()
-
-        update_resources_statement = Task_Computed_Resources.insert()\
-            .values(
-                task_id=bindparam('task_id'),
-                resource_id=bindparam('resource_id')
-            )
-
         if self.compute_resources:
+            delete_resources_statement = Task_Computed_Resources.delete()
+
+            update_resources_statement = Task_Computed_Resources.insert()\
+                .values(
+                    task_id=bindparam('task_id'),
+                    resource_id=bindparam('resource_id')
+                )
+
             db.DBSession.connection().execute(delete_resources_statement)
             db.DBSession.connection().execute(
                 update_resources_statement,
@@ -704,36 +711,51 @@ order by path_as_text"""
         logger.debug('tjp_file_full_path: %s' % self.tjp_file_full_path)
 
         # pass it to tj3
-        process = subprocess.Popen(
-            [defaults.tj_command,
-             self.tjp_file_full_path],
-            stderr=subprocess.PIPE
-        )
+        if os.name == 'nt':
+            command = '%s %s -o %s' % (
+                defaults.tj_command,
+                self.tjp_file_full_path,
+                self.temp_file_path,
+            )
+            logger.debug('tj3 using fallback mode for Windows!')
+            logger.debug('tj3 command: %s' % command)
+            returncode = os.system(command)
+            stderr_buffer = ''
+        else:
+            process = subprocess.Popen(
+                [defaults.tj_command,
+                 self.tjp_file_full_path,
+                 '-o',
+                 self.temp_file_path],
+                stderr=subprocess.PIPE
+            )
 
-        # loop until process finishes and capture stderr output
-        stderr_buffer = []
-        while True:
-            stderr = process.stderr.readline()
+            # loop until process finishes and capture stderr output
+            stderr_buffer = []
+            while True:
+                stderr = process.stderr.readline()
 
-            if stderr == b'' and process.poll() is not None:
-                break
+                if stderr == b'' and process.poll() is not None:
+                    break
 
-            if stderr != b'':
-                stderr = stderr.strip()
-                stderr_buffer.append(stderr)
-                logger.debug(stderr.strip())
+                if stderr != b'':
+                    stderr = stderr.strip()
+                    stderr_buffer.append(stderr)
+                    logger.debug(stderr.strip())
 
-        # flatten the buffer
-        stderr_buffer = '\n'.join(stderr_buffer)
+            # flatten the buffer
+            stderr_buffer = '\n'.join(stderr_buffer)
 
-        if process.returncode:
+            returncode = process.returncode
+
+        if returncode:
             # there is an error
             raise RuntimeError(stderr_buffer)
 
         # read back the csv file
         self._parse_csv_file()
 
-        logger.debug('tj3 return code: %s' % process.returncode)
+        logger.debug('tj3 return code: %s' % returncode)
 
         # remove the tjp file
         self._clean_up()

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2014 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -153,9 +153,11 @@ class Repository(Entity):
                 (self.__class__.__name__, windows_path.__class__.__name__)
             )
 
-        windows_path = os.path.normpath(windows_path) + '/'
-
+        windows_path = os.path.normpath(windows_path)
         windows_path = windows_path.replace("\\", "/")
+
+        if not windows_path.endswith('/'):
+            windows_path += '/'
 
         if self.id is not None and platform.system() == "Windows":
             # update the environment variable
@@ -339,6 +341,3 @@ def receive_after_insert(mapper, connection, repo):
     """
     logger.debug('auto creating env var for Repository with id: %s' % repo.id)
     os.environ[defaults.repo_env_var_template % {'id': repo.id}] = repo.path
-
-
-#@event.listens_for

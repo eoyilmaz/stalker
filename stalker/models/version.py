@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2014 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -28,7 +28,6 @@ from sqlalchemy.exc import UnboundExecutionError
 from sqlalchemy.orm import relationship, validates
 
 from stalker.db.declarative import Base
-from stalker.models import check_circular_dependency
 from stalker.models.link import Link
 
 from stalker import defaults, DAGMixin
@@ -111,6 +110,8 @@ class Version(Link, DAGMixin):
     __auto_name__ = True
     __tablename__ = "Versions"
     __mapper_args__ = {"polymorphic_identity": "Version"}
+
+    __dag_cascade__ = "save-update, merge"
 
     version_id = Column("id", Integer, ForeignKey("Links.id"),
                         primary_key=True)
@@ -584,7 +585,12 @@ class Version(Link, DAGMixin):
 Version_Inputs = Table(
     "Version_Inputs", Base.metadata,
     Column("version_id", Integer, ForeignKey("Versions.id"), primary_key=True),
-    Column("link_id", Integer, ForeignKey("Links.id"), primary_key=True)
+    Column(
+        "link_id",
+        Integer,
+        ForeignKey("Links.id", onupdate="CASCADE", ondelete="CASCADE"),
+        primary_key=True
+    )
 )
 
 # VERSION_OUTPUTS

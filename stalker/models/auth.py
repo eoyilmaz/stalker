@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2014 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -23,6 +23,7 @@ import json
 import re
 import base64
 import datetime
+import pytz
 
 from sqlalchemy import (Table, Column, Integer, ForeignKey, String, DateTime,
                         Enum, Float)
@@ -33,12 +34,16 @@ from sqlalchemy.schema import UniqueConstraint
 from stalker import defaults
 from stalker.db.declarative import Base
 from stalker.models.mixins import ACLMixin
-from stalker.models.entity import Entity
+from stalker.models.entity import Entity, SimpleEntity
 from stalker.log import logging_level
 
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
+
+
+LOGIN = 'login'
+LOGOUT = 'logout'
 
 
 class Permission(Base):
@@ -98,9 +103,9 @@ class Permission(Base):
 
       # get the permissions for the Project class
       project_permissions = Permission.query\
-          .filter(Actions.access='Allow')\
-          .filter(Actions.action='Create')\
-          .filter(Actions.class_name='Project')\
+          .filter(Permission.access='Allow')\
+          .filter(Permission.action='Create')\
+          .filter(Permission.class_name='Project')\
           .first()
 
       # now we have the permission specifying the allowance of creating a
@@ -123,7 +128,7 @@ class Permission(Base):
     id = Column(Integer, primary_key=True)
     _access = Column('access', Enum('Allow', 'Deny', name='AccessNames'))
     _action = Column('action',
-                     Enum(*defaults.actions, name='ActionNames'))
+                     Enum(*defaults.actions, name='AuthenticationActions'))
     _class_name = Column('class_name', String(32))
 
     def __init__(self, access, action, class_name):
@@ -246,13 +251,18 @@ class Group(Entity, ACLMixin):
         """
     )
 
-    def __init__(self, name='', users=None, **kwargs):
+    def __init__(self, name='', users=None, permissions=None, **kwargs):
         if users is None:
             users = []
+
+        if permissions is None:
+            permissions = []
+
         kwargs.update({'name': name})
         super(Group, self).__init__(**kwargs)
 
         self.users = users
+        self.permissions = permissions
 
     @validates('users')
     def _validate_users(self, key, user):
@@ -374,8 +384,12 @@ class User(Entity, ACLMixin):
     __tablename__ = "Users"
     __mapper_args__ = {"polymorphic_identity": "User"}
 
-    user_id = Column("id", Integer, ForeignKey("Entities.id"),
-                     primary_key=True)
+    user_id = Column(
+        "id",
+        Integer,
+        ForeignKey("Entities.id"),
+        primary_key=True
+    )
 
     departments = association_proxy(
         'department_role',
@@ -422,13 +436,6 @@ class User(Entity, ACLMixin):
         """
     )
 
-    last_login = Column(
-        DateTime,
-        doc="""The last login time of this user.
-
-        It is an instance of datetime.datetime class."""
-    )
-
     login = Column(
         String(256),
         nullable=False,
@@ -436,6 +443,16 @@ class User(Entity, ACLMixin):
         doc="""The login name of the user.
 
         Can not be empty.
+        """
+    )
+
+    authentication_logs = relationship(
+        "AuthenticationLog",
+        primaryjoin="AuthenticationLogs.c.uid==Users.c.id",
+        back_populates="user",
+        cascade='all, delete-orphan',
+        doc="""A list of :class:`.AuthenticationLog` instances which holds the
+        login/logout info for this :class:`.User`.
         """
     )
 
@@ -635,19 +652,19 @@ class User(Entity, ACLMixin):
 
         if len_splits < 2:
             raise ValueError(
-                "check the formatting %s.email, there are no @ sign" %
+                "check the formatting of %s.email, there is no @ sign" %
                 self.__class__.__name__
             )
 
         if splits[0] == "":
             raise ValueError(
-                "check the formatting %s.email, the name part is missing" %
+                "check the formatting of %s.email, the name part is missing" %
                 self.__class__.__name__
             )
 
         if splits[1] == "":
             raise ValueError(
-                "check the %s.email formatting, the domain part is missing" %
+                "check the formatting %s.email, the domain part is missing" %
                 self.__class__.__name__
             )
 
@@ -697,7 +714,10 @@ class User(Entity, ACLMixin):
             )
 
         if password_in == "":
-            raise ValueError("raw_password can not be empty string")
+            raise ValueError(
+                "%s.password can not be an empty string" %
+                self.__class__.__name__
+            )
 
         # mangle the password
         return base64.b64encode(password_in.encode('utf-8'))
@@ -754,20 +774,6 @@ class User(Entity, ACLMixin):
                 (self.__class__.__name__, task.__class__.__name__)
             )
         return task
-
-    @validates('projects')
-    def _validate_projects(self, key, project):
-        """validates the given project instance
-        """
-        from stalker import Project
-
-        if not isinstance(project, Project):
-            raise TypeError(
-                '%s.projects should a list of stalker.models.project.Project '
-                'instances, not %s' %
-                (self.__class__.__name__, project.__class__.__name__)
-            )
-        return project
 
     @validates('vacations')
     def _validate_vacations(self, key, vacation):
@@ -927,7 +933,7 @@ class LocalSession(object):
         :param int millis: an int value showing the millis from unix EPOCH
         :return:
         """
-        epoch = datetime.datetime(1970, 1, 1)
+        epoch = datetime.datetime(1970, 1, 1, tzinfo=pytz.utc)
         return epoch + datetime.timedelta(milliseconds=millis)
 
     def load(self):
@@ -938,7 +944,7 @@ class LocalSession(object):
                 # try:
                 json_object = json.load(s)
                 valid_to = self.millis_to_datetime(json_object.get('valid_to'))
-                if valid_to > datetime.datetime.now():
+                if valid_to > datetime.datetime.now(pytz.utc):
                     # fill __dict__ with the loaded one
                     self.valid_to = valid_to
                     self.logged_in_user_id = \
@@ -963,7 +969,8 @@ class LocalSession(object):
     def save(self):
         """remembers the data in user local file system
         """
-        self.valid_to = datetime.datetime.now() + datetime.timedelta(days=10)
+        self.valid_to = datetime.datetime.now(pytz.utc) + \
+                        datetime.timedelta(days=10)
         # serialize self
         dumped_data = json.dumps({
             'valid_to': self.valid_to,
@@ -1069,3 +1076,101 @@ Group_Users = Table(
     Column("uid", Integer, ForeignKey("Users.id"), primary_key=True),
     Column("gid", Integer, ForeignKey("Groups.id"), primary_key=True)
 )
+
+
+class AuthenticationLog(SimpleEntity):
+    """Keeps track of login/logout dates and the action (login or logout).
+    """
+
+    __auto_name__ = True
+    __tablename__ = "AuthenticationLogs"
+    __mapper_args__ = {"polymorphic_identity": "AuthenticationLog"}
+
+    log_id = Column(
+        'id',
+        Integer,
+        ForeignKey('SimpleEntities.id'),
+        primary_key=True
+    )
+
+    user_id = Column(
+        'uid',
+        Integer,
+        ForeignKey('Users.id'),
+        nullable=False
+    )
+
+    user = relationship(
+        'User',
+        primaryjoin='AuthenticationLogs.c.uid==Users.c.id',
+        uselist=False,
+        back_populates='authentication_logs',
+        doc="The :class:`.User` instance that this AuthenticationLog is "
+        "created for"
+    )
+
+    action = Column(
+        'action',
+        Enum(LOGIN, LOGOUT, name='ActionNames'),
+        nullable=False
+    )
+
+    date = Column(
+        DateTime(timezone=True),
+        nullable=False
+    )
+
+    def __init__(self, user=None, date=None, action=LOGIN, **kwargs):
+        super(AuthenticationLog, self).__init__(**kwargs)
+        self.user = user
+        self.date = date
+        self.action = action
+
+    @validates('user')
+    def __validate_user__(self, key, user):
+        """validates the given user argument value
+        """
+        if not isinstance(user, User):
+            raise TypeError(
+                '%s.user should be a User instance, not %s' % (
+                    self.__class__.__name__,
+                    user.__class__.__name__
+                )
+            )
+
+        return user
+
+    @validates('action')
+    def __validate_action__(self, key, action):
+        """validates the given action argument value
+        """
+        if action is None:
+            import copy
+            action = copy.copy(LOGIN)
+
+        if action not in [LOGIN, LOGOUT]:
+            raise ValueError(
+                '%s.action should be one of "login" or "logout", not "%s"' % (
+                    self.__class__.__name__,
+                    action
+                )
+            )
+
+        return action
+
+    @validates('date')
+    def __validate_date__(self, key, date):
+        """validates the given date value
+        """
+        if date is None:
+            date = datetime.datetime.now(pytz.utc)
+
+        if not isinstance(date, datetime.datetime):
+            raise TypeError(
+                '%s.date should be a "datetime.datetime" instance, not %s' % (
+                    self.__class__.__name__,
+                    date.__class__.__name__
+                )
+            )
+
+        return date
