@@ -22,6 +22,8 @@ import copy
 import unittest
 import datetime
 
+import pytz
+
 from stalker import config
 from stalker.models.studio import WorkingHours
 
@@ -317,11 +319,11 @@ class WorkingHoursTester(unittest.TestCase):
         wh['sun'] = []
 
         # monday
-        check_date = datetime.datetime(2013, 4, 8, 13, 55)
+        check_date = datetime.datetime(2013, 4, 8, 13, 55, tzinfo=pytz.utc)
         self.assertTrue(wh.is_working_hour(check_date))
 
         # sunday
-        check_date = datetime.datetime(2013, 4, 14, 13, 55)
+        check_date = datetime.datetime(2013, 4, 14, 13, 55, tzinfo=pytz.utc)
         self.assertFalse(wh.is_working_hour(check_date))
 
     def test_day_numbers_are_correct(self):
@@ -542,6 +544,6 @@ class WorkingHoursTester(unittest.TestCase):
         """
         with self.assertRaises(NotImplementedError):
             wh = WorkingHours()
-            start = datetime.datetime.now()
+            start = datetime.datetime.now(pytz.utc)
             end = start + datetime.timedelta(days=10)
             wh.split_in_to_working_hours(start, end)

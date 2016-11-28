@@ -20,100 +20,98 @@
 
 import datetime
 import tempfile
-import unittest
+
+import pytz
+
 from stalker.db import DBSession
+from stalker.testing import UnitTestBase
 from stalker import (db, User, Status, StatusList, Repository, Project, Task,
                      Type, TimeLog)
 from stalker.exceptions import StatusError
 
 
-class TaskStatusWorkflowTestCase(unittest.TestCase):
+class TaskStatusWorkflowTestCase(UnitTestBase):
     """tests the Task Status Workflow
     """
 
-    @classmethod
-    def setUpClass(cls):
+    def setUp(self):
         """setup the test
         """
-        db.setup({'sqlalchemy.url': 'sqlite:///:memory:'})
-        db.init()
+        super(TaskStatusWorkflowTestCase, self).setUp()
 
         # test users
-        cls.test_user1 = User(
+        self.test_user1 = User(
             name='Test User 1',
             login='tuser1',
             email='tuser1@test.com',
             password='secret'
         )
-        DBSession.add(cls.test_user1)
+        DBSession.add(self.test_user1)
 
-        cls.test_user2 = User(
+        self.test_user2 = User(
             name='Test User 2',
             login='tuser2',
             email='tuser2@test.com',
             password='secret'
         )
-        DBSession.add(cls.test_user2)
+        DBSession.add(self.test_user2)
 
         # create a couple of tasks
-        cls.status_new = Status.query.filter_by(code='NEW').first()
-        cls.status_wfd = Status.query.filter_by(code='WFD').first()
-        cls.status_rts = Status.query.filter_by(code='RTS').first()
-        cls.status_wip = Status.query.filter_by(code='WIP').first()
-        cls.status_prev = Status.query.filter_by(code='PREV').first()
-        cls.status_hrev = Status.query.filter_by(code='HREV').first()
-        cls.status_drev = Status.query.filter_by(code='DREV').first()
-        cls.status_oh = Status.query.filter_by(code='OH').first()
-        cls.status_stop = Status.query.filter_by(code='STOP').first()
-        cls.status_cmpl = Status.query.filter_by(code='CMPL').first()
+        self.status_new = Status.query.filter_by(code='NEW').first()
+        self.status_wfd = Status.query.filter_by(code='WFD').first()
+        self.status_rts = Status.query.filter_by(code='RTS').first()
+        self.status_wip = Status.query.filter_by(code='WIP').first()
+        self.status_prev = Status.query.filter_by(code='PREV').first()
+        self.status_hrev = Status.query.filter_by(code='HREV').first()
+        self.status_drev = Status.query.filter_by(code='DREV').first()
+        self.status_oh = Status.query.filter_by(code='OH').first()
+        self.status_stop = Status.query.filter_by(code='STOP').first()
+        self.status_cmpl = Status.query.filter_by(code='CMPL').first()
 
-        cls.status_rrev = Status.query.filter_by(code='RREV').first()
-        cls.status_app = Status.query.filter_by(code='APP').first()
+        self.status_rrev = Status.query.filter_by(code='RREV').first()
+        self.status_app = Status.query.filter_by(code='APP').first()
 
-        cls.test_project_status_list = StatusList(
+        self.test_project_status_list = StatusList(
             name='Project Statuses',
             target_entity_type='Project',
-            statuses=[cls.status_wfd, cls.status_wip,
-                      cls.status_cmpl]
+            statuses=[self.status_wfd, self.status_wip,
+                      self.status_cmpl]
         )
-        DBSession.add(cls.test_project_status_list)
+        DBSession.add(self.test_project_status_list)
 
-        cls.test_task_statuses = StatusList.query\
+        self.test_task_statuses = StatusList.query\
             .filter_by(target_entity_type='Task').first()
-        DBSession.add(cls.test_task_statuses)
+        DBSession.add(self.test_task_statuses)
 
         # repository
         tempdir = tempfile.mkdtemp()
-        cls.test_repo = Repository(
+        self.test_repo = Repository(
             name='Test Repository',
             linux_path=tempdir,
             windows_path=tempdir,
             osx_path=tempdir
         )
-        DBSession.add(cls.test_repo)
+        DBSession.add(self.test_repo)
 
         # proj1
-        cls.test_project1 = Project(
+        self.test_project1 = Project(
             name='Test Project 1',
             code='TProj1',
-            status_list=cls.test_project_status_list,
-            repository=cls.test_repo,
-            start=datetime.datetime(2013, 6, 20, 0, 0, 0),
-            end=datetime.datetime(2013, 6, 30, 0, 0, 0),
+            status_list=self.test_project_status_list,
+            repository=self.test_repo,
+            start=datetime.datetime(2013, 6, 20, 0, 0, 0, tzinfo=pytz.utc),
+            end=datetime.datetime(2013, 6, 30, 0, 0, 0, tzinfo=pytz.utc),
         )
-        DBSession.add(cls.test_project1)
+        DBSession.add(self.test_project1)
 
-    def setUp(self):
-        """set up before every test
-        """
         # root tasks
         self.test_task1 = Task(
             name='Test Task 1',
             project=self.test_project1,
             responsible=[self.test_user1],
             status_list=self.test_task_statuses,
-            start=datetime.datetime(2013, 6, 20, 0, 0),
-            end=datetime.datetime(2013, 6, 30, 0, 0),
+            start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
+            end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
             schedule_timing=10,
             schedule_unit='d',
             schedule_model='effort',
@@ -125,8 +123,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
             project=self.test_project1,
             responsible=[self.test_user1],
             status_list=self.test_task_statuses,
-            start=datetime.datetime(2013, 6, 20, 0, 0),
-            end=datetime.datetime(2013, 6, 30, 0, 0),
+            start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
+            end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
             schedule_timing=10,
             schedule_unit='d',
             schedule_model='effort',
@@ -139,8 +137,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
             status_list=self.test_task_statuses,
             resources=[self.test_user1, self.test_user2],
             responsible=[self.test_user1, self.test_user2],
-            start=datetime.datetime(2013, 6, 20, 0, 0),
-            end=datetime.datetime(2013, 6, 30, 0, 0),
+            start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
+            end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
             schedule_timing=10,
             schedule_unit='d',
             schedule_model='effort',
@@ -157,8 +155,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
             status_list=self.test_task_statuses,
             resources=[self.test_user1],
             depends=[self.test_task3],
-            start=datetime.datetime(2013, 6, 20, 0, 0),
-            end=datetime.datetime(2013, 6, 30, 0, 0),
+            start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
+            end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
             schedule_timing=10,
             schedule_unit='d',
             schedule_model='effort',
@@ -171,8 +169,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
             status_list=self.test_task_statuses,
             resources=[self.test_user1],
             depends=[self.test_task4],
-            start=datetime.datetime(2013, 6, 20, 0, 0),
-            end=datetime.datetime(2013, 6, 30, 0, 0),
+            start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
+            end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
             schedule_timing=10,
             schedule_unit='d',
             schedule_model='effort',
@@ -184,8 +182,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
             parent=self.test_task1,
             status_list=self.test_task_statuses,
             resources=[self.test_user1],
-            start=datetime.datetime(2013, 6, 20, 0, 0),
-            end=datetime.datetime(2013, 6, 30, 0, 0),
+            start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
+            end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
             schedule_timing=10,
             schedule_unit='d',
             schedule_model='effort',
@@ -198,8 +196,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
             parent=self.test_task2,
             status_list=self.test_task_statuses,
             resources=[self.test_user2],
-            start=datetime.datetime(2013, 6, 20, 0, 0),
-            end=datetime.datetime(2013, 6, 30, 0, 0),
+            start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
+            end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
             schedule_timing=10,
             schedule_unit='d',
             schedule_model='effort',
@@ -211,8 +209,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
             parent=self.test_task2,
             status_list=self.test_task_statuses,
             resources=[self.test_user2],
-            start=datetime.datetime(2013, 6, 20, 0, 0),
-            end=datetime.datetime(2013, 6, 30, 0, 0),
+            start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
+            end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
             schedule_timing=10,
             schedule_unit='d',
             schedule_model='effort',
@@ -243,8 +241,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
             name='Test Task 9',
             parent=self.test_asset1,
             status_list=self.test_task_statuses,
-            start=datetime.datetime(2013, 6, 20, 0, 0),
-            end=datetime.datetime(2013, 6, 30, 0, 0),
+            start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
+            end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
             resources=[self.test_user2],
             schedule_timing=10,
             schedule_unit='d',
@@ -284,30 +282,6 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
             self.test_task7, self.test_task8, self.test_task9,
             self.test_asset1
         ]
-
-        self.data_created = [
-            self.test_task1, self.test_task2, self.test_task3,
-            self.test_task4, self.test_task5, self.test_task6,
-            self.test_task7, self.test_task8, self.test_task9,
-            self.test_asset1
-        ]
-
-    def tearDown(self):
-        """run after every test and clean up
-        """
-        DBSession.commit()
-        for data in self.data_created:
-            if data in DBSession:
-                DBSession.delete(data)
-        DBSession.commit()
-
-    @classmethod
-    def tearDownClass(cls):
-        """run only once
-        """
-        from stalker import defaults
-        DBSession.remove()
-        defaults.timing_resolution = datetime.timedelta(hours=1)
 
     def test_walk_hierarchy_is_working_properly(self):
         """testing if walk_hierarchy_is_working_properly
@@ -863,7 +837,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
 
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
         self.test_task8.create_time_log(
             resource=self.test_task8.resources[0],
             start=now,
@@ -925,8 +899,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_wfd
         resource = self.test_task3.resources[0]
-        start = datetime.datetime.now()
-        end = datetime.datetime.now() + datetime.timedelta(hours=1)
+        start = datetime.datetime.now(pytz.utc)
+        end = datetime.datetime.now(pytz.utc) + datetime.timedelta(hours=1)
         self.assertRaises(StatusError, self.test_task3.create_time_log,
                           resource, start, end)
         DBSession.rollback()
@@ -938,8 +912,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task9.status = self.status_rts
         resource = self.test_task9.resources[0]
-        start = datetime.datetime.now()
-        end = datetime.datetime.now() + datetime.timedelta(hours=1)
+        start = datetime.datetime.now(pytz.utc)
+        end = datetime.datetime.now(pytz.utc) + datetime.timedelta(hours=1)
         self.test_task9.create_time_log(resource, start, end)
         self.assertEqual(self.test_task9.status, self.status_wip)
 
@@ -957,7 +931,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
 
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         self.test_task8.create_time_log(
             resource=self.test_task8.resources[0],
@@ -975,8 +949,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_rts
         resource = self.test_task3.resources[0]
-        start = datetime.datetime.now()
-        end = datetime.datetime.now() + datetime.timedelta(hours=1)
+        start = datetime.datetime.now(pytz.utc)
+        end = datetime.datetime.now(pytz.utc) + datetime.timedelta(hours=1)
         self.test_task3.create_time_log(resource, start, end)
         self.assertEqual(self.test_task3.status, self.status_wip)
 
@@ -987,8 +961,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task9.status = self.status_wip
         resource = self.test_task9.resources[0]
-        start = datetime.datetime.now()
-        end = datetime.datetime.now() + datetime.timedelta(hours=1)
+        start = datetime.datetime.now(pytz.utc)
+        end = datetime.datetime.now(pytz.utc) + datetime.timedelta(hours=1)
         self.test_task9.create_time_log(resource, start, end)
         self.assertEqual(self.test_task9.status, self.status_wip)
 
@@ -999,8 +973,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_prev
         resource = self.test_task3.resources[0]
-        start = datetime.datetime.now()
-        end = datetime.datetime.now() + datetime.timedelta(hours=1)
+        start = datetime.datetime.now(pytz.utc)
+        end = datetime.datetime.now(pytz.utc) + datetime.timedelta(hours=1)
         self.assertEqual(self.test_task3.status, self.status_prev)
         tlog = self.test_task3.create_time_log(resource, start, end)
         self.assertTrue(isinstance(tlog, TimeLog))
@@ -1013,8 +987,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task9.status = self.status_hrev
         resource = self.test_task9.resources[0]
-        start = datetime.datetime.now()
-        end = datetime.datetime.now() + datetime.timedelta(hours=1)
+        start = datetime.datetime.now(pytz.utc)
+        end = datetime.datetime.now(pytz.utc) + datetime.timedelta(hours=1)
         self.test_task9.create_time_log(resource, start, end)
         self.assertEqual(self.test_task9.status, self.status_wip)
 
@@ -1025,8 +999,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task9.status = self.status_drev
         resource = self.test_task9.resources[0]
-        start = datetime.datetime.now()
-        end = datetime.datetime.now() + datetime.timedelta(hours=1)
+        start = datetime.datetime.now(pytz.utc)
+        end = datetime.datetime.now(pytz.utc) + datetime.timedelta(hours=1)
         self.test_task9.create_time_log(resource, start, end)
         self.assertEqual(self.test_task9.status, self.status_drev)
 
@@ -1037,8 +1011,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task9.status = self.status_oh
         resource = self.test_task9.resources[0]
-        start = datetime.datetime.now()
-        end = datetime.datetime.now() + datetime.timedelta(hours=1)
+        start = datetime.datetime.now(pytz.utc)
+        end = datetime.datetime.now(pytz.utc) + datetime.timedelta(hours=1)
         self.assertRaises(StatusError, self.test_task9.create_time_log,
                           resource, start, end)
         DBSession.rollback()
@@ -1050,8 +1024,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task9.status = self.status_stop
         resource = self.test_task9.resources[0]
-        start = datetime.datetime.now()
-        end = datetime.datetime.now() + datetime.timedelta(hours=1)
+        start = datetime.datetime.now(pytz.utc)
+        end = datetime.datetime.now(pytz.utc) + datetime.timedelta(hours=1)
         self.assertRaises(StatusError, self.test_task9.create_time_log,
                           resource, start, end)
         DBSession.rollback()
@@ -1063,8 +1037,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task9.status = self.status_cmpl
         resource = self.test_task9.resources[0]
-        start = datetime.datetime.now()
-        end = datetime.datetime.now() + datetime.timedelta(hours=1)
+        start = datetime.datetime.now(pytz.utc)
+        end = datetime.datetime.now(pytz.utc) + datetime.timedelta(hours=1)
         with self.assertRaises(StatusError):
             self.test_task9.create_time_log(resource, start, end)
         DBSession.rollback()
@@ -1074,8 +1048,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """testing if a ValueError will be raised when the create_time_log
         action will be used in a container task
         """
-        start = datetime.datetime.now()
-        end = datetime.datetime.now() + datetime.timedelta(hours=1)
+        start = datetime.datetime.now(pytz.utc)
+        end = datetime.datetime.now(pytz.utc) + datetime.timedelta(hours=1)
         self.assertRaises(ValueError, self.test_task2.create_time_log,
                           resource=None, start=start, end=end)
 
@@ -1085,7 +1059,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # initial condition
         self.assertEqual(len(self.test_task3.time_logs), 0)
 
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(pytz.utc)
         self.test_task3.create_time_log(
             resource=self.test_task3.resources[0],
             start=now,
@@ -1094,7 +1068,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.assertEqual(len(self.test_task3.time_logs), 1)
         self.assertEqual(self.test_task3.total_logged_seconds, 3600)
 
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(pytz.utc)
         self.test_task3.create_time_log(
             resource=self.test_task3.resources[0],
             start=now + datetime.timedelta(hours=1),
@@ -1108,7 +1082,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.assertEqual(len(self.test_task3.time_logs), 0)
 
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(pytz.utc)
         tl = self.test_task3.create_time_log(
             resource=self.test_task3.resources[0],
             start=now,
@@ -1328,7 +1302,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # create a couple TimeLogs
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         self.test_task3.status = self.status_rts
         self.test_task3.responsible = [self.test_user1, self.test_user2]
@@ -1491,7 +1465,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # create a couple TimeLogs
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         self.test_task3.status = self.status_rts
         self.test_task3.create_time_log(
@@ -1530,7 +1504,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # create a couple TimeLogs
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         self.test_task9.status = self.status_rts
         TimeLog(
@@ -1566,7 +1540,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # create a couple TimeLogs
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         self.test_task8.depends = [self.test_task9]
         self.test_task8.status = self.status_wfd
@@ -1604,7 +1578,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # create a couple TimeLogs
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         self.test_task8.depends = [self.test_task9]
         self.test_task8.status = self.status_wip
@@ -1642,7 +1616,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # create a couple TimeLogs
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         self.test_task8.depends = [self.test_task9]
         self.assertTrue(self.test_task9 in self.test_task8.depends)
@@ -1696,7 +1670,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # create a couple of TimeLogs
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         # remove any TaskDependency instances
         from stalker import TaskDependency
@@ -1782,7 +1756,6 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         reviews = self.test_task4.request_review()
         DBSession.add_all(reviews)
         DBSession.commit()
-        self.data_created.extend(reviews)
 
         self.assertEqual(self.test_task4.status, self.status_prev)
         for r in reviews:
@@ -1840,7 +1813,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # create a couple TimeLogs
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         self.test_task9.depends = [self.test_task8]
         self.test_task9.status = self.status_wfd
@@ -1882,7 +1855,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # create a couple TimeLogs
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         # remove any TaskDependency instances
         from stalker import TaskDependency
@@ -2141,7 +2114,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # create a couple TimeLogs
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         self.test_task8.status = self.status_rts
         TimeLog(
@@ -2169,7 +2142,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # create a couple TimeLogs
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         self.test_task9.status = self.status_rts
         self.test_task8.status = self.status_rts
@@ -2200,7 +2173,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # create a couple TimeLogs
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         self.test_task9.status = self.status_rts
         self.test_task8.status = self.status_cmpl
@@ -2249,7 +2222,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # create a couple TimeLogs
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         TimeLog(
             task=self.test_task9,
@@ -2304,7 +2277,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # create a couple TimeLogs
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         self.test_task8.status = self.status_rts
         TimeLog(
@@ -2332,7 +2305,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # create a couple TimeLogs
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         TimeLog(
             task=self.test_task9,
@@ -2360,7 +2333,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # create a couple TimeLogs
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         self.test_task9.status = self.status_rts
         self.test_task8.status = self.status_rts
@@ -2391,7 +2364,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # create a couple TimeLogs
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         self.test_task9.status = self.status_rts
         self.test_task8.status = self.status_rts
@@ -2526,7 +2499,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
 
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         # start working on task3
         self.test_task3.create_time_log(
@@ -2604,7 +2577,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
 
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
         self.test_task3.create_time_log(
             resource=self.test_task3.resources[0],
             start=now,
@@ -2657,7 +2630,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
 
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         # start working on task3
         self.test_task3.create_time_log(
@@ -2749,7 +2722,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
 
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
         self.test_task6.create_time_log(
             resource=self.test_task6.resources[0],
             start=now,
@@ -2830,7 +2803,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task9.status = self.status_rts
 
         # finish task3 first
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(pytz.utc)
         self.test_task3.create_time_log(
             resource=self.test_task3.resources[0],
             start=now,
@@ -2930,7 +2903,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
 
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         # start working on task3
         self.test_task3.create_time_log(
@@ -3012,7 +2985,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
 
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         # start working on task3
         self.test_task3.create_time_log(
@@ -3109,7 +3082,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
 
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         # start working on task3
         self.test_task3.create_time_log(
@@ -3201,7 +3174,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
 
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
         self.test_task6.create_time_log(
             resource=self.test_task6.resources[0],
             start=now,
@@ -3288,7 +3261,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
 
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
 
         # start working on task3
         self.test_task3.create_time_log(
@@ -3567,7 +3540,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # create some time logs for
         dt = datetime.datetime
         td = datetime.timedelta
-        now = dt.now()
+        now = dt.now(pytz.utc)
         self.test_task5.create_time_log(
             resource=self.test_task5.resources[0],
             start=now,

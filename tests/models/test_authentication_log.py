@@ -21,14 +21,14 @@
 from stalker.testing import UnitTestBase
 
 
-class UserLoginInfoTestCase(UnitTestBase):
+class AuthenticationLogTestCase(UnitTestBase):
     """tests AuthenticationLog class
     """
 
     def setUp(self):
         """set the test up
         """
-        super(UserLoginInfoTestCase, self).setUp()
+        super(AuthenticationLogTestCase, self).setUp()
 
         from stalker import db, User
         self.test_user1 = User(
@@ -56,8 +56,12 @@ class UserLoginInfoTestCase(UnitTestBase):
         from stalker import AuthenticationLog
         from stalker.models.auth import LOGIN
         import datetime
+        import pytz
         with self.assertRaises(TypeError) as cm:
-            AuthenticationLog(action=LOGIN, date=datetime.datetime.now())
+            AuthenticationLog(
+                action=LOGIN,
+                date=datetime.datetime.now(pytz.utc)
+            )
 
         self.assertEqual(
             str(cm.exception),
@@ -70,11 +74,12 @@ class UserLoginInfoTestCase(UnitTestBase):
         from stalker import AuthenticationLog
         from stalker.models.auth import LOGIN
         import datetime
+        import pytz
         with self.assertRaises(TypeError) as cm:
             AuthenticationLog(
                 user=None,
                 action=LOGIN,
-                date=datetime.datetime.now()
+                date=datetime.datetime.now(pytz.utc)
             )
 
         self.assertEqual(
@@ -89,11 +94,12 @@ class UserLoginInfoTestCase(UnitTestBase):
         from stalker import AuthenticationLog
         from stalker.models.auth import LOGIN
         import datetime
+        import pytz
         with self.assertRaises(TypeError) as cm:
             AuthenticationLog(
                 user='not a user instance',
                 action=LOGIN,
-                date=datetime.datetime.now()
+                date=datetime.datetime.now(pytz.utc)
             )
 
         self.assertEqual(
@@ -108,10 +114,11 @@ class UserLoginInfoTestCase(UnitTestBase):
         from stalker import AuthenticationLog
         from stalker.models.auth import LOGIN
         import datetime
+        import pytz
         uli = AuthenticationLog(
             user=self.test_user1,
             action=LOGIN,
-            date=datetime.datetime.now()
+            date=datetime.datetime.now(pytz.utc)
         )
         with self.assertRaises(TypeError) as cm:
             uli.user = 'not a user instance'
@@ -128,10 +135,11 @@ class UserLoginInfoTestCase(UnitTestBase):
         from stalker import AuthenticationLog
         from stalker.models.auth import LOGOUT
         import datetime
+        import pytz
         uli = AuthenticationLog(
             user=self.test_user1,
             action=LOGOUT,
-            date=datetime.datetime.now()
+            date=datetime.datetime.now(pytz.utc)
         )
         self.assertEqual(uli.user, self.test_user1)
 
@@ -142,10 +150,11 @@ class UserLoginInfoTestCase(UnitTestBase):
         from stalker import AuthenticationLog
         from stalker.models.auth import LOGOUT
         import datetime
+        import pytz
         uli = AuthenticationLog(
             user=self.test_user1,
             action=LOGOUT,
-            date=datetime.datetime.now()
+            date=datetime.datetime.now(pytz.utc)
         )
         self.assertNotEqual(uli.user, self.test_user2)
         uli.user = self.test_user2
@@ -157,9 +166,10 @@ class UserLoginInfoTestCase(UnitTestBase):
         """
         from stalker import AuthenticationLog
         import datetime
+        import pytz
         uli = AuthenticationLog(
             user=self.test_user1,
-            date=datetime.datetime.now()
+            date=datetime.datetime.now(pytz.utc)
         )
         from stalker.models.auth import LOGIN
         self.assertEqual(uli.action, LOGIN)
@@ -170,10 +180,11 @@ class UserLoginInfoTestCase(UnitTestBase):
         """
         from stalker import AuthenticationLog
         import datetime
+        import pytz
         uli = AuthenticationLog(
             user=self.test_user1,
             action=None,
-            date=datetime.datetime.now()
+            date=datetime.datetime.now(pytz.utc)
         )
         from stalker.models.auth import LOGIN
         self.assertEqual(uli.action, LOGIN)
@@ -184,11 +195,12 @@ class UserLoginInfoTestCase(UnitTestBase):
         """
         from stalker import AuthenticationLog
         import datetime
+        import pytz
         with self.assertRaises(ValueError) as cm:
             AuthenticationLog(
                 user=self.test_user1,
                 action='not login',
-                date=datetime.datetime.now()
+                date=datetime.datetime.now(pytz.utc)
             )
 
         self.assertEqual(
@@ -203,10 +215,11 @@ class UserLoginInfoTestCase(UnitTestBase):
         from stalker import AuthenticationLog
         from stalker.models.auth import LOGIN
         import datetime
+        import pytz
         uli = AuthenticationLog(
             user=self.test_user1,
             action=LOGIN,
-            date=datetime.datetime.now()
+            date=datetime.datetime.now(pytz.utc)
         )
         with self.assertRaises(ValueError) as cm:
             uli.action = 'not login'
@@ -224,17 +237,18 @@ class UserLoginInfoTestCase(UnitTestBase):
         from stalker import AuthenticationLog
         from stalker.models.auth import LOGIN, LOGOUT
         import datetime
+        import pytz
         uli = AuthenticationLog(
             user=self.test_user1,
             action=LOGIN,
-            date=datetime.datetime.now()
+            date=datetime.datetime.now(pytz.utc)
         )
         self.assertEqual(uli.action, LOGIN)
 
         uli = AuthenticationLog(
             user=self.test_user1,
             action=LOGOUT,
-            date=datetime.datetime.now()
+            date=datetime.datetime.now(pytz.utc)
         )
         self.assertEqual(uli.action, LOGOUT)
 
@@ -244,10 +258,11 @@ class UserLoginInfoTestCase(UnitTestBase):
         from stalker import AuthenticationLog
         from stalker.models.auth import LOGIN, LOGOUT
         import datetime
+        import pytz
         uli = AuthenticationLog(
             user=self.test_user1,
             action=LOGIN,
-            date=datetime.datetime.now()
+            date=datetime.datetime.now(pytz.utc)
         )
         self.assertNotEqual(uli.action, LOGOUT)
         uli.action = LOGOUT
@@ -255,48 +270,51 @@ class UserLoginInfoTestCase(UnitTestBase):
 
     def test_date_argument_is_skipped(self):
         """testing if the date attribute value will be set to
-        datetime.datetime.now() when the date argument is skipped
+        datetime.datetime.now(pytz.utc) when the date argument is skipped
         """
         from stalker.models.auth import AuthenticationLog, LOGIN
         import datetime
+        import pytz
         uli = AuthenticationLog(
             user=self.test_user1,
             action=LOGIN
         )
-        diff = datetime.datetime.now() - uli.date
+        diff = datetime.datetime.now(pytz.utc) - uli.date
         self.assertTrue(diff.microseconds < 1000)
 
     def test_date_argument_is_None(self):
         """testing if the date attribute value will be set to
-        datetime.datetime.now() when the date argument is None
+        datetime.datetime.now(pytz.utc) when the date argument is None
         """
         from stalker.models.auth import AuthenticationLog, LOGIN
         import datetime
+        import pytz
         uli = AuthenticationLog(
             user=self.test_user1,
             action=LOGIN,
             date=None
         )
-        diff = datetime.datetime.now() - uli.date
+        diff = datetime.datetime.now(pytz.utc) - uli.date
         self.assertTrue(diff < datetime.timedelta(seconds=1))
 
     def test_date_attribute_is_None(self):
         """testing if the date attribute value is set to
-        datetime.datetime.now() when it is set to None
+        datetime.datetime.now(pytz.utc) when it is set to None
         """
         from stalker.models.auth import AuthenticationLog, LOGIN
         import datetime
+        import pytz
         uli = AuthenticationLog(
             user=self.test_user1,
             action=LOGIN,
-            date=datetime.datetime.now() - datetime.timedelta(days=10)
+            date=datetime.datetime.now(pytz.utc) - datetime.timedelta(days=10)
         )
-        diff = datetime.datetime.now() - uli.date
+        diff = datetime.datetime.now(pytz.utc) - uli.date
         one_second = datetime.timedelta(seconds=1)
         self.assertTrue(diff > one_second)
 
         uli.date = None
-        diff = datetime.datetime.now() - uli.date
+        diff = datetime.datetime.now(pytz.utc) - uli.date
         self.assertTrue(diff < one_second)
 
     def test_date_argument_is_not_a_datetime_instance(self):
@@ -323,10 +341,11 @@ class UserLoginInfoTestCase(UnitTestBase):
         """
         from stalker.models.auth import AuthenticationLog, LOGIN
         import datetime
+        import pytz
         uli = AuthenticationLog(
             user=self.test_user1,
             action=LOGIN,
-            date=datetime.datetime.now()
+            date=datetime.datetime.now(pytz.utc)
         )
         with self.assertRaises(TypeError) as cm:
             uli.date = 'not a datetime instance'
@@ -342,8 +361,9 @@ class UserLoginInfoTestCase(UnitTestBase):
         attribute
         """
         import datetime
+        import pytz
         from stalker.models.auth import AuthenticationLog, LOGIN
-        date = datetime.datetime(2016, 11, 14, 16, 30)
+        date = datetime.datetime(2016, 11, 14, 16, 30, tzinfo=pytz.utc)
         uli = AuthenticationLog(
             user=self.test_user1,
             action=LOGIN,
@@ -361,9 +381,10 @@ class UserLoginInfoTestCase(UnitTestBase):
             attribute
             """
             import datetime
+            import pytz
             from stalker.models.auth import AuthenticationLog, LOGIN
-            date1 = datetime.datetime(2016, 11, 4, 6, 30)
-            date2 = datetime.datetime(2016, 11, 14, 16, 30)
+            date1 = datetime.datetime(2016, 11, 4, 6, 30, tzinfo=pytz.utc)
+            date2 = datetime.datetime(2016, 11, 14, 16, 30, tzinfo=pytz.utc)
             uli = AuthenticationLog(
                 user=self.test_user1,
                 action=LOGIN,

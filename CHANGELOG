@@ -13,6 +13,12 @@ Stalker Changes
 * **Update:** Changed the ``id`` attribute name from ``info_id`` to ``log_id``
   in ``AuthenticationLog`` class.
 
+* **Update:** Started moving towards PostgreSQL only implementation. Merged the
+  ``DatabaseModelTester`` class and ``DatabaseModelsPostgreSQLTester`` class.
+
+* **Fix:** Fixed an autoflush issue in
+  ``stalker.models.review.Review.finalize_review_set()``.
+
 0.2.17.1
 ========
 

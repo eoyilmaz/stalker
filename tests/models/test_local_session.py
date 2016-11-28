@@ -163,8 +163,9 @@ class LocalSessionTester(unittest.TestCase):
         local_session.save()
 
         # set the valid time to an early date
+        import pytz
         local_session.valid_to = \
-            datetime.datetime.now() - datetime.timedelta(10)
+            datetime.datetime.now(pytz.utc) - datetime.timedelta(10)
 
         # pickle the data
         data = json.dumps(

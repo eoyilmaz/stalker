@@ -21,6 +21,8 @@
 import datetime
 import unittest
 
+import pytz
+
 from stalker import log
 from stalker.db.session import DBSession
 from stalker import (db, Asset, Entity, ImageFormat, Link, Project, Repository,
@@ -43,7 +45,7 @@ class ProjectTestCase(unittest.TestCase):
         #db.init()  # for tickets
 
         # create test objects
-        self.start = datetime.date.today()
+        self.start = datetime.datetime(2016, 11, 17, tzinfo=pytz.utc)
         self.end = self.start + datetime.timedelta(days=20)
 
         self.test_lead = User(
@@ -1192,7 +1194,8 @@ class ProjectTestCase(unittest.TestCase):
         """testing if the DateRangeMixin part is initialized correctly
         """
         start = \
-            datetime.datetime(2013, 3, 22, 4, 0) + datetime.timedelta(days=25)
+            datetime.datetime(2013, 3, 22, 4, 0, tzinfo=pytz.utc) \
+            + datetime.timedelta(days=25)
         end = start + datetime.timedelta(days=12)
 
         self.kwargs["start"] = start
@@ -1799,7 +1802,7 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
         TimeLog(
             task=self.test_task1,
             resource=self.test_task1.resources[0],
-            start=datetime.datetime(2013, 8, 1, 1, 0),
+            start=datetime.datetime(2013, 8, 1, 1, 0, tzinfo=pytz.utc),
             duration=datetime.timedelta(hours=1)
         )
         self.assertEqual(self.test_project.total_logged_seconds, 3600)
@@ -1808,7 +1811,7 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
         TimeLog(
             task=self.test_seq1,
             resource=self.test_seq1.resources[0],
-            start=datetime.datetime(2013, 8, 1, 2, 0),
+            start=datetime.datetime(2013, 8, 1, 2, 0, tzinfo=pytz.utc),
             duration=datetime.timedelta(hours=1)
         )
         self.assertEqual(self.test_project.total_logged_seconds, 7200)
@@ -1817,7 +1820,7 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
         TimeLog(
             task=self.test_task10,
             resource=self.test_task10.resources[0],
-            start=datetime.datetime(2013, 8, 1, 3, 0),
+            start=datetime.datetime(2013, 8, 1, 3, 0, tzinfo=pytz.utc),
             duration=datetime.timedelta(hours=3)
         )
         self.assertEqual(self.test_project.total_logged_seconds, 18000)
@@ -1826,7 +1829,7 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
         TimeLog(
             task=self.test_asset1,
             resource=self.test_asset1.resources[0],
-            start=datetime.datetime(2013, 8, 1, 6, 0),
+            start=datetime.datetime(2013, 8, 1, 6, 0, tzinfo=pytz.utc),
             duration=datetime.timedelta(hours=10)
         )
         self.assertEqual(self.test_project.total_logged_seconds, 15 * 3600)
@@ -1931,7 +1934,7 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
         t = TimeLog(
             task=self.test_task1,
             resource=self.test_task1.resources[0],
-            start=datetime.datetime(2013, 8, 1, 1, 0),
+            start=datetime.datetime(2013, 8, 1, 1, 0, tzinfo=pytz.utc),
             duration=datetime.timedelta(hours=1)
         )
         db.DBSession.add(t)
@@ -2043,7 +2046,7 @@ class ProjectTicketsTestCase(unittest.TestCase):
         db.init()  # for tickets
 
         # create test objects
-        self.start = datetime.date.today()
+        self.start = datetime.datetime(2016, 11, 17, tzinfo=pytz.utc)
         self.end = self.start + datetime.timedelta(days=20)
 
         self.test_lead = User(

@@ -43,6 +43,8 @@ class UnitTestBase(unittest.TestCase):
         # init database
         from stalker import db
         db.setup(self.config)
+
+        # remove anything beforehand
         db.init()
 
     def tearDown(self):
@@ -53,10 +55,12 @@ class UnitTestBase(unittest.TestCase):
         from stalker.db.declarative import Base
 
         # clean up test database
+        db.DBSession.rollback()
         connection = db.DBSession.connection()
         engine = connection.engine
         connection.close()
-        Base.metadata.drop_all(engine)
+
+        Base.metadata.drop_all(engine, checkfirst=True)
         db.DBSession.remove()
 
         defaults.timing_resolution = datetime.timedelta(hours=1)

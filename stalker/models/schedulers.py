@@ -25,6 +25,8 @@ import datetime
 import time
 import csv
 
+import pytz
+
 import stalker
 from stalker import defaults
 from stalker.log import logging_level
@@ -605,6 +607,10 @@ order by path_as_text"""
                     data[2],
                     "%Y-%m-%d-%H:%M"
                 )
+
+                # implement time zone info
+                start_date = start_date.replace(tzinfo=pytz.utc)
+                end_date = end_date.replace(tzinfo=pytz.utc)
 
                 # computed_resources
                 if self.compute_resources:

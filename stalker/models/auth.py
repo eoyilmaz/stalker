@@ -23,6 +23,7 @@ import json
 import re
 import base64
 import datetime
+import pytz
 
 from sqlalchemy import (Table, Column, Integer, ForeignKey, String, DateTime,
                         Enum, Float)
@@ -932,7 +933,7 @@ class LocalSession(object):
         :param int millis: an int value showing the millis from unix EPOCH
         :return:
         """
-        epoch = datetime.datetime(1970, 1, 1)
+        epoch = datetime.datetime(1970, 1, 1, tzinfo=pytz.utc)
         return epoch + datetime.timedelta(milliseconds=millis)
 
     def load(self):
@@ -943,7 +944,7 @@ class LocalSession(object):
                 # try:
                 json_object = json.load(s)
                 valid_to = self.millis_to_datetime(json_object.get('valid_to'))
-                if valid_to > datetime.datetime.now():
+                if valid_to > datetime.datetime.now(pytz.utc):
                     # fill __dict__ with the loaded one
                     self.valid_to = valid_to
                     self.logged_in_user_id = \
@@ -968,7 +969,8 @@ class LocalSession(object):
     def save(self):
         """remembers the data in user local file system
         """
-        self.valid_to = datetime.datetime.now() + datetime.timedelta(days=10)
+        self.valid_to = datetime.datetime.now(pytz.utc) + \
+                        datetime.timedelta(days=10)
         # serialize self
         dumped_data = json.dumps({
             'valid_to': self.valid_to,
@@ -1114,7 +1116,7 @@ class AuthenticationLog(SimpleEntity):
     )
 
     date = Column(
-        DateTime,
+        DateTime(timezone=True),
         nullable=False
     )
 
@@ -1161,7 +1163,7 @@ class AuthenticationLog(SimpleEntity):
         """validates the given date value
         """
         if date is None:
-            date = datetime.datetime.now()
+            date = datetime.datetime.now(pytz.utc)
 
         if not isinstance(date, datetime.datetime):
             raise TypeError(

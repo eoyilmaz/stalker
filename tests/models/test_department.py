@@ -18,21 +18,19 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest
-import datetime
-from stalker import db, Department, Entity, User
+from stalker.testing import UnitTestBase
 
 
-class DepartmentTester(unittest.TestCase):
+class DepartmentTester(UnitTestBase):
     """tests the Department class
     """
 
     def setUp(self):
         """lets setup the tests
         """
-        db.setup()  # uses in memory sqlite db
-        db.init()
+        super(DepartmentTester, self).setUp()
 
+        from stalker import db, User
         self.test_admin = User.query.filter_by(login="admin").first()
 
         # create a couple of test users
@@ -83,7 +81,9 @@ class DepartmentTester(unittest.TestCase):
             self.test_user4
         ]
 
-        self.date_created = self.date_updated = datetime.datetime.now()
+        import datetime
+        import pytz
+        self.date_created = self.date_updated = datetime.datetime.now(pytz.utc)
 
         self.kwargs = {
             "name": "Test Department",
@@ -96,6 +96,7 @@ class DepartmentTester(unittest.TestCase):
         }
 
         # create a default department object
+        from stalker import Department
         self.test_department = Department(**self.kwargs)
         db.DBSession.add(self.test_department)
         db.DBSession.commit()
@@ -104,6 +105,7 @@ class DepartmentTester(unittest.TestCase):
         """testing if the __auto_name__ class attribute is set to False for
         Department class
         """
+        from stalker import Department
         self.assertFalse(Department.__auto_name__)
 
     def test_users_argument_accepts_an_empty_list(self):
@@ -111,6 +113,7 @@ class DepartmentTester(unittest.TestCase):
         """
         # this should work without raising any error
         self.kwargs["users"] = []
+        from stalker import Department
         new_dep = Department(**self.kwargs)
         self.assertTrue(isinstance(new_dep, Department))
 
@@ -126,6 +129,7 @@ class DepartmentTester(unittest.TestCase):
         test_value = [1, 2.3, [], {}]
         self.kwargs["users"] = test_value
         # this should raise a TypeError
+        from stalker import Department
         self.assertRaises(
             TypeError,
             Department,
@@ -168,6 +172,7 @@ class DepartmentTester(unittest.TestCase):
         """testing if a TypeError will be raised when the given users
         argument is not an instance of list
         """
+        from stalker import Department
         test_values = [1, 1.2, "a user"]
         for test_value in test_values:
             self.kwargs["users"] = test_value
@@ -186,6 +191,7 @@ class DepartmentTester(unittest.TestCase):
         """testing if the users attribute defaults to an empty list if the
          users argument is skipped
         """
+        from stalker import Department
         self.kwargs.pop("users")
         new_department = Department(**self.kwargs)
         self.assertEqual(new_department.users, [])
@@ -202,7 +208,7 @@ class DepartmentTester(unittest.TestCase):
         """
         # assign a user to a department and search for a DepartmentUser
         # representing that relation
-        from stalker import DepartmentUser
+        from stalker import db, DepartmentUser
         db.DBSession.commit()
         with db.DBSession.no_autoflush:
             self.test_department.users.append(self.test_user5)
@@ -222,6 +228,7 @@ class DepartmentTester(unittest.TestCase):
     def test_equality(self):
         """testing equality of two Department objects
         """
+        from stalker import Department, Entity
         dep1 = Department(**self.kwargs)
         dep2 = Department(**self.kwargs)
 
@@ -239,6 +246,7 @@ class DepartmentTester(unittest.TestCase):
     def test_inequality(self):
         """testing inequality of two Department objects
         """
+        from stalker import Department, Entity
         dep1 = Department(**self.kwargs)
         dep2 = Department(**self.kwargs)
 
@@ -256,7 +264,7 @@ class DepartmentTester(unittest.TestCase):
     def test_tjp_id_is_working_properly(self):
         """testing if the tjp_is working properly
         """
-        self.assertEqual(self.test_department.tjp_id, 'Department_35')
+        self.assertEqual(self.test_department.tjp_id, 'Department_32')
 
     def test_to_tjp_is_working_properly(self):
         """testing if the to_tjp property is working properly

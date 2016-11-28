@@ -18,33 +18,25 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+from stalker.testing import UnitTestBase
 
-import unittest
-import datetime
 import logging
-
-from stalker import (db, defaults, Group, Department, Project, Repository,
-                     Sequence, Status, StatusList, Task, Type, User, Version,
-                     Ticket, Vacation, Client)
-
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-class UserTest(unittest.TestCase):
+class UserTest(UnitTestBase):
     """Tests the user class
     """
 
     def setUp(self):
         """setup the test
         """
-        # setup a test database
-        self.TEST_DATABASE_URI = "sqlite:///:memory:"
-        db.setup()
-        db.init()
+        super(UserTest, self).setUp()
 
         # need to have some test object for
         # a department
+        from stalker import db, Department
         self.test_department1 = Department(
             name="Test Department 1"
         )
@@ -62,6 +54,7 @@ class UserTest(unittest.TestCase):
         ])
 
         # a couple of groups
+        from stalker import Group
         self.test_group1 = Group(
             name="Test Group 1"
         )
@@ -80,6 +73,7 @@ class UserTest(unittest.TestCase):
         db.DBSession.commit()
 
         # a couple of statuses
+        from stalker import Status, StatusList
         self.status_cmpl = Status.query.filter(Status.code == 'CMPL').first()
         self.status_wip = Status.query.filter(Status.code == "WIP").first()
         self.status_rts = Status.query.filter(Status.code == "RTS").first()
@@ -94,10 +88,11 @@ class UserTest(unittest.TestCase):
                 self.status_rts,
                 self.status_prev
             ],
-            target_entity_type=Project,
+            target_entity_type='Project',
         )
 
         # a repository type
+        from stalker import Type, Repository, Project
         self.test_repository_type = Type(
             name="Test",
             code='test',
@@ -152,6 +147,7 @@ class UserTest(unittest.TestCase):
         self.task_status_list = StatusList.query\
             .filter_by(target_entity_type='Task').first()
 
+        from stalker import User
         self.test_lead = User(
             name='lead',
             login='lead',
@@ -160,6 +156,7 @@ class UserTest(unittest.TestCase):
         )
 
         # a couple of tasks
+        from stalker import Task
         self.test_task1 = Task(
             name="Test Task 1",
             status_list=self.task_status_list,
@@ -196,6 +193,7 @@ class UserTest(unittest.TestCase):
         ])
 
         # for task1
+        from stalker import Version
         self.test_version1 = Version(
             task=self.test_task1,
             full_path='some/path'
@@ -279,6 +277,7 @@ class UserTest(unittest.TestCase):
         # set up an running so it will be automatically linked
 
         # tickets for version1
+        from stalker import Ticket
         self.test_ticket1 = Ticket(
             project=self.test_project1,
             links=[self.test_version1],
@@ -365,6 +364,7 @@ class UserTest(unittest.TestCase):
             .filter_by(target_entity_type='Sequence').first()
 
         # a couple of sequences
+        from stalker import Sequence
         self.test_sequence1 = Sequence(
             name="Test Seq 1",
             code='ts1',
@@ -400,18 +400,13 @@ class UserTest(unittest.TestCase):
             self.test_sequence4
         ])
 
-        # a test admin
-        #self.test_admin = User(
-        #    name='Admin',
-        #    login='admin',
-        #    email='admin@admin.com',
-        #    password='admin'
-        #)
+        from stalker import defaults
         self.test_admin = User.query.filter_by(name=defaults.admin_name) \
             .first()
         self.assertTrue(self.test_admin is not None)
 
         # create test company
+        from stalker import Client
         self.test_company = Client(name='Test Company')
 
         # create the default values for parameters
@@ -439,15 +434,11 @@ class UserTest(unittest.TestCase):
         self.kwargs['name'] = 'some other name'
         self.kwargs['email'] = 'some@other.email'
 
-    def tearDown(self):
-        """tear down the test
-        """
-        db.DBSession.remove()
-
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for
         User class
         """
+        from stalker import User
         self.assertFalse(User.__auto_name__)
 
     def test_email_argument_accepting_only_string(self):
@@ -456,6 +447,7 @@ class UserTest(unittest.TestCase):
         # try to create a new user with wrong attribute
         test_values = [1, 1.3, ["an email"], {"an": "email"}]
 
+        from stalker import User
         for test_value in test_values:
             self.kwargs["email"] = test_value
             self.assertRaises(TypeError, User, **self.kwargs)
@@ -495,6 +487,7 @@ class UserTest(unittest.TestCase):
         ]
 
         # any of this values should raise a ValueError
+        from stalker import User
         for test_value in test_values:
             self.kwargs["email"] = test_value
             self.assertRaises(ValueError, User, **self.kwargs)
@@ -524,6 +517,7 @@ class UserTest(unittest.TestCase):
     def test_email_argument_should_be_a_unique_value(self):
         """testing if the email argument should be a unique value
         """
+        from stalker import db, User
         # this test should include a database
         test_email = "test@email.com"
         self.kwargs['login'] = 'test_user1'
@@ -550,6 +544,7 @@ class UserTest(unittest.TestCase):
         """testing if a ValueError will be raised when the given objects
         conversion to string results an empty string
         """
+        from stalker import User
         test_values = ["----++==#@#$", ]
         for test_value in test_values:
             self.kwargs["login"] = test_value
@@ -559,6 +554,7 @@ class UserTest(unittest.TestCase):
         """testing if a ValueError will be raised when trying to assign an
         empty string to login argument
         """
+        from stalker import User
         self.kwargs["login"] = ""
         self.assertRaises(ValueError, User, **self.kwargs)
 
@@ -578,6 +574,7 @@ class UserTest(unittest.TestCase):
         """testing if a TypeError will be raised when the login argument is
         skipped
         """
+        from stalker import User
         self.kwargs.pop("login")
         self.assertRaises(TypeError, User, **self.kwargs)
 
@@ -585,6 +582,7 @@ class UserTest(unittest.TestCase):
         """testing if a TypeError will be raised when trying to assign None
         to login argument
         """
+        from stalker import User
         self.kwargs["login"] = None
         self.assertRaises(TypeError, User, **self.kwargs)
 
@@ -616,6 +614,7 @@ class UserTest(unittest.TestCase):
             ("213 e.ozgur", "eozgur"),
         ]
 
+        from stalker import User
         for valuePair in test_values:
             # set the input and expect the expected output
             self.kwargs["login"] = valuePair[0]
@@ -652,6 +651,7 @@ class UserTest(unittest.TestCase):
     def test_login_argument_should_be_a_unique_value(self):
         """testing if the login argument should be a unique value
         """
+        from stalker import db, User
         # this test should include a database
         test_login = 'test_user1'
         self.kwargs['login'] = test_login
@@ -694,6 +694,7 @@ class UserTest(unittest.TestCase):
         except KeyError:
             pass
 
+        from stalker import User
         new_user = User(**self.kwargs)
         self.assertEqual(new_user.departments, [])
 
@@ -701,6 +702,7 @@ class UserTest(unittest.TestCase):
         """testing if a User can be created with the departments argument value
         is to None
         """
+        from stalker import User
         self.kwargs['departments'] = None
         new_user = User(**self.kwargs)
         self.assertEqual(new_user.departments, [])
@@ -716,6 +718,7 @@ class UserTest(unittest.TestCase):
         """testing if a User can be created with the departments argument is an
         empty list
         """
+        from stalker import User
         self.kwargs['departments'] = []
         User(**self.kwargs)
 
@@ -739,6 +742,7 @@ class UserTest(unittest.TestCase):
         ]
 
         self.kwargs["departments"] = test_values
+        from stalker import User
         self.assertRaises(TypeError, User, **self.kwargs)
 
     def test_departments_attribute_only_accepts_department_objects(self):
@@ -782,6 +786,7 @@ class UserTest(unittest.TestCase):
         to the password argument
         """
         import copy
+        from stalker import User
         kwargs = copy.copy(self.kwargs)
         kwargs["password"] = None
         with self.assertRaises(TypeError) as cm:
@@ -797,8 +802,10 @@ class UserTest(unittest.TestCase):
         empty string
         """
         import copy
+        from stalker import User
         kwargs = copy.copy(self.kwargs)
         kwargs["password"] = ''
+
         with self.assertRaises(ValueError) as cm:
             User(**kwargs)
 
@@ -829,6 +836,7 @@ class UserTest(unittest.TestCase):
     def test_password_argument_being_scrambled(self):
         """testing if password is scrambled when trying to store it
         """
+        from stalker import User
         test_password = "a new test password"
         self.kwargs["password"] = test_password
         new_user = User(**self.kwargs)
@@ -862,6 +870,7 @@ class UserTest(unittest.TestCase):
         """testing if the groups attribute will be an empty list
         when the groups argument is None
         """
+        from stalker import User
         self.kwargs["groups"] = None
         new_user = User(**self.kwargs)
         self.assertEqual(new_user.groups, [])
@@ -876,6 +885,7 @@ class UserTest(unittest.TestCase):
         """testing if a TypeError will be raised when trying to assign anything
         other then a Group instances to the group argument
         """
+        from stalker import User
         test_values = [
             23123,
             1231.43122,
@@ -1042,6 +1052,7 @@ class UserTest(unittest.TestCase):
     def test_equality_operator(self):
         """testing equality of two users
         """
+        from stalker import User
         self.kwargs.update({
             "name": "Generic User",
             "description": "this is a different user",
@@ -1057,6 +1068,7 @@ class UserTest(unittest.TestCase):
     def test_inequality_operator(self):
         """testing inequality of two users
         """
+        from stalker import User
         self.kwargs.update({
             "name": "Generic User",
             "description": "this is a different user",
@@ -1214,6 +1226,10 @@ class UserTest(unittest.TestCase):
         """testing if the to_tjp property is working properly for a user with
         vacations
         """
+        import datetime
+        import pytz
+        from stalker import Vacation, Type
+
         personal_vacation = Type(
             name='Personal',
             code='PERS',
@@ -1223,15 +1239,15 @@ class UserTest(unittest.TestCase):
         Vacation(
             user=self.test_user,
             type=personal_vacation,
-            start=datetime.datetime(2013, 6, 7, 0, 0),
-            end=datetime.datetime(2013, 6, 21, 0, 0)
+            start=datetime.datetime(2013, 6, 7, 0, 0, tzinfo=pytz.utc),
+            end=datetime.datetime(2013, 6, 21, 0, 0, tzinfo=pytz.utc)
         )
 
         Vacation(
             user=self.test_user,
             type=personal_vacation,
-            start=datetime.datetime(2013, 7, 1, 0, 0),
-            end=datetime.datetime(2013, 7, 15, 0, 0)
+            start=datetime.datetime(2013, 7, 1, 0, 0, tzinfo=pytz.utc),
+            end=datetime.datetime(2013, 7, 15, 0, 0, tzinfo=pytz.utc)
         )
 
         expected_tjp = """resource User_%s "User_%s" {
@@ -1273,6 +1289,9 @@ class UserTest(unittest.TestCase):
     def test_vacations_attribute_is_working_properly(self):
         """testing if the vacations attribute is working properly
         """
+        import datetime
+        import pytz
+        from stalker import User, Type, Vacation
         some_other_user = User(
             name='Some Other User',
             login='sou',
@@ -1289,8 +1308,8 @@ class UserTest(unittest.TestCase):
         vac1 = Vacation(
             user=some_other_user,
             type=personal_vac_type,
-            start=datetime.datetime(2013, 6, 7),
-            end=datetime.datetime(2013, 6, 10)
+            start=datetime.datetime(2013, 6, 7, tzinfo=pytz.utc),
+            end=datetime.datetime(2013, 6, 10, tzinfo=pytz.utc)
         )
 
         self.assertFalse(
@@ -1307,6 +1326,7 @@ class UserTest(unittest.TestCase):
         """testing if the efficiency attribute value will be 1.0 if the
         efficiency argument is skipped
         """
+        from stalker import User
         self.kwargs.pop('efficiency')
         new_user = User(**self.kwargs)
         self.assertEqual(1.0, new_user.efficiency)
@@ -1315,6 +1335,7 @@ class UserTest(unittest.TestCase):
         """testing if the efficiency attribute value will be 1.0 if the
         efficiency argument is None
         """
+        from stalker import User
         self.kwargs['efficiency'] = None
         new_user = User(**self.kwargs)
         self.assertEqual(1.0, new_user.efficiency)
@@ -1331,6 +1352,7 @@ class UserTest(unittest.TestCase):
         """testing if a TypeError will be raised when the efficiency argument
         is not a float or integer
         """
+        from stalker import User
         self.kwargs['efficiency'] = 'not a float or integer'
         with self.assertRaises(TypeError) as cm:
             User(**self.kwargs)
@@ -1358,6 +1380,7 @@ class UserTest(unittest.TestCase):
         """testing if a ValueError will be raised when the efficiency argument
         is a negative float or integer
         """
+        from stalker import User
         self.kwargs['efficiency'] = -1
         with self.assertRaises(ValueError) as cm:
             User(**self.kwargs)
@@ -1385,6 +1408,7 @@ class UserTest(unittest.TestCase):
         """testing if the efficiency argument value is correctly passed to the
         efficiency attribute
         """
+        from stalker import User
         # integer value
         self.kwargs['efficiency'] = 2
         new_user = User(**self.kwargs)
@@ -1432,6 +1456,7 @@ class UserTest(unittest.TestCase):
         """testing if the companies attribute will be set to an empty list when
         the company argument is skipped
         """
+        from stalker import User
         self.kwargs.pop('companies')
         new_user = User(**self.kwargs)
         self.assertEquals(new_user.companies, [])
@@ -1440,6 +1465,7 @@ class UserTest(unittest.TestCase):
         """testing if the companies argument is set to None the companies
         attribute will be an empty list
         """
+        from stalker import User
         self.kwargs['companies'] = None
         new_user = User(**self.kwargs)
         self.assertTrue(new_user.companies == [])
@@ -1460,6 +1486,7 @@ class UserTest(unittest.TestCase):
         """testing if a TypeError will be raised if the companies argument is
         not a list
         """
+        from stalker import User
         self.kwargs['companies'] = 'not a list of clients'
         with self.assertRaises(TypeError) as cm:
             User(**self.kwargs)
@@ -1474,6 +1501,7 @@ class UserTest(unittest.TestCase):
         """testing if a TypeError will be raised when the companies argument is
         not a list of Client instances
         """
+        from stalker import User
         test_value = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
         self.kwargs["companies"] = test_value
         self.assertRaises(
@@ -1499,6 +1527,7 @@ class UserTest(unittest.TestCase):
     def test_companies_attribute_is_working_properly(self):
         """from issue #27
         """
+        from stalker import db, Client, User
         new_companies = []
         c1 = Client(name='Company X')
         c2 = Client(name='Company Y')
@@ -1526,6 +1555,7 @@ class UserTest(unittest.TestCase):
     def test_companies_attribute_is_working_properly_2(self):
         """from issue #27
         """
+        from stalker import db, Client, User
         c1 = Client(name='Company X')
         c2 = Client(name='Company Y')
         c3 = Client(name='Company Z')
@@ -1582,20 +1612,11 @@ class UserTest(unittest.TestCase):
             sorted(self.test_user.watching, key=lambda x: x.name)
         )
 
-    # def test_hash_value(self):
-    #     """testing if the hash value is correctly calculated
-    #     """
-    #     self.assertEqual(
-    #         hash(self.test_user),
-    #         hash(self.test_user.id) +
-    #         2 * hash(self.test_user.name) +
-    #         3 * hash(self.test_user.entity_type)
-    #     )
-
     def test_rate_argument_is_skipped(self):
         """testing if the rate attribute will be 0 when the rate argument is
         skipped
         """
+        from stalker import User
         if 'rate' in self.kwargs:
             self.kwargs.pop('rate')
 
@@ -1606,6 +1627,7 @@ class UserTest(unittest.TestCase):
         """testing if the rate attribute will be 0 when the rate argument is
         None
         """
+        from stalker import User
         self.kwargs['rate'] = None
         new_user = User(**self.kwargs)
         self.assertEqual(new_user.rate, 0)
@@ -1622,6 +1644,7 @@ class UserTest(unittest.TestCase):
         """testing if a TypeError will be raised when the rate argument is not
         an integer or float value
         """
+        from stalker import User
         self.kwargs['rate'] = 'some string'
         with self.assertRaises(TypeError) as cm:
             User(**self.kwargs)
@@ -1649,6 +1672,7 @@ class UserTest(unittest.TestCase):
         """testing if a ValueError will be raised when the rate argument is a
         negative value
         """
+        from stalker import User
         self.kwargs['rate'] = -1
         with self.assertRaises(ValueError) as cm:
             User(**self.kwargs)
@@ -1675,6 +1699,7 @@ class UserTest(unittest.TestCase):
     def test_rate_argument_is_working_properly(self):
         """testing if the rate argument is working properly
         """
+        from stalker import User
         test_value = 102.3
         self.kwargs['rate'] = test_value
         new_user = User(**self.kwargs)

@@ -18,10 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-from sqlalchemy.orm import (
-    scoped_session,
-    sessionmaker,
-)
+from sqlalchemy.orm import scoped_session, sessionmaker
 
 # SQLAlchemy session manager
 DBSession = scoped_session(

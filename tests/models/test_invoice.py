@@ -154,12 +154,13 @@ class InvoiceTestCase(unittest.TestCase):
         """
         from stalker import Invoice
         import datetime
+        import pytz
         invoice = Invoice(
             budget=self.test_budget,
             amount=1500,
             unit='TL',
             client=self.test_client,
-            date_created=datetime.datetime.today(),
+            date_created=datetime.datetime(2016, 11, 7, tzinfo=pytz.utc),
         )
         self.assertIsInstance(invoice, Invoice)
 

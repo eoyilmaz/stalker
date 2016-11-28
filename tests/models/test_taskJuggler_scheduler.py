@@ -19,36 +19,24 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import datetime
-import unittest
 import os
 
+import pytz
 import stalker
+from stalker.testing import UnitTestBase
 from stalker.db import DBSession
 from stalker import (db, Department, User, Repository, Status, StatusList,
                      Project, Task, TaskJugglerScheduler, Studio)
 
 
-class TaskJugglerSchedulerTester(unittest.TestCase):
+class TaskJugglerSchedulerTester(UnitTestBase):
     """tests the stalker.models.scheduler.TaskJugglerScheduler class
     """
-
-    @classmethod
-    def setUpClass(cls):
-        """setup tests in class level
-        """
-        cls.config = {
-            'sqlalchemy.url': 'sqlite:///:memory:',
-            'sqlalchemy.echo': False
-        }
 
     def setUp(self):
         """set up the test
         """
-        # we need a database
-        db.setup(self.config)
-        db.init()
-
-        # replace datetime now function
+        super(TaskJugglerSchedulerTester, self).setUp()
 
         # create departments
         self.test_dep1 = Department(name='Dep1')
@@ -145,11 +133,11 @@ class TaskJugglerSchedulerTester(unittest.TestCase):
             code='TP1',
             repository=self.test_repo,
             status_list=self.test_proj_status_list,
-            start=datetime.datetime(2013, 4, 4),
-            end=datetime.datetime(2013, 5, 4)
+            start=datetime.datetime(2013, 4, 4, tzinfo=pytz.utc),
+            end=datetime.datetime(2013, 5, 4, tzinfo=pytz.utc)
         )
         DBSession.add(self.test_proj1)
-        self.test_proj1.now = datetime.datetime(2013, 4, 4)
+        self.test_proj1.now = datetime.datetime(2013, 4, 4, tzinfo=pytz.utc)
 
         # create task status list
         with DBSession.no_autoflush:
@@ -187,11 +175,6 @@ class TaskJugglerSchedulerTester(unittest.TestCase):
         DBSession.add(self.test_task2)
         DBSession.commit()
 
-    def tearDown(self):
-        """clean up the test
-        """
-        DBSession.remove()
-
     def test_tjp_file_is_created(self):
         """testing if the tjp file is correctly created
         """
@@ -220,9 +203,10 @@ class TaskJugglerSchedulerTester(unittest.TestCase):
         test_studio.daily_working_hours = 9
 
         test_studio.id = 564
-        test_studio.start = datetime.datetime(2013, 4, 16, 0, 7)
-        test_studio.end = datetime.datetime(2013, 6, 30, 0, 0)
-        test_studio.now = datetime.datetime(2013, 4, 16, 0, 0)
+        test_studio.start = \
+            datetime.datetime(2013, 4, 16, 0, 7, tzinfo=pytz.utc)
+        test_studio.end = datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc)
+        test_studio.now = datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
         tjp_sched.studio = test_studio
 
         tjp_sched._create_tjp_file()
@@ -275,16 +259,11 @@ project Studio_564 "Studio_564" 2013-04-16 - 2013-06-30 {
 }
         }
 
-        # tasks
+# tasks
         
             
 task Project_{{proj.id}} "Project_{{proj.id}}" {
-        
-task Task_{{task1.id}} "Task_{{task1.id}}" {
-
-    
-            
-            
+    task Task_{{task1.id}} "Task_{{task1.id}}" {
             effort 50.0h
             allocate User_{{user1.id}} {
                     alternative
@@ -357,10 +336,14 @@ task Task_{{task2.id}} "Task_{{task2.id}}" {
         """testing if the tasks are correctly scheduled
         """
         tjp_sched = TaskJugglerScheduler(compute_resources=True)
-        test_studio = Studio(name='Test Studio',
-                             now=datetime.datetime(2013, 4, 16, 0, 0))
-        test_studio.start = datetime.datetime(2013, 4, 16, 0, 0)
-        test_studio.end = datetime.datetime(2013, 4, 30, 0, 0)
+        test_studio = Studio(
+            name='Test Studio',
+            now=datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
+        )
+        test_studio.start = \
+            datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
+        test_studio.end = \
+            datetime.datetime(2013, 4, 30, 0, 0, tzinfo=pytz.utc)
         test_studio.daily_working_hours = 9
         DBSession.add(test_studio)
 
@@ -370,20 +353,20 @@ task Task_{{task2.id}} "Task_{{task2.id}}" {
 
         # check if the task and project timings are all adjusted
         self.assertEqual(
-            datetime.datetime(2013, 4, 16, 9, 0),
+            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc),
             self.test_proj1.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 4, 24, 10, 0),
+            datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc),
             self.test_proj1.computed_end
         )
 
         self.assertEqual(
-            datetime.datetime(2013, 4, 16, 9, 0),
+            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc),
             self.test_task1.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 4, 18, 16, 0),
+            datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc),
             self.test_task1.computed_end
         )
         self.assertEqual(
@@ -392,11 +375,11 @@ task Task_{{task2.id}} "Task_{{task2.id}}" {
         )
 
         self.assertEqual(
-            datetime.datetime(2013, 4, 18, 16, 0),
+            datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc),
             self.test_task2.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 4, 24, 10, 0),
+            datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc),
             self.test_task2.computed_end
         )
 
@@ -414,10 +397,13 @@ task Task_{{task2.id}} "Task_{{task2.id}}" {
         resources is False
         """
         tjp_sched = TaskJugglerScheduler(compute_resources=False)
-        test_studio = Studio(name='Test Studio',
-                             now=datetime.datetime(2013, 4, 16, 0, 0))
-        test_studio.start = datetime.datetime(2013, 4, 16, 0, 0)
-        test_studio.end = datetime.datetime(2013, 4, 30, 0, 0)
+        test_studio = Studio(
+            name='Test Studio',
+            now=datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
+        )
+        test_studio.start = \
+            datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
+        test_studio.end = datetime.datetime(2013, 4, 30, 0, 0, tzinfo=pytz.utc)
         test_studio.daily_working_hours = 9
         DBSession.add(test_studio)
 
@@ -427,20 +413,20 @@ task Task_{{task2.id}} "Task_{{task2.id}}" {
 
         # check if the task and project timings are all adjusted
         self.assertEqual(
-            datetime.datetime(2013, 4, 16, 9, 0),
+            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc),
             self.test_proj1.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 4, 24, 10, 0),
+            datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc),
             self.test_proj1.computed_end
         )
 
         self.assertEqual(
-            datetime.datetime(2013, 4, 16, 9, 0),
+            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc),
             self.test_task1.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 4, 18, 16, 0),
+            datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc),
             self.test_task1.computed_end
         )
         self.assertEqual(
@@ -449,11 +435,11 @@ task Task_{{task2.id}} "Task_{{task2.id}}" {
         )
 
         self.assertEqual(
-            datetime.datetime(2013, 4, 18, 16, 0),
+            datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc),
             self.test_task2.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 4, 24, 10, 0),
+            datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc),
             self.test_task2.computed_end
         )
         self.assertEqual(
@@ -466,10 +452,13 @@ task Task_{{task2.id}} "Task_{{task2.id}}" {
         resources is True
         """
         tjp_sched = TaskJugglerScheduler(compute_resources=True)
-        test_studio = Studio(name='Test Studio',
-                             now=datetime.datetime(2013, 4, 16, 0, 0))
-        test_studio.start = datetime.datetime(2013, 4, 16, 0, 0)
-        test_studio.end = datetime.datetime(2013, 4, 30, 0, 0)
+        test_studio = Studio(
+            name='Test Studio',
+            now=datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
+        )
+        test_studio.start = \
+            datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
+        test_studio.end = datetime.datetime(2013, 4, 30, 0, 0, tzinfo=pytz.utc)
         test_studio.daily_working_hours = 9
         DBSession.add(test_studio)
 
@@ -479,20 +468,20 @@ task Task_{{task2.id}} "Task_{{task2.id}}" {
 
         # check if the task and project timings are all adjusted
         self.assertEqual(
-            datetime.datetime(2013, 4, 16, 9, 0),
+            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc),
             self.test_proj1.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 4, 24, 10, 0),
+            datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc),
             self.test_proj1.computed_end
         )
 
         self.assertEqual(
-            datetime.datetime(2013, 4, 16, 9, 0),
+            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc),
             self.test_task1.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 4, 18, 16, 0),
+            datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc),
             self.test_task1.computed_end
         )
         self.assertEqual(
@@ -501,11 +490,11 @@ task Task_{{task2.id}} "Task_{{task2.id}}" {
         )
 
         self.assertEqual(
-            datetime.datetime(2013, 4, 18, 16, 0),
+            datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc),
             self.test_task2.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 4, 24, 10, 0),
+            datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc),
             self.test_task2.computed_end
         )
         possible_resources = [
@@ -546,10 +535,13 @@ task Task_{{task2.id}} "Task_{{task2.id}}" {
 
         tjp_sched = TaskJugglerScheduler(compute_resources=True,
                                          projects=[dummy_project])
-        test_studio = Studio(name='Test Studio',
-                             now=datetime.datetime(2013, 4, 16, 0, 0))
-        test_studio.start = datetime.datetime(2013, 4, 16, 0, 0)
-        test_studio.end = datetime.datetime(2013, 4, 30, 0, 0)
+        test_studio = Studio(
+            name='Test Studio',
+            now=datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
+        )
+        test_studio.start = \
+            datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
+        test_studio.end = datetime.datetime(2013, 4, 30, 0, 0, tzinfo=pytz.utc)
         test_studio.daily_working_hours = 9
         DBSession.add(test_studio)
         db.DBSession.commit()
@@ -572,15 +564,23 @@ task Task_{{task2.id}} "Task_{{task2.id}}" {
         self.assertEqual(self.test_task2.computed_resources,
                          [self.test_user1, self.test_user2])
 
-        self.assertEqual(dt1.computed_start,
-                         datetime.datetime(2013, 4, 16, 9, 0))
-        self.assertEqual(dt1.computed_end,
-                         datetime.datetime(2013, 4, 16, 13, 0))
+        self.assertEqual(
+            dt1.computed_start,
+            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc)
+        )
+        self.assertEqual(
+            dt1.computed_end,
+            datetime.datetime(2013, 4, 16, 13, 0, tzinfo=pytz.utc)
+        )
 
-        self.assertEqual(dt2.computed_start,
-                         datetime.datetime(2013, 4, 16, 9, 0))
-        self.assertEqual(dt2.computed_end,
-                         datetime.datetime(2013, 4, 16, 13, 0))
+        self.assertEqual(
+            dt2.computed_start,
+            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc)
+        )
+        self.assertEqual(
+            dt2.computed_end,
+            datetime.datetime(2013, 4, 16, 13, 0, tzinfo=pytz.utc)
+        )
 
     def test_projects_argument_is_skipped(self):
         """testing if the projects attribute will be an empty list if the
@@ -701,49 +701,7 @@ task Task_{{task2.id}} "Task_{{task2.id}}" {
 
         self.assertEqual(tjp.projects, [dp1, dp2])
 
-
-class TaskJugglerScheduler_PostgreSQL_Tester(TaskJugglerSchedulerTester):
-    """tests the stalker.models.scheduler.TaskJugglerScheduler class with
-    PostgreSQL
-    """
-
-    @classmethod
-    def setUpClass(cls):
-        """setup tests in class level
-        """
-        cls.config = {
-            'sqlalchemy.url':
-                'postgresql://stalker_admin:stalker@localhost/stalker_test',
-            'sqlalchemy.echo': False
-        }
-        # clean up test database
-        db.setup(cls.config)
-        from stalker.db.declarative import Base
-        Base.metadata.drop_all(db.DBSession.connection())
-        DBSession.commit()
-
-    def setUp(self):
-        """set up
-        """
-        from stalker.db.declarative import Base
-        Base.metadata.drop_all(db.DBSession.connection())
-        DBSession.commit()
-
-        super(TaskJugglerScheduler_PostgreSQL_Tester, self).setUp()
-
-    def tearDown(self):
-        """clean up the test
-        """
-        # clean up test database
-        from stalker.db.declarative import Base
-        Base.metadata.drop_all(db.DBSession.connection())
-        from sqlalchemy.exc import ProgrammingError
-        try:
-            DBSession.commit()
-        except ProgrammingError:
-            DBSession.rollback()
-
-    def test_tjp_file_content_is_correct(self):
+    def test_tjp_file_content_is_correct_2(self):
         """testing if the tjp file content is correct
         """
         tjp_sched = TaskJugglerScheduler()
@@ -754,9 +712,12 @@ class TaskJugglerScheduler_PostgreSQL_Tester(TaskJugglerSchedulerTester):
         test_studio.daily_working_hours = 9
 
         test_studio.id = 564
-        test_studio.start = datetime.datetime(2013, 4, 16, 0, 7)
-        test_studio.end = datetime.datetime(2013, 6, 30, 0, 0)
-        test_studio.now = datetime.datetime(2013, 4, 16, 0, 0)
+        test_studio.start = \
+            datetime.datetime(2013, 4, 16, 0, 7, tzinfo=pytz.utc)
+        test_studio.end = \
+            datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc)
+        test_studio.now = \
+            datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
         tjp_sched.studio = test_studio
 
         tjp_sched._create_tjp_file()
@@ -766,7 +727,7 @@ class TaskJugglerScheduler_PostgreSQL_Tester(TaskJugglerSchedulerTester):
 
         expected_tjp_template = jinja2.Template(
             """# Generated By Stalker v{{stalker.__version__}}
-        
+
 project Studio_564 "Studio_564" 2013-04-16 - 2013-06-30 {
     timingresolution 30min
     now 2013-04-16-00:00

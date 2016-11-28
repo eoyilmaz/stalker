@@ -18,32 +18,22 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest
 import datetime
 from stalker.models.entity import EntityGroup
+from stalker.testing import UnitTestBase
 
 
-class EntityGroupTestCase(unittest.TestCase):
+class EntityGroupTestCase(UnitTestBase):
     """tests EntityGroup class
     """
-
-    config = {
-        'sqlalchemy.url':
-            'postgresql://stalker_admin:stalker@localhost/stalker_test',
-        'sqlalchemy.echo': False
-    }
 
     def setUp(self):
         """set the test up
         """
+        super(EntityGroupTestCase, self).setUp()
+
         from stalker import (db, defaults, Status, User, StatusList,
                              Repository, Project, Type, Asset, Task)
-        defaults.timing_resolution = datetime.timedelta(hours=1)
-
-        # # clean up test database
-        db.setup(self.config)
-        db.init()
-
         # create a couple of task
         self.status_new = Status.query.filter(Status.code == 'NEW').first()
         self.status_wip = Status.query.filter(Status.code == 'WIP').first()
@@ -147,21 +137,6 @@ class EntityGroupTestCase(unittest.TestCase):
             self.status_new, self.status_wip, self.asset1
         ])
         db.DBSession.commit()
-
-    def tearDown(self):
-        """clean up tests
-        """
-        # clean up test database
-        from stalker import db, defaults
-        from stalker.db.declarative import Base
-        db.DBSession.commit()
-        connection = db.DBSession.connection()
-        engine = connection.engine
-        connection.close()
-        Base.metadata.drop_all(engine)
-        db.DBSession.remove()
-
-        defaults.timing_resolution = datetime.timedelta(hours=1)
 
     def test_entities_argument_is_skipped(self):
         """testing if the entities attribute will be an empty list if the

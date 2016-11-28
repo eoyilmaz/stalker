@@ -21,6 +21,8 @@
 import datetime
 import re
 import uuid
+
+import pytz
 from sqlalchemy import (Table, Column, Integer, String, Text, ForeignKey,
                         DateTime)
 from sqlalchemy.orm import relationship, validates
@@ -183,15 +185,15 @@ class SimpleEntity(Base):
     )
 
     date_created = Column(
-        DateTime,
-        default=datetime.datetime.now(),
+        DateTime(timezone=True),
+        default=datetime.datetime.now(pytz.utc),
         doc="""A :class:`datetime.datetime` instance showing the creation date
         and time of this object."""
     )
 
     date_updated = Column(
-        DateTime,
-        default=datetime.datetime.now(),
+        DateTime(timezone=True),
+        default=datetime.datetime.now(pytz.utc),
         doc="""A :class:`datetime.datetime` instance showing the update date
         and time of this object."""
         ,
@@ -278,7 +280,7 @@ class SimpleEntity(Base):
         self.created_by = created_by
         self.updated_by = updated_by
         if date_created is None:
-            date_created = datetime.datetime.now()
+            date_created = datetime.datetime.now(pytz.utc)
         if date_updated is None:
             date_updated = date_created
 

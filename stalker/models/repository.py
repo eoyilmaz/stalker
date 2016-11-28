@@ -341,6 +341,3 @@ def receive_after_insert(mapper, connection, repo):
     """
     logger.debug('auto creating env var for Repository with id: %s' % repo.id)
     os.environ[defaults.repo_env_var_template % {'id': repo.id}] = repo.path
-
-
-#@event.listens_for

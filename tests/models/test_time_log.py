@@ -18,21 +18,27 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest
+
 import datetime
+
+import pytz
+
 from stalker import (Project, Repository, Status, StatusList, Task, TimeLog,
                      User)
+from stalker.testing import UnitTestBase
 from stalker.exceptions import OverBookedError, StatusError, \
     DependencyViolationError
 
 
-class TimeLogTester(unittest.TestCase):
+class TimeLogTester(UnitTestBase):
     """tests the TimeLog class
     """
 
     def setUp(self):
         """setup the test
         """
+        super(TimeLogTester, self).setUp()
+
         # create a resource
         self.test_resource1 = User(
             name="User1",
@@ -81,7 +87,7 @@ class TimeLogTester(unittest.TestCase):
         self.kwargs = {
             "task": self.test_task,
             "resource": self.test_resource1,
-            "start": datetime.datetime(2013, 3, 22, 1, 0),
+            "start": datetime.datetime(2013, 3, 22, 1, 0, tzinfo=pytz.utc),
             "duration": datetime.timedelta(10)
         }
 
@@ -277,9 +283,10 @@ class TimeLogTester(unittest.TestCase):
                          self.kwargs["start"])
         self.assertEqual(self.test_time_log.duration, self.kwargs["duration"])
 
-        self.test_time_log.start = datetime.datetime(2013, 3, 22, 4, 0)
-        self.test_time_log.end = self.test_time_log.start + \
-                                 datetime.timedelta(10)
+        self.test_time_log.start = \
+            datetime.datetime(2013, 3, 22, 4, 0, tzinfo=pytz.utc)
+        self.test_time_log.end = \
+            self.test_time_log.start + datetime.timedelta(10)
         self.assertEqual(self.test_time_log.duration, datetime.timedelta(10))
 
     def test_OverbookedError_1(self):
@@ -292,7 +299,8 @@ class TimeLogTester(unittest.TestCase):
         """
         # time_log1
         self.kwargs["resource"] = self.test_resource2
-        self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0),
+        self.kwargs["start"] = \
+            datetime.datetime(2013, 3, 22, 4, 0, tzinfo=pytz.utc),
         self.kwargs["duration"] = datetime.timedelta(10)
         time_log1 = TimeLog(**self.kwargs)
 
@@ -308,7 +316,8 @@ class TimeLogTester(unittest.TestCase):
         """
         # time_log1
         self.kwargs["resource"] = self.test_resource2
-        self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0),
+        self.kwargs["start"] = \
+            datetime.datetime(2013, 3, 22, 4, 0, tzinfo=pytz.utc)
         self.kwargs["duration"] = datetime.timedelta(10)
         time_log1 = TimeLog(**self.kwargs)
 
@@ -326,7 +335,8 @@ class TimeLogTester(unittest.TestCase):
         """
         # time_log1
         self.kwargs["resource"] = self.test_resource2
-        self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0),
+        self.kwargs["start"] = \
+            datetime.datetime(2013, 3, 22, 4, 0, tzinfo=pytz.utc)
         self.kwargs["duration"] = datetime.timedelta(8)
         time_log1 = TimeLog(**self.kwargs)
 
@@ -345,14 +355,16 @@ class TimeLogTester(unittest.TestCase):
         """
         # time_log1
         self.kwargs["resource"] = self.test_resource2
-        self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0) - \
-                               datetime.timedelta(2)
+        self.kwargs["start"] = \
+            datetime.datetime(2013, 3, 22, 4, 0, tzinfo=pytz.utc) \
+            - datetime.timedelta(2)
         self.kwargs["duration"] = datetime.timedelta(12)
 
         time_log1 = TimeLog(**self.kwargs)
 
         # time_log2
-        self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0)
+        self.kwargs["start"] = \
+            datetime.datetime(2013, 3, 22, 4, 0, tzinfo=pytz.utc)
         self.kwargs["duration"] = datetime.timedelta(10)
 
         self.assertRaises(OverBookedError, TimeLog, **self.kwargs)
@@ -367,14 +379,16 @@ class TimeLogTester(unittest.TestCase):
         """
         # time_log1
         self.kwargs["resource"] = self.test_resource2
-        self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0)
+        self.kwargs["start"] = \
+            datetime.datetime(2013, 3, 22, 4, 0, tzinfo=pytz.utc)
         self.kwargs["duration"] = datetime.timedelta(10)
 
         time_log1 = TimeLog(**self.kwargs)
 
         # time_log2
-        self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0) - \
-                               datetime.timedelta(2)
+        self.kwargs["start"] = \
+            datetime.datetime(2013, 3, 22, 4, 0, tzinfo=pytz.utc) \
+            - datetime.timedelta(2)
         self.kwargs["duration"] = datetime.timedelta(12)
 
         self.assertRaises(OverBookedError, TimeLog, **self.kwargs)
@@ -389,14 +403,16 @@ class TimeLogTester(unittest.TestCase):
         """
         # time_log1
         self.kwargs["resource"] = self.test_resource2
-        self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0)
+        self.kwargs["start"] = \
+            datetime.datetime(2013, 3, 22, 4, 0, tzinfo=pytz.utc)
         self.kwargs["duration"] = datetime.timedelta(15)
 
         time_log1 = TimeLog(**self.kwargs)
 
         # time_log2
-        self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0) - \
-                               datetime.timedelta(5)
+        self.kwargs["start"] = \
+            datetime.datetime(2013, 3, 22, 4, 0, tzinfo=pytz.utc) \
+            - datetime.timedelta(5)
         self.kwargs["duration"] = datetime.timedelta(15)
 
         self.assertRaises(OverBookedError, TimeLog, **self.kwargs)
@@ -412,13 +428,15 @@ class TimeLogTester(unittest.TestCase):
         # time_log1
         self.kwargs["resource"] = self.test_resource2
         self.kwargs["start"] = \
-            datetime.datetime(2013, 3, 22, 4, 0) - datetime.timedelta(5)
+            datetime.datetime(2013, 3, 22, 4, 0, tzinfo=pytz.utc) \
+            - datetime.timedelta(5)
         self.kwargs["duration"] = datetime.timedelta(15)
 
         time_log1 = TimeLog(**self.kwargs)
 
         # time_log2
-        self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0)
+        self.kwargs["start"] = \
+            datetime.datetime(2013, 3, 22, 4, 0, tzinfo=pytz.utc)
         self.kwargs["duration"] = datetime.timedelta(15)
 
         self.assertRaises(OverBookedError, TimeLog, **self.kwargs)
@@ -433,13 +451,15 @@ class TimeLogTester(unittest.TestCase):
         """
         # time_log1
         self.kwargs["resource"] = self.test_resource2
-        self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0)
+        self.kwargs["start"] = \
+            datetime.datetime(2013, 3, 22, 4, 0, tzinfo=pytz.utc)
         self.kwargs["duration"] = datetime.timedelta(5)
         time_log1 = TimeLog(**self.kwargs)
 
         # time_log2
-        self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0) + \
-                               datetime.timedelta(20)
+        self.kwargs["start"] = \
+            datetime.datetime(2013, 3, 22, 4, 0, tzinfo=pytz.utc) \
+            + datetime.timedelta(20)
         # no warning
         time_log2 = TimeLog(**self.kwargs)
 
@@ -454,12 +474,14 @@ class TimeLogTester(unittest.TestCase):
         # time_log1
         self.kwargs["resource"] = self.test_resource2
         self.kwargs["start"] =\
-            datetime.datetime(2013, 3, 22, 4, 0) + datetime.timedelta(20)
+            datetime.datetime(2013, 3, 22, 4, 0, tzinfo=pytz.utc) \
+            + datetime.timedelta(20)
         self.kwargs["duration"] = datetime.timedelta(5)
         time_log1 = TimeLog(**self.kwargs)
 
         # time_log2
-        self.kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0)
+        self.kwargs["start"] = \
+            datetime.datetime(2013, 3, 22, 4, 0, tzinfo=pytz.utc)
 
         # no warning
         time_log2 = TimeLog(**self.kwargs)
@@ -470,7 +492,8 @@ class TimeLogTester(unittest.TestCase):
         """
         # time_log1
         self.kwargs['resource'] = self.test_resource2
-        self.kwargs['start'] = datetime.datetime(2013, 5, 6, 14, 0)
+        self.kwargs['start'] = \
+            datetime.datetime(2013, 5, 6, 14, 0, tzinfo=pytz.utc)
         self.kwargs['duration'] = datetime.timedelta(20)
         time_log1 = TimeLog(**self.kwargs)
 
@@ -478,18 +501,14 @@ class TimeLogTester(unittest.TestCase):
         self.test_resource2.time_logs.append(time_log1)
 
 
-class TimeLogDBTestCase(unittest.TestCase):
+class TimeLogDBTestCase(UnitTestBase):
     """Tests database interaction of TimeLog instances
     """
 
     def setUp(self):
         """set up the test
         """
-        # create an in memory database
-        from stalker import db
-
-        db.setup()
-        db.init()
+        super(TimeLogDBTestCase, self).setUp()
 
         self.status_wfd = Status.query.filter_by(code='WFD').first()
         self.status_rts = Status.query.filter_by(code='RTS').first()
@@ -553,7 +572,7 @@ class TimeLogDBTestCase(unittest.TestCase):
             "name": "test time_log",
             "task": self.test_task,
             "resource": self.test_resource1,
-            "start": datetime.datetime(2013, 3, 22, 1, 0),
+            "start": datetime.datetime(2013, 3, 22, 1, 0, tzinfo=pytz.utc),
             "duration": datetime.timedelta(10)
         }
 
@@ -629,8 +648,8 @@ class TimeLogDBTestCase(unittest.TestCase):
         tlog1 = TimeLog(
             task=child_task2,
             resource=child_task2.resources[0],
-            start=dt(2013, 7, 31, 10, 0),
-            end=dt(2013, 7, 31, 19, 0)
+            start=dt(2013, 7, 31, 10, 0, tzinfo=pytz.utc),
+            end=dt(2013, 7, 31, 19, 0, tzinfo=pytz.utc)
         )
 
         # before commit
@@ -654,8 +673,8 @@ class TimeLogDBTestCase(unittest.TestCase):
         tlog2 = TimeLog(
             task=child_task2,
             resource=child_task2.resources[0],
-            start=dt(2013, 7, 31, 19, 0),
-            end=dt(2013, 7, 31, 22, 0)
+            start=dt(2013, 7, 31, 19, 0, tzinfo=pytz.utc),
+            end=dt(2013, 7, 31, 22, 0, tzinfo=pytz.utc)
         )
 
         self.assertEqual(parent_task1.total_logged_seconds, 12 * 3600)
@@ -676,8 +695,8 @@ class TimeLogDBTestCase(unittest.TestCase):
         tlog3 = TimeLog(
             task=child_task1,
             resource=child_task1.resources[0],
-            start=dt(2013, 7, 31, 10, 0),
-            end=dt(2013, 7, 31, 19, 0)
+            start=dt(2013, 7, 31, 10, 0, tzinfo=pytz.utc),
+            end=dt(2013, 7, 31, 19, 0, tzinfo=pytz.utc)
         )
 
         self.assertEqual(parent_task1.total_logged_seconds, 21 * 3600)
@@ -794,8 +813,8 @@ class TimeLogDBTestCase(unittest.TestCase):
         """
         task = self.kwargs['task']
         task.status = self.status_cmpl
-        task.start = datetime.datetime(2014, 3, 16, 10, 0)
-        task.end = datetime.datetime(2014, 3, 25, 19, 0)
+        task.start = datetime.datetime(2014, 3, 16, 10, 0, tzinfo=pytz.utc)
+        task.end = datetime.datetime(2014, 3, 25, 19, 0, tzinfo=pytz.utc)
 
         dep_task = Task(
             name="test task 2",
@@ -815,14 +834,14 @@ class TimeLogDBTestCase(unittest.TestCase):
         with self.assertRaises(DependencyViolationError) as cm:
             dep_task.create_time_log(
                 self.test_resource2,
-                datetime.datetime(2014, 3, 25, 18, 0),
-                datetime.datetime(2014, 3, 25, 19, 0)
+                datetime.datetime(2014, 3, 25, 18, 0, tzinfo=pytz.utc),
+                datetime.datetime(2014, 3, 25, 19, 0, tzinfo=pytz.utc)
             )
 
         self.assertEqual(
             '\'It is not possible to create a TimeLog before %s, which '
             'violates the dependency relation of "%s" to "%s"\'' % (
-                datetime.datetime(2014, 3, 25, 19, 0),
+                datetime.datetime(2014, 3, 25, 19, 0, tzinfo=pytz.utc),
                 dep_task.name,
                 task.name
             ),
@@ -832,8 +851,8 @@ class TimeLogDBTestCase(unittest.TestCase):
         # and creating a TimeLog after that is possible
         dep_task.create_time_log(
             self.test_resource2,
-            datetime.datetime(2014, 3, 25, 19, 0),
-            datetime.datetime(2014, 3, 25, 20, 0)
+            datetime.datetime(2014, 3, 25, 19, 0, tzinfo=pytz.utc),
+            datetime.datetime(2014, 3, 25, 20, 0, tzinfo=pytz.utc)
         )
 
     def test_time_log_creation_that_violates_dependency_condition_WIP_CMPL_onstart(self):
@@ -850,8 +869,8 @@ class TimeLogDBTestCase(unittest.TestCase):
         """
         task = self.kwargs['task']
         task.status = self.status_cmpl
-        task.start = datetime.datetime(2014, 3, 16, 10, 0)
-        task.end = datetime.datetime(2014, 3, 25, 19, 0)
+        task.start = datetime.datetime(2014, 3, 16, 10, 0, tzinfo=pytz.utc)
+        task.end = datetime.datetime(2014, 3, 25, 19, 0, tzinfo=pytz.utc)
 
         dep_task = Task(
             name="test task 2",
@@ -871,14 +890,14 @@ class TimeLogDBTestCase(unittest.TestCase):
         with self.assertRaises(DependencyViolationError) as cm:
             dep_task.create_time_log(
                 self.test_resource2,
-                datetime.datetime(2014, 3, 16, 9, 0),
-                datetime.datetime(2014, 3, 16, 10, 0)
+                datetime.datetime(2014, 3, 16, 9, 0, tzinfo=pytz.utc),
+                datetime.datetime(2014, 3, 16, 10, 0, tzinfo=pytz.utc)
             )
 
         self.assertEqual(
             '\'It is not possible to create a TimeLog before %s, which '
             'violates the dependency relation of "%s" to "%s"\'' % (
-                datetime.datetime(2014, 3, 16, 10, 0),
+                datetime.datetime(2014, 3, 16, 10, 0, tzinfo=pytz.utc),
                 dep_task.name,
                 task.name
             ),
@@ -888,7 +907,7 @@ class TimeLogDBTestCase(unittest.TestCase):
         # and creating a TimeLog after that is possible
         dep_task.create_time_log(
             self.test_resource2,
-            datetime.datetime(2014, 3, 16, 10, 0),
-            datetime.datetime(2014, 3, 16, 10, 0)
+            datetime.datetime(2014, 3, 16, 10, 0, tzinfo=pytz.utc),
+            datetime.datetime(2014, 3, 16, 10, 0, tzinfo=pytz.utc)
         )
 

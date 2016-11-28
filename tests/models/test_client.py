@@ -120,7 +120,8 @@ class ClientTestCase(unittest.TestCase):
 
         ]
 
-        self.date_created = self.date_updated = datetime.datetime.now()
+        import pytz
+        self.date_created = self.date_updated = datetime.datetime.now(pytz.utc)
 
         self.kwargs = {
             "name": "Test Client",

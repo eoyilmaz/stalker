@@ -49,11 +49,11 @@ from stalker.models.entity import SimpleEntity, Entity, EntityGroup
 from stalker.models.format import ImageFormat
 from stalker.models.link import Link
 from stalker.models.message import Message
-from stalker.models.mixins import (ProjectMixin, ReferenceMixin,
-                                   DateRangeMixin, StatusMixin,
-                                   TargetEntityTypeMixin, CodeMixin,
-                                   WorkingHoursMixin, ScheduleMixin, DAGMixin,
-                                   AmountMixin, UnitMixin)
+from stalker.models.mixins import (ACLMixin, AmountMixin, CodeMixin, DAGMixin,
+                                   DateRangeMixin, ProjectMixin,
+                                   ReferenceMixin, ScheduleMixin, StatusMixin,
+                                   TargetEntityTypeMixin, UnitMixin,
+                                   WorkingHoursMixin)
 from stalker.models.note import Note
 from stalker.models.project import (Project, ProjectUser, ProjectClient,
                                     ProjectRepository)

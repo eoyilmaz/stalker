@@ -18,45 +18,32 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import os
-import shutil
-import tempfile
-import datetime
-import unittest
-import logging
-import stalker
+from stalker.testing import UnitTestBase
 
+import logging
 logger = logging.getLogger("stalker")
 logger.setLevel(logging.DEBUG)
 
 
-class ConfigTester(unittest.TestCase):
+class ConfigTester(UnitTestBase):
     """test the system configuration
     """
 
     def setUp(self):
         """setup the test
         """
+        super(ConfigTester, self).setUp()
+        import tempfile
         # so we need a temp directory to be specified as our config folder
         self.temp_config_folder = tempfile.mkdtemp()
 
         # we should set the environment variable
+        import os
         os.environ["STALKER_PATH"] = self.temp_config_folder
 
         self.config_full_path = os.path.join(
             self.temp_config_folder, "config.py"
         )
-
-    def tearDown(self):
-        """clean up the test
-        """
-        from stalker.db import DBSession
-        DBSession.remove()
-
-        # and remove the temp directory
-        shutil.rmtree(self.temp_config_folder)
-        # restore defaults.timing_resolution
-        stalker.defaults.timing_resolution = datetime.timedelta(hours=1)
 
     def test_config_variable_updates_with_user_config(self):
         """testing if the database_file_name will be updated by the user
@@ -96,13 +83,13 @@ class ConfigTester(unittest.TestCase):
         from stalker import config
         conf = config.Config()
 
-        #self.assertRaises(KeyError, getattr, conf, "test_value")
         self.assertEqual(conf.test_value, test_value)
 
     def test_env_variable_with_vars_module_import_with_shortcuts(self):
         """testing if the module path has shortcuts like ~ and other env
         variables
         """
+        import os
         splits = os.path.split(self.temp_config_folder)
         var1 = splits[0]
         var2 = os.path.sep.join(splits[1:])
@@ -128,6 +115,7 @@ class ConfigTester(unittest.TestCase):
         """testing if the module path has multiple shortcuts like ~ and other
         env variables
         """
+        import os
         splits = os.path.split(self.temp_config_folder)
         var1 = splits[0]
         var2 = os.path.sep.join(splits[1:])
@@ -155,8 +143,9 @@ class ConfigTester(unittest.TestCase):
         """testing if the non existing path situation will be handled
         gracefully by warning the user
         """
-        os.environ["STALKER_PATH"] = "/tmp/non_existing_path"
+        import os
         from stalker import config
+        os.environ["STALKER_PATH"] = "/tmp/non_existing_path"
         config.Config()
 
     def test_syntax_error_in_settings_file(self):
@@ -182,12 +171,12 @@ class ConfigTester(unittest.TestCase):
         if there is a database connection and there is a Studio in there
         """
         import datetime
-        from stalker import db, defaults
+        from stalker import defaults
         from stalker.db.session import DBSession
         from stalker.models.studio import Studio
 
-        db.setup()
-        db.init()
+        # db.setup()
+        # db.init()
 
         # check the defaults are still using them self
         self.assertEqual(
