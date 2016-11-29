@@ -6,6 +6,8 @@ Stalker Changes
 ========
 
 * **New:** Added ``Shot.fps`` attribute to hold the fps information per shot.
+* **Update:** Added the necessary alembic revision to reflect the changes in
+  the ``Version_Inputs`` table.
 
 0.2.17.2
 ========

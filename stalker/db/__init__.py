@@ -36,7 +36,7 @@ from stalker.log import logging_level
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
-alembic_version = 'a9319b19f7be'
+alembic_version = '0063f547dc2e'
 
 
 def setup(settings=None):
