@@ -2,6 +2,12 @@
 Stalker Changes
 ===============
 
+0.2.17.4
+========
+
+* **Update:** Updated the comment sections of all of the source files to
+  correctly show that Stalker is LGPL v3 (not v2.1).
+
 0.2.17.3
 ========
 
