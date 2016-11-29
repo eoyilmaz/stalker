@@ -2,6 +2,11 @@
 Stalker Changes
 ===============
 
+0.2.17.3
+========
+
+* **New:** Added ``Shot.fps`` attribute to hold the fps information per shot.
+
 0.2.17.2
 ========
 

@@ -799,73 +799,46 @@ class ProjectTestCase(unittest.TestCase):
         to None
         """
         self.kwargs["fps"] = None
-        self.assertRaises(TypeError, Project, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            p = Project(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Project.fps should be a positive float or int, not NoneType'
+        )
 
     def test_fps_argument_is_given_as_non_float_or_integer(self):
         """testing if a TypeError will be raised when the fps argument is
         given as a value other than a float or integer, or a string which is
-        convertable to float.
+        convertible to float.
         """
-        test_values = ["a str"]
+        test_values = [
+            ["a", "list"], {"a": "list"}]
         for test_value in test_values:
             self.kwargs["fps"] = test_value
-            self.assertRaises(
-                ValueError,
-                Project,
-                **self.kwargs
-            )
+            with self.assertRaises(TypeError) as cm:
+                p = Project(**self.kwargs)
 
-        test_values = [["a", "list"], {"a": "list"}]
-        for test_value in test_values:
-            self.kwargs["fps"] = test_value
-            self.assertRaises(
-                TypeError,
-                Project,
-                **self.kwargs
+            self.assertEqual(
+                str(cm.exception),
+                'Project.fps should be a positive float or int, not %s' %
+                test_value.__class__.__name__
             )
 
     def test_fps_attribute_is_given_as_non_float_or_integer(self):
         """testing if a TypeError will be raised when the fps attribute is
         set to a value other than a float, integer or valid string literals
         """
-        test_values = ["a str"]
+        test_values = ["a str", ["a", "list"], {"a": "list"}]
         for test_value in test_values:
-            self.assertRaises(
-                ValueError,
-                setattr,
-                self.test_project,
-                "fps",
-                test_value
+            with self.assertRaises(TypeError) as cm:
+                self.test_project.fps = test_value
+
+            self.assertEqual(
+                str(cm.exception),
+                'Project.fps should be a positive float or int, not %s' %
+                test_value.__class__.__name__
             )
-
-        test_values = [["a", "list"], {"a": "list"}]
-        for test_value in test_values:
-            self.assertRaises(
-                TypeError,
-                setattr,
-                self.test_project,
-                "fps",
-                test_value
-            )
-
-    def test_fps_argument_string_to_float_conversion(self):
-        """testing if valid string literals of fps argument will be converted
-        to float correctly
-        """
-        test_values = [("1", 1.0), ("2.3", 2.3)]
-        for test_value in test_values:
-            self.kwargs["fps"] = test_value[0]
-            new_project = Project(**self.kwargs)
-            self.assertAlmostEquals(new_project.fps, test_value[1])
-
-    def test_fps_attribute_string_to_float_conversion(self):
-        """testing if valid string literals of fps attribute will be converted
-        to float correctly
-        """
-        test_values = [("1", 1.0), ("2.3", 2.3)]
-        for test_value in test_values:
-            self.test_project.fps = test_value[0]
-            self.assertAlmostEquals(self.test_project.fps, test_value[1])
 
     def test_fps_attribute_float_conversion(self):
         """testing if the fps attribute is converted to float when the float
@@ -890,26 +863,50 @@ class ProjectTestCase(unittest.TestCase):
         """testing if a ValueError will be raised when the fps is 0
         """
         self.kwargs['fps'] = 0
-        self.assertRaises(ValueError, Project, **self.kwargs)
+        with self.assertRaises(ValueError) as cm:
+            p = Project(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Project.fps should be a positive float or int, not 0.0'
+        )
 
     def test_fps_attribute_is_set_to_zero(self):
         """testing if a value error will be raised when the fps attribute is
         set to zero
         """
-        self.assertRaises(ValueError, setattr, self.test_project, 'fps', 0)
+        with self.assertRaises(ValueError) as cm:
+            self.test_project.fps = 0
+
+        self.assertEqual(
+            str(cm.exception),
+            'Project.fps should be a positive float or int, not 0.0'
+        )
 
     def test_fps_argument_is_negative(self):
         """testing if a ValueError will be raised when the fps argument is
         negative
         """
         self.kwargs['fps'] = -1.0
-        self.assertRaises(ValueError, Project, **self.kwargs)
+        with self.assertRaises(ValueError) as cm:
+            p = Project(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Project.fps should be a positive float or int, not -1.0'
+        )
 
     def test_fps_attribute_is_negative(self):
         """testing if a ValueError will be raised when the fps attribute is
         set to a negative value
         """
-        self.assertRaises(ValueError, setattr, self.test_project, 'fps', -1)
+        with self.assertRaises(ValueError) as cm:
+            self.test_project.fps = -1
+
+        self.assertEqual(
+            str(cm.exception),
+            'Project.fps should be a positive float or int, not -1.0'
+        )
 
     def test_repositories_argument_is_skipped(self):
         """testing if the repositories attribute will be an empty list if the

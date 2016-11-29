@@ -356,11 +356,19 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
     def _validate_fps(self, key, fps):
         """validates the given fps_in value
         """
+        if not isinstance(fps, (int, float)):
+            raise TypeError(
+                '%s.fps should be a positive float or int, not %s' % (
+                    self.__class__.__name__,
+                    fps.__class__.__name__
+                )
+            )
+
         fps = float(fps)
         if fps <= 0:
             raise ValueError(
-                '%s.fps can not be 0 or a negative value' %
-                self.__class__.__name__
+                '%s.fps should be a positive float or int, not %s' %
+                (self.__class__.__name__, fps)
             )
         return float(fps)
 

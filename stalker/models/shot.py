@@ -18,8 +18,8 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-from sqlalchemy import Column, Integer, ForeignKey, Table
-from sqlalchemy.orm import relationship, validates, reconstructor
+from sqlalchemy import Column, Integer, ForeignKey, Table, Float
+from sqlalchemy.orm import relationship, validates, reconstructor, synonym
 
 from stalker import ImageFormat
 from stalker.db.declarative import Base
@@ -115,6 +115,15 @@ class Shot(Task, CodeMixin):
 
        :attr:`.handles_at_start` and :attr:`.handles_at_end` attributes.
 
+    .. note::
+
+       .. versionadded:: 0.2.17.2
+
+       Per shot FPS values. It is now possible to change the shot fps by
+       setting its :attr:`.fps` attribute. The default values is same with the
+       :class:`.Project`\ .
+
+
     :param project: This is the :class:`.Project` instance that this shot
       belongs to. A Shot can not be created without a Project instance.
 
@@ -144,6 +153,9 @@ class Shot(Task, CodeMixin):
       the same with the Project that this Shot belongs to.
 
     :type image_format: :class:`.ImageFormat`
+
+    :param float fps: The FPS of this shot. Default value is the same with the
+      :class:`.Project`\ .
     """
     __auto_name__ = True
     __tablename__ = 'Shots'
@@ -211,6 +223,16 @@ class Shot(Task, CodeMixin):
     )
     #record_out = Column(Integer)
 
+    _fps = Column(
+        'fps',
+        Float(precision=3),
+        doc="""The fps of the project.
+
+        It is a float value, any other types will be converted to float. The
+        default value is equal to :attr:`stalker.modesl.project..Project.fps`.
+        """
+    )
+
     def __init__(self,
                  code=None,
                  project=None,
@@ -222,6 +244,7 @@ class Shot(Task, CodeMixin):
                  source_out=None,
                  record_in=None,
                  image_format=None,
+                 fps=None,
                  **kwargs):
 
         # initialize TaskableMixin
@@ -271,6 +294,8 @@ class Shot(Task, CodeMixin):
         self.source_out = source_out
         self.record_in = record_in
 
+        self.fps = fps
+
     @reconstructor
     def __init_on_load__(self):
         """initialize on DB load
@@ -311,6 +336,49 @@ class Shot(Task, CodeMixin):
                            .filter(Shot.code == code)\
                            .first() is None
         return True
+
+    def _fps_getter(self):
+        """returns the fps value either from the Project or from the _fps
+        attribute
+        """
+        if self._fps is None:
+            return self.project.fps
+        else:
+            return self._fps
+
+    def _fps_setter(self, fps_in):
+        """sets the fps value
+        """
+        self._fps = self._validate_fps(fps_in)
+
+    fps = synonym(
+        '_fps',
+        descriptor=property(_fps_getter, _fps_setter),
+        doc='The fps of this shot.'
+    )
+
+    def _validate_fps(self, fps):
+        """validates the given fps_in value
+        """
+        if fps is None:
+            # fps = self.project.fps
+            return None
+
+        if not isinstance(fps, (int, float)):
+            raise TypeError(
+                '%s.fps should be a positive float or int, not %s' % (
+                    self.__class__.__name__,
+                    fps.__class__.__name__
+                )
+            )
+
+        fps = float(fps)
+        if fps <= 0:
+            raise ValueError(
+                '%s.fps should be a positive float or int, not %s' %
+                (self.__class__.__name__, fps)
+            )
+        return float(fps)
 
     @validates('cut_in')
     def _validate_cut_in(self, key, cut_in):

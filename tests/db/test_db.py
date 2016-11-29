@@ -1022,7 +1022,7 @@ class DatabaseTester(unittest.TestCase):
         sql_query = 'select version_num from "alembic_version"'
         version_num = \
             db.DBSession.connection().execute(sql_query).fetchone()[0]
-        self.assertEqual('f16651477e64', version_num)
+        self.assertEqual('a9319b19f7be', version_num)
 
     def test_initialization_of_alembic_version_table_multiple_times(self):
         """testing if the db.create_alembic_table() will handle initializing
@@ -1042,7 +1042,7 @@ class DatabaseTester(unittest.TestCase):
         sql_query = 'select version_num from "alembic_version"'
         version_num = \
             db.DBSession.connection().execute(sql_query).fetchone()[0]
-        self.assertEqual('f16651477e64', version_num)
+        self.assertEqual('a9319b19f7be', version_num)
 
         db.DBSession.remove()
         db.setup(db_config)
@@ -3897,6 +3897,7 @@ class DatabaseModelsTester(unittest.TestCase):
         tags = test_shot.tags
         tasks = test_shot.tasks
         updated_by = test_shot.updated_by
+        fps = test_shot.fps
 
         # delete the shot
         del test_shot
@@ -3922,6 +3923,7 @@ class DatabaseModelsTester(unittest.TestCase):
         self.assertEqual(tags, test_shot_db.tags)
         self.assertEqual(tasks, test_shot_db.tasks)
         self.assertEqual(updated_by, test_shot_db.updated_by)
+        self.assertEqual(fps, test_shot_db.fps)
 
     def test_persistence_of_SimpleEntity(self):
         """testing the persistence of SimpleEntity
