@@ -179,7 +179,7 @@ class Shot(Task, CodeMixin):
     )
 
     image_format_id = Column(Integer, ForeignKey("ImageFormats.id"))
-    image_format = relationship(
+    _image_format = relationship(
         "ImageFormat",
         primaryjoin="Shots.c.image_format_id==ImageFormats.c.id",
         doc="""The :class:`.ImageFormat` of this shot.
@@ -584,23 +584,41 @@ class Shot(Task, CodeMixin):
             )
         return scene
 
-    @validates('image_format')
-    def _validate_image_format(self, key, imf):
+    def _image_format_getter(self):
+        """returns the image_format value from the Project or from the
+        _image_format attribute
+        """
+        if self._image_format is None:
+            return self.project.image_format
+        else:
+            return self._image_format
+
+    def _image_format_setter(self, imf_in):
+        """sets the image_format value
+        """
+        self._image_format = self._validate_image_format(imf_in)
+
+    image_format = synonym(
+        '_image_format',
+        descriptor=property(_image_format_getter, _image_format_setter),
+        doc='The image_format of this shot. Set it to None to re-sync with '
+            'Project.image_format.'
+    )
+
+    def _validate_image_format(self, imf):
         """validates the given imf value
         """
         if imf is None:
-            # use the projects image format
-            from stalker import db
-            with db.DBSession.no_autoflush:
-                imf = self.project.image_format
+            # do not set it to anything it will automatically use the proejct
+            # image format
+            return None
 
-        if imf is not None:
-            if not isinstance(imf, ImageFormat):
-                raise TypeError(
-                    '%s.image_format should be an instance of '
-                    'stalker.models.format.ImageFormat, not %s' %
-                    (self.__class__.__name__, imf.__class__.__name__)
-                )
+        if not isinstance(imf, ImageFormat):
+            raise TypeError(
+                '%s.image_format should be an instance of '
+                'stalker.models.format.ImageFormat, not %s' %
+                (self.__class__.__name__, imf.__class__.__name__)
+            )
 
         return imf
 

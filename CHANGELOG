@@ -2,6 +2,15 @@
 Stalker Changes
 ===============
 
+0.2.17.5
+========
+
+* **Fix:** Fixed the ``image_format`` attribute implementation in ``Shot``
+  class. Now it will not copy the value of ``Project.image_format`` directly on
+  ``__init__`` but instead will only store the value if the ``image_format``
+  argument in ``__init__`` or ``Shot.image_format`` attribute is set to
+  something.
+
 0.2.17.4
 ========
 
