@@ -80,9 +80,9 @@ class Repository(Entity):
         ForeignKey('Entities.id'),
         primary_key=True,
     )
-    linux_path = Column(String(256))
-    windows_path = Column(String(256))
-    osx_path = Column(String(256))
+    linux_path = Column(String(256))   # \
+    windows_path = Column(String(256)) # -> these should be all unique
+    osx_path = Column(String(256))     # /
 
     def __init__(self,
                  linux_path="",

@@ -152,6 +152,7 @@ class Ticket(Entity, StatusMixin):
         "id", Integer, ForeignKey("Entities.id"), primary_key=True
     )
 
+    # TODO: use ProjectMixin
     project_id = Column('project_id', Integer, ForeignKey('Projects.id'),
                         nullable=False)
 

@@ -3371,7 +3371,6 @@ class DatabaseModelsTester(unittest.TestCase):
             resources=[user3],
             responsible=[user1]
         )
-
         dt = datetime.datetime
         td = datetime.timedelta
         new_project._computed_start = dt.now()
@@ -3386,6 +3385,14 @@ class DatabaseModelsTester(unittest.TestCase):
             project=new_project
         )
         db.DBSession.add(ticket1)
+        db.DBSession.commit()
+
+        # create dailies
+        from stalker import Daily
+        d1 = Daily(name='Daily1', project=new_project)
+        d2 = Daily(name='Daily2', project=new_project)
+        d3 = Daily(name='Daily3', project=new_project)
+        db.DBSession.add_all([d1, d2, d3])
         db.DBSession.commit()
 
         # store the attributes
@@ -3469,6 +3476,9 @@ class DatabaseModelsTester(unittest.TestCase):
 
         # Tickets
         self.assertEqual([], Ticket.query.all())
+
+        # Dailies
+        self.assertEqual([], Daily.query.all())
 
     def test_persistence_of_Repository(self):
         """testing the persistence of Repository

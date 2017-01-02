@@ -690,13 +690,18 @@ class DateRangeMixin(object):
 class ProjectMixin(object):
     """Allows connecting a :class:`.Project` to the mixed in object.
 
+    This also forces a ``all, delete-orphan`` cascade, so when a
+    :class:``.Project`` instance is deleted then all the class instances that
+    are inherited from ``ProjectMixin`` will also be deleted. Meaning that, a
+    class which also derives from ``ProjectMixin`` will not be able to exists
+    without a project (``delete-orphan`` case).
+
     :param project: A :class:`.Project` instance holding the project which this
       object is related to. It can not be None, or anything other than a
       :class:`.Project` instance.
 
     :type project: :class:`.Project`
     """
-
     #    # add this lines for Sphinx
     #    __tablename__ = "ProjectMixins"
 
@@ -705,28 +710,29 @@ class ProjectMixin(object):
         return Column(
             "project_id",
             Integer,
-            #ForeignKey("Projects.id", use_alter=True, name="project_x_id"),
             ForeignKey("Projects.id"),
             # cannot use nullable cause a Project object needs
             # insert itself as the project and it needs post_update
             # thus nullable should be True
-            #nullable=False,
         )
 
     @declared_attr
     def project(cls):
-        backref = cls.__tablename__.lower()
+        from sqlalchemy.orm import backref
+        backref_table_name = cls.__tablename__.lower()
         doc = """The :class:`.Project` instance that
         this object belongs to.
         """
 
         return relationship(
             "Project",
-            primaryjoin=
-            cls.__tablename__ + ".c.project_id==Projects.c.id",
+            primaryjoin="%s.c.project_id==Projects.c.id" % cls.__tablename__,
             post_update=True,  # for project itself
             uselist=False,
-            backref=backref,
+            backref=backref(
+                backref_table_name,
+                cascade='all, delete-orphan'
+            ),
             doc=doc
         )
 
@@ -786,7 +792,7 @@ class ReferenceMixin(object):
             'Link',
             cls.__tablename__,
             'Links',
-            cls.__name__ + "_References"
+            "%s_References" % cls.__name__
         )
         # return the relationship
         return relationship(
@@ -866,7 +872,7 @@ class ACLMixin(object):
         """
         return [(perm.access,
                  '%s:%s' % (self.__class__.__name__, self.name),
-                 perm.action + '_' + perm.class_name)
+                 '%s_%s' % (perm.action, perm.class_name))
                 for perm in self.permissions]
 
 
