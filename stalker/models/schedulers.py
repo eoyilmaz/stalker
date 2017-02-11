@@ -719,7 +719,7 @@ order by path_as_text"""
                  self.tjp_file_full_path,
                  '-o',
                  self.temp_file_path],
-                stderr=subprocess.PIPE, shell=True
+                stderr=subprocess.PIPE
             )
 
             # loop until process finishes and capture stderr output
