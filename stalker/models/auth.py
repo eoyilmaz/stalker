@@ -16,6 +16,7 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
+import sys
 import os
 import json
 import re
@@ -723,13 +724,29 @@ class User(Entity, ACLMixin):
         """Checks the given raw_password.
 
         Checks the given raw_password with the current Users objects encrypted
-        password.
+        password. Handles the encryption process behind the scene.
 
-        Checks the given raw password with the given encrypted password.
-        Handles the encryption process behind the scene.
+        Note:
+            This function was updated to support both Python 2.7 and 3.5.
+            It will now compare the string (str) versions of the given
+            raw_password and the current Users object encrypted password.
         """
-        return self.password == \
-            base64.b64encode(bytes(raw_password.encode('utf-8')))
+
+        user_password_str = str(self.password)
+        raw_password_bytes = base64.b64encode(
+            bytes(raw_password.encode('utf-8')))
+
+        if sys.version_info.major == 2:
+            raw_password_encrypted_str = str(raw_password_bytes)
+        else:
+            # Assuming Python >= 3.5
+            raw_password_encrypted_str = \
+                str(raw_password_bytes.decode('utf-8'))
+
+        if user_password_str == raw_password_encrypted_str:
+            return True
+        else:
+            return False
 
     @validates("groups")
     def _validate_groups(self, key, group):
