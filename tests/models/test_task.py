@@ -199,12 +199,7 @@ class TaskTestCase(unittest.TestCase):
         for data in self.data_created:
             if data in DBSession:
                 DBSession.delete(data)
-
-        try:
-            DBSession.commit()
-        except:
-            DBSession.rollback()
-            raise
+        DBSession.commit()
 
     @classmethod
     def tearDownClass(cls):
@@ -3465,9 +3460,9 @@ class TaskTestCase(unittest.TestCase):
         expected_tjp = """
 task Task_%(t1_id)s "Task_%(t1_id)s" {
 
-
-            depends Project_%(project1_id)s.Task_%(dep_t1_id)s {onend}, Project_%(project1_id)s.Task_%(dep_t2_id)s {onend}
-
+    
+            depends Project_%(project1_id)s.Task_%(dep_t1_id)s {onend}, Project_%(project1_id)s.Task_%(dep_t2_id)s {onend}        
+            
             effort 10.0d
             allocate User_%(user1_id)s {
                     alternative
@@ -3477,7 +3472,7 @@ task Task_%(t1_id)s "Task_%(t1_id)s" {
                     alternative
                     User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
                     persistent
-                }
+                }            
 }""" % {
             'project1_id': self.test_project1.id,
 
@@ -3536,9 +3531,9 @@ task Task_%(t1_id)s "Task_%(t1_id)s" {
         expected_tjp = """
 task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
 
-
-            depends Project_%(project1_id)s.Task_%(new_task_id)s.Task_%(dep_task1_id)s {onend}, Project_%(project1_id)s.Task_%(new_task_id)s.Task_%(dep_task2_id)s {onend}
-
+    
+            depends Project_%(project1_id)s.Task_%(new_task_id)s.Task_%(dep_task1_id)s {onend}, Project_%(project1_id)s.Task_%(new_task_id)s.Task_%(dep_task2_id)s {onend}        
+            
             effort 1003.0h
             allocate User_%(user1_id)s {
                     alternative
@@ -3548,7 +3543,7 @@ task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
                     alternative
                     User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
                     persistent
-                }
+                }            
 }""" % {
             'project1_id': self.test_project1.id,
 
@@ -3618,9 +3613,9 @@ task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
         expected_tjp = """
 task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
 
-
-            depends Project_%(project1_id)s.Task_%(new_task_id)s.Task_%(dep_task1_id)s {onstart gaplength 2d}, Project_%(project1_id)s.Task_%(new_task_id)s.Task_%(dep_task2_id)s {onend gapduration 4d}
-
+    
+            depends Project_%(project1_id)s.Task_%(new_task_id)s.Task_%(dep_task1_id)s {onstart gaplength 2d}, Project_%(project1_id)s.Task_%(new_task_id)s.Task_%(dep_task2_id)s {onend gapduration 4d}        
+            
             effort 1003.0h
             allocate User_%(user1_id)s {
                     alternative
@@ -3630,7 +3625,7 @@ task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
                     alternative
                     User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
                     persistent
-                }
+                }            
 }""" % {
             'project1_id': self.test_project1.id,
 
@@ -3705,9 +3700,9 @@ task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
         expected_tjp = """
 task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
 
-
-            depends Project_%(project1_id)s.Task_%(new_task1_id)s.Task_%(dep_task1_id)s {onstart gaplength 2d}, Project_%(project1_id)s.Task_%(new_task1_id)s.Task_%(dep_task2_id)s {onend gapduration 4d}
-
+    
+            depends Project_%(project1_id)s.Task_%(new_task1_id)s.Task_%(dep_task1_id)s {onstart gaplength 2d}, Project_%(project1_id)s.Task_%(new_task1_id)s.Task_%(dep_task2_id)s {onend gapduration 4d}        
+            
             effort 1003.0h
             allocate User_%(user1_id)s {
                     alternative
@@ -3717,7 +3712,7 @@ task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
                     alternative
                     User_%(user3_id)s select minloaded
                     persistent
-                }
+                }            
 }""" % {
             'project1_id': self.test_project1.id,
 
@@ -3780,13 +3775,13 @@ task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
         expected_tjp = """
 task Task_%(t1_id)s "Task_%(t1_id)s" {
 
-
-
+    
+    
 task Task_%(dep_task1_id)s "Task_%(dep_task1_id)s" {
 
-
-
-
+    
+            
+            
             effort 1.0d
             allocate User_%(user1_id)s {
                     alternative
@@ -3796,13 +3791,13 @@ task Task_%(dep_task1_id)s "Task_%(dep_task1_id)s" {
                     alternative
                     User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
                     persistent
-                }
+                }            
 }
 task Task_%(dep_task2_id)s "Task_%(dep_task2_id)s" {
 
-
-
-
+    
+            
+            
             effort 1.0d
             allocate User_%(user1_id)s {
                     alternative
@@ -3812,13 +3807,13 @@ task Task_%(dep_task2_id)s "Task_%(dep_task2_id)s" {
                     alternative
                     User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
                     persistent
-                }
+                }            
 }
 task Task_%(t2_id)s "Task_%(t2_id)s" {
 
-
-            depends Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task1_id)s {onend}, Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task2_id)s {onend}
-
+    
+            depends Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task1_id)s {onend}, Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task2_id)s {onend}        
+            
             effort 1.0d
             allocate User_%(user1_id)s {
                     alternative
@@ -3828,7 +3823,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
                     alternative
                     User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
                     persistent
-                }
+                }            
 }
 }""" % {
             'user1_id': self.test_user1.id,
@@ -3917,9 +3912,9 @@ task Task_%(t1_id)s "Task_%(t1_id)s" {
             depends Project_%(project1_id)s.Task_%(t0_id)s {onend}
 task Task_%(dep_task1_id)s "Task_%(dep_task1_id)s" {
 
-
-
-
+    
+            
+            
             effort 1.0d
             allocate User_%(user1_id)s {
                     alternative
@@ -3929,13 +3924,13 @@ task Task_%(dep_task1_id)s "Task_%(dep_task1_id)s" {
                     alternative
                     User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
                     persistent
-                }
+                }            
 }
 task Task_%(dep_task2_id)s "Task_%(dep_task2_id)s" {
 
-
-
-
+    
+            
+            
             effort 1.0d
             allocate User_%(user1_id)s {
                     alternative
@@ -3945,13 +3940,13 @@ task Task_%(dep_task2_id)s "Task_%(dep_task2_id)s" {
                     alternative
                     User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
                     persistent
-                }
+                }            
 }
 task Task_%(t2_id)s "Task_%(t2_id)s" {
 
-
-            depends Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task1_id)s {onend}, Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task2_id)s {onend}
-
+    
+            depends Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task1_id)s {onend}, Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task2_id)s {onend}        
+            
             effort 1.0d
             allocate User_%(user1_id)s {
                     alternative
@@ -3961,7 +3956,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
                     alternative
                     User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
                     persistent
-                }
+                }            
 }
 }""" % {
             'user1_id': self.test_user1.id,
@@ -4036,13 +4031,13 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         expected_tjp = """
 task Task_%(t1_id)s "Task_%(t1_id)s" {
 
-
-
+    
+    
 task Task_%(dep_task1_id)s "Task_%(dep_task1_id)s" {
 
-
-
-
+    
+            
+            
             effort 1.0d
             allocate User_%(user1_id)s {
                     alternative
@@ -4052,13 +4047,13 @@ task Task_%(dep_task1_id)s "Task_%(dep_task1_id)s" {
                     alternative
                     User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
                     persistent
-                }
+                }            
 }
 task Task_%(dep_task2_id)s "Task_%(dep_task2_id)s" {
 
-
-
-
+    
+            
+            
             effort 1.0d
             allocate User_%(user1_id)s {
                     alternative
@@ -4068,15 +4063,15 @@ task Task_%(dep_task2_id)s "Task_%(dep_task2_id)s" {
                     alternative
                     User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
                     persistent
-                }
+                }            
 }
 task Task_%(t2_id)s "Task_%(t2_id)s" {
 
-
-            depends Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task1_id)s {onend}, Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task2_id)s {onend}
+    
+            depends Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task1_id)s {onend}, Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task2_id)s {onend}        
                                                 start 2013-05-03-14:00
                                 end 2013-05-04-14:00
-
+                            
             effort 1.0d
             allocate User_%(user1_id)s {
                     alternative
@@ -4086,7 +4081,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
                     alternative
                     User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
                     persistent
-                }
+                }            
 }
 }""" % {
             'user1_id': self.test_user1.id,
