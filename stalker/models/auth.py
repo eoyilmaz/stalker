@@ -705,6 +705,11 @@ class User(Entity, ACLMixin):
     @validates("password")
     def _validate_password(self, key, password_in):
         """validates the given password
+
+        Note:
+            This function was updated to support both Python 2.7 and 3.5.
+            It will now explicitly convert the base64 bytes object into
+            a string object.
         """
         if password_in is None:
             raise TypeError(
@@ -718,12 +723,21 @@ class User(Entity, ACLMixin):
             )
 
         # mangle the password
-        return base64.b64encode(password_in.encode('utf-8'))
+        mangled_password_bytes = base64.b64encode(password_in.encode('utf-8'))
+
+        if sys.version_info.major == 2:
+            mangled_password_str = str(mangled_password_bytes)
+        else:
+            # Assuming Python >= 3.5
+            mangled_password_str = \
+                str(mangled_password_bytes.decode('utf-8'))
+
+        return mangled_password_str
 
     def check_password(self, raw_password):
         """Checks the given raw_password.
 
-        Checks the given raw_password with the current Users objects encrypted
+        Checks the given raw_password with the current User object's mangled
         password. Handles the encryption process behind the scene.
 
         Note:
@@ -732,7 +746,7 @@ class User(Entity, ACLMixin):
             raw_password and the current Users object encrypted password.
         """
 
-        user_password_str = str(self.password)
+        mangled_password_str = str(self.password)
         raw_password_bytes = base64.b64encode(
             bytes(raw_password.encode('utf-8')))
 
@@ -743,7 +757,7 @@ class User(Entity, ACLMixin):
             raw_password_encrypted_str = \
                 str(raw_password_bytes.decode('utf-8'))
 
-        if user_password_str == raw_password_encrypted_str:
+        if mangled_password_str == raw_password_encrypted_str:
             return True
         else:
             return False
