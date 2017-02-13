@@ -13,11 +13,8 @@
     addons:
       postgresql: "9.4"
 
-    before_install:
-      - sudo apt-get -qq update
-      - sudo apt-get install -y tj3
-
     install:
+      - gem install taskjuggler
       - pip install sqlalchemy psycopg2 jinja2 alembic Mako MarkupSafe python-editor nose coverage
 
     before_script:
