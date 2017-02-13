@@ -1,0 +1,26 @@
+    language: python
+
+    sudo: required
+    dist: trusty
+
+    python:
+      - 2.7
+      - 3.5
+
+    services:
+      - postgresql
+
+    addons:
+      postgresql: "9.4"
+
+    install:
+      - pip install sqlalchemy psycopg2 jinja2 alembic Mako MarkupSafe python-editor nose coverage
+
+    before_script:
+      - psql --version
+      - pg_config --version
+      - psql -c "CREATE DATABASE stalker_test;" -U postgres
+      - psql -c "CREATE USER stalker_admin WITH PASSWORD 'stalker';" -U postgres
+
+    script:
+      - nosetests $@ --verbosity=1 --cover-erase --with-coverage --cover-package=stalker
