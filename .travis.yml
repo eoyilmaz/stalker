@@ -11,7 +11,7 @@
       - postgresql
 
     addons:
-      postgresql: "9.4"
+      postgresql: "9.3"
 
     install:
       - gem install taskjuggler
@@ -20,6 +20,7 @@
     before_script:
       - psql --version
       - pg_config --version
+      - tj3 --version
       - psql -c "CREATE DATABASE stalker_test;" -U postgres
       - psql -c "CREATE USER stalker_admin WITH PASSWORD 'stalker';" -U postgres
 
