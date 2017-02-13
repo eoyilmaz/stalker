@@ -13,6 +13,9 @@
     addons:
       postgresql: "9.4"
 
+    before-install:
+      - sudo apt-get install -y tj3
+
     install:
       - pip install sqlalchemy psycopg2 jinja2 alembic Mako MarkupSafe python-editor nose coverage
 
