@@ -1,0 +1,20 @@
+build: false
+
+environment:
+  matrix:
+    - PYTHON: "C:\\Python27-x64"
+      PYTHON_ARCH: "64"
+    - PYTHON: "C:\\Python35-x64"
+      PYTHON_ARCH: "64"
+
+init:
+  - "ECHO %PYTHON% %PYTHON_VERSION% %PYTHON_ARCH%"
+  - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+
+install:
+  # Install PySide
+  - "%PYTHON%/Scripts/pip.exe install -y sqlalchemy psycopg2 jinja2 alembic mako markupsafe python-editor nose coverage"
+
+test_script:
+  - python build_caveats_tests.py
+  - nosetests --verbose --with-doctest --with-process-isolation --exe
