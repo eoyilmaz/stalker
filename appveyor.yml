@@ -29,7 +29,8 @@ services:
   - postgresql93
 
 before_test:
-  - createdb stalker_test -U postgres
+  - createdb --help
+  - createdb -U postgres stalker_test
 
 test_script:
   - nosetests --verbosity=1 --cover-erase --with-coverage --cover-package=stalker
