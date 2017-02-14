@@ -2,12 +2,12 @@ build: false
 
 environment:
   matrix:
-    - PYTHON: "C:\\Python27-x64"
-      PYTHON_ARCH: "64"
+    - PY27:
+      PYTHON: "C:\\Python27-x64"
       RUBY_VERSION: "22-x64"
-    - PYTHON: "C:\\Python35-x64"
-      PYTHON_ARCH: "64"
-      RUBY_VERSION: "22-x64"
+    - PY35:
+      PYTHON: "C:\\Python35-x64"
+      RUBY_VERSION: "22"
 
 init:
   - "ECHO %PYTHON% %PYTHON_VERSION% %PYTHON_ARCH%"
