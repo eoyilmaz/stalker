@@ -15,6 +15,8 @@ init:
   - SET PATH=C:\Ruby22\bin;%PATH%
   - ruby -v
   - gem -v
+  - SET PGUSER=postgres
+  - SET PGPASSWORD=Password12!
   - SET PATH=C:\Program Files\PostgreSQL\9.3\bin\;%PATH%
   - psql --version
 
@@ -27,13 +29,11 @@ services:
   - postgresql93
 
 before_test:
-    # - psql -l
     - pg_isready
-    # - psql -c "CREATE DATABASE stalker_test;" -U postgres
-    # - psql -c "CREATE USER stalker_admin WITH PASSWORD 'stalker';" -U postgres
-    - SET PGUSER=postgres
-    - SET PGPASSWORD=Password12!
     - createdb stalker_test
+    - psql -l
+    - psql -c "CREATE DATABASE stalker_test;" -U postgres
+    - psql -c "CREATE USER stalker_admin WITH PASSWORD 'stalker';" -U postgres
 
 
 test_script:
