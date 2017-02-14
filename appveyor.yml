@@ -30,7 +30,7 @@ services:
 
 before_test:
     - pg_isready
-    - createdb stalker_test
+    # - createdb stalker_test
     - psql -l
     - psql -c "CREATE DATABASE stalker_test;" -U postgres
     - psql -c "CREATE USER stalker_admin WITH PASSWORD 'stalker';" -U postgres
