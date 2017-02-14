@@ -10,28 +10,23 @@ environment:
       RUBY_VERSION: "22"
 
 init:
-  - "ECHO %PYTHON% %PYTHON_VERSION% %PYTHON_ARCH%"
-  - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+  - SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
+  - python --version
+  - SET PATH=C:\Ruby22\bin;%PATH%
+  - ruby -v
+  - gem -v
+  - SET PGUSER=stalker_admin
+  - SET PGPASSWORD=stalker
+  - SET PATH=C:\Program Files\PostgreSQL\9.3\bin\;%PATH%
+  - psql --version
 
 services:
   - postgresql93
 
 install:
-  - ruby -v
-  - SET PATH=C:\Ruby22\bin;%PATH%
-  - SET PGUSER=stalker_admin
-  - SET PGPASSWORD=stalker
-  - PATH=C:\Program Files\PostgreSQL\9.3\bin\;%PATH%
   - gem install mime-types -v 2.6.2  # Required to install taskjuggler
   - gem install taskjuggler
   - "%PYTHON%/Scripts/pip.exe install sqlalchemy psycopg2 jinja2 alembic mako markupsafe python-editor nose coverage"
-
-before_test:
-  - python --version
-  - ruby -v
-  - gem -v
-
-build_script:
   - createdb stalker_test
 
 test_script:
