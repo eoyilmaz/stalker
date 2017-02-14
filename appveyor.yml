@@ -20,8 +20,8 @@ init:
 
 install:
   - gem install mime-types -v 2.6.2  # Required to install taskjuggler
-  - gem install taskjuggler
-  - "%PYTHON%/Scripts/pip.exe install sqlalchemy psycopg2 jinja2 alembic mako markupsafe python-editor nose coverage"
+  # - gem install taskjuggler
+  # - "%PYTHON%/Scripts/pip.exe install sqlalchemy psycopg2 jinja2 alembic mako markupsafe python-editor nose coverage"
 
 services:
   - postgresql93
