@@ -9,9 +9,6 @@ environment:
       PYTHON: "C:\\Python35-x64"
       RUBY_VERSION: "22"
 
-services:
-  - postgresql93
-
 init:
   - SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
   - python --version
@@ -27,6 +24,11 @@ install:
   - gem install mime-types -v 2.6.2  # Required to install taskjuggler
   - gem install taskjuggler
   - "%PYTHON%/Scripts/pip.exe install sqlalchemy psycopg2 jinja2 alembic mako markupsafe python-editor nose coverage"
+
+services:
+  - postgresql93
+
+before_test:
   - createdb stalker_test
 
 test_script:
