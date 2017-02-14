@@ -13,7 +13,7 @@ init:
 
 install:
   # Install PySide
-  - "%PYTHON%/Scripts/pip.exe install -y sqlalchemy psycopg2 jinja2 alembic mako markupsafe python-editor nose coverage"
+  - "%PYTHON%/Scripts/pip.exe install sqlalchemy psycopg2 jinja2 alembic mako markupsafe python-editor nose coverage"
 
 test_script:
   - python build_caveats_tests.py
