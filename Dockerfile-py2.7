@@ -16,11 +16,14 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main" > /etc
 #  There are some warnings (in red) that show up during the build. You can hide
 #  them by prefixing each apt-get statement with DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
+
     apt-get install -y \
     python-software-properties python-pip \
     software-properties-common \
-    postgresql-9.3 postgresql-client-9.3 postgresql-contrib-9.3 postgresql-server-dev-9.3 \
-    tj3 && \
+    postgresql-9.3 postgresql-client-9.3 postgresql-contrib-9.3 postgresql-server-dev-9.3 && \
+
+    gem install taskjuggler && \
+
     pip install -U pip && \
     pip install sqlalchemy psycopg2 jinja2 alembic mako markupsafe python-editor nose coverage
 

@@ -20,7 +20,10 @@ RUN apt-get update && \
     python3-software-properties python3-pip \
     software-properties-common \
     postgresql-9.3 postgresql-client-9.3 postgresql-contrib-9.3 postgresql-server-dev-9.3 \
-    tj3 && \
+
+    gem install taskjuggler && \
+
+    pip3 install -U pip && \
     pip3 install -U pip && \
     pip3 install sqlalchemy psycopg2 jinja2 alembic mako markupsafe python-editor nose coverage
 
