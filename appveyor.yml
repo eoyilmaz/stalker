@@ -16,4 +16,4 @@ install:
   - "%PYTHON%/Scripts/pip.exe install sqlalchemy psycopg2 jinja2 alembic mako markupsafe python-editor nose coverage"
 
 test_script:
-  - nosetests --verbose --with-doctest --with-process-isolation --exe
+  - nosetests --verbosity=1 --cover-erase --with-coverage --cover-package=stalker
