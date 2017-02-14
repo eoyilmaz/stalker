@@ -27,7 +27,7 @@ services:
   - postgresql93
 
 before_test:
-    - psql -l
+    # - psql -l
     - pg_isready
     # - psql -c "CREATE DATABASE stalker_test;" -U postgres
     # - psql -c "CREATE USER stalker_admin WITH PASSWORD 'stalker';" -U postgres
