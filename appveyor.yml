@@ -4,7 +4,7 @@ environment:
   matrix:
     - PY27:
       PYTHON: "C:\\Python27-x64"
-      RUBY_VERSION: "22-x64"
+      RUBY_VERSION: "22"
     - PY35:
       PYTHON: "C:\\Python35-x64"
       RUBY_VERSION: "22"
@@ -17,6 +17,8 @@ services:
   - postgresql93
 
 install:
+  - ruby -v
+  - SET PATH=C:\Ruby22\bin;%PATH%
   - SET PGUSER=stalker_admin
   - SET PGPASSWORD=stalker
   - PATH=C:\Program Files\PostgreSQL\9.3\bin\;%PATH%
