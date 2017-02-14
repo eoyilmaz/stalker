@@ -20,6 +20,8 @@ RUN apt-get update && \
     python3-software-properties python3-pip \
     software-properties-common \
     postgresql-9.3 postgresql-client-9.3 postgresql-contrib-9.3 postgresql-server-dev-9.3 \
+    netcat \
+    rubygems && \
 
     gem install taskjuggler && \
 
@@ -52,12 +54,26 @@ EXPOSE 5432
 
 USER root
 
+# Create symlink to TaskJuggler
+# RUN ln -s $(which tj3) /usr/local/bin/tj3
+
+COPY tcp-port-wait /usr/local/bin/
+
 # It takes about 60 seconds on my machine to start the postgresql service, therefore we wait for 60 seconds.
+# Copy Stalker onto /workspace to avoid writing any files in the git repository, then perform nose tests
 ENTRYPOINT \
-           runuser -l postgres -c '/usr/lib/postgresql/9.3/bin/postgres -D /var/lib/postgresql/9.3/main -c config_file=/etc/postgresql/9.3/main/postgresql.conf & ' && \
-           sleep 60 && \
+
+           # Copy files into container
            mkdir -p /workspace && \
            cp -vr /stalker /workspace && \
            chmod -R 777 /workspace && \
            chmod -R -x /workspace && \
-           nosetests /workspace/stalker --verbose --cover-erase --with-coverage --cover-package=stalker
+
+           # Start PostgreSQL
+           # runuser -l postgres -c '/usr/lib/postgresql/9.3/bin/postgres -D /var/lib/postgresql/9.3/main -c config_file=/etc/postgresql/9.3/main/postgresql.conf & ' && \
+           # Wait for PostgresSQL
+           tcp-port-wait 5432 && \
+           # Wait an additional 30 seconds (doesn't seem like PostgreSQL is ready when port is opened')
+           sleep 30 && \
+           # Start tests
+           nosetests /workspace/stalker $@ --verbosity=1 --cover-erase --with-coverage --cover-package=stalker
