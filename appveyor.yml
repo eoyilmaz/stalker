@@ -31,6 +31,7 @@ before_test:
     - pg_isready
     # - psql -c "CREATE DATABASE stalker_test;" -U postgres
     # - psql -c "CREATE USER stalker_admin WITH PASSWORD 'stalker';" -U postgres
+    - createdb stalker_test
 
 test_script:
   - nosetests --verbosity=1 --cover-erase --with-coverage --cover-package=stalker
