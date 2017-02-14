@@ -9,6 +9,9 @@ environment:
       PYTHON: "C:\\Python35-x64"
       RUBY_VERSION: "22"
 
+services:
+  - postgresql93
+
 init:
   - SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
   - python --version
@@ -19,9 +22,6 @@ init:
   - SET PGPASSWORD=stalker
   - SET PATH=C:\Program Files\PostgreSQL\9.3\bin\;%PATH%
   - psql --version
-
-services:
-  - postgresql93
 
 install:
   - gem install mime-types -v 2.6.2  # Required to install taskjuggler
