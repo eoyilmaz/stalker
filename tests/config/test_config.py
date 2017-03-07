@@ -164,7 +164,14 @@ class ConfigTester(UnitTestBase):
         # now import the config.py and see if it updates the
         # database_file_name variable
         from stalker import config
-        self.assertRaises(RuntimeError, config.Config)
+        with self.assertRaises(RuntimeError) as cm:
+            config.Config()
+
+        self.assertEqual(
+            str(cm.exception),
+            'There is a syntax error in your configuration file: EOL while '
+            'scanning string literal (<string>, line 2)'
+        )
 
     def test_update_with_studio_is_working_properly(self):
         """testing if the default values are updated with the Studio instance

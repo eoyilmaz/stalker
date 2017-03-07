@@ -18,36 +18,44 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest
-from stalker import Type, Repository, Status, StatusList, Project
-from stalker.models.wiki import Page
+from stalker.testing import UnitTestBase
+from stalker import Page
 
 
-class PageTester(unittest.TestCase):
+class PageTester(UnitTestBase):
     """Tests stalker.wiki.Page class
     """
 
     def setUp(self):
         """setting up the test
         """
+        super(PageTester, self).setUp()
+
         # create a repository
+        from stalker import db, Type
         self.repository_type = Type(
             name="Test Repository Type",
             code='test_repo',
-            target_entity_type=Repository
+            target_entity_type='Repository'
         )
+        db.DBSession.add(self.repository_type)
 
+        from stalker import Repository
         self.test_repository = Repository(
             name="Test Repository",
             type=self.repository_type,
         )
+        db.DBSession.add(self.test_repository)
 
         # statuses
+        from stalker import Status
         self.status1 = Status(name="Status1", code="STS1")
         self.status2 = Status(name="Status2", code="STS2")
         self.status3 = Status(name="Status3", code="STS3")
+        db.DBSession.add_all([self.status1, self.status2, self.status3])
 
         # project status list
+        from stalker import StatusList
         self.project_status_list = StatusList(
             name="Project Status List",
             statuses=[
@@ -55,17 +63,20 @@ class PageTester(unittest.TestCase):
                 self.status2,
                 self.status3,
             ],
-            target_entity_type=Project
+            target_entity_type='Project'
         )
+        db.DBSession.add(self.project_status_list)
 
         # project type
         self.test_project_type = Type(
             name="Test Project Type",
             code='testproj',
-            target_entity_type=Project,
+            target_entity_type='Project',
         )
+        db.DBSession.add(self.test_project_type)
 
         # create projects
+        from stalker import Project
         self.test_project1 = Project(
             name="Test Project 1",
             code='tp1',
@@ -73,6 +84,7 @@ class PageTester(unittest.TestCase):
             status_list=self.project_status_list,
             repository=self.test_repository,
         )
+        db.DBSession.add(self.test_project1)
 
         self.kwargs = {
             'title': 'Test Page Title',
@@ -81,6 +93,8 @@ class PageTester(unittest.TestCase):
         }
 
         self.test_page = Page(**self.kwargs)
+        db.DBSession.add(self.test_page)
+        db.DBSession.commit()
 
     def test_title_argument_is_skipped(self):
         """testing if a ValueError will be raised when the title argument is

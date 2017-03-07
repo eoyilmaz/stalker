@@ -18,17 +18,18 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest
 from stalker import Tag, SimpleEntity
+from stalker.testing import UnitTestBase
 
 
-class TagTest(unittest.TestCase):
+class TagTest(UnitTestBase):
     """testing the Tag class
     """
 
     def setUp(self):
         """setup the test
         """
+        super(UnitTestBase, self).setUp()
         self.kwargs = {
             "name": "a test tag",
             "description": "this is a test tag",

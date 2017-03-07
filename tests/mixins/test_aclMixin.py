@@ -59,7 +59,14 @@ class ACLMixinTester(UnitTestBase):
         """testing if the permissions attribute accepts only Permission
         instances
         """
-        self.assertRaises(TypeError, setattr, self.test_instance, [234])
+        with self.assertRaises(TypeError) as cm:
+            self.test_instance.permissions = [234]
+
+        self.assertEqual(
+            str(cm.exception),
+            'TestClassForACL.permissions should be all instances of '
+            'stalker.models.auth.Permission not int'
+        )
 
     def test_permission_attribute_is_working_properly(self):
         """testing if the permissions attribute is working properly

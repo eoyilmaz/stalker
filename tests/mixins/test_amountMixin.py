@@ -18,9 +18,9 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest
 from stalker import AmountMixin, SimpleEntity
 from sqlalchemy import Column, Integer, ForeignKey
+from stalker.testing import UnitTestBase
 
 
 class AmountMixinFooMixedInClass(SimpleEntity, AmountMixin):
@@ -41,7 +41,7 @@ class AmountMixinFooMixedInClass(SimpleEntity, AmountMixin):
         AmountMixin.__init__(self, **kwargs)
 
 
-class AmountMixinTestCase(unittest.TestCase):
+class AmountMixinTestCase(UnitTestBase):
     """tests the AmountMixin
     """
 

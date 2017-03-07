@@ -218,24 +218,31 @@ class TaskTestCase(UnitTestBase):
         """testing if a TypeError will be raised if the priority argument value
         is not an integer
         """
-        test_values = ["a324", []]
         kwargs = copy.copy(self.kwargs)
+        kwargs["priority"] = "a324"
+        with self.assertRaises(TypeError) as cm:
+            Task(**kwargs)
 
-        for test_value in test_values:
-            kwargs["priority"] = test_value
-            with self.assertRaises(TypeError):
-                Task(**kwargs)
+        self.assertEqual(
+            str(cm.exception),
+            'Task.priority should be an integer value between 0 and 1000, not '
+            'str'
+        )
 
     def test_priority_attribute_is_not_an_integer(self):
         """testing if any other value then an positive integer for priority
         attribute will raise a TypeError.
         """
-        test_values = ["a324", []]
+        test_value = "sdfsdwe324"
         new_task = Task(**self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            new_task.priority = test_value
 
-        for test_value in test_values:
-            with self.assertRaises(TypeError):
-                new_task.priority = test_value
+        self.assertEqual(
+            str(cm.exception),
+            'Task.priority should be an integer value between 0 and 1000, not '
+            'str'
+        )
 
     def test_priority_argument_is_negative(self):
         """testing if the priority argument is given as a negative value will
@@ -323,7 +330,13 @@ class TaskTestCase(UnitTestBase):
         is set to None
         """
         new_task = Task(**self.kwargs)
-        self.assertRaises(TypeError, setattr, new_task, "resources", None)
+        with self.assertRaises(TypeError) as cm:
+            new_task.resources = None
+
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: None is not list-like'
+        )
 
     def test_resources_argument_is_not_list(self):
         """testing if a TypeError will be raised when the resources argument is
@@ -331,15 +344,25 @@ class TaskTestCase(UnitTestBase):
         """
         kwargs = copy.copy(self.kwargs)
         kwargs["resources"] = "a resource"
-        self.assertRaises(TypeError, Task, **kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Task(**kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: str is not list-like'
+        )
 
     def test_resources_attribute_is_not_list(self):
         """testing if a TypeError will be raised when the resources attribute
         is set to any other value then a list
         """
         new_task = Task(**self.kwargs)
-        self.assertRaises(
-            TypeError, setattr, new_task, "resources", "a resource"
+        with self.assertRaises(TypeError) as cm:
+            new_task.resources = "a resource"
+
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: str is not list-like'
         )
 
     def test_resources_argument_is_set_to_a_list_of_other_values_then_User(self):
@@ -348,16 +371,29 @@ class TaskTestCase(UnitTestBase):
         """
         kwargs = copy.copy(self.kwargs)
         kwargs["resources"] = ["a", "list", "of", "resources", self.test_user1]
-        self.assertRaises(TypeError, Task, **kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Task(**kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Task.resources should be a list of stalker.models.auth.User '
+            'instances, not str'
+        )
 
     def test_resources_attribute_is_set_to_a_list_of_other_values_then_User(self):
         """testing if a TypeError will be raised when the resources attribute
         is set to a list of other values then a User
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(TypeError):
+        with self.assertRaises(TypeError) as cm:
             new_task.resources = \
                 ["a", "list", "of", "resources", self.test_user1]
+
+        self.assertEqual(
+            str(cm.exception),
+            'Task.resources should be a list of stalker.models.auth.User '
+            'instances, not str'
+        )
 
     def test_resources_attribute_is_working_properly(self):
         """testing if the resources attribute is working properly
@@ -520,7 +556,13 @@ class TaskTestCase(UnitTestBase):
         new_task = Task(**self.kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.assertRaises(TypeError, setattr, new_task, "watchers", None)
+        with self.assertRaises(TypeError) as cm:
+            new_task.watchers = None
+
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: None is not list-like'
+        )
 
     def test_watchers_argument_is_not_list(self):
         """testing if a TypeError will be raised when the watchers argument is
@@ -528,7 +570,13 @@ class TaskTestCase(UnitTestBase):
         """
         kwargs = copy.copy(self.kwargs)
         kwargs["watchers"] = "a resource"
-        self.assertRaises(TypeError, Task, **kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Task(**kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: str is not list-like'
+        )
 
     def test_watchers_attribute_is_not_list(self):
         """testing if a TypeError will be raised when the watchers attribute
@@ -537,8 +585,12 @@ class TaskTestCase(UnitTestBase):
         new_task = Task(**self.kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.assertRaises(
-            TypeError, setattr, new_task, "watchers", "a resource"
+        with self.assertRaises(TypeError) as cm:
+            new_task.watchers = "a resource"
+
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: str is not list-like'
         )
 
     def test_watchers_argument_is_set_to_a_list_of_other_values_then_User(self):
@@ -547,7 +599,14 @@ class TaskTestCase(UnitTestBase):
         """
         kwargs = copy.copy(self.kwargs)
         kwargs["watchers"] = ["a", "list", "of", "watchers", self.test_user1]
-        self.assertRaises(TypeError, Task, **kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Task(**kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Task.watchers should be a list of stalker.models.auth.User '
+            'instances not str'
+        )
 
     def test_watchers_attribute_is_set_to_a_list_of_other_values_then_User(self):
         """testing if a TypeError will be raised when the watchers attribute
@@ -729,7 +788,13 @@ class TaskTestCase(UnitTestBase):
         """
         kwargs = copy.copy(self.kwargs)
         kwargs["depends"] = self.test_dependent_task1
-        self.assertRaises(TypeError, Task, **kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Task(**kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            "'Task' object is not iterable"
+        )
 
     def test_depends_attribute_is_not_a_list(self):
         """testing if a TypeError will be raised when the depends attribute is
@@ -737,8 +802,13 @@ class TaskTestCase(UnitTestBase):
         """
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
-        self.assertRaises(TypeError, setattr, new_task, "depends",
-                          self.test_dependent_task1)
+        with self.assertRaises(TypeError) as cm:
+            new_task.depends = self.test_dependent_task1
+
+        self.assertEqual(
+            str(cm.exception),
+            "'Task' object is not iterable"
+        )
 
     def test_depends_argument_is_a_list_of_other_objects_than_a_Task(self):
         """testing if a AttributeError will be raised when the depends argument is
@@ -747,7 +817,14 @@ class TaskTestCase(UnitTestBase):
         test_value = ["a", "dependent", "task", 1, 1.2]
         kwargs = copy.copy(self.kwargs)
         kwargs["depends"] = test_value
-        self.assertRaises(TypeError, Task, **kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Task(**kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'TaskDependency.depends_to can should be and instance of '
+            'stalker.models.task.Task, not str'
+        )
 
     def test_depends_attribute_is_a_list_of_other_objects_than_a_Task(self):
         """testing if a AttributeError will be raised when the depends
@@ -756,7 +833,14 @@ class TaskTestCase(UnitTestBase):
         test_value = ["a", "dependent", "task", 1, 1.2]
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
-        self.assertRaises(TypeError, setattr, new_task, "depends", test_value)
+        with self.assertRaises(TypeError) as cm:
+            new_task.depends = test_value
+
+        self.assertEqual(
+            str(cm.exception),
+            'TaskDependency.depends_to can should be and instance of '
+            'stalker.models.task.Task, not str'
+        )
 
     def test_depends_attribute_doesnt_allow_simple_cyclic_dependencies(self):
         """testing if a CircularDependencyError will be raised when the depends
@@ -774,9 +858,14 @@ class TaskTestCase(UnitTestBase):
 
         task_b.depends = [task_a]
 
-        self.assertRaises(CircularDependencyError, setattr, task_a, "depends",
-                          [task_b])
-        DBSession.rollback()
+        with self.assertRaises(CircularDependencyError) as cm:
+            task_a.depends = [task_b]
+
+        self.assertEqual(
+            str(cm.exception),
+            '<Modeling (Task)> (Task) and <Modeling (Task)> (Task) creates a '
+            'circular dependency in their "depends" attribute'
+        )
 
     def test_depends_attribute_doesnt_allow_cyclic_dependencies(self):
         """testing if a CircularDependencyError will be raised when the depends
@@ -802,9 +891,14 @@ class TaskTestCase(UnitTestBase):
         task_b.depends = [task_a]
         task_c.depends = [task_b]
 
-        self.assertRaises(CircularDependencyError, setattr, task_a, "depends",
-                          [task_c])
-        DBSession.rollback()
+        with self.assertRaises(CircularDependencyError) as cm:
+            task_a.depends = [task_c]
+
+        self.assertEqual(
+            str(cm.exception),
+             '<taskC (Task)> (Task) and <taskA (Task)> (Task) creates a '
+             'circular dependency in their "depends" attribute'
+        )
 
     def test_depends_attribute_doesnt_allow_more_deeper_cyclic_dependencies(self):
         """testing if a CircularDependencyError will be raised when the depends
@@ -835,9 +929,14 @@ class TaskTestCase(UnitTestBase):
         task_c.depends = [task_b]
         task_d.depends = [task_c]
 
-        self.assertRaises(CircularDependencyError, setattr, task_a, "depends",
-                          [task_d])
-        DBSession.rollback()
+        with self.assertRaises(CircularDependencyError) as cm:
+            task_a.depends = [task_d]
+
+        self.assertEqual(
+            str(cm.exception),
+            '<taskD (Task)> (Task) and <taskA (Task)> (Task) creates a '
+            'circular dependency in their "depends" attribute'
+        )
 
     def test_depends_argument_cyclic_dependency_bug_2(self):
         """testing if a CircularDependencyError will be raised in the following
@@ -862,10 +961,13 @@ class TaskTestCase(UnitTestBase):
         kwargs['depends'] = [t3]
 
         # the following should generate the CircularDependencyError
-        with self.assertRaises(CircularDependencyError):
-            new_task = Task(**kwargs)
+        with self.assertRaises(CircularDependencyError) as cm:
+            Task(**kwargs)
 
-        DBSession.rollback()
+        self.assertEqual(
+            str(cm.exception),
+            'One of the parents of <T2 (Task)> is depending to <T3 (Task)>'
+        )
 
     def test_depends_argument_doesnt_allow_one_of_the_parents_of_the_task(self):
         """testing if a CircularDependencyError will be raised when the depends
@@ -888,12 +990,23 @@ class TaskTestCase(UnitTestBase):
         self.assertTrue(task_b in task_a.children)
         self.assertTrue(task_a in task_c.children)
 
-        self.assertRaises(CircularDependencyError, setattr, task_b, 'depends',
-                          [task_a])
-        self.assertRaises(CircularDependencyError, setattr, task_b, 'depends',
-                          [task_c])
+        with self.assertRaises(CircularDependencyError) as cm:
+            task_b.depends = [task_a]
 
-        DBSession.rollback()
+        self.assertEqual(
+            str(cm.exception),
+            '<Modeling (Task)> (Task) and <Modeling (Task)> (Task) creates a '
+            'circular dependency in their "children" attribute'
+        )
+
+        with self.assertRaises(CircularDependencyError) as cm:
+            task_b.depends = [task_c]
+
+        self.assertEqual(
+            str(cm.exception),
+            '<Modeling (Task)> (Task) and <Modeling (Task)> (Task) creates a '
+            'circular dependency in their "children" attribute'
+        )
 
     def test_depends_argument_is_working_properly(self):
         """testing if the depends argument is working properly
@@ -932,8 +1045,13 @@ class TaskTestCase(UnitTestBase):
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
 
-        self.assertRaises(AttributeError, setattr, new_task,
-                          'percent_complete', 32)
+        with self.assertRaises(AttributeError) as cm:
+            new_task.percent_complete = 32
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
+        )
 
     def test_percent_complete_attribute_is_working_properly_for_a_leaf_task(self):
         """testing if the percent_complete attribute is working properly for a
@@ -1247,13 +1365,15 @@ class TaskTestCase(UnitTestBase):
         is anything other than a bool
         """
         kwargs = copy.copy(self.kwargs)
-        test_values = [1, 0, 1.2, "A string", "", [], [1]]
+        kwargs["name"] = "test" + str(0)
+        kwargs["is_milestone"] = "A string"
+        with self.assertRaises(TypeError) as cm:
+            Task(**kwargs)
 
-        for i, test_value in enumerate(test_values):
-            kwargs["name"] = "test" + str(i)
-            kwargs["is_milestone"] = test_value
-            with self.assertRaises(TypeError):
-                new_task = Task(**kwargs)
+        self.assertEqual(
+            str(cm.exception),
+            'Task.is_milestone should be a bool value (True or False), not str'
+        )
 
     def test_is_milestone_attribute_is_not_a_bool(self):
         """testing if a TypeError will be raised when the is_milestone
@@ -1262,10 +1382,14 @@ class TaskTestCase(UnitTestBase):
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
 
-        test_values = [1, 0, 1.2, "A string", "", [], [1]]
-        for test_value in test_values:
-            with self.assertRaises(TypeError):
-                new_task.is_milestone = test_value
+        test_value = "A string"
+        with self.assertRaises(TypeError) as cm:
+            new_task.is_milestone = test_value
+
+        self.assertEqual(
+            str(cm.exception),
+            'Task.is_milestone should be a bool value (True or False), not str'
+        )
 
     def test_is_milestone_argument_makes_the_resources_list_an_empty_list(self):
         """testing if the resources will be an empty list when the is_milestone
@@ -1297,8 +1421,12 @@ class TaskTestCase(UnitTestBase):
         is set to None
         """
         new_task = Task(**self.kwargs)
-        self.assertRaises(
-            TypeError, setattr, new_task, "time_logs", None
+        with self.assertRaises(TypeError) as cm:
+            new_task.time_logs = None
+
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: None is not list-like'
         )
 
     def test_time_logs_attribute_is_not_a_list(self):
@@ -1306,15 +1434,27 @@ class TaskTestCase(UnitTestBase):
         is not set to a list
         """
         new_task = Task(**self.kwargs)
-        self.assertRaises(TypeError, setattr, new_task, "time_logs", 123)
+        with self.assertRaises(TypeError) as cm:
+            new_task.time_logs = 123
+
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: int is not list-like'
+        )
 
     def test_time_logs_attribute_is_not_a_list_of_TimeLog_instances(self):
         """testing if a TypeError will be raised when the time_logs attribute
         is not a list of TimeLog instances
         """
         new_task = Task(**self.kwargs)
-        self.assertRaises(TypeError, setattr, new_task, "time_logs",
-                          [1, "1", 1.2, "a time_log", []])
+        with self.assertRaises(TypeError) as cm:
+            new_task.time_logs = [1, "1", 1.2, "a time_log"]
+
+        self.assertEqual(
+            str(cm.exception),
+            'Task.time_logs should be all stalker.models.task.TimeLog '
+            'instances, not int'
+        )
 
     def test_time_logs_attribute_is_working_properly(self):
         """testing if the time_log attribute is working properly
@@ -2116,8 +2256,13 @@ class TaskTestCase(UnitTestBase):
         """testing if the remaining hours is a read only attribute
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(AttributeError) as cm:
             setattr(new_task, 'remaining_seconds', 2342)
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
+        )
 
     def test_remaining_seconds_is_working_properly(self):
         """testing if the remaining hours is working properly
@@ -2289,24 +2434,40 @@ class TaskTestCase(UnitTestBase):
         is set to None
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(TypeError):
+        with self.assertRaises(TypeError) as cm:
             new_task.versions = None
+
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: None is not list-like'
+        )
 
     def test_versions_attribute_is_not_a_list(self):
         """testing if a TypeError will be raised when the versions attribute is
         set to a value other than a list
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(TypeError):
+        with self.assertRaises(TypeError) as cm:
             new_task.versions = 1
+
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: int is not list-like'
+        )
 
     def test_versions_attribute_is_not_a_list_of_Version_instances(self):
         """testing if a TypeError will be raised when the versions attribute is
         set to a list of other objects than Version instances
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(TypeError):
+        with self.assertRaises(TypeError) as cm:
             new_task.versions = [1, 1.2, "a version"]
+
+        self.assertEqual(
+            str(cm.exception),
+            'Task.versions should only have stalker.models.version.Version '
+            'instances, and not Task'
+        )
 
     def test_equality(self):
         """testing the equality operator
@@ -2444,7 +2605,14 @@ class TaskTestCase(UnitTestBase):
         """
         kwargs = copy.copy(self.kwargs)
         kwargs['parent'] = 'not a task'
-        self.assertRaises(TypeError, Task, **kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Task(**kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Task.parent should be an instance of stalker.models.task.Task, '
+            'not str'
+        )
 
     def test_parent_attribute_is_not_a_Task_instance(self):
         """testing if a TypeError will be raised when the parent attribute is
@@ -2453,7 +2621,14 @@ class TaskTestCase(UnitTestBase):
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
 
-        self.assertRaises(TypeError, new_task.parent, 'not a task')
+        with self.assertRaises(TypeError) as cm:
+            new_task.parent = 'not a task'
+
+        self.assertEqual(
+            str(cm.exception),
+            'Task.parent should be an instance of stalker.models.task.Task, '
+            'not str'
+        )
 
         # there is no way to generate a CycleError by using the parent argument
         # cause the Task is just created, it is not in relationship with other
@@ -2471,16 +2646,26 @@ class TaskTestCase(UnitTestBase):
         kwargs['parent'] = new_task1
         new_task2 = Task(**kwargs)
 
-        self.assertRaises(
-            CircularDependencyError, setattr, new_task1, 'parent', new_task2
+        with self.assertRaises(CircularDependencyError) as cm:
+            new_task1.parent = new_task2
+
+        self.assertEqual(
+            str(cm.exception),
+            '<Modeling (Task)> (Task) and <New Task (Task)> (Task) creates a '
+            'circular dependency in their "children" attribute'
         )
 
         # more deeper test
         kwargs['parent'] = new_task2
         new_task3 = Task(**kwargs)
 
-        self.assertRaises(
-            CircularDependencyError, setattr, new_task1, 'parent', new_task3
+        with self.assertRaises(CircularDependencyError) as cm:
+            new_task1.parent = new_task3
+
+        self.assertEqual(
+            str(cm.exception),
+            '<Modeling (Task)> (Task) and <New Task (Task)> (Task) creates a '
+            'circular dependency in their "children" attribute'
         )
 
     def test_parent_argument_is_working_properly(self):
@@ -2526,9 +2711,14 @@ class TaskTestCase(UnitTestBase):
 
         kwargs['depends'] = [task_a, task_b, task_c]
         kwargs['parent'] = task_a
-        self.assertRaises(CircularDependencyError, Task, **kwargs)
+        with self.assertRaises(CircularDependencyError) as cm:
+            Task(**kwargs)
 
-        DBSession.rollback()
+        self.assertEqual(
+            str(cm.exception),
+            '<Modeling (Task)> (Task) and <Modeling (Task)> (Task) creates a '
+            'circular dependency in their "children" attribute'
+        )
 
     def test_parent_attribute_will_not_allow_a_dependent_task_to_be_parent(self):
         """testing if a CircularDependencyError will be raised when one of the
@@ -2545,10 +2735,14 @@ class TaskTestCase(UnitTestBase):
 
         task_d.depends = [task_a, task_b, task_c]
 
-        with self.assertRaises(CircularDependencyError):
+        with self.assertRaises(CircularDependencyError) as cm:
             task_d.parent = task_a
 
-        DBSession.rollback()
+        self.assertEqual(
+            str(cm.exception),
+            '<Modeling (Task)> (Task) and <Modeling (Task)> (Task) creates a '
+            'circular dependency in their "depends" attribute'
+        )
 
     def test_children_attribute_is_empty_list_by_default(self):
         """testing if the children attribute is an empty list by default
@@ -2561,15 +2755,26 @@ class TaskTestCase(UnitTestBase):
         set to None
         """
         new_task = Task(**self.kwargs)
-        self.assertRaises(TypeError, setattr, new_task, 'children', None)
+        with self.assertRaises(TypeError) as cm:
+            new_task.children = None
+
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: None is not list-like'
+        )
 
     def test_children_attribute_accepts_Tasks_only(self):
         """testing if a TypeError will be raised when the item assigned to the
         children attribute is not a Task instance
         """
         new_task = Task(**self.kwargs)
-        self.assertRaises(TypeError, setattr, new_task, 'children',
-                          'no task')
+        with self.assertRaises(TypeError) as cm:
+            new_task.children = 'no task'
+
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: str is not list-like'
+        )
 
     def test_children_attribute_is_working_properly(self):
         """testing if the children attribute is working properly
@@ -2610,7 +2815,13 @@ class TaskTestCase(UnitTestBase):
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
         DBSession.commit()
-        self.assertRaises(AttributeError, setattr, new_task, 'is_leaf', True)
+        with self.assertRaises(AttributeError) as cm:
+            new_task.is_leaf = True
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
+        )
 
     def test_is_leaf_attribute_is_working_properly(self):
         """testing if the is_leaf attribute is True for a Task without a child
@@ -2648,8 +2859,13 @@ class TaskTestCase(UnitTestBase):
         DBSession.add(new_task)
         DBSession.commit()
 
-        self.assertRaises(AttributeError, setattr, new_task, 'is_root',
-                          True)
+        with self.assertRaises(AttributeError) as cm:
+            new_task.is_root = True
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
+        )
 
     def test_is_root_attribute_is_working_properly(self):
         """testing if the is_root attribute is True for a Task without a parent
@@ -2688,8 +2904,12 @@ class TaskTestCase(UnitTestBase):
         DBSession.add(new_task)
         DBSession.commit()
 
-        self.assertRaises(
-            AttributeError, setattr, new_task, 'is_container', False
+        with self.assertRaises(AttributeError) as cm:
+            new_task.is_container = False
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
         )
 
     def test_is_container_attribute_working_properly(self):
@@ -2734,7 +2954,16 @@ class TaskTestCase(UnitTestBase):
         except KeyError:
             pass
 
-        self.assertRaises(TypeError, Task, **kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Task(**kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Task.project should be an instance of '
+            'stalker.models.project.Project, not NoneType. Or please supply a '
+            'stalker.models.task.Task with the parent argument, so Stalker '
+            'can use the project of the supplied parent task'
+        )
 
     def test_project_arg_is_skipped_but_there_is_a_parent_arg(self):
         """testing if there is no problem creating a Task without a Project
@@ -2756,15 +2985,25 @@ class TaskTestCase(UnitTestBase):
         kwargs = copy.copy(self.kwargs)
         kwargs['name'] = 'New Task 1'
         kwargs['project'] = 'Not a Project instance'
-        self.assertRaises(TypeError, Task, **kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Task(**kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Task.project should be an instance of stalker.models.project.Project, not str'
+        )
 
     def test_project_attribute_is_a_read_only_attribute(self):
         """testing if the project attribute is a read only attribute
         """
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
-        self.assertRaises(
-            AttributeError, setattr, new_task, 'project', self.test_project1
+        with self.assertRaises(AttributeError) as cm:
+            new_task.project = self.test_project1
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
         )
 
     def test_project_argument_is_not_matching_the_given_parent_argument(self):
@@ -2793,6 +3032,13 @@ class TaskTestCase(UnitTestBase):
             self.assertTrue(
                 issubclass(w[-1].category, RuntimeWarning)
             )
+
+        self.assertEqual(
+            str(w[0].message),
+            'The supplied parent and the project is not matching in '
+            '<New Task (Task)>, Stalker will use the parents project '
+            '(<Test Project1 (Project)>) as the parent of this Task'
+        )
 
     def test_project_argument_is_not_matching_the_given_parent_argument_new_task_will_use_parents_project(self):
         """testing if the new task will use the parents project when the given
@@ -2962,7 +3208,13 @@ class TaskTestCase(UnitTestBase):
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
 
-        self.assertRaises(AttributeError, setattr, new_task, 'level', 0)
+        with self.assertRaises(AttributeError) as cm:
+            new_task.level = 0
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
+        )
 
     def test_level_attribute_returns_the_hierarchical_level_of_this_task(self):
         """testing if the level attribute returns the hierarchical level of
@@ -3052,10 +3304,14 @@ class TaskTestCase(UnitTestBase):
         DBSession.add(task1)
         DBSession.commit()
 
-        with self.assertRaises(CircularDependencyError):
+        with self.assertRaises(CircularDependencyError) as cm:
             task1.parent = task1
 
-        DBSession.rollback()
+        self.assertEqual(
+            str(cm.exception),
+            '<Cekimler (Task)> (Task) and <Cekimler (Task)> (Task) creates a '
+            'circular dependency in their "children" attribute'
+        )
 
     def test_bid_timing_argument_is_skipped(self):
         """testing if the bid_timing attribute value will be equal to
@@ -3092,14 +3348,28 @@ class TaskTestCase(UnitTestBase):
         """
         kwargs = copy.copy(self.kwargs)
         kwargs['bid_timing'] = '10d'
-        self.assertRaises(TypeError, Task, **kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Task(**kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Task.bid_timing should be an integer or float showing the value '
+            'of the initial bid for this Task, not str'
+        )
 
     def test_bid_timing_attribute_is_not_an_integer_or_float(self):
         """testing if a TypeError will be raised when the bid_timing attribute
         is set to a value which is not an integer or float
         """
         new_task = Task(**self.kwargs)
-        self.assertRaises(TypeError, setattr, new_task, 'bid_timing', '10d')
+        with self.assertRaises(TypeError) as cm:
+            new_task.bid_timing = '10d'
+
+        self.assertEqual(
+            str(cm.exception),
+            'Task.bid_timing should be an integer or float showing the value '
+            'of the initial bid for this Task, not str'
+        )
 
     def test_bid_timing_argument_is_working_properly(self):
         """testing if the bid_timing argument is working properly
@@ -3152,14 +3422,30 @@ class TaskTestCase(UnitTestBase):
         """
         kwargs = copy.copy(self.kwargs)
         kwargs['bid_unit'] = 10
-        self.assertRaises(TypeError, Task, **kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Task(**kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            "Task.bid_unit should be a string value one of ['min', 'h', 'd', "
+            "'w', 'm', 'y'] showing the unit of the bid timing of this Task, "
+            "not int"
+        )
 
     def test_bid_unit_attribute_is_not_a_string(self):
         """testing if a TypeError will be raised when the bid_unit attribute is
         set to a value which is not an integer
         """
         new_task = Task(**self.kwargs)
-        self.assertRaises(TypeError, setattr, new_task, 'bid_unit', 10)
+        with self.assertRaises(TypeError) as cm:
+            new_task.bid_unit = 10
+
+        self.assertEqual(
+            str(cm.exception),
+            "Task.bid_unit should be a string value one of ['min', 'h', 'd', "
+            "'w', 'm', 'y'] showing the unit of the bid timing of this Task, "
+            "not int"
+        )
 
     def test_bid_unit_argument_is_working_properly(self):
         """testing if the bid_unit argument is working properly
@@ -3183,7 +3469,15 @@ class TaskTestCase(UnitTestBase):
         """
         kwargs = copy.copy(self.kwargs)
         kwargs['bid_unit'] = 'os'
-        self.assertRaises(ValueError, Task, **kwargs)
+        with self.assertRaises(ValueError) as cm:
+            Task(**kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            "Task.bid_unit should be a string value one of ['min', 'h', 'd', "
+            "'w', 'm', 'y'] showing the unit of the bid timing of this Task, "
+            "not str"
+        )
 
     def test_bid_unit_attribute_value_not_in_defaults_datetime_units(self):
         """testing if a ValueError will be raised when the bid_unit value is
@@ -3192,7 +3486,15 @@ class TaskTestCase(UnitTestBase):
         new_task = Task(**self.kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.assertRaises(ValueError, setattr, new_task, 'bid_unit', 'sys')
+        with self.assertRaises(ValueError) as cm:
+            new_task.bid_unit = 'sys'
+
+        self.assertEqual(
+            str(cm.exception),
+            "Task.bid_unit should be a string value one of ['min', 'h', 'd', "
+            "'w', 'm', 'y'] showing the unit of the bid timing of this Task, "
+            "not str"
+        )
 
     def test_tjp_id_is_a_read_only_attribute(self):
         """testing if the tjp_id attribute is a read only attribute
@@ -3200,15 +3502,20 @@ class TaskTestCase(UnitTestBase):
         new_task = Task(**self.kwargs)
         DBSession.add(new_task)
         DBSession.commit()
-        self.assertRaises(AttributeError, setattr, new_task, 'tjp_id',
-                          'some value')
+        with self.assertRaises(AttributeError) as cm:
+            new_task.tjp_id = 'some value'
 
     def test_tjp_abs_id_is_a_read_only_attribute(self):
         """testing if the tjp_abs_id attribute is a read only attribute
         """
         new_task = Task(**self.kwargs)
-        self.assertRaises(AttributeError, setattr, new_task,
-                          'tjp_abs_id', 'some_value')
+        with self.assertRaises(AttributeError) as cm:
+            new_task.tjp_abs_id = 'some_value'
+
+        self.assertEqual(
+            str(cm.exception),
+             "can't set attribute"
+        )
 
     def test_tjp_id_attribute_is_working_properly_for_a_root_task(self):
         """testing if the tjp_id is working properly for a root task
@@ -3916,8 +4223,12 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         DBSession.add(new_task)
         DBSession.commit()
 
-        self.assertRaises(
-            AttributeError, setattr, new_task, 'is_scheduled', True
+        with self.assertRaises(AttributeError) as cm:
+            new_task.is_scheduled = True
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
         )
 
     def test_is_scheduled_is_true_if_the_computed_start_and_computed_end_is_not_None(self):
@@ -3959,12 +4270,12 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         DBSession.add(new_task)
         DBSession.commit()
 
-        self.assertRaises(
-            AttributeError,
-            setattr,
-            new_task,
-            'parents',
-            self.test_dependent_task1
+        with self.assertRaises(AttributeError) as cm:
+            new_task.parents = self.test_dependent_task1
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
         )
 
     def test_parents_attribute_is_working_properly(self):
@@ -4191,8 +4502,12 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
 
-        self.assertRaises(
-            AttributeError, setattr, new_task, 'tickets', 'some value'
+        with self.assertRaises(AttributeError) as cm:
+            new_task.tickets = 'some value'
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
         )
 
     def test_tickets_attribute_is_working_properly(self):
@@ -4240,8 +4555,12 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
 
-        self.assertRaises(
-            AttributeError, setattr, new_task, 'open_tickets', 'some value'
+        with self.assertRaises(AttributeError) as cm:
+            new_task.open_tickets = 'some value'
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
         )
 
     def test_open_tickets_attribute_is_working_properly(self):
@@ -4321,8 +4640,13 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
 
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(AttributeError) as cm:
             new_task.review_number = 12
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
+        )
 
     def test_review_number_attribute_initializes_with_0(self):
         """testing if the review_number attribute initializes to 0
@@ -4369,8 +4693,13 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         attribute is set to None
         """
         new_task = Task(**self.kwargs)
-        self.assertRaises(TypeError, setattr, new_task,
-                          'alternative_resources', None)
+        with self.assertRaises(TypeError) as cm:
+            new_task.alternative_resources = None
+
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: None is not list-like'
+        )
 
     def test_alternative_resources_argument_is_not_a_list(self):
         """testing if a TypeError will be raised when the alternative_resources
@@ -4378,15 +4707,26 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """
         kwargs = copy.copy(self.kwargs)
         kwargs['alternative_resources'] = self.test_user3
-        self.assertRaises(TypeError, Task, **kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Task(**kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: User is not list-like'
+        )
 
     def test_alternative_resources_attribute_is_not_a_list(self):
         """testing if a TypeError will be raised when the alternative_resources
         attribute is set to a value other than a list
         """
         new_task = Task(**self.kwargs)
-        self.assertRaises(TypeError, setattr, new_task,
-                          'alternative_resources', self.test_user3)
+        with self.assertRaises(TypeError) as cm:
+            new_task.alternative_resources = self.test_user3
+
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: User is not list-like'
+        )
 
     def test_alternative_resources_argument_elements_are_not_User_instances(self):
         """testing if a TypeError will be raised when the elements in the
@@ -4394,15 +4734,28 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """
         kwargs = copy.copy(self.kwargs)
         kwargs['alternative_resources'] = ['not', 1, 'user']
-        self.assertRaises(TypeError, Task, **kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Task(**kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Task.resources should be a list of stalker.models.auth.User '
+            'instances, not str'
+        )
 
     def test_alternative_resources_attribute_elements_are_not_all_User_instances(self):
         """testing if a TypeError will be raised when the elements in the
         alternative_resources attribute are not all User instances
         """
         new_task = Task(**self.kwargs)
-        self.assertRaises(TypeError, setattr, new_task,
-                          'alternative_resources', ['not', 1, 'user'])
+        with self.assertRaises(TypeError) as cm:
+            new_task.alternative_resources = ['not', 1, 'user']
+
+        self.assertEqual(
+            str(cm.exception),
+            'Task.resources should be a list of stalker.models.auth.User '
+            'instances, not str'
+        )
 
     def test_alternative_resources_argument_is_working_properly(self):
         """testing if the alternative_resources argument value is correctly
@@ -4467,15 +4820,28 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """
         kwargs = copy.copy(self.kwargs)
         kwargs['allocation_strategy'] = 234
-        self.assertRaises(TypeError, Task, **kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Task(**kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            "Task.allocation_strategy should be one of ['minallocated', "
+            "'maxloaded', 'minloaded', 'order', 'random'], not int"
+        )
 
     def test_allocation_strategy_attribute_is_set_to_a_value_other_than_string(self):
         """testing if a TypeError will be used when the allocation_strategy
         attribute is set to a value other then a string
         """
         new_task = Task(**self.kwargs)
-        self.assertRaises(TypeError, setattr, new_task,
-                          'allocation_strategy', 234)
+        with self.assertRaises(TypeError) as cm:
+            new_task.allocation_strategy = 234
+
+        self.assertEqual(
+            str(cm.exception),
+            "Task.allocation_strategy should be one of ['minallocated', "
+            "'maxloaded', 'minloaded', 'order', 'random'], not int"
+        )
 
     def test_allocation_strategy_argument_value_is_not_correct(self):
         """testing if a ValueError will be raised when the allocation_strategy
@@ -4484,7 +4850,14 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """
         kwargs = copy.copy(self.kwargs)
         kwargs['allocation_strategy'] = 'not in the list'
-        self.assertRaises(ValueError, Task, **kwargs)
+        with self.assertRaises(ValueError) as cm:
+            Task(**kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            "Task.allocation_strategy should be one of ['minallocated', "
+            "'maxloaded', 'minloaded', 'order', 'random'], not not in the list"
+        )
 
     def test_allocation_strategy_attribute_value_is_not_correct(self):
         """testing if a ValueError will be raised when the allocation_strategy
@@ -4492,8 +4865,14 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         maxloaded, minloaded, order, random]
         """
         new_task = Task(**self.kwargs)
-        self.assertRaises(ValueError, setattr, new_task,
-                          'allocation_strategy', 'not in the list')
+        with self.assertRaises(ValueError) as cm:
+            new_task.allocation_strategy = 'not in the list'
+
+        self.assertEqual(
+            str(cm.exception),
+            "Task.allocation_strategy should be one of ['minallocated', "
+            "'maxloaded', 'minloaded', 'order', 'random'], not not in the list"
+        )
 
     def test_allocation_strategy_argument_is_working_properly(self):
         """testing if the allocation_strategy argument value is correctly
@@ -4675,16 +5054,31 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """testing if the path attribute is read only
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(AttributeError) as cm:
             new_task.path = 'some_path'
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
+        )
 
     def test_path_attribute_raises_a_RuntimeError_if_no_FilenameTemplate_found(self):
         """testing if the path attribute raises a RuntimeError if there is no
         FilenameTemplate matching the entity_type
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(RuntimeError):
-            a = new_task.path
+        with self.assertRaises(RuntimeError) as cm:
+            new_task.path
+
+        self.assertEqual(
+            str(cm.exception),
+            "There are no suitable FilenameTemplate (target_entity_type == "
+            "'Task') defined in the Structure of the related Project "
+            "instance, please create a new "
+            "stalker.models.template.FilenameTemplate instance with its "
+            "'target_entity_type' attribute is set to 'Task' and assign it to "
+            "the `templates` attribute of the structure of the project"
+        )
 
     def test_path_attribute_raises_a_RuntimeError_if_no_matching_FilenameTemplate_found(self):
         """testing if the path attribute raises a RuntimeError if there is no
@@ -4704,10 +5098,18 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
             templates=[ft]
         )
         self.test_project1.structure = structure
-        with self.assertRaises(RuntimeError):
-            a = new_task.path
+        with self.assertRaises(RuntimeError) as cm:
+             new_task.path
 
-        self.test_project1.structure = None
+        self.assertEqual(
+            str(cm.exception),
+            "There are no suitable FilenameTemplate (target_entity_type == "
+            "'Task') defined in the Structure of the related Project "
+            "instance, please create a new "
+            "stalker.models.template.FilenameTemplate instance with its "
+            "'target_entity_type' attribute is set to 'Task' and assign it to "
+            "the `templates` attribute of the structure of the project"
+        )
 
     def test_path_attribute_is_the_rendered_version_of_the_related_FilenameTemplate_object_in_the_related_project(self):
         """testing if the path attribute value is the rendered version of the
@@ -4744,16 +5146,31 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """testing if absolute_path is read only
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(AttributeError):
-            setattr(new_task, 'absolute_path', 'some_path')
+        with self.assertRaises(AttributeError) as cm:
+            new_task.absolute_path = 'some_path'
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
+        )
 
     def test_absolute_path_attribute_raises_a_RuntimeError_if_no_FilenameTemplate_found(self):
         """testing if the absolute_path attribute raises a RuntimeError if
         there is no FilenameTemplate matching the entity_type
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(RuntimeError):
-            path = new_task.absolute_path
+        with self.assertRaises(RuntimeError) as cm:
+            new_task.absolute_path
+
+        self.assertEqual(
+            str(cm.exception),
+            "There are no suitable FilenameTemplate (target_entity_type == "
+            "'Task') defined in the Structure of the related Project "
+            "instance, please create a new "
+            "stalker.models.template.FilenameTemplate instance with its "
+            "'target_entity_type' attribute is set to 'Task' and assign it to "
+            "the `templates` attribute of the structure of the project"
+        )
 
     def test_absolute_path_attribute_raises_a_RuntimeError_if_no_matching_FilenameTemplate_found(self):
         """testing if the absolute_path attribute raises a RuntimeError if
@@ -4782,10 +5199,18 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         DBSession.commit()
 
         self.test_project1.structure = structure
-        with self.assertRaises(RuntimeError):
-            path = new_task.path
+        with self.assertRaises(RuntimeError) as cm:
+            new_task.path
 
-        self.test_project1.structure = None
+        self.assertEqual(
+            str(cm.exception),
+            "There are no suitable FilenameTemplate (target_entity_type == "
+            "'Task') defined in the Structure of the related Project "
+            "instance, please create a new "
+            "stalker.models.template.FilenameTemplate instance with its "
+            "'target_entity_type' attribute is set to 'Task' and assign it to "
+            "the `templates` attribute of the structure of the project"
+        )
 
     def test_absolute_path_attribute_is_the_rendered_version_of_the_related_FilenameTemplate_object_in_the_related_project(self):
         """testing if the absolute_path attribute value is the rendered version

@@ -29,6 +29,7 @@ from stalker.models.mixins import ProjectMixin
 
 # create a new mixed in SimpleEntity
 from stalker.models.entity import SimpleEntity
+from stalker.testing import UnitTestBase
 
 
 class DeclProjMixA(SimpleEntity, ProjectMixin):
@@ -53,13 +54,14 @@ class DeclProjMixB(SimpleEntity, ProjectMixin):
         ProjectMixin.__init__(self, **kwargs)
 
 
-class ProjectMixinTester(unittest.TestCase):
+class ProjectMixinTester(UnitTestBase):
     """tests ProjectMixin
     """
 
     def setUp(self):
         """setup the test
         """
+        super(ProjectMixinTester, self).setUp()
         self.test_stat1 = Status(name="On Hold", code="OH")
         self.test_stat2 = Status(name="Work In Progress", code="WIP")
         self.test_stat3 = Status(name="Approved", code="APP")
@@ -107,11 +109,6 @@ class ProjectMixinTester(unittest.TestCase):
         }
 
         self.test_a_obj = DeclProjMixA(**self.kwargs)
-
-    def tearDown(self):
-        """clean up the test
-        """
-        DBSession.remove()
 
     def test_project_attribute_is_working_properly(self):
         """testing if the project attribute is working properly

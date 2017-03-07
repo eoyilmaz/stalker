@@ -303,7 +303,7 @@ class StatusMixin(object):
             # StatusList.target_entity_type
             if self.__class__.__name__ != status_list.target_entity_type:
                 raise TypeError(
-                    "the given StatusLists' target_entity_type is %s, "
+                    "The given StatusLists' target_entity_type is %s, "
                     "whereas the entity_type of this object is %s" %
                     (status_list.target_entity_type, self.__class__.__name__)
                 )
@@ -813,8 +813,8 @@ class ReferenceMixin(object):
         # all the elements should be instance of stalker.models.entity.Entity
         if not isinstance(reference, Link):
             raise TypeError(
-                "%s.references should be all instances of "
-                "stalker.models.link.Link not %s" %
+                'All the elements in the %s.references should be '
+                'stalker.models.link.Link instances not %s' %
                 (self.__class__.__name__, reference.__class__.__name__)
             )
         return reference
@@ -1453,6 +1453,7 @@ class DAGMixin(object):
         """
         parents = []
         entity = self.parent
+        # TODO: make this a generator
         while entity:
             parents.append(entity)
             entity = entity.parent

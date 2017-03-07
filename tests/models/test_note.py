@@ -18,17 +18,18 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest
+from stalker.testing import UnitTestBase
 from stalker import Note
 
 
-class NoteTester(unittest.TestCase):
+class NoteTester(UnitTestBase):
     """tests  the Note class
     """
 
     def setUp(self):
         """setup the test
         """
+        super(NoteTester, self).setUp()
         self.kwargs = {
             "name": "Note to something",
             "description": "this is a simple note",
@@ -72,7 +73,7 @@ class NoteTester(unittest.TestCase):
         as an empty string
         """
         self.kwargs["content"] = ""
-        new_note = Note(**self.kwargs)
+        Note(**self.kwargs)
 
     def test_content_attribute_is_set_to_empty_string(self):
         """testing if nothing is going to happen when content argument is set
@@ -85,26 +86,30 @@ class NoteTester(unittest.TestCase):
         """testing if a TypeError will be raised when trying to set the content
         argument to something other than a string
         """
-        test_values = [1, 1.24, ["content"], {"a": "Content"}]
+        test_value = 1.24
 
-        for test_value in test_values:
-            self.kwargs["content"] = test_value
-            self.assertRaises(TypeError, Note, **self.kwargs)
+        self.kwargs["content"] = test_value
+        with self.assertRaises(TypeError) as cm:
+            Note(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Note.description should be a string, not float'
+        )
 
     def test_content_attribute_is_set_to_something_other_than_a_string(self):
         """testing if a TypeError will be raised when trying to set the
         content attribute to something other than a string
         """
-        test_values = [1, 1.24, ["content"], {"a": "Content"}]
+        test_value = 1
 
-        for test_value in test_values:
-            self.assertRaises(
-                TypeError,
-                setattr,
-                self.test_note,
-                "content",
-                test_value
-            )
+        with self.assertRaises(TypeError) as cm:
+            self.test_note.content = test_value
+
+        self.assertEqual(
+            str(cm.exception),
+            'Note.description should be a string, not int'
+        )
 
     def test_content_attribute_is_working_properly(self):
         """testing if the content attribute is working properly

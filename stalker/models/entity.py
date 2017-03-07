@@ -23,6 +23,8 @@ import re
 import uuid
 
 import pytz
+import functools
+
 from sqlalchemy import (Table, Column, Integer, String, Text, ForeignKey,
                         DateTime)
 from sqlalchemy.orm import relationship, validates
@@ -186,14 +188,14 @@ class SimpleEntity(Base):
 
     date_created = Column(
         DateTime(timezone=True),
-        default=datetime.datetime.now(pytz.utc),
+        default=functools.partial(datetime.datetime.now, pytz.utc),
         doc="""A :class:`datetime.datetime` instance showing the creation date
         and time of this object."""
     )
 
     date_updated = Column(
         DateTime(timezone=True),
-        default=datetime.datetime.now(pytz.utc),
+        default=functools.partial(datetime.datetime.now, pytz.utc),
         doc="""A :class:`datetime.datetime` instance showing the update date
         and time of this object."""
         ,
@@ -215,7 +217,7 @@ class SimpleEntity(Base):
         post_update=True,
         doc="""The type of the object.
 
-        It is an instance of :class:`.Type` with a proper
+        It is a :class:`.Type` instance with a proper
         :attr:`.Type.target_entity_type`.
         """
     )
@@ -324,7 +326,7 @@ class SimpleEntity(Base):
         from stalker import __string_types__
         if not isinstance(description, __string_types__):
             raise TypeError(
-                '%s.description should be an instance of string, not %s' %
+                '%s.description should be a string, not %s' %
                 (self.__class__.__name__, description.__class__.__name__)
             )
         return description
@@ -339,7 +341,7 @@ class SimpleEntity(Base):
         from stalker import __string_types__
         if not isinstance(generic_text, __string_types__):
             raise TypeError(
-                '%s.generic_text should be an instance of string, not %s' %
+                '%s.generic_text should be a string, not %s' %
                 (self.__class__.__name__, generic_text.__class__.__name__)
             )
         return generic_text
@@ -363,7 +365,7 @@ class SimpleEntity(Base):
         from stalker import __string_types__
         if not isinstance(name, __string_types__):
             raise TypeError(
-                "%s.name should be an instance of string not %s" %
+                "%s.name should be a string not %s" %
                 (self.__class__.__name__, name.__class__.__name__)
             )
 
@@ -442,8 +444,9 @@ class SimpleEntity(Base):
         if created_by_in is not None:
             if not isinstance(created_by_in, User):
                 raise TypeError(
-                    "%s.created_by should be an instance of "
-                    "stalker.models.auth.User" % self.__class__.__name__
+                    "%s.created_by should be a stalker.models.auth.User "
+                    "instance, not %s" % (self.__class__.__name__,
+                                          created_by_in.__class__.__name__)
                 )
         return created_by_in
 
@@ -460,8 +463,9 @@ class SimpleEntity(Base):
         if updated_by_in is not None:
             if not isinstance(updated_by_in, User):
                 raise TypeError(
-                    "%s.updated_by should be an instance of "
-                    "stalker.models.auth.User" % self.__class__.__name__
+                    "%s.updated_by should be a stalker.models.auth.User "
+                    "instance, not %s" % (self.__class__.__name__,
+                                          updated_by_in.__class__.__name__)
                 )
         return updated_by_in
 
@@ -476,7 +480,7 @@ class SimpleEntity(Base):
 
         if not isinstance(date_created_in, datetime.datetime):
             raise TypeError(
-                "%s.date_created should be an instance of datetime.datetime" %
+                "%s.date_created should be a datetime.datetime instance" %
                 self.__class__.__name__
             )
 
@@ -492,10 +496,10 @@ class SimpleEntity(Base):
                 "%s.date_updated can not be None" % self.__class__.__name__
             )
 
-        # it is not an instance of datetime.datetime
+        # it is not a datetime.datetime instance
         if not isinstance(date_updated_in, datetime.datetime):
             raise TypeError(
-                "%s.date_updated should be an instance of datetime.datetime" %
+                "%s.date_updated should be a datetime.datetime instance" %
                 self.__class__.__name__
             )
 
@@ -503,7 +507,8 @@ class SimpleEntity(Base):
         if date_updated_in < self.date_created:
             raise ValueError(
                 "%(class)s.date_updated could not be set to a date before "
-                "%(class)s.date_created, try setting the 'date_created' first."
+                "%(class)s.date_created, try setting the ``date_created`` "
+                "first."
                 % {'class': self.__class__.__name__}
             )
         return date_updated_in
@@ -520,9 +525,8 @@ class SimpleEntity(Base):
             from stalker.models.type import Type
             if not isinstance(type_in, Type):
                 raise TypeError(
-                    "%s.type must be an instance of "
-                    "stalker.models.type.Type not %s" %
-                    (self.__class__.__name__, type_in))
+                    "%s.type must be a stalker.models.type.Type instance, not "
+                    "%s" % (self.__class__.__name__, type_in))
         return type_in
 
     @validates('thumbnail')
@@ -565,7 +569,7 @@ class SimpleEntity(Base):
         from stalker import __string_types__
         if not isinstance(html_style, __string_types__):
             raise TypeError(
-                '%s.html_style should be an instance of basestring, not %s' %
+                '%s.html_style should be a basestring instance, not %s' %
                 (self.__class__.__name__, html_style.__class__.__name__)
             )
         return html_style
@@ -580,7 +584,7 @@ class SimpleEntity(Base):
         from stalker import __string_types__
         if not isinstance(html_class, __string_types__):
             raise TypeError(
-                '%s.html_class should be an instance of basestring, not %s' %
+                '%s.html_class should be a basestring instance, not %s' %
                 (self.__class__.__name__, html_class.__class__.__name__)
             )
         return html_class
@@ -652,9 +656,8 @@ class Entity(SimpleEntity):
         from stalker.models.note import Note
         if not isinstance(note, Note):
             raise TypeError(
-                "%s.note should be an instance of stalker.models.note.Note "
-                "not %s" %
-                (self.__class__.__name__, note.__class__.__name__)
+                "%s.note should be a stalker.models.note.Note instance, not "
+                "%s" % (self.__class__.__name__, note.__class__.__name__)
             )
         return note
 
@@ -665,8 +668,7 @@ class Entity(SimpleEntity):
         from stalker.models.tag import Tag
         if not isinstance(tag, Tag):
             raise TypeError(
-                "%s.tag should be an instance of stalker.models.tag.Tag not "
-                "%s" %
+                "%s.tag should be a stalker.models.tag.Tag instance, not %s" %
                 (self.__class__.__name__, tag.__class__.__name__)
             )
         return tag

@@ -18,19 +18,23 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest
+from stalker.testing import UnitTestBase
+from stalker import SchedulerBase
 
-from stalker import Studio, SchedulerBase
 
-
-class SchedulerBaseTester(unittest.TestCase):
+class SchedulerBaseTester(UnitTestBase):
     """tests the stalker.models.scheduler.SchedulerBase
     """
 
     def setUp(self):
         """set up the test
         """
+        super(SchedulerBaseTester, self).setUp()
+
+        from stalker import db, Studio
         self.test_studio = Studio(name='Test Studio')
+        db.DBSession.add(self.test_studio)
+        db.DBSession.commit()
         self.kwargs = {
             'studio': self.test_studio
         }
@@ -63,14 +67,27 @@ class SchedulerBaseTester(unittest.TestCase):
         not stalker.models.studio.Studio instance
         """
         self.kwargs['studio'] = 'not a studio instance'
-        self.assertRaises(TypeError, SchedulerBase, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            SchedulerBase(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'SchedulerBase.studio should be an instance of '
+            'stalker.models.studio.Studio, not str'
+        )
 
     def test_studio_attribute_is_not_a_Studio_instance(self):
         """testing if a TypeError will be raised when the studio attribute is
         set to a value which is not a stalker.models.studio.Studio instance
         """
-        self.assertRaises(TypeError, setattr, self.test_scheduler_base,
-                          'studio', 'not a studio instance')
+        with self.assertRaises(TypeError) as cm:
+            self.test_scheduler_base.studio = 'not a studio instance'
+
+        self.assertEqual(
+            str(cm.exception),
+            'SchedulerBase.studio should be an instance of '
+            'stalker.models.studio.Studio, not str'
+        )
 
     def test_studio_argument_is_working_properly(self):
         """testing if the studio argument value is correctly passed to the
@@ -82,6 +99,7 @@ class SchedulerBaseTester(unittest.TestCase):
     def test_studio_attribute_is_working_properly(self):
         """testing if the studio attribute is working properly
         """
+        from stalker import Studio
         new_studio = Studio(name='Test Studio 2')
         self.test_scheduler_base.studio = new_studio
         self.assertEqual(self.test_scheduler_base.studio, new_studio)

@@ -276,13 +276,6 @@ def __create_admin__():
     from stalker.models.auth import User
     from stalker.models.department import Department
 
-    # check if there is already an admin in the database
-    admin = User.query.filter_by(name=defaults.admin_name).first()
-    if admin:
-        # there should be an admin user do nothing
-        logger.debug("there is an admin already")
-        return
-
     logger.debug("creating the default administrator user")
 
     # create the admin department
@@ -305,33 +298,34 @@ def __create_admin__():
         admins_group = Group(name=defaults.admin_group_name)
         DBSession.add(admins_group)
 
-    # # create the admin user
-    # admin = User.query \
-    #     .filter_by(name=defaults.admin_name) \
-    #     .first()
+    # check if there is already an admin in the database
+    admin = User.query.filter_by(name=defaults.admin_name).first()
+    if admin:
+        # there should be an admin user do nothing
+        logger.debug("there is an admin already")
+        return admin
+    else:
+        admin = User(
+            name=defaults.admin_name,
+            login=defaults.admin_login,
+            password=defaults.admin_password,
+            email=defaults.admin_email,
+            departments=[admin_department],
+            groups=[admins_group]
+        )
 
-    # if not admin:
-    admin = User(
-        name=defaults.admin_name,
-        login=defaults.admin_login,
-        password=defaults.admin_password,
-        email=defaults.admin_email,
-        departments=[admin_department],
-        groups=[admins_group]
-    )
+        admin.created_by = admin
+        admin.updated_by = admin
 
-    admin.created_by = admin
-    admin.updated_by = admin
+        # update the department as created and updated by admin user
+        admin_department.created_by = admin
+        admin_department.updated_by = admin
 
-    # update the department as created and updated by admin user
-    admin_department.created_by = admin
-    admin_department.updated_by = admin
+        admins_group.created_by = admin
+        admins_group.updated_by = admin
 
-    admins_group.created_by = admin
-    admins_group.updated_by = admin
-
-    DBSession.add(admin)
-    DBSession.commit()
+        DBSession.add(admin)
+        DBSession.commit()
 
     return admin
 

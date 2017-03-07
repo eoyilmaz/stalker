@@ -18,20 +18,8 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import tempfile
-import unittest
-import datetime
-
-import pytz
-
-from stalker.db import DBSession
 from stalker.testing import UnitTestBase
-from stalker import (db, Task, Project, User, Status, StatusList, Repository,
-                     Structure, Review)
-
-import logging
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+from stalker import Review
 
 
 class ReviewTestCase(UnitTestBase):
@@ -43,13 +31,14 @@ class ReviewTestCase(UnitTestBase):
         """
         super(ReviewTestCase, self).setUp()
 
+        from stalker import db, User
         self.user1 = User(
             name='Test User 1',
             login='test_user1',
             email='test1@user.com',
             password='secret'
         )
-        DBSession.add(self.user1)
+        db.DBSession.add(self.user1)
 
         self.user2 = User(
             name='Test User 2',
@@ -57,7 +46,7 @@ class ReviewTestCase(UnitTestBase):
             email='test2@user.com',
             password='secret'
         )
-        DBSession.add(self.user2)
+        db.DBSession.add(self.user2)
 
         self.user3 = User(
             name='Test User 2',
@@ -65,10 +54,11 @@ class ReviewTestCase(UnitTestBase):
             email='test3@user.com',
             password='secret'
         )
-        DBSession.add(self.user3)
+        db.DBSession.add(self.user3)
 
         # Review Statuses
-        with DBSession.no_autoflush:
+        from stalker import Status
+        with db.DBSession.no_autoflush:
             self.status_new = Status.query.filter_by(code='NEW').first()
             self.status_rrev = Status.query.filter_by(code='RREV').first()
             self.status_app = Status.query.filter_by(code='APP').first()
@@ -82,60 +72,63 @@ class ReviewTestCase(UnitTestBase):
             self.status_drev = Status.query.filter_by(code='DREV').first()
             self.status_cmpl = Status.query.filter_by(code='CMPL').first()
 
+        from stalker import StatusList
         self.project_status_list = StatusList(
             target_entity_type='Project',
             statuses=[
                 self.status_new, self.status_wip, self.status_cmpl
             ]
         )
-        DBSession.add(self.project_status_list)
+        db.DBSession.add(self.project_status_list)
 
-        self.temp_path = tempfile.mkdtemp()
+        # self.temp_path = tempfile.mkdtemp()
+        from stalker import Repository
         self.repo = Repository(
             name='Test Repository',
-            linux_path=self.temp_path,
-            windows_path=self.temp_path,
-            osx_path=self.temp_path
+            linux_path='/mnt/T/',
+            windows_path='T:/',
+            osx_path='/Volumes/T/'
         )
-        DBSession.add(self.repo)
+        db.DBSession.add(self.repo)
 
+        from stalker import Structure
         self.structure = Structure(
             name='Test Project Structure'
         )
-        DBSession.add(self.structure)
+        db.DBSession.add(self.structure)
 
+        from stalker import Project
         self.project = Project(
             name='Test Project',
             code='TP',
             status_list=self.project_status_list,
             repository=self.repo
         )
-        DBSession.add(self.project)
+        db.DBSession.add(self.project)
 
+        from stalker import Task
         self.task1 = Task(
             name='Test Task 1',
             project=self.project,
             resources=[self.user1],
             responsible=[self.user2]
         )
-        DBSession.add(self.task1)
+        db.DBSession.add(self.task1)
 
         self.task2 = Task(
             name='Test Task 2',
             project=self.project,
             responsible=[self.user1]
         )
-        DBSession.add(self.task2)
+        db.DBSession.add(self.task2)
 
         self.task3 = Task(
             name='Test Task 3',
             parent=self.task2,
             resources=[self.user1]
         )
-        logger.debug('self.task3.start 1: %s' % self.task3.start)
-        DBSession.add(self.task3)
-        logger.debug('self.task3.start 2: %s' % self.task3.start)
-
+        db.DBSession.add(self.task3)
+        
         self.task4 = Task(
             name='Test Task 4',
             project=self.project,
@@ -145,8 +138,7 @@ class ReviewTestCase(UnitTestBase):
             schedule_timing=2,
             schedule_unit='h'
         )
-        DBSession.add(self.task4)
-        logger.debug('self.task3.start 2: %s' % self.task3.start)
+        db.DBSession.add(self.task4)
 
         self.task5 = Task(
             name='Test Task 5',
@@ -157,7 +149,7 @@ class ReviewTestCase(UnitTestBase):
             schedule_timing=2,
             schedule_unit='h'
         )
-        DBSession.add(self.task5)
+        db.DBSession.add(self.task5)
 
         self.task6 = Task(
             name='Test Task 6',
@@ -168,67 +160,35 @@ class ReviewTestCase(UnitTestBase):
             schedule_timing=2,
             schedule_unit='h'
         )
-        DBSession.add(self.task6)
+        db.DBSession.add(self.task6)
 
         self.kwargs = {
             'task': self.task1,
             'reviewer': self.user1
         }
-        #self.review = Review(**self.kwargs)
-        #DBSession.add(self.review)
 
         # add everything to the db
-        logger.debug('self.task3.start 3 : %s' % self.task3.start)
-        DBSession.commit()
-
-        logger.debug('self.task1.start 4: %s' % self.task1.start)
-        logger.debug('self.task2.start 4: %s' % self.task2.start)
-        logger.debug('self.task3.start 4: %s' % self.task3.start)
-        logger.debug('self.task4.start 4: %s' % self.task4.start)
-        logger.debug('self.task5.start 4: %s' % self.task5.start)
-
-    # def tearDown(self):
-    #     """clean up test
-    #     """
-    #     DBSession.remove()
-
-    # def test_task_argument_is_skipped(self):
-    #     """testing if a TypeError will be raised when the task argument is
-    #     skipped
-    #     """
-    #     self.kwargs.pop('task')
-    #     self.assertRaises(TypeError, Review, **self.kwargs)
-
-    # def test_task_argument_is_None(self):
-    #     """testing if a TypeError will be raised when the task argument is None
-    #     """
-    #     self.kwargs['task'] = None
-    #     self.assertRaises(TypeError, Review, **self.kwargs)
+        db.DBSession.commit()
 
     def test_task_argument_is_not_a_Task_instance(self):
         """testing if a TypeError will be raised when the task argument value
         is not a Task instance
         """
         self.kwargs['task'] = 'not a Task instance'
-        self.assertRaises(TypeError, Review, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Review(**self.kwargs)
 
-    # def test_task_attribute_is_read_only(self):
-    #     """testing if a the task attribute is read only
-    #     """
-    #     now = datetime.datetime.now(pytz.utc)
-    #     self.task1.create_time_log(
-    #         resource=self.task1.resources[0],
-    #         start=now,
-    #         end=now + datetime.timedelta(hours=1)
-    #     )
-    #     reviews = self.task1.request_review()
-    #     review = reviews[0]
-    #     self.assertRaises(AttributeError, setattr, review, 'task', self.task1)
+        self.assertEqual(
+            str(cm.exception),
+            'Review.task should be an instance of stalker.models.task.Task, '
+            'not str'
+        )
 
     def test_task_argument_is_not_a_leaf_task(self):
         """testing if a ValueError will be raised when the task given in task
         argument is not a leaf task
         """
+        from stalker import Task
         task1 = Task(
             name='Task1',
             project=self.project
@@ -238,12 +198,21 @@ class ReviewTestCase(UnitTestBase):
             parent=task1
         )
         self.kwargs['task'] = task1
-        self.assertRaises(ValueError, Review, **self.kwargs)
+        with self.assertRaises(ValueError) as cm:
+            Review(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'It is only possible to create a review for a leaf tasks, and '
+            '<Task1 (Task)> is not a leaf task.'
+        )
 
     def test_task_argument_is_working_properly(self):
         """testing if the task argument value is passed to the task argument
         properly
         """
+        import datetime
+        import pytz
         now = datetime.datetime.now(pytz.utc)
         self.task1.create_time_log(
             resource=self.task1.resources[0],
@@ -268,8 +237,12 @@ class ReviewTestCase(UnitTestBase):
         """testing if the review_number attribute is a read only attribute
         """
         review = Review(**self.kwargs)
-        self.assertRaises(
-            AttributeError, setattr, review, 'review_number', 2
+        with self.assertRaises(AttributeError) as cm:
+            review.review_number = 2
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
         )
 
     def test_review_number_attribute_is_initialized_to_the_task_review_number_plus_1(self):
@@ -285,6 +258,8 @@ class ReviewTestCase(UnitTestBase):
         other
         """
         self.task1.responsible = [self.user1, self.user2, self.user3]
+        import datetime
+        import pytz
         now = datetime.datetime.now(pytz.utc)
         self.task1.create_time_log(
             resource=self.task1.resources[0],
@@ -316,35 +291,70 @@ class ReviewTestCase(UnitTestBase):
         skipped
         """
         self.kwargs.pop('reviewer')
-        self.assertRaises(TypeError, Review, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Review(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Review.reviewer should be set to a stalker.models.auth.User '
+            'instance, not NoneType'
+        )
 
     def test_reviewer_argument_is_None(self):
         """testing if a TypeError will be raised when the reviewer argument is
         None
         """
         self.kwargs['reviewer'] = None
-        self.assertRaises(TypeError, Review, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Review(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Review.reviewer should be set to a stalker.models.auth.User '
+            'instance, not NoneType'
+        )
 
     def test_reviewer_attribute_is_set_to_None(self):
         """testing if a TypeError will be raised when the reviewer attribute is
         set to None
         """
         review = Review(**self.kwargs)
-        self.assertRaises(TypeError, setattr, review, 'reviewer', None)
+        with self.assertRaises(TypeError) as cm:
+            review.reviewer = None
+
+        self.assertEqual(
+            str(cm.exception),
+            'Review.reviewer should be set to a stalker.models.auth.User '
+            'instance, not NoneType'
+        )
 
     def test_reviewer_argument_is_not_a_User_instance(self):
         """testing if a TypeError will be raised when the reviewer argument is
         not a User instance
         """
         self.kwargs['reviewer'] = 'not a user instance'
-        self.assertRaises(TypeError, Review, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Review(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Review.reviewer should be set to a stalker.models.auth.User '
+            'instance, not str'
+        )
 
     def test_reviewer_attribute_is_not_a_User_instance(self):
         """testing if a TypeError will be raised when the reviewer attribute is
         set to a value other than a User instance
         """
         review = Review(**self.kwargs)
-        self.assertRaises(TypeError, setattr, review, 'reviewer', 'not a user')
+        with self.assertRaises(TypeError) as cm:
+            review.reviewer = 'not a user'
+
+        self.assertEqual(
+            str(cm.exception),
+            'Review.reviewer should be set to a stalker.models.auth.User '
+            'instance, not str'
+        )
 
     def test_reviewer_argument_is_not_in_Task_responsible_list(self):
         """testing if it is possible to use some other user which is not in the
@@ -415,6 +425,8 @@ class ReviewTestCase(UnitTestBase):
         """
         self.task1.responsible = [self.user1, self.user2]
 
+        import datetime
+        import pytz
         now = datetime.datetime.now(pytz.utc)
         self.task1.create_time_log(
             resource=self.user1,
@@ -444,6 +456,8 @@ class ReviewTestCase(UnitTestBase):
         """testing if approve method will also update the task parent status
         """
         self.task3.status = self.status_rts
+        import datetime
+        import pytz
         now = datetime.datetime.now(pytz.utc)
         td = datetime.timedelta
         self.task3.create_time_log(
@@ -473,9 +487,10 @@ class ReviewTestCase(UnitTestBase):
         statuses
         """
         self.task3.status = self.status_rts
+        import datetime
+        import pytz
         now = datetime.datetime.now(pytz.utc)
         td = datetime.timedelta
-        logger.debug('self.task3.start  : %s' % self.task3.start)
         self.task3.create_time_log(
             resource=self.task3.resources[0],
             start=now,
@@ -486,14 +501,8 @@ class ReviewTestCase(UnitTestBase):
         self.assertEqual(
             self.task3.status, self.status_prev
         )
-        logger.debug('A: code is here 1')
         review1 = reviews[0]
-        logger.debug('self.task3.start  : %s' % self.task3.start)
-        logger.debug('review1.task.start: %s' % review1.task.start)
-
-        logger.debug('A: code is here 2')
         review1.approve()
-        logger.debug('A: code is here 3')
 
         self.assertEqual(
             self.task3.status, self.status_cmpl
@@ -543,6 +552,8 @@ class ReviewTestCase(UnitTestBase):
         timings for DREV tasks with no effort left
         """
         self.task3.status = self.status_rts
+        import datetime
+        import pytz
         now = datetime.datetime.now(pytz.utc)
         td = datetime.timedelta
         self.task3.create_time_log(
@@ -660,6 +671,8 @@ class ReviewTestCase(UnitTestBase):
         """testing if approve method will also update the task timings
         """
         self.task3.status = self.status_rts
+        import datetime
+        import pytz
         now = datetime.datetime.now(pytz.utc)
         td = datetime.timedelta
 
@@ -700,6 +713,8 @@ class ReviewTestCase(UnitTestBase):
         correctly for a task with multiple responsible
         """
         self.task1.responsible = [self.user1, self.user2]
+        import datetime
+        import pytz
         now = datetime.datetime.now(pytz.utc)
         td = datetime.timedelta
         self.task1.create_time_log(
@@ -732,6 +747,8 @@ class ReviewTestCase(UnitTestBase):
         status correctly to HREV for a Task with only one responsible
         """
         self.task1.responsible = [self.user1]
+        import datetime
+        import pytz
         now = datetime.datetime.now(pytz.utc)
         self.task1.create_time_log(
             resource=self.task1.resources[0],
@@ -752,6 +769,8 @@ class ReviewTestCase(UnitTestBase):
         task status correctly for a Task with multiple responsible
         """
         self.task1.responsible = [self.user1, self.user2]
+        import datetime
+        import pytz
         now = datetime.datetime.now(pytz.utc)
         self.task1.create_time_log(
             resource=self.task1.resources[0],
@@ -782,6 +801,8 @@ class ReviewTestCase(UnitTestBase):
         task status correctly for a Task with multiple responsible
         """
         self.task1.responsible = [self.user1, self.user2]
+        import datetime
+        import pytz
         now = datetime.datetime.now(pytz.utc)
         self.task1.create_time_log(
             resource=self.task1.resources[0],
@@ -820,8 +841,10 @@ class ReviewTestCase(UnitTestBase):
             self.status_rts,
             self.task1.status
         )
+        import datetime
         dt = datetime.datetime
         td = datetime.timedelta
+        import pytz
         now = dt.now(pytz.utc)
         # create 1 hour time log
         self.task1.create_time_log(
@@ -878,8 +901,10 @@ class ReviewTestCase(UnitTestBase):
             self.status_rts,
             self.task1.status
         )
+        import datetime
         dt = datetime.datetime
         td = datetime.timedelta
+        import pytz
         now = dt.now(pytz.utc)
         # create 1 hour time log
         self.task1.create_time_log(
@@ -938,8 +963,10 @@ class ReviewTestCase(UnitTestBase):
             self.status_rts,
             self.task1.status
         )
+        import datetime
         dt = datetime.datetime
         td = datetime.timedelta
+        import pytz
         now = dt.now(pytz.utc)
         # create 1 hour time log
         self.task1.create_time_log(
@@ -989,6 +1016,8 @@ class ReviewTestCase(UnitTestBase):
         the same task with the same review_number
         """
         self.task1.responsible = [self.user1, self.user2, self.user3]
+        import datetime
+        import pytz
         now = datetime.datetime.now(pytz.utc)
         self.task1.create_time_log(
             resource=self.user1,

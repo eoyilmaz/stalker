@@ -28,6 +28,9 @@ from stalker.models.entity import SimpleEntity
 from stalker.models.mixins import DAGMixin
 
 import logging
+
+from stalker.testing import UnitTestBase
+
 logging.getLogger('stalker.models.studio').setLevel(logging.DEBUG)
 
 
@@ -49,23 +52,17 @@ class DAGMixinFooMixedInClass(SimpleEntity, DAGMixin):
         DAGMixin.__init__(self, **kwargs)
 
 
-class DAGMixinTestCase(unittest.TestCase):
+class DAGMixinTestCase(UnitTestBase):
     """tests the DAGMixin class
     """
 
     def setUp(self):
         """set the test up
         """
-        # db.setup({'sqlalchemy.url': 'sqlite:///:memory:'})
-
+        super(DAGMixinTestCase, self).setUp()
         self.kwargs = {
             'name': 'Test DAG Mixin'
         }
-
-    def tearDown(self):
-        """clean up the test
-        """
-        # DBSession.remove()
 
     def test_parent_argument_is_skipped(self):
         """testing if the parent attribute will be None if the parent argument
@@ -124,11 +121,11 @@ class DAGMixinTestCase(unittest.TestCase):
 
         self.assertEqual(
             str(cm.exception),
-            '\'<Test DAG Mixin (DAGMixinFooMixedInClass)> '
+            '<Test DAG Mixin (DAGMixinFooMixedInClass)> '
             '(DAGMixinFooMixedInClass) and '
             '<Test DAG Mixin (DAGMixinFooMixedInClass)> '
             '(DAGMixinFooMixedInClass) creates a circular dependency in their '
-            '"children" attribute\''
+            '"children" attribute'
         )
 
     def test_parent_argument_is_working_properly(self):
@@ -336,23 +333,17 @@ class DAGMixinTestCase(unittest.TestCase):
         self.assertEqual(entities_walked, [d4])
 
 
-class DAGMixinDBTestCase(unittest.TestCase):
+class DAGMixinDBTestCase(UnitTestBase):
     """tests the DAGMixin class with a DB
     """
 
     def setUp(self):
         """set the test up
         """
-        db.setup({'sqlalchemy.url': 'sqlite:///:memory:'})
-
+        super(DAGMixinDBTestCase, self).setUp()
         self.kwargs = {
             'name': 'Test DAG Mixin'
         }
-
-    def tearDown(self):
-        """clean up the test
-        """
-        db.DBSession.remove()
 
     def test_committing_data(self):
         """testing committing and retrieving data back

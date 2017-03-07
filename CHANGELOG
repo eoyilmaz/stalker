@@ -7,7 +7,38 @@ Stalker Changes
 
 * **Update:** Support for DB backends other than Postgresql has been dropped.
   This is done to greatly benefit from a code that is highly optimized only
-  for one DB backend.
+  for one DB backend. With This all of the tests should be inherited from the
+  ``stalker.tests.UnitTestBase`` class.
+
+* **New:** All the DateTime fields in Stalker are now TimeZone aware and
+  Stalker stores the DateTime values in UTC. Naive datetime values are not
+  supported anymore. You should use a library like ``pytz`` to supply timezone
+  information as shown below::
+
+    import datetime
+    import pytz
+    from stalker import db, SimpleEntity
+    new_simple_entity = SimpleEntity(
+        name='New Simple Entity',
+        date_created = datetime.datetime.now(tzinfo=pytz.utc)
+    )
+
+* **Fix:** The default values for ``date_created`` and ``date_updated`` has now
+  been properly set to a partial function that returns the current time.
+
+* **Fix:** Previously it was possible to enter two TimeLogs for the same
+  resource in the same datetime range by committing the data from two different
+  sessions simultaneously. Thus the database was not aware that it should
+  prevent that. Now with the new PostgreSQL only implementation and the
+  ``ExcludeConstraint`` of PostgreSQL an ``IntegrityError`` is raised by the
+  database backend when something like that happens.
+
+* **Update:** All the tests those are checking the system against an Exception
+  is being raised or not are now checking also the exception message.
+
+* **Update:** In the ``TimeLog`` class, the raised ``OverBookedException``
+  message has now been made clear by adding the start and end date values of
+  the clashing TimeLog instance.
 
 0.2.17.2
 ========

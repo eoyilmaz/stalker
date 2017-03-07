@@ -19,28 +19,33 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 import os
 
-import unittest
-from stalker import Type, Link
+from stalker.testing import UnitTestBase
+from stalker import Link
 
 
-class LinkTester(unittest.TestCase):
+class LinkTester(UnitTestBase):
     """tests the :class:`stalker.models.link.Link` class
     """
 
     def setUp(self):
         """setup the test
         """
+        super(LinkTester, self).setUp()
+
         # create a mock LinkType object
+        from stalker import db, Type
         self.test_link_type1 = Type(
             name='Test Type 1',
             code='test type1',
             target_entity_type=Link,
         )
+        db.DBSession.add(self.test_link_type1)
         self.test_link_type2 = Type(
             name='Test Type 2',
             code='test type2',
             target_entity_type=Link,
         )
+        db.DBSession.add(self.test_link_type2)
 
         self.kwargs = {
             'name': 'An Image Link',
@@ -51,6 +56,8 @@ class LinkTester(unittest.TestCase):
         }
 
         self.test_link = Link(**self.kwargs)
+        db.DBSession.add(self.test_link)
+        db.DBSession.commit()
 
     def test___auto_name__class_attribute_is_set_to_True(self):
         """testing if the __auto_name__ class attribute is set to False for
@@ -91,26 +98,28 @@ class LinkTester(unittest.TestCase):
         """testing if a TypeError will be raised when the full_path argument is
         not a string
         """
-        test_values = [1, 1.1, ['a path'], {'a': 'path'}]
+        test_value = 1
+        self.kwargs["full_path"] = test_value
+        with self.assertRaises(TypeError) as cm:
+            Link(**self.kwargs)
 
-        for test_value in test_values:
-            self.kwargs["full_path"] = test_value
-            self.assertRaises(TypeError, Link, **self.kwargs)
+        self.assertEqual(
+            str(cm.exception),
+            'Link.full_path should be an instance of string not int'
+        )
 
     def test_full_path_attribute_is_not_a_string(self):
         """testing if a TypeError will be raised when the full_path attribute
         is not a string instance
         """
-        test_values = [1, 1.1, ['a path'], {'a': 'path'}]
+        test_value = 1
+        with self.assertRaises(TypeError) as cm:
+            self.test_link.full_path = test_value
 
-        for test_value in test_values:
-            self.assertRaises(
-                TypeError,
-                setattr,
-                self.test_link,
-                'full_path',
-                test_value
-            )
+        self.assertEqual(
+            str(cm.exception),
+            'Link.full_path should be an instance of string not int'
+        )
 
     def test_full_path_windows_to_other_conversion(self):
         """testing if the full_path is stored in internal format
@@ -161,26 +170,28 @@ class LinkTester(unittest.TestCase):
         """testing if original_filename argument accepts string only and raises
         TypeError for other types
         """
-        test_values = [1, 1.1, ['a original_filename'],
-                       {'a': 'original_filename'}]
-        for test_value in test_values:
-            self.kwargs['original_filename'] = test_value
-            self.assertRaises(TypeError, Link, **self.kwargs)
+        test_value = 1
+        self.kwargs['original_filename'] = test_value
+        with self.assertRaises(TypeError) as cm:
+            Link(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Link.original_filename should be an instance of str and not int'
+        )
 
     def test_original_filename_attribute_accepts_string_only(self):
         """testing if original_filename attribute accepts string only and
         raises TypeError for other types
         """
-        test_values = [1, 1.1, ['a original_filename'],
-                       {'a': 'original_filename'}]
-        for test_value in test_values:
-            self.assertRaises(
-                TypeError,
-                setattr,
-                self.test_link,
-                'original_filename',
-                test_value
-            )
+        test_value = 1.1
+        with self.assertRaises(TypeError) as cm:
+            self.test_link.original_filename = test_value
+
+        self.assertEqual(
+            str(cm.exception),
+            'Link.original_filename should be an instance of str and not float'
+        )
 
     def test_original_filename_argument_is_working_properly(self):
         """testing if the original_filename argument is working properly
@@ -245,19 +256,37 @@ class LinkTester(unittest.TestCase):
         """testing if a TypeError will be raised when the path attribute is set
         to None
         """
-        self.assertRaises(TypeError, setattr, self.test_link, 'path', None)
+        with self.assertRaises(TypeError) as cm:
+            self.test_link.path = None
+
+        self.assertEqual(
+            str(cm.exception),
+            'Link.path can not be set to None'
+        )
 
     def test_path_attribute_is_set_to_empty_string(self):
         """testing if a ValueError will be raised when the path attribute is
         set to an empty string
         """
-        self.assertRaises(ValueError, setattr, self.test_link, 'path', '')
+        with self.assertRaises(ValueError) as cm:
+            self.test_link.path = ''
+
+        self.assertEqual(
+            str(cm.exception),
+            'Link.path can not be an empty string'
+        )
 
     def test_path_attribute_is_set_to_a_value_other_then_string(self):
         """testing if a TypeError will be raised when the path attribute is set
         to a value other than string
         """
-        self.assertRaises(TypeError, setattr, self.test_link, 'path', 1)
+        with self.assertRaises(TypeError) as cm:
+            self.test_link.path = 1
+
+        self.assertEqual(
+            str(cm.exception),
+            'Link.path should be an instance of str, not int'
+        )
 
     def test_path_attribute_value_comes_from_full_path(self):
         """testing if the path attribute value is calculated from the full_path
@@ -292,7 +321,13 @@ class LinkTester(unittest.TestCase):
         """testing if a TypeError will be raised when the filename attribute is
         set to a value other than string
         """
-        self.assertRaises(TypeError, setattr, self.test_link, 'filename', 3)
+        with self.assertRaises(TypeError) as cm:
+            self.test_link.filename = 3
+
+        self.assertEqual(
+            str(cm.exception),
+            'Link.filename should be an instance of str, not int'
+        )
 
     def test_filename_attribute_is_set_to_empty_string(self):
         """testing if the filename value can be set to an empty string
@@ -345,7 +380,13 @@ class LinkTester(unittest.TestCase):
         """testing if a TypeError will be raised when the extension attribute
         is set to a value other than string
         """
-        self.assertRaises(TypeError, setattr, self.test_link, 'extension', 123)
+        with self.assertRaises(TypeError) as cm:
+            self.test_link.extension = 123
+
+        self.assertEqual(
+            str(cm.exception),
+            'Link.extension should be an instance of str, not int'
+        )
 
     def test_extension_attribute_value_comes_from_full_path(self):
         """testing if the extension attribute value is calculated from the

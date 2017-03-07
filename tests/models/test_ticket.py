@@ -18,60 +18,38 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest
-
-from stalker.db.session import DBSession
-from stalker import (db, TicketLog, Asset, User, Note, Project, Repository,
-                     Status, StatusList, Task, Ticket, Type, Version, defaults)
 
 from stalker import log
-import logging
+from stalker.testing import UnitTestBase
 
+import logging
 logger = logging.getLogger("stalker.models.ticket")
 logger.setLevel(log.logging_level)
 
 
-class TicketTester(unittest.TestCase):
+class TicketTester(UnitTestBase):
     """Tests the :class:`~stalker.models.ticket.Ticket` class
     """
 
     def setUp(self):
         """set up the test
         """
-        # create the db
-        DBSession.remove()
-        db.setup()
-        # db.init()
-        # we just need statuses so create them instead of initializing the db
-        db.create_ticket_statuses()
-        db.create_entity_statuses(entity_type='Task',
-                                  status_names=defaults.task_status_names,
-                                  status_codes=defaults.task_status_codes)
-        db.create_entity_statuses(entity_type='Asset',
-                                  status_names=defaults.task_status_names,
-                                  status_codes=defaults.task_status_codes)
-        db.create_entity_statuses(entity_type='Shot',
-                                  status_names=defaults.task_status_names,
-                                  status_codes=defaults.task_status_codes)
-        db.create_entity_statuses(entity_type='Sequence',
-                                  status_names=defaults.task_status_names,
-                                  status_codes=defaults.task_status_codes)
-        db.create_entity_statuses(entity_type='Review',
-                                  status_names=defaults.review_status_names,
-                                  status_codes=defaults.review_status_codes)
-
+        super(TicketTester, self).setUp()
 
         # create statuses
+        from stalker import Status
         self.test_status1 = Status(name='N', code='N')
         self.test_status2 = Status(name='R', code='R')
 
         # get the ticket types
+        from stalker import Type
         ticket_types = Type.query \
             .filter(Type.target_entity_type == 'Ticket').all()
         self.ticket_type_1 = ticket_types[0]
         self.ticket_type_2 = ticket_types[1]
 
         # create a User
+        from stalker import User
         self.test_user = User(
             name='Test User',
             login='testuser1',
@@ -80,32 +58,35 @@ class TicketTester(unittest.TestCase):
         )
 
         # create a Repository
+        from stalker import Repository
         self.test_repo = Repository(name="Test Repo")
 
         # create a Project Type
         self.test_project_type = Type(
             name='Commercial Project',
             code='comm',
-            target_entity_type=Project,
+            target_entity_type='Project',
         )
 
         # create a Project StatusList
         self.test_project_status1 = Status(name='PrjStat1', code='PrjStat1')
         self.test_project_status2 = Status(name='PrjStat2', code='PrjStat2')
 
+        from stalker import StatusList
         self.test_project_status_list = StatusList(
             name="Project Status List",
-            target_entity_type=Project,
+            target_entity_type='Project',
             statuses=[
                 self.test_project_status1,
                 self.test_project_status2,
             ]
         )
 
-        self.test_task_status_list = StatusList.query\
-            .filter_by(target_entity_type='Task').first()
+        self.test_task_status_list = \
+            StatusList.query.filter_by(target_entity_type='Task').first()
 
         # create a Project
+        from stalker import Project
         self.test_project = Project(
             name="Test Project 1",
             code="TEST_PROJECT_1",
@@ -121,9 +102,10 @@ class TicketTester(unittest.TestCase):
         self.test_asset_type = Type(
             name='Character Asset',
             code='char',
-            target_entity_type=Asset
+            target_entity_type='Asset'
         )
 
+        from stalker import Asset
         self.test_asset = Asset(
             name="Test Asset",
             code='ta',
@@ -133,6 +115,7 @@ class TicketTester(unittest.TestCase):
         )
 
         # create a Task
+        from stalker import Task
         self.test_task = Task(
             name="Modeling of Asset 1",
             resources=[self.test_user],
@@ -143,10 +126,11 @@ class TicketTester(unittest.TestCase):
         # create a Version
         self.test_version_status_list = StatusList(
             name='Version Statuses',
-            target_entity_type=Version,
+            target_entity_type='Version',
             statuses=[self.test_status1, self.test_status2]
         )
 
+        from stalker import Version
         self.test_version = Version(
             name='Test Version',
             task=self.test_task,
@@ -165,9 +149,10 @@ class TicketTester(unittest.TestCase):
             'reported_by': self.test_user,
         }
 
+        from stalker import db, Ticket
         self.test_ticket = Ticket(**self.kwargs)
-        DBSession.add(self.test_ticket)
-        DBSession.commit()
+        db.DBSession.add(self.test_ticket)
+        db.DBSession.commit()
 
         # get the Ticket Statuses
         self.status_new = Status.query.filter_by(name='New').first()
@@ -176,26 +161,17 @@ class TicketTester(unittest.TestCase):
         self.status_reopened = Status.query.filter_by(name='Reopened').first()
         self.status_closed = Status.query.filter_by(name='Closed').first()
 
-    def tearDown(self):
-        """clean up the test
-        """
-        DBSession.remove()
-
-    @classmethod
-    def tearDownClass(cls):
-        """clean up the test
-        """
-        DBSession.remove()
-
     def test___auto_name__class_attribute_is_set_to_True(self):
         """testing if the __auto_name__ class attribute is set to True for
         Ticket class
         """
+        from stalker import Ticket
         self.assertTrue(Ticket.__auto_name__)
 
     def test_name_argument_is_not_used(self):
         """testing if the given name argument is not used
         """
+        from stalker import Ticket
         test_value = 'Test Name'
         self.kwargs['name'] = test_value
         new_ticket = Ticket(**self.kwargs)
@@ -205,6 +181,7 @@ class TicketTester(unittest.TestCase):
         """testing if skipping the name argument is not important and an
         automatically generated name will be used in that case
         """
+        from stalker import Ticket
         if 'name' in self.kwargs:
             self.kwargs.pop('name')
             # expect no errors
@@ -214,6 +191,7 @@ class TicketTester(unittest.TestCase):
         """testing if the number attribute is not created per project and
         continues to increase for every created ticket
         """
+        from stalker import Project
         proj1 = Project(
             name='Test Project 1',
             code='TP1',
@@ -235,63 +213,70 @@ class TicketTester(unittest.TestCase):
             status_list=self.test_project_status_list
         )
 
+        from stalker import db, Ticket
         p1_t1 = Ticket(project=proj1)
-        DBSession.add(p1_t1)
-        DBSession.commit()
+        db.DBSession.add(p1_t1)
+        db.DBSession.commit()
         self.assertEqual(p1_t1.number, 2)
 
         p1_t2 = Ticket(project=proj1)
-        DBSession.add(p1_t2)
-        DBSession.commit()
+        db.DBSession.add(p1_t2)
+        db.DBSession.commit()
         self.assertEqual(p1_t2.number, 3)
 
         p2_t1 = Ticket(project=proj2)
-        DBSession.add(p2_t1)
-        DBSession.commit()
+        db.DBSession.add(p2_t1)
+        db.DBSession.commit()
         self.assertEqual(p2_t1.number, 4)
 
         p1_t3 = Ticket(project=proj1)
-        DBSession.add(p1_t3)
-        DBSession.commit()
+        db.DBSession.add(p1_t3)
+        db.DBSession.commit()
         self.assertEqual(p1_t3.number, 5)
 
         p3_t1 = Ticket(project=proj3)
-        DBSession.add(p3_t1)
-        DBSession.commit()
+        db.DBSession.add(p3_t1)
+        db.DBSession.commit()
         self.assertEqual(p3_t1.number, 6)
 
         p2_t2 = Ticket(project=proj2)
-        DBSession.add(p2_t2)
-        DBSession.commit()
+        db.DBSession.add(p2_t2)
+        db.DBSession.commit()
         self.assertEqual(p2_t2.number, 7)
 
         p3_t2 = Ticket(project=proj3)
-        DBSession.add(p3_t2)
-        DBSession.commit()
+        db.DBSession.add(p3_t2)
+        db.DBSession.commit()
         self.assertEqual(p3_t2.number, 8)
 
         p2_t3 = Ticket(project=proj2)
-        DBSession.add(p2_t3)
-        DBSession.commit()
+        db.DBSession.add(p2_t3)
+        db.DBSession.commit()
         self.assertEqual(p2_t3.number, 9)
 
     def test_number_attribute_is_read_only(self):
         """testing if the number attribute is read-only
         """
-        self.assertRaises(AttributeError, setattr, self.test_ticket, 'number',
-                          234)
+        with self.assertRaises(AttributeError) as cm:
+            self.test_ticket.number = 234
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
+        )
 
     def test_number_attribute_is_automatically_increased(self):
         """testing if the number attribute is automatically increased
         """
         # create two new tickets
+        from stalker import db, Ticket
         ticket1 = Ticket(**self.kwargs)
-        DBSession.add(ticket1)
-        DBSession.commit()
+        db.DBSession.add(ticket1)
+        db.DBSession.commit()
 
         ticket2 = Ticket(**self.kwargs)
-        DBSession.add(ticket2)
-        DBSession.commit()
+        db.DBSession.add(ticket2)
+        db.DBSession.commit()
 
         self.assertEqual(ticket1.number + 1, ticket2.number)
         self.assertEqual(ticket1.number, 2)
@@ -308,6 +293,7 @@ class TicketTester(unittest.TestCase):
             self.test_version
         ]
 
+        from stalker import Ticket
         new_ticket = Ticket(**self.kwargs)
         self.assertEqual(
             sorted(self.kwargs['links'], key=lambda x: x.name),
@@ -340,13 +326,20 @@ class TicketTester(unittest.TestCase):
         """testing if a TypeError will be raised when the related_tickets
         attribute is set to something other than a list of Tickets
         """
-        self.assertRaises(TypeError, setattr, self.test_ticket,
-                          'related_tickets', ['a ticket'])
+        with self.assertRaises(TypeError) as cm:
+            self.test_ticket.related_tickets = ['a ticket']
+
+        self.assertEqual(
+            str(cm.exception),
+            'Ticket.related_ticket attribute should be a list of other '
+            'stalker.models.ticket.Ticket instances not str'
+        )
 
     def test_related_tickets_attribute_accepts_list_of_Ticket_instances(self):
         """testing if the related tickets attribute accepts only list of
         stalker.models.ticket.Ticket instances
         """
+        from stalker import Ticket
         new_ticket1 = Ticket(**self.kwargs)
         new_ticket2 = Ticket(**self.kwargs)
 
@@ -356,13 +349,14 @@ class TicketTester(unittest.TestCase):
         """testing if the related_tickets attribute will not accept the Ticket
         itself and will raise ValueError
         """
-        self.assertRaises(ValueError, setattr, self.test_ticket,
-                          'related_tickets', [self.test_ticket])
+        with self.assertRaises(ValueError) as cm:
+            self.test_ticket.related_tickets = [self.test_ticket]
 
     def test_priority_argument_is_skipped_will_set_it_to_zero(self):
         """testing if the priority argument is skipped will set the priority
         of the Ticket to 0 or TRIVIAL
         """
+        from stalker import Ticket
         self.kwargs.pop('priority')
         new_ticket = Ticket(**self.kwargs)
         self.assertEqual(new_ticket.priority, 'TRIVIAL')
@@ -371,6 +365,7 @@ class TicketTester(unittest.TestCase):
         """testing if the comments attribute is the synonym for the notes
         attribute, so setting one will also set the other
         """
+        from stalker import Note
         note1 = Note(name='Test Note 1', content='Test note 1')
         note2 = Note(name='Test Note 2', content='Test note 2')
 
@@ -390,6 +385,7 @@ class TicketTester(unittest.TestCase):
         """testing if the reported_by attribute is a synonym for the created_by
         attribute
         """
+        from stalker import User
         user1 = User(
             name='user1',
             login='user1',
@@ -404,6 +400,7 @@ class TicketTester(unittest.TestCase):
         """testing if the status of newly created tickets will be New
         """
         # get the status NEW from the session
+        from stalker import Ticket
         new_ticket = Ticket(**self.kwargs)
         self.assertEqual(new_ticket.status, self.status_new)
 
@@ -411,25 +408,50 @@ class TicketTester(unittest.TestCase):
         """testing if a TypeError will be raised when the project argument is
         skipped
         """
+        from stalker import Ticket
         self.kwargs.pop('project')
-        self.assertRaises(TypeError, Ticket, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Ticket(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Ticket.project should be an instance of '
+            'stalker.models.project.Project, not NoneType'
+        )
 
     def test_project_argument_is_None(self):
         """testing if a TypeError will be raised when the project argument is
         None
         """
+        from stalker import Ticket
         self.kwargs['project'] = None
-        self.assertRaises(TypeError, Ticket, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Ticket(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Ticket.project should be an instance of '
+            'stalker.models.project.Project, not NoneType'
+        )
 
     def test_project_argument_accepts_Project_instances_only(self):
         """testing if the project argument accepts Project instances only
         """
+        from stalker import Ticket
         self.kwargs['project'] = 'Not a Project instance'
-        self.assertRaises(TypeError, Ticket, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Ticket(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Ticket.project should be an instance of '
+            'stalker.models.project.Project, not str'
+        )
 
     def test_project_argument_is_working_properly(self):
         """testing if the project argument is working properly
         """
+        from stalker import Ticket
         self.kwargs['project'] = self.test_project
         new_ticket = Ticket(**self.kwargs)
         self.assertEqual(new_ticket.project, self.test_project)
@@ -437,8 +459,13 @@ class TicketTester(unittest.TestCase):
     def test_project_attribute_is_read_only(self):
         """testing if the project attribute is read only
         """
-        self.assertRaises(AttributeError, setattr, self.test_ticket, 'project',
-                          self.test_project)
+        with self.assertRaises(AttributeError) as cm:
+            self.test_ticket.project = self.test_project
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
+        )
 
     ## STATUSES ##
 
@@ -689,6 +716,7 @@ class TicketTester(unittest.TestCase):
         """testing if invoking the reopen method will clear the
         timing_resolution
         """
+        from stalker import TicketLog
         self.assertEqual(self.test_ticket.status, self.status_new)
         self.test_ticket.resolve(resolution='fixed')
         self.assertEqual(self.test_ticket.resolution, 'fixed')
@@ -699,6 +727,7 @@ class TicketTester(unittest.TestCase):
     def test_reassign_will_set_the_owner(self):
         """testing if invoking the reassign method will set the owner
         """
+        from stalker import TicketLog
         self.assertEqual(self.test_ticket.status, self.status_new)
         self.assertNotEqual(self.test_ticket.owner, self.test_user)
         ticket_log = self.test_ticket.reassign(assign_to=self.test_user)
@@ -708,6 +737,7 @@ class TicketTester(unittest.TestCase):
     def test_accept_will_set_the_owner(self):
         """testing if invoking the accept method will set the owner
         """
+        from stalker import TicketLog
         self.assertEqual(self.test_ticket.status, self.status_new)
         self.assertNotEqual(self.test_ticket.owner, self.test_user)
         ticket_log = self.test_ticket.accept(created_by=self.test_user)
@@ -717,6 +747,7 @@ class TicketTester(unittest.TestCase):
     def test_summary_argument_skipped(self):
         """testing if the summary argument can be skipped
         """
+        from stalker import Ticket
         try:
             self.kwargs.pop('summary')
         except KeyError:
@@ -727,6 +758,7 @@ class TicketTester(unittest.TestCase):
     def test_summary_argument_can_be_None(self):
         """testing if the summary argument can be None
         """
+        from stalker import Ticket
         self.kwargs['summary'] = None
         new_ticket = Ticket(**self.kwargs)
         self.assertEqual(new_ticket.summary, '')
@@ -741,20 +773,34 @@ class TicketTester(unittest.TestCase):
         """testing if a TypeError will be raised when the summary argument
         value is not a string
         """
+        from stalker import Ticket
         self.kwargs['summary'] = ['not a string instance']
-        self.assertRaises(TypeError, Ticket, self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Ticket(self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Ticket.project should be an instance of '
+            'stalker.models.project.Project, not dict'
+        )
 
     def test_summary_attribute_is_set_to_a_value_other_than_a_string(self):
         """testing if the summary attribute is set to a value other than a
         string
         """
-        self.assertRaises(TypeError, setattr, self.test_ticket, 'summary',
-                          ['not a string'])
+        with self.assertRaises(TypeError) as cm:
+            self.test_ticket.summary = ['not a string']
+
+        self.assertEqual(
+            str(cm.exception),
+            'Ticket.summary should be an instance of str, not list'
+        )
 
     def test_summary_argument_is_working_properly(self):
         """testing if the summary argument value is passed to summary attribute
         correctly
         """
+        from stalker import Ticket
         test_value = 'test summary'
         self.kwargs['summary'] = test_value
         new_ticket = Ticket(**self.kwargs)

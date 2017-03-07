@@ -18,7 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
-import unittest
+from stalker.testing import UnitTestBase
 from sqlalchemy import Column, Integer, ForeignKey
 from stalker import SimpleEntity, ScheduleMixin, defaults
 
@@ -41,13 +41,14 @@ class MixedInClass(SimpleEntity, ScheduleMixin):
         ScheduleMixin.__init__(self, **kwargs)
 
 
-class ScheduleMixinTestCase(unittest.TestCase):
+class ScheduleMixinTestCase(UnitTestBase):
     """tests the ScheduleMixin
     """
 
     def setUp(self):
         """set up the test
         """
+        super(ScheduleMixinTestCase, self).setUp()
         self.kwargs = {
             'name': 'Test Object',
             'schedule_timing': 1,
@@ -56,10 +57,6 @@ class ScheduleMixinTestCase(unittest.TestCase):
             'schedule_constraint': 0
         }
         self.test_obj = MixedInClass(**self.kwargs)
-
-    def tearDown(self):
-        from stalker.db.session import DBSession
-        DBSession.remove()
 
     def test_schedule_model_attribute_is_effort_by_default(self):
         """testing if the schedule_model is effort by default
@@ -91,14 +88,26 @@ class ScheduleMixinTestCase(unittest.TestCase):
         argument is not a string
         """
         self.kwargs['schedule_model'] = 234
-        self.assertRaises(TypeError, MixedInClass, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            MixedInClass(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            "MixedInClass.schedule_model should be one of ['effort', "
+            "'length', 'duration'], not int"
+        )
 
     def test_schedule_model_attribute_is_not_a_string(self):
         """testing if a TypeError will be raised when the schedule_model
         attribute is set to a value other than a string
         """
-        self.assertRaises(
-            TypeError, setattr, self.test_obj, 'schedule_model', 2343
+        with self.assertRaises(TypeError) as cm:
+            self.test_obj.schedule_model = 2343
+
+        self.assertEqual(
+            str(cm.exception),
+            "MixedInClass.schedule_model should be one of ['effort', "
+            "'length', 'duration'], not int"
         )
 
     def test_schedule_model_argument_is_not_in_correct_value(self):
@@ -106,15 +115,26 @@ class ScheduleMixinTestCase(unittest.TestCase):
         argument is not in correct value
         """
         self.kwargs['schedule_model'] = 'not in the list'
-        self.assertRaises(ValueError, MixedInClass, **self.kwargs)
+        with self.assertRaises(ValueError) as cm:
+            MixedInClass(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            "MixedInClass.schedule_model should be one of ['effort', "
+            "'length', 'duration'], not str"
+        )
 
     def test_schedule_model_attribute_is_not_in_correct_value(self):
         """testing if a ValueError will be raised when the schedule_model
         attribute is not set to a correct value
         """
-        self.assertRaises(
-            ValueError, setattr, self.test_obj, 'schedule_model',
-            'not in the list'
+        with self.assertRaises(ValueError) as cm:
+            self.test_obj.schedule_model = 'not in the list'
+
+        self.assertEqual(
+            str(cm.exception),
+            "MixedInClass.schedule_model should be one of ['effort', "
+            "'length', 'duration'], not str"
         )
 
     def test_schedule_model_argument_is_working_properly(self):
@@ -174,14 +194,27 @@ class ScheduleMixinTestCase(unittest.TestCase):
         argument is not an integer
         """
         self.kwargs['schedule_constraint'] = 'not an integer'
-        self.assertRaises(TypeError, MixedInClass, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            MixedInClass(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'MixedInClass.schedule_constraint should be an integer between 0 '
+            'and 3, not str'
+        )
 
     def test_schedule_constraint_attribute_is_not_an_integer(self):
         """testing if a TypeError will be raised when the schedule_constraint
         attribute is set to a value other than an integer
         """
-        self.assertRaises(TypeError, setattr, self.test_obj,
-                          'schedule_constraint', 'not an integer')
+        with self.assertRaises(TypeError) as cm:
+            self.test_obj.schedule_constraint = 'not an integer'
+
+        self.assertEqual(
+            str(cm.exception),
+            'MixedInClass.schedule_constraint should be an integer between 0 '
+            'and 3, not str'
+        )
 
     def test_schedule_constraint_argument_is_working_properly(self):
         """testing if the schedule_constraint argument value is correctly
@@ -260,14 +293,29 @@ class ScheduleMixinTestCase(unittest.TestCase):
         is not an integer or float
         """
         self.kwargs["schedule_timing"] = '10d'
-        self.assertRaises(TypeError, MixedInClass, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            MixedInClass(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'MixedInClass.schedule_timing should be an integer or float '
+            'number showing the value of the schedule timing of this '
+            'MixedInClass, not str'
+        )
 
     def test_schedule_timing_attribute_is_not_an_integer_or_float(self):
         """testing if a TypeError will be raised when the schedule_timing
         attribute is not set to an integer or float
         """
-        self.assertRaises(TypeError, setattr, self.test_obj,
-                          'schedule_timing', '10d')
+        with self.assertRaises(TypeError) as cm:
+            self.test_obj.schedule_timing = '10d'
+
+        self.assertEqual(
+            str(cm.exception),
+            'MixedInClass.schedule_timing should be an integer or float '
+            'number showing the value of the schedule timing of this '
+            'MixedInClass, not str'
+        )
 
     def test_schedule_timing_attribute_is_working_properly(self):
         """testing if the schedule_timing attribute is working properly
@@ -307,14 +355,29 @@ class ScheduleMixinTestCase(unittest.TestCase):
         an integer
         """
         self.kwargs["schedule_unit"] = 10
-        self.assertRaises(TypeError, MixedInClass, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            MixedInClass(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            "MixedInClass.schedule_unit should be a string value one of "
+            "['min', 'h', 'd', 'w', 'm', 'y'] showing the unit of the "
+            "schedule timing of this MixedInClass, not int"
+        )
 
     def test_schedule_unit_attribute_is_not_a_string(self):
         """testing if a TypeError will be raised when the schedule_unit
         attribute is not set to a string
         """
-        self.assertRaises(TypeError, setattr, self.test_obj, 'schedule_unit',
-                          23)
+        with self.assertRaises(TypeError) as cm:
+            self.test_obj.schedule_unit = 23
+
+        self.assertEqual(
+            str(cm.exception),
+            "MixedInClass.schedule_unit should be a string value one of "
+            "['min', 'h', 'd', 'w', 'm', 'y'] showing the unit of the "
+            "schedule timing of this MixedInClass, not int"
+        )
 
     def test_schedule_unit_attribute_is_working_properly(self):
         """testing if the schedule_unit attribute is working properly
@@ -328,14 +391,29 @@ class ScheduleMixinTestCase(unittest.TestCase):
         is not in stalker.config.Config.datetime_units list
         """
         self.kwargs['schedule_unit'] = 'os'
-        self.assertRaises(ValueError, MixedInClass, **self.kwargs)
+        with self.assertRaises(ValueError) as cm:
+            MixedInClass(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            "MixedInClass.schedule_unit should be a string value one of "
+            "['min', 'h', 'd', 'w', 'm', 'y'] showing the unit of the "
+            "schedule timing of this MixedInClass, not str"
+        )
 
     def test_schedule_unit_attribute_value_is_not_in_defaults_datetime_units(self):
         """testing if a ValueError will be raised when it is set to a value
         which is not in stalker.config.Config.datetime_units list
         """
-        self.assertRaises(ValueError, setattr, self.test_obj, 'schedule_unit',
-                          'so')
+        with self.assertRaises(ValueError) as cm:
+            self.test_obj.schedule_unit = 'so'
+
+        self.assertEqual(
+            str(cm.exception),
+            "MixedInClass.schedule_unit should be a string value one of "
+            "['min', 'h', 'd', 'w', 'm', 'y'] showing the unit of the "
+            "schedule timing of this MixedInClass, not str"
+        )
 
     def test_least_meaningful_time_unit_is_working_properly(self):
         """testing if the least_meaningful_time_unit is working properly

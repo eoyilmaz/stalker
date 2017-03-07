@@ -18,20 +18,13 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest
-
+from stalker.testing import UnitTestBase
 from stalker import Role
 
 
-class RoleTestCase(unittest.TestCase):
+class RoleTestCase(UnitTestBase):
     """testing the Role class
     """
-
-    def setUp(self):
-        """set the test up
-        """
-        # the role class does not have anything to test
-        pass
 
     def test_role_class_generic(self):
         """testing of creation of a Role instance

@@ -71,3 +71,30 @@ class UnitTestBase(unittest.TestCase):
         """
         from stalker import User
         return User.query.filter(User.login == 'admin').first()
+
+
+class PlatformPatcher(object):
+    """patches given callable
+    """
+
+    def __init__(self):
+        self.callable = None
+        self.original = None
+
+    def patch(self, desired_result):
+        """
+        """
+        import platform
+        self.original = platform.system
+
+        def f():
+            return desired_result
+
+        platform.system = f
+
+    def restore(self):
+        """restores the given callable_
+        """
+        if self.original:
+            import platform
+            platform.system = self.original

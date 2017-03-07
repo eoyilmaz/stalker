@@ -18,30 +18,19 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest
-from stalker.db import DBSession
 from stalker.models.auth import User, Group
+from stalker.testing import UnitTestBase
 
 
-class GroupTester(unittest.TestCase):
+class GroupTester(UnitTestBase):
     """tests the stalker.models.auth.Group class
     """
-
-    @classmethod
-    def setUpClass(cls):
-        """sets the test in class level
-        """
-        DBSession.remove()
-
-    @classmethod
-    def tearDownClass(cls):
-        """clear the test in class level
-        """
-        DBSession.remove()
 
     def setUp(self):
         """set up the test in method level
         """
+        super(GroupTester, self).setUp()
+
         # create a couple of Users
         self.test_user1 = User(
             name='User1',
@@ -95,18 +84,26 @@ class GroupTester(unittest.TestCase):
         a list of User instances
         """
         self.kwargs['users'] = [12, 'not a user']
-        self.assertRaises(TypeError, Group, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Group(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Group.users attribute must all be stalker.models.auth.User '
+            'instances not int'
+        )
 
     def test_users_attribute_is_not_a_list_of_User_instances(self):
         """testing if a TypeError will be raised when the users attribute is
         not a list of User instances
         """
-        self.assertRaises(
-            TypeError,
-            setattr,
-            self.test_group,
-            'users',
-            [12, 'not a user']
+        with self.assertRaises(TypeError) as cm:
+            self.test_group.users = [12, 'not a user']
+
+        self.assertEqual(
+            str(cm.exception),
+            'Group.users attribute must all be stalker.models.auth.User '
+            'instances not int'
         )
 
     def test_users_argument_updates_the_groups_attribute_in_the_given_User_instances(self):

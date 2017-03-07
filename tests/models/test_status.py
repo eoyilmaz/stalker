@@ -20,9 +20,10 @@
 
 import unittest
 from stalker import Entity, Status
+from stalker.testing import UnitTestBase
 
 
-class StatusTest(unittest.TestCase):
+class StatusTest(UnitTestBase):
     """tests the stalker.models.status.Status class
     """
 

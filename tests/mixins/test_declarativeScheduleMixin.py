@@ -26,6 +26,7 @@ from sqlalchemy import Column, Integer, ForeignKey
 from stalker.db.session import DBSession
 from stalker.models.mixins import DateRangeMixin
 from stalker.models.entity import SimpleEntity
+from stalker.testing import UnitTestBase
 
 
 class DeclSchedMixA(SimpleEntity, DateRangeMixin):
@@ -50,26 +51,20 @@ class DeclSchedMixB(SimpleEntity, DateRangeMixin):
         DateRangeMixin.__init__(self, **kwargs)
 
 
-class ScheduleMixinTester(unittest.TestCase):
+class ScheduleMixinTester(UnitTestBase):
     """tests DateRangeMixin setup
     """
 
     def setUp(self):
         """setup the test
         """
-
+        super(ScheduleMixinTester, self).setUp()
         self.kwargs = {
             "name": "ozgur",
             "start": datetime.datetime(2013, 3, 20, 4, 0, tzinfo=pytz.utc),
             "end": datetime.datetime(2013, 3, 30, 4, 0, tzinfo=pytz.utc),
             "duration": datetime.timedelta(10)
         }
-
-    def tearDown(self):
-        """clean up the test
-        """
-        DBSession.remove()
-        # DBSession.close()
 
     def test_mixin_setup_is_working_properly(self):
         """testing if the mixin setup is working properly

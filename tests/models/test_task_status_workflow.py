@@ -609,10 +609,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         self.test_task3.status = self.status_wip
         self.assertEqual(self.test_task3.status, self.status_wip)
         # create dependency
-        self.assertRaises(
-            StatusError, self.test_task3.depends.append, self.test_task8
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.depends.append(self.test_task8)
+
+        self.assertEqual(
+            str(cm.exception),
+            'This is a WIP task and it is not allowed to change the '
+            'dependencies of a WIP task'
         )
-        DBSession.rollback()
 
     def test_leaf_PREV_task_dependency_can_not_be_updated(self):
         """testing if it is not possible to update the dependencies of a PREV
@@ -623,10 +627,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         self.test_task3.status = self.status_prev
         self.assertEqual(self.test_task3.status, self.status_prev)
         # create dependency
-        self.assertRaises(
-            StatusError, self.test_task3.depends.append, self.test_task8
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.depends.append(self.test_task8)
+
+        self.assertEqual(
+            str(cm.exception),
+            'This is a PREV task and it is not allowed to change the '
+            'dependencies of a PREV task'
         )
-        DBSession.rollback()
 
     def test_leaf_HREV_task_dependency_can_not_be_updated(self):
         """testing if it is not possible to update the dependencies of a HREV
@@ -637,10 +645,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         self.test_task3.status = self.status_hrev
         self.assertEqual(self.test_task3.status, self.status_hrev)
         # create dependency
-        self.assertRaises(
-            StatusError, self.test_task3.depends.append, self.test_task8
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.depends.append(self.test_task8)
+
+        self.assertEqual(
+            str(cm.exception),
+            'This is a HREV task and it is not allowed to change the '
+            'dependencies of a HREV task'
         )
-        DBSession.rollback()
 
     def test_leaf_DREV_task_dependency_can_not_be_updated(self):
         """testing if it is not possible to update the dependencies of a DREV
@@ -651,10 +663,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         self.test_task3.status = self.status_drev
         self.assertEqual(self.test_task3.status, self.status_drev)
         # create dependency
-        self.assertRaises(
-            StatusError, self.test_task3.depends.append, self.test_task8
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.depends.append(self.test_task8)
+
+        self.assertEqual(
+            str(cm.exception),
+            'This is a DREV task and it is not allowed to change the '
+            'dependencies of a DREV task'
         )
-        DBSession.rollback()
 
     def test_leaf_OH_task_dependency_can_not_be_updated(self):
         """testing if it is not possible to update the dependencies of a OH
@@ -665,10 +681,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         self.test_task3.status = self.status_oh
         self.assertEqual(self.test_task3.status, self.status_oh)
         # create dependency
-        self.assertRaises(
-            StatusError, self.test_task3.depends.append, self.test_task8
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.depends.append(self.test_task8)
+
+        self.assertEqual(
+            str(cm.exception),
+            'This is a OH task and it is not allowed to change the '
+            'dependencies of a OH task'
         )
-        DBSession.rollback()
 
     def test_leaf_STOP_task_dependency_can_not_be_updated(self):
         """testing if it is not possible to update the dependencies of a STOP
@@ -679,10 +699,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         self.test_task3.status = self.status_stop
         self.assertEqual(self.test_task3.status, self.status_stop)
         # create dependency
-        self.assertRaises(
-            StatusError, self.test_task3.depends.append, self.test_task8
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.depends.append(self.test_task8)
+
+        self.assertEqual(
+            str(cm.exception),
+            'This is a STOP task and it is not allowed to change the '
+            'dependencies of a STOP task'
         )
-        DBSession.rollback()
 
     def test_leaf_CMPL_task_dependency_can_not_be_updated(self):
         """testing if it is not possible to update the dependencies of a CMPL
@@ -693,10 +717,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         self.test_task3.status = self.status_cmpl
         self.assertEqual(self.test_task3.status, self.status_cmpl)
         # create dependency
-        self.assertRaises(
-            StatusError, self.test_task3.depends.append, self.test_task8
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.depends.append(self.test_task8)
+
+        self.assertEqual(
+            str(cm.exception),
+            'This is a CMPL task and it is not allowed to change the '
+            'dependencies of a CMPL task'
         )
-        DBSession.rollback()
 
     # dependencies of containers
     # container Tasks - dependency relation changes
@@ -868,10 +896,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         self.test_task1.status = self.status_wip
         self.assertEqual(self.test_task1.status, self.status_wip)
         # create dependency
-        self.assertRaises(
-            StatusError, self.test_task1.depends.append, self.test_task8
+        with self.assertRaises(StatusError) as cm:
+            self.test_task1.depends.append(self.test_task8)
+
+        self.assertEqual(
+            str(cm.exception),
+            'This is a WIP task and it is not allowed to change the '
+            'dependencies of a WIP task'
         )
-        DBSession.rollback()
 
     def test_container_CMPL_task_dependency_can_not_be_updated(self):
         """testing if it is not possible to update the dependencies of a CMPL
@@ -882,10 +914,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         self.assertEqual(self.test_task1.status, self.status_cmpl)
         # create dependency
         with DBSession.no_autoflush:
-            self.assertRaises(
-                StatusError, self.test_task1.depends.append, self.test_task8
+            with self.assertRaises(StatusError) as cm:
+                self.test_task1.depends.append(self.test_task8)
+
+            self.assertEqual(
+                str(cm.exception),
+                'This is a CMPL task and it is not allowed to change the '
+                'dependencies of a CMPL task'
             )
-        DBSession.rollback()
 
     #
     # Action Tests
@@ -901,9 +937,15 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         resource = self.test_task3.resources[0]
         start = datetime.datetime.now(pytz.utc)
         end = datetime.datetime.now(pytz.utc) + datetime.timedelta(hours=1)
-        self.assertRaises(StatusError, self.test_task3.create_time_log,
-                          resource, start, end)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.create_time_log(resource, start, end)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 is a WFD task, and it is not allowed to create '
+            'TimeLogs for a WFD task, please supply a RTS, WIP, HREV or DREV '
+            'task!'
+        )
 
     # RTS: status updated to WIP
     def test_create_time_log_in_RTS_leaf_task_status_updated_to_WIP(self):
@@ -1013,9 +1055,15 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         resource = self.test_task9.resources[0]
         start = datetime.datetime.now(pytz.utc)
         end = datetime.datetime.now(pytz.utc) + datetime.timedelta(hours=1)
-        self.assertRaises(StatusError, self.test_task9.create_time_log,
-                          resource, start, end)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task9.create_time_log(resource, start, end)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 9 is a OH task, and it is not allowed to create '
+            'TimeLogs for a OH task, please supply a RTS, WIP, HREV or DREV '
+            'task!'
+        )
 
     # STOP
     def test_create_time_log_in_STOP_leaf_task(self):
@@ -1026,9 +1074,15 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         resource = self.test_task9.resources[0]
         start = datetime.datetime.now(pytz.utc)
         end = datetime.datetime.now(pytz.utc) + datetime.timedelta(hours=1)
-        self.assertRaises(StatusError, self.test_task9.create_time_log,
-                          resource, start, end)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task9.create_time_log(resource, start, end)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 9 is a STOP task, and it is not allowed to create '
+            'TimeLogs for a STOP task, please supply a RTS, WIP, HREV or DREV '
+            'task!'
+        )
 
     # CMPL
     def test_create_time_log_in_CMPL_leaf_task(self):
@@ -1039,9 +1093,15 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         resource = self.test_task9.resources[0]
         start = datetime.datetime.now(pytz.utc)
         end = datetime.datetime.now(pytz.utc) + datetime.timedelta(hours=1)
-        with self.assertRaises(StatusError):
+        with self.assertRaises(StatusError) as cm:
             self.test_task9.create_time_log(resource, start, end)
-        DBSession.rollback()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 9 is a CMPL task, and it is not allowed to create '
+            'TimeLogs for a CMPL task, please supply a RTS, WIP, HREV or DREV '
+            'task!'
+        )
 
     # On Container Task
     def test_create_time_log_on_container_task(self):
@@ -1050,8 +1110,16 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         """
         start = datetime.datetime.now(pytz.utc)
         end = datetime.datetime.now(pytz.utc) + datetime.timedelta(hours=1)
-        self.assertRaises(ValueError, self.test_task2.create_time_log,
-                          resource=None, start=start, end=end)
+        with self.assertRaises(ValueError) as cm:
+            self.test_task2.create_time_log(
+                resource=None, start=start, end=end
+            )
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 2 (id: 36) is a container task, and it is not allowed '
+            'to create TimeLogs for a container task'
+        )
 
     def test_create_time_log_is_creating_time_logs(self):
         """testing if create_time_log action is really creating some time logs
@@ -1097,8 +1165,15 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         action is used in a WFD leaf task
         """
         self.test_task3.status = self.status_wfd
-        self.assertRaises(StatusError, self.test_task3.request_review)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.request_review()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id:37) is a WFD task, and WFD tasks are not '
+            'suitable for requesting a review, please supply a WIP task '
+            'instead.'
+        )
 
     # RTS
     def test_request_review_in_RTS_leaf_task(self):
@@ -1106,8 +1181,15 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         action is used in a RTS leaf task
         """
         self.test_task3.status = self.status_rts
-        self.assertRaises(StatusError, self.test_task3.request_review)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.request_review()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id:37) is a RTS task, and RTS tasks are not '
+            'suitable for requesting a review, please supply a WIP task '
+            'instead.'
+        )
 
     # WIP: status updated to PREV
     def test_request_review_in_WIP_leaf_task_status_updated_to_PREV(self):
@@ -1176,8 +1258,15 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         action is used in a PREV leaf task
         """
         self.test_task3.status = self.status_prev
-        self.assertRaises(StatusError, self.test_task3.request_review)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.request_review()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id:37) is a PREV task, and PREV tasks are not '
+            'suitable for requesting a review, please supply a WIP task '
+            'instead.'
+        )
 
     # HREV
     def test_request_review_in_HREV_leaf_task(self):
@@ -1185,8 +1274,15 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         action is used in a HREV leaf task
         """
         self.test_task3.status = self.status_hrev
-        self.assertRaises(StatusError, self.test_task3.request_review)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.request_review()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id:37) is a HREV task, and HREV tasks are not '
+            'suitable for requesting a review, please supply a WIP task '
+            'instead.'
+        )
 
     # DREV
     def test_request_review_in_DREV_leaf_task(self):
@@ -1194,8 +1290,15 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         action is used in a DREV leaf task
         """
         self.test_task3.status = self.status_drev
-        self.assertRaises(StatusError, self.test_task3.request_review)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.request_review()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id:37) is a DREV task, and DREV tasks are not '
+            'suitable for requesting a review, please supply a WIP task '
+            'instead.'
+        )
 
     # OH
     def test_request_review_in_OH_leaf_task(self):
@@ -1203,8 +1306,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         action is used in a OH leaf task
         """
         self.test_task3.status = self.status_oh
-        self.assertRaises(StatusError, self.test_task3.request_review)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.request_review()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id:37) is a OH task, and OH tasks are not suitable '
+            'for requesting a review, please supply a WIP task instead.'
+        )
 
     # STOP
     def test_request_review_in_STOP_leaf_task(self):
@@ -1212,8 +1321,15 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         action is used in a STOP leaf task
         """
         self.test_task3.status = self.status_stop
-        self.assertRaises(StatusError, self.test_task3.request_review)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.request_review()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id:37) is a STOP task, and STOP tasks are not '
+            'suitable for requesting a review, please supply a WIP task '
+            'instead.'
+        )
 
     # CMPL
     def test_request_review_in_CMPL_leaf_task(self):
@@ -1221,8 +1337,15 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         action is used in a CMPL leaf task
         """
         self.test_task3.status = self.status_cmpl
-        self.assertRaises(StatusError, self.test_task3.request_review)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.request_review()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id:37) is a CMPL task, and CMPL tasks are not '
+            'suitable for requesting a review, please supply a WIP task '
+            'instead.'
+        )
 
     #request_revision
     #WFD
@@ -1231,8 +1354,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         action is used in a WFD leaf task
         """
         self.test_task3.status = self.status_wfd
-        self.assertRaises(StatusError, self.test_task3.request_revision)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.request_revision()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id: 37) is a WFD task, and it is not suitable for '
+            'requesting a revision, please supply a PREV or CMPL task'
+        )
 
     #RTS
     def test_request_revision_in_RTS_leaf_task(self):
@@ -1240,8 +1369,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         action is used in a RTS leaf task
         """
         self.test_task3.status = self.status_rts
-        self.assertRaises(StatusError, self.test_task3.request_revision)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.request_revision()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id: 37) is a RTS task, and it is not suitable for '
+            'requesting a revision, please supply a PREV or CMPL task'
+        )
 
     #WIP
     def test_request_revision_in_WIP_leaf_task(self):
@@ -1249,8 +1384,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         action is used in a WIP leaf task
         """
         self.test_task3.status = self.status_wip
-        self.assertRaises(StatusError, self.test_task3.request_revision)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.request_revision()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id: 37) is a WIP task, and it is not suitable for '
+            'requesting a revision, please supply a PREV or CMPL task'
+        )
 
     #PREV: Status updated to HREV
     def test_request_revision_in_PREV_leaf_task_status_updated_to_HREV(self):
@@ -1408,8 +1549,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
             'schedule_timing': 4,
             'schedule_unit': 'h'
         }
-        self.assertRaises(StatusError, self.test_task3.request_revision, **kw)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.request_revision(**kw)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id: 37) is a HREV task, and it is not suitable for '
+            'requesting a revision, please supply a PREV or CMPL task'
+        )
 
     #OH
     def test_request_revision_in_OH_leaf_task(self):
@@ -1423,8 +1570,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
             'schedule_timing': 4,
             'schedule_unit': 'h'
         }
-        self.assertRaises(StatusError, self.test_task3.request_revision, **kw)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.request_revision(**kw)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id: 37) is a OH task, and it is not suitable for '
+            'requesting a revision, please supply a PREV or CMPL task'
+        )
 
     #STOP
     def test_request_revision_in_STOP_leaf_task(self):
@@ -1438,8 +1591,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
             'schedule_timing': 4,
             'schedule_unit': 'h'
         }
-        self.assertRaises(StatusError, self.test_task3.request_revision, **kw)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.request_revision(**kw)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id: 37) is a STOP task, and it is not suitable for '
+            'requesting a revision, please supply a PREV or CMPL task'
+        )
 
     #CMPL: status update
     def test_request_revision_in_CMPL_leaf_task_status_updated_to_HREV(self):
@@ -1966,7 +2125,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         in a WFD leaf task
         """
         self.test_task3.status = self.status_wfd
-        self.assertRaises(StatusError, self.test_task3.hold)
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.hold()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id:37) is a WFD task, only WIP or DREV tasks can be '
+            'set to On Hold'
+        )
 
     # RTS
     def test_hold_in_RTS_leaf_task(self):
@@ -1974,8 +2140,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         in a RTS leaf task
         """
         self.test_task3.status = self.status_rts
-        self.assertRaises(StatusError, self.test_task3.hold)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.hold()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id:37) is a RTS task, only WIP or DREV tasks can be '
+            'set to On Hold'
+        )
 
     # WIP: Status updated to OH
     def test_hold_in_WIP_leaf_task_status(self):
@@ -2011,8 +2183,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         in a PREV leaf task
         """
         self.test_task3.status = self.status_prev
-        self.assertRaises(StatusError, self.test_task3.hold)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.hold()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id:37) is a PREV task, only WIP or DREV tasks can '
+            'be set to On Hold'
+        )
 
     # HREV
     def test_hold_in_HREV_leaf_task(self):
@@ -2020,8 +2198,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         in a HREV leaf task
         """
         self.test_task3.status = self.status_hrev
-        self.assertRaises(StatusError, self.test_task3.hold)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.hold()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id:37) is a HREV task, only WIP or DREV tasks can '
+            'be set to On Hold'
+        )
 
     # DREV: Status updated to OH
     def test_hold_in_DREV_leaf_task_status_updated_to_OH(self):
@@ -2066,8 +2250,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         in a STOP leaf task
         """
         self.test_task3.status = self.status_stop
-        self.assertRaises(StatusError, self.test_task3.hold)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.hold()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id:37) is a STOP task, only WIP or DREV tasks can '
+            'be set to On Hold'
+        )
 
     # CMPL
     def test_hold_in_CMPL_leaf_task(self):
@@ -2075,8 +2265,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         in a CMPL leaf task
         """
         self.test_task3.status = self.status_cmpl
-        self.assertRaises(StatusError, self.test_task3.hold)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.hold()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id:37) is a CMPL task, only WIP or DREV tasks can '
+            'be set to On Hold'
+        )
 
     # stop
     # WFD
@@ -2085,8 +2281,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         in a WFD leaf task
         """
         self.test_task3.status = self.status_wfd
-        self.assertRaises(StatusError, self.test_task3.stop)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.stop()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id:37)is a WFD task and it is not possible to stop '
+            'a WFD task.'
+        )
 
     # RTS
     def test_stop_in_RTS_leaf_task(self):
@@ -2094,8 +2296,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         in a RTS leaf task
         """
         self.test_task3.status = self.status_rts
-        self.assertRaises(StatusError, self.test_task3.stop)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.stop()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id:37)is a RTS task and it is not possible to stop '
+            'a RTS task.'
+        )
 
     # WIP: Status Test
     def test_stop_in_WIP_leaf_task_status_is_updated_to_STOP(self):
@@ -2248,8 +2456,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         in a PREV leaf task
         """
         self.test_task3.status = self.status_prev
-        self.assertRaises(StatusError, self.test_task3.stop)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.stop()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id:37)is a PREV task and it is not possible to stop '
+            'a PREV task.'
+        )
 
     # HREV
     def test_stop_in_HREV_leaf_task(self):
@@ -2257,8 +2471,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         in a HREV leaf task
         """
         self.test_task3.status = self.status_hrev
-        self.assertRaises(StatusError, self.test_task3.stop)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.stop()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id:37)is a HREV task and it is not possible to stop '
+            'a HREV task.'
+        )
 
     # DREV: Status Test
     def test_stop_in_DREV_leaf_task_status_is_updated_to_STOP(self):
@@ -2394,8 +2614,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         in a OH leaf task
         """
         self.test_task3.status = self.status_oh
-        self.assertRaises(StatusError, self.test_task3.stop)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.stop()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id:37)is a OH task and it is not possible to stop a '
+            'OH task.'
+        )
 
     # STOP
     def test_stop_in_STOP_leaf_task(self):
@@ -2412,8 +2638,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         in a CMPL leaf task
         """
         self.test_task3.status = self.status_cmpl
-        self.assertRaises(StatusError, self.test_task3.stop)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.stop()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id:37)is a CMPL task and it is not possible to stop '
+            'a CMPL task.'
+        )
 
     # resume
     # WFD
@@ -2422,8 +2654,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         used in a WFD leaf task
         """
         self.test_task3.status = self.status_wfd
-        self.assertRaises(StatusError, self.test_task3.resume)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.resume()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id:37) is a WFD task, and it is not suitable to be '
+            'resumed, please supply an OH or STOP task'
+        )
 
     # RTS
     def test_resume_in_RTS_leaf_task(self):
@@ -2431,8 +2669,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         used in a RTS leaf task
         """
         self.test_task3.status = self.status_rts
-        self.assertRaises(StatusError, self.test_task3.resume)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.resume()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id:37) is a RTS task, and it is not suitable to be '
+            'resumed, please supply an OH or STOP task'
+        )
 
     # WIP
     def test_resume_in_WIP_leaf_task(self):
@@ -2440,8 +2684,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         used in a WIP leaf task
         """
         self.test_task3.status = self.status_wip
-        self.assertRaises(StatusError, self.test_task3.resume)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.resume()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id:37) is a WIP task, and it is not suitable to be '
+            'resumed, please supply an OH or STOP task'
+        )
 
     # PREV
     def test_resume_in_PREV_leaf_task(self):
@@ -2449,8 +2699,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         used in a PREV leaf task
         """
         self.test_task3.status = self.status_prev
-        self.assertRaises(StatusError, self.test_task3.resume)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.resume()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id:37) is a PREV task, and it is not suitable to be '
+            'resumed, please supply an OH or STOP task'
+        )
 
     # HREV
     def test_resume_in_HREV_leaf_task(self):
@@ -2458,8 +2714,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         used in a HREV leaf task
         """
         self.test_task3.status = self.status_hrev
-        self.assertRaises(StatusError, self.test_task3.resume)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.resume()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id:37) is a HREV task, and it is not suitable to be '
+            'resumed, please supply an OH or STOP task'
+        )
 
     # DREV
     def test_resume_in_DREV_leaf_task(self):
@@ -2467,8 +2729,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         used in a DREV leaf task
         """
         self.test_task3.status = self.status_drev
-        self.assertRaises(StatusError, self.test_task3.resume)
-        DBSession.rollback()
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.resume()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id:37) is a DREV task, and it is not suitable to be '
+            'resumed, please supply an OH or STOP task'
+        )
 
     # OH: no dependency -> WIP
     def test_resume_in_OH_leaf_task_with_no_dependencies(self):
@@ -3371,7 +3639,14 @@ class TaskStatusWorkflowTestCase(UnitTestBase):
         in a CMPL leaf task
         """
         self.test_task3.status = self.status_drev
-        self.assertRaises(StatusError, self.test_task3.resume)
+        with self.assertRaises(StatusError) as cm:
+            self.test_task3.resume()
+
+        self.assertEqual(
+            str(cm.exception),
+            'Test Task 3 (id:37) is a DREV task, and it is not suitable to be '
+            'resumed, please supply an OH or STOP task'
+        )
 
     def test_review_set_review_number_is_skipped(self):
         """testing if the latest review set will be returned if the

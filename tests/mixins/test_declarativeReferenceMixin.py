@@ -25,6 +25,7 @@ from stalker.db.session import DBSession
 from stalker.models.entity import SimpleEntity
 from stalker.models.mixins import ReferenceMixin
 from stalker.models.link import Link
+from stalker.testing import UnitTestBase
 
 
 class DeclRefMixA(SimpleEntity, ReferenceMixin):
@@ -55,10 +56,9 @@ class DeclRefMixB(SimpleEntity, ReferenceMixin):
         ReferenceMixin.__init__(self, **kwargs)
 
 
-class ReferenceMixinTester(unittest.TestCase):
+class ReferenceMixinTester(UnitTestBase):
     """Tests ReferenceMixin
     """
-
 
     def test_ReferenceMixin_setup(self):
         """
@@ -74,12 +74,6 @@ class ReferenceMixinTester(unittest.TestCase):
 
         self.assertTrue(new_link1 in a_ins.references)
         self.assertTrue(new_link2 in b_ins.references)
-
-    def tearDown(self):
-        """clean up the test
-        """
-        DBSession.remove()
-        # DBSession.close()
 
 
 

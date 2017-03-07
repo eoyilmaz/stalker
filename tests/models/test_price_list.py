@@ -18,17 +18,18 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest
 from stalker import PriceList, Good
+from stalker.testing import UnitTestBase
 
 
-class PriceListTestCase(unittest.TestCase):
+class PriceListTestCase(UnitTestBase):
     """tests the PriceList class
     """
 
     def setUp(self):
         """set the test up
         """
+        super(PriceListTestCase, self).setUp()
         self.kwargs = {
             'name': 'Test Price List',
         }

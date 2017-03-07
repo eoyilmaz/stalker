@@ -84,14 +84,30 @@ class StatusMixinTester(UnitTestBase):
         is not set
         """
         self.kwargs.pop("status_list")
-        self.assertRaises(TypeError, DeclStatMixA, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            DeclStatMixA(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            "DeclStatMixA instances can not be initialized without a "
+            "stalker.models.status.StatusList instance, please pass a "
+            "suitable StatusList (StatusList.target_entity_type=DeclStatMixA) "
+            "with the 'status_list' argument"
+        )
 
     def test_status_list_argument_is_not_correct(self):
         """testing if a TypeError will be raised when the given StatusList
         instance with the status_list argument is not suitable for this class
         """
         self.kwargs["status_list"] = self.test_b_statusList
-        self.assertRaises(TypeError, DeclStatMixA, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            DeclStatMixA(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            "The given StatusLists' target_entity_type is DeclStatMixB, "
+            "whereas the entity_type of this object is DeclStatMixA"
+        )
 
     def test_status_list_working_properly(self):
         """testing if the status_list attribute is working properly

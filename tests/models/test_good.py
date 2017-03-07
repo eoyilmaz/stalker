@@ -18,17 +18,18 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest
 from stalker.models.budget import Good
+from stalker.testing import UnitTestBase
 
 
-class GoodTestCase(unittest.TestCase):
+class GoodTestCase(UnitTestBase):
     """tests the stalker.models.budget.Good class
     """
 
     def setUp(self):
         """set up the test
         """
+        super(GoodTestCase, self).setUp()
         self.kwargs = {
             'name': 'Comp',
             'cost': 10,

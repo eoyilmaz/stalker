@@ -18,17 +18,19 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest
 from stalker import ProjectClient
+from stalker.testing import UnitTestBase
 
 
-class ProjectClientTestCase(unittest.TestCase):
+class ProjectClientTestCase(UnitTestBase):
     """tests for ProjectClient class
     """
 
     def setUp(self):
         """set the test up
         """
+        super(ProjectClientTestCase, self).setUp()
+
         from stalker import Status, StatusList, Repository
         self.test_repo = Repository(
             name='Test Repo'

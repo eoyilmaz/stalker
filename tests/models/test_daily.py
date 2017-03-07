@@ -18,89 +18,94 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest
-from stalker import (db, Daily, Project, Repository, Status, StatusList, Task,
-                     Version, Link, DailyLink)
+from stalker.testing import UnitTestBase
 
 
-class DailyTestBase(unittest.TestCase):
+class DailyTestBase(UnitTestBase):
     """Tests the stalker.models.review.Daily class
     """
 
-    @classmethod
-    def setUpClass(cls):
-        """setup once
-        """
-        db.setup()
-        db.init()
+    def setUp(self):
+        super(DailyTestBase, self).setUp()
 
-        cls.status_new = Status.query.filter_by(code='NEW').first()
-        cls.status_wip = Status.query.filter_by(code='WIP').first()
-        cls.status_cmpl = Status.query.filter_by(code='CMPL').first()
+        from stalker import db, Status, StatusList
+        self.status_new = Status.query.filter_by(code='NEW').first()
+        self.status_wip = Status.query.filter_by(code='WIP').first()
+        self.status_cmpl = Status.query.filter_by(code='CMPL').first()
 
-        cls.test_project_status_list = StatusList(
+        self.test_project_status_list = StatusList(
             name='Project Statuses',
             target_entity_type='Project',
-            statuses=[cls.status_new, cls.status_wip, cls.status_cmpl]
+            statuses=[self.status_new, self.status_wip, self.status_cmpl]
         )
+        db.DBSession.add(self.test_project_status_list)
 
-        cls.test_repo = Repository(name='Test Repository')
+        from stalker import Repository, Project
+        self.test_repo = Repository(name='Test Repository')
+        db.DBSession.add(self.test_repo)
 
-        cls.test_project = Project(
+        self.test_project = Project(
             name='Test Project',
             code='TP',
-            repository=cls.test_repo,
-            status_list=cls.test_project_status_list
+            repository=self.test_repo,
+            status_list=self.test_project_status_list
         )
+        db.DBSession.add(self.test_project)
 
-        cls.test_task1 = Task(
+        from stalker import Task
+        self.test_task1 = Task(
             name='Test Task 1',
-            project=cls.test_project
+            project=self.test_project
         )
-        cls.test_task2 = Task(
+        db.DBSession.add(self.test_task1)
+        self.test_task2 = Task(
             name='Test Task 2',
-            project=cls.test_project
+            project=self.test_project
         )
-        cls.test_task3 = Task(
+        db.DBSession.add(self.test_task2)
+        self.test_task3 = Task(
             name='Test Task 3',
-            project=cls.test_project
+            project=self.test_project
         )
+        db.DBSession.add(self.test_task3)
 
-        cls.test_version1 = Version(task=cls.test_task1)
-        db.DBSession.add(cls.test_version1)
+        from stalker import Version
+        self.test_version1 = Version(task=self.test_task1)
+        db.DBSession.add(self.test_version1)
         db.DBSession.commit()
 
-        cls.test_version2 = Version(task=cls.test_task1)
-        db.DBSession.add(cls.test_version2)
+        self.test_version2 = Version(task=self.test_task1)
+        db.DBSession.add(self.test_version2)
         db.DBSession.commit()
 
-        cls.test_version3 = Version(task=cls.test_task1)
-        db.DBSession.add(cls.test_version3)
+        self.test_version3 = Version(task=self.test_task1)
+        db.DBSession.add(self.test_version3)
         db.DBSession.commit()
 
-        cls.test_version4 = Version(task=cls.test_task2)
-        db.DBSession.add(cls.test_version4)
+        self.test_version4 = Version(task=self.test_task2)
+        db.DBSession.add(self.test_version4)
         db.DBSession.commit()
 
-        cls.test_link1 = Link(original_filename='test_render1.jpg')
-        cls.test_link2 = Link(original_filename='test_render2.jpg')
-        cls.test_link3 = Link(original_filename='test_render3.jpg')
-        cls.test_link4 = Link(original_filename='test_render4.jpg')
+        from stalker import Link
+        self.test_link1 = Link(original_filename='test_render1.jpg')
+        self.test_link2 = Link(original_filename='test_render2.jpg')
+        self.test_link3 = Link(original_filename='test_render3.jpg')
+        self.test_link4 = Link(original_filename='test_render4.jpg')
 
-        cls.test_version1.outputs = [
-            cls.test_link1,
-            cls.test_link2,
-            cls.test_link3
+        self.test_version1.outputs = [
+            self.test_link1,
+            self.test_link2,
+            self.test_link3
         ]
-        cls.test_version4.outputs = [
-            cls.test_link4
+        self.test_version4.outputs = [
+            self.test_link4
         ]
 
         db.DBSession.add_all([
-            cls.test_task1, cls.test_task2, cls.test_task3,
-            cls.test_version1, cls.test_version2, cls.test_version3,
-            cls.test_version4,
-            cls.test_link1, cls.test_link2, cls.test_link3, cls.test_link4
+            self.test_task1, self.test_task2, self.test_task3,
+            self.test_version1, self.test_version2, self.test_version3,
+            self.test_version4,
+            self.test_link1, self.test_link2, self.test_link3, self.test_link4
         ])
         db.DBSession.commit()
 
@@ -112,6 +117,7 @@ class DailyTestCase(DailyTestBase):
     def test_daily_instance_creation(self):
         """testing if it is possible to create a Daily without a problem
         """
+        from stalker import Daily
         daily = Daily(name='Test Daily', project=self.test_project)
         self.assertTrue(isinstance(daily, Daily))
 
@@ -119,6 +125,7 @@ class DailyTestCase(DailyTestBase):
         """testing if the links attribute will be an empty list if the links
         argument is skipped
         """
+        from stalker import Daily
         daily = Daily(name='Test Daily', project=self.test_project)
         self.assertEqual(daily.links, [])
 
@@ -126,6 +133,7 @@ class DailyTestCase(DailyTestBase):
         """testing if the links attribute will be an empty list when the links
         argument is None
         """
+        from stalker import Daily
         daily = Daily(name='Test Daily', links=None, project=self.test_project)
         self.assertEqual(daily.links, [])
 
@@ -133,6 +141,7 @@ class DailyTestCase(DailyTestBase):
         """testing if a TypeError will be raised when the links attribute is
         set to None
         """
+        from stalker import Daily
         daily = Daily(name='Test Daily', project=self.test_project)
         with self.assertRaises(TypeError):
             daily.links = None
@@ -141,6 +150,7 @@ class DailyTestCase(DailyTestBase):
         """testing if a TypeError will be raised when the links argument is not
         a list
         """
+        from stalker import Daily
         with self.assertRaises(TypeError) as cm:
             Daily(
                 name='Test Daily',
@@ -158,6 +168,7 @@ class DailyTestCase(DailyTestBase):
         """testing if a TypeError will be raised when the links argument is not
         a list of Link instances
         """
+        from stalker import Daily
         with self.assertRaises(TypeError) as cm:
             Daily(
                 name='Test Daily',
@@ -176,6 +187,7 @@ class DailyTestCase(DailyTestBase):
         attribute
         """
         test_value = [self.test_link1, self.test_link2]
+        from stalker import Daily
         daily = Daily(
             name='Test Daily',
             links=test_value,
@@ -186,6 +198,7 @@ class DailyTestCase(DailyTestBase):
     def test_links_attribute_is_working_properly(self):
         """testing if the links attribute is working properly
         """
+        from stalker import Daily
         daily = Daily(name='Test Daily', project=self.test_project)
         daily.links.append(self.test_link1)
 
@@ -194,6 +207,7 @@ class DailyTestCase(DailyTestBase):
     def test_versions_attribute_is_read_only(self):
         """testing if versions attribute is a read only attribute
         """
+        from stalker import Daily
         daily = Daily(name='Test Daily', project=self.test_project)
         with self.assertRaises(AttributeError):
             setattr(daily, 'versions', 10)
@@ -202,6 +216,7 @@ class DailyTestCase(DailyTestBase):
         """testing if the versions attribute is a list of Version instances
         related to the given links
         """
+        from stalker import db, Daily
         daily = Daily(name='Test Daily', project=self.test_project)
         daily.links = [self.test_link1, self.test_link2]
         db.DBSession.add(daily)
@@ -212,6 +227,7 @@ class DailyTestCase(DailyTestBase):
         """testing if the tasks attribute is a list of Task instances related
         to the given links
         """
+        from stalker import db, Daily
         daily = Daily(name='Test Daily', project=self.test_project)
         daily.links = [self.test_link1, self.test_link2]
         db.DBSession.add(daily)
@@ -226,5 +242,6 @@ class DailyLinkTestCase(DailyTestBase):
     def test_rank_argument_is_skipped(self):
         """testing if rank attribute will use the default value is when skipped
         """
+        from stalker import DailyLink
         dl = DailyLink()
         self.assertEqual(dl.rank, 0)

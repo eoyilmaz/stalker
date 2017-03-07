@@ -57,7 +57,7 @@ class CircularDependencyError(Exception):
         self.value = value
 
     def __str__(self):
-        return repr(self.value)
+        return self.value
 
 
 class OverBookedError(Exception):
@@ -69,7 +69,7 @@ class OverBookedError(Exception):
         self.value = value
 
     def __str__(self):
-        return repr(self.value)
+        return self.value
 
 
 class StatusError(Exception):
@@ -82,7 +82,7 @@ class StatusError(Exception):
         self.value = value
 
     def __str__(self):
-        return repr(self.value)
+        return self.value
 
 
 class DependencyViolationError(Exception):

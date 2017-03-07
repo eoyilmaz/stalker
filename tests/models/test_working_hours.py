@@ -18,19 +18,11 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import copy
-import unittest
-import datetime
-
-import pytz
-
-from stalker import config
 from stalker.models.studio import WorkingHours
+from stalker.testing import UnitTestBase
 
-defaults = config.Config()
 
-
-class WorkingHoursTester(unittest.TestCase):
+class WorkingHoursTester(UnitTestBase):
     """tests the stalker.models.project.WorkingHours class
     """
 
@@ -39,6 +31,7 @@ class WorkingHoursTester(unittest.TestCase):
         default.
         """
         wh = WorkingHours()
+        from stalker import defaults
         self.assertEqual(wh.working_hours, defaults.working_hours)
 
     def test_working_hours_argument_is_None(self):
@@ -46,67 +39,142 @@ class WorkingHoursTester(unittest.TestCase):
         the working_hours argument is None
         """
         wh = WorkingHours(working_hours=None)
+        from stalker import defaults
         self.assertEqual(wh.working_hours, defaults.working_hours)
 
     def test_working_hours_argument_is_not_a_dictionary(self):
         """testing if a TypeError will be raised when the working_hours
         argument value is not a dictionary
         """
-        self.assertRaises(TypeError, WorkingHours,
-                          working_hours='not a dictionary of proper values')
+        with self.assertRaises(TypeError) as cm:
+            WorkingHours(working_hours='not a dictionary of proper values')
+
+        self.assertEqual(
+            str(cm.exception),
+            'WorkingHours.working_hours should be a dictionary, not str'
+        )
 
     def test_working_hours_attribute_is_not_a_dictionary(self):
         """testing if a TypeError will be raised when the working_hours
         attribute is set to a value which is not a dictionary
         """
         wh = WorkingHours()
-        self.assertRaises(TypeError, setattr, wh, 'working_hours',
-                          'not a dictionary of proper values')
+        with self.assertRaises(TypeError) as cm:
+            wh.working_hours= 'not a dictionary of proper values'
+
+        self.assertEqual(
+            str(cm.exception),
+            'WorkingHours.working_hours should be a dictionary, not str'
+        )
 
     def test_working_hours_argument_value_is_dictionary_of_other_formatted_data(self):
         """testing if a TypeError will be raised when the working_hours
         argument value is a dictionary of some other value than list of list of
         dual integers
         """
-        self.assertRaises(TypeError, WorkingHours,
-                          working_hours={'not': 'properly valued'})
+        with self.assertRaises(TypeError) as cm:
+            WorkingHours(working_hours={'not': 'properly valued'})
+
+        self.assertEqual(
+            str(cm.exception),
+            'WorkingHours.working_hours should be a dictionary with keys '
+            '"mon, tue, wed, thu, fri, sat, sun" and the values should a list '
+            'of lists of two integers like [[540, 720], [800, 1080]], not str'
+        )
 
     def test_working_hours_attribute_is_set_to_a_dictionary_of_other_formatted_data(self):
         """testing if a TypeError will be raised when the working hours
         attribute value is a dictionary of some other value
         """
         wh = WorkingHours()
-        self.assertRaises(TypeError, setattr, wh, 'working_hours',
-                          {'not': 'properly valued'})
+        with self.assertRaises(TypeError) as cm:
+            wh.working_hours = {'not': 'properly valued'}
 
-    def test_working_hours_argument_data_is_not_in_correct_range(self):
+        self.assertEqual(
+            str(cm.exception),
+            'WorkingHours.working_hours should be a dictionary with keys '
+            '"mon, tue, wed, thu, fri, sat, sun" and the values should a '
+            'list of lists of two integers like [[540, 720], [800, 1080]], '
+            'not str'
+        )
+
+    def test_working_hours_argument_data_is_not_in_correct_range1(self):
         """testing if a ValueError will be raised when the range of the time
         values are not correct in the working_hours argument
         """
+        import copy
+        from stalker import defaults
         wh = copy.copy(defaults.working_hours)
         wh['sun'] = [[-10, 1000]]
 
-        self.assertRaises(ValueError, WorkingHours,
-                          working_hours=wh)
+        with self.assertRaises(ValueError) as cm:
+            WorkingHours(working_hours=wh)
+
+        self.assertEqual(
+            str(cm.exception),
+            'WorkingHours.working_hours value should be a list of lists of '
+            'two integers between and the range of integers should be 0-1440, '
+            'not [[-10, 1000]]'
+        )
+
+    def test_working_hours_argument_data_is_not_in_correct_range2(self):
+        """testing if a ValueError will be raised when the range of the time
+        values are not correct in the working_hours argument
+        """
+        import copy
+        from stalker import defaults
 
         wh = copy.copy(defaults.working_hours)
         wh['sat'] = [[900, 1080], [1090, 1500]]
-        self.assertRaises(ValueError, WorkingHours,
-                          working_hours=wh)
+        with self.assertRaises(ValueError) as cm:
+            WorkingHours(working_hours=wh)
 
-    def test_working_hours_attribute_data_is_not_in_correct_range(self):
+        self.assertEqual(
+            str(cm.exception),
+            'WorkingHours.working_hours value should be a list of lists of '
+            'two integers between and the range of integers should be 0-1440, '
+            'not [[900, 1080], [1090, 1500]]'
+        )
+
+    def test_working_hours_attribute_data_is_not_in_correct_range1(self):
         """testing if a ValueError will be raised if the range of the time
         values are not correct when setting the working_hours attr
         """
+        import copy
+        from stalker import defaults
         wh = copy.copy(defaults.working_hours)
         wh['sun'] = [[-10, 1000]]
 
         wh_ins = WorkingHours()
-        self.assertRaises(ValueError, setattr, wh_ins, 'working_hours', wh)
+        with self.assertRaises(ValueError) as cm:
+            wh_ins.working_hours = wh
 
+        self.assertEqual(
+            str(cm.exception),
+            'WorkingHours.working_hours value should be a list of lists of '
+            'two integers between and the range of integers should be 0-1440, '
+            'not [[-10, 1000]]'
+        )
+
+    def test_working_hours_attribute_data_is_not_in_correct_range2(self):
+        """testing if a ValueError will be raised if the range of the time
+        values are not correct when setting the working_hours attr
+        """
+        import copy
+        from stalker import defaults
+
+        wh_ins = WorkingHours()
         wh = copy.copy(defaults.working_hours)
         wh['sat'] = [[900, 1080], [1090, 1500]]
-        self.assertRaises(ValueError, setattr, wh_ins, 'working_hours', wh)
+        with self.assertRaises(ValueError) as cm:
+            wh_ins.working_hours = wh
+
+        self.assertEqual(
+            str(cm.exception),
+            'WorkingHours.working_hours value should be a list of lists of '
+            'two integers between and the range of integers should be 0-1440, '
+            'not [[900, 1080], [1090, 1500]]'
+        )
 
     def test_working_hours_argument_value_is_not_complete(self):
         """testing if the default values are going to be used for missing days
@@ -117,6 +185,7 @@ class WorkingHoursTester(unittest.TestCase):
             'sun': [[900, 1080]]
         }
         wh = WorkingHours(working_hours=working_hours)
+        from stalker import defaults
         self.assertEqual(wh['mon'], defaults.working_hours['mon'])
         self.assertEqual(wh['tue'], defaults.working_hours['tue'])
         self.assertEqual(wh['wed'], defaults.working_hours['wed'])
@@ -133,6 +202,7 @@ class WorkingHoursTester(unittest.TestCase):
         }
         wh = WorkingHours()
         wh.working_hours = working_hours
+        from stalker import defaults
         self.assertEqual(wh['mon'], defaults.working_hours['mon'])
         self.assertEqual(wh['tue'], defaults.working_hours['tue'])
         self.assertEqual(wh['wed'], defaults.working_hours['wed'])
@@ -143,6 +213,7 @@ class WorkingHoursTester(unittest.TestCase):
         """testing if the working hours for a day can be reached by an index
         """
         wh = WorkingHours()
+        from stalker import defaults
         self.assertEqual(wh[6], defaults.working_hours['sun'])
         wh[6] = [[540, 1080]]
 
@@ -158,61 +229,312 @@ class WorkingHoursTester(unittest.TestCase):
         the short date name as the index
         """
         wh = WorkingHours()
+        from stalker import defaults
         self.assertEqual(wh['sun'], defaults.working_hours['sun'])
         wh['sun'] = [[540, 1080]]
 
-    def test___setitem__checks_the_given_data(self):
+    def test___setitem__checks_the_given_data_1(self):
         """testing if the __setitem__ checks the given data format
         """
         wh = WorkingHours()
-        self.assertRaises(TypeError, wh.__setitem__, 0, 'not a proper data')
-        self.assertRaises(TypeError, wh.__setitem__, 'sun',
-                          'not a proper data')
-        self.assertRaises(TypeError, wh.__setitem__, 0, ['no proper data'])
-        self.assertRaises(TypeError, wh.__setitem__, 'sun', ['no proper data'])
+        with self.assertRaises(TypeError) as cm:
+            wh[0] = 'not a proper data'
 
-        self.assertRaises(RuntimeError, wh.__setitem__, 0,
-                          [['no proper data']])
-        self.assertRaises(RuntimeError, wh.__setitem__, 'sun',
-                          [['no proper data']])
+        self.assertEqual(
+            str(cm.exception),
+            'WorkingHours.working_hours value should be a list of lists of '
+            'two integers between and the range of integers should be 0-1440, '
+            'not str'
+        )
 
-        self.assertRaises(RuntimeError, wh.__setitem__, 0, [[3]])
-        self.assertRaises(TypeError, wh.__setitem__, 2, [[2, 'a']])
-        self.assertRaises(TypeError, wh.__setitem__, 1, [[20, 10], ['a', 300]])
-        self.assertRaises(TypeError, wh.__setitem__, 5,
-                          [[323, 1344], [2, 'd']])
-        self.assertRaises(RuntimeError, wh.__setitem__, 0, [[4, 100, 3]])
+    def test___setitem__checks_the_given_data_2(self):
+        """testing if the __setitem__ checks the given data format
+        """
+        wh = WorkingHours()
 
-        self.assertRaises(RuntimeError, wh.__setitem__, 'mon', [[3]])
-        self.assertRaises(TypeError, wh.__setitem__, 'mon', [[2, 'a']])
-        self.assertRaises(TypeError, wh.__setitem__, 'tue', [[20, 10],
-                                                             ['a', 300]])
-        self.assertRaises(TypeError, wh.__setitem__, 'fri', [[323, 1344],
-                                                             [2, 'd']])
-        self.assertRaises(RuntimeError, wh.__setitem__, 'sat', [[4, 100, 3]])
+        with self.assertRaises(TypeError) as cm:
+            wh['sun'] = 'not a proper data'
 
-    def test___setitem__checks_the_value_ranges(self):
+        self.assertEqual(
+            str(cm.exception),
+            'WorkingHours.working_hours value should be a list of lists of '
+            'two integers between and the range of integers should be 0-1440, '
+            'not str'
+        )
+
+    def test___setitem__checks_the_given_data_3(self):
+        """testing if the __setitem__ checks the given data format
+        """
+        wh = WorkingHours()
+
+        with self.assertRaises(TypeError) as cm:
+            wh[0] = ['no proper data']
+
+        self.assertEqual(
+            str(cm.exception),
+            'WorkingHours.working_hours value should be a list of lists of '
+            'two integers between and the range of integers should be 0-1440, '
+            'not str'
+        )
+
+    def test___setitem__checks_the_given_data_4(self):
+        """testing if the __setitem__ checks the given data format
+        """
+        wh = WorkingHours()
+
+        with self.assertRaises(TypeError) as cm:
+            wh['sun'] = ['no proper data']
+
+        self.assertEqual(
+            str(cm.exception),
+            'WorkingHours.working_hours value should be a list of lists of '
+            'two integers between and the range of integers should be 0-1440, '
+            'not str'
+        )
+
+    def test___setitem__checks_the_given_data_5(self):
+        """testing if the __setitem__ checks the given data format
+        """
+        wh = WorkingHours()
+
+        with self.assertRaises(RuntimeError) as cm:
+            wh[0] = [['no proper data']]
+
+        self.assertEqual(
+            str(cm.exception),
+            "WorkingHours.working_hours value should be a list of lists of "
+            "two integers between and the range of integers should be 0-1440, "
+            "not [['no proper data']]"
+        )
+
+    def test___setitem__checks_the_given_data_6(self):
+        """testing if the __setitem__ checks the given data format
+        """
+        wh = WorkingHours()
+
+        with self.assertRaises(RuntimeError) as cm:
+            wh['sun'] = [['no proper data']]
+
+        self.assertEqual(
+            str(cm.exception),
+            "WorkingHours.working_hours value should be a list of lists of "
+            "two integers between and the range of integers should be 0-1440, "
+            "not [['no proper data']]"
+        )
+
+    def test___setitem__checks_the_given_data_7(self):
+        """testing if the __setitem__ checks the given data format
+        """
+        wh = WorkingHours()
+
+        with self.assertRaises(RuntimeError) as cm:
+            wh[0] = [[3]]
+
+        self.assertEqual(
+            str(cm.exception),
+            'WorkingHours.working_hours value should be a list of lists of '
+            'two integers between and the range of integers should be 0-1440, '
+            'not [[3]]'
+        )
+
+    def test___setitem__checks_the_given_data_8(self):
+        """testing if the __setitem__ checks the given data format
+        """
+        wh = WorkingHours()
+
+        with self.assertRaises(TypeError) as cm:
+            wh[2] = [[2, 'a']]
+
+        self.assertEqual(
+            str(cm.exception),
+            "WorkingHours.working_hours value should be a list of lists of "
+            "two integers between and the range of integers should be 0-1440, "
+            "not [[2, 'a']]"
+        )
+
+    def test___setitem__checks_the_given_data_9(self):
+        """testing if the __setitem__ checks the given data format
+        """
+        wh = WorkingHours()
+
+        with self.assertRaises(TypeError) as cm:
+            wh[1] = [[20, 10], ['a', 300]]
+
+        self.assertEqual(
+            str(cm.exception),
+            "WorkingHours.working_hours value should be a list of lists of "
+            "two integers between and the range of integers should be 0-1440, "
+            "not [[20, 10], ['a', 300]]"
+        )
+
+    def test___setitem__checks_the_given_data_10(self):
+        """testing if the __setitem__ checks the given data format
+        """
+        wh = WorkingHours()
+
+        with self.assertRaises(TypeError) as cm:
+            wh[5] = [[323, 1344], [2, 'd']]
+
+        self.assertEqual(
+            str(cm.exception),
+            "WorkingHours.working_hours value should be a list of lists of "
+            "two integers between and the range of integers should be 0-1440, "
+            "not [[323, 1344], [2, 'd']]"
+        )
+
+    def test___setitem__checks_the_given_data_11(self):
+        """testing if the __setitem__ checks the given data format
+        """
+        wh = WorkingHours()
+
+        with self.assertRaises(RuntimeError) as cm:
+            wh[0] = [[4, 100, 3]]
+
+        self.assertEqual(
+            str(cm.exception),
+            'WorkingHours.working_hours value should be a list of lists of '
+            'two integers between and the range of integers should be 0-1440, '
+            'not [[4, 100, 3]]'
+        )
+
+    def test___setitem__checks_the_given_data_13(self):
+        """testing if the __setitem__ checks the given data format
+        """
+        wh = WorkingHours()
+
+        with self.assertRaises(RuntimeError) as cm:
+            wh['mon'] = [[3]]
+
+        self.assertEqual(
+            str(cm.exception),
+            'WorkingHours.working_hours value should be a list of lists of '
+            'two integers between and the range of integers should be 0-1440, '
+            'not [[3]]'
+        )
+
+    def test___setitem__checks_the_given_data_14(self):
+        """testing if the __setitem__ checks the given data format
+        """
+        wh = WorkingHours()
+
+        with self.assertRaises(TypeError) as cm:
+            wh['mon'] = [[2, 'a']]
+
+        self.assertEqual(
+            str(cm.exception),
+            "WorkingHours.working_hours value should be a list of lists of "
+            "two integers between and the range of integers should be 0-1440, "
+            "not [[2, 'a']]"
+        )
+
+    def test___setitem__checks_the_given_data_15(self):
+        """testing if the __setitem__ checks the given data format
+        """
+        wh = WorkingHours()
+
+        with self.assertRaises(TypeError) as cm:
+            wh['tue'] = [[20, 10], ['a', 300]]
+
+        self.assertEqual(
+            str(cm.exception),
+            "WorkingHours.working_hours value should be a list of lists of "
+            "two integers between and the range of integers should be 0-1440, "
+            "not [[20, 10], ['a', 300]]"
+        )
+
+    def test___setitem__checks_the_given_data_16(self):
+        """testing if the __setitem__ checks the given data format
+        """
+        wh = WorkingHours()
+
+        with self.assertRaises(TypeError) as cm:
+            wh['fri'] = [[323, 1344], [2, 'd']]
+
+        self.assertEqual(
+            str(cm.exception),
+            "WorkingHours.working_hours value should be a list of lists of "
+            "two integers between and the range of integers should be 0-1440, "
+            "not [[323, 1344], [2, 'd']]"
+        )
+
+    def test___setitem__checks_the_given_data_17(self):
+        """testing if the __setitem__ checks the given data format
+        """
+        wh = WorkingHours()
+
+        with self.assertRaises(RuntimeError) as cm:
+            wh['sat'] = [[4, 100, 3]]
+
+        self.assertEqual(
+            str(cm.exception),
+            'WorkingHours.working_hours value should be a list of lists of '
+            'two integers between and the range of integers should be 0-1440, '
+            'not [[4, 100, 3]]'
+        )
+
+    def test___setitem__checks_the_value_ranges_1(self):
         """testing if a ValueError will be raised if value is not in the
         correct range in __setitem__
         """
         wh = WorkingHours()
-        self.assertRaises(ValueError, wh.__setitem__, 'sun', [[-10, 100]])
-        self.assertRaises(ValueError, wh.__setitem__, 'sat', [[0, 1800]])
+        with self.assertRaises(ValueError) as cm:
+            wh['sun'] = [[-10, 100]]
 
-    def test___setitem__will_not_accept_any_other_key_or_value(self):
+        self.assertEqual(
+            str(cm.exception),
+            'WorkingHours.working_hours value should be a list of lists of '
+            'two integers between and the range of integers should be 0-1440, '
+            'not [[-10, 100]]'
+        )
+
+    def test___setitem__checks_the_value_ranges_2(self):
+        """testing if a ValueError will be raised if value is not in the
+        correct range in __setitem__
+        """
+        wh = WorkingHours()
+        with self.assertRaises(ValueError) as cm:
+            wh['sat'] = [[0, 1800]]
+
+        self.assertEqual(
+            str(cm.exception),
+            'WorkingHours.working_hours value should be a list of lists of '
+            'two integers between and the range of integers should be 0-1440, '
+            'not [[0, 1800]]'
+        )
+
+    def test___setitem__will_not_accept_any_other_key_or_value_1(self):
         """testing if it is possible to use the other indexes or keys
         """
         wh = WorkingHours()
 
         # indexing out of interested range
-        self.assertRaises(IndexError, wh.__setitem__, 7,
-                          [[32, 23], [233, 324]])
-        self.assertRaises(KeyError, wh.__setitem__, 'zon',
-                          [[32, 23], [233, 324]])
+        with self.assertRaises(IndexError) as cm:
+            wh[7] = [[32, 23], [233, 324]]
+
+        self.assertEqual(
+            str(cm.exception),
+            'list index out of range'
+        )
+
+    def test___setitem__will_not_accept_any_other_key_or_value_2(self):
+        """testing if it is possible to use the other indexes or keys
+        """
+        wh = WorkingHours()
+        # indexing non existent day
+        with self.assertRaises(KeyError) as cm:
+            wh['zon'] = [[32, 23], [233, 324]]
+
+        self.assertEqual(
+            str(cm.exception),
+            '"WorkingHours accepts only [\'mon\', \'tue\', \'wed\', \'thu\', '
+            '\'fri\', \'sat\', \'sun\'] as key, not \'zon\'"'
+        )
 
     def test_working_hours_argument_is_working_properly(self):
         """testing if the working_hours argument is working properly
         """
+        import copy
+        from stalker import defaults
         working_hours = copy.copy(defaults.working_hours)
         working_hours['sun'] = [[540, 1000]]
         working_hours['sat'] = [[500, 800], [900, 1440]]
@@ -224,6 +546,8 @@ class WorkingHoursTester(unittest.TestCase):
     def test_working_hours_attribute_is_working_properly(self):
         """testing if the working_hours attribute is working properly
         """
+        import copy
+        from stalker import defaults
         working_hours = copy.copy(defaults.working_hours)
         working_hours['sun'] = [[540, 1000]]
         working_hours['sat'] = [[500, 800], [900, 1440]]
@@ -237,7 +561,13 @@ class WorkingHoursTester(unittest.TestCase):
         """testing if the to_tjp attribute is read only
         """
         wh = WorkingHours()
-        self.assertRaises(AttributeError, setattr, wh, 'to_tjp', 'some value')
+        with self.assertRaises(AttributeError) as cm:
+            wh.to_tjp = 'some value'
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
+        )
 
     def test_to_tjp_attribute_is_working_properly(self):
         """testing if the to_tjp property is working properly
@@ -287,8 +617,13 @@ class WorkingHoursTester(unittest.TestCase):
         """testing if the weekly_working_hours is a read-only attribute
         """
         wh = WorkingHours()
-        self.assertRaises(AttributeError, setattr, wh, 'weekly_working_hours',
-                          232)
+        with self.assertRaises(AttributeError) as cm:
+            wh.weekly_working_hours = 232
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
+        )
 
     def test_weekly_working_hours_attribute_is_working_properly(self):
         """testing if the weekly_working_hours attribute is working properly
@@ -319,6 +654,8 @@ class WorkingHoursTester(unittest.TestCase):
         wh['sun'] = []
 
         # monday
+        import datetime
+        import pytz
         check_date = datetime.datetime(2013, 4, 8, 13, 55, tzinfo=pytz.utc)
         self.assertTrue(wh.is_working_hour(check_date))
 
@@ -338,6 +675,7 @@ class WorkingHoursTester(unittest.TestCase):
         wh['sat'] = [[11, 12]]
         wh['sun'] = [[13, 14]]
 
+        from stalker import defaults
         self.assertEqual(defaults.day_order[0], 'mon')
         self.assertEqual(defaults.day_order[1], 'tue')
         self.assertEqual(defaults.day_order[2], 'wed')
@@ -358,8 +696,13 @@ class WorkingHoursTester(unittest.TestCase):
         """testing if the weekly working days is a read-only attribute
         """
         wh = WorkingHours()
-        self.assertRaises(AttributeError, setattr, wh, 'weekly_working_days',
-                          6)
+        with self.assertRaises(AttributeError) as cm:
+            wh.weekly_working_days = 6
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
+        )
 
     def test_weekly_working_days_is_calculated_correctly(self):
         """testing if the weekly working days are calculated correctly
@@ -399,8 +742,13 @@ class WorkingHoursTester(unittest.TestCase):
         attribute
         """
         wh = WorkingHours()
-        self.assertRaises(AttributeError, setattr, wh, 'yearly_working_days',
-                          260.1)
+        with self.assertRaises(AttributeError) as cm:
+            wh.yearly_working_days = 260.1
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
+        )
 
     def test_yearly_working_days_is_calculated_correctly(self):
         """testing if the yearly_working_days is calculated correctly
@@ -441,6 +789,7 @@ class WorkingHoursTester(unittest.TestCase):
         default settings when the daily_working_hours argument is skipped
         """
         wh = WorkingHours()
+        from stalker import defaults
         self.assertEqual(wh.daily_working_hours, defaults.daily_working_hours)
 
     def test_daily_working_hours_argument_is_None(self):
@@ -450,6 +799,7 @@ class WorkingHoursTester(unittest.TestCase):
         kwargs = dict()
         kwargs['daily_working_hours'] = None
         wh = WorkingHours(**kwargs)
+        from stalker import defaults
         self.assertEqual(wh.daily_working_hours,
                          defaults.daily_working_hours)
 
@@ -459,6 +809,7 @@ class WorkingHoursTester(unittest.TestCase):
         """
         wh = WorkingHours()
         wh.daily_working_hours = None
+        from stalker import defaults
         self.assertEqual(wh.daily_working_hours, defaults.daily_working_hours)
 
     def test_daily_working_hours_argument_is_not_integer(self):
@@ -467,15 +818,26 @@ class WorkingHoursTester(unittest.TestCase):
         """
         kwargs = dict()
         kwargs['daily_working_hours'] = 'not an integer'
-        self.assertRaises(TypeError, WorkingHours, **kwargs)
+        with self.assertRaises(TypeError) as cm:
+            WorkingHours(**kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'WorkingHours.daily_working_hours should be an integer, not str'
+        )
 
     def test_daily_working_hours_attribute_is_not_an_integer(self):
         """testing if a TypeError will be raised when the daily_working hours
         attribute is set to a value other than an integer
         """
         wh = WorkingHours()
-        self.assertRaises(TypeError, setattr, wh, 'daily_working_hours',
-                          'not an integer')
+        with self.assertRaises(TypeError) as cm:
+            wh.daily_working_hours = 'not an integer'
+
+        self.assertEqual(
+            str(cm.exception),
+            'WorkingHours.daily_working_hours should be an integer, not str'
+        )
 
     def test_daily_working_hours_argument_is_working_fine(self):
         """testing if the daily working hours argument value is correctly
@@ -499,14 +861,28 @@ class WorkingHoursTester(unittest.TestCase):
         """
         kwargs = dict()
         kwargs['daily_working_hours'] = 0
-        self.assertRaises(ValueError, WorkingHours, **kwargs)
+        with self.assertRaises(ValueError) as cm:
+            WorkingHours(**kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'WorkingHours.daily_working_hours should be a positive integer '
+            'value greater than 0 and smaller than or equal to 24'
+        )
 
     def test_daily_working_hours_attribute_is_zero(self):
         """testing if a ValueError will be raised when the daily_working_hours
         attribute is set to zero
         """
         wh = WorkingHours()
-        self.assertRaises(ValueError, setattr, wh, 'daily_working_hours', 0)
+        with self.assertRaises(ValueError) as cm:
+            wh.daily_working_hours = 0
+
+        self.assertEqual(
+            str(cm.exception),
+            'WorkingHours.daily_working_hours should be a positive integer '
+            'value greater than 0 and smaller than or equal to 24'
+        )
 
     def test_daily_working_hours_argument_is_a_negative_number(self):
         """testing if a ValueError will be raised when the daily_working_hours
@@ -514,14 +890,28 @@ class WorkingHoursTester(unittest.TestCase):
         """
         kwargs = dict()
         kwargs['daily_working_hours'] = -10
-        self.assertRaises(ValueError, WorkingHours, **kwargs)
+        with self.assertRaises(ValueError) as cm:
+            WorkingHours(**kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'WorkingHours.daily_working_hours should be a positive integer '
+            'value greater than 0 and smaller than or equal to 24'
+        )
 
     def test_daily_working_hours_attribute_is_a_negative_number(self):
         """testing if a ValueError will be raised when the daily_working_hours
         attribute is set to a negative value
         """
         wh = WorkingHours()
-        self.assertRaises(ValueError, setattr, wh, 'daily_working_hours', -10)
+        with self.assertRaises(ValueError) as cm:
+            wh.daily_working_hours = -10
+
+        self.assertEqual(
+            str(cm.exception),
+            'WorkingHours.daily_working_hours should be a positive integer '
+            'value greater than 0 and smaller than or equal to 24'
+        )
 
     def test_daily_working_hours_argument_is_set_to_a_number_bigger_than_24(self):
         """testing if a ValueError will be raised when the daily working hours
@@ -529,14 +919,28 @@ class WorkingHoursTester(unittest.TestCase):
         """
         kwargs = dict()
         kwargs['daily_working_hours'] = 25
-        self.assertRaises(ValueError, WorkingHours, **kwargs)
+        with self.assertRaises(ValueError) as cm:
+            WorkingHours(**kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'WorkingHours.daily_working_hours should be a positive integer '
+            'value greater than 0 and smaller than or equal to 24'
+        )
 
     def test_daily_working_hours_attribute_is_set_to_a_number_bigger_than_24(self):
         """testing if a ValueError will be raised when the daily working hours
         attribute value is bigger than 24
         """
         wh = WorkingHours()
-        self.assertRaises(ValueError, setattr, wh, 'daily_working_hours', 25)
+        with self.assertRaises(ValueError) as cm:
+            wh.daily_working_hours = 25
+
+        self.assertEqual(
+            str(cm.exception),
+            'WorkingHours.daily_working_hours should be a positive integer '
+            'value greater than 0 and smaller than or equal to 24'
+        )
 
     def test_split_in_to_working_hours_is_not_implemented_yet(self):
         """testing if a NotimplementedError will be raised when the
@@ -544,6 +948,8 @@ class WorkingHoursTester(unittest.TestCase):
         """
         with self.assertRaises(NotImplementedError):
             wh = WorkingHours()
+            import datetime
+            import pytz
             start = datetime.datetime.now(pytz.utc)
             end = start + datetime.timedelta(days=10)
             wh.split_in_to_working_hours(start, end)

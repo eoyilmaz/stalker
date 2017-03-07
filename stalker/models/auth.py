@@ -197,7 +197,7 @@ class Permission(Base):
 
         if action not in defaults.actions:
             raise ValueError(
-                '%s.action should be one of the values of %s not %s' %
+                "%s.action should be one of the values of %s not '%s'" %
                 (self.__class__.__name__, defaults.actions, action)
             )
 
@@ -740,7 +740,7 @@ class User(Entity, ACLMixin):
         """
         if not isinstance(group, Group):
             raise TypeError(
-                "Any group in %s.groups should be an instance of"
+                "Any group in %s.groups should be an instance of "
                 "stalker.models.auth.Group not %s" %
                 (self.__class__.__name__, group.__class__.__name__)
             )
@@ -783,8 +783,8 @@ class User(Entity, ACLMixin):
 
         if not isinstance(vacation, Vacation):
             raise TypeError(
-                "All of the members of %s.vacations should be an instance of "
-                "stalker.models.studio.Vacation, not %s" %
+                "All of the elements in %s.vacations should be a "
+                "stalker.models.studio.Vacation instance, not %s" %
                 (self.__class__.__name__, vacation.__class__.__name__)
             )
         return vacation

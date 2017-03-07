@@ -601,19 +601,24 @@ class DateRangeMixinTester(UnitTestBase):
         """testing if the computed_duration attribute is read-only
         """
         new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
-        self.assertRaises(AttributeError, setattr, new_foo_obj,
-                          'computed_duration', datetime.timedelta(10))
+        with self.assertRaises(AttributeError) as cm:
+            new_foo_obj.computed_duration = datetime.timedelta(10)
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
+        )
 
     def test_total_seconds_attribute_is_read_only(self):
         """testing if the total_seconds is read only
         """
         new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
-        self.assertRaises(
-            AttributeError,
-            setattr,
-            new_foo_obj,
-            'total_seconds',
-            234234
+        with self.assertRaises(AttributeError) as cm:
+            new_foo_obj.total_seconds = 234234
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
         )
 
     def test_total_seconds_attribute_is_working_properly(self):
@@ -633,12 +638,12 @@ class DateRangeMixinTester(UnitTestBase):
         """testing if the computed_total_seconds is read only
         """
         new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
-        self.assertRaises(
-            AttributeError,
-            setattr,
-            new_foo_obj,
-            'computed_total_seconds',
-            234234
+        with self.assertRaises(AttributeError) as cm:
+            new_foo_obj.computed_total_seconds = 234234
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
         )
 
     def test_computed_total_seconds_attribute_is_working_properly(self):

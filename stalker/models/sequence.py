@@ -79,7 +79,7 @@ class Sequence(Task, CodeMixin):
         if not isinstance(shot, Shot):
             raise TypeError(
                 '%s.shots should be all stalker.models.shot.Shot instances, '
-                'not %s'
+                'not %s' % (self.__class__.__name__, shot.__class__.__name__)
             )
         return shot
 

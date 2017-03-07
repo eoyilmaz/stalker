@@ -237,22 +237,50 @@ class TimeLog(Entity, DateRangeMixin):
         with DBSession.no_autoflush:
             # TODO: use other logging levels not just DEBUG
             # logger.debug('resource.time_logs: %s' % resource.time_logs)
-            for time_log in resource.time_logs:
-                # logger.debug('time_log       : %s' % time_log)
-                # logger.debug('time_log.start : %s' % time_log.start)
-                # logger.debug('time_log.end   : %s' % time_log.end)
-                # logger.debug('self.start     : %s' % self.start)
-                # logger.debug('self.end       : %s' % self.end)
-
-                if time_log != self:
-                    if time_log.start == self.start or \
-                       time_log.end == self.end or \
-                       time_log.start < self.end < time_log.end or \
-                       time_log.start < self.start < time_log.end:
-                        raise OverBookedError(
-                            "The resource %s is overly booked with %s and %s" %
-                            (resource, self, time_log),
+            # for time_log in resource.time_logs:
+            #     # logger.debug('time_log       : %s' % time_log)
+            #     # logger.debug('time_log.start : %s' % time_log.start)
+            #     # logger.debug('time_log.end   : %s' % time_log.end)
+            #     # logger.debug('self.start     : %s' % self.start)
+            #     # logger.debug('self.end       : %s' % self.end)
+            #
+            #     if time_log != self:
+            #         if time_log.start == self.start or \
+            #            time_log.end == self.end or \
+            #            time_log.start < self.end < time_log.end or \
+            #            time_log.start < self.start < time_log.end:
+            #             raise OverBookedError(
+            #                 "The resource %s is overly booked with %s and %s" %
+            #                 (resource, self, time_log),
+            #             )
+            
+            from stalker import db
+            from sqlalchemy import or_, and_
+            clashing_time_log_data = \
+                db.DBSession.query(TimeLog.start, TimeLog.end)\
+                    .filter(TimeLog.id != self.id)\
+                    .filter(TimeLog.resource_id == resource.id)\
+                    .filter(
+                        or_(
+                            and_(
+                                TimeLog.start <= self.start,
+                                self.start < TimeLog.end
+                            ),
+                            and_(
+                                TimeLog.start < self.end,
+                                self.end <= TimeLog.end
+                            )
                         )
+                    )\
+                    .first()
+
+            if clashing_time_log_data:
+                raise OverBookedError(
+                    "The resource has another TimeLog between %s and %s" % (
+                        clashing_time_log_data[0], clashing_time_log_data[1]
+                    )
+                )
+
         return resource
 
     def __eq__(self, other):
@@ -268,8 +296,7 @@ class TimeLog(Entity, DateRangeMixin):
 #       later on, will it be ok with TJ
 
 
-class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin,
-           DAGMixin):
+class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, DAGMixin):
     """Manages Task related data.
 
     **Introduction**
@@ -1479,7 +1506,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin,
 
                         message = \
                             'The supplied parent and the project is not ' \
-                            'matching in %s, Stalker will use the parent ' \
+                            'matching in %s, Stalker will use the parents ' \
                             'project (%s) as the parent of this %s' % (
                                 self,
                                 self.parent.project,
@@ -1681,7 +1708,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin,
 
         if not isinstance(version, Version):
             raise TypeError(
-                "%(class)s.versions should only have"
+                "%(class)s.versions should only have "
                 "stalker.models.version.Version instances, and not %(class)s" %
                 {'class': self.__class__.__name__}
             )

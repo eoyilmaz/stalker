@@ -18,22 +18,19 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest
-from stalker import Entity, FilenameTemplate, Type
+from stalker.testing import UnitTestBase
+from stalker import FilenameTemplate
 
 
-# a test class
-class Asset(object):
-    pass
-
-
-class FilenameTemplateTester(unittest.TestCase):
+class FilenameTemplateTester(UnitTestBase):
     """tests the stalker.models.template.FilenameTemplate class
     """
 
     def setUp(self):
         """setup the test
         """
+        super(FilenameTemplateTester, self).setUp()
+        from stalker import db, Type, Asset, FilenameTemplate
         self.kwargs = {
             "name": "Test FilenameTemplate",
             "type": Type(
@@ -48,11 +45,14 @@ class FilenameTemplateTester(unittest.TestCase):
             "target_entity_type": Asset,
         }
         self.filename_template = FilenameTemplate(**self.kwargs)
+        db.DBSession.add(self.filename_template)
+        db.DBSession.commit()
 
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for
         Asset class
         """
+        from stalker import FilenameTemplate
         self.assertFalse(FilenameTemplate.__auto_name__)
 
     def test_filename_template_is_not_strictly_typed(self):
@@ -68,33 +68,50 @@ class FilenameTemplateTester(unittest.TestCase):
         argument is skipped
         """
         self.kwargs.pop("target_entity_type")
-        self.assertRaises(TypeError, FilenameTemplate, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            FilenameTemplate(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'FilenameTemplate.target_entity_type can not be None'
+        )
 
     def test_target_entity_type_argument_is_None(self):
         """testing if a TypeError will be raised when the target_entity_type
         argument is given as None
         """
         self.kwargs["target_entity_type"] = None
-        self.assertRaises(TypeError, FilenameTemplate, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            FilenameTemplate(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'FilenameTemplate.target_entity_type can not be None'
+        )
 
     def test_target_entity_type_attribute_is_read_only(self):
         """testing if a AttributeError will be raised when the
         target_entity_type attribute is tried to be changed
         """
-        self.assertRaises(AttributeError, setattr, self.filename_template,
-                          "target_entity_type", "Asset")
+        with self.assertRaises(AttributeError) as cm:
+            self.filename_template.target_entity_type = "Asset"
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
+        )
 
     def test_target_entity_type_argument_accepts_Classes(self):
         """testing if the target_entity_type can be set to a class directly
         """
-        self.kwargs["target_entity_type"] = Asset
+        self.kwargs["target_entity_type"] = 'Asset'
         new_filenameTemplate = FilenameTemplate(**self.kwargs)
 
     def test_target_entity_type_attribute_is_converted_to_a_string_if_given_as_a_class(self):
         """testing if the target_entity_type attribute is converted when the
         target_entity_type is given as a class
         """
-        self.kwargs["target_entity_type"] = Asset
+        self.kwargs["target_entity_type"] = 'Asset'
         ft = FilenameTemplate(**self.kwargs)
         self.assertEqual(ft.target_entity_type, "Asset")
 
@@ -141,15 +158,26 @@ class FilenameTemplateTester(unittest.TestCase):
         """
         test_value = list("a list from a string")
         self.kwargs["path"] = test_value
-        self.assertRaises(TypeError, FilenameTemplate, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            FilenameTemplate(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'FilenameTemplate.path attribute should be string not list'
+        )
 
     def test_path_attribute_is_not_string(self):
         """testing if a TypeError will be raised when the path attribute is not
         set to a string
         """
         test_value = list("a list from a string")
-        self.assertRaises(TypeError, setattr, self.filename_template, "path",
-                          test_value)
+        with self.assertRaises(TypeError) as cm:
+            self.filename_template.path = test_value
+
+        self.assertEqual(
+            str(cm.exception),
+            'FilenameTemplate.path attribute should be string not list'
+        )
 
     def test_filename_argument_is_skipped(self):
         """testing if nothing happens when the filename argument is skipped
@@ -194,21 +222,33 @@ class FilenameTemplateTester(unittest.TestCase):
         """
         test_value = list("a list from a string")
         self.kwargs["filename"] = test_value
-        self.assertRaises(TypeError, FilenameTemplate, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            FilenameTemplate(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'FilenameTemplate.filename attribute should be string not list'
+        )
 
     def test_filename_attribute_is_not_string(self):
         """testing if the given value converted to string for the filename
         attribute
         """
         test_value = list("a list from a string")
-        self.assertRaises(TypeError, self.filename_template, "filename",
-                          test_value)
+        with self.assertRaises(TypeError) as cm:
+            self.filename_template.filename = test_value
+
+        self.assertEqual(
+            str(cm.exception),
+            'FilenameTemplate.filename attribute should be string not list'
+        )
 
     def test_equality(self):
         """testing the equality of FilenameTemplate objects
         """
         ft1 = FilenameTemplate(**self.kwargs)
 
+        from stalker import Entity
         new_entity = Entity(**self.kwargs)
 
         self.kwargs["target_entity_type"] = "Entity"
@@ -231,6 +271,7 @@ class FilenameTemplateTester(unittest.TestCase):
         """
         ft1 = FilenameTemplate(**self.kwargs)
 
+        from stalker import Entity
         new_entity = Entity(**self.kwargs)
 
         self.kwargs["target_entity_type"] = "Entity"

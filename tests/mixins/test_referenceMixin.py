@@ -27,6 +27,7 @@ from stalker.models.mixins import ReferenceMixin
 from stalker.db.session import DBSession
 from stalker.models.type import Type
 from stalker.models.entity import SimpleEntity
+from stalker.testing import UnitTestBase
 
 
 class RefMixFooClass(SimpleEntity, ReferenceMixin):
@@ -39,13 +40,14 @@ class RefMixFooClass(SimpleEntity, ReferenceMixin):
         super(RefMixFooClass, self).__init__(**kwargs)
 
 
-class ReferenceMixinTester(unittest.TestCase):
+class ReferenceMixinTester(UnitTestBase):
     """tests the ReferenceMixin
     """
 
     def setUp(self):
         """setup the test
         """
+        super(ReferenceMixinTester, self).setUp()
         # link type
         self.test_link_type = Type(
             name='Test Link Type',
@@ -99,11 +101,6 @@ class ReferenceMixinTester(unittest.TestCase):
 
         self.test_foo_obj = RefMixFooClass(name="Ref Mixin Test")
 
-    def tearDown(self):
-        """clean up the test
-        """
-        DBSession.remove()
-
     def test_references_attribute_accepting_empty_list(self):
         """testing if references attribute accepting empty lists
         """
@@ -113,37 +110,27 @@ class ReferenceMixinTester(unittest.TestCase):
         """testing if references attribute accepts only list-like objects,
         (objects with __setitem__, __getitem__ methods
         """
-        test_values = [1, 1.2, "a string"]
+        with self.assertRaises(TypeError) as cm:
+            self.test_foo_obj.references = "a string"
 
-        for test_value in test_values:
-            self.assertRaises(
-                TypeError,
-                setattr,
-                self.test_foo_obj,
-                "references",
-                test_value
-            )
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: str is not list-like'
+        )
 
     def test_references_attribute_accepting_only_lists_of_Link_instances(self):
         """testing if references attribute accepting only lists with Link
         instances and derivatives
         """
-        test_value = [1, 2.2, ["a reference as list"], "some references"]
+        test_value = [1, 2.2, "some references"]
 
-        self.assertRaises(
-            TypeError,
-            setattr,
-            self.test_foo_obj,
-            "references",
-            test_value
-        )
+        with self.assertRaises(TypeError) as cm:
+            self.test_foo_obj.references = test_value
 
-        # and test if it is accepting a proper list
-        test_value = [self.test_link1, self.test_link2, self.test_link3]
-        self.test_foo_obj.references = test_value
         self.assertEqual(
-            sorted(test_value, key=lambda x: x.name),
-            sorted(self.test_foo_obj.references, key=lambda x: x.name)
+            str(cm.exception),
+            'All the elements in the RefMixFooClass.references should be '
+            'stalker.models.link.Link instances not int'
         )
 
     def test_references_attribute_elements_accepts_Links_only(self):
@@ -151,14 +138,17 @@ class ReferenceMixinTester(unittest.TestCase):
         something other than an instance of Link or its derived classes to
         the references list
         """
-        self.assertRaises(
-            TypeError,
-            setattr,
-            self.test_foo_obj, 'references',
-            [self.test_entity1, self.test_entity2]
+        with self.assertRaises(TypeError) as cm:
+            self.test_foo_obj.references = \
+                [self.test_entity1, self.test_entity2]
+
+        self.assertEqual(
+            str(cm.exception),
+            'All the elements in the RefMixFooClass.references should be '
+            'stalker.models.link.Link instances not Entity'
         )
 
-    def test_references_attribute_working_properly(self):
+    def test_references_attribute_is_working_properly(self):
         """testing if references attribute working properly
         """
         self.test_foo_obj.references = self.test_links

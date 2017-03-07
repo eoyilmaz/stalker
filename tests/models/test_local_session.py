@@ -17,45 +17,27 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-import json
-
-import os
-import shutil
-import tempfile
-import datetime
-import unittest
-
-from stalker import defaults, db, User
-from stalker.db import DBSession
-from stalker.models.auth import LocalSession
+from stalker.testing import UnitTestBase
 
 
-class LocalSessionTester(unittest.TestCase):
+class LocalSessionTester(UnitTestBase):
     """tests LocalSession class
     """
-
-    @classmethod
-    def setUpClass(cls):
-        """setting up the test in class level
-        """
-        DBSession.remove()
-
-    @classmethod
-    def tearDownClass(cls):
-        """clean up the test in class level
-        """
-        DBSession.remove()
 
     def setUp(self):
         """setup the test
         """
-        DBSession.remove()
-        db.setup()
+        super(LocalSessionTester, self).setUp()
+        import tempfile
+        from stalker import defaults
         defaults.local_storage_path = tempfile.mktemp()
 
     def tearDown(self):
         """cleans the test environment
         """
+        super(LocalSessionTester, self).tearDown()
+        import shutil
+        from stalker import defaults
         shutil.rmtree(
             defaults.local_storage_path,
             True
@@ -64,10 +46,13 @@ class LocalSessionTester(unittest.TestCase):
     def test_save_serializes_the_class_itself(self):
         """testing if the save function serializes the class to the filesystem
         """
+        from stalker import LocalSession
         new_local_session = LocalSession()
         new_local_session.save()
 
         # check if a file is created in the users local storage
+        import os
+        from stalker import defaults
         self.assertTrue(
             os.path.exists(
                 os.path.join(
@@ -85,6 +70,7 @@ class LocalSessionTester(unittest.TestCase):
         logged_in_user_id = -10
 
         # create a local_session
+        from stalker import LocalSession
         local_session = LocalSession()
 
         # store some data
@@ -104,6 +90,7 @@ class LocalSessionTester(unittest.TestCase):
         """testing if logged_in_user returns the logged in user
         """
         # create a new user
+        from stalker import db, User
         new_user = User(
             name='Test User',
             login='test_user',
@@ -112,12 +99,13 @@ class LocalSessionTester(unittest.TestCase):
         )
 
         # save it to the Database
-        DBSession.add(new_user)
-        DBSession.commit()
+        db.DBSession.add(new_user)
+        db.DBSession.commit()
 
         self.assertTrue(new_user.id is not None)
 
         # save it to the local storage
+        from stalker import LocalSession
         local_session = LocalSession()
         local_session.store_user(new_user)
 
@@ -142,6 +130,7 @@ class LocalSessionTester(unittest.TestCase):
         not valid anymore
         """
         # create a new user
+        from stalker import db, User, LocalSession
         new_user = User(
             name='Test User',
             login='test_user',
@@ -150,8 +139,8 @@ class LocalSessionTester(unittest.TestCase):
         )
 
         # save it to the Database
-        DBSession.add(new_user)
-        DBSession.commit()
+        db.DBSession.add(new_user)
+        db.DBSession.commit()
 
         self.assertTrue(new_user.id is not None)
 
@@ -164,10 +153,12 @@ class LocalSessionTester(unittest.TestCase):
 
         # set the valid time to an early date
         import pytz
+        import datetime
         local_session.valid_to = \
             datetime.datetime.now(pytz.utc) - datetime.timedelta(10)
 
         # pickle the data
+        import json
         data = json.dumps(
             {
                 'valid_to': local_session.valid_to,
@@ -192,6 +183,7 @@ class LocalSessionTester(unittest.TestCase):
         file
         """
         # create a new user
+        from stalker import db, User
         new_user = User(
             name='Test User',
             login='test_user',
@@ -200,12 +192,13 @@ class LocalSessionTester(unittest.TestCase):
         )
 
         # save it to the Database
-        DBSession.add(new_user)
-        DBSession.commit()
+        db.DBSession.add(new_user)
+        db.DBSession.commit()
 
         self.assertTrue(new_user.id is not None)
 
         # save it to the local storage
+        from stalker import LocalSession
         local_session = LocalSession()
         local_session.store_user(new_user)
 
@@ -214,6 +207,8 @@ class LocalSessionTester(unittest.TestCase):
 
         # check if the file is created
         # check if a file is created in the users local storage
+        import os
+        from stalker import defaults
         self.assertTrue(
             os.path.exists(
                 os.path.join(

@@ -19,6 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 from stalker.testing import UnitTestBase
+from stalker import User
 
 import logging
 logger = logging.getLogger(__name__)
@@ -147,7 +148,6 @@ class UserTest(UnitTestBase):
         self.task_status_list = StatusList.query\
             .filter_by(target_entity_type='Task').first()
 
-        from stalker import User
         self.test_lead = User(
             name='lead',
             login='lead',
@@ -401,8 +401,8 @@ class UserTest(UnitTestBase):
         ])
 
         from stalker import defaults
-        self.test_admin = User.query.filter_by(name=defaults.admin_name) \
-            .first()
+        self.test_admin = \
+            User.query.filter(User.name == defaults.admin_name).first()
         self.assertTrue(self.test_admin is not None)
 
         # create test company
@@ -438,81 +438,173 @@ class UserTest(UnitTestBase):
         """testing if the __auto_name__ class attribute is set to False for
         User class
         """
-        from stalker import User
         self.assertFalse(User.__auto_name__)
 
     def test_email_argument_accepting_only_string(self):
         """testing if email argument accepting only string values
         """
         # try to create a new user with wrong attribute
-        test_values = [1, 1.3, ["an email"], {"an": "email"}]
+        self.kwargs["email"] = 1.3
+        with self.assertRaises(TypeError) as cm:
+            User(**self.kwargs)
 
-        from stalker import User
-        for test_value in test_values:
-            self.kwargs["email"] = test_value
-            self.assertRaises(TypeError, User, **self.kwargs)
+        self.assertEqual(
+            str(cm.exception),
+            'User.email should be an instance of str not float'
+        )
 
-    def test_email_attribute_accepting_only_string(self):
+    def test_email_attribute_accepting_only_string_1(self):
         """testing if email attribute accepting only string values
         """
         # try to assign something else than a string
         test_value = 1
 
-        self.assertRaises(
-            TypeError,
-            setattr,
-            self.test_user,
-            "email",
-            test_value
+        with self.assertRaises(TypeError) as cm:
+            self.test_user.email = test_value
+
+        self.assertEqual(
+            str(cm.exception),
+            'User.email should be an instance of str not int'
         )
 
+    def test_email_attribute_accepting_only_string_2(self):
+        """testing if email attribute accepting only string values
+        """
+        # try to assign something else than a string
         test_value = ["an email"]
 
-        self.assertRaises(
-            TypeError,
-            setattr,
-            self.test_user,
-            "email",
-            test_value
+        with self.assertRaises(TypeError) as cm:
+            self.test_user.email = test_value
+
+        self.assertEqual(
+            str(cm.exception),
+            'User.email should be an instance of str not list'
         )
 
-    def test_email_argument_format(self):
+    def test_email_argument_format_1(self):
         """testing if given an email in wrong format will raise a ValueError
         """
-        test_values = [
-            "an email in no format",
-            "an_email_with_no_part2",
-            "@an_email_with_only_part2",
-            "@"
-        ]
-
         # any of this values should raise a ValueError
-        from stalker import User
-        for test_value in test_values:
-            self.kwargs["email"] = test_value
-            self.assertRaises(ValueError, User, **self.kwargs)
+        self.kwargs["email"] = "an email in no format"
+        with self.assertRaises(ValueError) as cm:
+            User(**self.kwargs)
 
-    def test_email_attribute_format(self):
+        self.assertEqual(
+            str(cm.exception),
+            'check the formatting of User.email, there is no @ sign'
+        )
+
+    def test_email_argument_format_2(self):
         """testing if given an email in wrong format will raise a ValueError
         """
-        test_values = [
-            "an email in no format",
-            "an_email_with_no_part2",
-            "@an_email_with_only_part2",
-            "@",
-            "eoyilmaz@",
-            "eoyilmaz@some.compony@com",
-        ]
+        # any of this values should raise a ValueError
+        self.kwargs["email"] = "an_email_with_no_part2"
+        with self.assertRaises(ValueError) as cm:
+            User(**self.kwargs)
 
+        self.assertEqual(
+            str(cm.exception),
+            'check the formatting of User.email, there is no @ sign'
+        )
+
+    def test_email_argument_format_3(self):
+        """testing if given an email in wrong format will raise a ValueError
+        """
+        # any of this values should raise a ValueError
+        self.kwargs["email"] = "@an_email_with_only_part2"
+        with self.assertRaises(ValueError) as cm:
+            User(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'check the formatting of User.email, the name part is missing'
+        )
+
+    def test_email_argument_format_4(self):
+        """testing if given an email in wrong format will raise a ValueError
+        """
+        # any of this values should raise a ValueError
+        self.kwargs["email"] = "@"
+        with self.assertRaises(ValueError) as cm:
+            User(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'check the formatting of User.email, the name part is missing'
+        )
+
+    def test_email_attribute_format_1(self):
+        """testing if given an email in wrong format will raise a ValueError
+        """
         # any of these email values should raise a ValueError
-        for value in test_values:
-            self.assertRaises(
-                ValueError,
-                setattr,
-                self.test_user,
-                "email",
-                value
-            )
+        with self.assertRaises(ValueError) as cm:
+            self.test_user.email = "an email in no format"
+
+        self.assertEqual(
+            str(cm.exception),
+            'check the formatting of User.email, there is no @ sign'
+        )
+
+    def test_email_attribute_format_2(self):
+        """testing if given an email in wrong format will raise a ValueError
+        """
+        # any of these email values should raise a ValueError
+        with self.assertRaises(ValueError) as cm:
+            self.test_user.email = "an_email_with_no_part2"
+
+        self.assertEqual(
+            str(cm.exception),
+            'check the formatting of User.email, there is no @ sign'
+        )
+
+    def test_email_attribute_format_3(self):
+        """testing if given an email in wrong format will raise a ValueError
+        """
+        # any of these email values should raise a ValueError
+        with self.assertRaises(ValueError) as cm:
+            self.test_user.email = "@an_email_with_only_part2"
+
+        self.assertEqual(
+            str(cm.exception),
+            'check the formatting of User.email, the name part is missing'
+        )
+
+    def test_email_attribute_format_4(self):
+        """testing if given an email in wrong format will raise a ValueError
+        """
+        # any of these email values should raise a ValueError
+        with self.assertRaises(ValueError) as cm:
+            self.test_user.email = "@"
+
+        self.assertEqual(
+            str(cm.exception),
+            'check the formatting of User.email, the name part is missing'
+        )
+
+    def test_email_attribute_format_5(self):
+        """testing if given an email in wrong format will raise a ValueError
+        """
+        # any of these email values should raise a ValueError
+        with self.assertRaises(ValueError) as cm:
+            self.test_user.email = "eoyilmaz@"
+
+        self.assertEqual(
+            str(cm.exception),
+            'check the formatting User.email, the domain part is missing'
+        )
+
+    def test_email_attribute_format_6(self):
+        """testing if given an email in wrong format will raise a ValueError
+        """
+        # any of these email values should raise a ValueError
+        with self.assertRaises(ValueError) as cm:
+            self.test_user.email = "eoyilmaz@some.compony@com"
+
+        self.assertEqual(
+            str(cm.exception),
+            'check the formatting of User.email, there are more than one @ '
+            'sign'
+        )
 
     def test_email_argument_should_be_a_unique_value(self):
         """testing if the email argument should be a unique value
@@ -530,8 +622,16 @@ class UserTest(UnitTestBase):
         user2 = User(**self.kwargs)
         db.DBSession.add(user2)
 
-        with self.assertRaises(Exception) as cm:
+        from sqlalchemy.exc import IntegrityError
+        with self.assertRaises(IntegrityError) as cm:
             db.DBSession.commit()
+
+        self.assertTrue(
+            str(cm.exception).startswith(
+                '(psycopg2.IntegrityError) duplicate key value violates '
+                'unique constraint "Users_email_key"'
+            )
+        )
 
     def test_email_attribute_is_working_properly(self):
         """testing if email attribute works properly
@@ -544,58 +644,76 @@ class UserTest(UnitTestBase):
         """testing if a ValueError will be raised when the given objects
         conversion to string results an empty string
         """
-        from stalker import User
-        test_values = ["----++==#@#$", ]
-        for test_value in test_values:
-            self.kwargs["login"] = test_value
-            self.assertRaises(ValueError, User, **self.kwargs)
+        self.kwargs["login"] = "----++==#@#$"
+        with self.assertRaises(ValueError) as cm:
+            User(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'User.login can not be an empty string'
+        )
 
     def test_login_argument_for_empty_string(self):
         """testing if a ValueError will be raised when trying to assign an
         empty string to login argument
         """
-        from stalker import User
         self.kwargs["login"] = ""
-        self.assertRaises(ValueError, User, **self.kwargs)
+        with self.assertRaises(ValueError) as cm:
+            User(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'User.login can not be an empty string'
+        )
 
     def test_login_attribute_for_empty_string(self):
         """testing if a ValueError will be raised when trying to assign an
         empty string to login attribute
         """
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.test_user,
-            "login",
-            ""
+        with self.assertRaises(ValueError) as cm:
+            self.test_user.login = ''
+
+        self.assertEqual(
+            str(cm.exception),
+            'User.login can not be an empty string'
         )
 
     def test_login_argument_is_skipped(self):
         """testing if a TypeError will be raised when the login argument is
         skipped
         """
-        from stalker import User
         self.kwargs.pop("login")
-        self.assertRaises(TypeError, User, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            User(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'User.login can not be None'
+        )
 
     def test_login_argument_is_None(self):
         """testing if a TypeError will be raised when trying to assign None
         to login argument
         """
-        from stalker import User
         self.kwargs["login"] = None
-        self.assertRaises(TypeError, User, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            User(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'User.login can not be None'
+        )
 
     def test_login_attribute_is_None(self):
         """testing if a TypeError will be raised when trying to assign None
         to login attribute
         """
-        self.assertRaises(
-            TypeError,
-            setattr,
-            self.test_user,
-            "login",
-            None
+        with self.assertRaises(TypeError) as cm:
+            self.test_user.login = None
+
+        self.assertEqual(
+            str(cm.exception),
+            'User.login can not be None'
         )
 
     def test_login_argument_formatted_correctly(self):
@@ -614,7 +732,6 @@ class UserTest(UnitTestBase):
             ("213 e.ozgur", "eozgur"),
         ]
 
-        from stalker import User
         for valuePair in test_values:
             # set the input and expect the expected output
             self.kwargs["login"] = valuePair[0]
@@ -665,7 +782,16 @@ class UserTest(UnitTestBase):
         user2 = User(**self.kwargs)
         db.DBSession.add(user2)
 
-        self.assertRaises(Exception, db.DBSession.commit)
+        from sqlalchemy.exc import IntegrityError
+        with self.assertRaises(IntegrityError) as cm:
+            db.DBSession.commit()
+
+        self.assertTrue(
+            str(cm.exception).startswith(
+                '(psycopg2.IntegrityError) duplicate key value violates '
+                'unique constraint "Users_login_key"'
+            )
+        )
 
     def test_login_argument_is_working_properly(self):
         """testing if the login argument is working properly
@@ -694,7 +820,6 @@ class UserTest(UnitTestBase):
         except KeyError:
             pass
 
-        from stalker import User
         new_user = User(**self.kwargs)
         self.assertEqual(new_user.departments, [])
 
@@ -702,7 +827,6 @@ class UserTest(UnitTestBase):
         """testing if a User can be created with the departments argument value
         is to None
         """
-        from stalker import User
         self.kwargs['departments'] = None
         new_user = User(**self.kwargs)
         self.assertEqual(new_user.departments, [])
@@ -711,14 +835,18 @@ class UserTest(UnitTestBase):
         """testing if a TypeError will be raised when the User's departments
         attribute set to None
         """
-        self.assertRaises(TypeError, setattr, self.test_user, 'departments',
-                          None)
+        with self.assertRaises(TypeError) as cm:
+            self.test_user.departments = None
+
+        self.assertEqual(
+            str(cm.exception),
+            "'NoneType' object is not iterable"
+        )
 
     def test_departments_argument_is_an_empty_list(self):
         """testing if a User can be created with the departments argument is an
         empty list
         """
-        from stalker import User
         self.kwargs['departments'] = []
         User(**self.kwargs)
 
@@ -742,8 +870,14 @@ class UserTest(UnitTestBase):
         ]
 
         self.kwargs["departments"] = test_values
-        from stalker import User
-        self.assertRaises(TypeError, User, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            User(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'DepartmentUser.department should be a '
+            'stalker.models.department.Department instance, not str'
+        )
 
     def test_departments_attribute_only_accepts_department_objects(self):
         """testing if a TypeError will be raised when trying to assign
@@ -751,12 +885,13 @@ class UserTest(UnitTestBase):
         """
         # try to assign something other than a department
         test_value = "a department"
-        self.assertRaises(
-            TypeError,
-            setattr,
-            self.test_user,
-            "departments",
-            test_value
+        with self.assertRaises(TypeError) as cm:
+            self.test_user.departments = test_value
+
+        self.assertEqual(
+            str(cm.exception),
+            'DepartmentUser.department should be a '
+            'stalker.models.department.Department instance, not str'
         )
 
     def test_departments_attribute_works_properly(self):
@@ -786,7 +921,6 @@ class UserTest(UnitTestBase):
         to the password argument
         """
         import copy
-        from stalker import User
         kwargs = copy.copy(self.kwargs)
         kwargs["password"] = None
         with self.assertRaises(TypeError) as cm:
@@ -802,7 +936,6 @@ class UserTest(UnitTestBase):
         empty string
         """
         import copy
-        from stalker import User
         kwargs = copy.copy(self.kwargs)
         kwargs["password"] = ''
 
@@ -818,12 +951,12 @@ class UserTest(UnitTestBase):
         """testing if a TypeError will be raised when tyring to assign None to
         the password attribute
         """
-        self.assertRaises(
-            TypeError,
-            setattr,
-            self.test_user,
-            "password",
-            None
+        with self.assertRaises(TypeError) as cm:
+            self.test_user.password = None
+
+        self.assertEqual(
+            str(cm.exception),
+            'User.password cannot be None'
         )
 
     def test_password_attribute_works_properly(self):
@@ -836,7 +969,6 @@ class UserTest(UnitTestBase):
     def test_password_argument_being_scrambled(self):
         """testing if password is scrambled when trying to store it
         """
-        from stalker import User
         test_password = "a new test password"
         self.kwargs["password"] = test_password
         new_user = User(**self.kwargs)
@@ -870,7 +1002,6 @@ class UserTest(UnitTestBase):
         """testing if the groups attribute will be an empty list
         when the groups argument is None
         """
-        from stalker import User
         self.kwargs["groups"] = None
         new_user = User(**self.kwargs)
         self.assertEqual(new_user.groups, [])
@@ -879,43 +1010,38 @@ class UserTest(UnitTestBase):
         """testing if a TypeError will be raised when groups attribute is set
         to None
         """
-        self.assertRaises(TypeError, setattr, self.test_user, "groups", None)
+        with self.assertRaises(TypeError) as cm:
+            self.test_user.groups = None
+
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: None is not list-like'
+        )
 
     def test_groups_argument_accepts_only_Group_instances(self):
         """testing if a TypeError will be raised when trying to assign anything
         other then a Group instances to the group argument
         """
-        from stalker import User
-        test_values = [
-            23123,
-            1231.43122,
-            "a_group",
-            ["group1", "group2", 234],
-        ]
+        self.kwargs["groups"] = "a_group"
+        with self.assertRaises(TypeError) as cm:
+            User(**self.kwargs)
 
-        for test_value in test_values:
-            self.kwargs["groups"] = test_value
-            self.assertRaises(TypeError, User, **self.kwargs)
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: str is not list-like'
+        )
 
     def test_groups_attribute_accepts_only_Group_instances(self):
         """testing if a TypeError will be raised when trying to assign anything
         other then a Group instances to the group attribute
         """
-        test_values = [
-            23123,
-            1231.43122,
-            "a_group",
-            ["group1", "group2", 234],
-        ]
+        with self.assertRaises(TypeError) as cm:
+            self.test_user.groups = "a_group"
 
-        for test_value in test_values:
-            self.assertRaises(
-                TypeError,
-                setattr,
-                self.test_user,
-                "groups",
-                test_value
-            )
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: str is not list-like'
+        )
 
     def test_groups_attribute_works_properly(self):
         """testing if groups attribute works properly
@@ -924,23 +1050,32 @@ class UserTest(UnitTestBase):
         self.test_user.groups = test_pg
         self.assertEqual(self.test_user.groups, test_pg)
 
-    def test_groups_attribute_elements_accepts_Group_only(self):
+    def test_groups_attribute_elements_accepts_Group_only_1(self):
         """testing if a TypeError will be raised when trying to assign
         something other than a Group instances to the groups list
         """
         # append
-        self.assertRaises(
-            TypeError,
-            self.test_user.groups.append,
-            0
+        with self.assertRaises(TypeError) as cm:
+            self.test_user.groups.append(0)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Any group in User.groups should be an instance of '
+            'stalker.models.auth.Group not int'
         )
 
+    def test_groups_attribute_elements_accepts_Group_only_2(self):
+        """testing if a TypeError will be raised when trying to assign
+        something other than a Group instances to the groups list
+        """
         # __setitem__
-        self.assertRaises(
-            TypeError,
-            self.test_user.groups.__setitem__,
-            0,
-            0
+        with self.assertRaises(TypeError) as cm:
+            self.test_user.groups[0] = 0
+
+        self.assertEqual(
+            str(cm.exception),
+            'Any group in User.groups should be an instance of '
+            'stalker.models.auth.Group not int'
         )
 
     def test_projects_attribute_is_None(self):
@@ -1002,22 +1137,25 @@ class UserTest(UnitTestBase):
         """testing if a TypeError will be raised when the tasks attribute is
         set to None
         """
-        self.assertRaises(TypeError, setattr, self.test_user, "tasks", None)
+        with self.assertRaises(TypeError) as cm:
+            self.test_user.tasks = None
+
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: None is not list-like'
+        )
 
     def test_tasks_attribute_accepts_only_list_of_task_objects(self):
         """testing if a TypeError will be raised when trying to assign
         anything other than a list of task objects to the tasks argument
         """
-        test_values = [12312, 1233244.2341, ["aTask1", "aTask2"], "a_task"]
+        with self.assertRaises(TypeError) as cm:
+            self.test_user.tasks = "aTask1"
 
-        for test_value in test_values:
-            self.assertRaises(
-                TypeError,
-                setattr,
-                self.test_user,
-                "tasks",
-                test_value
-            )
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: str is not list-like'
+        )
 
     def test_tasks_attribute_accepts_an_empty_list(self):
         """testing if nothing happens when trying to assign an empty list to
@@ -1043,16 +1181,18 @@ class UserTest(UnitTestBase):
         something other than a Task object to the tasks list
         """
         # append
-        self.assertRaises(
-            TypeError,
-            self.test_user.tasks.append,
-            0
+        with self.assertRaises(TypeError) as cm:
+            self.test_user.tasks.append(0)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Any element in User.tasks should be an instance of '
+            'stalker.models.task.Task not int'
         )
 
     def test_equality_operator(self):
         """testing equality of two users
         """
-        from stalker import User
         self.kwargs.update({
             "name": "Generic User",
             "description": "this is a different user",
@@ -1068,7 +1208,6 @@ class UserTest(UnitTestBase):
     def test_inequality_operator(self):
         """testing inequality of two users
         """
-        from stalker import User
         self.kwargs.update({
             "name": "Generic User",
             "description": "this is a different user",
@@ -1104,15 +1243,24 @@ class UserTest(UnitTestBase):
     def test_tickets_attribute_is_read_only(self):
         """testing if the User.tickets attribute is a read only attribute
         """
-        self.assertRaises(
-            AttributeError, setattr, self.test_user, 'tickets', []
+        with self.assertRaises(AttributeError) as cm:
+            self.test_user.tickets = []
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
         )
 
     def test_open_tickets_attribute_is_read_only(self):
         """testing if the User.open_tickets attribute is a read only attribute
         """
-        self.assertRaises(AttributeError, setattr, self.test_user,
-                          'open_tickets', [])
+        with self.assertRaises(AttributeError) as cm:
+            self.test_user.open_tickets = []
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
+        )
 
     def test_tickets_attribute_returns_all_tickets_owned_by_this_user(self):
         """testing if User.tickets returns all the tickets owned by this user
@@ -1252,8 +1400,8 @@ class UserTest(UnitTestBase):
 
         expected_tjp = """resource User_%s "User_%s" {
     efficiency 1.0
-    vacation 2013-06-07-00:00:00 - 2013-06-21-00:00:00
-    vacation 2013-07-01-00:00:00 - 2013-07-15-00:00:00
+    vacation 2013-06-07-03:00:00 - 2013-06-21-03:00:00
+    vacation 2013-07-01-03:00:00 - 2013-07-15-03:00:00
 }""" % (self.test_user.id, self.test_user.id)
 
         # print expected_tjp
@@ -1269,29 +1417,45 @@ class UserTest(UnitTestBase):
         """testing if a TypeError will be raised when the vacations attribute
         is set to None
         """
-        self.assertRaises(TypeError, setattr, self.test_user, 'vacations',
-                          None)
+        with self.assertRaises(TypeError) as cm:
+            self.test_user.vacations = None
+
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: None is not list-like'
+        )
 
     def test_vacations_attribute_is_not_a_list(self):
         """testing if a TypeError will be raised when the vacations attribute
         is set to a value other than a list
         """
-        self.assertRaises(TypeError, setattr, self.test_user, 'vacations',
-                          'not a list of Vacation instances')
+        with self.assertRaises(TypeError) as cm:
+            self.test_user.vacations = 'not a list of Vacation instances'
+
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: str is not list-like'
+        )
 
     def test_vacations_attribute_is_not_a_list_of_Vacation_instances(self):
         """testing if a TypeError will be raised when the vacations attribute
         is set to a list of other objects than Vacation instances
         """
-        self.assertRaises(TypeError, setattr, self.test_user, 'vacations',
-                          ['list of', 'other', 'instances', 1])
+        with self.assertRaises(TypeError) as cm:
+            self.test_user.vacations = ['list of', 'other', 'instances', 1]
+
+        self.assertEqual(
+            str(cm.exception),
+            'All of the elements in User.vacations should be a '
+            'stalker.models.studio.Vacation instance, not str'
+        )
 
     def test_vacations_attribute_is_working_properly(self):
         """testing if the vacations attribute is working properly
         """
         import datetime
         import pytz
-        from stalker import User, Type, Vacation
+        from stalker import Type, Vacation
         some_other_user = User(
             name='Some Other User',
             login='sou',
@@ -1326,7 +1490,6 @@ class UserTest(UnitTestBase):
         """testing if the efficiency attribute value will be 1.0 if the
         efficiency argument is skipped
         """
-        from stalker import User
         self.kwargs.pop('efficiency')
         new_user = User(**self.kwargs)
         self.assertEqual(1.0, new_user.efficiency)
@@ -1335,7 +1498,6 @@ class UserTest(UnitTestBase):
         """testing if the efficiency attribute value will be 1.0 if the
         efficiency argument is None
         """
-        from stalker import User
         self.kwargs['efficiency'] = None
         new_user = User(**self.kwargs)
         self.assertEqual(1.0, new_user.efficiency)
@@ -1352,7 +1514,6 @@ class UserTest(UnitTestBase):
         """testing if a TypeError will be raised when the efficiency argument
         is not a float or integer
         """
-        from stalker import User
         self.kwargs['efficiency'] = 'not a float or integer'
         with self.assertRaises(TypeError) as cm:
             User(**self.kwargs)
@@ -1380,7 +1541,6 @@ class UserTest(UnitTestBase):
         """testing if a ValueError will be raised when the efficiency argument
         is a negative float or integer
         """
-        from stalker import User
         self.kwargs['efficiency'] = -1
         with self.assertRaises(ValueError) as cm:
             User(**self.kwargs)
@@ -1408,7 +1568,6 @@ class UserTest(UnitTestBase):
         """testing if the efficiency argument value is correctly passed to the
         efficiency attribute
         """
-        from stalker import User
         # integer value
         self.kwargs['efficiency'] = 2
         new_user = User(**self.kwargs)
@@ -1456,7 +1615,6 @@ class UserTest(UnitTestBase):
         """testing if the companies attribute will be set to an empty list when
         the company argument is skipped
         """
-        from stalker import User
         self.kwargs.pop('companies')
         new_user = User(**self.kwargs)
         self.assertEquals(new_user.companies, [])
@@ -1465,7 +1623,6 @@ class UserTest(UnitTestBase):
         """testing if the companies argument is set to None the companies
         attribute will be an empty list
         """
-        from stalker import User
         self.kwargs['companies'] = None
         new_user = User(**self.kwargs)
         self.assertTrue(new_user.companies == [])
@@ -1486,7 +1643,6 @@ class UserTest(UnitTestBase):
         """testing if a TypeError will be raised if the companies argument is
         not a list
         """
-        from stalker import User
         self.kwargs['companies'] = 'not a list of clients'
         with self.assertRaises(TypeError) as cm:
             User(**self.kwargs)
@@ -1501,13 +1657,15 @@ class UserTest(UnitTestBase):
         """testing if a TypeError will be raised when the companies argument is
         not a list of Client instances
         """
-        from stalker import User
         test_value = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
         self.kwargs["companies"] = test_value
-        self.assertRaises(
-            TypeError,
-            User,
-            **self.kwargs
+        with self.assertRaises(TypeError) as cm:
+            User(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'ClientUser.client should be instance of '
+            'stalker.models.client.Client, not int'
         )
 
     def test_companies_attribute_is_set_to_a_value_other_than_a_list_of_client_instances(self):
@@ -1616,7 +1774,6 @@ class UserTest(UnitTestBase):
         """testing if the rate attribute will be 0 when the rate argument is
         skipped
         """
-        from stalker import User
         if 'rate' in self.kwargs:
             self.kwargs.pop('rate')
 
@@ -1627,7 +1784,6 @@ class UserTest(UnitTestBase):
         """testing if the rate attribute will be 0 when the rate argument is
         None
         """
-        from stalker import User
         self.kwargs['rate'] = None
         new_user = User(**self.kwargs)
         self.assertEqual(new_user.rate, 0)
@@ -1644,7 +1800,6 @@ class UserTest(UnitTestBase):
         """testing if a TypeError will be raised when the rate argument is not
         an integer or float value
         """
-        from stalker import User
         self.kwargs['rate'] = 'some string'
         with self.assertRaises(TypeError) as cm:
             User(**self.kwargs)
@@ -1672,7 +1827,6 @@ class UserTest(UnitTestBase):
         """testing if a ValueError will be raised when the rate argument is a
         negative value
         """
-        from stalker import User
         self.kwargs['rate'] = -1
         with self.assertRaises(ValueError) as cm:
             User(**self.kwargs)
@@ -1699,7 +1853,6 @@ class UserTest(UnitTestBase):
     def test_rate_argument_is_working_properly(self):
         """testing if the rate argument is working properly
         """
-        from stalker import User
         test_value = 102.3
         self.kwargs['rate'] = test_value
         new_user = User(**self.kwargs)

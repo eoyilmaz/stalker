@@ -18,44 +18,37 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest
-from stalker import Structure, FilenameTemplate, Type
+from stalker import Structure
+from stalker.testing import UnitTestBase
 
 
-# mock classes
-class Asset(object):
-    pass
-
-
-class Shot(object):
-    pass
-
-
-class Link(object):
-    pass
-
-
-class StructureTester(unittest.TestCase):
+class StructureTester(UnitTestBase):
     """tests the stalker.models.structure.Structure class
     """
 
     def setUp(self):
         """setting up the tests
         """
+        super(StructureTester, self).setUp()
 
+        from stalker import db, Type
         vers_type = Type(
             name="Version",
             code='vers',
             target_entity_type="FilenameTemplate"
         )
+        db.DBSession.add(vers_type)
 
         ref_type = Type(
             name="Reference",
             code='ref',
             target_entity_type="FilenameTemplate"
         )
+        db.DBSession.add(ref_type)
+        db.DBSession.commit()
 
         # type templates
+        from stalker import FilenameTemplate
         self.asset_template = FilenameTemplate(
             name="Test Asset Template",
             target_entity_type="Asset",
@@ -85,7 +78,7 @@ class StructureTester(unittest.TestCase):
         self.test_type = Type(
             name="Commercial Structure",
             code='comm',
-            target_entity_type=Structure,
+            target_entity_type='Structure',
         )
 
         # keyword arguments
@@ -97,6 +90,8 @@ class StructureTester(unittest.TestCase):
             "type": self.test_type,
         }
         self.test_structure = Structure(**self.kwargs)
+        db.DBSession.add(self.test_structure)
+        db.DBSession.commit()
 
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for
@@ -132,14 +127,25 @@ class StructureTester(unittest.TestCase):
         argument is not a string
         """
         self.kwargs['custom_template'] = ["this is not a string"]
-        self.assertRaises(TypeError, Structure, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Structure(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Structure.custom_template should be a string not list'
+        )
 
     def test_custom_template_attribute_is_not_a_string(self):
         """testing if a TypeError will be raised when the custom_template
         attribute is not a string
         """
-        self.assertRaises(TypeError, setattr, self.test_structure,
-                          'custom_template', ['this is not a string'])
+        with self.assertRaises(TypeError) as cm:
+            self.test_structure.custom_template = ['this is not a string']
+
+        self.assertEqual(
+            str(cm.exception),
+            'Structure.custom_template should be a string not list'
+        )
 
     def test_templates_argument_can_be_skipped(self):
         """testing if no error will be raised when the templates argument is
@@ -161,24 +167,48 @@ class StructureTester(unittest.TestCase):
         """testing if a TypeError will be raised when the templates attribute
         is set to None
         """
-        self.assertRaises(TypeError, setattr, self.test_structure, "templates",
-                          None)
+        with self.assertRaises(TypeError) as cm:
+            self.test_structure.templates = None
+
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: None is not list-like'
+        )
 
     def test_templates_argument_only_accepts_list(self):
         """testing if a TypeError will be raised when the given templates
         argument is not a list
         """
         self.kwargs["templates"] = 1
-        self.assertRaises(TypeError, Structure, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Structure(**self.kwargs)
 
-    def test_templates_attribute_only_accepts_list(self):
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: int is not list-like'
+        )
+
+    def test_templates_attribute_only_accepts_list_1(self):
         """testing if a TypeError will be raised when the templates attribute
         is tried to be set to an object which is not a list instance.
         """
-        self.assertRaises(TypeError, setattr, self.test_structure, "templates",
-                          1.121)
+        with self.assertRaises(TypeError) as cm:
+            self.test_structure.templates = 1.121
+
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: float is not list-like'
+        )
+
+    def test_templates_attribute_is_working_properly(self):
+        """testing if templates attribute is working properly
+        """
         # test the correct value
         self.test_structure.templates = self.test_templates
+        self.assertEqual(
+            self.test_structure.templates,
+            self.test_templates
+        )
 
     def test_templates_argument_accepts_only_list_of_FilenameTemplate_instances(self):
         """testing if a TypeError will be raised when the templates argument is
@@ -187,12 +217,26 @@ class StructureTester(unittest.TestCase):
         """
         test_value = [1, 1.2, "a string"]
         self.kwargs["templates"] = test_value
-        self.assertRaises(TypeError, Structure, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Structure(**self.kwargs)
 
+        self.assertEqual(
+            str(cm.exception),
+            'All the elements in the Structure.templates should be a '
+            'stalker.models.template.FilenameTemplate instance not int'
+        )
+
+    def test_templates_argument_is_working_properly(self):
+        """testing if the templates argument value is correctly passed to the
+        templates attribute
+        """
         # test the correct value
         self.kwargs["templates"] = self.test_templates
         new_structure = Structure(**self.kwargs)
-        self.assertTrue(isinstance(new_structure, Structure))
+        self.assertEqual(
+            new_structure.templates,
+            self.test_templates
+        )
 
     def test_templates_attribute_accpets_only_list_of_FilenameTemplate_instances(self):
         """testing if a TypeError will be raised when the templates attribute
@@ -200,8 +244,14 @@ class StructureTester(unittest.TestCase):
         class.
         """
         test_value = [1, 1.2, "a string"]
-        self.assertRaises(TypeError, setattr, self.test_structure, "templates",
-                          test_value)
+        with self.assertRaises(TypeError) as cm:
+            self.test_structure.templates = test_value
+
+        self.assertEqual(
+            str(cm.exception),
+            'All the elements in the Structure.templates should be a '
+            'stalker.models.template.FilenameTemplate instance not int'
+        )
 
     def test___strictly_typed___is_False(self):
         """testing if the __strictly_typed__ is False

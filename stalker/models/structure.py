@@ -183,8 +183,8 @@ class Structure(Entity):
 
         if not isinstance(template_in, FilenameTemplate):
             raise TypeError(
-                "All the elements in the %s.templates should be a list of "
-                "stalker.models.template.FilenameTemplate instances not %s" %
+                "All the elements in the %s.templates should be a "
+                "stalker.models.template.FilenameTemplate instance not %s" %
                 (self.__class__.__name__, template_in.__class__.__name__)
             )
 

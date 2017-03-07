@@ -17,48 +17,21 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-
-import unittest
-import platform
-
-from stalker import Repository, Tag
+from stalker.testing import UnitTestBase, PlatformPatcher
 
 
-class PlatformPatcher(object):
-    """patches given callable
-    """
-
-    def __init__(self):
-        self.callable = None
-        self.original = None
-
-    def patch(self, desired_result):
-        """
-        """
-        self.original = platform.system
-
-        def f():
-            return desired_result
-
-        platform.system = f
-
-    def restore(self):
-        """restores the given callable_
-        """
-        if self.original:
-            platform.system = self.original
-
-
-class RepositoryTester(unittest.TestCase):
+class RepositoryTester(UnitTestBase):
     """tests the Repository class
     """
 
     def setUp(self):
         """setup the test
         """
+        super(RepositoryTester, self).setUp()
         self.patcher = PlatformPatcher()
 
         # create a couple of test tags
+        from stalker import Tag
         self.test_tag1 = Tag(name="test tag 1")
         self.test_tag2 = Tag(name="test tag 2")
 
@@ -71,17 +44,22 @@ class RepositoryTester(unittest.TestCase):
             "windows_path": "M:/Projects"
         }
 
+        from stalker import db, Repository
         self.test_repo = Repository(**self.kwargs)
+        db.DBSession.add(self.test_repo)
+        db.DBSession.commit()
 
     def tearDown(self):
         """clean up test
         """
         self.patcher.restore()
+        super(RepositoryTester, self).tearDown()
 
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for
         Repository class
         """
+        from stalker import Repository
         self.assertFalse(Repository.__auto_name__)
 
     def test_linux_path_argument_accepts_only_strings(self):
@@ -90,20 +68,18 @@ class RepositoryTester(unittest.TestCase):
         test_values = [123123, 123.1231, [], {}]
         for test_value in test_values:
             self.kwargs["linux_path"] = test_value
-            self.assertRaises(TypeError, Repository, **self.kwargs)
+            from stalker import Repository
+
+            with self.assertRaises(TypeError):
+                Repository(**self.kwargs)
 
     def test_linux_path_attribute_accepts_only_strings(self):
         """testing if linux_path attribute accepts only string values
         """
         test_values = [123123, 123.1231, [], {}]
         for test_value in test_values:
-            self.assertRaises(
-                TypeError,
-                setattr,
-                self.test_repo,
-                "linux_path",
-                test_value
-            )
+            with self.assertRaises(TypeError):
+                self.test_repo.linux_path = test_value
 
     def test_linux_path_attribute_is_working_properly(self):
         """testing if linux_path attribute is working properly
@@ -124,23 +100,23 @@ class RepositoryTester(unittest.TestCase):
     def test_windows_path_argument_accepts_only_strings(self):
         """testing if windows_path argument accepts only string values
         """
+        from stalker import Repository
         test_values = [123123, 123.1231, [], {}]
         for test_value in test_values:
             self.kwargs["windows_path"] = test_value
-            self.assertRaises(TypeError, Repository, **self.kwargs)
+            with self.assertRaises(TypeError):
+                Repository(**self.kwargs)
 
     def test_windows_path_attribute_accepts_only_strings(self):
         """testing if windows_path attribute accepts only string values
         """
-        test_values = [123123, 123.1231, [], {}]
-        for test_value in test_values:
-            self.assertRaises(
-                TypeError,
-                setattr,
-                self.test_repo,
-                "windows_path",
-                test_value
-            )
+        with self.assertRaises(TypeError) as cm:
+            self.test_repo.windows_path = 123123
+
+        self.assertEqual(
+            str(cm.exception),
+            'Repository.windows_path should be an instance of string not int'
+        )
 
     def test_windows_path_attribute_is_working_properly(self):
         """testing if windows_path attribute is working properly
@@ -161,23 +137,26 @@ class RepositoryTester(unittest.TestCase):
     def test_osx_path_argument_accepts_only_strings(self):
         """testing if osx_path argument accepts only string values
         """
-        test_values = [123123, 123.1231, [], {}]
-        for test_value in test_values:
-            self.kwargs["osx_path"] = test_value
-            self.assertRaises(TypeError, Repository, **self.kwargs)
+        from stalker import Repository
+        self.kwargs["osx_path"] = 123123
+        with self.assertRaises(TypeError) as cm:
+            Repository(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Repository.osx_path should be an instance of string not int'
+        )
 
     def test_osx_path_attribute_accepts_only_strings(self):
         """testing if osx_path attribute accepts only string values
         """
-        test_values = [123123, 123.1231, [], {}]
-        for test_value in test_values:
-            self.assertRaises(
-                TypeError,
-                setattr,
-                self.test_repo,
-                "osx_path",
-                test_value
-            )
+        with self.assertRaises(TypeError) as cm:
+            self.test_repo.osx_path = 123123
+
+        self.assertEqual(
+            str(cm.exception),
+            'Repository.osx_path should be an instance of string not int'
+        )
 
     def test_osx_path_attribute_is_working_properly(self):
         """testing if osx_path attribute is working properly
@@ -249,6 +228,7 @@ class RepositoryTester(unittest.TestCase):
     def test_equality(self):
         """testing the equality of two repositories
         """
+        from stalker import Repository
         repo1 = Repository(**self.kwargs)
         repo2 = Repository(**self.kwargs)
 
@@ -268,6 +248,7 @@ class RepositoryTester(unittest.TestCase):
     def test_inequality(self):
         """testing the inequality of two repositories
         """
+        from stalker import Repository
         repo1 = Repository(**self.kwargs)
         repo2 = Repository(**self.kwargs)
 
@@ -294,6 +275,7 @@ class RepositoryTester(unittest.TestCase):
         in the linux_path argument
         """
         self.kwargs["linux_path"] = r"\mnt\M\Projects"
+        from stalker import Repository
         new_repo = Repository(**self.kwargs)
 
         self.assertFalse("\\" in new_repo.linux_path)
@@ -311,6 +293,7 @@ class RepositoryTester(unittest.TestCase):
         """testing if the backward slashes are converted to forward slashes
         in the osx_path argument
         """
+        from stalker import Repository
         self.kwargs["osx_path"] = r"\Volumes\M\Projects"
         new_repo = Repository(**self.kwargs)
 
@@ -329,6 +312,7 @@ class RepositoryTester(unittest.TestCase):
         """testing if the backward slashes are converted to forward slashes
         in the windows_path argument
         """
+        from stalker import Repository
         self.kwargs["windows_path"] = r"M:\Projects"
         new_repo = Repository(**self.kwargs)
 
@@ -458,12 +442,24 @@ class RepositoryTester(unittest.TestCase):
     def test_to_linux_path_raises_TypeError_if_path_is_None(self):
         """testing if to_linux_path raises TypeError if path is None
         """
-        self.assertRaises(TypeError, self.test_repo.to_linux_path, None)
+        with self.assertRaises(TypeError) as cm:
+            self.test_repo.to_linux_path(None)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Repository.path can not be None'
+        )
 
     def test_to_linux_path_raises_TypeError_if_path_is_not_a_string(self):
         """testing if to_linux_path raises TypeError if path is None
         """
-        self.assertRaises(TypeError, self.test_repo.to_linux_path, 123)
+        with self.assertRaises(TypeError) as cm:
+            self.test_repo.to_linux_path(123)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Repository.path should be a string, not int'
+        )
 
     def test_to_windows_path_returns_the_windows_version_of_the_given_windows_path(self):
         """testing if the to_windows_path returns the windows version of the
@@ -565,12 +561,24 @@ class RepositoryTester(unittest.TestCase):
     def test_to_windows_path_raises_TypeError_if_path_is_None(self):
         """testing if to_windows_path raises TypeError if path is None
         """
-        self.assertRaises(TypeError, self.test_repo.to_windows_path, None)
+        with self.assertRaises(TypeError) as cm:
+            self.test_repo.to_windows_path(None)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Repository.path can not be None'
+        )
 
     def test_to_windows_path_raises_TypeError_if_path_is_not_a_string(self):
         """testing if to_windows_path raises TypeError if path is None
         """
-        self.assertRaises(TypeError, self.test_repo.to_windows_path, 123)
+        with self.assertRaises(TypeError) as cm:
+            self.test_repo.to_windows_path(123)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Repository.path should be a string, not int'
+        )
 
     def test_to_osx_path_returns_the_osx_version_of_the_given_windows_path(self):
         """testing if the to_osx_path returns the osx version of the given
@@ -730,12 +738,24 @@ class RepositoryTester(unittest.TestCase):
     def test_to_osx_path_raises_TypeError_if_path_is_None(self):
         """testing if to_osx_path raises TypeError if path is None
         """
-        self.assertRaises(TypeError, self.test_repo.to_osx_path, None)
+        with self.assertRaises(TypeError) as cm:
+            self.test_repo.to_osx_path(None)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Repository.path can not be None'
+        )
 
     def test_to_osx_path_raises_TypeError_if_path_is_not_a_string(self):
         """testing if to_osx_path raises TypeError if path is None
         """
-        self.assertRaises(TypeError, self.test_repo.to_osx_path, 123)
+        with self.assertRaises(TypeError) as cm:
+            self.test_repo.to_osx_path(123)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Repository.path should be a string, not int'
+        )
 
     def test_to_native_path_returns_the_native_version_of_the_given_linux_path(self):
         """testing if the to_native_path returns the native version of the
@@ -842,12 +862,24 @@ class RepositoryTester(unittest.TestCase):
     def test_to_native_path_raises_TypeError_if_path_is_None(self):
         """testing if to_native_path raises TypeError if path is None
         """
-        self.assertRaises(TypeError, self.test_repo.to_native_path, None)
+        with self.assertRaises(TypeError) as cm:
+            self.test_repo.to_native_path(None)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Repository.path can not be None'
+        )
 
     def test_to_native_path_raises_TypeError_if_path_is_not_a_string(self):
         """testing if to_native_path raises TypeError if path is None
         """
-        self.assertRaises(TypeError, self.test_repo.to_native_path, 123)
+        with self.assertRaises(TypeError) as cm:
+            self.test_repo.to_native_path(123)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Repository.path should be a string, not int'
+        )
 
     def test_is_in_repo_returns_True_if_the_given_linux_path_is_in_this_repo(self):
         """testing if is_in_repo returns True if the given linux path is in
@@ -976,8 +1008,6 @@ class RepositoryTester(unittest.TestCase):
         """testing if Repository.make_relative() will convert the given path
         with environment variable to repository root relative path
         """
-        self.test_repo.id = 1
-
         # so we should have the env var to be configured
         # now create a path with env var
         path = '$REPO%s/Sero/Task1/Task2/Some_file.ma' % self.test_repo.id
@@ -991,13 +1021,12 @@ class RepositoryTester(unittest.TestCase):
         """testing if to_os_independent_path class method is working properly
         """
         from stalker import db
-        db.setup()
-
         db.DBSession.add(self.test_repo)
         db.DBSession.commit()
 
         relative_part = 'some/path/to/a/file.ma'
         test_path = '%s/%s' % (self.test_repo.path, relative_part)
+        from stalker import Repository
         self.assertEqual(
             Repository.to_os_independent_path(test_path),
             '$REPO%s/%s' % (self.test_repo.id, relative_part)
@@ -1007,12 +1036,11 @@ class RepositoryTester(unittest.TestCase):
         """testing if the find_repo class method is working properly
         """
         from stalker import db
-        db.setup()
-
         db.DBSession.add(self.test_repo)
         db.DBSession.commit()
 
         # add some other repositories
+        from stalker import Repository
         new_repo1 = Repository(
             name='New Repository',
             linux_path='/mnt/T/Projects',
@@ -1039,12 +1067,11 @@ class RepositoryTester(unittest.TestCase):
         containing env vars
         """
         from stalker import db
-        db.setup()
-
         db.DBSession.add(self.test_repo)
         db.DBSession.commit()
 
         # add some other repositories
+        from stalker import Repository
         new_repo1 = Repository(
             name='New Repository',
             linux_path='/mnt/T/Projects',
@@ -1069,39 +1096,16 @@ class RepositoryTester(unittest.TestCase):
     def test_env_var_property_is_working_properly(self):
         """testing if the env_var property is working properly
         """
-        from stalker import db
-        db.setup()
-
-        db.DBSession.add(self.test_repo)
-        db.DBSession.commit()
-
         self.assertEqual(
             self.test_repo.env_var,
-            'REPO1'
+            'REPO30'
         )
-
-
-class RepositoryDBTester(unittest.TestCase):
-    """tests Repository DB relation
-    """
-
-    def setUp(self):
-        """set the test up
-        """
-        self.patcher = PlatformPatcher()
-
-    def tearDown(self):
-        """clean the test down
-        """
-        self.patcher.restore()
 
     def test_creating_and_committing_a_new_repository_instance_will_create_env_var(self):
         """testing if an environment variable will be created when a new
         repository is created
         """
-        from stalker import db, defaults
-        db.setup({'sqlalchemy.url': 'sqlite:///:memory:'})
-
+        from stalker import db, defaults, Repository
         repo = Repository(
             name='Test Repo',
             linux_path='/mnt/T',
@@ -1124,9 +1128,7 @@ class RepositoryDBTester(unittest.TestCase):
         """testing if the environment variable will be updated when the
         repository path is updated
         """
-        from stalker import db, defaults
-        db.setup({'sqlalchemy.url': 'sqlite:///:memory:'})
-
+        from stalker import db, defaults, Repository
         repo = Repository(
             name='Test Repo',
             linux_path='/mnt/T',
@@ -1156,10 +1158,7 @@ class RepositoryDBTester(unittest.TestCase):
         the system is windows
         """
         self.patcher.patch('Linux')
-
-        from stalker import db, defaults
-        db.setup({'sqlalchemy.url': 'sqlite:///:memory:'})
-
+        from stalker import db, defaults, Repository
         repo = Repository(
             name='Test Repo',
             linux_path='/mnt/T',
@@ -1211,9 +1210,7 @@ class RepositoryDBTester(unittest.TestCase):
         """
         self.patcher.patch('Windows')
 
-        from stalker import db, defaults
-        db.setup({'sqlalchemy.url': 'sqlite:///:memory:'})
-
+        from stalker import db, defaults, Repository
         repo = Repository(
             name='Test Repo',
             linux_path='/mnt/T',
@@ -1265,9 +1262,7 @@ class RepositoryDBTester(unittest.TestCase):
         """
         self.patcher.patch('Darwin')
 
-        from stalker import db, defaults
-        db.setup({'sqlalchemy.url': 'sqlite:///:memory:'})
-
+        from stalker import db, defaults, Repository
         repo = Repository(
             name='Test Repo',
             linux_path='/mnt/T',

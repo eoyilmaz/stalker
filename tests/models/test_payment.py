@@ -18,29 +18,18 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest
+from stalker.testing import UnitTestBase
 
 
-class PaymentTestCase(unittest.TestCase):
+class PaymentTestCase(UnitTestBase):
     """tests for Payment class
     """
 
     def setUp(self):
         """run once
         """
-        from stalker import defaults
-        import datetime
-        defaults.timing_resolution = datetime.timedelta(hours=1)
-
-        # create a new session
-        from stalker import db
-        db.setup({
-            'sqlalchemy.url': 'sqlite://',
-            'sqlalchemy.echo': False
-        })
-        db.init()
-
-        from stalker import Status
+        super(PaymentTestCase, self).setUp()
+        from stalker import db, Status
         self.status_wfd = Status.query.filter_by(code="WFD").first()
         self.status_rts = Status.query.filter_by(code="RTS").first()
         self.status_wip = Status.query.filter_by(code="WIP").first()
@@ -73,6 +62,7 @@ class PaymentTestCase(unittest.TestCase):
                       self.status_cmpl],
             target_entity_type=Project,
         )
+        db.DBSession.add(self.test_project_status_list)
 
         from stalker import Type
         self.test_movie_project_type = Type(
@@ -80,6 +70,7 @@ class PaymentTestCase(unittest.TestCase):
             code='movie',
             target_entity_type=Project,
         )
+        db.DBSession.add(self.test_movie_project_type)
 
         from stalker import Repository
         self.test_repository_type = Type(
@@ -87,11 +78,13 @@ class PaymentTestCase(unittest.TestCase):
             code='test',
             target_entity_type=Repository,
         )
+        db.DBSession.add(self.test_repository_type)
 
         self.test_repository = Repository(
             name="Test Repository",
             type=self.test_repository_type,
         )
+        db.DBSession.add(self.test_repository)
 
         from stalker import User
         self.test_user1 = User(
@@ -100,6 +93,7 @@ class PaymentTestCase(unittest.TestCase):
             email="user1@user1.com",
             password="1234"
         )
+        db.DBSession.add(self.test_user1)
 
         self.test_user2 = User(
             name="User2",
@@ -107,6 +101,7 @@ class PaymentTestCase(unittest.TestCase):
             email="user2@user2.com",
             password="1234"
         )
+        db.DBSession.add(self.test_user2)
 
         self.test_user3 = User(
             name="User3",
@@ -114,6 +109,7 @@ class PaymentTestCase(unittest.TestCase):
             email="user3@user3.com",
             password="1234"
         )
+        db.DBSession.add(self.test_user3)
 
         self.test_user4 = User(
             name="User4",
@@ -121,6 +117,7 @@ class PaymentTestCase(unittest.TestCase):
             email="user4@user4.com",
             password="1234"
         )
+        db.DBSession.add(self.test_user4)
 
         self.test_user5 = User(
             name="User5",
@@ -128,11 +125,13 @@ class PaymentTestCase(unittest.TestCase):
             email="user5@user5.com",
             password="1234"
         )
+        db.DBSession.add(self.test_user5)
 
         from stalker import Client
         self.test_client = Client(
             name='Test Client',
         )
+        db.DBSession.add(self.test_client)
 
         self.test_project = Project(
             name="Test Project1",
@@ -142,12 +141,14 @@ class PaymentTestCase(unittest.TestCase):
             repository=self.test_repository,
             clients=[self.test_client]
         )
+        db.DBSession.add(self.test_project)
 
         from stalker import Budget
         self.test_budget = Budget(
             project=self.test_project,
             name='Test Budget 1',
         )
+        db.DBSession.add(self.test_budget)
 
         from stalker import Invoice
         self.test_invoice = Invoice(
@@ -156,6 +157,8 @@ class PaymentTestCase(unittest.TestCase):
             amount=1500,
             unit='TRY'
         )
+        db.DBSession.add(self.test_invoice)
+        db.DBSession.commit()
 
     def test_creating_a_payment_instance(self):
         """testing if it is possible to create a Payment instance

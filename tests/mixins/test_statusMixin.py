@@ -18,15 +18,9 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import unittest
+from stalker.testing import UnitTestBase
 from sqlalchemy import Column, Integer, ForeignKey
-from sqlalchemy import orm
-
-from stalker import db
-from stalker.db.session import DBSession
-from stalker.models.mixins import StatusMixin
-from stalker.models.status import Status, StatusList
-from stalker.models.entity import SimpleEntity
+from stalker import db, StatusMixin, Status, StatusList, SimpleEntity
 
 
 class StatMixClass(SimpleEntity, StatusMixin):
@@ -40,13 +34,14 @@ class StatMixClass(SimpleEntity, StatusMixin):
         StatusMixin.__init__(self, **kwargs)
 
 
-class StatusMixinTester(unittest.TestCase):
+class StatusMixinTester(UnitTestBase):
     """tests the StatusMixin class
     """
 
     def setUp(self):
         """setup the test
         """
+        super(StatusMixinTester, self).setUp()
         self.test_status1 = Status(name="Status1", code="STS1")
         self.test_status2 = Status(name="Status2", code="STS2")
         self.test_status3 = Status(name="Status3", code="STS3")
@@ -96,54 +91,62 @@ class StatusMixinTester(unittest.TestCase):
         # create another one without status_list set to something
         self.test_mixed_obj2 = StatMixClass(**self.kwargs)
 
-    #def tearDown(self):
-    #    """clean up the test
-    #    """
-    #    DBSession.remove()
-
     def test_status_list_argument_is_None(self):
         """testing if TypeError is going to be raised when trying to initialize
         status_list with None
         """
         self.kwargs["status_list"] = None
-        self.assertRaises(TypeError, StatMixClass, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            StatMixClass(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            "StatMixClass instances can not be initialized without a "
+            "stalker.models.status.StatusList instance, please pass a "
+            "suitable StatusList (StatusList.target_entity_type=StatMixClass) "
+            "with the 'status_list' argument"
+        )
 
     def test_status_list_argument_is_not_a_StatusList_instance(self):
         """testing if TypeError is going to be raised when trying to initialize
         status_list with something other than a StatusList
         """
-        testValues = [100, "", 100.2]
-        for testValue in testValues:
-            self.kwargs["status_list"] = testValue
-            self.assertRaises(TypeError, StatMixClass, **self.kwargs)
+        self.kwargs["status_list"] = 100
+        with self.assertRaises(TypeError) as cm:
+            StatMixClass(**self.kwargs)
 
-    def test_status_list_attribute_set_to_something_other_than_StatusList(
-            self):
+        self.assertEqual(
+            str(cm.exception),
+            'StatMixClass.status_list should be an instance of '
+            'stalker.models.status.StatusList not int'
+        )
+
+    def test_status_list_attribute_set_to_something_other_than_StatusList(self):
         """testing if TypeError is going to be raised when trying to set the
         status_list to something else than a StatusList object
         """
-        test_values = ["a string", 1.0, 1, {"a": "statusList"}]
+        with self.assertRaises(TypeError) as cm:
+            self.test_mixed_obj.status_list = "a string"
 
-        for test_value in test_values:
-            # now try to set it
-            self.assertRaises(
-                TypeError,
-                setattr,
-                self.test_mixed_obj,
-                "status_list",
-                test_value
-            )
+        self.assertEqual(
+            str(cm.exception),
+            'StatMixClass.status_list should be an instance of '
+            'stalker.models.status.StatusList not str'
+        )
 
     def test_status_list_attribute_set_to_None(self):
         """testing if TypeError is going to be raised when trying to set the
         status_list to None
         """
-        self.assertRaises(
-            TypeError,
-            setattr,
-            self.test_mixed_obj,
-            "status_list",
-            None
+        with self.assertRaises(TypeError) as cm:
+            self.test_mixed_obj.status_list = None
+
+        self.assertEqual(
+            str(cm.exception),
+            "StatMixClass instances can not be initialized without a "
+            "stalker.models.status.StatusList instance, please pass a "
+            "suitable StatusList (StatusList.target_entity_type=StatMixClass) "
+            "with the 'status_list' argument"
         )
 
     def test_status_list_argument_skipped(self):
@@ -151,7 +154,16 @@ class StatusMixinTester(unittest.TestCase):
         is skipped
         """
         self.kwargs.pop("status_list")
-        self.assertRaises(TypeError, StatMixClass, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            StatMixClass(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            "StatMixClass instances can not be initialized without a "
+            "stalker.models.status.StatusList instance, please pass a "
+            "suitable StatusList (StatusList.target_entity_type=StatMixClass) "
+            "with the 'status_list' argument"
+        )
 
     def test_status_list_argument_suitable_for_the_current_class(self):
         """testing if a TypeError will be raised when the
@@ -169,14 +181,18 @@ class StatusMixinTester(unittest.TestCase):
             target_entity_type="Sequence"
         )
 
-        self.assertRaises(
-            TypeError,
-            setattr,
-            self.test_mixed_obj,
-            "status_list",
-            new_status_list
+        with self.assertRaises(TypeError) as cm:
+            self.test_mixed_obj.status_list = new_status_list
+
+        self.assertEqual(
+            str(cm.exception),
+            "The given StatusLists' target_entity_type is Sequence, whereas "
+            "the entity_type of this object is StatMixClass"
         )
 
+    def test_status_list_attribute_is_working_properly(self):
+        """testing if the status_list attribute is working properly
+        """
         new_suitable_list = StatusList(
             name="Suitable Statuses",
             statuses=[
@@ -188,6 +204,11 @@ class StatusMixinTester(unittest.TestCase):
 
         # this shouldn't raise any error
         self.test_mixed_obj.status_list = new_suitable_list
+
+        self.assertEqual(
+            self.test_mixed_obj.status_list,
+            new_suitable_list
+        )
 
     def test_status_argument_set_to_None(self):
         """testing if the first Status in the status_list attribute will be
@@ -211,38 +232,42 @@ class StatusMixinTester(unittest.TestCase):
         """testing if a TypeError is going to be raised if status argument is
         not a Status instance or an integer
         """
-        test_values = ["0", 1.2, [0]]
+        self.kwargs["status"] = "0"
+        with self.assertRaises(TypeError) as cm:
+            StatMixClass(**self.kwargs)
 
-        for test_value in test_values:
-            self.kwargs["status"] = test_value
-            self.assertRaises(TypeError, StatMixClass, **self.kwargs)
+        self.assertEqual(
+            str(cm.exception),
+            'StatMixClass.status must be an instance of '
+            'stalker.models.status.Status or an integer showing the index of '
+            'the Status object in the StatMixClass.status_list, not str'
+        )
 
-    def test_status_attribute_set_to_a_value_other_than_a_Status_or_integer(
-            self):
+    def test_status_attribute_set_to_a_value_other_than_a_Status_or_integer(self):
         """testing if a TypeError will be raised when trying to set the current
         status to something other than a Status instance or an integer
         """
-        test_values = ["a string", 1.2, [1], {"a": "status"}]
-        for test_value in test_values:
-            self.assertRaises(
-                TypeError,
-                setattr,
-                self.test_mixed_obj,
-                "status",
-                test_value
-            )
+        with self.assertRaises(TypeError) as cm:
+            self.test_mixed_obj.status = "a string"
 
-    def test_status_attribute_is_set_to_a_Status_which_is_not_in_the_StatusList(
-            self):
+        self.assertEqual(
+            str(cm.exception),
+            'StatMixClass.status must be an instance of '
+            'stalker.models.status.Status or an integer showing the index of '
+            'the Status object in the StatMixClass.status_list, not str'
+        )
+
+    def test_status_attribute_is_set_to_a_Status_which_is_not_in_the_StatusList(self):
         """testing if a ValueError will be raised when the given Status is not
         in the related StatusList
         """
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.test_mixed_obj,
-            'status',
-            self.test_status8
+        with self.assertRaises(ValueError) as cm:
+            self.test_mixed_obj.status = self.test_status8
+
+        self.assertEqual(
+            str(cm.exception),
+            'The given Status instance for StatMixClass.status is not in the '
+            'StatMixClass.status_list, please supply a status from that list.'
         )
 
     def test_status_argument_is_working_properly_with_Status_instances(self):
@@ -295,42 +320,52 @@ class StatusMixinTester(unittest.TestCase):
         """testing if a ValueError will be raised if the status argument is an
         integer but it is way out of range
         """
-        test_value = 10
-        self.kwargs['status'] = test_value
-        self.assertRaises(ValueError, StatMixClass, **self.kwargs)
+        self.kwargs['status'] = 10
+        with self.assertRaises(ValueError) as cm:
+            StatMixClass(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'StatMixClass.status can not be bigger than the length of the '
+            'status_list'
+        )
 
     def test_status_attribute_set_to_an_integer_but_out_of_range(self):
         """testing if a ValueError will be raised if the status attribute is
         set to an integer which is out of range
         """
-        test_value = 10
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.test_mixed_obj,
-            'status',
-            test_value
+        with self.assertRaises(ValueError) as cm:
+            self.test_mixed_obj.status = 10
+
+        self.assertEqual(
+            str(cm.exception),
+            'StatMixClass.status can not be bigger than the length of the '
+            'status_list'
         )
 
     def test_status_argument_is_a_negative_integer(self):
         """testing if a ValueError will be raised if the status argument is a
         negative integer
         """
-        test_value = -10
-        self.kwargs['status'] = test_value
-        self.assertRaises(ValueError, StatMixClass, **self.kwargs)
+        self.kwargs['status'] = -10
+        with self.assertRaises(ValueError) as cm:
+            StatMixClass(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'StatMixClass.status must be a non-negative integer'
+        )
 
     def test_status_attribute_set_to_an_negative_integer(self):
         """testing if a ValueError will be raised if the status attribute is
         set to an negative integer
         """
-        test_value = -10
-        self.assertRaises(
-            ValueError,
-            setattr,
-            self.test_mixed_obj,
-            'status',
-            test_value
+        with self.assertRaises(ValueError) as cm:
+            self.test_mixed_obj.status = -10
+
+        self.assertEqual(
+            str(cm.exception),
+            'StatMixClass.status must be a non-negative integer'
         )
 
 
@@ -341,19 +376,16 @@ class StatusListAutoAddClass(SimpleEntity, StatusMixin):
 
     __tablename__ = "StatusListAutoAddClass"
     __mapper_args__ = {"polymorphic_identity": "StatusListAutoAddClass"}
-    statusListAutoAddClass_id = Column("id", Integer,
-                                       ForeignKey("SimpleEntities.id"),
-                                       primary_key=True)
+    statusListAutoAddClass_id = Column(
+        "id",
+        Integer,
+        ForeignKey("SimpleEntities.id"),
+        primary_key=True
+    )
 
     def __init__(self, **kwargs):
         super(SimpleEntity, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)
-
-    @orm.reconstructor
-    def __init_on_load__(self):
-        """the init function for instances loaded from the db
-        """
-        super(StatusListAutoAddClass, self).__init_on_load__()
 
 
 class StatusListNoAutoAddClass(SimpleEntity, StatusMixin):
@@ -363,47 +395,21 @@ class StatusListNoAutoAddClass(SimpleEntity, StatusMixin):
 
     __tablename__ = "StatusListNoAutoAddClass"
     __mapper_args__ = {"polymorphic_identity": "StatusListNoAutoAddClass"}
-    statusListNoAutoAddClass_id = Column("id", Integer,
-                                         ForeignKey("SimpleEntities.id"),
-                                         primary_key=True)
+    statusListNoAutoAddClass_id = Column(
+        "id",
+        Integer,
+        ForeignKey("SimpleEntities.id"),
+        primary_key=True
+    )
 
     def __init__(self, **kwargs):
         super(SimpleEntity, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)
 
-    @orm.reconstructor
-    def __init_on_load__(self):
-        """the init function for instances loaded from the db
-        """
-        super(StatusListAutoAddClass, self).__init_on_load__()
 
-
-class StatusMixinDBTester(unittest.TestCase):
+class StatusMixinDBTester(UnitTestBase):
     """tests the StatusMixin with a DB is already setup
     """
-
-    @classmethod
-    def setUpClass(cls):
-        """setup test in class level
-        """
-        DBSession.remove()
-
-    @classmethod
-    def tearDownClass(cls):
-        """clear test in class level
-        """
-        DBSession.remove()
-
-    def setUp(self):
-        """setup the test
-        """
-        # create a database
-        db.setup()
-
-    def tearDown(self):
-        """clean up the test
-        """
-        DBSession.remove()
 
     def test_status_list_attribute_is_skipped_and_there_is_a_db_setup(self):
         """testing if there will be no error and the status_list attribute is
@@ -423,8 +429,8 @@ class StatusMixinDBTester(unittest.TestCase):
         )
 
         # add it to the db
-        DBSession.add(test_status_list)
-        DBSession.commit()
+        db.DBSession.add(test_status_list)
+        db.DBSession.commit()
 
         # now try to create a StatusListAutoAddClass without a status_list 
         # argument
@@ -438,8 +444,7 @@ class StatusMixinDBTester(unittest.TestCase):
             test_status_list
         )
 
-    def test_status_list_attribute_is_skipped_and_there_is_a_db_setup_but_no_suitable_StatusList(
-            self):
+    def test_status_list_attribute_is_skipped_and_there_is_a_db_setup_but_no_suitable_StatusList(self):
         """testing if a TypeError will be raised even a database is setup 
         but there is no suitable StatusList for StatusListNoAutoAddClass in 
         the database
@@ -457,14 +462,20 @@ class StatusMixinDBTester(unittest.TestCase):
         )
 
         # add it to the db
-        DBSession.add(test_status_list)
-        DBSession.commit()
+        db.DBSession.add(test_status_list)
+        db.DBSession.commit()
 
         # now try to create a StatusListAutoAddClass without a status_list 
         # argument
 
-        self.assertRaises(
-            TypeError,
-            StatusListNoAutoAddClass,
-            **{"name": "Test StatusListNoAutoAddClass"}
+        with self.assertRaises(TypeError) as cm:
+            StatusListNoAutoAddClass(name="Test StatusListNoAutoAddClass")
+
+        self.assertEqual(
+            str(cm.exception),
+            "StatusListNoAutoAddClass instances can not be initialized "
+            "without a stalker.models.status.StatusList instance, please pass "
+            "a suitable StatusList "
+            "(StatusList.target_entity_type=StatusListNoAutoAddClass) with "
+            "the 'status_list' argument"
         )

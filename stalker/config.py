@@ -45,7 +45,7 @@ class Config(object):
         #
         database_engine_settings={
             "sqlalchemy.url":
-                "postgresql:///stalker_admin:stalker@localhost/stalker",
+                "postgres://stalker_admin:stalker@localhost/stalker",
             "sqlalchemy.echo": False,
         },
 

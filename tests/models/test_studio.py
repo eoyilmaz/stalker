@@ -645,8 +645,13 @@ class StudioTester(UnitTestBase):
     def test_projects_attribute_is_read_only(self):
         """testing if the project attribute is a read only attribute
         """
-        self.assertRaises(AttributeError, setattr, self.test_studio,
-                          'projects', [self.test_project1])
+        with self.assertRaises(AttributeError) as cm:
+            self.test_studio.projects = [self.test_project1]
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
+        )
 
     def test_projects_attribute_is_working_properly(self):
         """testing if the projects attribute is working properly
@@ -662,8 +667,13 @@ class StudioTester(UnitTestBase):
     def test_active_projects_attribute_is_read_only(self):
         """testing if the active_projects attribute is a read only attribute
         """
-        self.assertRaises(AttributeError, setattr, self.test_studio,
-                          'active_projects', [self.test_project1])
+        with self.assertRaises(AttributeError) as cm:
+            self.test_studio.active_projects = [self.test_project1]
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
+        )
 
     def test_active_projects_attribute_is_working_properly(self):
         """testing if the active_projects attribute is working properly
@@ -677,8 +687,13 @@ class StudioTester(UnitTestBase):
     def test_inactive_projects_attribute_is_read_only(self):
         """testing if the inactive_projects attribute is a read only attribute
         """
-        self.assertRaises(AttributeError, setattr, self.test_studio,
-                          'inactive_projects', [self.test_project1])
+        with self.assertRaises(AttributeError) as cm:
+            self.test_studio.inactive_projects = [self.test_project1]
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
+        )
 
     def test_inactive_projects_attribute_is_working_properly(self):
         """testing if the inactive_projects attribute is working properly
@@ -691,14 +706,20 @@ class StudioTester(UnitTestBase):
     def test_departments_attribute_is_read_only(self):
         """testing if the departments attribute is a read only attribute
         """
-        self.assertRaises(AttributeError, setattr, self.test_studio,
-                          'departments', [self.test_project1])
+        with self.assertRaises(AttributeError) as cm:
+            self.test_studio.departments = [self.test_project1]
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
+        )
 
     def test_departments_attribute_is_working_properly(self):
         """testing if the departments attribute is working properly
         """
         from stalker import Department
-        admins_dep = Department.query.filter_by(name='admins').first()
+        admins_dep = \
+            Department.query.filter(Department.name == 'admins').first()
         self.assertIsNotNone(admins_dep)
         self.assertEqual(
             sorted(self.test_studio.departments, key=lambda x: x.name),
@@ -709,8 +730,13 @@ class StudioTester(UnitTestBase):
     def test_users_attribute_is_read_only(self):
         """testing if the users attribute is a read only attribute
         """
-        self.assertRaises(AttributeError, setattr, self.test_studio, 'users',
-                          [self.test_project1])
+        with self.assertRaises(AttributeError) as cm:
+            self.test_studio.users = [self.test_project1]
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
+        )
 
     def test_users_attribute_is_working_properly(self):
         """testing if the users attribute is working properly
@@ -718,7 +744,7 @@ class StudioTester(UnitTestBase):
         # don't forget the admin
         from stalker import User
         admin = User.query.filter_by(name='admin').first()
-
+        self.assertIsNotNone(admin)
         self.assertEqual(
             sorted(self.test_studio.users, key=lambda x: x.name),
             sorted([admin, self.test_user1, self.test_user2, self.test_user3],
@@ -728,8 +754,13 @@ class StudioTester(UnitTestBase):
     def test_to_tjp_attribute_is_read_only(self):
         """testing if the to_tjp attribute is a read only attribute
         """
-        self.assertRaises(AttributeError, setattr, self.test_studio, 'to_tjp',
-                          "some text")
+        with self.assertRaises(AttributeError) as cm:
+            self.test_studio.to_tjp = "some text"
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
+        )
 
     def test_now_argument_is_skipped(self):
         """testing if the now attribute will use the rounded
@@ -787,14 +818,27 @@ class StudioTester(UnitTestBase):
         """
         from stalker import Studio
         self.kwargs['now'] = 'not a datetime instance'
-        self.assertRaises(TypeError, Studio, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Studio(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Studio.now attribute should be an instance of datetime.datetime, '
+            'not str'
+        )
 
     def test_now_attribute_is_set_to_a_value_other_than_datetime_instance(self):
         """testing if a TypeError will be raised when the now attribute is set
         to a value other than a datetime.datetime instance
         """
-        self.assertRaises(TypeError, setattr, self.test_studio, 'now',
-                          'not a datetime instance')
+        with self.assertRaises(TypeError) as cm:
+            self.test_studio.now = 'not a datetime instance'
+
+        self.assertEqual(
+            str(cm.exception),
+            'Studio.now attribute should be an instance of datetime.datetime, '
+            'not str'
+        )
 
     def test_now_argument_is_working_properly(self):
         """testing if the now argument value is passed to the now attribute
@@ -892,8 +936,14 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         """testing if a TypeError will be raised when the scheduler attribute
         is set to a value which is not a scheduler instance
         """
-        self.assertRaises(TypeError, setattr, self.test_studio, 'scheduler',
-                          'not a Scheduler instance')
+        with self.assertRaises(TypeError) as cm:
+            self.test_studio.scheduler = 'not a Scheduler instance'
+
+        self.assertEqual(
+            str(cm.exception),
+            'Studio.scheduler should be an instance of '
+            'stalker.models.scheduler.SchedulerBase, not str'
+        )
 
     def test_scheduler_attribute_is_working_properly(self):
         """testing if the scheduler attribute is working properly
@@ -908,7 +958,15 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         attribute is not set to a Scheduler instance and schedule is called
         """
         self.test_studio.scheduler = None
-        self.assertRaises(RuntimeError, self.test_studio.schedule)
+        with self.assertRaises(RuntimeError) as cm:
+            self.test_studio.schedule()
+
+        self.assertEqual(
+            str(cm.exception),
+            'There is no scheduler for this Studio, please assign a scheduler '
+            'to the Studio.scheduler attribute, before calling '
+            'Studio.schedule()'
+        )
 
     def test_schedule_will_schedule_the_tasks_with_the_given_scheduler(self):
         """testing if the schedule method will schedule the tasks with the
@@ -936,52 +994,152 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         # now check the timings of the tasks are all adjusted
 
         # Projects
-        # print "%s:self.test_project" % self.test_project.id
-        # print "%s:self.test_project2" % self.test_project2.id
-        # print "%s:self.test_project3" % self.test_project3.id
-        #
-        # print "%s:self.test_asset1" % self.test_asset1.id
-        # print "%s:self.test_asset2" % self.test_asset2.id
-        #
-        # print "%s:self.test_shot1.id" % self.test_shot1.id
-        # print "%s:self.test_shot2.id" % self.test_shot2.id
-        # print "%s:self.test_shot3.id" % self.test_shot3.id
-        # print "%s:self.test_shot4.id" % self.test_shot4.id
-        # print "%s:self.test_shot5.id" % self.test_shot5.id
-        #
-        # print "%s:self.test_task1.id" % self.test_task1.id
-        # print "%s:self.test_task2.id" % self.test_task2.id
-        # print "%s:self.test_task3.id" % self.test_task3.id
-        # print "%s:self.test_task4.id" % self.test_task4.id
-        # print "%s:self.test_task5.id" % self.test_task5.id
-        # print "%s:self.test_task6.id" % self.test_task6.id
-        # print "%s:self.test_task7.id" % self.test_task7.id
-        # print "%s:self.test_task8.id" % self.test_task8.id
-        # print "%s:self.test_task9.id" % self.test_task9.id
-        #
-        # print "%s:self.test_task10.id" % self.test_task10.id
-        # print "%s:self.test_task11.id" % self.test_task11.id
-        # print "%s:self.test_task12.id" % self.test_task12.id
-        # print "%s:self.test_task13.id" % self.test_task13.id
-        # print "%s:self.test_task14.id" % self.test_task14.id
-        # print "%s:self.test_task15.id" % self.test_task15.id
-        # print "%s:self.test_task16.id" % self.test_task16.id
-        # print "%s:self.test_task17.id" % self.test_task17.id
-        # print "%s:self.test_task18.id" % self.test_task18.id
-        # print "%s:self.test_task19.id" % self.test_task19.id
-        #
-        # print "%s:self.test_task20.id" % self.test_task20.id
-        # print "%s:self.test_task21.id" % self.test_task21.id
-        # print "%s:self.test_task22.id" % self.test_task22.id
-        # print "%s:self.test_task23.id" % self.test_task23.id
-        # print "%s:self.test_task24.id" % self.test_task24.id
-        # print "%s:self.test_task25.id" % self.test_task25.id
-        # print "%s:self.test_task26.id" % self.test_task26.id
-        # print "%s:self.test_task27.id" % self.test_task27.id
-        # print "%s:self.test_task28.id" % self.test_task28.id
-        # print "%s:self.test_task29.id" % self.test_task29.id
-        # print "%s:self.test_task30.id" % self.test_task30.id
-        # print "%s:self.test_task31.id" % self.test_task31.id
+        # print("%s:self.test_project" % self.test_project1.id)
+        # print("%s:self.test_project2" % self.test_project2.id)
+        # print("%s:self.test_project3" % self.test_project3.id)
+
+        # print("%s:self.test_asset1" % self.test_asset1.id)
+        # print("%s:self.test_asset2" % self.test_asset2.id)
+
+        # print("%s:self.test_shot1.id" % self.test_shot1.id)
+        # print("%s:self.test_shot2.id" % self.test_shot2.id)
+        # print("%s:self.test_shot3.id" % self.test_shot3.id)
+        # print("%s:self.test_shot4.id" % self.test_shot4.id)
+        # print("%s:self.test_shot5.id" % self.test_shot5.id)
+
+        # print("%s:self.test_task1.id" % self.test_task1.id)
+        # print("%s:self.test_task2.id" % self.test_task2.id)
+        # print("%s:self.test_task3.id" % self.test_task3.id)
+        # print("%s:self.test_task4.id" % self.test_task4.id)
+        # print("%s:self.test_task5.id" % self.test_task5.id)
+        # print("%s:self.test_task6.id" % self.test_task6.id)
+        # print("%s:self.test_task7.id" % self.test_task7.id)
+        # print("%s:self.test_task8.id" % self.test_task8.id)
+        # print("%s:self.test_task9.id" % self.test_task9.id)
+
+        # print("%s:self.test_task10.id" % self.test_task10.id)
+        # print("%s:self.test_task11.id" % self.test_task11.id)
+        # print("%s:self.test_task12.id" % self.test_task12.id)
+        # print("%s:self.test_task13.id" % self.test_task13.id)
+        # print("%s:self.test_task14.id" % self.test_task14.id)
+        # print("%s:self.test_task15.id" % self.test_task15.id)
+        # print("%s:self.test_task16.id" % self.test_task16.id)
+        # print("%s:self.test_task17.id" % self.test_task17.id)
+        # print("%s:self.test_task18.id" % self.test_task18.id)
+        # print("%s:self.test_task19.id" % self.test_task19.id)
+
+        # print("%s:self.test_task20.id" % self.test_task20.id)
+        # print("%s:self.test_task21.id" % self.test_task21.id)
+        # print("%s:self.test_task22.id" % self.test_task22.id)
+        # print("%s:self.test_task23.id" % self.test_task23.id)
+        # print("%s:self.test_task24.id" % self.test_task24.id)
+        # print("%s:self.test_task25.id" % self.test_task25.id)
+        # print("%s:self.test_task26.id" % self.test_task26.id)
+        # print("%s:self.test_task27.id" % self.test_task27.id)
+        # print("%s:self.test_task28.id" % self.test_task28.id)
+        # print("%s:self.test_task29.id" % self.test_task29.id)
+        # print("%s:self.test_task30.id" % self.test_task30.id)
+        # print("%s:self.test_task31.id" % self.test_task31.id)
+
+
+        # print('self.test_project1.computed_start: %s' % self.test_project1.computed_start)
+        # print('self.test_project1.computed_end: %s' % self.test_project1.computed_end)
+        # print('self.test_asset1.computed_start: %s' % self.test_asset1.computed_start)
+        # print('self.test_asset1.computed_end: %s' % self.test_asset1.computed_end)
+        # print('self.test_asset1.computed_resources: %s' % self.test_asset1.computed_resources)
+        # print('self.test_task24.computed_start: %s' % self.test_task24.computed_start)
+        # print('self.test_task24.computed_end: %s' % self.test_task24.computed_end)
+        # print('self.test_task24.computed_resources: %s' % self.test_task24.computed_resources)
+        # print('self.test_task25.computed_start: %s' % self.test_task25.computed_start)
+        # print('self.test_task25.computed_end: %s' % self.test_task25.computed_end)
+        # print('self.test_task25.computed_resources: %s' % self.test_task25.computed_resources)
+        # print('self.test_task26.computed_start: %s' % self.test_task26.computed_start)
+        # print('self.test_task26.computed_end: %s' % self.test_task26.computed_end)
+        # print('self.test_task26.computed_resources: %s' % self.test_task26.computed_resources)
+        # print('self.test_task27.computed_start: %s' % self.test_task27.computed_start)
+        # print('self.test_task27.computed_end: %s' % self.test_task27.computed_end)
+        # print('self.test_task27.computed_resources: %s' % self.test_task27.computed_resources)
+        # print('self.test_shot2.computed_start: %s' % self.test_shot2.computed_start)
+        # print('self.test_shot2.computed_end: %s' % self.test_shot2.computed_end)
+        # print('self.test_shot2.computed_resources: %s' % self.test_shot2.computed_resources)
+        # print('self.test_task8.computed_start: %s' % self.test_task8.computed_start)
+        # print('self.test_task8.computed_end: %s' % self.test_task8.computed_end)
+        # print('self.test_task8.computed_resources: %s' % self.test_task8.computed_resources)
+        # print('self.test_task9.computed_start: %s' % self.test_task9.computed_start)
+        # print('self.test_task9.computed_end: %s' % self.test_task9.computed_end)
+        # print('self.test_task9.computed_resources: %s' % self.test_task9.computed_resources)
+        # print('self.test_task10.computed_start: %s' % self.test_task10.computed_start)
+        # print('self.test_task10.computed_end: %s' % self.test_task10.computed_end)
+        # print('self.test_task10.computed_resources: %s' % self.test_task10.computed_resources)
+        # print('self.test_task11.computed_start: %s' % self.test_task11.computed_start)
+        # print('self.test_task11.computed_end: %s' % self.test_task11.computed_end)
+        # print('self.test_task11.computed_resources: %s' % self.test_task11.computed_resources)
+        # print('self.test_shot1.computed_start: %s' % self.test_shot1.computed_start)
+        # print('self.test_shot1.computed_end: %s' % self.test_shot1.computed_end)
+        # print('self.test_shot1.computed_resources: %s' % self.test_shot1.computed_resources)
+        # print('self.test_task4.computed_start: %s' % self.test_task4.computed_start)
+        # print('self.test_task4.computed_end: %s' % self.test_task4.computed_end)
+        # print('self.test_task4.computed_resources: %s' % self.test_task4.computed_resources)
+        # print('self.test_task5.computed_start: %s' % self.test_task5.computed_start)
+        # print('self.test_task5.computed_end: %s' % self.test_task5.computed_end)
+        # print('self.test_task5.computed_resources: %s' % self.test_task5.computed_resources)
+        # print('self.test_task6.computed_start: %s' % self.test_task6.computed_start)
+        # print('self.test_task6.computed_end: %s' % self.test_task6.computed_end)
+        # print('self.test_task6.computed_resources: %s' % self.test_task6.computed_resources)
+        # print('self.test_task7.computed_start: %s' % self.test_task7.computed_start)
+        # print('self.test_task7.computed_end: %s' % self.test_task7.computed_end)
+        # print('self.test_task7.computed_resources: %s' % self.test_task7.computed_resources)
+        # print('self.test_task1.computed_start: %s' % self.test_task1.computed_start)
+        # print('self.test_task1.computed_end: %s' % self.test_task1.computed_end)
+        # print('self.test_task1.computed_resources: %s' % self.test_task1.computed_resources)
+        # print('self.test_asset2.computed_start: %s' % self.test_asset2.computed_start)
+        # print('self.test_asset2.computed_end: %s' % self.test_asset2.computed_end)
+        # print('self.test_asset2.computed_resources: %s' % self.test_asset2.computed_resources)
+        # print('self.test_task28.computed_start: %s' % self.test_task28.computed_start)
+        # print('self.test_task28.computed_end: %s' % self.test_task28.computed_end)
+        # print('self.test_task28.computed_resources: %s' % self.test_task28.computed_resources)
+        # print('self.test_task29.computed_start: %s' % self.test_task29.computed_start)
+        # print('self.test_task29.computed_end: %s' % self.test_task29.computed_end)
+        # print('self.test_task29.computed_resources: %s' % self.test_task29.computed_resources)
+        # print('self.test_task30.computed_start: %s' % self.test_task30.computed_start)
+        # print('self.test_task30.computed_end: %s' % self.test_task30.computed_end)
+        # print('self.test_task30.computed_resources: %s' % self.test_task30.computed_resources)
+        # print('self.test_task31.computed_start: %s' % self.test_task31.computed_start)
+        # print('self.test_task31.computed_end: %s' % self.test_task31.computed_end)
+        # print('self.test_task31.computed_resources: %s' % self.test_task31.computed_resources)
+        # print('self.test_shot3.computed_start: %s' % self.test_shot3.computed_start)
+        # print('self.test_shot3.computed_end: %s' % self.test_shot3.computed_end)
+        # print('self.test_shot3.computed_resources: %s' % self.test_shot3.computed_resources)
+        # print('self.test_task12.computed_start: %s' % self.test_task12.computed_start)
+        # print('self.test_task12.computed_end: %s' % self.test_task12.computed_end)
+        # print('self.test_task12.computed_resources: %s' % self.test_task12.computed_resources)
+        # print('self.test_task13.computed_start: %s' % self.test_task13.computed_start)
+        # print('self.test_task13.computed_end: %s' % self.test_task13.computed_end)
+        # print('self.test_task13.computed_resources: %s' % self.test_task13.computed_resources)
+        # print('self.test_task14.computed_start: %s' % self.test_task14.computed_start)
+        # print('self.test_task14.computed_end: %s' % self.test_task14.computed_end)
+        # print('self.test_task14.computed_resources: %s' % self.test_task14.computed_resources)
+        # print('self.test_task15.computed_start: %s' % self.test_task15.computed_start)
+        # print('self.test_task15.computed_end: %s' % self.test_task15.computed_end)
+        # print('self.test_task15.computed_resources: %s' % self.test_task15.computed_resources)
+        # print('self.test_shot4.computed_start: %s' % self.test_shot4.computed_start)
+        # print('self.test_shot4.computed_end: %s' % self.test_shot4.computed_end)
+        # print('self.test_shot4.computed_resources: %s' % self.test_shot4.computed_resources)
+        # print('self.test_task16.computed_start: %s' % self.test_task16.computed_start)
+        # print('self.test_task16.computed_end: %s' % self.test_task16.computed_end)
+        # print('self.test_task16.computed_resources: %s' % self.test_task16.computed_resources)
+        # print('self.test_task17.computed_start: %s' % self.test_task17.computed_start)
+        # print('self.test_task17.computed_end: %s' % self.test_task17.computed_end)
+        # print('self.test_task17.computed_resources: %s' % self.test_task17.computed_resources)
+        # print('self.test_task18.computed_start: %s' % self.test_task18.computed_start)
+        # print('self.test_task18.computed_end: %s' % self.test_task18.computed_end)
+        # print('self.test_task18.computed_resources: %s' % self.test_task18.computed_resources)
+        # print('self.test_task19.computed_start: %s' % self.test_task19.computed_start)
+        # print('self.test_task19.computed_end: %s' % self.test_task19.computed_end)
+        # print('self.test_task19.computed_resources: %s' % self.test_task19.computed_resources)
+        # print('self.test_task2.computed_start: %s' % self.test_task2.computed_start)
+        # print('self.test_task2.computed_end: %s' % self.test_task2.computed_end)
+        # print('self.test_task2.computed_resources: %s' % self.test_task2.computed_resources)
 
         # self.test_project
         self.assertEqual(
@@ -989,7 +1147,7 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
             self.test_project1.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 19, 11, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 6, 24, 16, 0, tzinfo=pytz.utc),
             self.test_project1.computed_end
         )
 
@@ -999,7 +1157,7 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
             self.test_asset1.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 5, 17, 10, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 5, 17, 18, 0, tzinfo=pytz.utc),
             self.test_asset1.computed_end
         )
 
@@ -1040,32 +1198,32 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_task26
         self.assertEqual(
-            datetime.datetime(2013, 5, 3, 12, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 5, 6, 11, 0, tzinfo=pytz.utc),
             self.test_task26.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 5, 16, 11, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 5, 17, 10, 0, tzinfo=pytz.utc),
             self.test_task26.computed_end
         )
 
         self.assertEqual(
             self.test_task26.computed_resources,
-            [self.test_user3]
+            [self.test_user1]
         )
 
         # self.test_task27
         self.assertEqual(
-            datetime.datetime(2013, 5, 6, 11, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 5, 7, 10, 0, tzinfo=pytz.utc),
             self.test_task27.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 5, 17, 10, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 5, 17, 18, 0, tzinfo=pytz.utc),
             self.test_task27.computed_end
         )
 
         self.assertEqual(
             self.test_task27.computed_resources,
-            [self.test_user2]
+            [self.test_user3]
         )
 
         # self.test_shot2
@@ -1074,7 +1232,7 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
             self.test_shot2.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 14, 14, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 6, 20, 10, 0, tzinfo=pytz.utc),
             self.test_shot2.computed_end
         )
 
@@ -1095,52 +1253,52 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         self.assertEqual(
             self.test_task8.computed_resources,
-            [self.test_user2]
+            [self.test_user1]
         )
 
         # self.test_task9
         self.assertEqual(
-            datetime.datetime(2013, 5, 30, 9, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 5, 30, 17, 0, tzinfo=pytz.utc),
             self.test_task9.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 5, 31, 16, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 6, 3, 15, 0, tzinfo=pytz.utc),
             self.test_task9.computed_end
         )
 
         self.assertEqual(
             self.test_task9.computed_resources,
-            [self.test_user2]
+            [self.test_user3]
         )
 
         # self.test_task10
         self.assertEqual(
-            datetime.datetime(2013, 6, 4, 14, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 6, 5, 13, 0, tzinfo=pytz.utc),
             self.test_task10.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 7, 11, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 6, 10, 10, 0, tzinfo=pytz.utc),
             self.test_task10.computed_end
         )
 
         self.assertEqual(
             self.test_task10.computed_resources,
-            [self.test_user2]
+            [self.test_user3]
         )
 
         # self.test_task11
         self.assertEqual(
-            datetime.datetime(2013, 6, 11, 9, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 6, 14, 14, 0, tzinfo=pytz.utc),
             self.test_task11.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 14, 14, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 6, 20, 10, 0, tzinfo=pytz.utc),
             self.test_task11.computed_end
         )
 
         self.assertEqual(
             self.test_task11.computed_resources,
-            [self.test_user3]
+            [self.test_user2]
         )
 
         # self.test_shot1
@@ -1149,7 +1307,7 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
             self.test_shot1.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 19, 11, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 6, 24, 16, 0, tzinfo=pytz.utc),
             self.test_shot1.computed_end
         )
 
@@ -1170,31 +1328,31 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         self.assertEqual(
             self.test_task4.computed_resources,
-            [self.test_user1]
+            [self.test_user2]
         )
 
         # self.test_task5
         self.assertEqual(
-            datetime.datetime(2013, 6, 3, 15, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 6, 5, 13, 0, tzinfo=pytz.utc),
             self.test_task5.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 5, 13, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 6, 7, 11, 0, tzinfo=pytz.utc),
             self.test_task5.computed_end
         )
 
         self.assertEqual(
             self.test_task5.computed_resources,
-            [self.test_user1]
+            [self.test_user2]
         )
 
         # self.test_task6
         self.assertEqual(
-            datetime.datetime(2013, 6, 10, 10, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 6, 11, 17, 0, tzinfo=pytz.utc),
             self.test_task6.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 12, 16, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 6, 14, 14, 0, tzinfo=pytz.utc),
             self.test_task6.computed_end
         )
 
@@ -1205,32 +1363,32 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_task7
         self.assertEqual(
-            datetime.datetime(2013, 6, 14, 14, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 6, 20, 10, 0, tzinfo=pytz.utc),
             self.test_task7.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 19, 11, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 6, 24, 16, 0, tzinfo=pytz.utc),
             self.test_task7.computed_end
         )
 
         self.assertEqual(
             self.test_task7.computed_resources,
-            [self.test_user3]
+            [self.test_user1]
         )
 
         # self.test_task1
         self.assertEqual(
-            datetime.datetime(2013, 5, 16, 11, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 5, 17, 10, 0, tzinfo=pytz.utc),
             self.test_task1.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 5, 29, 10, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 5, 29, 18, 0, tzinfo=pytz.utc),
             self.test_task1.computed_end
         )
 
         self.assertEqual(
             self.test_task1.computed_resources,
-            [self.test_user3]
+            [self.test_user1]
         )
 
         # self.test_project2
@@ -1290,16 +1448,16 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         self.assertEqual(
             self.test_task29.computed_resources,
-            [self.test_user1]
+            [self.test_user2]
         )
 
         # self.test_task30
         self.assertEqual(
-            datetime.datetime(2013, 5, 17, 10, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 5, 20, 9, 0, tzinfo=pytz.utc),
             self.test_task30.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 5, 29, 18, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 5, 30, 17, 0, tzinfo=pytz.utc),
             self.test_task30.computed_end
         )
 
@@ -1320,7 +1478,7 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         self.assertEqual(
             self.test_task31.computed_resources,
-            [self.test_user1]
+            [self.test_user3]
         )
 
         # self.test_shot3
@@ -1329,7 +1487,7 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
             self.test_shot3.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 17, 13, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 6, 20, 10, 0, tzinfo=pytz.utc),
             self.test_shot3.computed_end
         )
 
@@ -1350,7 +1508,7 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         self.assertEqual(
             self.test_task12.computed_resources,
-            [self.test_user2]
+            [self.test_user1]
         )
 
         # self.test_task13
@@ -1365,37 +1523,37 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         self.assertEqual(
             self.test_task13.computed_resources,
-            [self.test_user1]
+            [self.test_user2]
         )
 
         # self.test_task14
         self.assertEqual(
-            datetime.datetime(2013, 6, 5, 13, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 6, 7, 11, 0, tzinfo=pytz.utc),
             self.test_task14.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 10, 10, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 6, 11, 17, 0, tzinfo=pytz.utc),
             self.test_task14.computed_end
         )
 
         self.assertEqual(
             self.test_task14.computed_resources,
-            [self.test_user1]
+            [self.test_user2]
         )
 
         # self.test_task15
         self.assertEqual(
-            datetime.datetime(2013, 6, 11, 17, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 6, 14, 14, 0, tzinfo=pytz.utc),
             self.test_task15.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 17, 13, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 6, 20, 10, 0, tzinfo=pytz.utc),
             self.test_task15.computed_end
         )
 
         self.assertEqual(
             self.test_task15.computed_resources,
-            [self.test_user2]
+            [self.test_user1]
         )
 
         # self.test_shot4
@@ -1404,7 +1562,7 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
             self.test_shot4.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 18, 12, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 6, 24, 16, 0, tzinfo=pytz.utc),
             self.test_shot4.computed_end
         )
 
@@ -1425,16 +1583,16 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         self.assertEqual(
             self.test_task16.computed_resources,
-            [self.test_user2]
+            [self.test_user1]
         )
 
         # self.test_task17
         self.assertEqual(
-            datetime.datetime(2013, 5, 31, 16, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 6, 3, 15, 0, tzinfo=pytz.utc),
             self.test_task17.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 4, 14, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 6, 5, 13, 0, tzinfo=pytz.utc),
             self.test_task17.computed_end
         )
 
@@ -1445,47 +1603,47 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         # self.test_task18
         self.assertEqual(
-            datetime.datetime(2013, 6, 7, 11, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 6, 10, 10, 0, tzinfo=pytz.utc),
             self.test_task18.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 11, 17, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 6, 12, 16, 0, tzinfo=pytz.utc),
             self.test_task18.computed_end
         )
 
         self.assertEqual(
             self.test_task18.computed_resources,
-            [self.test_user2]
+            [self.test_user3]
         )
 
         # self.test_task19
         self.assertEqual(
-            datetime.datetime(2013, 6, 12, 16, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 6, 19, 11, 0, tzinfo=pytz.utc),
             self.test_task19.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 18, 12, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 6, 24, 16, 0, tzinfo=pytz.utc),
             self.test_task19.computed_end
         )
 
         self.assertEqual(
             self.test_task19.computed_resources,
-            [self.test_user1]
+            [self.test_user3]
         )
 
         # self.test_task2
         self.assertEqual(
-            datetime.datetime(2013, 5, 29, 10, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 5, 30, 9, 0, tzinfo=pytz.utc),
             self.test_task2.computed_start
         )
         self.assertEqual(
-            datetime.datetime(2013, 6, 10, 18, 0, tzinfo=pytz.utc),
+            datetime.datetime(2013, 6, 11, 17, 0, tzinfo=pytz.utc),
             self.test_task2.computed_end
         )
 
         self.assertEqual(
             self.test_task2.computed_resources,
-            [self.test_user3]
+            [self.test_user1]
         )
 
     def test_schedule_will_schedule_only_the_tasks_of_the_given_projects_with_the_given_scheduler(self):
@@ -1863,8 +2021,13 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
     def test_vacation_attribute_is_read_only(self):
         """testing if the vacation attribute is a read-only attribute
         """
-        self.assertRaises(AttributeError, setattr, self.test_studio,
-                          'vacations', 'some random value')
+        with self.assertRaises(AttributeError) as cm:
+            self.test_studio.vacations = 'some random value'
+
+        self.assertEqual(
+            str(cm.exception),
+            "can't set attribute"
+        )
 
     def test_vacation_attribute_returns_studio_vacation_instances(self):
         """Testing if the vacation attribute is returning the Vacation
@@ -1950,7 +2113,14 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         """
         from stalker import Studio
         self.kwargs['timing_resolution'] = 'not a timedelta instance'
-        self.assertRaises(TypeError, Studio, **self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            Studio(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Studio.timing_resolution should be an instance of '
+            'datetime.timedelta not, str'
+        )
 
     def test_timing_resolution_attribute_is_not_a_timedelta_instance(self):
         """testing if a TypeError will be raised when the timing_resolution
@@ -1958,8 +2128,14 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         """
         from stalker import Studio
         new_foo_obj = Studio(**self.kwargs)
-        self.assertRaises(TypeError, setattr, new_foo_obj, 'timing_resolution',
-                          'not a timedelta instance')
+        with self.assertRaises(TypeError) as cm:
+            new_foo_obj.timing_resolution = 'not a timedelta instance'
+
+        self.assertEqual(
+            str(cm.exception),
+            'Studio.timing_resolution should be an instance of '
+            'datetime.timedelta not, str'
+        )
 
     def test_timing_resolution_argument_is_working_properly(self):
         """testing if the timing_resolution argument value is passed to
