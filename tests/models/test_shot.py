@@ -4,19 +4,18 @@
 #
 # This file is part of Stalker.
 #
-# This library is free software; you can redistribute it and/or
-# modify it under the terms of the GNU Lesser General Public
-# License as published by the Free Software Foundation;
-# version 2.1 of the License.
+# Stalker is free software: you can redistribute it and/or modify
+# it under the terms of the Lesser GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License.
 #
-# This library is distributed in the hope that it will be useful,
+# Stalker is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-# Lesser General Public License for more details.
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# Lesser GNU General Public License for more details.
 #
-# You should have received a copy of the GNU Lesser General Public
-# License along with this library; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+# You should have received a copy of the Lesser GNU General Public License
+# along with Stalker.  If not, see <http://www.gnu.org/licenses/>
+
 from stalker.testing import UnitTestBase
 
 
@@ -1272,6 +1271,146 @@ class ShotTester(UnitTestBase):
         from stalker import Shot
         self.assertEqual(Shot.__strictly_typed__, False)
 
+    def test_fps_argument_is_skipped(self):
+        """testing if the default value will be used when fps is skipped
+        """
+        if 'fps' in self.kwargs:
+            self.kwargs.pop("fps")
+
+        self.kwargs['code'] = 'SHnew'
+        new_shot = Shot(**self.kwargs)
+        self.assertEqual(new_shot.fps, self.test_project1.fps)
+
+    def test_fps_attribute_is_set_to_None(self):
+        """testing if the Project.fps will be used if the fps argument is None
+        """
+        self.kwargs["fps"] = None
+        self.kwargs['code'] = 'SHnew'
+        new_shot = Shot(**self.kwargs)
+
+        self.assertEqual(new_shot.fps, self.test_project1.fps)
+
+    def test_fps_argument_is_given_as_non_float_or_integer(self):
+        """testing if a TypeError will be raised when the fps argument is
+        given as a value other than a float or integer, or a string which is
+        convertible to float.
+        """
+        test_values = [["a", "list"], {"a": "list"}]
+        for i, test_value in enumerate(test_values):
+            self.kwargs["fps"] = test_value
+            self.kwargs['code'] = 'SH%i'
+            with self.assertRaises(TypeError) as cm:
+                s = Shot(**self.kwargs)
+
+            self.assertEqual(
+                str(cm.exception),
+                'Shot.fps should be a positive float or int, not %s' %
+                test_value.__class__.__name__
+            )
+
+    def test_fps_attribute_is_given_as_non_float_or_integer(self):
+        """testing if a TypeError will be raised when the fps attribute is
+        set to a value other than a float, integer or valid string literals
+        """
+        test_values = ["a str", ["a", "list"], {"a": "list"}]
+        for test_value in test_values:
+            with self.assertRaises(TypeError) as cm:
+                self.test_shot.fps = test_value
+
+            self.assertEqual(
+                str(cm.exception),
+                'Shot.fps should be a positive float or int, not %s' %
+                test_value.__class__.__name__
+            )
+
+    def test_fps_attribute_float_conversion(self):
+        """testing if the fps attribute is converted to float when the float
+        argument is given as an integer
+        """
+        test_value = 1
+        self.kwargs["fps"] = test_value
+        self.kwargs['code'] = 'SHnew'
+        new_shot = Shot(**self.kwargs)
+        self.assertIsInstance(new_shot.fps, float)
+        self.assertEqual(new_shot.fps, float(test_value))
+
+    def test_fps_attribute_float_conversion_2(self):
+        """testing if the fps attribute is converted to float when it is set to
+        an integer value
+        """
+        test_value = 1
+        self.test_shot.fps = test_value
+        self.assertIsInstance(self.test_shot.fps, float)
+        self.assertEqual(self.test_shot.fps, float(test_value))
+
+    def test_fps_argument_is_zero(self):
+        """testing if a ValueError will be raised when the fps is 0
+        """
+        self.kwargs['fps'] = 0
+        self.kwargs['code'] = 'SHnew'
+        with self.assertRaises(ValueError) as cm:
+            s = Shot(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Shot.fps should be a positive float or int, not 0.0'
+        )
+
+    def test_fps_attribute_is_set_to_zero(self):
+        """testing if a value error will be raised when the fps attribute is
+        set to zero
+        """
+        with self.assertRaises(ValueError) as cm:
+            self.test_shot.fps = 0
+
+        self.assertEqual(
+            str(cm.exception),
+            'Shot.fps should be a positive float or int, not 0.0'
+        )
+
+    def test_fps_argument_is_negative(self):
+        """testing if a ValueError will be raised when the fps argument is
+        negative
+        """
+        self.kwargs['fps'] = -1.0
+        self.kwargs['code'] = 'SHrandom'
+        with self.assertRaises(ValueError) as cm:
+            s = Shot(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Shot.fps should be a positive float or int, not -1.0'
+        )
+
+    def test_fps_attribute_is_negative(self):
+        """testing if a ValueError will be raised when the fps attribute is
+        set to a negative value
+        """
+        with self.assertRaises(ValueError) as cm:
+            self.test_shot.fps = -1
+
+        self.assertEqual(
+            str(cm.exception),
+            'Shot.fps should be a positive float or int, not -1.0'
+        )
+
+    def test_fps_changes_with_project(self):
+        """testing if the fps reflects the project.fps unless it is set to a
+        value
+        """
+        new_shot = Shot(
+            name='New Shot',
+            code='ns',
+            project=self.test_project1
+        )
+        self.assertEqual(new_shot.fps, self.test_project1.fps)
+        self.test_project1.fps = 335
+        self.assertEqual(new_shot.fps, 335)
+        new_shot.fps = 12
+        self.assertEqual(new_shot.fps, 12)
+        self.test_project1.fps = 24
+        self.assertEqual(new_shot.fps, 12)
+
 
 class ShotDBTestCase(UnitTestBase):
     """Tests stalker.model.shot.Shot class in a DB environment
@@ -1396,7 +1535,7 @@ class ShotDBTestCase(UnitTestBase):
         a Shot restored from DB
         """
         from stalker import db, Shot
-        # re connect to the database
+        # reconnect to the database
         # retrieve the shot back from DB
         test_shot_db = Shot.query.filter_by(name=self.kwargs['name']).first()
         # trying to change the cut_in and cut_out values should not raise any
@@ -1424,3 +1563,143 @@ class ShotDBTestCase(UnitTestBase):
 
         self.assertEqual(test_shot_db.cut_in, 100)
         self.assertEqual(test_shot_db.cut_out, 153)
+
+    def test_fps_argument_is_skipped(self):
+        """testing if the default value will be used when fps is skipped
+        """
+        if 'fps' in self.kwargs:
+            self.kwargs.pop("fps")
+
+        self.kwargs['code'] = 'SHnew'
+        new_shot = Shot(**self.kwargs)
+        self.assertEqual(new_shot.fps, self.test_project1.fps)
+
+    def test_fps_attribute_is_set_to_None(self):
+        """testing if the Project.fps will be used if the fps argument is None
+        """
+        self.kwargs["fps"] = None
+        self.kwargs['code'] = 'SHnew'
+        new_shot = Shot(**self.kwargs)
+
+        self.assertEqual(new_shot.fps, self.test_project1.fps)
+
+    def test_fps_argument_is_given_as_non_float_or_integer(self):
+        """testing if a TypeError will be raised when the fps argument is
+        given as a value other than a float or integer, or a string which is
+        convertible to float.
+        """
+        test_values = [["a", "list"], {"a": "list"}]
+        for i, test_value in enumerate(test_values):
+            self.kwargs["fps"] = test_value
+            self.kwargs['code'] = 'SH%i'
+            with self.assertRaises(TypeError) as cm:
+                s = Shot(**self.kwargs)
+
+            self.assertEqual(
+                str(cm.exception),
+                'Shot.fps should be a positive float or int, not %s' %
+                test_value.__class__.__name__
+            )
+
+    def test_fps_attribute_is_given_as_non_float_or_integer(self):
+        """testing if a TypeError will be raised when the fps attribute is
+        set to a value other than a float, integer or valid string literals
+        """
+        test_values = ["a str", ["a", "list"], {"a": "list"}]
+        for test_value in test_values:
+            with self.assertRaises(TypeError) as cm:
+                self.test_shot.fps = test_value
+
+            self.assertEqual(
+                str(cm.exception),
+                'Shot.fps should be a positive float or int, not %s' %
+                test_value.__class__.__name__
+            )
+
+    def test_fps_attribute_float_conversion(self):
+        """testing if the fps attribute is converted to float when the float
+        argument is given as an integer
+        """
+        test_value = 1
+        self.kwargs["fps"] = test_value
+        self.kwargs['code'] = 'SHnew'
+        new_shot = Shot(**self.kwargs)
+        self.assertIsInstance(new_shot.fps, float)
+        self.assertEqual(new_shot.fps, float(test_value))
+
+    def test_fps_attribute_float_conversion_2(self):
+        """testing if the fps attribute is converted to float when it is set to
+        an integer value
+        """
+        test_value = 1
+        self.test_shot.fps = test_value
+        self.assertIsInstance(self.test_shot.fps, float)
+        self.assertEqual(self.test_shot.fps, float(test_value))
+
+    def test_fps_argument_is_zero(self):
+        """testing if a ValueError will be raised when the fps is 0
+        """
+        self.kwargs['fps'] = 0
+        self.kwargs['code'] = 'SHnew'
+        with self.assertRaises(ValueError) as cm:
+            s = Shot(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Shot.fps should be a positive float or int, not 0.0'
+        )
+
+    def test_fps_attribute_is_set_to_zero(self):
+        """testing if a value error will be raised when the fps attribute is
+        set to zero
+        """
+        with self.assertRaises(ValueError) as cm:
+            self.test_shot.fps = 0
+
+        self.assertEqual(
+            str(cm.exception),
+            'Shot.fps should be a positive float or int, not 0.0'
+        )
+
+    def test_fps_argument_is_negative(self):
+        """testing if a ValueError will be raised when the fps argument is
+        negative
+        """
+        self.kwargs['fps'] = -1.0
+        self.kwargs['code'] = 'SHrandom'
+        with self.assertRaises(ValueError) as cm:
+            s = Shot(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Shot.fps should be a positive float or int, not -1.0'
+        )
+
+    def test_fps_attribute_is_negative(self):
+        """testing if a ValueError will be raised when the fps attribute is
+        set to a negative value
+        """
+        with self.assertRaises(ValueError) as cm:
+            self.test_shot.fps = -1
+
+        self.assertEqual(
+            str(cm.exception),
+            'Shot.fps should be a positive float or int, not -1.0'
+        )
+
+    def test_fps_changes_with_project(self):
+        """testing if the fps reflects the project.fps unless it is set to a
+        value
+        """
+        new_shot = Shot(
+            name='New Shot',
+            code='ns',
+            project=self.test_project1
+        )
+        self.assertEqual(new_shot.fps, self.test_project1.fps)
+        self.test_project1.fps = 335
+        self.assertEqual(new_shot.fps, 335)
+        new_shot.fps = 12
+        self.assertEqual(new_shot.fps, 12)
+        self.test_project1.fps = 24
+        self.assertEqual(new_shot.fps, 12)

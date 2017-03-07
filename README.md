@@ -3,7 +3,7 @@ About
 
 Stalker is an Open Source Production Asset Management (ProdAM) Library designed 
 specifically for Animation and VFX Studios but can be used for any kind of
-projects. Stalker is licensed under LGPL v2.1.
+projects. Stalker is licensed under LGPL v3.
 
 Features:
  * Designed for animation and VFX Studios.

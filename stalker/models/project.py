@@ -4,19 +4,17 @@
 #
 # This file is part of Stalker.
 #
-# This library is free software; you can redistribute it and/or
-# modify it under the terms of the GNU Lesser General Public
-# License as published by the Free Software Foundation;
-# version 2.1 of the License.
+# Stalker is free software: you can redistribute it and/or modify
+# it under the terms of the Lesser GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License.
 #
-# This library is distributed in the hope that it will be useful,
+# Stalker is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-# Lesser General Public License for more details.
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# Lesser GNU General Public License for more details.
 #
-# You should have received a copy of the GNU Lesser General Public
-# License along with this library; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+# You should have received a copy of the Lesser GNU General Public License
+# along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
 import logging
 
@@ -356,11 +354,19 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
     def _validate_fps(self, key, fps):
         """validates the given fps_in value
         """
+        if not isinstance(fps, (int, float)):
+            raise TypeError(
+                '%s.fps should be a positive float or int, not %s' % (
+                    self.__class__.__name__,
+                    fps.__class__.__name__
+                )
+            )
+
         fps = float(fps)
         if fps <= 0:
             raise ValueError(
-                '%s.fps can not be 0 or a negative value' %
-                self.__class__.__name__
+                '%s.fps should be a positive float or int, not %s' %
+                (self.__class__.__name__, fps)
             )
         return float(fps)
 

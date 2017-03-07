@@ -4,19 +4,17 @@
 #
 # This file is part of Stalker.
 #
-# This library is free software; you can redistribute it and/or
-# modify it under the terms of the GNU Lesser General Public
-# License as published by the Free Software Foundation;
-# version 2.1 of the License.
+# Stalker is free software: you can redistribute it and/or modify
+# it under the terms of the Lesser GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License.
 #
-# This library is distributed in the hope that it will be useful,
+# Stalker is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-# Lesser General Public License for more details.
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# Lesser GNU General Public License for more details.
 #
-# You should have received a copy of the GNU Lesser General Public
-# License along with this library; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+# You should have received a copy of the Lesser GNU General Public License
+# along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
 import logging
 from stalker import log
@@ -876,7 +874,7 @@ class DatabaseTester(UnitTestBase):
         sql_query = 'select version_num from "alembic_version"'
         version_num = \
             db.DBSession.connection().execute(sql_query).fetchone()[0]
-        self.assertEqual('f16651477e64', version_num)
+        self.assertEqual('0063f547dc2e', version_num)
 
     def test_initialization_of_alembic_version_table_multiple_times(self):
         """testing if the db.create_alembic_table() will handle initializing
@@ -886,7 +884,7 @@ class DatabaseTester(UnitTestBase):
         sql_query = 'select version_num from "alembic_version"'
         version_num = \
             db.DBSession.connection().execute(sql_query).fetchone()[0]
-        self.assertEqual('f16651477e64', version_num)
+        self.assertEqual('0063f547dc2e', version_num)
 
         db.DBSession.remove()
         db.init()
@@ -3294,7 +3292,6 @@ class DatabaseModelsTester(UnitTestBase):
             resources=[user3],
             responsible=[user1]
         )
-
         dt = datetime.datetime
         td = datetime.timedelta
         new_project._computed_start = dt.now(pytz.utc)
@@ -3309,6 +3306,14 @@ class DatabaseModelsTester(UnitTestBase):
             project=new_project
         )
         db.DBSession.add(ticket1)
+        db.DBSession.commit()
+
+        # create dailies
+        from stalker import Daily
+        d1 = Daily(name='Daily1', project=new_project)
+        d2 = Daily(name='Daily2', project=new_project)
+        d3 = Daily(name='Daily3', project=new_project)
+        db.DBSession.add_all([d1, d2, d3])
         db.DBSession.commit()
 
         # store the attributes
@@ -3392,6 +3397,9 @@ class DatabaseModelsTester(UnitTestBase):
 
         # Tickets
         self.assertEqual([], Ticket.query.all())
+
+        # Dailies
+        self.assertEqual([], Daily.query.all())
 
     def test_persistence_of_Repository(self):
         """testing the persistence of Repository
@@ -3818,6 +3826,7 @@ class DatabaseModelsTester(UnitTestBase):
         tags = test_shot.tags
         tasks = test_shot.tasks
         updated_by = test_shot.updated_by
+        fps = test_shot.fps
 
         # delete the shot
         del test_shot
@@ -3843,6 +3852,7 @@ class DatabaseModelsTester(UnitTestBase):
         self.assertEqual(tags, test_shot_db.tags)
         self.assertEqual(tasks, test_shot_db.tasks)
         self.assertEqual(updated_by, test_shot_db.updated_by)
+        self.assertEqual(fps, test_shot_db.fps)
 
     def test_persistence_of_SimpleEntity(self):
         """testing the persistence of SimpleEntity

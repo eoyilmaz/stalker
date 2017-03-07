@@ -40,6 +40,35 @@ Stalker Changes
   message has now been made clear by adding the start and end date values of
   the clashing TimeLog instance.
 
+0.2.17.6
+========
+
+* **Fix:** Fixed a bug in ``ProjectMixin`` where a proper cascade was not
+  defined and the Delete operations to the Project table were not cascaded
+  to the in the mixed-in classes properly.
+
+0.2.17.5
+========
+
+* **Fix:** Fixed the ``image_format`` attribute implementation in ``Shot``
+  class. Now it will not copy the value of ``Project.image_format`` directly on
+  ``__init__`` but instead will only store the value if the ``image_format``
+  argument in ``__init__`` or ``Shot.image_format`` attribute is set to
+  something.
+
+0.2.17.4
+========
+
+* **Update:** Updated the comment sections of all of the source files to
+  correctly show that Stalker is LGPL v3 (not v2.1).
+
+0.2.17.3
+========
+
+* **New:** Added ``Shot.fps`` attribute to hold the fps information per shot.
+* **Update:** Added the necessary alembic revision to reflect the changes in
+  the ``Version_Inputs`` table.
+
 0.2.17.2
 ========
 
