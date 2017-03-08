@@ -17,6 +17,7 @@
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
 from stalker.testing import UnitTestBase
+from stalker import Shot
 
 
 class ShotTester(UnitTestBase):
@@ -225,7 +226,6 @@ class ShotTester(UnitTestBase):
         )
 
         # create a mock shot object
-        from stalker import Shot
         self.test_shot = Shot(**self.kwargs)
         db.DBSession.add(self.test_project1)
         db.DBSession.commit()
@@ -234,14 +234,12 @@ class ShotTester(UnitTestBase):
         """testing if the __auto_name__ class attribute is set to True for Shot
         class
         """
-        from stalker import Shot
         self.assertTrue(Shot.__auto_name__)
 
     def test_project_argument_is_skipped(self):
         """testing if a TypeError will be raised when the project argument is
         skipped
         """
-        from stalker import Shot
         self.kwargs.pop('project')
         with self.assertRaises(TypeError) as cm:
             Shot(**self.kwargs)
@@ -258,7 +256,6 @@ class ShotTester(UnitTestBase):
         """testing if a TypeError will be raised when the project argument is
         None
         """
-        from stalker import Shot
         self.kwargs["project"] = None
 
         with self.assertRaises(TypeError) as cm:
@@ -276,7 +273,6 @@ class ShotTester(UnitTestBase):
         """testing if a TypeError will be raised when the given sequence
         argument is not a Project instance
         """
-        from stalker import Shot
         test_values = [1, 1.2, "project", ["a", "project"]]
         for test_value in test_values:
             self.kwargs["project"] = test_value
@@ -293,7 +289,6 @@ class ShotTester(UnitTestBase):
             self.kwargs['code'],
             self.test_shot.code
         )
-        from stalker import Shot
         with self.assertRaises(ValueError) as cm:
             Shot(**self.kwargs)
 
@@ -339,7 +334,6 @@ class ShotTester(UnitTestBase):
         """testing if the sequences attribute will be an empty list when the
         sequences argument is skipped
         """
-        from stalker import Shot
         self.kwargs.pop('sequences')
         self.kwargs['code'] = 'DifferentCode'
         new_shot = Shot(**self.kwargs)
@@ -349,7 +343,6 @@ class ShotTester(UnitTestBase):
         """testing if the sequences attribute will be an empty list when the
         sequences argument is set to None
         """
-        from stalker import Shot
         self.kwargs['sequences'] = None
         self.kwargs['code'] = 'NewCode'
         new_shot = Shot(**self.kwargs)
@@ -366,7 +359,6 @@ class ShotTester(UnitTestBase):
         """testing if a TypeError will be raised when the sequences argument is
         not a list
         """
-        from stalker import Shot
         self.kwargs['sequences'] = 'not a list'
         self.kwargs['code'] = 'NewCode'
         with self.assertRaises(TypeError) as cm:
@@ -383,7 +375,6 @@ class ShotTester(UnitTestBase):
         """testing if a TypeError will be raised when the sequences argument is
         not a list of Sequences
         """
-        from stalker import Shot
         self.kwargs['sequences'] = ['not', 1, 'list', 'of', 'sequences']
         self.kwargs['code'] = 'NewShot'
         with self.assertRaises(TypeError) as cm:
@@ -422,7 +413,6 @@ class ShotTester(UnitTestBase):
 
         seqs = [seq1, seq2, seq3]
         self.kwargs['sequences'] = seqs
-        from stalker import Shot
         new_shot = Shot(**self.kwargs)
 
         self.assertEqual(
@@ -455,7 +445,6 @@ class ShotTester(UnitTestBase):
             status_list=self.test_sequence_status_list
         )
 
-        from stalker import Shot
         new_shot = Shot(**self.kwargs)
 
         new_shot.sequences = [seq1]
@@ -474,7 +463,6 @@ class ShotTester(UnitTestBase):
         """
         self.kwargs.pop('scenes')
         self.kwargs['code'] = 'DifferentCode'
-        from stalker import Shot
         new_shot = Shot(**self.kwargs)
         self.assertEqual(new_shot.scenes, [])
 
@@ -484,7 +472,6 @@ class ShotTester(UnitTestBase):
         """
         self.kwargs['scenes'] = None
         self.kwargs['code'] = 'NewCode'
-        from stalker import Shot
         new_shot = Shot(**self.kwargs)
         self.assertEqual(new_shot.scenes, [])
 
@@ -504,7 +491,6 @@ class ShotTester(UnitTestBase):
         """testing if a TypeError will be raised when the scenes argument is
         not a list
         """
-        from stalker import Shot
         self.kwargs['scenes'] = 'not a list'
         self.kwargs['code'] = 'NewCode'
         with self.assertRaises(TypeError) as cm:
@@ -531,7 +517,6 @@ class ShotTester(UnitTestBase):
         """testing if a TypeError will be raised when the scenes argument is
         not a list of Scenes
         """
-        from stalker import Shot
         self.kwargs['scenes'] = ['not', 1, 'list', 'of', 'scenes']
         self.kwargs['code'] = 'NewShot'
         with self.assertRaises(TypeError) as cm:
@@ -559,7 +544,7 @@ class ShotTester(UnitTestBase):
     def test_scenes_argument_is_working_properly(self):
         """testing if the scenes attribute is working properly
         """
-        from stalker import Shot, Scene
+        from stalker import Scene
         self.kwargs['code'] = 'NewShot'
         sce1 = Scene(name='sce1', code='sce1', project=self.test_project1)
         sce2 = Scene(name='sce2', code='sce2', project=self.test_project1)
@@ -577,7 +562,7 @@ class ShotTester(UnitTestBase):
     def test_scenes_attribute_is_working_properly(self):
         """testing if the scenes attribute is working properly
         """
-        from stalker import Shot, Scene
+        from stalker import Scene
         self.kwargs['code'] = 'NewShot'
 
         sce1 = Scene(name='sce1', code='sce1', project=self.test_project1)
@@ -600,7 +585,6 @@ class ShotTester(UnitTestBase):
         """testing if the cut_in argument is skipped the cut_in argument will
         be calculated from cut_out argument
         """
-        from stalker import Shot
         self.kwargs["code"] = "SH123A"
         self.kwargs.pop("cut_in")
         self.kwargs['source_in'] = None
@@ -613,7 +597,6 @@ class ShotTester(UnitTestBase):
         """testing if the cut_in attribute value will be calculated from the
         cut_out attribute value if the cut_in argument is None
         """
-        from stalker import Shot
         self.kwargs["code"] = "SH123A"
         self.kwargs["cut_in"] = None
         self.kwargs['source_in'] = None
@@ -638,7 +621,6 @@ class ShotTester(UnitTestBase):
         """testing if a TypeError will be raised if the cut_in argument is not
         an instance of int
         """
-        from stalker import Shot
         self.kwargs["code"] = "SH123A"
         self.kwargs["cut_in"] = "a string"
 
@@ -666,7 +648,6 @@ class ShotTester(UnitTestBase):
         """testing if a cut_out will be offset when the cut_in argument
         value is bigger than the cut_out argument value
         """
-        from stalker import Shot
         self.kwargs["code"] = "SH123A"
         self.kwargs["cut_in"] = self.kwargs["cut_out"] + 10
         self.kwargs['source_in'] = None
@@ -687,7 +668,6 @@ class ShotTester(UnitTestBase):
         """testing if the cut_out attribute will be calculated from cut_in
         argument value when the cut_out argument is skipped
         """
-        from stalker import Shot
         self.kwargs["code"] = "SH123A"
         self.kwargs.pop("cut_out")
         self.kwargs['source_in'] = None
@@ -700,7 +680,6 @@ class ShotTester(UnitTestBase):
         """testing if the cut_out argument is set to None the cut_out attribute
         will be calculated from cut_in argument value
         """
-        from stalker import Shot
         self.kwargs["code"] = "SH123A"
         self.kwargs["cut_out"] = None
         self.kwargs['source_in'] = None
@@ -725,7 +704,6 @@ class ShotTester(UnitTestBase):
         """testing if a TypeError will be raised when the cut_out argument is
         not an integer
         """
-        from stalker import Shot
         self.kwargs["code"] = "SH123A"
         self.kwargs["cut_out"] = "a string"
         with self.assertRaises(TypeError) as cm:
@@ -751,7 +729,6 @@ class ShotTester(UnitTestBase):
         """testing if the cut_out attribute is updated when the cut_out
         argument is smaller than cut_in argument
         """
-        from stalker import Shot
         self.kwargs["code"] = "SH123A"
         self.kwargs["cut_out"] = self.kwargs["cut_in"] - 10
         self.kwargs['source_in'] = None
@@ -841,7 +818,6 @@ class ShotTester(UnitTestBase):
         """testing if the source_in argument is skipped the source_in argument
         will be equal to cut_in attribute value
         """
-        from stalker import Shot
         self.kwargs["code"] = "SH123A"
         self.kwargs.pop('source_in')
         shot = Shot(**self.kwargs)
@@ -851,7 +827,6 @@ class ShotTester(UnitTestBase):
         """testing if the source_in attribute value will be equal to the cut_in
         attribute value when the source_in argument is None
         """
-        from stalker import Shot
         self.kwargs["code"] = "SH123A"
         self.kwargs["source_in"] = None
         shot = Shot(**self.kwargs)
@@ -873,7 +848,6 @@ class ShotTester(UnitTestBase):
         """testing if a TypeError will be raised if the source_in argument is
         not an instance of int
         """
-        from stalker import Shot
         self.kwargs["code"] = "SH123A"
         self.kwargs["source_in"] = "a string"
 
@@ -901,7 +875,6 @@ class ShotTester(UnitTestBase):
         """testing if a ValueError will be raised when the source_in argument
         value is set to bigger than source_out argument value
         """
-        from stalker import Shot
         self.kwargs['code'] = 'SH123A'
         self.kwargs['source_out'] = self.kwargs['cut_out'] - 10
         self.kwargs['source_in'] = self.kwargs['source_out'] + 5
@@ -934,7 +907,6 @@ class ShotTester(UnitTestBase):
         """testing if a ValueError will be raised when the source_in argument
         value is smaller than cut_in attribute value
         """
-        from stalker import Shot
         self.kwargs['code'] = 'SH123A'
         self.kwargs['source_in'] = self.kwargs['cut_in'] - 10
         with self.assertRaises(ValueError) as cm:
@@ -950,7 +922,6 @@ class ShotTester(UnitTestBase):
         """testing if a ValueError will be raised when the source_in argument
         value is bigger than cut_out attribute value
         """
-        from stalker import Shot
         self.kwargs['code'] = 'SH123A'
         self.kwargs['source_in'] = self.kwargs['cut_out'] + 10
         with self.assertRaises(ValueError) as cm:
@@ -966,7 +937,6 @@ class ShotTester(UnitTestBase):
         """testing if the source_out attribute will be equal to cut_out
         argument value when the source_out argument is skipped
         """
-        from stalker import Shot
         self.kwargs["code"] = "SH123A"
         self.kwargs.pop("source_out")
         new_shot = Shot(**self.kwargs)
@@ -976,7 +946,6 @@ class ShotTester(UnitTestBase):
         """testing if the source_out attribute value will be equal to cut_out
         if the source_out argument value is None
         """
-        from stalker import Shot
         self.kwargs["code"] = "SH123A"
         self.kwargs["source_out"] = None
 
@@ -998,7 +967,6 @@ class ShotTester(UnitTestBase):
         """testing if a TypeError will be raised when the source_out argument
         is not an integer
         """
-        from stalker import Shot
         self.kwargs["code"] = "SH123A"
         self.kwargs["source_out"] = "a string"
         with self.assertRaises(TypeError) as cm:
@@ -1024,7 +992,6 @@ class ShotTester(UnitTestBase):
         """testing if a ValueError will be raised when the source_out argument
         is smaller than the source_in attibute value
         """
-        from stalker import Shot
         self.kwargs["code"] = "SH123A"
         self.kwargs["source_in"] = self.kwargs['cut_in'] + 15
         self.kwargs["source_out"] = self.kwargs["source_in"] - 10
@@ -1054,7 +1021,6 @@ class ShotTester(UnitTestBase):
         """testing if the image_format is copied from the Project instance when
         the image_format argument is skipped
         """
-        from stalker import Shot
         self.kwargs.pop('image_format')
         self.kwargs['code'] = 'TestShot'
         new_shot = Shot(**self.kwargs)
@@ -1065,7 +1031,6 @@ class ShotTester(UnitTestBase):
         """testing if the image format is copied from the Project instance when
         the image_format argument is None
         """
-        from stalker import Shot
         self.kwargs['image_format'] = None
         self.kwargs['code'] = 'newShot'
         new_shot = Shot(**self.kwargs)
@@ -1087,7 +1052,6 @@ class ShotTester(UnitTestBase):
         """testing if a TypeError will be raised when the image_format argument
         is not a ImageFormat instance and not None
         """
-        from stalker import Shot
         self.kwargs['code'] = 'new_shot'
         self.kwargs['image_format'] = 'not an image format instance'
         with self.assertRaises(TypeError) as cm:
@@ -1131,7 +1095,7 @@ class ShotTester(UnitTestBase):
     def test_equality(self):
         """testing equality of shot objects
         """
-        from stalker import Shot, Entity
+        from stalker import Entity
         self.kwargs["code"] = "SH123A"
         new_shot1 = Shot(**self.kwargs)
 
@@ -1153,7 +1117,7 @@ class ShotTester(UnitTestBase):
     def test_inequality(self):
         """testing inequality of shot objects
         """
-        from stalker import Shot, Entity
+        from stalker import Entity
         self.kwargs['code'] = 'SH123A'
         new_shot1 = Shot(**self.kwargs)
 
@@ -1175,7 +1139,7 @@ class ShotTester(UnitTestBase):
     def test_ReferenceMixin_initialization(self):
         """testing if the ReferenceMixin part is initialized correctly
         """
-        from stalker import Shot, Type, Link
+        from stalker import Type, Link
         link_type_1 = Type(
             name="Image",
             code='image',
@@ -1227,7 +1191,7 @@ class ShotTester(UnitTestBase):
 
         self.kwargs["code"] = "SH12314"
 
-        from stalker import Shot, Task
+        from stalker import Task
         new_shot = Shot(**self.kwargs)
 
         task1 = Task(
@@ -1268,7 +1232,6 @@ class ShotTester(UnitTestBase):
         """testing if the __strictly_typed__ class attribute is False for
         Shot class
         """
-        from stalker import Shot
         self.assertEqual(Shot.__strictly_typed__, False)
 
     def test_fps_argument_is_skipped(self):
@@ -1410,112 +1373,6 @@ class ShotTester(UnitTestBase):
         self.assertEqual(new_shot.fps, 12)
         self.test_project1.fps = 24
         self.assertEqual(new_shot.fps, 12)
-
-
-class ShotDBTestCase(UnitTestBase):
-    """Tests stalker.model.shot.Shot class in a DB environment
-    """
-
-    def setUp(self):
-        """set up the test
-        """
-        super(ShotDBTestCase, self).setUp()
-
-        # statuses
-        from stalker import Status, StatusList
-        self.status_new = Status.query.filter_by(code='NEW').first()
-        self.status_wfd = Status.query.filter_by(code='WFD').first()
-        self.status_rts = Status.query.filter_by(code='RTS').first()
-        self.status_wip = Status.query.filter_by(code='WIP').first()
-        self.status_prev = Status.query.filter_by(code='PREV').first()
-        self.status_hrev = Status.query.filter_by(code='HREV').first()
-        self.status_drev = Status.query.filter_by(code='DREV').first()
-        self.status_oh = Status.query.filter_by(code='OH').first()
-        self.status_stop = Status.query.filter_by(code='STOP').first()
-        self.status_cmpl = Status.query.filter_by(code='CMPL').first()
-
-        # status lists
-        self.test_project_status_list = StatusList(
-            name="Project Status List",
-            statuses=[
-                self.status_new,
-                self.status_wip,
-                self.status_cmpl
-            ],
-            target_entity_type='Project',
-        )
-
-        self.test_shot_status_list = \
-            StatusList.query.filter_by(target_entity_type='Shot').first()
-
-        # types
-        from stalker import Type
-        self.test_commercial_project_type = Type(
-            name="Commercial Project",
-            code='comm',
-            target_entity_type='Project',
-        )
-
-        self.test_repository_type = Type(
-            name="Test Repository Type",
-            code='test',
-            target_entity_type='Repository'
-        )
-
-        # repository
-        from stalker import Repository
-        self.test_repository = Repository(
-            name="Test Repository",
-            type=self.test_repository_type,
-        )
-
-        # image format
-        from stalker import ImageFormat
-        self.test_image_format1 = ImageFormat(
-            name='Test Image Format 1',
-            width=1920,
-            height=1080,
-            pixel_aspect=1.0
-        )
-
-        self.test_image_format2 = ImageFormat(
-            name='Test Image Format 2',
-            width=1280,
-            height=720,
-            pixel_aspect=1.0
-        )
-
-        # project and sequences
-        from stalker import Project
-        self.test_project1 = Project(
-            name='Test Project1',
-            code='tp1',
-            type=self.test_commercial_project_type,
-            status_list=self.test_project_status_list,
-            repository=self.test_repository,
-            image_format=self.test_image_format1
-        )
-
-        self.test_cut_in_default = 1
-        self.test_cut_duration_default = 1
-        self.test_cut_out_default = 1
-
-        self.kwargs = dict(
-            name='SH123',
-            code='SH123',
-            description='This is a test Shot',
-            project=self.test_project1,
-            cut_in=112,
-            cut_out=149,
-            cut_duration=123,
-            status=0
-        )
-
-        # create a mock shot object
-        from stalker import db, Shot
-        self.test_shot = Shot(**self.kwargs)
-        db.DBSession.add(self.test_shot)
-        db.DBSession.commit()
 
     def test_cut_duration_initialization_bug_with_cut_in(self):
         """testing if the _cut_duration attribute is initialized correctly for

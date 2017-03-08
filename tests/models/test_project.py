@@ -734,7 +734,7 @@ class ProjectTestCase(UnitTestBase):
 
         self.assertEqual(
             str(cm.exception),
-            'float() argument must be a string or a number'
+            'Project.fps should be a positive float or int, not NoneType'
         )
 
     def test_fps_argument_is_given_as_non_float_or_integer_1(self):
@@ -744,12 +744,12 @@ class ProjectTestCase(UnitTestBase):
         """
         from stalker import Project
         self.kwargs["fps"] = "a str"
-        with self.assertRaises(ValueError) as cm:
+        with self.assertRaises(TypeError) as cm:
             Project(**self.kwargs)
 
         self.assertEqual(
             str(cm.exception),
-            'could not convert string to float: a str'
+            'Project.fps should be a positive float or int, not str'
         )
 
     def test_fps_argument_is_given_as_non_float_or_integer_2(self):
@@ -764,19 +764,19 @@ class ProjectTestCase(UnitTestBase):
 
         self.assertEqual(
             str(cm.exception),
-             'float() argument must be a string or a number'
+            'Project.fps should be a positive float or int, not list'
         )
 
     def test_fps_attribute_is_given_as_non_float_or_integer_1(self):
         """testing if a TypeError will be raised when the fps attribute is
         set to a value other than a float, integer or valid string literals
         """
-        with self.assertRaises(ValueError) as cm:
+        with self.assertRaises(TypeError) as cm:
             self.test_project.fps = "a str"
 
         self.assertEqual(
             str(cm.exception),
-            'could not convert string to float: a str'
+            'Project.fps should be a positive float or int, not str'
         )
 
     def test_fps_attribute_is_given_as_non_float_or_integer_2(self):
@@ -788,28 +788,34 @@ class ProjectTestCase(UnitTestBase):
 
         self.assertEqual(
             str(cm.exception),
-            'float() argument must be a string or a number'
+            'Project.fps should be a positive float or int, not list'
         )
 
     def test_fps_argument_string_to_float_conversion(self):
-        """testing if valid string literals of fps argument will be converted
-        to float correctly
+        """testing if a TypeError will be raised when a string containing a
+        float has been passed
         """
-        test_values = [("1", 1.0), ("2.3", 2.3)]
-        for test_value in test_values:
-            self.kwargs["fps"] = test_value[0]
-            from stalker import Project
-            new_project = Project(**self.kwargs)
-            self.assertAlmostEquals(new_project.fps, test_value[1])
+        from stalker import Project
+        self.kwargs["fps"] = "2.3"
+        with self.assertRaises(TypeError) as cm:
+            Project(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Project.fps should be a positive float or int, not str'
+        )
 
     def test_fps_attribute_string_to_float_conversion(self):
-        """testing if valid string literals of fps attribute will be converted
-        to float correctly
+        """testing if a TypeError will be raised if a the fps attribute is set
+        to a string containing a float
         """
-        test_values = [("1", 1.0), ("2.3", 2.3)]
-        for test_value in test_values:
-            self.test_project.fps = test_value[0]
-            self.assertAlmostEquals(self.test_project.fps, test_value[1])
+        with self.assertRaises(TypeError) as cm:
+            self.test_project.fps = "2.3"
+
+        self.assertEqual(
+            str(cm.exception),
+            'Project.fps should be a positive float or int, not str'
+        )
 
     def test_fps_attribute_float_conversion(self):
         """testing if the fps attribute is converted to float when the float
@@ -842,7 +848,7 @@ class ProjectTestCase(UnitTestBase):
 
         self.assertEqual(
             str(cm.exception),
-            'Project.fps can not be 0 or a negative value'
+            'Project.fps should be a positive float or int, not 0.0'
         )
 
     def test_fps_attribute_is_set_to_zero(self):
@@ -854,7 +860,7 @@ class ProjectTestCase(UnitTestBase):
 
         self.assertEqual(
             str(cm.exception),
-            'Project.fps can not be 0 or a negative value'
+            'Project.fps should be a positive float or int, not 0.0'
         )
 
     def test_fps_argument_is_negative(self):
@@ -868,7 +874,7 @@ class ProjectTestCase(UnitTestBase):
 
         self.assertEqual(
             str(cm.exception),
-            'Project.fps can not be 0 or a negative value'
+            'Project.fps should be a positive float or int, not -1.0'
         )
 
     def test_fps_attribute_is_negative(self):
@@ -880,7 +886,7 @@ class ProjectTestCase(UnitTestBase):
 
         self.assertEqual(
             str(cm.exception),
-            'Project.fps can not be 0 or a negative value'
+            'Project.fps should be a positive float or int, not -1.0'
         )
 
     def test_repositories_argument_is_skipped(self):
