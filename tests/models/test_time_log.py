@@ -94,19 +94,29 @@ class TimeLogTester(UnitTestBase):
         )
         db.DBSession.add(self.test_project)
 
-        # create a Task
-        self.test_task = Task(
-            name="test task",
+        # create Tasks
+        self.test_task1 = Task(
+            name="test task 1",
             project=self.test_project,
             status_list=self.test_task_status_list,
             schedule_timing=10,
             schedule_unit='d',
             resources=[self.test_resource1]
         )
-        db.DBSession.add(self.test_task)
+        db.DBSession.add(self.test_task1)
+
+        self.test_task2 = Task(
+            name="test task 2",
+            project=self.test_project,
+            status_list=self.test_task_status_list,
+            schedule_timing=10,
+            schedule_unit='d',
+            resources=[self.test_resource1]
+        )
+        db.DBSession.add(self.test_task2)
 
         self.kwargs = {
-            "task": self.test_task,
+            "task": self.test_task1,
             "resource": self.test_resource1,
             "start": datetime.datetime(2013, 3, 22, 1, 0, tzinfo=pytz.utc),
             "duration": datetime.timedelta(10)
@@ -717,6 +727,49 @@ class TimeLogTester(UnitTestBase):
             )
         )
 
+    def test_OverbookedError_12(self):
+        """testing if a IntegrityError will be raised by the database backend
+        when the resource is already booked for the given time period and it is
+        not caught in Python side. But this one ensures that the error is
+        raised even if the tasks are different.
+
+        Simple case diagram:
+        #######
+          #######
+        """
+        # time_log1
+        kwargs = copy.copy(self.kwargs)
+        kwargs["resource"] = self.test_resource2
+        kwargs["start"] = \
+            datetime.datetime(2013, 3, 22, 4, 0, tzinfo=pytz.utc) \
+            - datetime.timedelta(5)
+        kwargs["duration"] = datetime.timedelta(15)
+        kwargs['task'] = self.test_task1
+
+        time_log1 = TimeLog(**kwargs)
+        db.DBSession.add(time_log1)
+
+        # time_log2
+        kwargs["start"] = \
+            datetime.datetime(2013, 3, 22, 4, 0, tzinfo=pytz.utc)
+        kwargs["duration"] = datetime.timedelta(15)
+        kwargs['task'] = self.test_task2
+
+        time_log2 = TimeLog(**kwargs)
+        db.DBSession.add(time_log2)
+
+        # there should be an DatabaseError raised
+        from sqlalchemy.exc import IntegrityError
+        with self.assertRaises(IntegrityError) as cm:
+            db.DBSession.commit()
+
+        self.assertTrue(
+            str(cm.exception).startswith(
+                '(psycopg2.IntegrityError) conflicting key value violates '
+                'exclusion constraint "overlapping_time_logs"'
+            )
+        )
+
     def test_timeLog_prevents_auto_flush_when_expanding_task_schedule_timing(self):
         """testing timeLog prevents auto flush when expanding task
         schedule_timing attribute
@@ -862,7 +915,7 @@ class TimeLogTester(UnitTestBase):
             name='Test Task 2',
             project=self.test_project
         )
-        new_task.depends = [self.test_task]
+        new_task.depends = [self.test_task1]
         kwargs = copy.copy(self.kwargs)
         kwargs['task'] = new_task
         with self.assertRaises(StatusError) as cm:

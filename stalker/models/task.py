@@ -3200,7 +3200,6 @@ IMMUTABLE;
             DDL("""ALTER TABLE "TimeLogs" ADD CONSTRAINT
                 overlapping_time_logs EXCLUDE USING GIST (
                   resource_id WITH =,
-                  task_id WITH =,
                   ts_to_box(start, "end") WITH &&
                 )"""
             )
