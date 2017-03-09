@@ -1020,22 +1020,6 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
         """
     )
 
-    computed_start = Column(
-        DateTime(timezone=True),
-        doc="""A :class:`~datetime.datetime` instance showing the start value
-        computed by **TaskJuggler**. It is None if this task is not scheduled
-        yet.
-        """
-    )
-
-    computed_end = Column(
-        DateTime(timezone=True),
-        doc="""A :class:`~datetime.datetime` instance showing the end value
-        computed by **TaskJuggler**. It is None if this task is not scheduled
-        yet.
-        """
-    )
-
     _computed_resources = relationship(
         "User",
         secondary="Task_Computed_Resources",
@@ -1774,6 +1758,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
             if task.end < end:
                 task.end = end
 
+    # TODO: Why these methods are not in the DateRangeMixin class.
     @validates('computed_start')
     def _validate_computed_start(self, key, computed_start):
         """validates the given computed_start value

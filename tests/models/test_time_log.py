@@ -678,8 +678,9 @@ class TimeLogTester(UnitTestBase):
         self.test_resource2.time_logs.append(time_log1)
 
     def test_OverbookedError_11(self):
-        """testing if a IntegrityError will be raised when the resource is
-        already booked for the given time period.
+        """testing if a IntegrityError will be raised by the database backend
+        when the resource is already booked for the given time period and it is
+        not caught in Python side.
 
         Simple case diagram:
         #######

@@ -40,6 +40,10 @@ Stalker Changes
   message has now been made clear by adding the start and end date values of
   the clashing TimeLog instance.
 
+* **Update:** Removed the unnecessary ``computed_start`` and ``computed_end``
+  columns from ``Task`` class, which are already defined in the
+  ``DateRangeMixin`` which is a super for the Task class.
+
 0.2.17.6
 ========
 
