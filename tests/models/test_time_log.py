@@ -998,7 +998,7 @@ class TimeLogTester(UnitTestBase):
 
         self.assertEqual(
             str(cm.exception),
-            'test task is a OH task, and it is not allowed to create '
+            'test task 1 is a OH task, and it is not allowed to create '
             'TimeLogs for a OH task, please supply a RTS, WIP, HREV or DREV '
             'task!'
         )
@@ -1016,7 +1016,7 @@ class TimeLogTester(UnitTestBase):
 
         self.assertEqual(
             str(cm.exception),
-            'test task is a STOP task, and it is not allowed to create '
+            'test task 1 is a STOP task, and it is not allowed to create '
             'TimeLogs for a STOP task, please supply a RTS, WIP, HREV or DREV '
             'task!'
         )
@@ -1034,7 +1034,7 @@ class TimeLogTester(UnitTestBase):
 
         self.assertEqual(
             str(cm.exception),
-            'test task is a CMPL task, and it is not allowed to create '
+            'test task 1 is a CMPL task, and it is not allowed to create '
             'TimeLogs for a CMPL task, please supply a RTS, WIP, HREV or DREV '
             'task!'
         )

@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/eoyilmaz/stalker.svg?branch=master)](https://travis-ci.org/eoyilmaz/stalker)
+
 About
 =====
 
@@ -13,10 +15,11 @@ Features:
  * Customizable with configuration scripts.
  * Customizable object model (Stalker Object Model - SOM).
  * Uses TaskJuggler as the project planing and tracking backend.
- * Can be used with any kind of databases supported by SQLAlchemy.
- * Can be connected to all the major 3d animation packages like Maya, Houdini,
-   Nuke, Softimage, Vue, Blender etc. and any application that has a Python
-   API.
+ * Uses PostgreSQL for its main database backend.
+ * Can be connected to all the major 3d animation packages like **Maya,
+   Houdini, Nuke, Fusion, Softimage, Blender** etc. and any application that
+   has a Python API. And with applications like **Adobe Photoshop** which does
+   not have a direct Python API but supports ``win32com`` or ``comtypes``.
  * Python 2.6+ and Python 3.0+ compatible.
 
 Stalker is build over these other OpenSource projects:

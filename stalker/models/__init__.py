@@ -15,9 +15,6 @@
 #
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
-import calendar
-import datetime
-from stalker.exceptions import CircularDependencyError
 
 
 def make_plural(name):
@@ -72,6 +69,7 @@ def check_circular_dependency(entity, other_entity, attr_name):
     """
     for e in walk_hierarchy(entity, attr_name):
         if e is other_entity:
+            from stalker.exceptions import CircularDependencyError
             raise CircularDependencyError(
                 '%(entity_name)s (%(entity_class)s) and '
                 '%(other_entity_name)s (%(other_entity_class)s) creates a '
@@ -93,6 +91,8 @@ def utc_to_local(utc_dt):
     http://stackoverflow.com/questions/4563272/how-to-convert-a-python-utc-datetime-to-a-local-datetime-using-only-python-stand/13287083#13287083
     """
     # get integer timestamp to avoid precision lost
+    import calendar
+    import datetime
     timestamp = calendar.timegm(utc_dt.timetuple())
     local_dt = datetime.datetime.fromtimestamp(timestamp)
     return local_dt.replace(microsecond=utc_dt.microsecond)

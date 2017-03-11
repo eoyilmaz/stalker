@@ -746,7 +746,6 @@ class User(Entity, ACLMixin):
             It will now compare the string (str) versions of the given
             raw_password and the current Users object encrypted password.
         """
-
         mangled_password_str = str(self.password)
         raw_password_bytes = base64.b64encode(
             bytes(raw_password.encode('utf-8')))
@@ -758,10 +757,7 @@ class User(Entity, ACLMixin):
             raw_password_encrypted_str = \
                 str(raw_password_bytes.decode('utf-8'))
 
-        if mangled_password_str == raw_password_encrypted_str:
-            return True
-        else:
-            return False
+        return mangled_password_str == raw_password_encrypted_str
 
     @validates("groups")
     def _validate_groups(self, key, group):
