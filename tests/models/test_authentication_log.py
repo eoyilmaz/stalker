@@ -373,22 +373,32 @@ class AuthenticationLogTestCase(UnitTestBase):
     def test_date_attribute_is_working_properly(self):
         """testing if the date attribute value can be properly changed
         """
+        import datetime
+        import pytz
+        from stalker.models.auth import AuthenticationLog, LOGIN
+        date1 = datetime.datetime(2016, 11, 4, 6, 30, tzinfo=pytz.utc)
+        date2 = datetime.datetime(2016, 11, 14, 16, 30, tzinfo=pytz.utc)
+        uli = AuthenticationLog(
+            user=self.test_user1,
+            action=LOGIN,
+            date=date1
+        )
+        self.assertNotEqual(uli.date, date2)
+        uli.date = date2
+        self.assertEqual(uli.date, date2)
 
-        def test_date_argument_is_working_properly(self):
-            """testing if the date argument value is properly passed to the date
-            attribute
-            """
-            import datetime
-            import pytz
-            from stalker.models.auth import AuthenticationLog, LOGIN
-            date1 = datetime.datetime(2016, 11, 4, 6, 30, tzinfo=pytz.utc)
-            date2 = datetime.datetime(2016, 11, 14, 16, 30, tzinfo=pytz.utc)
-            uli = AuthenticationLog(
-                user=self.test_user1,
-                action=LOGIN,
-                date=date1
-            )
-
-            self.assertNotEqual(uli.date, date2)
-            uli.date = date2
-            self.assertEqual(uli.date, date2)
+    def test_date_argument_is_working_properly(self):
+        """testing if the date argument value is properly passed to the date
+        attribute
+        """
+        import datetime
+        import pytz
+        from stalker.models.auth import AuthenticationLog, LOGIN
+        date1 = datetime.datetime(2016, 11, 4, 6, 30, tzinfo=pytz.utc)
+        date2 = datetime.datetime(2016, 11, 14, 16, 30, tzinfo=pytz.utc)
+        uli = AuthenticationLog(
+            user=self.test_user1,
+            action=LOGIN,
+            date=date1
+        )
+        self.assertEqual(uli.date, date1)

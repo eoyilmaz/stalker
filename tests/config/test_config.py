@@ -201,3 +201,43 @@ class ConfigTester(UnitTestBase):
             defaults.timing_resolution,
             studio.timing_resolution
         )
+
+    def test___getattr___is_working_properly(self):
+        """testing if config.Config.__getattr__() method is working properly
+        """
+        from stalker import config
+        c = config.Config()
+        self.assertEqual(c.admin_name, 'admin')
+
+    def test___getitem___is_working_properly(self):
+        """testing if config.Config.__getitem__() method is working properly
+        """
+        from stalker import config
+        c = config.Config()
+        self.assertEqual(c['admin_name'], 'admin')
+
+    def test___setitem__is_working_properly(self):
+        """testing if config.Config.__setitem__() method is working properly
+        """
+        from stalker import config
+        c = config.Config()
+        test_value = 'administrator'
+        self.assertNotEqual(c['admin_name'], test_value)
+        c['admin_name'] = test_value
+        self.assertEqual(c['admin_name'], test_value)
+
+    def test___delitem__is_working_properly(self):
+        """testing if config.Config.__delitem__() method is working properly
+        """
+        from stalker import config
+        c = config.Config()
+        self.assertIsNotNone(c['admin_name'])
+        del c['admin_name']
+        self.assertTrue('admin_name' not in c)
+
+    def test___contains___is_working_properly(self):
+        """testing if config.Config.__contains__() method is working properly
+        """
+        from stalker import config
+        c = config.Config()
+        self.assertTrue('admin_name' in c)

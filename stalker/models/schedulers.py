@@ -220,17 +220,16 @@ class TaskJugglerScheduler(SchedulerBase):
         conn = db.DBSession.connection()
         engine = conn.engine
 
-        if engine.dialect.name == 'postgresql':
-            template = Template(defaults.tjp_main_template2)
+        template = Template(defaults.tjp_main_template2)
 
-            if not self.projects:
-                project_ids = db.DBSession.connection().execute(
-                    'select id, code from "Projects"'
-                ).fetchall()
-            else:
-                project_ids = [[project.id] for project in self.projects]
+        if not self.projects:
+            project_ids = db.DBSession.connection().execute(
+                'select id, code from "Projects"'
+            ).fetchall()
+        else:
+            project_ids = [[project.id] for project in self.projects]
 
-            sql_query = """select
+        sql_query = """select
     "Tasks".id,
     tasks.path,
     coalesce("Tasks".parent_id, "Tasks".project_id) as parent_id,
@@ -346,192 +345,175 @@ left outer join (
 --order by "Tasks".id
 order by path_as_text"""
 
-            result_buffer = []
-            num_of_records = 0
+        result_buffer = []
+        num_of_records = 0
 
-            # run it per project
-            for pr in project_ids:
-                p_id = pr[0]
-                #p_code = pr[1]
+        # run it per project
+        for pr in project_ids:
+            p_id = pr[0]
+            #p_code = pr[1]
 
-                sql_query_pp = sql_query % {'id': p_id}
-                result = db.DBSession.connection().execute(sql_query_pp)
+            sql_query_pp = sql_query % {'id': p_id}
+            result = db.DBSession.connection().execute(sql_query_pp)
 
-                # start by adding the project first
-                result_buffer.append('task Project_%s "Project_%s" {' % (p_id, p_id))
+            # start by adding the project first
+            result_buffer.append('task Project_%s "Project_%s" {' % (p_id, p_id))
 
-                # now start jumping around
-                previous_level = 0
-                for r in result.fetchall():
-                    # start by appending task tjp id first
-                    task_id = r[0]
-                    # path = r[1]
-                    # parent_id = r[2]
-                    # entity_type = r[3]
-                    #name = r[4]
-                    priority = r[5]
-                    schedule_timing = r[6]
-                    schedule_unit = r[7]
-                    schedule_model = r[8]
-                    allocation_strategy = r[9]
-                    persistent_allocation = r[10]
-                    depth = r[11] + 1
-                    resource_ids = r[12]
-                    alternative_resource_ids = r[13]
-                    time_log_array = r[14]
-                    dependency_info = r[15]
-                    is_leaf = r[16]
+            # now start jumping around
+            previous_level = 0
+            for r in result.fetchall():
+                # start by appending task tjp id first
+                task_id = r[0]
+                # path = r[1]
+                # parent_id = r[2]
+                # entity_type = r[3]
+                #name = r[4]
+                priority = r[5]
+                schedule_timing = r[6]
+                schedule_unit = r[7]
+                schedule_model = r[8]
+                allocation_strategy = r[9]
+                persistent_allocation = r[10]
+                depth = r[11] + 1
+                resource_ids = r[12]
+                alternative_resource_ids = r[13]
+                time_log_array = r[14]
+                dependency_info = r[15]
+                is_leaf = r[16]
 
-                    tab = '  ' * depth
+                tab = '  ' * depth
 
-                    # close the previous level if necessary
-                    for i in range(previous_level - depth + 1):
-                        i_tab = '  ' * (previous_level - i)
-                        result_buffer.append('%s}' % i_tab)
+                # close the previous level if necessary
+                for i in range(previous_level - depth + 1):
+                    i_tab = '  ' * (previous_level - i)
+                    result_buffer.append('%s}' % i_tab)
 
+                result_buffer.append(
+                    """%(tab)stask Task_%(id)s "Task_%(id)s" {""" % {
+                        'tab': tab,
+                        'id': task_id
+                    }
+                )
+
+                # append priority if it is different then 500
+                if priority != 500:
                     result_buffer.append(
-                        """%(tab)stask Task_%(id)s "Task_%(id)s" {""" % {
-                            'tab': tab,
-                            'id': task_id
-                        }
+                        '%s  priority %s' % (tab, priority))
+
+                # append dependency information
+                if dependency_info:
+                    dep_buffer = ['%s  depends ' % tab]
+
+                    json_data = json.loads(
+                        dependency_info.replace('{', '[')
+                        .replace('}', ']')
+                        .replace('(', '')
+                        .replace(')', '')
+                    )  # it is an array of string
+
+                    for i, dep in enumerate(json_data):
+                        if i > 0:
+                            dep_buffer.append(', ')
+
+                        dep_full_ids, \
+                            dependency_target, \
+                            gap_timing, \
+                            gap_unit, \
+                            gap_model = dep.split(',')
+
+                        dep_full_path = '.'.join(
+                            map(lambda x: 'Task_%s' % x,
+                                dep_full_ids.split('-'))
+                        )
+                        # fix for Project id
+                        dep_full_path = 'Project_%s' % dep_full_path[5:]
+
+                        dep_string = '%s {%s}' % (
+                            dep_full_path, dependency_target)
+
+                        dep_buffer.append(dep_string)
+
+                    result_buffer.append(''.join(dep_buffer))
+
+                # append schedule model and timing information
+                # if this is a leaf task and has resources
+                if is_leaf and resource_ids:
+                    result_buffer.append(
+                        '%s  %s %s%s' % (
+                            tab, schedule_model, schedule_timing,
+                            schedule_unit
+                        )
                     )
 
-                    # append priority if it is different then 500
-                    if priority != 500:
-                        result_buffer.append(
-                            '%s  priority %s' % (tab, priority))
+                    resource_buffer = ['%s  allocate ' % tab]
+                    for i, resource_id in enumerate(resource_ids):
+                        if i > 0:
+                            resource_buffer.append(', ')
+                        resource_buffer.append('User_%s' % resource_id)
 
-                    # append dependency information
-                    if dependency_info:
-                        dep_buffer = ['%s  depends ' % tab]
+                        # now go through alternatives
+                        if alternative_resource_ids:
+                            resource_buffer.append(' { alternative ')
+                            for j, alt_resource_id in \
+                                    enumerate(alternative_resource_ids):
+                                if j > 0:
+                                    resource_buffer.append(', ')
+                                resource_buffer.append(
+                                    'User_%s' % alt_resource_id)
 
+                            # set the allocation strategy
+                            resource_buffer.append(
+                                ' select %s' % allocation_strategy)
+
+                            # is is persistent
+                            if persistent_allocation:
+                                resource_buffer.append(' persistent')
+                            resource_buffer.append(' }')
+
+                    result_buffer.append(''.join(resource_buffer))
+
+                    # append any time log information
+                    print('time_log_array: %s' % time_log_array)
+                    if time_log_array:
                         json_data = json.loads(
-                            dependency_info.replace('{', '[')
+                            time_log_array.replace('{', '[')
                             .replace('}', ']')
                             .replace('(', '')
                             .replace(')', '')
                         )  # it is an array of string
 
-                        for i, dep in enumerate(json_data):
-                            if i > 0:
-                                dep_buffer.append(', ')
-
-                            dep_full_ids, \
-                                dependency_target, \
-                                gap_timing, \
-                                gap_unit, \
-                                gap_model = dep.split(',')
-
-                            dep_full_path = '.'.join(
-                                map(lambda x: 'Task_%s' % x,
-                                    dep_full_ids.split('-'))
-                            )
-                            # fix for Project id
-                            dep_full_path = 'Project_%s' % dep_full_path[5:]
-
-                            dep_string = '%s {%s}' % (
-                                dep_full_path, dependency_target)
-
-                            dep_buffer.append(dep_string)
-
-                        result_buffer.append(''.join(dep_buffer))
-
-                    # append schedule model and timing information
-                    # if this is a leaf task and has resources
-                    if is_leaf and resource_ids:
-                        result_buffer.append(
-                            '%s  %s %s%s' % (
-                                tab, schedule_model, schedule_timing,
-                                schedule_unit
-                            )
-                        )
-
-                        resource_buffer = ['%s  allocate ' % tab]
-                        for i, resource_id in enumerate(resource_ids):
-                            if i > 0:
-                                resource_buffer.append(', ')
-                            resource_buffer.append('User_%s' % resource_id)
-
-                            # now go through alternatives
-                            if alternative_resource_ids:
-                                resource_buffer.append(' { alternative ')
-                                for j, alt_resource_id in \
-                                        enumerate(alternative_resource_ids):
-                                    if j > 0:
-                                        resource_buffer.append(', ')
-                                    resource_buffer.append(
-                                        'User_%s' % alt_resource_id)
-
-                                # set the allocation strategy
-                                resource_buffer.append(
-                                    ' select %s' % allocation_strategy)
-
-                                # is is persistent
-                                if persistent_allocation:
-                                    resource_buffer.append(' persistent')
-                                resource_buffer.append(' }')
-
-                        result_buffer.append(''.join(resource_buffer))
-
-                        # append any time log information
-                        if time_log_array:
-                            json_data = json.loads(
-                                time_log_array.replace('{', '[')
-                                .replace('}', ']')
-                                .replace('(', '')
-                                .replace(')', '')
-                            )  # it is an array of string
-
-                            for tlog in json_data:
-                                user_id, t_start, t_end = tlog.split(',')
-                                result_buffer.append(
-                                    '%s  booking %s %s - %s { overtime 2 }' % (
-                                        tab, user_id, t_start, t_end
-                                    )
+                        for tlog in json_data:
+                            user_id, t_start, t_end = tlog.split(',')
+                            result_buffer.append(
+                                '%s  booking %s %s - %s { overtime 2 }' % (
+                                    tab, user_id, t_start, t_end
                                 )
+                            )
 
-                    previous_level = depth
-                    num_of_records += 1
+                previous_level = depth
+                num_of_records += 1
 
-                # and close the brackets per project
-                depth = 0  # current depth is 0 (Project)
-                # previous_level is the last task
-                for i in range(previous_level - depth + 1):
-                    i_tab = '  ' * (previous_level - i)
-                    result_buffer.append('%s}' % i_tab)
+            # and close the brackets per project
+            depth = 0  # current depth is 0 (Project)
+            # previous_level is the last task
+            for i in range(previous_level - depth + 1):
+                i_tab = '  ' * (previous_level - i)
+                result_buffer.append('%s}' % i_tab)
 
-            tasks_buffer = '\n'.join(result_buffer)
+        tasks_buffer = '\n'.join(result_buffer)
 
-            self.tjp_content = template.render({
-                'stalker': stalker,
-                'studio': self.studio,
-                'csv_file_name': self.temp_file_name,
-                'csv_file_full_path': self.temp_file_full_path,
-                'compute_resources': self.compute_resources,
-                'tasks_buffer': tasks_buffer
-            })
+        self.tjp_content = template.render({
+            'stalker': stalker,
+            'studio': self.studio,
+            'csv_file_name': self.temp_file_name,
+            'csv_file_full_path': self.temp_file_full_path,
+            'compute_resources': self.compute_resources,
+            'tasks_buffer': tasks_buffer
+        })
 
-            logger.debug(
-                'total number of records: %s' % num_of_records
-            )
-
-        else:
-            # fallback to the previous implementation
-            template = Template(defaults.tjp_main_template)
-
-            if self.projects:
-                projects = self.projects
-            else:
-                projects = self.studio.active_projects
-
-            self.tjp_content = template.render({
-                'stalker': stalker,
-                'studio': self.studio,
-                'projects': projects,
-                'csv_file_name': self.temp_file_name,
-                'csv_file_full_path': self.temp_file_full_path,
-                'compute_resources': self.compute_resources
-            })
+        logger.debug(
+            'total number of records: %s' % num_of_records
+        )
 
         end = time.time()
         logger.debug(
