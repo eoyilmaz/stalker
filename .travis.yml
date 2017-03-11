@@ -15,7 +15,7 @@
 
     install:
       - gem install taskjuggler
-      - pip install sqlalchemy psycopg2 jinja2 alembic Mako MarkupSafe python-editor nose coverage
+      - pip install sqlalchemy psycopg2 jinja2 alembic Mako MarkupSafe python-editor nose coverage pytz
 
     before_script:
       - psql --version
