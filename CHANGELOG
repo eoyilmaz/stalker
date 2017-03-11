@@ -48,8 +48,8 @@ Stalker Changes
 ========
 
 * **Fix:** Fixed a bug in ``ProjectMixin`` where a proper cascade was not
-  defined and the Delete operations to the Project table were not cascaded
-  to the in the mixed-in classes properly.
+  defined and the ``Delete`` operations to the ``Projects`` table were not
+  cascaded to the mixed-in classes properly.
 
 0.2.17.5
 ========
