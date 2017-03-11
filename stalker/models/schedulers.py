@@ -289,7 +289,7 @@ join (
 left outer join (
     select
         task_id,
-        array_agg(resource_id) as resource_ids
+        array_agg(resource_id order by resource_id) as resource_ids
     from "Task_Resources"
     group by task_id
 ) as task_resources on "Tasks".id = task_resources.task_id
@@ -298,7 +298,7 @@ left outer join (
 left outer join (
     select
         task_id,
-        array_agg(resource_id) as resource_ids
+        array_agg(resource_id order by resource_id) as resource_ids
     from "Task_Alternative_Resources"
     group by task_id
 ) as task_alternative_resources on "Tasks".id = task_alternative_resources.task_id

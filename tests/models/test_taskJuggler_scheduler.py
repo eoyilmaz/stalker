@@ -168,7 +168,8 @@ class TaskJugglerSchedulerTester(UnitTestBase):
             schedule_model=0,
             schedule_timing=60,
             schedule_unit='h',
-            status_list=self.test_task_status_list
+            status_list=self.test_task_status_list,
+            priority=800
         )
         DBSession.add(self.test_task2)
         DBSession.commit()
@@ -261,12 +262,13 @@ project Studio_564 "Studio_564" 2013-04-16 - 2013-06-30 {
 task Project_45 "Project_45" {
   task Task_46 "Task_46" {
     effort 50.0h
-    allocate User_32 { alternative User_33, User_35, User_36 select minallocated persistent }, User_30 { alternative User_33, User_35, User_36 select minallocated persistent }
+    allocate User_30 { alternative User_33, User_35, User_36 select minallocated persistent }, User_32 { alternative User_33, User_35, User_36 select minallocated persistent }
   }
   task Task_47 "Task_47" {
+    priority 800
     depends Project_45.Task_46 {onend}
     effort 60.0h
-    allocate User_32 { alternative User_33, User_35, User_36 select minallocated persistent }, User_30 { alternative User_33, User_35, User_36 select minallocated persistent }
+    allocate User_30 { alternative User_33, User_35, User_36 select minallocated persistent }, User_32 { alternative User_33, User_35, User_36 select minallocated persistent }
   }
 }
 
@@ -276,7 +278,6 @@ taskreport breakdown "{{csv_path}}"{
     timeformat "%Y-%m-%d-%H:%M"
     columns id, start, end
 }
-
 """)
         expected_tjp_content = expected_tjp_template.render(
             {
@@ -299,9 +300,9 @@ taskreport breakdown "{{csv_path}}"{
         tjp_content = tjp_sched.tjp_content
         # print tjp_content
         tjp_sched._clean_up()
-        # print(expected_tjp_content)
-        # print('----------------')
-        # print(tjp_content)
+        print(expected_tjp_content)
+        print('----------------')
+        print(tjp_content)
         self.assertEqual(tjp_content, expected_tjp_content)
 
     def test_schedule_will_not_work_when_the_studio_attribute_is_None(self):
