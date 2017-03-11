@@ -170,105 +170,45 @@ the first line::
 
 .. _PEP 8: http://www.python.org/dev/peps/pep-0008/
 
-SCM - Mercurial (HG)
-====================
+SCM - Git
+=========
 
-The choice of SCM is Mercurial. Every developer should be familiar with it. It
-is a good start to go the `Selenic Mercurial Site`_ and do the tutorial if you
+The choice of SCM is Git. Every developer should be familiar with it. It
+is a good start to go the `Git Web Site`_ and do the tutorial if you
 don't feel familiar enough with hg.
 
-.. _Selenic Mercurial Site: http://mercurial.selenic.com 
+.. _Git Web Site: https://git-scm.com/
 
 Adding Changes
 ==============
 
+Stalker is hosted in `GitHub`_.
+
+.. _GitHub: https://github.com/eoyilmaz/stalker
+
 If you want to do changes in Stalker, the basic pipeline is as follows:
 
- * When you first start to develop, clone the repository to your computer (it
-   should be done only once) by using the following command::
+ * Fork Stalker from `GitHub`_ project page.
 
-     hg clone https://stalker.googlecode.com/hg/ stalker
-
- * Note the changeset that you have started to make new additions::
-   
-     hg identify
-     
-     aee27d8c6820+ tip
-   
-   Note the **aee27d8c6820** to somewhere, it will be needed when you are going
-   to create the bundle file.
+ * Clone your own Stalker repository to your own computer.
 
  * Do your addition, run your tests, and be sure that your part doesn't have
-   any errors or failures, in stalker root directory run this command:
-   
-     Linux/Mac::
-       
-       ./doTests
-     
-     Windows::
-     
-       doTests.bat
+   any errors or failures.
 
- * Commit your changes::
-   
-     hg ci -m "I did this and that"
-   
-   You can use the text you have written in the CHANGELOG.
+ * Commit your changes.
 
- * Before creating a bundle check if there are new revisions in the
-   google repository::
-   
-     hg pull
+ * Before creating a pull request check if your repository is in sync with the
+   upstream GitHub repository (the repository that you've forked Stalker from)
+   by using the tools supplied in your GitHub project page.
 
- * If there are changes and mercurial pulled them update your repository::
-   
-     hg update
+ * In case there are new changes in upstream, merge them with yours.
 
- * If there are conflicts where mercurial is waiting for you to solve them,
-   solve the conflicts by using your text editor and opening the file which has
-   conflicts. You will see lines like ">>>>>>> other" and "<<<<<<< local",
-   showing the conflicting code. Clean the code and save the file, and inform
-   mercurial that you have resolved the conflicts by::
+ * Do the tests again. If there are problems in your part of the code, solve
+   the errors/failures.
 
-     hg resolve -m the_conflicting_source_file.py
-   
-   or better, use a merge tool like `Meld`_.
-   
-   .. _Meld: http://meld.sourceforge.net/
+ * Commit your changes again.
 
- * Delete the file with \*.orig extension (generally not needed if you are
-   using a merge tool)::
-     
-     Linux/Mac:
-     
-       rm the_conflicting_source_file.py.orig
-     
-     Windows:
-     
-       del the_conflicting_source_file.py.orig
-     
-     Or use your favourite file browser.
+ * And push them to your own GitHub repository.
 
- * Do the tests again:
-   
-     Linux/Mac::
-       
-       ./doTests
-     
-     Windows::
-     
-       doTests.bat
-   
-   If there are problems in your part of the code, solve the errors/failures.
-
- * Commit your changes::
-   
-     hg ci -m "Pulled changes from the server and merged..."
-
- * Create a bundle::
-   
-     hg bundle --base aee27d8c6820 ~/my.bundle
-  
-  and send it to eoyilmaz-you-know-what-to-do-with-this-part@gmail.com. I also
-  accept, diffs in git format.
+ * And in the original `GitHub`_ page create a Pull Request.
 

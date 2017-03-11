@@ -74,10 +74,10 @@ development. So to setup a virtualenv for Stalker::
   cd ~/Documents/development
   virtualenv --no-site-packages stalker
 
-Then clone the repository (you need mercurial to do that)::
+Then clone the repository (you need git to do that)::
 
   cd stalker
-  hg clone https://stalker.googlecode.com/hg/ stalker 
+  git clone https://github.com/eoyilmaz/stalker.git stalker
 
 And then to setup the virtual environment for development::
 
