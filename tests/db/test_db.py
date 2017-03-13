@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2017 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -28,39 +28,11 @@ class DatabaseTester(UnitTestBase):
     """tests the database and connection to the database
     """
 
-    # def setUp(self):
-    #     """set the test up
-    #     """
-    #     super(DatabaseTester, self).setUp()
-
-    # def test_creating_a_custom_in_memory_db(self):
-    #     """testing if a custom in-memory sqlite database will be created
-    #     """
-    #     # try to persist a user and get it back
-    #     # create a new user
-    #     kwargs = {
-    #         "name": "Erkan Ozgur Yilmaz",
-    #         "login": "eoyilmaz",
-    #         "email": "eoyilmaz@gmail.com",
-    #         #"created_by": admin,
-    #         "password": "password",
-    #     }
-    #
-    #     from stalker import db, User
-    #     new_user = User(**kwargs)
-    #     db.DBSession.add(new_user)
-    #     db.DBSession.commit()
-    #
-    #     # now check if the newUser is there
-    #     new_user_db = User.query.filter_by(name=kwargs["name"]).first()
-    #
-    #     self.assertTrue(new_user_db is not None)
-
     def test_default_admin_creation(self):
         """testing if a default admin is created
         """
         # set default admin creation to True
-        from stalker import db, defaults
+        from stalker import defaults
         defaults.auto_create_admin = True
 
         # check if there is an admin
@@ -194,8 +166,7 @@ class DatabaseTester(UnitTestBase):
         self.assertEqual(len(daily_status_list.statuses),
                          len(expected_status_names))
 
-        from stalker import User
-        admin = User.query.filter(User.name == 'admin').first()
+        admin = self.admin
         for status in daily_status_list.statuses:
             self.assertTrue(status.name in expected_status_names)
             # check if the created_by and updated_by attributes
@@ -370,8 +341,7 @@ class DatabaseTester(UnitTestBase):
 
         # check if the created_by and updated_by attributes are correctly set
         # to the admin
-        from stalker import User
-        admin = User.query.filter(User.name == 'admin').first()
+        admin = self.admin
         for status in task_status_list.statuses:
             self.assertEqual(status.created_by, admin)
             self.assertEqual(status.updated_by, admin)
@@ -527,8 +497,7 @@ class DatabaseTester(UnitTestBase):
         )
         # check if the created_by and updated_by attributes are correctly set
         # to admin
-        from stalker import User
-        admin = User.query.filter(User.name == 'admin').first()
+        admin = self.admin
         for status in sequence_status_list.statuses:
             self.assertEqual(status.created_by, admin)
             self.assertEqual(status.updated_by, admin)
@@ -586,8 +555,7 @@ class DatabaseTester(UnitTestBase):
 
         # check if the created_by and updated_by attributes are correctly set
         # to the admin
-        from stalker import User
-        admin = User.query.filter(User.name == 'admin').first()
+        admin = self.admin
         for status in task_status_list.statuses:
             self.assertEqual(status.created_by, admin)
             self.assertEqual(status.updated_by, admin)
@@ -596,7 +564,7 @@ class DatabaseTester(UnitTestBase):
         """testing if the asset statuses are correctly created when there is a
         StatusList for Sequence is already created
         """
-        from stalker import db, StatusList
+        from stalker import StatusList
         asset_status_list = StatusList.query \
             .filter(StatusList.name == 'Asset Statuses') \
             .first()
@@ -645,8 +613,7 @@ class DatabaseTester(UnitTestBase):
 
         # check if the created_by and updated_by attributes are correctly set
         # to the admin
-        from stalker import User
-        admin = User.query.filter(User.name == 'admin').first()
+        admin = self.admin
         for status in asset_status_list.statuses:
             self.assertEqual(status.created_by, admin)
             self.assertEqual(status.updated_by, admin)
@@ -704,8 +671,7 @@ class DatabaseTester(UnitTestBase):
 
         # check if the created_by and updated_by attributes are correctly set
         # to the admin
-        from stalker import User
-        admin = User.query.filter(User.name == 'admin').first()
+        admin = self.admin
         for status in shot_status_list.statuses:
             self.assertEqual(status.created_by, admin)
             self.assertEqual(status.updated_by, admin)
@@ -763,8 +729,7 @@ class DatabaseTester(UnitTestBase):
 
         # check if the created_by and updated_by attributes are correctly set
         # to the admin
-        from stalker import User
-        admin = User.query.filter(User.name == 'admin').first()
+        admin = self.admin
         for status in sequence_status_list.statuses:
             self.assertEqual(status.created_by, admin)
             self.assertEqual(status.updated_by, admin)
@@ -809,8 +774,7 @@ class DatabaseTester(UnitTestBase):
 
         # check if the created_by and updated_by attributes are correctly set
         # to the admin
-        from stalker import User
-        admin = User.query.filter(User.name == 'admin').first()
+        admin = self.admin
         for status in review_status_list.statuses:
             self.assertEqual(status.created_by, admin)
             self.assertEqual(status.updated_by, admin)
@@ -1026,6 +990,88 @@ class DatabaseTester(UnitTestBase):
         self.assertEqual(defaults.yearly_working_days, 209)
         self.assertEqual(defaults.timing_resolution,
                          datetime.timedelta(minutes=5))
+
+    def test_get_alembic_version_is_working_properly_when_there_is_no_alembic_version_table(self):
+        """testing if get_alembic_version() is working properly when there is
+        no alembic_version table
+        """
+        # drop the table
+        from stalker import db
+        db.DBSession.connection().execute(
+            'DROP TABLE IF EXISTS alembic_version'
+        )
+        # now get the alembic_version
+        # this should not raise an OperationalError
+        alembic_version = db.get_alembic_version()
+        self.assertIsNone(alembic_version)
+
+    def test_create_ticket_statuses_called_multiple_times(self):
+        """testing if no IntegrityError will be raised when
+        create_ticket_statuses() called multiple times
+        """
+        from stalker import db
+        db.create_ticket_statuses()
+        db.create_ticket_statuses()
+        db.create_ticket_statuses()
+
+    def test_create_entity_statuses_called_multiple_times(self):
+        """testing if no IntegrityError will be raised when
+        create_entity_statuses() called multiple times
+        """
+        from stalker import defaults
+
+        # create statuses for Tickets
+        ticket_names = defaults.ticket_status_names
+        ticket_codes = defaults.ticket_status_codes
+
+        from stalker import db
+        db.create_entity_statuses(
+            'Ticket', ticket_names, ticket_codes, self.admin
+        )
+        db.create_entity_statuses(
+            'Ticket', ticket_names, ticket_codes, self.admin
+        )
+
+    def test_register_called_multiple_times(self):
+        """testing if calling db.register() multiple times will not raise any
+        errors
+        """
+        from stalker import db, User
+        db.register(User)
+        db.register(User)
+        db.register(User)
+        db.register(User)
+
+    def test_setup_without_settings(self):
+        """testing if db.setup() function will use the default settings if no
+        setting is supplied
+        """
+        from stalker import db
+        db.setup()
+        conn = db.DBSession.connection()
+        engine = conn.engine
+        self.assertEqual(
+            str(engine.url),
+            'postgres://stalker_admin:stalker@localhost/stalker_test'
+        )
+
+    def test_setup_with_settings(self):
+        """testing if db.setup() function will use the given settings if no
+        setting is supplied
+        """
+        self.tearDown()
+
+        # the default setup is already using the
+        from stalker import db
+        from sqlalchemy.exc import ArgumentError
+
+        with self.assertRaises(ArgumentError) as cm:
+            db.setup({'sqlalchemy.url': 'random url'})
+
+        self.assertEqual(
+            str(cm.exception),
+            "Could not parse rfc1738 URL from string 'random url'"
+        )
 
 
 class DatabaseModelsTester(UnitTestBase):
@@ -4046,7 +4092,7 @@ class DatabaseModelsTester(UnitTestBase):
     def test_persistence_of_Structure(self):
         """testing the persistence of Structure
         """
-        from stalker import db, Type, Task
+        from stalker import db, Type
         # create pipeline steps for character
         modeling_task_type = Type(
             name='Modeling',

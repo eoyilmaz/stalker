@@ -12,10 +12,10 @@ if %F%==1 goto auth
 if %F%==2  goto all
 rem 
 :auth
-nosetests  --verbosity=2 --with-coverage tests/ext/test_auth.py 
+..\Scripts\nosetests --processes=4 --verbosity=2 tests/ext/test_auth.py
 goto end
 :all
-nosetests  --verbosity=2 --with-coverage --cover-package tests
+..\Scripts\nosetests --processes=4 --verbosity=2 tests
 goto end 
 :end
 echo press any key to exit

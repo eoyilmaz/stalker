@@ -22,7 +22,6 @@
       - pg_config --version
       - tj3 --version
       - sudo ln -s $(which tj3) /usr/local/bin/tj3
-      - psql -c "CREATE DATABASE stalker_test;" -U postgres
       - psql -c "CREATE USER stalker_admin WITH PASSWORD 'stalker';" -U postgres
 
     script:

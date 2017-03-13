@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2017 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -398,9 +398,7 @@ class UserTest(UnitTestBase):
             self.test_sequence4
         ])
 
-        from stalker import defaults
-        self.test_admin = \
-            User.query.filter(User.name == defaults.admin_name).first()
+        self.test_admin = self.admin
         self.assertTrue(self.test_admin is not None)
 
         # create test company
@@ -813,10 +811,7 @@ class UserTest(UnitTestBase):
     def test_departments_argument_is_skipped(self):
         """testing if a User can be created without a Department instance
         """
-        try:
-            self.kwargs.pop('departments')
-        except KeyError:
-            pass
+        self.kwargs.pop('departments')
 
         new_user = User(**self.kwargs)
         self.assertEqual(new_user.departments, [])

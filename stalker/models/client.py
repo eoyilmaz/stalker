@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2017 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -19,7 +19,7 @@
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship, validates
-from stalker.db import Base
+from stalker.db.declarative import Base
 
 from stalker.models.entity import Entity
 

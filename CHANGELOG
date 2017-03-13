@@ -2,6 +2,23 @@
 Stalker Changes
 ===============
 
+0.2.18.1
+========
+
+* **Update:** Updated the ``stalker.config.Config.database_engine_settings`` to
+  point the test database.
+
+* **Fix:** Fixed a bug in ``stalker.testing.UnitTestBase.setUp()`` where it was
+  not considering the existence of the ``STALKER_PATH`` environment variable
+  while doing the tests.
+
+* **Update:** Removed debug message from ``db.setup()`` which was revealing the
+  database password.
+
+* **Update:** Updated the ``UnitTestBase``, it now creates its own test
+  database, which allows all the tests to run in an individual database. Thus,
+  the tests can now be run in ``multiprocess`` mode which speeds things a lot.
+
 0.2.18
 ======
 

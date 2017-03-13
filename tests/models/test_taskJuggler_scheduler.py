@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2017 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -778,6 +778,7 @@ task Project_{{proj1.id}} "Project_{{proj1.id}}" {
     allocate User_{{user1.id}} { alternative User_{{user3.id}}, User_{{user4.id}}, User_{{user5.id}} select minallocated persistent }, User_{{user2.id}} { alternative User_{{user3.id}}, User_{{user4.id}}, User_{{user5.id}} select minallocated persistent }
   }
   task Task_{{task2.id}} "Task_{{task2.id}}" {
+    priority 800
     depends Project_{{proj1.id}}.Task_{{task1.id}} {onend}
     effort 60.0h
     allocate User_{{user1.id}} { alternative User_{{user3.id}}, User_{{user4.id}}, User_{{user5.id}} select minallocated persistent }, User_{{user2.id}} { alternative User_{{user3.id}}, User_{{user4.id}}, User_{{user5.id}} select minallocated persistent }

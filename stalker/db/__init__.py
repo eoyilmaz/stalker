@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2017 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -21,16 +21,11 @@ Whenever stalker.db or something under it imported, the
 :func:`stalker.db.setup` becomes available to let one setup the database.
 """
 
-import logging
 
-from sqlalchemy import engine_from_config
-from sqlalchemy.exc import IntegrityError, OperationalError, ProgrammingError
-
-from stalker import defaults
-from stalker.db.declarative import Base
 from stalker.db.session import DBSession
 from stalker.log import logging_level
 
+import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
@@ -51,11 +46,13 @@ def setup(settings=None):
     """
 
     if settings is None:
+        from stalker import defaults
         settings = defaults.database_engine_settings
-        logger.debug('no settings given, using the default: %s' % settings)
+        logger.debug('no settings given, using the default setting')
 
-    logger.debug("settings: %s" % settings)
+    # logger.debug("settings: %s" % settings)
     # create engine
+    from sqlalchemy import engine_from_config
     engine = engine_from_config(settings, 'sqlalchemy.')
 
     logger.debug('engine: %s' % engine)
@@ -73,6 +70,7 @@ def setup(settings=None):
 
     # create the database
     logger.debug("creating the tables")
+    from stalker.db.declarative import Base
     Base.metadata.create_all(engine)
 
     # update defaults
@@ -124,6 +122,7 @@ def init():
 
     # create the admin if needed
     admin = None
+    from stalker import defaults
     if defaults.auto_create_admin:
         admin = __create_admin__()
 
@@ -195,6 +194,7 @@ def get_alembic_version():
     engine = conn.engine
     if engine.dialect.has_table(conn, 'alembic_version'):
         sql_query = 'select version_num from alembic_version'
+        from sqlalchemy.exc import OperationalError, ProgrammingError
         try:
             return DBSession.connection().execute(sql_query).fetchone()[0]
         except (OperationalError, ProgrammingError, TypeError):
@@ -239,6 +239,7 @@ def create_alembic_table():
     engine = conn.engine
 
     # check if the table is already there
+    from stalker.db.declarative import Base
     table = Table(
         table_name, Base.metadata,
         Column('version_num', Text),
@@ -272,6 +273,7 @@ def create_alembic_table():
 def __create_admin__():
     """creates the admin
     """
+    from stalker import defaults
     from stalker.models.auth import User
     from stalker.models.department import Department
 
@@ -332,7 +334,7 @@ def __create_admin__():
 def create_ticket_statuses():
     """creates the default ticket statuses
     """
-    from stalker import User
+    from stalker import defaults, User
 
     # create as admin
     admin = User.query.filter(User.login == defaults.admin_name).first()
@@ -371,6 +373,8 @@ def create_ticket_statuses():
             updated_by=admin
         )
         DBSession.add(ticket_type_2)
+
+    from sqlalchemy.exc import IntegrityError
     try:
         DBSession.commit()
     except IntegrityError:
@@ -441,6 +445,7 @@ def create_entity_statuses(entity_type='', status_names=None,
     status_list.statuses = statuses
     DBSession.add(status_list)
 
+    from sqlalchemy.exc import IntegrityError
     try:
         DBSession.commit()
     except IntegrityError as e:
@@ -523,12 +528,14 @@ def register(class_):
 
         DBSession.add(new_entity_type)
 
+    from stalker import defaults
     for action in defaults.actions:
         for access in ['Allow', 'Deny']:
             permission_obj = Permission(access, action, class_name)
             if permission_obj not in permissions_db:
                 DBSession.add(permission_obj)
 
+    from sqlalchemy.exc import IntegrityError
     try:
         DBSession.commit()
     except IntegrityError:

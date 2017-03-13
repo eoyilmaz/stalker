@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2017 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -577,7 +577,6 @@ class User(Entity, ACLMixin):
 
         self.tasks = []
 
-        self.last_login = None
         self.efficiency = efficiency
         self.rate = rate
 
@@ -668,19 +667,6 @@ class User(Entity, ACLMixin):
             )
 
         return email_in
-
-    @validates("last_login")
-    def _validate_last_login(self, key, last_login_in):
-        """validates the given last_login argument
-        """
-        if not isinstance(last_login_in, datetime.datetime) \
-           and last_login_in is not None:
-            raise TypeError(
-                "%s.last_login should be an instance of datetime.datetime or "
-                "None not %s" %
-                (self.__class__.__name__, last_login_in.__class__.__name__)
-            )
-        return last_login_in
 
     @classmethod
     def _format_login(cls, login):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2017 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -34,6 +34,7 @@ class Config(object):
 
     .. _configuring stalker: ../configure.html
     """
+    env_key = "STALKER_PATH"
 
     default_config_values = dict(
 
@@ -43,7 +44,7 @@ class Config(object):
         #
         database_engine_settings={
             "sqlalchemy.url":
-                "postgres://stalker_admin:stalker@localhost/stalker",
+                "postgres://stalker_admin:stalker@localhost/stalker_test",
             "sqlalchemy.echo": False,
         },
 
@@ -482,10 +483,9 @@ taskreport breakdown "{{csv_file_name}}"{
 
     def _parse_settings(self):
         # for now just use $STALKER_PATH
-        env_key = "STALKER_PATH"
 
         # try to get the environment variable
-        if env_key not in os.environ:
+        if self.env_key not in os.environ:
             # don't do anything
             logger.debug("no environment key found for user settings")
         else:
@@ -493,7 +493,7 @@ taskreport breakdown "{{csv_file_name}}"{
 
             resolved_path = os.path.expanduser(
                 os.path.join(
-                    os.environ[env_key],
+                    os.environ[self.env_key],
                     "config.py"
                 )
             )

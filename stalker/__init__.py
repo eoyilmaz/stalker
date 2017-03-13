@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2017 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -23,7 +23,7 @@ See docs for more information.
 
 import sys
 
-__version__ = '0.2.18'
+__version__ = '0.2.18.1'
 
 
 __string_types__ = []

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2017 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -1237,9 +1237,6 @@ class ShotTester(UnitTestBase):
     def test_fps_argument_is_skipped(self):
         """testing if the default value will be used when fps is skipped
         """
-        if 'fps' in self.kwargs:
-            self.kwargs.pop("fps")
-
         self.kwargs['code'] = 'SHnew'
         new_shot = Shot(**self.kwargs)
         self.assertEqual(new_shot.fps, self.test_project1.fps)
@@ -1254,8 +1251,8 @@ class ShotTester(UnitTestBase):
         self.assertEqual(new_shot.fps, self.test_project1.fps)
 
     def test_fps_argument_is_given_as_non_float_or_integer(self):
-        """testing if a TypeError will be raised when the fps argument is
-        given as a value other than a float or integer, or a string which is
+        """testing if a TypeError will be raised when the fps argument is given
+        as a value other than a float or integer, or a string which is
         convertible to float.
         """
         test_values = [["a", "list"], {"a": "list"}]
@@ -1263,7 +1260,7 @@ class ShotTester(UnitTestBase):
             self.kwargs["fps"] = test_value
             self.kwargs['code'] = 'SH%i'
             with self.assertRaises(TypeError) as cm:
-                s = Shot(**self.kwargs)
+                Shot(**self.kwargs)
 
             self.assertEqual(
                 str(cm.exception),

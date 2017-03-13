@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2017 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -1080,8 +1080,8 @@ class TimeLogTester(UnitTestBase):
             )
 
         self.assertEqual(
-            'u\'It is not possible to create a TimeLog before %s, which '
-            'violates the dependency relation of "%s" to "%s"\'' % (
+            'It is not possible to create a TimeLog before %s, which '
+            'violates the dependency relation of "%s" to "%s"' % (
                 datetime.datetime(2014, 3, 25, 19, 0, tzinfo=pytz.utc),
                 dep_task.name,
                 task.name
@@ -1137,8 +1137,8 @@ class TimeLogTester(UnitTestBase):
             )
 
         self.assertEqual(
-            'u\'It is not possible to create a TimeLog before %s, which '
-            'violates the dependency relation of "%s" to "%s"\'' % (
+            'It is not possible to create a TimeLog before %s, which '
+            'violates the dependency relation of "%s" to "%s"' % (
                 datetime.datetime(2014, 3, 16, 10, 0, tzinfo=pytz.utc),
                 dep_task.name,
                 task.name

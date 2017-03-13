@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2017 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -19,24 +19,105 @@
 """
 
 import unittest
+import logging
+from stalker import log
+logger = logging.getLogger(__name__)
+logger.setLevel(log.logging_level)
+
+
+def create_db(database_name):
+    """creates new PostgreSQL database
+    """
+    logger.debug('creating database: %s' % database_name)
+    import subprocess
+    subprocess.check_output(
+        'psql -c "CREATE DATABASE %s;" -U postgres' % database_name,
+        shell=True
+    )
+
+
+def create_random_db():
+    """creates a random named PostgreSQL database
+
+    :returns (str, str): db_url, db_name
+    """
+    # create a new database for this test only
+    import uuid
+    database_name = 'stalker_test_%s' % uuid.uuid4().hex[:4]
+    database_url = \
+        'postgresql://stalker_admin:stalker@localhost/%s' % database_name
+    create_db(database_name)
+    return database_url, database_name
+
+
+def drop_db(database_name):
+    """drops a PostgreSQL database
+    """
+    import subprocess
+    import time
+
+    while True:
+        output = ''
+        try:
+            output = subprocess.check_output(
+                'psql -c "DROP DATABASE %s;" -U postgres' % database_name,
+                # stderr=subprocess.PIPE,
+                shell=True
+            )
+        except subprocess.CalledProcessError as e:
+            # sleep for 1 seconds and run again
+            logger.debug(output)
+            logger.debug(str(e))
+            time.sleep(1)
+        else:
+            return
 
 
 class UnitTestBase(unittest.TestCase):
     """the base for Stalker Pyramid Views unit tests
     """
 
-    config = {
-        'sqlalchemy.url':
-            'postgresql://stalker_admin:stalker@localhost/stalker_test',
-        'sqlalchemy.echo': False
-    }
+    config = {}
+    database_url = None
+    database_name = None
+
+    @classmethod
+    def setUpClass(cls):
+        """setup once
+        """
+        # create a new database for this test only
+        cls.database_url, cls.database_name = create_random_db()
+
+        # update the config
+        cls.config['sqlalchemy.url'] = cls.database_url
+        from sqlalchemy.pool import NullPool
+        cls.config['sqlalchemy.poolclass'] = NullPool
+
+    @classmethod
+    def tearDownClass(cls):
+        """tear down once
+        """
+        from stalker import db
+        db.DBSession.close_all()
+        drop_db(cls.database_name)
 
     def setUp(self):
         """setup test
         """
+        import os
+        from stalker.config import Config
+        try:
+            os.environ.pop(Config.env_key)
+        except KeyError:
+            # already removed
+            pass
+
+        # regenerate the defaults
+        import stalker
+        stalker.defaults = Config()
+
         import datetime
-        from stalker import defaults
-        defaults.timing_resolution = datetime.timedelta(hours=1)
+        stalker.defaults.timing_resolution = datetime.timedelta(hours=1)
 
         # init database
         from stalker import db
@@ -67,8 +148,8 @@ class UnitTestBase(unittest.TestCase):
     def admin(self):
         """returns the admin user
         """
-        from stalker import User
-        return User.query.filter(User.login == 'admin').first()
+        from stalker import User, defaults
+        return User.query.filter(User.login == defaults.admin_login).first()
 
 
 class PlatformPatcher(object):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2017 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -216,9 +216,6 @@ class TaskJugglerScheduler(SchedulerBase):
         # use new way of doing it, it will just work with PostgreSQL
         import json
         from stalker import db
-
-        conn = db.DBSession.connection()
-        engine = conn.engine
 
         template = Template(defaults.tjp_main_template2)
 
@@ -473,7 +470,6 @@ order by path_as_text"""
                     result_buffer.append(''.join(resource_buffer))
 
                     # append any time log information
-                    print('time_log_array: %s' % time_log_array)
                     if time_log_array:
                         json_data = json.loads(
                             time_log_array.replace('{', '[')

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2016 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2017 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -71,7 +71,7 @@ class ClientTestCase(UnitTestBase):
         ]
         db.DBSession.commit()
 
-        self.test_admin = User.query.filter(User.name == 'admin').first()
+        self.test_admin = self.admin
 
         from stalker import Status
         self.status_new = Status.query.filter(Status.code == 'NEW').first()
