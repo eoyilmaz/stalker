@@ -25,4 +25,4 @@
       - psql -c "CREATE USER stalker_admin WITH PASSWORD 'stalker';" -U postgres
 
     script:
-      - nosetests --verbosity=1 --cover-erase --with-coverage --cover-package=stalker --processes=-1 --process-timeout=60
+      - nosetests --verbosity=1 --cover-erase --with-coverage --cover-package=stalker
