@@ -15,32 +15,29 @@
 #
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
-
-import datetime
 import os
-
 import pytz
-import stalker
-from stalker.testing import UnitTestBase
-from stalker.db import DBSession
-from stalker import (db, Department, User, Repository, Status, StatusList,
-                     Project, Task, TaskJugglerScheduler, Studio)
+import datetime
+from stalker import TaskJugglerScheduler
+from stalker.testing import UnitTestDBBase
 
 
-class TaskJugglerSchedulerTester(UnitTestBase):
+class TaskJugglerSchedulerDBTester(UnitTestDBBase):
     """tests the stalker.models.scheduler.TaskJugglerScheduler class
     """
 
     def setUp(self):
         """set up the test
         """
-        super(TaskJugglerSchedulerTester, self).setUp()
+        super(self.__class__, self).setUp()
 
         # create departments
+        from stalker import Department
         self.test_dep1 = Department(name='Dep1')
         self.test_dep2 = Department(name='Dep2')
 
         # create resources
+        from stalker import User
         self.test_user1 = User(
             login='user1',
             name='User1',
@@ -48,6 +45,7 @@ class TaskJugglerSchedulerTester(UnitTestBase):
             password='1234',
             departments=[self.test_dep1]
         )
+        from stalker.db.session import DBSession
         DBSession.add(self.test_user1)
 
         self.test_user2 = User(
@@ -97,6 +95,7 @@ class TaskJugglerSchedulerTester(UnitTestBase):
         DBSession.add(self.test_user6)
 
         # repository
+        from stalker import Repository
         self.test_repo = Repository(
             name='Test Repository',
             linux_path='/mnt/T/',
@@ -106,18 +105,19 @@ class TaskJugglerSchedulerTester(UnitTestBase):
         DBSession.add(self.test_repo)
 
         # statuses
+        from stalker import Status
         self.test_status1 = Status(name='Status 1', code='STS1')
         self.test_status2 = Status(name='Status 2', code='STS2')
         self.test_status3 = Status(name='Status 3', code='STS3')
         self.test_status4 = Status(name='Status 4', code='STS4')
         self.test_status5 = Status(name='Status 5', code='STS5')
-        DBSession.add_all([self.test_status1,
-                           self.test_status2,
-                           self.test_status3,
-                           self.test_status4,
-                           self.test_status5])
+        DBSession.add_all([
+            self.test_status1, self.test_status2, self.test_status3,
+            self.test_status4, self.test_status5
+        ])
 
         # status lists
+        from stalker import StatusList
         self.test_proj_status_list = StatusList(
             name='Project Status List',
             statuses=[self.test_status1, self.test_status2, self.test_status3],
@@ -126,6 +126,7 @@ class TaskJugglerSchedulerTester(UnitTestBase):
         DBSession.add(self.test_proj_status_list)
 
         # create one project
+        from stalker import Project
         self.test_proj1 = Project(
             name='Test Project 1',
             code='TP1',
@@ -143,6 +144,7 @@ class TaskJugglerSchedulerTester(UnitTestBase):
                 .filter_by(target_entity_type='Task').first()
 
         # create two tasks with the same resources
+        from stalker import Task
         self.test_task1 = Task(
             name='Task1',
             project=self.test_proj1,
@@ -193,17 +195,19 @@ class TaskJugglerSchedulerTester(UnitTestBase):
         """testing if the tjp file content is correct
         """
         # enter a couple of time logs
-        from stalker import db, TimeLog
+        from stalker import TimeLog
         tlog1 = TimeLog(
             resource=self.test_user1,
             task=self.test_task1,
             start=datetime.datetime(2013, 4, 16, 6, 0, tzinfo=pytz.utc),
             end=datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc)
         )
-        db.DBSession.add(tlog1)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(tlog1)
+        DBSession.commit()
 
         tjp_sched = TaskJugglerScheduler()
+        from stalker import Studio
         test_studio = Studio(
             name='Test Studio',
             timing_resolution=datetime.timedelta(minutes=30)
@@ -292,6 +296,7 @@ taskreport breakdown "{{csv_path}}"{
     columns id, start, end
 }
 """)
+        import stalker
         expected_tjp_content = expected_tjp_template.render(
             {
                 'stalker': stalker,
@@ -337,6 +342,7 @@ taskreport breakdown "{{csv_path}}"{
         """testing if the tasks are correctly scheduled
         """
         tjp_sched = TaskJugglerScheduler(compute_resources=True)
+        from stalker import Studio
         test_studio = Studio(
             name='Test Studio',
             now=datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
@@ -346,11 +352,12 @@ taskreport breakdown "{{csv_path}}"{
         test_studio.end = \
             datetime.datetime(2013, 4, 30, 0, 0, tzinfo=pytz.utc)
         test_studio.daily_working_hours = 9
+        from stalker.db.session import DBSession
         DBSession.add(test_studio)
 
         tjp_sched.studio = test_studio
         tjp_sched.schedule()
-        db.DBSession.commit()
+        DBSession.commit()
 
         # check if the task and project timings are all adjusted
         self.assertEqual(
@@ -398,6 +405,7 @@ taskreport breakdown "{{csv_path}}"{
         resources is False
         """
         tjp_sched = TaskJugglerScheduler(compute_resources=False)
+        from stalker import Studio
         test_studio = Studio(
             name='Test Studio',
             now=datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
@@ -406,11 +414,12 @@ taskreport breakdown "{{csv_path}}"{
             datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
         test_studio.end = datetime.datetime(2013, 4, 30, 0, 0, tzinfo=pytz.utc)
         test_studio.daily_working_hours = 9
+        from stalker.db.session import DBSession
         DBSession.add(test_studio)
 
         tjp_sched.studio = test_studio
         tjp_sched.schedule()
-        db.DBSession.commit()
+        DBSession.commit()
 
         # check if the task and project timings are all adjusted
         self.assertEqual(
@@ -453,6 +462,7 @@ taskreport breakdown "{{csv_path}}"{
         resources is True
         """
         tjp_sched = TaskJugglerScheduler(compute_resources=True)
+        from stalker import Studio
         test_studio = Studio(
             name='Test Studio',
             now=datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
@@ -461,11 +471,12 @@ taskreport breakdown "{{csv_path}}"{
             datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
         test_studio.end = datetime.datetime(2013, 4, 30, 0, 0, tzinfo=pytz.utc)
         test_studio.daily_working_hours = 9
+        from stalker.db.session import DBSession
         DBSession.add(test_studio)
 
         tjp_sched.studio = test_studio
         tjp_sched.schedule()
-        db.DBSession.commit()
+        DBSession.commit()
 
         # check if the task and project timings are all adjusted
         self.assertEqual(
@@ -510,12 +521,14 @@ taskreport breakdown "{{csv_path}}"{
         """
         # create a dummy project
         # create a dummy Project to schedule
+        from stalker import Project
         dummy_project = Project(
             name='Dummy Project',
             code='DP',
             repository=self.test_repo
         )
 
+        from stalker import Task
         dt1 = Task(
             name='Dummy Task 1',
             project=dummy_project,
@@ -531,11 +544,13 @@ taskreport breakdown "{{csv_path}}"{
             schedule_unit='h',
             resources=[self.test_user2]
         )
-        db.DBSession.add_all([dummy_project, dt1, dt2])
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add_all([dummy_project, dt1, dt2])
+        DBSession.commit()
 
         tjp_sched = TaskJugglerScheduler(compute_resources=True,
                                          projects=[dummy_project])
+        from stalker import Studio
         test_studio = Studio(
             name='Test Studio',
             now=datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
@@ -545,11 +560,11 @@ taskreport breakdown "{{csv_path}}"{
         test_studio.end = datetime.datetime(2013, 4, 30, 0, 0, tzinfo=pytz.utc)
         test_studio.daily_working_hours = 9
         DBSession.add(test_studio)
-        db.DBSession.commit()
+        DBSession.commit()
 
         tjp_sched.studio = test_studio
         tjp_sched.schedule()
-        db.DBSession.commit()
+        DBSession.commit()
 
         # check if the task and project timings are all adjusted
         self.assertEqual(self.test_proj1.computed_start, None)
@@ -665,6 +680,7 @@ taskreport breakdown "{{csv_path}}"{
         """testing if the projects argument value is correctly passed to the
         projects attribute
         """
+        from stalker import Project
         dp1 = Project(
             name='Dummy Project',
             code='DP',
@@ -685,6 +701,7 @@ taskreport breakdown "{{csv_path}}"{
     def test_projects_attribute_is_working_properly(self):
         """testing if the projects attribute is working properly
         """
+        from stalker import Project
         dp1 = Project(
             name='Dummy Project',
             code='DP',
@@ -706,6 +723,7 @@ taskreport breakdown "{{csv_path}}"{
         """testing if the tjp file content is correct
         """
         tjp_sched = TaskJugglerScheduler()
+        from stalker import Studio
         test_studio = Studio(
             name='Test Studio',
             timing_resolution=datetime.timedelta(minutes=30)
@@ -791,6 +809,7 @@ taskreport breakdown "{{csv_path}}"{
     timeformat "%Y-%m-%d-%H:%M"
     columns id, start, end
 }""")
+        import stalker
         expected_tjp_content = expected_tjp_template.render(
             {
                 'stalker': stalker,

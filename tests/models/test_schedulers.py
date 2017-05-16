@@ -16,11 +16,11 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-from stalker.testing import UnitTestBase
+import unittest
 from stalker import SchedulerBase
 
 
-class SchedulerBaseTester(UnitTestBase):
+class SchedulerBaseTester(unittest.TestCase):
     """tests the stalker.models.scheduler.SchedulerBase
     """
 
@@ -29,10 +29,8 @@ class SchedulerBaseTester(UnitTestBase):
         """
         super(SchedulerBaseTester, self).setUp()
 
-        from stalker import db, Studio
+        from stalker import Studio
         self.test_studio = Studio(name='Test Studio')
-        db.DBSession.add(self.test_studio)
-        db.DBSession.commit()
         self.kwargs = {
             'studio': self.test_studio
         }
@@ -101,3 +99,15 @@ class SchedulerBaseTester(UnitTestBase):
         new_studio = Studio(name='Test Studio 2')
         self.test_scheduler_base.studio = new_studio
         self.assertEqual(self.test_scheduler_base.studio, new_studio)
+
+    def test_schedule_method_will_raise_not_implemented_error(self):
+        """testing if the schedule() method will raise a NotImplementedError
+        """
+        base = SchedulerBase()
+        with self.assertRaises(NotImplementedError) as cm:
+            base.schedule()
+
+        self.assertEqual(
+            str(cm.exception),
+            ''
+        )

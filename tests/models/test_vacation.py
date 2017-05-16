@@ -16,11 +16,11 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
+import unittest
 from stalker.models.studio import Vacation
-from stalker.testing import UnitTestBase
 
 
-class VacationTestCase(UnitTestBase):
+class VacationTestCase(unittest.TestCase):
     """tests the stalker.models.studio.Vacation class
     """
 
@@ -30,14 +30,13 @@ class VacationTestCase(UnitTestBase):
         super(VacationTestCase, self).setUp()
 
         # create a user
-        from stalker import db, User
+        from stalker import User
         self.test_user = User(
             name='Test User',
             login='testuser',
             email='testuser@test.com',
             password='secret',
         )
-        db.DBSession.add(self.test_user)
 
         # vacation type
         from stalker import Type
@@ -46,14 +45,12 @@ class VacationTestCase(UnitTestBase):
             code='PERS',
             target_entity_type='Vacation'
         )
-        db.DBSession.add(self.personal_vacation)
 
         self.studio_vacation = Type(
             name='Studio Wide',
             code='STD',
             target_entity_type='Vacation'
         )
-        db.DBSession.add(self.studio_vacation)
 
         import datetime
         import pytz

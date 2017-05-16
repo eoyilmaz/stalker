@@ -16,11 +16,11 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-from stalker.testing import UnitTestBase
+from stalker.testing import UnitTestDBBase
 from stalker import Role
 
 
-class RoleTestCase(UnitTestBase):
+class RoleTestDBCase(UnitTestDBBase):
     """testing the Role class
     """
 

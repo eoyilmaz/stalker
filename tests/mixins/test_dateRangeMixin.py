@@ -16,16 +16,14 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
+import unittest
 import datetime
-
 import pytz
+
 from sqlalchemy import Column, Integer, ForeignKey
 
-from stalker import db, defaults, SimpleEntity, DateRangeMixin
-from stalker.testing import UnitTestBase
-
-import logging
-logging.getLogger('stalker.models.studio').setLevel(logging.DEBUG)
+from stalker import SimpleEntity, DateRangeMixin
+from stalker.testing import UnitTestDBBase
 
 
 class DateRangeMixFooMixedInClass(SimpleEntity, DateRangeMixin):
@@ -45,7 +43,7 @@ class DateRangeMixFooMixedInClass(SimpleEntity, DateRangeMixin):
         DateRangeMixin.__init__(self, **kwargs)
 
 
-class DateRangeMixinTester(UnitTestBase):
+class DateRangeMixinTester(unittest.TestCase):
     """Tests the DateRangeMixin
     """
 
@@ -202,7 +200,7 @@ class DateRangeMixinTester(UnitTestBase):
         an instance of datetime.datetime class when both of the start and end
         arguments are present.
         """
-        test_values = [1, 1.2, "10", "10 days"]
+        test_values = [None, 1, 1.2, "10", "10 days"]
 
         # no problem if there are start and end arguments
         for test_value in test_values:
@@ -218,6 +216,7 @@ class DateRangeMixinTester(UnitTestBase):
         argument is not an instance of datetime.datetime class when start
         argument is also missing
         """
+        from stalker import defaults
         test_values = [1, 1.2, "10", "10 days"]
         self.kwargs.pop("start")
         for test_value in test_values:
@@ -233,6 +232,7 @@ class DateRangeMixinTester(UnitTestBase):
         duration argument is not an instance of datetime.datetime class and
         when end argument is also missing
         """
+        from stalker import defaults
         defaults.timing_resolution = datetime.timedelta(hours=1)
         # some wrong values for the duration
         test_values = [1, 1.2, "10", "10 days"]
@@ -278,7 +278,7 @@ class DateRangeMixinTester(UnitTestBase):
         """testing if duration attribute reset to a calculated value when it is
         set to something other than a datetime.timedelta instance
         """
-        test_values = [1, 1.2, "10", "10 days"]
+        test_values = [None, 1, 1.2, "10", "10 days"]
 
         # no problem if there are start and end arguments
         for test_value in test_values:
@@ -337,6 +337,7 @@ class DateRangeMixinTester(UnitTestBase):
         duration value when the given value for the duration attribute is
         smaller then the defaults.timing_resolution
         """
+        from stalker import defaults
         self.test_foo_obj.duration = datetime.timedelta(minutes=10)
         self.assertEqual(
             self.test_foo_obj.duration,
@@ -373,6 +374,7 @@ class DateRangeMixinTester(UnitTestBase):
         #     new_foo_entity.start,
         #     datetime.datetime(2013, 3, 22, 15, 30, tzinfo=pytz.utc)
         # )
+        from stalker import defaults
         self.assertEqual(new_foo_entity.duration,
                          defaults.timing_resolution)
         self.assertEqual(new_foo_entity.end,
@@ -389,6 +391,7 @@ class DateRangeMixinTester(UnitTestBase):
 
         new_foo_entity = DateRangeMixFooMixedInClass(**self.kwargs)
 
+        from stalker import defaults
         self.assertEqual(new_foo_entity.duration, defaults.timing_resolution)
         self.assertEqual(new_foo_entity.end,
                          new_foo_entity.start + new_foo_entity.duration)
@@ -463,6 +466,7 @@ class DateRangeMixinTester(UnitTestBase):
         duration = defaults.timing_resolution
         start = end - duration
         """
+        from stalker import defaults
         self.kwargs.pop("duration")
         self.kwargs.pop("start")
         new_foo_entity = DateRangeMixFooMixedInClass(**self.kwargs)
@@ -498,39 +502,12 @@ class DateRangeMixinTester(UnitTestBase):
         """testing if the start and end dates are rounded to the default
         timing_resolution (no Studio)
         """
+        from stalker import defaults
         self.kwargs['start'] = \
             datetime.datetime(2013, 3, 22, 2, 38, 55, 531, tzinfo=pytz.utc)
         self.kwargs['end'] = \
             datetime.datetime(2013, 3, 24, 16, 46, 32, 102, tzinfo=pytz.utc)
         defaults.timing_resolution = datetime.timedelta(minutes=5)
-
-        new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
-        # check the start
-        expected_start = \
-            datetime.datetime(2013, 3, 22, 2, 40, tzinfo=pytz.utc)
-        self.assertEqual(new_foo_obj.start, expected_start)
-        # check the end
-        expected_end = \
-            datetime.datetime(2013, 3, 24, 16, 45, tzinfo=pytz.utc)
-        self.assertEqual(new_foo_obj.end, expected_end)
-        # check the duration
-        self.assertEqual(new_foo_obj.duration, expected_end - expected_start)
-
-    def test_start_end_and_duration_values_are_rounded_to_the_Studio_timing_resolution(self):
-        """testing if the start and end dates are rounded to the Studio
-        timing_resolution
-        """
-        from stalker.models.studio import Studio
-        studio = Studio(
-            name='Test Studio',
-            timing_resolution=datetime.timedelta(minutes=5)
-        )
-        db.DBSession.add(studio)
-        db.DBSession.commit()
-        self.kwargs['start'] = \
-            datetime.datetime(2013, 3, 22, 2, 38, 55, 531, tzinfo=pytz.utc)
-        self.kwargs['end'] = \
-            datetime.datetime(2013, 3, 24, 16, 46, 32, 102, tzinfo=pytz.utc)
 
         new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
         # check the start
@@ -656,3 +633,60 @@ class DateRangeMixinTester(UnitTestBase):
             new_foo_obj.computed_total_seconds,
             8 * 60 * 60
         )
+
+
+class DateRangeMixinDBTester(UnitTestDBBase):
+    """tests that needs a database
+    """
+
+    def setUp(self):
+        """setup the test
+        """
+        super(DateRangeMixinDBTester, self).setUp()
+
+        # create mock objects
+        self.start = datetime.datetime(2013, 3, 22, 15, 15, tzinfo=pytz.utc)
+        self.end = self.start + datetime.timedelta(days=20)
+        self.duration = datetime.timedelta(days=10)
+
+        self.kwargs = {
+            'name': 'Test Daterange Mixin',
+            'description': 'This is a simple entity object for testing '
+                           'DateRangeMixin',
+            'start': self.start,
+            'end': self.end,
+            'duration': self.duration
+        }
+        self.test_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
+
+    def test_start_end_and_duration_values_are_rounded_to_the_Studio_timing_resolution(self):
+        """testing if the start and end dates are rounded to the Studio
+        timing_resolution
+        """
+        import logging
+        logging.getLogger('stalker.models.studio').setLevel(logging.DEBUG)
+
+        from stalker.models.studio import Studio
+        studio = Studio(
+            name='Test Studio',
+            timing_resolution=datetime.timedelta(minutes=5)
+        )
+        from stalker.db.session import DBSession
+        DBSession.add(studio)
+        DBSession.commit()
+        self.kwargs['start'] = \
+            datetime.datetime(2013, 3, 22, 2, 38, 55, 531, tzinfo=pytz.utc)
+        self.kwargs['end'] = \
+            datetime.datetime(2013, 3, 24, 16, 46, 32, 102, tzinfo=pytz.utc)
+
+        new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
+        # check the start
+        expected_start = \
+            datetime.datetime(2013, 3, 22, 2, 40, tzinfo=pytz.utc)
+        self.assertEqual(new_foo_obj.start, expected_start)
+        # check the end
+        expected_end = \
+            datetime.datetime(2013, 3, 24, 16, 45, tzinfo=pytz.utc)
+        self.assertEqual(new_foo_obj.end, expected_end)
+        # check the duration
+        self.assertEqual(new_foo_obj.duration, expected_end - expected_start)

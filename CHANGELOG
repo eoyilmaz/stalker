@@ -2,22 +2,67 @@
 Stalker Changes
 ===============
 
-0.2.18.1
-========
+0.2.19
+======
 
 * **Update:** Updated the ``stalker.config.Config.database_engine_settings`` to
   point the test database.
 
-* **Fix:** Fixed a bug in ``stalker.testing.UnitTestBase.setUp()`` where it was
-  not considering the existence of the ``STALKER_PATH`` environment variable
-  while doing the tests.
+* **Fix:** Fixed a bug in ``stalker.testing.UnitTestDBBase.setUp()`` where it
+  was not considering the existence of the ``STALKER_PATH`` environment
+  variable while doing the tests.
 
 * **Update:** Removed debug message from ``db.setup()`` which was revealing the
   database password.
 
-* **Update:** Updated the ``UnitTestBase``, it now creates its own test
+* **Update:** Updated the ``UnitTestDBBase``, it now creates its own test
   database, which allows all the tests to run in an individual database. Thus,
   the tests can now be run in ``multiprocess`` mode which speeds things a lot.
+
+* **Fix:** Removed any module level imports of ``stalker.defaults`` variable,
+  which can be changed by a Studio (or by tests) and should always be
+  refreshed.
+
+* **Update:** Removed the module level import of the
+  ``stalker.db.session.DBSession`` in ``stalker.db``, so it is not possible to
+  use ``db.DBSession`` anymore.
+
+* **Update:** The import statements that imports ``stalker.defaults`` moved to
+  local scopes to allow runtime changes to the ``defaults`` to be reflected
+  correctly.
+
+* **Update:** Added Python fall back mode to
+  ``stalker.shot.Shot._check_code_availability()`` which runs when there is no
+  database.
+
+* **Update:** ``stalker.models.task.TimeLog._validate_task()`` is now getting
+  the ``Status`` instances from the ``StatusList`` that is attached to the
+  ``Task`` instance instead of doing a database query.
+
+* **Update:** ``stalker.models.task.TimeLog._validate_resource()`` is now
+  falling back to a Python implementation if there is no database connection.
+
+* **Update:** ``stalker.models.task.Task._total_logged_seconds_getter()`` is
+  now hundreds of times faster when there is a lot of ``TimeLog`` instances
+  attached to the ``Task``.
+
+* **Update:** In ``stalker.models.task.Task`` class, methods those were doing a
+  database query to get the required ``Status`` instances are now using the
+  attached ``StatusList`` instance to get them.
+
+* **Fix:** A possible ``auto_flush`` is prevented in ``Ticket`` class.
+
+* **Update:** ``Version.latest_version`` property is now able to fall back to a
+  pure Python implementation when there is no database connection.
+
+* **Update:** The default log level has been increased from ``DEBUG`` to
+  ``INFO``.
+
+* **Update:** In an attempt to speed up tests, a lot of tests that doesn't need
+  an active Database has been updated to use the regular ``unittest.TestCase``
+  instead of ``stalker.testing.TestBase`` and as a result running all of the
+  tests are now 2x faster.
+
 
 0.2.18
 ======
@@ -25,7 +70,7 @@ Stalker Changes
 * **Update:** Support for DB backends other than Postgresql has been dropped.
   This is done to greatly benefit from a code that is highly optimized only
   for one DB backend. With This all of the tests should be inherited from the
-  ``stalker.tests.UnitTestBase`` class.
+  ``stalker.tests.UnitTestDBBase`` class.
 
 * **New:** All the DateTime fields in Stalker are now TimeZone aware and
   Stalker stores the DateTime values in UTC. Naive datetime values are not

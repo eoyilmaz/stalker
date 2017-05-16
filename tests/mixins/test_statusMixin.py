@@ -15,10 +15,11 @@
 #
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
+import unittest
 
-from stalker.testing import UnitTestBase
+from stalker.testing import UnitTestDBBase
 from sqlalchemy import Column, Integer, ForeignKey
-from stalker import db, StatusMixin, Status, StatusList, SimpleEntity
+from stalker import StatusMixin, Status, StatusList, SimpleEntity
 
 
 class StatMixClass(SimpleEntity, StatusMixin):
@@ -32,7 +33,7 @@ class StatMixClass(SimpleEntity, StatusMixin):
         StatusMixin.__init__(self, **kwargs)
 
 
-class StatusMixinTester(UnitTestBase):
+class StatusMixinTester(unittest.TestCase):
     """tests the StatusMixin class
     """
 
@@ -89,22 +90,6 @@ class StatusMixinTester(UnitTestBase):
         # create another one without status_list set to something
         self.test_mixed_obj2 = StatMixClass(**self.kwargs)
 
-    def test_status_list_argument_is_None(self):
-        """testing if TypeError is going to be raised when trying to initialize
-        status_list with None
-        """
-        self.kwargs["status_list"] = None
-        with self.assertRaises(TypeError) as cm:
-            StatMixClass(**self.kwargs)
-
-        self.assertEqual(
-            str(cm.exception),
-            "StatMixClass instances can not be initialized without a "
-            "stalker.models.status.StatusList instance, please pass a "
-            "suitable StatusList (StatusList.target_entity_type=StatMixClass) "
-            "with the 'status_list' argument"
-        )
-
     def test_status_list_argument_is_not_a_StatusList_instance(self):
         """testing if TypeError is going to be raised when trying to initialize
         status_list with something other than a StatusList
@@ -130,37 +115,6 @@ class StatusMixinTester(UnitTestBase):
             str(cm.exception),
             'StatMixClass.status_list should be an instance of '
             'stalker.models.status.StatusList not str'
-        )
-
-    def test_status_list_attribute_set_to_None(self):
-        """testing if TypeError is going to be raised when trying to set the
-        status_list to None
-        """
-        with self.assertRaises(TypeError) as cm:
-            self.test_mixed_obj.status_list = None
-
-        self.assertEqual(
-            str(cm.exception),
-            "StatMixClass instances can not be initialized without a "
-            "stalker.models.status.StatusList instance, please pass a "
-            "suitable StatusList (StatusList.target_entity_type=StatMixClass) "
-            "with the 'status_list' argument"
-        )
-
-    def test_status_list_argument_skipped(self):
-        """testing if a TypeError going to be raised when status_list argument
-        is skipped
-        """
-        self.kwargs.pop("status_list")
-        with self.assertRaises(TypeError) as cm:
-            StatMixClass(**self.kwargs)
-
-        self.assertEqual(
-            str(cm.exception),
-            "StatMixClass instances can not be initialized without a "
-            "stalker.models.status.StatusList instance, please pass a "
-            "suitable StatusList (StatusList.target_entity_type=StatMixClass) "
-            "with the 'status_list' argument"
         )
 
     def test_status_list_argument_suitable_for_the_current_class(self):
@@ -405,9 +359,62 @@ class StatusListNoAutoAddClass(SimpleEntity, StatusMixin):
         StatusMixin.__init__(self, **kwargs)
 
 
-class StatusMixinDBTester(UnitTestBase):
+class StatusMixinDBTester(UnitTestDBBase):
     """tests the StatusMixin with a DB is already setup
     """
+
+    def setUp(self):
+        """setup the test
+        """
+        super(StatusMixinDBTester, self).setUp()
+        self.test_status1 = Status(name="Status1", code="STS1")
+        self.test_status2 = Status(name="Status2", code="STS2")
+        self.test_status3 = Status(name="Status3", code="STS3")
+        self.test_status4 = Status(name="Status4", code="STS4")
+        self.test_status5 = Status(name="Status5", code="STS5")
+
+        # statuses which are not going to be used
+        self.test_status6 = Status(name="Status6", code="STS6")
+        self.test_status7 = Status(name="Status7", code="STS7")
+        self.test_status8 = Status(name="Status8", code="STS8")
+
+        # a test StatusList object
+        self.test_status_list1 = StatusList(
+            name="Test Status List 1",
+            statuses=[
+                self.test_status1,
+                self.test_status2,
+                self.test_status3,
+                self.test_status4,
+                self.test_status5,
+            ],
+            target_entity_type="StatMixClass",
+        )
+
+        # another test StatusList object
+        self.test_status_list2 = StatusList(
+            name="Test Status List 2",
+            statuses=[
+                self.test_status1,
+                self.test_status2,
+                self.test_status3,
+                self.test_status4,
+                self.test_status5,
+            ],
+            target_entity_type="StatMixClass",
+        )
+
+        self.kwargs = {
+            "name": "Test Class",
+            "status_list": self.test_status_list1,
+            "status": self.test_status_list1.statuses[0],
+        }
+
+        self.test_mixed_obj = StatMixClass(**self.kwargs)
+        self.test_mixed_obj.status_list = self.test_status_list1
+
+        # create another one without status_list set to something
+        self.test_mixed_obj2 = StatMixClass(**self.kwargs)
 
     def test_status_list_attribute_is_skipped_and_there_is_a_db_setup(self):
         """testing if there will be no error and the status_list attribute is
@@ -427,8 +434,9 @@ class StatusMixinDBTester(UnitTestBase):
         )
 
         # add it to the db
-        db.DBSession.add(test_status_list)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(test_status_list)
+        DBSession.commit()
 
         # now try to create a StatusListAutoAddClass without a status_list 
         # argument
@@ -460,8 +468,9 @@ class StatusMixinDBTester(UnitTestBase):
         )
 
         # add it to the db
-        db.DBSession.add(test_status_list)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(test_status_list)
+        DBSession.commit()
 
         # now try to create a StatusListAutoAddClass without a status_list 
         # argument
@@ -476,4 +485,51 @@ class StatusMixinDBTester(UnitTestBase):
             "a suitable StatusList "
             "(StatusList.target_entity_type=StatusListNoAutoAddClass) with "
             "the 'status_list' argument"
+        )
+
+    def test_status_list_argument_is_None(self):
+        """testing if TypeError is going to be raised when trying to initialize
+        status_list with None
+        """
+        self.kwargs["status_list"] = None
+        with self.assertRaises(TypeError) as cm:
+            StatMixClass(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            "StatMixClass instances can not be initialized without a "
+            "stalker.models.status.StatusList instance, please pass a "
+            "suitable StatusList (StatusList.target_entity_type=StatMixClass) "
+            "with the 'status_list' argument"
+        )
+
+    def test_status_list_argument_skipped(self):
+        """testing if a TypeError going to be raised when status_list argument
+        is skipped
+        """
+        self.kwargs.pop("status_list")
+        with self.assertRaises(TypeError) as cm:
+            StatMixClass(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            "StatMixClass instances can not be initialized without a "
+            "stalker.models.status.StatusList instance, please pass a "
+            "suitable StatusList (StatusList.target_entity_type=StatMixClass) "
+            "with the 'status_list' argument"
+        )
+
+    def test_status_list_attribute_set_to_None(self):
+        """testing if TypeError is going to be raised when trying to set the
+        status_list to None
+        """
+        with self.assertRaises(TypeError) as cm:
+            self.test_mixed_obj.status_list = None
+
+        self.assertEqual(
+            str(cm.exception),
+            "StatMixClass instances can not be initialized without a "
+            "stalker.models.status.StatusList instance, please pass a "
+            "suitable StatusList (StatusList.target_entity_type=StatMixClass) "
+            "with the 'status_list' argument"
         )

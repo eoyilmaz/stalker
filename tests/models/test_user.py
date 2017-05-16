@@ -16,7 +16,7 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-from stalker.testing import UnitTestBase
+from stalker.testing import UnitTestDBBase
 from stalker import User
 
 import logging
@@ -24,18 +24,18 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-class UserTest(UnitTestBase):
+class UserTestDB(UnitTestDBBase):
     """Tests the user class
     """
 
     def setUp(self):
         """setup the test
         """
-        super(UserTest, self).setUp()
+        super(UserTestDB, self).setUp()
 
         # need to have some test object for
         # a department
-        from stalker import db, Department
+        from stalker import Department
         self.test_department1 = Department(
             name="Test Department 1"
         )
@@ -46,7 +46,8 @@ class UserTest(UnitTestBase):
             name="Test Department 3"
         )
 
-        db.DBSession.add_all([
+        from stalker.db.session import DBSession
+        DBSession.add_all([
             self.test_department1,
             self.test_department2,
             self.test_department3
@@ -64,12 +65,12 @@ class UserTest(UnitTestBase):
             name="Test Group 3"
         )
 
-        db.DBSession.add_all([
+        DBSession.add_all([
             self.test_group1,
             self.test_group2,
             self.test_group3
         ])
-        db.DBSession.commit()
+        DBSession.commit()
 
         # a couple of statuses
         from stalker import Status, StatusList
@@ -136,7 +137,7 @@ class UserTest(UnitTestBase):
             repository=self.test_repository,
         )
 
-        db.DBSession.add_all([
+        DBSession.add_all([
             self.test_project1,
             self.test_project2,
             self.test_project3
@@ -183,7 +184,7 @@ class UserTest(UnitTestBase):
             responsible=[self.test_lead]
         )
 
-        db.DBSession.add_all([
+        DBSession.add_all([
             self.test_task1,
             self.test_task2,
             self.test_task3,
@@ -196,76 +197,76 @@ class UserTest(UnitTestBase):
             task=self.test_task1,
             full_path='some/path'
         )
-        db.DBSession.add(self.test_version1)
+        DBSession.add(self.test_version1)
 
         self.test_version2 = Version(
             task=self.test_task1,
             full_path='some/path'
         )
-        db.DBSession.add(self.test_version2)
+        DBSession.add(self.test_version2)
 
         self.test_version3 = Version(
             task=self.test_task1,
             full_path='some/path'
         )
-        db.DBSession.add(self.test_version3)
+        DBSession.add(self.test_version3)
 
         # for task2
         self.test_version4 = Version(
             task=self.test_task2,
             full_path='some/path'
         )
-        db.DBSession.add(self.test_version4)
+        DBSession.add(self.test_version4)
 
         self.test_version5 = Version(
             task=self.test_task2,
             full_path='some/path'
         )
-        db.DBSession.add(self.test_version5)
+        DBSession.add(self.test_version5)
 
         self.test_version6 = Version(
             task=self.test_task2,
             full_path='some/path'
         )
-        db.DBSession.add(self.test_version6)
+        DBSession.add(self.test_version6)
 
         # for task3
         self.test_version7 = Version(
             task=self.test_task3,
             full_path='some/path'
         )
-        db.DBSession.add(self.test_version7)
+        DBSession.add(self.test_version7)
 
         self.test_version8 = Version(
             task=self.test_task3,
             full_path='some/path'
         )
-        db.DBSession.add(self.test_version8)
+        DBSession.add(self.test_version8)
 
         self.test_version9 = Version(
             task=self.test_task3,
             full_path='some/path'
         )
-        db.DBSession.add(self.test_version9)
+        DBSession.add(self.test_version9)
 
         # for task4
         self.test_version10 = Version(
             task=self.test_task4,
             full_path='some/path'
         )
-        db.DBSession.add(self.test_version10)
+        DBSession.add(self.test_version10)
 
         self.test_version11 = Version(
             task=self.test_task4,
             full_path='some/path'
         )
-        db.DBSession.add(self.test_version11)
+        DBSession.add(self.test_version11)
 
         self.test_version12 = Version(
             task=self.test_task4,
             full_path='some/path'
         )
-        db.DBSession.add(self.test_version12)
+        DBSession.add(self.test_version12)
 
         # *********************************************************************
         # Tickets
@@ -280,25 +281,28 @@ class UserTest(UnitTestBase):
             project=self.test_project1,
             links=[self.test_version1],
         )
-        db.DBSession.add(self.test_ticket1)
+        DBSession.add(self.test_ticket1)
         # set it to closed
         self.test_ticket1.resolve()
+        DBSession.commit()
 
         # create a new ticket and leave it open
         self.test_ticket2 = Ticket(
             project=self.test_project1,
             links=[self.test_version1],
         )
-        db.DBSession.add(self.test_ticket2)
+        DBSession.add(self.test_ticket2)
+        DBSession.commit()
 
         # create a new ticket and close and then reopen it
         self.test_ticket3 = Ticket(
             project=self.test_project1,
             links=[self.test_version1],
         )
-        db.DBSession.add(self.test_ticket3)
+        DBSession.add(self.test_ticket3)
         self.test_ticket3.resolve()
         self.test_ticket3.reopen()
+        DBSession.commit()
 
         # *********************************************************************
         # tickets for version2
@@ -307,23 +311,26 @@ class UserTest(UnitTestBase):
             project=self.test_project1,
             links=[self.test_version2],
         )
-        db.DBSession.add(self.test_ticket4)
+        DBSession.add(self.test_ticket4)
+        DBSession.commit()
 
         # create a new Ticket and close it
         self.test_ticket5 = Ticket(
             project=self.test_project1,
             links=[self.test_version2],
         )
-        db.DBSession.add(self.test_ticket5)
+        DBSession.add(self.test_ticket5)
         self.test_ticket5.resolve()
+        DBSession.commit()
 
         # create a new Ticket and close it
         self.test_ticket6 = Ticket(
             project=self.test_project1,
             links=[self.test_version3],
         )
-        db.DBSession.add(self.test_ticket6)
+        DBSession.add(self.test_ticket6)
         self.test_ticket6.resolve()
+        DBSession.commit()
 
         # *********************************************************************
         # tickets for version3
@@ -332,16 +339,18 @@ class UserTest(UnitTestBase):
             project=self.test_project1,
             links=[self.test_version3],
         )
-        db.DBSession.add(self.test_ticket7)
+        DBSession.add(self.test_ticket7)
         self.test_ticket7.resolve()
+        DBSession.commit()
 
         # create a new ticket and close it
         self.test_ticket8 = Ticket(
             project=self.test_project1,
             links=[self.test_version3],
         )
-        db.DBSession.add(self.test_ticket8)
+        DBSession.add(self.test_ticket8)
         self.test_ticket8.resolve()
+        DBSession.commit()
 
         # *********************************************************************
         # tickets for version4
@@ -350,16 +359,17 @@ class UserTest(UnitTestBase):
             project=self.test_project1,
             links=[self.test_version4],
         )
-        db.DBSession.add(self.test_ticket9)
-
+        DBSession.add(self.test_ticket9)
         self.test_ticket9.resolve()
+        DBSession.commit()
 
         # no tickets for any other version
         # *********************************************************************
 
         # a status list for sequence
-        self.sequence_status_list = StatusList.query\
-            .filter_by(target_entity_type='Sequence').first()
+        with DBSession.no_autoflush:
+            self.sequence_status_list = StatusList.query\
+                .filter_by(target_entity_type='Sequence').first()
 
         # a couple of sequences
         from stalker import Sequence
@@ -391,7 +401,7 @@ class UserTest(UnitTestBase):
             status_list=self.sequence_status_list
         )
 
-        db.DBSession.add_all([
+        DBSession.add_all([
             self.test_sequence1,
             self.test_sequence2,
             self.test_sequence3,
@@ -423,8 +433,8 @@ class UserTest(UnitTestBase):
 
         # create a proper user object
         self.test_user = User(**self.kwargs)
-        db.DBSession.add(self.test_user)
-        db.DBSession.commit()
+        DBSession.add(self.test_user)
+        DBSession.commit()
 
         # just change the kwargs for other tests
         self.kwargs['name'] = 'some other name'
@@ -605,22 +615,23 @@ class UserTest(UnitTestBase):
     def test_email_argument_should_be_a_unique_value(self):
         """testing if the email argument should be a unique value
         """
-        from stalker import db, User
+        from stalker import User
         # this test should include a database
         test_email = "test@email.com"
         self.kwargs['login'] = 'test_user1'
         self.kwargs['email'] = test_email
         user1 = User(**self.kwargs)
-        db.DBSession.add(user1)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(user1)
+        DBSession.commit()
 
         self.kwargs['login'] = 'test_user2'
         user2 = User(**self.kwargs)
-        db.DBSession.add(user2)
+        DBSession.add(user2)
 
         from sqlalchemy.exc import IntegrityError
         with self.assertRaises(IntegrityError) as cm:
-            db.DBSession.commit()
+            DBSession.commit()
 
         self.assertTrue(
             str(cm.exception).startswith(
@@ -764,23 +775,24 @@ class UserTest(UnitTestBase):
     def test_login_argument_should_be_a_unique_value(self):
         """testing if the login argument should be a unique value
         """
-        from stalker import db, User
+        from stalker import User
         # this test should include a database
         test_login = 'test_user1'
         self.kwargs['login'] = test_login
         self.kwargs['email'] = "test1@email.com"
         user1 = User(**self.kwargs)
-        db.DBSession.add(user1)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(user1)
+        DBSession.commit()
 
         self.kwargs['email'] = "test2@email.com"
 
         user2 = User(**self.kwargs)
-        db.DBSession.add(user2)
+        DBSession.add(user2)
 
         from sqlalchemy.exc import IntegrityError
         with self.assertRaises(IntegrityError) as cm:
-            db.DBSession.commit()
+            DBSession.commit()
 
         self.assertTrue(
             str(cm.exception).startswith(
@@ -1678,13 +1690,14 @@ class UserTest(UnitTestBase):
     def test_companies_attribute_is_working_properly(self):
         """from issue #27
         """
-        from stalker import db, Client, User
+        from stalker import Client, User
         new_companies = []
         c1 = Client(name='Company X')
         c2 = Client(name='Company Y')
         c3 = Client(name='Company Z')
-        db.DBSession.add_all([c1, c2, c3])
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add_all([c1, c2, c3])
+        DBSession.commit()
 
         c1 = Client.query.filter_by(name='Company X').first()
         c2 = Client.query.filter_by(name='Company Y').first()
@@ -1692,12 +1705,12 @@ class UserTest(UnitTestBase):
 
         user = User(name='test_user', password='1234', email='a@a.com',
                     login='test_user', clients=[c3])
-        db.DBSession.commit()
+        DBSession.commit()
 
         new_companies.append(c1)
         new_companies.append(c2)
         user.companies = new_companies
-        db.DBSession.commit()
+        DBSession.commit()
 
         self.assertTrue(c1 in user.companies)
         self.assertTrue(c2 in user.companies)
@@ -1719,25 +1732,26 @@ class UserTest(UnitTestBase):
             companies=[c1, c2, c3]
         )
 
-        db.DBSession.add(user)
+        from stalker.db.session import DBSession
+        DBSession.add(user)
 
-        self.assertTrue(c1 in db.DBSession)
-        self.assertTrue(c2 in db.DBSession)
-        self.assertTrue(c3 in db.DBSession)
+        self.assertTrue(c1 in DBSession)
+        self.assertTrue(c2 in DBSession)
+        self.assertTrue(c3 in DBSession)
 
-        db.DBSession.commit()
+        DBSession.commit()
 
         c1 = Client(name='New Company X')
         c2 = Client(name='New Company Y')
         c3 = Client(name='New Company Z')
 
-        db.DBSession.add_all([c1, c2, c3])
-        db.DBSession.commit()
+        DBSession.add_all([c1, c2, c3])
+        DBSession.commit()
 
         user = User.query.filter_by(name='Fredrik').first()
         user.companies = [c1, c2, c3]
 
-        db.DBSession.commit()
+        DBSession.commit()
 
     def test_watching_attribute_is_a_list_of_other_values_than_Task(self):
         """testing if a TypeError will be raised when the watching attribute is

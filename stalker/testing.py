@@ -73,7 +73,7 @@ def drop_db(database_name):
             return
 
 
-class UnitTestBase(unittest.TestCase):
+class UnitTestDBBase(unittest.TestCase):
     """the base for Stalker Pyramid Views unit tests
     """
 
@@ -97,8 +97,8 @@ class UnitTestBase(unittest.TestCase):
     def tearDownClass(cls):
         """tear down once
         """
-        from stalker import db
-        db.DBSession.close_all()
+        from stalker.db.session import DBSession
+        DBSession.close_all()
         drop_db(cls.database_name)
 
     def setUp(self):
@@ -121,26 +121,26 @@ class UnitTestBase(unittest.TestCase):
 
         # init database
         from stalker import db
-        db.setup(self.config)
-
         # remove anything beforehand
+        db.setup(self.config)
         db.init()
 
     def tearDown(self):
         """clean up the test
         """
         import datetime
-        from stalker import db, defaults
+        from stalker import defaults
         from stalker.db.declarative import Base
+        from stalker.db.session import DBSession
 
         # clean up test database
-        db.DBSession.rollback()
-        connection = db.DBSession.connection()
+        DBSession.rollback()
+        connection = DBSession.connection()
         engine = connection.engine
         connection.close()
 
         Base.metadata.drop_all(engine, checkfirst=True)
-        db.DBSession.remove()
+        DBSession.remove()
 
         defaults.timing_resolution = datetime.timedelta(hours=1)
 
@@ -148,8 +148,12 @@ class UnitTestBase(unittest.TestCase):
     def admin(self):
         """returns the admin user
         """
-        from stalker import User, defaults
-        return User.query.filter(User.login == defaults.admin_login).first()
+        from stalker import defaults, User
+        from stalker.db.session import DBSession
+        with DBSession.no_autoflush:
+            return User.query\
+                .filter(User.login == defaults.admin_login)\
+                .first()
 
 
 class PlatformPatcher(object):

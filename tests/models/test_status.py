@@ -18,16 +18,17 @@
 
 import unittest
 from stalker import Entity, Status
-from stalker.testing import UnitTestBase
 
 
-class StatusTest(UnitTestBase):
+class StatusTest(unittest.TestCase):
     """tests the stalker.models.status.Status class
     """
 
     def setUp(self):
         """setup the test
         """
+        super(StatusTest, self).setUp()
+
         self.kwargs = {
             'name': 'Complete',
             'description': 'use this when the object is complete',

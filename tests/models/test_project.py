@@ -19,20 +19,20 @@
 import logging
 
 from stalker import log
-from stalker.testing import UnitTestBase
+from stalker.testing import UnitTestDBBase
 
 logger = logging.getLogger('stalker.models.project')
 logger.setLevel(log.logging_level)
 
 
-class ProjectTestCase(UnitTestBase):
+class ProjectTestDBCase(UnitTestDBBase):
     """tests the Project class
     """
 
     def setUp(self):
         """setup the test
         """
-        super(ProjectTestCase, self).setUp()
+        super(ProjectTestDBCase, self).setUp()
 
         # create test objects
         import datetime
@@ -606,9 +606,9 @@ class ProjectTestCase(UnitTestBase):
         # test_task2
         # test_task3
 
-        from stalker import db
-        db.DBSession.add(self.test_project)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(self.test_project)
+        DBSession.commit()
 
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for
@@ -1009,17 +1009,18 @@ class ProjectTestCase(UnitTestBase):
     def test_repositories_attribute_value_order_is_not_changing(self):
         """testing if the order of the repositories attribute is not changing
         """
-        from stalker import db, Repository, Project
+        from stalker import Repository, Project
         repo1 = Repository(name='Repo1')
         repo2 = Repository(name='Repo2')
         repo3 = Repository(name='Repo3')
 
-        db.DBSession.add_all([repo1, repo2, repo3])
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add_all([repo1, repo2, repo3])
+        DBSession.commit()
 
         test_value = [repo3, repo1, repo2]
         self.test_project.repositories = test_value
-        db.DBSession.commit()
+        DBSession.commit()
 
         for i in range(10):
             db_proj = Project.query.first()
@@ -1027,7 +1028,7 @@ class ProjectTestCase(UnitTestBase):
                 db_proj.repositories,
                 test_value
             )
-            db.DBSession.commit()
+            DBSession.commit()
 
     def test_is_stereoscopic_argument_skipped(self):
         """testing if is_stereoscopic will set the is_stereoscopic attribute to
@@ -1834,16 +1835,17 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
         """testing if the total_logged_seconds attribute is working properly
         """
         # create some time logs
-        from stalker import TimeLog
-
         import datetime
         import pytz
+        from stalker import TimeLog
         TimeLog(
             task=self.test_task1,
             resource=self.test_task1.resources[0],
             start=datetime.datetime(2013, 8, 1, 1, 0, tzinfo=pytz.utc),
             duration=datetime.timedelta(hours=1)
         )
+        from stalker.db.session import DBSession
+        DBSession.commit()
         self.assertEqual(self.test_project.total_logged_seconds, 3600)
 
         # add more time logs
@@ -1853,6 +1855,7 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
             start=datetime.datetime(2013, 8, 1, 2, 0, tzinfo=pytz.utc),
             duration=datetime.timedelta(hours=1)
         )
+        DBSession.commit()
         self.assertEqual(self.test_project.total_logged_seconds, 7200)
 
         # create more deeper time logs
@@ -1862,6 +1865,7 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
             start=datetime.datetime(2013, 8, 1, 3, 0, tzinfo=pytz.utc),
             duration=datetime.timedelta(hours=3)
         )
+        DBSession.commit()
         self.assertEqual(self.test_project.total_logged_seconds, 18000)
 
         # create a time log for one asset
@@ -1871,6 +1875,7 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
             start=datetime.datetime(2013, 8, 1, 6, 0, tzinfo=pytz.utc),
             duration=datetime.timedelta(hours=10)
         )
+        DBSession.commit()
         self.assertEqual(self.test_project.total_logged_seconds, 15 * 3600)
 
     def test_schedule_seconds_attribute_is_read_only(self):
@@ -1990,9 +1995,9 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
             start=datetime.datetime(2013, 8, 1, 1, 0, tzinfo=pytz.utc),
             duration=datetime.timedelta(hours=1)
         )
-        from stalker import db
-        db.DBSession.add(t)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(t)
+        DBSession.commit()
 
         self.assertEqual(self.test_project.percent_complete,
                          (1.0 / 44.0 * 100))
@@ -2074,14 +2079,14 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
         self.assertEqual(self.test_project.clients, [new_client])
 
 
-class ProjectTicketsTestCase(UnitTestBase):
+class ProjectTicketsTestDBCase(UnitTestDBBase):
     """tests the Project <-> Ticket relation
     """
 
     def setUp(self):
         """setup the test
         """
-        super(ProjectTicketsTestCase, self).setUp()
+        super(ProjectTicketsTestDBCase, self).setUp()
 
         # create test objects
         import datetime
@@ -2266,27 +2271,31 @@ class ProjectTicketsTestCase(UnitTestBase):
         # set up an running so it will be automatically linked
 
         # tickets for version1
-        from stalker import db, Ticket
+        from stalker import Ticket
         self.test_ticket1 = Ticket(
             project=self.test_project
         )
-        db.DBSession.add(self.test_ticket1)
+        from stalker.db.session import DBSession
+        DBSession.add(self.test_ticket1)
         # set it to closed
         self.test_ticket1.resolve()
+        DBSession.commit()
 
         # create a new ticket and leave it open
         self.test_ticket2 = Ticket(
             project=self.test_project
         )
-        db.DBSession.add(self.test_ticket2)
+        DBSession.add(self.test_ticket2)
+        DBSession.commit()
 
         # create a new ticket and close and then reopen it
         self.test_ticket3 = Ticket(
             project=self.test_project
         )
-        db.DBSession.add(self.test_ticket3)
+        DBSession.add(self.test_ticket3)
         self.test_ticket3.resolve()
         self.test_ticket3.reopen()
+        DBSession.commit()
 
         # *********************************************************************
         # tickets for version2
@@ -2294,21 +2303,24 @@ class ProjectTicketsTestCase(UnitTestBase):
         self.test_ticket4 = Ticket(
             project=self.test_project
         )
-        db.DBSession.add(self.test_ticket4)
+        DBSession.add(self.test_ticket4)
+        DBSession.commit()
 
         # create a new Ticket and close it
         self.test_ticket5 = Ticket(
             project=self.test_project
         )
-        db.DBSession.add(self.test_ticket5)
+        DBSession.add(self.test_ticket5)
         self.test_ticket5.resolve()
+        DBSession.commit()
 
         # create a new Ticket and close it
         self.test_ticket6 = Ticket(
             project=self.test_project
         )
-        db.DBSession.add(self.test_ticket6)
+        DBSession.add(self.test_ticket6)
         self.test_ticket6.resolve()
+        DBSession.commit()
 
         # *********************************************************************
         # tickets for version3
@@ -2316,15 +2328,17 @@ class ProjectTicketsTestCase(UnitTestBase):
         self.test_ticket7 = Ticket(
             project=self.test_project
         )
-        db.DBSession.add(self.test_ticket7)
+        DBSession.add(self.test_ticket7)
         self.test_ticket7.resolve()
+        DBSession.commit()
 
         # create a new ticket and close it
         self.test_ticket8 = Ticket(
             project=self.test_project
         )
-        db.DBSession.add(self.test_ticket8)
+        DBSession.add(self.test_ticket8)
         self.test_ticket8.resolve()
+        DBSession.commit()
 
         # *********************************************************************
         # tickets for version4
@@ -2332,14 +2346,15 @@ class ProjectTicketsTestCase(UnitTestBase):
         self.test_ticket9 = Ticket(
             project=self.test_project
         )
-        db.DBSession.add(self.test_ticket9)
+        DBSession.add(self.test_ticket9)
 
         self.test_ticket9.resolve()
+        DBSession.commit()
 
         # *********************************************************************
 
-        db.DBSession.add(self.test_project)
-        db.DBSession.commit()
+        DBSession.add(self.test_project)
+        DBSession.commit()
 
     def test_tickets_attribute_is_an_empty_list_by_default(self):
         """testing if the Project.tickets is an empty list by default

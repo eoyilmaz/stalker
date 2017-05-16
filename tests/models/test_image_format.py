@@ -16,11 +16,11 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-from stalker.testing import UnitTestBase
+import unittest
 from stalker import ImageFormat
 
 
-class ImageFormatTest(UnitTestBase):
+class ImageFormatTest(unittest.TestCase):
     """the test case for the image format
     """
 
@@ -39,9 +39,6 @@ class ImageFormatTest(UnitTestBase):
         }
 
         self.test_image_format = ImageFormat(**self.kwargs)
-        from stalker import db
-        db.DBSession.add(self.test_image_format)
-        db.DBSession.commit()
 
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for
@@ -626,12 +623,12 @@ class ImageFormatTest(UnitTestBase):
         self.assertTrue(self.test_image_format.plural_class_name,
                         "ImageFormats")
 
-    # def test_hash_value(self):
-    #     """testing if the hash value is correctly calculated
-    #     """
-    #     self.assertEqual(
-    #         hash(self.test_image_format),
-    #         hash(self.test_image_format.id) +
-    #         2 * hash(self.test_image_format.name) +
-    #         3 * hash(self.test_image_format.entity_type)
-    #     )
+    def test_hash_value(self):
+        """testing if the hash value is correctly calculated
+        """
+        self.assertEqual(
+            self.test_image_format.__hash__(),
+            hash(self.test_image_format.id) +
+            2 * hash(self.test_image_format.name) +
+            3 * hash(self.test_image_format.entity_type)
+        )

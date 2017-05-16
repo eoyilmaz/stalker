@@ -16,11 +16,11 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-from stalker.testing import UnitTestBase
+import unittest
 from stalker import Entity
 
 
-class EntityTester(UnitTestBase):
+class EntityTester(unittest.TestCase):
     """tests the Entity class
     """
 
@@ -37,14 +37,12 @@ class EntityTester(UnitTestBase):
             email="test@user.com",
             password="test"
         )
-        db.DBSession.add(self.test_user)
 
         # create some test Tag objects, not necessarily needed but create them
         from stalker import Tag
         self.test_tag1 = Tag(name="Test Tag 1")
         self.test_tag2 = Tag(name="Test Tag 1")  # make it equal to tag1
         self.test_tag3 = Tag(name="Test Tag 3")
-        db.DBSession.add_all([self.test_tag1, self.test_tag2, self.test_tag3])
 
         self.tags = [self.test_tag1, self.test_tag2]
 
@@ -53,9 +51,6 @@ class EntityTester(UnitTestBase):
         self.test_note1 = Note(name="test note1", content="test note1")
         self.test_note2 = Note(name="test note2", content="test note2")
         self.test_note3 = Note(name="test note3", content="test note3")
-        db.DBSession.add_all([
-            self.test_note1, self.test_note2, self.test_note3
-        ])
 
         self.notes = [self.test_note1, self.test_note2]
 
@@ -71,8 +66,6 @@ class EntityTester(UnitTestBase):
 
         # create a proper SimpleEntity to use it later in the tests
         self.test_entity = Entity(**self.kwargs)
-        db.DBSession.add(self.test_entity)
-        db.DBSession.commit()
 
     def test___auto_name__class_attribute_is_set_to_True(self):
         """testing if the __auto_name__ class attribute is set to False for

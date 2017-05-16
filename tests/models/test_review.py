@@ -16,27 +16,28 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-from stalker.testing import UnitTestBase
+from stalker.testing import UnitTestDBBase
 from stalker import Review
 
 
-class ReviewTestCase(UnitTestBase):
+class ReviewTestDBCase(UnitTestDBBase):
     """tests the stalker.models.review.Review class
     """
 
     def setUp(self):
         """set up the test
         """
-        super(ReviewTestCase, self).setUp()
+        super(ReviewTestDBCase, self).setUp()
 
-        from stalker import db, User
+        from stalker import User
         self.user1 = User(
             name='Test User 1',
             login='test_user1',
             email='test1@user.com',
             password='secret'
         )
-        db.DBSession.add(self.user1)
+        from stalker.db.session import DBSession
+        DBSession.add(self.user1)
 
         self.user2 = User(
             name='Test User 2',
@@ -44,7 +45,7 @@ class ReviewTestCase(UnitTestBase):
             email='test2@user.com',
             password='secret'
         )
-        db.DBSession.add(self.user2)
+        DBSession.add(self.user2)
 
         self.user3 = User(
             name='Test User 2',
@@ -52,11 +53,11 @@ class ReviewTestCase(UnitTestBase):
             email='test3@user.com',
             password='secret'
         )
-        db.DBSession.add(self.user3)
+        DBSession.add(self.user3)
 
         # Review Statuses
         from stalker import Status
-        with db.DBSession.no_autoflush:
+        with DBSession.no_autoflush:
             self.status_new = Status.query.filter_by(code='NEW').first()
             self.status_rrev = Status.query.filter_by(code='RREV').first()
             self.status_app = Status.query.filter_by(code='APP').first()
@@ -77,7 +78,7 @@ class ReviewTestCase(UnitTestBase):
                 self.status_new, self.status_wip, self.status_cmpl
             ]
         )
-        db.DBSession.add(self.project_status_list)
+        DBSession.add(self.project_status_list)
 
         # self.temp_path = tempfile.mkdtemp()
         from stalker import Repository
@@ -87,13 +88,13 @@ class ReviewTestCase(UnitTestBase):
             windows_path='T:/',
             osx_path='/Volumes/T/'
         )
-        db.DBSession.add(self.repo)
+        DBSession.add(self.repo)
 
         from stalker import Structure
         self.structure = Structure(
             name='Test Project Structure'
         )
-        db.DBSession.add(self.structure)
+        DBSession.add(self.structure)
 
         from stalker import Project
         self.project = Project(
@@ -102,7 +103,7 @@ class ReviewTestCase(UnitTestBase):
             status_list=self.project_status_list,
             repository=self.repo
         )
-        db.DBSession.add(self.project)
+        DBSession.add(self.project)
 
         from stalker import Task
         self.task1 = Task(
@@ -111,21 +112,21 @@ class ReviewTestCase(UnitTestBase):
             resources=[self.user1],
             responsible=[self.user2]
         )
-        db.DBSession.add(self.task1)
+        DBSession.add(self.task1)
 
         self.task2 = Task(
             name='Test Task 2',
             project=self.project,
             responsible=[self.user1]
         )
-        db.DBSession.add(self.task2)
+        DBSession.add(self.task2)
 
         self.task3 = Task(
             name='Test Task 3',
             parent=self.task2,
             resources=[self.user1]
         )
-        db.DBSession.add(self.task3)
+        DBSession.add(self.task3)
         
         self.task4 = Task(
             name='Test Task 4',
@@ -136,7 +137,7 @@ class ReviewTestCase(UnitTestBase):
             schedule_timing=2,
             schedule_unit='h'
         )
-        db.DBSession.add(self.task4)
+        DBSession.add(self.task4)
 
         self.task5 = Task(
             name='Test Task 5',
@@ -147,7 +148,7 @@ class ReviewTestCase(UnitTestBase):
             schedule_timing=2,
             schedule_unit='h'
         )
-        db.DBSession.add(self.task5)
+        DBSession.add(self.task5)
 
         self.task6 = Task(
             name='Test Task 6',
@@ -158,7 +159,7 @@ class ReviewTestCase(UnitTestBase):
             schedule_timing=2,
             schedule_unit='h'
         )
-        db.DBSession.add(self.task6)
+        DBSession.add(self.task6)
 
         self.kwargs = {
             'task': self.task1,
@@ -166,7 +167,7 @@ class ReviewTestCase(UnitTestBase):
         }
 
         # add everything to the db
-        db.DBSession.commit()
+        DBSession.commit()
 
     def test_task_argument_is_not_a_Task_instance(self):
         """testing if a TypeError will be raised when the task argument value
@@ -618,6 +619,8 @@ class ReviewTestCase(UnitTestBase):
             start=now + td(hours=2),
             end=now + td(hours=3),
         )
+        from stalker.db.session import DBSession
+        DBSession.commit()
 
         # the task should have not effort left
         self.assertEqual(
@@ -641,6 +644,7 @@ class ReviewTestCase(UnitTestBase):
         reviews = self.task3.review_set()
         for rev in reviews:
             rev.approve()
+        DBSession.commit()
 
         # check the task statuses again
         self.assertEqual(self.task4.status, self.status_hrev)
@@ -850,6 +854,8 @@ class ReviewTestCase(UnitTestBase):
             start=now,
             end=now + td(hours=1)
         )
+        from stalker.db.session import DBSession
+        DBSession.commit()
 
         # first reviewer requests a revision
         reviews = self.task1.request_review()

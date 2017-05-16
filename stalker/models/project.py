@@ -23,7 +23,6 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.orm import relationship, validates
 
-from stalker import defaults
 from stalker.db.declarative import Base
 from stalker.models.entity import Entity
 from stalker.models.mixins import (StatusMixin, DateRangeMixin, ReferenceMixin,
@@ -408,9 +407,11 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
     def root_tasks(self):
         """returns a list of Tasks which have no parent
         """
-        from stalker import db, Task
+        from stalker import Task
+        from stalker.db.session import DBSession
 
-        with db.DBSession.no_autoflush:
+        # TODO: add a fallback method
+        with DBSession.no_autoflush:
             return Task.query \
                 .filter(Task.project == self) \
                 .filter(Task.parent == None) \
@@ -420,12 +421,14 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
     def assets(self):
         """returns the assets related to this project
         """
-        # use joins over the session.query
         from stalker.models.asset import Asset
+        from stalker.db.session import DBSession
 
-        return Asset.query \
-            .filter(Asset.project == self) \
-            .all()
+        # TODO: add a fallback method
+        with DBSession.no_autoflush:
+            return Asset.query \
+                .filter(Asset.project == self) \
+                .all()
 
     @property
     def sequences(self):
@@ -454,6 +457,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         """returns a TaskJuggler compatible string representing this project
         """
         from jinja2 import Template
+        from stalker import defaults
         temp = Template(defaults.tjp_project_template, trim_blocks=True,
                         lstrip_blocks=True)
         return temp.render({'project': self})

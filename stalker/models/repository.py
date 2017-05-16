@@ -20,7 +20,6 @@ import os
 import platform
 from sqlalchemy import event, Column, Integer, ForeignKey, String
 from sqlalchemy.orm import validates
-from stalker import defaults
 from stalker.models.entity import Entity
 
 from stalker.log import logging_level
@@ -112,6 +111,7 @@ class Repository(Entity):
 
         if self.id is not None and platform.system() == "Linux":
             # update the environment variable
+            from stalker import defaults
             os.environ[defaults.repo_env_var_template % {'id': self.id}] = \
                 linux_path
 
@@ -134,6 +134,7 @@ class Repository(Entity):
 
         if self.id is not None and platform.system() == "Darwin":
             # update the environment variable
+            from stalker import defaults
             os.environ[defaults.repo_env_var_template % {'id': self.id}] = \
                 osx_path
 
@@ -159,6 +160,7 @@ class Repository(Entity):
 
         if self.id is not None and platform.system() == "Windows":
             # update the environment variable
+            from stalker import defaults
             os.environ[defaults.repo_env_var_template % {'id': self.id}] = \
                 windows_path
 
@@ -322,6 +324,7 @@ class Repository(Entity):
     def env_var(self):
         """returns the env var of this repo
         """
+        from stalker import defaults
         return defaults.repo_env_var_template % {'id': self.id}
 
     def __eq__(self, other):
@@ -344,4 +347,5 @@ def receive_after_insert(mapper, connection, repo):
     """listen for the 'after_insert' event
     """
     logger.debug('auto creating env var for Repository with id: %s' % repo.id)
+    from stalker import defaults
     os.environ[defaults.repo_env_var_template % {'id': repo.id}] = repo.path

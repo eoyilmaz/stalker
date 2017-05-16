@@ -16,26 +16,27 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-from stalker.testing import UnitTestBase
+from stalker.testing import UnitTestDBBase
 from stalker import ProjectUser
 
 
-class ProjectUserTestCase(UnitTestBase):
+class ProjectUserTestDBCase(UnitTestDBBase):
     """tests for ProjectUser class
     """
 
     def setUp(self):
         """set the test up
         """
-        super(ProjectUserTestCase, self).setUp()
+        super(ProjectUserTestDBCase, self).setUp()
 
         from stalker import Status, StatusList, Repository
         self.test_repo = Repository(
             name='Test Repo'
         )
-        from stalker import db
-        db.DBSession.add(self.test_repo)
-        db.DBSession.commit()
+
+        from stalker.db.session import DBSession
+        DBSession.add(self.test_repo)
+        DBSession.commit()
 
         self.status_new = Status.query.filter_by(code='NEW').first()
         self.status_wip = Status.query.filter_by(code='WIP').first()
@@ -46,7 +47,7 @@ class ProjectUserTestCase(UnitTestBase):
             statuses=[self.status_new, self.status_wip, self.status_cmpl],
             target_entity_type='Project'
         )
-        db.DBSession.add(self.project_statuses)
+        DBSession.add(self.project_statuses)
 
         from stalker import User
         self.test_user1 = User(
@@ -55,7 +56,7 @@ class ProjectUserTestCase(UnitTestBase):
             email='testuser1@users.com',
             password='secret'
         )
-        db.DBSession.add(self.test_user1)
+        DBSession.add(self.test_user1)
 
         from stalker import Project
         self.test_project = Project(
@@ -64,14 +65,14 @@ class ProjectUserTestCase(UnitTestBase):
             repositories=[self.test_repo],
             status_list=self.project_statuses
         )
-        db.DBSession.add(self.test_project)
+        DBSession.add(self.test_project)
 
         from stalker import Role
         self.test_role = Role(
             name='Test User'
         )
-        db.DBSession.add(self.test_role)
-        db.DBSession.commit()
+        DBSession.add(self.test_role)
+        DBSession.commit()
 
     def test_project_user_creation(self):
         """testing project user creation

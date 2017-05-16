@@ -17,11 +17,11 @@
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
 
-from stalker.testing import UnitTestBase
+import unittest
 from stalker import Message
 
 
-class MessageTestCase(UnitTestBase):
+class MessageTestCase(unittest.TestCase):
     """tests for Message class
     """
 

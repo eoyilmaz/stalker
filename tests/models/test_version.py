@@ -15,8 +15,9 @@
 #
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
+import unittest
 
-from stalker.testing import UnitTestBase, PlatformPatcher
+from stalker.testing import UnitTestDBBase, PlatformPatcher
 
 import logging
 from stalker import log
@@ -25,17 +26,17 @@ logger = logging.getLogger('stalker.models.version.Version')
 logger.setLevel(log.logging_level)
 
 
-class VersionTester(UnitTestBase):
+class VersionDBTester(UnitTestDBBase):
     """tests stalker.models.version.Version class
     """
 
     def setUp(self):
         """setup the test
         """
-        super(VersionTester, self).setUp()
+        super(self.__class__, self).setUp()
         self.patcher = PlatformPatcher()
 
-        from stalker import db, Status, StatusList
+        from stalker import Status, StatusList
 
         # statuses
         self.test_status1 = Status(name='Status1', code='STS1')
@@ -43,11 +44,12 @@ class VersionTester(UnitTestBase):
         self.test_status3 = Status(name='Status3', code='STS3')
         self.test_status4 = Status(name='Status4', code='STS4')
         self.test_status5 = Status(name='Status5', code='STS5')
-        db.DBSession.add_all([
+        from stalker.db.session import DBSession
+        DBSession.add_all([
             self.test_status1, self.test_status2, self.test_status3,
             self.test_status4, self.test_status5
         ])
-        db.DBSession.commit()
+        DBSession.commit()
 
         # status lists
         self.test_project_status_list = StatusList(
@@ -61,7 +63,7 @@ class VersionTester(UnitTestBase):
             ],
             target_entity_type='Project',
         )
-        db.DBSession.add(self.test_project_status_list)
+        DBSession.add(self.test_project_status_list)
 
         # repository
         from stalker import Repository, Type
@@ -71,7 +73,7 @@ class VersionTester(UnitTestBase):
             windows_path='T:/',
             osx_path='/Volumes/T/'
         )
-        db.DBSession.add(self.test_repo)
+        DBSession.add(self.test_repo)
 
         # a project type
         self.test_project_type = Type(
@@ -79,14 +81,14 @@ class VersionTester(UnitTestBase):
             code='test',
             target_entity_type='Project',
         )
-        db.DBSession.add(self.test_project_type)
+        DBSession.add(self.test_project_type)
 
         # create a structure
         from stalker import Structure
         self.test_structure = Structure(
             name='Test Project Structure'
         )
-        db.DBSession.add(self.test_structure)
+        DBSession.add(self.test_structure)
 
         # create a project
         from stalker import Project
@@ -98,7 +100,7 @@ class VersionTester(UnitTestBase):
             repositories=[self.test_repo],
             structure=self.test_structure
         )
-        db.DBSession.add(self.test_project)
+        DBSession.add(self.test_project)
 
         # create a sequence
         from stalker import Sequence
@@ -107,7 +109,7 @@ class VersionTester(UnitTestBase):
             code='SEQ1',
             project=self.test_project,
         )
-        db.DBSession.add(self.test_sequence)
+        DBSession.add(self.test_sequence)
 
         # create a shot
         from stalker import Shot
@@ -117,7 +119,7 @@ class VersionTester(UnitTestBase):
             project=self.test_project,
             sequences=[self.test_sequence]
         )
-        db.DBSession.add(self.test_shot1)
+        DBSession.add(self.test_shot1)
 
         # create a group of Tasks for the shot
         from stalker import Task
@@ -125,7 +127,7 @@ class VersionTester(UnitTestBase):
             name='Task1',
             parent=self.test_shot1
         )
-        db.DBSession.add(self.test_task1)
+        DBSession.add(self.test_task1)
 
         # a Link for the input file
         from stalker import Link
@@ -134,14 +136,14 @@ class VersionTester(UnitTestBase):
             full_path='/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/'
                       'Outputs/SH001_beauty_v001.###.exr'
         )
-        db.DBSession.add(self.test_input_link1)
+        DBSession.add(self.test_input_link1)
 
         self.test_input_link2 = Link(
             name='Input Link 2',
             full_path='/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/'
                       'Outputs/SH001_occ_v001.###.exr'
         )
-        db.DBSession.add(self.test_input_link2)
+        DBSession.add(self.test_input_link2)
 
         # a Link for the output file
         self.test_output_link1 = Link(
@@ -149,14 +151,14 @@ class VersionTester(UnitTestBase):
             full_path='/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/'
                       'Outputs/SH001_beauty_v001.###.exr'
         )
-        db.DBSession.add(self.test_output_link1)
+        DBSession.add(self.test_output_link1)
 
         self.test_output_link2 = Link(
             name='Output Link 2',
             full_path='/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/'
                       'Outputs/SH001_occ_v001.###.exr'
         )
-        db.DBSession.add(self.test_output_link2)
+        DBSession.add(self.test_output_link2)
 
         # now create a version for the Task
         self.kwargs = {
@@ -184,17 +186,17 @@ class VersionTester(UnitTestBase):
         # and the Version
         from stalker import Version
         self.test_version = Version(**self.kwargs)
-        db.DBSession.add(self.test_version)
+        DBSession.add(self.test_version)
 
         # set the published to False
         self.test_version.is_published = False
-        db.DBSession.commit()
+        DBSession.commit()
 
     def tearDown(self):
         """clean up test
         """
         self.patcher.restore()
-        super(VersionTester, self).tearDown()
+        super(self.__class__, self).tearDown()
 
     def test___auto_name__class_attribute_is_set_to_True(self):
         """testing if the __auto_name__ class attribute is set to True for
@@ -420,14 +422,15 @@ class VersionTester(UnitTestBase):
     def test_version_number_attribute_is_automatically_generated(self):
         """testing if the version_number attribute is automatically generated
         """
-        from stalker import db, Version
+        from stalker.db.session import DBSession
+        from stalker import Version
         self.assertEqual(self.test_version.version_number, 1)
-        db.DBSession.add(self.test_version)
-        db.DBSession.commit()
+        DBSession.add(self.test_version)
+        DBSession.commit()
 
         new_version = Version(**self.kwargs)
-        db.DBSession.add(new_version)
-        db.DBSession.commit()
+        DBSession.add(new_version)
+        DBSession.commit()
 
         self.assertEqual(self.test_version.task, new_version.task)
         self.assertEqual(self.test_version.take_name, new_version.take_name)
@@ -435,8 +438,8 @@ class VersionTester(UnitTestBase):
         self.assertEqual(new_version.version_number, 2)
 
         new_version = Version(**self.kwargs)
-        db.DBSession.add(new_version)
-        db.DBSession.commit()
+        DBSession.add(new_version)
+        DBSession.commit()
 
         self.assertEqual(self.test_version.task, new_version.task)
         self.assertEqual(self.test_version.take_name, new_version.take_name)
@@ -444,8 +447,8 @@ class VersionTester(UnitTestBase):
         self.assertEqual(new_version.version_number, 3)
 
         new_version = Version(**self.kwargs)
-        db.DBSession.add(new_version)
-        db.DBSession.commit()
+        DBSession.add(new_version)
+        DBSession.commit()
 
         self.assertEqual(self.test_version.task, new_version.task)
         self.assertEqual(self.test_version.take_name, new_version.take_name)
@@ -461,15 +464,16 @@ class VersionTester(UnitTestBase):
         """testing if the version_number attribute will be set to a correct
         unique value when it is set to a lower number then it should be
         """
-        from stalker import db, Version
+        from stalker import Version
         self.test_version.version_number = -1
         self.assertEqual(self.test_version.version_number, 1)
 
         self.test_version.version_number = -10
         self.assertEqual(self.test_version.version_number, 1)
 
-        db.DBSession.add(self.test_version)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(self.test_version)
+        DBSession.commit()
 
         self.test_version.version_number = -100
         # it should be 1 again
@@ -854,7 +858,12 @@ class VersionTester(UnitTestBase):
         from stalker import Version
         self.kwargs['parent'] = None
         new_version1 = Version(**self.kwargs)
+        from stalker.db.session import DBSession
+        DBSession.add(new_version1)
+        DBSession.commit()
         new_version2 = Version(**self.kwargs)
+        DBSession.add(new_version2)
+        DBSession.commit()
 
         new_version1.parent = new_version2
         from stalker.exceptions import CircularDependencyError
@@ -863,7 +872,7 @@ class VersionTester(UnitTestBase):
 
         self.assertEqual(
             str(cm.exception),
-            '<tp_SH001_Task1_TestTake_v002 (Version)> (Version) and '
+            '<tp_SH001_Task1_TestTake_v003 (Version)> (Version) and '
             '<tp_SH001_Task1_TestTake_v002 (Version)> (Version) creates a '
             'circular dependency in their "children" attribute'
         )
@@ -875,9 +884,16 @@ class VersionTester(UnitTestBase):
         """
         self.kwargs['parent'] = None
         from stalker import Version
+        from stalker.db.session import DBSession
         new_version1 = Version(**self.kwargs)
+        DBSession.add(new_version1)
+        DBSession.commit()
         new_version2 = Version(**self.kwargs)
+        DBSession.add(new_version2)
+        DBSession.commit()
         new_version3 = Version(**self.kwargs)
+        DBSession.add(new_version2)
+        DBSession.commit()
 
         new_version1.parent = new_version2
         new_version2.parent = new_version3
@@ -888,7 +904,7 @@ class VersionTester(UnitTestBase):
 
         self.assertEqual(
             str(cm.exception),
-            '<tp_SH001_Task1_TestTake_v002 (Version)> (Version) and '
+            '<tp_SH001_Task1_TestTake_v004 (Version)> (Version) and '
             '<tp_SH001_Task1_TestTake_v002 (Version)> (Version) creates a '
             'circular dependency in their "children" attribute'
         )
@@ -952,10 +968,11 @@ class VersionTester(UnitTestBase):
                      '_v{{"%03d"|format(version.version_number)}}{{extension}}'
         )
         self.test_project.structure.templates.append(ft)
-        from stalker import db, Version
+        from stalker.db.session import DBSession
+        from stalker import Version
         new_version1 = Version(**self.kwargs)
-        db.DBSession.add(new_version1)
-        db.DBSession.commit()
+        DBSession.add(new_version1)
+        DBSession.commit()
         new_version1.update_paths()
 
         self.assertEqual(
@@ -983,10 +1000,11 @@ class VersionTester(UnitTestBase):
                      '_v{{"%03d"|format(version.version_number)}}{{extension}}'
         )
         self.test_project.structure.templates.append(ft)
-        from stalker import db, Version
+        from stalker.db.session import DBSession
+        from stalker import Version
         new_version1 = Version(**self.kwargs)
-        db.DBSession.add(new_version1)
-        db.DBSession.commit()
+        DBSession.add(new_version1)
+        DBSession.commit()
         new_version1.update_paths()
 
         self.assertEqual(
@@ -1131,10 +1149,11 @@ class VersionTester(UnitTestBase):
                      '_v{{"%03d"|format(version.version_number)}}{{extension}}'
         )
         self.test_project.structure.templates.append(ft)
-        from stalker import db, Version
+        from stalker.db.session import DBSession
+        from stalker import Version
         new_version1 = Version(**self.kwargs)
-        db.DBSession.add(new_version1)
-        db.DBSession.commit()
+        DBSession.add(new_version1)
+        DBSession.commit()
 
         new_version1.take_name = 'TestTake@BBOX'
 
@@ -1161,26 +1180,27 @@ class VersionTester(UnitTestBase):
     def test_latest_published_version_is_working_properly(self):
         """testing if the is_latest_published_version is working properly
         """
-        from stalker import db, Version
+        from stalker.db.session import DBSession
+        from stalker import Version
         new_version1 = Version(**self.kwargs)
-        db.DBSession.add(new_version1)
-        db.DBSession.commit()
+        DBSession.add(new_version1)
+        DBSession.commit()
 
         new_version2 = Version(**self.kwargs)
-        db.DBSession.add(new_version2)
-        db.DBSession.commit()
+        DBSession.add(new_version2)
+        DBSession.commit()
 
         new_version3 = Version(**self.kwargs)
-        db.DBSession.add(new_version3)
-        db.DBSession.commit()
+        DBSession.add(new_version3)
+        DBSession.commit()
 
         new_version4 = Version(**self.kwargs)
-        db.DBSession.add(new_version4)
-        db.DBSession.commit()
+        DBSession.add(new_version4)
+        DBSession.commit()
 
         new_version5 = Version(**self.kwargs)
-        db.DBSession.add(new_version5)
-        db.DBSession.commit()
+        DBSession.add(new_version5)
+        DBSession.commit()
 
         new_version1.is_published = True
         new_version3.is_published = True
@@ -1195,26 +1215,27 @@ class VersionTester(UnitTestBase):
     def test_is_latest_published_version_is_working_properly(self):
         """testing if the is_latest_published_version is working properly
         """
-        from stalker import db, Version
+        from stalker.db.session import DBSession
+        from stalker import Version
         new_version1 = Version(**self.kwargs)
-        db.DBSession.add(new_version1)
-        db.DBSession.commit()
+        DBSession.add(new_version1)
+        DBSession.commit()
 
         new_version2 = Version(**self.kwargs)
-        db.DBSession.add(new_version2)
-        db.DBSession.commit()
+        DBSession.add(new_version2)
+        DBSession.commit()
 
         new_version3 = Version(**self.kwargs)
-        db.DBSession.add(new_version3)
-        db.DBSession.commit()
+        DBSession.add(new_version3)
+        DBSession.commit()
 
         new_version4 = Version(**self.kwargs)
-        db.DBSession.add(new_version4)
-        db.DBSession.commit()
+        DBSession.add(new_version4)
+        DBSession.commit()
 
         new_version5 = Version(**self.kwargs)
-        db.DBSession.add(new_version5)
-        db.DBSession.commit()
+        DBSession.add(new_version5)
+        DBSession.commit()
 
         new_version1.is_published = True
         new_version3.is_published = True
@@ -1229,26 +1250,27 @@ class VersionTester(UnitTestBase):
     def test_equality_operator(self):
         """testing equality of two Version instances
         """
-        from stalker import db, Version
+        from stalker.db.session import DBSession
+        from stalker import Version
         new_version1 = Version(**self.kwargs)
-        db.DBSession.add(new_version1)
-        db.DBSession.commit()
+        DBSession.add(new_version1)
+        DBSession.commit()
 
         new_version2 = Version(**self.kwargs)
-        db.DBSession.add(new_version2)
-        db.DBSession.commit()
+        DBSession.add(new_version2)
+        DBSession.commit()
 
         new_version3 = Version(**self.kwargs)
-        db.DBSession.add(new_version3)
-        db.DBSession.commit()
+        DBSession.add(new_version3)
+        DBSession.commit()
 
         new_version4 = Version(**self.kwargs)
-        db.DBSession.add(new_version4)
-        db.DBSession.commit()
+        DBSession.add(new_version4)
+        DBSession.commit()
 
         new_version5 = Version(**self.kwargs)
-        db.DBSession.add(new_version5)
-        db.DBSession.commit()
+        DBSession.add(new_version5)
+        DBSession.commit()
 
         new_version1.is_published = True
         new_version3.is_published = True
@@ -1271,26 +1293,27 @@ class VersionTester(UnitTestBase):
     def test_inequality_operator(self):
         """testing inequality of two Version instances
         """
-        from stalker import db, Version
+        from stalker.db.session import DBSession
+        from stalker import Version
         new_version1 = Version(**self.kwargs)
-        db.DBSession.add(new_version1)
-        db.DBSession.commit()
+        DBSession.add(new_version1)
+        DBSession.commit()
 
         new_version2 = Version(**self.kwargs)
-        db.DBSession.add(new_version2)
-        db.DBSession.commit()
+        DBSession.add(new_version2)
+        DBSession.commit()
 
         new_version3 = Version(**self.kwargs)
-        db.DBSession.add(new_version3)
-        db.DBSession.commit()
+        DBSession.add(new_version3)
+        DBSession.commit()
 
         new_version4 = Version(**self.kwargs)
-        db.DBSession.add(new_version4)
-        db.DBSession.commit()
+        DBSession.add(new_version4)
+        DBSession.commit()
 
         new_version5 = Version(**self.kwargs)
-        db.DBSession.add(new_version5)
-        db.DBSession.commit()
+        DBSession.add(new_version5)
+        DBSession.commit()
 
         new_version1.is_published = True
         new_version3.is_published = True
@@ -1387,26 +1410,27 @@ class VersionTester(UnitTestBase):
     def test_max_version_number_attribute_is_working_properly(self):
         """testing if the max_version_number attribute is working properly
         """
-        from stalker import db, Version
+        from stalker.db.session import DBSession
+        from stalker import Version
         new_version1 = Version(**self.kwargs)
-        db.DBSession.add(new_version1)
-        db.DBSession.commit()
+        DBSession.add(new_version1)
+        DBSession.commit()
 
         new_version2 = Version(**self.kwargs)
-        db.DBSession.add(new_version2)
-        db.DBSession.commit()
+        DBSession.add(new_version2)
+        DBSession.commit()
 
         new_version3 = Version(**self.kwargs)
-        db.DBSession.add(new_version3)
-        db.DBSession.commit()
+        DBSession.add(new_version3)
+        DBSession.commit()
 
         new_version4 = Version(**self.kwargs)
-        db.DBSession.add(new_version4)
-        db.DBSession.commit()
+        DBSession.add(new_version4)
+        DBSession.commit()
 
         new_version5 = Version(**self.kwargs)
-        db.DBSession.add(new_version5)
-        db.DBSession.commit()
+        DBSession.add(new_version5)
+        DBSession.commit()
 
         self.assertEqual(new_version5.version_number, 6)
 
@@ -1430,26 +1454,27 @@ class VersionTester(UnitTestBase):
     def test_latest_version_attribute_is_working_properly(self):
         """testing if the last_version attribute is working properly
         """
-        from stalker import db, Version
+        from stalker.db.session import DBSession
+        from stalker import Version
         new_version1 = Version(**self.kwargs)
-        db.DBSession.add(new_version1)
-        db.DBSession.commit()
+        DBSession.add(new_version1)
+        DBSession.commit()
 
         new_version2 = Version(**self.kwargs)
-        db.DBSession.add(new_version2)
-        db.DBSession.commit()
+        DBSession.add(new_version2)
+        DBSession.commit()
 
         new_version3 = Version(**self.kwargs)
-        db.DBSession.add(new_version3)
-        db.DBSession.commit()
+        DBSession.add(new_version3)
+        DBSession.commit()
 
         new_version4 = Version(**self.kwargs)
-        db.DBSession.add(new_version4)
-        db.DBSession.commit()
+        DBSession.add(new_version4)
+        DBSession.commit()
 
         new_version5 = Version(**self.kwargs)
-        db.DBSession.add(new_version5)
-        db.DBSession.commit()
+        DBSession.add(new_version5)
+        DBSession.commit()
 
         self.assertEqual(new_version5.version_number, 6)
 
@@ -1495,15 +1520,16 @@ class VersionTester(UnitTestBase):
             name='Test Task 3',
             parent=task2,
         )
-        db.DBSession.add_all([task1, task2, task3])
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add_all([task1, task2, task3])
+        DBSession.commit()
 
         from stalker import Version
         version1 = Version(
             task=task3
         )
-        db.DBSession.add(version1)
-        db.DBSession.commit()
+        DBSession.add(version1)
+        DBSession.commit()
 
         self.assertEqual(
             version1.naming_parents,
@@ -1589,16 +1615,17 @@ class VersionTester(UnitTestBase):
             name='Test Task 3',
             parent=task2,
         )
-        db.DBSession.add_all([task1, task2, task3])
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add_all([task1, task2, task3])
+        DBSession.commit()
 
         from stalker import Version
         version1 = Version(
             task=task3,
             take_name='Take1@Main'
         )
-        db.DBSession.add(version1)
-        db.DBSession.commit()
+        DBSession.add(version1)
+        DBSession.commit()
 
         self.assertEqual(
             version1.nice_name,
@@ -1725,8 +1752,8 @@ class VersionTester(UnitTestBase):
     #         filename='{{version.nice_name}}_v{{"%03d"|format(version.version_number)}}{{extension}}'
     #     )
     #     self.test_project.structure.templates.append(ft)
-    #     db.DBSession.add(self.test_project)
-    #     db.DBSession.commit()
+    #     DBSession.add(self.test_project)
+    #     DBSession.commit()
     # 
     #     print 'entity_type: %s' % self.test_task1.entity_type
     # 
@@ -1736,3 +1763,253 @@ class VersionTester(UnitTestBase):
     #     #     v1.path
     #     # )
     #     self.fail()
+
+
+class VersionTester(unittest.TestCase):
+    """Non-DB related tests of Version class
+    """
+
+    def setUp(self):
+        """setup the test
+        """
+        super(self.__class__, self).setUp()
+        self.patcher = PlatformPatcher()
+
+        from stalker import Status, StatusList
+
+        # statuses
+        self.test_status1 = Status(name='Status1', code='STS1')
+        self.test_status2 = Status(name='Status2', code='STS2')
+        self.test_status3 = Status(name='Status3', code='STS3')
+        self.test_status4 = Status(name='Status4', code='STS4')
+        self.test_status5 = Status(name='Status5', code='STS5')
+
+        # status lists
+        self.test_task_status_list = StatusList(
+            name='Task Status List',
+            statuses=[
+                self.test_status1,
+                self.test_status2,
+                self.test_status3,
+                self.test_status4,
+                self.test_status5,
+            ],
+            target_entity_type='Task',
+        )
+
+        self.test_asset_status_list = StatusList(
+            name='Asset Status List',
+            statuses=[
+                self.test_status1,
+                self.test_status2,
+                self.test_status3,
+                self.test_status4,
+                self.test_status5,
+            ],
+            target_entity_type='Asset',
+        )
+
+        self.test_shot_status_list = StatusList(
+            name='Shot Status List',
+            statuses=[
+                self.test_status1,
+                self.test_status2,
+                self.test_status3,
+                self.test_status4,
+                self.test_status5,
+            ],
+            target_entity_type='Shot',
+        )
+
+        self.test_sequence_status_list = StatusList(
+            name='Sequence Status List',
+            statuses=[
+                self.test_status1,
+                self.test_status2,
+                self.test_status3,
+                self.test_status4,
+                self.test_status5,
+            ],
+            target_entity_type='Sequence',
+        )
+
+        self.test_project_status_list = StatusList(
+            name='Project Status List',
+            statuses=[
+                self.test_status1,
+                self.test_status2,
+                self.test_status3,
+                self.test_status4,
+                self.test_status5,
+            ],
+            target_entity_type='Project',
+        )
+
+        # repository
+        from stalker import Repository, Type
+        self.test_repo = Repository(
+            name='Test Repository',
+            linux_path='/mnt/T/',
+            windows_path='T:/',
+            osx_path='/Volumes/T/'
+        )
+
+        # a project type
+        self.test_project_type = Type(
+            name='Test',
+            code='test',
+            target_entity_type='Project',
+        )
+
+        # create a structure
+        from stalker import Structure
+        self.test_structure = Structure(
+            name='Test Project Structure'
+        )
+
+        # create a project
+        from stalker import Project
+        self.test_project = Project(
+            name='Test Project',
+            code='tp',
+            type=self.test_project_type,
+            status_list=self.test_project_status_list,
+            repositories=[self.test_repo],
+            structure=self.test_structure
+        )
+
+        # create a sequence
+        from stalker import Sequence
+        self.test_sequence = Sequence(
+            name='Test Sequence',
+            code='SEQ1',
+            project=self.test_project,
+            status_list=self.test_sequence_status_list
+        )
+
+        # create a shot
+        from stalker import Shot
+        self.test_shot1 = Shot(
+            name='SH001',
+            code='SH001',
+            project=self.test_project,
+            sequences=[self.test_sequence],
+            status_list=self.test_shot_status_list
+        )
+
+        # create a group of Tasks for the shot
+        from stalker import Task
+        self.test_task1 = Task(
+            name='Task1',
+            parent=self.test_shot1,
+            status_list=self.test_task_status_list
+        )
+
+        # a Link for the input file
+        from stalker import Link
+        self.test_input_link1 = Link(
+            name='Input Link 1',
+            full_path='/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/'
+                      'Outputs/SH001_beauty_v001.###.exr'
+        )
+
+        self.test_input_link2 = Link(
+            name='Input Link 2',
+            full_path='/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/'
+                      'Outputs/SH001_occ_v001.###.exr'
+        )
+
+        # a Link for the output file
+        self.test_output_link1 = Link(
+            name='Output Link 1',
+            full_path='/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/'
+                      'Outputs/SH001_beauty_v001.###.exr'
+        )
+
+        self.test_output_link2 = Link(
+            name='Output Link 2',
+            full_path='/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/'
+                      'Outputs/SH001_occ_v001.###.exr'
+        )
+
+        # now create a version for the Task
+        self.kwargs = {
+            'take_name': 'TestTake',
+            'inputs': [self.test_input_link1,
+                       self.test_input_link2],
+            'outputs': [self.test_output_link1,
+                        self.test_output_link2],
+            'task': self.test_task1,
+            'created_with': 'Houdini'
+        }
+
+        self.take_name_test_values = [
+            ('Take Name', 'Take_Name'),
+            ('TakeName', 'TakeName'),
+            ('take name', 'take_name'),
+            ('  take_name', 'take_name'),
+            ('take_name   ', 'take_name'),
+            ('   take   name   ', 'take_name'),
+            ('TakeName', 'TakeName'),
+            ('Take___Name', 'Take___Name'),
+            ('Take@Name', 'Take@Name'),
+        ]
+
+        # and the Version
+        from stalker import Version
+        self.test_version = Version(**self.kwargs)
+
+        # set the published to False
+        self.test_version.is_published = False
+
+    def tearDown(self):
+        """clean up test
+        """
+        self.patcher.restore()
+        super(VersionTester, self).tearDown()
+
+    def test_children_attribute_will_not_allow_circular_dependencies(self):
+        """testing if a CircularDependency error will be raised when a parent
+        Version is set as a children to its child
+        """
+        from stalker import Version
+        self.kwargs['parent'] = None
+        new_version1 = Version(**self.kwargs)
+        new_version2 = Version(**self.kwargs)
+
+        new_version1.parent = new_version2
+        from stalker.exceptions import CircularDependencyError
+        with self.assertRaises(CircularDependencyError) as cm:
+            new_version1.children.append(new_version2)
+
+        self.assertEqual(
+            str(cm.exception),
+            '<tp_SH001_Task1_TestTake_v003 (Version)> (Version) and '
+            '<tp_SH001_Task1_TestTake_v002 (Version)> (Version) creates a '
+            'circular dependency in their "children" attribute'
+        )
+
+    def test_children_attribute_will_not_allow_deeper_circular_dependencies(self):
+        """testing if a CircularDependency error will be raised when the a
+        parent Version of a parent Version is set as a children to its grand
+        child
+        """
+        self.kwargs['parent'] = None
+        from stalker import Version
+        new_version1 = Version(**self.kwargs)
+        new_version2 = Version(**self.kwargs)
+        new_version3 = Version(**self.kwargs)
+
+        new_version1.parent = new_version2
+        new_version2.parent = new_version3
+
+        from stalker.exceptions import CircularDependencyError
+        with self.assertRaises(CircularDependencyError) as cm:
+            new_version1.children.append(new_version3)
+
+        self.assertEqual(
+            str(cm.exception),
+            '<tp_SH001_Task1_TestTake_v004 (Version)> (Version) and '
+            '<tp_SH001_Task1_TestTake_v002 (Version)> (Version) creates a '
+            'circular dependency in their "children" attribute'
+        )

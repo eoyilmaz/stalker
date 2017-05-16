@@ -16,10 +16,10 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-from stalker.testing import UnitTestBase
+import unittest
 
 
-class PaymentTestCase(UnitTestBase):
+class PaymentTestCase(unittest.TestCase):
     """tests for Payment class
     """
 
@@ -28,18 +28,20 @@ class PaymentTestCase(UnitTestBase):
         """
         super(PaymentTestCase, self).setUp()
         from stalker import db, Status
-        self.status_wfd = Status.query.filter_by(code="WFD").first()
-        self.status_rts = Status.query.filter_by(code="RTS").first()
-        self.status_wip = Status.query.filter_by(code="WIP").first()
-        self.status_prev = Status.query.filter_by(code="PREV").first()
-        self.status_hrev = Status.query.filter_by(code="HREV").first()
-        self.status_drev = Status.query.filter_by(code="DREV").first()
-        self.status_oh = Status.query.filter_by(code="OH").first()
-        self.status_stop = Status.query.filter_by(code="STOP").first()
-        self.status_cmpl = Status.query.filter_by(code="CMPL").first()
 
-        self.status_new = Status.query.filter_by(code='NEW').first()
-        self.status_app = Status.query.filter_by(code='APP').first()
+        self.status_new = Status(name='Mew', code='NEW')
+        self.status_wfd = Status(name='Waiting For Dependency', code='WFD')
+        self.status_rts = Status(name='Ready To Start', code='RTS')
+        self.status_wip = Status(name='Work In Progress', code='WIP')
+        self.status_prev = Status(name='Pending Review', code='PREV')
+        self.status_hrev = Status(name='Has Revision', code='HREV')
+        self.status_drev = Status(name='Dependency Has Revision', code='DREV')
+        self.status_oh = Status(name='On Hold', code='OH')
+        self.status_stop = Status(name='Stopped', code='STOP')
+        self.status_cmpl = Status(name='Completed', code='CMPL')
+
+        self.status_new = Status(name='New', code='NEW')
+        self.status_app = Status(name='Approved', code='APP')
 
         from stalker import StatusList
         self.budget_status_list = StatusList(
@@ -47,10 +49,16 @@ class PaymentTestCase(UnitTestBase):
             target_entity_type='Budget',
             statuses=[self.status_new, self.status_prev, self.status_app]
         )
-        db.DBSession.add(self.budget_status_list)
 
-        self.task_status_list = StatusList.query\
-            .filter_by(target_entity_type='Task').first()
+        self.task_status_list = StatusList(
+            name='Task Statses',
+            statuses=[
+                self.status_wfd, self.status_rts, self.status_wip,
+                self.status_prev, self.status_hrev, self.status_drev,
+                self.status_oh, self.status_stop, self.status_cmpl
+            ],
+            target_entity_type='Task'
+        )
 
         from stalker import Project
         self.test_project_status_list = StatusList(
@@ -60,7 +68,6 @@ class PaymentTestCase(UnitTestBase):
                       self.status_cmpl],
             target_entity_type=Project,
         )
-        db.DBSession.add(self.test_project_status_list)
 
         from stalker import Type
         self.test_movie_project_type = Type(
@@ -68,7 +75,6 @@ class PaymentTestCase(UnitTestBase):
             code='movie',
             target_entity_type=Project,
         )
-        db.DBSession.add(self.test_movie_project_type)
 
         from stalker import Repository
         self.test_repository_type = Type(
@@ -76,13 +82,11 @@ class PaymentTestCase(UnitTestBase):
             code='test',
             target_entity_type=Repository,
         )
-        db.DBSession.add(self.test_repository_type)
 
         self.test_repository = Repository(
             name="Test Repository",
             type=self.test_repository_type,
         )
-        db.DBSession.add(self.test_repository)
 
         from stalker import User
         self.test_user1 = User(
@@ -91,7 +95,6 @@ class PaymentTestCase(UnitTestBase):
             email="user1@user1.com",
             password="1234"
         )
-        db.DBSession.add(self.test_user1)
 
         self.test_user2 = User(
             name="User2",
@@ -99,7 +102,6 @@ class PaymentTestCase(UnitTestBase):
             email="user2@user2.com",
             password="1234"
         )
-        db.DBSession.add(self.test_user2)
 
         self.test_user3 = User(
             name="User3",
@@ -107,7 +109,6 @@ class PaymentTestCase(UnitTestBase):
             email="user3@user3.com",
             password="1234"
         )
-        db.DBSession.add(self.test_user3)
 
         self.test_user4 = User(
             name="User4",
@@ -115,7 +116,6 @@ class PaymentTestCase(UnitTestBase):
             email="user4@user4.com",
             password="1234"
         )
-        db.DBSession.add(self.test_user4)
 
         self.test_user5 = User(
             name="User5",
@@ -123,13 +123,11 @@ class PaymentTestCase(UnitTestBase):
             email="user5@user5.com",
             password="1234"
         )
-        db.DBSession.add(self.test_user5)
 
         from stalker import Client
         self.test_client = Client(
             name='Test Client',
         )
-        db.DBSession.add(self.test_client)
 
         self.test_project = Project(
             name="Test Project1",
@@ -139,14 +137,13 @@ class PaymentTestCase(UnitTestBase):
             repository=self.test_repository,
             clients=[self.test_client]
         )
-        db.DBSession.add(self.test_project)
 
         from stalker import Budget
         self.test_budget = Budget(
             project=self.test_project,
             name='Test Budget 1',
+            status_list=self.budget_status_list
         )
-        db.DBSession.add(self.test_budget)
 
         from stalker import Invoice
         self.test_invoice = Invoice(
@@ -155,8 +152,6 @@ class PaymentTestCase(UnitTestBase):
             amount=1500,
             unit='TRY'
         )
-        db.DBSession.add(self.test_invoice)
-        db.DBSession.commit()
 
     def test_creating_a_payment_instance(self):
         """testing if it is possible to create a Payment instance

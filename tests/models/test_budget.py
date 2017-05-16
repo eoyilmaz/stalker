@@ -17,11 +17,11 @@
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
 
-from stalker.testing import UnitTestBase
+import unittest
 from stalker import Budget, BudgetEntry, Good
 
 
-class BudgetTestBase(UnitTestBase):
+class BudgetTestBase(unittest.TestCase):
     """the base for this test
     """
 
@@ -30,19 +30,19 @@ class BudgetTestBase(UnitTestBase):
         """
         super(BudgetTestBase, self).setUp()
 
-        from stalker import db, Status
-        self.status_wfd = Status.query.filter_by(code="WFD").first()
-        self.status_rts = Status.query.filter_by(code="RTS").first()
-        self.status_wip = Status.query.filter_by(code="WIP").first()
-        self.status_prev = Status.query.filter_by(code="PREV").first()
-        self.status_hrev = Status.query.filter_by(code="HREV").first()
-        self.status_drev = Status.query.filter_by(code="DREV").first()
-        self.status_oh = Status.query.filter_by(code="OH").first()
-        self.status_stop = Status.query.filter_by(code="STOP").first()
-        self.status_cmpl = Status.query.filter_by(code="CMPL").first()
+        from stalker import Status
+        self.status_wfd = Status(name='Waiting For Dependency', code="WFD")
+        self.status_rts = Status(name='Ready To Start', code="RTS")
+        self.status_wip = Status(name='Work In Progress', code="WIP")
+        self.status_prev = Status(name='Pending Review', code="PREV")
+        self.status_hrev = Status(name='Has Revision', code="HREV")
+        self.status_drev = Status(name='Dependency Has Revision', code="DREV")
+        self.status_oh = Status(name='On Hold', code="OH")
+        self.status_stop = Status(name='Stopped', code="STOP")
+        self.status_cmpl = Status(name='Completed', code="CMPL")
 
-        self.status_new = Status.query.filter_by(code='NEW').first()
-        self.status_app = Status.query.filter_by(code='APP').first()
+        self.status_new = Status(name='New', code='NEW')
+        self.status_app = Status(name='Approved', code='APP')
 
         from stalker import StatusList
         self.budget_status_list = StatusList(
@@ -50,10 +50,19 @@ class BudgetTestBase(UnitTestBase):
             target_entity_type='Budget',
             statuses=[self.status_new, self.status_prev, self.status_app]
         )
-        db.DBSession.add(self.budget_status_list)
 
-        self.task_status_list = StatusList.query\
-            .filter_by(target_entity_type='Task').first()
+        self.task_status_list = StatusList(
+            statuses=[
+                self.status_wfd,
+                self.status_rts,
+                self.status_wip,
+                self.status_prev,
+                self.status_hrev,
+                self.status_drev,
+                self.status_cmpl
+            ],
+            target_entity_type='Task'
+        )
 
         self.test_project_status_list = StatusList(
             name="Project Statuses",
@@ -62,7 +71,6 @@ class BudgetTestBase(UnitTestBase):
                       self.status_cmpl],
             target_entity_type='Project',
         )
-        db.DBSession.add(self.test_project_status_list)
 
         from stalker import Type
         self.test_movie_project_type = Type(
@@ -70,14 +78,12 @@ class BudgetTestBase(UnitTestBase):
             code='movie',
             target_entity_type='Project',
         )
-        db.DBSession.add(self.test_movie_project_type)
 
         self.test_repository_type = Type(
             name="Test Repository Type",
             code='test',
             target_entity_type='Repository',
         )
-        db.DBSession.add(self.test_repository_type)
 
         from stalker import Repository
         self.test_repository = Repository(
@@ -87,7 +93,6 @@ class BudgetTestBase(UnitTestBase):
             windows_path='T:/',
             osx_path='/Volumes/T/'
         )
-        db.DBSession.add(self.test_repository)
 
         from stalker import User
         self.test_user1 = User(
@@ -96,7 +101,6 @@ class BudgetTestBase(UnitTestBase):
             email="user1@user1.com",
             password="1234"
         )
-        db.DBSession.add(self.test_user1)
 
         self.test_user2 = User(
             name="User2",
@@ -104,7 +108,6 @@ class BudgetTestBase(UnitTestBase):
             email="user2@user2.com",
             password="1234"
         )
-        db.DBSession.add(self.test_user2)
 
         self.test_user3 = User(
             name="User3",
@@ -112,7 +115,6 @@ class BudgetTestBase(UnitTestBase):
             email="user3@user3.com",
             password="1234"
         )
-        db.DBSession.add(self.test_user3)
 
         self.test_user4 = User(
             name="User4",
@@ -120,7 +122,6 @@ class BudgetTestBase(UnitTestBase):
             email="user4@user4.com",
             password="1234"
         )
-        db.DBSession.add(self.test_user4)
 
         self.test_user5 = User(
             name="User5",
@@ -128,7 +129,6 @@ class BudgetTestBase(UnitTestBase):
             email="user5@user5.com",
             password="1234"
         )
-        db.DBSession.add(self.test_user5)
 
         from stalker import Project
         self.test_project = Project(
@@ -136,17 +136,16 @@ class BudgetTestBase(UnitTestBase):
             code='tp1',
             type=self.test_movie_project_type,
             status_list=self.test_project_status_list,
-            repository=self.test_repository
+            repository=self.test_repository,
         )
-        db.DBSession.add(self.test_project)
 
         self.kwargs = {
             'project': self.test_project,
-            'name': 'Test Budget 1'
+            'name': 'Test Budget 1',
+            'status_list': self.budget_status_list
         }
 
         self.test_budget = Budget(**self.kwargs)
-        db.DBSession.add(self.test_budget)
 
         from stalker import Good
         self.test_good = Good(
@@ -155,8 +154,6 @@ class BudgetTestBase(UnitTestBase):
             msrp=120,
             unit='$'
         )
-        db.DBSession.add(self.test_good)
-        db.DBSession.commit()
 
 
 class BudgetTestCase(BudgetTestBase):
@@ -181,7 +178,8 @@ class BudgetTestCase(BudgetTestBase):
         from stalker import BudgetEntry
         some_other_budget = Budget(
             name='Test Budget',
-            project=self.test_project
+            project=self.test_project,
+            status_list=self.budget_status_list
         )
         entry1 = BudgetEntry(
             budget=some_other_budget,
@@ -314,7 +312,11 @@ class BudgetEntryTestCase(BudgetTestBase):
             good=self.test_good,
             amount=10.0
         )
-        new_budget = Budget(name='Test Budget', project=self.test_project)
+        new_budget = Budget(
+            name='Test Budget',
+            project=self.test_project,
+            status_list=self.budget_status_list
+        )
         self.assertNotEqual(entry.budget, new_budget)
         entry.budget = new_budget
         self.assertEqual(entry.budget, new_budget)

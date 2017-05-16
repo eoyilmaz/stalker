@@ -22,10 +22,8 @@ from sqlalchemy import Column, Integer, ForeignKey
 from stalker.models.entity import Entity
 from stalker.models.link import Link
 from stalker.models.mixins import ReferenceMixin
-from stalker.db.session import DBSession
 from stalker.models.type import Type
 from stalker.models.entity import SimpleEntity
-from stalker.testing import UnitTestBase
 
 
 class RefMixFooClass(SimpleEntity, ReferenceMixin):
@@ -38,7 +36,7 @@ class RefMixFooClass(SimpleEntity, ReferenceMixin):
         super(RefMixFooClass, self).__init__(**kwargs)
 
 
-class ReferenceMixinTester(UnitTestBase):
+class ReferenceMixinTester(unittest.TestCase):
     """tests the ReferenceMixin
     """
 

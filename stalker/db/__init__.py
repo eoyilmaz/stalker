@@ -22,7 +22,6 @@ Whenever stalker.db or something under it imported, the
 """
 
 
-from stalker.db.session import DBSession
 from stalker.log import logging_level
 
 import logging
@@ -58,6 +57,7 @@ def setup(settings=None):
     logger.debug('engine: %s' % engine)
 
     # create the Session class
+    from stalker.db.session import DBSession
     DBSession.remove()
     DBSession.configure(
         bind=engine,
@@ -72,6 +72,7 @@ def setup(settings=None):
     logger.debug("creating the tables")
     from stalker.db.declarative import Base
     Base.metadata.create_all(engine)
+    DBSession.commit()
 
     # update defaults
     update_defaults_with_studio()
@@ -84,10 +85,12 @@ def update_defaults_with_studio():
     """updates the default values from Studio instance if a database and a
     Studio instance is present
     """
+    from stalker.db.session import DBSession
     if DBSession:
         with DBSession.no_autoflush:
             from stalker.models.studio import Studio
-            studio = Studio.query.first()
+            # studio = Studio.query.first()
+            studio = DBSession.query(Studio).first()
             if studio:
                 logger.debug('found a studio, updating defaults')
                 studio.update_defaults()
@@ -190,6 +193,7 @@ def get_alembic_version():
     """returns the alembic version of the database
     """
     # try to query the version value
+    from stalker.db.session import DBSession
     conn = DBSession.connection()
     engine = conn.engine
     if engine.dialect.has_table(conn, 'alembic_version'):
@@ -235,6 +239,7 @@ def create_alembic_table():
 
     table_name = 'alembic_version'
 
+    from stalker.db.session import DBSession
     conn = DBSession.connection()
     engine = conn.engine
 
@@ -286,6 +291,7 @@ def __create_admin__():
 
     if not admin_department:
         admin_department = Department(name=defaults.admin_department_name)
+        from stalker.db.session import DBSession
         DBSession.add(admin_department)
         # create the admins group
 
@@ -354,6 +360,7 @@ def create_ticket_statuses():
 
     # create Ticket Types
     logger.debug("Creating Ticket Types")
+    from stalker.db.session import DBSession
     if 'Defect' not in t_names:
         ticket_type_1 = Type(
             name='Defect',
@@ -409,6 +416,7 @@ def create_entity_statuses(entity_type='', status_names=None,
     status_names_in_db = list(map(lambda x: x.name, statuses))
     logger.debug('statuses_names_in_db: %s' % status_names_in_db)
 
+    from stalker.db.session import DBSession
     for name, code in zip(status_names, status_codes):
         if name not in status_names_in_db:
             logger.debug('Creating Status: %s (%s)' % (name, code))
@@ -514,6 +522,7 @@ def register(class_):
 
     class_name = class_.__name__
 
+    from stalker.db.session import DBSession
     if not EntityType.query.filter_by(name=class_name).first():
         new_entity_type = EntityType(class_name)
         # update attributes

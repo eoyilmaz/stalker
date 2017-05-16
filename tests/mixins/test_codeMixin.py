@@ -16,7 +16,7 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-from stalker.testing import UnitTestBase
+import unittest
 from sqlalchemy import Column, Integer, ForeignKey
 from stalker import CodeMixin, SimpleEntity
 
@@ -37,14 +37,13 @@ class CodeMixFooMixedInClass(SimpleEntity, CodeMixin):
         CodeMixin.__init__(self, **kwargs)
 
 
-class CodeMixinTester(UnitTestBase):
+class CodeMixinTester(unittest.TestCase):
     """Tests the CodeMixin
     """
 
     def setUp(self):
         """setup the test
         """
-        super(CodeMixinTester, self).setUp()
         self.kwargs = {
             'name': 'Test Code Mixin',
             'code': 'this_is_a_test_code',

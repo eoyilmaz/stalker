@@ -18,13 +18,13 @@
 
 import logging
 from stalker import log
-from stalker.testing import UnitTestBase
+from stalker.testing import UnitTestDBBase
 
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
 
 
-class DatabaseTester(UnitTestBase):
+class DatabaseTester(UnitTestDBBase):
     """tests the database and connection to the database
     """
 
@@ -105,10 +105,11 @@ class DatabaseTester(UnitTestBase):
             #"created_by": admin
         }
 
-        from stalker import db, Entity
+        from stalker import Entity
+        from stalker.db.session import DBSession
         entity1 = Entity(**kwargs)
-        db.DBSession.add(entity1)
-        db.DBSession.commit()
+        DBSession.add(entity1)
+        DBSession.commit()
 
         # lets create the second user
         kwargs.update({
@@ -120,10 +121,10 @@ class DatabaseTester(UnitTestBase):
 
         from stalker import User
         user1 = User(**kwargs)
-        db.DBSession.add(user1)
+        DBSession.add(user1)
 
         # expect nothing, this should work without any error
-        db.DBSession.commit()
+        DBSession.commit()
 
     def test_ticket_status_initialization(self):
         """testing if the ticket statuses are correctly created
@@ -244,13 +245,14 @@ class DatabaseTester(UnitTestBase):
         __init_db__ will not raise any error
         """
         from stalker import db
-        db.DBSession.remove()
+        from stalker.db.session import DBSession
+        DBSession.remove()
         # DBSession.close()
         db.setup(self.config)
         db.init()
 
         # this should not give any error
-        db.DBSession.remove()
+        DBSession.remove()
 
         db.setup(self.config)
         db.init()
@@ -266,7 +268,8 @@ class DatabaseTester(UnitTestBase):
         """
         # create the environment variable and point it to a temp directory
         from stalker import db
-        db.DBSession.remove()
+        from stalker.db.session import DBSession
+        DBSession.remove()
 
         db.setup(self.config)
         db.init()
@@ -834,10 +837,10 @@ class DatabaseTester(UnitTestBase):
         """testing if the db.init() will also create a table called
         alembic_version
         """
-        from stalker import db
+        from stalker.db.session import DBSession
         sql_query = 'select version_num from "alembic_version"'
         version_num = \
-            db.DBSession.connection().execute(sql_query).fetchone()[0]
+            DBSession.connection().execute(sql_query).fetchone()[0]
         self.assertEqual('31b1e22b455e', version_num)
 
     def test_initialization_of_alembic_version_table_multiple_times(self):
@@ -845,18 +848,19 @@ class DatabaseTester(UnitTestBase):
         the table multiple times
         """
         from stalker import db
+        from stalker.db.session import DBSession
         sql_query = 'select version_num from "alembic_version"'
         version_num = \
-            db.DBSession.connection().execute(sql_query).fetchone()[0]
+            DBSession.connection().execute(sql_query).fetchone()[0]
         self.assertEqual('31b1e22b455e', version_num)
 
-        db.DBSession.remove()
+        DBSession.remove()
         db.init()
         db.init()
         db.init()
 
         version_nums = \
-            db.DBSession.connection().execute(sql_query).fetchall()
+            DBSession.connection().execute(sql_query).fetchall()
 
         # no additional version is created
         self.assertEqual(1, len(version_nums))
@@ -867,23 +871,24 @@ class DatabaseTester(UnitTestBase):
         current Stalker release
         """
         from stalker import db
+        from stalker.db.session import DBSession
         db.init()
 
         # now change the alembic_version
         sql = "update alembic_version set version_num = 'some_random_number'"
-        db.DBSession.connection().execute(sql)
-        db.DBSession.commit()
+        DBSession.connection().execute(sql)
+        DBSession.commit()
 
         # check if it is updated correctly
         sql = "select version_num from alembic_version"
-        result = db.DBSession.connection().execute(sql).fetchone()
+        result = DBSession.connection().execute(sql).fetchone()
         self.assertEqual(
             result[0], 'some_random_number'
         )
 
         # close the connection
-        db.DBSession.connection().close()
-        db.DBSession.remove()
+        DBSession.connection().close()
+        DBSession.remove()
 
         # re-setup
         with self.assertRaises(ValueError) as cm:
@@ -905,8 +910,9 @@ class DatabaseTester(UnitTestBase):
         repo3 = Repository(name='Repo3')
 
         all_repos = [repo1, repo2, repo3]
-        db.DBSession.add_all(all_repos)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add_all(all_repos)
+        DBSession.commit()
 
         # remove any auto created repo vars
         import os
@@ -922,7 +928,7 @@ class DatabaseTester(UnitTestBase):
             self.assertFalse('REPO%s' % repo.id in os.environ)
 
         # remove db connection
-        db.DBSession.remove()
+        DBSession.remove()
 
         # reconnect
         db.setup(self.config)
@@ -973,12 +979,13 @@ class DatabaseTester(UnitTestBase):
         test_studio.timing_resolution = datetime.timedelta(minutes=5)
 
         from stalker import db
-        db.DBSession.add(test_studio)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(test_studio)
+        DBSession.commit()
 
         # remove everything
-        db.DBSession.connection().close()
-        db.DBSession.remove()
+        DBSession.connection().close()
+        DBSession.remove()
 
         # re-init db
         db.setup(self.config)
@@ -997,7 +1004,8 @@ class DatabaseTester(UnitTestBase):
         """
         # drop the table
         from stalker import db
-        db.DBSession.connection().execute(
+        from stalker.db.session import DBSession
+        DBSession.connection().execute(
             'DROP TABLE IF EXISTS alembic_version'
         )
         # now get the alembic_version
@@ -1048,7 +1056,9 @@ class DatabaseTester(UnitTestBase):
         """
         from stalker import db
         db.setup()
-        conn = db.DBSession.connection()
+        # db.init()
+        from stalker.db.session import DBSession
+        conn = DBSession.connection()
         engine = conn.engine
         self.assertEqual(
             str(engine.url),
@@ -1074,7 +1084,7 @@ class DatabaseTester(UnitTestBase):
         )
 
 
-class DatabaseModelsTester(UnitTestBase):
+class DatabaseModelsTester(UnitTestDBBase):
     """tests the database model with a PostgreSQL database
 
     NOTE TO DEVELOPERS:
@@ -1146,9 +1156,9 @@ class DatabaseModelsTester(UnitTestBase):
             repository=test_repository,
         )
 
-        from stalker import db
-        db.DBSession.add(test_project)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(test_project)
+        DBSession.commit()
 
         from stalker import StatusList
         task_status_list = StatusList.query\
@@ -1171,8 +1181,8 @@ class DatabaseModelsTester(UnitTestBase):
         test_asset = Asset(**kwargs)
         # logger.debug('test_asset.project : %s' % test_asset.project)
 
-        db.DBSession.add(test_asset)
-        db.DBSession.commit()
+        DBSession.add(test_asset)
+        DBSession.commit()
 
         # logger.debug('test_asset.project (after commit): %s' %
         #              test_asset.project)
@@ -1196,8 +1206,8 @@ class DatabaseModelsTester(UnitTestBase):
             parent=test_asset,
         )
 
-        db.DBSession.add_all([test_task1, test_task2, test_task3])
-        db.DBSession.commit()
+        DBSession.add_all([test_task1, test_task2, test_task3])
+        DBSession.commit()
 
         code = test_asset.code
         created_by = test_asset.created_by
@@ -1248,8 +1258,8 @@ class DatabaseModelsTester(UnitTestBase):
         self.assertEqual(updated_by, test_asset_db.updated_by)
 
         # now test the deletion of the asset class
-        db.DBSession.delete(test_asset_db)
-        db.DBSession.commit()
+        DBSession.delete(test_asset_db)
+        DBSession.commit()
 
         # we should still have the user
         self.assertIsNotNone(
@@ -1318,9 +1328,9 @@ class DatabaseModelsTester(UnitTestBase):
             repository=test_repository,
         )
 
-        from stalker import db
-        db.DBSession.add(test_project)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(test_project)
+        DBSession.commit()
 
         kwargs = {
             'name': 'Test Budget',
@@ -1333,21 +1343,21 @@ class DatabaseModelsTester(UnitTestBase):
         from stalker import Budget
         test_budget = Budget(**kwargs)
 
-        db.DBSession.add(test_budget)
-        db.DBSession.commit()
+        DBSession.add(test_budget)
+        DBSession.commit()
 
         from stalker import Good
         good = Good(name='Some Good', cost=9, msrp=10, unit='$/hour')
-        db.DBSession.add(good)
-        db.DBSession.commit()
+        DBSession.add(good)
+        DBSession.commit()
 
         # create some entries
         from stalker import BudgetEntry
         entry1 = BudgetEntry(budget=test_budget, good=good, amount=5.0)
         entry2 = BudgetEntry(budget=test_budget, good=good, amount=1.0)
 
-        db.DBSession.add_all([entry1, entry2])
-        db.DBSession.commit()
+        DBSession.add_all([entry1, entry2])
+        DBSession.commit()
 
         created_by = test_budget.created_by
         date_created = test_budget.date_created
@@ -1386,8 +1396,8 @@ class DatabaseModelsTester(UnitTestBase):
         )
 
         # now test the deletion of the asset class
-        db.DBSession.delete(test_budget_db)
-        db.DBSession.commit()
+        DBSession.delete(test_budget_db)
+        DBSession.commit()
 
         # we should still have the user
         self.assertTrue(
@@ -1461,9 +1471,10 @@ class DatabaseModelsTester(UnitTestBase):
             target_entity_type='Project'
         )
 
-        from stalker import db, Client, Project
+        from stalker import Client, Project
+        from stalker.db.session import DBSession
         test_client = Client(name='Test Client')
-        db.DBSession.add(test_client)
+        DBSession.add(test_client)
 
         test_project = Project(
             name='Test Project For Budget Creation',
@@ -1474,8 +1485,8 @@ class DatabaseModelsTester(UnitTestBase):
             clients=[test_client]
         )
 
-        db.DBSession.add(test_project)
-        db.DBSession.commit()
+        DBSession.add(test_project)
+        DBSession.commit()
 
         from stalker import Budget
         test_budget = Budget(
@@ -1486,21 +1497,21 @@ class DatabaseModelsTester(UnitTestBase):
             status=status1
         )
 
-        db.DBSession.add(test_budget)
-        db.DBSession.commit()
+        DBSession.add(test_budget)
+        DBSession.commit()
 
         from stalker import Good
         good = Good(name='Some Good', cost=9, msrp=10, unit='$/hour')
-        db.DBSession.add(good)
-        db.DBSession.commit()
+        DBSession.add(good)
+        DBSession.commit()
 
         # create some entries
         from stalker import BudgetEntry
         entry1 = BudgetEntry(budget=test_budget, good=good, amount=5.0)
         entry2 = BudgetEntry(budget=test_budget, good=good, amount=1.0)
 
-        db.DBSession.add_all([entry1, entry2])
-        db.DBSession.commit()
+        DBSession.add_all([entry1, entry2])
+        DBSession.commit()
 
         # create an invoice
         from stalker import Invoice
@@ -1511,7 +1522,7 @@ class DatabaseModelsTester(UnitTestBase):
             amount=1232.4,
             unit='TRY'
         )
-        db.DBSession.add(test_invoice)
+        DBSession.add(test_invoice)
 
         created_by = test_invoice.created_by
         date_created = test_invoice.date_created
@@ -1551,8 +1562,8 @@ class DatabaseModelsTester(UnitTestBase):
         self.assertEqual(unit, test_invoice_db.unit)
 
         # now test the deletion of the invoice instance
-        db.DBSession.delete(test_invoice_db)
-        db.DBSession.commit()
+        DBSession.delete(test_invoice_db)
+        DBSession.commit()
 
         # we should still have the budget
         self.assertEqual(
@@ -1619,9 +1630,10 @@ class DatabaseModelsTester(UnitTestBase):
             target_entity_type='Project'
         )
 
-        from stalker import db, Client
+        from stalker import Client
+        from stalker.db.session import DBSession
         test_client = Client(name='Test Client')
-        db.DBSession.add(test_client)
+        DBSession.add(test_client)
 
         from stalker import Project
         test_project = Project(
@@ -1633,8 +1645,8 @@ class DatabaseModelsTester(UnitTestBase):
             clients=[test_client]
         )
 
-        db.DBSession.add(test_project)
-        db.DBSession.commit()
+        DBSession.add(test_project)
+        DBSession.commit()
 
         from stalker import Budget
         test_budget = Budget(
@@ -1645,21 +1657,21 @@ class DatabaseModelsTester(UnitTestBase):
             status=status1
         )
 
-        db.DBSession.add(test_budget)
-        db.DBSession.commit()
+        DBSession.add(test_budget)
+        DBSession.commit()
 
         from stalker import Good
         good = Good(name='Some Good', cost=9, msrp=10, unit='$/hour')
-        db.DBSession.add(good)
-        db.DBSession.commit()
+        DBSession.add(good)
+        DBSession.commit()
 
         # create some entries
         from stalker import BudgetEntry
         entry1 = BudgetEntry(budget=test_budget, good=good, amount=5.0)
         entry2 = BudgetEntry(budget=test_budget, good=good, amount=1.0)
 
-        db.DBSession.add_all([entry1, entry2])
-        db.DBSession.commit()
+        DBSession.add_all([entry1, entry2])
+        DBSession.commit()
 
         # create an invoice
         from stalker import Invoice
@@ -1670,7 +1682,7 @@ class DatabaseModelsTester(UnitTestBase):
             amount=1232.4,
             unit='TRY'
         )
-        db.DBSession.add(test_invoice)
+        DBSession.add(test_invoice)
 
         from stalker import Payment
         test_payment = Payment(
@@ -1716,8 +1728,8 @@ class DatabaseModelsTester(UnitTestBase):
         self.assertEqual(unit, test_payment_db.unit)
 
         # now test the deletion of the invoice instance
-        db.DBSession.delete(test_payment_db)
-        db.DBSession.commit()
+        DBSession.delete(test_payment_db)
+        DBSession.commit()
 
         # we should still have the budget
         self.assertEqual(
@@ -1787,9 +1799,9 @@ class DatabaseModelsTester(UnitTestBase):
             repository=test_repository,
         )
 
-        from stalker import db
-        db.DBSession.add(test_project)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(test_project)
+        DBSession.commit()
 
         kwargs = {
             'title': 'Test Wiki Page',
@@ -1801,8 +1813,8 @@ class DatabaseModelsTester(UnitTestBase):
         from stalker import Page
         test_page = Page(**kwargs)
 
-        db.DBSession.add(test_page)
-        db.DBSession.commit()
+        DBSession.add(test_page)
+        DBSession.commit()
 
         created_by = test_page.created_by
         date_created = test_page.date_created
@@ -1837,8 +1849,8 @@ class DatabaseModelsTester(UnitTestBase):
         self.assertEqual(updated_by, test_page_db.updated_by)
 
         # now test the deletion of the asset class
-        db.DBSession.delete(test_page_db)
-        db.DBSession.commit()
+        DBSession.delete(test_page_db)
+        DBSession.commit()
 
         # we should still have the user
         self.assertTrue(
@@ -1946,9 +1958,9 @@ class DatabaseModelsTester(UnitTestBase):
             description=description
         )
 
-        from stalker import db
-        db.DBSession.add(test_time_log)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(test_time_log)
+        DBSession.commit()
         tlog_id = test_time_log.id
 
         del test_time_log
@@ -2041,9 +2053,9 @@ class DatabaseModelsTester(UnitTestBase):
             responsible=[user1]
         )
 
-        from stalker import db
-        db.DBSession.add(test_task)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(test_task)
+        DBSession.commit()
 
         # now insert a new TimeLog in to the Timelogs table which has the same
         # value for start and end arguments, which should automatically raise
@@ -2057,8 +2069,8 @@ class DatabaseModelsTester(UnitTestBase):
             start=start,
             end=end
         )
-        db.DBSession.add(new_tl1)
-        db.DBSession.commit()
+        DBSession.add(new_tl1)
+        DBSession.commit()
 
         # create a new TimeLog
         new_tl2 = TimeLog(
@@ -2067,15 +2079,15 @@ class DatabaseModelsTester(UnitTestBase):
             start=end,
             end=end + datetime.timedelta(hours=3)
         )
-        db.DBSession.add(new_tl2)
-        db.DBSession.commit()
+        DBSession.add(new_tl2)
+        DBSession.commit()
 
         # update it to have overlapping timing values with new_tl1
         from sqlalchemy.exc import IntegrityError
         new_tl2.start = start + datetime.timedelta(hours=2)
 
         with self.assertRaises(IntegrityError) as cm:
-            db.DBSession.commit()
+            DBSession.commit()
 
     def test_persistence_of_Client(self):
         """testing the persistence of Client
@@ -2100,9 +2112,9 @@ class DatabaseModelsTester(UnitTestBase):
             date_created=date_created,
             date_updated=date_updated
         )
-        from stalker import db
-        db.DBSession.add(test_client)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(test_client)
+        DBSession.commit()
 
         # create three users
 
@@ -2155,10 +2167,10 @@ class DatabaseModelsTester(UnitTestBase):
             password="password",
         )
 
-        db.DBSession.add_all([user1, user2, user3, test_client])
-        db.DBSession.commit()
+        DBSession.add_all([user1, user2, user3, test_client])
+        DBSession.commit()
 
-        self.assertTrue(test_client in db.DBSession)
+        self.assertTrue(test_client in DBSession)
 
         created_by = test_client.created_by
         date_created = test_client.date_created
@@ -2191,8 +2203,8 @@ class DatabaseModelsTester(UnitTestBase):
         self.assertEqual(updated_by, client_db.updated_by)
 
         # delete the client and expect the users are still there
-        db.DBSession.delete(client_db)
-        db.DBSession.commit()
+        DBSession.delete(client_db)
+        DBSession.commit()
 
         user1_db = User.query.filter_by(login='u1tpd').first()
         user2_db = User.query.filter_by(login='u2tpd').first()
@@ -2251,22 +2263,23 @@ class DatabaseModelsTester(UnitTestBase):
             responsible=[test_user1]
         )
 
-        from stalker import db, Version
+        from stalker import Version
+        from stalker.db.session import DBSession
         test_version1 = Version(task=test_task1)
-        db.DBSession.add(test_version1)
-        db.DBSession.commit()
+        DBSession.add(test_version1)
+        DBSession.commit()
 
         test_version2 = Version(task=test_task1)
-        db.DBSession.add(test_version2)
-        db.DBSession.commit()
+        DBSession.add(test_version2)
+        DBSession.commit()
 
         test_version3 = Version(task=test_task1)
-        db.DBSession.add(test_version3)
-        db.DBSession.commit()
+        DBSession.add(test_version3)
+        DBSession.commit()
 
         test_version4 = Version(task=test_task2)
-        db.DBSession.add(test_version4)
-        db.DBSession.commit()
+        DBSession.add(test_version4)
+        DBSession.commit()
 
         from stalker import Link
         test_link1 = Link(original_filename='test_render1.jpg')
@@ -2283,13 +2296,13 @@ class DatabaseModelsTester(UnitTestBase):
             test_link4
         ]
 
-        db.DBSession.add_all([
+        DBSession.add_all([
             test_task1, test_task2, test_task3,
             test_version1, test_version2, test_version3,
             test_version4,
             test_link1, test_link2, test_link3, test_link4
         ])
-        db.DBSession.commit()
+        DBSession.commit()
 
         # arguments
         name = 'Test Daily'
@@ -2299,8 +2312,8 @@ class DatabaseModelsTester(UnitTestBase):
         daily = Daily(name=name, project=test_project)
         daily.links = links
 
-        db.DBSession.add(daily)
-        db.DBSession.commit()
+        DBSession.add(daily)
+        DBSession.commit()
 
         daily_id = daily.id
 
@@ -2318,8 +2331,8 @@ class DatabaseModelsTester(UnitTestBase):
         link4_id = test_link4.id
 
         # delete tests
-        db.DBSession.delete(daily_db)
-        db.DBSession.commit()
+        DBSession.delete(daily_db)
+        DBSession.commit()
 
         # test if links are still there
         from stalker import Link
@@ -2365,7 +2378,7 @@ class DatabaseModelsTester(UnitTestBase):
         date_created = datetime.datetime.now(pytz.utc)
         date_updated = datetime.datetime.now(pytz.utc)
 
-        from stalker import db, Department
+        from stalker import Department
         test_dep = Department(
             name=name,
             description=description,
@@ -2374,8 +2387,9 @@ class DatabaseModelsTester(UnitTestBase):
             date_created=date_created,
             date_updated=date_updated
         )
-        db.DBSession.add(test_dep)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(test_dep)
+        DBSession.commit()
 
         # create three users, one for lead and two for users
 
@@ -2432,10 +2446,10 @@ class DatabaseModelsTester(UnitTestBase):
         # add as the users
         test_dep.users = [user1, user2, user3]
 
-        db.DBSession.add(test_dep)
-        db.DBSession.commit()
+        DBSession.add(test_dep)
+        DBSession.commit()
 
-        self.assertTrue(test_dep in db.DBSession)
+        self.assertTrue(test_dep in DBSession)
 
         created_by = test_dep.created_by
         date_created = test_dep.date_created
@@ -2539,9 +2553,9 @@ class DatabaseModelsTester(UnitTestBase):
         )
 
         # persist it to the database
-        from stalker import db
-        db.DBSession.add_all([test_entity, test_entity2])
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add_all([test_entity, test_entity2])
+        DBSession.commit()
 
         # store attributes
         created_by = test_entity.created_by
@@ -2580,9 +2594,8 @@ class DatabaseModelsTester(UnitTestBase):
         # delete tests
 
         # Deleting an Entity should also delete the associated notes
-        from stalker import db
-        db.DBSession.delete(test_entity_db)
-        db.DBSession.commit()
+        DBSession.delete(test_entity_db)
+        DBSession.commit()
 
         from stalker import Entity, Note
         test_entity2_db = Entity.query.filter_by(name='Test Entity 2').first()
@@ -2701,11 +2714,11 @@ class DatabaseModelsTester(UnitTestBase):
             task1, child_task2, task2
         ]
 
-        from stalker import db
-        db.DBSession.add_all([
+        from stalker.db.session import DBSession
+        DBSession.add_all([
             task1, child_task1, child_task2, task2, user1, user2, entity_group1
         ])
-        db.DBSession.commit()
+        DBSession.commit()
 
         created_by = entity_group1.created_by
         date_created = entity_group1.date_created
@@ -2741,8 +2754,8 @@ class DatabaseModelsTester(UnitTestBase):
 
         # delete tests
         # deleting entity group will not delete the contained entities
-        db.DBSession.delete(entity_group1_db)
-        db.DBSession.commit()
+        DBSession.delete(entity_group1_db)
+        DBSession.commit()
 
         self.assertEqual(
             sorted([task1, asset1, child_task1, child_task2, task2],
@@ -2784,12 +2797,13 @@ class DatabaseModelsTester(UnitTestBase):
             "output_file_code": "{{link.file_name}}",
         }
 
-        from stalker import db, FilenameTemplate
+        from stalker import FilenameTemplate
         new_type_template = FilenameTemplate(**kwargs)
 
         # persist it
-        db.DBSession.add(new_type_template)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(new_type_template)
+        DBSession.commit()
 
         created_by = new_type_template.created_by
         date_created = new_type_template.date_created
@@ -2842,12 +2856,13 @@ class DatabaseModelsTester(UnitTestBase):
         }
 
         # create the ImageFormat object
-        from stalker import db, ImageFormat
+        from stalker import ImageFormat
         im_format = ImageFormat(**kwargs)
 
         # persist it
-        db.DBSession.add(im_format)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(im_format)
+        DBSession.commit()
 
         # store attributes
         created_by = im_format.created_by
@@ -2893,15 +2908,16 @@ class DatabaseModelsTester(UnitTestBase):
         """testing the persistence of Link
         """
         # user
-        from stalker import db, User
+        from stalker import User
         user1 = User(
             name='Test User 1',
             login='tu1',
             email='test@users.com',
             password='secret'
         )
-        db.DBSession.add(user1)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(user1)
+        DBSession.commit()
         # create a link Type
         from stalker import Type
         sound_link_type = Type(
@@ -2922,8 +2938,8 @@ class DatabaseModelsTester(UnitTestBase):
         link1 = Link(**kwargs)
 
         # persist it
-        db.DBSession.add_all([sound_link_type, link1])
-        db.DBSession.commit()
+        DBSession.add_all([sound_link_type, link1])
+        DBSession.commit()
 
         # use it as a task reference
         from stalker import Repository, Status, StatusList, Project, Task
@@ -2952,8 +2968,8 @@ class DatabaseModelsTester(UnitTestBase):
         )
         task1.references.append(link1)
 
-        db.DBSession.add(task1)
-        db.DBSession.commit()
+        DBSession.add(task1)
+        DBSession.commit()
 
         # store attributes
         created_by = link1.created_by
@@ -2993,8 +3009,8 @@ class DatabaseModelsTester(UnitTestBase):
         task1.references.remove(link1_db)
 
         # Deleting a Link should not delete anything else
-        db.DBSession.delete(link1_db)
-        db.DBSession.commit()
+        DBSession.delete(link1_db)
+        DBSession.commit()
 
         # We still should have the user and the type intact
         self.assertTrue(User.query.get(user1.id) is not None)
@@ -3034,8 +3050,9 @@ class DatabaseModelsTester(UnitTestBase):
 
         test_entity = Entity(**entity_kwargs)
 
-        db.DBSession.add_all([test_entity, test_note])
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add_all([test_entity, test_note])
+        DBSession.commit()
 
         # store the attributes
         content = test_note.content
@@ -3068,14 +3085,14 @@ class DatabaseModelsTester(UnitTestBase):
     def test_persistence_of_Good(self):
         """testing hte persistence of Good
         """
-        from stalker import db, Good
-
+        from stalker import Good
         g1 = Good(
             name='Test Good 1'
         )
 
-        db.DBSession.add(g1)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(g1)
+        DBSession.commit()
 
         name = g1.name
 
@@ -3109,8 +3126,9 @@ class DatabaseModelsTester(UnitTestBase):
 
         group1.users = [user1, user2]
 
-        db.DBSession.add(group1)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(group1)
+        DBSession.commit()
 
         name = group1.name
         users = group1.users
@@ -3134,8 +3152,9 @@ class DatabaseModelsTester(UnitTestBase):
             goods=[g1, g2, g3]
         )
 
-        db.DBSession.add_all([p, g1, g2, g3])
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add_all([p, g1, g2, g3])
+        DBSession.commit()
 
         del p
 
@@ -3144,8 +3163,8 @@ class DatabaseModelsTester(UnitTestBase):
         self.assertEqual(p_db.name, 'Test Price List')
         self.assertEqual(p_db.goods, [g1, g2, g3])
 
-        db.DBSession.delete(p_db)
-        db.DBSession.commit()
+        DBSession.delete(p_db)
+        DBSession.commit()
 
         # we should still have goods
         self.assertTrue(g1 is not None)
@@ -3247,8 +3266,9 @@ class DatabaseModelsTester(UnitTestBase):
             target_entity_type='Project'
         )
 
-        db.DBSession.add(project_status_list)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(project_status_list)
+        DBSession.commit()
 
         # create data for mixins
         # Reference Mixin
@@ -3277,9 +3297,9 @@ class DatabaseModelsTester(UnitTestBase):
         task_status_list = StatusList.query\
             .filter_by(target_entity_type='Task').first()
 
-        db.DBSession.add(task_status_list)
-        db.DBSession.add_all([lead, ref1, ref2])
-        db.DBSession.commit()
+        DBSession.add(task_status_list)
+        DBSession.add_all([lead, ref1, ref2])
+        DBSession.commit()
 
         from stalker import WorkingHours
         working_hours = WorkingHours(
@@ -3317,8 +3337,8 @@ class DatabaseModelsTester(UnitTestBase):
         new_project = Project(**kwargs)
 
         # persist it in the database
-        db.DBSession.add(new_project)
-        db.DBSession.commit()
+        DBSession.add(new_project)
+        DBSession.commit()
 
         from stalker import Task
         task1 = Task(
@@ -3343,24 +3363,24 @@ class DatabaseModelsTester(UnitTestBase):
         new_project._computed_start = dt.now(pytz.utc)
         new_project._computed_end = dt.now(pytz.utc) + td(10)
 
-        db.DBSession.add_all([task1, task2])
-        db.DBSession.commit()
+        DBSession.add_all([task1, task2])
+        DBSession.commit()
 
         # add tickets
         from stalker import Ticket
         ticket1 = Ticket(
             project=new_project
         )
-        db.DBSession.add(ticket1)
-        db.DBSession.commit()
+        DBSession.add(ticket1)
+        DBSession.commit()
 
         # create dailies
         from stalker import Daily
         d1 = Daily(name='Daily1', project=new_project)
         d2 = Daily(name='Daily2', project=new_project)
         d3 = Daily(name='Daily3', project=new_project)
-        db.DBSession.add_all([d1, d2, d3])
-        db.DBSession.commit()
+        DBSession.add_all([d1, d2, d3])
+        DBSession.commit()
 
         # store the attributes
         assets = new_project.assets
@@ -3396,7 +3416,7 @@ class DatabaseModelsTester(UnitTestBase):
         del new_project
 
         # now get it
-        new_project_db = db.DBSession.query(Project). \
+        new_project_db = DBSession.query(Project). \
             filter_by(name=kwargs["name"]).first()
 
         assert isinstance(new_project_db, Project)
@@ -3435,8 +3455,8 @@ class DatabaseModelsTester(UnitTestBase):
         #
         # Tasks
         # Tickets
-        db.DBSession.delete(new_project_db)
-        db.DBSession.commit()
+        DBSession.delete(new_project_db)
+        DBSession.commit()
 
         # Tasks
         self.assertEqual([], Task.query.all())
@@ -3460,12 +3480,13 @@ class DatabaseModelsTester(UnitTestBase):
         }
 
         # create the repository object
-        from stalker import db, Repository
+        from stalker import Repository
         repo = Repository(**kwargs)
 
         # save it to database
-        db.DBSession.add(repo)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(repo)
+        DBSession.commit()
 
         # store attributes
         created_by = repo.created_by
@@ -3581,9 +3602,10 @@ class DatabaseModelsTester(UnitTestBase):
             status_list=shot_status_list,
             responsible=[user1]
         )
-        db.DBSession.add_all([shot1, shot2, shot3])
-        db.DBSession.add(test_scene)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add_all([shot1, shot2, shot3])
+        DBSession.add(test_scene)
+        DBSession.commit()
 
         # store the attributes
         code = test_scene.code
@@ -3701,10 +3723,10 @@ class DatabaseModelsTester(UnitTestBase):
             responsible=[lead]
         )
 
-        from stalker import db
-        db.DBSession.add_all([shot1, shot2, shot3])
-        db.DBSession.add(test_sequence)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add_all([shot1, shot2, shot3])
+        DBSession.add(test_sequence)
+        DBSession.commit()
 
         # store the attributes
         code = test_sequence.code
@@ -3847,10 +3869,10 @@ class DatabaseModelsTester(UnitTestBase):
 
         test_shot = Shot(**shot_kwargs)
 
-        from stalker import db
-        db.DBSession.add(test_shot)
-        db.DBSession.add(test_seq1)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(test_shot)
+        DBSession.add(test_seq1)
+        DBSession.commit()
 
         # store the attributes
         code = test_shot.code
@@ -3924,8 +3946,9 @@ class DatabaseModelsTester(UnitTestBase):
         test_simple_entity = SimpleEntity(**kwargs)
 
         # persist it to the database
-        db.DBSession.add(test_simple_entity)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(test_simple_entity)
+        DBSession.commit()
 
         created_by = test_simple_entity.created_by
         date_created = test_simple_entity.date_created
@@ -3974,12 +3997,13 @@ class DatabaseModelsTester(UnitTestBase):
             "code": "TSTST"
         }
 
-        from stalker import db, Status
+        from stalker import Status
         test_status = Status(**kwargs)
 
         # persist it to the database
-        db.DBSession.add(test_status)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(test_status)
+        DBSession.commit()
 
         # store the attributes
         code = test_status.code
@@ -4034,8 +4058,9 @@ class DatabaseModelsTester(UnitTestBase):
 
         sequence_status_list = StatusList(**kwargs)
 
-        db.DBSession.add(sequence_status_list)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(sequence_status_list)
+        DBSession.commit()
 
         # store the attributes
         created_by = sequence_status_list.created_by
@@ -4079,15 +4104,15 @@ class DatabaseModelsTester(UnitTestBase):
         kwargs["name"] = "new Sequence Status List"
         new_sequence_list = StatusList(**kwargs)
 
-        db.DBSession.add(new_sequence_list)
-        self.assertTrue(new_sequence_list in db.DBSession)
+        DBSession.add(new_sequence_list)
+        self.assertTrue(new_sequence_list in DBSession)
 
         from sqlalchemy.exc import IntegrityError
         with self.assertRaises(IntegrityError) as cm:
-            db.DBSession.commit()
+            DBSession.commit()
 
         # roll it back
-        db.DBSession.rollback()
+        DBSession.rollback()
 
     def test_persistence_of_Structure(self):
         """testing the persistence of Structure
@@ -4184,11 +4209,12 @@ class DatabaseModelsTester(UnitTestBase):
         from stalker import Structure
         new_structure = Structure(**kwargs)
 
-        db.DBSession.add_all([
+        from stalker.db.session import DBSession
+        DBSession.add_all([
             new_structure, modeling_task_type, animation_task_type,
             char_asset_type, image_link_type
         ])
-        db.DBSession.commit()
+        DBSession.commit()
 
         # store the attributes
         templates = new_structure.templates
@@ -4226,10 +4252,11 @@ class DatabaseModelsTester(UnitTestBase):
     def test_persistence_of_Studio(self):
         """testing the persistence of Studio
         """
-        from stalker import db, Studio
+        from stalker import Studio
+        from stalker.db.session import DBSession
         test_studio = Studio(name='Test Studio')
-        db.DBSession.add(test_studio)
-        db.DBSession.commit()
+        DBSession.add(test_studio)
+        DBSession.commit()
 
         # customize attributes
         from stalker import WorkingHours
@@ -4271,7 +4298,7 @@ class DatabaseModelsTester(UnitTestBase):
         import pytz
         date_created = date_updated = datetime.datetime.now(pytz.utc)
 
-        from stalker import db, Tag
+        from stalker import Tag
         tag = Tag(
             name=name,
             description=description,
@@ -4281,8 +4308,9 @@ class DatabaseModelsTester(UnitTestBase):
             date_updated=date_updated)
 
         # persist it to the database
-        db.DBSession.add(tag)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(tag)
+        DBSession.commit()
 
         # store the attributes
         description = tag.description
@@ -4295,7 +4323,7 @@ class DatabaseModelsTester(UnitTestBase):
         del tag
 
         # now try to retrieve it
-        tag_db = db.DBSession.query(Tag).filter_by(name=name).first()
+        tag_db = DBSession.query(Tag).filter_by(name=name).first()
 
         assert (isinstance(tag_db, Tag))
 
@@ -4432,32 +4460,33 @@ class DatabaseModelsTester(UnitTestBase):
         version1 = Version(
             task=task1
         )
-        db.DBSession.add(version1)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(version1)
+        DBSession.commit()
 
         version2 = Version(
             task=task1
         )
-        db.DBSession.add(version2)
-        db.DBSession.commit()
+        DBSession.add(version2)
+        DBSession.commit()
 
         version3 = Version(
             task=task2
         )
-        db.DBSession.add(version3)
-        db.DBSession.commit()
+        DBSession.add(version3)
+        DBSession.commit()
 
         version4 = Version(
             task=task2
         )
-        db.DBSession.add(version4)
-        db.DBSession.commit()
+        DBSession.add(version4)
+        DBSession.commit()
 
         version3.inputs = [version2]
         version2.inputs = [version1]
         version2.inputs = [version4]
-        db.DBSession.add(version1)
-        db.DBSession.commit()
+        DBSession.add(version1)
+        DBSession.commit()
 
         # references
         from stalker import Link
@@ -4474,12 +4503,12 @@ class DatabaseModelsTester(UnitTestBase):
         task1.references.append(ref1)
         task1.references.append(ref2)
 
-        db.DBSession.add_all([
+        DBSession.add_all([
             task1, child_task1, child_task2, task2, time_log1,
             time_log2, time_log3, user1, user2, version1, version2, version3,
             version4, ref1, ref2
         ])
-        db.DBSession.commit()
+        DBSession.commit()
 
         computed_start = task1.computed_start
         computed_end = task1.computed_end
@@ -4558,14 +4587,14 @@ class DatabaseModelsTester(UnitTestBase):
         # And orphan-references
         #
         # task1_db.references = []
-        # with db.DBSession.no_autoflush:
+        # with DBSession.no_autoflush:
         #     for v in task1_db.versions:
         #         v.inputs = []
         #         for tv in Version.query.filter(Version.inputs.contains(v)):
         #             tv.inputs.remove(v)
 
-        db.DBSession.delete(task1_db)
-        db.DBSession.commit()
+        DBSession.delete(task1_db)
+        DBSession.commit()
 
         # we still should have the versions that are in the inputs (version3
         # and version4) of the original versions (version1, version2)
@@ -4751,12 +4780,12 @@ class DatabaseModelsTester(UnitTestBase):
             schedule_unit='h'
         )
 
-        from stalker import db
-        db.DBSession.add_all([
+        from stalker.db.session import DBSession
+        DBSession.add_all([
             task1, child_task1, child_task2, task2, time_log1,
             time_log2, time_log3, user1, user2, rev1
         ])
-        db.DBSession.commit()
+        DBSession.commit()
 
         created_by = rev1.created_by
         date_created = rev1.date_created
@@ -4786,8 +4815,8 @@ class DatabaseModelsTester(UnitTestBase):
         # delete tests
 
         # deleting a Review should be fairly simple:
-        db.DBSession.delete(rev1_db)
-        db.DBSession.commit()
+        DBSession.delete(rev1_db)
+        DBSession.commit()
 
         # Expect to have no task is deleted
         self.assertEqual(
@@ -4857,14 +4886,15 @@ class DatabaseModelsTester(UnitTestBase):
         note1 = Note(content='This is the content of the note 1')
         note2 = Note(content='This is the content of the note 2')
 
-        from stalker import db, Ticket
+        from stalker import Ticket
+        from stalker.db.session import DBSession
         related_ticket1 = Ticket(project=proj1)
-        db.DBSession.add(related_ticket1)
-        db.DBSession.commit()
+        DBSession.add(related_ticket1)
+        DBSession.commit()
 
         related_ticket2 = Ticket(project=proj1)
-        db.DBSession.add(related_ticket2)
-        db.DBSession.commit()
+        DBSession.add(related_ticket2)
+        DBSession.commit()
 
         # create Tickets
         test_ticket = Ticket(
@@ -4879,8 +4909,8 @@ class DatabaseModelsTester(UnitTestBase):
         test_ticket.reassign(user1, user2)
         test_ticket.priority = 'MAJOR'
 
-        db.DBSession.add(test_ticket)
-        db.DBSession.commit()
+        DBSession.add(test_ticket)
+        DBSession.commit()
 
         comments = test_ticket.comments
         created_by = test_ticket.created_by
@@ -4937,8 +4967,8 @@ class DatabaseModelsTester(UnitTestBase):
             sorted(logs, key=lambda x: x.name)
         )
 
-        db.DBSession.delete(test_ticket_db)
-        db.DBSession.commit()
+        DBSession.delete(test_ticket_db)
+        DBSession.commit()
 
         from stalker import TicketLog
         self.assertEqual([], TicketLog.query.all())
@@ -4969,11 +4999,13 @@ class DatabaseModelsTester(UnitTestBase):
             'efficiency': 2.5
         }
 
-        from stalker import db, User
+        from stalker import User
+        from stalker.db.session import DBSession
+
         user1 = User(**user_kwargs)
 
-        db.DBSession.add_all([user1, new_department])
-        db.DBSession.commit()
+        DBSession.add_all([user1, new_department])
+        DBSession.commit()
 
         import datetime
         import pytz
@@ -4992,8 +5024,8 @@ class DatabaseModelsTester(UnitTestBase):
 
         user1.vacations.append(vacation1)
         user1.vacations.append(vacation2)
-        db.DBSession.add(user1)
-        db.DBSession.commit()
+        DBSession.add(user1)
+        DBSession.commit()
 
         # create a test project
         from stalker import Repository, Status, StatusList
@@ -5029,9 +5061,9 @@ class DatabaseModelsTester(UnitTestBase):
             start=dt.now(pytz.utc),
             end=dt.now(pytz.utc) + td(1)
         )
-        db.DBSession.add(time_log1)
-        db.DBSession.add(task1)
-        db.DBSession.commit()
+        DBSession.add(time_log1)
+        DBSession.add(task1)
+        DBSession.commit()
 
         # store attributes
         created_by = user1.created_by
@@ -5104,8 +5136,8 @@ class DatabaseModelsTester(UnitTestBase):
         )
 
         # deleting a user should also delete its vacations
-        db.DBSession.delete(user1_db)
-        db.DBSession.commit()
+        DBSession.delete(user1_db)
+        DBSession.commit()
 
         self.assertEqual([], Vacation.query.all())
 
@@ -5118,15 +5150,15 @@ class DatabaseModelsTester(UnitTestBase):
         import datetime
         import pytz
         from stalker import User, AuthenticationLog
-        from stalker import db
+        from stalker.db.session import DBSession
         user1 = User(
             name='Test User 1',
             login='tuser1',
             email='tuser1@users.com',
             password='sosecret'
         )
-        db.DBSession.add(user1)
-        db.DBSession.commit()
+        DBSession.add(user1)
+        DBSession.commit()
 
         from stalker.models.auth import LOGIN, LOGOUT
         al1 = AuthenticationLog(
@@ -5141,8 +5173,8 @@ class DatabaseModelsTester(UnitTestBase):
             date=datetime.datetime.now(pytz.utc) + datetime.timedelta(minutes=10)
         )
 
-        db.DBSession.add_all([al1, al2])
-        db.DBSession.commit()
+        DBSession.add_all([al1, al2])
+        DBSession.commit()
 
         al1_id = al1.id
         action = al1.action
@@ -5163,8 +5195,8 @@ class DatabaseModelsTester(UnitTestBase):
         )
 
         # delete tests
-        db.DBSession.delete(al1_from_db)
-        db.DBSession.commit()
+        DBSession.delete(al1_from_db)
+        DBSession.commit()
 
         # check the user still exists
         user1_from_db = User.query.get(user1.id)
@@ -5175,8 +5207,8 @@ class DatabaseModelsTester(UnitTestBase):
         self.assertIsNotNone(al2_from_db)
 
         # delete the other AuhenticationLog
-        db.DBSession.delete(al2_from_db)
-        db.DBSession.commit()
+        DBSession.delete(al2_from_db)
+        DBSession.commit()
 
         # check if the user is still there
         user1_from_db = User.query.get(user1.id)
@@ -5213,8 +5245,9 @@ class DatabaseModelsTester(UnitTestBase):
             end=end
         )
 
-        db.DBSession.add(vacation)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(vacation)
+        DBSession.commit()
 
         name = vacation.name
 
@@ -5283,8 +5316,9 @@ class DatabaseModelsTester(UnitTestBase):
         )
 
         # now save it to the database
-        db.DBSession.add(test_version)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(test_version)
+        DBSession.commit()
 
         # create a new version
         test_version_2 = Version(
@@ -5296,8 +5330,8 @@ class DatabaseModelsTester(UnitTestBase):
             inputs=[test_version]
         )
         self.assertEqual(test_version_2.inputs, [test_version])
-        db.DBSession.add(test_version_2)
-        db.DBSession.commit()
+        DBSession.add(test_version_2)
+        DBSession.commit()
 
         created_by = test_version.created_by
         date_created = test_version.date_created
@@ -5341,8 +5375,8 @@ class DatabaseModelsTester(UnitTestBase):
 
         # try to delete version and expect the task, user and other versions
         # to be intact
-        db.DBSession.delete(test_version_db)
-        db.DBSession.commit()
+        DBSession.delete(test_version_db)
+        DBSession.commit()
 
         self.assertEqual(test_version_2.inputs, [])
 
@@ -5357,12 +5391,12 @@ class DatabaseModelsTester(UnitTestBase):
         )
         test_version_2.inputs.append(test_version_3)
         self.assertEqual(test_version_2.inputs, [test_version_3])
-        db.DBSession.add(test_version_3)
-        db.DBSession.commit()
+        DBSession.add(test_version_3)
+        DBSession.commit()
 
         # now delete test_version_2
-        db.DBSession.delete(test_version_2)
-        db.DBSession.commit()
+        DBSession.delete(test_version_2)
+        DBSession.commit()
 
         # and check if test_version_3 is still present in the database
         test_version_3_db = Version.query\
@@ -5389,8 +5423,8 @@ class DatabaseModelsTester(UnitTestBase):
         )
         test_version_3.children.append(test_version_4)
         self.assertEqual(test_version_3.children, [test_version_4])
-        db.DBSession.add(test_version_4)
-        db.DBSession.commit()
+        DBSession.add(test_version_4)
+        DBSession.commit()
 
         # and check if test_version_4 is still present in the database
         test_version_4_db = Version.query\
@@ -5411,8 +5445,8 @@ class DatabaseModelsTester(UnitTestBase):
         )
 
         # now delete test_version_3
-        db.DBSession.delete(test_version_3)
-        db.DBSession.commit()
+        DBSession.delete(test_version_3)
+        DBSession.commit()
 
         # and check if test_version_4 is still present in the database
         test_version_4_db = Version.query\

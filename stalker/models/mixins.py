@@ -21,11 +21,11 @@ import logging
 import pytz
 from sqlalchemy import (Table, Column, String, Integer, ForeignKey, Interval,
                         DateTime, PickleType, Float, Enum)
-from sqlalchemy.exc import UnboundExecutionError
+from sqlalchemy.exc import UnboundExecutionError, OperationalError
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import synonym, relationship, validates
 
-from stalker import defaults
+
 from stalker.db.declarative import Base
 from stalker.log import logging_level
 
@@ -265,15 +265,15 @@ class StatusMixin(object):
             # StatusList from the database
 
             # disable autoflush to prevent premature class initialization
-            from stalker import db
-            with db.DBSession.no_autoflush:
+            from stalker.db.session import DBSession
+            with DBSession.no_autoflush:
                 try:
                     # try to get a StatusList with the target_entity_type is
                     # matching the class name
                     status_list = StatusList.query\
                         .filter_by(target_entity_type=self.__class__.__name__)\
                         .first()
-                except UnboundExecutionError:
+                except (UnboundExecutionError, OperationalError):
                     # it is not mapped just skip it
                     pass
 
@@ -312,18 +312,12 @@ class StatusMixin(object):
     def _validate_status(self, key, status):
         """validates the given status value
         """
-        from stalker.models.status import Status, StatusList
-        from stalker import db
-        with db.DBSession.no_autoflush:
-            if not isinstance(self.status_list, StatusList):
-                raise TypeError(
-                    "Please set the %s.status_list attribute first" %
-                    self.__class__.__name__
-                )
+        from stalker.models.status import Status
+        from stalker.db.session import DBSession
 
         # it is set to None
         if status is None:
-            with db.DBSession.no_autoflush:
+            with DBSession.no_autoflush:
                 status = self.status_list.statuses[0]
 
         # it is not an instance of status or int
@@ -571,6 +565,7 @@ class DateRangeMixin(object):
         # logger.debug('end      : %s' % end)
         # logger.debug('duration : %s' % duration)
 
+        from stalker import defaults
         import datetime
         if not isinstance(start, datetime.datetime):
             start = None
@@ -664,6 +659,7 @@ class DateRangeMixin(object):
         """
         # to be compatible with python 2.6 use the following instead of
         # total_seconds()
+        from stalker import defaults
         timing_resolution = defaults.timing_resolution
         trs = timing_resolution.days * 86400 + timing_resolution.seconds
 
@@ -978,6 +974,7 @@ class ScheduleMixin(object):
     """
 
     # some default values that can be overridden in Mixed in classes
+    from stalker import defaults
     __default_schedule_attr_name__ = 'schedule'
     __default_schedule_timing__ = defaults.timing_resolution.seconds / 60
     __default_schedule_unit__ = 'h'
@@ -1014,6 +1011,7 @@ class ScheduleMixin(object):
 
     @declared_attr
     def schedule_unit(cls):
+        from stalker import defaults
         return Column(
             '%s_unit' % cls.__default_schedule_attr_name__,
             Enum(*defaults.datetime_units, name='TimeUnit'),
@@ -1161,6 +1159,7 @@ class ScheduleMixin(object):
     def _validate_schedule_unit(self, key, schedule_unit):
         """validates the given schedule_unit
         """
+        from stalker import defaults
         if schedule_unit is None:
             schedule_unit = self.__default_schedule_unit__
 
@@ -1241,6 +1240,7 @@ class ScheduleMixin(object):
         :returns int, string: Returns one integer and one string, showing the
           timing value and the unit.
         """
+        from stalker import defaults
         minutes = 60
         hour = 3600
         day = 86400
@@ -1304,6 +1304,7 @@ class ScheduleMixin(object):
         }
 
         if model in ['effort', 'length']:
+            from stalker import defaults
             day_wt = defaults.daily_working_hours * 3600
             week_wt = defaults.weekly_working_days * day_wt
             month_wt = 4 * week_wt
@@ -1440,8 +1441,8 @@ class DAGMixin(object):
     def is_container(self):
         """Returns True if the Task has children Tasks
         """
-        from stalker import db
-        with db.DBSession.no_autoflush:
+        from stalker.db.session import DBSession
+        with DBSession.no_autoflush:
             return bool(len(self.children))
 
     @property

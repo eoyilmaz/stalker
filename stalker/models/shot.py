@@ -327,12 +327,20 @@ class Shot(Task, CodeMixin):
         :return: bool
         """
         if project and code:
-            from stalker import db
-            with db.DBSession.no_autoflush:
-                return Shot.query\
-                           .filter(Shot.project == project)\
-                           .filter(Shot.code == code)\
-                           .first() is None
+            from stalker.db.session import DBSession
+            from sqlalchemy.exc import UnboundExecutionError, OperationalError
+            try:
+                with DBSession.no_autoflush:
+                    return Shot.query\
+                               .filter(Shot.project == project)\
+                               .filter(Shot.code == code)\
+                               .first() is None
+            except (UnboundExecutionError, OperationalError) as e:
+                # Fallback to Python
+                for t in project.tasks:
+                    if isinstance(t, Shot):
+                        if t.code == code:
+                            return False
         return True
 
     def _fps_getter(self):

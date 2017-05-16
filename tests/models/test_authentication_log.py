@@ -16,10 +16,10 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-from stalker.testing import UnitTestBase
+from psycopg2.tests import unittest
 
 
-class AuthenticationLogTestCase(UnitTestBase):
+class AuthenticationLogTestCase(unittest.TestCase):
     """tests AuthenticationLog class
     """
 
@@ -35,8 +35,6 @@ class AuthenticationLogTestCase(UnitTestBase):
             email='tuser1@users.com',
             password='secret'
         )
-        db.DBSession.add(self.test_user1)
-        db.DBSession.commit()
 
         self.test_user2 = User(
             name='Test User 2',
@@ -44,8 +42,6 @@ class AuthenticationLogTestCase(UnitTestBase):
             email='tuser2@users.com',
             password='secret'
         )
-        db.DBSession.add(self.test_user1)
-        db.DBSession.commit()
 
     def test_user_argument_is_skipped(self):
         """testing if a TypeError will be raised when the user argument is

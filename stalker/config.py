@@ -23,6 +23,9 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+from stalker.log import logging_level
+logger.setLevel(logging_level)
+
 
 class Config(object):
     """Config abstraction

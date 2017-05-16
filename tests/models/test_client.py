@@ -16,11 +16,11 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-from stalker.testing import UnitTestBase
+import unittest
 from stalker import Client
 
 
-class ClientTestCase(UnitTestBase):
+class ClientTestCase(unittest.TestCase):
     """tests the Client class
     """
 
@@ -36,8 +36,6 @@ class ClientTestCase(UnitTestBase):
             email="user1@test.com",
             password="123456",
         )
-        from stalker import db
-        db.DBSession.add(self.test_user1)
 
         self.test_user2 = User(
             name="User2",
@@ -45,7 +43,6 @@ class ClientTestCase(UnitTestBase):
             email="user2@test.com",
             password="123456",
         )
-        db.DBSession.add(self.test_user2)
 
         self.test_user3 = User(
             name="User3",
@@ -53,7 +50,6 @@ class ClientTestCase(UnitTestBase):
             email="user3@test.com",
             password="123456",
         )
-        db.DBSession.add(self.test_user3)
 
         self.test_user4 = User(
             name="User4",
@@ -61,7 +57,6 @@ class ClientTestCase(UnitTestBase):
             email="user4@test.com",
             password="123456",
         )
-        db.DBSession.add(self.test_user4)
 
         self.users_list = [
             self.test_user1,
@@ -69,14 +64,18 @@ class ClientTestCase(UnitTestBase):
             self.test_user3,
             self.test_user4
         ]
-        db.DBSession.commit()
 
-        self.test_admin = self.admin
+        self.test_admin = User(
+            name='admin',
+            login='admin',
+            email='admin@admins.com',
+            password='1234'
+        )
 
         from stalker import Status
-        self.status_new = Status.query.filter(Status.code == 'NEW').first()
-        self.status_wip = Status.query.filter(Status.code == 'WIP').first()
-        self.status_cmpl = Status.query.filter(Status.code == 'CMPL').first()
+        self.status_new = Status(name='New', code='NEW')
+        self.status_wip = Status(name='Work In Progress', code='WIP')
+        self.status_cmpl = Status(name='Completed', code='CMPL')
 
         from stalker import StatusList
         self.project_statuses = StatusList(
@@ -88,13 +87,11 @@ class ClientTestCase(UnitTestBase):
             ],
             target_entity_type='Project'
         )
-        db.DBSession.add(self.project_statuses)
 
         from stalker import Repository
         self.test_repo = Repository(
             name="Test Repository"
         )
-        db.DBSession.add(self.test_repo)
 
         from stalker import Project
         self.test_project1 = Project(
@@ -103,7 +100,6 @@ class ClientTestCase(UnitTestBase):
             status_list=self.project_statuses,
             repository=self.test_repo,
         )
-        db.DBSession.add(self.test_project1)
 
         self.test_project2 = Project(
             name="Test Project 1",
@@ -111,7 +107,6 @@ class ClientTestCase(UnitTestBase):
             status_list=self.project_statuses,
             repository=self.test_repo,
         )
-        db.DBSession.add(self.test_project2)
 
         self.test_project3 = Project(
             name="Test Project 1",
@@ -119,7 +114,6 @@ class ClientTestCase(UnitTestBase):
             status_list=self.project_statuses,
             repository=self.test_repo,
         )
-        db.DBSession.add(self.test_project3)
 
         self.projects_list = [
             self.test_project1,
@@ -145,8 +139,6 @@ class ClientTestCase(UnitTestBase):
 
         # create a default client object
         self.test_client = Client(**self.kwargs)
-        db.DBSession.add(self.test_client)
-        db.DBSession.commit()
 
     def test___auto_name__class_attribute_is_set_to_false(self):
         """testing if the __auto_name__ class attribute is set to False for
@@ -348,14 +340,14 @@ class ClientTestCase(UnitTestBase):
         """testing if a TypeError will be raised when the given projects
         argument is not an instance of list
         """
-        from stalker import Project
         self.kwargs["projects"] = "a project"
         with self.assertRaises(TypeError) as cm:
-            Project(**self.kwargs)
+            Client(**self.kwargs)
 
         self.assertEqual(
             str(cm.exception),
-            'Project.code cannot be None'
+            'ProjectClient.project should be a stalker.models.project.Project '
+            'instance, not str'
         )
 
     def test_projects_attribute_is_not_iterable(self):
@@ -434,8 +426,8 @@ class ClientTestCase(UnitTestBase):
     def test_equality(self):
         """testing equality of two Client objects
         """
-        dep1 = Client(**self.kwargs)
-        dep2 = Client(**self.kwargs)
+        client1 = Client(**self.kwargs)
+        client2 = Client(**self.kwargs)
 
         entity_kwargs = self.kwargs.copy()
         entity_kwargs.pop("users")
@@ -444,17 +436,17 @@ class ClientTestCase(UnitTestBase):
         entity1 = Entity(**entity_kwargs)
 
         self.kwargs["name"] = "Company X"
-        dep3 = Client(**self.kwargs)
+        client3 = Client(**self.kwargs)
 
-        self.assertTrue(dep1 == dep2)
-        self.assertFalse(dep1 == dep3)
-        self.assertFalse(dep1 == entity1)
+        self.assertTrue(client1 == client2)
+        self.assertFalse(client1 == client3)
+        self.assertFalse(client1 == entity1)
 
     def test_inequality(self):
         """testing inequality of two Client objects
         """
-        dep1 = Client(**self.kwargs)
-        dep2 = Client(**self.kwargs)
+        client1 = Client(**self.kwargs)
+        client2 = Client(**self.kwargs)
 
         entity_kwargs = self.kwargs.copy()
         entity_kwargs.pop("users")
@@ -463,11 +455,11 @@ class ClientTestCase(UnitTestBase):
         entity1 = Entity(**entity_kwargs)
 
         self.kwargs["name"] = "Company X"
-        dep3 = Client(**self.kwargs)
+        client3 = Client(**self.kwargs)
 
-        self.assertFalse(dep1 != dep2)
-        self.assertTrue(dep1 != dep3)
-        self.assertTrue(dep1 != entity1)
+        self.assertFalse(client1 != client2)
+        self.assertTrue(client1 != client3)
+        self.assertTrue(client1 != entity1)
 
     # def test_hash_value(self):
     #     """testing if the hash value is correctly calculated
@@ -476,3 +468,19 @@ class ClientTestCase(UnitTestBase):
     #         hash(self.test_client),
     #         self.test_client.__hash__()
     #     )
+
+    def test_to_tjp_method_is_working_properly(self):
+        """testing if the to_tjp method is working properly
+        """
+        client1 = Client(**self.kwargs)
+        self.assertEqual(client1.to_tjp(), '')
+
+    def test_hash_is_correctly_calculated(self):
+        """testing if the hash value is correctly calculated
+        """
+        client1 = Client(**self.kwargs)
+        self.assertEqual(
+            client1.__hash__(),
+            hash(client1.id) + 2 * hash(client1.name)
+            + 3 * hash(client1.entity_type)
+        )

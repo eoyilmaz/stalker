@@ -16,10 +16,10 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-from stalker.testing import UnitTestBase
+from stalker.testing import UnitTestDBBase
 
 
-class AssetTester(UnitTestBase):
+class AssetTester(UnitTestDBBase):
     """tests Asset class
     """
 
@@ -29,14 +29,15 @@ class AssetTester(UnitTestBase):
         super(AssetTester, self).setUp()
 
         # users
-        from stalker import db, User
+        from stalker import User
+        from stalker.db.session import DBSession
         self.test_user1 = User(
             name='User1',
             login='user1',
             password='12345',
             email='user1@user1.com'
         )
-        db.DBSession.add(self.test_user1)
+        DBSession.add(self.test_user1)
 
         self.test_user2 = User(
             name='User2',
@@ -44,8 +45,8 @@ class AssetTester(UnitTestBase):
             password='12345',
             email='user2@user2.com'
         )
-        db.DBSession.add(self.test_user2)
-        db.DBSession.commit()
+        DBSession.add(self.test_user2)
+        DBSession.commit()
 
         # statuses
         from stalker import Status, StatusList, Project
@@ -61,8 +62,8 @@ class AssetTester(UnitTestBase):
                 self.status_wip
             ]
         )
-        db.DBSession.add(self.project_status_list)
-        db.DBSession.commit()
+        DBSession.add(self.project_status_list)
+        DBSession.commit()
 
         self.task_status_list = \
             StatusList.query.filter_by(target_entity_type='Task').first()
@@ -83,28 +84,28 @@ class AssetTester(UnitTestBase):
             code='commproj',
             target_entity_type=Project,
         )
-        db.DBSession.add(self.commercial_project_type)
+        DBSession.add(self.commercial_project_type)
 
         self.asset_type1 = Type(
             name="Character",
             code='char',
             target_entity_type='Asset'
         )
-        db.DBSession.add(self.asset_type1)
+        DBSession.add(self.asset_type1)
 
         self.asset_type2 = Type(
             name="Environment",
             code='env',
             target_entity_type='Asset'
         )
-        db.DBSession.add(self.asset_type2)
+        DBSession.add(self.asset_type2)
 
         self.repository_type = Type(
             name="Test Repository Type",
             code='testrepo',
             target_entity_type='Repository',
         )
-        db.DBSession.add(self.repository_type)
+        DBSession.add(self.repository_type)
 
         # repository
         from stalker import Repository
@@ -112,7 +113,7 @@ class AssetTester(UnitTestBase):
             name="Test Repository",
             type=self.repository_type,
         )
-        db.DBSession.add(self.repository)
+        DBSession.add(self.repository)
 
         # project
         self.project1 = Project(
@@ -122,7 +123,7 @@ class AssetTester(UnitTestBase):
             status_list=self.project_status_list,
             repositories=[self.repository],
         )
-        db.DBSession.add(self.project1)
+        DBSession.add(self.project1)
 
         # sequence
         from stalker import Sequence
@@ -133,7 +134,7 @@ class AssetTester(UnitTestBase):
             status_list=self.sequence_status_list,
             responsible=[self.test_user1]
         )
-        db.DBSession.add(self.seq1)
+        DBSession.add(self.seq1)
 
         # shots
         from stalker import Shot
@@ -144,7 +145,7 @@ class AssetTester(UnitTestBase):
             sequences=[self.seq1],
             responsible=[self.test_user1]
         )
-        db.DBSession.add(self.shot1)
+        DBSession.add(self.shot1)
 
         self.shot2 = Shot(
             code="TestSH002",
@@ -153,7 +154,7 @@ class AssetTester(UnitTestBase):
             sequences=[self.seq1],
             responsible=[self.test_user1]
         )
-        db.DBSession.add(self.shot2)
+        DBSession.add(self.shot2)
 
         self.shot3 = Shot(
             code="TestSH003",
@@ -162,7 +163,7 @@ class AssetTester(UnitTestBase):
             sequences=[self.seq1],
             responsible=[self.test_user1]
         )
-        db.DBSession.add(self.shot3)
+        DBSession.add(self.shot3)
 
         self.shot4 = Shot(
             code="TestSH004",
@@ -171,7 +172,7 @@ class AssetTester(UnitTestBase):
             sequences=[self.seq1],
             responsible=[self.test_user1]
         )
-        db.DBSession.add(self.shot4)
+        DBSession.add(self.shot4)
 
         self.kwargs = {
             "name": "Test Asset",
@@ -186,7 +187,7 @@ class AssetTester(UnitTestBase):
 
         from stalker import Asset, Task
         self.asset1 = Asset(**self.kwargs)
-        db.DBSession.add(self.asset1)
+        DBSession.add(self.asset1)
 
         # tasks
         self.task1 = Task(
@@ -194,22 +195,22 @@ class AssetTester(UnitTestBase):
             parent=self.asset1,
             status_list=self.task_status_list
         )
-        db.DBSession.add(self.task1)
+        DBSession.add(self.task1)
 
         self.task2 = Task(
             name="Task2",
             parent=self.asset1,
             status_list=self.task_status_list
         )
-        db.DBSession.add(self.task2)
+        DBSession.add(self.task2)
 
         self.task3 = Task(
             name="Task3",
             parent=self.asset1,
             status_list=self.task_status_list
         )
-        db.DBSession.add(self.task3)
-        db.DBSession.commit()
+        DBSession.add(self.task3)
+        DBSession.commit()
 
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for

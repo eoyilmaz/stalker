@@ -16,9 +16,9 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
+import unittest
 from stalker import UnitMixin, SimpleEntity
 from sqlalchemy import Column, Integer, ForeignKey
-from stalker.testing import UnitTestBase
 
 
 class UnitMixinFooMixedInClass(SimpleEntity, UnitMixin):
@@ -39,7 +39,7 @@ class UnitMixinFooMixedInClass(SimpleEntity, UnitMixin):
         UnitMixin.__init__(self, **kwargs)
 
 
-class UnitMixinTestCase(UnitTestBase):
+class UnitMixinTestCase(unittest.TestCase):
     """tests the UnitMixin
     """
 

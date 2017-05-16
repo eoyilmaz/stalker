@@ -15,11 +15,10 @@
 #
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
-
+import unittest
 
 from sqlalchemy import Column, Integer, ForeignKey
 from stalker import StatusMixin, StatusList, Status
-from stalker.testing import UnitTestBase
 
 # create a new mixed in SimpleEntity
 from stalker.models.entity import SimpleEntity
@@ -47,7 +46,7 @@ class DeclStatMixB(SimpleEntity, StatusMixin):
         StatusMixin.__init__(self, **kwargs)
 
 
-class StatusMixinTester(UnitTestBase):
+class StatusMixinTester(unittest.TestCase):
     """tests StatusMixin
     """
 

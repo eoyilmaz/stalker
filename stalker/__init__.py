@@ -23,7 +23,7 @@ See docs for more information.
 
 import sys
 
-__version__ = '0.2.18.1'
+__version__ = '0.2.19.dev'
 
 
 __string_types__ = []

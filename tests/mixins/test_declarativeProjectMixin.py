@@ -18,7 +18,6 @@
 
 import unittest
 from sqlalchemy import Column, Integer, ForeignKey
-from stalker.db.session import DBSession
 from stalker.models.project import Project
 from stalker.models.type import Type
 from stalker.models.status import Status, StatusList
@@ -27,7 +26,6 @@ from stalker.models.mixins import ProjectMixin
 
 # create a new mixed in SimpleEntity
 from stalker.models.entity import SimpleEntity
-from stalker.testing import UnitTestBase
 
 
 class DeclProjMixA(SimpleEntity, ProjectMixin):
@@ -52,7 +50,7 @@ class DeclProjMixB(SimpleEntity, ProjectMixin):
         ProjectMixin.__init__(self, **kwargs)
 
 
-class ProjectMixinTester(UnitTestBase):
+class ProjectMixinTester(unittest.TestCase):
     """tests ProjectMixin
     """
 

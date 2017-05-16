@@ -25,8 +25,6 @@ import csv
 
 import pytz
 
-import stalker
-from stalker import defaults
 from stalker.log import logging_level
 
 import logging
@@ -215,12 +213,12 @@ class TaskJugglerScheduler(SchedulerBase):
 
         # use new way of doing it, it will just work with PostgreSQL
         import json
-        from stalker import db
-
+        from stalker import defaults
+        from stalker.db.session import DBSession
         template = Template(defaults.tjp_main_template2)
 
         if not self.projects:
-            project_ids = db.DBSession.connection().execute(
+            project_ids = DBSession.connection().execute(
                 'select id, code from "Projects"'
             ).fetchall()
         else:
@@ -258,7 +256,7 @@ join (
             array[project_id] as path,
             0
         from "Tasks"
-        where parent_id is NULL and project_id = %(id)s
+        where parent_id is NULL and project_id = :id
     union all
         select
             task.id,
@@ -346,15 +344,17 @@ order by path_as_text"""
         num_of_records = 0
 
         # run it per project
+        from sqlalchemy import text
         for pr in project_ids:
             p_id = pr[0]
             #p_code = pr[1]
 
-            sql_query_pp = sql_query % {'id': p_id}
-            result = db.DBSession.connection().execute(sql_query_pp)
+            result = DBSession.connection().execute(text(sql_query), id=p_id)
 
             # start by adding the project first
-            result_buffer.append('task Project_%s "Project_%s" {' % (p_id, p_id))
+            result_buffer.append(
+                'task Project_%s "Project_%s" {' % (p_id, p_id)
+            )
 
             # now start jumping around
             previous_level = 0
@@ -498,6 +498,7 @@ order by path_as_text"""
 
         tasks_buffer = '\n'.join(result_buffer)
 
+        import stalker
         self.tjp_content = template.render({
             'stalker': stalker,
             'studio': self.studio,
@@ -556,7 +557,7 @@ order by path_as_text"""
                          'returning without updating db!')
             return
 
-        from stalker import db, Task, Project
+        from stalker import Task, Project
         from stalker.models.task import Task_Computed_Resources
 
         entity_ids = []
@@ -620,7 +621,8 @@ order by path_as_text"""
                 computed_start=bindparam('computed_start'),
                 computed_end=bindparam('computed_end')
             )
-        db.DBSession.connection().execute(
+        from stalker.db.session import DBSession
+        DBSession.connection().execute(
             update_statement,
             update_data
         )
@@ -634,7 +636,7 @@ order by path_as_text"""
                 computed_start=bindparam('computed_start'),
                 computed_end=bindparam('computed_end')
             )
-        db.DBSession.connection().execute(
+        DBSession.connection().execute(
             update_project_statement,
             update_data
         )
@@ -650,8 +652,8 @@ order by path_as_text"""
                     resource_id=bindparam('resource_id')
                 )
 
-            db.DBSession.connection().execute(delete_resources_statement)
-            db.DBSession.connection().execute(
+            DBSession.connection().execute(delete_resources_statement)
+            DBSession.connection().execute(
                 update_resources_statement,
                 update_user_data
             )
@@ -687,13 +689,14 @@ order by path_as_text"""
         logger.debug('tjp_file_full_path: %s' % self.tjp_file_full_path)
 
         # pass it to tj3
+        from stalker import defaults
         if os.name == 'nt':
+            logger.debug('tj3 using fallback mode for Windows!')
             command = '%s %s -o %s' % (
                 defaults.tj_command,
                 self.tjp_file_full_path,
                 self.temp_file_path,
             )
-            logger.debug('tj3 using fallback mode for Windows!')
             logger.debug('tj3 command: %s' % command)
             returncode = os.system(command)
             stderr_buffer = ''

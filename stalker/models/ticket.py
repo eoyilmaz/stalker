@@ -29,8 +29,6 @@ from stalker.db.declarative import Base
 from stalker.models.entity import Entity, SimpleEntity
 from stalker.models.mixins import StatusMixin
 
-from stalker import defaults
-
 from stalker.log import logging_level
 import logging
 
@@ -243,7 +241,8 @@ class Ticket(Entity, StatusMixin):
                  summary=None, **kwargs):
         # just force auto name generation
         self._number = self._generate_ticket_number()
-        kwargs['name'] = defaults.ticket_label + ' #%i' % self.number
+        from stalker import defaults
+        kwargs['name'] = '%s #%i' % (defaults.ticket_label, self.number)
 
         super(Ticket, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)
@@ -286,9 +285,11 @@ class Ticket(Entity, StatusMixin):
         """
         try:
             # do your query
-            max_ticket = Ticket.query \
-                .order_by(Ticket.number.desc()) \
-                .first()
+            from stalker.db.session import DBSession
+            with DBSession.no_autoflush:
+                max_ticket = Ticket.query \
+                    .order_by(Ticket.number.desc()) \
+                    .first()
         except UnboundExecutionError:
             max_ticket = None
 
@@ -359,6 +360,7 @@ class Ticket(Entity, StatusMixin):
         :param stalker.models.auth.User created_by: The User creating this
             action
         """
+        from stalker import defaults
         statuses = defaults.ticket_workflow[action].keys()
         status = self.status.name
         return_value = None
@@ -465,6 +467,7 @@ class TicketLog(SimpleEntity):
 
     .. _Track Workflow: http://trac.edgewall.org/wiki/TracWorkflow
     """
+    from stalker import defaults  # need to limit it with a scope
 
     # TODO: there are no tests for the TicketLog class
 

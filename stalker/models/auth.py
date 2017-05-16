@@ -30,7 +30,6 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship, synonym, validates
 from sqlalchemy.schema import UniqueConstraint
 
-from stalker import defaults
 from stalker.db.declarative import Base
 from stalker.models.mixins import ACLMixin
 from stalker.models.entity import Entity, SimpleEntity
@@ -118,6 +117,10 @@ class Permission(Base):
       DBSession.add(group)
       DBSession.commit()
     """
+    from stalker import defaults  # I know it is a weird place to import but we
+                                  # need to do it in that way to limit the
+                                  # import statement with a scope, because the
+                                  # default can be updated
     __tablename__ = 'Permissions'
     __table_args__ = (
         UniqueConstraint('access', 'action', 'class_name'),
@@ -194,6 +197,7 @@ class Permission(Base):
                 (self.__class__.__name__, action.__class__.__name__)
             )
 
+        from stalker import defaults
         if action not in defaults.actions:
             raise ValueError(
                 "%s.action should be one of the values of %s not '%s'" %
@@ -887,7 +891,7 @@ class User(Entity, ACLMixin):
         """outputs a TaskJuggler formatted string
         """
         from jinja2 import Template
-
+        from stalker import defaults
         temp = Template(defaults.tjp_user_template, trim_blocks=True)
         return temp.render({'user': self})
 
@@ -1003,6 +1007,7 @@ class LocalSession(object):
         """
         :return str: the session file full path
         """
+        from stalker import defaults
         return os.path.normpath(os.path.join(
             defaults.local_storage_path,
             defaults.local_session_data_file_name

@@ -19,11 +19,9 @@
 import unittest
 
 from sqlalchemy import Column, Integer, ForeignKey
-from stalker.db.session import DBSession
 from stalker.models.entity import SimpleEntity
 from stalker.models.mixins import ReferenceMixin
 from stalker.models.link import Link
-from stalker.testing import UnitTestBase
 
 
 class DeclRefMixA(SimpleEntity, ReferenceMixin):
@@ -54,7 +52,7 @@ class DeclRefMixB(SimpleEntity, ReferenceMixin):
         ReferenceMixin.__init__(self, **kwargs)
 
 
-class ReferenceMixinTester(UnitTestBase):
+class ReferenceMixinTester(unittest.TestCase):
     """Tests ReferenceMixin
     """
 

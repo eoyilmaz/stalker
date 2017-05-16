@@ -16,11 +16,12 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
+
+import unittest
 from stalker.models.auth import User, Group
-from stalker.testing import UnitTestBase
 
 
-class GroupTester(UnitTestBase):
+class GroupTester(unittest.TestCase):
     """tests the stalker.models.auth.Group class
     """
 

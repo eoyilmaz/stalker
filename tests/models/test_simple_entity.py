@@ -16,17 +16,17 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-from stalker.testing import UnitTestBase
-
-# create a new class deriving from the SimpleEntity
+import unittest
+from stalker.testing import UnitTestDBBase
 from stalker import SimpleEntity
 
 
+# create a new class deriving from the SimpleEntity
 class NewClass(SimpleEntity):
     __strictly_typed__ = True
 
 
-class SimpleEntityTester(UnitTestBase):
+class SimpleEntityTester(unittest.TestCase):
     """testing the SimpleEntity class
     """
 
@@ -127,14 +127,20 @@ class SimpleEntityTester(UnitTestBase):
         """
         self.kwargs["name"] = None
         new_simple_entity = SimpleEntity(**self.kwargs)
-        self.assertTrue(new_simple_entity.name)
+        self.assertIsNotNone(new_simple_entity.name)
 
     def test_name_attribute_is_set_to_None(self):
         """testing if the name attribute will be set to an automatic value if
         it is set to None
         """
         self.test_simple_entity.name = ''
-        self.assertTrue(self.test_simple_entity.name)
+        self.assertIsNotNone(self.test_simple_entity.name)
+
+    def test_name_attribute_is_set_to_None2(self):
+        """testing if the name attribute will be set to an automatic value if
+        it is set to None
+        """
+        self.assertNotEqual(self.test_simple_entity.name, '')
 
     def test_name_argument_is_empty_string(self):
         """testing if the name attribute will be set to an automatic value if
@@ -705,78 +711,6 @@ class SimpleEntityTester(UnitTestBase):
         # restore the stalker.__version__
         stalker.__version__ = current_version
 
-    def test_generic_data_attribute_can_hold_a_wide_variety_of_object_types(self):
-        """testing if the generic_data attribute can hold any kind of object as
-        a list
-        """
-        new_simple_entity = SimpleEntity(**self.kwargs)
-        from stalker import User
-        test_user = User(
-            name='email',
-            login='email',
-            email='email@email.com',
-            password='email',
-        )
-
-        from stalker import Department
-        test_department = Department(
-            name='department1'
-        )
-
-        from stalker import Repository
-        test_repo = Repository(
-            name='Test Repository'
-        )
-
-        from stalker import Structure
-        test_struct = Structure(
-            name='Test Project Structure'
-        )
-
-        from stalker import Status, StatusList
-        test_project_status_list = StatusList(
-            name='Project Status List',
-            target_entity_type='Project',
-            statuses=[
-                Status(name='Active', code='ACT')
-            ]
-        )
-
-        from stalker import Project
-        test_proj = Project(
-            name='Test Project 1',
-            code='tp1',
-            repository=test_repo,
-            structure=test_struct,
-            status_list=test_project_status_list
-        )
-
-        new_simple_entity.generic_data.extend(
-            [test_proj, test_project_status_list, test_struct, test_repo,
-             test_department, test_user]
-        )
-
-        from stalker import db
-        db.DBSession.add(new_simple_entity)
-        db.DBSession.commit()
-
-        # now check if it is added to the database correctly
-        del new_simple_entity
-
-        new_simple_entity_db = SimpleEntity.query \
-            .filter_by(name=self.kwargs['name']) \
-            .first()
-
-        self.assertTrue(test_proj in new_simple_entity_db.generic_data)
-        self.assertTrue(
-            test_project_status_list in new_simple_entity_db.generic_data)
-        self.assertTrue(test_struct in new_simple_entity_db.generic_data)
-        self.assertTrue(test_repo in new_simple_entity_db.generic_data)
-        self.assertTrue(test_department in new_simple_entity_db.generic_data)
-        self.assertTrue(test_user in new_simple_entity_db.generic_data)
-
-        db.DBSession.remove()
-
     def test_thumbnail_argument_is_skipped(self):
         """testing if the thumbnail attribute will be None when the thumbnail
         argument is skipped
@@ -986,3 +920,119 @@ class SimpleEntityTester(UnitTestBase):
         """
         with self.assertRaises(NotImplementedError):
             self.test_simple_entity.to_tjp()
+
+
+class SimpleEntityDBTester(UnitTestDBBase):
+    """tests that needs a database
+    """
+
+    def setUp(self):
+        """set the test
+        """
+        super(SimpleEntityDBTester, self).setUp()
+        from stalker import User
+        import json
+        self.test_user = User(
+            name="Test User",
+            login="testuser",
+            email="test@user.com",
+            password="test",
+            generic_text=json.dumps(
+                {
+                    'Phone number': '123'
+                },
+                sort_keys=True
+            ),
+        )
+        from stalker.db.session import DBSession
+        DBSession.add(self.test_user)
+        DBSession.commit()
+
+        import datetime
+        import pytz
+        self.date_created = \
+            datetime.datetime(2010, 10, 21, 3, 8, 0, tzinfo=pytz.utc)
+        self.date_updated = self.date_created
+
+        self.kwargs = {
+            "name": "Test Entity",
+            "code": "TstEnt",
+            "description": "This is a test entity, and this is a proper \
+            description for it",
+            "created_by": self.test_user,
+            "updated_by": self.test_user,
+            "date_created": self.date_created,
+            "date_updated": self.date_updated,
+            'generic_text': json.dumps(
+                {
+                    'Phone number': '123'
+                },
+                sort_keys=True
+            ),
+        }
+
+    def test_generic_data_attribute_can_hold_a_wide_variety_of_object_types(self):
+        """testing if the generic_data attribute can hold any kind of object as
+        a list
+        """
+        new_simple_entity = SimpleEntity(**self.kwargs)
+        from stalker import User
+        test_user = User(
+            name='email',
+            login='email',
+            email='email@email.com',
+            password='email',
+        )
+
+        from stalker import Department
+        test_department = Department(
+            name='department1'
+        )
+
+        from stalker import Repository
+        test_repo = Repository(
+            name='Test Repository'
+        )
+
+        from stalker import Structure
+        test_struct = Structure(
+            name='Test Project Structure'
+        )
+
+        from stalker import Status, StatusList
+        test_project_status_list = StatusList(
+            name='Project Status List',
+            target_entity_type='Project',
+            statuses=[
+                Status(name='Active', code='ACT')
+            ]
+        )
+
+        from stalker import Project
+        test_proj = Project(
+            name='Test Project 1',
+            code='tp1',
+            repository=test_repo,
+            structure=test_struct,
+            status_list=test_project_status_list
+        )
+
+        new_simple_entity.generic_data.extend(
+            [test_proj, test_project_status_list, test_struct, test_repo,
+             test_department, test_user]
+        )
+
+        # now check if it is added to the database correctly
+        del new_simple_entity
+
+        new_simple_entity_db = SimpleEntity.query \
+            .filter_by(name=self.kwargs['name']) \
+            .first()
+
+        self.assertTrue(test_proj in new_simple_entity_db.generic_data)
+        self.assertTrue(
+            test_project_status_list in new_simple_entity_db.generic_data)
+        self.assertTrue(test_struct in new_simple_entity_db.generic_data)
+        self.assertTrue(test_repo in new_simple_entity_db.generic_data)
+        self.assertTrue(test_department in new_simple_entity_db.generic_data)
+        self.assertTrue(test_user in new_simple_entity_db.generic_data)

@@ -16,11 +16,10 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-
+import unittest
 from sqlalchemy import Column, Integer
 
 from stalker import ACLMixin
-from stalker.testing import UnitTestBase
 from stalker.db.declarative import Base
 
 
@@ -33,15 +32,13 @@ class TestClassForACL(Base, ACLMixin):
         self.name = None
 
 
-class ACLMixinTester(UnitTestBase):
+class ACLMixinTester(unittest.TestCase):
     """tests the stalker.models.mixins.ACLMixin class
     """
 
     def setUp(self):
         """setup the test
         """
-        super(ACLMixinTester, self).setUp()
-
         # create permissions
         from stalker import Permission
         self.test_perm1 = Permission(

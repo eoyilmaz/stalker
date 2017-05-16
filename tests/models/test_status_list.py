@@ -16,11 +16,11 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-from stalker.testing import UnitTestBase
+import unittest
 from stalker import Status, StatusList
 
 
-class StatusListTest(UnitTestBase):
+class StatusListTest(unittest.TestCase):
     """testing the StatusList class
     """
 
@@ -33,21 +33,19 @@ class StatusListTest(UnitTestBase):
             "name": "a status list",
             "description": "this is a status list for testing purposes",
             "statuses": [
-                Status.query.filter_by(code="WFD").first(),
-                Status.query.filter_by(code="RTS").first(),
-                Status.query.filter_by(code="WIP").first(),
-                Status.query.filter_by(code="PREV").first(),
-                Status.query.filter_by(code="HREV").first(),
-                Status.query.filter_by(code="CMPL").first(),
-                Status.query.filter_by(code="OH").first(),
+                Status(name='Waiting For Dependency', code="WFD"),
+                Status(name='Ready To Start', code="RTS"),
+                Status(name='Work In Progress', code="WIP"),
+                Status(name='Pending Review', code="PREV"),
+                Status(name='Has Revision', code="HREV"),
+                Status(name='Completed', code="CMPL"),
+                Status(name='On Hold', code="OH"),
             ],
             "target_entity_type": "Project",
         }
 
         self.test_status_list = StatusList(**self.kwargs)
         from stalker import db
-        db.DBSession.add(self.test_status_list)
-        db.DBSession.commit()
 
     def test___auto_name__class_attribute_is_set_to_True(self):
         """testing if the __auto_name__ class attribute is set to True for

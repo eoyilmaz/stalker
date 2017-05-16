@@ -18,11 +18,11 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+import unittest
 from stalker.models.studio import WorkingHours
-from stalker.testing import UnitTestBase
 
 
-class WorkingHoursTester(UnitTestBase):
+class WorkingHoursTester(unittest.TestCase):
     """tests the stalker.models.project.WorkingHours class
     """
 

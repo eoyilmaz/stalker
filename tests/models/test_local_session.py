@@ -16,10 +16,11 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-from stalker.testing import UnitTestBase
+import unittest
+from stalker.testing import UnitTestDBBase
 
 
-class LocalSessionTester(UnitTestBase):
+class LocalSessionTester(unittest.TestCase):
     """tests LocalSession class
     """
 
@@ -85,104 +86,12 @@ class LocalSessionTester(UnitTestBase):
             logged_in_user_id
         )
 
-    def test_logged_in_user_returns_the_stored_User_instance_from_last_time(self):
-        """testing if logged_in_user returns the logged in user
-        """
-        # create a new user
-        from stalker import db, User
-        new_user = User(
-            name='Test User',
-            login='test_user',
-            email='test_user@users.com',
-            password='secret'
-        )
-
-        # save it to the Database
-        db.DBSession.add(new_user)
-        db.DBSession.commit()
-
-        self.assertTrue(new_user.id is not None)
-
-        # save it to the local storage
-        from stalker import LocalSession
-        local_session = LocalSession()
-        local_session.store_user(new_user)
-
-        # save the session
-        local_session.save()
-
-        # now get it back with a new local_session
-        local_session2 = LocalSession()
-
-        self.assertEqual(
-            local_session2.logged_in_user_id,
-            new_user.id
-        )
-
-        self.assertEqual(
-            local_session2.logged_in_user,
-            new_user
-        )
-
-    def test_LocalSession_will_not_use_the_stored_data_if_it_is_invalid(self):
-        """testing if the LocalSession will not use the stored session if it is
-        not valid anymore
-        """
-        # create a new user
-        from stalker import db, User, LocalSession
-        new_user = User(
-            name='Test User',
-            login='test_user',
-            email='test_user@users.com',
-            password='secret'
-        )
-
-        # save it to the Database
-        db.DBSession.add(new_user)
-        db.DBSession.commit()
-
-        self.assertTrue(new_user.id is not None)
-
-        # save it to the local storage
-        local_session = LocalSession()
-        local_session.store_user(new_user)
-
-        # save the session
-        local_session.save()
-
-        # set the valid time to an early date
-        import pytz
-        import datetime
-        local_session.valid_to = \
-            datetime.datetime.now(pytz.utc) - datetime.timedelta(10)
-
-        # pickle the data
-        import json
-        data = json.dumps(
-            {
-                'valid_to': local_session.valid_to,
-                'logged_in_user_id': -1
-            },
-            default=local_session.default_json_serializer
-        )
-        print('data: %s' % data)
-        local_session._write_data(data)
-
-        # now get it back with a new local_session
-        local_session2 = LocalSession()
-
-        self.assertEqual(
-            local_session2.logged_in_user_id, None
-        )
-
-        self.assertTrue(local_session2.logged_in_user is None)
-
     def test_delete_will_delete_the_session_cache(self):
         """testing if the LocalSession.delete() will delete the current cache
         file
         """
         # create a new user
-        from stalker import db, User
+        from stalker import User
         new_user = User(
             name='Test User',
             login='test_user',
@@ -191,9 +100,7 @@ class LocalSessionTester(UnitTestBase):
         )
 
         # save it to the Database
-        db.DBSession.add(new_user)
-        db.DBSession.commit()
-
+        new_user.id = 1023
         self.assertTrue(new_user.id is not None)
 
         # save it to the local storage
@@ -234,3 +141,99 @@ class LocalSessionTester(UnitTestBase):
         # delete a second time
         # this should not raise an OSError
         local_session.delete()
+
+
+class LocalSessionDBTester(UnitTestDBBase):
+    """tests that needs a database
+    """
+
+    def test_LocalSession_will_not_use_the_stored_data_if_it_is_invalid(self):
+        """testing if the LocalSession will not use the stored session if it is
+        not valid anymore
+        """
+        # create a new user
+        from stalker import User, LocalSession
+        new_user = User(
+            name='Test User',
+            login='test_user',
+            email='test_user@users.com',
+            password='secret'
+        )
+
+        # save it to the Database
+        from stalker.db.session import DBSession
+        DBSession.add(new_user)
+        DBSession.commit()
+        self.assertTrue(new_user.id is not None)
+
+        # save it to the local storage
+        local_session = LocalSession()
+        local_session.store_user(new_user)
+
+        # save the session
+        local_session.save()
+
+        # set the valid time to an early date
+        import pytz
+        import datetime
+        local_session.valid_to = \
+            datetime.datetime.now(pytz.utc) - datetime.timedelta(10)
+
+        # pickle the data
+        import json
+        data = json.dumps(
+            {
+                'valid_to': local_session.valid_to,
+                'logged_in_user_id': -1
+            },
+            default=local_session.default_json_serializer
+        )
+        local_session._write_data(data)
+
+        # now get it back with a new local_session
+        local_session2 = LocalSession()
+
+        self.assertEqual(
+            local_session2.logged_in_user_id, None
+        )
+
+        self.assertTrue(local_session2.logged_in_user is None)
+
+    def test_logged_in_user_returns_the_stored_User_instance_from_last_time(self):
+        """testing if logged_in_user returns the logged in user
+        """
+        # create a new user
+        from stalker import User
+        new_user = User(
+            name='Test User',
+            login='test_user',
+            email='test_user@users.com',
+            password='secret'
+        )
+
+        # save it to the Database
+        from stalker.db.session import DBSession
+        DBSession.add(new_user)
+        DBSession.commit()
+        self.assertTrue(new_user.id is not None)
+
+        # save it to the local storage
+        from stalker import LocalSession
+        local_session = LocalSession()
+        local_session.store_user(new_user)
+
+        # save the session
+        local_session.save()
+
+        # now get it back with a new local_session
+        local_session2 = LocalSession()
+
+        self.assertEqual(
+            local_session2.logged_in_user_id,
+            new_user.id
+        )
+
+        self.assertEqual(
+            local_session2.logged_in_user,
+            new_user
+        )

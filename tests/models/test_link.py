@@ -17,12 +17,11 @@
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
 import os
-
-from stalker.testing import UnitTestBase
+import unittest
 from stalker import Link
 
 
-class LinkTester(UnitTestBase):
+class LinkTester(unittest.TestCase):
     """tests the :class:`stalker.models.link.Link` class
     """
 
@@ -38,13 +37,11 @@ class LinkTester(UnitTestBase):
             code='test type1',
             target_entity_type=Link,
         )
-        db.DBSession.add(self.test_link_type1)
         self.test_link_type2 = Type(
             name='Test Type 2',
             code='test type2',
             target_entity_type=Link,
         )
-        db.DBSession.add(self.test_link_type2)
 
         self.kwargs = {
             'name': 'An Image Link',
@@ -55,8 +52,6 @@ class LinkTester(UnitTestBase):
         }
 
         self.test_link = Link(**self.kwargs)
-        db.DBSession.add(self.test_link)
-        db.DBSession.commit()
 
     def test___auto_name__class_attribute_is_set_to_True(self):
         """testing if the __auto_name__ class attribute is set to False for

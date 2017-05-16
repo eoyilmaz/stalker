@@ -17,17 +17,17 @@
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
 from stalker import ProjectClient
-from stalker.testing import UnitTestBase
+from stalker.testing import UnitTestDBBase
 
 
-class ProjectClientTestCase(UnitTestBase):
+class ProjectClientTestDBCase(UnitTestDBBase):
     """tests for ProjectClient class
     """
 
     def setUp(self):
         """set the test up
         """
-        super(ProjectClientTestCase, self).setUp()
+        super(ProjectClientTestDBCase, self).setUp()
 
         from stalker import Status, StatusList, Repository
         self.test_repo = Repository(

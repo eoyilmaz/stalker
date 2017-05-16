@@ -17,17 +17,17 @@
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
 from stalker import Tag, SimpleEntity
-from stalker.testing import UnitTestBase
+from stalker.testing import UnitTestDBBase
 
 
-class TagTest(UnitTestBase):
+class TagTestDB(UnitTestDBBase):
     """testing the Tag class
     """
 
     def setUp(self):
         """setup the test
         """
-        super(UnitTestBase, self).setUp()
+        super(TagTestDB, self).setUp()
         self.kwargs = {
             "name": "a test tag",
             "description": "this is a test tag",

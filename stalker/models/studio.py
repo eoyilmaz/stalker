@@ -26,7 +26,7 @@ from sqlalchemy import (Column, Integer, ForeignKey, Interval, Boolean,
                         DateTime, PickleType)
 from sqlalchemy.orm import validates, relationship, synonym, reconstructor
 
-from stalker import db, defaults, log
+from stalker import log
 from stalker.models.entity import SimpleEntity, Entity
 from stalker.models.mixins import DateRangeMixin, WorkingHoursMixin
 from stalker.models.schedulers import SchedulerBase
@@ -205,7 +205,7 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         except AttributeError:
             # The Studio and WorkingHours classes has changed from
             # v0.2.3 to v0.2.5 and with this change it is simply
-            # no possible to initialize the db if we insist to update the
+            # not possible to initialize the db if we insist to update the
             # defaults for daily_working_hours, because there is no
             # WorkingHours._daily_working_hours in versions before than
             # v0.2.5, so just skip it for at least the studio instance
@@ -336,6 +336,7 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         """converts the studio to a tjp representation
         """
         from jinja2 import Template
+        from stalker import defaults
 
         temp = Template(
             defaults.tjp_studio_template,
@@ -413,7 +414,8 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
             )
 
         import pytz
-        with db.DBSession.no_autoflush:
+        from stalker.db.session import DBSession
+        with DBSession.no_autoflush:
             self.scheduling_started_at = datetime.datetime.now(pytz.utc)
 
             # run the scheduler
@@ -428,7 +430,7 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
             result = self.scheduler.schedule()
         finally:
             # in any case set is_scheduling to False
-            with db.DBSession.no_autoflush:
+            with DBSession.no_autoflush:
                 self.is_scheduling = False
                 self.is_scheduling_by = None
 
@@ -512,6 +514,7 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         """validates the given timing_resolution value
         """
         if timing_resolution is None:
+            from stalker import defaults
             timing_resolution = defaults.timing_resolution
 
         if not isinstance(timing_resolution, datetime.timedelta):
@@ -585,6 +588,7 @@ class WorkingHours(object):
                  daily_working_hours=None,
                  **kwargs):
         if working_hours is None:
+            from stalker import defaults
             working_hours = defaults.working_hours
         self._wh = None
         self.working_hours = self._validate_working_hours(working_hours)
@@ -605,13 +609,14 @@ class WorkingHours(object):
     def __getitem__(self, item):
         from stalker import __string_types__
         if isinstance(item, int):
+            from stalker import defaults
             return self._wh[defaults.day_order[item]]
         elif isinstance(item, __string_types__):
             return self._wh[item]
 
     def __setitem__(self, key, value):
         self._validate_wh_value(value)
-        from stalker import __string_types__
+        from stalker import __string_types__, defaults
         if isinstance(key, int):
             self._wh[defaults.day_order[key]] = value
         elif isinstance(key, __string_types__):
@@ -647,6 +652,7 @@ class WorkingHours(object):
 
         # update the default values with the supplied working_hour dictionary
         # copy the defaults
+        from stalker import defaults
         wh_def = copy.copy(defaults.working_hours)
         # update them
         wh_def.update(wh_in)
@@ -726,6 +732,7 @@ class WorkingHours(object):
         """
         # render the template
         from jinja2 import Template
+        from stalker import defaults
 
         template = Template(defaults.tjp_working_hours_template)
         return template.render({'workinghours': self})
@@ -761,6 +768,7 @@ class WorkingHours(object):
         """validates the given daily working hours value
         """
         if dwh is None:
+            from stalker import defaults
             dwh = defaults.daily_working_hours
 
         if not isinstance(dwh, int):
@@ -857,6 +865,6 @@ class Vacation(SimpleEntity, DateRangeMixin):
         """overridden to_tjp method
         """
         from jinja2 import Template
-
+        from stalker import defaults
         template = Template(defaults.tjp_vacation_template)
         return template.render({'vacation': self})

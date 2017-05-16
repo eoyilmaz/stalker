@@ -16,11 +16,12 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
+
+import unittest
 from stalker import PriceList, Good
-from stalker.testing import UnitTestBase
 
 
-class PriceListTestCase(UnitTestBase):
+class PriceListTestCase(unittest.TestCase):
     """tests the PriceList class
     """
 

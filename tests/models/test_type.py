@@ -16,11 +16,11 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
+import unittest
 from stalker import Entity, Type
-from stalker.testing import UnitTestBase
 
 
-class TypeTester(UnitTestBase):
+class TypeTester(unittest.TestCase):
     """Tests Type class
     """
 

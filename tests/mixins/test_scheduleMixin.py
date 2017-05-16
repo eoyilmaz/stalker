@@ -16,9 +16,9 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-from stalker.testing import UnitTestBase
+import unittest
 from sqlalchemy import Column, Integer, ForeignKey
-from stalker import SimpleEntity, ScheduleMixin, defaults
+from stalker import SimpleEntity, ScheduleMixin
 
 
 class MixedInClass(SimpleEntity, ScheduleMixin):
@@ -39,7 +39,7 @@ class MixedInClass(SimpleEntity, ScheduleMixin):
         ScheduleMixin.__init__(self, **kwargs)
 
 
-class ScheduleMixinTestCase(UnitTestBase):
+class ScheduleMixinTestCase(unittest.TestCase):
     """tests the ScheduleMixin
     """
 
@@ -265,9 +265,12 @@ class ScheduleMixinTestCase(UnitTestBase):
 
     def test_schedule_timing_argument_is_None(self):
         """testing if the schedule_timing attribute will be equal to the
-        stalker.config.Config.timing_resolution.seconds/3600 if the
+        stalker.config.Config.timing_resolution.seconds / 60 if the
         schedule_timing argument is None
         """
+        from stalker import defaults
+        import datetime
+        defaults.timing_resolution = datetime.timedelta(hours=1)
         self.kwargs["schedule_timing"] = None
         new_task = MixedInClass(**self.kwargs)
         self.assertEqual(
@@ -277,9 +280,12 @@ class ScheduleMixinTestCase(UnitTestBase):
 
     def test_schedule_timing_attribute_is_set_to_None(self):
         """testing if the schedule_timing attribute will be equal to the
-        stalker.config.Config.timing_resolution.seconds/3600 if it is set to
+        stalker.config.Config.timing_resolution.seconds / 60 if it is set to
         None
         """
+        from stalker import defaults
+        import datetime
+        defaults.timing_resolution = datetime.timedelta(hours=1)
         self.test_obj.schedule_timing = None
         self.assertEqual(
             self.test_obj.schedule_timing,
@@ -416,6 +422,7 @@ class ScheduleMixinTestCase(UnitTestBase):
     def test_least_meaningful_time_unit_is_working_properly(self):
         """testing if the least_meaningful_time_unit is working properly
         """
+        from stalker import defaults
         defaults.daily_working_hours = 9
         defaults.weekly_working_days = 5
         defaults.weekly_working_hours = 45
@@ -443,10 +450,13 @@ class ScheduleMixinTestCase(UnitTestBase):
             [[86400, False], (1, 'd')],
             [[162000, True], (1, 'w')],
             [[162000, False], (45, 'h')],
+            [[604800, False], (1, 'w')],
             [[648000, True], (1, 'm')],
             [[648000, False], (180, 'h')],
             [[8424000, True], (1, 'y')],
-            [[8424000, False], (2340, 'h')]
+            [[8424000, False], (2340, 'h')],
+            [[2419200, False], (1, 'm')],
+            [[31536000, False], (1, 'y')],
         ]
 
         for test_value in test_values:
@@ -460,6 +470,7 @@ class ScheduleMixinTestCase(UnitTestBase):
     def test_to_seconds_is_working_properly(self):
         """testing if the to_seconds method is working properly
         """
+        from stalker import defaults
         defaults.daily_working_hours = 9
         defaults.weekly_working_days = 5
         defaults.weekly_working_hours = 45
@@ -507,6 +518,7 @@ class ScheduleMixinTestCase(UnitTestBase):
     def test_schedule_seconds_is_working_properly(self):
         """testing if the schedule_seconds property is working properly
         """
+        from stalker import defaults
         defaults.daily_working_hours = 9
         defaults.weekly_working_days = 5
         defaults.weekly_working_hours = 45

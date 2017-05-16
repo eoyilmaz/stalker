@@ -22,13 +22,13 @@ import re
 import jinja2
 
 from sqlalchemy import Table, Column, Integer, ForeignKey, String, Boolean
-from sqlalchemy.exc import UnboundExecutionError
+from sqlalchemy.exc import UnboundExecutionError, OperationalError
 from sqlalchemy.orm import relationship, validates
 
 from stalker.db.declarative import Base
 from stalker.models.link import Link
 
-from stalker import defaults, DAGMixin
+from stalker import DAGMixin
 
 from stalker.log import logging_level
 import logging
@@ -105,6 +105,7 @@ class Version(Link, DAGMixin):
 
     :type parent: :class:`.Version`
     """
+    from stalker import defaults
     __auto_name__ = True
     __tablename__ = "Versions"
     __mapper_args__ = {"polymorphic_identity": "Version"}
@@ -265,13 +266,24 @@ class Version(Link, DAGMixin):
         :returns: :class:`.Version` instance
         """
         try:
-            last_version = Version.query\
-                .filter(Version.task == self.task)\
-                .filter(Version.take_name == self.take_name)\
-                .order_by(Version.version_number.desc())\
-                .first()
-        except UnboundExecutionError:
-            last_version = None
+            from stalker.db.session import DBSession
+            with DBSession.no_autoflush:
+                last_version = Version.query\
+                    .filter(Version.task == self.task)\
+                    .filter(Version.take_name == self.take_name)\
+                    .order_by(Version.version_number.desc())\
+                    .first()
+        except (UnboundExecutionError, OperationalError):
+            all_versions = \
+                sorted(self.task.versions, key=lambda x: x.version_number)
+            if all_versions:
+                last_version = all_versions[-1]
+                if last_version != self:
+                    return last_version
+                else:
+                    return 0
+            else:
+                last_version = None
         return last_version
 
     @property
@@ -291,11 +303,7 @@ class Version(Link, DAGMixin):
         """validates the given version_number value
         """
         # get the latest version
-        # and do it with auto flush turned off,
-        # or it will find itself and increase the version number unnecessarily
-        from stalker.db.session import DBSession
-        with DBSession.no_autoflush:
-            latest_version = self.latest_version
+        latest_version = self.latest_version
 
         max_version_number = 0
         if latest_version:

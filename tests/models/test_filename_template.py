@@ -16,11 +16,11 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-from stalker.testing import UnitTestBase
+import unittest
 from stalker import FilenameTemplate
 
 
-class FilenameTemplateTester(UnitTestBase):
+class FilenameTemplateTester(unittest.TestCase):
     """tests the stalker.models.template.FilenameTemplate class
     """
 
@@ -28,7 +28,7 @@ class FilenameTemplateTester(UnitTestBase):
         """setup the test
         """
         super(FilenameTemplateTester, self).setUp()
-        from stalker import db, Type, Asset, FilenameTemplate
+        from stalker import Type, Asset, FilenameTemplate
         self.kwargs = {
             "name": "Test FilenameTemplate",
             "type": Type(
@@ -40,11 +40,9 @@ class FilenameTemplateTester(UnitTestBase):
             "filename": "{{asset.code}}_{{version.take}}_{{task.type.code}}_" \
                         "{{version.version}}_{{user.initials}}",
             "output_path": "",
-            "target_entity_type": Asset,
+            "target_entity_type": 'Asset',
         }
         self.filename_template = FilenameTemplate(**self.kwargs)
-        db.DBSession.add(self.filename_template)
-        db.DBSession.commit()
 
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for

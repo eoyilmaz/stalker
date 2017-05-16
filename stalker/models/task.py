@@ -21,22 +21,16 @@ import logging
 import os
 
 from sqlalchemy import (Table, Column, Integer, ForeignKey, Boolean, Enum,
-                        DateTime, Float, event, CheckConstraint)
-from sqlalchemy.exc import InvalidRequestError
+                        Float, event, CheckConstraint)
+from sqlalchemy.exc import UnboundExecutionError, OperationalError, \
+    InvalidRequestError
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship, validates, synonym, reconstructor
 
-from stalker import defaults
-from stalker.db.session import DBSession
 from stalker.db.declarative import Base
-from stalker.models import check_circular_dependency
 from stalker.models.entity import Entity
-from stalker.models.auth import User
 from stalker.models.mixins import (DateRangeMixin, StatusMixin, ReferenceMixin,
                                    ScheduleMixin, DAGMixin)
-from stalker.models.status import Status
-from stalker.exceptions import (OverBookedError, CircularDependencyError,
-                                StatusError, DependencyViolationError)
 from stalker.log import logging_level
 
 logger = logging.getLogger(__name__)
@@ -114,9 +108,6 @@ class TimeLog(Entity, DateRangeMixin):
         doc="""The :class:`.User` instance that this time_log is created for"""
     )
 
-    # TODO: Create a Constraint to prevent TimeLogs to be entered to the same
-    #       or intersecting dates for the same resource.
-
     def __init__(
             self,
             task=None,
@@ -155,18 +146,21 @@ class TimeLog(Entity, DateRangeMixin):
 
         # check status
         logger.debug('checking task status!')
+        from stalker.db.session import DBSession
         with DBSession.no_autoflush:
-            WFD = Status.query.filter_by(code='WFD').first()
-            RTS = Status.query.filter_by(code='RTS').first()
-            WIP = Status.query.filter_by(code='WIP').first()
-            PREV = Status.query.filter_by(code='PREV').first()
-            HREV = Status.query.filter_by(code='HREV').first()
-            DREV = Status.query.filter_by(code='DREV').first()
-            OH = Status.query.filter_by(code='OH').first()
-            STOP = Status.query.filter_by(code='STOP').first()
-            CMPL = Status.query.filter_by(code='CMPL').first()
-
+            task_status_list = task.status_list
+            WFD = task_status_list['WFD']
+            RTS = task_status_list['RTS']
+            WIP = task_status_list['WIP']
+            PREV = task_status_list['PREV']
+            HREV = task_status_list['HREV']
+            DREV = task_status_list['DREV']
+            OH = task_status_list['OH']
+            STOP = task_status_list['STOP']
+            CMPL = task_status_list['CMPL']
+    
             if task.status in [WFD, OH, STOP, CMPL]:
+                from stalker.exceptions import StatusError
                 raise StatusError(
                     '%(task)s is a %(status)s task, and it is not allowed to '
                     'create TimeLogs for a %(status)s task, please supply a '
@@ -199,6 +193,7 @@ class TimeLog(Entity, DateRangeMixin):
                         violation_date = dep_task.start
 
                 if raise_violation_error:
+                    from stalker.exceptions import DependencyViolationError
                     raise DependencyViolationError(
                         'It is not possible to create a TimeLog before '
                         '%s, which violates the dependency relation of '
@@ -224,6 +219,7 @@ class TimeLog(Entity, DateRangeMixin):
                 "%s.resource can not be None" % self.__class__.__name__
             )
 
+        from stalker import User
         if not isinstance(resource, User):
             raise TypeError(
                 "%s.resource should be a stalker.models.auth.User instance "
@@ -232,47 +228,42 @@ class TimeLog(Entity, DateRangeMixin):
             )
 
         # check for overbooking
+        clashing_time_log_data = None
+        from stalker.db.session import DBSession
         with DBSession.no_autoflush:
-            # TODO: use other logging levels not just DEBUG
-            # logger.debug('resource.time_logs: %s' % resource.time_logs)
-            # for time_log in resource.time_logs:
-            #     # logger.debug('time_log       : %s' % time_log)
-            #     # logger.debug('time_log.start : %s' % time_log.start)
-            #     # logger.debug('time_log.end   : %s' % time_log.end)
-            #     # logger.debug('self.start     : %s' % self.start)
-            #     # logger.debug('self.end       : %s' % self.end)
-            #
-            #     if time_log != self:
-            #         if time_log.start == self.start or \
-            #            time_log.end == self.end or \
-            #            time_log.start < self.end < time_log.end or \
-            #            time_log.start < self.start < time_log.end:
-            #             raise OverBookedError(
-            #                 "The resource %s is overly booked with %s and %s" %
-            #                 (resource, self, time_log),
-            #             )
-            
-            from stalker import db
-            from sqlalchemy import or_, and_
-            clashing_time_log_data = \
-                db.DBSession.query(TimeLog.start, TimeLog.end)\
-                    .filter(TimeLog.id != self.id)\
-                    .filter(TimeLog.resource_id == resource.id)\
-                    .filter(
-                        or_(
-                            and_(
-                                TimeLog.start <= self.start,
-                                self.start < TimeLog.end
-                            ),
-                            and_(
-                                TimeLog.start < self.end,
-                                self.end <= TimeLog.end
+            try:
+                from sqlalchemy import or_, and_
+                clashing_time_log_data = \
+                    DBSession.query(TimeLog.start, TimeLog.end)\
+                        .filter(TimeLog.id != self.id)\
+                        .filter(TimeLog.resource_id == resource.id)\
+                        .filter(
+                            or_(
+                                and_(
+                                    TimeLog.start <= self.start,
+                                    self.start < TimeLog.end
+                                ),
+                                and_(
+                                    TimeLog.start < self.end,
+                                    self.end <= TimeLog.end
+                                )
                             )
-                        )
-                    )\
-                    .first()
+                        )\
+                        .first()
+
+            except (UnboundExecutionError, OperationalError) as e:
+                # fallback to Python
+                for time_log in resource.time_logs:
+                    if time_log != self:
+                        if time_log.start == self.start or \
+                           time_log.end == self.end or \
+                           time_log.start < self.end < time_log.end or \
+                           time_log.start < self.start < time_log.end:
+                            clashing_time_log_data = \
+                                [time_log.start, time_log.end]
 
             if clashing_time_log_data:
+                from stalker.exceptions import OverBookedError
                 raise OverBookedError(
                     "The resource has another TimeLog between %s and %s" % (
                         clashing_time_log_data[0], clashing_time_log_data[1]
@@ -860,6 +851,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
       filter and group them later on.
 
     """
+    from stalker import defaults
     __auto_name__ = False
     __tablename__ = "Tasks"
     __mapper_args__ = {'polymorphic_identity': "Task"}
@@ -1139,9 +1131,9 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
         self.is_milestone = is_milestone
 
         # update the status
+        from stalker.db.session import DBSession
         with DBSession.no_autoflush:
-            wfd = Status.query.filter_by(code='WFD').first()
-        self.status = wfd
+            self.status = self.status_list['WFD']
 
         if depends is None:
             depends = []
@@ -1220,6 +1212,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
 
         # TODO: convert this to an event
         # update parents total_logged_second attribute
+        from stalker.db.session import DBSession
         with DBSession.no_autoflush:
             if self.parent:
                 self.parent.total_logged_seconds += time_log.total_seconds
@@ -1253,17 +1246,19 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
             return task_depends_to
 
         # check the status of the current task
+        from stalker.db.session import DBSession
         with DBSession.no_autoflush:
-            wfd = Status.query.filter_by(code='WFD').first()
-            rts = Status.query.filter_by(code='RTS').first()
-            wip = Status.query.filter_by(code='WIP').first()
-            prev = Status.query.filter_by(code='PREV').first()
-            hrev = Status.query.filter_by(code='HREV').first()
-            drev = Status.query.filter_by(code='DREV').first()
-            oh = Status.query.filter_by(code='OH').first()
-            stop = Status.query.filter_by(code='STOP').first()
-            cmpl = Status.query.filter_by(code='CMPL').first()
+            wfd = self.status_list['WFD']
+            rts = self.status_list['RTS']
+            wip = self.status_list['WIP']
+            prev = self.status_list['PREV']
+            hrev = self.status_list['HREV']
+            drev = self.status_list['DREV']
+            oh = self.status_list['OH']
+            stop = self.status_list['STOP']
+            cmpl = self.status_list['CMPL']
 
+            from stalker.exceptions import StatusError
             if self.status in [wip, prev, hrev, drev, oh, stop, cmpl]:
                 raise StatusError(
                     'This is a %(status)s task and it is not allowed to '
@@ -1288,6 +1283,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
             )
 
         # check for the circular dependency
+        from stalker.models import check_circular_dependency
         with DBSession.no_autoflush:
             check_circular_dependency(depends, self, 'depends')
             check_circular_dependency(depends, self, 'children')
@@ -1298,6 +1294,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
             parent = self.parent
             while parent:
                 if parent in depends.depends:
+                    from stalker.exceptions import CircularDependencyError
                     raise CircularDependencyError(
                         'One of the parents of %s is depending to %s' %
                         (self, depends)
@@ -1312,7 +1309,6 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
         # dependent task it self
 
         if self.status == rts:
-
             with DBSession.no_autoflush:
                 do_update_status = False
                 if depends.status in [wfd, rts, wip, oh, prev, hrev, drev, oh]:
@@ -1358,6 +1354,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
         """
         # update end date value by using the start and calculated duration
         if self.is_leaf:
+            from stalker import defaults
             unit = defaults.datetime_units_to_timedelta_kwargs.get(
                 schedule_unit,
                 None
@@ -1421,6 +1418,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
 
             #with DBSession.no_autoflush:
             # check for cycle
+            from stalker.models import check_circular_dependency
             check_circular_dependency(self, parent, 'children')
             check_circular_dependency(self, parent, 'depends')
 
@@ -1448,6 +1446,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
     def _validates_project(self, key, project):
         """validates the given project instance
         """
+        from stalker.db.session import DBSession
         if project is None:
             # check if there is a parent defined
             if self.parent:
@@ -1506,6 +1505,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
         """validates the given priority value
         """
         if priority is None:
+            from stalker import defaults
             priority = defaults.task_priority
 
         if not isinstance(priority, (int, float)):
@@ -1530,6 +1530,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
         """
         # just empty the resources list
         # do it without a flush
+        from stalker.db.session import DBSession
         with DBSession.no_autoflush:
             self.resources = []
 
@@ -1633,6 +1634,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
     def _validate_allocation_strategy(self, key, strategy):
         """validates the given allocation_strategy value
         """
+        from stalker import defaults
         if strategy is None:
             strategy = defaults.allocation_strategy[0]
 
@@ -1664,6 +1666,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
         """validates the given persistent_allocation value
         """
         if persistent_allocation is None:
+            from stalker import defaults
             persistent_allocation = defaults.persistent_allocation
 
         return bool(persistent_allocation)
@@ -1721,7 +1724,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
         if bid_unit is None:
             bid_unit = 'h'
 
-        from stalker import __string_types__
+        from stalker import __string_types__, defaults
         if not isinstance(bid_unit, __string_types__):
             raise TypeError(
                 '%(class)s.bid_unit should be a string value one of %(units)s '
@@ -1842,7 +1845,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
         """TaskJuggler representation of this task
         """
         from jinja2 import Template
-
+        from stalker import defaults
         temp = Template(defaults.tjp_task_template, trim_blocks=True)
         return temp.render({'task': self})
 
@@ -1873,16 +1876,32 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
 
         :returns int: An integer showing the total seconds spent.
         """
-        seconds = 0
+        from stalker.db.session import DBSession
         with DBSession.no_autoflush:
             if self.is_leaf:
-                for time_log in self.time_logs:
-                    seconds += time_log.total_seconds
+                try:
+                    from sqlalchemy import text
+                    sql = """
+                    select
+                        extract(epoch from sum("TimeLogs".end - "TimeLogs".start))
+                    from "TimeLogs"
+                    where "TimeLogs".task_id = :task_id
+                    """
+                    engine = DBSession.connection().engine
+                    result = engine.execute(text(sql), task_id=self.id).fetchone()
+                    return result[0] if result[0] else 0
+                except (UnboundExecutionError, OperationalError) as e:
+                    # no database connection
+                    # fallback to Python
+                    logger.debug('No session found! Falling back to Python')
+                    seconds = 0
+                    for time_log in self.time_logs:
+                        seconds += time_log.total_seconds
+                    return seconds
             else:
                 if self._total_logged_seconds is None:
                     self.update_schedule_info()
                 return self._total_logged_seconds
-        return seconds
 
     def _total_logged_seconds_setter(self, seconds):
         """Setter for total_logged_seconds. Mainly used for container tasks, to
@@ -1935,6 +1954,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
         # do it only for container tasks
         if self.is_container:
             # also update the parents
+            from stalker.db.session import DBSession
             with DBSession.no_autoflush:
                 if self.parent:
                     current_value = 0
@@ -2132,11 +2152,13 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
         Only applicable to leaf tasks.
         """
         # check task status
+        from stalker.db.session import DBSession
         with DBSession.no_autoflush:
-            wip = Status.query.filter_by(code='WIP').first()
-            prev = Status.query.filter_by(code='PREV').first()
+            wip = self.status_list['WIP']
+            prev = self.status_list['PREV']
 
         if self.status != wip:
+            from stalker.exceptions import StatusError
             raise StatusError(
                 '%(task)s (id:%(id)s) is a %(status)s task, and %(status)s '
                 'tasks are not suitable for requesting a review, please '
@@ -2186,11 +2208,13 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
         :type reviewer: class:`.User`
         """
         # check status
+        from stalker.db.session import DBSession
         with DBSession.no_autoflush:
-            prev = Status.query.filter_by(code='PREV').first()
-            cmpl = Status.query.filter_by(code='CMPL').first()
+            prev = self.status_list['PREV']
+            cmpl = self.status_list['CMPL']
 
         if self.status not in [prev, cmpl]:
+            from stalker.exceptions import StatusError
             raise StatusError(
                 '%(task)s (id: %(id)s) is a %(status)s task, and it is not '
                 'suitable for requesting a revision, please supply a PREV or '
@@ -2239,12 +2263,14 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
         raise a ValueError.
         """
         # check if status is WIP
+        from stalker.db.session import DBSession
         with DBSession.no_autoflush:
-            wip = Status.query.filter_by(code='WIP').first()
-            drev = Status.query.filter_by(code='DREV').first()
-            oh = Status.query.filter_by(code='OH').first()
+            wip = self.status_list['WIP']
+            drev = self.status_list['DREV']
+            oh = self.status_list['OH']
 
         if self.status not in [wip, drev, oh]:
+            from stalker.exceptions import StatusError
             raise StatusError(
                 '%(task)s (id:%(id)s) is a %(status)s task, only WIP or DREV '
                 'tasks can be set to On Hold' % {
@@ -2281,12 +2307,14 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
         """
 
         # check the status
+        from stalker.db.session import DBSession
         with DBSession.no_autoflush:
-            wip = Status.query.filter_by(code='WIP').first()
-            drev = Status.query.filter_by(code='DREV').first()
-            stop = Status.query.filter_by(code='STOP').first()
+            wip = self.status_list['WIP']
+            drev = self.status_list['DREV']
+            stop = self.status_list['STOP']
 
         if self.status not in [wip, drev, stop]:
+            from stalker.exceptions import StatusError
             raise StatusError(
                 '%(task)s (id:%(id)s)is a %(status)s task and it is not '
                 'possible to stop a %(status)s task.' % {
@@ -2317,12 +2345,14 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
         applicable to Tasks with status OH.
         """
         # check status
+        from stalker.db.session import DBSession
         with DBSession.no_autoflush:
-            wip = Status.query.filter_by(code='WIP').first()
-            oh = Status.query.filter_by(code='OH').first()
-            stop = Status.query.filter_by(code='STOP').first()
+            wip = self.status_list['WIP']
+            oh = self.status_list['OH']
+            stop = self.status_list['STOP']
 
         if self.status not in [oh, stop]:
+            from stalker.exceptions import StatusError
             raise StatusError(
                 '%(task)s (id:%(id)s) is a %(status)s task, and it is not '
                 'suitable to be resumed, please supply an OH or STOP task' %
@@ -2390,16 +2420,16 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
             # do nothing, its status will be decided by its children
             return
 
+        # in case there is no database
+        # try to find the statuses from the status_list attribute
+        from stalker.db.session import DBSession
         with DBSession.no_autoflush:
-            wfd = Status.query.filter_by(code='WFD').first()
-            rts = Status.query.filter_by(code='RTS').first()
-            wip = Status.query.filter_by(code='WIP').first()
-            # prev = Status.query.filter_by(code='PREV').first()
-            hrev = Status.query.filter_by(code='HREV').first()
-            drev = Status.query.filter_by(code='DREV').first()
-            # oh = Status.query.filter_by(code='OH').first()
-            # stop = Status.query.filter_by(code='STOP').first()
-            cmpl = Status.query.filter_by(code='CMPL').first()
+            wfd = self.status_list['WFD']
+            rts = self.status_list['RTS']
+            wip = self.status_list['WIP']
+            hrev = self.status_list['HREV']
+            drev = self.status_list['DREV']
+            cmpl = self.status_list['CMPL']
 
         if removing:
             self._previously_removed_dependent_tasks.append(removing)
@@ -2510,6 +2540,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
                 # Expand task timing with the timing resolution if there is no
                 # time left for this task
                 if self.total_logged_seconds == self.schedule_seconds:
+                    from stalker import defaults
                     total_seconds = \
                         self.schedule_seconds \
                         + defaults.timing_resolution.seconds
@@ -2542,8 +2573,8 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
         """updates the parent statuses of this task if any
         """
         # prevent query-invoked auto-flush
-        from stalker import db
-        with db.DBSession.no_autoflush:
+        from stalker.db.session import DBSession
+        with DBSession.no_autoflush:
             if self.parent:
                 self.parent.update_status_with_children_statuses()
 
@@ -2559,11 +2590,12 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
             logger.debug('not a container returning!')
             return
 
+        from stalker.db.session import DBSession
         with DBSession.no_autoflush:
-            wfd = Status.query.filter(Status.code == 'WFD').first()
-            rts = Status.query.filter(Status.code == 'RTS').first()
-            wip = Status.query.filter(Status.code == 'WIP').first()
-            cmpl = Status.query.filter(Status.code == 'CMPL').first()
+            wfd = self.status_list['WFD']
+            rts = self.status_list['RTS']
+            wip = self.status_list['WIP']
+            cmpl = self.status_list['CMPL']
 
         parent_statuses_lut = [wfd, rts, wip, cmpl]
 
@@ -2756,6 +2788,7 @@ class TaskDependency(Base, ScheduleMixin):
     """The association object used in Task-to-Task dependency relation
     """
 
+    from stalker import defaults
     __default_schedule_attr_name__ = 'gap'  # used in docstrings coming from
                                             # ScheduleMixin
     __default_schedule_models__ = defaults.task_dependency_gap_models
@@ -2874,6 +2907,7 @@ class TaskDependency(Base, ScheduleMixin):
     def _validate_dependency_target(self, key, dep_target):
         """validates the given dep_target value
         """
+        from stalker import defaults
         if dep_target is None:
             dep_target = defaults.task_dependency_targets[0]
 
@@ -2912,6 +2946,7 @@ class TaskDependency(Base, ScheduleMixin):
             'gap_model': self.gap_model
         }
 
+        from stalker import defaults
         temp = Template(
             defaults.tjp_task_dependency_template,
             trim_blocks=True
@@ -3110,6 +3145,7 @@ def update_task_date_values(task, removed_child, initiator):
     :param initiator: not used
     """
     # update start and end date values of the task
+    from stalker.db.session import DBSession
     with DBSession.no_autoflush:
         import pytz
         start = datetime.datetime.max.replace(tzinfo=pytz.utc)

@@ -16,11 +16,12 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-from stalker.testing import UnitTestBase
+import unittest
+from stalker.testing import UnitTestDBBase
 from stalker import Department
 
 
-class DepartmentTester(UnitTestBase):
+class DepartmentTester(unittest.TestCase):
     """tests the Department class
     """
 
@@ -29,8 +30,13 @@ class DepartmentTester(UnitTestBase):
         """
         super(DepartmentTester, self).setUp()
 
-        from stalker import db, User
-        self.test_admin = User.query.filter_by(login="admin").first()
+        from stalker import User
+        self.test_admin = User(
+            name='admin',
+            login='admin',
+            email='admin@admins.com',
+            password='12345',
+        )
 
         # create a couple of test users
         self.test_user1 = User(
@@ -39,7 +45,6 @@ class DepartmentTester(UnitTestBase):
             email="user1@test.com",
             password="123456",
         )
-        db.DBSession.add(self.test_user1)
 
         self.test_user2 = User(
             name="User2",
@@ -47,7 +52,6 @@ class DepartmentTester(UnitTestBase):
             email="user2@test.com",
             password="123456",
         )
-        db.DBSession.add(self.test_user2)
 
         self.test_user3 = User(
             name="User3",
@@ -55,7 +59,6 @@ class DepartmentTester(UnitTestBase):
             email="user3@test.com",
             password="123456",
         )
-        db.DBSession.add(self.test_user3)
 
         self.test_user4 = User(
             name="User4",
@@ -63,7 +66,6 @@ class DepartmentTester(UnitTestBase):
             email="user4@test.com",
             password="123456",
         )
-        db.DBSession.add(self.test_user4)
 
         self.test_user5 = User(
             name="User5",
@@ -71,7 +73,6 @@ class DepartmentTester(UnitTestBase):
             email="user5@test.com",
             password="123456",
         )
-        db.DBSession.add(self.test_user5)
 
         self.users_list = [
             self.test_user1,
@@ -96,14 +97,22 @@ class DepartmentTester(UnitTestBase):
 
         # create a default department object
         self.test_department = Department(**self.kwargs)
-        db.DBSession.add(self.test_department)
-        db.DBSession.commit()
 
     def test___auto_name__class_attribute_is_set_to_false(self):
         """testing if the __auto_name__ class attribute is set to False for
         Department class
         """
         self.assertFalse(Department.__auto_name__)
+
+    def test___hash___value_is_correctly_calculated(self):
+        """testing if the __hash__ value is correctly calculated
+        """
+        self.assertEqual(
+            self.test_department.__hash__(),
+            hash(self.test_department.id)
+            + 2 * hash(self.test_department.name)
+            + 3 * hash(self.test_department.entity_type)
+        )
 
     def test_users_argument_accepts_an_empty_list(self):
         """testing if users argument accepts an empty list
@@ -223,28 +232,6 @@ class DepartmentTester(UnitTestBase):
             "'NoneType' object is not iterable"
         )
 
-    def test_user_role_attribute(self):
-        """testing the automatic generation of the DepartmentUser class
-        """
-        # assign a user to a department and search for a DepartmentUser
-        # representing that relation
-        from stalker import db, DepartmentUser
-        db.DBSession.commit()
-        with db.DBSession.no_autoflush:
-            self.test_department.users.append(self.test_user5)
-
-        dus = DepartmentUser.query\
-            .filter(DepartmentUser.user == self.test_user5)\
-            .filter(DepartmentUser.department == self.test_department)\
-            .all()
-
-        self.assertTrue(len(dus) > 0)
-        du = dus[0]
-        self.assertTrue(isinstance(du, DepartmentUser))
-        self.assertEqual(du.department, self.test_department)
-        self.assertEqual(du.user, self.test_user5)
-        self.assertEqual(du.role, None)
-
     def test_equality(self):
         """testing equality of two Department objects
         """
@@ -280,6 +267,110 @@ class DepartmentTester(UnitTestBase):
         self.assertFalse(dep1 != dep2)
         self.assertTrue(dep1 != dep3)
         self.assertTrue(dep1 != entity1)
+
+
+class DepartmentDBTester(UnitTestDBBase):
+    """tests that needs a Database
+    """
+
+    def setUp(self):
+        """lets setup the tests
+        """
+        super(DepartmentDBTester, self).setUp()
+
+        from stalker import User
+        self.test_admin = User.query.filter_by(login="admin").first()
+
+        # create a couple of test users
+        self.test_user1 = User(
+            name="User1",
+            login="user1",
+            email="user1@test.com",
+            password="123456",
+        )
+        from stalker.db.session import DBSession
+        DBSession.add(self.test_user1)
+
+        self.test_user2 = User(
+            name="User2",
+            login="user2",
+            email="user2@test.com",
+            password="123456",
+        )
+        DBSession.add(self.test_user2)
+
+        self.test_user3 = User(
+            name="User3",
+            login="user3",
+            email="user3@test.com",
+            password="123456",
+        )
+        DBSession.add(self.test_user3)
+
+        self.test_user4 = User(
+            name="User4",
+            login="user4",
+            email="user4@test.com",
+            password="123456",
+        )
+        DBSession.add(self.test_user4)
+
+        self.test_user5 = User(
+            name="User5",
+            login="user5",
+            email="user5@test.com",
+            password="123456",
+        )
+        DBSession.add(self.test_user5)
+
+        self.users_list = [
+            self.test_user1,
+            self.test_user2,
+            self.test_user3,
+            self.test_user4
+        ]
+
+        import datetime
+        import pytz
+        self.date_created = self.date_updated = datetime.datetime.now(pytz.utc)
+
+        self.kwargs = {
+            "name": "Test Department",
+            "description": "This is a department for testing purposes",
+            "created_by": self.test_admin,
+            "updated_by": self.test_admin,
+            "date_created": self.date_created,
+            "date_updated": self.date_updated,
+            "users": self.users_list
+        }
+
+        # create a default department object
+        self.test_department = Department(**self.kwargs)
+        DBSession.add(self.test_department)
+        DBSession.commit()
+
+    def test_user_role_attribute(self):
+        """testing the automatic generation of the DepartmentUser class
+        """
+        # assign a user to a department and search for a DepartmentUser
+        # representing that relation
+        from stalker import DepartmentUser
+        from stalker.db.session import DBSession
+        DBSession.commit()
+        with DBSession.no_autoflush:
+            self.test_department.users.append(self.test_user5)
+
+        dus = DepartmentUser.query\
+            .filter(DepartmentUser.user == self.test_user5)\
+            .filter(DepartmentUser.department == self.test_department)\
+            .all()
+
+        self.assertTrue(len(dus) > 0)
+        du = dus[0]
+        self.assertTrue(isinstance(du, DepartmentUser))
+        self.assertEqual(du.department, self.test_department)
+        self.assertEqual(du.user, self.test_user5)
+        self.assertEqual(du.role, None)
 
     def test_tjp_id_is_working_properly(self):
         """testing if the tjp_is working properly

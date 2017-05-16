@@ -15,12 +15,13 @@
 #
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
+import unittest
 
 from sqlalchemy import Column, Integer, ForeignKey
 from stalker.models.mixins import TargetEntityTypeMixin
 from stalker.models.project import Project
 from stalker.models.entity import SimpleEntity
-from stalker.testing import UnitTestBase
+from stalker.testing import UnitTestDBBase
 
 
 class TestClass(object):
@@ -42,7 +43,7 @@ class TargetEntityTypeMixedClass(SimpleEntity, TargetEntityTypeMixin):
         TargetEntityTypeMixin.__init__(self, **kwargs)
 
 
-class TargetEntityMixinTester(UnitTestBase):
+class TargetEntityMixinTester(unittest.TestCase):
     """Tests the TargetEntityMixin
     """
     def setUp(self):

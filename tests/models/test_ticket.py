@@ -18,14 +18,14 @@
 
 
 from stalker import log
-from stalker.testing import UnitTestBase
+from stalker.testing import UnitTestDBBase
 
 import logging
 logger = logging.getLogger("stalker.models.ticket")
 logger.setLevel(log.logging_level)
 
 
-class TicketTester(UnitTestBase):
+class TicketTester(UnitTestDBBase):
     """Tests the :class:`~stalker.models.ticket.Ticket` class
     """
 
@@ -147,10 +147,11 @@ class TicketTester(UnitTestBase):
             'reported_by': self.test_user,
         }
 
-        from stalker import db, Ticket
+        from stalker import Ticket
         self.test_ticket = Ticket(**self.kwargs)
-        db.DBSession.add(self.test_ticket)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(self.test_ticket)
+        DBSession.commit()
 
         # get the Ticket Statuses
         self.status_new = Status.query.filter_by(name='New').first()
@@ -211,45 +212,46 @@ class TicketTester(UnitTestBase):
             status_list=self.test_project_status_list
         )
 
-        from stalker import db, Ticket
+        from stalker import Ticket
         p1_t1 = Ticket(project=proj1)
-        db.DBSession.add(p1_t1)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(p1_t1)
+        DBSession.commit()
         self.assertEqual(p1_t1.number, 2)
 
         p1_t2 = Ticket(project=proj1)
-        db.DBSession.add(p1_t2)
-        db.DBSession.commit()
+        DBSession.add(p1_t2)
+        DBSession.commit()
         self.assertEqual(p1_t2.number, 3)
 
         p2_t1 = Ticket(project=proj2)
-        db.DBSession.add(p2_t1)
-        db.DBSession.commit()
+        DBSession.add(p2_t1)
+        DBSession.commit()
         self.assertEqual(p2_t1.number, 4)
 
         p1_t3 = Ticket(project=proj1)
-        db.DBSession.add(p1_t3)
-        db.DBSession.commit()
+        DBSession.add(p1_t3)
+        DBSession.commit()
         self.assertEqual(p1_t3.number, 5)
 
         p3_t1 = Ticket(project=proj3)
-        db.DBSession.add(p3_t1)
-        db.DBSession.commit()
+        DBSession.add(p3_t1)
+        DBSession.commit()
         self.assertEqual(p3_t1.number, 6)
 
         p2_t2 = Ticket(project=proj2)
-        db.DBSession.add(p2_t2)
-        db.DBSession.commit()
+        DBSession.add(p2_t2)
+        DBSession.commit()
         self.assertEqual(p2_t2.number, 7)
 
         p3_t2 = Ticket(project=proj3)
-        db.DBSession.add(p3_t2)
-        db.DBSession.commit()
+        DBSession.add(p3_t2)
+        DBSession.commit()
         self.assertEqual(p3_t2.number, 8)
 
         p2_t3 = Ticket(project=proj2)
-        db.DBSession.add(p2_t3)
-        db.DBSession.commit()
+        DBSession.add(p2_t3)
+        DBSession.commit()
         self.assertEqual(p2_t3.number, 9)
 
     def test_number_attribute_is_read_only(self):
@@ -267,14 +269,15 @@ class TicketTester(UnitTestBase):
         """testing if the number attribute is automatically increased
         """
         # create two new tickets
-        from stalker import db, Ticket
+        from stalker import Ticket
         ticket1 = Ticket(**self.kwargs)
-        db.DBSession.add(ticket1)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(ticket1)
+        DBSession.commit()
 
         ticket2 = Ticket(**self.kwargs)
-        db.DBSession.add(ticket2)
-        db.DBSession.commit()
+        DBSession.add(ticket2)
+        DBSession.commit()
 
         self.assertEqual(ticket1.number + 1, ticket2.number)
         self.assertEqual(ticket1.number, 2)
@@ -339,7 +342,13 @@ class TicketTester(UnitTestBase):
         """
         from stalker import Ticket
         new_ticket1 = Ticket(**self.kwargs)
+        from stalker.db.session import DBSession
+        DBSession.add(new_ticket1)
+        DBSession.commit()
+
         new_ticket2 = Ticket(**self.kwargs)
+        DBSession.add(new_ticket2)
+        DBSession.commit()
 
         self.test_ticket.related_tickets = [new_ticket1, new_ticket2]
 

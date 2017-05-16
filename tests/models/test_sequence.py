@@ -16,9 +16,10 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-from stalker.testing import UnitTestBase
+from stalker.testing import UnitTestDBBase
 
-class SequenceTester(UnitTestBase):
+
+class SequenceTester(UnitTestDBBase):
     """Tests stalker.models.sequence.Sequence class
     """
 
@@ -44,13 +45,14 @@ class SequenceTester(UnitTestBase):
             StatusList.query.filter_by(target_entity_type='Sequence').first()
 
         # create a test project, user and a couple of shots
-        from stalker import db, Type
+        from stalker import Type
         self.project_type = Type(
             name="Test Project Type",
             code='test',
             target_entity_type='Project',
         )
-        db.DBSession.add(self.project_type)
+        from stalker.db.session import DBSession
+        DBSession.add(self.project_type)
 
         # create a status list for project
         self.project_status_list = StatusList(
@@ -62,7 +64,7 @@ class SequenceTester(UnitTestBase):
             ],
             target_entity_type='Project',
         )
-        db.DBSession.add(self.project_status_list)
+        DBSession.add(self.project_status_list)
 
         # create a repository
         self.repository_type = Type(
@@ -70,14 +72,14 @@ class SequenceTester(UnitTestBase):
             code='test',
             target_entity_type='Repository'
         )
-        db.DBSession.add(self.repository_type)
+        DBSession.add(self.repository_type)
 
         from stalker import Repository
         self.test_repository = Repository(
             name="Test Repository",
             type=self.repository_type,
         )
-        db.DBSession.add(self.test_repository)
+        DBSession.add(self.test_repository)
 
         # create projects
         from stalker import Project
@@ -88,7 +90,7 @@ class SequenceTester(UnitTestBase):
             status_list=self.project_status_list,
             repository=self.test_repository,
         )
-        db.DBSession.add(self.test_project)
+        DBSession.add(self.test_project)
 
         self.test_project2 = Project(
             name="Test Project 2",
@@ -97,7 +99,7 @@ class SequenceTester(UnitTestBase):
             status_list=self.project_status_list,
             repository=self.test_repository,
         )
-        db.DBSession.add(self.test_project2)
+        DBSession.add(self.test_project2)
 
         # the parameters
         self.kwargs = {
@@ -111,7 +113,7 @@ class SequenceTester(UnitTestBase):
         # the test sequence
         from stalker import Sequence
         self.test_sequence = Sequence(**self.kwargs)
-        db.DBSession.commit()
+        DBSession.commit()
 
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for

@@ -27,7 +27,7 @@ from stalker.models.mixins import DAGMixin
 
 import logging
 
-from stalker.testing import UnitTestBase
+from stalker.testing import UnitTestDBBase
 
 logging.getLogger('stalker.models.studio').setLevel(logging.DEBUG)
 
@@ -50,14 +50,13 @@ class DAGMixinFooMixedInClass(SimpleEntity, DAGMixin):
         DAGMixin.__init__(self, **kwargs)
 
 
-class DAGMixinTestCase(UnitTestBase):
+class DAGMixinTestCase(unittest.TestCase):
     """tests the DAGMixin class
     """
 
     def setUp(self):
         """set the test up
         """
-        super(DAGMixinTestCase, self).setUp()
         self.kwargs = {
             'name': 'Test DAG Mixin'
         }
@@ -331,14 +330,14 @@ class DAGMixinTestCase(UnitTestBase):
         self.assertEqual(entities_walked, [d4])
 
 
-class DAGMixinDBTestCase(UnitTestBase):
+class DAGMixinDBTestDBCase(UnitTestDBBase):
     """tests the DAGMixin class with a DB
     """
 
     def setUp(self):
         """set the test up
         """
-        super(DAGMixinDBTestCase, self).setUp()
+        super(DAGMixinDBTestDBCase, self).setUp()
         self.kwargs = {
             'name': 'Test DAG Mixin'
         }
@@ -354,8 +353,9 @@ class DAGMixinDBTestCase(UnitTestBase):
         d1.children = [d2, d3]
         d2.children = [d4]
 
-        db.DBSession.add_all([d1, d2, d3, d4])
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add_all([d1, d2, d3, d4])
+        DBSession.commit()
 
         del d1, d2, d3, d4
 
@@ -378,11 +378,12 @@ class DAGMixinDBTestCase(UnitTestBase):
         d1.children = [d2, d3]
         d2.children = [d4]
 
-        db.DBSession.add_all([d1, d2, d3, d4])
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add_all([d1, d2, d3, d4])
+        DBSession.commit()
 
-        db.DBSession.delete(d1)
-        db.DBSession.commit()
+        DBSession.delete(d1)
+        DBSession.commit()
 
         all_data = DAGMixinFooMixedInClass.query.all()
         self.assertEqual(len(all_data), 0)

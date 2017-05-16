@@ -15,77 +15,82 @@
 #
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
-
 import copy
-import datetime
-import logging
-import tempfile
+import unittest
 
+import datetime
 
 import pytz
-
 from stalker.exceptions import CircularDependencyError
-from stalker.db import DBSession
-from stalker.testing import UnitTestBase
-from stalker import (db, defaults, Entity, Project, Repository, StatusList,
-                     Status, Task, Type, User, TimeLog, FilenameTemplate,
-                     Structure)
-from stalker.models.task import CONSTRAIN_END, CONSTRAIN_BOTH
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+from stalker.testing import UnitTestDBBase
+from stalker import Task
 
 
-class TaskTestCase(UnitTestBase):
-    """Tests the stalker.models.task.Task class
+class TaskTester(unittest.TestCase):
+    """tests that doesn't require a database
     """
 
     def setUp(self):
         """run once
         """
-        super(TaskTestCase, self).setUp()
+        super(self.__class__, self).setUp()
+        from stalker import config
+        import stalker
+        stalker.defaults = config.Config()
 
-        self.status_wfd = Status.query.filter_by(code="WFD").first()
-        self.status_rts = Status.query.filter_by(code="RTS").first()
-        self.status_wip = Status.query.filter_by(code="WIP").first()
-        self.status_prev = Status.query.filter_by(code="PREV").first()
-        self.status_hrev = Status.query.filter_by(code="HREV").first()
-        self.status_drev = Status.query.filter_by(code="DREV").first()
-        self.status_oh = Status.query.filter_by(code="OH").first()
-        self.status_stop = Status.query.filter_by(code="STOP").first()
-        self.status_cmpl = Status.query.filter_by(code="CMPL").first()
+        from stalker import Status
+        self.status_wfd = Status(name='Waiting For Dependency', code="WFD")
+        self.status_rts = Status(name='Ready To Start', code="RTS")
+        self.status_wip = Status(name='Work In Progress', code="WIP")
+        self.status_prev = Status(name='Pending Review', code="PREV")
+        self.status_hrev = Status(name='Has Revision', code="HREV")
+        self.status_drev = \
+            Status(name='Dependency Has Revision', code="DREV")
+        self.status_oh = Status(name='On Hold', code="OH")
+        self.status_stop = Status(name='Stopped', code="STOP")
+        self.status_cmpl = Status(name='Completed', code="CMPL")
 
-        self.task_status_list = StatusList.query\
-            .filter_by(target_entity_type='Task').first()
+        from stalker import StatusList
+        self.task_status_list = StatusList(
+            statuses=[
+                self.status_wfd, self.status_rts, self.status_wip,
+                self.status_prev, self.status_hrev, self.status_drev,
+                self.status_oh, self.status_stop, self.status_cmpl
+            ],
+            target_entity_type='Task'
+        )
 
         self.test_project_status_list = StatusList(
             name="Project Statuses",
             statuses=[self.status_wip,
                       self.status_prev,
                       self.status_cmpl],
-            target_entity_type=Project,
+            target_entity_type='Project',
         )
 
+        from stalker import Type
         self.test_movie_project_type = Type(
             name="Movie Project",
             code='movie',
-            target_entity_type=Project,
+            target_entity_type='Project',
         )
 
         self.test_repository_type = Type(
             name="Test Repository Type",
             code='test',
-            target_entity_type=Repository,
+            target_entity_type='Repository',
         )
 
+        from stalker import Repository
         self.test_repository = Repository(
             name="Test Repository",
             type=self.test_repository_type,
-            linux_path=tempfile.mkdtemp(),
-            windows_path=tempfile.mkdtemp(),
-            osx_path=tempfile.mkdtemp()
+            linux_path='/mnt/T/',
+            windows_path='T:/',
+            osx_path='/Volumes/T/'
         )
 
+        from stalker import User
         self.test_user1 = User(
             name="User1",
             login="user1",
@@ -121,6 +126,7 @@ class TaskTestCase(UnitTestBase):
             password="1234"
         )
 
+        from stalker import Project
         self.test_project1 = Project(
             name="Test Project1",
             code='tp1',
@@ -129,6 +135,7 @@ class TaskTestCase(UnitTestBase):
             repositories=[self.test_repository]
         )
 
+        from stalker import Task
         self.test_dependent_task1 = Task(
             name="Dependent Task1",
             project=self.test_project1,
@@ -170,16 +177,6 @@ class TaskTestCase(UnitTestBase):
             'status_list': self.task_status_list,
         }
 
-        # create a test Task
-        DBSession.add_all([
-            self.test_project_status_list, self.test_movie_project_type,
-            self.test_repository_type, self.test_repository, self.test_user1,
-            self.test_user2, self.test_user3, self.test_user4,
-            self.test_user5, self.test_project1, self.test_dependent_task1,
-            self.test_dependent_task2,
-        ])
-        DBSession.commit()
-
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for
         Task class
@@ -190,6 +187,7 @@ class TaskTestCase(UnitTestBase):
         """testing if skipping the priority argument will default the priority
         attribute to task_priority.
         """
+        from stalker import defaults
         kwargs = copy.copy(self.kwargs)
         kwargs.pop("priority")
         new_task = Task(**kwargs)
@@ -199,6 +197,7 @@ class TaskTestCase(UnitTestBase):
         """testing if the priority argument is given as None will default the
         priority attribute to task_priority.
         """
+        from stalker import defaults
         kwargs = copy.copy(self.kwargs)
         kwargs["priority"] = None
         new_task = Task(**kwargs)
@@ -208,6 +207,7 @@ class TaskTestCase(UnitTestBase):
         """testing if the priority attribute is given as None will default the
         priority attribute to task_priority.
         """
+        from stalker import defaults
         new_task = Task(**self.kwargs)
         new_task.priority = None
         self.assertEqual(new_task.priority, defaults.task_priority)
@@ -368,7 +368,8 @@ class TaskTestCase(UnitTestBase):
         set to a list of other values then a User
         """
         kwargs = copy.copy(self.kwargs)
-        kwargs["resources"] = ["a", "list", "of", "resources", self.test_user1]
+        kwargs["resources"] = ["a", "list", "of", "resources",
+                               self.test_user1]
         with self.assertRaises(TypeError) as cm:
             Task(**kwargs)
 
@@ -406,14 +407,13 @@ class TaskTestCase(UnitTestBase):
         will have the current task in their User.tasks attribute
         """
         # create a couple of new users
+        from stalker import User
         new_user1 = User(
             name="test1",
             login="test1",
             email="test1@test.com",
             password="test1"
         )
-        DBSession.add(new_user1)
-        DBSession.commit()
 
         new_user2 = User(
             name="test2",
@@ -421,15 +421,11 @@ class TaskTestCase(UnitTestBase):
             email="test2@test.com",
             password="test2"
         )
-        DBSession.add(new_user2)
-        DBSession.commit()
 
         # assign it to a newly created task
         kwargs = copy.copy(self.kwargs)
         kwargs["resources"] = [new_user1]
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         # now check if the user has the task in its tasks list
         self.assertTrue(new_task in new_user1.tasks)
@@ -451,6 +447,7 @@ class TaskTestCase(UnitTestBase):
         will have the current task in their User.tasks attribute
         """
         # create a new user
+        from stalker import User
         new_user = User(
             name="Test User",
             login="testuser",
@@ -459,7 +456,7 @@ class TaskTestCase(UnitTestBase):
         )
 
         # assign it to a newly created task
-        #self.kwargs["resources"] = [new_user]
+        # self.kwargs["resources"] = [new_user]
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
         new_task.resources = [new_user]
@@ -472,6 +469,7 @@ class TaskTestCase(UnitTestBase):
         the current resources tasks attribute.
         """
         # create a couple of new users
+        from stalker import User
         new_user1 = User(
             name="Test User1",
             login="testuser1",
@@ -499,16 +497,12 @@ class TaskTestCase(UnitTestBase):
             email="testuser4@test.com",
             password="testpass"
         )
-        DBSession.add_all([new_user1, new_user2, new_user3, new_user4])
-        DBSession.commit()
 
         # now add the 1 and 2 to the resources with the resources argument
         # assign it to a newly created task
         kwargs = copy.copy(self.kwargs)
         kwargs["resources"] = [new_user1, new_user2]
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         # now check if the user has the task in its tasks list
         self.assertTrue(new_task in new_user1.tasks)
@@ -532,8 +526,6 @@ class TaskTestCase(UnitTestBase):
         kwargs = copy.copy(self.kwargs)
         kwargs.pop("watchers")
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
         self.assertEqual(new_task.watchers, [])
 
     def test_watchers_argument_is_None(self):
@@ -543,8 +535,6 @@ class TaskTestCase(UnitTestBase):
         kwargs = copy.copy(self.kwargs)
         kwargs["watchers"] = None
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
         self.assertEqual(new_task.watchers, [])
 
     def test_watchers_attribute_is_None(self):
@@ -552,8 +542,6 @@ class TaskTestCase(UnitTestBase):
         is set to None
         """
         new_task = Task(**self.kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
         with self.assertRaises(TypeError) as cm:
             new_task.watchers = None
 
@@ -581,8 +569,6 @@ class TaskTestCase(UnitTestBase):
         is set to any other value then a list
         """
         new_task = Task(**self.kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
         with self.assertRaises(TypeError) as cm:
             new_task.watchers = "a resource"
 
@@ -596,7 +582,8 @@ class TaskTestCase(UnitTestBase):
         set to a list of other values then a User
         """
         kwargs = copy.copy(self.kwargs)
-        kwargs["watchers"] = ["a", "list", "of", "watchers", self.test_user1]
+        kwargs["watchers"] = ["a", "list", "of", "watchers",
+                              self.test_user1]
         with self.assertRaises(TypeError) as cm:
             Task(**kwargs)
 
@@ -611,8 +598,6 @@ class TaskTestCase(UnitTestBase):
         is set to a list of other values then a User
         """
         new_task = Task(**self.kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         test_values = ["a", "list", "of", "watchers", self.test_user1]
 
@@ -623,8 +608,6 @@ class TaskTestCase(UnitTestBase):
         """testing if the watchers attribute is working properly
         """
         new_task = Task(**self.kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         test_value = [self.test_user1]
 
@@ -636,14 +619,13 @@ class TaskTestCase(UnitTestBase):
         will have the current task in their User.watching attribute
         """
         # create a couple of new users
+        from stalker import User
         new_user1 = User(
             name="new_user1",
             login="new_user1",
             email="new_user1@test.com",
             password="new_user1"
         )
-        DBSession.add(new_user1)
-        DBSession.commit()
 
         new_user2 = User(
             name="new_user2",
@@ -651,15 +633,11 @@ class TaskTestCase(UnitTestBase):
             email="new_user2@test.com",
             password="new_user2"
         )
-        DBSession.add(new_user2)
-        DBSession.commit()
 
         # assign it to a newly created task
         kwargs = copy.copy(self.kwargs)
         kwargs["watchers"] = [new_user1]
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         # now check if the user has the task in its tasks list
         self.assertTrue(new_task in new_user1.watching)
@@ -678,21 +656,18 @@ class TaskTestCase(UnitTestBase):
         have the current task in their User.watching attribute
         """
         # create a new user
+        from stalker import User
         new_user = User(
             name="new_user",
             login="new_user",
             email="new_user@test.com",
             password="new_user"
         )
-        DBSession.add(new_user)
-        DBSession.commit()
 
         # assign it to a newly created task
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
         new_task.watchers = [new_user]
-        DBSession.add(new_task)
-        DBSession.commit()
 
         # now check if the user has the task in its watching list
         self.assertTrue(new_task in new_user.watching)
@@ -702,14 +677,13 @@ class TaskTestCase(UnitTestBase):
         the current watchers watching attribute.
         """
         # create a couple of new users
+        from stalker import User
         new_user1 = User(
             name="new_user1",
             login="new_user1",
             email="new_user1@test.com",
             password="new_user1"
         )
-        DBSession.add(new_user1)
-        DBSession.commit()
 
         new_user2 = User(
             name="new_user2",
@@ -717,8 +691,6 @@ class TaskTestCase(UnitTestBase):
             email="new_user2@test.com",
             password="new_user2"
         )
-        DBSession.add(new_user2)
-        DBSession.commit()
 
         new_user3 = User(
             name="new_user3",
@@ -726,8 +698,6 @@ class TaskTestCase(UnitTestBase):
             email="new_user3@test.com",
             password="new_user3"
         )
-        DBSession.add(new_user3)
-        DBSession.commit()
 
         new_user4 = User(
             name="new_user4",
@@ -735,16 +705,12 @@ class TaskTestCase(UnitTestBase):
             email="new_user4@test.com",
             password="new_user4"
         )
-        DBSession.add(new_user4)
-        DBSession.commit()
 
         # now add the 1 and 2 to the watchers with the watchers argument
         # assign it to a newly created task
         kwargs = copy.copy(self.kwargs)
         kwargs["watchers"] = [new_user1, new_user2]
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         # now check if the user has the task in its watching list
         self.assertTrue(new_task in new_user1.watching)
@@ -894,8 +860,8 @@ class TaskTestCase(UnitTestBase):
 
         self.assertEqual(
             str(cm.exception),
-             '<taskC (Task)> (Task) and <taskA (Task)> (Task) creates a '
-             'circular dependency in their "depends" attribute'
+            '<taskC (Task)> (Task) and <taskA (Task)> (Task) creates a '
+            'circular dependency in their "depends" attribute'
         )
 
     def test_depends_attribute_doesnt_allow_more_deeper_cyclic_dependencies(self):
@@ -952,7 +918,6 @@ class TaskTestCase(UnitTestBase):
         t3 = Task(**kwargs)
 
         t3.depends.append(t1)
-        DBSession.commit()
 
         kwargs['name'] = 'T2'
         kwargs['parent'] = t1
@@ -1051,47 +1016,6 @@ class TaskTestCase(UnitTestBase):
             "can't set attribute"
         )
 
-    def test_percent_complete_attribute_is_working_properly_for_a_leaf_task(self):
-        """testing if the percent_complete attribute is working properly for a
-        leaf task
-        """
-        kwargs = copy.copy(self.kwargs)
-        kwargs['depends'] = []
-
-        new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
-
-        dt = datetime.datetime
-        td = datetime.timedelta
-        now = dt.now(pytz.utc)
-
-        new_task.time_logs = []
-        tlog1 = TimeLog(
-            task=new_task,
-            resource=new_task.resources[0],
-            start=now,
-            end=now + td(hours=8)
-        )
-        DBSession.add(tlog1)
-        DBSession.commit()
-
-        self.assertTrue(tlog1 in new_task.time_logs)
-
-        tlog2 = TimeLog(
-            task=new_task,
-            resource=new_task.resources[1],
-            start=now,
-            end=now + td(hours=12)
-        )
-        DBSession.add(tlog2)
-        DBSession.commit()
-
-        self.assertTrue(tlog2 in new_task.time_logs)
-        self.assertEqual(new_task.total_logged_seconds, 20 * 3600)
-        self.assertEqual(new_task.percent_complete, 20.0 / 9.0 * 100.0)
-        DBSession.commit()
-
     def test_percent_complete_attribute_is_working_properly_for_a_duration_based_leaf_task_1(self):
         """testing if the percent_complete attribute is working properly for a
         duration based leaf task
@@ -1114,11 +1038,7 @@ class TaskTestCase(UnitTestBase):
         new_task.computed_start = now - td(days=2)
         new_task.computed_end = now - td(days=1)
 
-        DBSession.add(new_task)
-        DBSession.commit()
-
         self.assertEqual(new_task.percent_complete, 100)
-        DBSession.commit()
 
     def test_percent_complete_attribute_is_working_properly_for_a_duration_based_leaf_task_2(self):
         """testing if the percent_complete attribute is working properly for a
@@ -1141,11 +1061,7 @@ class TaskTestCase(UnitTestBase):
         new_task.start = now - td(days=1, hours=1)
         new_task.end = now - td(hours=1)
 
-        DBSession.add(new_task)
-        DBSession.commit()
-
         self.assertEqual(new_task.percent_complete, 100)
-        DBSession.commit()
 
     def test_percent_complete_attribute_is_working_properly_for_a_duration_based_leaf_task_3(self):
         """testing if the percent_complete attribute is working properly for a
@@ -1168,9 +1084,6 @@ class TaskTestCase(UnitTestBase):
         new_task.start = now - td(hours=12)
         new_task.end = now + td(hours=12)
 
-        DBSession.add(new_task)
-        DBSession.commit()
-
         # it should be somewhere around 50%
         # due to the timing resolution we can not know it exactly
         # and I don't want to patch datetime.datetime.now(pytz.utc)
@@ -1180,7 +1093,6 @@ class TaskTestCase(UnitTestBase):
             50,
             delta=5
         )
-        DBSession.commit()
 
     def test_percent_complete_attribute_is_working_properly_for_a_duration_based_leaf_task_4(self):
         """testing if the percent_complete attribute is working properly for a
@@ -1203,15 +1115,11 @@ class TaskTestCase(UnitTestBase):
         new_task.computed_start = now
         new_task.computed_end = now + td(days=1)
 
-        DBSession.add(new_task)
-        DBSession.commit()
-
         self.assertAlmostEqual(
             new_task.percent_complete,
             0,
             delta=5
         )
-        DBSession.commit()
 
     def test_percent_complete_attribute_is_working_properly_for_a_duration_based_leaf_task_5(self):
         """testing if the percent_complete attribute is working properly for a
@@ -1234,102 +1142,7 @@ class TaskTestCase(UnitTestBase):
         new_task.computed_start = now + td(days=1)
         new_task.computed_end = now + td(days=2)
 
-        DBSession.add(new_task)
-        DBSession.commit()
-
         self.assertEqual(new_task.percent_complete, 0)
-        DBSession.commit()
-
-    def test_percent_complete_attribute_is_not_using_any_time_logs_for_a_duration_task(self):
-        """testing if the percent_complete attribute does not use any time log
-        information if the task is a duration based task
-        """
-        kwargs = copy.copy(self.kwargs)
-        kwargs['depends'] = []
-        kwargs['schedule_model'] = 'duration'
-
-        dt = datetime.datetime
-        td = datetime.timedelta
-        now = dt.now(pytz.utc)
-
-        new_task = Task(**kwargs)
-        new_task.computed_start = now + td(days=1)
-        new_task.computed_end = now + td(days=2)
-
-        DBSession.add(new_task)
-        DBSession.commit()
-
-        tlog1 = TimeLog(
-            task=new_task,
-            resource=new_task.resources[0],
-            start=now + td(days=1),
-            end=now + td(days=2)
-        )
-        DBSession.add(tlog1)
-        DBSession.commit()
-
-        self.assertEqual(new_task.percent_complete, 0)
-        DBSession.commit()
-
-    def test_percent_complete_attribute_is_working_properly_for_a_container_task(self):
-        """testing if the percent complete attribute is working properly for a
-        container task
-        """
-        kwargs = copy.copy(self.kwargs)
-        kwargs['depends'] = []  # remove dependencies just to make it
-                                # easy to create time logs after stalker
-                                # v0.2.6.1
-
-        new_task = Task(**kwargs)
-        new_task.status = self.status_rts
-        DBSession.add(new_task)
-        DBSession.commit()
-
-        dt = datetime.datetime
-        td = datetime.timedelta
-        now = dt.now(pytz.utc)
-
-        defaults.timing_resolution = td(hours=1)
-        defaults.daily_working_hours = 9
-
-        parent_task = Task(**kwargs)
-
-        new_task.time_logs = []
-        tlog1 = TimeLog(
-            task=new_task,
-            resource=new_task.resources[0],
-            start=now - td(hours=4),
-            end=now - td(hours=2)
-        )
-        DBSession.add(tlog1)
-        DBSession.commit()
-
-        self.assertTrue(tlog1 in new_task.time_logs)
-
-        tlog2 = TimeLog(
-            task=new_task,
-            resource=new_task.resources[1],
-            start=now - td(hours=4),
-            end=now + td(hours=1)
-        )
-        DBSession.add(tlog2)
-        DBSession.commit()
-
-        new_task.parent = parent_task
-
-        self.assertTrue(tlog2 in new_task.time_logs)
-        self.assertEqual(new_task.total_logged_seconds, 7 * 3600)
-        self.assertEqual(new_task.schedule_seconds, 9 * 3600)
-        self.assertAlmostEqual(
-            new_task.percent_complete,
-            77.7777778,
-            delta=0.01
-        )
-        self.assertAlmostEqual(
-            parent_task.percent_complete,
-            77.7777778,
-            delta=0.01
-        )
 
     def test_is_milestone_argument_is_skipped(self):
         """testing if the default value of the is_milestone attribute is going
@@ -1397,7 +1210,6 @@ class TaskTestCase(UnitTestBase):
         kwargs["is_milestone"] = True
         kwargs["resources"] = [self.test_user1, self.test_user2]
         new_task = Task(**kwargs)
-        DBSession.commit()
 
         self.assertEqual(new_task.resources, [])
 
@@ -1407,8 +1219,6 @@ class TaskTestCase(UnitTestBase):
         """
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         new_task.resources = [self.test_user1, self.test_user2]
         new_task.is_milestone = True
@@ -1454,291 +1264,6 @@ class TaskTestCase(UnitTestBase):
             'instances, not int'
         )
 
-    def test_time_logs_attribute_is_working_properly(self):
-        """testing if the time_log attribute is working properly
-        """
-        kwargs = copy.copy(self.kwargs)
-        kwargs['depends'] = []
-        new_task1 = Task(**kwargs)
-
-        DBSession.add(new_task1)
-        DBSession.commit()
-        self.assertEqual(new_task1.depends, [])
-
-        now = datetime.datetime.now(pytz.utc)
-        dt = datetime.timedelta
-
-        new_time_log1 = TimeLog(
-            task=new_task1,
-            resource=new_task1.resources[0],
-            start=now + dt(100),
-            end=now + dt(101)
-        )
-
-        new_time_log2 = TimeLog(
-            task=new_task1,
-            resource=new_task1.resources[0],
-            start=now + dt(101),
-            end=now + dt(102)
-        )
-
-        # create a new task
-        kwargs['name'] = 'New Task'
-        new_task2 = Task(**kwargs)
-        DBSession.add(new_task2)
-        DBSession.commit()
-
-        # create a new TimeLog for that task
-        new_time_log3 = TimeLog(
-            task=new_task2,
-            resource=new_task2.resources[0],
-            start=now + dt(102),
-            end=now + dt(103)
-        )
-        logger.debug('Task.query.get(37): %s' % Task.query.get(37))
-
-        self.assertEqual(new_task2.depends, [])
-
-        logger.debug('new_task.id : %s' % new_task2.id)
-
-        DBSession.add_all([new_time_log1, new_time_log2, new_time_log3])
-        DBSession.commit()
-
-        # check if everything is in place
-        self.assertTrue(new_time_log1 in new_task1.time_logs)
-        self.assertTrue(new_time_log2 in new_task1.time_logs)
-        self.assertTrue(new_time_log3 in new_task2.time_logs)
-
-        # now move the time_log to test_task1
-        new_task1.time_logs.append(new_time_log3)
-
-        # check if new_time_log3 is in test_task1
-        self.assertTrue(new_time_log3 in new_task1.time_logs)
-
-        # there needs to be a database session commit to remove the time_log
-        # from the previous tasks time_logs attribute
-
-        DBSession.commit()
-
-        self.assertTrue(new_time_log3 in new_task1.time_logs)
-        self.assertFalse(new_time_log3 in new_task2.time_logs)
-
-    def test_total_logged_seconds_is_the_sum_of_all_time_logs(self):
-        """testing if the total_logged_seconds is the sum of all time_logs in
-        hours
-        """
-        kwargs = copy.copy(self.kwargs)
-        kwargs['depends'] = []
-
-        new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
-
-        new_task.depends = []
-
-        dt = datetime.datetime
-        td = datetime.timedelta
-        now = dt.now(pytz.utc)
-
-        new_task.time_logs = []
-        tlog1 = TimeLog(
-            task=new_task,
-            resource=new_task.resources[0],
-            start=now,
-            end=now + td(hours=8)
-        )
-        DBSession.add(tlog1)
-        DBSession.commit()
-
-        self.assertTrue(tlog1 in new_task.time_logs)
-
-        tlog2 = TimeLog(
-            task=new_task,
-            resource=new_task.resources[1],
-            start=now,
-            end=now + td(hours=12)
-        )
-        DBSession.add(tlog2)
-        DBSession.commit()
-
-        self.assertTrue(tlog2 in new_task.time_logs)
-        self.assertEqual(new_task.total_logged_seconds, 20 * 3600)
-
-    def test_total_logged_seconds_is_the_sum_of_all_time_logs_of_children_for_a_container_task(self):
-        """testing if the total_logged_seconds is the sum of all time_logs of
-        the child tasks for a container task
-        """
-        kwargs = copy.copy(self.kwargs)
-        kwargs['depends'] = []
-
-        new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
-
-        dt = datetime.datetime
-        td = datetime.timedelta
-        now = dt.now(pytz.utc)
-
-        kwargs.pop('schedule_timing')
-        kwargs.pop('schedule_unit')
-        parent_task = Task(**kwargs)
-        DBSession.add(parent_task)
-        DBSession.commit()
-
-        new_task.parent = parent_task
-
-        new_task.time_logs = []
-        tlog1 = TimeLog(
-            task=new_task,
-            resource=new_task.resources[0],
-            start=now,
-            end=now + td(hours=8)
-        )
-        DBSession.add(tlog1)
-        DBSession.commit()
-
-        self.assertTrue(tlog1 in new_task.time_logs)
-
-        tlog2 = TimeLog(
-            task=new_task,
-            resource=new_task.resources[1],
-            start=now,
-            end=now + td(hours=12)
-        )
-        DBSession.add(tlog2)
-        DBSession.commit()
-
-        self.assertTrue(tlog2 in new_task.time_logs)
-        self.assertEqual(new_task.total_logged_seconds, 20 * 3600)
-        self.assertEqual(parent_task.total_logged_seconds, 20 * 3600)
-
-    def test_total_logged_seconds_is_the_sum_of_all_time_logs_of_children_for_a_container_task_deeper(self):
-        """testing if the total_logged_seconds is the sum of all time_logs of
-        the child tasks for a container task (test deeper)
-        """
-        kwargs = copy.copy(self.kwargs)
-        kwargs['depends'] = []
-
-        new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
-
-        dt = datetime.datetime
-        td = datetime.timedelta
-        now = dt.now(pytz.utc)
-
-        kwargs.pop('schedule_timing')
-        kwargs.pop('schedule_unit')
-
-        parent_task1 = Task(**kwargs)
-        DBSession.add(parent_task1)
-        DBSession.commit()
-        self.assertEqual(parent_task1.total_logged_seconds, 0)
-
-        parent_task2 = Task(**kwargs)
-        DBSession.add(parent_task2)
-        DBSession.commit()
-        self.assertEqual(parent_task2.total_logged_seconds, 0)
-
-        # create some other child
-        child = Task(**kwargs)
-        DBSession.add(child)
-        DBSession.commit()
-
-        self.assertEqual(child.total_logged_seconds, 0)
-        # create a TimeLog for that child
-        tlog1 = TimeLog(
-            task=child,
-            resource=child.resources[0],
-            start=now - td(hours=50),
-            end=now - td(hours=40)
-        )
-        DBSession.add(tlog1)
-        DBSession.commit()
-
-        self.assertEqual(child.total_logged_seconds, 10 * 3600)
-        parent_task2.children.append(child)
-        self.assertEqual(parent_task2.total_logged_seconds, 10 * 3600)
-
-        # self.test_task1.parent = parent_task
-        parent_task1.children.append(new_task)
-        self.assertEqual(parent_task1.total_logged_seconds, 0)
-
-        parent_task1.parent = parent_task2
-        self.assertEqual(parent_task2.total_logged_seconds, 10 * 3600)
-
-        new_task.time_logs = []
-        tlog2 = TimeLog(
-            task=new_task,
-            resource=new_task.resources[0],
-            start=now,
-            end=now + td(hours=8)
-        )
-        DBSession.add(tlog2)
-        DBSession.commit()
-
-        self.assertTrue(tlog2 in new_task.time_logs)
-        self.assertEqual(new_task.total_logged_seconds, 8 * 3600)
-        self.assertEqual(parent_task1.total_logged_seconds, 8 * 3600)
-        self.assertEqual(parent_task2.total_logged_seconds, 18 * 3600)
-
-        tlog3 = TimeLog(
-            task=new_task,
-            resource=new_task.resources[1],
-            start=now,
-            end=now + td(hours=12)
-        )
-        DBSession.add(tlog3)
-        DBSession.commit()
-
-        self.assertEqual(new_task.total_logged_seconds, 20 * 3600)
-        self.assertEqual(parent_task1.total_logged_seconds, 20 * 3600)
-        self.assertEqual(parent_task2.total_logged_seconds, 30 * 3600)
-
-    def test_total_logged_seconds_attribute_is_working_properly_for_a_container_task_when_the_time_log_of_child_is_changed(self):
-        """testing if the total_logged_seconds attribute is working properly
-        for a container task when one of the time logs of one of the children
-        of the task is changed
-        """
-        kwargs = copy.copy(self.kwargs)
-        kwargs['depends'] = []
-        new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
-
-        dt = datetime.datetime
-        td = datetime.timedelta
-        now = dt.now(pytz.utc)
-
-        parent_task = Task(**kwargs)
-        DBSession.add(parent_task)
-        DBSession.commit()
-
-        child_task = Task(**kwargs)
-        DBSession.add(child_task)
-        DBSession.commit()
-
-        parent_task.children.append(child_task)
-
-        tlog1 = TimeLog(
-            task=child_task,
-            resource=child_task.resources[0],
-            start=now,
-            end=now + td(hours=8)
-        )
-        DBSession.add(tlog1)
-        DBSession.commit()
-
-        self.assertEqual(
-            parent_task.total_logged_seconds, 8 * 60 * 60
-        )
-
-        # now update the time log
-        tlog1.end = now + td(hours=16)
-        self.assertEqual(
-            parent_task.total_logged_seconds, 16 * 60 * 60
-        )
-
     def test_schedule_seconds_is_working_properly_for_an_effort_based_task_no_studio(self):
         """testing if schedule_seconds attribute is working properly for a
         effort based task on an environment where there are no studio
@@ -1750,17 +1275,14 @@ class TaskTestCase(UnitTestBase):
         kwargs['schedule_timing'] = 10
         kwargs['schedule_unit'] = 'h'
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         self.assertEqual(new_task.schedule_seconds, 10 * 3600)
 
         kwargs['schedule_timing'] = 23
         kwargs['schedule_unit'] = 'd'
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
+        from stalker import defaults
         self.assertEqual(
             new_task.schedule_seconds,
             23 * defaults.daily_working_hours * 3600
@@ -1769,8 +1291,6 @@ class TaskTestCase(UnitTestBase):
         kwargs['schedule_timing'] = 2
         kwargs['schedule_unit'] = 'w'
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         self.assertEqual(
             new_task.schedule_seconds,
@@ -1780,8 +1300,6 @@ class TaskTestCase(UnitTestBase):
         kwargs['schedule_timing'] = 2.5
         kwargs['schedule_unit'] = 'm'
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         self.assertEqual(
             new_task.schedule_seconds,
@@ -1791,8 +1309,6 @@ class TaskTestCase(UnitTestBase):
         kwargs['schedule_timing'] = 3.1
         kwargs['schedule_unit'] = 'y'
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         self.assertAlmostEqual(
             new_task.schedule_seconds,
@@ -1807,7 +1323,7 @@ class TaskTestCase(UnitTestBase):
         """
         kwargs = copy.copy(self.kwargs)
         # no studio, using defaults
-        from stalker import Studio
+        from stalker import defaults, Studio
 
         defaults.timing_resolution = datetime.timedelta(hours=1)
 
@@ -1815,24 +1331,18 @@ class TaskTestCase(UnitTestBase):
             name='Test Studio',
             timing_resolution=datetime.timedelta(hours=1)
         )
-        DBSession.add(studio)
-        DBSession.commit()
 
         kwargs['schedule_model'] = 'effort'
 
         kwargs['schedule_timing'] = 10
         kwargs['schedule_unit'] = 'h'
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         self.assertEqual(new_task.schedule_seconds, 10 * 3600)
 
         kwargs['schedule_timing'] = 23
         kwargs['schedule_unit'] = 'd'
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         self.assertEqual(
             new_task.schedule_seconds,
@@ -1842,8 +1352,6 @@ class TaskTestCase(UnitTestBase):
         kwargs['schedule_timing'] = 2
         kwargs['schedule_unit'] = 'w'
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         self.assertEqual(
             new_task.schedule_seconds,
@@ -1853,8 +1361,6 @@ class TaskTestCase(UnitTestBase):
         kwargs['schedule_timing'] = 2.5
         kwargs['schedule_unit'] = 'm'
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         self.assertEqual(
             new_task.schedule_seconds,
@@ -1864,8 +1370,6 @@ class TaskTestCase(UnitTestBase):
         kwargs['schedule_timing'] = 3.1
         kwargs['schedule_unit'] = 'y'
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         self.assertAlmostEqual(
             new_task.schedule_seconds,
@@ -1881,16 +1385,12 @@ class TaskTestCase(UnitTestBase):
         # no studio, using defaults
         kwargs = copy.copy(self.kwargs)
         parent_task = Task(**kwargs)
-        DBSession.add(parent_task)
-        DBSession.commit()
 
         kwargs['schedule_model'] = 'effort'
 
         kwargs['schedule_timing'] = 10
         kwargs['schedule_unit'] = 'h'
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         self.assertEqual(new_task.schedule_seconds, 10 * 3600)
         new_task.parent = parent_task
@@ -1899,9 +1399,8 @@ class TaskTestCase(UnitTestBase):
         kwargs['schedule_timing'] = 23
         kwargs['schedule_unit'] = 'd'
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
+        from stalker import defaults
         self.assertEqual(
             new_task.schedule_seconds,
             23 * defaults.daily_working_hours * 3600
@@ -1915,8 +1414,6 @@ class TaskTestCase(UnitTestBase):
         kwargs['schedule_timing'] = 2
         kwargs['schedule_unit'] = 'w'
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         self.assertEqual(
             new_task.schedule_seconds,
@@ -1932,8 +1429,6 @@ class TaskTestCase(UnitTestBase):
         kwargs['schedule_timing'] = 2.5
         kwargs['schedule_unit'] = 'm'
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         self.assertEqual(
             new_task.schedule_seconds,
@@ -1950,8 +1445,6 @@ class TaskTestCase(UnitTestBase):
         kwargs['schedule_timing'] = 3.1
         kwargs['schedule_unit'] = 'y'
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         self.assertAlmostEqual(
             new_task.schedule_seconds,
@@ -1976,16 +1469,12 @@ class TaskTestCase(UnitTestBase):
         kwargs = copy.copy(self.kwargs)
         # no studio, using defaults
         parent_task = Task(**kwargs)
-        DBSession.add(parent_task)
-        DBSession.commit()
 
         kwargs['schedule_model'] = 'effort'
 
         kwargs['schedule_timing'] = 10
         kwargs['schedule_unit'] = 'h'
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         self.assertEqual(new_task.schedule_seconds, 10 * 3600)
         new_task.parent = parent_task
@@ -2006,9 +1495,8 @@ class TaskTestCase(UnitTestBase):
         kwargs['schedule_timing'] = 23
         kwargs['schedule_unit'] = 'd'
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
+        from stalker import defaults
         self.assertEqual(
             new_task.schedule_seconds,
             23 * defaults.daily_working_hours * 3600
@@ -2022,8 +1510,6 @@ class TaskTestCase(UnitTestBase):
         kwargs['schedule_timing'] = 2
         kwargs['schedule_unit'] = 'w'
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         self.assertEqual(
             new_task.schedule_seconds,
@@ -2039,8 +1525,6 @@ class TaskTestCase(UnitTestBase):
         kwargs['schedule_timing'] = 2.5
         kwargs['schedule_unit'] = 'm'
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         self.assertEqual(
             new_task.schedule_seconds,
@@ -2057,8 +1541,6 @@ class TaskTestCase(UnitTestBase):
         kwargs['schedule_timing'] = 3.1
         kwargs['schedule_unit'] = 'y'
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         self.assertAlmostEqual(
             new_task.schedule_seconds,
@@ -2080,20 +1562,17 @@ class TaskTestCase(UnitTestBase):
         """testing if schedule_seconds attribute is working properly for a
         container task
         """
+        from stalker import defaults
         kwargs = copy.copy(self.kwargs)
         defaults.timing_resolution = datetime.timedelta(hours=1)
         defaults.daily_working_hours = 9
 
         # no studio, using defaults
         parent_task1 = Task(**kwargs)
-        DBSession.add(parent_task1)
-        DBSession.commit()
 
         self.assertEqual(parent_task1.schedule_seconds, 9 * 3600)
 
         parent_task2 = Task(**kwargs)
-        DBSession.add(parent_task2)
-        DBSession.commit()
 
         self.assertEqual(parent_task2.schedule_seconds, 9 * 3600)
         parent_task2.schedule_timing = 5
@@ -2106,47 +1585,45 @@ class TaskTestCase(UnitTestBase):
 
         # create another child task for parent_task2
         child_task = Task(**kwargs)
-        DBSession.add(child_task)
-        DBSession.commit()
 
         child_task.schedule_timing = 10
         child_task.schedule_unit = 'h'
         self.assertEqual(child_task.schedule_seconds, 10 * 3600)
 
         parent_task2.children.append(child_task)
-        self.assertEqual(parent_task2.schedule_seconds, 10 * 3600 + 9 * 3600)
+        self.assertEqual(parent_task2.schedule_seconds,
+                         10 * 3600 + 9 * 3600)
 
         kwargs['schedule_model'] = 'effort'
         kwargs['schedule_timing'] = 10
         kwargs['schedule_unit'] = 'h'
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         self.assertEqual(new_task.schedule_seconds, 10 * 3600)
         new_task.parent = parent_task1
         self.assertEqual(parent_task1.schedule_seconds, 10 * 3600)
-        self.assertEqual(parent_task2.schedule_seconds, 10 * 3600 + 10 * 3600)
+        self.assertEqual(parent_task2.schedule_seconds,
+                         10 * 3600 + 10 * 3600)
 
         # update the schedule_timing of the child
         new_task.schedule_timing = 5
         self.assertEqual(new_task.schedule_seconds, 5 * 3600)
         new_task.parent = parent_task1
         self.assertEqual(parent_task1.schedule_seconds, 5 * 3600)
-        self.assertEqual(parent_task2.schedule_seconds, 5 * 3600 + 10 * 3600)
+        self.assertEqual(parent_task2.schedule_seconds,
+                         5 * 3600 + 10 * 3600)
 
         # update it back to 10 hours
         new_task.schedule_timing = 10
         self.assertEqual(new_task.schedule_seconds, 10 * 3600)
         new_task.parent = parent_task1
         self.assertEqual(parent_task1.schedule_seconds, 10 * 3600)
-        self.assertEqual(parent_task2.schedule_seconds, 10 * 3600 + 10 * 3600)
+        self.assertEqual(parent_task2.schedule_seconds,
+                         10 * 3600 + 10 * 3600)
 
         kwargs['schedule_timing'] = 23
         kwargs['schedule_unit'] = 'd'
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         self.assertEqual(
             new_task.schedule_seconds,
@@ -2166,8 +1643,6 @@ class TaskTestCase(UnitTestBase):
         kwargs['schedule_timing'] = 2
         kwargs['schedule_unit'] = 'w'
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         self.assertEqual(
             new_task.schedule_seconds,
@@ -2196,8 +1671,6 @@ class TaskTestCase(UnitTestBase):
         kwargs['schedule_timing'] = 2.5
         kwargs['schedule_unit'] = 'm'
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         self.assertEqual(
             new_task.schedule_seconds,
@@ -2221,8 +1694,6 @@ class TaskTestCase(UnitTestBase):
         kwargs['schedule_timing'] = 3.1
         kwargs['schedule_unit'] = 'y'
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         self.assertAlmostEqual(
             new_task.schedule_seconds,
@@ -2260,171 +1731,6 @@ class TaskTestCase(UnitTestBase):
         self.assertEqual(
             str(cm.exception),
             "can't set attribute"
-        )
-
-    def test_remaining_seconds_is_working_properly(self):
-        """testing if the remaining hours is working properly
-        """
-        kwargs = copy.copy(self.kwargs)
-        kwargs['depends'] = []
-
-        dt = datetime.datetime
-        td = datetime.timedelta
-        now = dt(2013, 4, 19, 10, 0, tzinfo=pytz.utc)
-
-        kwargs['schedule_model'] = 'effort'
-
-        # -------------- HOURS --------------
-        kwargs['schedule_timing'] = 10
-        kwargs['schedule_unit'] = 'h'
-        new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
-
-        # create a time_log of 2 hours
-        tlog1 = TimeLog(
-            task=new_task,
-            start=now,
-            duration=td(hours=2),
-            resource=new_task.resources[0]
-        )
-        DBSession.add(tlog1)
-        DBSession.commit()
-
-        # check
-        self.assertEqual(
-            new_task.remaining_seconds,
-            new_task.schedule_seconds - new_task.total_logged_seconds
-        )
-
-        # -------------- DAYS --------------
-        kwargs['schedule_timing'] = 23
-        kwargs['schedule_unit'] = 'd'
-        new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
-
-        # create a time_log of 5 days
-        tlog2 = TimeLog(
-            task=new_task,
-            start=now + td(hours=2),
-            end=now + td(days=5),
-            resource=new_task.resources[0]
-        )
-        DBSession.add(tlog2)
-        DBSession.commit()
-
-        # check
-        self.assertEqual(
-            new_task.remaining_seconds,
-            new_task.schedule_seconds - new_task.total_logged_seconds
-        )
-
-        # add another 2 hours
-        tlog3 = TimeLog(
-            task=new_task,
-            start=now + td(days=5),
-            duration=td(hours=2),
-            resource=new_task.resources[0]
-        )
-        DBSession.add(tlog3)
-        DBSession.commit()
-
-        self.assertEqual(
-            new_task.remaining_seconds,
-            new_task.schedule_seconds - new_task.total_logged_seconds
-        )
-
-        # ------------------- WEEKS ------------------
-        kwargs['schedule_timing'] = 2
-        kwargs['schedule_unit'] = 'w'
-        new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
-
-        # create a time_log of 2 hours
-        tlog4 = TimeLog(
-            task=new_task,
-            start=now + td(days=6),
-            duration=td(hours=2),
-            resource=new_task.resources[0]
-        )
-        DBSession.add(tlog4)
-        DBSession.commit()
-        new_task.time_logs.append(tlog4)
-
-        # check
-        self.assertEqual(
-            new_task.remaining_seconds,
-            new_task.schedule_seconds - new_task.total_logged_seconds
-        )
-
-        # create a time_log of 1 week
-        tlog5 = TimeLog(
-            task=new_task,
-            start=now + td(days=7),
-            duration=td(weeks=1),
-            resource=new_task.resources[0]
-        )
-        DBSession.add(tlog5)
-        DBSession.commit()
-        new_task.time_logs.append(tlog5)
-
-        # check
-        self.assertEqual(
-            new_task.remaining_seconds,
-            new_task.schedule_seconds - new_task.total_logged_seconds
-        )
-
-        # ------------------ MONTH -------------------
-        kwargs['schedule_timing'] = 2.5
-        kwargs['schedule_unit'] = 'm'
-        new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
-
-        # create a time_log of 1 months or 30 days, remaining_seconds can be
-        # negative
-        tlog6 = TimeLog(
-            task=new_task,
-            start=now + td(days=15),
-            duration=td(days=30),
-            resource=new_task.resources[0]
-        )
-        DBSession.add(tlog6)
-        DBSession.commit()
-        new_task.time_logs.append(tlog6)
-
-        # check
-        self.assertEqual(
-            new_task.remaining_seconds,
-            new_task.schedule_seconds - new_task.total_logged_seconds
-        )
-
-        # ------------------ YEARS ---------------------
-        kwargs['schedule_timing'] = 3.1
-        kwargs['schedule_unit'] = 'y'
-        new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
-
-        # create a time_log of 1 months or 30 days, remaining_seconds can be
-        # negative
-        tlog8 = TimeLog(
-            task=new_task,
-            start=now + td(days=55),
-            duration=td(days=30),
-            resource=new_task.resources[0]
-        )
-        DBSession.add(tlog8)
-        DBSession.commit()
-
-        new_task.time_logs.append(tlog8)
-
-        # check
-        self.assertEqual(
-            new_task.remaining_seconds,
-            new_task.schedule_seconds - new_task.total_logged_seconds
         )
 
     def test_versions_attribute_is_None(self):
@@ -2473,6 +1779,7 @@ class TaskTestCase(UnitTestBase):
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
 
+        from stalker import Entity
         entity1 = Entity(**kwargs)
         task0 = Task(**kwargs)
         task1 = Task(**kwargs)
@@ -2512,6 +1819,7 @@ class TaskTestCase(UnitTestBase):
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
 
+        from stalker import Entity
         new_entity1 = Entity(**kwargs)
         new_task2 = Task(**kwargs)
 
@@ -2581,21 +1889,21 @@ class TaskTestCase(UnitTestBase):
         kwargs['parent'] = new_task1
         new_task2 = Task(**kwargs)
         self.assertEqual(new_task2.parent, new_task1)
-        db.DBSession.add_all([new_task1, new_task2])
-        db.DBSession.commit()
+        # DBSession.add_all([new_task1, new_task2])
+        # DBSession.commit()
 
         # store the id to be used later
-        id_ = new_task2.id
-        self.assertTrue(id_ is not None)
+        # id_ = new_task2.id
+        # self.assertTrue(id_ is not None)
 
         new_task2.parent = None
         self.assertTrue(new_task2.parent is None)
-        db.DBSession.commit()
+        # DBSession.commit()
 
         # we still should have this task
-        t = Task.query.get(id_)
-        self.assertTrue(t is not None)
-        self.assertEqual(t.name, kwargs['name'])
+        # t = Task.query.get(id_)
+        # self.assertTrue(t is not None)
+        # self.assertEqual(t.name, kwargs['name'])
 
     def test_parent_argument_is_not_a_Task_instance(self):
         """testing if a TypeError will be raised when the parent argument is
@@ -2704,8 +2012,6 @@ class TaskTestCase(UnitTestBase):
         task_a = Task(**kwargs)
         task_b = Task(**kwargs)
         task_c = Task(**kwargs)
-        DBSession.add_all([task_a, task_b, task_c])
-        DBSession.commit()
 
         kwargs['depends'] = [task_a, task_b, task_c]
         kwargs['parent'] = task_a
@@ -2728,8 +2034,6 @@ class TaskTestCase(UnitTestBase):
         task_b = Task(**kwargs)
         task_c = Task(**kwargs)
         task_d = Task(**kwargs)
-        DBSession.add_all([task_a, task_b, task_c])
-        DBSession.commit()
 
         task_d.depends = [task_a, task_b, task_c]
 
@@ -2779,24 +2083,16 @@ class TaskTestCase(UnitTestBase):
         """
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         kwargs['parent'] = new_task
         kwargs['name'] = 'Task 1'
         task1 = Task(**kwargs)
-        DBSession.add(task1)
-        DBSession.commit()
 
         kwargs['name'] = 'Task 2'
         task2 = Task(**kwargs)
-        DBSession.add(task2)
-        DBSession.commit()
 
         kwargs['name'] = 'Task 3'
         task3 = Task(**kwargs)
-        DBSession.add(task3)
-        DBSession.commit()
 
         self.assertFalse(task2 in task1.children)
         self.assertFalse(task3 in task1.children)
@@ -2812,7 +2108,6 @@ class TaskTestCase(UnitTestBase):
         """
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
-        DBSession.commit()
         with self.assertRaises(AttributeError) as cm:
             new_task.is_leaf = True
 
@@ -2841,10 +2136,6 @@ class TaskTestCase(UnitTestBase):
         task2.parent = task1
         task3.parent = task1
 
-        # we need to commit the Session
-        DBSession.add_all([task1, task2, task3])
-        DBSession.commit()
-
         self.assertTrue(task2.is_leaf)
         self.assertTrue(task3.is_leaf)
         self.assertFalse(task1.is_leaf)
@@ -2854,8 +2145,6 @@ class TaskTestCase(UnitTestBase):
         """
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         with self.assertRaises(AttributeError) as cm:
             new_task.is_root = True
@@ -2885,10 +2174,6 @@ class TaskTestCase(UnitTestBase):
         task2.parent = task1
         task3.parent = task1
 
-        # we need to commit the Session
-        DBSession.add_all([task1, task2, task3])
-        DBSession.commit()
-
         self.assertFalse(task2.is_root)
         self.assertFalse(task3.is_root)
         self.assertFalse(task1.is_root)
@@ -2899,8 +2184,6 @@ class TaskTestCase(UnitTestBase):
         """
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         with self.assertRaises(AttributeError) as cm:
             new_task.is_container = False
@@ -2927,14 +2210,8 @@ class TaskTestCase(UnitTestBase):
         kwargs['name'] = 'Task 3'
         task3 = Task(**kwargs)
 
-        # we need to commit the Session
-        DBSession.add_all([task1, task2, task3])
-        DBSession.commit()
-
         task2.parent = task1
         task3.parent = task1
-
-        DBSession.commit()
 
         self.assertFalse(task2.is_container)
         self.assertFalse(task3.is_container)
@@ -3014,6 +2291,7 @@ class TaskTestCase(UnitTestBase):
 
         kwargs['name'] = 'New Task'
         kwargs['parent'] = new_task
+        from stalker import Project
         kwargs['project'] = Project(
             name='Some Other Project',
             code='SOP',
@@ -3021,7 +2299,7 @@ class TaskTestCase(UnitTestBase):
             repository=self.test_repository
         )
         # catching warnings are different then catching exceptions
-        #self.assertRaises(RuntimeWarning, Task, **self.kwargs)
+        # self.assertRaises(RuntimeWarning, Task, **self.kwargs)
         import warnings
         warnings.simplefilter("always")
 
@@ -3047,6 +2325,7 @@ class TaskTestCase(UnitTestBase):
 
         kwargs['name'] = 'New Task'
         kwargs['parent'] = new_task
+        from stalker import Project
         kwargs['project'] = Project(
             name='Some Other Project',
             code='SOP',
@@ -3066,6 +2345,7 @@ class TaskTestCase(UnitTestBase):
         # remove effort and duration. Why?
         kwargs.pop('schedule_timing')
         kwargs.pop('schedule_unit')
+        from stalker.models.task import CONSTRAIN_BOTH
         kwargs['schedule_constraint'] = CONSTRAIN_BOTH
 
         now = datetime.datetime(2013, 3, 22, 15, 0, tzinfo=pytz.utc)
@@ -3076,15 +2356,6 @@ class TaskTestCase(UnitTestBase):
         kwargs['start'] = now
         kwargs['end'] = now + dt(3)
         task1 = Task(**kwargs)
-
-        logger.debug('now                   : %s' % now)
-        logger.debug('now + dt(3)           : %s' % (now + dt(3)))
-        logger.debug('now + dt(3) - now     : %s' % (now + dt(3) - now))
-        logger.debug('task1.start           : %s' % task1.start)
-        logger.debug('task1.end             : %s' % task1.end)
-        logger.debug('task1.schedule_timing : %s' % task1.schedule_timing)
-        logger.debug('task1.schedule_unit   : %s' % task1.schedule_unit)
-        logger.debug('task1.is_leaf         : %s' % task1.is_leaf)
 
         # task2
         kwargs['name'] = 'Task2'
@@ -3099,8 +2370,6 @@ class TaskTestCase(UnitTestBase):
         task3 = Task(**kwargs)
 
         # check start conditions
-        logger.debug('task1.start: %s' % task1.start)
-        logger.debug('task1.end  : %s' % task1.end)
         self.assertEqual(task1.start, now)
         self.assertEqual(task1.end, now + dt(3))
 
@@ -3135,7 +2404,8 @@ class TaskTestCase(UnitTestBase):
         """
         kwargs = copy.copy(self.kwargs)
 
-        kwargs['start'] = datetime.datetime(2013, 4, 17, 0, 0, tzinfo=pytz.utc)
+        kwargs['start'] = datetime.datetime(2013, 4, 17, 0, 0,
+                                            tzinfo=pytz.utc)
         kwargs.pop('end')
         kwargs['schedule_timing'] = 10
         kwargs['schedule_unit'] = 'h'
@@ -3161,8 +2431,11 @@ class TaskTestCase(UnitTestBase):
         """
         kwargs = copy.copy(self.kwargs)
 
-        kwargs['start'] = datetime.datetime(2013, 4, 17, 0, 0, tzinfo=pytz.utc)
-        kwargs['end'] = datetime.datetime(2013, 4, 18, 0, 0, tzinfo=pytz.utc)
+        kwargs['start'] = \
+            datetime.datetime(2013, 4, 17, 0, 0, tzinfo=pytz.utc)
+        kwargs['end'] = \
+            datetime.datetime(2013, 4, 18, 0, 0, tzinfo=pytz.utc)
+        from stalker.models.task import CONSTRAIN_END
         kwargs['schedule_constraint'] = CONSTRAIN_END
         kwargs['schedule_timing'] = 10
         kwargs['schedule_unit'] = 'd'
@@ -3184,8 +2457,11 @@ class TaskTestCase(UnitTestBase):
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
 
-        kwargs['start'] = datetime.datetime(2013, 4, 17, 0, 0, tzinfo=pytz.utc)
-        kwargs['end'] = datetime.datetime(2013, 4, 27, 0, 0, tzinfo=pytz.utc)
+        kwargs['start'] = datetime.datetime(2013, 4, 17, 0, 0,
+                                            tzinfo=pytz.utc)
+        kwargs['end'] = datetime.datetime(2013, 4, 27, 0, 0,
+                                          tzinfo=pytz.utc)
+        from stalker.models.task import CONSTRAIN_BOTH
         kwargs['schedule_constraint'] = CONSTRAIN_BOTH
         kwargs['schedule_timing'] = 100
         kwargs['schedule_unit'] = 'd'
@@ -3277,13 +2553,8 @@ class TaskTestCase(UnitTestBase):
             status_list=self.task_status_list
         )
 
-
-        DBSession.add_all([task1, task2, task3, task4])
-        DBSession.commit()
-
         # move task4 dependency to task2
         task4.depends = [task2]
-        DBSession.commit()
 
     def test_parent_attribute_checks_cycle_on_self(self):
         """Bug ID: None
@@ -3299,8 +2570,6 @@ class TaskTestCase(UnitTestBase):
             status_list=self.task_status_list,
             responsible=[self.test_user1]
         )
-        DBSession.add(task1)
-        DBSession.commit()
 
         with self.assertRaises(CircularDependencyError) as cm:
             task1.parent = task1
@@ -3319,7 +2588,8 @@ class TaskTestCase(UnitTestBase):
         kwargs['schedule_timing'] = 155
         kwargs.pop('bid_timing')
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.schedule_timing, kwargs['schedule_timing'])
+        self.assertEqual(new_task.schedule_timing,
+                         kwargs['schedule_timing'])
         self.assertEqual(new_task.bid_timing, new_task.schedule_timing)
 
     def test_bid_timing_argument_is_None(self):
@@ -3330,7 +2600,8 @@ class TaskTestCase(UnitTestBase):
         kwargs['bid_timing'] = None
         kwargs['schedule_timing'] = 1342
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.schedule_timing, kwargs['schedule_timing'])
+        self.assertEqual(new_task.schedule_timing,
+                         kwargs['schedule_timing'])
         self.assertEqual(new_task.bid_timing, new_task.schedule_timing)
 
     def test_bid_timing_attribute_is_set_to_None(self):
@@ -3482,8 +2753,6 @@ class TaskTestCase(UnitTestBase):
         set to a value which is not in stalker.config.Config.datetime_units.
         """
         new_task = Task(**self.kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
         with self.assertRaises(ValueError) as cm:
             new_task.bid_unit = 'sys'
 
@@ -3498,8 +2767,6 @@ class TaskTestCase(UnitTestBase):
         """testing if the tjp_id attribute is a read only attribute
         """
         new_task = Task(**self.kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
         with self.assertRaises(AttributeError) as cm:
             new_task.tjp_id = 'some value'
 
@@ -3512,7 +2779,7 @@ class TaskTestCase(UnitTestBase):
 
         self.assertEqual(
             str(cm.exception),
-             "can't set attribute"
+            "can't set attribute"
         )
 
     def test_tjp_id_attribute_is_working_properly_for_a_root_task(self):
@@ -3557,8 +2824,6 @@ class TaskTestCase(UnitTestBase):
 
         t2.parent = t1
         t3.parent = t2
-        DBSession.add_all([t1, t2, t3])
-        DBSession.commit()
 
         self.assertEqual(
             t3.tjp_abs_id,
@@ -3582,15 +2847,21 @@ class TaskTestCase(UnitTestBase):
 
         dep_t1 = Task(**kwargs)
         dep_t2 = Task(**kwargs)
-        DBSession.add_all([dep_t1, dep_t2])
-        DBSession.commit()
 
         kwargs['depends'] = [dep_t1, dep_t2]
         kwargs['name'] = 'Modeling'
 
         t1 = Task(**kwargs)
-        DBSession.add(t1)
-        DBSession.commit()
+
+        self.test_project1.id = 120
+        t1.id = 121
+        dep_t1.id = 122
+        dep_t2.id = 123
+        self.test_user1.id = 124
+        self.test_user2.id = 125
+        self.test_user3.id = 126
+        self.test_user4.id = 127
+        self.test_user5.id = 128
 
         expected_tjp = """
 task Task_%(t1_id)s "Task_%(t1_id)s" {
@@ -3598,7 +2869,7 @@ task Task_%(t1_id)s "Task_%(t1_id)s" {
     
             depends Project_%(project1_id)s.Task_%(dep_t1_id)s {onend}, Project_%(project1_id)s.Task_%(dep_t2_id)s {onend}        
             
-            effort 10.0d
+            effort 10d
             allocate User_%(user1_id)s {
                     alternative
                     User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
@@ -3632,19 +2903,12 @@ task Task_%(t1_id)s "Task_%(t1_id)s" {
         """
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         kwargs['parent'] = new_task
         kwargs['depends'] = []
 
         dep_task1 = Task(**kwargs)
-        DBSession.add(dep_task1)
-        DBSession.commit()
-
         dep_task2 = Task(**kwargs)
-        DBSession.add(dep_task2)
-        DBSession.commit()
 
         kwargs['name'] = 'Modeling'
         kwargs['schedule_timing'] = 1003
@@ -3655,8 +2919,18 @@ task Task_%(t1_id)s "Task_%(t1_id)s" {
         kwargs['resources'] = [self.test_user1, self.test_user2]
 
         new_task2 = Task(**kwargs)
-        DBSession.add(new_task2)
-        DBSession.commit()
+
+        # create some random ids
+        self.test_project1.id = 120
+        new_task.id = 121
+        new_task2.id = 122
+        dep_task1.id = 123
+        dep_task2.id = 124
+        self.test_user1.id = 125
+        self.test_user2.id = 126
+        self.test_user3.id = 127
+        self.test_user4.id = 128
+        self.test_user5.id = 129
 
         # self.maxDiff = None
         expected_tjp = """
@@ -3665,7 +2939,7 @@ task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
     
             depends Project_%(project1_id)s.Task_%(new_task_id)s.Task_%(dep_task1_id)s {onend}, Project_%(project1_id)s.Task_%(new_task_id)s.Task_%(dep_task2_id)s {onend}        
             
-            effort 1003.0h
+            effort 1003h
             allocate User_%(user1_id)s {
                     alternative
                     User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
@@ -3699,19 +2973,13 @@ task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
         """
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         kwargs['parent'] = new_task
         kwargs['depends'] = []
 
         dep_task1 = Task(**kwargs)
-        DBSession.add(dep_task1)
-        DBSession.commit()
 
         dep_task2 = Task(**kwargs)
-        DBSession.add(dep_task2)
-        DBSession.commit()
 
         kwargs['name'] = 'Modeling'
         kwargs['schedule_timing'] = 1003
@@ -3721,8 +2989,6 @@ task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
         kwargs['resources'] = [self.test_user1, self.test_user2]
 
         new_task2 = Task(**kwargs)
-        DBSession.add(new_task2)
-        DBSession.commit()
 
         # modify dependency attributes
         tdep1 = new_task2.task_depends_to[0]
@@ -3737,13 +3003,25 @@ task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
         tdep2.gap_unit = 'd'
         tdep2.gap_model = 'duration'
 
+        # create some random ids
+        self.test_project1.id = 120
+        new_task.id = 121
+        new_task2.id = 122
+        dep_task1.id = 123
+        dep_task2.id = 124
+        self.test_user1.id = 125
+        self.test_user2.id = 126
+        self.test_user3.id = 127
+        self.test_user4.id = 128
+        self.test_user5.id = 129
+
         expected_tjp = """
 task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
 
     
             depends Project_%(project1_id)s.Task_%(new_task_id)s.Task_%(dep_task1_id)s {onstart gaplength 2d}, Project_%(project1_id)s.Task_%(new_task_id)s.Task_%(dep_task2_id)s {onend gapduration 4d}        
             
-            effort 1003.0h
+            effort 1003h
             allocate User_%(user1_id)s {
                     alternative
                     User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
@@ -3755,10 +3033,10 @@ task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
                 }            
 }""" % {
             'project1_id': self.test_project1.id,
-
+    
             'new_task_id': new_task.id,
             'new_task2_id': new_task2.id,
-
+    
             'dep_task1_id': dep_task1.id,
             'dep_task2_id': dep_task2.id,
             'user1_id': self.test_user1.id,
@@ -3778,19 +3056,13 @@ task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
         """
         kwargs = copy.copy(self.kwargs)
         new_task1 = Task(**kwargs)
-        DBSession.add(new_task1)
-        DBSession.commit()
 
         kwargs['parent'] = new_task1
         kwargs['depends'] = []
 
         dep_task1 = Task(**kwargs)
-        DBSession.add(dep_task1)
-        DBSession.commit()
 
         dep_task2 = Task(**kwargs)
-        DBSession.add(dep_task2)
-        DBSession.commit()
 
         kwargs['name'] = 'Modeling'
         kwargs['schedule_timing'] = 1003
@@ -3804,8 +3076,6 @@ task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
         kwargs['allocation_strategy'] = 'minloaded'
 
         new_task2 = Task(**kwargs)
-        DBSession.add(new_task2)
-        DBSession.commit()
 
         # modify dependency attributes
         tdep1 = new_task2.task_depends_to[0]
@@ -3820,13 +3090,25 @@ task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
         tdep2.gap_unit = 'd'
         tdep2.gap_model = 'duration'
 
+        # create some random id
+        self.test_project1.id = 120
+        new_task1.id = 121
+        new_task2.id = 122
+        dep_task1.id = 123
+        dep_task2.id = 124
+        self.test_user1.id = 125
+        self.test_user2.id = 126
+        self.test_user3.id = 127
+        self.test_user4.id = 128
+        self.test_user5.id = 129
+
         expected_tjp = """
 task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
 
     
             depends Project_%(project1_id)s.Task_%(new_task1_id)s.Task_%(dep_task1_id)s {onstart gaplength 2d}, Project_%(project1_id)s.Task_%(new_task1_id)s.Task_%(dep_task2_id)s {onend gapduration 4d}        
             
-            effort 1003.0h
+            effort 1003h
             allocate User_%(user1_id)s {
                     alternative
                     User_%(user3_id)s select minloaded
@@ -3866,18 +3148,12 @@ task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
         kwargs['depends'] = []
 
         t1 = Task(**kwargs)
-        DBSession.add(t1)
-        DBSession.commit()
 
         kwargs['parent'] = t1
 
         dep_task1 = Task(**kwargs)
-        DBSession.add(dep_task1)
-        DBSession.commit()
 
         dep_task2 = Task(**kwargs)
-        DBSession.add(dep_task2)
-        DBSession.commit()
 
         kwargs['name'] = 'Modeling'
         kwargs['schedule_timing'] = 1
@@ -3888,8 +3164,19 @@ task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
         kwargs['resources'] = [self.test_user1, self.test_user2]
 
         t2 = Task(**kwargs)
-        DBSession.add(t2)
-        DBSession.commit()
+        # set some random ids
+        self.test_user1.id = 123
+        self.test_user2.id = 124
+        self.test_user3.id = 125
+        self.test_user4.id = 126
+        self.test_user5.id = 127
+
+        self.test_project1.id = 128
+
+        t1.id = 129
+        t2.id = 130
+        dep_task1.id = 131
+        dep_task2.id = 132
 
         expected_tjp = """
 task Task_%(t1_id)s "Task_%(t1_id)s" {
@@ -3901,7 +3188,7 @@ task Task_%(dep_task1_id)s "Task_%(dep_task1_id)s" {
     
             
             
-            effort 1.0d
+            effort 1d
             allocate User_%(user1_id)s {
                     alternative
                     User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
@@ -3917,7 +3204,7 @@ task Task_%(dep_task2_id)s "Task_%(dep_task2_id)s" {
     
             
             
-            effort 1.0d
+            effort 1d
             allocate User_%(user1_id)s {
                     alternative
                     User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
@@ -3933,7 +3220,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
     
             depends Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task1_id)s {onend}, Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task2_id)s {onend}        
             
-            effort 1.0d
+            effort 1d
             allocate User_%(user1_id)s {
                     alternative
                     User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
@@ -3958,9 +3245,9 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
             'dep_task1_id': dep_task1.id,
             'dep_task2_id': dep_task2.id,
         }
-        # print(t1.to_tjp)
-        # print('---------------------------------')
-        # print(expected_tjp)
+        print(t1.to_tjp)
+        print('---------------------------------')
+        print(expected_tjp)
         self.assertEqual(t1.to_tjp, expected_tjp)
 
     def test_to_tjp_attribute_is_working_properly_for_a_container_task_with_dependency(self):
@@ -3975,29 +3262,21 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs['name'] = 'Random Task Name 1'
 
         t0 = Task(**kwargs)
-        DBSession.add(t0)
-        DBSession.commit()
 
         kwargs['depends'] = [t0]
         kwargs['name'] = 'Modeling'
 
         t1 = Task(**kwargs)
         t1.priority = 888
-        DBSession.add(t1)
-        DBSession.commit()
 
         kwargs['parent'] = t1
         kwargs['depends'] = []
 
         dep_task1 = Task(**kwargs)
         dep_task1.depends = []
-        DBSession.add(dep_task1)
-        DBSession.commit()
 
         dep_task2 = Task(**kwargs)
         dep_task1.depends = []
-        DBSession.add(dep_task2)
-        DBSession.commit()
 
         kwargs['name'] = 'Modeling'
         kwargs['schedule_timing'] = 1
@@ -4016,8 +3295,21 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs['resources'] = [self.test_user1, self.test_user2]
 
         t2 = Task(**kwargs)
-        DBSession.add(t2)
-        DBSession.commit()
+
+        # generate random ids
+        self.test_user1.id = 123
+        self.test_user2.id = 124
+        self.test_user3.id = 125
+        self.test_user4.id = 126
+        self.test_user5.id = 127
+
+        self.test_project1.id = 128
+
+        t0.id = 129
+        t1.id = 130
+        t2.id = 131
+        dep_task1.id = 132
+        dep_task2.id = 133
 
         expected_tjp = """
 task Task_%(t1_id)s "Task_%(t1_id)s" {
@@ -4029,7 +3321,7 @@ task Task_%(dep_task1_id)s "Task_%(dep_task1_id)s" {
     
             
             
-            effort 1.0d
+            effort 1d
             allocate User_%(user1_id)s {
                     alternative
                     User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
@@ -4045,7 +3337,7 @@ task Task_%(dep_task2_id)s "Task_%(dep_task2_id)s" {
     
             
             
-            effort 1.0d
+            effort 1d
             allocate User_%(user1_id)s {
                     alternative
                     User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
@@ -4061,7 +3353,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
     
             depends Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task1_id)s {onend}, Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task2_id)s {onend}        
             
-            effort 1.0d
+            effort 1d
             allocate User_%(user1_id)s {
                     alternative
                     User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
@@ -4102,18 +3394,12 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs['depends'] = []
 
         t1 = Task(**kwargs)
-        DBSession.add(t1)
-        DBSession.commit()
 
         kwargs['parent'] = t1
 
         dep_task1 = Task(**kwargs)
-        DBSession.add(dep_task1)
-        DBSession.commit()
 
         dep_task2 = Task(**kwargs)
-        DBSession.add(dep_task2)
-        DBSession.commit()
 
         kwargs['name'] = 'Modeling'
         kwargs['schedule_timing'] = 1
@@ -4121,8 +3407,10 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs['schedule_model'] = 'effort'
         kwargs['depends'] = [dep_task1, dep_task2]
         kwargs['schedule_constraint'] = 3
-        kwargs['start'] = datetime.datetime(2013, 5, 3, 14, 0, tzinfo=pytz.utc)
-        kwargs['end'] = datetime.datetime(2013, 5, 4, 14, 0, tzinfo=pytz.utc)
+        kwargs['start'] = datetime.datetime(2013, 5, 3, 14, 0,
+                                            tzinfo=pytz.utc)
+        kwargs['end'] = datetime.datetime(2013, 5, 4, 14, 0,
+                                          tzinfo=pytz.utc)
 
         self.test_user1.name = 'Test User 1'
         self.test_user1.login = 'testuser1'
@@ -4135,8 +3423,18 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs['resources'] = [self.test_user1, self.test_user2]
 
         t2 = Task(**kwargs)
-        DBSession.add(t2)
-        DBSession.commit()
+
+        # create some random ids
+        self.test_user1.id = 120
+        self.test_user2.id = 121
+        self.test_user3.id = 122
+        self.test_user4.id = 123
+        self.test_user5.id = 124
+        self.test_project1.id = 125
+        t1.id = 126
+        t2.id = 127
+        dep_task1.id = 128
+        dep_task2.id = 129
 
         expected_tjp = """
 task Task_%(t1_id)s "Task_%(t1_id)s" {
@@ -4148,7 +3446,7 @@ task Task_%(dep_task1_id)s "Task_%(dep_task1_id)s" {
     
             
             
-            effort 1.0d
+            effort 1d
             allocate User_%(user1_id)s {
                     alternative
                     User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
@@ -4164,7 +3462,7 @@ task Task_%(dep_task2_id)s "Task_%(dep_task2_id)s" {
     
             
             
-            effort 1.0d
+            effort 1d
             allocate User_%(user1_id)s {
                     alternative
                     User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
@@ -4179,10 +3477,10 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
 
     
             depends Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task1_id)s {onend}, Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task2_id)s {onend}        
-                                                start 2013-05-03-17:00
-                                end 2013-05-04-17:00
+                                                start 2013-05-03-14:00
+                                end 2013-05-04-14:00
                             
-            effort 1.0d
+            effort 1d
             allocate User_%(user1_id)s {
                     alternative
                     User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
@@ -4218,8 +3516,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         with self.assertRaises(AttributeError) as cm:
             new_task.is_scheduled = True
@@ -4235,8 +3531,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         new_task.computed_start = datetime.datetime.now(pytz.utc)
         new_task.computed_end = \
@@ -4249,8 +3543,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         new_task.computed_start = None
         new_task.computed_end = datetime.datetime.now(pytz.utc)
@@ -4265,8 +3557,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
         with self.assertRaises(AttributeError) as cm:
             new_task.parents = self.test_dependent_task1
@@ -4508,45 +3798,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
             "can't set attribute"
         )
 
-    def test_tickets_attribute_is_working_properly(self):
-        """testing if the tickets attribute is working properly
-        """
-        kwargs = copy.copy(self.kwargs)
-        new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
-
-        from stalker import Ticket
-        # create ticket statuses
-        #db.init()
-
-        new_ticket1 = Ticket(
-            project=new_task.project,
-            links=[new_task]
-        )
-        DBSession.add(new_ticket1)
-        DBSession.commit()
-
-        new_ticket2 = Ticket(
-            project=new_task.project,
-            links=[new_task]
-        )
-        DBSession.add(new_ticket2)
-        DBSession.commit()
-
-        # add some other tickets
-        new_ticket3 = Ticket(
-            project=new_task.project,
-            links=[]
-        )
-        DBSession.add(new_ticket3)
-        DBSession.commit()
-
-        self.assertEqual(
-            sorted(new_task.tickets, key=lambda x: x.name),
-            sorted([new_ticket1, new_ticket2], key=lambda x: x.name)
-        )
-
     def test_open_tickets_attribute_is_a_read_only_property(self):
         """testing if the open_tickets attribute is a read-only property
         """
@@ -4561,48 +3812,6 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
             "can't set attribute"
         )
 
-    def test_open_tickets_attribute_is_working_properly(self):
-        """testing if the open_tickets attribute is working properly
-        """
-        kwargs = copy.copy(self.kwargs)
-        new_task = Task(**kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
-
-        from stalker import Ticket
-        # create ticket statuses
-        #db.init()
-
-        new_ticket1 = Ticket(
-            project=new_task.project,
-            links=[new_task]
-        )
-        DBSession.add(new_ticket1)
-        DBSession.commit()
-
-        new_ticket2 = Ticket(
-            project=new_task.project,
-            links=[new_task]
-        )
-        DBSession.add(new_ticket2)
-        DBSession.commit()
-
-        # close this ticket
-        new_ticket2.resolve(None, 'fixed')
-        DBSession.commit()
-
-        # add some other tickets
-        new_ticket3 = Ticket(
-            project=new_task.project,
-            links=[]
-        )
-        DBSession.add(new_ticket3)
-        DBSession.commit()
-
-        self.assertEqual(
-            new_task.open_tickets,
-            [new_ticket1]
-        )
 
     def test_reviews_attribute_is_an_empty_list_by_default(self):
         """testing if the reviews attribute is an empty list by default
@@ -4666,7 +3875,8 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
 
         task_depends = new_task.task_depends_to[0]
         self.assertEqual(task_depends.task, new_task)
-        self.assertEqual(task_depends.depends_to, self.test_dependent_task1)
+        self.assertEqual(task_depends.depends_to,
+                         self.test_dependent_task1)
 
     def test_alternative_resources_argument_is_skipped(self):
         """testing if the alternative_resources attribute will be an empty list
@@ -4787,6 +3997,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """testing if the default value will be used for allocation_strategy
         attribute if the allocation_strategy argument is skipped
         """
+        from stalker import defaults
         kwargs = copy.copy(self.kwargs)
         kwargs.pop('allocation_strategy')
         new_task = Task(**kwargs)
@@ -4797,6 +4008,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """testing if the default value will be used for allocation_strategy
         attribute if the allocation_strategy argument is None
         """
+        from stalker import defaults
         kwargs = copy.copy(self.kwargs)
         kwargs['allocation_strategy'] = None
         new_task = Task(**kwargs)
@@ -4807,6 +4019,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """testing if the default value will be used for the
         allocation_strategy when it is set to None
         """
+        from stalker import defaults
         new_task = Task(**self.kwargs)
         new_task.allocation_strategy = None
         self.assertEqual(new_task.allocation_strategy,
@@ -4876,6 +4089,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """testing if the allocation_strategy argument value is correctly
         passed to the allocation_strategy attribute
         """
+        from stalker import defaults
         test_value = defaults.allocation_strategy[1]
         kwargs = copy.copy(self.kwargs)
         kwargs['allocation_strategy'] = test_value
@@ -4888,6 +4102,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """
         new_task = Task(**self.kwargs)
 
+        from stalker import defaults
         test_value = defaults.allocation_strategy[1]
         self.assertNotEqual(new_task.allocation_strategy, test_value)
 
@@ -4900,7 +4115,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
-        db.DBSession.commit()
+        # DBSession.commit()
 
         self.assertFalse(new_task.is_scheduled)
         self.assertEqual(new_task.resources, new_task.computed_resources)
@@ -5083,6 +4298,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         matching FilenameTemplate matching the entity_type
         """
         new_task = Task(**self.kwargs)
+        from stalker import FilenameTemplate
         ft = FilenameTemplate(
             name='Asset Filename Template',
             target_entity_type='Asset',
@@ -5091,13 +4307,14 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
             filename='{{task.nice_name}}_{{version.take_name}}'
                      '_v{{"%03d"|format(version.version_number)}}{{extension}}'
         )
+        from stalker import Structure
         structure = Structure(
             name='Movie Project Structure',
             templates=[ft]
         )
         self.test_project1.structure = structure
         with self.assertRaises(RuntimeError) as cm:
-             new_task.path
+            new_task.path
 
         self.assertEqual(
             str(cm.exception),
@@ -5114,9 +4331,8 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         FilenameTemplate matching the class entity_type
         """
         new_task = Task(**self.kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
+        from stalker import FilenameTemplate
         ft = FilenameTemplate(
             name='Task Filename Template',
             target_entity_type='Task',
@@ -5125,15 +4341,12 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
             filename='{{task.nice_name}}_{{version.take_name}}'
                      '_v{{"%03d"|format(version.version_number)}}{{extension}}'
         )
-        DBSession.add(ft)
-        DBSession.commit()
 
+        from stalker import Structure
         structure = Structure(
             name='Movie Project Structure',
             templates=[ft]
         )
-        DBSession.add(structure)
-        DBSession.commit()
 
         self.test_project1.structure = structure
 
@@ -5175,9 +4388,8 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         there is no matching FilenameTemplate matching the entity_type
         """
         new_task = Task(**self.kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
+        from stalker import FilenameTemplate
         ft = FilenameTemplate(
             name='Asset Filename Template',
             target_entity_type='Asset',
@@ -5186,15 +4398,12 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
             filename='{{task.nice_name}}_{{version.take_name}}'
                      '_v{{"%03d"|format(version.version_number)}}{{extension}}'
         )
-        DBSession.add(ft)
-        DBSession.commit()
 
+        from stalker import Structure
         structure = Structure(
             name='Movie Project Structure',
             templates=[ft]
         )
-        DBSession.add(structure)
-        DBSession.commit()
 
         self.test_project1.structure = structure
         with self.assertRaises(RuntimeError) as cm:
@@ -5215,9 +4424,8 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         of the FilenameTemplate matching the class entity_type
         """
         new_task = Task(**self.kwargs)
-        DBSession.add(new_task)
-        DBSession.commit()
 
+        from stalker import FilenameTemplate
         ft = FilenameTemplate(
             name='Task Filename Template',
             target_entity_type='Task',
@@ -5228,16 +4436,12 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
             filename='{{task.nice_name}}_{{version.take_name}}'
                      '_v{{"%03d"|format(version.version_number)}}{{extension}}'
         )
-        DBSession.add(ft)
-        DBSession.commit()
 
+        from stalker import Structure
         structure = Structure(
             name='Movie Project Structure',
             templates=[ft]
         )
-        DBSession.add(structure)
-        DBSession.commit()
-
         self.test_project1.structure = structure
 
         import os
@@ -5260,8 +4464,8 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
             pass
 
         new_task = Task(**kwargs)
-        db.DBSession.add(new_task)
-        db.DBSession.commit()
+        # DBSession.add(new_task)
+        # DBSession.commit()
         self.assertEqual(new_task.good, None)
 
     def test_good_argument_is_None(self):
@@ -5270,8 +4474,8 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         kwargs['good'] = None
         new_task = Task(**kwargs)
-        db.DBSession.add(new_task)
-        db.DBSession.commit()
+        # DBSession.add(new_task)
+        # DBSession.commit()
         self.assertEqual(new_task.good, None)
 
     def test_good_attribute_is_None(self):
@@ -5281,8 +4485,8 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         kwargs['good'] = Good(name='Some Good')
         new_task = Task(**kwargs)
-        db.DBSession.add(new_task)
-        db.DBSession.commit()
+        # DBSession.add(new_task)
+        # DBSession.commit()
         self.assertNotEqual(new_task.good, None)
         new_task.good = None
         self.assertEqual(new_task.good, None)
@@ -5336,3 +4540,771 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         self.assertNotEqual(new_task.good, new_good)
         new_task.good = new_good
         self.assertEqual(new_task.good, new_good)
+
+
+class TaskDBTestDBCase(UnitTestDBBase):
+    """Tests the stalker.models.task.Task class with a DB
+    """
+
+    def setUp(self):
+        """run once
+        """
+        super(self.__class__, self).setUp()
+
+        from stalker import Status
+        self.status_wfd = Status.query.filter_by(code="WFD").first()
+        self.status_rts = Status.query.filter_by(code="RTS").first()
+        self.status_wip = Status.query.filter_by(code="WIP").first()
+        self.status_prev = Status.query.filter_by(code="PREV").first()
+        self.status_hrev = Status.query.filter_by(code="HREV").first()
+        self.status_drev = Status.query.filter_by(code="DREV").first()
+        self.status_oh = Status.query.filter_by(code="OH").first()
+        self.status_stop = Status.query.filter_by(code="STOP").first()
+        self.status_cmpl = Status.query.filter_by(code="CMPL").first()
+
+        from stalker import StatusList
+        self.task_status_list = StatusList.query\
+            .filter_by(target_entity_type='Task').first()
+
+        self.test_project_status_list = StatusList(
+            name="Project Statuses",
+            statuses=[self.status_wip,
+                      self.status_prev,
+                      self.status_cmpl],
+            target_entity_type='Project',
+        )
+
+        from stalker import Type
+        self.test_movie_project_type = Type(
+            name="Movie Project",
+            code='movie',
+            target_entity_type='Project',
+        )
+
+        self.test_repository_type = Type(
+            name="Test Repository Type",
+            code='test',
+            target_entity_type='Repository',
+        )
+
+        from stalker import Repository
+        self.test_repository = Repository(
+            name="Test Repository",
+            type=self.test_repository_type,
+            linux_path='/mnt/T/',
+            windows_path='T:/',
+            osx_path='/Volumes/T/'
+        )
+
+        from stalker import User
+        self.test_user1 = User(
+            name="User1",
+            login="user1",
+            email="user1@user1.com",
+            password="1234"
+        )
+
+        self.test_user2 = User(
+            name="User2",
+            login="user2",
+            email="user2@user2.com",
+            password="1234"
+        )
+
+        self.test_user3 = User(
+            name="User3",
+            login="user3",
+            email="user3@user3.com",
+            password="1234"
+        )
+
+        self.test_user4 = User(
+            name="User4",
+            login="user4",
+            email="user4@user4.com",
+            password="1234"
+        )
+
+        self.test_user5 = User(
+            name="User5",
+            login="user5",
+            email="user5@user5.com",
+            password="1234"
+        )
+
+        from stalker import Project
+        self.test_project1 = Project(
+            name="Test Project1",
+            code='tp1',
+            type=self.test_movie_project_type,
+            status_list=self.test_project_status_list,
+            repositories=[self.test_repository]
+        )
+
+        self.test_dependent_task1 = Task(
+            name="Dependent Task1",
+            project=self.test_project1,
+            status_list=self.task_status_list,
+            responsible=[self.test_user1]
+        )
+
+        self.test_dependent_task2 = Task(
+            name="Dependent Task2",
+            project=self.test_project1,
+            status_list=self.task_status_list,
+            responsible=[self.test_user1]
+        )
+
+        self.kwargs = {
+            'name': 'Modeling',
+            'description': 'A Modeling Task',
+            'project': self.test_project1,
+            'priority': 500,
+            'responsible': [self.test_user1],
+            'resources': [self.test_user1, self.test_user2],
+            'alternative_resources': [self.test_user3, self.test_user4,
+                                      self.test_user5],
+            'allocation_strategy': 'minloaded',
+            'persistent_allocation': True,
+            'watchers': [self.test_user3],
+            'bid_timing': 4,
+            'bid_unit': 'd',
+            'schedule_timing': 1,
+            'schedule_unit': 'd',
+            'start': datetime.datetime(2013, 4, 8, 13, 0, tzinfo=pytz.utc),
+            'end': datetime.datetime(2013, 4, 8, 18, 0, tzinfo=pytz.utc),
+            'depends': [self.test_dependent_task1,
+                        self.test_dependent_task2],
+            'time_logs': [],
+            'versions': [],
+            'is_milestone': False,
+            'status': 0,
+            'status_list': self.task_status_list,
+        }
+
+        # create a test Task
+        from stalker.db.session import DBSession
+        DBSession.add_all([
+            self.test_project_status_list, self.test_movie_project_type,
+            self.test_repository_type, self.test_repository, self.test_user1,
+            self.test_user2, self.test_user3, self.test_user4,
+            self.test_user5, self.test_project1, self.test_dependent_task1,
+            self.test_dependent_task2,
+        ])
+        DBSession.commit()
+
+    def test_open_tickets_attribute_is_working_properly(self):
+        """testing if the open_tickets attribute is working properly
+        """
+        kwargs = copy.copy(self.kwargs)
+        new_task = Task(**kwargs)
+        from stalker.db.session import DBSession
+        DBSession.add(new_task)
+        DBSession.commit()
+
+        # create ticket statuses
+        from stalker import db
+        db.init()
+
+        from stalker import Ticket
+        new_ticket1 = Ticket(
+            project=new_task.project,
+            links=[new_task]
+        )
+        DBSession.add(new_ticket1)
+        DBSession.commit()
+
+        new_ticket2 = Ticket(
+            project=new_task.project,
+            links=[new_task]
+        )
+        DBSession.add(new_ticket2)
+        DBSession.commit()
+
+        # close this ticket
+        new_ticket2.resolve(None, 'fixed')
+        DBSession.commit()
+
+        # add some other tickets
+        new_ticket3 = Ticket(
+            project=new_task.project,
+            links=[],
+        )
+        DBSession.add(new_ticket3)
+        DBSession.commit()
+
+        self.assertEqual(
+            new_task.open_tickets,
+            [new_ticket1]
+        )
+
+    def test_tickets_attribute_is_working_properly(self):
+        """testing if the tickets attribute is working properly
+        """
+        kwargs = copy.copy(self.kwargs)
+        new_task = Task(**kwargs)
+        from stalker.db.session import DBSession
+        DBSession.add(new_task)
+        DBSession.commit()
+
+        from stalker import Ticket
+        # create ticket statuses
+        from stalker import db
+        db.init()
+
+        new_ticket1 = Ticket(
+            project=new_task.project,
+            links=[new_task]
+        )
+        DBSession.add(new_ticket1)
+        DBSession.commit()
+
+        new_ticket2 = Ticket(
+            project=new_task.project,
+            links=[new_task]
+        )
+        DBSession.add(new_ticket2)
+        DBSession.commit()
+
+        # add some other tickets
+        new_ticket3 = Ticket(
+            project=new_task.project,
+            links=[]
+        )
+        DBSession.add(new_ticket3)
+        DBSession.commit()
+
+        self.assertEqual(
+            sorted(new_task.tickets, key=lambda x: x.name),
+            sorted([new_ticket1, new_ticket2], key=lambda x: x.name)
+        )
+
+    def test_percent_complete_attribute_is_not_using_any_time_logs_for_a_duration_task(self):
+        """testing if the percent_complete attribute does not use any time log
+        information if the task is a duration based task
+        """
+        kwargs = copy.copy(self.kwargs)
+        kwargs['depends'] = []
+        kwargs['schedule_model'] = 'duration'
+
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now(pytz.utc)
+
+        new_task = Task(**kwargs)
+        new_task.computed_start = now + td(days=1)
+        new_task.computed_end = now + td(days=2)
+
+        from stalker import TimeLog
+        tlog1 = TimeLog(
+            task=new_task,
+            resource=new_task.resources[0],
+            start=now + td(days=1),
+            end=now + td(days=2)
+        )
+
+        self.assertEqual(new_task.percent_complete, 0)
+
+    def test_percent_complete_attribute_is_working_properly_for_a_container_task(self):
+        """testing if the percent complete attribute is working properly for a
+        container task
+        """
+        kwargs = copy.copy(self.kwargs)
+        kwargs['depends'] = []  # remove dependencies just to make it
+        # easy to create time logs after stalker
+        # v0.2.6.1
+
+        new_task = Task(**kwargs)
+        new_task.status = self.status_rts
+
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now(pytz.utc)
+
+        from stalker import defaults
+        defaults.timing_resolution = td(hours=1)
+        defaults.daily_working_hours = 9
+
+        parent_task = Task(**kwargs)
+
+        new_task.time_logs = []
+        from stalker import TimeLog
+        tlog1 = TimeLog(
+            task=new_task,
+            resource=new_task.resources[0],
+            start=now - td(hours=4),
+            end=now - td(hours=2)
+        )
+
+        self.assertTrue(tlog1 in new_task.time_logs)
+
+        tlog2 = TimeLog(
+            task=new_task,
+            resource=new_task.resources[1],
+            start=now - td(hours=4),
+            end=now + td(hours=1)
+        )
+
+        from stalker.db.session import DBSession
+        DBSession.commit()
+
+        new_task.parent = parent_task
+        DBSession.commit()
+
+        self.assertTrue(tlog2 in new_task.time_logs)
+        self.assertEqual(new_task.total_logged_seconds, 7 * 3600)
+        self.assertEqual(new_task.schedule_seconds, 9 * 3600)
+        self.assertAlmostEqual(
+            new_task.percent_complete,
+            77.7777778,
+            delta=0.01
+        )
+        self.assertAlmostEqual(
+            parent_task.percent_complete,
+            77.7777778,
+            delta=0.01
+        )
+
+    def test_percent_complete_attribute_is_working_properly_for_a_leaf_task(self):
+        """testing if the percent_complete attribute is working properly for a
+        leaf task
+        """
+        kwargs = copy.copy(self.kwargs)
+        kwargs['depends'] = []
+
+        new_task = Task(**kwargs)
+
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now(pytz.utc)
+
+        new_task.time_logs = []
+        from stalker import TimeLog
+        tlog1 = TimeLog(
+            task=new_task,
+            resource=new_task.resources[0],
+            start=now,
+            end=now + td(hours=8)
+        )
+        from stalker.db.session import DBSession
+        DBSession.add(tlog1)
+        DBSession.commit()
+
+        self.assertTrue(tlog1 in new_task.time_logs)
+
+        tlog2 = TimeLog(
+            task=new_task,
+            resource=new_task.resources[1],
+            start=now,
+            end=now + td(hours=12)
+        )
+        DBSession.add(tlog2)
+        DBSession.commit()
+
+        self.assertTrue(tlog2 in new_task.time_logs)
+        self.assertEqual(new_task.total_logged_seconds, 20 * 3600)
+        self.assertEqual(new_task.percent_complete, 20.0 / 9.0 * 100.0)
+
+    def test_time_logs_attribute_is_working_properly(self):
+        """testing if the time_log attribute is working properly
+        """
+        kwargs = copy.copy(self.kwargs)
+        kwargs['depends'] = []
+        new_task1 = Task(**kwargs)
+
+        self.assertEqual(new_task1.depends, [])
+
+        now = datetime.datetime.now(pytz.utc)
+        dt = datetime.timedelta
+
+        from stalker import TimeLog
+        new_time_log1 = TimeLog(
+            task=new_task1,
+            resource=new_task1.resources[0],
+            start=now + dt(100),
+            end=now + dt(101)
+        )
+
+        new_time_log2 = TimeLog(
+            task=new_task1,
+            resource=new_task1.resources[0],
+            start=now + dt(101),
+            end=now + dt(102)
+        )
+
+        # create a new task
+        kwargs['name'] = 'New Task'
+        new_task2 = Task(**kwargs)
+
+        # create a new TimeLog for that task
+        new_time_log3 = TimeLog(
+            task=new_task2,
+            resource=new_task2.resources[0],
+            start=now + dt(102),
+            end=now + dt(103)
+        )
+        # logger.debug('Task.query.get(37): %s' % Task.query.get(37))
+
+        self.assertEqual(new_task2.depends, [])
+
+        # check if everything is in place
+        self.assertTrue(new_time_log1 in new_task1.time_logs)
+        self.assertTrue(new_time_log2 in new_task1.time_logs)
+        self.assertTrue(new_time_log3 in new_task2.time_logs)
+
+        # now move the time_log to test_task1
+        new_task1.time_logs.append(new_time_log3)
+
+        # check if new_time_log3 is in test_task1
+        self.assertTrue(new_time_log3 in new_task1.time_logs)
+
+        # there needs to be a database session commit to remove the time_log
+        # from the previous tasks time_logs attribute
+
+        self.assertTrue(new_time_log3 in new_task1.time_logs)
+        self.assertFalse(new_time_log3 in new_task2.time_logs)
+
+    def test_total_logged_seconds_attribute_is_working_properly_for_a_container_task_when_the_time_log_of_child_is_changed(self):
+        """testing if the total_logged_seconds attribute is working properly
+        for a container task when one of the time logs of one of the children
+        of the task is changed
+        """
+        kwargs = copy.copy(self.kwargs)
+        kwargs['depends'] = []
+        new_task = Task(**kwargs)
+
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now(pytz.utc)
+
+        parent_task = Task(**kwargs)
+
+        child_task = Task(**kwargs)
+
+        parent_task.children.append(child_task)
+
+        from stalker import TimeLog
+        tlog1 = TimeLog(
+            task=child_task,
+            resource=child_task.resources[0],
+            start=now,
+            end=now + td(hours=8)
+        )
+
+        self.assertEqual(
+            parent_task.total_logged_seconds, 8 * 60 * 60
+        )
+
+        # now update the time log
+        tlog1.end = now + td(hours=16)
+        self.assertEqual(
+            parent_task.total_logged_seconds, 16 * 60 * 60
+        )
+
+    def test_total_logged_seconds_is_the_sum_of_all_time_logs(self):
+        """testing if the total_logged_seconds is the sum of all time_logs in
+        hours
+        """
+        kwargs = copy.copy(self.kwargs)
+        kwargs['depends'] = []
+
+        new_task = Task(**kwargs)
+
+        new_task.depends = []
+
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now(pytz.utc)
+
+        new_task.time_logs = []
+        from stalker import TimeLog
+        tlog1 = TimeLog(
+            task=new_task,
+            resource=new_task.resources[0],
+            start=now,
+            end=now + td(hours=8)
+        )
+        from stalker.db.session import DBSession
+        DBSession.add(tlog1)
+        DBSession.commit()
+
+        self.assertTrue(tlog1 in new_task.time_logs)
+
+        tlog2 = TimeLog(
+            task=new_task,
+            resource=new_task.resources[1],
+            start=now,
+            end=now + td(hours=12)
+        )
+        DBSession.add(tlog2)
+        DBSession.commit()
+
+        self.assertTrue(tlog2 in new_task.time_logs)
+        self.assertEqual(new_task.total_logged_seconds, 20 * 3600)
+
+    def test_total_logged_seconds_is_the_sum_of_all_time_logs_of_children_for_a_container_task(self):
+        """testing if the total_logged_seconds is the sum of all time_logs of
+        the child tasks for a container task
+        """
+        kwargs = copy.copy(self.kwargs)
+        kwargs['depends'] = []
+
+        new_task = Task(**kwargs)
+
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now(pytz.utc)
+
+        kwargs.pop('schedule_timing')
+        kwargs.pop('schedule_unit')
+        parent_task = Task(**kwargs)
+
+        new_task.parent = parent_task
+
+        new_task.time_logs = []
+        from stalker import TimeLog
+        tlog1 = TimeLog(
+            task=new_task,
+            resource=new_task.resources[0],
+            start=now,
+            end=now + td(hours=8)
+        )
+        from stalker.db.session import DBSession
+        DBSession.add(tlog1)
+        DBSession.commit()
+
+        self.assertTrue(tlog1 in new_task.time_logs)
+
+        tlog2 = TimeLog(
+            task=new_task,
+            resource=new_task.resources[1],
+            start=now,
+            end=now + td(hours=12)
+        )
+        DBSession.add(tlog2)
+        DBSession.commit()
+
+        self.assertTrue(tlog2 in new_task.time_logs)
+        self.assertEqual(new_task.total_logged_seconds, 20 * 3600)
+        self.assertEqual(parent_task.total_logged_seconds, 20 * 3600)
+
+    def test_total_logged_seconds_is_the_sum_of_all_time_logs_of_children_for_a_container_task_deeper(self):
+        """testing if the total_logged_seconds is the sum of all time_logs of
+        the child tasks for a container task (test deeper)
+        """
+        kwargs = copy.copy(self.kwargs)
+        kwargs['depends'] = []
+
+        new_task = Task(**kwargs)
+
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt.now(pytz.utc)
+
+        kwargs.pop('schedule_timing')
+        kwargs.pop('schedule_unit')
+
+        parent_task1 = Task(**kwargs)
+        self.assertEqual(parent_task1.total_logged_seconds, 0)
+
+        parent_task2 = Task(**kwargs)
+        self.assertEqual(parent_task2.total_logged_seconds, 0)
+
+        # create some other child
+        child = Task(**kwargs)
+
+        self.assertEqual(child.total_logged_seconds, 0)
+        # create a TimeLog for that child
+        from stalker import TimeLog
+        tlog1 = TimeLog(
+            task=child,
+            resource=child.resources[0],
+            start=now - td(hours=50),
+            end=now - td(hours=40)
+        )
+        from stalker.db.session import DBSession
+        DBSession.add(tlog1)
+        DBSession.commit()
+
+        self.assertEqual(child.total_logged_seconds, 10 * 3600)
+        parent_task2.children.append(child)
+        self.assertEqual(parent_task2.total_logged_seconds, 10 * 3600)
+
+        # self.test_task1.parent = parent_task
+        parent_task1.children.append(new_task)
+        self.assertEqual(parent_task1.total_logged_seconds, 0)
+
+        parent_task1.parent = parent_task2
+        self.assertEqual(parent_task2.total_logged_seconds, 10 * 3600)
+
+        new_task.time_logs = []
+        tlog2 = TimeLog(
+            task=new_task,
+            resource=new_task.resources[0],
+            start=now,
+            end=now + td(hours=8)
+        )
+        DBSession.add(tlog2)
+        DBSession.commit()
+
+        self.assertTrue(tlog2 in new_task.time_logs)
+        self.assertEqual(new_task.total_logged_seconds, 8 * 3600)
+        self.assertEqual(parent_task1.total_logged_seconds, 8 * 3600)
+        self.assertEqual(parent_task2.total_logged_seconds, 18 * 3600)
+
+        tlog3 = TimeLog(
+            task=new_task,
+            resource=new_task.resources[1],
+            start=now,
+            end=now + td(hours=12)
+        )
+        from stalker.db.session import DBSession
+        DBSession.add(tlog3)
+        DBSession.commit()
+
+        self.assertEqual(new_task.total_logged_seconds, 20 * 3600)
+        self.assertEqual(parent_task1.total_logged_seconds, 20 * 3600)
+        self.assertEqual(parent_task2.total_logged_seconds, 30 * 3600)
+
+    def test_remaining_seconds_is_working_properly(self):
+        """testing if the remaining hours is working properly
+        """
+        kwargs = copy.copy(self.kwargs)
+        kwargs['depends'] = []
+
+        dt = datetime.datetime
+        td = datetime.timedelta
+        now = dt(2013, 4, 19, 10, 0, tzinfo=pytz.utc)
+
+        kwargs['schedule_model'] = 'effort'
+
+        # -------------- HOURS --------------
+        kwargs['schedule_timing'] = 10
+        kwargs['schedule_unit'] = 'h'
+        new_task = Task(**kwargs)
+
+        # create a time_log of 2 hours
+        from stalker import TimeLog
+        tlog1 = TimeLog(
+            task=new_task,
+            start=now,
+            duration=td(hours=2),
+            resource=new_task.resources[0]
+        )
+
+        # check
+        self.assertEqual(
+            new_task.remaining_seconds,
+            new_task.schedule_seconds - new_task.total_logged_seconds
+        )
+
+        # -------------- DAYS --------------
+        kwargs['schedule_timing'] = 23
+        kwargs['schedule_unit'] = 'd'
+        new_task = Task(**kwargs)
+
+        # create a time_log of 5 days
+        tlog2 = TimeLog(
+            task=new_task,
+            start=now + td(hours=2),
+            end=now + td(days=5),
+            resource=new_task.resources[0]
+        )
+
+        # check
+        self.assertEqual(
+            new_task.remaining_seconds,
+            new_task.schedule_seconds - new_task.total_logged_seconds
+        )
+
+        # add another 2 hours
+        tlog3 = TimeLog(
+            task=new_task,
+            start=now + td(days=5),
+            duration=td(hours=2),
+            resource=new_task.resources[0]
+        )
+
+        self.assertEqual(
+            new_task.remaining_seconds,
+            new_task.schedule_seconds - new_task.total_logged_seconds
+        )
+
+        # ------------------- WEEKS ------------------
+        kwargs['schedule_timing'] = 2
+        kwargs['schedule_unit'] = 'w'
+        new_task = Task(**kwargs)
+
+        # create a time_log of 2 hours
+        tlog4 = TimeLog(
+            task=new_task,
+            start=now + td(days=6),
+            duration=td(hours=2),
+            resource=new_task.resources[0]
+        )
+        new_task.time_logs.append(tlog4)
+
+        # check
+        self.assertEqual(
+            new_task.remaining_seconds,
+            new_task.schedule_seconds - new_task.total_logged_seconds
+        )
+
+        # create a time_log of 1 week
+        tlog5 = TimeLog(
+            task=new_task,
+            start=now + td(days=7),
+            duration=td(weeks=1),
+            resource=new_task.resources[0]
+        )
+        new_task.time_logs.append(tlog5)
+
+        # check
+        self.assertEqual(
+            new_task.remaining_seconds,
+            new_task.schedule_seconds - new_task.total_logged_seconds
+        )
+
+        # ------------------ MONTH -------------------
+        kwargs['schedule_timing'] = 2.5
+        kwargs['schedule_unit'] = 'm'
+        new_task = Task(**kwargs)
+
+        # create a time_log of 1 months or 30 days, remaining_seconds can be
+        # negative
+        tlog6 = TimeLog(
+            task=new_task,
+            start=now + td(days=15),
+            duration=td(days=30),
+            resource=new_task.resources[0]
+        )
+        new_task.time_logs.append(tlog6)
+
+        # check
+        self.assertEqual(
+            new_task.remaining_seconds,
+            new_task.schedule_seconds - new_task.total_logged_seconds
+        )
+
+        # ------------------ YEARS ---------------------
+        kwargs['schedule_timing'] = 3.1
+        kwargs['schedule_unit'] = 'y'
+        new_task = Task(**kwargs)
+
+        # create a time_log of 1 months or 30 days, remaining_seconds can be
+        # negative
+        tlog8 = TimeLog(
+            task=new_task,
+            start=now + td(days=55),
+            duration=td(days=30),
+            resource=new_task.resources[0]
+        )
+
+        new_task.time_logs.append(tlog8)
+
+        # check
+        self.assertEqual(
+            new_task.remaining_seconds,
+            new_task.schedule_seconds - new_task.total_logged_seconds
+        )
+

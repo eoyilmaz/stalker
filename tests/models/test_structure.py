@@ -16,11 +16,11 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
+import unittest
 from stalker import Structure
-from stalker.testing import UnitTestBase
 
 
-class StructureTester(UnitTestBase):
+class StructureTester(unittest.TestCase):
     """tests the stalker.models.structure.Structure class
     """
 
@@ -29,21 +29,18 @@ class StructureTester(UnitTestBase):
         """
         super(StructureTester, self).setUp()
 
-        from stalker import db, Type
+        from stalker import Type
         vers_type = Type(
             name="Version",
             code='vers',
             target_entity_type="FilenameTemplate"
         )
-        db.DBSession.add(vers_type)
 
         ref_type = Type(
             name="Reference",
             code='ref',
             target_entity_type="FilenameTemplate"
         )
-        db.DBSession.add(ref_type)
-        db.DBSession.commit()
 
         # type templates
         from stalker import FilenameTemplate
@@ -88,8 +85,6 @@ class StructureTester(UnitTestBase):
             "type": self.test_type,
         }
         self.test_structure = Structure(**self.kwargs)
-        db.DBSession.add(self.test_structure)
-        db.DBSession.commit()
 
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for

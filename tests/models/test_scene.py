@@ -16,11 +16,11 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-from stalker.testing import UnitTestBase
+from stalker.testing import UnitTestDBBase
 from stalker import Scene
 
 
-class SceneTester(UnitTestBase):
+class SceneTester(UnitTestDBBase):
     """Tests stalker.models.scene.Scene class
     """
 
@@ -30,7 +30,7 @@ class SceneTester(UnitTestBase):
         super(SceneTester, self).setUp()
 
         # create statuses
-        from stalker import db, Status, StatusList
+        from stalker import Status, StatusList
         self.test_status1 = Status(name="Status1", code="STS1")
         self.test_status2 = Status(name="Status2", code="STS2")
         self.test_status3 = Status(name="Status3", code="STS3")
@@ -99,8 +99,9 @@ class SceneTester(UnitTestBase):
 
         # the test sequence
         self.test_scene = Scene(**self.kwargs)
-        db.DBSession.add(self.test_scene)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(self.test_scene)
+        DBSession.commit()
 
     def test___auto_name__class_attribute_is_set_to_False(self):
         """testing if the __auto_name__ class attribute is set to False for

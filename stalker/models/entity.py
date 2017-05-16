@@ -27,10 +27,9 @@ from sqlalchemy import (Table, Column, Integer, String, Text, ForeignKey,
                         DateTime)
 from sqlalchemy.orm import relationship, validates
 
-import stalker
 from stalker.db.declarative import Base
-
 from stalker.log import logging_level
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -291,6 +290,8 @@ class SimpleEntity(Base):
         self.generic_text = generic_text
         self.html_style = html_style
         self.html_class = html_class
+
+        import stalker
         self.__stalker_version__ = stalker.__version__
 
     def __repr__(self):

@@ -15,9 +15,8 @@
 #
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
+import unittest
 
-
-from stalker.testing import UnitTestBase
 from sqlalchemy import Column, Integer, ForeignKey
 from stalker import SimpleEntity, ProjectMixin
 
@@ -33,7 +32,7 @@ class ProjMixClass(SimpleEntity, ProjectMixin):
         ProjectMixin.__init__(self, **kwargs)
 
 
-class ProjectMixinTester(UnitTestBase):
+class ProjectMixinTester(unittest.TestCase):
     """Tests the ProjectMixin
     """
 
@@ -49,21 +48,18 @@ class ProjectMixinTester(UnitTestBase):
             code='testproj',
             target_entity_type='Repository'
         )
-        db.DBSession.add(self.repository_type)
 
         from stalker import Repository
         self.test_repository = Repository(
             name="Test Repository",
             type=self.repository_type,
         )
-        db.DBSession.add(self.test_repository)
 
         # statuses
         from stalker import Status
         self.status1 = Status(name="Status1", code="STS1")
         self.status2 = Status(name="Status2", code="STS2")
         self.status3 = Status(name="Status3", code="STS3")
-        db.DBSession.add_all([self.status1, self.status2, self.status3])
 
         # project status list
         from stalker import StatusList
@@ -76,7 +72,6 @@ class ProjectMixinTester(UnitTestBase):
                 ],
             target_entity_type='Project'
         )
-        db.DBSession.add(self.project_status_list)
 
         # project type
         self.test_project_type = Type(
@@ -84,7 +79,6 @@ class ProjectMixinTester(UnitTestBase):
             code='testproj',
             target_entity_type='Project',
         )
-        db.DBSession.add(self.test_project_type)
 
         # create projects
         from stalker import Project
@@ -95,7 +89,6 @@ class ProjectMixinTester(UnitTestBase):
             status_list=self.project_status_list,
             repository=self.test_repository,
         )
-        db.DBSession.add(self.test_project1)
 
         self.test_project2 = Project(
             name="Test Project 2",
@@ -104,7 +97,6 @@ class ProjectMixinTester(UnitTestBase):
             status_list=self.project_status_list,
             repository=self.test_repository,
         )
-        db.DBSession.add(self.test_project2)
 
         self.kwargs = {
             "name": "Test Class",
@@ -112,7 +104,6 @@ class ProjectMixinTester(UnitTestBase):
         }
 
         self.test_foo_obj = ProjMixClass(**self.kwargs)
-        db.DBSession.add(self.test_foo_obj)
 
     def test_project_argument_is_skipped(self):
         """testing if a TypeError will be raised when the project argument is

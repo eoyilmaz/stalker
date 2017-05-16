@@ -16,9 +16,10 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-from stalker.testing import UnitTestBase, PlatformPatcher
+from stalker.testing import UnitTestDBBase, PlatformPatcher
 
-class RepositoryTester(UnitTestBase):
+
+class RepositoryTester(UnitTestDBBase):
     """tests the Repository class
     """
 
@@ -42,10 +43,11 @@ class RepositoryTester(UnitTestBase):
             "windows_path": "M:/Projects"
         }
 
-        from stalker import db, Repository
+        from stalker import Repository
+        from stalker.db.session import DBSession
         self.test_repo = Repository(**self.kwargs)
-        db.DBSession.add(self.test_repo)
-        db.DBSession.commit()
+        DBSession.add(self.test_repo)
+        DBSession.commit()
 
     def tearDown(self):
         """clean up test
@@ -1018,9 +1020,9 @@ class RepositoryTester(UnitTestBase):
     def test_to_os_independent_path_is_working_properly(self):
         """testing if to_os_independent_path class method is working properly
         """
-        from stalker import db
-        db.DBSession.add(self.test_repo)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(self.test_repo)
+        DBSession.commit()
 
         relative_part = 'some/path/to/a/file.ma'
         test_path = '%s/%s' % (self.test_repo.path, relative_part)
@@ -1033,9 +1035,9 @@ class RepositoryTester(UnitTestBase):
     def test_find_repo_is_working_properly(self):
         """testing if the find_repo class method is working properly
         """
-        from stalker import db
-        db.DBSession.add(self.test_repo)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(self.test_repo)
+        DBSession.commit()
 
         # add some other repositories
         from stalker import Repository
@@ -1045,8 +1047,8 @@ class RepositoryTester(UnitTestBase):
             osx_path='/Volumes/T/Projects',
             windows_path='T:/Projects'
         )
-        db.DBSession.add(new_repo1)
-        db.DBSession.commit()
+        DBSession.add(new_repo1)
+        DBSession.commit()
 
         test_path = '%s/some/path/to/a/file.ma' % self.test_repo.path
         self.assertEqual(
@@ -1064,9 +1066,9 @@ class RepositoryTester(UnitTestBase):
         """testing if the find_repo class method is working properly with paths
         containing env vars
         """
-        from stalker import db
-        db.DBSession.add(self.test_repo)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(self.test_repo)
+        DBSession.commit()
 
         # add some other repositories
         from stalker import Repository
@@ -1076,8 +1078,8 @@ class RepositoryTester(UnitTestBase):
             osx_path='/Volumes/T/Projects',
             windows_path='T:/Projects'
         )
-        db.DBSession.add(new_repo1)
-        db.DBSession.commit()
+        DBSession.add(new_repo1)
+        DBSession.commit()
 
         test_path = '$REPO%s/some/path/to/a/file.ma' % self.test_repo.id
         self.assertEqual(
@@ -1103,15 +1105,16 @@ class RepositoryTester(UnitTestBase):
         """testing if an environment variable will be created when a new
         repository is created
         """
-        from stalker import db, defaults, Repository
+        from stalker import defaults, Repository
+        from stalker.db.session import DBSession
         repo = Repository(
             name='Test Repo',
             linux_path='/mnt/T',
             osx_path='/Volumes/T',
             windows_path='T:/'
         )
-        db.DBSession.add(repo)
-        db.DBSession.commit()
+        DBSession.add(repo)
+        DBSession.commit()
 
         import os
         self.assertTrue(
@@ -1126,15 +1129,16 @@ class RepositoryTester(UnitTestBase):
         """testing if the environment variable will be updated when the
         repository path is updated
         """
-        from stalker import db, defaults, Repository
+        from stalker import defaults, Repository
         repo = Repository(
             name='Test Repo',
             linux_path='/mnt/T',
             osx_path='/Volumes/T',
             windows_path='T:/'
         )
-        db.DBSession.add(repo)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(repo)
+        DBSession.commit()
 
         import os
         self.assertTrue(
@@ -1156,17 +1160,19 @@ class RepositoryTester(UnitTestBase):
         the system is windows
         """
         self.patcher.patch('Linux')
-        from stalker import db, defaults, Repository
+        from stalker import Repository
         repo = Repository(
             name='Test Repo',
             linux_path='/mnt/T',
             osx_path='/Volumes/T',
             windows_path='T:/'
         )
-        db.DBSession.add(repo)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(repo)
+        DBSession.commit()
 
         import os
+        from stalker import defaults
         self.assertTrue(
             defaults.repo_env_var_template % {'id': repo.id} in os.environ
         )
@@ -1208,15 +1214,16 @@ class RepositoryTester(UnitTestBase):
         """
         self.patcher.patch('Windows')
 
-        from stalker import db, defaults, Repository
+        from stalker import defaults, Repository
         repo = Repository(
             name='Test Repo',
             linux_path='/mnt/T',
             osx_path='/Volumes/T',
             windows_path='T:/'
         )
-        db.DBSession.add(repo)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(repo)
+        DBSession.commit()
 
         import os
         self.assertTrue(
@@ -1260,15 +1267,16 @@ class RepositoryTester(UnitTestBase):
         """
         self.patcher.patch('Darwin')
 
-        from stalker import db, defaults, Repository
+        from stalker import defaults, Repository
         repo = Repository(
             name='Test Repo',
             linux_path='/mnt/T',
             osx_path='/Volumes/T',
             windows_path='T:/'
         )
-        db.DBSession.add(repo)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(repo)
+        DBSession.commit()
 
         import os
         self.assertTrue(

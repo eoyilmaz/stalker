@@ -16,11 +16,11 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-from stalker.testing import UnitTestBase
+import unittest
 from stalker import Page
 
 
-class PageTester(UnitTestBase):
+class PageTester(unittest.TestCase):
     """Tests stalker.wiki.Page class
     """
 
@@ -30,27 +30,24 @@ class PageTester(UnitTestBase):
         super(PageTester, self).setUp()
 
         # create a repository
-        from stalker import db, Type
+        from stalker import Type
         self.repository_type = Type(
             name="Test Repository Type",
             code='test_repo',
             target_entity_type='Repository'
         )
-        db.DBSession.add(self.repository_type)
 
         from stalker import Repository
         self.test_repository = Repository(
             name="Test Repository",
             type=self.repository_type,
         )
-        db.DBSession.add(self.test_repository)
 
         # statuses
         from stalker import Status
         self.status1 = Status(name="Status1", code="STS1")
         self.status2 = Status(name="Status2", code="STS2")
         self.status3 = Status(name="Status3", code="STS3")
-        db.DBSession.add_all([self.status1, self.status2, self.status3])
 
         # project status list
         from stalker import StatusList
@@ -63,7 +60,6 @@ class PageTester(UnitTestBase):
             ],
             target_entity_type='Project'
         )
-        db.DBSession.add(self.project_status_list)
 
         # project type
         self.test_project_type = Type(
@@ -71,7 +67,6 @@ class PageTester(UnitTestBase):
             code='testproj',
             target_entity_type='Project',
         )
-        db.DBSession.add(self.test_project_type)
 
         # create projects
         from stalker import Project
@@ -82,7 +77,6 @@ class PageTester(UnitTestBase):
             status_list=self.project_status_list,
             repository=self.test_repository,
         )
-        db.DBSession.add(self.test_project1)
 
         self.kwargs = {
             'title': 'Test Page Title',
@@ -91,8 +85,6 @@ class PageTester(UnitTestBase):
         }
 
         self.test_page = Page(**self.kwargs)
-        db.DBSession.add(self.test_page)
-        db.DBSession.commit()
 
     def test_title_argument_is_skipped(self):
         """testing if a ValueError will be raised when the title argument is

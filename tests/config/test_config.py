@@ -16,14 +16,15 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-from stalker.testing import UnitTestBase
+import unittest
+from stalker.testing import UnitTestDBBase
 
 import logging
 logger = logging.getLogger("stalker")
 logger.setLevel(logging.DEBUG)
 
 
-class ConfigTester(UnitTestBase):
+class ConfigTester(unittest.TestCase):
     """test the system configuration
     """
 
@@ -171,37 +172,6 @@ class ConfigTester(UnitTestBase):
             'scanning string literal (<string>, line 2)'
         )
 
-    def test_update_with_studio_is_working_properly(self):
-        """testing if the default values are updated with the Studio instance
-        if there is a database connection and there is a Studio in there
-        """
-        import datetime
-        from stalker import defaults
-        from stalker.db.session import DBSession
-        from stalker.models.studio import Studio
-
-        # db.setup()
-        # db.init()
-
-        # check the defaults are still using them self
-        self.assertEqual(
-            defaults.timing_resolution,
-            datetime.timedelta(hours=1)
-        )
-
-        studio = Studio(
-            name='Test Studio',
-            timing_resolution=datetime.timedelta(minutes=15)
-        )
-        DBSession.add(studio)
-        DBSession.commit()
-
-        # now check it again
-        self.assertEqual(
-            defaults.timing_resolution,
-            studio.timing_resolution
-        )
-
     def test___getattr___is_working_properly(self):
         """testing if config.Config.__getattr__() method is working properly
         """
@@ -241,3 +211,36 @@ class ConfigTester(UnitTestBase):
         from stalker import config
         c = config.Config()
         self.assertTrue('admin_name' in c)
+
+
+class ConfigTesterDB(UnitTestDBBase):
+    """tests config module with database
+    """
+
+    def test_update_with_studio_is_working_properly(self):
+        """testing if the default values are updated with the Studio instance
+        if there is a database connection and there is a Studio in there
+        """
+        import datetime
+        from stalker import defaults
+        from stalker.db.session import DBSession
+        from stalker.models.studio import Studio
+
+        # check the defaults are still using them self
+        self.assertEqual(
+            defaults.timing_resolution,
+            datetime.timedelta(hours=1)
+        )
+
+        studio = Studio(
+            name='Test Studio',
+            timing_resolution=datetime.timedelta(minutes=15)
+        )
+        DBSession.add(studio)
+        DBSession.commit()
+
+        # now check it again
+        self.assertEqual(
+            defaults.timing_resolution,
+            studio.timing_resolution
+        )

@@ -16,16 +16,17 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-from stalker.testing import UnitTestBase
+from stalker.testing import UnitTestDBBase
 
-class TaskDependencyTestCase(UnitTestBase):
+
+class TaskDependencyTestDBCase(UnitTestDBBase):
     """tests the TaskDependency class
     """
 
     def setUp(self):
         """set up the test
         """
-        super(TaskDependencyTestCase, self).setUp()
+        super(TaskDependencyTestDBCase, self).setUp()
         # get statuses
         from stalker import Status
         self.status_new = Status.query.filter_by(code="NEW").first()
@@ -111,13 +112,13 @@ class TaskDependencyTestCase(UnitTestBase):
         )
 
         # add everything to db
-        from stalker import db
-        db.DBSession.add_all([
+        from stalker.db.session import DBSession
+        DBSession.add_all([
             self.test_project1, self.test_project_status_list, self.test_repo,
             self.test_structure, self.test_task1, self.test_task2,
             self.test_task3, self.test_user1, self.test_user2
         ])
-        db.DBSession.commit()
+        DBSession.commit()
 
         self.kwargs = {
             'task': self.test_task1,
@@ -140,12 +141,13 @@ class TaskDependencyTestCase(UnitTestBase):
         is skipped and the session is committed
         """
         self.kwargs.pop('task')
-        from stalker import db, TaskDependency
+        from stalker.db.session import DBSession
+        from stalker import TaskDependency
         new_dependency = TaskDependency(**self.kwargs)
-        db.DBSession.add(new_dependency)
+        DBSession.add(new_dependency)
         from sqlalchemy.exc import IntegrityError
         with self.assertRaises(IntegrityError) as cm:
-            db.DBSession.commit()
+            DBSession.commit()
 
         self.assertTrue(
             str(cm.exception).startswith(
@@ -206,12 +208,13 @@ class TaskDependencyTestCase(UnitTestBase):
         argument is skipped and the session is committed
         """
         self.kwargs.pop('depends_to')
-        from stalker import db, TaskDependency
-        new_dependency = TaskDependency(**self.kwargs)
-        db.DBSession.add(new_dependency)
+        from stalker.db.session import DBSession
+        from stalker import TaskDependency
         from sqlalchemy.exc import IntegrityError
+        new_dependency = TaskDependency(**self.kwargs)
+        DBSession.add(new_dependency)
         with self.assertRaises(IntegrityError) as cm:
-            db.DBSession.commit()
+            DBSession.commit()
 
         self.assertTrue(
             str(cm.exception).startswith(

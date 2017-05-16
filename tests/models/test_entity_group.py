@@ -16,12 +16,11 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-import datetime
+import unittest
 from stalker.models.entity import EntityGroup
-from stalker.testing import UnitTestBase
 
 
-class EntityGroupTestCase(UnitTestBase):
+class EntityGroupTestCase(unittest.TestCase):
     """tests EntityGroup class
     """
 
@@ -30,13 +29,17 @@ class EntityGroupTestCase(UnitTestBase):
         """
         super(EntityGroupTestCase, self).setUp()
 
-        from stalker import (db, defaults, Status, User, StatusList,
-                             Repository, Project, Type, Asset, Task)
+        from stalker import (Status, User, StatusList, Repository, Project,
+                             Type, Asset, Task)
         # create a couple of task
-        self.status_new = Status.query.filter(Status.code == 'NEW').first()
-        self.status_wip = Status.query.filter(Status.code == 'WIP').first()
-        self.status_cmpl = \
-            Status.query.filter(Status.code == 'CMPL').first()
+        self.status_new = Status(name='Mew', code='NEW')
+        self.status_wfd = Status(name='Waiting For Dependency', code='WFD')
+        self.status_rts = Status(name='Ready To Start', code='RTS')
+        self.status_wip = Status(name='Work In Progress', code='WIP')
+        self.status_prev = Status(name='Pending Review', code='PREV')
+        self.status_hrev = Status(name='Has Revision', code='HREV')
+        self.status_drev = Status(name='Dependency Has Revision', code='DREV')
+        self.status_cmpl = Status(name='Completed', code='CMPL')
 
         self.test_user1 = User(
             name="User1",
@@ -85,12 +88,33 @@ class EntityGroupTestCase(UnitTestBase):
             target_entity_type="Asset"
         )
 
+        self.task_status_list = StatusList(
+            name='Task Statuses',
+            statuses=[
+                self.status_wfd, self.status_rts, self.status_wip,
+                self.status_prev, self.status_hrev, self.status_drev,
+                self.status_cmpl
+            ],
+            target_entity_type='Task'
+        )
+
+        self.asset_status_list = StatusList(
+            name='Asset Statuses',
+            statuses=[
+                self.status_wfd, self.status_rts, self.status_wip,
+                self.status_prev, self.status_hrev, self.status_drev,
+                self.status_cmpl
+            ],
+            target_entity_type='Asset'
+        )
+
         self.asset1 = Asset(
             name='Char1',
             code='char1',
             type=self.char_asset_type,
             project=self.project1,
-            responsible=[self.test_user1]
+            responsible=[self.test_user1],
+            status_list=self.asset_status_list
         )
 
         self.task1 = Task(
@@ -100,26 +124,30 @@ class EntityGroupTestCase(UnitTestBase):
             schedule_timing=5,
             schedule_unit='h',
             bid_timing=52,
-            bid_unit='h'
+            bid_unit='h',
+            status_list=self.task_status_list
         )
 
         self.child_task1 = Task(
             name='Child Task 1',
             resources=[self.test_user1, self.test_user2],
             parent=self.task1,
+            status_list=self.task_status_list
         )
 
         self.child_task2 = Task(
             name='Child Task 2',
             resources=[self.test_user1, self.test_user2],
             parent=self.task1,
+            status_list=self.task_status_list
         )
 
         self.task2 = Task(
             name='Another Task',
             project=self.project1,
             resources=[self.test_user1],
-            responsible=[self.test_user2]
+            responsible=[self.test_user2],
+            status_list=self.task_status_list
         )
 
         self.entity_group1 = EntityGroup(
@@ -128,13 +156,6 @@ class EntityGroupTestCase(UnitTestBase):
                 self.task1, self.child_task2, self.task2
             ]
         )
-
-        db.DBSession.add_all([
-            self.task1, self.child_task1, self.child_task2, self.task2,
-            self.test_user1, self.test_user2, self.project1, self.status_cmpl,
-            self.status_new, self.status_wip, self.asset1
-        ])
-        db.DBSession.commit()
 
     def test_entities_argument_is_skipped(self):
         """testing if the entities attribute will be an empty list if the

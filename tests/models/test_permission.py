@@ -17,11 +17,11 @@
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
 
+import unittest
 from stalker.models.auth import Permission
-from stalker.testing import UnitTestBase
 
 
-class PermissionTester(UnitTestBase):
+class PermissionTester(unittest.TestCase):
     """tests the stalker.models.auth.Permission class
     """
 

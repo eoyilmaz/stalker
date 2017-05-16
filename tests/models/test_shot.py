@@ -16,11 +16,11 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-from stalker.testing import UnitTestBase
+from stalker.testing import UnitTestDBBase
 from stalker import Shot
 
 
-class ShotTester(UnitTestBase):
+class ShotTester(UnitTestDBBase):
     """Tests the Shot class
     """
 
@@ -29,7 +29,7 @@ class ShotTester(UnitTestBase):
         """
         super(ShotTester, self).setUp()
         # statuses
-        from stalker import db, Status, StatusList
+        from stalker import Status, StatusList
         self.status_new = Status.query.filter_by(code='NEW').first()
         self.status_wfd = Status.query.filter_by(code='WFD').first()
         self.status_rts = Status.query.filter_by(code='RTS').first()
@@ -60,7 +60,8 @@ class ShotTester(UnitTestBase):
             ],
             target_entity_type='Project',
         )
-        db.DBSession.add(self.test_project_status_list)
+        from stalker.db.session import DBSession
+        DBSession.add(self.test_project_status_list)
 
         # types
         from stalker import Type
@@ -69,21 +70,21 @@ class ShotTester(UnitTestBase):
             code='comm',
             target_entity_type='Project',
         )
-        db.DBSession.add(self.test_commercial_project_type)
+        DBSession.add(self.test_commercial_project_type)
 
         self.test_character_asset_type = Type(
             name="Character",
             code='char',
             target_entity_type='Asset',
         )
-        db.DBSession.add(self.test_character_asset_type)
+        DBSession.add(self.test_character_asset_type)
 
         self.test_repository_type = Type(
             name="Test Repository Type",
             code='test',
             target_entity_type='Repository'
         )
-        db.DBSession.add(self.test_repository_type)
+        DBSession.add(self.test_repository_type)
 
         # repository
         from stalker import Repository
@@ -91,7 +92,7 @@ class ShotTester(UnitTestBase):
             name="Test Repository",
             type=self.test_repository_type,
         )
-        db.DBSession.add(self.test_repository)
+        DBSession.add(self.test_repository)
 
         # image format
         from stalker import ImageFormat
@@ -101,7 +102,7 @@ class ShotTester(UnitTestBase):
             height=1080,
             pixel_aspect=1.0
         )
-        db.DBSession.add(self.test_image_format1)
+        DBSession.add(self.test_image_format1)
 
         self.test_image_format2 = ImageFormat(
             name='Test Image Format 2',
@@ -109,7 +110,7 @@ class ShotTester(UnitTestBase):
             height=720,
             pixel_aspect=1.0
         )
-        db.DBSession.add(self.test_image_format2)
+        DBSession.add(self.test_image_format2)
 
         # project and sequences
         from stalker import Project
@@ -121,7 +122,7 @@ class ShotTester(UnitTestBase):
             repository=self.test_repository,
             image_format=self.test_image_format1
         )
-        db.DBSession.add(self.test_project1)
+        DBSession.add(self.test_project1)
 
         self.test_project2 = Project(
             name='Test Project2',
@@ -131,7 +132,7 @@ class ShotTester(UnitTestBase):
             repository=self.test_repository,
             image_format=self.test_image_format1
         )
-        db.DBSession.add(self.test_project2)
+        DBSession.add(self.test_project2)
 
         from stalker import Sequence
         self.test_sequence1 = Sequence(
@@ -140,7 +141,7 @@ class ShotTester(UnitTestBase):
             project=self.test_project1,
             status_list=self.test_sequence_status_list,
         )
-        db.DBSession.add(self.test_sequence1)
+        DBSession.add(self.test_sequence1)
 
         self.test_sequence2 = Sequence(
             name="Test Seq2",
@@ -148,7 +149,7 @@ class ShotTester(UnitTestBase):
             project=self.test_project1,
             status_list=self.test_sequence_status_list,
         )
-        db.DBSession.add(self.test_sequence2)
+        DBSession.add(self.test_sequence2)
 
         self.test_sequence3 = Sequence(
             name="Test Seq3",
@@ -156,7 +157,7 @@ class ShotTester(UnitTestBase):
             project=self.test_project1,
             status_list=self.test_sequence_status_list,
         )
-        db.DBSession.add(self.test_sequence3)
+        DBSession.add(self.test_sequence3)
 
         from stalker import Scene
         self.test_scene1 = Scene(
@@ -164,21 +165,21 @@ class ShotTester(UnitTestBase):
             code='tsc1',
             project=self.test_project1,
         )
-        db.DBSession.add(self.test_scene1)
+        DBSession.add(self.test_scene1)
 
         self.test_scene2 = Scene(
             name='Test Sce2',
             code='tsc2',
             project=self.test_project1,
         )
-        db.DBSession.add(self.test_scene2)
+        DBSession.add(self.test_scene2)
 
         self.test_scene3 = Scene(
             name='Test Sce3',
             code='tsc3',
             project=self.test_project1
         )
-        db.DBSession.add(self.test_scene3)
+        DBSession.add(self.test_scene3)
 
         from stalker import Asset
         self.test_asset1 = Asset(
@@ -188,7 +189,7 @@ class ShotTester(UnitTestBase):
             status_list=self.test_asset_status_list,
             type=self.test_character_asset_type,
         )
-        db.DBSession.add(self.test_asset1)
+        DBSession.add(self.test_asset1)
 
         self.test_asset2 = Asset(
             name="Test Asset2",
@@ -197,7 +198,7 @@ class ShotTester(UnitTestBase):
             status_list=self.test_asset_status_list,
             type=self.test_character_asset_type,
         )
-        db.DBSession.add(self.test_asset2)
+        DBSession.add(self.test_asset2)
 
         self.test_asset3 = Asset(
             name="Test Asset3",
@@ -206,7 +207,7 @@ class ShotTester(UnitTestBase):
             status_list=self.test_asset_status_list,
             type=self.test_character_asset_type,
         )
-        db.DBSession.add(self.test_asset3)
+        DBSession.add(self.test_asset3)
 
         self.kwargs = dict(
             name='SH123',
@@ -227,14 +228,24 @@ class ShotTester(UnitTestBase):
 
         # create a mock shot object
         self.test_shot = Shot(**self.kwargs)
-        db.DBSession.add(self.test_project1)
-        db.DBSession.commit()
+        DBSession.add(self.test_project1)
+        DBSession.commit()
 
     def test___auto_name__class_attribute_is_set_to_True(self):
         """testing if the __auto_name__ class attribute is set to True for Shot
         class
         """
         self.assertTrue(Shot.__auto_name__)
+
+    def test___hash___value_is_correctly_calculated(self):
+        """testing if __hash__ value is correctly calculated
+        """
+        self.assertTrue(
+            self.test_shot.__hash__(),
+            hash(self.test_shot.id) +
+            2 * hash(self.test_shot.name) +
+            3 * hash(self.test_shot.entity_type)
+        )
 
     def test_project_argument_is_skipped(self):
         """testing if a TypeError will be raised when the project argument is
@@ -1234,155 +1245,19 @@ class ShotTester(UnitTestBase):
         """
         self.assertEqual(Shot.__strictly_typed__, False)
 
-    def test_fps_argument_is_skipped(self):
-        """testing if the default value will be used when fps is skipped
-        """
-        self.kwargs['code'] = 'SHnew'
-        new_shot = Shot(**self.kwargs)
-        self.assertEqual(new_shot.fps, self.test_project1.fps)
-
-    def test_fps_attribute_is_set_to_None(self):
-        """testing if the Project.fps will be used if the fps argument is None
-        """
-        self.kwargs["fps"] = None
-        self.kwargs['code'] = 'SHnew'
-        new_shot = Shot(**self.kwargs)
-
-        self.assertEqual(new_shot.fps, self.test_project1.fps)
-
-    def test_fps_argument_is_given_as_non_float_or_integer(self):
-        """testing if a TypeError will be raised when the fps argument is given
-        as a value other than a float or integer, or a string which is
-        convertible to float.
-        """
-        test_values = [["a", "list"], {"a": "list"}]
-        for i, test_value in enumerate(test_values):
-            self.kwargs["fps"] = test_value
-            self.kwargs['code'] = 'SH%i'
-            with self.assertRaises(TypeError) as cm:
-                Shot(**self.kwargs)
-
-            self.assertEqual(
-                str(cm.exception),
-                'Shot.fps should be a positive float or int, not %s' %
-                test_value.__class__.__name__
-            )
-
-    def test_fps_attribute_is_given_as_non_float_or_integer(self):
-        """testing if a TypeError will be raised when the fps attribute is
-        set to a value other than a float, integer or valid string literals
-        """
-        test_values = ["a str", ["a", "list"], {"a": "list"}]
-        for test_value in test_values:
-            with self.assertRaises(TypeError) as cm:
-                self.test_shot.fps = test_value
-
-            self.assertEqual(
-                str(cm.exception),
-                'Shot.fps should be a positive float or int, not %s' %
-                test_value.__class__.__name__
-            )
-
-    def test_fps_attribute_float_conversion(self):
-        """testing if the fps attribute is converted to float when the float
-        argument is given as an integer
-        """
-        test_value = 1
-        self.kwargs["fps"] = test_value
-        self.kwargs['code'] = 'SHnew'
-        new_shot = Shot(**self.kwargs)
-        self.assertIsInstance(new_shot.fps, float)
-        self.assertEqual(new_shot.fps, float(test_value))
-
-    def test_fps_attribute_float_conversion_2(self):
-        """testing if the fps attribute is converted to float when it is set to
-        an integer value
-        """
-        test_value = 1
-        self.test_shot.fps = test_value
-        self.assertIsInstance(self.test_shot.fps, float)
-        self.assertEqual(self.test_shot.fps, float(test_value))
-
-    def test_fps_argument_is_zero(self):
-        """testing if a ValueError will be raised when the fps is 0
-        """
-        self.kwargs['fps'] = 0
-        self.kwargs['code'] = 'SHnew'
-        with self.assertRaises(ValueError) as cm:
-            s = Shot(**self.kwargs)
-
-        self.assertEqual(
-            str(cm.exception),
-            'Shot.fps should be a positive float or int, not 0.0'
-        )
-
-    def test_fps_attribute_is_set_to_zero(self):
-        """testing if a value error will be raised when the fps attribute is
-        set to zero
-        """
-        with self.assertRaises(ValueError) as cm:
-            self.test_shot.fps = 0
-
-        self.assertEqual(
-            str(cm.exception),
-            'Shot.fps should be a positive float or int, not 0.0'
-        )
-
-    def test_fps_argument_is_negative(self):
-        """testing if a ValueError will be raised when the fps argument is
-        negative
-        """
-        self.kwargs['fps'] = -1.0
-        self.kwargs['code'] = 'SHrandom'
-        with self.assertRaises(ValueError) as cm:
-            s = Shot(**self.kwargs)
-
-        self.assertEqual(
-            str(cm.exception),
-            'Shot.fps should be a positive float or int, not -1.0'
-        )
-
-    def test_fps_attribute_is_negative(self):
-        """testing if a ValueError will be raised when the fps attribute is
-        set to a negative value
-        """
-        with self.assertRaises(ValueError) as cm:
-            self.test_shot.fps = -1
-
-        self.assertEqual(
-            str(cm.exception),
-            'Shot.fps should be a positive float or int, not -1.0'
-        )
-
-    def test_fps_changes_with_project(self):
-        """testing if the fps reflects the project.fps unless it is set to a
-        value
-        """
-        new_shot = Shot(
-            name='New Shot',
-            code='ns',
-            project=self.test_project1
-        )
-        self.assertEqual(new_shot.fps, self.test_project1.fps)
-        self.test_project1.fps = 335
-        self.assertEqual(new_shot.fps, 335)
-        new_shot.fps = 12
-        self.assertEqual(new_shot.fps, 12)
-        self.test_project1.fps = 24
-        self.assertEqual(new_shot.fps, 12)
-
     def test_cut_duration_initialization_bug_with_cut_in(self):
         """testing if the _cut_duration attribute is initialized correctly for
         a Shot restored from DB
         """
         # retrieve the shot back from DB
-        from stalker import db, Shot
+        from stalker import Shot
         test_shot_db = Shot.query.filter_by(name=self.kwargs['name']).first()
         # trying to change the cut_in and cut_out values should not raise any
         # errors
         test_shot_db.cut_in = 1
-        db.DBSession.add(test_shot_db)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(test_shot_db)
+        DBSession.commit()
 
     def test_cut_duration_initialization_bug_with_cut_out(self):
         """testing if the _cut_duration attribute is initialized correctly for
@@ -1395,8 +1270,9 @@ class ShotTester(UnitTestBase):
         # trying to change the cut_in and cut_out values should not raise any
         # errors
         test_shot_db.cut_out = 100
-        db.DBSession.add(test_shot_db)
-        db.DBSession.commit()
+        from stalker.db.session import DBSession
+        DBSession.add(test_shot_db)
+        DBSession.commit()
 
     def test_cut_values_are_set_correctly(self):
         """testing if the cut_in attribute is set correctly in db
@@ -1408,9 +1284,10 @@ class ShotTester(UnitTestBase):
         self.assertEqual(self.test_shot.cut_in, 100)
         self.assertEqual(self.test_shot.cut_out, 153)
 
-        from stalker import db, Shot
-        db.DBSession.add(self.test_shot)
-        db.DBSession.commit()
+        from stalker import Shot
+        from stalker.db.session import DBSession
+        DBSession.add(self.test_shot)
+        DBSession.commit()
 
         # retrieve the shot back from DB
         test_shot_db = Shot.query.filter_by(name=self.kwargs['name']).first()
@@ -1522,7 +1399,7 @@ class ShotTester(UnitTestBase):
         self.kwargs['fps'] = -1.0
         self.kwargs['code'] = 'SHrandom'
         with self.assertRaises(ValueError) as cm:
-            s = Shot(**self.kwargs)
+            Shot(**self.kwargs)
 
         self.assertEqual(
             str(cm.exception),
