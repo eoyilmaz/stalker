@@ -1356,9 +1356,9 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
             self.test_task6.computed_end
         )
 
-        self.assertEqual(
-            self.test_task6.computed_resources,
-            [self.test_user1]
+        self.assertTrue(
+            self.test_task6.computed_resources[0] in
+            [self.test_user1, self.test_user2, self.test_user3]
         )
 
         # self.test_task7
@@ -1371,9 +1371,9 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
             self.test_task7.computed_end
         )
 
-        self.assertEqual(
-            self.test_task7.computed_resources,
-            [self.test_user1]
+        self.assertTrue(
+            self.test_task7.computed_resources[0] in
+            [self.test_user1, self.test_user2, self.test_user3]
         )
 
         # self.test_task1
@@ -1386,9 +1386,9 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
             self.test_task1.computed_end
         )
 
-        self.assertEqual(
-            self.test_task1.computed_resources,
-            [self.test_user1]
+        self.assertTrue(
+            self.test_task1.computed_resources[0] in
+            [self.test_user1, self.test_user2, self.test_user3]
         )
 
         # self.test_project2
@@ -1431,9 +1431,9 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
             self.test_task28.computed_end
         )
 
-        self.assertEqual(
-            self.test_task28.computed_resources,
-            [self.test_user2]
+        self.assertTrue(
+            self.test_task28.computed_resources[0] in
+            [self.test_user1, self.test_user2, self.test_user3]
         )
 
         # self.test_task29
@@ -1446,9 +1446,9 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
             self.test_task29.computed_end
         )
 
-        self.assertEqual(
-            self.test_task29.computed_resources,
-            [self.test_user2]
+        self.assertTrue(
+            self.test_task29.computed_resources[0] in
+            [self.test_user1, self.test_user2, self.test_user3]
         )
 
         # self.test_task30
@@ -1461,9 +1461,9 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
             self.test_task30.computed_end
         )
 
-        self.assertEqual(
-            self.test_task30.computed_resources,
-            [self.test_user2]
+        self.assertTrue(
+            self.test_task30.computed_resources[0] in
+            [self.test_user1, self.test_user2, self.test_user3]
         )
 
         # self.test_task31
@@ -1476,9 +1476,9 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
             self.test_task31.computed_end
         )
 
-        self.assertEqual(
-            self.test_task31.computed_resources,
-            [self.test_user3]
+        self.assertTrue(
+            self.test_task31.computed_resources[0] in
+            [self.test_user1, self.test_user2, self.test_user3]
         )
 
         # self.test_shot3
@@ -1506,9 +1506,9 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
             self.test_task12.computed_end
         )
 
-        self.assertEqual(
-            self.test_task12.computed_resources,
-            [self.test_user1]
+        self.assertTrue(
+            self.test_task12.computed_resources[0] in
+            [self.test_user1, self.test_user2, self.test_user3]
         )
 
         # self.test_task13
@@ -1521,9 +1521,9 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
             self.test_task13.computed_end
         )
 
-        self.assertEqual(
-            self.test_task13.computed_resources,
-            [self.test_user2]
+        self.assertTrue(
+            self.test_task13.computed_resources[0] in
+            [self.test_user1, self.test_user2, self.test_user3]
         )
 
         # self.test_task14
@@ -1536,9 +1536,9 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
             self.test_task14.computed_end
         )
 
-        self.assertEqual(
-            self.test_task14.computed_resources,
-            [self.test_user2]
+        self.assertTrue(
+            self.test_task14.computed_resources[0] in
+            [self.test_user1, self.test_user2, self.test_user3]
         )
 
         # self.test_task15
@@ -1551,9 +1551,9 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
             self.test_task15.computed_end
         )
 
-        self.assertEqual(
-            self.test_task15.computed_resources,
-            [self.test_user1]
+        self.assertTrue(
+            self.test_task15.computed_resources[0] in
+            [self.test_user1, self.test_user2, self.test_user3]
         )
 
         # self.test_shot4
@@ -1581,9 +1581,9 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
             self.test_task16.computed_end
         )
 
-        self.assertEqual(
-            self.test_task16.computed_resources,
-            [self.test_user1]
+        self.assertTrue(
+            self.test_task16.computed_resources[0] in
+            [self.test_user1, self.test_user2, self.test_user3]
         )
 
         # self.test_task17
@@ -1596,9 +1596,9 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
             self.test_task17.computed_end
         )
 
-        self.assertEqual(
-            self.test_task17.computed_resources,
-            [self.test_user2]
+        self.assertTrue(
+            self.test_task17.computed_resources[0] in
+            [self.test_user1, self.test_user2, self.test_user3]
         )
 
         # self.test_task18
@@ -1611,9 +1611,9 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
             self.test_task18.computed_end
         )
 
-        self.assertEqual(
-            self.test_task18.computed_resources,
-            [self.test_user3]
+        self.assertTrue(
+            self.test_task18.computed_resources[0],
+            [self.test_user1, self.test_user2, self.test_user3]
         )
 
         # self.test_task19
@@ -1626,9 +1626,9 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
             self.test_task19.computed_end
         )
 
-        self.assertEqual(
-            self.test_task19.computed_resources,
-            [self.test_user3]
+        self.assertTrue(
+            self.test_task19.computed_resources[0] in
+            [self.test_user1, self.test_user2, self.test_user3]
         )
 
         # self.test_task2
@@ -1641,9 +1641,9 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
             self.test_task2.computed_end
         )
 
-        self.assertEqual(
-            self.test_task2.computed_resources,
-            [self.test_user1]
+        self.assertTrue(
+            self.test_task2.computed_resources[0] in
+            [self.test_user1, self.test_user2, self.test_user3]
         )
 
     def test_schedule_will_schedule_only_the_tasks_of_the_given_projects_with_the_given_scheduler(self):

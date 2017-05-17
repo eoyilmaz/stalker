@@ -1830,7 +1830,10 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
         """testing if the total_logged_seconds
         """
         from stalker import Project
+        from stalker.db.session import DBSession
         new_project = Project(**self.kwargs)
+        DBSession.add(new_project)
+        DBSession.commit()
         self.assertEqual(new_project.total_logged_seconds, 0)
 
     def test_total_logged_seconds_attribute_is_working_properly(self):
@@ -1896,7 +1899,10 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
         with no tasks
         """
         from stalker import Project
+        from stalker.db.session import DBSession
         new_project = Project(**self.kwargs)
+        DBSession.add(new_project)
+        DBSession.commit()
         self.assertEqual(new_project.schedule_seconds, 0)
 
     def test_schedule_seconds_attribute_is_working_properly(self):
@@ -1971,7 +1977,10 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
         with no tasks
         """
         from stalker import Project
+        from stalker.db.session import DBSession
         new_project = Project(**self.kwargs)
+        DBSession.add(new_project)
+        DBSession.commit()
         self.assertEqual(new_project.percent_complete, 0)
 
     def test_percent_complete_attribute_is_working_properly(self):

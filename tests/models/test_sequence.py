@@ -240,8 +240,8 @@ class SequenceTester(UnitTestDBBase):
         new_sequence = Sequence(**self.kwargs)
         self.assertEqual(new_sequence.references, references)
 
-    def test_TaskableEntity_initialization(self):
-        """testing if the TaskableEntity part is initialized correctly
+    def test_initialization_of_task_part(self):
+        """testing if the Task part is initialized correctly
         """
         from stalker import Status, StatusList
         status1 = Status(name="On Hold", code="OH")
@@ -266,8 +266,7 @@ class SequenceTester(UnitTestDBBase):
             repository=self.test_repository,
         )
 
-        self.kwargs["new_project"] = new_project
-
+        self.kwargs["project"] = new_project
         new_sequence = Sequence(**self.kwargs)
 
         task1 = Task(

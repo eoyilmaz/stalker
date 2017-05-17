@@ -23,6 +23,7 @@
       - tj3 --version
       - sudo ln -s $(which tj3) /usr/local/bin/tj3
       - psql -c "CREATE USER stalker_admin WITH PASSWORD 'stalker' SUPERUSER INHERIT CREATEDB CREATEROLE NOREPLICATION;" -U postgres
+      - psql -c "CREATE DATABASE stalker_test WITH OWNER = stalker_admin ENCODING = 'UTF8' TABLESPACE = pg_default CONNECTION LIMIT = -1;" -U postgres
 
     script:
       - nosetests --verbosity=1 --cover-erase --with-coverage --cover-package=stalker
