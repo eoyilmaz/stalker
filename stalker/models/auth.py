@@ -138,6 +138,11 @@ class Permission(Base):
         self._action = self._validate_action(action)
         self._class_name = self._validate_class_name(class_name)
 
+    def __hash__(self):
+        """returns the hash value for this instance
+        """
+        return hash(self.access + self.action + self.class_name)
+
     def _validate_access(self, access):
         """validates the given access value
         """
@@ -1141,6 +1146,14 @@ class AuthenticationLog(SimpleEntity):
         self.user = user
         self.date = date
         self.action = action
+
+    def __lt__(self, other):
+        """make this orderable
+        """
+        return (
+            '%s %s %s' % (self.date, self.action, self.user.name),
+            '%s %s %s' % (other.date, other.action, other.user.name)
+        )
 
     @validates('user')
     def __validate_user__(self, key, user):

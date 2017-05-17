@@ -1813,7 +1813,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_drev
         self.test_task3.stop()
-        self.assertEquals(self.test_task3.status, self.status_stop)
+        self.assertEqual(self.test_task3.status, self.status_stop)
 
     # DREV: Schedule Timing Test
     def test_stop_in_DREV_leaf_task_schedule_values_are_clamped(self):
@@ -1962,7 +1962,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_stop
         self.test_task3.stop()
-        self.assertEquals(self.test_task3.status, self.status_stop)
+        self.assertEqual(self.test_task3.status, self.status_stop)
 
     # CMPL
     def test_stop_in_CMPL_leaf_task(self):

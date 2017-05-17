@@ -142,6 +142,7 @@ class UserTestDB(UnitTestDBBase):
             self.test_project2,
             self.test_project3
         ])
+        DBSession.commit()
 
         # a task status list
         self.task_status_list = StatusList.query\
@@ -190,6 +191,7 @@ class UserTestDB(UnitTestDBBase):
             self.test_task3,
             self.test_task4
         ])
+        DBSession.commit()
 
         # for task1
         from stalker import Version
@@ -198,18 +200,21 @@ class UserTestDB(UnitTestDBBase):
             full_path='some/path'
         )
         DBSession.add(self.test_version1)
+        DBSession.commit()
 
         self.test_version2 = Version(
             task=self.test_task1,
             full_path='some/path'
         )
         DBSession.add(self.test_version2)
+        DBSession.commit()
 
         self.test_version3 = Version(
             task=self.test_task1,
             full_path='some/path'
         )
         DBSession.add(self.test_version3)
+        DBSession.commit()
 
         # for task2
         self.test_version4 = Version(
@@ -217,18 +222,21 @@ class UserTestDB(UnitTestDBBase):
             full_path='some/path'
         )
         DBSession.add(self.test_version4)
+        DBSession.commit()
 
         self.test_version5 = Version(
             task=self.test_task2,
             full_path='some/path'
         )
         DBSession.add(self.test_version5)
+        DBSession.commit()
 
         self.test_version6 = Version(
             task=self.test_task2,
             full_path='some/path'
         )
         DBSession.add(self.test_version6)
+        DBSession.commit()
 
         # for task3
         self.test_version7 = Version(
@@ -236,18 +244,21 @@ class UserTestDB(UnitTestDBBase):
             full_path='some/path'
         )
         DBSession.add(self.test_version7)
+        DBSession.commit()
 
         self.test_version8 = Version(
             task=self.test_task3,
             full_path='some/path'
         )
         DBSession.add(self.test_version8)
+        DBSession.commit()
 
         self.test_version9 = Version(
             task=self.test_task3,
             full_path='some/path'
         )
         DBSession.add(self.test_version9)
+        DBSession.commit()
 
         # for task4
         self.test_version10 = Version(
@@ -255,18 +266,21 @@ class UserTestDB(UnitTestDBBase):
             full_path='some/path'
         )
         DBSession.add(self.test_version10)
+        DBSession.commit()
 
         self.test_version11 = Version(
             task=self.test_task4,
             full_path='some/path'
         )
         DBSession.add(self.test_version11)
+        DBSession.commit()
 
         self.test_version12 = Version(
             task=self.test_task4,
             full_path='some/path'
         )
         DBSession.add(self.test_version12)
+        DBSession.commit()
 
         # *********************************************************************
         # Tickets
@@ -407,6 +421,7 @@ class UserTestDB(UnitTestDBBase):
             self.test_sequence3,
             self.test_sequence4
         ])
+        DBSession.commit()
 
         self.test_admin = self.admin
         self.assertTrue(self.test_admin is not None)
@@ -969,7 +984,7 @@ class UserTestDB(UnitTestDBBase):
         """
         test_password = "a new test password"
         self.test_user.password = test_password
-        self.assertNotEquals(self.test_user.password, test_password)
+        self.assertNotEqual(self.test_user.password, test_password)
 
     def test_password_argument_being_scrambled(self):
         """testing if password is scrambled when trying to store it
@@ -977,7 +992,7 @@ class UserTestDB(UnitTestDBBase):
         test_password = "a new test password"
         self.kwargs["password"] = test_password
         new_user = User(**self.kwargs)
-        self.assertNotEquals(new_user.password, test_password)
+        self.assertNotEqual(new_user.password, test_password)
 
     def test_password_attribute_being_scrambled(self):
         """testing if password is scrambled when trying to store it
@@ -986,7 +1001,7 @@ class UserTestDB(UnitTestDBBase):
         self.test_user.password = test_password
 
         # test if they are not the same any more
-        self.assertNotEquals(self.test_user.password, test_password)
+        self.assertNotEqual(self.test_user.password, test_password)
 
     def test_check_password_works_properly(self):
         """testing if check_password method works properly
@@ -995,7 +1010,7 @@ class UserTestDB(UnitTestDBBase):
         self.test_user.password = test_password
 
         # check if it is scrambled
-        self.assertNotEquals(self.test_user.password, test_password)
+        self.assertNotEqual(self.test_user.password, test_password)
 
         # check if check_password returns True
         self.assertTrue(self.test_user.check_password(test_password))
@@ -1622,7 +1637,7 @@ class UserTestDB(UnitTestDBBase):
         """
         self.kwargs.pop('companies')
         new_user = User(**self.kwargs)
-        self.assertEquals(new_user.companies, [])
+        self.assertEqual(new_user.companies, [])
 
     def test_companies_argument_is_None(self):
         """testing if the companies argument is set to None the companies

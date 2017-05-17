@@ -71,6 +71,26 @@ Stalker Changes
 * **Fix:** ``to_tjp`` methods of SOM classes that is printing a Datetime object
   are now printing the dates in UTC.
 
+* **Fix:** Fixed ``stalker.models.auth.Permission`` to be hashable for Python
+  3.
+
+* **Fix:** Fixed ``stalker.models.auth.AuthenticationLog`` to be sortable for
+  Python 3.
+
+* **Fix:** Fixed ``stalker.models.version.Version.latest_version`` property for
+  Python 3.
+
+* **Fix:** Fixed tests of ``Permission`` class to check for correct exception
+  messages in Python 3.
+
+* **Update:** Replaced the ``assertEquals`` and ``assertNotEquals`` calls which
+  are deprecated in Python 3 with ``assertEqual`` and ``assertNotEquals`` calls
+  respectively.
+
+* **Fix:** Fixed tests for ``User`` and ``Version`` classes to not to cause the
+  ``id column is None`` warnings of SQLAlchemy to be emitted.
+
+
 0.2.18
 ======
 

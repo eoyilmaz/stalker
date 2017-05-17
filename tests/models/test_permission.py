@@ -18,6 +18,8 @@
 
 
 import unittest
+
+import sys
 from stalker.models.auth import Permission
 
 
@@ -45,10 +47,16 @@ class PermissionTester(unittest.TestCase):
         with self.assertRaises(TypeError) as cm:
             Permission(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            '__init__() takes exactly 4 arguments (3 given)'
-        )
+        if sys.version_info[0] >= 3:
+            self.assertEqual(
+                str(cm.exception),
+                "__init__() missing 1 required positional argument: 'access'"
+            )
+        else:
+            self.assertEqual(
+                str(cm.exception),
+                '__init__() takes exactly 4 arguments (3 given)'
+            )
 
     def test_access_argument_is_None(self):
         """testing if a TypeError will be raised when the access argument is
@@ -101,10 +109,16 @@ class PermissionTester(unittest.TestCase):
         with self.assertRaises(TypeError) as cm:
             Permission(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            '__init__() takes exactly 4 arguments (3 given)'
-        )
+        if sys.version_info[0] >= 3:
+            self.assertEqual(
+                str(cm.exception),
+                "__init__() missing 1 required positional argument: 'action'"
+            )
+        else:
+            self.assertEqual(
+                str(cm.exception),
+                '__init__() takes exactly 4 arguments (3 given)'
+            )
 
     def test_action_argument_is_None(self):
         """testing if a TypeError will be raised when the action argument is
@@ -158,10 +172,17 @@ class PermissionTester(unittest.TestCase):
         with self.assertRaises(TypeError) as cm:
             Permission(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            '__init__() takes exactly 4 arguments (3 given)'
-        )
+        if sys.version_info[0] >= 3:
+            self.assertEqual(
+                str(cm.exception),
+                "__init__() missing 1 required positional argument: "
+                "'class_name'"
+            )
+        else:
+            self.assertEqual(
+                str(cm.exception),
+                '__init__() takes exactly 4 arguments (3 given)'
+            )
 
     def test_class_name_argument_is_None(self):
         """testing if a TypeError will be raised when the class_name argument

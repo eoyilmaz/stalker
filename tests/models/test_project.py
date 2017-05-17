@@ -1317,7 +1317,7 @@ class ProjectTestDBCase(UnitTestDBBase):
             pass
         from stalker import Project
         new_project = Project(**self.kwargs)
-        self.assertEquals(new_project.users, [])
+        self.assertEqual(new_project.users, [])
 
     def test_users_argument_is_None(self):
         """testing if a the users attribute will be an empty list when the
@@ -1327,7 +1327,7 @@ class ProjectTestDBCase(UnitTestDBBase):
         self.kwargs['users'] = None
         from stalker import Project
         new_project = Project(**self.kwargs)
-        self.assertEquals(new_project.users, [])
+        self.assertEqual(new_project.users, [])
 
     def test_users_attribute_is_set_to_None(self):
         """testing if a TypeError will be raised when the users attribute is
@@ -2024,7 +2024,7 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
             pass
         from stalker import Project
         new_project = Project(**self.kwargs)
-        self.assertEquals(new_project.clients, [])
+        self.assertEqual(new_project.clients, [])
 
     def test_clients_argument_is_None(self):
         """testing if the clients argument can be None

@@ -101,6 +101,7 @@ class VersionDBTester(UnitTestDBBase):
             structure=self.test_structure
         )
         DBSession.add(self.test_project)
+        DBSession.commit()
 
         # create a sequence
         from stalker import Sequence
@@ -110,6 +111,7 @@ class VersionDBTester(UnitTestDBBase):
             project=self.test_project,
         )
         DBSession.add(self.test_sequence)
+        DBSession.commit()
 
         # create a shot
         from stalker import Shot
@@ -120,6 +122,7 @@ class VersionDBTester(UnitTestDBBase):
             sequences=[self.test_sequence]
         )
         DBSession.add(self.test_shot1)
+        DBSession.commit()
 
         # create a group of Tasks for the shot
         from stalker import Task
@@ -128,6 +131,7 @@ class VersionDBTester(UnitTestDBBase):
             parent=self.test_shot1
         )
         DBSession.add(self.test_task1)
+        DBSession.commit()
 
         # a Link for the input file
         from stalker import Link

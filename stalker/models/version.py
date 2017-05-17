@@ -275,7 +275,10 @@ class Version(Link, DAGMixin):
                     .first()
         except (UnboundExecutionError, OperationalError):
             all_versions = \
-                sorted(self.task.versions, key=lambda x: x.version_number)
+                sorted(
+                    self.task.versions,
+                    key=lambda x: x.version_number if x.version_number else -1
+                )
             if all_versions:
                 last_version = all_versions[-1]
                 if last_version != self:

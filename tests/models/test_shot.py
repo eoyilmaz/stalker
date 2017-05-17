@@ -795,7 +795,7 @@ class ShotTester(UnitTestDBBase):
         """
         first_cut_out = self.test_shot.cut_out
         self.test_shot.cut_duration = 245
-        self.assertNotEquals(self.test_shot.cut_out, first_cut_out)
+        self.assertNotEqual(self.test_shot.cut_out, first_cut_out)
         self.assertEqual(
             self.test_shot.cut_out,
             self.test_shot.cut_in + self.test_shot.cut_duration - 1
