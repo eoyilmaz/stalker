@@ -301,7 +301,7 @@ left outer join (
 left outer join (
     select
         "TimeLogs".task_id,
-        array_agg(('User_' || "TimeLogs".resource_id, to_char("TimeLogs".start, 'YYYY-MM-DD-HH24:MI:00'), to_char("TimeLogs".end, 'YYYY-MM-DD-HH24:MI:00'))) as time_log_array
+        array_agg(('User_' || "TimeLogs".resource_id, to_char(cast("TimeLogs".start at time zone 'utc' as timestamp), 'YYYY-MM-DD-HH24:MI:00'), to_char(cast("TimeLogs".end at time zone 'utc' as timestamp), 'YYYY-MM-DD-HH24:MI:00'))) as time_log_array
     from "TimeLogs"
     group by task_id
 ) as time_logs on "Tasks".id = time_logs.task_id

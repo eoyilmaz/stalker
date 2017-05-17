@@ -344,10 +344,13 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
             lstrip_blocks=True
         )
         start = time.time()
+        import pytz
         rendered_template = temp.render({
             'studio': self,
             'datetime': datetime,
-            'now': self.round_time(self.now).strftime('%Y-%m-%d-%H:%M')
+            'utc': pytz.utc,
+            'now': self.round_time(self.now).astimezone(pytz.utc)
+                .strftime('%Y-%m-%d-%H:%M')
         })
         end = time.time()
         logger.debug('render studio to tjp took: %s seconds' % (end - start))
@@ -866,5 +869,9 @@ class Vacation(SimpleEntity, DateRangeMixin):
         """
         from jinja2 import Template
         from stalker import defaults
+        import pytz
         template = Template(defaults.tjp_vacation_template)
-        return template.render({'vacation': self})
+        return template.render({
+            'vacation': self,
+            'utc': pytz.utc
+        })

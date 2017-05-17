@@ -498,8 +498,9 @@ class TimeLogDBTester(UnitTestDBBase):
 
         self.assertEqual(
             str(cm.exception),
-            'The resource has another TimeLog between 2013-03-22 '
-            '06:00:00+02:00 and 2013-03-30 06:00:00+02:00'
+            'The resource has another TimeLog between %s and %s' % (
+                time_log1.start, time_log1.end
+            )
         )
 
     def test_OverbookedError_4(self):
@@ -531,10 +532,16 @@ class TimeLogDBTester(UnitTestDBBase):
         with self.assertRaises(OverBookedError) as cm:
             TimeLog(**kwargs)
 
+        import tzlocal
+        local_tz = tzlocal.get_localzone()
         self.assertEqual(
             str(cm.exception),
-            'The resource has another TimeLog between 2013-03-20 '
-            '06:00:00+02:00 and 2013-04-01 07:00:00+03:00'
+            'The resource has another TimeLog between %s and %s' % (
+                datetime.datetime(2013, 3, 20, 4, 0, tzinfo=pytz.utc)
+                    .astimezone(local_tz),
+                (datetime.datetime(2013, 3, 20, 4, 0, tzinfo=pytz.utc)
+                    + datetime.timedelta(12)).astimezone(local_tz)
+            )
         )
 
     def test_OverbookedError_5(self):
@@ -568,10 +575,16 @@ class TimeLogDBTester(UnitTestDBBase):
         with self.assertRaises(OverBookedError) as cm:
             TimeLog(**kwargs)
 
+        import tzlocal
+        local_tz = tzlocal.get_localzone()
         self.assertEqual(
             str(cm.exception),
-            'The resource has another TimeLog between 2013-03-22 '
-            '06:00:00+02:00 and 2013-04-01 07:00:00+03:00'
+            'The resource has another TimeLog between %s and %s' % (
+                datetime.datetime(2013, 3, 22, 4, 0, tzinfo=pytz.utc)
+                    .astimezone(local_tz),
+                datetime.datetime(2013, 4, 1, 4, 0, tzinfo=pytz.utc)
+                    .astimezone(local_tz)
+            )
         )
 
     def test_OverbookedError_6(self):
@@ -605,10 +618,16 @@ class TimeLogDBTester(UnitTestDBBase):
         with self.assertRaises(OverBookedError) as cm:
             TimeLog(**kwargs)
 
+        import tzlocal
+        local_tz = tzlocal.get_localzone()
         self.assertEqual(
             str(cm.exception),
-            'The resource has another TimeLog between 2013-03-22 '
-            '06:00:00+02:00 and 2013-04-06 07:00:00+03:00'
+            'The resource has another TimeLog between %s and %s' % (
+                datetime.datetime(2013, 3, 22, 4, 0, tzinfo=pytz.utc)
+                    .astimezone(local_tz),
+                datetime.datetime(2013, 4, 6, 4, 0, tzinfo=pytz.utc)
+                    .astimezone(local_tz)
+            )
         )
 
     def test_OverbookedError_7(self):
@@ -642,10 +661,16 @@ class TimeLogDBTester(UnitTestDBBase):
         with self.assertRaises(OverBookedError) as cm:
             TimeLog(**kwargs)
 
+        import tzlocal
+        local_tz = tzlocal.get_localzone()
         self.assertEqual(
             str(cm.exception),
-            'The resource has another TimeLog between 2013-03-17 '
-            '06:00:00+02:00 and 2013-04-01 07:00:00+03:00'
+            'The resource has another TimeLog between %s and %s' % (
+                datetime.datetime(2013, 3, 17, 4, 0, tzinfo=pytz.utc)
+                    .astimezone(local_tz),
+                datetime.datetime(2013, 4, 1, 4, 0, tzinfo=pytz.utc)
+                    .astimezone(local_tz),
+            )
         )
 
     def test_OverbookedError_8(self):

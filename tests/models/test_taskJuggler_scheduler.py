@@ -279,7 +279,7 @@ task Project_{{proj.id}} "Project_{{proj.id}}" {
   task Task_{{task1.id}} "Task_{{task1.id}}" {
     effort 50.0h
     allocate User_{{user1.id}} { alternative User_{{user3.id}}, User_{{user4.id}}, User_{{user5.id}} select minallocated persistent }, User_{{user2.id}} { alternative User_{{user3.id}}, User_{{user4.id}}, User_{{user5.id}} select minallocated persistent }
-    booking User_30 2013-04-16-09:00:00 - 2013-04-16-12:00:00 { overtime 2 }
+    booking User_30 2013-04-16-06:00:00 - 2013-04-16-09:00:00 { overtime 2 }
   }
   task Task_{{task2.id}} "Task_{{task2.id}}" {
     priority 800
@@ -318,9 +318,9 @@ taskreport breakdown "{{csv_path}}"{
         tjp_content = tjp_sched.tjp_content
         # print tjp_content
         tjp_sched._clean_up()
-        print(expected_tjp_content)
-        print('----------------')
-        print(tjp_content)
+        # print(expected_tjp_content)
+        # print('----------------')
+        # print(tjp_content)
         self.assertEqual(tjp_content, expected_tjp_content)
 
     def test_schedule_will_not_work_when_the_studio_attribute_is_None(self):

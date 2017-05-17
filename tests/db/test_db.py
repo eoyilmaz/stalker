@@ -1062,7 +1062,7 @@ class DatabaseTester(UnitTestDBBase):
         engine = conn.engine
         self.assertEqual(
             str(engine.url),
-            'postgres://stalker_admin:stalker@localhost/stalker_test'
+            'postgresql://stalker_admin:stalker@localhost/stalker_test'
         )
 
     def test_setup_with_settings(self):
@@ -1948,6 +1948,7 @@ class DatabaseModelsTester(UnitTestDBBase):
             status_list=task_status_list,
             responsible=[user1]
         )
+        from stalker.db.session import DBSession
 
         from stalker import TimeLog
         test_time_log = TimeLog(
@@ -1958,7 +1959,6 @@ class DatabaseModelsTester(UnitTestDBBase):
             description=description
         )
 
-        from stalker.db.session import DBSession
         DBSession.add(test_time_log)
         DBSession.commit()
         tlog_id = test_time_log.id
@@ -2262,9 +2262,11 @@ class DatabaseModelsTester(UnitTestDBBase):
             project=test_project,
             responsible=[test_user1]
         )
+        from stalker.db.session import DBSession
+        DBSession.add_all([test_task1, test_task2, test_task3])
+        DBSession.commit()
 
         from stalker import Version
-        from stalker.db.session import DBSession
         test_version1 = Version(task=test_task1)
         DBSession.add(test_version1)
         DBSession.commit()
@@ -3569,6 +3571,9 @@ class DatabaseModelsTester(UnitTestDBBase):
             type=commercial_project_type,
             repository=repo1,
         )
+        from stalker.db.session import DBSession
+        DBSession.add(test_project1)
+        DBSession.commit()
 
         kwargs = {
             'name': 'Test Scene',
@@ -3602,7 +3607,6 @@ class DatabaseModelsTester(UnitTestDBBase):
             status_list=shot_status_list,
             responsible=[user1]
         )
-        from stalker.db.session import DBSession
         DBSession.add_all([shot1, shot2, shot3])
         DBSession.add(test_scene)
         DBSession.commit()
@@ -3683,6 +3687,9 @@ class DatabaseModelsTester(UnitTestDBBase):
             type=commercial_project_type,
             repository=repo1,
         )
+        from stalker.db.session import DBSession
+        DBSession.add(test_project1)
+        DBSession.commit()
 
         kwargs = {
             'name': 'Test Sequence',
@@ -3723,7 +3730,6 @@ class DatabaseModelsTester(UnitTestDBBase):
             responsible=[lead]
         )
 
-        from stalker.db.session import DBSession
         DBSession.add_all([shot1, shot2, shot3])
         DBSession.add(test_sequence)
         DBSession.commit()
@@ -3827,6 +3833,9 @@ class DatabaseModelsTester(UnitTestDBBase):
             type=commercial_project_type,
             repository=repo1,
         )
+        from stalker.db.session import DBSession
+        DBSession.add(test_project1)
+        DBSession.commit()
 
         kwargs = {
             'name': "Test Sequence 1",
@@ -3869,7 +3878,6 @@ class DatabaseModelsTester(UnitTestDBBase):
 
         test_shot = Shot(**shot_kwargs)
 
-        from stalker.db.session import DBSession
         DBSession.add(test_shot)
         DBSession.add(test_seq1)
         DBSession.commit()
@@ -4386,6 +4394,9 @@ class DatabaseModelsTester(UnitTestDBBase):
             status_list=project_status_list,
             repository=repo,
         )
+        from stalker.db.session import DBSession
+        DBSession.add(project1)
+        DBSession.commit()
 
         from stalker import Type, Asset, Task, TimeLog
         char_asset_type = Type(
@@ -4426,6 +4437,8 @@ class DatabaseModelsTester(UnitTestDBBase):
             resources=[user1],
             responsible=[user2]
         )
+        DBSession.add_all([asset1, task1, child_task1, child_task2, task2])
+        DBSession.commit()
 
         # time logs
         import datetime
@@ -4460,7 +4473,6 @@ class DatabaseModelsTester(UnitTestDBBase):
         version1 = Version(
             task=task1
         )
-        from stalker.db.session import DBSession
         DBSession.add(version1)
         DBSession.commit()
 
@@ -5266,7 +5278,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         """testing the persistence of Version instances
         """
         # create a project
-        from stalker import db, Project, Status, StatusList, Repository
+        from stalker import Project, Status, StatusList, Repository
         test_project = Project(
             name='Test Project',
             code='tp',
@@ -5285,6 +5297,8 @@ class DatabaseModelsTester(UnitTestDBBase):
                 osx_path='/Users/Volumes/M/',
             )
         )
+        from stalker.db.session import DBSession
+        DBSession.add(test_project)
 
         # create a task
         from stalker import Task, User
@@ -5297,6 +5311,8 @@ class DatabaseModelsTester(UnitTestDBBase):
                 User(name='user1', login='user1', email='u@u', password='12')
             ]
         )
+        DBSession.add(test_task)
+        DBSession.commit()
 
         # create a new version
         from stalker import Version, Link

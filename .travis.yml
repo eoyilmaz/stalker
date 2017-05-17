@@ -11,18 +11,18 @@
       - postgresql
 
     addons:
-      postgresql: "9.3"
+      postgresql: "9.5"
 
     install:
       - gem install taskjuggler
-      - pip install sqlalchemy psycopg2 jinja2 alembic Mako MarkupSafe python-editor nose coverage pytz
+      - pip install sqlalchemy psycopg2 jinja2 alembic Mako MarkupSafe python-editor nose coverage pytz tzlocal
 
     before_script:
       - psql --version
       - pg_config --version
       - tj3 --version
       - sudo ln -s $(which tj3) /usr/local/bin/tj3
-      - psql -c "CREATE USER stalker_admin WITH PASSWORD 'stalker';" -U postgres
+      - psql -c "CREATE USER stalker_admin WITH PASSWORD 'stalker' SUPERUSER INHERIT CREATEDB CREATEROLE NOREPLICATION;" -U postgres
 
     script:
       - nosetests --verbosity=1 --cover-erase --with-coverage --cover-package=stalker

@@ -47,7 +47,7 @@ class Config(object):
         #
         database_engine_settings={
             "sqlalchemy.url":
-                "postgres://stalker_admin:stalker@localhost/stalker_test",
+                "postgresql://stalker_admin:stalker@localhost/stalker_test",
             "sqlalchemy.echo": False,
         },
 
@@ -271,7 +271,7 @@ class Config(object):
         tjp_studio_template="""
 project {{ studio.tjp_id }} "{{ studio.tjp_id }}" {{ studio.start.date() }} - {{ studio.end.date() }} {
     timingresolution {{ '%i'|format((studio.timing_resolution.days * 86400 + studio.timing_resolution.seconds)//60|int) }}min
-    now {{ studio.now.strftime('%Y-%m-%d-%H:%M') }}
+    now {{ studio.now.astimezone(utc).strftime('%Y-%m-%d-%H:%M') }}
     dailyworkinghours {{ studio.daily_working_hours }}
     weekstartsmonday
 {{ studio.working_hours.to_tjp }}
@@ -312,10 +312,10 @@ task {{task.tjp_id}} "{{task.tjp_id}}" {
 
             {% if task.schedule_constraint %}
                 {% if task.schedule_constraint == 1 or task.schedule_constraint == 3 %}
-                    start {{ task.start.strftime('%Y-%m-%d-%H:%M') }}
+                    start {{ task.start.astimezone(utc).strftime('%Y-%m-%d-%H:%M') }}
                 {% endif %}
                 {% if task.schedule_constraint == 2 or task.schedule_constraint == 3 -%}
-                    end {{ task.end.strftime('%Y-%m-%d-%H:%M') }}
+                    end {{ task.end.astimezone(utc).strftime('%Y-%m-%d-%H:%M') }}
                 {% endif %}
             {% endif %}
 
@@ -339,7 +339,7 @@ task {{task.tjp_id}} "{{task.tjp_id}}" {
             {%- endfor %}
         {%- endif %}
         {% for time_log in task.time_logs %}
-            booking {{time_log.resource.tjp_id}} {{time_log.start.strftime('%Y-%m-%d-%H:%M:%S')}} - {{time_log.end.strftime('%Y-%m-%d-%H:%M:%S')}} { overtime 2 }
+            booking {{time_log.resource.tjp_id}} {{time_log.start.astimezone(utc).strftime('%Y-%m-%d-%H:%M:%S')}} - {{time_log.end.astimezone(utc).strftime('%Y-%m-%d-%H:%M:%S')}} { overtime 2 }
         {% endfor %}
     {% endif %}
 
@@ -356,7 +356,7 @@ resource {{department.tjp_id}} "{{department.tjp_id}}" {
 }
 """,
 
-        tjp_vacation_template='''vacation {{ vacation.start.strftime('%Y-%m-%d-%H:%M:%S') }} - {{ vacation.end.strftime('%Y-%m-%d-%H:%M:%S') }}''',
+        tjp_vacation_template='''vacation {{ vacation.start.astimezone(utc).strftime('%Y-%m-%d-%H:%M:%S') }} - {{ vacation.end.astimezone(utc).strftime('%Y-%m-%d-%H:%M:%S') }}''',
 
         tjp_user_template='''resource {{user.tjp_id}} "{{user.tjp_id}}" {
     efficiency {{user.efficiency}}

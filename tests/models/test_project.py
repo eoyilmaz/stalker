@@ -229,7 +229,10 @@ class ProjectTestDBCase(UnitTestDBBase):
         }
 
         from stalker import Project
+        from stalker.db.session import DBSession
         self.test_project = Project(**self.kwargs)
+        DBSession.add(self.test_project)
+        DBSession.commit()
 
         # status list for sequence
         # self.sequence_status_list = StatusList(
@@ -606,7 +609,6 @@ class ProjectTestDBCase(UnitTestDBBase):
         # test_task2
         # test_task3
 
-        from stalker.db.session import DBSession
         DBSession.add(self.test_project)
         DBSession.commit()
 
@@ -2368,6 +2370,9 @@ class ProjectTicketsTestDBCase(UnitTestDBBase):
         """
         from stalker import Project
         project1 = Project(**self.kwargs)
+        from stalker.db.session import DBSession
+        DBSession.add(project1)
+        DBSession.commit()
         self.assertEqual(project1.open_tickets, [])
 
     def test_open_tickets_attribute_is_read_only(self):

@@ -1405,8 +1405,8 @@ class UserTestDB(UnitTestDBBase):
 
         expected_tjp = """resource User_%s "User_%s" {
     efficiency 1.0
-    vacation 2013-06-07-03:00:00 - 2013-06-21-03:00:00
-    vacation 2013-07-01-03:00:00 - 2013-07-15-03:00:00
+    vacation 2013-06-07-00:00:00 - 2013-06-21-00:00:00
+    vacation 2013-07-01-00:00:00 - 2013-07-15-00:00:00
 }""" % (self.test_user.id, self.test_user.id)
 
         # print expected_tjp

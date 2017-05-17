@@ -3245,9 +3245,9 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
             'dep_task1_id': dep_task1.id,
             'dep_task2_id': dep_task2.id,
         }
-        print(t1.to_tjp)
-        print('---------------------------------')
-        print(expected_tjp)
+        # print(t1.to_tjp)
+        # print('---------------------------------')
+        # print(expected_tjp)
         self.assertEqual(t1.to_tjp, expected_tjp)
 
     def test_to_tjp_attribute_is_working_properly_for_a_container_task_with_dependency(self):
@@ -3505,9 +3505,9 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
             'dep_task1_id': dep_task1.id,
             'dep_task2_id': dep_task2.id
         }
-        print(t1.to_tjp)
-        print('-----------------------')
-        print(expected_tjp)
+        # print(t1.to_tjp)
+        # print('-----------------------')
+        # print(expected_tjp)
         self.maxDiff = None
         self.assertEqual(t1.to_tjp, expected_tjp)
 

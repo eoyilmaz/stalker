@@ -1178,11 +1178,9 @@ class ShotTester(UnitTestDBBase):
         from stalker import Status, StatusList
         status1 = Status(name="On Hold", code="OH")
 
-        project_status_list = StatusList(
-            name="Project Statuses",
-            statuses=[status1],
-            target_entity_type='Project'
-        )
+        project_status_list = \
+            StatusList.query\
+                .filter(StatusList.target_entity_type=='Project').first()
 
         from stalker import Type
         project_type = Type(
@@ -1199,8 +1197,12 @@ class ShotTester(UnitTestDBBase):
             type=project_type,
             repository=self.test_repository,
         )
+        from stalker.db.session import DBSession
+        DBSession.add(new_project)
+        DBSession.commit()
 
-        self.kwargs["code"] = "SH12314"
+        self.kwargs['project'] = new_project
+        self.kwargs['code'] = "SH12314"
 
         from stalker import Task
         new_shot = Shot(**self.kwargs)

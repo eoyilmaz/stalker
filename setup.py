@@ -12,7 +12,8 @@ requires = [
     'sqlalchemy',
     'alembic',
     'jinja2',
-    'pytz'
+    'pytz',
+    'tzlocal'
 ]
 
 setup(

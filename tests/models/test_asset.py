@@ -124,6 +124,7 @@ class AssetTester(UnitTestDBBase):
             repositories=[self.repository],
         )
         DBSession.add(self.project1)
+        DBSession.commit()
 
         # sequence
         from stalker import Sequence
@@ -264,7 +265,6 @@ class AssetTester(UnitTestDBBase):
     def test_ReferenceMixin_initialization(self):
         """testing if the ReferenceMixin part is initialized correctly
         """
-
         from stalker import Link, Type
         link_type_1 = Type(
             name="Image",

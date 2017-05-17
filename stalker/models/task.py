@@ -1846,8 +1846,12 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
         """
         from jinja2 import Template
         from stalker import defaults
+        import pytz
         temp = Template(defaults.tjp_task_template, trim_blocks=True)
-        return temp.render({'task': self})
+        return temp.render({
+            'task': self,
+            'utc': pytz.utc
+        })
 
     @property
     def level(self):

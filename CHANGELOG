@@ -63,6 +63,13 @@ Stalker Changes
   instead of ``stalker.testing.TestBase`` and as a result running all of the
   tests are now 2x faster.
 
+* **Fix:** ``TimeLogs`` are now correctly reflected in UTC in a tj3 file.
+
+* **Fix:** Fixed a lot of tests which were raising Warnings and surprisingly
+  considered as Errors in TravisCI.
+
+* **Fix:** ``to_tjp`` methods of SOM classes that is printing a Datetime object
+  are now printing the dates in UTC.
 
 0.2.18
 ======
