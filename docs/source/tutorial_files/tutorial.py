@@ -1,10 +1,9 @@
 
 from stalker import db
-db.setup()
-
+db.setup({"sqlalchemy.url": "sqlite:///"})
 db.init()
 
-import datetime
+
 from stalker import Studio
 my_studio = Studio(
     name='My Great Studio'
@@ -32,10 +31,11 @@ print(me.departments)
 # [<TDs (Department)>]
 
 
-db.DBSession.add(my_studio)
-db.DBSession.add(me)
-db.DBSession.add(tds_department)
-db.DBSession.commit()
+from stalker.db.session import DBSession
+DBSession.add(my_studio)
+DBSession.add(me)
+DBSession.add(tds_department)
+DBSession.commit()
 
 
 all_departments = Department.query.all()
@@ -70,7 +70,8 @@ project_statuses = StatusList(
         status_wip,
         status_cmpl
     ],
-    target_entity_type=Project  # you can also use "Project" which is a str
+    target_entity_type='Project'  # you can also use Project which is the
+    # class itself
 )
 
 from stalker import Repository
@@ -87,6 +88,7 @@ new_project = Project(
     repositories=[commercial_repo],
 )
 
+import tzlocal
 import datetime
 from stalker import ImageFormat
 
@@ -102,11 +104,12 @@ new_project.image_format = ImageFormat(
 )
 
 new_project.fps = 25
-new_project.end = datetime.date(2014, 5, 15)
+local_tz = tzlocal.get_localzone()
+new_project.end = datetime.datetime(2014, 5, 15, tzinfo=local_tz)
 new_project.users.append(me)
 
-db.DBSession.add(new_project)
-db.DBSession.commit()
+DBSession.add(new_project)
+DBSession.commit()
 
 from stalker import Sequence
 
@@ -135,19 +138,19 @@ sh003 = Shot(
     sequences=[seq1]
 )
 
-db.DBSession.add_all([sh001, sh002, sh003])
-db.DBSession.commit()
+DBSession.add_all([sh001, sh002, sh003])
+DBSession.commit()
 
 sh004 = Shot(
     code='SH004',
     project=new_project,
     sequences=[seq1]
 )
-db.DBSession.add(sh004)
-db.DBSession.commit()
+DBSession.add(sh004)
+DBSession.commit()
 
 sh004.code = "SH005"
-db.DBSession.commit()
+DBSession.commit()
 
 # first find the data
 wrong_shot = Shot.query.filter_by(code="SH005").first()
@@ -156,10 +159,10 @@ wrong_shot = Shot.query.filter_by(code="SH005").first()
 wrong_shot.code = "SH004"
 
 # commit the changes to the database
-db.DBSession.commit()
+DBSession.commit()
 
-db.DBSession.delete(wrong_shot)
-db.DBSession.commit()
+DBSession.delete(wrong_shot)
+DBSession.commit()
 
 wrong_shot = Shot.query.filter_by(code="SH005").first()
 print(wrong_shot)
@@ -216,7 +219,7 @@ comp.resources = [me]
 comp.schedule_timing = 6
 comp.schedule_unit = 'h'
 
-db.DBSession.commit()
+DBSession.commit()
 
 from stalker import TaskJugglerScheduler
 
@@ -229,7 +232,7 @@ my_studio.schedule(scheduled_by=me)                # duration to 1 year just
                                                    # fitting in to the time
                                                    # frame.
 
-db.DBSession.commit()  # to reflect the change
+DBSession.commit()  # to reflect the change
 
 print(previs.computed_start)     # 2014-04-02 16:00:00
 print(previs.computed_end)       # 2014-04-15 15:00:00
@@ -289,7 +292,7 @@ task_template = FilenameTemplate(
 commercial_project_structure.templates.append(task_template)
 
 # commit to database
-db.DBSession.commit()  # no need to add anything, project is already on db
+DBSession.commit()  # no need to add anything, project is already on db
 
 from stalker import Version
 
@@ -314,7 +317,7 @@ print(vers1.absolute_full_path)  # '/mnt/M/commercials/FC/SH001/comp/SH001_comp_
 print(vers1.version_number)      # 1
 
 # commit to database
-db.DBSession.commit()
+DBSession.commit()
 
 vers1.is_published = False  # I still work on this version, this is not a
                             # usable one
@@ -330,7 +333,7 @@ print(vers2.version_number)  # 2
 print(vers2.filename)        # 'SH001_comp_Main_v002'
 
 # before creating a new version commit this one to db
-db.DBSession.commit()
+DBSession.commit()
 
 # now create a new version
 vers3 = Version(task=comp)

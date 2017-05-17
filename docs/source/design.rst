@@ -252,10 +252,11 @@ Here is the code::
   )
 
   # just add the project to the database
-  db.DBSession.add(proj1)
+  from stalker.db.session import DBSession
+  DBSession.add(proj1)
 
   # and commit the data to database
-  db.DBSession.commit()
+  DBSession.commit()
 
 It may seem too much for just creating a Project, but it is for the first time
 only. For a second project, we can use the previous Repository, Structure,
@@ -292,10 +293,10 @@ Because we have a project now lets create a task for this project::
   # created by default when we called db.init() in previous example
 
   # add it to the database
-  db.DBSession.add(task1)
+  DBSession.add(task1)
 
   # and commit
-  db.DBSession.commit()
+  DBSession.commit()
 
 Now we have created a simple Task and assigned it to the resource1. Lets check
 the status of the Task::

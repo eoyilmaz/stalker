@@ -31,7 +31,7 @@ We are going to use a helper script to connect to the default database. Use the
 following command to connect to the database::
 
   from stalker import db
-  db.setup()
+  db.setup({"sqlalchemy.url": "sqlite:///"})
 
 This will create an in-memory SQLite3 database, which is useless other than
 testing purposes. To be able to get more out of Stalker we should give a proper
@@ -55,8 +55,13 @@ or::
    .. _engine: http://www.sqlalchemy.org/docs/core/engines.html
    .. _mapping: http://www.sqlalchemy.org/docs/orm/mapper_config.html
 
+.. note::
+   Although with Stalker v0.2.18 the SQLite3 support is dropped, Stalker can
+   still work with an SQLite3 database. But the suggested database backend is
+   PostgreSQL (preferably PostgreSQL 9.5).
+
 Then if this is the first time you are connecting to the database, then you
-should initialize the database and create some defaults::
+should initialize the database to create some default data::
 
   db.init()
 
@@ -121,13 +126,14 @@ assigned the user as one of the member of the **TDs Department**.
 Because we didn't tell Stalker to commit the changes, no data has been saved to
 the database yet. So lets send it the data to the database::
 
-  db.DBSession.add(my_studio)
-  db.DBSession.add(me)
-  db.DBSession.add(tds_department)
-  db.DBSession.commit()
+  from stalker.db.session import DBSession
+  DBSession.add(my_studio)
+  DBSession.add(me)
+  DBSession.add(tds_department)
+  DBSession.commit()
 
-As you see we have used the ``db.DBSession`` object to send the data to the
-database. These information are in the database right now.
+As you see we have used the ``DBSession`` object to send (commit) the data to
+the database. These information are stored in the database right now.
 
 Lets try to get something back from the database by querying all the
 departments, then getting the second one (the first department is always the
@@ -156,8 +162,7 @@ using Stalker with it. So we need to create a :class:`.Project` object to hold
 data about it.
 
 A project instance needs to have a suitable :class:`.StatusList` (see
-:ref:`status_and_status_lists_toplevel`) and it needs to be attached to a
-:class:`.Repository` instance::
+:ref:`status_and_status_lists_toplevel`) and a :class:`.Repository` instance::
 
   # we will reuse the Statuses created by default (in db.init())
   from stalker import Status
@@ -170,14 +175,15 @@ A project instance needs to have a suitable :class:`.StatusList` (see
    When the Stalker database is first initialized (with ``db.init()``) a set of
    :class:`.Status`\ es for :class:`.Task`\ s, :class:`.Asset`\ s,
    :class:`.Shot`\ s, :class:`.Sequence`\ s and :class:`.Ticket`\ s are created
-   along with a :class:`.StatusList` for each of the data types. Up in this
-   tutorial we have used those Statuses (new, wip and cmpl) created by default.
+   along with a :class:`.StatusList` for each of the data types. Up to this
+   point in the tutorial we have used those Statuses (new, wip and cmpl)
+   that are created by default.
 
 For now we have just created generic statuses. These :class:`.Status` instances
-can be used with any kind of statusable objects. The idea behind is to define
-the statuses only once, and use them in mixtures suitable for different type of
-objects. So you can define all the possible Statuses for your entities, then
-you can create a list of them for specific type of objects.
+can be used with any kind of **statusable** objects. The idea behind is to
+define the statuses only once, and use them in mixtures suitable for different
+type of objects. So you can define all the possible Statuses for your entities,
+then you can create a list of them for specific type of objects.
 
 Lets create a :class:`.StatusList` suitable for :class:`.Project` instances::
 
@@ -191,12 +197,13 @@ Lets create a :class:`.StatusList` suitable for :class:`.Project` instances::
           status_wip,
           status_cmpl
       ],
-      target_entity_type=Project  # you can also use "Project" which is a str
+      target_entity_type='Project'  # you can also use Project which is the
+                                    # class itself
   )
 
-So we defined a status list which is suitable for Project instances. As you
-see we didn't used all the generic Statuses in our ``project_statuses`` because
-for a Project object we thought that these statuses are enough.
+So we defined a status list which is suitable for :class:`.Project` instances.
+As you see we didn't used all the generic Statuses in our ``project_statuses``
+because for a Project object we thought that these statuses are enough.
 
 .. ::
   We also need to specify the type of the project, which is *commercial* in our
@@ -240,6 +247,7 @@ So we have created our project now.
 
 Lets enter more information about this new project::
 
+  import tzlocal
   import datetime
   from stalker import ImageFormat
   
@@ -255,26 +263,32 @@ Lets enter more information about this new project::
   )
 
   new_project.fps = 25
-  new_project.end = datetime.date(2014, 5, 15)
+  local_tz = tzlocal.get_localzone()
+  new_project.end = datetime.datetime(2014, 5, 15, tzinfo=local_tz)
   new_project.users.append(me)
 
 Lets save all the new data to the database::
 
-  db.DBSession.add(new_project)
-  db.DBSession.commit()
+  DBSession.add(new_project)
+  DBSession.commit()
 
 As you see, even though we have created multiple objects (new_project,
 statuses, status lists etc.) we've just added the ``new_project`` object to the
 database, but don't worry all the related objects will be added to the
 database.
 
+.. note::
+   Starting with Stalker v0.2.18 all the datetime information needs to have
+   timezone information (we've used the local timezone in the example).
+
+
 A Project generally is group of :class:`.Task`\ s that needs to be completed. A
 :class:`.Task` in Stalker is a type of entity where we define the total amount
 of effort need to be done (or the duration or the length of the task, see
 :class:`.Task` class documentation) to consider that Task as completed. All of
 the tasks (leaf tasks in fact, coming next) has ``resources`` which defines the
-:class:`.User`\ s who need to work on that task and complete it. This will all
-be explained in :class:`.Task` class documentation.
+:class:`.User`\ s who need to work on that task and complete it. These are all
+explained in :class:`.Task` class documentation.
 
 For now you just need to now that :class:`.Asset`\ s, :class:`.Shot`\ s and
 :class:`.Sequence`\ s in Stalker are derived from :class:`.Task` and they are
@@ -313,8 +327,8 @@ And a Sequence generally has :class:`.Shot`\ s::
 
 send them to the database::
 
-  db.DBSession.add_all([sh001, sh002, sh003])
-  db.DBSession.commit()
+  DBsession.add_all([sh001, sh002, sh003])
+  DBsession.commit()
 
 .. note::
    Even though, in this tutorial we have created :class:`.Shot`\ s with one
@@ -324,9 +338,9 @@ send them to the database::
    For small projects like commercials, you may skip creating a Sequence at
    all.
    
-   For bigger projects, like feature movies, it is a very good idea to use
+   For bigger projects, like feature films, it is a very good idea to use
    Sequences and then group the Shots under them.
-   
+
    But again, a Shot can be connected to multiple sequences, which is useful if
    your shot, let say, is a kind of flashback and you will use this shot again
    without changing it at all, then this feature becomes handy.
@@ -342,14 +356,14 @@ we created a new shot with wrong info::
       project=new_project,
       sequences=[seq1]
   )
-  db.DBSession.add(sh004)
-  db.DBSession.commit()
+  DBSession.add(sh004)
+  DBSession.commit()
 
 and you figured out that you have created and committed a wrong info and you
 want to correct it::
 
   sh004.code = "SH005"
-  db.DBSession.commit()
+  DBsession.commit()
 
 later on lets say you wanted to get the shot back from database::
 
@@ -360,12 +374,12 @@ later on lets say you wanted to get the shot back from database::
   wrong_shot.code = "SH004"
   
   # commit the changes to the database
-  db.DBSession.commit()
+  DBsession.commit()
 
 and let say that you decided to delete the data::
 
-  db.DBSession.delete(wrong_shot)
-  db.DBSession.commit()
+  DBsession.delete(wrong_shot)
+  DBsession.commit()
 
 If you don't close your python session, your variable are still going to
 contain the data but they do not exist in the database anymore::
@@ -466,7 +480,7 @@ problem, and will tell you when to start and complete this tasks.
 
 Lets commit the changes again::
 
-  db.DBSession.commit()
+  DBsession.commit()
 
 If you noticed, this time we didn't add anything to the session, cause we have
 added the ``sh001`` in a previous commit, and because all the objects are
@@ -526,7 +540,7 @@ have created at the beginning of this tutorial::
                                                      # about the project is not
                                                      # fitting in to the time
                                                      # frame.
-  db.DBSession.commit()  # to reflect the change
+  DBsession.commit()  # to reflect the change
 
 This should take a little while depending to your projects size (around 1-2
 seconds for this tutorial, but around ~15 min for a project with 15000+ tasks).
@@ -673,7 +687,7 @@ and filename::
   commercial_project_structure.templates.append(task_template)
 
   # commit to database
-  db.DBSession.commit()  # no need to add anything, project is already on db
+  DBsession.commit()  # no need to add anything, project is already on db
 
 By defining a :class:`.FilenameTemplate` instance we have essentially told
 Stalker how to store :class:`.Version` instances created for :class:`.Task`
@@ -718,7 +732,7 @@ Lets create a :class:`.Version` instance for one of our tasks::
   print(vers1.version_number)      # 1
 
   # commit to database
-  db.DBSession.commit()
+  DBsession.commit()
 
 As you see, the :class:`.Version` instance magically knows where to place
 itself and what to use as the filename. Thanks to Stalker it is now easy to
@@ -749,7 +763,7 @@ Lets create another version for the same task and see what happens::
   print(vers2.filename)        # 'SH001_comp_Main_v002'
 
   # before creating a new version commit this one to db
-  db.DBSession.commit()
+  DBsession.commit()
 
   # now create a new version
   vers3 = Version(task=comp)
