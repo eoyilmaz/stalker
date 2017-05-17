@@ -351,3 +351,66 @@ class GoodTestCase(unittest.TestCase):
         self.assertNotEqual(g.unit, test_value)
         g.unit = test_value
         self.assertEqual(g.unit, test_value)
+
+    def test_client_argument_is_skipped(self):
+        """testing if a Good can be created without a Client
+        """
+        self.kwargs.pop('client', None)
+        g = Good(**self.kwargs)
+        self.assertIsNotNone(g)
+        self.assertIsInstance(g, Good)
+
+    def test_client_argument_is_none(self):
+        """testing if a Good can be created without a Client
+        """
+        self.kwargs['client'] = None
+        g = Good(**self.kwargs)
+        self.assertIsNotNone(g)
+        self.assertIsInstance(g, Good)
+
+    def test_client_argument_is_not_a_client_instance(self):
+        """testing if a TypeError will be raised if the client argument is not
+        a Client instance
+        """
+        self.kwargs['client'] = 'not a client'
+        with self.assertRaises(TypeError) as cm:
+            Good(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Good.client attribute should be a stalker.models.client.Client '
+            'instance, not str'
+        )
+
+    def test_client_attribute_is_set_to_a_value_other_than_a_client(self):
+        """testing if a TypeError will be raised when the client attribute is
+        set to a value other than a Client instance
+        """
+        g = Good(**self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            g.client = 'not a client'
+
+        self.assertEqual(
+            str(cm.exception),
+            'Good.client attribute should be a stalker.models.client.Client '
+            'instance, not str'
+        )
+
+    def test_client_argument_is_working_properly(self):
+        """testing if the client argument is working properly
+        """
+        from stalker.models.client import Client
+        client = Client(name='Test Client')
+        self.kwargs['client'] = client
+        g = Good(**self.kwargs)
+        self.assertEqual(g.client, client)
+
+    def test_client_attribute_is_working_properly(self):
+        """testing if the client attribute is working properly
+        """
+        from stalker.models.client import Client
+        client = Client(name='Test Client')
+        g = Good(**self.kwargs)
+        self.assertNotEqual(g.client, client)
+        g.client = client
+        self.assertEqual(g.client, client)

@@ -38,9 +38,25 @@ class Client(Entity):
       * The projects affiliated with the client
       * and all the other things those are inherited from the Entity class
 
+    .. note::
+       .. versionadded 0.2.20: Client Specific Goods
+
+       Clients now can own a list of :class:`.Good`\ s attached to them.
+       So one can define a list of class:`.Good`\ s with special prices
+       adjusted for a particular ``Client``, then get them back from the db by
+       querying the :class:`.Good`\ s those have their ``client`` attribute set
+       to that particular ``Client`` instance. Removing a ``Good`` from a
+       :class:`.Client` will not delete it from the database, but deleting a
+       :class:`.Client` will also delete the ``Good``\ s attached to that
+       particular :class:`.Client`.
+
+    .. ::
+       don't forget to update the Good documentation, which also has the same
+       text.
+
     Two Client object considered the same if they have the same name.
 
-    so creating a client object needs the following parameters:
+    So creating a client object needs the following parameters:
 
     :param users: It can be an empty list, so one client can be created
       without any user in it. But this parameter should be a list of User
@@ -93,6 +109,14 @@ class Client(Entity):
         primaryjoin='Clients.c.id==Project_Clients.c.client_id'
     )
 
+    goods = relationship(
+        'Good',
+        back_populates='client',
+        cascade='all',  # do not include "delete-orphan" we want to keep goods
+                        # if they are detached on purpose
+        primaryjoin='Clients.c.id==Goods.c.client_id'
+    )
+
     def __init__(
             self,
             users=None,
@@ -122,6 +146,21 @@ class Client(Entity):
 
     def to_tjp(self):
         return ''
+
+    @validates('goods')
+    def _validate_good(self, key, good):
+        """validates the given good value
+        """
+        from stalker.models.budget import Good
+        if not isinstance(good, Good):
+            raise TypeError(
+                "%s.goods attribute should be all stalker.models.budget.Good "
+                "instances, not %s" % (
+                    self.__class__.__name__, good.__class__.__name__
+                )
+            )
+
+        return good
 
 
 class ClientUser(Base):

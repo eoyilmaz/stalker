@@ -163,6 +163,7 @@ class VersionDBTester(UnitTestDBBase):
                       'Outputs/SH001_occ_v001.###.exr'
         )
         DBSession.add(self.test_output_link2)
+        DBSession.commit()
 
         # now create a version for the Task
         self.kwargs = {
@@ -1502,7 +1503,7 @@ class VersionDBTester(UnitTestDBBase):
     def test_naming_parents_attribute_is_working_properly(self):
         """testing if the naming_parents attribute is working properly
         """
-        from stalker import db, Task
+        from stalker import Task
         # for self.test_version
         self.assertEqual(
             self.test_version.naming_parents,
@@ -1554,6 +1555,9 @@ class VersionDBTester(UnitTestDBBase):
             parent=task1,
             type=character_type
         )
+        DBSession.add(asset1)
+        DBSession.commit()
+
         version2 = Version(
             task=asset1
         )
@@ -1569,11 +1573,15 @@ class VersionDBTester(UnitTestDBBase):
             code='SH002',
             parent=task3,
         )
+        DBSession.add(shot2)
+        DBSession.commit()
 
         task4 = Task(
             name='Test Task 4',
             parent=shot2,
         )
+        DBSession.add(task4)
+        DBSession.commit()
 
         version3 = Version(
             task=task4
@@ -1591,6 +1599,9 @@ class VersionDBTester(UnitTestDBBase):
             parent=shot2,
             type=character_type
         )
+        DBSession.add(asset2)
+        DBSession.commit()
+
         version4 = Version(task=asset2)
         self.assertEqual(version4.naming_parents, [asset2])
 
@@ -1653,6 +1664,9 @@ class VersionDBTester(UnitTestDBBase):
             parent=task1,
             type=character_type
         )
+        DBSession.add(asset1)
+        DBSession.commit()
+
         version2 = Version(
             task=asset1
         )
@@ -1668,11 +1682,15 @@ class VersionDBTester(UnitTestDBBase):
             code='SH002',
             parent=task3,
         )
+        DBSession.add(shot2)
+        DBSession.commit()
 
         task4 = Task(
             name='Test Task 4',
             parent=shot2,
         )
+        DBSession.add(task4)
+        DBSession.commit()
 
         version3 = Version(
             task=task4
@@ -1690,6 +1708,9 @@ class VersionDBTester(UnitTestDBBase):
             parent=shot2,
             type=character_type
         )
+        DBSession.add(asset2)
+        DBSession.commit()
+
         version4 = Version(task=asset2)
         self.assertEqual(
             version4.nice_name,

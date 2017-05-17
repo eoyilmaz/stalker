@@ -31,6 +31,22 @@ class Good(Entity, UnitMixin):
     A Studio can define service prices or items that's been sold by the Studio
     by using a list of commercial items.
 
+    .. note::
+       .. versionadded 0.2.20: Client Specific Goods
+
+       Clients now can own a list of :class:`.Good`\ s attached to them.
+       So one can define a list of :class:`.Good`\ s with special prices
+       adjusted for a particular ``Client``, then get them back from the db by
+       querying the :class:`.Good`\ s those have their ``client`` attribute set
+       to that particular ``Client`` instance. Removing a ``Good`` from a
+       :class:`.Client` will not delete it from the database, but deleting a
+       :class:`.Client` will also delete the ``Good``\ s attached to that
+       particular :class:`.Client`.
+
+    .. ::
+       don't forget to update the Client documentation, which also has the same
+       text.
+
     A Good has the following attributes
 
     :param msrp: The suggested retail price for this item.
@@ -66,11 +82,20 @@ class Good(Entity, UnitMixin):
     msrp = Column(Float, default=0.0)
     unit = Column(String(64))
 
-    def __init__(self, cost=0.0, msrp=0.0, unit='', **kwargs):
+    client_id = Column('client_id', Integer, ForeignKey('Clients.id'))
+    client = relationship(
+        'Client',
+        primaryjoin='Goods.c.client_id==Clients.c.id',
+        back_populates='goods',
+        uselist=False
+    )
+
+    def __init__(self, cost=0.0, msrp=0.0, unit='', client=None, **kwargs):
         super(Good, self).__init__(**kwargs)
         UnitMixin.__init__(self, unit=unit)
         self.cost = cost
         self.msrp = msrp
+        self.client = client
 
     @validates('cost')
     def _validate_cost(self, key, cost):
@@ -117,6 +142,21 @@ class Good(Entity, UnitMixin):
             )
 
         return msrp
+
+    @validates('client')
+    def _validate_client(self, key, client):
+        """validates the given client value
+        """
+        if client is not None:
+            from stalker import Client
+            if not isinstance(client, Client):
+                raise TypeError(
+                    '%s.client attribute should be a '
+                    'stalker.models.client.Client instance, not %s' % (
+                        self.__class__.__name__, client.__class__.__name__
+                    )
+                )
+        return client
 
 
 class PriceList(Entity):

@@ -461,14 +461,6 @@ class ClientTestCase(unittest.TestCase):
         self.assertTrue(client1 != client3)
         self.assertTrue(client1 != entity1)
 
-    # def test_hash_value(self):
-    #     """testing if the hash value is correctly calculated
-    #     """
-    #     self.assertEqual(
-    #         hash(self.test_client),
-    #         self.test_client.__hash__()
-    #     )
-
     def test_to_tjp_method_is_working_properly(self):
         """testing if the to_tjp method is working properly
         """
@@ -483,4 +475,44 @@ class ClientTestCase(unittest.TestCase):
             client1.__hash__(),
             hash(client1.id) + 2 * hash(client1.name)
             + 3 * hash(client1.entity_type)
+        )
+
+    def test_goods_attribute_is_set_to_none(self):
+        """testing if a TypeError will be raised
+        """
+        client1 = Client(**self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            client1.goods = None
+
+        self.assertEqual(
+            str(cm.exception),
+            'Incompatible collection type: None is not list-like'
+        )
+
+    def test_goods_attribute_is_set_to_a_list_of_non_good_instances(self):
+        """testing if a TypeError will be raised if the goods attribute is set
+        to a list of non Good instances.
+        """
+        client1 = Client(**self.kwargs)
+        with self.assertRaises(TypeError) as cm:
+            client1.goods = ['not', 1, 'list', 'of', 'goods']
+
+        self.assertEqual(
+            str(cm.exception),
+            'Client.goods attribute should be all stalker.models.budget.Good '
+            'instances, not str'
+        )
+
+    def test_goods_attribute_is_working_properly(self):
+        """testing if the goods attribute is working properly
+        """
+        client1 = Client(**self.kwargs)
+        from stalker.models.budget import Good
+        good1 = Good(name='Test Good 1')
+        good2 = Good(name='Test Good 2')
+        good3 = Good(name='Test Good 3')
+        client1.goods = [good1, good2, good3]
+
+        self.assertEqual(
+            client1.goods, [good1, good2, good3]
         )

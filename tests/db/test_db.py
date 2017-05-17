@@ -841,7 +841,7 @@ class DatabaseTester(UnitTestDBBase):
         sql_query = 'select version_num from "alembic_version"'
         version_num = \
             DBSession.connection().execute(sql_query).fetchone()[0]
-        self.assertEqual('31b1e22b455e', version_num)
+        self.assertEqual('1181305d3001', version_num)
 
     def test_initialization_of_alembic_version_table_multiple_times(self):
         """testing if the db.create_alembic_table() will handle initializing
@@ -852,7 +852,7 @@ class DatabaseTester(UnitTestDBBase):
         sql_query = 'select version_num from "alembic_version"'
         version_num = \
             DBSession.connection().execute(sql_query).fetchone()[0]
-        self.assertEqual('31b1e22b455e', version_num)
+        self.assertEqual('1181305d3001', version_num)
 
         DBSession.remove()
         db.init()
@@ -2167,6 +2167,15 @@ class DatabaseModelsTester(UnitTestDBBase):
             password="password",
         )
 
+        from stalker.models.budget import Good
+        good1 = Good(name='Test Good 1')
+        good2 = Good(name='Test Good 2')
+        good3 = Good(name='Test Good 3')
+        good4 = Good(name='Test Good 4')
+        good5 = Good(name='Test Good 5')
+        test_client.goods = [good1, good2, good3, good5]
+
+        DBSession.add(good4)
         DBSession.add_all([user1, user2, user3, test_client])
         DBSession.commit()
 
@@ -2182,6 +2191,11 @@ class DatabaseModelsTester(UnitTestDBBase):
         notes = test_client.notes
         tags = test_client.tags
         updated_by = test_client.updated_by
+        goods = [good1, good2, good3]  # not included good5 on purpose
+
+        # remove the good5 from list to see if it will still be exist in the db
+        test_client.goods.remove(good5)
+        DBSession.commit()
 
         del test_client
 
@@ -2201,6 +2215,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         self.assertEqual(notes, client_db.notes)
         self.assertEqual(tags, client_db.tags)
         self.assertEqual(updated_by, client_db.updated_by)
+        self.assertEqual(goods, client_db.goods)
 
         # delete the client and expect the users are still there
         DBSession.delete(client_db)
@@ -2210,9 +2225,22 @@ class DatabaseModelsTester(UnitTestDBBase):
         user2_db = User.query.filter_by(login='u2tpd').first()
         user3_db = User.query.filter_by(login='u3tpd').first()
 
-        self.assertTrue(user1_db is not None)
-        self.assertTrue(user2_db is not None)
-        self.assertTrue(user3_db is not None)
+        self.assertIsNotNone(user1_db)
+        self.assertIsNotNone(user2_db)
+        self.assertIsNotNone(user3_db)
+
+        # goods should be deleted with client
+        good1 = Good.query.filter_by(name='Test Good 1').first()
+        good2 = Good.query.filter_by(name='Test Good 2').first()
+        good3 = Good.query.filter_by(name='Test Good 3').first()
+        good4 = Good.query.filter_by(name='Test Good 4').first()
+        good5 = Good.query.filter_by(name='Test Good 5').first()
+
+        self.assertIsNone(good1)
+        self.assertIsNone(good2)
+        self.assertIsNone(good3)
+        self.assertIsNotNone(good4)
+        self.assertIsNotNone(good5)
 
     def test_persistence_of_Daily(self):
         """testing the persistence of a Daily instance
@@ -3089,7 +3117,10 @@ class DatabaseModelsTester(UnitTestDBBase):
         """
         from stalker import Good
         g1 = Good(
-            name='Test Good 1'
+            name='Test Good 1',
+            cost=10,
+            msrp=100,
+            unit='TRY'
         )
 
         from stalker.db.session import DBSession
@@ -3097,12 +3128,39 @@ class DatabaseModelsTester(UnitTestDBBase):
         DBSession.commit()
 
         name = g1.name
+        cost = g1.cost
+        msrp = g1.msrp
+        unit = g1.unit
 
         del g1
 
         g1_db = Good.query.first()
 
         self.assertEqual(g1_db.name, name)
+        self.assertEqual(g1_db.cost, cost)
+        self.assertEqual(g1_db.msrp, msrp)
+        self.assertEqual(g1_db.unit, unit)
+
+        # attach a client
+        from stalker.models.client import Client
+        client = Client(name='Test Client')
+        DBSession.add(client)
+
+        g1_db.client = client
+        DBSession.commit()
+        del g1_db
+
+        g1_db2 = Good.query.first()
+        self.assertEqual(g1_db2.client, client)
+
+        # Delete the good
+        DBSession.delete(g1_db2)
+        DBSession.commit()
+
+        # except the client still exist
+        client_db = Client.query.filter(Client.name == 'Test Client').first()
+
+        self.assertIsNotNone(client_db)
 
     def test_persistence_of_Group(self):
         """testing the persistence of Group

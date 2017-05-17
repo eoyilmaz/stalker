@@ -2,6 +2,12 @@
 Stalker Changes
 ===============
 
+0.2.20
+======
+
+* **New:** Added ``goods`` attribute to the ``Client`` class. To allow special
+  priced ``Goods`` to be created for individual clients.
+
 0.2.19
 ======
 
