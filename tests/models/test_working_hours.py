@@ -26,6 +26,11 @@ class WorkingHoursTester(unittest.TestCase):
     """tests the stalker.models.project.WorkingHours class
     """
 
+    def test___auto_name___is_true(self):
+        """testing if WorkingHours.__auto_name__ is True
+        """
+        self.assertTrue(WorkingHours.__auto_name__)
+
     def test_working_hours_argument_is_skipped(self):
         """testing if a WorkingHours is created with the default settings by
         default.

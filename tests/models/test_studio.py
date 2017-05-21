@@ -635,6 +635,65 @@ class StudioTester(UnitTestDBBase):
         self.test_studio.working_horus = None
         self.assertEqual(self.test_studio.working_hours, WorkingHours())
 
+    def test_working_hours_argument_is_not_a_working_hours_instance(self):
+        """testing if a TypeError will be raised if the working_hours argument
+        value is not a WorkingHours instance
+        """
+        self.kwargs['working_hours'] = 'not a working hours instance'
+        self.kwargs['name'] = 'New Studio'
+        from stalker import Studio
+        with self.assertRaises(TypeError) as cm:
+            Studio(**self.kwargs)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Studio.working_hours should be a '
+            'stalker.models.studio.WorkingHours instance, not str'
+        )
+
+    def test_working_hours_attribute_is_not_a_working_hours_instance(self):
+        """testing if a TypeError will be raised if the working_hours attribute
+        is set to a value which is not a WorkingHours instance
+        """
+        with self.assertRaises(TypeError) as cm:
+            self.test_studio.working_hours = 'not a working hours instance'
+
+        self.assertEqual(
+            str(cm.exception),
+            'Studio.working_hours should be a '
+            'stalker.models.studio.WorkingHours instance, not str'
+        )
+
+    def test_working_hours_argument_is_working_properly(self):
+        """testing if the working_hours argument value is passed to the
+        working_hours attribute without any problem
+        """
+        self.kwargs['name'] = 'New Studio'
+        from stalker import Studio, WorkingHours
+        wh = WorkingHours(
+            working_hours={
+                'mon': [[60, 900]]
+            }
+        )
+
+        self.kwargs['working_hours'] = wh
+        new_studio = Studio(**self.kwargs)
+        self.assertEqual(new_studio.working_hours, wh)
+
+    def test_working_hours_attribute_is_working_properly(self):
+        """testing if the working_hours attribute is working properly
+        """
+        from stalker import WorkingHours
+        new_working_hours = WorkingHours(
+            working_hours={
+                'mon': [[60, 1200]]  # they were doing all the jobs in
+                                     # Monday :))
+            }
+        )
+        self.assertNotEqual(self.test_studio.working_hours, new_working_hours)
+        self.test_studio.working_hours = new_working_hours
+        self.assertEqual(self.test_studio.working_hours, new_working_hours)
+
     def test_tjp_id_attribute_returns_a_plausible_id(self):
         """testing if the tjp_id is returning something meaningful
         """

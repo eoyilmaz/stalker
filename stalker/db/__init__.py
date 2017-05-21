@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
 # TODO: Try to get it from the API (it was not working inside a package before)
-alembic_version = '1181305d3001'
+alembic_version = 'ed0167fff399'
 
 
 def setup(settings=None):

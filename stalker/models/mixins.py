@@ -20,7 +20,7 @@ import logging
 
 import pytz
 from sqlalchemy import (Table, Column, String, Integer, ForeignKey, Interval,
-                        DateTime, PickleType, Float, Enum)
+                        DateTime, Float, Enum)
 from sqlalchemy.exc import UnboundExecutionError, OperationalError
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import synonym, relationship, validates
@@ -227,7 +227,7 @@ class StatusMixin(object):
     def status(cls):
         return relationship(
             'Status',
-            primaryjoin= "%s.status_id==Status.status_id" % cls.__name__,
+            primaryjoin="%s.status_id==Status.status_id" % cls.__name__,
             doc="""The current status of the object.
 
             It is a :class:`.Status` instance which
@@ -940,25 +940,45 @@ class WorkingHoursMixin(object):
     Generally is meaningful for users, departments and studio.
 
     :param working_hours: A :class:`.WorkingHours` instance showing the working
-      hours settings for that project. This data is stored as a PickleType in
-      the database.
+      hours settings.
     """
 
     def __init__(self, working_hours=None, **kwargs):
         self.working_hours = working_hours
 
     @declared_attr
+    def working_hours_id(cls):
+        """the id of the related working hours
+        """
+        return Column(
+            'working_hours_id',
+            Integer,
+            ForeignKey('WorkingHours.id')
+        )
+
+    @declared_attr
     def working_hours(cls):
-        return Column(PickleType)
+        return relationship(
+            'WorkingHours',
+            primaryjoin='%s.working_hours_id==WorkingHours.working_hours_id' %
+                        cls.__name__
+        )
 
     @validates('working_hours')
     def _validate_working_hours(self, key, wh):
         """validates the given working hours value
         """
+        from stalker import WorkingHours
         if wh is None:
-            # use the default one
-            from stalker import WorkingHours
-            wh = WorkingHours()
+            wh = WorkingHours()  # without any argument this will use the
+                                 # default.working_hours settings
+        elif not isinstance(wh, WorkingHours):
+            raise TypeError(
+                '%s.working_hours should be a '
+                'stalker.models.studio.WorkingHours instance, not %s' % (
+                    self.__class__.__name__, wh.__class__.__name__
+                )
+            )
 
         return wh
 

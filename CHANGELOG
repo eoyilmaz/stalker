@@ -8,6 +8,11 @@ Stalker Changes
 * **New:** Added ``goods`` attribute to the ``Client`` class. To allow special
   priced ``Goods`` to be created for individual clients.
 
+* **Fix:** The ``WorkingHours`` class is now derived from ``Entity`` thus it is
+  not stored in a ``PickleType`` column in ``Studio`` anymore. (issue: #44)
+
+* **Update:** Updated ``appveyor.yml`` to match ``travis.yml``.
+
 0.2.19
 ======
 

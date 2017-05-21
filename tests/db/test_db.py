@@ -841,7 +841,7 @@ class DatabaseTester(UnitTestDBBase):
         sql_query = 'select version_num from "alembic_version"'
         version_num = \
             DBSession.connection().execute(sql_query).fetchone()[0]
-        self.assertEqual('1181305d3001', version_num)
+        self.assertEqual('ed0167fff399', version_num)
 
     def test_initialization_of_alembic_version_table_multiple_times(self):
         """testing if the db.create_alembic_table() will handle initializing
@@ -852,7 +852,7 @@ class DatabaseTester(UnitTestDBBase):
         sql_query = 'select version_num from "alembic_version"'
         version_num = \
             DBSession.connection().execute(sql_query).fetchone()[0]
-        self.assertEqual('1181305d3001', version_num)
+        self.assertEqual('ed0167fff399', version_num)
 
         DBSession.remove()
         db.init()
@@ -5536,3 +5536,37 @@ class DatabaseModelsTester(UnitTestDBBase):
             test_version_4.version_number
         )
         self.assertIsNone(test_version_4_db.parent)
+
+    def test_persistence_of_WorkingHours(self):
+        """testing the persistence of WorkingHours instances
+        """
+        from stalker import WorkingHours
+        wh = WorkingHours(
+            name='Default Working Hours',
+            working_hours={
+                'mon': [[9, 12], [13, 18]],
+                'tue': [[9, 12], [13, 18]],
+                'wed': [[9, 12], [13, 18]],
+                'thu': [[9, 12], [13, 18]],
+                'fri': [[9, 12], [13, 18]],
+                'sat': [],
+                'sun': [],
+            },
+            daily_working_hours=8
+        )
+
+        from stalker.db.session import DBSession
+        DBSession.add(wh)
+        DBSession.commit()
+
+        name = wh.name
+        hours = wh.working_hours
+        daily_working_hours = 8
+
+        del wh
+
+        wh_db = WorkingHours.query.filter_by(name=name).first()
+
+        self.assertEqual(name, wh_db.name)
+        self.assertEqual(hours, wh_db.working_hours)
+        self.assertEqual(daily_working_hours, wh_db.daily_working_hours)

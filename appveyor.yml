@@ -23,14 +23,14 @@ init:
 install:
   - gem install mime-types -v 2.6.2  # Required to install taskjuggler
   - gem install taskjuggler
-  - "%PYTHON%/Scripts/pip.exe install sqlalchemy psycopg2 jinja2 alembic mako markupsafe python-editor nose coverage"
+  - "%PYTHON%/Scripts/pip.exe install sqlalchemy psycopg2 jinja2 alembic mako markupsafe python-editor nose coverage pytz tzlocal"
 
 services:
   - postgresql93
 
 before_test:
-    - psql -c "CREATE DATABASE stalker_test;" -U postgres
-    - psql -c "CREATE USER stalker_admin WITH PASSWORD 'stalker';" -U postgres
+    - psql -c "CREATE USER stalker_admin WITH PASSWORD 'stalker' SUPERUSER INHERIT CREATEDB CREATEROLE NOREPLICATION;" -U postgres
+    - psql -c "CREATE DATABASE stalker_test WITH OWNER = stalker_admin ENCODING = 'UTF8' TABLESPACE = pg_default CONNECTION LIMIT = -1;" -U postgres
 
 test_script:
   - nosetests --verbosity=1 --cover-erase --with-coverage --cover-package=stalker
