@@ -28,6 +28,82 @@ class DatabaseTester(UnitTestDBBase):
     """tests the database and connection to the database
     """
 
+    def test_dbsession_save_method_is_correctly_created(self):
+        """testing if the DBSession is correctly created from
+        ExtendedScopedSession class
+        """
+        from stalker.db.session import DBSession, ExtendedScopedSession
+        assert isinstance(DBSession, ExtendedScopedSession)
+
+    def test_dbsession_save_method_is_working_properly_for_single_entity(
+            self):
+        """testing if the DBSession.save() method is working properly for
+        single entity
+        """
+        from stalker import User
+        from stalker.db.session import DBSession
+
+        test_user = User(
+            name='Test User',
+            login='tuser',
+            email='tuser@gmail.com',
+            password='12345'
+        )
+        DBSession.save(test_user)
+
+        del test_user
+        test_user_db = User.query.filter(User.name == 'Test User').first()
+        assert test_user_db is not None
+
+    def test_dbsession_save_method_is_working_properly_for_multiple_entity(self):
+        """testing if the DBSession.save() method is working properly for
+        single entity
+        """
+        from stalker import User
+        from stalker.db.session import DBSession
+
+        test_user1 = User(
+            name='Test User 1',
+            login='tuser1',
+            email='tuser1@gmail.com',
+            password='12345'
+        )
+        test_user2 = User(
+            name='Test User 2',
+            login='tuser2',
+            email='tuser2@gmail.com',
+            password='12345'
+        )
+
+        DBSession.save([test_user1, test_user2])
+
+        del test_user1
+        del test_user2
+        test_user1_db = User.query.filter(User.name == 'Test User 1').first()
+        test_user2_db = User.query.filter(User.name == 'Test User 2').first()
+        assert test_user1_db is not None
+        assert test_user2_db is not None
+
+    def test_dbsession_save_method_is_working_properly_for_no_entry(self):
+        """testing if the DBSession.save() method is working properly with no
+        parameter given
+        """
+        from stalker import User
+        from stalker.db.session import DBSession
+
+        test_user = User(
+            name='Test User',
+            login='tuser',
+            email='tuser@gmail.com',
+            password='12345'
+        )
+        DBSession.add(test_user)
+        DBSession.save()
+
+        del test_user
+        test_user_db = User.query.filter(User.name == 'Test User').first()
+        assert test_user_db is not None
+
     def test_default_admin_creation(self):
         """testing if a default admin is created
         """
@@ -502,64 +578,6 @@ class DatabaseTester(UnitTestDBBase):
         # to admin
         admin = self.admin
         for status in sequence_status_list.statuses:
-            self.assertEqual(status.created_by, admin)
-            self.assertEqual(status.updated_by, admin)
-
-    def test_task_status_initialization_when_there_is_a_Task_status_list(self):
-        """testing if the task statuses are correctly created when there is a
-        StatusList for Task is already created
-        """
-        from stalker import StatusList
-        task_status_list = StatusList.query \
-            .filter(StatusList.target_entity_type == 'Task') \
-            .first()
-
-        self.assertTrue(isinstance(task_status_list, StatusList))
-
-        expected_status_names = [
-            'Waiting For Dependency',
-            'Ready To Start',
-            'Work In Progress',
-            'Pending Review',
-            'Has Revision',
-            'Dependency Has Revision',
-            'On Hold',
-            'Stopped',
-            'Completed'
-        ]
-
-        expected_status_codes = [
-            'WFD',
-            'RTS',
-            'WIP',
-            'PREV',
-            'HREV',
-            'DREV',
-            'OH',
-            'STOP',
-            'CMPL'
-        ]
-
-        self.assertEqual(
-            len(task_status_list.statuses),
-            len(expected_status_names)
-        )
-
-        db_status_names = map(lambda x: x.name, task_status_list.statuses)
-        db_status_codes = map(lambda x: x.code, task_status_list.statuses)
-        self.assertEqual(
-            sorted(expected_status_names),
-            sorted(db_status_names)
-        )
-        self.assertEqual(
-            sorted(expected_status_codes),
-            sorted(db_status_codes)
-        )
-
-        # check if the created_by and updated_by attributes are correctly set
-        # to the admin
-        admin = self.admin
-        for status in task_status_list.statuses:
             self.assertEqual(status.created_by, admin)
             self.assertEqual(status.updated_by, admin)
 

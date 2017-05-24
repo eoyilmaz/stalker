@@ -92,6 +92,9 @@ class TicketTester(UnitTestDBBase):
             repository=self.test_repo,
             status_list=self.test_project_status_list
         )
+        from stalker.db.session import DBSession
+        DBSession.add(self.test_project)
+        DBSession.commit()
 
         # create an Asset
         self.test_asset_status_list = StatusList.query\
@@ -111,6 +114,8 @@ class TicketTester(UnitTestDBBase):
             status_list=self.test_asset_status_list,
             type=self.test_asset_type
         )
+        DBSession.add(self.test_asset)
+        DBSession.commit()
 
         # create a Task
         from stalker import Task
@@ -120,6 +125,8 @@ class TicketTester(UnitTestDBBase):
             status_list=self.test_task_status_list,
             parent=self.test_asset
         )
+        DBSession.add(self.test_task)
+        DBSession.commit()
 
         # create a Version
         self.test_version_status_list = StatusList(
@@ -149,7 +156,6 @@ class TicketTester(UnitTestDBBase):
 
         from stalker import Ticket
         self.test_ticket = Ticket(**self.kwargs)
-        from stalker.db.session import DBSession
         DBSession.add(self.test_ticket)
         DBSession.commit()
 

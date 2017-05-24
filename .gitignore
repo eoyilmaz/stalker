@@ -7,6 +7,7 @@ docs/doctrees/*
 docs/source/generated/*
 docs/source/static/stalker_design*.vue
 docs/source/static/design
+.cache/*
 .coverage
 .DS_Store
 dist/*

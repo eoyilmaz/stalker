@@ -40,6 +40,7 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         self.status_stop = Status.query.filter_by(code="STOP").first()
         self.status_cmpl = Status.query.filter_by(code="CMPL").first()
 
+        from stalker.db.session import DBSession
         from stalker import User
         self.test_user1 = User(
             name='Test User 1',
@@ -47,6 +48,7 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
             email='user1@test.com',
             password='secret'
         )
+        DBSession.add(self.test_user1)
 
         self.test_user2 = User(
             name='Test User 2',
@@ -54,23 +56,27 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
             email='user2@test.com',
             password='secret'
         )
+        DBSession.add(self.test_user2)
 
         self.test_user3 = User(
-            name='Test User 1',
-            login='testuser1',
-            email='user1@test.com',
+            name='Test User 3',
+            login='testuser3',
+            email='user3@test.com',
             password='secret'
         )
+        DBSession.add(self.test_user3)
 
         from stalker import Repository
         self.test_repo = Repository(
             name='Test Repository'
         )
+        DBSession.add(self.test_repo)
 
         from stalker import Structure
         self.test_structure = Structure(
             name='test structure'
         )
+        DBSession.add(self.test_structure)
 
         # project status list
         from stalker import StatusList
@@ -85,6 +91,9 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
                 self.status_cmpl
             ]
         )
+        DBSession.add(self.test_project_status_list)
+        DBSession.commit()
+
         from stalker import Project
         self.test_project1 = Project(
             name='Test Project 1',
@@ -93,6 +102,8 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
             structure=self.test_structure,
             status_list=self.test_project_status_list
         )
+        DBSession.add(self.test_project1)
+        DBSession.commit()
 
         # create three Tasks
         from stalker import Task
@@ -100,24 +111,19 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
             name='Test Task 1',
             project=self.test_project1
         )
+        DBSession.add(self.test_task1)
 
         self.test_task2 = Task(
             name='Test Task 2',
             project=self.test_project1
         )
+        DBSession.add(self.test_task2)
 
         self.test_task3 = Task(
             name='Test Task 3',
             project=self.test_project1
         )
-
-        # add everything to db
-        from stalker.db.session import DBSession
-        DBSession.add_all([
-            self.test_project1, self.test_project_status_list, self.test_repo,
-            self.test_structure, self.test_task1, self.test_task2,
-            self.test_task3, self.test_user1, self.test_user2
-        ])
+        DBSession.add(self.test_task3)
         DBSession.commit()
 
         self.kwargs = {

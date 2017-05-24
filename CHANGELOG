@@ -2,6 +2,16 @@
 Stalker Changes
 ===============
 
+0.2.21
+======
+
+* **New:** Switched from ``nose`` + ``unittest`` to ``pytest`` as the main
+  testing framework (with ``pytest-xdist`` tests are 4x faster).
+
+* **New:** Added ``DBSession.save()`` shortcut method for convenience which
+  does an ``add`` or ``add_all`` (depending to the input) followed by a
+  ``commit`` at once.
+
 0.2.20
 ======
 

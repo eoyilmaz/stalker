@@ -123,6 +123,7 @@ class ShotTester(UnitTestDBBase):
             image_format=self.test_image_format1
         )
         DBSession.add(self.test_project1)
+        DBSession.commit()
 
         self.test_project2 = Project(
             name='Test Project2',
@@ -133,6 +134,7 @@ class ShotTester(UnitTestDBBase):
             image_format=self.test_image_format1
         )
         DBSession.add(self.test_project2)
+        DBSession.commit()
 
         from stalker import Sequence
         self.test_sequence1 = Sequence(
@@ -142,6 +144,7 @@ class ShotTester(UnitTestDBBase):
             status_list=self.test_sequence_status_list,
         )
         DBSession.add(self.test_sequence1)
+        DBSession.commit()
 
         self.test_sequence2 = Sequence(
             name="Test Seq2",
@@ -150,6 +153,7 @@ class ShotTester(UnitTestDBBase):
             status_list=self.test_sequence_status_list,
         )
         DBSession.add(self.test_sequence2)
+        DBSession.commit()
 
         self.test_sequence3 = Sequence(
             name="Test Seq3",
@@ -158,6 +162,7 @@ class ShotTester(UnitTestDBBase):
             status_list=self.test_sequence_status_list,
         )
         DBSession.add(self.test_sequence3)
+        DBSession.commit()
 
         from stalker import Scene
         self.test_scene1 = Scene(
@@ -166,6 +171,7 @@ class ShotTester(UnitTestDBBase):
             project=self.test_project1,
         )
         DBSession.add(self.test_scene1)
+        DBSession.commit()
 
         self.test_scene2 = Scene(
             name='Test Sce2',
@@ -173,6 +179,7 @@ class ShotTester(UnitTestDBBase):
             project=self.test_project1,
         )
         DBSession.add(self.test_scene2)
+        DBSession.commit()
 
         self.test_scene3 = Scene(
             name='Test Sce3',
@@ -180,6 +187,7 @@ class ShotTester(UnitTestDBBase):
             project=self.test_project1
         )
         DBSession.add(self.test_scene3)
+        DBSession.commit()
 
         from stalker import Asset
         self.test_asset1 = Asset(
@@ -190,6 +198,7 @@ class ShotTester(UnitTestDBBase):
             type=self.test_character_asset_type,
         )
         DBSession.add(self.test_asset1)
+        DBSession.commit()
 
         self.test_asset2 = Asset(
             name="Test Asset2",
@@ -199,6 +208,7 @@ class ShotTester(UnitTestDBBase):
             type=self.test_character_asset_type,
         )
         DBSession.add(self.test_asset2)
+        DBSession.commit()
 
         self.test_asset3 = Asset(
             name="Test Asset3",
@@ -208,6 +218,7 @@ class ShotTester(UnitTestDBBase):
             type=self.test_character_asset_type,
         )
         DBSession.add(self.test_asset3)
+        DBSession.commit()
 
         self.kwargs = dict(
             name='SH123',
