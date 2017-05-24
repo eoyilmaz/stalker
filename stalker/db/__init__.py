@@ -140,6 +140,12 @@ def init():
         user=admin
     )
     create_entity_statuses(
+        entity_type='Project',
+        status_names=defaults.project_status_names,
+        status_codes=defaults.project_status_codes,
+        user=admin
+    )
+    create_entity_statuses(
         entity_type='Task',
         status_names=defaults.task_status_names,
         status_codes=defaults.task_status_codes,

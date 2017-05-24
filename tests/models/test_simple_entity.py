@@ -999,26 +999,16 @@ class SimpleEntityDBTester(UnitTestDBBase):
             name='Test Project Structure'
         )
 
-        from stalker import Status, StatusList
-        test_project_status_list = StatusList(
-            name='Project Status List',
-            target_entity_type='Project',
-            statuses=[
-                Status(name='Active', code='ACT')
-            ]
-        )
-
         from stalker import Project
         test_proj = Project(
             name='Test Project 1',
             code='tp1',
             repository=test_repo,
             structure=test_struct,
-            status_list=test_project_status_list
         )
 
         new_simple_entity.generic_data.extend(
-            [test_proj, test_project_status_list, test_struct, test_repo,
+            [test_proj, test_struct, test_repo,
              test_department, test_user]
         )
 
@@ -1029,10 +1019,8 @@ class SimpleEntityDBTester(UnitTestDBBase):
             .filter_by(name=self.kwargs['name']) \
             .first()
 
-        self.assertTrue(test_proj in new_simple_entity_db.generic_data)
-        self.assertTrue(
-            test_project_status_list in new_simple_entity_db.generic_data)
-        self.assertTrue(test_struct in new_simple_entity_db.generic_data)
-        self.assertTrue(test_repo in new_simple_entity_db.generic_data)
-        self.assertTrue(test_department in new_simple_entity_db.generic_data)
-        self.assertTrue(test_user in new_simple_entity_db.generic_data)
+        assert test_proj in new_simple_entity_db.generic_data
+        assert test_struct in new_simple_entity_db.generic_data
+        assert test_repo in new_simple_entity_db.generic_data
+        assert test_department in new_simple_entity_db.generic_data
+        assert test_user in new_simple_entity_db.generic_data

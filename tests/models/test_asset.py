@@ -49,40 +49,16 @@ class AssetTester(UnitTestDBBase):
         DBSession.commit()
 
         # statuses
-        from stalker import Status, StatusList, Project
+        from stalker import Status, Project
         self.status_wip = Status.query.filter_by(code='WIP').first()
         self.status_cmpl = Status.query.filter_by(code='CMPL').first()
-
-        # status lists
-        self.project_status_list = StatusList(
-            name="Project Status List",
-            target_entity_type=Project,
-            statuses=[
-                self.status_cmpl,
-                self.status_wip
-            ]
-        )
-        DBSession.add(self.project_status_list)
-        DBSession.commit()
-
-        self.task_status_list = \
-            StatusList.query.filter_by(target_entity_type='Task').first()
-
-        self.asset_status_list = \
-            StatusList.query.filter_by(target_entity_type='Asset').first()
-
-        self.shot_status_list = \
-            StatusList.query.filter_by(target_entity_type='Shot').first()
-
-        self.sequence_status_list = \
-            StatusList.query.filter_by(target_entity_type='Sequence').first()
 
         # types
         from stalker import Type
         self.commercial_project_type = Type(
             name="Commercial Project",
             code='commproj',
-            target_entity_type=Project,
+            target_entity_type='Project',
         )
         DBSession.add(self.commercial_project_type)
 
@@ -120,7 +96,6 @@ class AssetTester(UnitTestDBBase):
             name="Test Project1",
             code='tp1',
             type=self.commercial_project_type,
-            status_list=self.project_status_list,
             repositories=[self.repository],
         )
         DBSession.add(self.project1)
@@ -132,7 +107,6 @@ class AssetTester(UnitTestDBBase):
             name="Test Sequence",
             code='tseq',
             project=self.project1,
-            status_list=self.sequence_status_list,
             responsible=[self.test_user1]
         )
         DBSession.add(self.seq1)
@@ -141,7 +115,6 @@ class AssetTester(UnitTestDBBase):
         from stalker import Shot
         self.shot1 = Shot(
             code="TestSH001",
-            status_list=self.shot_status_list,
             project=self.project1,
             sequences=[self.seq1],
             responsible=[self.test_user1]
@@ -150,7 +123,6 @@ class AssetTester(UnitTestDBBase):
 
         self.shot2 = Shot(
             code="TestSH002",
-            status_list=self.shot_status_list,
             project=self.project1,
             sequences=[self.seq1],
             responsible=[self.test_user1]
@@ -159,7 +131,6 @@ class AssetTester(UnitTestDBBase):
 
         self.shot3 = Shot(
             code="TestSH003",
-            status_list=self.shot_status_list,
             project=self.project1,
             sequences=[self.seq1],
             responsible=[self.test_user1]
@@ -168,7 +139,6 @@ class AssetTester(UnitTestDBBase):
 
         self.shot4 = Shot(
             code="TestSH004",
-            status_list=self.shot_status_list,
             project=self.project1,
             sequences=[self.seq1],
             responsible=[self.test_user1]
@@ -182,7 +152,6 @@ class AssetTester(UnitTestDBBase):
             "project": self.project1,
             "type": self.asset_type1,
             "status": 0,
-            "status_list": self.asset_status_list,
             'responsible': [self.test_user1]
         }
 
@@ -194,21 +163,18 @@ class AssetTester(UnitTestDBBase):
         self.task1 = Task(
             name="Task1",
             parent=self.asset1,
-            status_list=self.task_status_list
         )
         DBSession.add(self.task1)
 
         self.task2 = Task(
             name="Task2",
             parent=self.asset1,
-            status_list=self.task_status_list
         )
         DBSession.add(self.task2)
 
         self.task3 = Task(
             name="Task3",
             parent=self.asset1,
-            status_list=self.task_status_list
         )
         DBSession.add(self.task3)
         DBSession.commit()
@@ -325,7 +291,6 @@ class AssetTester(UnitTestDBBase):
             name="Commercial",
             code='COM',
             type=commercial_project_type,
-            status_list=self.project_status_list,
             repository=self.repository,
         )
 

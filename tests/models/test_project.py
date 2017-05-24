@@ -124,31 +124,13 @@ class ProjectTestDBCase(UnitTestDBBase):
             email="user@client.com",
             password="123456"
         )
-
-        # statuses
-        from stalker import Status
-        self.status_new = Status(name="New", code="NEW")
-        self.status_wfd = Status(name="Waiting For Dependency", code="WFD")
-        self.status_rts = Status(name="Ready To Start", code="RTS")
-        self.status_wip = Status(name="Work In Progress", code="WIP")
-        self.status_prev = Status(name="Pending Review", code="PREV")
-        self.status_hrev = Status(name="Has Revision", code="HREV")
-        self.status_drev = Status(name="Dependency Has Revision", code="DREV")
-        self.status_oh = Status(name="On Hold", code="OH")
-        self.status_stop = Status(name="Stopped", code="STOP")
-        self.status_cmpl = Status(name="Completed", code="CMPL")
-
-        # status list for project
-        from stalker import StatusList
-        self.project_status_list = StatusList(
-            name="Project Statuses",
-            target_entity_type='Project',
-            statuses=[
-                self.status_new,
-                self.status_wip,
-                self.status_cmpl,
-            ],
-        )
+        from stalker.db.session import DBSession
+        DBSession.save([
+            self.test_lead, self.test_user1, self.test_user2, self.test_user3,
+            self.test_user4, self.test_user5, self.test_user6, self.test_user7,
+            self.test_user8, self.test_user9, self.test_user10,
+            self.test_user_client
+        ])
 
         from stalker import ImageFormat
         self.test_image_format = ImageFormat(
@@ -224,32 +206,13 @@ class ProjectTestDBCase(UnitTestDBBase):
             "display_width": 15,
             "start": self.start,
             "end": self.end,
-            "status_list": self.project_status_list,
             "clients": [self.test_client]
         }
 
         from stalker import Project
-        from stalker.db.session import DBSession
         self.test_project = Project(**self.kwargs)
         DBSession.add(self.test_project)
         DBSession.commit()
-
-        # status list for sequence
-        # self.sequence_status_list = StatusList(
-        #     name="Sequence Statuses",
-        #     statuses=[
-        #         self.status_rts,
-        #         self.status_wfd,
-        #         self.status_wip,
-        #         self.status_prev,
-        #         self.status_hrev,
-        #         self.status_drev,
-        #         self.status_oh,
-        #         self.status_stop,
-        #         self.status_cmpl,
-        #     ],
-        #     target_entity_type='Sequence'
-        # )
 
         # sequences without tasks
         from stalker import Sequence
@@ -1174,15 +1137,9 @@ class ProjectTestDBCase(UnitTestDBBase):
     def test_StatusMixin_initialization(self):
         """testing if the StatusMixin part is initialized correctly
         """
-        from stalker import Status, StatusList
-        status1 = Status.query.filter_by(name="On Hold").first()
-        status2 = Status.query.filter_by(name="Completed").first()
-
-        status_list = StatusList(
-            name="Project Statuses",
-            statuses=[status1, status2],
-            target_entity_type='Project'
-        )
+        from stalker import StatusList
+        status_list = StatusList\
+            .query.filter_by(target_entity_type='Project').first()
         self.kwargs["status"] = 0
         self.kwargs["status_list"] = status_list
         from stalker import Project
@@ -2183,27 +2140,6 @@ class ProjectTicketsTestDBCase(UnitTestDBBase):
             password="123456"
         )
 
-        # statuses
-        from stalker import Status, StatusList
-        self.test_status1 = Status(name="Status1", code="S1")
-        self.test_status2 = Status(name="Status2", code="S2")
-        self.test_status3 = Status(name="Status3", code="S3")
-        self.test_status4 = Status(name="Status4", code="S4")
-        self.test_status5 = Status(name="Status5", code="S5")
-
-        # status list for project
-        self.project_status_list = StatusList(
-            name="Project Statuses",
-            target_entity_type='Project',
-            statuses=[
-                self.test_status1,
-                self.test_status2,
-                self.test_status3,
-                self.test_status4,
-                self.test_status5,
-            ],
-        )
-
         from stalker import ImageFormat
         self.test_image_format = ImageFormat(
             name="HD",
@@ -2268,7 +2204,6 @@ class ProjectTicketsTestDBCase(UnitTestDBBase):
             "display_width": 15,
             "start": self.start,
             "end": self.end,
-            "status_list": self.project_status_list
         }
 
         from stalker import Project

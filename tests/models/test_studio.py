@@ -83,27 +83,6 @@ class StudioTester(UnitTestDBBase):
         )
         DBSession.add(self.test_department2)
 
-        from stalker import Status
-        self.test_status1 = Status(
-            name='Status 1',
-            code='ST1'
-        )
-        DBSession.add(self.test_status1)
-
-        self.test_status2 = Status(
-            name='Status 2',
-            code='ST2'
-        )
-        DBSession.add(self.test_status2)
-
-        from stalker import StatusList
-        self.test_project_status_list1 = StatusList(
-            name='Project Statuses',
-            statuses=[self.test_status1, self.test_status2],
-            target_entity_type='Project'
-        )
-        DBSession.add(self.test_project_status_list1)
-
         from stalker import Repository
         self.test_repo = Repository(
             name='Test Repository',
@@ -118,7 +97,6 @@ class StudioTester(UnitTestDBBase):
         self.test_project1 = Project(
             name='Test Project 1',
             code='TP1',
-            status_list=self.test_project_status_list1,
             repository=self.test_repo
         )
         DBSession.add(self.test_project1)
@@ -127,7 +105,6 @@ class StudioTester(UnitTestDBBase):
         self.test_project2 = Project(
             name='Test Project 2',
             code='TP2',
-            status_list=self.test_project_status_list1,
             repository=self.test_repo
         )
         DBSession.add(self.test_project2)
@@ -136,11 +113,10 @@ class StudioTester(UnitTestDBBase):
         self.test_project3 = Project(
             name='Test Project 3',
             code='TP3',
-            status_list=self.test_project_status_list1,
             repository=self.test_repo
         )
         self.test_project3.active = False
-        DBSession.add(self.test_project3)
+        DBSession.save(self.test_project3)
 
         # create assets and shots
         from stalker import Type
@@ -150,9 +126,6 @@ class StudioTester(UnitTestDBBase):
             target_entity_type='Asset'
         )
         DBSession.add(self.test_asset_type)
-
-        self.test_asset_status_list = \
-            StatusList.query.filter_by(target_entity_type='Asset').first()
 
         from stalker import Asset, Shot, Task
         self.test_asset1 = Asset(
@@ -172,21 +145,16 @@ class StudioTester(UnitTestDBBase):
         DBSession.add(self.test_asset2)
 
         # shots
-        self.test_shot_status_list = \
-            StatusList.query.filter_by(target_entity_type='Shot').first()
-
         # for project 1
         self.test_shot1 = Shot(
             code='shot1',
             project=self.test_project1,
-            status_list=self.test_shot_status_list
         )
         DBSession.add(self.test_shot1)
 
         self.test_shot2 = Shot(
             code='shot2',
             project=self.test_project1,
-            status_list=self.test_shot_status_list
         )
         DBSession.add(self.test_shot2)
 
@@ -194,14 +162,12 @@ class StudioTester(UnitTestDBBase):
         self.test_shot3 = Shot(
             code='shot3',
             project=self.test_project2,
-            status_list=self.test_shot_status_list
         )
         DBSession.add(self.test_shot3)
 
         self.test_shot4 = Shot(
             code='shot4',
             project=self.test_project2,
-            status_list=self.test_shot_status_list
         )
         DBSession.add(self.test_shot4)
 
@@ -209,15 +175,11 @@ class StudioTester(UnitTestDBBase):
         self.test_shot5 = Shot(
             code='shot5',
             project=self.test_project3,
-            status_list=self.test_shot_status_list
         )
         DBSession.add(self.test_shot5)
 
         #########################################################
         # tasks for projects
-        self.test_task_statuses = \
-            StatusList.query.filter_by(target_entity_type='Task').first()
-
         self.test_task1 = Task(
             name='Project Planing',
             project=self.test_project1,
@@ -243,7 +205,6 @@ class StudioTester(UnitTestDBBase):
             project=self.test_project3,
             resources=[self.test_user1],
             alternative_resources=[self.test_user2, self.test_user3],
-            status_list=self.test_task_statuses,
             schedule_timing=5,
             schedule_unit='d'
         )
@@ -259,7 +220,6 @@ class StudioTester(UnitTestDBBase):
             alternative_resources=[self.test_user2, self.test_user3],
             schedule_timing=2,
             schedule_unit='d',
-            status_list=self.test_task_statuses
         )
         DBSession.add(self.test_task4)
 
@@ -271,7 +231,6 @@ class StudioTester(UnitTestDBBase):
             depends=[self.test_task4],
             schedule_timing=2,
             schedule_unit='d',
-            status_list=self.test_task_statuses
         )
         DBSession.add(self.test_task5)
 
@@ -283,7 +242,6 @@ class StudioTester(UnitTestDBBase):
             depends=[self.test_task4, self.test_task5],
             schedule_timing=3,
             schedule_unit='d',
-            status_list=self.test_task_statuses
         )
         DBSession.add(self.test_task6)
 
@@ -295,7 +253,6 @@ class StudioTester(UnitTestDBBase):
             depends=[self.test_task6],
             schedule_timing=3,
             schedule_unit='d',
-            status_list=self.test_task_statuses
         )
         DBSession.add(self.test_task7)
 
@@ -307,7 +264,6 @@ class StudioTester(UnitTestDBBase):
             alternative_resources=[self.test_user1, self.test_user2],
             schedule_timing=2,
             schedule_unit='d',
-            status_list=self.test_task_statuses
         )
         DBSession.add(self.test_task8)
 
@@ -319,7 +275,6 @@ class StudioTester(UnitTestDBBase):
             depends=[self.test_task8],
             schedule_timing=2,
             schedule_unit='d',
-            status_list=self.test_task_statuses
         )
         DBSession.add(self.test_task9)
 
@@ -331,7 +286,6 @@ class StudioTester(UnitTestDBBase):
             depends=[self.test_task8, self.test_task9],
             schedule_timing=3,
             schedule_unit='d',
-            status_list=self.test_task_statuses
         )
         DBSession.add(self.test_task10)
 
@@ -343,7 +297,6 @@ class StudioTester(UnitTestDBBase):
             depends=[self.test_task10],
             schedule_timing=4,
             schedule_unit='d',
-            status_list=self.test_task_statuses
         )
         DBSession.add(self.test_task11)
 
@@ -355,7 +308,6 @@ class StudioTester(UnitTestDBBase):
             alternative_resources=[self.test_user2, self.test_user3],
             schedule_timing=2,
             schedule_unit='d',
-            status_list=self.test_task_statuses
         )
         DBSession.add(self.test_task12)
 
@@ -367,7 +319,6 @@ class StudioTester(UnitTestDBBase):
             depends=[self.test_task12],
             schedule_timing=2,
             schedule_unit='d',
-            status_list=self.test_task_statuses
         )
         DBSession.add(self.test_task13)
 
@@ -379,7 +330,6 @@ class StudioTester(UnitTestDBBase):
             depends=[self.test_task12, self.test_task13],
             schedule_timing=3,
             schedule_unit='d',
-            status_list=self.test_task_statuses
         )
         DBSession.add(self.test_task14)
 
@@ -391,7 +341,6 @@ class StudioTester(UnitTestDBBase):
             depends=[self.test_task14],
             schedule_timing=4,
             schedule_unit='d',
-            status_list=self.test_task_statuses
         )
         DBSession.add(self.test_task15)
 
@@ -403,7 +352,6 @@ class StudioTester(UnitTestDBBase):
             alternative_resources=[self.test_user1, self.test_user3],
             schedule_timing=2,
             schedule_unit='d',
-            status_list=self.test_task_statuses
         )
         DBSession.add(self.test_task16)
 
@@ -415,7 +363,6 @@ class StudioTester(UnitTestDBBase):
             depends=[self.test_task16],
             schedule_timing=2,
             schedule_unit='d',
-            status_list=self.test_task_statuses
         )
         DBSession.add(self.test_task17)
 
@@ -427,7 +374,6 @@ class StudioTester(UnitTestDBBase):
             depends=[self.test_task16, self.test_task17],
             schedule_timing=3,
             schedule_unit='d',
-            status_list=self.test_task_statuses
         )
         DBSession.add(self.test_task18)
 
@@ -439,7 +385,6 @@ class StudioTester(UnitTestDBBase):
             depends=[self.test_task18],
             schedule_timing=4,
             schedule_unit='d',
-            status_list=self.test_task_statuses
         )
         DBSession.add(self.test_task19)
 
@@ -451,7 +396,6 @@ class StudioTester(UnitTestDBBase):
             alternative_resources=[self.test_user1, self.test_user2],
             schedule_timing=2,
             schedule_unit='d',
-            status_list=self.test_task_statuses
         )
         DBSession.add(self.test_task20)
 
@@ -463,7 +407,6 @@ class StudioTester(UnitTestDBBase):
             depends=[self.test_task20],
             schedule_timing=2,
             schedule_unit='d',
-            status_list=self.test_task_statuses
         )
         DBSession.add(self.test_task21)
 
@@ -475,7 +418,6 @@ class StudioTester(UnitTestDBBase):
             depends=[self.test_task20, self.test_task21],
             schedule_timing=3,
             schedule_unit='d',
-            status_list=self.test_task_statuses
         )
         DBSession.add(self.test_task22)
 
@@ -487,7 +429,6 @@ class StudioTester(UnitTestDBBase):
             depends=[self.test_task22],
             schedule_timing=4,
             schedule_unit='d',
-            status_list=self.test_task_statuses
         )
         DBSession.add(self.test_task23)
 
@@ -502,7 +443,6 @@ class StudioTester(UnitTestDBBase):
             alternative_resources=[self.test_user2, self.test_user3],
             schedule_timing=10,
             schedule_unit='d',
-            status_list=self.test_task_statuses
         )
         DBSession.add(self.test_task24)
 
@@ -514,7 +454,6 @@ class StudioTester(UnitTestDBBase):
             alternative_resources=[self.test_user2, self.test_user3],
             schedule_timing=15,
             schedule_unit='d',
-            status_list=self.test_task_statuses
         )
         DBSession.add(self.test_task25)
 
@@ -526,7 +465,6 @@ class StudioTester(UnitTestDBBase):
             alternative_resources=[self.test_user2, self.test_user3],
             schedule_timing=10,
             schedule_unit='d',
-            status_list=self.test_task_statuses
         )
         DBSession.add(self.test_task26)
 
@@ -538,7 +476,6 @@ class StudioTester(UnitTestDBBase):
             alternative_resources=[self.test_user2, self.test_user3],
             schedule_timing=10,
             schedule_unit='d',
-            status_list=self.test_task_statuses
         )
         DBSession.add(self.test_task27)
 
@@ -550,7 +487,6 @@ class StudioTester(UnitTestDBBase):
             alternative_resources=[self.test_user1, self.test_user3],
             schedule_timing=10,
             schedule_unit='d',
-            status_list=self.test_task_statuses
         )
         DBSession.add(self.test_task28)
 
@@ -562,7 +498,6 @@ class StudioTester(UnitTestDBBase):
             alternative_resources=[self.test_user1, self.test_user3],
             schedule_timing=15,
             schedule_unit='d',
-            status_list=self.test_task_statuses
         )
         DBSession.add(self.test_task29)
 
@@ -574,7 +509,6 @@ class StudioTester(UnitTestDBBase):
             alternative_resources=[self.test_user1, self.test_user3],
             schedule_timing=10,
             schedule_unit='d',
-            status_list=self.test_task_statuses
         )
         DBSession.add(self.test_task30)
 
@@ -586,7 +520,6 @@ class StudioTester(UnitTestDBBase):
             alternative_resources=[self.test_user1, self.test_user3],
             schedule_timing=10,
             schedule_unit='d',
-            status_list=self.test_task_statuses
         )
         DBSession.add(self.test_task31)
 
@@ -1032,7 +965,7 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         """
         import datetime
         import pytz
-        from stalker import db, TaskJugglerScheduler
+        from stalker import TaskJugglerScheduler
         tj_scheduler = TaskJugglerScheduler(compute_resources=True)
         self.test_studio.now = \
             datetime.datetime(2013, 4, 15, 22, 56, tzinfo=pytz.utc)
@@ -1709,7 +1642,7 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         """testing if the schedule method will schedule the tasks of the given
         projects with the given scheduler
         """
-        from stalker import db, Project, Task, TaskJugglerScheduler
+        from stalker import Project, Task, TaskJugglerScheduler
         # create a dummy Project to schedule
         dummy_project = Project(
             name='Dummy Project',
@@ -2035,7 +1968,7 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         """
         import datetime
         import pytz
-        from stalker import db, Studio, TaskJugglerScheduler
+        from stalker import Studio, TaskJugglerScheduler
         tj_scheduler = TaskJugglerScheduler()
         self.test_studio.now = \
             datetime.datetime(2013, 4, 15, 22, 56, tzinfo=pytz.utc)
@@ -2096,7 +2029,7 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         """
         import datetime
         import pytz
-        from stalker import db, Vacation
+        from stalker import Vacation
 
         vacation1 = Vacation(
             start=datetime.datetime(2013, 8, 2, tzinfo=pytz.utc),

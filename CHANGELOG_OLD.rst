@@ -1,7 +1,7 @@
 0.1.2.a5
---------
+========
 
-* :class:`~stalker.core.models.SimpleEntity`.\ 
+* :class:`~stalker.core.models.SimpleEntity`.\
   :attr:`~stalker.core.models.SimpleEntity.name` attribute doesn't accept
   anything other than a string or unicode anymore.
 * All the error messages are now showing both the class and attribute names,
@@ -18,13 +18,13 @@
   :class:`~stalker.models.template.FilenameTemplate``\ .
 
 0.1.2.a4
----------
+========
 
 * Added database tests for:
   * :class:`~stalker.core.models.Review`
   * :class:`~stalker.core.models.Task`
   * :class:`~stalker.core.models.Version`
-* The ``published`` attribute in :class:`~stalker.core.models.Version` is 
+* The ``published`` attribute in :class:`~stalker.core.models.Version` is
   renamed to :attr:`~stalker.core.models.Version.is_published`.
 * :class:`~stalker.core.models.Structure` is not ``strictly_typed`` anymore.
 * The initialization of ``status_list`` attribute in classes which are mixed
@@ -46,12 +46,12 @@
 * Included the ``pyseq`` library to the dependency list.
 
 0.1.2.a3
----------
+========
 
 * stalker.__version__ is fixed for PyPI
 
 0.1.2.a2
----------
+========
 
 * All the models are now converted to SQLAlchemy's Declarative.
 * Because of the move to the SQLAlchemy Declarative extension the
@@ -76,11 +76,11 @@
   strictly typed.
 
 0.1.2.a1
-----------
+========
 
 * Started to switch to SQLAlchemy ORM Declarative for SOM, implemented these
   classes successfully:
-  
+
   SimpleEntity, Type, Tag, Note, ImageFormat, Status, StatusList, Repository,
   Structure, FilenameTemplate, Department, Link, ReferenceMixin, StatusMixin,
   ScheduleMixin, Project, Sequence, Shot, Asset, Review.
@@ -114,7 +114,7 @@
   :class:`~stalker.core.models.Review` instances.
 
 0.1.1.a10
-----------
+=========
 
 * :class:`~stalker.core.mixins.TaskMixin` from now on doesn't have a ``tasks``
   argument in its ``__init__`` method.
@@ -126,7 +126,7 @@
   to :attr:`~stalker.core.models.Task.task_of` to reflect its duty clearly.
 * Removed the ``ProjectMixin``. The ``project`` attribute has been moved to
   the :class:`~stalker.core.mixins.TaskMixin`. Now anything mixed with the
-  :class:`~stalker.core.mixins.TaskMixin` also has a 
+  :class:`~stalker.core.mixins.TaskMixin` also has a
   :attr:`~stalker.core.mixins.TaskMixin.project` attribute.
 * :attr:`~stalker.core.models.Task.task_of` attribute in
   :class:`~stalker.core.models.Task` class now accepts anything that has been
@@ -226,7 +226,7 @@
   passing the added and removed elements to the given ``validator`` function.
 
 0.1.1.a9
---------
+========
 
 * Introduced :class:`~stalker.core.models.Type`. A new class to define
   **types**. With this introduction, all the classes deriving from
@@ -274,7 +274,7 @@
   :class:`~stalker.core.models.User`\ s are gathered from the
   :class:`~stalker.core.models.Task`\ s of the
   :class:`~stalker.core.models.Project` and from the
-  :class:`~stalker.core.models.Sequence`\ s, 
+  :class:`~stalker.core.models.Sequence`\ s,
   the :class:`~stalker.core.models.Shot`\ s and
   the :class:`~stalker.core.models.Asset`\ s of the same
   :class:`~stalker.core.models.Project`.
@@ -290,7 +290,7 @@
 * The :class:`~stalker.core.mixins.ScheduleMixin` class now accepts a third
   argument called ``duration``.
 * The :attr:`~stalker.core.mixins.ScheduleMixin.duration` attribute in the
-  :class:`~stalker.core.mixins.ScheduleMixin` is now a settable. See the 
+  :class:`~stalker.core.mixins.ScheduleMixin` is now a settable. See the
   :class:`~stalker.core.mixins.ScheduleMixin` class documentation for details.
 * The :attr:`~stalker.core.mixins.ScheduleMixin.due_date` in
   :class:`~stalker.core.mixins.ScheduleMixin` doesn't accept
@@ -349,7 +349,7 @@
   entity is this task a part of.
 
 0.1.1.a8
---------
+========
 
 * From now on an :class:`~stalker.core.models.Asset` instance can not be
   created without a :class:`~stalker.core.models.AssetType` object defining
@@ -376,9 +376,9 @@
   rules of English but if the name has an irregular plural name (or it is not
   in English) you can override this attribute by adding ``plural_name`` to the
   class attributes::
-    
+
     from stalker.core.models import SimpleEntity
-    
+
     class MyEntity(SimpleEntity):
         plural_name = "MyEntities"
         pass
@@ -390,7 +390,7 @@
 * Updated the table names in the :mod:`stalker.db.mixin` module
 
 0.1.1.a7
---------
+========
 
 * Updated the :ref:`roadmap_toplevel` to reflect the current development
   history and cycle
@@ -412,12 +412,12 @@
   properly. And removed the return value from the function. Now it doesn't
   return any bool value but None. To check if the user is already logged in
   use :const:`stalker.ext.auth.SESSION` dictionary as follows::
-  
+
     from stalker.ext import auth
-    
+
     # initialize the session
     auth.create_session()
-    
+
     # check if there is a user
     if auth.SESSION_KEY in auth.SESSION:
         print "There is a logged in user"
@@ -497,7 +497,7 @@
 * Updated database model tests to test all the attributes of the models.
 
 0.1.1.a6
---------
+========
 
 * updated/fixed tests for :class:`stalker.ext.validatedList.ValidatedList`
 * updated a couple of tests to increase tests coverage
@@ -544,18 +544,18 @@
 * Now all the mixin classes have proper :func:`__init__` methods, and in a
   mixed class, the mixin classes' :func:`__init__` method can be called
   directly by giving the current object instance (*self*) like shown below::
-    
+
     class ANewEntity(entity.SimpleEntity, mixin.StatusMixin):
         def __init__(self, **kwargs):
             super(ANewEntity, self).__init__(**kwargs)
             mixin.StatusMixin.__init__(self, **kwargs)
-  
+
   and it can be repeated for any number of mixins in class inheritance path.
 * Added the **CHANGELOG** to the documentation, and updated all formating of
   the mentioned references inside the file.
 
 0.1.1.a5
---------
+========
 
 * removed the :class:`stalker.core.models.entity.StatusedEntity` and its
   tests, with the introduction of
@@ -602,7 +602,7 @@
   :attr:`stalker.db.metadata` if it exists
 
 0.1.1.a4
---------
+========
 
 * changed the arguments of the
   :func:`stalker.db.mixins.ReferenceMixin.setup` function, to allow
@@ -621,7 +621,7 @@
   dictionary.
 
 0.1.1.a3
---------
+========
 
 * Removed the included *tests* from the egg build
 * Added/fixed equality and inequality operators for classes:
@@ -684,7 +684,7 @@
 * Added an example about how to create a new mixed in entity type for SOM.
 
 0.1.1.a2
---------
+========
 
 * Updated the Tutorial
 * Added *code* attribute to :class:`stalker.core.models.entity.SimpleEntity`
@@ -726,7 +726,7 @@
   and the ``name``
 
 0.1.1.a1
---------
+========
 
 * Fixed a couple of documentation errors like:
   * :ref:`inheritance_diagram_toplevel` had references to modules
@@ -757,18 +757,18 @@
   enough to understand what is meant
 
 0.1.1.a0
---------
+========
 
 * Changed the version number scheme a little bit to follow the setuptools guide
 
 0.1.0.20110111.1
-----------------
+================
 
 * Persistence tests for Link is now fixed
 * Now every table correctly has a ``primary_key``
 
 0.1.0.20110110.1
-----------------
+================
 
 * Added :ref:`installation_toplevel` to the documentation
 * Updated **README** file for **PyPI**
@@ -799,7 +799,7 @@
   tests.
 
 0.1.0.20110108.1
-----------------
+================
 
 * ``Template`` class is renamed to ``TypeTemplate`` and moved inside
   ``stalker.core.models.typeEntity`` to prevent the name clashing with
@@ -809,19 +809,19 @@
 * organized the project structure to conform setup tools for **PyPI**
 
 0.1.0.20110107.2
-----------------
+================
 
 * updating the db tests
 * stalker.core.models.user.User class is now allowed to have its department
   to be set None
 
 0.1.0.20110107.1
-----------------
+================
 
 * organized the existent tests
 
 0.1.0.20110106.2
-----------------
+================
 
 * added nice_name property to the stalker.core.models.entity.SimpleEntity
   class
@@ -831,7 +831,7 @@
   added all the tests
 
 0.1.0.20110106.1
-----------------
+================
 
 * re-introduced the link.Link, which has a general meaning than
   reference.Reference (I bet it will be reference again tomorrow)
@@ -840,13 +840,13 @@
   solved by moving the models to core/models
 
 0.1.0.20110105
---------------
+==============
 
 * improved the stalker.models.template.Template class documentation, and added
   an example showing the usage of it.
 
 0.1.0.20110104
---------------
+==============
 
 * removed the link.Link and introduced reference.Reference and
   typeEntity.ReferenceType classes, which I think are more organized then the
@@ -861,46 +861,46 @@
   and classes derived from TypeEntity.
 
 0.1.0.20110103.2
-----------------
+================
 
 * added login_required decorator to the stalker.db.auth module, but the
   implementation is not done yet
 
 0.1.0.20110103
---------------
+==============
 
 * user.User._password is now scrambled, but the password property uses the raw
   password
 * added stalker.db.auth for authentication, removed the db.login function.
 
 0.1.0.20110102
---------------
+==============
 
 * added the error.LoginError exception for login errors
 * started to add tests for db.login function
 
 0.1.0.20101231
---------------
+==============
 
 * moved the login function to the db.__init__ to let it used just after
   setting up the database without importing any new module
 * updated the example in the docstring of the template.AssetTemplate
 
 0.1.0.20101229.3
-----------------
+================
 
 * generalized the Template class. Now every Entity can be assigned to a
   template, it is not limited with Assets or References.
 
 0.1.0.20101229.2
-----------------
+================
 
 * entity.SimpleEntity.name now can have white spaces, but not at the beginning
   or end, just in the middle
 * done mapping template.Template class
 
 0.1.0.20101229.1
-----------------
+================
 
 * trying to create a session system with Beaker, to hold user login
   information
@@ -908,7 +908,7 @@
 * done mapping pipelineStep class
 
 0.1.0.20101228.1
-----------------
+================
 
 * added repositories table and mapper for the repository.Repository class
 * added imageFormats table and mapper for the imageFormat.ImageFormat class
@@ -916,7 +916,7 @@
 * added roadmap to docs
 
 0.1.0.20101228
---------------
+==============
 
 * created the block of database tests
 * added stalker.db.meta.__mappers__ list to hold the mappers and use it to
@@ -928,3 +928,86 @@
   need to make things more complex than it needs to be.
 * increased the version number to 0.1.0 to follow the stalker roadmap
 
+0.0.1.20101227
+==============
+
+* the test_db is converted to a proper unittest which is testing all the
+  models one by one
+* test/db renamed to test/z_db to let nose run it latest to solve the problem
+  about mocker and sqlalchemy fighting each other.
+* Mapping syntax is changed a little bit, now to do the mapping, the
+  <mapper>.setup() function needs to be called to be able to do the mapping
+  any time
+* started adding tests for every class in SOM
+
+0.0.1.20101226
+==============
+
+* in user.User the last_name attribute could be an empty string
+* removed SimpleEntity, TaggedEntity and introduced StatusedEntity to make the
+  inheritance clear and let users to find somebody to blame by moving all the
+  audit information to the the SimpleEntity class in which everything is
+  inherited from. Now even a Tag has audit information.
+
+0.0.1.20101225
+==============
+
+* entity.AuditEntity.created_by can now be None (for now)
+* user.User.last_name can now be None, to let users like admin have no last
+  name
+* creating tables for catch the general inheritance of the entity classes
+* entitiy.SimpleEntity.name's first letter is not capitalized any more
+* department.Department class now accepts Null for lead attribute (for now
+  again)
+
+0.0.1.20101224
+==============
+
+* started playing with the SQLAlchemy side of the system
+
+0.0.1.20101223
+==============
+
+* updating the documentation
+* AuditEntity now accepts None for updated_by attribute when it an object is
+  created, but sets it to the same value with created_by attribute
+
+0.0.1.20101219
+==============
+
+* started to implement:
+  * a database entry point
+  * a customizable object model and database tables
+  * an automatic mapper to map the objects and tables together according to
+     user settings
+
+  things can change a lot in this phase, I'm just trying to figure out the
+  best possible way to do it.
+
+* added a new entity type called TaggedEntity which derives from SimpleEntity,
+  and moved all the tag related attributes of SimpleEntity to TaggedEntity,
+  and all the child classes deriving from SimpleEntity now derives from
+  TaggedEntity, also moved the tests related with tag in SimpleEntity to
+  TaggedEntity.
+* tag.Tag now derives from the SimpleEntity and doesn't add any other
+  attribute to its super.
+* updated tests for tag.Tag
+* updated docs for TaggedEntity
+* finished implementing the Department object and its tests
+* removed the notes attribute from the Entity class
+
+0.0.1.20101209
+==============
+
+* added the inheritance diagram as an rst page to reference it anywhere needed
+* added the empty classes for:
+  * Asset
+  * AssetBase
+  * Booking
+  * Shot
+  * Structure
+  * Template
+  * Version
+
+* added the Department class
+* added inheritance diagrams to the autosummary pages of the classes

@@ -74,15 +74,6 @@ status_cmpl = Status.query.filter_by(code="CMPL").first()
 task_status_list = StatusList.query \
     .filter_by(target_entity_type='Task').first()
 
-test_project_status_list = StatusList(
-    name="Project Statuses",
-    statuses=[status_wip,
-              status_prev,
-              status_cmpl],
-    target_entity_type='Project',
-)
-
-
 test_movie_project_type = Type(
     name="Movie Project",
     code='movie',
@@ -144,7 +135,6 @@ test_project1 = Project(
     name="Test Project1",
     code='tp1',
     type=test_movie_project_type,
-    status_list=test_project_status_list,
     repositories=[test_repository]
 )
 

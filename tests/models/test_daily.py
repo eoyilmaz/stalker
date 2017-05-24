@@ -264,12 +264,6 @@ class DailyDBTestDBCase(UnitTestDBBase):
         self.task_status_list = \
             StatusList.query.filter_by(target_entity_type='Task').first()
 
-        self.test_project_status_list = StatusList(
-            name='Project Statuses',
-            target_entity_type='Project',
-            statuses=[self.status_new, self.status_wip, self.status_cmpl]
-        )
-
         from stalker import Repository, Project
         self.test_repo = Repository(name='Test Repository')
         from stalker.db.session import DBSession
@@ -279,7 +273,6 @@ class DailyDBTestDBCase(UnitTestDBBase):
             name='Test Project',
             code='TP',
             repository=self.test_repo,
-            status_list=self.test_project_status_list
         )
         DBSession.add(self.test_project)
 

@@ -4566,14 +4566,6 @@ class TaskDBTestDBCase(UnitTestDBBase):
         self.task_status_list = StatusList.query\
             .filter_by(target_entity_type='Task').first()
 
-        self.test_project_status_list = StatusList(
-            name="Project Statuses",
-            statuses=[self.status_wip,
-                      self.status_prev,
-                      self.status_cmpl],
-            target_entity_type='Project',
-        )
-
         from stalker import Type
         self.test_movie_project_type = Type(
             name="Movie Project",
@@ -4637,7 +4629,6 @@ class TaskDBTestDBCase(UnitTestDBBase):
             name="Test Project1",
             code='tp1',
             type=self.test_movie_project_type,
-            status_list=self.test_project_status_list,
             repositories=[self.test_repository]
         )
 
@@ -4685,10 +4676,10 @@ class TaskDBTestDBCase(UnitTestDBBase):
         # create a test Task
         from stalker.db.session import DBSession
         DBSession.add_all([
-            self.test_project_status_list, self.test_movie_project_type,
-            self.test_repository_type, self.test_repository, self.test_user1,
-            self.test_user2, self.test_user3, self.test_user4,
-            self.test_user5, self.test_project1, self.test_dependent_task1,
+            self.test_movie_project_type, self.test_repository_type,
+            self.test_repository, self.test_user1, self.test_user2,
+            self.test_user3, self.test_user4, self.test_user5,
+            self.test_project1, self.test_dependent_task1,
             self.test_dependent_task2,
         ])
         DBSession.commit()

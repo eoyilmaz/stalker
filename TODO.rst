@@ -1,14 +1,6 @@
 TODO
 ====
 
-* Drop support to any database other then PostgreSQL.
-
-  This is needs to be done mainly to benefit from a system that is highly
-  optimized for one database in mind. There are some certain functionality that
-  is only supported in PostgreSQL and will make Stalker better but break the
-  compatibility to any other DB. Also trying to support SQLite3 with its lack
-  of support to some key functionality stabs Stalker in back.
-
 * **Update:** Better support ``duration`` Tasks.
 
   The current status workflow is not working with **duration** based tasks.
@@ -54,21 +46,30 @@ TODO
     seq = uncompress("./tests/012_vb_110_v001.%04d.png 1-10",
                      format="%h%p%t %r")
 
-* Update error messages:
-  
-  Not all error message are clear. Generally, because of the heavy
-  inheritance, it is not very obvious which class gave the error. Writing down
-  the class name should help the user to understand at least what class is 
-  giving the error message.
-
 * Hidden keyword arguments:
   
   Because of the heavy inheritance, it is not very clear what parameters are 
   needed to initialize a class. A simple solution is to repeat all the 
   parameters of the inherited class in the __init__ of the child class.
 
-DONE:
-=====
+DONE
+====
+
+* Update error messages:
+
+  Not all error message are clear. Generally, because of the heavy
+  inheritance, it is not very obvious which class gave the error. Writing down
+  the class name should help the user to understand at least what class is
+  giving the error message.
+
+* Drop support to any database other then PostgreSQL.
+
+  This is needs to be done mainly to benefit from a system that is highly
+  optimized for one database in mind. There are some certain functionality that
+  is only supported in PostgreSQL and will make Stalker better but break the
+  compatibility to any other DB. Also trying to support SQLite3 with its lack
+  of support to some key functionality stabs Stalker in back.
+
 * Test CRUD:
   
   The database tests should test if all the Create, Read, Update and Delete

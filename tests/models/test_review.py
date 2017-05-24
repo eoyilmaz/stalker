@@ -71,16 +71,6 @@ class ReviewTestDBCase(UnitTestDBBase):
             self.status_drev = Status.query.filter_by(code='DREV').first()
             self.status_cmpl = Status.query.filter_by(code='CMPL').first()
 
-        from stalker import StatusList
-        self.project_status_list = StatusList(
-            target_entity_type='Project',
-            statuses=[
-                self.status_new, self.status_wip, self.status_cmpl
-            ]
-        )
-        DBSession.add(self.project_status_list)
-
-        # self.temp_path = tempfile.mkdtemp()
         from stalker import Repository
         self.repo = Repository(
             name='Test Repository',
@@ -100,7 +90,6 @@ class ReviewTestDBCase(UnitTestDBBase):
         self.project = Project(
             name='Test Project',
             code='TP',
-            status_list=self.project_status_list,
             repository=self.repo
         )
         DBSession.add(self.project)

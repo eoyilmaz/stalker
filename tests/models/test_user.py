@@ -79,24 +79,12 @@ class UserTestDB(UnitTestDBBase):
         self.status_rts = Status.query.filter(Status.code == "RTS").first()
         self.status_prev = Status.query.filter(Status.code == "PREV").first()
 
-        # a project status list
-        self.project_status_list = StatusList(
-            name="Project Status List",
-            statuses=[
-                self.status_cmpl,
-                self.status_wip,
-                self.status_rts,
-                self.status_prev
-            ],
-            target_entity_type='Project',
-        )
-
         # a repository type
         from stalker import Type, Repository, Project
         self.test_repository_type = Type(
             name="Test",
             code='test',
-            target_entity_type=Repository,
+            target_entity_type='Repository',
         )
 
         # a repository
@@ -109,14 +97,13 @@ class UserTestDB(UnitTestDBBase):
         self.commercial_project_type = Type(
             name="Commercial Project",
             code='comm',
-            target_entity_type=Project,
+            target_entity_type='Project',
         )
 
         # a couple of projects
         self.test_project1 = Project(
             name="Test Project 1",
             code='tp1',
-            status_list=self.project_status_list,
             type=self.commercial_project_type,
             repository=self.test_repository,
         )
@@ -124,7 +111,6 @@ class UserTestDB(UnitTestDBBase):
         self.test_project2 = Project(
             name="Test Project 2",
             code='tp2',
-            status_list=self.project_status_list,
             type=self.commercial_project_type,
             repository=self.test_repository,
         )
@@ -132,7 +118,6 @@ class UserTestDB(UnitTestDBBase):
         self.test_project3 = Project(
             name="Test Project 3",
             code='tp3',
-            status_list=self.project_status_list,
             type=self.commercial_project_type,
             repository=self.test_repository,
         )

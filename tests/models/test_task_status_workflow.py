@@ -2361,19 +2361,6 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         self.status_rrev = Status.query.filter_by(code='RREV').first()
         self.status_app = Status.query.filter_by(code='APP').first()
 
-        from stalker import StatusList
-        self.test_project_status_list = StatusList(
-            name='Project Statuses',
-            target_entity_type='Project',
-            statuses=[self.status_wfd, self.status_wip,
-                      self.status_cmpl]
-        )
-        DBSession.add(self.test_project_status_list)
-        DBSession.commit()
-
-        self.test_task_status_list = \
-            StatusList.query.filter_by(target_entity_type='Task').first()
-
         # repository
         from stalker import Repository
         self.test_repo = Repository(
@@ -2389,7 +2376,6 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         self.test_project1 = Project(
             name='Test Project 1',
             code='TProj1',
-            status_list=self.test_project_status_list,
             repository=self.test_repo,
             start=datetime.datetime(2013, 6, 20, 0, 0, 0, tzinfo=pytz.utc),
             end=datetime.datetime(2013, 6, 30, 0, 0, 0, tzinfo=pytz.utc),
@@ -2402,7 +2388,6 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
             name='Test Task 1',
             project=self.test_project1,
             responsible=[self.test_user1],
-            status_list=self.test_task_status_list,
             start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
             end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
             schedule_timing=10,
@@ -2415,7 +2400,6 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
             name='Test Task 2',
             project=self.test_project1,
             responsible=[self.test_user1],
-            status_list=self.test_task_status_list,
             start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
             end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
             schedule_timing=10,
@@ -2427,7 +2411,6 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         self.test_task3 = Task(
             name='Test Task 3',
             project=self.test_project1,
-            status_list=self.test_task_status_list,
             resources=[self.test_user1, self.test_user2],
             responsible=[self.test_user1, self.test_user2],
             start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
@@ -2445,7 +2428,6 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
             name='Test Task 4',
             parent=self.test_task1,
             status=self.status_wfd,
-            status_list=self.test_task_status_list,
             resources=[self.test_user1],
             depends=[self.test_task3],
             start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
@@ -2459,7 +2441,6 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         self.test_task5 = Task(
             name='Test Task 5',
             parent=self.test_task1,
-            status_list=self.test_task_status_list,
             resources=[self.test_user1],
             depends=[self.test_task4],
             start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
@@ -2473,7 +2454,6 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         self.test_task6 = Task(
             name='Test Task 6',
             parent=self.test_task1,
-            status_list=self.test_task_status_list,
             resources=[self.test_user1],
             start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
             end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
@@ -2487,7 +2467,6 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         self.test_task7 = Task(
             name='Test Task 7',
             parent=self.test_task2,
-            status_list=self.test_task_status_list,
             resources=[self.test_user2],
             start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
             end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
@@ -2500,7 +2479,6 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         self.test_task8 = Task(
             name='Test Task 8',
             parent=self.test_task2,
-            status_list=self.test_task_status_list,
             resources=[self.test_user2],
             start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
             end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
@@ -2509,9 +2487,6 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
             schedule_model='effort',
         )
         DBSession.add(self.test_task8)
-
-        self.test_asset_status_list = \
-            StatusList.query.filter_by(target_entity_type='Asset').first()
 
         # create an asset in between
         from stalker import Asset
@@ -2525,7 +2500,6 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
                 code='Char',
                 target_entity_type='Asset',
             ),
-            status_list=self.test_asset_status_list
         )
         DBSession.add(self.test_asset1)
 
@@ -2533,7 +2507,6 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         self.test_task9 = Task(
             name='Test Task 9',
             parent=self.test_asset1,
-            status_list=self.test_task_status_list,
             start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
             end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
             resources=[self.test_user2],

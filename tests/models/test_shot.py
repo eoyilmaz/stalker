@@ -16,6 +16,7 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
+import pytest
 from stalker.testing import UnitTestDBBase
 from stalker import Shot
 
@@ -29,41 +30,8 @@ class ShotTester(UnitTestDBBase):
         """
         super(ShotTester, self).setUp()
         # statuses
-        from stalker import Status, StatusList
-        self.status_new = Status.query.filter_by(code='NEW').first()
-        self.status_wfd = Status.query.filter_by(code='WFD').first()
-        self.status_rts = Status.query.filter_by(code='RTS').first()
-        self.status_wip = Status.query.filter_by(code='WIP').first()
-        self.status_prev = Status.query.filter_by(code='PREV').first()
-        self.status_hrev = Status.query.filter_by(code='HREV').first()
-        self.status_drev = Status.query.filter_by(code='DREV').first()
-        self.status_oh = Status.query.filter_by(code='OH').first()
-        self.status_stop = Status.query.filter_by(code='STOP').first()
-        self.status_cmpl = Status.query.filter_by(code='CMPL').first()
-
-        self.test_sequence_status_list = \
-            StatusList.query.filter_by(target_entity_type='Sequence').first()
-
-        self.test_shot_status_list = \
-            StatusList.query.filter_by(target_entity_type='Shot').first()
-
-        self.test_asset_status_list = \
-            StatusList.query.filter_by(target_entity_type='Asset').first()
-
-        # status lists
-        self.test_project_status_list = StatusList(
-            name="Project Status List",
-            statuses=[
-                self.status_new,
-                self.status_wip,
-                self.status_cmpl
-            ],
-            target_entity_type='Project',
-        )
-        from stalker.db.session import DBSession
-        DBSession.add(self.test_project_status_list)
-
         # types
+        from stalker.db.session import DBSession
         from stalker import Type
         self.test_commercial_project_type = Type(
             name="Commercial Project",
@@ -118,7 +86,6 @@ class ShotTester(UnitTestDBBase):
             name='Test Project1',
             code='tp1',
             type=self.test_commercial_project_type,
-            status_list=self.test_project_status_list,
             repository=self.test_repository,
             image_format=self.test_image_format1
         )
@@ -129,7 +96,6 @@ class ShotTester(UnitTestDBBase):
             name='Test Project2',
             code='tp2',
             type=self.test_commercial_project_type,
-            status_list=self.test_project_status_list,
             repository=self.test_repository,
             image_format=self.test_image_format1
         )
@@ -141,7 +107,6 @@ class ShotTester(UnitTestDBBase):
             name="Test Seq1",
             code='ts1',
             project=self.test_project1,
-            status_list=self.test_sequence_status_list,
         )
         DBSession.add(self.test_sequence1)
         DBSession.commit()
@@ -150,7 +115,6 @@ class ShotTester(UnitTestDBBase):
             name="Test Seq2",
             code='ts2',
             project=self.test_project1,
-            status_list=self.test_sequence_status_list,
         )
         DBSession.add(self.test_sequence2)
         DBSession.commit()
@@ -159,7 +123,6 @@ class ShotTester(UnitTestDBBase):
             name="Test Seq3",
             code='ts3',
             project=self.test_project1,
-            status_list=self.test_sequence_status_list,
         )
         DBSession.add(self.test_sequence3)
         DBSession.commit()
@@ -194,7 +157,6 @@ class ShotTester(UnitTestDBBase):
             name="Test Asset1",
             code='ta1',
             project=self.test_project1,
-            status_list=self.test_asset_status_list,
             type=self.test_character_asset_type,
         )
         DBSession.add(self.test_asset1)
@@ -204,7 +166,6 @@ class ShotTester(UnitTestDBBase):
             name="Test Asset2",
             code='ta2',
             project=self.test_project1,
-            status_list=self.test_asset_status_list,
             type=self.test_character_asset_type,
         )
         DBSession.add(self.test_asset2)
@@ -214,7 +175,6 @@ class ShotTester(UnitTestDBBase):
             name="Test Asset3",
             code='ta3',
             project=self.test_project1,
-            status_list=self.test_asset_status_list,
             type=self.test_character_asset_type,
         )
         DBSession.add(self.test_asset3)
@@ -233,7 +193,6 @@ class ShotTester(UnitTestDBBase):
             source_out=140,
             record_in=85485,
             status=0,
-            status_list=self.test_shot_status_list,
             image_format=self.test_image_format2
         )
 
@@ -292,7 +251,7 @@ class ShotTester(UnitTestDBBase):
         )
 
     def test_project_argument_is_not_Project_instance(self):
-        """testing if a TypeError will be raised when the given sequence
+        """testing if a TypeError will be raised when the given project
         argument is not a Project instance
         """
         test_values = [1, 1.2, "project", ["a", "project"]]
@@ -300,6 +259,14 @@ class ShotTester(UnitTestDBBase):
             self.kwargs["project"] = test_value
             with self.assertRaises(TypeError) as cm:
                 Shot(self.kwargs)
+
+            assert str(cm.exception) == 'Shot.project should be an instance ' \
+                                        'of stalker.models.project.Project, ' \
+                                        'not NoneType. Or please supply a ' \
+                                        'stalker.models.task.Task with the ' \
+                                        'parent argument, so Stalker can ' \
+                                        'use the project of the supplied ' \
+                                        'parent task'
 
     def test_project_already_has_a_shot_with_the_same_code(self):
         """testing if a ValueError will be raised when the given project
@@ -374,8 +341,11 @@ class ShotTester(UnitTestDBBase):
         """testing if a TypeError will be raised when the sequences attribute
         is set to None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_shot.sequences = None
+
+        assert str(cm.value) == 'Incompatible collection type: None is not ' \
+                                'list-like'
 
     def test_sequences_argument_is_not_a_list(self):
         """testing if a TypeError will be raised when the sequences argument is
@@ -383,15 +353,21 @@ class ShotTester(UnitTestDBBase):
         """
         self.kwargs['sequences'] = 'not a list'
         self.kwargs['code'] = 'NewCode'
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Shot(**self.kwargs)
+
+        assert str(cm.value) == 'Incompatible collection type: str is not ' \
+                                'list-like'
 
     def test_sequences_attribute_is_not_a_list(self):
         """testing if a TypeError will be raised when the sequences attribute
         is not a list
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_shot.sequences = 'not a list'
+
+        assert str(cm.value) == 'Incompatible collection type: str is not ' \
+                                'list-like'
 
     def test_sequences_argument_is_not_a_list_of_Sequence_instances(self):
         """testing if a TypeError will be raised when the sequences argument is
@@ -399,15 +375,23 @@ class ShotTester(UnitTestDBBase):
         """
         self.kwargs['sequences'] = ['not', 1, 'list', 'of', 'sequences']
         self.kwargs['code'] = 'NewShot'
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Shot(**self.kwargs)
+
+        assert str(cm.value) == 'Shot.sequences should all be ' \
+                                'stalker.models.sequence.Sequence ' \
+                                'instances, not str'
 
     def test_sequences_attribute_is_not_a_list_of_Sequence_instances(self):
         """testing if a TypeError will be raised when the sequences attribute
         is not a list of Sequence instances
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_shot.sequences = ['not', 1, 'list', 'of', 'sequences']
+
+        assert str(cm.value) == 'Shot.sequences should all be ' \
+                                'stalker.models.sequence.Sequence ' \
+                                'instances, not str'
 
     def test_sequences_argument_is_working_properly(self):
         """testing if the sequences attribute is working properly
@@ -418,19 +402,16 @@ class ShotTester(UnitTestDBBase):
             name='seq1',
             code='seq1',
             project=self.test_project1,
-            status_list=self.test_sequence_status_list
         )
         seq2 = Sequence(
             name='seq2',
             code='seq2',
             project=self.test_project1,
-            status_list=self.test_sequence_status_list
         )
         seq3 = Sequence(
             name='seq3',
             code='seq3',
             project=self.test_project1,
-            status_list=self.test_sequence_status_list
         )
 
         seqs = [seq1, seq2, seq3]
@@ -452,19 +433,16 @@ class ShotTester(UnitTestDBBase):
             name='seq1',
             code='seq1',
             project=self.test_project1,
-            status_list=self.test_sequence_status_list
         )
         seq2 = Sequence(
             name='seq2',
             code='seq2',
             project=self.test_project1,
-            status_list=self.test_sequence_status_list
         )
         seq3 = Sequence(
             name='seq3',
             code='seq3',
             project=self.test_project1,
-            status_list=self.test_sequence_status_list
         )
 
         new_shot = Shot(**self.kwargs)
@@ -1186,9 +1164,7 @@ class ShotTester(UnitTestDBBase):
     def test_TaskMixin_initialization(self):
         """testing if the TaskMixin part is initialized correctly
         """
-        from stalker import Status, StatusList
-        status1 = Status(name="On Hold", code="OH")
-
+        from stalker import StatusList
         project_status_list = \
             StatusList.query\
                 .filter(StatusList.target_entity_type=='Project').first()
@@ -1276,7 +1252,7 @@ class ShotTester(UnitTestDBBase):
         """testing if the _cut_duration attribute is initialized correctly for
         a Shot restored from DB
         """
-        from stalker import db, Shot
+        from stalker import Shot
         # reconnect to the database
         # retrieve the shot back from DB
         test_shot_db = Shot.query.filter_by(name=self.kwargs['name']).first()
@@ -1337,7 +1313,7 @@ class ShotTester(UnitTestDBBase):
             self.kwargs["fps"] = test_value
             self.kwargs['code'] = 'SH%i'
             with self.assertRaises(TypeError) as cm:
-                s = Shot(**self.kwargs)
+                Shot(**self.kwargs)
 
             self.assertEqual(
                 str(cm.exception),
@@ -1386,7 +1362,7 @@ class ShotTester(UnitTestDBBase):
         self.kwargs['fps'] = 0
         self.kwargs['code'] = 'SHnew'
         with self.assertRaises(ValueError) as cm:
-            s = Shot(**self.kwargs)
+            Shot(**self.kwargs)
 
         self.assertEqual(
             str(cm.exception),

@@ -29,19 +29,13 @@ class ProjectClientTestDBCase(UnitTestDBBase):
         """
         super(ProjectClientTestDBCase, self).setUp()
 
-        from stalker import Status, StatusList, Repository
+        from stalker import Status, Repository
         self.test_repo = Repository(
             name='Test Repo'
         )
         self.status_new = Status(name='New', code='NEW')
         self.status_wip = Status(name='Work In Progress', code='WIP')
         self.status_cmpl = Status(name='Completed', code='CMPL')
-
-        self.project_statuses = StatusList(
-            name='Project Status List',
-            statuses=[self.status_new, self.status_wip, self.status_cmpl],
-            target_entity_type='Project'
-        )
 
         from stalker import User
         self.test_user1 = User(
@@ -61,7 +55,6 @@ class ProjectClientTestDBCase(UnitTestDBBase):
             name='Test Project 1',
             code='TP1',
             repositories=[self.test_repo],
-            status_list=self.project_statuses
         )
 
         from stalker import Role
@@ -72,20 +65,20 @@ class ProjectClientTestDBCase(UnitTestDBBase):
     def test_project_client_creation(self):
         """testing project client creation
         """
-        project_client1 = ProjectClient(
+        ProjectClient(
             project=self.test_project,
             client=self.test_client,
             role=self.test_role
         )
 
-        self.assertTrue(self.test_client in self.test_project.clients)
+        assert self.test_client in self.test_project.clients
 
     def test_role_argument_is_not_a_role_instance(self):
         """testing if a TypeError will be raised when the role argument is not
         a Role instance
         """
         with self.assertRaises(TypeError) as cm:
-            project_client1 = ProjectClient(
+            ProjectClient(
                 project=self.test_project,
                 client=self.test_client,
                 role='not a role instance'

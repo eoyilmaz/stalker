@@ -274,7 +274,7 @@ class AuthenticationLogTestCase(unittest.TestCase):
             action=LOGIN
         )
         diff = datetime.datetime.now(pytz.utc) - uli.date
-        self.assertTrue(diff.microseconds < 1000)
+        self.assertTrue(diff.microseconds < 5000)
 
     def test_date_argument_is_None(self):
         """testing if the date attribute value will be set to

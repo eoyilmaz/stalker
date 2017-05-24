@@ -16,6 +16,7 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
+import pytest
 from stalker.testing import UnitTestDBBase
 
 
@@ -27,18 +28,6 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         """set up the test
         """
         super(TaskDependencyTestDBCase, self).setUp()
-        # get statuses
-        from stalker import Status
-        self.status_new = Status.query.filter_by(code="NEW").first()
-        self.status_wfd = Status.query.filter_by(code="WFD").first()
-        self.status_rts = Status.query.filter_by(code="RTS").first()
-        self.status_wip = Status.query.filter_by(code="WIP").first()
-        self.status_prev = Status.query.filter_by(code="PREV").first()
-        self.status_hrev = Status.query.filter_by(code="HREV").first()
-        self.status_drev = Status.query.filter_by(code="DREV").first()
-        self.status_oh = Status.query.filter_by(code="OH").first()
-        self.status_stop = Status.query.filter_by(code="STOP").first()
-        self.status_cmpl = Status.query.filter_by(code="CMPL").first()
 
         from stalker.db.session import DBSession
         from stalker import User
@@ -78,29 +67,12 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         )
         DBSession.add(self.test_structure)
 
-        # project status list
-        from stalker import StatusList
-        self.test_project_status_list = StatusList(
-            name='Project Statuses',
-            target_entity_type='Project',
-            statuses=[
-                self.status_new,
-                self.status_wip,
-                self.status_oh,
-                self.status_stop,
-                self.status_cmpl
-            ]
-        )
-        DBSession.add(self.test_project_status_list)
-        DBSession.commit()
-
         from stalker import Project
         self.test_project1 = Project(
             name='Test Project 1',
             code='TP1',
             repository=self.test_repo,
             structure=self.test_structure,
-            status_list=self.test_project_status_list
         )
         DBSession.add(self.test_project1)
         DBSession.commit()
@@ -146,21 +118,17 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         """testing if an Integrity error will be raised when the task argument
         is skipped and the session is committed
         """
-        self.kwargs.pop('task')
         from stalker.db.session import DBSession
         from stalker import TaskDependency
+        from sqlalchemy.exc import IntegrityError
+        self.kwargs.pop('task')
         new_dependency = TaskDependency(**self.kwargs)
         DBSession.add(new_dependency)
-        from sqlalchemy.exc import IntegrityError
-        with self.assertRaises(IntegrityError) as cm:
+        with pytest.raises(IntegrityError) as cm:
             DBSession.commit()
 
-        self.assertTrue(
-            str(cm.exception).startswith(
-                '(psycopg2.IntegrityError) null value in column "task_id" '
-                'violates not-null constraint'
-            )
-        )
+        assert '(psycopg2.IntegrityError) null value in column "task_id" ' \
+               'violates not-null constraint' in str(cm.value)
 
     def test_task_argument_is_not_a_task_instance(self):
         """testing if a TypeError will be raised when the task argument value

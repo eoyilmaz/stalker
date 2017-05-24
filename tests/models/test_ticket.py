@@ -15,7 +15,7 @@
 #
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
-
+import pytest
 
 from stalker import log
 from stalker.testing import UnitTestDBBase
@@ -70,19 +70,6 @@ class TicketTester(UnitTestDBBase):
         self.test_project_status1 = Status(name='PrjStat1', code='PrjStat1')
         self.test_project_status2 = Status(name='PrjStat2', code='PrjStat2')
 
-        from stalker import StatusList
-        self.test_project_status_list = StatusList(
-            name="Project Status List",
-            target_entity_type='Project',
-            statuses=[
-                self.test_project_status1,
-                self.test_project_status2,
-            ]
-        )
-
-        self.test_task_status_list = \
-            StatusList.query.filter_by(target_entity_type='Task').first()
-
         # create a Project
         from stalker import Project
         self.test_project = Project(
@@ -90,15 +77,10 @@ class TicketTester(UnitTestDBBase):
             code="TEST_PROJECT_1",
             type=self.test_project_type,
             repository=self.test_repo,
-            status_list=self.test_project_status_list
         )
         from stalker.db.session import DBSession
         DBSession.add(self.test_project)
         DBSession.commit()
-
-        # create an Asset
-        self.test_asset_status_list = StatusList.query\
-            .filter_by(target_entity_type='Asset').first()
 
         self.test_asset_type = Type(
             name='Character Asset',
@@ -111,7 +93,6 @@ class TicketTester(UnitTestDBBase):
             name="Test Asset",
             code='ta',
             project=self.test_project,
-            status_list=self.test_asset_status_list,
             type=self.test_asset_type
         )
         DBSession.add(self.test_asset)
@@ -122,24 +103,15 @@ class TicketTester(UnitTestDBBase):
         self.test_task = Task(
             name="Modeling of Asset 1",
             resources=[self.test_user],
-            status_list=self.test_task_status_list,
             parent=self.test_asset
         )
         DBSession.add(self.test_task)
         DBSession.commit()
 
-        # create a Version
-        self.test_version_status_list = StatusList(
-            name='Version Statuses',
-            target_entity_type='Version',
-            statuses=[self.test_status1, self.test_status2]
-        )
-
         from stalker import Version
         self.test_version = Version(
             name='Test Version',
             task=self.test_task,
-            status_list=self.test_version_status_list,
             version=1,
             full_path='some/path'
         )
@@ -201,21 +173,18 @@ class TicketTester(UnitTestDBBase):
             name='Test Project 1',
             code='TP1',
             repository=self.test_repo,
-            status_list=self.test_project_status_list
         )
 
         proj2 = Project(
             name='Test Project 2',
             code='TP2',
             repository=self.test_repo,
-            status_list=self.test_project_status_list
         )
 
         proj3 = Project(
             name='Test Project 3',
             code='TP3',
             repository=self.test_repo,
-            status_list=self.test_project_status_list
         )
 
         from stalker import Ticket
@@ -362,8 +331,11 @@ class TicketTester(UnitTestDBBase):
         """testing if the related_tickets attribute will not accept the Ticket
         itself and will raise ValueError
         """
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             self.test_ticket.related_tickets = [self.test_ticket]
+
+        assert str(cm.value) == 'Ticket.related_ticket attribute can not ' \
+                                'have itself in the list'
 
     def test_priority_argument_is_skipped_will_set_it_to_zero(self):
         """testing if the priority argument is skipped will set the priority
@@ -480,9 +452,9 @@ class TicketTester(UnitTestDBBase):
             "can't set attribute"
         )
 
-    ## STATUSES ##
+    # STATUSES
 
-    ## resolve ##
+    # resolve
     def test_resolve_method_will_change_the_status_from_New_to_Closed_and_creates_a_log(self):
         """testing if invoking the resolve method will change the status of the
         Ticket from New to Closed
@@ -540,7 +512,7 @@ class TicketTester(UnitTestDBBase):
         self.assertTrue(ticket_log is None)
         self.assertEqual(self.test_ticket.status, self.status_closed)
 
-    ## reopen ##
+    # reopen
     def test_reopen_method_will_not_change_the_status_from_New_to_anything(self):
         """testing if invoking the reopen method will not change the status of
         the Ticket from New to anything
@@ -593,8 +565,7 @@ class TicketTester(UnitTestDBBase):
         self.assertEqual(ticket_log.to_status, self.status_reopened)
         self.assertEqual(ticket_log.action, 'reopen')
 
-    ## accept ##
-
+    # accept
     def test_accept_method_will_change_the_status_from_New_to_Accepted(self):
         """testing if invoking the accept method will change the status of the
         Ticket from New to Accepted
@@ -653,8 +624,7 @@ class TicketTester(UnitTestDBBase):
         self.assertTrue(ticket_log is None)
         self.assertEqual(self.test_ticket.status, self.status_closed)
 
-    ## reassign ##
-
+    # reassign
     def test_reassign_method_will_change_the_status_from_New_to_Assigned(self):
         """testing if invoking the reassign method will change the status of
         the Ticket from New to Assigned

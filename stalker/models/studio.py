@@ -23,10 +23,11 @@ import datetime
 from math import ceil
 
 from sqlalchemy import (Column, Integer, ForeignKey, Interval, Boolean,
-                        DateTime, Text, JSON)
+                        DateTime, Text)
 from sqlalchemy.orm import validates, relationship, synonym, reconstructor
 
 from stalker import log
+from stalker.db.types import GenericJSON
 from stalker.models.entity import SimpleEntity, Entity
 from stalker.models.mixins import DateRangeMixin, WorkingHoursMixin
 from stalker.models.schedulers import SchedulerBase
@@ -593,7 +594,7 @@ class WorkingHours(Entity):
     working_hours_id = \
         Column('id', Integer, ForeignKey('Entities.id'), primary_key=True)
 
-    working_hours = Column(JSON)
+    working_hours = Column(GenericJSON)
 
     # I know it is not a very common place to import modules
     from stalker import defaults

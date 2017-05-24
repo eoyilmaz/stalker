@@ -51,20 +51,6 @@ class VersionDBTester(UnitTestDBBase):
         ])
         DBSession.commit()
 
-        # status lists
-        self.test_project_status_list = StatusList(
-            name='Project Status List',
-            statuses=[
-                self.test_status1,
-                self.test_status2,
-                self.test_status3,
-                self.test_status4,
-                self.test_status5,
-            ],
-            target_entity_type='Project',
-        )
-        DBSession.add(self.test_project_status_list)
-
         # repository
         from stalker import Repository, Type
         self.test_repo = Repository(
@@ -96,7 +82,6 @@ class VersionDBTester(UnitTestDBBase):
             name='Test Project',
             code='tp',
             type=self.test_project_type,
-            status_list=self.test_project_status_list,
             repositories=[self.test_repo],
             structure=self.test_structure
         )

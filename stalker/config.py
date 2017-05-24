@@ -46,8 +46,7 @@ class Config(object):
         # for possible parameters
         #
         database_engine_settings={
-            "sqlalchemy.url":
-                "postgresql://stalker_admin:stalker@localhost/stalker_test",
+            "sqlalchemy.url": "sqlite://",
             "sqlalchemy.echo": False,
         },
 
@@ -220,6 +219,18 @@ class Config(object):
             'DREV',
             'OH',
             'STOP',
+            'CMPL'
+        ],
+    
+        project_status_names=[
+            'Ready To Start',
+            'Work In Progress',
+            'Completed'
+        ],
+
+        project_status_codes=[
+            'RTS',
+            'WIP',
             'CMPL'
         ],
 

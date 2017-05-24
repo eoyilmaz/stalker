@@ -28,22 +28,6 @@ class SequenceTester(UnitTestDBBase):
         """
         super(SequenceTester, self).setUp()
 
-        # get statuses
-        from stalker import Status, StatusList
-        self.status_new = Status.query.filter_by(code='NEW').first()
-        self.status_wfd = Status.query.filter_by(code='WFD').first()
-        self.status_rts = Status.query.filter_by(code='RTS').first()
-        self.status_wip = Status.query.filter_by(code='WIP').first()
-        self.status_prev = Status.query.filter_by(code='PREV').first()
-        self.status_hrev = Status.query.filter_by(code='HREV').first()
-        self.status_drev = Status.query.filter_by(code='DREV').first()
-        self.status_oh = Status.query.filter_by(code='OH').first()
-        self.status_stop = Status.query.filter_by(code='STOP').first()
-        self.status_cmpl = Status.query.filter_by(code='CMPL').first()
-
-        self.sequence_status_list = \
-            StatusList.query.filter_by(target_entity_type='Sequence').first()
-
         # create a test project, user and a couple of shots
         from stalker import Type
         self.project_type = Type(
@@ -53,18 +37,6 @@ class SequenceTester(UnitTestDBBase):
         )
         from stalker.db.session import DBSession
         DBSession.add(self.project_type)
-
-        # create a status list for project
-        self.project_status_list = StatusList(
-            name="Project Statuses",
-            statuses=[
-                self.status_new,
-                self.status_wip,
-                self.status_cmpl,
-            ],
-            target_entity_type='Project',
-        )
-        DBSession.add(self.project_status_list)
 
         # create a repository
         self.repository_type = Type(
@@ -87,7 +59,6 @@ class SequenceTester(UnitTestDBBase):
             name="Test Project 1",
             code='tp1',
             type=self.project_type,
-            status_list=self.project_status_list,
             repository=self.test_repository,
         )
         DBSession.add(self.test_project)
@@ -96,7 +67,6 @@ class SequenceTester(UnitTestDBBase):
             name="Test Project 2",
             code='tp2',
             type=self.project_type,
-            status_list=self.project_status_list,
             repository=self.test_repository,
         )
         DBSession.add(self.test_project2)
@@ -107,7 +77,6 @@ class SequenceTester(UnitTestDBBase):
             'code': 'tseq',
             "description": "A test sequence",
             "project": self.test_project,
-            "status_list": self.sequence_status_list
         }
 
         # the test sequence
@@ -243,14 +212,6 @@ class SequenceTester(UnitTestDBBase):
     def test_initialization_of_task_part(self):
         """testing if the Task part is initialized correctly
         """
-        from stalker import Status, StatusList
-        status1 = Status(name="On Hold", code="OH")
-
-        project_status_list = StatusList(
-            name="Project Statuses", statuses=[status1],
-            target_entity_type='Project',
-        )
-
         from stalker import Type, Project, Sequence, Task
         project_type = Type(
             name="Commercial",
@@ -261,7 +222,6 @@ class SequenceTester(UnitTestDBBase):
         new_project = Project(
             name="Commercial",
             code='comm',
-            status_list=project_status_list,
             type=project_type,
             repository=self.test_repository,
         )
@@ -293,14 +253,6 @@ class SequenceTester(UnitTestDBBase):
     def test_ProjectMixin_initialization(self):
         """testing if the ProjectMixin part is initialized correctly
         """
-        from stalker import Status, StatusList
-        status1 = Status(name="On Hold", code="OH")
-
-        project_status_list = StatusList(
-            name="Project Statuses", statuses=[status1],
-            target_entity_type='Project'
-        )
-
         from stalker import Type
         project_type = Type(
             name="Commercial",
@@ -312,8 +264,6 @@ class SequenceTester(UnitTestDBBase):
         new_project = Project(
             name="Test Project",
             code='tp',
-            status=project_status_list[0],
-            status_list=project_status_list,
             type=project_type,
             repository=self.test_repository
         )

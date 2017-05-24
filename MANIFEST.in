@@ -1,8 +1,8 @@
 include *.ini *.cfg
 
-include CHANGELOG
+include CHANGELOG.rst
 include TODO
-include README
+include README.rst
 include INSTALL
 include MANIFEST.in
 include COPYING

@@ -76,24 +76,11 @@ class TimeLogDBTester(UnitTestDBBase):
             self.test_status1, self.test_status2, self.test_status3
         ])
 
-        from stalker import StatusList
-        self.test_project_status_list = StatusList(
-            name="Project Statuses",
-            statuses=[self.test_status1],
-            target_entity_type='Project'
-        )
-        DBSession.add(self.test_project_status_list)
-        DBSession.commit()
-
-        self.test_task_status_list = StatusList.query\
-            .filter_by(target_entity_type='Task').first()
-
         from stalker import Project
         self.test_project = Project(
             name="test project",
             code='tp',
             repository=self.test_repo,
-            status_list=self.test_project_status_list
         )
         DBSession.add(self.test_project)
 
@@ -102,7 +89,6 @@ class TimeLogDBTester(UnitTestDBBase):
         self.test_task1 = Task(
             name="test task 1",
             project=self.test_project,
-            status_list=self.test_task_status_list,
             schedule_timing=10,
             schedule_unit='d',
             resources=[self.test_resource1]
@@ -112,7 +98,6 @@ class TimeLogDBTester(UnitTestDBBase):
         self.test_task2 = Task(
             name="test task 2",
             project=self.test_project,
-            status_list=self.test_task_status_list,
             schedule_timing=10,
             schedule_unit='d',
             resources=[self.test_resource1]
@@ -224,7 +209,6 @@ class TimeLogDBTester(UnitTestDBBase):
         new_task = Task(
             name="Test task 2",
             project=self.test_project,
-            status_list=self.test_task_status_list,
             resources=[self.test_resource1],
         )
         self.assertNotEqual(self.test_time_log.task, new_task)
@@ -240,7 +224,6 @@ class TimeLogDBTester(UnitTestDBBase):
         new_task = Task(
             name="Test Task 3",
             project=self.test_project,
-            status_list=self.test_task_status_list,
             resources=[self.test_resource1],
         )
 
@@ -263,7 +246,6 @@ class TimeLogDBTester(UnitTestDBBase):
         new_task = Task(
             name="Test Task 3",
             project=self.test_project,
-            status_list=self.test_task_status_list,
             resources=[self.test_resource1],
         )
 
@@ -357,8 +339,8 @@ class TimeLogDBTester(UnitTestDBBase):
 
     def test_resource_argument_updates_backref(self):
         """testing if the User instance given with the resource argument is
-        updated with the current TimeLog is listed in the time_logs attribute of
-        the User instance
+        updated with the current TimeLog is listed in the time_logs attribute
+        of the User instance
         """
         from stalker import User
         new_resource = User(
@@ -376,8 +358,8 @@ class TimeLogDBTester(UnitTestDBBase):
 
     def test_resource_attribute_updates_backref(self):
         """testing if the User instance given with the resource attribute is
-        updated with the current TimeLog is listed in the time_logs attribute of
-        the User instance
+        updated with the current TimeLog is listed in the time_logs attribute
+        of the User instance
         """
         from stalker import User
         new_resource = User(
@@ -861,26 +843,22 @@ class TimeLogDBTester(UnitTestDBBase):
         parent_task1 = Task(
             name="Parent Task 1",
             project=self.test_project,
-            status_list=self.test_task_status_list,
         )
 
         parent_task2 = Task(
             name="Parent Task 2",
             project=self.test_project,
-            status_list=self.test_task_status_list,
         )
 
         child_task1 = Task(
             name="Child Task 1",
             project=self.test_project,
-            status_list=self.test_task_status_list,
             resources=[self.test_resource1]
         )
 
         child_task2 = Task(
             name="Child Task 1",
             project=self.test_project,
-            status_list=self.test_task_status_list,
             resources=[self.test_resource2]
         )
 
@@ -1131,7 +1109,6 @@ class TimeLogDBTester(UnitTestDBBase):
         dep_task = Task(
             name="test task 2",
             project=self.test_project,
-            status_list=self.test_task_status_list,
             schedule_timing=10,
             schedule_unit='d',
             depends=[task],
@@ -1190,7 +1167,6 @@ class TimeLogDBTester(UnitTestDBBase):
         dep_task = Task(
             name="test task 2",
             project=self.test_project,
-            status_list=self.test_task_status_list,
             schedule_timing=10,
             schedule_unit='d',
             depends=[task],

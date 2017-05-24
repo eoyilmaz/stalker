@@ -1,3 +1,3 @@
 .. _changelog_toplevel:
 
-.. include:: source/../../../CHANGELOG
+.. include:: source/../../../CHANGELOG.rst

@@ -116,32 +116,17 @@ class TaskJugglerSchedulerDBTester(UnitTestDBBase):
             self.test_status4, self.test_status5
         ])
 
-        # status lists
-        from stalker import StatusList
-        self.test_proj_status_list = StatusList(
-            name='Project Status List',
-            statuses=[self.test_status1, self.test_status2, self.test_status3],
-            target_entity_type='Project'
-        )
-        DBSession.add(self.test_proj_status_list)
-
         # create one project
         from stalker import Project
         self.test_proj1 = Project(
             name='Test Project 1',
             code='TP1',
             repository=self.test_repo,
-            status_list=self.test_proj_status_list,
             start=datetime.datetime(2013, 4, 4, tzinfo=pytz.utc),
             end=datetime.datetime(2013, 5, 4, tzinfo=pytz.utc)
         )
         DBSession.add(self.test_proj1)
         self.test_proj1.now = datetime.datetime(2013, 4, 4, tzinfo=pytz.utc)
-
-        # create task status list
-        with DBSession.no_autoflush:
-            self.test_task_status_list = StatusList.query\
-                .filter_by(target_entity_type='Task').first()
 
         # create two tasks with the same resources
         from stalker import Task
@@ -171,8 +156,7 @@ class TaskJugglerSchedulerDBTester(UnitTestDBBase):
             schedule_unit='h',
             priority=800
         )
-        DBSession.add(self.test_task2)
-        DBSession.commit()
+        DBSession.save(self.test_task2)
 
     def test_tjp_file_is_created(self):
         """testing if the tjp file is correctly created
@@ -279,7 +263,7 @@ task Project_{{proj.id}} "Project_{{proj.id}}" {
   task Task_{{task1.id}} "Task_{{task1.id}}" {
     effort 50.0h
     allocate User_{{user1.id}} { alternative User_{{user3.id}}, User_{{user4.id}}, User_{{user5.id}} select minallocated persistent }, User_{{user2.id}} { alternative User_{{user3.id}}, User_{{user4.id}}, User_{{user5.id}} select minallocated persistent }
-    booking User_30 2013-04-16-06:00:00 - 2013-04-16-09:00:00 { overtime 2 }
+    booking User_{{user1.id}} 2013-04-16-06:00:00 - 2013-04-16-09:00:00 { overtime 2 }
   }
   task Task_{{task2.id}} "Task_{{task2.id}}" {
     priority 800

@@ -1,3 +1,3 @@
 .. about_toplevel:
 
-.. include:: source/../../../README
+.. include:: source/../../../README.rst

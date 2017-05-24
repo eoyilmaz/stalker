@@ -5,16 +5,8 @@ from setuptools import setup, find_packages
 import stalker
 
 here = os.path.abspath(os.path.dirname(__file__))
-README = open(os.path.join(here, 'README')).read()
-CHANGES = open(os.path.join(here, 'CHANGELOG')).read()
-
-requires = [
-    'sqlalchemy',
-    'alembic',
-    'jinja2',
-    'pytz',
-    'tzlocal'
-]
+README = open(os.path.join(here, 'README.rst')).read()
+CHANGES = open(os.path.join(here, 'CHANGELOG.rst')).read()
 
 setup(
     name='stalker',
@@ -57,11 +49,23 @@ setup(
             'COPYING.LESSER',
             'INSTALL',
             'MANIFEST.in',
-            'README'
+            'README.rst'
         ]),
     ],
     zip_safe=True,
     test_suite='stalker',
-    install_requires=requires,
+    install_requires=[
+        'sqlalchemy',
+        'alembic',
+        'jinja2',
+        'pytz',
+        'tzlocal'
+    ],
+    test_requires=[
+        'pytest',
+        'pytest-xdist',
+        'pytest-cov',
+        'coverage'
+    ]
 )
 

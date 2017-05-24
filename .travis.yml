@@ -15,7 +15,7 @@
 
     install:
       - gem install taskjuggler
-      - pip install sqlalchemy psycopg2 jinja2 alembic Mako MarkupSafe python-editor nose coverage pytz tzlocal
+      - pip install sqlalchemy psycopg2 jinja2 alembic Mako MarkupSafe python-editor pytz tzlocal pytest pytest-xdist pytest-cov
 
     before_script:
       - psql --version
@@ -26,4 +26,4 @@
       - psql -c "CREATE DATABASE stalker_test WITH OWNER = stalker_admin ENCODING = 'UTF8' TABLESPACE = pg_default CONNECTION LIMIT = -1;" -U postgres
 
     script:
-      - nosetests --verbosity=1 --cover-erase --with-coverage --cover-package=stalker
+      - py.test -n auto --cov-report term --cov=stalker tests

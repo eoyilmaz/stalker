@@ -1098,7 +1098,7 @@ class RepositoryTester(UnitTestDBBase):
         """
         self.assertEqual(
             self.test_repo.env_var,
-            'REPO30'
+            'REPO31'
         )
 
     def test_creating_and_committing_a_new_repository_instance_will_create_env_var(self):

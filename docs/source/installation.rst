@@ -63,15 +63,14 @@ Stalker by using the Python prompt like this::
   
   >>> import stalker
   >>> stalker.__version__
-  0.2.5
+  0.2.21
 
 For developers
 ==============
 
-It is highly recommended to create a VirtualEnv specific for Stalker
+It is highly recommended to create a `VirtualEnv` specific for Stalker
 development. So to setup a virtualenv for Stalker::
 
-  cd ~/Documents/development
   virtualenv --no-site-packages stalker
 
 Then clone the repository (you need git to do that)::
@@ -85,6 +84,8 @@ And then to setup the virtual environment for development::
   ../bin/python setup.py develop
 
 This command should install any dependent package to the virtual environment.
+
+.. _VirtualEnv: https://pypi.python.org/pypi/virtualenv
 
 Installing a Database
 =====================

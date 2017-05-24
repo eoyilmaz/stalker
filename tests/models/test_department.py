@@ -375,16 +375,13 @@ class DepartmentDBTester(UnitTestDBBase):
     def test_tjp_id_is_working_properly(self):
         """testing if the tjp_is working properly
         """
-        self.assertEqual(self.test_department.tjp_id, 'Department_35')
+        self.assertEqual(self.test_department.tjp_id, 'Department_36')
 
     def test_to_tjp_is_working_properly(self):
         """testing if the to_tjp property is working properly
         """
         expected_tjp = """
-resource Department_35 "Department_35" {
-    resource User_30 "User_30" {
-    efficiency 1.0
-}
+resource Department_36 "Department_36" {
     resource User_31 "User_31" {
     efficiency 1.0
 }
@@ -394,9 +391,12 @@ resource Department_35 "Department_35" {
     resource User_33 "User_33" {
     efficiency 1.0
 }
+    resource User_34 "User_34" {
+    efficiency 1.0
+}
 }"""
         # print expected_tjp
         # print "-----------------"
         # print self.test_department.to_tjp
         # self.maxDiff = None
-        self.assertEqual(self.test_department.to_tjp, expected_tjp)
+        assert self.test_department.to_tjp == expected_tjp

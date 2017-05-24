@@ -42,13 +42,6 @@ class ProjectUserTestDBCase(UnitTestDBBase):
         self.status_wip = Status.query.filter_by(code='WIP').first()
         self.status_cmpl = Status.query.filter_by(code='CMPL').first()
 
-        self.project_statuses = StatusList(
-            name='Project Status List',
-            statuses=[self.status_new, self.status_wip, self.status_cmpl],
-            target_entity_type='Project'
-        )
-        DBSession.add(self.project_statuses)
-
         from stalker import User
         self.test_user1 = User(
             name='Test User 1',
@@ -63,7 +56,6 @@ class ProjectUserTestDBCase(UnitTestDBBase):
             name='Test Project 1',
             code='TP1',
             repositories=[self.test_repo],
-            status_list=self.project_statuses
         )
         DBSession.add(self.test_project)
 
@@ -77,7 +69,7 @@ class ProjectUserTestDBCase(UnitTestDBBase):
     def test_project_user_creation(self):
         """testing project user creation
         """
-        project_user1 = ProjectUser(
+        ProjectUser(
             project=self.test_project,
             user=self.test_user1,
             role=self.test_role
@@ -90,7 +82,7 @@ class ProjectUserTestDBCase(UnitTestDBBase):
         a Role instance
         """
         with self.assertRaises(TypeError) as cm:
-            project_user1 = ProjectUser(
+            ProjectUser(
                 project=self.test_project,
                 user=self.test_user1,
                 role='not a role instance'

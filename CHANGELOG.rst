@@ -6,11 +6,27 @@ Stalker Changes
 ======
 
 * **New:** Switched from ``nose`` + ``unittest`` to ``pytest`` as the main
-  testing framework (with ``pytest-xdist`` tests are 4x faster).
+  testing framework (with ``pytest-xdist`` tests complete 4x faster).
 
 * **New:** Added ``DBSession.save()`` shortcut method for convenience which
   does an ``add`` or ``add_all`` (depending to the input) followed by a
   ``commit`` at once.
+
+* **Update:** Updated the about page for a more appealing introduction to the
+  library.
+
+* **New:** Stalker now creates default ``StatusList`` for ``Project`` instances
+  on database initialization.
+
+* **Update:** SQLite3 support is back. In fact it was newer gone. For
+  simplicity of first time users the default database is again SQLite3. It was
+  dropped for the sake of adding more PostgreSQL oriented features. But then it
+  is recognized that the system can handle both.
+
+* **Update:** With the reintroduction of SQLite3, the new JSON type column in
+  ``WorkingHours`` class has been upgraded to support SQLite3. So with SQLite3
+  the column stores the data as TEXT but seamlessly convert them to JSON on
+  when ORM loads or commits the data.
 
 0.2.20
 ======
@@ -22,6 +38,7 @@ Stalker Changes
   not stored in a ``PickleType`` column in ``Studio`` anymore. (issue: #44)
 
 * **Update:** Updated ``appveyor.yml`` to match ``travis.yml``.
+
 
 0.2.19
 ======
@@ -1885,7 +1902,7 @@ Stalker Changes
   
   By using this kind of organization, both development and usage will be eased
   out.
-  
+
 * ``task_of`` now only accepts TaskableEntity instances.
 
 * Updated the examples. It is now showing how to extend SOM correctly. 

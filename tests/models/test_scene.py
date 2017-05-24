@@ -45,19 +45,6 @@ class SceneTester(UnitTestDBBase):
             target_entity_type='Project',
         )
 
-        # create a status list for project
-        self.project_status_list = StatusList(
-            name="Project Statuses",
-            statuses=[
-                self.test_status1,
-                self.test_status2,
-                self.test_status3,
-                self.test_status4,
-                self.test_status5,
-            ],
-            target_entity_type='Project',
-        )
-
         # create a repository
         self.repository_type = Type(
             name="Test Type",
@@ -77,7 +64,6 @@ class SceneTester(UnitTestDBBase):
             name="Test Project 1",
             code='tp1',
             type=self.project_type,
-            status_list=self.project_status_list,
             repository=self.test_repository,
         )
 
@@ -85,7 +71,6 @@ class SceneTester(UnitTestDBBase):
             name="Test Project 2",
             code='tp2',
             type=self.project_type,
-            status_list=self.project_status_list,
             repository=self.test_repository,
         )
 
@@ -202,15 +187,6 @@ class SceneTester(UnitTestDBBase):
     def test_ProjectMixin_initialization(self):
         """testing if the ProjectMixin part is initialized correctly
         """
-        from stalker import Status
-        status1 = Status.query.filter_by(code="OH").first()
-
-        from stalker import StatusList
-        project_status_list = StatusList(
-            name="Project Statuses", statuses=[status1],
-            target_entity_type='Project'
-        )
-
         from stalker import Type
         project_type = Type(
             name="Commercial",
@@ -222,8 +198,6 @@ class SceneTester(UnitTestDBBase):
         new_project = Project(
             name="Test Project",
             code='tp',
-            status=project_status_list[0],
-            status_list=project_status_list,
             type=project_type,
             repository=self.test_repository
         )
