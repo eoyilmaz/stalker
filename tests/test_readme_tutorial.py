@@ -1,95 +1,51 @@
-|travis| |license| |pyversion| |pypiversion| |wheel|
+# -*- coding: utf-8 -*-
+# Stalker a Production Asset Management System
+# Copyright (C) 2009-2017 Erkan Ozgur Yilmaz
+#
+# This file is part of Stalker.
+#
+# Stalker is free software: you can redistribute it and/or modify
+# it under the terms of the Lesser GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License.
+#
+# Stalker is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# Lesser GNU General Public License for more details.
+#
+# You should have received a copy of the Lesser GNU General Public License
+# along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-.. |travis| image:: https://travis-ci.org/eoyilmaz/stalker.svg?branch=master
-    :target: https://travis-ci.org/eoyilmaz/stalker
-    :alt: Travis-CI Build Status
-
-.. |license| image:: https://img.shields.io/badge/License-LGPL%20v3-blue.svg
-     :target: http://www.gnu.org/licenses/lgpl-3.0
-     :alt: License
-
-.. |pyversion| image:: https://img.shields.io/pypi/pyversions/stalker.svg
-     :target: https://pypi.python.org/pypi/stalker
-     :alt: Supported Python versions
-
-.. |pypiversion| image:: https://img.shields.io/pypi/v/stalker.svg
-     :target: https://pypi.python.org/pypi/stalker
-     :alt: PyPI Version
-
-.. |wheel| image:: https://img.shields.io/pypi/wheel/stalker.svg
-     :target: https://pypi.python.org/pypi/stalker
-     :alt: Wheel Support
+import pytest
 
 
+@pytest.fixture('module')
+def setup():
+    """delete environment vars so it won't try to open the system stalker
+    database
+    """
+    import os
+    from stalker.config import Config
+    try:
+        os.environ.pop(Config.env_key)
+    except KeyError:
+        # already removed
+        pass
 
-=====
-About
-=====
+    # regenerate the defaults
+    import stalker
+    stalker.defaults = Config()
 
-Stalker is an Open Source Production Asset Management (ProdAM) Library designed 
-specifically for Animation and VFX Studios but can be used for any kind of
-projects. Stalker is licensed under LGPL v3.
-
-Features
-========
-
-Stalker has the following features:
-
- * Designed for **Animation and VFX Studios**.
- * Platform independent.
- * Default installation handles nearly all the asset and project management 
-   needs of an animation and vfx studio.
- * Customizable with configuration scripts.
- * Customizable object model (**Stalker Object Model - SOM**).
- * Uses **TaskJuggler** as the project planing and tracking backend.
- * Mainly developed for **PostgreSQL** in mind but **SQLite3** is also
-   supported.
- * Can be connected to all the major 3D animation packages like **Maya,
-   Houdini, Nuke, Fusion, Softimage, Blender** etc. and any application that
-   has a Python API. And with applications like **Adobe Photoshop** which does
-   not have a direct Python API but supports ``win32com`` or ``comtypes``.
- * Mainly developed for **Python 3.0+** and **Python 2.7** is fully supported.
- * Developed with **TDD** practices.
-
-Stalker is build over these other OpenSource projects:
- * Python
- * SQLAlchemy and Alembic
- * Jinja2
- * TaskJuggler
-
-Stalker as a library has no graphical UI, it is a python library that gives you
-the ability to build your pipeline on top of it. There are other python
-packages like the Open Source Pyramid Web Application `Stalker Pyramid`_ and
-the Open Source pipeline library `Anima`_ which has PyQt/PySide/PySide2 UIs for
-applications like Maya, Nuke, Houdini, Fusion, Photoshop etc.
-
-.. _`Stalker Pyramid`: https://github.com/eoyilmaz/stalker_pyramid
-.. _`Anima`: https://github.com/eoyilmaz/anima
-
-Installation
-============
-
-Use::
-
-  pip install stalker
+    import datetime
+    stalker.defaults.timing_resolution = datetime.timedelta(hours=1)
 
 
-Examples
-========
-
-Let's play with **Stalker**.
-
-Initialize the database and fill with some default data:
-
-.. code:: python
-
+def test_readme_tutorial_code(setup):
+    """Tests the tutorial code in README.rst
+    """
     from stalker import db
     db.setup()
     db.init()
-
-Create a ``User``:
-
-.. code:: python
 
     from stalker.db.session import DBSession
     from stalker import User
@@ -103,10 +59,6 @@ Create a ``User``:
     # Save the user to database
     DBSession.save(me)
 
-Create a ``Repository`` for project files to be saved under:
-
-.. code:: python
-
     from stalker import Repository
     repo = Repository(
         name='Commercial Projects Repository',
@@ -114,10 +66,6 @@ Create a ``Repository`` for project files to be saved under:
         linux_path='/mnt/Z/Projects',
         osx_path='/Volumes/Z/Projects'
     )
-
-Create a ``FilenameTemplate`` (to be used as file naming convention):
-
-.. code:: python
 
     from stalker import FilenameTemplate
 
@@ -131,21 +79,12 @@ Create a ``FilenameTemplate`` (to be used as file naming convention):
         filename='{{version.nice_name}}_v{{"%03d"|format(version.version_number)}}'
     )
 
-Create a ``Structure`` that uses this template:
-
-.. code:: python
-
     from stalker import Structure
     standard_folder_structure = Structure(
         name='Standard Project Folder Structure',
         templates=[task_template],
         custom_template='{{project.code}}/References'  # If you need extra folders
     )
-
-Now create a ``Project`` that uses this structure and will be placed under the
-repository:
-
-.. code:: python
 
     from stalker import Project
     new_project = Project(
@@ -155,10 +94,6 @@ repository:
         repositories=[repo],  # if you have more than one repository you can do it
     )
 
-Define the project resolution:
-
-.. code:: python
-
     from stalker import ImageFormat
     hd1080 = ImageFormat(
         name='1080p',
@@ -166,16 +101,10 @@ Define the project resolution:
         height=1080
     )
 
-Set the project resolution:
-
     new_project.image_format = hd1080
 
     # Save the project and all the other data it is connected to it
     DBSession.save(new_project)
-
-Create Assets, Shots and other Tasks:
-
-.. code:: python
 
     from stalker import Task, Asset, Shot, Type
 
@@ -232,34 +161,18 @@ Create Assets, Shots and other Tasks:
     )
     DBSession.save([animation, lighting])
 
-Let's create versions for the Animation task.
-
-.. code-block:: python
-
     from stalker import Version
 
     new_version = Version(task=animation)
     new_version.update_paths()  # to render the naming convention template
     new_version.extension = '.ma'  # let's say that we have created under Maya
 
-Let's check how the version path is rendered:
-
-.. code-block:: python
-
     assert new_version.absolute_full_path == \
         "Z:/Projects/TP/SH001/Animation/SH001_Animation_Main_v001.ma"
     assert new_version.version_number == 1
-
-Create a new version and check that the version number increased automatically:
-
-.. code-block:: python
 
     new_version2 = Version(task=animation)
     new_version2.update_paths()  # to render the naming convention template
     new_version2.extension = '.ma'  # let's say that we have created under Maya
 
     assert new_version2.version_number == 2
-
-See more detailed example in `API Tutorial`_.
-
-.. _API Tutorial: https://pythonhosted.org/stalker/tutorial.html
