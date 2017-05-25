@@ -1,11 +1,26 @@
-|travis|
-
-.. _Build Status: https://travis-ci.org/eoyilmaz/stalker.svg?branch=master)
-
+|travis| |license| |pyversion| |pypiversion| |wheel|
 
 .. |travis| image:: https://travis-ci.org/eoyilmaz/stalker.svg?branch=master
-    :alt: Travis-CI Build Status
     :target: https://travis-ci.org/eoyilmaz/stalker
+    :alt: Travis-CI Build Status
+
+.. |license| image:: https://img.shields.io/badge/License-LGPL%20v3-blue.svg
+     :target: http://www.gnu.org/licenses/lgpl-3.0
+     :alt: License
+
+.. |pyversion| image:: https://img.shields.io/pypi/pyversions/stalker.svg
+     :target: https://pypi.python.org/pypi/stalker
+     :alt: Supported Python versions
+
+.. |pypiversion| image:: https://img.shields.io/pypi/v/stalker.svg
+     :target: https://pypi.python.org/pypi/stalker
+     :alt: PyPI Version
+
+.. |wheel| image:: https://img.shields.io/pypi/wheel/stalker.svg
+     :target: https://pypi.python.org/pypi/stalker
+     :alt: Wheel Support
+
+
 
 =====
 About
@@ -18,20 +33,23 @@ projects. Stalker is licensed under LGPL v3.
 Features
 ========
 
- * Designed for animation and VFX Studios.
+Stalker has the following features:
+
+ * Designed for **Animation and VFX Studios**.
  * Platform independent.
  * Default installation handles nearly all the asset and project management 
    needs of an animation and vfx studio.
  * Customizable with configuration scripts.
- * Customizable object model (Stalker Object Model - SOM).
- * Uses TaskJuggler as the project planing and tracking backend.
- * Mainly developed for PostgreSQL in mind but SQLite3 is also supported.
+ * Customizable object model (**Stalker Object Model - SOM**).
+ * Uses **TaskJuggler** as the project planing and tracking backend.
+ * Mainly developed for **PostgreSQL** in mind but **SQLite3** is also
+   supported.
  * Can be connected to all the major 3D animation packages like **Maya,
    Houdini, Nuke, Fusion, Softimage, Blender** etc. and any application that
    has a Python API. And with applications like **Adobe Photoshop** which does
    not have a direct Python API but supports ``win32com`` or ``comtypes``.
- * Mainly developed for Python 3.0+ and Python 2.7 is fully supported.
- * Developed with TDD practices.
+ * Mainly developed for **Python 3.0+** and **Python 2.7** is fully supported.
+ * Developed with **TDD** practices.
 
 Stalker is build over these other OpenSource projects:
  * Python
@@ -64,6 +82,7 @@ Let's play with **Stalker**.
 Initialize the database and fill with some default data:
 
 .. code:: python
+
     from stalker import db
     db.setup()
     db.init()
@@ -71,6 +90,7 @@ Initialize the database and fill with some default data:
 Create a ``User``:
 
 .. code:: python
+
     from stalker.db.session import DBSession
     from stalker import User
     me = User(
@@ -86,6 +106,7 @@ Create a ``User``:
 Create a ``Repository`` for project files to be saved under:
 
 .. code:: python
+
     from stalker import Repository
     repo = Repository(
         name='Commercial Projects Repository',
@@ -97,6 +118,7 @@ Create a ``Repository`` for project files to be saved under:
 Create a ``FilenameTemplate`` (to be used as file naming convention):
 
 .. code:: python
+
     from stalker import FilenameTemplate
 
     task_template = FilenameTemplate(
@@ -112,6 +134,7 @@ Create a ``FilenameTemplate`` (to be used as file naming convention):
 Create a ``Structure`` that uses this template:
 
 .. code:: python
+
     from stalker import Structure
     standard_folder_structure = Structure(
         name='Standard Project Folder Structure',
@@ -123,6 +146,7 @@ Now create a Project that uses this structure and will be placed under the
 repository:
 
 .. code:: python
+
     from stalker import Project
     new_project = Project(
         name='Test Project',
@@ -134,6 +158,7 @@ repository:
 Define the project resolution:
 
 .. code:: python
+
     from stalker import ImageFormat
     hd1080 = ImageFormat(
         width=1920,
@@ -150,6 +175,7 @@ Set the project resolution:
 Create Assets, Shots and other Tasks:
 
 .. code:: python
+
     from stalker import Task, Asset, Shot
 
     character1 = Asset(

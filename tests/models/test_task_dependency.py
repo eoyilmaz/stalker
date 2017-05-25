@@ -120,12 +120,13 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         """
         from stalker.db.session import DBSession
         from stalker import TaskDependency
-        from sqlalchemy.exc import IntegrityError
+        from sqlalchemy.exc import IntegrityError, SAWarning
         self.kwargs.pop('task')
         new_dependency = TaskDependency(**self.kwargs)
         DBSession.add(new_dependency)
         with pytest.raises(IntegrityError) as cm:
-            DBSession.commit()
+            with pytest.warns(SAWarning) as cm2:
+                DBSession.commit()
 
         assert '(psycopg2.IntegrityError) null value in column "task_id" ' \
                'violates not-null constraint' in str(cm.value)
@@ -181,21 +182,19 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         """testing if an Integrity error will be raised when the depends_to
         argument is skipped and the session is committed
         """
-        self.kwargs.pop('depends_to')
-        from stalker.db.session import DBSession
         from stalker import TaskDependency
-        from sqlalchemy.exc import IntegrityError
+        from sqlalchemy.exc import IntegrityError, SAWarning
+        from stalker.db.session import DBSession
+        self.kwargs.pop('depends_to')
         new_dependency = TaskDependency(**self.kwargs)
         DBSession.add(new_dependency)
-        with self.assertRaises(IntegrityError) as cm:
-            DBSession.commit()
+        with pytest.raises(IntegrityError) as cm:
+            with pytest.warns(SAWarning) as cm2:
+                DBSession.commit()
 
-        self.assertTrue(
-            str(cm.exception).startswith(
-                '(psycopg2.IntegrityError) null value in column '
-                '"depends_to_id" violates not-null constraint'
-            )
-        )
+        assert '(psycopg2.IntegrityError) null value in ' \
+               'column "depends_to_id" violates not-null ' \
+               'constraint' in str(cm.value)
 
     def test_depends_to_argument_is_not_a_task_instance(self):
         """testing if a TypeError will be raised when the depends_to argument
