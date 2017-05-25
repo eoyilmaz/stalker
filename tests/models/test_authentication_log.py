@@ -28,7 +28,7 @@ class AuthenticationLogTestCase(unittest.TestCase):
         """
         super(AuthenticationLogTestCase, self).setUp()
 
-        from stalker import db, User
+        from stalker import User
         self.test_user1 = User(
             name='Test User 1',
             login='tuser1',
@@ -383,7 +383,7 @@ class AuthenticationLogTestCase(unittest.TestCase):
         uli.date = date2
         self.assertEqual(uli.date, date2)
 
-    def test_date_argument_is_working_properly(self):
+    def test_date_argument_is_working_properly2(self):
         """testing if the date argument value is properly passed to the date
         attribute
         """
