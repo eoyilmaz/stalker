@@ -16,7 +16,7 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-from psycopg2.tests import unittest
+import unittest
 
 
 class AuthenticationLogTestCase(unittest.TestCase):
