@@ -4,7 +4,6 @@
     dist: trusty
 
     python:
-      - 2.6
       - 2.7
       - 3.3
       - 3.4
@@ -29,7 +28,7 @@
       - psql -c "CREATE DATABASE stalker_test WITH OWNER = stalker_admin ENCODING = 'UTF8' TABLESPACE = pg_default CONNECTION LIMIT = -1;" -U postgres
 
     script:
-      - py.test -n auto --cov-report term --cov=stalker tests
+      - py.test -n auto --cov-report= --cov=stalker tests
 
     after_sucess:
       - codeclimate-test-reporter
