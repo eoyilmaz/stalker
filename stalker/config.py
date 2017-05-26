@@ -27,12 +27,90 @@ from stalker.log import logging_level
 logger.setLevel(logging_level)
 
 
-class Config(object):
+class ConfigBase(object):
     """Config abstraction
 
     Idea is coming from Sphinx config.
+    """
+    default_config_values = {}
 
-    Holds system wide configuration variables. See
+    def __init__(self):
+        self.config_values = self.default_config_values.copy()
+        self.user_config = {}
+
+        # the priority order is
+        # stalker.config
+        # config.py under .stalker_rc directory
+        # config.py under $STALKER_PATH
+
+        self._parse_settings()
+
+    def _parse_settings(self):
+        # for now just use $STALKER_PATH
+
+        # try to get the environment variable
+        if self.env_key not in os.environ:
+            # don't do anything
+            logger.debug("no environment key found for user settings")
+        else:
+            logger.debug("environment key found")
+
+            resolved_path = os.path.expanduser(
+                os.path.join(
+                    os.environ[self.env_key],
+                    "config.py"
+                )
+            )
+
+            # using `while` is not safe to expand variables
+            # so expand vars for 100 times which already is ridiculously
+            # complex
+            max_recursion = 100
+            i = 0
+            while '$' in resolved_path and i < max_recursion:
+                resolved_path = os.path.expandvars(
+                    resolved_path
+                )
+                i += 1
+
+            try:
+                logger.debug("importing user config")
+                with open(resolved_path) as f:
+                    exec(f.read(), self.user_config)
+            except IOError:
+                logger.warning("The $STALKER_PATH: %s doesn't exists! "
+                               "skipping user config" % resolved_path)
+            except SyntaxError as e:
+                raise RuntimeError(
+                    "There is a syntax error in your configuration file: %s" %
+                    str(e)
+                )
+            finally:
+                # append the data to the current settings
+                logger.debug("updating system config")
+                for key in self.user_config:
+                    #if key in self.config_values:
+                    self.config_values[key] = self.user_config[key]
+
+    def __getattr__(self, name):
+        return self.config_values[name]
+
+    def __getitem__(self, name):
+        return getattr(self, name)
+
+    def __setitem__(self, name, value):
+        return setattr(self, name, value)
+
+    def __delitem__(self, name):
+        # delattr(self, name)
+        self.config_values.pop(name)
+
+    def __contains__(self, name):
+        return name in self.config_values
+
+
+class Config(ConfigBase):
+    """Holds system wide configuration variables. See
     `configuring stalker`_ for more detail.
 
     .. _configuring stalker: ../configure.html
@@ -483,80 +561,6 @@ taskreport breakdown "{{csv_file_name}}"{
         thumbnail_quality=70,
         thumbnail_size=[320, 180],
     )
-
-    def __init__(self):
-        self.config_values = Config.default_config_values.copy()
-        self.user_config = {}
-
-        # the priority order is
-        # stalker.config
-        # config.py under .stalker_rc directory
-        # config.py under $STALKER_PATH
-
-        self._parse_settings()
-
-    def _parse_settings(self):
-        # for now just use $STALKER_PATH
-
-        # try to get the environment variable
-        if self.env_key not in os.environ:
-            # don't do anything
-            logger.debug("no environment key found for user settings")
-        else:
-            logger.debug("environment key found")
-
-            resolved_path = os.path.expanduser(
-                os.path.join(
-                    os.environ[self.env_key],
-                    "config.py"
-                )
-            )
-
-            # using `while` is not safe to expand variables
-            # so expand vars for 100 times which already is ridiculously
-            # complex
-            max_recursion = 100
-            i = 0
-            while '$' in resolved_path and i < max_recursion:
-                resolved_path = os.path.expandvars(
-                    resolved_path
-                )
-                i += 1
-
-            try:
-                logger.debug("importing user config")
-                with open(resolved_path) as f:
-                    exec(f.read(), self.user_config)
-            except IOError:
-                logger.warning("The $STALKER_PATH: %s doesn't exists! "
-                               "skipping user config" % resolved_path)
-            except SyntaxError as e:
-                raise RuntimeError(
-                    "There is a syntax error in your configuration file: %s" %
-                    str(e)
-                )
-            finally:
-                # append the data to the current settings
-                logger.debug("updating system config")
-                for key in self.user_config:
-                    #if key in self.config_values:
-                    self.config_values[key] = self.user_config[key]
-
-    def __getattr__(self, name):
-        return self.config_values[name]
-
-    def __getitem__(self, name):
-        return getattr(self, name)
-
-    def __setitem__(self, name, value):
-        return setattr(self, name, value)
-
-    def __delitem__(self, name):
-        # delattr(self, name)
-        self.config_values.pop(name)
-
-    def __contains__(self, name):
-        return name in self.config_values
 
 
 # use this instance

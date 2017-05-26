@@ -29,6 +29,9 @@ Stalker Changes
   the column stores the data as TEXT but seamlessly convert them to JSON on
   when ORM loads or commits the data.
 
+* **New:** Added ``ConfigBase`` as a base class for ``Config`` to let it be
+  used in other config classes.
+
 0.2.20
 ======
 
