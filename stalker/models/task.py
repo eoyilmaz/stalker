@@ -2209,6 +2209,17 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
           doesn't need to be the responsible, anybody that has a Permission to
           create a Review instance can request a revision.
 
+        :param str description: The description of the requested revision.
+
+        :param int schedule_timing: The timing value of the requested revision.
+          The task will be extended this much of duration. Works along with the
+          ``schedule_unit`` parameter. The default value is 1.
+
+        :param str schedule_unit: The timin unit value of the requested
+          revision. The task will be extended this much of duration. Works
+          along with the ``schedule_timing`` parameter. The default value is
+          'h' for 'hour'.
+
         :type reviewer: class:`.User`
         """
         # check status

@@ -1,0 +1,10 @@
+engines:
+  duplication:
+    enabled: false
+
+ratings:
+  paths:
+    - "stalker/**/*"
+
+exclude_paths:
+- "alembic/**"
