@@ -34,7 +34,9 @@ else:  # Python 2
 
 
 # before anything about stalker create the defaults
-from stalker.config import defaults
+# use this instance
+from stalker import config
+defaults = config.Config()
 
 from stalker.models.auth import (Group, Permission, User, LocalSession, Role,
                                  AuthenticationLog)

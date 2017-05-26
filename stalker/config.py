@@ -561,7 +561,3 @@ taskreport breakdown "{{csv_file_name}}"{
         thumbnail_quality=70,
         thumbnail_size=[320, 180],
     )
-
-
-# use this instance
-defaults = Config()

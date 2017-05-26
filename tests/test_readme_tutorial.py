@@ -147,7 +147,8 @@ def test_readme_tutorial_code(setup_sqlite3):
     new_version.extension = '.ma'  # let's say that we have created under Maya
 
     assert new_version.absolute_full_path == \
-        "Z:/Projects/TP/SH001/Animation/SH001_Animation_Main_v001.ma"
+        "%sTP/SH001/Animation/SH001_Animation_Main_v001.ma" % \
+        repo.path
     assert new_version.version_number == 1
 
     new_version2 = Version(task=animation)
