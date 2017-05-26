@@ -23,11 +23,11 @@ import uuid
 import pytz
 import functools
 
-from sqlalchemy import (Table, Column, Integer, String, Text, ForeignKey,
-                        DateTime)
+from sqlalchemy import Table, Column, Integer, String, Text, ForeignKey
 from sqlalchemy.orm import relationship, validates
 
 from stalker.db.declarative import Base
+from stalker.db.types import GenericDateTime
 from stalker.log import logging_level
 
 import logging
@@ -184,14 +184,14 @@ class SimpleEntity(Base):
     )
 
     date_created = Column(
-        DateTime(timezone=True),
+        GenericDateTime,
         default=functools.partial(datetime.datetime.now, pytz.utc),
         doc="""A :class:`datetime.datetime` instance showing the creation date
         and time of this object."""
     )
 
     date_updated = Column(
-        DateTime(timezone=True),
+        GenericDateTime,
         default=functools.partial(datetime.datetime.now, pytz.utc),
         doc="""A :class:`datetime.datetime` instance showing the update date
         and time of this object."""

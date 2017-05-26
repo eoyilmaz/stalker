@@ -21,7 +21,8 @@ Stalker Changes
 * **Update:** SQLite3 support is back. In fact it was newer gone. For
   simplicity of first time users the default database is again SQLite3. It was
   dropped for the sake of adding more PostgreSQL oriented features. But then it
-  is recognized that the system can handle both.
+  is recognized that the system can handle both. Though a two new Variant had
+  to be created for JSON and Datetime columns.
 
 * **Update:** With the reintroduction of SQLite3, the new JSON type column in
   ``WorkingHours`` class has been upgraded to support SQLite3. So with SQLite3

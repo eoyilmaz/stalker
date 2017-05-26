@@ -16,31 +16,8 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-import pytest
 
-
-@pytest.fixture('module')
-def setup():
-    """delete environment vars so it won't try to open the system stalker
-    database
-    """
-    import os
-    from stalker.config import Config
-    try:
-        os.environ.pop(Config.env_key)
-    except KeyError:
-        # already removed
-        pass
-
-    # regenerate the defaults
-    import stalker
-    stalker.defaults = Config()
-
-    import datetime
-    stalker.defaults.timing_resolution = datetime.timedelta(hours=1)
-
-
-def test_readme_tutorial_code(setup):
+def test_readme_tutorial_code(setup_sqlite3):
     """Tests the tutorial code in README.rst
     """
     from stalker import db
@@ -48,6 +25,8 @@ def test_readme_tutorial_code(setup):
     db.init()
 
     from stalker.db.session import DBSession
+    assert str(DBSession.connection().engine.url) == 'sqlite://'
+
     from stalker import User
     me = User(
         name='Erkan Ozgur Yilmaz',

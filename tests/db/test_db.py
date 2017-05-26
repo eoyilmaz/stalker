@@ -5305,14 +5305,12 @@ class DatabaseModelsTester(UnitTestDBBase):
         test_version_4 = Version(
             name='version for task modeling',
             task=test_task,
-            take='MAIN',
-            full_path='M:/Shows/Proj1/Seq1/Shots/SH001/Lighting'
-            '/Proj1_Seq1_Sh001_MAIN_Lighting_v003.ma'
+            take='MAIN'
         )
         test_version_3.children.append(test_version_4)
-        self.assertEqual(test_version_3.children, [test_version_4])
-        DBSession.add(test_version_4)
-        DBSession.commit()
+        DBSession.save(test_version_4)
+        assert test_version_3.children == [test_version_4]
+        assert test_version_4.parent == test_version_3
 
         # and check if test_version_4 is still present in the database
         test_version_4_db = Version.query\
@@ -5321,16 +5319,11 @@ class DatabaseModelsTester(UnitTestDBBase):
             .filter(Version.version_number == test_version_4.version_number)\
             .first()
 
-        self.assertIsNotNone(test_version_4_db)
-        self.assertEqual(test_version_4_db.task, test_version_4.task)
-        self.assertEqual(
-            test_version_4_db.version_number,
-            test_version_4.version_number
-        )
-        self.assertEqual(
-            test_version_4_db.parent,
-            test_version_3
-        )
+        assert test_version_4_db is not None
+        assert test_version_4_db.task == test_version_4.task
+        assert test_version_4_db.version_number == \
+               test_version_4.version_number
+        assert test_version_4_db.parent == test_version_3
 
         # now delete test_version_3
         DBSession.delete(test_version_3)
@@ -5343,13 +5336,29 @@ class DatabaseModelsTester(UnitTestDBBase):
             .filter(Version.version_number == test_version_4.version_number)\
             .first()
 
-        self.assertIsNotNone(test_version_4_db)
-        self.assertEqual(test_version_4_db.task, test_version_4.task)
-        self.assertEqual(
-            test_version_4_db.version_number,
-            test_version_4.version_number
+        assert test_version_4_db is not None
+        assert test_version_4_db.task == test_version_4.task
+        assert test_version_4_db.version_number == \
+               test_version_4.version_number
+        assert test_version_4_db.parent is None
+
+        # create a new version and assign it as a child of version_5
+        test_version_5 = Version(
+            task=test_task,
+            take='MAIN'
         )
-        self.assertIsNone(test_version_4_db.parent)
+        DBSession.save(test_version_5)
+        test_version_4.children = [test_version_5]
+        DBSession.commit()
+
+        # now delete test_version_5
+        test_version_5_id = test_version_5.id
+        DBSession.delete(test_version_5)
+        DBSession.commit()
+
+        # query it from db
+        assert Version.query.get(test_version_5_id) is None
+        assert test_version_4.children == []
 
     def test_persistence_of_WorkingHours(self):
         """testing the persistence of WorkingHours instances
@@ -5384,3 +5393,40 @@ class DatabaseModelsTester(UnitTestDBBase):
         self.assertEqual(name, wh_db.name)
         self.assertEqual(hours, wh_db.working_hours)
         self.assertEqual(daily_working_hours, wh_db.daily_working_hours)
+
+
+def test_timezones_with_sqlite3(setup_sqlite3):
+    """testing if timezones will be correctly handled in SQLite3
+    """
+    from stalker import db
+    db.setup()
+    db.init()
+
+    from stalker.db.session import DBSession
+    from stalker import SimpleEntity
+
+    # check if we're really using SQLite3
+    assert str(DBSession.connection().engine.url) == 'sqlite://'
+
+    # create a simple entity
+    test_se_1 = SimpleEntity(name='Test Entry 1')
+
+    # check if it has UTC as timezone
+    import pytz
+    assert test_se_1.date_created.tzinfo == pytz.utc
+
+    # commit to database
+    DBSession.save(test_se_1)
+
+    # now delete the local copy and retrieve it back
+    del test_se_1
+
+    test_se_1_db = SimpleEntity.query.filter_by(name='Test Entry 1').first()
+
+    # now check if the test_se_1_db has the local time zone in its
+    # date_created field
+    import tzlocal
+    local_tz = tzlocal.get_localzone()
+    import datetime
+    now = datetime.datetime.now(local_tz)
+    assert test_se_1_db.date_created.tzinfo == now.tzinfo

@@ -24,13 +24,14 @@ import base64
 import datetime
 import pytz
 
-from sqlalchemy import (Table, Column, Integer, ForeignKey, String, DateTime,
-                        Enum, Float)
+from sqlalchemy import (Table, Column, Integer, ForeignKey, String, Enum,
+                        Float)
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship, synonym, validates
 from sqlalchemy.schema import UniqueConstraint
 
 from stalker.db.declarative import Base
+from stalker.db.types import GenericDateTime
 from stalker.models.mixins import ACLMixin
 from stalker.models.entity import Entity, SimpleEntity
 from stalker.log import logging_level
@@ -1137,7 +1138,7 @@ class AuthenticationLog(SimpleEntity):
     )
 
     date = Column(
-        DateTime(timezone=True),
+        GenericDateTime,
         nullable=False
     )
 

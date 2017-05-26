@@ -52,6 +52,7 @@ Stalker has the following features:
  * Developed with **TDD** practices.
 
 Stalker is build over these other OpenSource projects:
+
  * Python
  * SQLAlchemy and Alembic
  * Jinja2

@@ -20,13 +20,14 @@ import logging
 
 import pytz
 from sqlalchemy import (Table, Column, String, Integer, ForeignKey, Interval,
-                        DateTime, Float, Enum)
+                        Float, Enum)
 from sqlalchemy.exc import UnboundExecutionError, OperationalError
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import synonym, relationship, validates
 
 
 from stalker.db.declarative import Base
+from stalker.db.types import GenericDateTime
 from stalker.log import logging_level
 
 logger = logging.getLogger(__name__)
@@ -461,7 +462,7 @@ class DateRangeMixin(object):
 
     @declared_attr
     def _end(cls):
-        return Column("end", DateTime(timezone=True))
+        return Column("end", GenericDateTime)
 
     def _end_getter(self):
         """The date that the entity should be delivered.
@@ -490,7 +491,7 @@ class DateRangeMixin(object):
 
     @declared_attr
     def _start(cls):
-        return Column("start", DateTime(timezone=True))
+        return Column("start", GenericDateTime)
 
     def _start_getter(self):
         """The date that this entity should start.
@@ -627,11 +628,11 @@ class DateRangeMixin(object):
 
     @declared_attr
     def computed_start(cls):
-        return Column('computed_start', DateTime(timezone=True))
+        return Column('computed_start', GenericDateTime)
 
     @declared_attr
     def computed_end(cls):
-        return Column('computed_end', DateTime(timezone=True))
+        return Column('computed_end', GenericDateTime)
 
     @property
     def computed_duration(self):

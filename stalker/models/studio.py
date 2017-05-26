@@ -22,12 +22,11 @@ import time
 import datetime
 from math import ceil
 
-from sqlalchemy import (Column, Integer, ForeignKey, Interval, Boolean,
-                        DateTime, Text)
+from sqlalchemy import (Column, Integer, ForeignKey, Interval, Boolean, Text)
 from sqlalchemy.orm import validates, relationship, synonym, reconstructor
 
 from stalker import log
-from stalker.db.types import GenericJSON
+from stalker.db.types import GenericJSON, GenericDateTime
 from stalker.models.entity import SimpleEntity, Entity
 from stalker.models.mixins import DateRangeMixin, WorkingHoursMixin
 from stalker.models.schedulers import SchedulerBase
@@ -131,13 +130,13 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         doc='The User who is scheduling the Studio projects right now'
     )
     scheduling_started_at = Column(
-        DateTime(timezone=True),
+        GenericDateTime,
         doc='Stores when the current scheduling is started at, it is a good '
             'measure for measuring if the last schedule is not correctly '
             'finished'
     )
     last_scheduled_at = Column(
-        DateTime(timezone=True),
+        GenericDateTime,
         doc='Stores the last schedule date'
     )
     last_scheduled_by_id = Column(
