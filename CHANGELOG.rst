@@ -32,6 +32,9 @@ Stalker Changes
 * **New:** Added ``ConfigBase`` as a base class for ``Config`` to let it be
   used in other config classes.
 
+* **Fix:** Fixed ``testing.create_db()`` and ``testing.drop_db()`` to fallback
+  to ``subprocess.check_call`` method for Python 2.6.
+
 0.2.20
 ======
 

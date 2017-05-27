@@ -30,7 +30,14 @@ def create_db(database_name):
     """
     logger.debug('creating database: %s' % database_name)
     import subprocess
-    subprocess.check_output(
+
+    # fallback to check_call for Python 2.6
+    try:
+        process_caller = subprocess.check_output
+    except AttributeError:
+        process_caller = subprocess.check_call
+
+    process_caller(
         'psql -c "CREATE DATABASE %s;" -U postgres' % database_name,
         shell=True
     )
@@ -56,10 +63,16 @@ def drop_db(database_name):
     import subprocess
     import time
 
+    # fallback to check_call for Python 2.6
+    try:
+        process_caller = subprocess.check_output
+    except AttributeError:
+        process_caller = subprocess.check_call
+
     while True:
         output = ''
         try:
-            output = subprocess.check_output(
+            output = process_caller(
                 'psql -c "DROP DATABASE %s;" -U postgres' % database_name,
                 # stderr=subprocess.PIPE,
                 shell=True
