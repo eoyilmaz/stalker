@@ -43,7 +43,7 @@ def upgrade():
 
 def downgrade():
     op.add_column(
-        u'Studios',
+        'Studios',
         sa.Column(
             'working_hours',
             postgresql.BYTEA(),
@@ -54,11 +54,11 @@ def downgrade():
     op.drop_constraint(
         'Studios_working_hours_id_fkey', 'Studios', type_='foreignkey'
     )
-    op.drop_column(u'Studios', 'working_hours_id')
+    op.drop_column('Studios', 'working_hours_id')
     op.drop_table('WorkingHours')
     op.execute(
         'ALTER TABLE "Studios"'
-        'ALTER COLUMN last_schedule_message TYPE BYTEA'
+        'ALTER COLUMN last_schedule_message TYPE BYTEA '
         'USING last_schedule_message::bytea'
     )
     print("Warning! Can not keep WorkingHours instances.")
