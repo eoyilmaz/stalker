@@ -26,8 +26,8 @@ Stalker Changes
 
 * **Update:** With the reintroduction of SQLite3, the new JSON type column in
   ``WorkingHours`` class has been upgraded to support SQLite3. So with SQLite3
-  the column stores the data as TEXT but seamlessly convert them to JSON on
-  when ORM loads or commits the data.
+  the column stores the data as TEXT but seamlessly convert them to JSON when
+  ORM loads or commits the data.
 
 * **New:** Added ``ConfigBase`` as a base class for ``Config`` to let it be
   used in other config classes.
