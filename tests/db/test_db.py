@@ -850,7 +850,7 @@ class DatabaseTester(UnitTestDBBase):
         db.init()
 
         # now change the alembic_version
-        sql = "update alembic_version set version_num = 'some_random_number'"
+        sql = "update alembic_version set version_num='some_random_number'"
         DBSession.connection().execute(sql)
         DBSession.commit()
 
@@ -869,6 +869,37 @@ class DatabaseTester(UnitTestDBBase):
 
         assert str(cm.value) == 'Please update the database to version: ' \
                                 '%s' % db.alembic_version
+
+        # also it is not possible to continue with the current DBSession
+        from sqlalchemy.exc import StatementError
+        from stalker import User
+        with pytest.raises(StatementError) as cm:
+            DBSession.query(User.id).all()
+
+        assert "(sqlalchemy.exc.InvalidRequestError) Can't reconnect until " \
+               "invalid transaction is rolled back" in str(cm.value)
+
+        # rollback and reconnect to the database
+        DBSession.rollback()
+
+        # expect it happen again
+        with pytest.raises(ValueError) as cm:
+            db.setup(self.config)
+
+        assert str(cm.value) == 'Please update the database to version: ' \
+                                '%s' % db.alembic_version
+
+        # rollback and insert the correct alembic version number
+        DBSession.rollback()
+        from stalker.db import alembic_version
+        sql = "update alembic_version set version_num='%s'" % alembic_version
+        DBSession.connection().execute(sql)
+        DBSession.commit()
+
+        # and now expect everything to work correctly
+        db.setup(self.config)
+        all_users = DBSession.query(User).all()
+        assert all_users is not None
 
     def test_initialization_of_repo_environment_variables(self):
         """testing if the db.create_repo_env_vars() will create environment

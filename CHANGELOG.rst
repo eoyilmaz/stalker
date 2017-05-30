@@ -41,6 +41,12 @@ Stalker Changes
 * **Update:** Updated all of the tests to use ``pytest`` style assertions to
   support Python 2.6 along with 2.7 and 3.0+.
 
+* **Fix:** Fixed ``stalker.db.check_alembic_version()`` function to invalidate
+  the connection, so it is not possible to continue with the current session,
+  preventing users to ignore the raised ``ValueError`` when the
+  ``alembic_version`` of the database is not matching the ``alembic_version``
+  of Stalker's current version.
+
 
 0.2.20
 ======

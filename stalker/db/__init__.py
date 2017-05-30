@@ -221,9 +221,11 @@ def check_alembic_version():
     current_alembic_version = get_alembic_version()
     logger.debug('current_alembic_version: %s' % current_alembic_version)
     if current_alembic_version and current_alembic_version != alembic_version:
-        # close all connection and
-        
-        # remove the session
+        # invalidate the connection
+        from stalker.db.session import DBSession
+        DBSession.connection().invalidate()
+
+        # and raise a ValueError (which I'm not sure is the correct exception)
         raise ValueError(
             'Please update the database to version: %s' % alembic_version
         )
