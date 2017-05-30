@@ -17,6 +17,9 @@
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
+
+import pytest
+
 from stalker import Entity, Type
 
 
@@ -46,7 +49,7 @@ class TypeTester(unittest.TestCase):
         """testing if the __auto_name__ class attribute is set to False for
         Ticket class
         """
-        self.assertFalse(Type.__auto_name__)
+        assert Type.__auto_name__ is False
 
     def test_equality(self):
         """testing the equality operator
@@ -60,10 +63,10 @@ class TypeTester(unittest.TestCase):
         self.kwargs["description"] = "this is a different type"
         new_type4 = Type(**self.kwargs)
 
-        self.assertTrue(self.test_type == new_type2)
-        self.assertFalse(self.test_type == new_type3)
-        self.assertFalse(self.test_type == new_type4)
-        self.assertFalse(self.test_type == self.entity1)
+        assert self.test_type == new_type2
+        assert not self.test_type == new_type3
+        assert not self.test_type == new_type4
+        assert not self.test_type == self.entity1
 
     def test_inequality(self):
         """testing the inequality operator
@@ -77,54 +80,45 @@ class TypeTester(unittest.TestCase):
         self.kwargs["description"] = "this is a different type"
         new_type4 = Type(**self.kwargs)
 
-        self.assertFalse(self.test_type != new_type2)
-        self.assertTrue(self.test_type != new_type3)
-        self.assertTrue(self.test_type != new_type4)
-        self.assertTrue(self.test_type != self.entity1)
+        assert not self.test_type != new_type2
+        assert self.test_type != new_type3
+        assert self.test_type != new_type4
+        assert self.test_type != self.entity1
 
     def test_plural_class_name(self):
         """testing the plural name of Type class
         """
-        self.assertTrue(self.test_type.plural_class_name, "Types")
+        assert self.test_type.plural_class_name == "Types"
 
     def test_target_entity_type_argument_can_not_be_skipped(self):
         """testing if a TypeError will be raised when the created Type doesn't
         have any target_entity_type
         """
         self.kwargs.pop("target_entity_type")
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Type(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Type.target_entity_type can not be None'
-        )
+        assert str(cm.value) == 'Type.target_entity_type can not be None'
 
     def test_target_entity_type_argument_can_not_be_None(self):
         """testing if a TypeError will be raised when the target_entity_type
         argument is None
         """
         self.kwargs["target_entity_type"] = None
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Type(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Type.target_entity_type can not be None'
-        )
+        assert str(cm.value) == 'Type.target_entity_type can not be None'
 
     def test_target_entity_type_argument_can_not_be_empty_string(self):
         """testing if a ValueError will be raised when the target_entity_type
         argument is an empty string
         """
         self.kwargs["target_entity_type"] = ""
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             Type(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Type.target_entity_type can not be empty'
-        )
+        assert str(cm.value) == 'Type.target_entity_type can not be empty'
 
     def test_target_entity_type_argument_accepts_strings(self):
         """testing if target_entity_type argument accepts strings
@@ -141,31 +135,27 @@ class TypeTester(unittest.TestCase):
 
         self.kwargs["target_entity_type"] = Asset
         new_type = Type(**self.kwargs)
-        self.assertEqual(new_type.target_entity_type, "Asset")
+        assert new_type.target_entity_type == "Asset"
 
     def test_target_entity_type_attribute_is_read_only(self):
         """testing if the target_entity_type attribute is read-only
         """
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             self.test_type.target_entity_type = "Asset"
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_target_entity_type_attribute_is_working_properly(self):
         """testing if the target_entity_type attribute is working properly
         """
-        self.assertEqual(self.test_type.target_entity_type,
-                         self.kwargs["target_entity_type"])
+        assert self.test_type.target_entity_type == \
+            self.kwargs["target_entity_type"]
 
     # def test_hash_value(self):
     #     """testing if the hash value is correctly calculated
     #     """
-    #     self.assertEqual(
-    #         hash(self.test_type),
+    #     assert \
+    #         hash(self.test_type) == \
     #         hash(self.test_type.id) +
     #         2 * hash(self.test_type.name) +
     #         3 * hash(self.test_type.entity_type)
-    #     )

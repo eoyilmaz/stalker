@@ -17,6 +17,9 @@
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
+
+import pytest
+
 from stalker.testing import UnitTestDBBase
 
 
@@ -122,7 +125,7 @@ class DailyTestCase(DailyTestBase):
             project=self.test_project,
             status_list=self.daily_status_list
         )
-        self.assertTrue(isinstance(daily, Daily))
+        assert isinstance(daily, Daily)
 
     def test_links_argument_is_skipped(self):
         """testing if the links attribute will be an empty list if the links
@@ -134,7 +137,7 @@ class DailyTestCase(DailyTestBase):
             project=self.test_project,
             status_list=self.daily_status_list
         )
-        self.assertEqual(daily.links, [])
+        assert daily.links == []
 
     def test_links_argument_is_none(self):
         """testing if the links attribute will be an empty list when the links
@@ -147,7 +150,7 @@ class DailyTestCase(DailyTestBase):
             project=self.test_project,
             status_list=self.daily_status_list
         )
-        self.assertEqual(daily.links, [])
+        assert daily.links == []
 
     def test_links_attribute_is_set_to_none(self):
         """testing if a TypeError will be raised when the links attribute is
@@ -159,7 +162,7 @@ class DailyTestCase(DailyTestBase):
             project=self.test_project,
             status_list=self.daily_status_list
         )
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             daily.links = None
 
     def test_links_argument_is_not_a_list_instance(self):
@@ -167,7 +170,7 @@ class DailyTestCase(DailyTestBase):
         a list
         """
         from stalker import Daily
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Daily(
                 name='Test Daily',
                 links='not a list of Daily instances',
@@ -175,18 +178,16 @@ class DailyTestCase(DailyTestBase):
                 status_list=self.daily_status_list
             )
 
-        self.assertEqual(
-            str(cm.exception),
-            'DailyLink.link should be an instance of stalker.models.link.Link '
-            'instance, not str'
-        )
+        assert str(cm.value) == \
+            'DailyLink.link should be an instance of ' \
+            'stalker.models.link.Link instance, not str'
 
     def test_links_argument_is_not_a_list_of_link_instances(self):
         """testing if a TypeError will be raised when the links argument is not
         a list of Link instances
         """
         from stalker import Daily
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Daily(
                 name='Test Daily',
                 links=['not', 1, 'list', 'of', Daily, 'instances'],
@@ -194,11 +195,9 @@ class DailyTestCase(DailyTestBase):
                 status_list=self.daily_status_list
             )
 
-        self.assertEqual(
-            str(cm.exception),
-            'DailyLink.link should be an instance of stalker.models.link.Link '
-            'instance, not str'
-        )
+        assert str(cm.value) == \
+            'DailyLink.link should be an instance of ' \
+            'stalker.models.link.Link instance, not str'
 
     def test_links_argument_is_working_properly(self):
         """testing if the links argument value is correctly passed to the links
@@ -212,7 +211,7 @@ class DailyTestCase(DailyTestBase):
             project=self.test_project,
             status_list=self.daily_status_list
         )
-        self.assertEqual(daily.links, test_value)
+        assert daily.links == test_value
 
     def test_links_attribute_is_working_properly(self):
         """testing if the links attribute is working properly
@@ -225,7 +224,7 @@ class DailyTestCase(DailyTestBase):
         )
         daily.links.append(self.test_link1)
 
-        self.assertEqual(daily.links, [self.test_link1])
+        assert daily.links == [self.test_link1]
 
     def test_versions_attribute_is_read_only(self):
         """testing if versions attribute is a read only attribute
@@ -236,7 +235,7 @@ class DailyTestCase(DailyTestBase):
             project=self.test_project,
             status_list=self.daily_status_list
         )
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             setattr(daily, 'versions', 10)
 
 
@@ -344,7 +343,7 @@ class DailyDBTestDBCase(UnitTestDBBase):
         from stalker.db.session import DBSession
         DBSession.add(daily)
         DBSession.commit()
-        self.assertEqual(daily.tasks, [self.test_task1])
+        assert daily.tasks == [self.test_task1]
 
     def test_versions_attribute_will_return_a_list_of_versions(self):
         """testing if the versions attribute is a list of Version instances
@@ -360,7 +359,7 @@ class DailyDBTestDBCase(UnitTestDBBase):
         from stalker.db.session import DBSession
         DBSession.add(daily)
         DBSession.commit()
-        self.assertEqual(daily.versions, [self.test_version1])
+        assert daily.versions == [self.test_version1]
 
 
 class DailyLinkTestCase(DailyTestBase):
@@ -372,18 +371,16 @@ class DailyLinkTestCase(DailyTestBase):
         """
         from stalker import DailyLink
         dl = DailyLink()
-        self.assertEqual(dl.rank, 0)
+        assert dl.rank == 0
 
     def test_daily_argument_is_not_a_daily_instance(self):
         """testing if a TypeError will be raised if the daily argument is not a
         Daily instance and not None
         """
         from stalker import DailyLink
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             DailyLink(daily='not a daily')
 
-        self.assertEqual(
-            str(cm.exception),
-            'DailyLink.daily should be an instance of '
+        assert str(cm.value) == \
+            'DailyLink.daily should be an instance of ' \
             'stalker.models.review.Daily instance, not str'
-        )

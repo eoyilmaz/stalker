@@ -18,6 +18,7 @@
 
 import unittest
 import datetime
+import pytest
 import pytz
 
 from sqlalchemy import Column, Integer, ForeignKey
@@ -78,12 +79,11 @@ class DateRangeMixinTester(unittest.TestCase):
 
             new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
 
-            self.assertEqual(new_foo_obj.start,
-                             new_foo_obj.end - new_foo_obj.duration)
+            assert new_foo_obj.start == new_foo_obj.end - new_foo_obj.duration
 
             # the values are rounded can not check anymore
-            #self.assertEqual(new_foo_obj.end, self.kwargs["end"])
-            #self.assertEqual(new_foo_obj.duration, self.kwargs["duration"])
+            # assert new_foo_obj.end == self.kwargs["end"]
+            # assert new_foo_obj.duration == self.kwargs["duration"]
 
     def test_start_attribute_is_not_a_date_object(self):
         """testing if the defaults will be used when trying to set the
@@ -97,34 +97,30 @@ class DateRangeMixinTester(unittest.TestCase):
 
             self.test_foo_obj.start = test_value
 
-            self.assertEqual(
-                self.test_foo_obj.start,
-                self.test_foo_obj.end - self.test_foo_obj.duration
-            )
+            assert self.test_foo_obj.start == \
+                   self.test_foo_obj.end - self.test_foo_obj.duration
 
             # check if we still have the same end
-            self.assertEqual(self.test_foo_obj.end, end)
+            assert self.test_foo_obj.end == end
 
             # check if we still have the same duration
-            self.assertEqual(self.test_foo_obj.duration, duration)
+            assert self.test_foo_obj.duration == duration
 
     def test_start_attribute_is_set_to_None_use_the_default_value(self):
         """testing if setting the start attribute to None will update the
         start to today
         """
         self.test_foo_obj.start = None
-        self.assertEqual(
-            self.test_foo_obj.start,
+        assert self.test_foo_obj.start == \
             datetime.datetime(2013, 3, 22, 15, 00, tzinfo=pytz.utc)
-        )
-        self.assertTrue(isinstance(self.test_foo_obj.start, datetime.datetime))
+        assert isinstance(self.test_foo_obj.start, datetime.datetime)
 
     def test_start_attribute_works_properly(self):
         """testing if the start properly is working properly
         """
         test_value = datetime.datetime(2011, 1, 1, tzinfo=pytz.utc)
         self.test_foo_obj.start = test_value
-        self.assertEqual(self.test_foo_obj.start, test_value)
+        assert self.test_foo_obj.start == test_value
 
     def test_end_argument_is_not_a_date_object(self):
         """testing if default values will be for the end attribute used when
@@ -138,8 +134,7 @@ class DateRangeMixinTester(unittest.TestCase):
             self.kwargs["end"] = test_value
             new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
 
-            self.assertEqual(new_foo_obj.end,
-                             new_foo_obj.start + new_foo_obj.duration)
+            assert new_foo_obj.end == new_foo_obj.start + new_foo_obj.duration
 
     def test_end_attribute_is_not_a_date_object(self):
         """testing if default values will be used for the end attribute
@@ -152,10 +147,8 @@ class DateRangeMixinTester(unittest.TestCase):
         for test_value in test_values:
             self.test_foo_obj.end = test_value
 
-            self.assertEqual(
-                self.test_foo_obj.end,
+            assert self.test_foo_obj.end == \
                 self.test_foo_obj.start + self.test_foo_obj.duration
-            )
 
     def test_end_argument_is_tried_to_set_to_a_time_before_start(self):
         """testing if end attribute will be updated to
@@ -168,8 +161,7 @@ class DateRangeMixinTester(unittest.TestCase):
 
         new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
 
-        self.assertEqual(new_foo_obj.end,
-                         new_foo_obj.start + new_foo_obj.duration)
+        assert new_foo_obj.end == new_foo_obj.start + new_foo_obj.duration
 
     def test_end_attribute_is_tried_to_set_to_a_time_before_start(self):
         """testing if a the due attribute is re calculated from the start
@@ -178,10 +170,8 @@ class DateRangeMixinTester(unittest.TestCase):
         """
         new_end = self.test_foo_obj.start - datetime.timedelta(days=10)
         self.test_foo_obj.end = new_end
-        self.assertEqual(
-            self.test_foo_obj.end,
+        assert self.test_foo_obj.end == \
             self.test_foo_obj.start + self.test_foo_obj.duration
-        )
 
     def test_end_attribute_is_shifted_when_start_passes_it(self):
         """testing if end attribute will be shifted when the start
@@ -190,10 +180,7 @@ class DateRangeMixinTester(unittest.TestCase):
         time_delta = self.test_foo_obj.end - self.test_foo_obj.start
         self.test_foo_obj.start += 2 * time_delta
 
-        self.assertEqual(
-            self.test_foo_obj.end - self.test_foo_obj.start,
-            time_delta
-        )
+        assert  self.test_foo_obj.end - self.test_foo_obj.start == time_delta
 
     def test_duration_argument_is_not_an_instance_of_timedelta_no_problem_if_start_and_end_is_present(self):
         """testing if no error will be raised when the duration argument is not
@@ -208,8 +195,7 @@ class DateRangeMixinTester(unittest.TestCase):
             new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
 
             # check the value
-            self.assertEqual(new_foo_obj.duration,
-                             new_foo_obj.end - new_foo_obj.start)
+            assert new_foo_obj.duration == new_foo_obj.end - new_foo_obj.start
 
     def test_duration_argument_is_not_an_instance_of_date_when_start_argument_is_missing(self):
         """testing if defaults.timing_resolution will be used when the duration
@@ -222,10 +208,7 @@ class DateRangeMixinTester(unittest.TestCase):
         for test_value in test_values:
             self.kwargs["duration"] = test_value
             new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
-            self.assertEqual(
-                new_foo_obj.duration,
-                defaults.timing_resolution
-            )
+            assert new_foo_obj.duration == defaults.timing_resolution
 
     def test_duration_argument_is_not_an_instance_of_date_when_end_argument_is_missing(self):
         """testing if the defaults.timing_resolution will be used when the
@@ -241,10 +224,7 @@ class DateRangeMixinTester(unittest.TestCase):
         for test_value in test_values:
             self.kwargs["duration"] = test_value
             new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
-            self.assertEqual(
-                new_foo_obj.duration,
-                defaults.timing_resolution
-            )
+            assert new_foo_obj.duration == defaults.timing_resolution
 
     def test_duration_argument_is_smaller_than_timing_resolution(self):
         """testing if the defaults.timing_resolution will be used as for the
@@ -254,14 +234,10 @@ class DateRangeMixinTester(unittest.TestCase):
         self.kwargs.pop("end")
         self.kwargs['duration'] = datetime.timedelta(minutes=1)
         obj = DateRangeMixFooMixedInClass(**self.kwargs)
-        self.assertEqual(
-            obj.start,
+        assert obj.start == \
             datetime.datetime(2013, 3, 22, 15, 0, tzinfo=pytz.utc)
-        )
-        self.assertEqual(
-            obj.end,
+        assert obj.end == \
             datetime.datetime(2013, 3, 22, 16, 0, tzinfo=pytz.utc)
-        )
 
     def test_duration_attribute_is_calculated_correctly(self):
         """testing if the duration attribute is calculated correctly
@@ -272,7 +248,7 @@ class DateRangeMixinTester(unittest.TestCase):
         new_foo_entity.end = \
             new_foo_entity.start + datetime.timedelta(201)
 
-        self.assertEqual(new_foo_entity.duration, datetime.timedelta(201))
+        assert new_foo_entity.duration == datetime.timedelta(201)
 
     def test_duration_attribute_is_set_to_not_an_instance_of_timedelta(self):
         """testing if duration attribute reset to a calculated value when it is
@@ -285,10 +261,8 @@ class DateRangeMixinTester(unittest.TestCase):
             self.test_foo_obj.duration = test_value
 
             # check the value
-            self.assertEqual(
-                self.test_foo_obj.duration,
+            assert self.test_foo_obj.duration == \
                 self.test_foo_obj.end - self.test_foo_obj.start
-            )
 
     def test_duration_attribute_expands_then_end_shifts(self):
         """testing if duration attribute is expanded then the end
@@ -303,13 +277,13 @@ class DateRangeMixinTester(unittest.TestCase):
         self.test_foo_obj.duration = new_duration
 
         # duration expanded
-        self.assertEqual(self.test_foo_obj.duration, new_duration)
+        assert self.test_foo_obj.duration == new_duration
 
         # start is not changed
-        self.assertEqual(self.test_foo_obj.start, start)
+        assert self.test_foo_obj.start == start
 
         # end is postponed
-        self.assertEqual(self.test_foo_obj.end, start + new_duration)
+        assert self.test_foo_obj.end == start + new_duration
 
     def test_duration_attribute_contracts_then_end_shifts_back(self):
         """testing if duration attribute is contracted then the end
@@ -324,13 +298,13 @@ class DateRangeMixinTester(unittest.TestCase):
         self.test_foo_obj.duration = new_duration
 
         # duration expanded
-        self.assertEqual(self.test_foo_obj.duration, new_duration)
+        assert self.test_foo_obj.duration == new_duration
 
         # start is not changed
-        self.assertEqual(self.test_foo_obj.start, start)
+        assert self.test_foo_obj.start == start
 
         # end is postponed
-        self.assertEqual(self.test_foo_obj.end, start + new_duration)
+        assert self.test_foo_obj.end == start + new_duration
 
     def test_duration_attribute_is_smaller_then_timing_resolution(self):
         """testing if the defaults.timing_resolution will be used as for the
@@ -339,10 +313,7 @@ class DateRangeMixinTester(unittest.TestCase):
         """
         from stalker import defaults
         self.test_foo_obj.duration = datetime.timedelta(minutes=10)
-        self.assertEqual(
-            self.test_foo_obj.duration,
-            defaults.timing_resolution
-        )
+        assert self.test_foo_obj.duration == defaults.timing_resolution
 
     def test_duration_is_a_negative_timedelta(self):
         """testing if the duration is a negative timedelta will set the
@@ -350,8 +321,8 @@ class DateRangeMixinTester(unittest.TestCase):
         """
         start = self.test_foo_obj.start
         self.test_foo_obj.duration = datetime.timedelta(-10)
-        self.assertEqual(self.test_foo_obj.duration, datetime.timedelta(1))
-        self.assertEqual(self.test_foo_obj.start, start)
+        assert self.test_foo_obj.duration == datetime.timedelta(1)
+        assert self.test_foo_obj.start == start
 
     def test_init_all_parameters_skipped(self):
         """testing if the attributes are initialized to:
@@ -367,18 +338,16 @@ class DateRangeMixinTester(unittest.TestCase):
 
         new_foo_entity = DateRangeMixFooMixedInClass(**self.kwargs)
 
-        self.assertTrue(isinstance(new_foo_entity.start, datetime.datetime))
+        assert isinstance(new_foo_entity.start, datetime.datetime)
         # can not check for start, just don't want to struggle with the round
         # thing
-        # self.assertEqual(
-        #     new_foo_entity.start,
+        # assert \
+        #     new_foo_entity.start == \
         #     datetime.datetime(2013, 3, 22, 15, 30, tzinfo=pytz.utc)
-        # )
         from stalker import defaults
-        self.assertEqual(new_foo_entity.duration,
-                         defaults.timing_resolution)
-        self.assertEqual(new_foo_entity.end,
-                         new_foo_entity.start + new_foo_entity.duration)
+        assert new_foo_entity.duration == defaults.timing_resolution
+        assert new_foo_entity.end == \
+               new_foo_entity.start + new_foo_entity.duration
 
     def test_init_only_start_argument_is_given(self):
         """testing if the attributes are initialized to:
@@ -392,9 +361,9 @@ class DateRangeMixinTester(unittest.TestCase):
         new_foo_entity = DateRangeMixFooMixedInClass(**self.kwargs)
 
         from stalker import defaults
-        self.assertEqual(new_foo_entity.duration, defaults.timing_resolution)
-        self.assertEqual(new_foo_entity.end,
-                         new_foo_entity.start + new_foo_entity.duration)
+        assert new_foo_entity.duration == defaults.timing_resolution
+        assert new_foo_entity.end == \
+               new_foo_entity.start + new_foo_entity.duration
 
     def test_init_start_and_end_argument_is_given(self):
         """testing if the attributes are initialized to:
@@ -403,8 +372,8 @@ class DateRangeMixinTester(unittest.TestCase):
         """
         self.kwargs.pop("duration")
         new_foo_entity = DateRangeMixFooMixedInClass(**self.kwargs)
-        self.assertEqual(new_foo_entity.duration,
-                         new_foo_entity.end - new_foo_entity.start)
+        assert new_foo_entity.duration == \
+               new_foo_entity.end - new_foo_entity.start
 
     def test_init_start_and_end_argument_is_given_but_duration_is_smaller_than_timing_resolution(self):
         """testing if the start will be anchored and the end will be
@@ -419,27 +388,20 @@ class DateRangeMixinTester(unittest.TestCase):
         self.kwargs['end'] = \
             datetime.datetime(2013, 12, 22, 23, 15, tzinfo=pytz.utc)
         obj = DateRangeMixFooMixedInClass(**self.kwargs)
-        self.assertEqual(
-            obj.start,
-            datetime.datetime(2013, 12, 22, 23, 0, tzinfo=pytz.utc)
-        )
-        self.assertEqual(
-            obj.end,
-            datetime.datetime(2013, 12, 23, 0, 0, tzinfo=pytz.utc)
-        )
+        assert obj.start == \
+               datetime.datetime(2013, 12, 22, 23, 0, tzinfo=pytz.utc)
+        assert obj.end == \
+               datetime.datetime(2013, 12, 23, 0, 0, tzinfo=pytz.utc)
 
     def test_init_start_and_duration_argument_is_given(self):
         """testing if the attributes are initialized to:
 
         end = start + duration
         """
-
         self.kwargs.pop("end")
-
         new_foo_entity = DateRangeMixFooMixedInClass(**self.kwargs)
-
-        self.assertEqual(new_foo_entity.end,
-                         new_foo_entity.start + new_foo_entity.duration)
+        assert new_foo_entity.end == \
+               new_foo_entity.start + new_foo_entity.duration
 
     def test_init_all_arguments_are_given(self):
         """testing if the attributes are initialized to:
@@ -447,8 +409,8 @@ class DateRangeMixinTester(unittest.TestCase):
         duration = end - start
         """
         new_foo_entity = DateRangeMixFooMixedInClass(**self.kwargs)
-        self.assertEqual(new_foo_entity.duration,
-                         new_foo_entity.end - new_foo_entity.start)
+        assert new_foo_entity.duration == \
+               new_foo_entity.end - new_foo_entity.start
 
     def test_init_end_and_duration_argument_is_given(self):
         """testing if the attributes are initialized to:
@@ -457,8 +419,8 @@ class DateRangeMixinTester(unittest.TestCase):
         """
         self.kwargs.pop("start")
         new_foo_entity = DateRangeMixFooMixedInClass(**self.kwargs)
-        self.assertEqual(new_foo_entity.start,
-                         new_foo_entity.end - new_foo_entity.duration)
+        assert new_foo_entity.start == \
+               new_foo_entity.end - new_foo_entity.duration
 
     def test_init_only_end_argument_is_given(self):
         """testing if the attributes are initialized to:
@@ -470,10 +432,9 @@ class DateRangeMixinTester(unittest.TestCase):
         self.kwargs.pop("duration")
         self.kwargs.pop("start")
         new_foo_entity = DateRangeMixFooMixedInClass(**self.kwargs)
-        self.assertEqual(new_foo_entity.duration,
-                         defaults.timing_resolution)
-        self.assertEqual(new_foo_entity.start,
-                         new_foo_entity.end - new_foo_entity.duration)
+        assert new_foo_entity.duration == defaults.timing_resolution
+        assert new_foo_entity.start == \
+               new_foo_entity.end - new_foo_entity.duration
 
     def test_init_only_duration_argument_is_given(self):
         """testing if the attributes are initialized to:
@@ -487,16 +448,12 @@ class DateRangeMixinTester(unittest.TestCase):
         new_foo_entity = DateRangeMixFooMixedInClass(**self.kwargs)
 
         # just check if it is an instance of datetime.datetime
-        self.assertTrue(isinstance(new_foo_entity.start, datetime.datetime))
+        assert isinstance(new_foo_entity.start, datetime.datetime)
         # can not check for start
-        # self.assertEqual(
-        #     new_foo_entity.start,
-        #     datetime.datetime(2013, 3, 22, 15, 30, tzinfo=pytz.utc)
-        # )
-        self.assertEqual(
-            new_foo_entity.end,
-            new_foo_entity.start + new_foo_entity.duration
-        )
+        # assert new_foo_entity.start == \
+        #        datetime.datetime(2013, 3, 22, 15, 30, tzinfo=pytz.utc
+        assert new_foo_entity.end == \
+               new_foo_entity.start + new_foo_entity.duration
 
     def test_start_end_and_duration_values_are_rounded_to_the_default_timing_resolution(self):
         """testing if the start and end dates are rounded to the default
@@ -513,27 +470,27 @@ class DateRangeMixinTester(unittest.TestCase):
         # check the start
         expected_start = \
             datetime.datetime(2013, 3, 22, 2, 40, tzinfo=pytz.utc)
-        self.assertEqual(new_foo_obj.start, expected_start)
+        assert new_foo_obj.start == expected_start
         # check the end
         expected_end = \
             datetime.datetime(2013, 3, 24, 16, 45, tzinfo=pytz.utc)
-        self.assertEqual(new_foo_obj.end, expected_end)
+        assert new_foo_obj.end == expected_end
         # check the duration
-        self.assertEqual(new_foo_obj.duration, expected_end - expected_start)
+        assert new_foo_obj.duration == expected_end - expected_start
 
     def test_computed_start_is_None_for_a_non_scheduled_class(self):
         """testing if the computed_start attribute is None for a non scheduled
         class
         """
         new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
-        self.assertTrue(new_foo_obj.computed_start is None)
+        assert new_foo_obj.computed_start is None
 
     def test_computed_end_is_None_for_a_non_scheduled_class(self):
         """testing if the computed_end attribute is None for a non scheduled
         class
         """
         new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
-        self.assertTrue(new_foo_obj.computed_end is None)
+        assert new_foo_obj.computed_end is None
 
     def test_computed_duration_attribute_is_None_if_there_is_no_computed_start_and_no_computed_end(self):
         """testing if the computed_start attribute is None if there is no
@@ -542,7 +499,7 @@ class DateRangeMixinTester(unittest.TestCase):
         new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
         new_foo_obj.computed_start = None
         new_foo_obj.computed_end = None
-        self.assertTrue(new_foo_obj.computed_duration is None)
+        assert new_foo_obj.computed_duration is None
 
     def test_computed_duration_attribute_is_None_if_there_is_computed_start_but_no_computed_end(self):
         """testing if the computed_start attribute is None if there is
@@ -551,7 +508,7 @@ class DateRangeMixinTester(unittest.TestCase):
         new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
         new_foo_obj.computed_start = datetime.datetime.now(pytz.utc)
         new_foo_obj.computed_end = None
-        self.assertTrue(new_foo_obj.computed_duration is None)
+        assert new_foo_obj.computed_duration is None
 
     def test_computed_duration_attribute_is_None_if_there_is_no_computed_start_but_computed_end(self):
         """testing if the computed_start attribute is None if there is no
@@ -560,7 +517,7 @@ class DateRangeMixinTester(unittest.TestCase):
         new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
         new_foo_obj.computed_start = None
         new_foo_obj.computed_end = datetime.datetime.now(pytz.utc)
-        self.assertTrue(new_foo_obj.computed_duration is None)
+        assert new_foo_obj.computed_duration is None
 
     def test_computed_duration_attribute_is_calculated_correctly_when_there_are_both_computed_start_and_computed_end(self):
         """testing if the computed_duration is calculated correctly when there
@@ -570,31 +527,25 @@ class DateRangeMixinTester(unittest.TestCase):
         new_foo_obj.computed_start = datetime.datetime.now(pytz.utc)
         new_foo_obj.computed_end = \
             new_foo_obj.computed_start + datetime.timedelta(12)
-        self.assertEqual(new_foo_obj.computed_duration, datetime.timedelta(12))
+        assert new_foo_obj.computed_duration == datetime.timedelta(12)
 
     def test_computed_duration_is_read_only(self):
         """testing if the computed_duration attribute is read-only
         """
         new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             new_foo_obj.computed_duration = datetime.timedelta(10)
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_total_seconds_attribute_is_read_only(self):
         """testing if the total_seconds is read only
         """
         new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             new_foo_obj.total_seconds = 234234
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_total_seconds_attribute_is_working_properly(self):
         """testing is the total_seconds is read only
@@ -604,22 +555,16 @@ class DateRangeMixinTester(unittest.TestCase):
             datetime.datetime(2013, 5, 31, 10, 0, tzinfo=pytz.utc)
         new_foo_obj.end = \
             datetime.datetime(2013, 5, 31, 18, 0, tzinfo=pytz.utc)
-        self.assertEqual(
-            new_foo_obj.total_seconds,
-            8 * 60 * 60
-        )
+        assert new_foo_obj.total_seconds == 8 * 60 * 60
 
     def test_computed_total_seconds_attribute_is_read_only(self):
         """testing if the computed_total_seconds is read only
         """
         new_foo_obj = DateRangeMixFooMixedInClass(**self.kwargs)
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             new_foo_obj.computed_total_seconds = 234234
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_computed_total_seconds_attribute_is_working_properly(self):
         """testing is the computed_total_seconds is read only
@@ -629,10 +574,7 @@ class DateRangeMixinTester(unittest.TestCase):
             datetime.datetime(2013, 5, 31, 10, 0, tzinfo=pytz.utc)
         new_foo_obj.computed_end = \
             datetime.datetime(2013, 5, 31, 18, 0, tzinfo=pytz.utc)
-        self.assertEqual(
-            new_foo_obj.computed_total_seconds,
-            8 * 60 * 60
-        )
+        assert new_foo_obj.computed_total_seconds == 8 * 60 * 60
 
 
 class DateRangeMixinDBTester(UnitTestDBBase):
@@ -683,10 +625,10 @@ class DateRangeMixinDBTester(UnitTestDBBase):
         # check the start
         expected_start = \
             datetime.datetime(2013, 3, 22, 2, 40, tzinfo=pytz.utc)
-        self.assertEqual(new_foo_obj.start, expected_start)
+        assert new_foo_obj.start == expected_start
         # check the end
         expected_end = \
             datetime.datetime(2013, 3, 24, 16, 45, tzinfo=pytz.utc)
-        self.assertEqual(new_foo_obj.end, expected_end)
+        assert new_foo_obj.end == expected_end
         # check the duration
-        self.assertEqual(new_foo_obj.duration, expected_end - expected_start)
+        assert new_foo_obj.duration == expected_end - expected_start

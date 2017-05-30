@@ -17,6 +17,7 @@
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
+import pytest
 from sqlalchemy import Column, Integer
 
 from stalker import ACLMixin
@@ -54,30 +55,26 @@ class ACLMixinTester(unittest.TestCase):
         """testing if the permissions attribute accepts only Permission
         instances
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_instance.permissions = [234]
 
-        self.assertEqual(
-            str(cm.exception),
-            'TestClassForACL.permissions should be all instances of '
-            'stalker.models.auth.Permission not int'
-        )
+        assert str(cm.value) == \
+               'TestClassForACL.permissions should be all instances of ' \
+               'stalker.models.auth.Permission not int'
 
     def test_permission_attribute_is_working_properly(self):
         """testing if the permissions attribute is working properly
         """
-        self.assertEqual(self.test_instance.permissions, [self.test_perm1])
+        assert self.test_instance.permissions == [self.test_perm1]
 
     def test_acl_property_returns_a_list(self):
         """testing if the __acl__ property returns a list
         """
-        self.assertTrue(isinstance(self.test_instance.__acl__, list))
+        assert isinstance(self.test_instance.__acl__, list)
 
     def test_acl_property_returns_a_proper_ACL_list(self):
         """testing if the __acl__ property returns a proper ACL list according
         to the given permissions
         """
-        self.assertEqual(
-            self.test_instance.__acl__,
+        assert self.test_instance.__acl__ == \
             [('Allow', 'TestClassForACL:Test', 'Create_Something')]
-        )

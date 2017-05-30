@@ -16,6 +16,7 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
+import pytest
 from stalker.testing import UnitTestDBBase
 
 
@@ -89,53 +90,59 @@ class SequenceTester(UnitTestDBBase):
         Sequence class
         """
         from stalker import Sequence
-        self.assertFalse(Sequence.__auto_name__)
+        assert Sequence.__auto_name__ is False
+
+    def test_plural_class_name(self):
+        """testing the plural name of Sequence class
+        """
+        assert self.test_sequence.plural_class_name == "Sequences"
+
+    def test___strictly_typed___is_False(self):
+        """testing if the __strictly_typed__ class attribute is False for
+        Sequence class.
+        """
+        from stalker import Sequence
+        assert Sequence.__strictly_typed__ is False
 
     def test_shots_attribute_defaults_to_empty_list(self):
         """testing if the shots attribute defaults to an empty list
         """
         from stalker import Sequence
         new_sequence = Sequence(**self.kwargs)
-        self.assertEqual(new_sequence.shots, [])
+        assert new_sequence.shots == []
 
     def test_shots_attribute_is_set_None(self):
         """testing if a TypeError will be raised when the shots attribute will
         be set to None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_sequence.shots = None
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: None is not list-like'
-        )
 
     def test_shots_attribute_is_set_to_other_than_a_list(self):
         """testing if a TypeError will be raised when the shots attribute is
         tried to be set to something other than a list
         """
         test_value = "a string"
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_sequence.shots = test_value
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: str is not list-like'
-        )
 
     def test_shots_attribute_is_a_list_of_other_objects(self):
         """testing if a TypeError will be raised when the shots argument is a
         list of other type of objects
         """
         test_value = [1, 1.2, "a string"]
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_sequence.shots = test_value
 
-        self.assertEqual(
-            str(cm.exception),
-            'Sequence.shots should be all stalker.models.shot.Shot instances, '
-            'not int'
-        )
+        assert str(cm.value) == \
+            'Sequence.shots should be all stalker.models.shot.Shot ' \
+            'instances, not int'
 
     def test_shots_attribute_elements_tried_to_be_set_to_non_Shot_object(self):
         """testing if a TypeError will be raised when the individual elements
@@ -143,14 +150,12 @@ class SequenceTester(UnitTestDBBase):
         instance
         """
         test_value = "a string"
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_sequence.shots.append(test_value)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Sequence.shots should be all stalker.models.shot.Shot instances, '
-            'not str'
-        )
+        assert str(cm.value) == \
+            'Sequence.shots should be all stalker.models.shot.Shot ' \
+            'instances, not str'
 
     def test_equality(self):
         """testing the equality of sequences
@@ -163,9 +168,9 @@ class SequenceTester(UnitTestDBBase):
         self.kwargs["name"] = "a different sequence"
         new_seq3 = Sequence(**self.kwargs)
 
-        self.assertTrue(new_seq1 == new_seq2)
-        self.assertFalse(new_seq1 == new_seq3)
-        self.assertFalse(new_seq1 == new_entity)
+        assert new_seq1 == new_seq2
+        assert not new_seq1 == new_seq3
+        assert not new_seq1 == new_entity
 
     def test_inequality(self):
         """testing the inequality of sequences
@@ -178,9 +183,9 @@ class SequenceTester(UnitTestDBBase):
         self.kwargs["name"] = "a different sequence"
         new_seq3 = Sequence(**self.kwargs)
 
-        self.assertFalse(new_seq1 != new_seq2)
-        self.assertTrue(new_seq1 != new_seq3)
-        self.assertTrue(new_seq1 != new_entity)
+        assert not new_seq1 != new_seq2
+        assert new_seq1 != new_seq3
+        assert new_seq1 != new_entity
 
     def test_ReferenceMixin_initialization(self):
         """testing if the ReferenceMixin part is initialized correctly
@@ -207,7 +212,7 @@ class SequenceTester(UnitTestDBBase):
         references = [link1, link2]
         self.kwargs["references"] = references
         new_sequence = Sequence(**self.kwargs)
-        self.assertEqual(new_sequence.references, references)
+        assert new_sequence.references == references
 
     def test_initialization_of_task_part(self):
         """testing if the Task part is initialized correctly
@@ -245,10 +250,9 @@ class SequenceTester(UnitTestDBBase):
 
         tasks = [task1, task2]
 
-        self.assertEqual(
-            sorted(new_sequence.tasks, key=lambda x: x.name),
+        assert \
+            sorted(new_sequence.tasks, key=lambda x: x.name) == \
             sorted(tasks, key=lambda x: x.name)
-        )
 
     def test_ProjectMixin_initialization(self):
         """testing if the ProjectMixin part is initialized correctly
@@ -271,16 +275,4 @@ class SequenceTester(UnitTestDBBase):
         from stalker import Sequence
         self.kwargs["project"] = new_project
         new_sequence = Sequence(**self.kwargs)
-        self.assertEqual(new_sequence.project, new_project)
-
-    def test_plural_class_name(self):
-        """testing the plural name of Sequence class
-        """
-        self.assertTrue(self.test_sequence.plural_class_name, "Sequences")
-
-    def test___strictly_typed___is_False(self):
-        """testing if the __strictly_typed__ class attribute is False for
-        Sequence class.
-        """
-        from stalker import Sequence
-        self.assertEqual(Sequence.__strictly_typed__, False)
+        assert new_sequence.project == new_project

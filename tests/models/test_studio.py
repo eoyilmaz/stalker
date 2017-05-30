@@ -16,7 +16,8 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-import unittest
+import pytest
+
 from stalker.testing import UnitTestDBBase
 from stalker import SchedulerBase
 
@@ -548,7 +549,7 @@ class StudioTester(UnitTestDBBase):
 
         from stalker import Studio, WorkingHours
         new_studio = Studio(**self.kwargs)
-        self.assertEqual(new_studio.working_hours, WorkingHours())
+        assert new_studio.working_hours == WorkingHours()
 
     def test_working_hours_argument_is_None(self):
         """testing if the a WorkingHour instance with default settings will be
@@ -558,7 +559,7 @@ class StudioTester(UnitTestDBBase):
         self.kwargs['working_hours'] = None
         from stalker import Studio, WorkingHours
         new_studio = Studio(**self.kwargs)
-        self.assertEqual(new_studio.working_hours, WorkingHours())
+        assert new_studio.working_hours == WorkingHours()
 
     def test_working_hours_attribute_is_None(self):
         """testing if a WorkingHour instance will be created with the default
@@ -566,7 +567,7 @@ class StudioTester(UnitTestDBBase):
         """
         from stalker import WorkingHours
         self.test_studio.working_horus = None
-        self.assertEqual(self.test_studio.working_hours, WorkingHours())
+        assert self.test_studio.working_hours == WorkingHours()
 
     def test_working_hours_argument_is_not_a_working_hours_instance(self):
         """testing if a TypeError will be raised if the working_hours argument
@@ -575,27 +576,23 @@ class StudioTester(UnitTestDBBase):
         self.kwargs['working_hours'] = 'not a working hours instance'
         self.kwargs['name'] = 'New Studio'
         from stalker import Studio
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Studio(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Studio.working_hours should be a '
+        assert str(cm.value) == \
+            'Studio.working_hours should be a ' \
             'stalker.models.studio.WorkingHours instance, not str'
-        )
 
     def test_working_hours_attribute_is_not_a_working_hours_instance(self):
         """testing if a TypeError will be raised if the working_hours attribute
         is set to a value which is not a WorkingHours instance
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_studio.working_hours = 'not a working hours instance'
 
-        self.assertEqual(
-            str(cm.exception),
-            'Studio.working_hours should be a '
+        assert str(cm.value) == \
+            'Studio.working_hours should be a ' \
             'stalker.models.studio.WorkingHours instance, not str'
-        )
 
     def test_working_hours_argument_is_working_properly(self):
         """testing if the working_hours argument value is passed to the
@@ -611,7 +608,7 @@ class StudioTester(UnitTestDBBase):
 
         self.kwargs['working_hours'] = wh
         new_studio = Studio(**self.kwargs)
-        self.assertEqual(new_studio.working_hours, wh)
+        assert new_studio.working_hours == wh
 
     def test_working_hours_attribute_is_working_properly(self):
         """testing if the working_hours attribute is working properly
@@ -623,87 +620,72 @@ class StudioTester(UnitTestDBBase):
                                      # Monday :))
             }
         )
-        self.assertNotEqual(self.test_studio.working_hours, new_working_hours)
+        assert self.test_studio.working_hours != new_working_hours
         self.test_studio.working_hours = new_working_hours
-        self.assertEqual(self.test_studio.working_hours, new_working_hours)
+        assert self.test_studio.working_hours == new_working_hours
 
     def test_tjp_id_attribute_returns_a_plausible_id(self):
         """testing if the tjp_id is returning something meaningful
         """
         self.test_studio.id = 432
-        self.assertEqual(self.test_studio.tjp_id, 'Studio_432')
+        assert self.test_studio.tjp_id == 'Studio_432'
 
     def test_projects_attribute_is_read_only(self):
         """testing if the project attribute is a read only attribute
         """
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             self.test_studio.projects = [self.test_project1]
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_projects_attribute_is_working_properly(self):
         """testing if the projects attribute is working properly
         """
-        self.assertEqual(
-            sorted(self.test_studio.projects, key=lambda x: x.name),
+        assert \
+            sorted(self.test_studio.projects, key=lambda x: x.name) == \
             sorted(
                 [self.test_project1, self.test_project2, self.test_project3],
                 key=lambda x: x.name
             )
-        )
 
     def test_active_projects_attribute_is_read_only(self):
         """testing if the active_projects attribute is a read only attribute
         """
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             self.test_studio.active_projects = [self.test_project1]
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_active_projects_attribute_is_working_properly(self):
         """testing if the active_projects attribute is working properly
         """
-        self.assertEqual(
-            sorted(self.test_studio.active_projects, key=lambda x: x.name),
+        assert \
+            sorted(self.test_studio.active_projects, key=lambda x: x.name) == \
             sorted([self.test_project1, self.test_project2],
                    key=lambda x: x.name)
-        )
 
     def test_inactive_projects_attribute_is_read_only(self):
         """testing if the inactive_projects attribute is a read only attribute
         """
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             self.test_studio.inactive_projects = [self.test_project1]
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_inactive_projects_attribute_is_working_properly(self):
         """testing if the inactive_projects attribute is working properly
         """
-        self.assertEqual(
-            sorted(self.test_studio.inactive_projects, key=lambda x: x.name),
-            sorted([self.test_project3], key=lambda x: x.name)
-        )
+        assert \
+            sorted(self.test_studio.inactive_projects, key=lambda x: x.name) \
+            == sorted([self.test_project3], key=lambda x: x.name)
 
     def test_departments_attribute_is_read_only(self):
         """testing if the departments attribute is a read only attribute
         """
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             self.test_studio.departments = [self.test_project1]
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_departments_attribute_is_working_properly(self):
         """testing if the departments attribute is working properly
@@ -711,23 +693,19 @@ class StudioTester(UnitTestDBBase):
         from stalker import Department
         admins_dep = \
             Department.query.filter(Department.name == 'admins').first()
-        self.assertIsNotNone(admins_dep)
-        self.assertEqual(
-            sorted(self.test_studio.departments, key=lambda x: x.name),
+        assert admins_dep is not None
+        assert \
+            sorted(self.test_studio.departments, key=lambda x: x.name) == \
             sorted([self.test_department1, self.test_department2, admins_dep],
                    key=lambda x: x.name)
-        )
 
     def test_users_attribute_is_read_only(self):
         """testing if the users attribute is a read only attribute
         """
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             self.test_studio.users = [self.test_project1]
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_users_attribute_is_working_properly(self):
         """testing if the users attribute is working properly
@@ -735,23 +713,19 @@ class StudioTester(UnitTestDBBase):
         # don't forget the admin
         from stalker import User
         admin = User.query.filter_by(name='admin').first()
-        self.assertIsNotNone(admin)
-        self.assertEqual(
-            sorted(self.test_studio.users, key=lambda x: x.name),
+        assert admin is not None
+        assert \
+            sorted(self.test_studio.users, key=lambda x: x.name) == \
             sorted([admin, self.test_user1, self.test_user2, self.test_user3],
                    key=lambda x: x.name)
-        )
 
     def test_to_tjp_attribute_is_read_only(self):
         """testing if the to_tjp attribute is a read only attribute
         """
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             self.test_studio.to_tjp = "some text"
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_now_argument_is_skipped(self):
         """testing if the now attribute will use the rounded
@@ -766,12 +740,8 @@ class StudioTester(UnitTestDBBase):
         import pytz
         from stalker import Studio
         new_studio = Studio(**self.kwargs)
-        self.assertEqual(
-            new_studio.now,
-            new_studio.round_time(
-                datetime.datetime.now(pytz.utc)
-            )
-        )
+        assert new_studio.now == \
+            new_studio.round_time(datetime.datetime.now(pytz.utc))
 
     def test_now_argument_is_None(self):
         """testing if the now attribute will use the rounded
@@ -782,12 +752,8 @@ class StudioTester(UnitTestDBBase):
         from stalker import Studio
         self.kwargs['now'] = None
         new_studio = Studio(**self.kwargs)
-        self.assertEqual(
-            new_studio.now,
-            new_studio.round_time(
-                datetime.datetime.now(pytz.utc)
-            )
-        )
+        assert new_studio.now == \
+            new_studio.round_time(datetime.datetime.now(pytz.utc))
 
     def test_now_attribute_is_None(self):
         """testing if the now attribute will be equal to the rounded value of
@@ -796,12 +762,8 @@ class StudioTester(UnitTestDBBase):
         import pytz
         import datetime
         self.test_studio.now = None
-        self.assertEqual(
-            self.test_studio.now,
-            self.test_studio.round_time(
-                datetime.datetime.now(pytz.utc)
-            )
-        )
+        assert self.test_studio.now == \
+            self.test_studio.round_time(datetime.datetime.now(pytz.utc))
 
     def test_now_argument_is_not_a_datetime_instance(self):
         """testing if a TypeError will be raised when the now argument is not
@@ -809,27 +771,23 @@ class StudioTester(UnitTestDBBase):
         """
         from stalker import Studio
         self.kwargs['now'] = 'not a datetime instance'
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Studio(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Studio.now attribute should be an instance of datetime.datetime, '
-            'not str'
-        )
+        assert str(cm.value) == \
+            'Studio.now attribute should be an instance of ' \
+            'datetime.datetime, not str'
 
     def test_now_attribute_is_set_to_a_value_other_than_datetime_instance(self):
         """testing if a TypeError will be raised when the now attribute is set
         to a value other than a datetime.datetime instance
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_studio.now = 'not a datetime instance'
 
-        self.assertEqual(
-            str(cm.exception),
-            'Studio.now attribute should be an instance of datetime.datetime, '
-            'not str'
-        )
+        assert str(cm.value) == \
+            'Studio.now attribute should be an instance of ' \
+            'datetime.datetime, not str'
 
     def test_now_argument_is_working_properly(self):
         """testing if the now argument value is passed to the now attribute
@@ -843,7 +801,7 @@ class StudioTester(UnitTestDBBase):
         expected_now = \
             datetime.datetime(2013, 4, 15, 21, 0, tzinfo=pytz.utc)
         new_studio = Studio(**self.kwargs)
-        self.assertEqual(new_studio.now, expected_now)
+        assert new_studio.now == expected_now
 
     def test_now_attribute_is_working_properly(self):
         """testing if the now attribute is working properly
@@ -854,7 +812,7 @@ class StudioTester(UnitTestDBBase):
             datetime.datetime(2013, 4, 15, 21, 11, tzinfo=pytz.utc)
         expected_now = \
             datetime.datetime(2013, 4, 15, 21, 0, tzinfo=pytz.utc)
-        self.assertEqual(self.test_studio.now, expected_now)
+        assert self.test_studio.now == expected_now
 
     def test_now_attribute_is_working_properly_case2(self):
         """testing if the now attribute is working properly
@@ -865,10 +823,7 @@ class StudioTester(UnitTestDBBase):
         self.test_studio._now = None
         expected_now = \
             Studio.round_time(datetime.datetime.now(pytz.utc))
-        self.assertEqual(
-            self.test_studio.now,
-            expected_now
-        )
+        assert self.test_studio.now == expected_now
 
     def test_to_tjp_attribute_is_working_properly(self):
         """testing if the to_tjp attribute is working properly
@@ -916,7 +871,7 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         # print('-----------------------------------')
         # print(self.test_studio.to_tjp)
         # print('-----------------------------------')
-        self.assertEqual(self.test_studio.to_tjp, expected_tjp)
+        assert self.test_studio.to_tjp == expected_tjp
 
     def test_scheduler_attribute_can_be_set_to_None(self):
         """testing if the scheduler attribute can be set to None
@@ -927,14 +882,12 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         """testing if a TypeError will be raised when the scheduler attribute
         is set to a value which is not a scheduler instance
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_studio.scheduler = 'not a Scheduler instance'
 
-        self.assertEqual(
-            str(cm.exception),
-            'Studio.scheduler should be an instance of '
+        assert str(cm.value) == \
+            'Studio.scheduler should be an instance of ' \
             'stalker.models.scheduler.SchedulerBase, not str'
-        )
 
     def test_scheduler_attribute_is_working_properly(self):
         """testing if the scheduler attribute is working properly
@@ -942,22 +895,20 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         from stalker import TaskJugglerScheduler
         tj_s = TaskJugglerScheduler()
         self.test_studio.scheduler = tj_s
-        self.assertEqual(self.test_studio.scheduler, tj_s)
+        assert self.test_studio.scheduler == tj_s
 
     def test_schedule_will_not_work_without_a_scheduler(self):
         """testing if a RuntimeError will be raised when the scheduler
         attribute is not set to a Scheduler instance and schedule is called
         """
         self.test_studio.scheduler = None
-        with self.assertRaises(RuntimeError) as cm:
+        with pytest.raises(RuntimeError) as cm:
             self.test_studio.schedule()
 
-        self.assertEqual(
-            str(cm.exception),
-            'There is no scheduler for this Studio, please assign a scheduler '
-            'to the Studio.scheduler attribute, before calling '
+        assert str(cm.value) == \
+            'There is no scheduler for this Studio, please assign a ' \
+            'scheduler to the Studio.scheduler attribute, before calling ' \
             'Studio.schedule()'
-        )
 
     def test_schedule_will_schedule_the_tasks_with_the_given_scheduler(self):
         """testing if the schedule method will schedule the tasks with the
@@ -1134,509 +1085,324 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         # print('self.test_task2.computed_resources: %s' % self.test_task2.computed_resources)
 
         # self.test_project
-        self.assertEqual(
-            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc),
-            self.test_project1.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 6, 24, 16, 0, tzinfo=pytz.utc),
-            self.test_project1.computed_end
-        )
+        assert self.test_project1.computed_start == \
+            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc)
+
+        assert self.test_project1.computed_end == \
+            datetime.datetime(2013, 6, 24, 16, 0, tzinfo=pytz.utc)
 
         # self.test_asset1
-        self.assertEqual(
-            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc),
-            self.test_asset1.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 5, 17, 18, 0, tzinfo=pytz.utc),
-            self.test_asset1.computed_end
-        )
+        assert self.test_asset1.computed_start == \
+            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc)
 
-        self.assertEqual(
-            self.test_asset1.computed_resources,
-            []
-        )
+        assert self.test_asset1.computed_end == \
+            datetime.datetime(2013, 5, 17, 18, 0, tzinfo=pytz.utc)
+
+        assert self.test_asset1.computed_resources == []
 
         # self.test_task24
-        self.assertEqual(
-            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc),
-            self.test_task24.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 4, 26, 17, 0, tzinfo=pytz.utc),
-            self.test_task24.computed_end
-        )
+        assert self.test_task24.computed_start == \
+            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc)
 
-        self.assertEqual(
-            self.test_task24.computed_resources,
-            [self.test_user1]
-        )
+        assert self.test_task24.computed_end == \
+            datetime.datetime(2013, 4, 26, 17, 0, tzinfo=pytz.utc)
+
+        assert self.test_task24.computed_resources == [self.test_user1]
 
         # self.test_task25
-        self.assertEqual(
-            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc),
-            self.test_task25.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 5, 3, 12, 0, tzinfo=pytz.utc),
-            self.test_task25.computed_end
-        )
+        assert self.test_task25.computed_start == \
+            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc)
 
-        self.assertEqual(
-            self.test_task25.computed_resources,
-            [self.test_user3]
-        )
+        assert self.test_task25.computed_end == \
+            datetime.datetime(2013, 5, 3, 12, 0, tzinfo=pytz.utc)
+
+        assert self.test_task25.computed_resources == [self.test_user3]
 
         # self.test_task26
-        self.assertEqual(
-            datetime.datetime(2013, 5, 6, 11, 0, tzinfo=pytz.utc),
-            self.test_task26.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 5, 17, 10, 0, tzinfo=pytz.utc),
-            self.test_task26.computed_end
-        )
+        assert self.test_task26.computed_start == \
+            datetime.datetime(2013, 5, 6, 11, 0, tzinfo=pytz.utc)
 
-        self.assertEqual(
-            self.test_task26.computed_resources,
-            [self.test_user1]
-        )
+        assert self.test_task26.computed_end == \
+            datetime.datetime(2013, 5, 17, 10, 0, tzinfo=pytz.utc)
+
+        assert self.test_task26.computed_resources == [self.test_user1]
 
         # self.test_task27
-        self.assertEqual(
-            datetime.datetime(2013, 5, 7, 10, 0, tzinfo=pytz.utc),
-            self.test_task27.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 5, 17, 18, 0, tzinfo=pytz.utc),
-            self.test_task27.computed_end
-        )
+        assert self.test_task27.computed_start == \
+            datetime.datetime(2013, 5, 7, 10, 0, tzinfo=pytz.utc)
 
-        self.assertEqual(
-            self.test_task27.computed_resources,
-            [self.test_user3]
-        )
+        assert self.test_task27.computed_end == \
+            datetime.datetime(2013, 5, 17, 18, 0, tzinfo=pytz.utc)
+
+        assert self.test_task27.computed_resources == [self.test_user3]
 
         # self.test_shot2
-        self.assertEqual(
-            datetime.datetime(2013, 4, 26, 17, 0, tzinfo=pytz.utc),
-            self.test_shot2.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 6, 20, 10, 0, tzinfo=pytz.utc),
-            self.test_shot2.computed_end
-        )
+        assert self.test_shot2.computed_start == \
+            datetime.datetime(2013, 4, 26, 17, 0, tzinfo=pytz.utc)
 
-        self.assertEqual(
-            self.test_shot2.computed_resources,
-            []
-        )
+        assert self.test_shot2.computed_end == \
+            datetime.datetime(2013, 6, 20, 10, 0, tzinfo=pytz.utc)
+
+        assert self.test_shot2.computed_resources == []
 
         # self.test_task8
-        self.assertEqual(
-            datetime.datetime(2013, 4, 26, 17, 0, tzinfo=pytz.utc),
-            self.test_task8.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 4, 30, 15, 0, tzinfo=pytz.utc),
-            self.test_task8.computed_end
-        )
+        assert self.test_task8.computed_start == \
+            datetime.datetime(2013, 4, 26, 17, 0, tzinfo=pytz.utc)
 
-        self.assertEqual(
-            self.test_task8.computed_resources,
-            [self.test_user1]
-        )
+        assert self.test_task8.computed_end == \
+            datetime.datetime(2013, 4, 30, 15, 0, tzinfo=pytz.utc)
+
+        assert self.test_task8.computed_resources == [self.test_user1]
 
         # self.test_task9
-        self.assertEqual(
-            datetime.datetime(2013, 5, 30, 17, 0, tzinfo=pytz.utc),
-            self.test_task9.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 6, 3, 15, 0, tzinfo=pytz.utc),
-            self.test_task9.computed_end
-        )
+        assert self.test_task9.computed_start == \
+            datetime.datetime(2013, 5, 30, 17, 0, tzinfo=pytz.utc)
 
-        self.assertEqual(
-            self.test_task9.computed_resources,
-            [self.test_user3]
-        )
+        assert self.test_task9.computed_end == \
+            datetime.datetime(2013, 6, 3, 15, 0, tzinfo=pytz.utc)
+
+        assert self.test_task9.computed_resources == [self.test_user3]
 
         # self.test_task10
-        self.assertEqual(
-            datetime.datetime(2013, 6, 5, 13, 0, tzinfo=pytz.utc),
-            self.test_task10.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 6, 10, 10, 0, tzinfo=pytz.utc),
-            self.test_task10.computed_end
-        )
+        assert self.test_task10.computed_start == \
+            datetime.datetime(2013, 6, 5, 13, 0, tzinfo=pytz.utc)
 
-        self.assertEqual(
-            self.test_task10.computed_resources,
-            [self.test_user3]
-        )
+        assert self.test_task10.computed_end == \
+            datetime.datetime(2013, 6, 10, 10, 0, tzinfo=pytz.utc)
+
+        assert self.test_task10.computed_resources == [self.test_user3]
 
         # self.test_task11
-        self.assertEqual(
-            datetime.datetime(2013, 6, 14, 14, 0, tzinfo=pytz.utc),
-            self.test_task11.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 6, 20, 10, 0, tzinfo=pytz.utc),
-            self.test_task11.computed_end
-        )
+        assert self.test_task11.computed_start == \
+            datetime.datetime(2013, 6, 14, 14, 0, tzinfo=pytz.utc)
 
-        self.assertEqual(
-            self.test_task11.computed_resources,
-            [self.test_user2]
-        )
+        assert self.test_task11.computed_end == \
+            datetime.datetime(2013, 6, 20, 10, 0, tzinfo=pytz.utc)
+
+        assert self.test_task11.computed_resources == [self.test_user2]
 
         # self.test_shot1
-        self.assertEqual(
-            datetime.datetime(2013, 5, 16, 11, 0, tzinfo=pytz.utc),
-            self.test_shot1.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 6, 24, 16, 0, tzinfo=pytz.utc),
-            self.test_shot1.computed_end
-        )
+        assert self.test_shot1.computed_start == \
+            datetime.datetime(2013, 5, 16, 11, 0, tzinfo=pytz.utc)
 
-        self.assertEqual(
-            self.test_shot1.computed_resources,
-            []
-        )
+        assert self.test_shot1.computed_end == \
+            datetime.datetime(2013, 6, 24, 16, 0, tzinfo=pytz.utc)
+
+        assert self.test_shot1.computed_resources == []
 
         # self.test_task4
-        self.assertEqual(
-            datetime.datetime(2013, 5, 16, 11, 0, tzinfo=pytz.utc),
-            self.test_task4.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 5, 17, 18, 0, tzinfo=pytz.utc),
-            self.test_task4.computed_end
-        )
+        assert self.test_task4.computed_start == \
+            datetime.datetime(2013, 5, 16, 11, 0, tzinfo=pytz.utc)
 
-        self.assertEqual(
-            self.test_task4.computed_resources,
-            [self.test_user2]
-        )
+        assert self.test_task4.computed_end == \
+            datetime.datetime(2013, 5, 17, 18, 0, tzinfo=pytz.utc)
+
+        assert self.test_task4.computed_resources == [self.test_user2]
 
         # self.test_task5
-        self.assertEqual(
-            datetime.datetime(2013, 6, 5, 13, 0, tzinfo=pytz.utc),
-            self.test_task5.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 6, 7, 11, 0, tzinfo=pytz.utc),
-            self.test_task5.computed_end
-        )
+        assert self.test_task5.computed_start == \
+            datetime.datetime(2013, 6, 5, 13, 0, tzinfo=pytz.utc)
 
-        self.assertEqual(
-            self.test_task5.computed_resources,
-            [self.test_user2]
-        )
+        assert self.test_task5.computed_end == \
+            datetime.datetime(2013, 6, 7, 11, 0, tzinfo=pytz.utc)
+
+        assert self.test_task5.computed_resources == [self.test_user2]
 
         # self.test_task6
-        self.assertEqual(
-            datetime.datetime(2013, 6, 11, 17, 0, tzinfo=pytz.utc),
-            self.test_task6.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 6, 14, 14, 0, tzinfo=pytz.utc),
-            self.test_task6.computed_end
-        )
+        assert self.test_task6.computed_start == \
+            datetime.datetime(2013, 6, 11, 17, 0, tzinfo=pytz.utc)
 
-        self.assertTrue(
-            self.test_task6.computed_resources[0] in
+        assert self.test_task6.computed_end == \
+            datetime.datetime(2013, 6, 14, 14, 0, tzinfo=pytz.utc)
+
+        assert self.test_task6.computed_resources[0] in \
             [self.test_user1, self.test_user2, self.test_user3]
-        )
 
         # self.test_task7
-        self.assertEqual(
-            datetime.datetime(2013, 6, 20, 10, 0, tzinfo=pytz.utc),
-            self.test_task7.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 6, 24, 16, 0, tzinfo=pytz.utc),
-            self.test_task7.computed_end
-        )
+        assert self.test_task7.computed_start == \
+            datetime.datetime(2013, 6, 20, 10, 0, tzinfo=pytz.utc)
 
-        self.assertTrue(
-            self.test_task7.computed_resources[0] in
+        assert self.test_task7.computed_end == \
+            datetime.datetime(2013, 6, 24, 16, 0, tzinfo=pytz.utc)
+
+        assert self.test_task7.computed_resources[0] in \
             [self.test_user1, self.test_user2, self.test_user3]
-        )
 
         # self.test_task1
-        self.assertEqual(
-            datetime.datetime(2013, 5, 17, 10, 0, tzinfo=pytz.utc),
-            self.test_task1.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 5, 29, 18, 0, tzinfo=pytz.utc),
-            self.test_task1.computed_end
-        )
+        assert self.test_task1.computed_start == \
+            datetime.datetime(2013, 5, 17, 10, 0, tzinfo=pytz.utc)
 
-        self.assertTrue(
-            self.test_task1.computed_resources[0] in
+        assert self.test_task1.computed_end == \
+            datetime.datetime(2013, 5, 29, 18, 0, tzinfo=pytz.utc)
+
+        assert self.test_task1.computed_resources[0] in \
             [self.test_user1, self.test_user2, self.test_user3]
-        )
 
         # self.test_project2
-        # self.assertEqual(
-        #     datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc),
-        #     self.test_project2.computed_start
-        # )
-        # self.assertEqual(
-        #     datetime.datetime(2013, 6, 18, 12, 0, tzinfo=pytz.utc),
-        #     self.test_project2.computed_end
-        # )
-
-        # self.assertEqual(
-        #     self.test_project2.computed_resources,
-        #     []
-        # )
+        # assert self.test_project2.computed_start == \
+        #     datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc)
+        #
+        # assert self.test_project2.computed_end == \
+        #     datetime.datetime(2013, 6, 18, 12, 0, tzinfo=pytz.utc)
+        #
+        # assert self.test_project2.computed_resources == []
 
         # self.test_asset2
-        self.assertEqual(
-            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc),
-            self.test_asset2.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 5, 30, 17, 0, tzinfo=pytz.utc),
-            self.test_asset2.computed_end
-        )
+        assert self.test_asset2.computed_start == \
+            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc)
 
-        self.assertEqual(
-            self.test_asset2.computed_resources,
-            []
-        )
+        assert self.test_asset2.computed_end == \
+            datetime.datetime(2013, 5, 30, 17, 0, tzinfo=pytz.utc)
+
+        assert self.test_asset2.computed_resources == []
 
         # self.test_task28
-        self.assertEqual(
-            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc),
-            self.test_task28.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 4, 26, 17, 0, tzinfo=pytz.utc),
-            self.test_task28.computed_end
-        )
+        assert self.test_task28.computed_start == \
+            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc)
 
-        self.assertTrue(
-            self.test_task28.computed_resources[0] in
+        assert self.test_task28.computed_end == \
+            datetime.datetime(2013, 4, 26, 17, 0, tzinfo=pytz.utc)
+
+        assert self.test_task28.computed_resources[0] in \
             [self.test_user1, self.test_user2, self.test_user3]
-        )
 
         # self.test_task29
-        self.assertEqual(
-            datetime.datetime(2013, 4, 26, 17, 0, tzinfo=pytz.utc),
-            self.test_task29.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 5, 16, 11, 0, tzinfo=pytz.utc),
-            self.test_task29.computed_end
-        )
+        assert self.test_task29.computed_start == \
+            datetime.datetime(2013, 4, 26, 17, 0, tzinfo=pytz.utc)
 
-        self.assertTrue(
-            self.test_task29.computed_resources[0] in
+        assert self.test_task29.computed_end == \
+            datetime.datetime(2013, 5, 16, 11, 0, tzinfo=pytz.utc)
+
+        assert self.test_task29.computed_resources[0] in \
             [self.test_user1, self.test_user2, self.test_user3]
-        )
 
         # self.test_task30
-        self.assertEqual(
-            datetime.datetime(2013, 5, 20, 9, 0, tzinfo=pytz.utc),
-            self.test_task30.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 5, 30, 17, 0, tzinfo=pytz.utc),
-            self.test_task30.computed_end
-        )
+        assert self.test_task30.computed_start == \
+            datetime.datetime(2013, 5, 20, 9, 0, tzinfo=pytz.utc)
 
-        self.assertTrue(
-            self.test_task30.computed_resources[0] in
+        assert self.test_task30.computed_end == \
+            datetime.datetime(2013, 5, 30, 17, 0, tzinfo=pytz.utc)
+
+        assert self.test_task30.computed_resources[0] in \
             [self.test_user1, self.test_user2, self.test_user3]
-        )
 
         # self.test_task31
-        self.assertEqual(
-            datetime.datetime(2013, 5, 20, 9, 0, tzinfo=pytz.utc),
-            self.test_task31.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 5, 30, 17, 0, tzinfo=pytz.utc),
-            self.test_task31.computed_end
-        )
+        assert self.test_task31.computed_start == \
+            datetime.datetime(2013, 5, 20, 9, 0, tzinfo=pytz.utc)
 
-        self.assertTrue(
-            self.test_task31.computed_resources[0] in
+        assert self.test_task31.computed_end == \
+            datetime.datetime(2013, 5, 30, 17, 0, tzinfo=pytz.utc)
+
+        assert self.test_task31.computed_resources[0] in \
             [self.test_user1, self.test_user2, self.test_user3]
-        )
 
         # self.test_shot3
-        self.assertEqual(
-            datetime.datetime(2013, 4, 30, 15, 0, tzinfo=pytz.utc),
-            self.test_shot3.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 6, 20, 10, 0, tzinfo=pytz.utc),
-            self.test_shot3.computed_end
-        )
+        assert self.test_shot3.computed_start == \
+            datetime.datetime(2013, 4, 30, 15, 0, tzinfo=pytz.utc)
 
-        self.assertEqual(
-            self.test_shot3.computed_resources,
-            []
-        )
+        assert self.test_shot3.computed_end == \
+            datetime.datetime(2013, 6, 20, 10, 0, tzinfo=pytz.utc)
+
+        assert self.test_shot3.computed_resources == []
 
         # self.test_task12
-        self.assertEqual(
-            datetime.datetime(2013, 4, 30, 15, 0, tzinfo=pytz.utc),
-            self.test_task12.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 5, 2, 13, 0, tzinfo=pytz.utc),
-            self.test_task12.computed_end
-        )
+        assert self.test_task12.computed_start == \
+            datetime.datetime(2013, 4, 30, 15, 0, tzinfo=pytz.utc)
 
-        self.assertTrue(
-            self.test_task12.computed_resources[0] in
+        assert self.test_task12.computed_end == \
+            datetime.datetime(2013, 5, 2, 13, 0, tzinfo=pytz.utc)
+
+        assert self.test_task12.computed_resources[0] in \
             [self.test_user1, self.test_user2, self.test_user3]
-        )
 
         # self.test_task13
-        self.assertEqual(
-            datetime.datetime(2013, 5, 30, 17, 0, tzinfo=pytz.utc),
-            self.test_task13.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 6, 3, 15, 0, tzinfo=pytz.utc),
-            self.test_task13.computed_end
-        )
+        assert self.test_task13.computed_start == \
+            datetime.datetime(2013, 5, 30, 17, 0, tzinfo=pytz.utc)
 
-        self.assertTrue(
-            self.test_task13.computed_resources[0] in
+        assert self.test_task13.computed_end == \
+            datetime.datetime(2013, 6, 3, 15, 0, tzinfo=pytz.utc)
+
+        assert self.test_task13.computed_resources[0] in \
             [self.test_user1, self.test_user2, self.test_user3]
-        )
 
         # self.test_task14
-        self.assertEqual(
-            datetime.datetime(2013, 6, 7, 11, 0, tzinfo=pytz.utc),
-            self.test_task14.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 6, 11, 17, 0, tzinfo=pytz.utc),
-            self.test_task14.computed_end
-        )
+        assert self.test_task14.computed_start == \
+            datetime.datetime(2013, 6, 7, 11, 0, tzinfo=pytz.utc)
 
-        self.assertTrue(
-            self.test_task14.computed_resources[0] in
+        assert self.test_task14.computed_end == \
+            datetime.datetime(2013, 6, 11, 17, 0, tzinfo=pytz.utc)
+
+        assert self.test_task14.computed_resources[0] in \
             [self.test_user1, self.test_user2, self.test_user3]
-        )
 
         # self.test_task15
-        self.assertEqual(
-            datetime.datetime(2013, 6, 14, 14, 0, tzinfo=pytz.utc),
-            self.test_task15.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 6, 20, 10, 0, tzinfo=pytz.utc),
-            self.test_task15.computed_end
-        )
+        assert self.test_task15.computed_start == \
+            datetime.datetime(2013, 6, 14, 14, 0, tzinfo=pytz.utc)
 
-        self.assertTrue(
-            self.test_task15.computed_resources[0] in
+        assert self.test_task15.computed_end == \
+            datetime.datetime(2013, 6, 20, 10, 0, tzinfo=pytz.utc)
+
+        assert self.test_task15.computed_resources[0] in \
             [self.test_user1, self.test_user2, self.test_user3]
-        )
 
         # self.test_shot4
-        self.assertEqual(
-            datetime.datetime(2013, 5, 2, 13, 0, tzinfo=pytz.utc),
-            self.test_shot4.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 6, 24, 16, 0, tzinfo=pytz.utc),
-            self.test_shot4.computed_end
-        )
+        assert self.test_shot4.computed_start == \
+            datetime.datetime(2013, 5, 2, 13, 0, tzinfo=pytz.utc)
 
-        self.assertEqual(
-            self.test_shot4.computed_resources,
-            []
-        )
+        assert self.test_shot4.computed_end == \
+            datetime.datetime(2013, 6, 24, 16, 0, tzinfo=pytz.utc)
+
+        assert self.test_shot4.computed_resources == []
 
         # self.test_task16
-        self.assertEqual(
-            datetime.datetime(2013, 5, 2, 13, 0, tzinfo=pytz.utc),
-            self.test_task16.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 5, 6, 11, 0, tzinfo=pytz.utc),
-            self.test_task16.computed_end
-        )
+        assert self.test_task16.computed_start == \
+            datetime.datetime(2013, 5, 2, 13, 0, tzinfo=pytz.utc)
 
-        self.assertTrue(
-            self.test_task16.computed_resources[0] in
+        assert self.test_task16.computed_end == \
+            datetime.datetime(2013, 5, 6, 11, 0, tzinfo=pytz.utc)
+
+        assert self.test_task16.computed_resources[0] in \
             [self.test_user1, self.test_user2, self.test_user3]
-        )
 
         # self.test_task17
-        self.assertEqual(
-            datetime.datetime(2013, 6, 3, 15, 0, tzinfo=pytz.utc),
-            self.test_task17.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 6, 5, 13, 0, tzinfo=pytz.utc),
-            self.test_task17.computed_end
-        )
+        assert self.test_task17.computed_start == \
+            datetime.datetime(2013, 6, 3, 15, 0, tzinfo=pytz.utc)
 
-        self.assertTrue(
-            self.test_task17.computed_resources[0] in
+        assert self.test_task17.computed_end == \
+            datetime.datetime(2013, 6, 5, 13, 0, tzinfo=pytz.utc)
+
+        assert self.test_task17.computed_resources[0] in \
             [self.test_user1, self.test_user2, self.test_user3]
-        )
 
         # self.test_task18
-        self.assertEqual(
-            datetime.datetime(2013, 6, 10, 10, 0, tzinfo=pytz.utc),
-            self.test_task18.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 6, 12, 16, 0, tzinfo=pytz.utc),
-            self.test_task18.computed_end
-        )
+        assert self.test_task18.computed_start == \
+            datetime.datetime(2013, 6, 10, 10, 0, tzinfo=pytz.utc)
 
-        self.assertTrue(
-            self.test_task18.computed_resources[0],
+        assert self.test_task18.computed_end == \
+            datetime.datetime(2013, 6, 12, 16, 0, tzinfo=pytz.utc)
+
+        assert self.test_task18.computed_resources[0] in \
             [self.test_user1, self.test_user2, self.test_user3]
-        )
 
         # self.test_task19
-        self.assertEqual(
-            datetime.datetime(2013, 6, 19, 11, 0, tzinfo=pytz.utc),
-            self.test_task19.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 6, 24, 16, 0, tzinfo=pytz.utc),
-            self.test_task19.computed_end
-        )
+        assert self.test_task19.computed_start == \
+            datetime.datetime(2013, 6, 19, 11, 0, tzinfo=pytz.utc)
 
-        self.assertTrue(
-            self.test_task19.computed_resources[0] in
+        assert self.test_task19.computed_end == \
+            datetime.datetime(2013, 6, 24, 16, 0, tzinfo=pytz.utc)
+
+        assert self.test_task19.computed_resources[0] in \
             [self.test_user1, self.test_user2, self.test_user3]
-        )
 
         # self.test_task2
-        self.assertEqual(
-            datetime.datetime(2013, 5, 30, 9, 0, tzinfo=pytz.utc),
-            self.test_task2.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 6, 11, 17, 0, tzinfo=pytz.utc),
-            self.test_task2.computed_end
-        )
+        assert self.test_task2.computed_start == \
+            datetime.datetime(2013, 5, 30, 9, 0, tzinfo=pytz.utc)
 
-        self.assertTrue(
-            self.test_task2.computed_resources[0] in
+        assert self.test_task2.computed_end == \
+            datetime.datetime(2013, 6, 11, 17, 0, tzinfo=pytz.utc)
+
+        assert self.test_task2.computed_resources[0] in \
             [self.test_user1, self.test_user2, self.test_user3]
-        )
 
     def test_schedule_will_schedule_only_the_tasks_of_the_given_projects_with_the_given_scheduler(self):
         """testing if the schedule method will schedule the tasks of the given
@@ -1688,251 +1454,236 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         DBSession.commit()
 
         # now check the timings of the tasks are all adjusted
-        self.assertEqual(
-            dt1.computed_start,
+        assert dt1.computed_start == \
             datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc)
-        )
-        self.assertEqual(
-            dt1.computed_end,
-            datetime.datetime(2013, 4, 16, 13, 0, tzinfo=pytz.utc)
-        )
 
-        self.assertEqual(
-            dt2.computed_start,
-            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc)
-        )
-        self.assertEqual(
-            dt2.computed_end,
+        assert dt1.computed_end == \
             datetime.datetime(2013, 4, 16, 13, 0, tzinfo=pytz.utc)
-        )
+
+        assert dt2.computed_start == \
+            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc)
+
+        assert dt2.computed_end == \
+            datetime.datetime(2013, 4, 16, 13, 0, tzinfo=pytz.utc)
 
         # self.test_project
-        self.assertEqual(self.test_project1.computed_start, None)
-        self.assertEqual(self.test_project1.computed_end, None)
+        assert self.test_project1.computed_start is None
+        assert self.test_project1.computed_end is None
 
         # self.test_asset1
-        self.assertEqual(self.test_asset1.computed_start, None)
-        self.assertEqual(self.test_asset1.computed_end, None)
+        assert self.test_asset1.computed_start is None
+        assert self.test_asset1.computed_end is None
 
-        self.assertEqual(self.test_asset1.computed_resources,
-                         self.test_asset1.resources)
+        assert self.test_asset1.computed_resources == \
+            self.test_asset1.resources
 
         # self.test_task24
-        self.assertEqual(self.test_task24.computed_start, None)
-        self.assertEqual(self.test_task24.computed_end, None)
+        assert self.test_task24.computed_start is None
+        assert self.test_task24.computed_end is None
 
-        self.assertEqual(self.test_task24.computed_resources,
-                         self.test_task24.resources)
+        assert self.test_task24.computed_resources == \
+            self.test_task24.resources
 
         # self.test_task25
-        self.assertEqual(self.test_task25.computed_start, None)
-        self.assertEqual(self.test_task25.computed_end, None)
+        assert self.test_task25.computed_start is None
+        assert self.test_task25.computed_end is None
 
-        self.assertEqual(self.test_task25.computed_resources,
-                         self.test_task25.resources)
+        assert self.test_task25.computed_resources == \
+            self.test_task25.resources
 
         # self.test_task26
-        self.assertEqual(self.test_task26.computed_start, None)
-        self.assertEqual(self.test_task26.computed_end, None)
+        assert self.test_task26.computed_start is None
+        assert self.test_task26.computed_end is None
 
-        self.assertEqual(self.test_task26.computed_resources,
-                         self.test_task26.resources)
+        assert self.test_task26.computed_resources == \
+            self.test_task26.resources
 
         # self.test_task27
-        self.assertEqual(self.test_task27.computed_start, None)
-        self.assertEqual(self.test_task27.computed_end, None)
+        assert self.test_task27.computed_start is None
+        assert self.test_task27.computed_end is None
 
-        self.assertEqual(self.test_task27.computed_resources,
-                         self.test_task27.resources)
+        assert self.test_task27.computed_resources == \
+            self.test_task27.resources
 
         # self.test_shot2
-        self.assertEqual(self.test_shot2.computed_start, None)
-        self.assertEqual(self.test_shot2.computed_end, None)
+        assert self.test_shot2.computed_start is None
+        assert self.test_shot2.computed_end is None
 
-        self.assertEqual(self.test_shot2.computed_resources,
-                         self.test_shot2.resources)
+        assert self.test_shot2.computed_resources == \
+            self.test_shot2.resources
 
         # self.test_task8
-        self.assertEqual(self.test_task8.computed_start, None)
-        self.assertEqual(self.test_task8.computed_end, None)
+        assert self.test_task8.computed_start is None
+        assert self.test_task8.computed_end is None
 
-        self.assertEqual(self.test_task8.computed_resources,
-                         self.test_task8.resources)
+        assert self.test_task8.computed_resources == self.test_task8.resources
 
         # self.test_task9
-        self.assertEqual(self.test_task9.computed_start, None)
-        self.assertEqual(self.test_task9.computed_end, None)
+        assert self.test_task9.computed_start is None
+        assert self.test_task9.computed_end is None
 
-        self.assertEqual(self.test_task9.computed_resources,
-                         self.test_task9.resources)
+        assert self.test_task9.computed_resources == self.test_task9.resources
 
         # self.test_task10
-        self.assertEqual(self.test_task10.computed_start, None)
-        self.assertEqual(self.test_task10.computed_end, None)
+        assert self.test_task10.computed_start is None
+        assert self.test_task10.computed_end is None
 
-        self.assertEqual(self.test_task10.computed_resources,
-                         self.test_task10.resources)
+        assert self.test_task10.computed_resources == \
+            self.test_task10.resources
 
         # self.test_task11
-        self.assertEqual(self.test_task11.computed_start, None)
-        self.assertEqual(self.test_task11.computed_end, None)
+        assert self.test_task11.computed_start is None
+        assert self.test_task11.computed_end is None
 
-        self.assertEqual(self.test_task11.computed_resources,
-                         self.test_task11.resources)
+        assert self.test_task11.computed_resources == \
+            self.test_task11.resources
 
         # self.test_shot1
-        self.assertEqual(self.test_shot1.computed_start, None)
-        self.assertEqual(self.test_shot1.computed_end, None)
+        assert self.test_shot1.computed_start is None
+        assert self.test_shot1.computed_end is None
 
-        self.assertEqual(self.test_shot1.computed_resources,
-                         self.test_shot1.resources)
+        assert self.test_shot1.computed_resources == self.test_shot1.resources
 
         # self.test_task4
-        self.assertEqual(self.test_task4.computed_start, None)
-        self.assertEqual(self.test_task4.computed_end, None)
+        assert self.test_task4.computed_start is None
+        assert self.test_task4.computed_end is None
 
-        self.assertEqual(self.test_task4.computed_resources,
-                         self.test_task4.resources)
+        assert self.test_task4.computed_resources == self.test_task4.resources
 
         # self.test_task5
-        self.assertEqual(self.test_task5.computed_start, None)
-        self.assertEqual(self.test_task5.computed_end, None)
+        assert self.test_task5.computed_start is None
+        assert self.test_task5.computed_end is None
 
-        self.assertEqual(self.test_task5.computed_resources,
-                         self.test_task5.resources)
+        assert self.test_task5.computed_resources == self.test_task5.resources
 
         # self.test_task6
-        self.assertEqual(self.test_task6.computed_start, None)
-        self.assertEqual(self.test_task6.computed_end, None)
+        assert self.test_task6.computed_start is None
+        assert self.test_task6.computed_end is None
 
-        self.assertEqual(self.test_task6.computed_resources,
-                         self.test_task6.resources)
+        assert self.test_task6.computed_resources == self.test_task6.resources
 
         # self.test_task7
-        self.assertEqual(self.test_task7.computed_start, None)
-        self.assertEqual(self.test_task7.computed_end, None)
+        assert self.test_task7.computed_start is None
+        assert self.test_task7.computed_end is None
 
-        self.assertEqual(self.test_task7.computed_resources,
-                         self.test_task7.resources)
+        assert self.test_task7.computed_resources == self.test_task7.resources
 
         # self.test_task1
-        self.assertEqual(self.test_task1.computed_start, None)
-        self.assertEqual(self.test_task1.computed_end, None)
+        assert self.test_task1.computed_start is None
+        assert self.test_task1.computed_end is None
 
-        self.assertEqual(self.test_task1.computed_resources,
-                         self.test_task1.resources)
+        assert self.test_task1.computed_resources == self.test_task1.resources
 
         # self.test_asset2
-        self.assertEqual(self.test_asset2.computed_start, None)
-        self.assertEqual(self.test_asset2.computed_end, None)
+        assert self.test_asset2.computed_start is None
+        assert self.test_asset2.computed_end is None
 
-        self.assertEqual(self.test_asset2.computed_resources,
-                         self.test_asset2.resources)
+        assert self.test_asset2.computed_resources == \
+            self.test_asset2.resources
 
         # self.test_task28
-        self.assertEqual(self.test_task28.computed_start, None)
-        self.assertEqual(self.test_task28.computed_end, None)
+        assert self.test_task28.computed_start is None
+        assert self.test_task28.computed_end is None
 
-        self.assertEqual(self.test_task28.computed_resources,
-                         self.test_task28.resources)
+        assert self.test_task28.computed_resources == \
+            self.test_task28.resources
 
         # self.test_task29
-        self.assertEqual(self.test_task29.computed_start, None)
-        self.assertEqual(self.test_task29.computed_end, None)
+        assert self.test_task29.computed_start is None
+        assert self.test_task29.computed_end is None
 
-        self.assertEqual(self.test_task29.computed_resources,
-                         self.test_task29.resources)
+        assert self.test_task29.computed_resources == \
+            self.test_task29.resources
 
         # self.test_task30
-        self.assertEqual(self.test_task30.computed_start, None)
-        self.assertEqual(self.test_task30.computed_end, None)
+        assert self.test_task30.computed_start is None
+        assert self.test_task30.computed_end is None
 
-        self.assertEqual(self.test_task30.computed_resources,
-                         self.test_task30.resources)
+        assert self.test_task30.computed_resources == \
+            self.test_task30.resources
 
         # self.test_task31
-        self.assertEqual(self.test_task31.computed_start, None)
-        self.assertEqual(self.test_task31.computed_end, None)
+        assert self.test_task31.computed_start is None
+        assert self.test_task31.computed_end is None
 
-        self.assertEqual(self.test_task31.computed_resources,
-                         self.test_task31.resources)
+        assert self.test_task31.computed_resources == \
+            self.test_task31.resources
 
         # self.test_shot3
-        self.assertEqual(self.test_shot3.computed_start, None)
-        self.assertEqual(self.test_shot3.computed_end, None)
+        assert self.test_shot3.computed_start is None
+        assert self.test_shot3.computed_end is None
 
-        self.assertEqual(self.test_shot3.computed_resources,
-                         self.test_shot3.resources)
+        assert self.test_shot3.computed_resources == \
+            self.test_shot3.resources
 
         # self.test_task12
-        self.assertEqual(self.test_task12.computed_start, None)
-        self.assertEqual(self.test_task12.computed_end, None)
+        assert self.test_task12.computed_start is None
+        assert self.test_task12.computed_end is None
 
-        self.assertEqual(self.test_task12.computed_resources,
-                         self.test_task12.resources)
+        assert self.test_task12.computed_resources == \
+            self.test_task12.resources
 
         # self.test_task13
-        self.assertEqual(self.test_task13.computed_start, None)
-        self.assertEqual(self.test_task13.computed_end, None)
+        assert self.test_task13.computed_start is None
+        assert self.test_task13.computed_end is None
 
-        self.assertEqual(self.test_task13.computed_resources,
-                         self.test_task13.resources)
+        assert self.test_task13.computed_resources == \
+            self.test_task13.resources
 
         # self.test_task14
-        self.assertEqual(self.test_task14.computed_start, None)
-        self.assertEqual(self.test_task14.computed_end, None)
+        assert self.test_task14.computed_start is None
+        assert self.test_task14.computed_end is None
 
-        self.assertEqual(self.test_task14.computed_resources,
-                         self.test_task14.resources)
+        assert self.test_task14.computed_resources == \
+            self.test_task14.resources
 
         # self.test_task15
-        self.assertEqual(self.test_task15.computed_start, None)
-        self.assertEqual(self.test_task15.computed_end, None)
+        assert self.test_task15.computed_start is None
+        assert self.test_task15.computed_end is None
 
-        self.assertEqual(self.test_task15.computed_resources,
-                         self.test_task15.resources)
+        assert self.test_task15.computed_resources == \
+            self.test_task15.resources
 
         # self.test_shot4
-        self.assertEqual(self.test_shot4.computed_start, None)
-        self.assertEqual(self.test_shot4.computed_end, None)
+        assert self.test_shot4.computed_start is None
+        assert self.test_shot4.computed_end is None
 
-        self.assertEqual(self.test_shot4.computed_resources,
-                         self.test_shot4.resources)
+        assert self.test_shot4.computed_resources == self.test_shot4.resources
 
         # self.test_task16
-        self.assertEqual(self.test_task16.computed_start, None)
-        self.assertEqual(self.test_task16.computed_end, None)
+        assert self.test_task16.computed_start is None
+        assert self.test_task16.computed_end is None
 
-        self.assertEqual(self.test_task16.computed_resources,
-                         self.test_task16.resources)
+        assert self.test_task16.computed_resources == \
+            self.test_task16.resources
 
         # self.test_task17
-        self.assertEqual(self.test_task17.computed_start, None)
-        self.assertEqual(self.test_task17.computed_end, None)
+        assert self.test_task17.computed_start is None
+        assert self.test_task17.computed_end is None
 
-        self.assertEqual(self.test_task17.computed_resources,
-                         self.test_task17.resources)
+        assert self.test_task17.computed_resources == \
+            self.test_task17.resources
 
         # self.test_task18
-        self.assertEqual(self.test_task18.computed_start, None)
-        self.assertEqual(self.test_task18.computed_end, None)
+        assert self.test_task18.computed_start is None
+        assert self.test_task18.computed_end is None
 
-        self.assertEqual(self.test_task18.computed_resources,
-                         self.test_task18.resources)
+        assert self.test_task18.computed_resources == \
+            self.test_task18.resources
 
         # self.test_task19
-        self.assertEqual(self.test_task19.computed_start, None)
-        self.assertEqual(self.test_task19.computed_end, None)
+        assert self.test_task19.computed_start is None
+        assert self.test_task19.computed_end is None
 
-        self.assertEqual(self.test_task19.computed_resources,
-                         self.test_task19.resources)
+        assert self.test_task19.computed_resources == \
+            self.test_task19.resources
 
         # self.test_task2
-        self.assertEqual(self.test_task2.computed_start, None)
-        self.assertEqual(self.test_task2.computed_end, None)
+        assert self.test_task2.computed_start is None
+        assert self.test_task2.computed_end is None
 
-        self.assertEqual(self.test_task2.computed_resources,
-                         self.test_task2.resources)
+        assert self.test_task2.computed_resources == \
+            self.test_task2.resources
 
     def test_is_scheduling_will_be_False_after_scheduling_is_done(self):
         """testing if the is_scheduling attribute will be back to False when
@@ -1949,18 +1700,18 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
             datetime.datetime(2013, 7, 30, 0, 0, tzinfo=pytz.utc)
 
         def callback():
-            self.assertTrue(self.test_studio.is_scheduling)
+            assert self.test_studio.is_scheduling is True
 
         dummy_scheduler = DummyScheduler(callback=callback)
 
         self.test_studio.scheduler = dummy_scheduler
-        self.assertFalse(self.test_studio.is_scheduling)
+        assert self.test_studio.is_scheduling is False
 
         # with v0.2.6.9 it is now the users duty to set is_scheduling to True
         self.test_studio.is_scheduling = True
 
         self.test_studio.schedule()
-        self.assertFalse(self.test_studio.is_scheduling)
+        assert self.test_studio.is_scheduling is False
 
     def test_schedule_will_store_schedule_info_in_database(self):
         """testing if the schedule method will store the schedule info in
@@ -1980,15 +1731,15 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         self.test_studio.scheduler = tj_scheduler
         self.test_studio.schedule(scheduled_by=self.test_user1)
 
-        self.assertEqual(self.test_studio.last_scheduled_by, self.test_user1)
+        assert self.test_studio.last_scheduled_by == self.test_user1
 
         last_schedule_message = self.test_studio.last_schedule_message
         last_scheduled_at = self.test_studio.last_scheduled_at
         last_scheduled_by = self.test_studio.last_scheduled_by
 
-        self.assertTrue(last_schedule_message is not None)
-        self.assertTrue(last_scheduled_at is not None)
-        self.assertTrue(last_scheduled_by is not None)
+        assert last_schedule_message is not None
+        assert last_scheduled_at is not None
+        assert last_scheduled_by is not None
 
         from stalker.db.session import DBSession
         DBSession.add(self.test_studio)
@@ -2000,28 +1751,24 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
 
         studio = Studio.query.first()
 
-        self.assertFalse(studio.is_scheduling)
-        self.assertTrue(
-            datetime.datetime.now(pytz.utc) - studio.scheduling_started_at <
+        assert studio.is_scheduling is False
+        assert \
+            datetime.datetime.now(pytz.utc) - studio.scheduling_started_at < \
             datetime.timedelta(minutes=1)
-        )
-        self.assertEqual(last_schedule_message, studio.last_schedule_message)
-        self.assertEqual(last_scheduled_at, studio.last_scheduled_at)
-        self.assertEqual(last_scheduled_by, studio.last_scheduled_by)
+        assert studio.last_schedule_message == last_schedule_message
+        assert studio.last_scheduled_at == last_scheduled_at
+        assert studio.last_scheduled_by == last_scheduled_by
 
-        self.assertEqual(studio.last_scheduled_by_id, self.test_user1.id)
-        self.assertEqual(studio.last_scheduled_by, self.test_user1)
+        assert studio.last_scheduled_by_id == self.test_user1.id
+        assert studio.last_scheduled_by == self.test_user1
 
     def test_vacation_attribute_is_read_only(self):
         """testing if the vacation attribute is a read-only attribute
         """
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             self.test_studio.vacations = 'some random value'
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_vacation_attribute_returns_studio_vacation_instances(self):
         """Testing if the vacation attribute is returning the Vacation
@@ -2048,10 +1795,9 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         DBSession.add_all([vacation1, vacation2, vacation3])
         DBSession.commit()
 
-        self.assertEqual(
-            sorted(self.test_studio.vacations, key=lambda x: x.name),
+        assert \
+            sorted(self.test_studio.vacations, key=lambda x: x.name) == \
             sorted([vacation1, vacation2], key=lambda x: x.name)
-        )
 
     def test_timing_resolution_argument_skipped(self):
         """testing if the timing_resolution attribute will be set to the
@@ -2065,10 +1811,7 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
             pass
 
         studio = Studio(**self.kwargs)
-        self.assertEqual(
-            studio.timing_resolution,
-            defaults.timing_resolution
-        )
+        assert studio.timing_resolution == defaults.timing_resolution
 
     def test_timing_resolution_argument_is_None(self):
         """testing if the timing_resolution attribute will be set to the
@@ -2078,10 +1821,7 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         from stalker import defaults, Studio
         self.kwargs['timing_resolution'] = None
         studio = Studio(**self.kwargs)
-        self.assertEqual(
-            studio.timing_resolution,
-            defaults.timing_resolution
-        )
+        assert studio.timing_resolution == defaults.timing_resolution
 
     def test_timing_resolution_attribute_is_set_to_None(self):
         """testing if the timing_resolution attribute will be set to the
@@ -2092,15 +1832,9 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         self.kwargs['timing_resolution'] = datetime.timedelta(minutes=5)
         studio = Studio(**self.kwargs)
         # check start conditions
-        self.assertEqual(
-            studio.timing_resolution,
-            self.kwargs['timing_resolution']
-        )
+        assert studio.timing_resolution == self.kwargs['timing_resolution']
         studio.timing_resolution = None
-        self.assertEqual(
-            studio.timing_resolution,
-            defaults.timing_resolution
-        )
+        assert studio.timing_resolution == defaults.timing_resolution
 
     def test_timing_resolution_argument_is_not_a_timedelta_instance(self):
         """testing if a TypeError will be raised when the timing_resolution
@@ -2108,14 +1842,12 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         """
         from stalker import Studio
         self.kwargs['timing_resolution'] = 'not a timedelta instance'
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Studio(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Studio.timing_resolution should be an instance of '
+        assert str(cm.value) == \
+            'Studio.timing_resolution should be an instance of ' \
             'datetime.timedelta not, str'
-        )
 
     def test_timing_resolution_attribute_is_not_a_timedelta_instance(self):
         """testing if a TypeError will be raised when the timing_resolution
@@ -2123,14 +1855,12 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         """
         from stalker import Studio
         new_foo_obj = Studio(**self.kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             new_foo_obj.timing_resolution = 'not a timedelta instance'
 
-        self.assertEqual(
-            str(cm.exception),
-            'Studio.timing_resolution should be an instance of '
+        assert str(cm.value) == \
+            'Studio.timing_resolution should be an instance of ' \
             'datetime.timedelta not, str'
-        )
 
     def test_timing_resolution_argument_is_working_properly(self):
         """testing if the timing_resolution argument value is passed to
@@ -2140,10 +1870,7 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         from stalker import Studio
         self.kwargs['timing_resolution'] = datetime.timedelta(minutes=5)
         studio = Studio(**self.kwargs)
-        self.assertEqual(
-            studio.timing_resolution,
-            self.kwargs['timing_resolution']
-        )
+        assert studio.timing_resolution == self.kwargs['timing_resolution']
 
     def test_timing_resolution_attribute_is_working_properly(self):
         """testing if the timing_resolution attribute is working properly
@@ -2153,6 +1880,6 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         studio = Studio(**self.kwargs)
         res = studio
         new_res = datetime.timedelta(hours=1, minutes=30)
-        self.assertNotEqual(res, new_res)
+        assert res != new_res
         studio.timing_resolution = new_res
-        self.assertEqual(studio.timing_resolution, new_res)
+        assert studio.timing_resolution == new_res

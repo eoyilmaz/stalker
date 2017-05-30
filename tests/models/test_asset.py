@@ -184,7 +184,7 @@ class AssetTester(UnitTestDBBase):
         Asset class
         """
         from stalker import Asset
-        self.assertFalse(Asset.__auto_name__)
+        assert Asset.__auto_name__ is False
 
     def test_equality(self):
         """testing equality of two Asset objects
@@ -201,11 +201,11 @@ class AssetTester(UnitTestDBBase):
         self.kwargs["name"] = "another name"
         new_asset4 = Asset(**self.kwargs)
 
-        self.assertTrue(new_asset1 == new_asset2)
-        self.assertFalse(new_asset1 == new_asset3)
-        self.assertFalse(new_asset1 == new_asset4)
-        self.assertFalse(new_asset3 == new_asset4)
-        self.assertFalse(new_asset1 == new_entity1)
+        assert new_asset1 == new_asset2
+        assert not new_asset1 == new_asset3
+        assert not new_asset1 == new_asset4
+        assert not new_asset3 == new_asset4
+        assert not new_asset1 == new_entity1
 
     def test_inequality(self):
         """testing inequality of two Asset objects
@@ -222,11 +222,11 @@ class AssetTester(UnitTestDBBase):
         self.kwargs["name"] = "another name"
         new_asset4 = Asset(**self.kwargs)
 
-        self.assertFalse(new_asset1 != new_asset2)
-        self.assertTrue(new_asset1 != new_asset3)
-        self.assertTrue(new_asset1 != new_asset4)
-        self.assertTrue(new_asset3 != new_asset4)
-        self.assertTrue(new_asset1 != new_entity1)
+        assert not new_asset1 != new_asset2
+        assert new_asset1 != new_asset3
+        assert new_asset1 != new_asset4
+        assert new_asset3 != new_asset4
+        assert new_asset1 != new_entity1
 
     def test_ReferenceMixin_initialization(self):
         """testing if the ReferenceMixin part is initialized correctly
@@ -260,7 +260,7 @@ class AssetTester(UnitTestDBBase):
         from stalker import Asset
         new_asset = Asset(**self.kwargs)
 
-        self.assertEqual(new_asset.references, references)
+        assert new_asset.references == references
 
     def test_StatusMixin_initialization(self):
         """testing if the StatusMixin part is initialized correctly
@@ -275,7 +275,7 @@ class AssetTester(UnitTestDBBase):
 
         new_asset = Asset(**self.kwargs)
 
-        self.assertEqual(new_asset.status_list, status_list)
+        assert new_asset.status_list == status_list
 
     def test_TaskMixin_initialization(self):
         """testing if the TaskMixin part is initialized correctly
@@ -320,18 +320,17 @@ class AssetTester(UnitTestDBBase):
 
         tasks = [task1, task2]
 
-        self.assertEqual(
-            sorted(new_asset.tasks, key=lambda x: x.name),
+        assert \
+            sorted(new_asset.tasks, key=lambda x: x.name) == \
             sorted(tasks, key=lambda x: x.name)
-        )
 
     def test_plural_class_name(self):
         """testing the default plural name of the Asset class
         """
-        self.assertEqual(self.asset1.plural_class_name, "Assets")
+        assert self.asset1.plural_class_name == "Assets"
 
     def test___strictly_typed___is_True(self):
         """testing if the __strictly_typed__ class attribute is True
         """
         from stalker import Asset
-        self.assertEqual(Asset.__strictly_typed__, True)
+        assert Asset.__strictly_typed__ is True

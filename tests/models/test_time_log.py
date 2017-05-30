@@ -19,6 +19,8 @@
 
 import copy
 import datetime
+
+import pytest
 import pytz
 
 from stalker import TimeLog
@@ -121,7 +123,7 @@ class TimeLogDBTester(UnitTestDBBase):
         """testing if the __auto_name__ class attribute is set to True for
         TimeLog class
         """
-        self.assertTrue(TimeLog.__auto_name__)
+        assert TimeLog.__auto_name__ is True
 
     def test_task_argument_is_skipped(self):
         """testing if a TypeError will be raised when the task argument is
@@ -132,14 +134,12 @@ class TimeLogDBTester(UnitTestDBBase):
         kwargs.pop("task")
         kwargs['start'] = kwargs['start'] - td(days=100)
         kwargs['duration'] = td(hours=10)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             TimeLog(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'TimeLog.task should be an instance of stalker.models.task.Task '
+        assert str(cm.value) == \
+            'TimeLog.task should be an instance of stalker.models.task.Task ' \
             'not NoneType'
-        )
 
     def test_task_argument_is_None(self):
         """testing if a TypeError will be raised when the task argument is None
@@ -149,27 +149,23 @@ class TimeLogDBTester(UnitTestDBBase):
         kwargs["task"] = None
         kwargs['start'] = kwargs['start'] - td(days=100)
         kwargs['duration'] = td(hours=10)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             TimeLog(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'TimeLog.task should be an instance of stalker.models.task.Task '
+        assert str(cm.value) == \
+            'TimeLog.task should be an instance of stalker.models.task.Task ' \
             'not NoneType'
-        )
 
     def test_task_attribute_is_None(self):
         """testing if a TypeError will be raised when the task attribute i
         None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_time_log.task = None
 
-        self.assertEqual(
-            str(cm.exception),
-            'TimeLog.task should be an instance of stalker.models.task.Task '
+        assert str(cm.value) == \
+            'TimeLog.task should be an instance of stalker.models.task.Task ' \
             'not NoneType'
-        )
 
     def test_task_argument_is_not_a_Task_instance(self):
         """testing if a TypeError will be raised when the task argument is not
@@ -180,27 +176,23 @@ class TimeLogDBTester(UnitTestDBBase):
         kwargs["task"] = "this is a task"
         kwargs['start'] = kwargs['start'] - td(days=100)
         kwargs['duration'] = td(hours=10)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             TimeLog(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'TimeLog.task should be an instance of stalker.models.task.Task '
+        assert str(cm.value) == \
+            'TimeLog.task should be an instance of stalker.models.task.Task ' \
             'not str'
-        )
 
     def test_task_attribute_is_not_a_Task_instance(self):
         """testing if a TypeError will be raised when the task attribute is not
         a stalker.models.task.Task instance
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_time_log.task = "this is a task"
 
-        self.assertEqual(
-            str(cm.exception),
-            'TimeLog.task should be an instance of stalker.models.task.Task '
+        assert str(cm.value) == \
+            'TimeLog.task should be an instance of stalker.models.task.Task ' \
             'not str'
-        )
 
     def test_task_attribute_is_working_properly(self):
         """testing if the task attribute is working properly
@@ -211,9 +203,9 @@ class TimeLogDBTester(UnitTestDBBase):
             project=self.test_project,
             resources=[self.test_resource1],
         )
-        self.assertNotEqual(self.test_time_log.task, new_task)
+        assert self.test_time_log.task != new_task
         self.test_time_log.task = new_task
-        self.assertEqual(self.test_time_log.task, new_task)
+        assert self.test_time_log.task == new_task
 
     def test_task_argument_updates_backref(self):
         """testing if the Task given with the task argument is updated
@@ -235,7 +227,7 @@ class TimeLogDBTester(UnitTestDBBase):
         new_time_log = TimeLog(**kwargs)
 
         # now check if the new_time_log is in task.time_logs
-        self.assertTrue(new_time_log in new_task.time_logs)
+        assert new_time_log in new_task.time_logs
 
     def test_task_attribute_updates_backref(self):
         """testing if the Task given with the task attribute is updated
@@ -250,7 +242,7 @@ class TimeLogDBTester(UnitTestDBBase):
         )
 
         self.test_time_log.task = new_task
-        self.assertTrue(self.test_time_log in new_task.time_logs)
+        assert self.test_time_log in new_task.time_logs
 
     def test_resource_argument_is_skipped(self):
         """testing if a TypeError will be raised when the resource argument is
@@ -260,13 +252,10 @@ class TimeLogDBTester(UnitTestDBBase):
         kwargs.pop("resource")
         kwargs['start'] -= datetime.timedelta(days=200)
         kwargs['end'] = kwargs['start'] + datetime.timedelta(days=10)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             TimeLog(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'TimeLog.resource can not be None'
-        )
+        assert str(cm.value) == 'TimeLog.resource can not be None'
 
     def test_resource_argument_is_None(self):
         """testing if a TypeError will be raised when the resource argument is
@@ -274,25 +263,19 @@ class TimeLogDBTester(UnitTestDBBase):
         """
         kwargs = copy.copy(self.kwargs)
         kwargs["resource"] = None
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             TimeLog(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'TimeLog.resource can not be None'
-        )
+        assert str(cm.value) == 'TimeLog.resource can not be None'
 
     def test_resource_attribute_is_None(self):
         """testing if a TypeError will be raised when the resource attribute is
         set to None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_time_log.resource = None
 
-        self.assertEqual(
-            str(cm.exception),
-            'TimeLog.resource can not be None'
-        )
+        assert str(cm.value) == 'TimeLog.resource can not be None'
 
     def test_resource_argument_is_not_a_User_instance(self):
         """testing if a TypeError will be raised when the resource argument is
@@ -300,27 +283,23 @@ class TimeLogDBTester(UnitTestDBBase):
         """
         kwargs = copy.copy(self.kwargs)
         kwargs["resource"] = "This is a resource"
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             TimeLog(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'TimeLog.resource should be a stalker.models.auth.User instance '
+        assert str(cm.value) == \
+            'TimeLog.resource should be a stalker.models.auth.User instance ' \
             'not str'
-        )
 
     def test_resource_attribute_is_not_a_User_instance(self):
         """testing if a TypeError will be raised when the resource attribute is
         set to a value other than a stalker.models.user.User instance
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_time_log.resource = "this is a resource"
 
-        self.assertEqual(
-            str(cm.exception),
-            'TimeLog.resource should be a stalker.models.auth.User instance '
+        assert str(cm.value) == \
+            'TimeLog.resource should be a stalker.models.auth.User instance ' \
             'not str'
-        )
 
     def test_resource_attribute_is_working_properly(self):
         """testing if the resource attribute is working properly
@@ -333,9 +312,9 @@ class TimeLogDBTester(UnitTestDBBase):
             password="1234",
         )
 
-        self.assertNotEqual(self.test_time_log.resource, new_resource)
+        assert self.test_time_log.resource != new_resource
         self.test_time_log.resource = new_resource
-        self.assertEqual(self.test_time_log.resource, new_resource)
+        assert self.test_time_log.resource == new_resource
 
     def test_resource_argument_updates_backref(self):
         """testing if the User instance given with the resource argument is
@@ -354,7 +333,7 @@ class TimeLogDBTester(UnitTestDBBase):
         kwargs["resource"] = new_resource
         new_time_log = TimeLog(**kwargs)
 
-        self.assertEqual(new_time_log.resource, new_resource)
+        assert new_time_log.resource == new_resource
 
     def test_resource_attribute_updates_backref(self):
         """testing if the User instance given with the resource attribute is
@@ -369,25 +348,22 @@ class TimeLogDBTester(UnitTestDBBase):
             password="1234",
         )
 
-        self.assertNotEqual(self.test_time_log.resource, new_resource)
+        assert self.test_time_log.resource != new_resource
         self.test_time_log.resource = new_resource
-        self.assertEqual(self.test_time_log.resource, new_resource)
+        assert self.test_time_log.resource == new_resource
 
     def test_ScheduleMixin_initialization(self):
         """testing if the DateRangeMixin part is initialized correctly
         """
         # it should have schedule attributes
-        self.assertEqual(
-            self.test_time_log.start,
-            self.kwargs["start"]
-        )
-        self.assertEqual(self.test_time_log.duration, self.kwargs["duration"])
+        assert self.test_time_log.start == self.kwargs["start"]
+        assert self.test_time_log.duration == self.kwargs["duration"]
 
         self.test_time_log.start = \
             datetime.datetime(2013, 3, 22, 4, 0, tzinfo=pytz.utc)
         self.test_time_log.end = \
             self.test_time_log.start + datetime.timedelta(10)
-        self.assertEqual(self.test_time_log.duration, datetime.timedelta(10))
+        assert self.test_time_log.duration == datetime.timedelta(10)
 
     def test_OverbookedError_1(self):
         """testing if a OverBookedError will be raised when the resource 
@@ -411,15 +387,13 @@ class TimeLogDBTester(UnitTestDBBase):
         DBSession.commit()
 
         from stalker.exceptions import OverBookedError
-        with self.assertRaises(OverBookedError) as cm:
+        with pytest.raises(OverBookedError) as cm:
             TimeLog(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'The resource has another TimeLog between %s and %s' % (
                 time_log1.start, time_log1.end
             )
-        )
 
     def test_OverbookedError_2(self):
         """testing if a OverBookedError will be raised when the resource is
@@ -443,15 +417,13 @@ class TimeLogDBTester(UnitTestDBBase):
         # time_log2
         kwargs["duration"] = datetime.timedelta(8)
         from stalker.exceptions import OverBookedError
-        with self.assertRaises(OverBookedError) as cm:
+        with pytest.raises(OverBookedError) as cm:
             TimeLog(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'The resource has another TimeLog between %s and %s' % (
                 time_log1.start, time_log1.end
             )
-        )
 
     def test_OverbookedError_3(self):
         """testing if a OverBookedError will be raised when the resource is
@@ -475,15 +447,13 @@ class TimeLogDBTester(UnitTestDBBase):
         # time_log2
         kwargs["duration"] = datetime.timedelta(10)
         from stalker.exceptions import OverBookedError
-        with self.assertRaises(OverBookedError) as cm:
+        with pytest.raises(OverBookedError) as cm:
             TimeLog(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'The resource has another TimeLog between %s and %s' % (
                 time_log1.start, time_log1.end
             )
-        )
 
     def test_OverbookedError_4(self):
         """testing if a OverBookedError will be raised when the resource is
@@ -511,20 +481,18 @@ class TimeLogDBTester(UnitTestDBBase):
         kwargs["duration"] = datetime.timedelta(10)
 
         from stalker.exceptions import OverBookedError
-        with self.assertRaises(OverBookedError) as cm:
+        with pytest.raises(OverBookedError) as cm:
             TimeLog(**kwargs)
 
         import tzlocal
         local_tz = tzlocal.get_localzone()
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'The resource has another TimeLog between %s and %s' % (
                 datetime.datetime(2013, 3, 20, 4, 0, tzinfo=pytz.utc)
                     .astimezone(local_tz),
                 (datetime.datetime(2013, 3, 20, 4, 0, tzinfo=pytz.utc)
                     + datetime.timedelta(12)).astimezone(local_tz)
             )
-        )
 
     def test_OverbookedError_5(self):
         """testing if a OverBookedError will be raised when the resource is
@@ -554,20 +522,18 @@ class TimeLogDBTester(UnitTestDBBase):
         kwargs["duration"] = datetime.timedelta(12)
 
         from stalker.exceptions import OverBookedError
-        with self.assertRaises(OverBookedError) as cm:
+        with pytest.raises(OverBookedError) as cm:
             TimeLog(**kwargs)
 
         import tzlocal
         local_tz = tzlocal.get_localzone()
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'The resource has another TimeLog between %s and %s' % (
                 datetime.datetime(2013, 3, 22, 4, 0, tzinfo=pytz.utc)
                     .astimezone(local_tz),
                 datetime.datetime(2013, 4, 1, 4, 0, tzinfo=pytz.utc)
                     .astimezone(local_tz)
             )
-        )
 
     def test_OverbookedError_6(self):
         """testing if a OverBookedError will be raised when the resource is
@@ -597,20 +563,18 @@ class TimeLogDBTester(UnitTestDBBase):
         kwargs["duration"] = datetime.timedelta(15)
 
         from stalker.exceptions import OverBookedError
-        with self.assertRaises(OverBookedError) as cm:
+        with pytest.raises(OverBookedError) as cm:
             TimeLog(**kwargs)
 
         import tzlocal
         local_tz = tzlocal.get_localzone()
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'The resource has another TimeLog between %s and %s' % (
                 datetime.datetime(2013, 3, 22, 4, 0, tzinfo=pytz.utc)
                     .astimezone(local_tz),
                 datetime.datetime(2013, 4, 6, 4, 0, tzinfo=pytz.utc)
                     .astimezone(local_tz)
             )
-        )
 
     def test_OverbookedError_7(self):
         """testing if a OverBookedError will be raised when the resource is
@@ -640,20 +604,18 @@ class TimeLogDBTester(UnitTestDBBase):
         kwargs["duration"] = datetime.timedelta(15)
 
         from stalker.exceptions import OverBookedError
-        with self.assertRaises(OverBookedError) as cm:
+        with pytest.raises(OverBookedError) as cm:
             TimeLog(**kwargs)
 
         import tzlocal
         local_tz = tzlocal.get_localzone()
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'The resource has another TimeLog between %s and %s' % (
                 datetime.datetime(2013, 3, 17, 4, 0, tzinfo=pytz.utc)
                     .astimezone(local_tz),
                 datetime.datetime(2013, 4, 1, 4, 0, tzinfo=pytz.utc)
                     .astimezone(local_tz),
             )
-        )
 
     def test_OverbookedError_8(self):
         """testing if no OverBookedError will be raised when the resource is
@@ -761,15 +723,11 @@ class TimeLogDBTester(UnitTestDBBase):
 
         # there should be an DatabaseError raised
         from sqlalchemy.exc import IntegrityError
-        with self.assertRaises(IntegrityError) as cm:
+        with pytest.raises(IntegrityError) as cm:
             DBSession.commit()
 
-        self.assertTrue(
-            str(cm.exception).startswith(
-                '(psycopg2.IntegrityError) conflicting key value violates '
-                'exclusion constraint "overlapping_time_logs"'
-            )
-        )
+        assert '(psycopg2.IntegrityError) conflicting key value violates ' \
+            'exclusion constraint "overlapping_time_logs"' in str(cm.value)
 
     def test_OverbookedError_12(self):
         """testing if a IntegrityError will be raised by the database backend
@@ -806,15 +764,11 @@ class TimeLogDBTester(UnitTestDBBase):
 
         # there should be an DatabaseError raised
         from sqlalchemy.exc import IntegrityError
-        with self.assertRaises(IntegrityError) as cm:
+        with pytest.raises(IntegrityError) as cm:
             DBSession.commit()
 
-        self.assertTrue(
-            str(cm.exception).startswith(
-                '(psycopg2.IntegrityError) conflicting key value violates '
-                'exclusion constraint "overlapping_time_logs"'
-            )
-        )
+        assert '(psycopg2.IntegrityError) conflicting key value violates ' \
+            'exclusion constraint "overlapping_time_logs"' in str(cm.value)
 
     def test_timeLog_prevents_auto_flush_when_expanding_task_schedule_timing(self):
         """testing timeLog prevents auto flush when expanding task
@@ -876,10 +830,10 @@ class TimeLogDBTester(UnitTestDBBase):
         child_task2.parent = parent_task1
         child_task1.parent = parent_task2
 
-        self.assertEqual(parent_task1.total_logged_seconds, 0)
-        self.assertEqual(parent_task2.total_logged_seconds, 0)
-        self.assertEqual(child_task1.total_logged_seconds, 0)
-        self.assertEqual(child_task2.total_logged_seconds, 0)
+        assert parent_task1.total_logged_seconds == 0
+        assert parent_task2.total_logged_seconds == 0
+        assert child_task1.total_logged_seconds == 0
+        assert child_task2.total_logged_seconds == 0
 
         # now create a time log for child_task2
         tlog1 = TimeLog(
@@ -890,10 +844,10 @@ class TimeLogDBTester(UnitTestDBBase):
         )
 
         # before commit
-        self.assertEqual(parent_task1.total_logged_seconds, 9 * 3600)
-        self.assertEqual(parent_task2.total_logged_seconds, 0)
-        self.assertEqual(child_task1.total_logged_seconds, 0)
-        self.assertEqual(child_task2.total_logged_seconds, 0)
+        assert parent_task1.total_logged_seconds == 9 * 3600
+        assert parent_task2.total_logged_seconds == 0
+        assert child_task1.total_logged_seconds == 0
+        assert child_task2.total_logged_seconds == 0
 
         # commit changes
         from stalker.db.session import DBSession
@@ -901,10 +855,10 @@ class TimeLogDBTester(UnitTestDBBase):
         DBSession.commit()
 
         # after commit it should not change
-        self.assertEqual(parent_task1.total_logged_seconds, 9 * 3600)
-        self.assertEqual(parent_task2.total_logged_seconds, 0)
-        self.assertEqual(child_task1.total_logged_seconds, 0)
-        self.assertEqual(child_task2.total_logged_seconds, 9 * 3600)
+        assert parent_task1.total_logged_seconds == 9 * 3600
+        assert parent_task2.total_logged_seconds == 0
+        assert child_task1.total_logged_seconds == 0
+        assert child_task2.total_logged_seconds == 9 * 3600
 
         # add a new tlog to child_task2 and commit it
         # now create a time log for child_task2
@@ -915,19 +869,19 @@ class TimeLogDBTester(UnitTestDBBase):
             end=dt(2013, 7, 31, 22, 0, tzinfo=pytz.utc)
         )
 
-        self.assertEqual(parent_task1.total_logged_seconds, 12 * 3600)
-        self.assertEqual(parent_task2.total_logged_seconds, 0)
-        self.assertEqual(child_task1.total_logged_seconds, 0)
-        self.assertEqual(child_task2.total_logged_seconds, 9 * 3600)
+        assert parent_task1.total_logged_seconds == 12 * 3600
+        assert parent_task2.total_logged_seconds == 0
+        assert child_task1.total_logged_seconds == 0
+        assert child_task2.total_logged_seconds == 9 * 3600
 
         # commit changes
         DBSession.add(tlog2)
         DBSession.commit()
 
-        self.assertEqual(parent_task1.total_logged_seconds, 12 * 3600)
-        self.assertEqual(parent_task2.total_logged_seconds, 0)
-        self.assertEqual(child_task1.total_logged_seconds, 0)
-        self.assertEqual(child_task2.total_logged_seconds, 12 * 3600)
+        assert parent_task1.total_logged_seconds == 12 * 3600
+        assert parent_task2.total_logged_seconds == 0
+        assert child_task1.total_logged_seconds == 0
+        assert child_task2.total_logged_seconds == 12 * 3600
 
         # add a new time log to child_task1 and commit it
         tlog3 = TimeLog(
@@ -940,15 +894,15 @@ class TimeLogDBTester(UnitTestDBBase):
         DBSession.add(tlog3)
         DBSession.commit()
 
-        self.assertEqual(parent_task1.total_logged_seconds, 21 * 3600)
-        self.assertEqual(parent_task2.total_logged_seconds, 9 * 3600)
-        self.assertEqual(child_task1.total_logged_seconds, 9 * 3600)
-        self.assertEqual(child_task2.total_logged_seconds, 12 * 3600)
-        #
-        # self.assertEqual(parent_task1.total_logged_seconds, 21 * 3600)
-        # self.assertEqual(parent_task2.total_logged_seconds, 9 * 3600)
-        # self.assertEqual(child_task1.total_logged_seconds, 9 * 3600)
-        # self.assertEqual(child_task2.total_logged_seconds, 12 * 3600)
+        assert parent_task1.total_logged_seconds == 21 * 3600
+        assert parent_task2.total_logged_seconds == 9 * 3600
+        assert child_task1.total_logged_seconds == 9 * 3600
+        assert child_task2.total_logged_seconds == 12 * 3600
+
+        # assert parent_task1.total_logged_seconds == 21 * 3600
+        # assert parent_task2.total_logged_seconds == 9 * 3600
+        # assert child_task1.total_logged_seconds == 9 * 3600
+        # assert child_task2.total_logged_seconds == 12 * 3600
 
     def test_time_log_creation_for_a_WFD_leaf_task(self):
         """testing if a StatusError will be raised when a TimeLog instance
@@ -963,15 +917,13 @@ class TimeLogDBTester(UnitTestDBBase):
         kwargs = copy.copy(self.kwargs)
         kwargs['task'] = new_task
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             TimeLog(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 2 is a WFD task, and it is not allowed to create '
-            'TimeLogs for a WFD task, please supply a RTS, WIP, HREV or DREV '
-            'task!'
-        )
+        assert str(cm.value) == \
+            'Test Task 2 is a WFD task, and it is not allowed to create ' \
+            'TimeLogs for a WFD task, please supply a RTS, WIP, HREV or ' \
+            'DREV task!'
 
     def test_time_log_creation_for_a_RTS_leaf_task(self):
         """testing if the status will be updated to WIP when a TimeLog instance
@@ -981,9 +933,9 @@ class TimeLogDBTester(UnitTestDBBase):
         task = kwargs['task']
         kwargs['start'] -= datetime.timedelta(days=100)
         task.status = self.status_rts
-        self.assertEqual(task.status, self.status_rts)
+        assert task.status == self.status_rts
         TimeLog(**kwargs)
-        self.assertEqual(task.status, self.status_wip)
+        assert task.status == self.status_wip
 
     def test_time_log_creation_for_a_WIP_leaf_task(self):
         """testing if the status will stay at WIP when a TimeLog instance is
@@ -993,7 +945,7 @@ class TimeLogDBTester(UnitTestDBBase):
         task = kwargs['task']
         kwargs['start'] -= datetime.timedelta(days=10)
         task.status = self.status_wip
-        self.assertEqual(task.status, self.status_wip)
+        assert task.status == self.status_wip
         TimeLog(**kwargs)
 
     def test_time_log_creation_for_a_PREV_leaf_task(self):
@@ -1004,9 +956,9 @@ class TimeLogDBTester(UnitTestDBBase):
         task = kwargs['task']
         kwargs['start'] -= datetime.timedelta(days=100)
         task.status = self.status_prev
-        self.assertEqual(task.status, self.status_prev)
-        tlog = TimeLog(**kwargs)
-        self.assertEqual(task.status, self.status_prev)
+        assert task.status == self.status_prev
+        TimeLog(**kwargs)
+        assert task.status == self.status_prev
 
     def test_time_log_creation_for_a_HREV_leaf_task(self):
         """testing if the status will be updated to WIP when a TimeLog instance
@@ -1016,7 +968,7 @@ class TimeLogDBTester(UnitTestDBBase):
         task = kwargs['task']
         kwargs['start'] -= datetime.timedelta(days=100)
         task.status = self.status_hrev
-        self.assertEqual(task.status, self.status_hrev)
+        assert task.status == self.status_hrev
         TimeLog(**kwargs)
 
     def test_time_log_creation_for_a_DREV_leaf_task(self):
@@ -1027,7 +979,7 @@ class TimeLogDBTester(UnitTestDBBase):
         task = kwargs['task']
         kwargs['start'] -= datetime.timedelta(days=100)
         task.status = self.status_drev
-        self.assertEqual(task.status, self.status_drev)
+        assert task.status == self.status_drev
         TimeLog(**kwargs)
 
     def test_time_log_creation_for_a_OH_leaf_task(self):
@@ -1037,17 +989,15 @@ class TimeLogDBTester(UnitTestDBBase):
         kwargs = copy.copy(self.kwargs)
         task = kwargs['task']
         task.status = self.status_oh
-        self.assertEqual(task.status, self.status_oh)
+        assert task.status == self.status_oh
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             TimeLog(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'test task 1 is a OH task, and it is not allowed to create '
-            'TimeLogs for a OH task, please supply a RTS, WIP, HREV or DREV '
+        assert str(cm.value) == \
+            'test task 1 is a OH task, and it is not allowed to create ' \
+            'TimeLogs for a OH task, please supply a RTS, WIP, HREV or DREV ' \
             'task!'
-        )
 
     def test_time_log_creation_for_a_STOP_leaf_task(self):
         """testing if a StatusError will be raised when a TimeLog instance is
@@ -1056,17 +1006,15 @@ class TimeLogDBTester(UnitTestDBBase):
         kwargs = copy.copy(self.kwargs)
         task = kwargs['task']
         task.status = self.status_stop
-        self.assertEqual(task.status, self.status_stop)
+        assert task.status == self.status_stop
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             TimeLog(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'test task 1 is a STOP task, and it is not allowed to create '
-            'TimeLogs for a STOP task, please supply a RTS, WIP, HREV or DREV '
-            'task!'
-        )
+        assert str(cm.value) == \
+            'test task 1 is a STOP task, and it is not allowed to create ' \
+            'TimeLogs for a STOP task, please supply a RTS, WIP, HREV or ' \
+            'DREV task!'
 
     def test_time_log_creation_for_a_CMPL_leaf_task(self):
         """testing if a StatusError will be raised when a TimeLog instance is
@@ -1075,17 +1023,15 @@ class TimeLogDBTester(UnitTestDBBase):
         kwargs = copy.copy(self.kwargs)
         task = kwargs['task']
         task.status = self.status_cmpl
-        self.assertEqual(task.status, self.status_cmpl)
+        assert task.status == self.status_cmpl
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             TimeLog(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'test task 1 is a CMPL task, and it is not allowed to create '
-            'TimeLogs for a CMPL task, please supply a RTS, WIP, HREV or DREV '
-            'task!'
-        )
+        assert str(cm.value) == \
+            'test task 1 is a CMPL task, and it is not allowed to create ' \
+            'TimeLogs for a CMPL task, please supply a RTS, WIP, HREV or ' \
+            'DREV task!'
 
     def test_time_log_creation_that_violates_dependency_condition_WIP_CMPL_onend(self):
         """testing if a DependencyViolationError will be raised when the entered
@@ -1121,22 +1067,19 @@ class TimeLogDBTester(UnitTestDBBase):
         # entering a time log to the dates before 2014-03-25-19-0 should raise
         # a ValueError
         from stalker.exceptions import DependencyViolationError
-        with self.assertRaises(DependencyViolationError) as cm:
+        with pytest.raises(DependencyViolationError) as cm:
             dep_task.create_time_log(
                 self.test_resource2,
                 datetime.datetime(2014, 3, 25, 18, 0, tzinfo=pytz.utc),
                 datetime.datetime(2014, 3, 25, 19, 0, tzinfo=pytz.utc)
             )
 
-        self.assertEqual(
-            'It is not possible to create a TimeLog before %s, which '
+        assert 'It is not possible to create a TimeLog before %s, which ' \
             'violates the dependency relation of "%s" to "%s"' % (
                 datetime.datetime(2014, 3, 25, 19, 0, tzinfo=pytz.utc),
                 dep_task.name,
                 task.name
-            ),
-            str(cm.exception)
-        )
+            ) == str(cm.value)
 
         # and creating a TimeLog after that is possible
         dep_task.create_time_log(
@@ -1179,22 +1122,17 @@ class TimeLogDBTester(UnitTestDBBase):
         # entering a time log to the dates before 2014-03-16-10-0 should raise
         # a ValueError
         from stalker.exceptions import DependencyViolationError
-        with self.assertRaises(DependencyViolationError) as cm:
+        with pytest.raises(DependencyViolationError) as cm:
             dep_task.create_time_log(
                 self.test_resource2,
                 datetime.datetime(2014, 3, 16, 9, 0, tzinfo=pytz.utc),
                 datetime.datetime(2014, 3, 16, 10, 0, tzinfo=pytz.utc)
             )
 
-        self.assertEqual(
-            'It is not possible to create a TimeLog before %s, which '
+        assert 'It is not possible to create a TimeLog before %s, which ' \
             'violates the dependency relation of "%s" to "%s"' % (
                 datetime.datetime(2014, 3, 16, 10, 0, tzinfo=pytz.utc),
-                dep_task.name,
-                task.name
-            ),
-            str(cm.exception)
-        )
+                dep_task.name, task.name) == str(cm.value)
 
         # and creating a TimeLog after that is possible
         dep_task.create_time_log(

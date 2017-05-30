@@ -17,6 +17,9 @@
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
+
+import pytest
+
 from stalker import Page
 
 
@@ -91,107 +94,80 @@ class PageTester(unittest.TestCase):
         skipped
         """
         self.kwargs.pop('title')
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             Page(**self.kwargs)
 
-        self.assertEqual(
-            'Page.title can not be empty',
-            str(cm.exception)
-        )
+        assert str(cm.value) == 'Page.title can not be empty'
 
     def test_title_argument_is_None(self):
         """testing if a TypeError will be raised when the title argument is
         None
         """
         self.kwargs['title'] = None
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Page(**self.kwargs)
 
-        self.assertEqual(
-            'Page.title should be a string, not NoneType',
-            str(cm.exception)
-        )
+        assert str(cm.value) == 'Page.title should be a string, not NoneType'
 
     def test_title_attribute_is_set_to_None(self):
         """testing if a TypeError will be raised when the title attribute is
         set to None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_page.title = None
 
-        self.assertEqual(
-            'Page.title should be a string, not NoneType',
-            str(cm.exception)
-        )
+        assert str(cm.value) == 'Page.title should be a string, not NoneType'
 
     def test_title_argument_is_an_empty_string(self):
         """testing if a ValueError will be raised when the title argument is
         an empty string
         """
         self.kwargs['title'] = ''
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             Page(**self.kwargs)
 
-        self.assertEqual(
-            'Page.title can not be empty',
-            str(cm.exception)
-        )
+        assert str(cm.value) == 'Page.title can not be empty'
 
     def test_title_attribute_is_set_to_empty_string(self):
         """testing if a ValueError will be raised when the title attribute is
         set to empty string
         """
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             self.test_page.title = ''
 
-        self.assertEqual(
-            'Page.title can not be empty',
-            str(cm.exception)
-        )
+        assert str(cm.value) == 'Page.title can not be empty'
 
     def test_title_argument_is_not_a_string(self):
         """testing if a TypeError will be raised when the title argument is not
         a string
         """
         self.kwargs['title'] = 2165
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Page(**self.kwargs)
 
-        self.assertEqual(
-            'Page.title should be a string, not int',
-            str(cm.exception)
-        )
+        assert str(cm.value) == 'Page.title should be a string, not int'
 
     def test_title_attribute_is_not_a_string(self):
         """testing if a TypeError will be raised when the title is set to a
         value other than a string
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_page.title = 2135
 
-        self.assertEqual(
-            'Page.title should be a string, not int',
-            str(cm.exception)
-        )
+        assert str(cm.value) == 'Page.title should be a string, not int'
 
     def test_title_argument_is_working_properly(self):
         """testing if the title argument value is correctly passed to title
         attribute
         """
-        self.assertEqual(
-            self.kwargs['title'],
-            self.test_page.title
-        )
+        assert self.test_page.title == self.kwargs['title']
 
     def test_title_attribute_is_working_properly(self):
         """testing if the title attribute is working properly
         """
         test_value = 'Test Title 2'
         self.test_page.title = test_value
-        self.assertEqual(
-            test_value,
-            self.test_page.title
-        )
+        assert self.test_page.title == test_value
 
     def test_content_argument_skipped(self):
         """testing if the content attribute value will be an empty string if
@@ -199,7 +175,7 @@ class PageTester(unittest.TestCase):
         """
         self.kwargs.pop('content')
         new_page = Page(**self.kwargs)
-        self.assertEqual(new_page.content, '')
+        assert new_page.content == ''
 
     def test_content_argument_is_None(self):
         """testing if the content attribute value will be an empty string if
@@ -207,15 +183,15 @@ class PageTester(unittest.TestCase):
         """
         self.kwargs['content'] = None
         new_page = Page(**self.kwargs)
-        self.assertEqual(new_page.content, '')
+        assert new_page.content == ''
 
     def test_content_attribute_is_set_to_None(self):
         """testing if the content attribute value will be an empty string if
         the content attribute is set to None
         """
-        self.assertNotEqual('', self.test_page.content)
+        assert self.test_page.content != ''
         self.test_page.content = None
-        self.assertEqual('', self.test_page.content)
+        assert self.test_page.content == ''
 
     def test_content_argument_is_empty_string(self):
         """testing if the content attribute value will be an empty string if
@@ -223,57 +199,42 @@ class PageTester(unittest.TestCase):
         """
         self.kwargs['content'] = ''
         new_page = Page(**self.kwargs)
-        self.assertEqual(new_page.content, '')
+        assert new_page.content == ''
 
     def test_content_attribute_is_set_to_an_empty_string(self):
         """testing if the content attribute can be set to an empty string
         """
         self.test_page.content = ''
-        self.assertEqual('', self.test_page.content)
+        assert self.test_page.content == ''
 
     def test_content_argument_is_not_a_string(self):
         """testing if a TypeError will be raised when the content argument is
         not a string
         """
         self.kwargs['content'] = 1234
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Page(**self.kwargs)
 
-        self.assertEqual(
-            'Page.content should be a string, not int',
-            str(cm.exception)
-        )
+        assert str(cm.value) == 'Page.content should be a string, not int'
 
     def test_content_attribute_is_set_to_a_value_other_than_a_string(self):
         """testing if a TypeError will be raised when the content attribute is
         set to a value other than a string
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_page.content = ['not', 'a', 'string']
-        self.assertEqual(
-            'Page.content should be a string, not list',
-            str(cm.exception)
-        )
+        assert str(cm.value) == 'Page.content should be a string, not list'
 
     def test_content_argument_is_working_properly(self):
         """testing if content argument value is correctly passed to the content
         attribute
         """
-        self.assertEqual(
-            self.kwargs['content'],
-            self.test_page.content
-        )
+        assert self.test_page.content == self.kwargs['content']
 
     def test_content_attribute_is_working_properly(self):
         """testing if the content attribute value can be correctly set
         """
         test_value = 'This is a test content'
-        self.assertNotEqual(
-            test_value,
-            self.test_page.content
-        )
+        assert self.test_page.content != test_value
         self.test_page.content = test_value
-        self.assertEqual(
-            test_value,
-            self.test_page.content
-        )
+        assert self.test_page.content == test_value

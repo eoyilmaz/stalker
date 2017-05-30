@@ -17,6 +17,7 @@
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 import unittest
 
+import pytest
 from sqlalchemy import Column, Integer, ForeignKey
 from stalker import StatusMixin, StatusList, Status
 
@@ -81,30 +82,27 @@ class StatusMixinTester(unittest.TestCase):
         is not set
         """
         self.kwargs.pop("status_list")
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             DeclStatMixA(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            "DeclStatMixA instances can not be initialized without a "
-            "stalker.models.status.StatusList instance, please pass a "
-            "suitable StatusList (StatusList.target_entity_type=DeclStatMixA) "
-            "with the 'status_list' argument"
-        )
+        assert str(cm.value) == \
+            "DeclStatMixA instances can not be initialized without a " \
+            "stalker.models.status.StatusList instance, please pass a " \
+            "suitable StatusList " \
+            "(StatusList.target_entity_type=DeclStatMixA) with the " \
+            "'status_list' argument"
 
     def test_status_list_argument_is_not_correct(self):
         """testing if a TypeError will be raised when the given StatusList
         instance with the status_list argument is not suitable for this class
         """
         self.kwargs["status_list"] = self.test_b_statusList
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             DeclStatMixA(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            "The given StatusLists' target_entity_type is DeclStatMixB, "
+        assert str(cm.value) == \
+            "The given StatusLists' target_entity_type is DeclStatMixB, " \
             "whereas the entity_type of this object is DeclStatMixA"
-        )
 
     def test_status_list_working_properly(self):
         """testing if the status_list attribute is working properly
@@ -114,6 +112,6 @@ class StatusMixinTester(unittest.TestCase):
             status_list=self.test_a_statusList
         )
 
-        self.assertTrue(self.test_stat1 in new_a_ins.status_list)
-        self.assertFalse(self.test_stat2 in new_a_ins.status_list)
-        self.assertTrue(self.test_stat3 in new_a_ins.status_list)
+        assert self.test_stat1 in new_a_ins.status_list
+        assert self.test_stat2 not in new_a_ins.status_list
+        assert self.test_stat3 in new_a_ins.status_list

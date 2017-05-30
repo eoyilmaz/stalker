@@ -17,6 +17,7 @@
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
+import pytest
 from sqlalchemy import Column, Integer, ForeignKey
 from stalker import SimpleEntity, ScheduleMixin
 
@@ -59,7 +60,7 @@ class ScheduleMixinTestCase(unittest.TestCase):
     def test_schedule_model_attribute_is_effort_by_default(self):
         """testing if the schedule_model is effort by default
         """
-        self.assertEqual(self.test_obj.schedule_model, 'effort')
+        assert self.test_obj.schedule_model == 'effort'
 
     def test_schedule_model_argument_is_None(self):
         """testing if the schedule model attribute will be 'effort' if the
@@ -67,73 +68,59 @@ class ScheduleMixinTestCase(unittest.TestCase):
         """
         self.kwargs['schedule_model'] = None
         new_task = MixedInClass(**self.kwargs)
-        self.assertEqual(
-            new_task.schedule_model,
-            'effort'
-        )
+        assert new_task.schedule_model == 'effort'
 
     def test_schedule_model_attribute_is_set_to_None(self):
         """testing if the schedule_model will be 'effort' if it is set to None
         """
         self.test_obj.schedule_model = None
-        self.assertEqual(
-            self.test_obj.schedule_model,
-            'effort'
-        )
+        assert self.test_obj.schedule_model == 'effort'
 
     def test_schedule_model_argument_is_not_a_string(self):
         """testing if a TypeError will be raised when the schedule_model
         argument is not a string
         """
         self.kwargs['schedule_model'] = 234
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             MixedInClass(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            "MixedInClass.schedule_model should be one of ['effort', "
+        assert str(cm.value) == \
+            "MixedInClass.schedule_model should be one of ['effort', " \
             "'length', 'duration'], not int"
-        )
 
     def test_schedule_model_attribute_is_not_a_string(self):
         """testing if a TypeError will be raised when the schedule_model
         attribute is set to a value other than a string
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_obj.schedule_model = 2343
 
-        self.assertEqual(
-            str(cm.exception),
-            "MixedInClass.schedule_model should be one of ['effort', "
+        assert str(cm.value) == \
+            "MixedInClass.schedule_model should be one of ['effort', " \
             "'length', 'duration'], not int"
-        )
 
     def test_schedule_model_argument_is_not_in_correct_value(self):
         """testing if a ValueError will be raised when the schedule_model
         argument is not in correct value
         """
         self.kwargs['schedule_model'] = 'not in the list'
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             MixedInClass(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            "MixedInClass.schedule_model should be one of ['effort', "
+        assert str(cm.value) == \
+            "MixedInClass.schedule_model should be one of ['effort', " \
             "'length', 'duration'], not str"
-        )
 
     def test_schedule_model_attribute_is_not_in_correct_value(self):
         """testing if a ValueError will be raised when the schedule_model
         attribute is not set to a correct value
         """
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             self.test_obj.schedule_model = 'not in the list'
 
-        self.assertEqual(
-            str(cm.exception),
-            "MixedInClass.schedule_model should be one of ['effort', "
+        assert str(cm.value) == \
+            "MixedInClass.schedule_model should be one of ['effort', " \
             "'length', 'duration'], not str"
-        )
 
     def test_schedule_model_argument_is_working_properly(self):
         """testing if the schedule_model argument value is correctly passed to
@@ -142,24 +129,20 @@ class ScheduleMixinTestCase(unittest.TestCase):
         test_value = 'duration'
         self.kwargs['schedule_model'] = test_value
         new_task = MixedInClass(**self.kwargs)
-        self.assertEqual(new_task.schedule_model, test_value)
+        assert new_task.schedule_model == test_value
 
     def test_schedule_model_attribute_is_working_properly(self):
         """testing if the schedule_model attribute is working properly
         """
         test_value = 'duration'
-        self.assertNotEqual(
-            self.test_obj.schedule_model, test_value
-        )
+        assert self.test_obj.schedule_model != test_value
         self.test_obj.schedule_model = test_value
-        self.assertEqual(
-            self.test_obj.schedule_model, test_value
-        )
+        assert self.test_obj.schedule_model == test_value
 
     def test_schedule_constraint_is_0_by_default(self):
         """testing if the schedule_constraint attribute is None by default
         """
-        self.assertEqual(self.test_obj.schedule_constraint, 0)
+        assert self.test_obj.schedule_constraint == 0
 
     def test_schedule_constraint_argument_is_skipped(self):
         """testing if the schedule_constraint attribute will be 0 if
@@ -170,7 +153,7 @@ class ScheduleMixinTestCase(unittest.TestCase):
         except KeyError:
             pass
         new_task = MixedInClass(**self.kwargs)
-        self.assertEqual(new_task.schedule_constraint, 0)
+        assert new_task.schedule_constraint == 0
 
     def test_schedule_constraint_argument_is_None(self):
         """testing if the schedule_constraint attribute will be 0 if
@@ -178,41 +161,37 @@ class ScheduleMixinTestCase(unittest.TestCase):
         """
         self.kwargs['schedule_constraint'] = None
         new_task = MixedInClass(**self.kwargs)
-        self.assertEqual(new_task.schedule_constraint, 0)
+        assert new_task.schedule_constraint == 0
 
     def test_schedule_constraint_attribute_is_set_to_None(self):
         """testing if the schedule_constraint attribute will be 0 if
         it is set to None
         """
         self.test_obj.schedule_constraint = None
-        self.assertEqual(self.test_obj.schedule_constraint, 0)
+        assert self.test_obj.schedule_constraint == 0
 
     def test_schedule_constraint_argument_is_not_an_integer(self):
         """testing if a TypeError will be raised when the schedule_constraint
         argument is not an integer
         """
         self.kwargs['schedule_constraint'] = 'not an integer'
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             MixedInClass(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'MixedInClass.schedule_constraint should be an integer between 0 '
-            'and 3, not str'
-        )
+        assert str(cm.value) == \
+            'MixedInClass.schedule_constraint should be an integer between ' \
+            '0 and 3, not str'
 
     def test_schedule_constraint_attribute_is_not_an_integer(self):
         """testing if a TypeError will be raised when the schedule_constraint
         attribute is set to a value other than an integer
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_obj.schedule_constraint = 'not an integer'
 
-        self.assertEqual(
-            str(cm.exception),
-            'MixedInClass.schedule_constraint should be an integer between 0 '
-            'and 3, not str'
-        )
+        assert str(cm.value) == \
+            'MixedInClass.schedule_constraint should be an integer between ' \
+            '0 and 3, not str'
 
     def test_schedule_constraint_argument_is_working_properly(self):
         """testing if the schedule_constraint argument value is correctly
@@ -221,7 +200,7 @@ class ScheduleMixinTestCase(unittest.TestCase):
         test_value = 2
         self.kwargs['schedule_constraint'] = test_value
         new_task = MixedInClass(**self.kwargs)
-        self.assertEqual(new_task.schedule_constraint, test_value)
+        assert new_task.schedule_constraint == test_value
 
     def test_schedule_constraint_attribute_is_working_properly(self):
         """testing if the schedule_constraint attribute value is correctly
@@ -229,7 +208,7 @@ class ScheduleMixinTestCase(unittest.TestCase):
         """
         test_value = 3
         self.test_obj.schedule_constraint = test_value
-        self.assertEqual(self.test_obj.schedule_constraint, test_value)
+        assert self.test_obj.schedule_constraint == test_value
 
     def test_schedule_constraint_argument_value_is_out_of_range(self):
         """testing if the value of schedule_constraint argument value will be
@@ -237,21 +216,21 @@ class ScheduleMixinTestCase(unittest.TestCase):
         """
         self.kwargs['schedule_constraint'] = -1
         new_task = MixedInClass(**self.kwargs)
-        self.assertEqual(new_task.schedule_constraint, 0)
+        assert new_task.schedule_constraint == 0
 
         self.kwargs['schedule_constraint'] = 4
         new_task = MixedInClass(**self.kwargs)
-        self.assertEqual(new_task.schedule_constraint, 3)
+        assert new_task.schedule_constraint == 3
 
     def test_schedule_constraint_attribute_value_is_out_of_range(self):
         """testing if the value of schedule_constraint attribute value will be
         clamped to the [0-3] range if it is out of range
         """
         self.test_obj.schedule_constraint = -1
-        self.assertEqual(self.test_obj.schedule_constraint, 0)
+        assert self.test_obj.schedule_constraint == 0
 
         self.test_obj.schedule_constraint = 4
-        self.assertEqual(self.test_obj.schedule_constraint, 3)
+        assert self.test_obj.schedule_constraint == 3
 
     def test_schedule_timing_argument_skipped(self):
         """testing if the schedule_timing attribute will be equal to 1 hour if
@@ -260,8 +239,8 @@ class ScheduleMixinTestCase(unittest.TestCase):
         self.kwargs.pop("schedule_timing")
         new_task = MixedInClass(**self.kwargs)
 
-        self.assertEqual(new_task.schedule_timing,
-                         MixedInClass.__default_schedule_timing__)
+        assert new_task.schedule_timing == \
+            MixedInClass.__default_schedule_timing__
 
     def test_schedule_timing_argument_is_None(self):
         """testing if the schedule_timing attribute will be equal to the
@@ -273,10 +252,8 @@ class ScheduleMixinTestCase(unittest.TestCase):
         defaults.timing_resolution = datetime.timedelta(hours=1)
         self.kwargs["schedule_timing"] = None
         new_task = MixedInClass(**self.kwargs)
-        self.assertEqual(
-            new_task.schedule_timing,
+        assert new_task.schedule_timing == \
             defaults.timing_resolution.seconds / 60.0
-        )
 
     def test_schedule_timing_attribute_is_set_to_None(self):
         """testing if the schedule_timing attribute will be equal to the
@@ -287,46 +264,40 @@ class ScheduleMixinTestCase(unittest.TestCase):
         import datetime
         defaults.timing_resolution = datetime.timedelta(hours=1)
         self.test_obj.schedule_timing = None
-        self.assertEqual(
-            self.test_obj.schedule_timing,
+        assert self.test_obj.schedule_timing == \
             defaults.timing_resolution.seconds / 60.0
-        )
 
     def test_schedule_timing_argument_is_not_an_integer_or_float(self):
         """testing if a TypeError will be raised when the schedule_timing
         is not an integer or float
         """
         self.kwargs["schedule_timing"] = '10d'
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             MixedInClass(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'MixedInClass.schedule_timing should be an integer or float '
-            'number showing the value of the schedule timing of this '
+        assert str(cm.value) == \
+            'MixedInClass.schedule_timing should be an integer or float ' \
+            'number showing the value of the schedule timing of this ' \
             'MixedInClass, not str'
-        )
 
     def test_schedule_timing_attribute_is_not_an_integer_or_float(self):
         """testing if a TypeError will be raised when the schedule_timing
         attribute is not set to an integer or float
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_obj.schedule_timing = '10d'
 
-        self.assertEqual(
-            str(cm.exception),
-            'MixedInClass.schedule_timing should be an integer or float '
-            'number showing the value of the schedule timing of this '
+        assert str(cm.value) == \
+            'MixedInClass.schedule_timing should be an integer or float ' \
+            'number showing the value of the schedule timing of this ' \
             'MixedInClass, not str'
-        )
 
     def test_schedule_timing_attribute_is_working_properly(self):
         """testing if the schedule_timing attribute is working properly
         """
         test_value = 18
         self.test_obj.schedule_timing = test_value
-        self.assertEqual(self.test_obj.schedule_timing, test_value)
+        assert self.test_obj.schedule_timing == test_value
 
     def test_schedule_unit_argument_skipped(self):
         """testing if the schedule_unit attribute will use the default value if
@@ -334,8 +305,8 @@ class ScheduleMixinTestCase(unittest.TestCase):
         """
         self.kwargs.pop("schedule_unit")
         new_task = MixedInClass(**self.kwargs)
-        self.assertEqual(new_task.schedule_unit,
-                         MixedInClass.__default_schedule_unit__)
+        assert new_task.schedule_unit == \
+            MixedInClass.__default_schedule_unit__
 
     def test_schedule_unit_argument_is_None(self):
         """testing if the schedule_unit attribute will use the default value if
@@ -343,81 +314,73 @@ class ScheduleMixinTestCase(unittest.TestCase):
         """
         self.kwargs["schedule_unit"] = None
         new_task = MixedInClass(**self.kwargs)
-        self.assertEqual(new_task.schedule_unit,
-                         MixedInClass.__default_schedule_unit__)
+        assert new_task.schedule_unit == \
+            MixedInClass.__default_schedule_unit__
 
     def test_schedule_unit_attribute_is_set_to_None(self):
         """testing if the schedule_unit attribute will use the default value if
         it is set to None
         """
         self.test_obj.schedule_unit = None
-        self.assertEqual(self.test_obj.schedule_unit,
-                         MixedInClass.__default_schedule_unit__)
+        assert self.test_obj.schedule_unit == \
+            MixedInClass.__default_schedule_unit__
 
     def test_schedule_unit_argument_is_not_a_string(self):
         """testing if a TypeError will be raised when the schedule_unit is not
         an integer
         """
         self.kwargs["schedule_unit"] = 10
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             MixedInClass(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            "MixedInClass.schedule_unit should be a string value one of "
-            "['min', 'h', 'd', 'w', 'm', 'y'] showing the unit of the "
+        assert str(cm.value) == \
+            "MixedInClass.schedule_unit should be a string value one of " \
+            "['min', 'h', 'd', 'w', 'm', 'y'] showing the unit of the " \
             "schedule timing of this MixedInClass, not int"
-        )
 
     def test_schedule_unit_attribute_is_not_a_string(self):
         """testing if a TypeError will be raised when the schedule_unit
         attribute is not set to a string
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_obj.schedule_unit = 23
 
-        self.assertEqual(
-            str(cm.exception),
-            "MixedInClass.schedule_unit should be a string value one of "
-            "['min', 'h', 'd', 'w', 'm', 'y'] showing the unit of the "
+        assert str(cm.value) == \
+            "MixedInClass.schedule_unit should be a string value one of " \
+            "['min', 'h', 'd', 'w', 'm', 'y'] showing the unit of the " \
             "schedule timing of this MixedInClass, not int"
-        )
 
     def test_schedule_unit_attribute_is_working_properly(self):
         """testing if the schedule_unit attribute is working properly
         """
         test_value = 'w'
         self.test_obj.schedule_unit = test_value
-        self.assertEqual(self.test_obj.schedule_unit, test_value)
+        assert self.test_obj.schedule_unit == test_value
 
     def test_schedule_unit_argument_value_is_not_in_defaults_datetime_units(self):
         """testing if a ValueError will be raised when the schedule_unit value
         is not in stalker.config.Config.datetime_units list
         """
         self.kwargs['schedule_unit'] = 'os'
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             MixedInClass(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            "MixedInClass.schedule_unit should be a string value one of "
-            "['min', 'h', 'd', 'w', 'm', 'y'] showing the unit of the "
+        assert str(cm.value) == \
+            "MixedInClass.schedule_unit should be a string value one of " \
+            "['min', 'h', 'd', 'w', 'm', 'y'] showing the unit of the " \
             "schedule timing of this MixedInClass, not str"
-        )
 
     def test_schedule_unit_attribute_value_is_not_in_defaults_datetime_units(self):
         """testing if a ValueError will be raised when it is set to a value
         which is not in stalker.config.Config.datetime_units list
         """
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             self.test_obj.schedule_unit = 'so'
 
-        self.assertEqual(
-            str(cm.exception),
-            "MixedInClass.schedule_unit should be a string value one of "
-            "['min', 'h', 'd', 'w', 'm', 'y'] showing the unit of the "
+        assert str(cm.value) == \
+            "MixedInClass.schedule_unit should be a string value one of " \
+            "['min', 'h', 'd', 'w', 'm', 'y'] showing the unit of the " \
             "schedule timing of this MixedInClass, not str"
-        )
 
     def test_least_meaningful_time_unit_is_working_properly(self):
         """testing if the least_meaningful_time_unit is working properly
@@ -462,10 +425,8 @@ class ScheduleMixinTestCase(unittest.TestCase):
         for test_value in test_values:
             input_value = test_value[0]
             expected_result = test_value[1]
-            self.assertEqual(
-                expected_result,
+            assert expected_result == \
                 self.test_obj.least_meaningful_time_unit(*input_value)
-            )
 
     def test_to_seconds_is_working_properly(self):
         """testing if the to_seconds method is working properly
@@ -506,14 +467,12 @@ class ScheduleMixinTestCase(unittest.TestCase):
             self.test_obj.schedule_model = test_value[0]
             self.test_obj.schedule_timing = test_value[1]
             self.test_obj.schedule_unit = test_value[2]
-            self.assertEqual(
-                test_value[3],
+            assert test_value[3] == \
                 self.test_obj.to_seconds(
                     self.test_obj.schedule_timing,
                     self.test_obj.schedule_unit,
                     self.test_obj.schedule_model
                 )
-            )
 
     def test_schedule_seconds_is_working_properly(self):
         """testing if the schedule_seconds property is working properly
@@ -554,10 +513,7 @@ class ScheduleMixinTestCase(unittest.TestCase):
             self.test_obj.schedule_model = test_value[0]
             self.test_obj.schedule_timing = test_value[1]
             self.test_obj.schedule_unit = test_value[2]
-            self.assertEqual(
-                test_value[3],
-                self.test_obj.schedule_seconds
-            )
+            assert test_value[3] == self.test_obj.schedule_seconds
 
     # def test_schedule_timing_and_schedule_unit_are_converted_to_the_least_meaningful_unit(self):
     #     """testing if the schedule_unit is converted to the least meaningful
@@ -568,9 +524,5 @@ class ScheduleMixinTestCase(unittest.TestCase):
     #     self.kwargs['schedule_unit'] = 'h'
     # 
     #     test_obj = MixedInClass(**self.kwargs)
-    #     self.assertEqual(
-    #         test_obj.schedule_timing, 1
-    #     )
-    #     self.assertEqual(
-    #         test_obj.schedule_unit, 'd'
-    #     )
+    #     assert test_obj.schedule_timing == 1
+    #     assert test_obj.schedule_unit == 'd'

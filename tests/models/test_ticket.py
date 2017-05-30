@@ -15,8 +15,8 @@
 #
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
-import pytest
 
+import pytest
 from stalker import log
 from stalker.testing import UnitTestDBBase
 
@@ -143,7 +143,7 @@ class TicketTester(UnitTestDBBase):
         Ticket class
         """
         from stalker import Ticket
-        self.assertTrue(Ticket.__auto_name__)
+        assert Ticket.__auto_name__ is True
 
     def test_name_argument_is_not_used(self):
         """testing if the given name argument is not used
@@ -152,7 +152,7 @@ class TicketTester(UnitTestDBBase):
         test_value = 'Test Name'
         self.kwargs['name'] = test_value
         new_ticket = Ticket(**self.kwargs)
-        self.assertNotEqual(new_ticket.name, test_value)
+        assert new_ticket.name != test_value
 
     def test_name_argument_is_skipped_will_not_raise_error(self):
         """testing if skipping the name argument is not important and an
@@ -192,53 +192,50 @@ class TicketTester(UnitTestDBBase):
         from stalker.db.session import DBSession
         DBSession.add(p1_t1)
         DBSession.commit()
-        self.assertEqual(p1_t1.number, 2)
+        assert p1_t1.number == 2
 
         p1_t2 = Ticket(project=proj1)
         DBSession.add(p1_t2)
         DBSession.commit()
-        self.assertEqual(p1_t2.number, 3)
+        assert p1_t2.number == 3
 
         p2_t1 = Ticket(project=proj2)
         DBSession.add(p2_t1)
         DBSession.commit()
-        self.assertEqual(p2_t1.number, 4)
+        assert p2_t1.number == 4
 
         p1_t3 = Ticket(project=proj1)
         DBSession.add(p1_t3)
         DBSession.commit()
-        self.assertEqual(p1_t3.number, 5)
+        assert p1_t3.number == 5
 
         p3_t1 = Ticket(project=proj3)
         DBSession.add(p3_t1)
         DBSession.commit()
-        self.assertEqual(p3_t1.number, 6)
+        assert p3_t1.number == 6
 
         p2_t2 = Ticket(project=proj2)
         DBSession.add(p2_t2)
         DBSession.commit()
-        self.assertEqual(p2_t2.number, 7)
+        assert p2_t2.number == 7
 
         p3_t2 = Ticket(project=proj3)
         DBSession.add(p3_t2)
         DBSession.commit()
-        self.assertEqual(p3_t2.number, 8)
+        assert p3_t2.number == 8
 
         p2_t3 = Ticket(project=proj2)
         DBSession.add(p2_t3)
         DBSession.commit()
-        self.assertEqual(p2_t3.number, 9)
+        assert p2_t3.number == 9
 
     def test_number_attribute_is_read_only(self):
         """testing if the number attribute is read-only
         """
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             self.test_ticket.number = 234
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_number_attribute_is_automatically_increased(self):
         """testing if the number attribute is automatically increased
@@ -254,9 +251,9 @@ class TicketTester(UnitTestDBBase):
         DBSession.add(ticket2)
         DBSession.commit()
 
-        self.assertEqual(ticket1.number + 1, ticket2.number)
-        self.assertEqual(ticket1.number, 2)
-        self.assertEqual(ticket2.number, 3)
+        assert ticket1.number + 1 == ticket2.number
+        assert ticket1.number == 2
+        assert ticket2.number == 3
 
     def test_links_argument_accepts_anything_derived_from_SimpleEntity(self):
         """testing if links accepting anything derived from SimpleEntity
@@ -271,10 +268,9 @@ class TicketTester(UnitTestDBBase):
 
         from stalker import Ticket
         new_ticket = Ticket(**self.kwargs)
-        self.assertEqual(
-            sorted(self.kwargs['links'], key=lambda x: x.name),
+        assert \
+            sorted(self.kwargs['links'], key=lambda x: x.name) == \
             sorted(new_ticket.links, key=lambda x: x.name)
-        )
 
     def test_links_attribute_accepts_anything_derived_from_SimpleEntity(self):
         """testing if links attribute is accepting anything derived from
@@ -288,28 +284,25 @@ class TicketTester(UnitTestDBBase):
             self.test_version
         ]
         self.test_ticket.links = links
-        self.assertEqual(
-            sorted(links, key=lambda x: x.name),
+        assert \
+            sorted(links, key=lambda x: x.name) == \
             sorted(self.test_ticket.links, key=lambda x: x.name)
-        )
 
     def test_related_tickets_attribute_is_an_empty_list_on_init(self):
         """testing if the related_tickets attribute is an empty list on init
         """
-        self.assertEqual(self.test_ticket.related_tickets, [])
+        assert self.test_ticket.related_tickets == []
 
     def test_related_tickets_attribute_is_set_to_something_other_then_a_list_of_Tickets(self):
         """testing if a TypeError will be raised when the related_tickets
         attribute is set to something other than a list of Tickets
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_ticket.related_tickets = ['a ticket']
 
-        self.assertEqual(
-            str(cm.exception),
-            'Ticket.related_ticket attribute should be a list of other '
+        assert str(cm.value) == \
+            'Ticket.related_ticket attribute should be a list of other ' \
             'stalker.models.ticket.Ticket instances not str'
-        )
 
     def test_related_tickets_attribute_accepts_list_of_Ticket_instances(self):
         """testing if the related tickets attribute accepts only list of
@@ -344,7 +337,7 @@ class TicketTester(UnitTestDBBase):
         from stalker import Ticket
         self.kwargs.pop('priority')
         new_ticket = Ticket(**self.kwargs)
-        self.assertEqual(new_ticket.priority, 'TRIVIAL')
+        assert new_ticket.priority == 'TRIVIAL'
 
     def test_comments_attribute_is_synonym_for_notes_attribute(self):
         """testing if the comments attribute is the synonym for the notes
@@ -357,14 +350,14 @@ class TicketTester(UnitTestDBBase):
         self.test_ticket.comments.append(note1)
         self.test_ticket.comments.append(note2)
 
-        self.assertTrue(note1 in self.test_ticket.notes)
-        self.assertTrue(note2 in self.test_ticket.notes)
+        assert note1 in self.test_ticket.notes
+        assert note2 in self.test_ticket.notes
 
         self.test_ticket.notes.remove(note1)
-        self.assertFalse(note1 in self.test_ticket.comments)
+        assert note1 not in self.test_ticket.comments
 
         self.test_ticket.notes.remove(note2)
-        self.assertFalse(note2 in self.test_ticket.comments)
+        assert note2 not in self.test_ticket.comments
 
     def test_reported_by_attribute_is_synonym_of_created_by(self):
         """testing if the reported_by attribute is a synonym for the created_by
@@ -379,7 +372,7 @@ class TicketTester(UnitTestDBBase):
         )
 
         self.test_ticket.reported_by = user1
-        self.assertEqual(user1, self.test_ticket.created_by)
+        assert user1 == self.test_ticket.created_by
 
     def test_status_for_newly_created_tickets_will_be_NEW_when_skipped(self):
         """testing if the status of newly created tickets will be New
@@ -387,7 +380,7 @@ class TicketTester(UnitTestDBBase):
         # get the status NEW from the session
         from stalker import Ticket
         new_ticket = Ticket(**self.kwargs)
-        self.assertEqual(new_ticket.status, self.status_new)
+        assert new_ticket.status == self.status_new
 
     def test_project_argument_is_skipped(self):
         """testing if a TypeError will be raised when the project argument is
@@ -395,14 +388,12 @@ class TicketTester(UnitTestDBBase):
         """
         from stalker import Ticket
         self.kwargs.pop('project')
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Ticket(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Ticket.project should be an instance of '
+        assert str(cm.value) == \
+            'Ticket.project should be an instance of ' \
             'stalker.models.project.Project, not NoneType'
-        )
 
     def test_project_argument_is_None(self):
         """testing if a TypeError will be raised when the project argument is
@@ -410,28 +401,24 @@ class TicketTester(UnitTestDBBase):
         """
         from stalker import Ticket
         self.kwargs['project'] = None
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Ticket(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Ticket.project should be an instance of '
+        assert str(cm.value) == \
+            'Ticket.project should be an instance of ' \
             'stalker.models.project.Project, not NoneType'
-        )
 
     def test_project_argument_accepts_Project_instances_only(self):
         """testing if the project argument accepts Project instances only
         """
         from stalker import Ticket
         self.kwargs['project'] = 'Not a Project instance'
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Ticket(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Ticket.project should be an instance of '
+        assert str(cm.value) == \
+            'Ticket.project should be an instance of ' \
             'stalker.models.project.Project, not str'
-        )
 
     def test_project_argument_is_working_properly(self):
         """testing if the project argument is working properly
@@ -439,18 +426,15 @@ class TicketTester(UnitTestDBBase):
         from stalker import Ticket
         self.kwargs['project'] = self.test_project
         new_ticket = Ticket(**self.kwargs)
-        self.assertEqual(new_ticket.project, self.test_project)
+        assert new_ticket.project == self.test_project
 
     def test_project_attribute_is_read_only(self):
         """testing if the project attribute is read only
         """
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             self.test_ticket.project = self.test_project
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     # STATUSES
 
@@ -459,58 +443,58 @@ class TicketTester(UnitTestDBBase):
         """testing if invoking the resolve method will change the status of the
         Ticket from New to Closed
         """
-        self.assertEqual(self.test_ticket.status, self.status_new)
+        assert self.test_ticket.status == self.status_new
         ticket_log = self.test_ticket.resolve()
-        self.assertEqual(self.test_ticket.status, self.status_closed)
-        self.assertEqual(ticket_log.from_status, self.status_new)
-        self.assertEqual(ticket_log.to_status, self.status_closed)
-        self.assertEqual(ticket_log.action, 'resolve')
+        assert self.test_ticket.status == self.status_closed
+        assert ticket_log.from_status == self.status_new
+        assert ticket_log.to_status == self.status_closed
+        assert ticket_log.action == 'resolve'
 
     def test_resolve_method_will_change_the_status_from_Accepted_to_Closed(self):
         """testing if invoking the resolve method will change the status of the
         Ticket from Accepted to Closed
         """
         self.test_ticket.status = self.status_accepted
-        self.assertEqual(self.test_ticket.status, self.status_accepted)
+        assert self.test_ticket.status == self.status_accepted
         ticket_log = self.test_ticket.resolve()
-        self.assertEqual(self.test_ticket.status, self.status_closed)
-        self.assertEqual(ticket_log.from_status, self.status_accepted)
-        self.assertEqual(ticket_log.to_status, self.status_closed)
-        self.assertEqual(ticket_log.action, 'resolve')
+        assert self.test_ticket.status == self.status_closed
+        assert ticket_log.from_status == self.status_accepted
+        assert ticket_log.to_status == self.status_closed
+        assert ticket_log.action == 'resolve'
 
     def test_resolve_method_will_change_the_status_from_Assigned_to_Closed(self):
         """testing if invoking the resolve method will change the status of the
         Ticket from Assigned to Closed
         """
         self.test_ticket.status = self.status_assigned
-        self.assertEqual(self.test_ticket.status, self.status_assigned)
+        assert self.test_ticket.status == self.status_assigned
         ticket_log = self.test_ticket.resolve()
-        self.assertEqual(self.test_ticket.status, self.status_closed)
-        self.assertEqual(ticket_log.from_status, self.status_assigned)
-        self.assertEqual(ticket_log.to_status, self.status_closed)
-        self.assertEqual(ticket_log.action, 'resolve')
+        assert self.test_ticket.status == self.status_closed
+        assert ticket_log.from_status == self.status_assigned
+        assert ticket_log.to_status == self.status_closed
+        assert ticket_log.action == 'resolve'
 
     def test_resolve_method_will_change_the_status_from_Reopened_to_Closed(self):
         """testing if invoking the accept method will change the status of the
         Ticket from Reopened to closed
         """
         self.test_ticket.status = self.status_reopened
-        self.assertEqual(self.test_ticket.status, self.status_reopened)
+        assert self.test_ticket.status == self.status_reopened
         ticket_log = self.test_ticket.resolve()
-        self.assertEqual(self.test_ticket.status, self.status_closed)
-        self.assertEqual(ticket_log.from_status, self.status_reopened)
-        self.assertEqual(ticket_log.to_status, self.status_closed)
-        self.assertEqual(ticket_log.action, 'resolve')
+        assert self.test_ticket.status == self.status_closed
+        assert ticket_log.from_status == self.status_reopened
+        assert ticket_log.to_status == self.status_closed
+        assert ticket_log.action == 'resolve'
 
     def test_resolve_method_will_not_change_the_status_from_Closed_to_anything(self):
         """testing if invoking the resolve method will not change the status of
         the Ticket from Closed to anything
         """
         self.test_ticket.status = self.status_closed
-        self.assertEqual(self.test_ticket.status, self.status_closed)
+        assert self.test_ticket.status == self.status_closed
         ticket_log = self.test_ticket.resolve()
-        self.assertTrue(ticket_log is None)
-        self.assertEqual(self.test_ticket.status, self.status_closed)
+        assert ticket_log is None
+        assert self.test_ticket.status == self.status_closed
 
     # reopen
     def test_reopen_method_will_not_change_the_status_from_New_to_anything(self):
@@ -518,52 +502,52 @@ class TicketTester(UnitTestDBBase):
         the Ticket from New to anything
         """
         self.test_ticket.status = self.status_new
-        self.assertEqual(self.test_ticket.status, self.status_new)
+        assert self.test_ticket.status == self.status_new
         ticket_log = self.test_ticket.reopen()
-        self.assertTrue(ticket_log is None)
-        self.assertEqual(self.test_ticket.status, self.status_new)
+        assert ticket_log is None
+        assert self.test_ticket.status == self.status_new
 
     def test_reopen_method_will_not_change_the_status_from_Accepted_to_anything(self):
         """testing if invoking the reopen method will not change the status of
         the Ticket from Accepted to anything
         """
         self.test_ticket.status = self.status_accepted
-        self.assertEqual(self.test_ticket.status, self.status_accepted)
+        assert self.test_ticket.status == self.status_accepted
         ticket_log = self.test_ticket.reopen()
-        self.assertTrue(ticket_log is None)
-        self.assertEqual(self.test_ticket.status, self.status_accepted)
+        assert ticket_log is None
+        assert self.test_ticket.status == self.status_accepted
 
     def test_reopen_method_will_not_change_the_status_from_Assigned_to_anything(self):
         """testing if invoking the reopen method will not change the status of
         the Ticket from Assigned to anything
         """
         self.test_ticket.status = self.status_assigned
-        self.assertEqual(self.test_ticket.status, self.status_assigned)
+        assert self.test_ticket.status == self.status_assigned
         ticket_log = self.test_ticket.reopen()
-        self.assertTrue(ticket_log is None)
-        self.assertEqual(self.test_ticket.status, self.status_assigned)
+        assert ticket_log is None
+        assert self.test_ticket.status == self.status_assigned
 
     def test_reopen_method_will_not_change_the_status_from_Reopened_to_anything(self):
         """testing if invoking the reopen method will not change the status of
         the Ticket from Reopened to anything
         """
         self.test_ticket.status = self.status_reopened
-        self.assertEqual(self.test_ticket.status, self.status_reopened)
+        assert self.test_ticket.status == self.status_reopened
         ticket_log = self.test_ticket.reopen()
-        self.assertTrue(ticket_log is None)
-        self.assertEqual(self.test_ticket.status, self.status_reopened)
+        assert ticket_log is None
+        assert self.test_ticket.status == self.status_reopened
 
     def test_reopen_method_will_change_the_status_from_Closed_to_Reopened(self):
         """testing if invoking the reopen method will change the status of the
         Ticket from Closed to Reopened
         """
         self.test_ticket.status = self.status_closed
-        self.assertEqual(self.test_ticket.status, self.status_closed)
+        assert self.test_ticket.status == self.status_closed
         ticket_log = self.test_ticket.reopen()
-        self.assertEqual(self.test_ticket.status, self.status_reopened)
-        self.assertEqual(ticket_log.from_status, self.status_closed)
-        self.assertEqual(ticket_log.to_status, self.status_reopened)
-        self.assertEqual(ticket_log.action, 'reopen')
+        assert self.test_ticket.status == self.status_reopened
+        assert ticket_log.from_status == self.status_closed
+        assert ticket_log.to_status == self.status_reopened
+        assert ticket_log.action == 'reopen'
 
     # accept
     def test_accept_method_will_change_the_status_from_New_to_Accepted(self):
@@ -571,58 +555,58 @@ class TicketTester(UnitTestDBBase):
         Ticket from New to Accepted
         """
         self.test_ticket.status = self.status_new
-        self.assertEqual(self.test_ticket.status, self.status_new)
+        assert self.test_ticket.status == self.status_new
         ticket_log = self.test_ticket.accept()
-        self.assertEqual(self.test_ticket.status, self.status_accepted)
-        self.assertEqual(ticket_log.from_status, self.status_new)
-        self.assertEqual(ticket_log.to_status, self.status_accepted)
-        self.assertEqual(ticket_log.action, 'accept')
+        assert self.test_ticket.status == self.status_accepted
+        assert ticket_log.from_status == self.status_new
+        assert ticket_log.to_status == self.status_accepted
+        assert ticket_log.action == 'accept'
 
     def test_accept_method_will_change_the_status_from_Accepted_to_Accepted(self):
         """testing if invoking the accept method will change the status of the
         Ticket from Accepted to Accepted
         """
         self.test_ticket.status = self.status_accepted
-        self.assertEqual(self.test_ticket.status, self.status_accepted)
+        assert self.test_ticket.status == self.status_accepted
         ticket_log = self.test_ticket.accept()
-        self.assertEqual(self.test_ticket.status, self.status_accepted)
-        self.assertEqual(ticket_log.from_status, self.status_accepted)
-        self.assertEqual(ticket_log.to_status, self.status_accepted)
-        self.assertEqual(ticket_log.action, 'accept')
+        assert self.test_ticket.status == self.status_accepted
+        assert ticket_log.from_status == self.status_accepted
+        assert ticket_log.to_status == self.status_accepted
+        assert ticket_log.action == 'accept'
 
     def test_accept_method_will_change_the_status_from_Assigned_to_Accepted(self):
         """testing if invoking the accept method will change the status of the
         Ticket from Assigned to Accepted
         """
         self.test_ticket.status = self.status_assigned
-        self.assertEqual(self.test_ticket.status, self.status_assigned)
+        assert self.test_ticket.status == self.status_assigned
         ticket_log = self.test_ticket.accept()
-        self.assertEqual(self.test_ticket.status, self.status_accepted)
-        self.assertEqual(ticket_log.from_status, self.status_assigned)
-        self.assertEqual(ticket_log.to_status, self.status_accepted)
-        self.assertEqual(ticket_log.action, 'accept')
+        assert self.test_ticket.status == self.status_accepted
+        assert ticket_log.from_status == self.status_assigned
+        assert ticket_log.to_status == self.status_accepted
+        assert ticket_log.action == 'accept'
 
     def test_accept_method_will_change_the_status_from_Reopened_to_Accepted(self):
         """testing if invoking the accept method will change the status of the
         Ticket from Reopened to Accepted
         """
         self.test_ticket.status = self.status_reopened
-        self.assertEqual(self.test_ticket.status, self.status_reopened)
+        assert self.test_ticket.status == self.status_reopened
         ticket_log = self.test_ticket.accept()
-        self.assertEqual(self.test_ticket.status, self.status_accepted)
-        self.assertEqual(ticket_log.from_status, self.status_reopened)
-        self.assertEqual(ticket_log.to_status, self.status_accepted)
-        self.assertEqual(ticket_log.action, 'accept')
+        assert self.test_ticket.status == self.status_accepted
+        assert ticket_log.from_status == self.status_reopened
+        assert ticket_log.to_status == self.status_accepted
+        assert ticket_log.action == 'accept'
 
     def test_accept_method_will_not_change_the_status_of_Closed_to_Anything(self):
         """testing if invoking the accept method will not change the status of
         the Ticket from Closed to Anything
         """
         self.test_ticket.status = self.status_closed
-        self.assertEqual(self.test_ticket.status, self.status_closed)
+        assert self.test_ticket.status == self.status_closed
         ticket_log = self.test_ticket.accept()
-        self.assertTrue(ticket_log is None)
-        self.assertEqual(self.test_ticket.status, self.status_closed)
+        assert ticket_log is None
+        assert self.test_ticket.status == self.status_closed
 
     # reassign
     def test_reassign_method_will_change_the_status_from_New_to_Assigned(self):
@@ -630,102 +614,102 @@ class TicketTester(UnitTestDBBase):
         the Ticket from New to Assigned
         """
         self.test_ticket.status = self.status_new
-        self.assertEqual(self.test_ticket.status, self.status_new)
+        assert self.test_ticket.status == self.status_new
         ticket_log = self.test_ticket.reassign()
-        self.assertEqual(self.test_ticket.status, self.status_assigned)
-        self.assertEqual(ticket_log.from_status, self.status_new)
-        self.assertEqual(ticket_log.to_status, self.status_assigned)
-        self.assertEqual(ticket_log.action, 'reassign')
+        assert self.test_ticket.status == self.status_assigned
+        assert ticket_log.from_status == self.status_new
+        assert ticket_log.to_status == self.status_assigned
+        assert ticket_log.action == 'reassign'
 
     def test_reassign_method_will_change_the_status_from_Accepted_to_Assigned(self):
         """testing if invoking the reassign method will change the status of
         the Ticket from Accepted to Accepted
         """
         self.test_ticket.status = self.status_accepted
-        self.assertEqual(self.test_ticket.status, self.status_accepted)
+        assert self.test_ticket.status == self.status_accepted
         ticket_log = self.test_ticket.reassign()
-        self.assertEqual(self.test_ticket.status, self.status_assigned)
-        self.assertEqual(ticket_log.from_status, self.status_accepted)
-        self.assertEqual(ticket_log.to_status, self.status_assigned)
-        self.assertEqual(ticket_log.action, 'reassign')
+        assert self.test_ticket.status == self.status_assigned
+        assert ticket_log.from_status == self.status_accepted
+        assert ticket_log.to_status == self.status_assigned
+        assert ticket_log.action == 'reassign'
 
     def test_reassign_method_will_change_the_status_from_Assigned_to_Assigned(self):
         """testing if invoking the reassign method will change the status of
         the Ticket from Assigned to Accepted
         """
         self.test_ticket.status = self.status_assigned
-        self.assertEqual(self.test_ticket.status, self.status_assigned)
+        assert self.test_ticket.status == self.status_assigned
         ticket_log = self.test_ticket.reassign()
-        self.assertEqual(self.test_ticket.status, self.status_assigned)
-        self.assertEqual(ticket_log.from_status, self.status_assigned)
-        self.assertEqual(ticket_log.to_status, self.status_assigned)
-        self.assertEqual(ticket_log.action, 'reassign')
+        assert self.test_ticket.status == self.status_assigned
+        assert ticket_log.from_status == self.status_assigned
+        assert ticket_log.to_status == self.status_assigned
+        assert ticket_log.action == 'reassign'
 
     def test_reassign_method_will_change_the_status_from_Reopened_to_Assigned(self):
         """testing if invoking the accept method will change the status of the
         Ticket from Reopened to Assigned
         """
         self.test_ticket.status = self.status_reopened
-        self.assertEqual(self.test_ticket.status, self.status_reopened)
+        assert self.test_ticket.status == self.status_reopened
         ticket_log = self.test_ticket.reassign()
-        self.assertEqual(self.test_ticket.status, self.status_assigned)
-        self.assertEqual(ticket_log.from_status, self.status_reopened)
-        self.assertEqual(ticket_log.to_status, self.status_assigned)
-        self.assertEqual(ticket_log.action, 'reassign')
+        assert self.test_ticket.status == self.status_assigned
+        assert ticket_log.from_status == self.status_reopened
+        assert ticket_log.to_status == self.status_assigned
+        assert ticket_log.action == 'reassign'
 
     def test_reassign_method_will_not_change_the_status_of_Closed_to_Anything(self):
         """testing if invoking the reassign method will not change the status
         of the Ticket from Closed to Anything
         """
         self.test_ticket.status = self.status_closed
-        self.assertEqual(self.test_ticket.status, self.status_closed)
+        assert self.test_ticket.status == self.status_closed
         ticket_log = self.test_ticket.reassign()
-        self.assertTrue(ticket_log is None)
-        self.assertEqual(self.test_ticket.status, self.status_closed)
+        assert ticket_log is None
+        assert self.test_ticket.status == self.status_closed
 
     def test_resolve_method_will_set_the_resolution(self):
         """testing if invoking the resolve method will change the status of the
         Ticket from New to Closed
         """
-        self.assertEqual(self.test_ticket.status, self.status_new)
+        assert self.test_ticket.status == self.status_new
         ticket_log = self.test_ticket.resolve(resolution='fixed')
-        self.assertEqual(self.test_ticket.status, self.status_closed)
-        self.assertEqual(ticket_log.from_status, self.status_new)
-        self.assertEqual(ticket_log.to_status, self.status_closed)
-        self.assertEqual(ticket_log.action, 'resolve')
-        self.assertEqual(self.test_ticket.resolution, 'fixed')
+        assert self.test_ticket.status == self.status_closed
+        assert ticket_log.from_status == self.status_new
+        assert ticket_log.to_status == self.status_closed
+        assert ticket_log.action == 'resolve'
+        assert self.test_ticket.resolution == 'fixed'
 
     def test_reopen_will_clear_resolution(self):
         """testing if invoking the reopen method will clear the
         timing_resolution
         """
         from stalker import TicketLog
-        self.assertEqual(self.test_ticket.status, self.status_new)
+        assert self.test_ticket.status == self.status_new
         self.test_ticket.resolve(resolution='fixed')
-        self.assertEqual(self.test_ticket.resolution, 'fixed')
+        assert self.test_ticket.resolution == 'fixed'
         ticket_log = self.test_ticket.reopen()
-        self.assertTrue(isinstance(ticket_log, TicketLog))
-        self.assertEqual(self.test_ticket.resolution, '')
+        assert isinstance(ticket_log, TicketLog)
+        assert self.test_ticket.resolution == ''
 
     def test_reassign_will_set_the_owner(self):
         """testing if invoking the reassign method will set the owner
         """
         from stalker import TicketLog
-        self.assertEqual(self.test_ticket.status, self.status_new)
-        self.assertNotEqual(self.test_ticket.owner, self.test_user)
+        assert self.test_ticket.status == self.status_new
+        assert self.test_ticket.owner != self.test_user
         ticket_log = self.test_ticket.reassign(assign_to=self.test_user)
-        self.assertTrue(isinstance(ticket_log, TicketLog))
-        self.assertEqual(self.test_ticket.owner, self.test_user)
+        assert isinstance(ticket_log, TicketLog)
+        assert self.test_ticket.owner == self.test_user
 
     def test_accept_will_set_the_owner(self):
         """testing if invoking the accept method will set the owner
         """
         from stalker import TicketLog
-        self.assertEqual(self.test_ticket.status, self.status_new)
-        self.assertNotEqual(self.test_ticket.owner, self.test_user)
+        assert self.test_ticket.status == self.status_new
+        assert self.test_ticket.owner != self.test_user
         ticket_log = self.test_ticket.accept(created_by=self.test_user)
-        self.assertTrue(isinstance(ticket_log, TicketLog))
-        self.assertEqual(self.test_ticket.owner, self.test_user)
+        assert isinstance(ticket_log, TicketLog)
+        assert self.test_ticket.owner == self.test_user
 
     def test_summary_argument_skipped(self):
         """testing if the summary argument can be skipped
@@ -736,7 +720,7 @@ class TicketTester(UnitTestDBBase):
         except KeyError:
             pass
         new_ticket = Ticket(**self.kwargs)
-        self.assertEqual(new_ticket.summary, '')
+        assert new_ticket.summary == ''
 
     def test_summary_argument_can_be_None(self):
         """testing if the summary argument can be None
@@ -744,13 +728,13 @@ class TicketTester(UnitTestDBBase):
         from stalker import Ticket
         self.kwargs['summary'] = None
         new_ticket = Ticket(**self.kwargs)
-        self.assertEqual(new_ticket.summary, '')
+        assert new_ticket.summary == ''
 
     def test_summary_attribute_can_be_set_to_None(self):
         """testing if the summary attribute can be set to None
         """
         self.test_ticket.summary = None
-        self.assertEqual(self.test_ticket.summary, '')
+        assert self.test_ticket.summary == ''
 
     def test_summary_argument_is_not_a_string(self):
         """testing if a TypeError will be raised when the summary argument
@@ -758,26 +742,22 @@ class TicketTester(UnitTestDBBase):
         """
         from stalker import Ticket
         self.kwargs['summary'] = ['not a string instance']
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Ticket(self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Ticket.project should be an instance of '
+        assert str(cm.value) == \
+            'Ticket.project should be an instance of ' \
             'stalker.models.project.Project, not dict'
-        )
 
     def test_summary_attribute_is_set_to_a_value_other_than_a_string(self):
         """testing if the summary attribute is set to a value other than a
         string
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_ticket.summary = ['not a string']
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Ticket.summary should be an instance of str, not list'
-        )
 
     def test_summary_argument_is_working_properly(self):
         """testing if the summary argument value is passed to summary attribute
@@ -787,12 +767,12 @@ class TicketTester(UnitTestDBBase):
         test_value = 'test summary'
         self.kwargs['summary'] = test_value
         new_ticket = Ticket(**self.kwargs)
-        self.assertEqual(new_ticket.summary, test_value)
+        assert new_ticket.summary == test_value
 
     def test_summary_attribute_is_working_properly(self):
         """testing if the summary attribute is working properly
         """
         test_value = 'test_summary'
-        self.assertNotEqual(self.test_ticket.summary, test_value)
+        assert self.test_ticket.summary != test_value
         self.test_ticket.summary = test_value
-        self.assertEqual(self.test_ticket.summary, test_value)
+        assert self.test_ticket.summary == test_value

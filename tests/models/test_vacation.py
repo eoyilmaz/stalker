@@ -17,6 +17,9 @@
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
+
+import pytest
+
 from stalker.models.studio import Vacation
 
 
@@ -67,7 +70,7 @@ class VacationTestCase(unittest.TestCase):
         """testing if the __strictly_typed_ attribute is False for Vacation
         class
         """
-        self.assertEqual(Vacation.__strictly_typed__, False)
+        assert Vacation.__strictly_typed__ is False
 
     def test_user_argument_is_skipped(self):
         """testing if the user argument can be skipped skipped
@@ -91,33 +94,29 @@ class VacationTestCase(unittest.TestCase):
         a stalker.models.auth.User instance
         """
         self.kwargs['user'] = 'not a user instance'
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Vacation(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Vacation.user should be an instance of stalker.models.auth.User, '
-            'not str'
-        )
+        assert str(cm.value) == \
+            'Vacation.user should be an instance of ' \
+            'stalker.models.auth.User, not str'
 
     def test_user_attribute_is_not_a_User_instance(self):
         """testing if a TypeError will be raised when the user attribute is set
         to a value which is not a stalker.models.auth.User instance
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_vacation.user = 'not a user instance'
 
-        self.assertEqual(
-            str(cm.exception),
-            'Vacation.user should be an instance of stalker.models.auth.User, '
-            'not str'
-        )
+        assert str(cm.value) == \
+            'Vacation.user should be an instance of ' \
+            'stalker.models.auth.User, not str'
 
     def test_user_argument_is_working_properly(self):
         """testing if the user argument value is correctly passed to the user
         attribute
         """
-        self.assertEqual(self.kwargs['user'], self.test_vacation.user)
+        assert self.test_vacation.user == self.kwargs['user']
 
     def test_user_attribute_is_working_properly(self):
         """testing if the user attribute is working properly
@@ -130,17 +129,15 @@ class VacationTestCase(unittest.TestCase):
             password='secret'
         )
 
-        self.assertNotEqual(self.test_vacation.user, new_user)
+        assert self.test_vacation.user != new_user
         self.test_vacation.user = new_user
-        self.assertEqual(self.test_vacation.user, new_user)
+        assert self.test_vacation.user == new_user
 
     def test_user_argument_back_populates_vacations_attribute(self):
         """testing if the user argument back populates vacations attribute of
         the User instance
         """
-        self.assertTrue(
-            self.test_vacation in self.kwargs['user'].vacations
-        )
+        assert self.test_vacation in self.kwargs['user'].vacations
 
     def test_user_attribute_back_populates_vacations_attribute(self):
         """testing if the user attribute back populates vacations attribute of
@@ -155,24 +152,19 @@ class VacationTestCase(unittest.TestCase):
         )
 
         self.test_vacation.user = new_user
-        self.assertTrue(self.test_vacation in new_user.vacations)
+        assert self.test_vacation in new_user.vacations
 
     def test_to_tjp_attribute_is_a_read_only_property(self):
         """testing if the to_tjp is a read-only attribute
         """
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             self.test_vacation.to_tjp = 'some value'
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_to_tjp_attribute_is_working_properly(self):
         """testing if the to_tjp attribute is working properly
         """
+        # TODO: Vacation should also use time zone info
         expected_tjp = "vacation 2013-06-06-10:00:00 - 2013-06-10-19:00:00"
-        self.assertEqual(
-            self.test_vacation.to_tjp,
-            expected_tjp
-        )
+        assert self.test_vacation.to_tjp == expected_tjp

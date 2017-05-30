@@ -17,6 +17,7 @@
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
+import pytest
 from sqlalchemy import Column, Integer, ForeignKey
 from stalker import CodeMixin, SimpleEntity
 
@@ -58,97 +59,80 @@ class CodeMixinTester(unittest.TestCase):
         skipped
         """
         self.kwargs.pop('code')
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             CodeMixFooMixedInClass(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'CodeMixFooMixedInClass.code cannot be None'
-        )
+        assert str(cm.value) == 'CodeMixFooMixedInClass.code cannot be None'
 
     def test_code_argument_is_None(self):
         """testing if a TypeError will be raised when the code argument is None
         """
         self.kwargs['code'] = None
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             CodeMixFooMixedInClass(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'CodeMixFooMixedInClass.code cannot be None'
-        )
+        assert str(cm.value) == 'CodeMixFooMixedInClass.code cannot be None'
 
     def test_code_attribute_is_None(self):
         """testing if a TypeError will be raised when teh code attribute is set
         to None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_foo_obj.code = None
 
-        self.assertEqual(
-            str(cm.exception),
-            'CodeMixFooMixedInClass.code cannot be None'
-        )
+        assert str(cm.value) == 'CodeMixFooMixedInClass.code cannot be None'
 
     def test_code_argument_is_not_a_string(self):
         """testing if a TypeError will be raised when the code argument is not
         a string
         """
         self.kwargs['code'] = 123
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             CodeMixFooMixedInClass(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'CodeMixFooMixedInClass.code should be a string not int'
-        )
 
     def test_code_attribute_is_not_a_string(self):
         """testing if a TypeError will be raised when the code attribute is set
         to None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_foo_obj.code = 2342
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'CodeMixFooMixedInClass.code should be a string not int'
-        )
 
     def test_code_argument_is_an_empty_string(self):
         """testing if a ValueError will be raised when the code attribute is an
         empty string
         """
         self.kwargs['code'] = ''
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             CodeMixFooMixedInClass(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'CodeMixFooMixedInClass.code can not be an empty string'
-        )
 
     def test_code_attribute_is_set_to_an_empty_string(self):
         """testing if a ValueError will be raised when the code attribute is
         set to an empty string
         """
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             self.test_foo_obj.code = ''
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'CodeMixFooMixedInClass.code can not be an empty string'
-        )
 
     def test_code_argument_is_working_properly(self):
         """testing if the code argument value is passed to the code attribute
         properly
         """
-        self.assertEqual(self.test_foo_obj.code, self.kwargs['code'])
+        assert self.test_foo_obj.code == self.kwargs['code']
 
     def test_code_attribute_is_working_properly(self):
         """testing if the code attribute is working properly
         """
         test_value = 'new code'
         self.test_foo_obj.code = test_value
-        self.assertEqual(self.test_foo_obj.code, test_value)
+        assert self.test_foo_obj.code == test_value

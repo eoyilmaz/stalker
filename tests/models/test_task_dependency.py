@@ -136,15 +136,13 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         is not a stalker.models.task.Task instance
         """
         self.kwargs['task'] = 'Not a Task instance'
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             from stalker import TaskDependency
             TaskDependency(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'TaskDependency.task should be and instance of '
+        assert str(cm.value) == \
+            'TaskDependency.task should be and instance of ' \
             'stalker.models.task.Task, not str'
-        )
 
     def test_task_attribute_is_not_a_task_instance(self):
         """testing if a TypeError will be raised when the task attribute value
@@ -152,14 +150,12 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         """
         from stalker import TaskDependency
         new_dep = TaskDependency(**self.kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             new_dep.task = 'not a task'
 
-        self.assertEqual(
-            str(cm.exception),
-            'TaskDependency.task should be and instance of '
+        assert str(cm.value) == \
+            'TaskDependency.task should be and instance of ' \
             'stalker.models.task.Task, not str'
-        )
 
     def test_task_argument_is_working_properly(self):
         """testing if the task argument value is correctly passed to task
@@ -168,7 +164,7 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         from stalker import TaskDependency
         self.test_task1.depends = []
         new_dep = TaskDependency(**self.kwargs)
-        self.assertEqual(new_dep.task, self.test_task1)
+        assert new_dep.task == self.test_task1
 
     def test_depends_to_argument_is_skipped(self):
         """testing if no error will be raised when the depends_to argument is
@@ -202,14 +198,12 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         """
         self.kwargs['depends_to'] = 'Not a Task instance'
         from stalker import TaskDependency
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             TaskDependency(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'TaskDependency.depends_to can should be and instance of '
+        assert str(cm.value) == \
+            'TaskDependency.depends_to can should be and instance of ' \
             'stalker.models.task.Task, not str'
-        )
 
     def test_depends_to_attribute_is_not_a_task_instance(self):
         """testing if a TypeError will be raised when the depends_to attribute
@@ -217,14 +211,12 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         """
         from stalker import TaskDependency
         new_dep = TaskDependency(**self.kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             new_dep.depends_to = 'not a task'
 
-        self.assertEqual(
-            str(cm.exception),
-            'TaskDependency.depends_to can should be and instance of '
+        assert str(cm.value) == \
+            'TaskDependency.depends_to can should be and instance of ' \
             'stalker.models.task.Task, not str'
-        )
 
     def test_depends_to_argument_is_working_properly(self):
         """testing if the depends_to argument value is correctly passed to
@@ -233,7 +225,7 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         from stalker import TaskDependency
         self.test_task1.depends = []
         new_dep = TaskDependency(**self.kwargs)
-        self.assertEqual(new_dep.depends_to, self.test_task2)
+        assert new_dep.depends_to == self.test_task2
 
     def test_gap_timing_argument_is_skipped(self):
         """testing if the gap_timing attribute value will be 0 when the
@@ -242,7 +234,7 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         self.kwargs.pop('gap_timing')
         from stalker import TaskDependency
         tdep = TaskDependency(**self.kwargs)
-        self.assertEqual(tdep.gap_timing, 0)
+        assert tdep.gap_timing == 0
 
     def test_gap_timing_argument_is_None(self):
         """testing if the gap_timing attribute value will be 0 when the
@@ -251,7 +243,7 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         self.kwargs['gap_timing'] = None
         from stalker import TaskDependency
         tdep = TaskDependency(**self.kwargs)
-        self.assertEqual(tdep.gap_timing, 0)
+        assert tdep.gap_timing == 0
 
     def test_gap_timing_attribute_is_set_to_None(self):
         """testing if the gap_timing attribute value will be 0 when it is set
@@ -260,7 +252,7 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         from stalker import TaskDependency
         tdep = TaskDependency(**self.kwargs)
         tdep.gap_timing = None
-        self.assertEqual(tdep.gap_timing, 0)
+        assert tdep.gap_timing == 0
 
     def test_gap_timing_argument_is_not_a_float(self):
         """testing if a TypeError will be raised when the gap_timing argument
@@ -268,15 +260,13 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         """
         self.kwargs['gap_timing'] = 'not a time delta'
         from stalker import TaskDependency
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             TaskDependency(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'TaskDependency.gap_timing should be an integer or float number '
-            'showing the value of the gap timing of this TaskDependency, not '
-            'str'
-        )
+        assert str(cm.value) == \
+            'TaskDependency.gap_timing should be an integer or float number ' \
+            'showing the value of the gap timing of this TaskDependency, ' \
+            'not str'
 
     def test_gap_timing_attribute_is_not_a_float(self):
         """testing if a TypeError will be raised when the gap_timing attribute
@@ -284,15 +274,13 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         """
         from stalker import TaskDependency
         tdep = TaskDependency(**self.kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             tdep.gap_timing = 'not float'
 
-        self.assertEqual(
-            str(cm.exception),
-            'TaskDependency.gap_timing should be an integer or float number '
-            'showing the value of the gap timing of this TaskDependency, '
+        assert str(cm.value) == \
+            'TaskDependency.gap_timing should be an integer or float number ' \
+            'showing the value of the gap timing of this TaskDependency, ' \
             'not str'
-        )
 
     def test_gap_timing_argument_is_working_properly(self):
         """testing if the gap_timing argument value is correctly passed to the
@@ -302,7 +290,7 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         test_value = 11
         self.kwargs['gap_timing'] = test_value
         tdep = TaskDependency(**self.kwargs)
-        self.assertEqual(tdep.gap_timing, test_value)
+        assert tdep.gap_timing == test_value
 
     def test_gap_timing_attribute_is_working_properly(self):
         """testing if the gap_timing attribute is working properly
@@ -311,7 +299,7 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         tdep = TaskDependency(**self.kwargs)
         test_value = 11
         tdep.gap_timing = test_value
-        self.assertEqual(tdep.gap_timing, test_value)
+        assert tdep.gap_timing == test_value
 
     def test_gap_unit_argument_is_skipped(self):
         """testing if the default value will be used when the gap_unit argument
@@ -320,10 +308,7 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         from stalker import TaskDependency
         self.kwargs.pop('gap_unit')
         tdep = TaskDependency(**self.kwargs)
-        self.assertEqual(
-            tdep.gap_unit,
-            TaskDependency.__default_schedule_unit__
-        )
+        assert tdep.gap_unit == TaskDependency.__default_schedule_unit__
 
     def test_gap_unit_argument_is_None(self):
         """testing if the default value will be used when the gap_unit argument
@@ -332,10 +317,7 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         from stalker import TaskDependency
         self.kwargs['gap_unit'] = None
         tdep = TaskDependency(**self.kwargs)
-        self.assertEqual(
-            tdep.gap_unit,
-            TaskDependency.__default_schedule_unit__
-        )
+        assert tdep.gap_unit == TaskDependency.__default_schedule_unit__
 
     def test_gap_unit_attribute_is_None(self):
         """testing if the default value will be used when the gap_unit
@@ -344,10 +326,7 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         from stalker import TaskDependency
         tdep = TaskDependency(**self.kwargs)
         tdep.gap_unit = None
-        self.assertEqual(
-            tdep.gap_unit,
-            TaskDependency.__default_schedule_unit__
-        )
+        assert tdep.gap_unit == TaskDependency.__default_schedule_unit__
 
     def test_gap_unit_argument_is_not_a_string_instance(self):
         """testing if a TypeError will be raised when the gap_unit argument is
@@ -355,15 +334,13 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         """
         from stalker import TaskDependency
         self.kwargs['gap_unit'] = 231
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             TaskDependency(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            "TaskDependency.gap_unit should be a string value one of ['min', "
-            "'h', 'd', 'w', 'm', 'y'] showing the unit of the gap timing of "
-            "this TaskDependency, not int"
-        )
+        assert str(cm.value) == \
+            "TaskDependency.gap_unit should be a string value one of " \
+            "['min', 'h', 'd', 'w', 'm', 'y'] showing the unit of the gap " \
+            "timing of this TaskDependency, not int"
 
     def test_gap_unit_attribute_is_not_a_string_instance(self):
         """testing if a TypeError will be raised when the gap_unit attribute
@@ -371,15 +348,13 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         """
         from stalker import TaskDependency
         tdep = TaskDependency(**self.kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             tdep.gap_unit = 2342
 
-        self.assertEqual(
-            str(cm.exception),
-            "TaskDependency.gap_unit should be a string value one of ['min', "
-            "'h', 'd', 'w', 'm', 'y'] showing the unit of the gap timing of "
-            "this TaskDependency, not int"
-        )
+        assert str(cm.value) == \
+            "TaskDependency.gap_unit should be a string value one of " \
+            "['min', 'h', 'd', 'w', 'm', 'y'] showing the unit of the gap " \
+            "timing of this TaskDependency, not int"
 
     def test_gap_unit_argument_value_is_not_in_the_enum_list(self):
         """testing if a ValueError will be raised when the gap_unit argument
@@ -387,15 +362,13 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         """
         from stalker import TaskDependency
         self.kwargs['gap_unit'] = 'not in the list'
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             TaskDependency(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            "TaskDependency.gap_unit should be a string value one of ['min', "
-            "'h', 'd', 'w', 'm', 'y'] showing the unit of the gap timing of "
-            "this TaskDependency, not str"
-        )
+        assert str(cm.value) == \
+            "TaskDependency.gap_unit should be a string value one of " \
+            "['min', 'h', 'd', 'w', 'm', 'y'] showing the unit of the gap " \
+            "timing of this TaskDependency, not str"
 
     def test_gap_unit_attribute_value_is_not_in_the_enum_list(self):
         """testing if a ValueError will be raised when the gap_unit attribute
@@ -403,15 +376,13 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         """
         from stalker import TaskDependency
         tdep = TaskDependency(**self.kwargs)
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             tdep.gap_unit = 'not in the list'
 
-        self.assertEqual(
-            str(cm.exception),
-            "TaskDependency.gap_unit should be a string value one of ['min', "
-            "'h', 'd', 'w', 'm', 'y'] showing the unit of the gap timing of "
-            "this TaskDependency, not str"
-        )
+        assert str(cm.value) == \
+            "TaskDependency.gap_unit should be a string value one of " \
+            "['min', 'h', 'd', 'w', 'm', 'y'] showing the unit of the gap " \
+            "timing of this TaskDependency, not str"
 
     def test_gap_unit_argument_is_working_properly(self):
         """testing if the gap_unit argument value is correctly passed to the
@@ -421,7 +392,7 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         test_value = 'y'
         self.kwargs['gap_unit'] = test_value
         tdep = TaskDependency(**self.kwargs)
-        self.assertEqual(test_value, tdep.gap_unit)
+        assert tdep.gap_unit == test_value
 
     def test_gap_unit_attribute_is_working_properly(self):
         """testing if the gap_unit attribute is working properly
@@ -429,9 +400,9 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         from stalker import TaskDependency
         tdep = TaskDependency(**self.kwargs)
         test_value = 'w'
-        self.assertNotEqual(tdep.gap_unit, test_value)
+        assert tdep.gap_unit != test_value
         tdep.gap_unit = test_value
-        self.assertEqual(tdep.gap_unit, test_value)
+        assert tdep.gap_unit == test_value
 
     def test_gap_model_argument_is_skipped(self):
         """testing if the default value will be used when the gap_model
@@ -440,10 +411,7 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         from stalker import defaults, TaskDependency
         self.kwargs.pop('gap_model')
         tdep = TaskDependency(**self.kwargs)
-        self.assertEqual(
-            tdep.gap_model,
-            defaults.task_dependency_gap_models[0]
-        )
+        assert tdep.gap_model == defaults.task_dependency_gap_models[0]
 
     def test_gap_model_argument_is_None(self):
         """testing if the default value will be used when the gap_model
@@ -452,10 +420,7 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         from stalker import defaults, TaskDependency
         self.kwargs['gap_model'] = None
         tdep = TaskDependency(**self.kwargs)
-        self.assertEqual(
-            tdep.gap_model,
-            defaults.task_dependency_gap_models[0]
-        )
+        assert tdep.gap_model == defaults.task_dependency_gap_models[0]
 
     def test_gap_model_attribute_is_None(self):
         """testing if the default value will be used when the gap_model
@@ -464,10 +429,7 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         from stalker import defaults, TaskDependency
         tdep = TaskDependency(**self.kwargs)
         tdep.gap_model = None
-        self.assertEqual(
-            tdep.gap_model,
-            defaults.task_dependency_gap_models[0]
-        )
+        assert tdep.gap_model == defaults.task_dependency_gap_models[0]
 
     def test_gap_model_argument_is_not_a_string_instance(self):
         """testing if a TypeError will be raised when the gap_model argument is
@@ -475,14 +437,12 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         """
         from stalker import TaskDependency
         self.kwargs['gap_model'] = 231
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             TaskDependency(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            "TaskDependency.gap_model should be one of ['length', "
+        assert str(cm.value) == \
+            "TaskDependency.gap_model should be one of ['length', " \
             "'duration'], not int"
-        )
 
     def test_gap_model_attribute_is_not_a_string_instance(self):
         """testing if a TypeError will be raised when the gap_model attribute
@@ -490,14 +450,12 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         """
         from stalker import TaskDependency
         tdep = TaskDependency(**self.kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             tdep.gap_model = 2342
 
-        self.assertEqual(
-            str(cm.exception),
-            "TaskDependency.gap_model should be one of ['length', "
+        assert str(cm.value) == \
+            "TaskDependency.gap_model should be one of ['length', " \
             "'duration'], not int"
-        )
 
     def test_gap_model_argument_value_is_not_in_the_enum_list(self):
         """testing if a ValueError will be raised when the gap_model argument
@@ -505,14 +463,12 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         """
         from stalker import TaskDependency
         self.kwargs['gap_model'] = 'not in the list'
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             TaskDependency(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            "TaskDependency.gap_model should be one of ['length', "
+        assert str(cm.value) == \
+            "TaskDependency.gap_model should be one of ['length', " \
             "'duration'], not str"
-        )
 
     def test_gap_model_attribute_value_is_not_in_the_enum_list(self):
         """testing if a ValueError will be raised when the gap_model attribute
@@ -520,14 +476,12 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         """
         from stalker import TaskDependency
         tdep = TaskDependency(**self.kwargs)
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             tdep.gap_model = 'not in the list'
 
-        self.assertEqual(
-            str(cm.exception),
-            "TaskDependency.gap_model should be one of ['length', "
+        assert str(cm.value) == \
+            "TaskDependency.gap_model should be one of ['length', " \
             "'duration'], not str"
-        )
 
     def test_gap_model_argument_is_working_properly(self):
         """testing if the gap_model argument value is correctly passed to the
@@ -537,7 +491,7 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         test_value = 'duration'
         self.kwargs['gap_model'] = test_value
         tdep = TaskDependency(**self.kwargs)
-        self.assertEqual(test_value, tdep.gap_model)
+        assert tdep.gap_model == test_value
 
     def test_gap_model_attribute_is_working_properly(self):
         """testing if the gap_model attribute is working properly
@@ -545,9 +499,9 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         from stalker import TaskDependency
         tdep = TaskDependency(**self.kwargs)
         test_value = 'duration'
-        self.assertNotEqual(tdep.gap_model, test_value)
+        assert tdep.gap_model != test_value
         tdep.gap_model = test_value
-        self.assertEqual(tdep.gap_model, test_value)
+        assert tdep.gap_model == test_value
 
     def test_dependency_target_argument_is_skipped(self):
         """testing if the default value will be used when the dependency_target
@@ -556,8 +510,7 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         from stalker import defaults, TaskDependency
         self.kwargs.pop('dependency_target')
         tdep = TaskDependency(**self.kwargs)
-        self.assertEqual(tdep.dependency_target,
-                         defaults.task_dependency_targets[0])
+        assert tdep.dependency_target == defaults.task_dependency_targets[0]
 
     def test_dependency_target_argument_is_None(self):
         """testing if the default value will be used when the dependency_target
@@ -566,8 +519,7 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         from stalker import defaults, TaskDependency
         self.kwargs['dependency_target'] = None
         tdep = TaskDependency(**self.kwargs)
-        self.assertEqual(tdep.dependency_target,
-                         defaults.task_dependency_targets[0])
+        assert tdep.dependency_target == defaults.task_dependency_targets[0]
 
     def test_dependency_target_attribute_is_None(self):
         """testing if the default value will be used when the dependency_target
@@ -576,8 +528,7 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         from stalker import defaults, TaskDependency
         tdep = TaskDependency(**self.kwargs)
         tdep.dependency_target = None
-        self.assertEqual(tdep.dependency_target,
-                         defaults.task_dependency_targets[0])
+        assert tdep.dependency_target == defaults.task_dependency_targets[0]
 
     def test_dependency_target_argument_is_not_a_string_instance(self):
         """testing if a TypeError will be raised when the dependency_target
@@ -585,14 +536,12 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         """
         from stalker import TaskDependency
         self.kwargs['dependency_target'] = 0
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             TaskDependency(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            "TaskDependency.dependency_target should be a string with a value "
-            "one of ['onend', 'onstart'], not int"
-        )
+        assert str(cm.value) == \
+            "TaskDependency.dependency_target should be a string with a " \
+            "value one of ['onend', 'onstart'], not int"
 
     def test_dependency_target_attribute_is_not_a_string_instance(self):
         """testing if a TypeError will be raised when the dependency_target
@@ -600,14 +549,12 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         """
         from stalker import TaskDependency
         tdep = TaskDependency(**self.kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             tdep.dependency_target = 0
 
-        self.assertEqual(
-            str(cm.exception),
-            "TaskDependency.dependency_target should be a string with a value "
-            "one of ['onend', 'onstart'], not int"
-        )
+        assert str(cm.value) == \
+            "TaskDependency.dependency_target should be a string with a " \
+            "value one of ['onend', 'onstart'], not int"
 
     def test_dependency_target_argument_value_is_not_in_the_enum_list(self):
         """testing if a ValueError will be raised when the dependency_target
@@ -615,14 +562,12 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         """
         from stalker import TaskDependency
         self.kwargs['dependency_target'] = 'not in the list'
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             TaskDependency(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            "TaskDependency.dependency_target should be one of ['onend', "
+        assert str(cm.value) == \
+            "TaskDependency.dependency_target should be one of ['onend', " \
             "'onstart'], not 'not in the list'"
-        )
 
     def test_dependency_target_attribute_value_is_not_in_the_enum_list(self):
         """testing if a ValueError will be raised when the dependency_target
@@ -630,14 +575,12 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         """
         from stalker import TaskDependency
         tdep = TaskDependency(**self.kwargs)
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             tdep.dependency_target = 'not in the list'
 
-        self.assertEqual(
-            str(cm.exception),
-            "TaskDependency.dependency_target should be one of ['onend', "
+        assert str(cm.value) == \
+            "TaskDependency.dependency_target should be one of ['onend', " \
             "'onstart'], not 'not in the list'"
-        )
 
     def test_dependency_target_argument_is_working_properly(self):
         """testing if the dependency_target argument value is correctly passed
@@ -645,7 +588,7 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         """
         from stalker import TaskDependency
         tdep = TaskDependency(**self.kwargs)
-        self.assertEqual(tdep.dependency_target, 'onend')
+        assert tdep.dependency_target == 'onend'
 
     def test_dependency_target_attribute_is_working_properly(self):
         """testing if the dependency_target attribute is working properly
@@ -654,4 +597,4 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
         tdep = TaskDependency(**self.kwargs)
         onstart = 'onstart'
         tdep.dependency_target = onstart
-        self.assertEqual(onstart, tdep.dependency_target)
+        assert tdep.dependency_target == onstart

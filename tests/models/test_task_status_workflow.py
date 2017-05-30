@@ -18,6 +18,7 @@
 
 
 import datetime
+import pytest
 import pytz
 import unittest
 
@@ -307,7 +308,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         for task in self.test_task2.walk_hierarchy(method=1):
             visited_tasks.append(task)
 
-        self.assertEqual(expected_result, visited_tasks)
+        assert expected_result == visited_tasks
 
     def test_walk_dependencies_is_working_properly(self):
         """testing if walk_dependencies is working properly
@@ -329,7 +330,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         for task in self.test_task9.walk_dependencies():
             visited_tasks.append(task)
 
-        self.assertEqual(expected_result, visited_tasks)
+        assert expected_result == visited_tasks
 
     # The following tests will test the status changes in dependency changes
 
@@ -343,15 +344,15 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # create another dependency to make the task3 a WFD task
         self.test_task3.depends = []
         self.test_task9.status = self.status_wip
-        self.assertEqual(self.test_task9.status, self.status_wip)
+        assert self.test_task9.status == self.status_wip
         self.test_task3.depends.append(self.test_task9)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wfd
         # make a task with HREV status
         # create dependency
         self.test_task8.status = self.status_wfd
-        self.assertEqual(self.test_task8.status, self.status_wfd)
+        assert self.test_task8.status == self.status_wfd
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wfd
 
     def test_leaf_WFD_task_updated_to_have_a_dependency_of_RTS_task(self):
         """testing if it is possible to set a dependency between a task with
@@ -361,15 +362,15 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # create another dependency to make the task3 a WFD task
         self.test_task3.depends = []
         self.test_task9.status = self.status_wip
-        self.assertEqual(self.test_task9.status, self.status_wip)
+        assert self.test_task9.status == self.status_wip
         self.test_task3.depends.append(self.test_task9)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wfd
         # make a task with HREV status
         # create dependency
         self.test_task8.status = self.status_rts
-        self.assertEqual(self.test_task8.status, self.status_rts)
+        assert self.test_task8.status == self.status_rts
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wfd
 
     def test_leaf_WFD_task_updated_to_have_a_dependency_of_WIP_task(self):
         """testing if it is possible to set a dependency between a task with
@@ -379,15 +380,15 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # create another dependency to make the task3 a WFD task
         self.test_task3.depends = []
         self.test_task9.status = self.status_wip
-        self.assertEqual(self.test_task9.status, self.status_wip)
+        assert self.test_task9.status == self.status_wip
         self.test_task3.depends.append(self.test_task9)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wfd
         # make a task with HREV status
         # create dependency
         self.test_task8.status = self.status_wip
-        self.assertEqual(self.test_task8.status, self.status_wip)
+        assert self.test_task8.status == self.status_wip
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wfd
 
     def test_leaf_WFD_task_updated_to_have_a_dependency_of_PREV_task(self):
         """testing if it is possible to set a dependency between a task with
@@ -397,15 +398,15 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # create another dependency to make the task3 a WFD task
         self.test_task3.depends = []
         self.test_task9.status = self.status_wip
-        self.assertEqual(self.test_task9.status, self.status_wip)
+        assert self.test_task9.status == self.status_wip
         self.test_task3.depends.append(self.test_task9)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wfd
         # make a task with HREV status
         # create dependency
         self.test_task8.status = self.status_prev
-        self.assertEqual(self.test_task8.status, self.status_prev)
+        assert self.test_task8.status == self.status_prev
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wfd
 
     def test_leaf_WFD_task_updated_to_have_a_dependency_of_HREV_task(self):
         """testing if it is possible to set a dependency between a task with
@@ -415,15 +416,15 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # create another dependency to make the task3 a WFD task
         self.test_task3.depends = []
         self.test_task9.status = self.status_wip
-        self.assertEqual(self.test_task9.status, self.status_wip)
+        assert self.test_task9.status == self.status_wip
         self.test_task3.depends.append(self.test_task9)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wfd
         # make a task with HREV status
         # create dependency
         self.test_task8.status = self.status_hrev
-        self.assertEqual(self.test_task8.status, self.status_hrev)
+        assert self.test_task8.status == self.status_hrev
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wfd
 
     def test_leaf_WFD_task_updated_to_have_a_dependency_of_OH_task(self):
         """testing if it is possible to set a dependency between a task with
@@ -433,15 +434,15 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # create another dependency to make the task3 a WFD task
         self.test_task3.depends = []
         self.test_task9.status = self.status_wip
-        self.assertEqual(self.test_task9.status, self.status_wip)
+        assert self.test_task9.status == self.status_wip
         self.test_task3.depends.append(self.test_task9)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wfd
         # make a task with HREV status
         # create dependency
         self.test_task8.status = self.status_oh
-        self.assertEqual(self.test_task8.status, self.status_oh)
+        assert self.test_task8.status == self.status_oh
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wfd
 
     def test_leaf_WFD_task_updated_to_have_a_dependency_of_STOP_task(self):
         """testing if it is possible to set a dependency between a task with
@@ -451,15 +452,15 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # create another dependency to make the task3 a WFD task
         self.test_task3.depends = []
         self.test_task9.status = self.status_wip
-        self.assertEqual(self.test_task9.status, self.status_wip)
+        assert self.test_task9.status == self.status_wip
         self.test_task3.depends.append(self.test_task9)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wfd
         # make a task with HREV status
         # create dependency
         self.test_task8.status = self.status_stop
-        self.assertEqual(self.test_task8.status, self.status_stop)
+        assert self.test_task8.status == self.status_stop
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wfd
 
     def test_leaf_WFD_task_updated_to_have_a_dependency_of_CMPL_task(self):
         """testing if it is possible to set a dependency between a task with
@@ -469,15 +470,15 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # create another dependency to make the task3 a WFD task
         self.test_task3.depends = []
         self.test_task9.status = self.status_wip
-        self.assertEqual(self.test_task9.status, self.status_wip)
+        assert self.test_task9.status == self.status_wip
         self.test_task3.depends.append(self.test_task9)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wfd
         # make a task with HREV status
         # create dependency
         self.test_task8.status = self.status_cmpl
-        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        assert self.test_task8.status == self.status_cmpl
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wfd
 
     # Leaf Tasks - dependency relation changes
     # RTS
@@ -489,13 +490,13 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # find an RTS task
         self.test_task3.depends = []
         self.test_task3.status = self.status_rts
-        self.assertEqual(self.test_task3.status, self.status_rts)
+        assert self.test_task3.status == self.status_rts
         # create dependency
         # make a task with WFD status
         self.test_task8.status = self.status_wfd
-        self.assertEqual(self.test_task8.status, self.status_wfd)
+        assert self.test_task8.status == self.status_wfd
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wfd
 
     def test_leaf_RTS_task_updated_to_have_a_dependency_of_RTS_task(self):
         """testing if it is possible to set a dependency between a task with
@@ -505,13 +506,13 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # find an RTS task
         self.test_task3.depends = []
         self.test_task3.status = self.status_rts
-        self.assertEqual(self.test_task3.status, self.status_rts)
+        assert self.test_task3.status == self.status_rts
         # create dependency
         # make a task with RTS status
         self.test_task8.status = self.status_rts
-        self.assertEqual(self.test_task8.status, self.status_rts)
+        assert self.test_task8.status == self.status_rts
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wfd
 
     def test_leaf_RTS_task_updated_to_have_a_dependency_of_WIP_task(self):
         """testing if it is possible to set a dependency between a task with
@@ -521,13 +522,13 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # find an RTS task
         self.test_task3.depends = []
         self.test_task3.status = self.status_rts
-        self.assertEqual(self.test_task3.status, self.status_rts)
+        assert self.test_task3.status == self.status_rts
         # create dependency
         # make a task with WIP status
         self.test_task8.status = self.status_wip
-        self.assertEqual(self.test_task8.status, self.status_wip)
+        assert self.test_task8.status == self.status_wip
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wfd
 
     def test_leaf_RTS_task_updated_to_have_a_dependency_of_PREV_task(self):
         """testing if it is possible to set a dependency between a task with
@@ -537,13 +538,13 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # find an RTS task
         self.test_task3.depends = []
         self.test_task3.status = self.status_rts
-        self.assertEqual(self.test_task3.status, self.status_rts)
+        assert self.test_task3.status == self.status_rts
         # create dependency
         # make a task with PREV status
         self.test_task8.status = self.status_prev
-        self.assertEqual(self.test_task8.status, self.status_prev)
+        assert self.test_task8.status == self.status_prev
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wfd
 
     def test_leaf_RTS_task_updated_to_have_a_dependency_of_HREV_task(self):
         """testing if it is possible to set a dependency between a task with
@@ -553,13 +554,13 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # find an RTS task
         self.test_task3.depends = []
         self.test_task3.status = self.status_rts
-        self.assertEqual(self.test_task3.status, self.status_rts)
+        assert self.test_task3.status == self.status_rts
         # create dependency
         # make a task with HREV status
         self.test_task8.status = self.status_hrev
-        self.assertEqual(self.test_task8.status, self.status_hrev)
+        assert self.test_task8.status == self.status_hrev
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wfd
 
     def test_leaf_RTS_task_updated_to_have_a_dependency_of_OH_task(self):
         """testing if it is possible to set a dependency between a task with
@@ -569,13 +570,13 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # find an RTS task
         self.test_task3.depends = []
         self.test_task3.status = self.status_rts
-        self.assertEqual(self.test_task3.status, self.status_rts)
+        assert self.test_task3.status == self.status_rts
         # create dependency
         # make a task with OH status
         self.test_task8.status = self.status_oh
-        self.assertEqual(self.test_task8.status, self.status_oh)
+        assert self.test_task8.status == self.status_oh
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wfd
 
     def test_leaf_RTS_task_updated_to_have_a_dependency_of_STOP_task(self):
         """testing if it is possible to set a dependency between a task with
@@ -585,13 +586,13 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # find an RTS task
         self.test_task3.depends = []
         self.test_task3.status = self.status_rts
-        self.assertEqual(self.test_task3.status, self.status_rts)
+        assert self.test_task3.status == self.status_rts
         # create dependency
         # make a task with STOP status
         self.test_task8.status = self.status_stop
-        self.assertEqual(self.test_task8.status, self.status_stop)
+        assert self.test_task8.status == self.status_stop
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_rts)
+        assert self.test_task3.status == self.status_rts
 
     def test_leaf_RTS_task_updated_to_have_a_dependency_of_CMPL_task(self):
         """testing if it is possible to set a dependency between a task with
@@ -599,15 +600,15 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         stay RTS
         """
         # find an RTS task
-        self.assertEqual(self.test_task3.depends, [])
+        assert self.test_task3.depends == []
         self.test_task3.status = self.status_rts
-        self.assertEqual(self.test_task3.status, self.status_rts)
+        assert self.test_task3.status == self.status_rts
         # create dependency
         # make a task with CMPL status
         self.test_task8.status = self.status_cmpl
-        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        assert self.test_task8.status == self.status_cmpl
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_rts)
+        assert self.test_task3.status == self.status_rts
 
     # Leaf Tasks - dependency changes
     # WIP - DREV - PREV - HREV - OH - STOP - CMPL
@@ -618,17 +619,15 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # find an WIP task
         self.test_task3.depends = []
         self.test_task3.status = self.status_wip
-        self.assertEqual(self.test_task3.status, self.status_wip)
+        assert self.test_task3.status == self.status_wip
         # create dependency
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.depends.append(self.test_task8)
 
-        self.assertEqual(
-            str(cm.exception),
-            'This is a WIP task and it is not allowed to change the '
+        assert str(cm.value) == \
+            'This is a WIP task and it is not allowed to change the ' \
             'dependencies of a WIP task'
-        )
 
     def test_leaf_PREV_task_dependency_can_not_be_updated(self):
         """testing if it is not possible to update the dependencies of a PREV
@@ -637,17 +636,15 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # find an PREV task
         self.test_task3.depends = []
         self.test_task3.status = self.status_prev
-        self.assertEqual(self.test_task3.status, self.status_prev)
+        assert self.test_task3.status == self.status_prev
         # create dependency
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.depends.append(self.test_task8)
 
-        self.assertEqual(
-            str(cm.exception),
-            'This is a PREV task and it is not allowed to change the '
+        assert str(cm.value) == \
+            'This is a PREV task and it is not allowed to change the ' \
             'dependencies of a PREV task'
-        )
 
     def test_leaf_HREV_task_dependency_can_not_be_updated(self):
         """testing if it is not possible to update the dependencies of a HREV
@@ -656,17 +653,15 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # find an HREV task
         self.test_task3.depends = []
         self.test_task3.status = self.status_hrev
-        self.assertEqual(self.test_task3.status, self.status_hrev)
+        assert self.test_task3.status == self.status_hrev
         # create dependency
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.depends.append(self.test_task8)
 
-        self.assertEqual(
-            str(cm.exception),
-            'This is a HREV task and it is not allowed to change the '
+        assert str(cm.value) == \
+            'This is a HREV task and it is not allowed to change the ' \
             'dependencies of a HREV task'
-        )
 
     def test_leaf_DREV_task_dependency_can_not_be_updated(self):
         """testing if it is not possible to update the dependencies of a DREV
@@ -675,17 +670,15 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # find an DREV task
         self.test_task3.depends = []
         self.test_task3.status = self.status_drev
-        self.assertEqual(self.test_task3.status, self.status_drev)
+        assert self.test_task3.status == self.status_drev
         # create dependency
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.depends.append(self.test_task8)
 
-        self.assertEqual(
-            str(cm.exception),
-            'This is a DREV task and it is not allowed to change the '
+        assert str(cm.value) == \
+            'This is a DREV task and it is not allowed to change the ' \
             'dependencies of a DREV task'
-        )
 
     def test_leaf_OH_task_dependency_can_not_be_updated(self):
         """testing if it is not possible to update the dependencies of a OH
@@ -694,17 +687,15 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # find an OH task
         self.test_task3.depends = []
         self.test_task3.status = self.status_oh
-        self.assertEqual(self.test_task3.status, self.status_oh)
+        assert self.test_task3.status == self.status_oh
         # create dependency
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.depends.append(self.test_task8)
 
-        self.assertEqual(
-            str(cm.exception),
-            'This is a OH task and it is not allowed to change the '
+        assert str(cm.value) == \
+            'This is a OH task and it is not allowed to change the ' \
             'dependencies of a OH task'
-        )
 
     def test_leaf_STOP_task_dependency_can_not_be_updated(self):
         """testing if it is not possible to update the dependencies of a STOP
@@ -713,17 +704,15 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # find an STOP task
         self.test_task3.depends = []
         self.test_task3.status = self.status_stop
-        self.assertEqual(self.test_task3.status, self.status_stop)
+        assert self.test_task3.status == self.status_stop
         # create dependency
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.depends.append(self.test_task8)
 
-        self.assertEqual(
-            str(cm.exception),
-            'This is a STOP task and it is not allowed to change the '
+        assert str(cm.value) == \
+            'This is a STOP task and it is not allowed to change the ' \
             'dependencies of a STOP task'
-        )
 
     def test_leaf_CMPL_task_dependency_can_not_be_updated(self):
         """testing if it is not possible to update the dependencies of a CMPL
@@ -732,17 +721,15 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # find an CMPL task
         self.test_task3.depends = []
         self.test_task3.status = self.status_cmpl
-        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        assert self.test_task3.status == self.status_cmpl
         # create dependency
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.depends.append(self.test_task8)
 
-        self.assertEqual(
-            str(cm.exception),
-            'This is a CMPL task and it is not allowed to change the '
+        assert str(cm.value) == \
+            'This is a CMPL task and it is not allowed to change the ' \
             'dependencies of a CMPL task'
-        )
 
     # dependencies of containers
     # container Tasks - dependency relation changes
@@ -755,15 +742,15 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # make a task with WFD status
         self.test_task3.depends = []
         self.test_task8.status = self.status_wfd
-        self.assertEqual(self.test_task8.status, self.status_wfd)
+        assert self.test_task8.status == self.status_wfd
         # find a RTS container task
         self.test_task3.children.append(self.test_task2)
         self.test_task2.status = self.status_rts
         self.test_task3.status = self.status_rts
-        self.assertEqual(self.test_task3.status, self.status_rts)
+        assert self.test_task3.status == self.status_rts
         # create dependency
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wfd
 
     def test_container_RTS_task_updated_to_have_a_dependency_of_RTS_task(self):
         """testing if it is possible to set a dependency between an RTS
@@ -773,15 +760,15 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # make a task with WFD status
         self.test_task3.depends = []
         self.test_task8.status = self.status_rts
-        self.assertEqual(self.test_task8.status, self.status_rts)
+        assert self.test_task8.status == self.status_rts
         # find a RTS container task
         self.test_task3.children.append(self.test_task2)
         self.test_task2.status = self.status_rts
         self.test_task3.status = self.status_rts
-        self.assertEqual(self.test_task3.status, self.status_rts)
+        assert self.test_task3.status == self.status_rts
         # create dependency
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wfd
 
     def test_container_RTS_task_updated_to_have_a_dependency_of_WIP_task(self):
         """testing if it is possible to set a dependency between an RTS
@@ -791,15 +778,15 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # make a task with WIP status
         self.test_task3.depends = []
         self.test_task8.status = self.status_wip
-        self.assertEqual(self.test_task8.status, self.status_wip)
+        assert self.test_task8.status == self.status_wip
         # find a RTS container task
         self.test_task3.children.append(self.test_task2)
         self.test_task2.status = self.status_rts
         self.test_task3.status = self.status_rts
-        self.assertEqual(self.test_task3.status, self.status_rts)
+        assert self.test_task3.status == self.status_rts
         # create dependency
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wfd
 
     def test_container_RTS_task_updated_to_have_a_dependency_of_PREV_task(self):
         """testing if it is possible to set a dependency between an RTS
@@ -809,15 +796,15 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # make a task with PREV status
         self.test_task3.depends = []
         self.test_task8.status = self.status_prev
-        self.assertEqual(self.test_task8.status, self.status_prev)
+        assert self.test_task8.status == self.status_prev
         # find a RTS container task
         self.test_task3.children.append(self.test_task2)
         self.test_task2.status = self.status_rts
         self.test_task3.status = self.status_rts
-        self.assertEqual(self.test_task3.status, self.status_rts)
+        assert self.test_task3.status == self.status_rts
         # create dependency
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wfd
 
     def test_container_RTS_task_updated_to_have_a_dependency_of_HREV_task(self):
         """testing if it is possible to set a dependency between an RTS
@@ -827,15 +814,15 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # make a task with HREV status
         self.test_task3.depends = []
         self.test_task8.status = self.status_hrev
-        self.assertEqual(self.test_task8.status, self.status_hrev)
+        assert self.test_task8.status == self.status_hrev
         # find a RTS container task
         self.test_task3.children.append(self.test_task2)
         self.test_task2.status = self.status_rts
         self.test_task3.status = self.status_rts
-        self.assertEqual(self.test_task3.status, self.status_rts)
+        assert self.test_task3.status == self.status_rts
         # create dependency
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wfd
 
     def test_container_RTS_task_updated_to_have_a_dependency_of_OH_task(self):
         """testing if it is possible to set a dependency between an RTS
@@ -845,15 +832,15 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # make a task with OH status
         self.test_task3.depends = []
         self.test_task8.status = self.status_oh
-        self.assertEqual(self.test_task8.status, self.status_oh)
+        assert self.test_task8.status == self.status_oh
         # find a RTS container task
         self.test_task3.children.append(self.test_task2)
         self.test_task2.status = self.status_rts
         self.test_task3.status = self.status_rts
-        self.assertEqual(self.test_task3.status, self.status_rts)
+        assert self.test_task3.status == self.status_rts
         # create dependency
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wfd
 
     def test_container_RTS_task_updated_to_have_a_dependency_of_STOP_task(self):
         """testing if it is possible to set a dependency between an RTS
@@ -863,15 +850,15 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # make a task with STOP status
         self.test_task3.depends = []
         self.test_task8.status = self.status_stop
-        self.assertEqual(self.test_task8.status, self.status_stop)
+        assert self.test_task8.status == self.status_stop
         # find a RTS container task
         self.test_task3.children.append(self.test_task2)
         self.test_task2.status = self.status_rts
         self.test_task3.status = self.status_rts
-        self.assertEqual(self.test_task3.status, self.status_rts)
+        assert self.test_task3.status == self.status_rts
         # create dependency
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_rts)
+        assert self.test_task3.status == self.status_rts
 
     # Container Tasks - dependency relation changes
     # WIP - DREV - PREV - HREV - OH - STOP - CMPL
@@ -882,17 +869,15 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # find an WIP task
         self.test_task1.depends = []
         self.test_task1.status = self.status_wip
-        self.assertEqual(self.test_task1.status, self.status_wip)
+        assert self.test_task1.status == self.status_wip
         # create dependency
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task1.depends.append(self.test_task8)
 
-        self.assertEqual(
-            str(cm.exception),
-            'This is a WIP task and it is not allowed to change the '
+        assert str(cm.value) == \
+            'This is a WIP task and it is not allowed to change the ' \
             'dependencies of a WIP task'
-        )
 
     def test_container_CMPL_task_dependency_can_not_be_updated(self):
         """testing if it is not possible to update the dependencies of a CMPL
@@ -900,18 +885,16 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         # find an CMPL task
         self.test_task1.status = self.status_cmpl
-        self.assertEqual(self.test_task1.status, self.status_cmpl)
+        assert self.test_task1.status == self.status_cmpl
         # create dependency
         # with DBSession.no_autoflush:
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task1.depends.append(self.test_task8)
 
-        self.assertEqual(
-            str(cm.exception),
-            'This is a CMPL task and it is not allowed to change the '
+        assert str(cm.value) == \
+            'This is a CMPL task and it is not allowed to change the ' \
             'dependencies of a CMPL task'
-        )
 
     #
     # Action Tests
@@ -928,15 +911,13 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         start = datetime.datetime.now(pytz.utc)
         end = datetime.datetime.now(pytz.utc) + datetime.timedelta(hours=1)
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.create_time_log(resource, start, end)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 is a WFD task, and it is not allowed to create '
-            'TimeLogs for a WFD task, please supply a RTS, WIP, HREV or DREV '
-            'task!'
-        )
+        assert str(cm.value) == \
+            'Test Task 3 is a WFD task, and it is not allowed to create ' \
+            'TimeLogs for a WFD task, please supply a RTS, WIP, HREV or ' \
+            'DREV task!'
 
     # RTS: status updated to WIP
     def test_create_time_log_in_RTS_leaf_task_status_updated_to_WIP(self):
@@ -948,7 +929,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         start = datetime.datetime.now(pytz.utc)
         end = datetime.datetime.now(pytz.utc) + datetime.timedelta(hours=1)
         self.test_task9.create_time_log(resource, start, end)
-        self.assertEqual(self.test_task9.status, self.status_wip)
+        assert self.test_task9.status == self.status_wip
 
     # RTS -> parent update
     def test_create_time_log_in_RTS_leaf_task_update_parent_status(self):
@@ -958,9 +939,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task2.status = self.status_rts
         self.test_task8.status = self.status_rts
 
-        self.assertEqual(
-            self.test_task8.parent, self.test_task2
-        )
+        assert self.test_task8.parent == self.test_task2
 
         dt = datetime.datetime
         td = datetime.timedelta
@@ -972,8 +951,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
             end=now + td(hours=1)
         )
 
-        self.assertEqual(self.test_task8.status, self.status_wip)
-        self.assertEqual(self.test_task2.status, self.status_wip)
+        assert self.test_task8.status == self.status_wip
+        assert self.test_task2.status == self.status_wip
 
     # RTS -> root task no problem
     def test_create_time_log_in_RTS_root_task_no_parent_no_problem(self):
@@ -985,7 +964,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         start = datetime.datetime.now(pytz.utc)
         end = datetime.datetime.now(pytz.utc) + datetime.timedelta(hours=1)
         self.test_task3.create_time_log(resource, start, end)
-        self.assertEqual(self.test_task3.status, self.status_wip)
+        assert self.test_task3.status == self.status_wip
 
     # WIP
     def test_create_time_log_in_WIP_leaf_task(self):
@@ -997,7 +976,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         start = datetime.datetime.now(pytz.utc)
         end = datetime.datetime.now(pytz.utc) + datetime.timedelta(hours=1)
         self.test_task9.create_time_log(resource, start, end)
-        self.assertEqual(self.test_task9.status, self.status_wip)
+        assert self.test_task9.status == self.status_wip
 
     # PREV
     def test_create_time_log_in_PREV_leaf_task(self):
@@ -1008,11 +987,11 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         resource = self.test_task3.resources[0]
         start = datetime.datetime.now(pytz.utc)
         end = datetime.datetime.now(pytz.utc) + datetime.timedelta(hours=1)
-        self.assertEqual(self.test_task3.status, self.status_prev)
+        assert self.test_task3.status == self.status_prev
         tlog = self.test_task3.create_time_log(resource, start, end)
         from stalker import TimeLog
-        self.assertTrue(isinstance(tlog, TimeLog))
-        self.assertEqual(self.test_task3.status, self.status_prev)
+        assert isinstance(tlog, TimeLog)
+        assert self.test_task3.status == self.status_prev
 
     # HREV
     def test_create_time_log_in_HREV_leaf_task(self):
@@ -1024,7 +1003,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         start = datetime.datetime.now(pytz.utc)
         end = datetime.datetime.now(pytz.utc) + datetime.timedelta(hours=1)
         self.test_task9.create_time_log(resource, start, end)
-        self.assertEqual(self.test_task9.status, self.status_wip)
+        assert self.test_task9.status == self.status_wip
 
     # DREV
     def test_create_time_log_in_DREV_leaf_task(self):
@@ -1036,7 +1015,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         start = datetime.datetime.now(pytz.utc)
         end = datetime.datetime.now(pytz.utc) + datetime.timedelta(hours=1)
         self.test_task9.create_time_log(resource, start, end)
-        self.assertEqual(self.test_task9.status, self.status_drev)
+        assert self.test_task9.status == self.status_drev
 
     # OH
     def test_create_time_log_in_OH_leaf_task(self):
@@ -1048,15 +1027,13 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         start = datetime.datetime.now(pytz.utc)
         end = datetime.datetime.now(pytz.utc) + datetime.timedelta(hours=1)
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task9.create_time_log(resource, start, end)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 9 is a OH task, and it is not allowed to create '
-            'TimeLogs for a OH task, please supply a RTS, WIP, HREV or DREV '
+        assert str(cm.value) == \
+            'Test Task 9 is a OH task, and it is not allowed to create ' \
+            'TimeLogs for a OH task, please supply a RTS, WIP, HREV or DREV ' \
             'task!'
-        )
 
     # STOP
     def test_create_time_log_in_STOP_leaf_task(self):
@@ -1068,15 +1045,13 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         start = datetime.datetime.now(pytz.utc)
         end = datetime.datetime.now(pytz.utc) + datetime.timedelta(hours=1)
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task9.create_time_log(resource, start, end)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 9 is a STOP task, and it is not allowed to create '
-            'TimeLogs for a STOP task, please supply a RTS, WIP, HREV or DREV '
-            'task!'
-        )
+        assert str(cm.value) == \
+            'Test Task 9 is a STOP task, and it is not allowed to create ' \
+            'TimeLogs for a STOP task, please supply a RTS, WIP, HREV or ' \
+            'DREV task!'
 
     # CMPL
     def test_create_time_log_in_CMPL_leaf_task(self):
@@ -1088,15 +1063,13 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         start = datetime.datetime.now(pytz.utc)
         end = datetime.datetime.now(pytz.utc) + datetime.timedelta(hours=1)
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task9.create_time_log(resource, start, end)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 9 is a CMPL task, and it is not allowed to create '
-            'TimeLogs for a CMPL task, please supply a RTS, WIP, HREV or DREV '
-            'task!'
-        )
+        assert str(cm.value) == \
+            'Test Task 9 is a CMPL task, and it is not allowed to create ' \
+            'TimeLogs for a CMPL task, please supply a RTS, WIP, HREV or ' \
+            'DREV task!'
 
     # On Container Task
     def test_create_time_log_on_container_task(self):
@@ -1106,22 +1079,20 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         start = datetime.datetime.now(pytz.utc)
         end = datetime.datetime.now(pytz.utc) + datetime.timedelta(hours=1)
         self.test_task2.id = 36
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             self.test_task2.create_time_log(
                 resource=None, start=start, end=end
             )
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 2 (id: 36) is a container task, and it is not allowed '
-            'to create TimeLogs for a container task'
-        )
+        assert str(cm.value) == \
+            'Test Task 2 (id: 36) is a container task, and it is not ' \
+            'allowed to create TimeLogs for a container task'
 
     def test_create_time_log_is_creating_time_logs(self):
         """testing if create_time_log action is really creating some time logs
         """
         # initial condition
-        self.assertEqual(len(self.test_task3.time_logs), 0)
+        assert len(self.test_task3.time_logs) == 0
 
         now = datetime.datetime.now(pytz.utc)
         self.test_task3.create_time_log(
@@ -1129,8 +1100,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
             start=now,
             end=now + datetime.timedelta(hours=1)
         )
-        self.assertEqual(len(self.test_task3.time_logs), 1)
-        self.assertEqual(self.test_task3.total_logged_seconds, 3600)
+        assert len(self.test_task3.time_logs) == 1
+        assert self.test_task3.total_logged_seconds == 3600
 
         now = datetime.datetime.now(pytz.utc)
         self.test_task3.create_time_log(
@@ -1138,13 +1109,13 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
             start=now + datetime.timedelta(hours=1),
             end=now + datetime.timedelta(hours=2)
         )
-        self.assertEqual(len(self.test_task3.time_logs), 2)
-        self.assertEqual(self.test_task3.total_logged_seconds, 7200)
+        assert len(self.test_task3.time_logs) == 2
+        assert self.test_task3.total_logged_seconds == 7200
 
     def test_create_time_log_returns_time_log_instance(self):
         """testing if create_time_log returns a TimeLog instance
         """
-        self.assertEqual(len(self.test_task3.time_logs), 0)
+        assert len(self.test_task3.time_logs) == 0
 
         now = datetime.datetime.now(pytz.utc)
         tl = self.test_task3.create_time_log(
@@ -1153,7 +1124,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
             end=now + datetime.timedelta(hours=1)
         )
         from stalker import TimeLog
-        self.assertTrue(isinstance(tl, TimeLog))
+        assert isinstance(tl, TimeLog)
 
     # request_review
     # WFD
@@ -1164,15 +1135,13 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_wfd
         self.test_task3.id = 37
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.request_review()
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id:37) is a WFD task, and WFD tasks are not '
-            'suitable for requesting a review, please supply a WIP task '
+        assert str(cm.value) == \
+            'Test Task 3 (id:37) is a WFD task, and WFD tasks are not ' \
+            'suitable for requesting a review, please supply a WIP task ' \
             'instead.'
-        )
 
     # RTS
     def test_request_review_in_RTS_leaf_task(self):
@@ -1182,15 +1151,13 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_rts
         self.test_task3.id = 37
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.request_review()
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id:37) is a RTS task, and RTS tasks are not '
-            'suitable for requesting a review, please supply a WIP task '
+        assert str(cm.value) == \
+            'Test Task 3 (id:37) is a RTS task, and RTS tasks are not ' \
+            'suitable for requesting a review, please supply a WIP task ' \
             'instead.'
-        )
 
     # PREV
     def test_request_review_in_PREV_leaf_task(self):
@@ -1200,15 +1167,13 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_prev
         self.test_task3.id = 37
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.request_review()
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id:37) is a PREV task, and PREV tasks are not '
-            'suitable for requesting a review, please supply a WIP task '
+        assert str(cm.value) == \
+            'Test Task 3 (id:37) is a PREV task, and PREV tasks are not ' \
+            'suitable for requesting a review, please supply a WIP task ' \
             'instead.'
-        )
 
     # HREV
     def test_request_review_in_HREV_leaf_task(self):
@@ -1218,15 +1183,13 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_hrev
         self.test_task3.id = 37
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.request_review()
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id:37) is a HREV task, and HREV tasks are not '
-            'suitable for requesting a review, please supply a WIP task '
+        assert str(cm.value) == \
+            'Test Task 3 (id:37) is a HREV task, and HREV tasks are not ' \
+            'suitable for requesting a review, please supply a WIP task ' \
             'instead.'
-        )
 
     # DREV
     def test_request_review_in_DREV_leaf_task(self):
@@ -1236,15 +1199,13 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_drev
         self.test_task3.id = 37
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.request_review()
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id:37) is a DREV task, and DREV tasks are not '
-            'suitable for requesting a review, please supply a WIP task '
+        assert str(cm.value) == \
+            'Test Task 3 (id:37) is a DREV task, and DREV tasks are not ' \
+            'suitable for requesting a review, please supply a WIP task ' \
             'instead.'
-        )
 
     # OH
     def test_request_review_in_OH_leaf_task(self):
@@ -1254,14 +1215,13 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_oh
         self.test_task3.id = 37
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.request_review()
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id:37) is a OH task, and OH tasks are not suitable '
-            'for requesting a review, please supply a WIP task instead.'
-        )
+        assert str(cm.value) == \
+            'Test Task 3 (id:37) is a OH task, and OH tasks are not ' \
+            'suitable for requesting a review, please supply a WIP task ' \
+            'instead.'
 
     # STOP
     def test_request_review_in_STOP_leaf_task(self):
@@ -1271,15 +1231,13 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_stop
         self.test_task3.id = 37
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.request_review()
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id:37) is a STOP task, and STOP tasks are not '
-            'suitable for requesting a review, please supply a WIP task '
+        assert str(cm.value) == \
+            'Test Task 3 (id:37) is a STOP task, and STOP tasks are not ' \
+            'suitable for requesting a review, please supply a WIP task ' \
             'instead.'
-        )
 
     # CMPL
     def test_request_review_in_CMPL_leaf_task(self):
@@ -1289,15 +1247,13 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_cmpl
         self.test_task3.id = 37
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.request_review()
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id:37) is a CMPL task, and CMPL tasks are not '
-            'suitable for requesting a review, please supply a WIP task '
+        assert str(cm.value) == \
+            'Test Task 3 (id:37) is a CMPL task, and CMPL tasks are not ' \
+            'suitable for requesting a review, please supply a WIP task ' \
             'instead.'
-        )
 
     #request_revision
     #WFD
@@ -1308,14 +1264,12 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_wfd
         self.test_task3.id = 37
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.request_revision()
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id: 37) is a WFD task, and it is not suitable for '
+        assert str(cm.value) == \
+            'Test Task 3 (id: 37) is a WFD task, and it is not suitable for ' \
             'requesting a revision, please supply a PREV or CMPL task'
-        )
 
     #RTS
     def test_request_revision_in_RTS_leaf_task(self):
@@ -1325,14 +1279,12 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_rts
         self.test_task3.id = 37
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.request_revision()
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id: 37) is a RTS task, and it is not suitable for '
+        assert str(cm.value) == \
+            'Test Task 3 (id: 37) is a RTS task, and it is not suitable for ' \
             'requesting a revision, please supply a PREV or CMPL task'
-        )
 
     #WIP
     def test_request_revision_in_WIP_leaf_task(self):
@@ -1342,14 +1294,12 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_wip
         self.test_task3.id = 37
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.request_revision()
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id: 37) is a WIP task, and it is not suitable for '
+        assert str(cm.value) == \
+            'Test Task 3 (id: 37) is a WIP task, and it is not suitable for ' \
             'requesting a revision, please supply a PREV or CMPL task'
-        )
 
     #HREV
     def test_request_revision_in_HREV_leaf_task(self):
@@ -1365,14 +1315,12 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
             'schedule_unit': 'h'
         }
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.request_revision(**kw)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id: 37) is a HREV task, and it is not suitable for '
-            'requesting a revision, please supply a PREV or CMPL task'
-        )
+        assert str(cm.value) == \
+            'Test Task 3 (id: 37) is a HREV task, and it is not suitable ' \
+            'for requesting a revision, please supply a PREV or CMPL task'
 
     #OH
     def test_request_revision_in_OH_leaf_task(self):
@@ -1388,14 +1336,12 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
             'schedule_unit': 'h'
         }
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.request_revision(**kw)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id: 37) is a OH task, and it is not suitable for '
+        assert str(cm.value) == \
+            'Test Task 3 (id: 37) is a OH task, and it is not suitable for ' \
             'requesting a revision, please supply a PREV or CMPL task'
-        )
 
     #STOP
     def test_request_revision_in_STOP_leaf_task(self):
@@ -1411,14 +1357,12 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
             'schedule_unit': 'h'
         }
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.request_revision(**kw)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id: 37) is a STOP task, and it is not suitable for '
-            'requesting a revision, please supply a PREV or CMPL task'
-        )
+        assert str(cm.value) == \
+            'Test Task 3 (id: 37) is a STOP task, and it is not suitable ' \
+            'for requesting a revision, please supply a PREV or CMPL task'
 
     # hold
     # WFD
@@ -1429,14 +1373,12 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_wfd
         self.test_task3.id = 37
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.hold()
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id:37) is a WFD task, only WIP or DREV tasks can be '
-            'set to On Hold'
-        )
+        assert str(cm.value) == \
+            'Test Task 3 (id:37) is a WFD task, only WIP or DREV tasks can ' \
+            'be set to On Hold'
 
     # RTS
     def test_hold_in_RTS_leaf_task(self):
@@ -1446,14 +1388,12 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_rts
         self.test_task3.id = 37
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.hold()
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id:37) is a RTS task, only WIP or DREV tasks can be '
-            'set to On Hold'
-        )
+        assert str(cm.value) == \
+            'Test Task 3 (id:37) is a RTS task, only WIP or DREV tasks can ' \
+            'be set to On Hold'
 
     # WIP: Status updated to OH
     def test_hold_in_WIP_leaf_task_status(self):
@@ -1462,7 +1402,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_wip
         self.test_task3.hold()
-        self.assertEqual(self.test_task3.status, self.status_oh)
+        assert self.test_task3.status == self.status_oh
 
     # WIP: Schedule values are intact
     def test_hold_in_WIP_leaf_task_schedule_values(self):
@@ -1471,8 +1411,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_wip
         self.test_task3.hold()
-        self.assertEqual(self.test_task3.schedule_timing, 10)
-        self.assertEqual(self.test_task3.schedule_unit, 'd')
+        assert self.test_task3.schedule_timing == 10
+        assert self.test_task3.schedule_unit == 'd'
 
     # WIP: Priority is set to 0
     def test_hold_in_WIP_leaf_task(self):
@@ -1481,7 +1421,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_wip
         self.test_task3.hold()
-        self.assertEqual(self.test_task3.priority, 0)
+        assert self.test_task3.priority == 0
 
     # PREV
     def test_hold_in_PREV_leaf_task(self):
@@ -1491,14 +1431,12 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_prev
         self.test_task3.id = 37
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.hold()
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id:37) is a PREV task, only WIP or DREV tasks can '
+        assert str(cm.value) == \
+            'Test Task 3 (id:37) is a PREV task, only WIP or DREV tasks can ' \
             'be set to On Hold'
-        )
 
     # HREV
     def test_hold_in_HREV_leaf_task(self):
@@ -1508,14 +1446,12 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_hrev
         self.test_task3.id = 37
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.hold()
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id:37) is a HREV task, only WIP or DREV tasks can '
+        assert str(cm.value) == \
+            'Test Task 3 (id:37) is a HREV task, only WIP or DREV tasks can ' \
             'be set to On Hold'
-        )
 
     # DREV: Status updated to OH
     def test_hold_in_DREV_leaf_task_status_updated_to_OH(self):
@@ -1524,7 +1460,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_drev
         self.test_task3.hold()
-        self.assertEqual(self.test_task3.status, self.status_oh)
+        assert self.test_task3.status == self.status_oh
 
     # DREV: Schedule values are intact
     def test_hold_in_DREV_leaf_task_schedule_values_are_intact(self):
@@ -1533,8 +1469,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_drev
         self.test_task3.hold()
-        self.assertEqual(self.test_task3.schedule_timing, 10)
-        self.assertEqual(self.test_task3.schedule_unit, 'd')
+        assert self.test_task3.schedule_timing == 10
+        assert self.test_task3.schedule_unit == 'd'
 
     # DREV: Priority is set to 0
     def test_hold_in_DREV_leaf_task_priority_set_to_0(self):
@@ -1543,7 +1479,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_drev
         self.test_task3.hold()
-        self.assertEqual(self.test_task3.priority, 0)
+        assert self.test_task3.priority == 0
 
     # OH
     def test_hold_in_OH_leaf_task(self):
@@ -1552,7 +1488,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_oh
         self.test_task3.hold()
-        self.assertEqual(self.test_task3.status, self.status_oh)
+        assert self.test_task3.status == self.status_oh
 
     # STOP
     def test_hold_in_STOP_leaf_task(self):
@@ -1562,14 +1498,12 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_stop
         self.test_task3.id = 37
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.hold()
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id:37) is a STOP task, only WIP or DREV tasks can '
+        assert str(cm.value) == \
+            'Test Task 3 (id:37) is a STOP task, only WIP or DREV tasks can ' \
             'be set to On Hold'
-        )
 
     # CMPL
     def test_hold_in_CMPL_leaf_task(self):
@@ -1579,14 +1513,12 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_cmpl
         self.test_task3.id = 37
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.hold()
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id:37) is a CMPL task, only WIP or DREV tasks can '
+        assert str(cm.value) == \
+            'Test Task 3 (id:37) is a CMPL task, only WIP or DREV tasks can ' \
             'be set to On Hold'
-        )
 
     # stop
     # WFD
@@ -1597,14 +1529,12 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_wfd
         self.test_task3.id = 37
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.stop()
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id:37)is a WFD task and it is not possible to stop '
-            'a WFD task.'
-        )
+        assert str(cm.value) == \
+            'Test Task 3 (id:37)is a WFD task and it is not possible to ' \
+            'stop a WFD task.'
 
     # RTS
     def test_stop_in_RTS_leaf_task(self):
@@ -1614,14 +1544,12 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_rts
         self.test_task3.id = 37
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.stop()
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id:37)is a RTS task and it is not possible to stop '
-            'a RTS task.'
-        )
+        assert str(cm.value) == \
+            'Test Task 3 (id:37)is a RTS task and it is not possible to ' \
+            'stop a RTS task.'
 
     # WIP: Status Test
     def test_stop_in_WIP_leaf_task_status_is_updated_to_STOP(self):
@@ -1630,7 +1558,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_wip
         self.test_task3.hold()
-        self.assertEqual(self.test_task3.status, self.status_oh)
+        assert self.test_task3.status == self.status_oh
 
     # WIP: Schedule Timing Test
     def test_stop_in_WIP_leaf_task_schedule_values_clamped(self):
@@ -1658,8 +1586,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         )
         self.test_task8.status = self.status_wip
         self.test_task8.stop()
-        self.assertEqual(self.test_task8.schedule_timing, 2)
-        self.assertEqual(self.test_task8.schedule_unit, 'h')
+        assert self.test_task8.schedule_timing == 2
+        assert self.test_task8.schedule_unit == 'h'
 
     # WIP: Dependency Status: WFD -> RTS
     def test_stop_in_WIP_leaf_task_dependent_task_status_updated_from_WFD_to_RTS(self):
@@ -1691,7 +1619,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         )
         self.test_task8.status = self.status_wip
         self.test_task8.stop()
-        self.assertEqual(self.test_task9.status, self.status_rts)
+        assert self.test_task9.status == self.status_rts
 
     # WIP: Dependency Status: DREV -> WIP
     def test_stop_in_WIP_leaf_task_status_from_DREV_to_HREV(self):
@@ -1741,7 +1669,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
 
         self.test_task8.status = self.status_wip
         self.test_task8.stop()
-        self.assertEqual(self.test_task9.status, self.status_hrev)
+        assert self.test_task9.status == self.status_hrev
 
     # WIP: parent statuses
     def test_stop_in_DREV_leaf_task_check_parent_status(self):
@@ -1769,8 +1697,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
 
         self.test_task9.status = self.status_drev
         self.test_task9.stop()
-        self.assertEqual(self.test_task9.status, self.status_stop)
-        self.assertEqual(self.test_asset1.status, self.status_cmpl)
+        assert self.test_task9.status == self.status_stop
+        assert self.test_asset1.status == self.status_cmpl
 
     # PREV
     def test_stop_in_PREV_leaf_task(self):
@@ -1780,14 +1708,12 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_prev
         self.test_task3.id = 37
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.stop()
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id:37)is a PREV task and it is not possible to stop '
-            'a PREV task.'
-        )
+        assert str(cm.value) == \
+            'Test Task 3 (id:37)is a PREV task and it is not possible to ' \
+            'stop a PREV task.'
 
     # HREV
     def test_stop_in_HREV_leaf_task(self):
@@ -1797,14 +1723,12 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_hrev
         self.test_task3.id = 37
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.stop()
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id:37)is a HREV task and it is not possible to stop '
-            'a HREV task.'
-        )
+        assert str(cm.value) == \
+            'Test Task 3 (id:37)is a HREV task and it is not possible to ' \
+            'stop a HREV task.'
 
     # DREV: Status Test
     def test_stop_in_DREV_leaf_task_status_is_updated_to_STOP(self):
@@ -1813,7 +1737,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_drev
         self.test_task3.stop()
-        self.assertEqual(self.test_task3.status, self.status_stop)
+        assert self.test_task3.status == self.status_stop
 
     # DREV: Schedule Timing Test
     def test_stop_in_DREV_leaf_task_schedule_values_are_clamped(self):
@@ -1841,8 +1765,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         )
         self.test_task8.status = self.status_drev
         self.test_task8.stop()
-        self.assertEqual(self.test_task8.schedule_timing, 4)
-        self.assertEqual(self.test_task8.schedule_unit, 'h')
+        assert self.test_task8.schedule_timing == 4
+        assert self.test_task8.schedule_unit == 'h'
 
     # DREV: parent statuses
     def test_stop_in_DREV_leaf_task_parent_status(self):
@@ -1870,8 +1794,8 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
 
         self.test_task9.status = self.status_wip
         self.test_task9.stop()
-        self.assertEqual(self.test_task9.status, self.status_stop)
-        self.assertEqual(self.test_asset1.status, self.status_cmpl)
+        assert self.test_task9.status == self.status_stop
+        assert self.test_asset1.status == self.status_cmpl
 
     # DREV: Dependency Status: WFD -> RTS
     def test_stop_in_DREV_leaf_task_dependent_task_status_updated_from_WFD_to_RTS(self):
@@ -1903,7 +1827,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         )
         self.test_task8.status = self.status_wip
         self.test_task8.stop()
-        self.assertEqual(self.test_task9.status, self.status_rts)
+        assert self.test_task9.status == self.status_rts
 
     # DREV: Dependency Status: DREV -> WIP
     def test_stop_in_DREV_leaf_task_dependent_task_status_updated_from_DREV_to_HREV(self):
@@ -1936,7 +1860,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         )
         self.test_task8.status = self.status_wip
         self.test_task8.stop()
-        self.assertEqual(self.test_task9.status, self.status_hrev)
+        assert self.test_task9.status == self.status_hrev
 
     # OH
     def test_stop_in_OH_leaf_task(self):
@@ -1946,14 +1870,12 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_oh
         self.test_task3.id = 37
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.stop()
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id:37)is a OH task and it is not possible to stop a '
-            'OH task.'
-        )
+        assert str(cm.value) == \
+            'Test Task 3 (id:37)is a OH task and it is not possible to stop ' \
+            'a OH task.'
 
     # STOP
     def test_stop_in_STOP_leaf_task(self):
@@ -1962,7 +1884,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         """
         self.test_task3.status = self.status_stop
         self.test_task3.stop()
-        self.assertEqual(self.test_task3.status, self.status_stop)
+        assert self.test_task3.status == self.status_stop
 
     # CMPL
     def test_stop_in_CMPL_leaf_task(self):
@@ -1972,14 +1894,12 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_cmpl
         self.test_task3.id = 37
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.stop()
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id:37)is a CMPL task and it is not possible to stop '
-            'a CMPL task.'
-        )
+        assert str(cm.value) == \
+            'Test Task 3 (id:37)is a CMPL task and it is not possible to ' \
+            'stop a CMPL task.'
 
     # resume
     # WFD
@@ -1990,14 +1910,12 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_wfd
         self.test_task3.id = 37
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.resume()
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id:37) is a WFD task, and it is not suitable to be '
-            'resumed, please supply an OH or STOP task'
-        )
+        assert str(cm.value) == \
+            'Test Task 3 (id:37) is a WFD task, and it is not suitable to ' \
+            'be resumed, please supply an OH or STOP task'
 
     # RTS
     def test_resume_in_RTS_leaf_task(self):
@@ -2007,14 +1925,12 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_rts
         self.test_task3.id = 37
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.resume()
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id:37) is a RTS task, and it is not suitable to be '
-            'resumed, please supply an OH or STOP task'
-        )
+        assert str(cm.value) == \
+            'Test Task 3 (id:37) is a RTS task, and it is not suitable to ' \
+            'be resumed, please supply an OH or STOP task'
 
     # WIP
     def test_resume_in_WIP_leaf_task(self):
@@ -2024,14 +1940,12 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_wip
         self.test_task3.id = 37
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.resume()
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id:37) is a WIP task, and it is not suitable to be '
-            'resumed, please supply an OH or STOP task'
-        )
+        assert str(cm.value) == \
+            'Test Task 3 (id:37) is a WIP task, and it is not suitable to ' \
+            'be resumed, please supply an OH or STOP task'
 
     # PREV
     def test_resume_in_PREV_leaf_task(self):
@@ -2041,14 +1955,12 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_prev
         self.test_task3.id = 37
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.resume()
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id:37) is a PREV task, and it is not suitable to be '
-            'resumed, please supply an OH or STOP task'
-        )
+        assert str(cm.value) == \
+            'Test Task 3 (id:37) is a PREV task, and it is not suitable to ' \
+            'be resumed, please supply an OH or STOP task'
 
     # HREV
     def test_resume_in_HREV_leaf_task(self):
@@ -2058,14 +1970,12 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_hrev
         self.test_task3.id = 37
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.resume()
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id:37) is a HREV task, and it is not suitable to be '
-            'resumed, please supply an OH or STOP task'
-        )
+        assert str(cm.value) == \
+            'Test Task 3 (id:37) is a HREV task, and it is not suitable to ' \
+            'be resumed, please supply an OH or STOP task'
 
     # DREV
     def test_resume_in_DREV_leaf_task(self):
@@ -2075,14 +1985,12 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_drev
         self.test_task3.id = 37
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.resume()
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id:37) is a DREV task, and it is not suitable to be '
-            'resumed, please supply an OH or STOP task'
-        )
+        assert str(cm.value) == \
+            'Test Task 3 (id:37) is a DREV task, and it is not suitable to ' \
+            'be resumed, please supply an OH or STOP task'
 
     # OH: no dependency -> WIP
     def test_resume_in_OH_leaf_task_with_no_dependencies(self):
@@ -2096,7 +2004,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # the test is wrong in the first place (no way to turn a task with no
         # time logs in to a OH task),
         # but checks a situation that the system needs to be more robust
-        self.assertEqual(self.test_task3.status, self.status_rts)
+        assert self.test_task3.status == self.status_rts
 
     # OH: STOP dependencies -> WIP
     def test_resume_in_OH_leaf_task_with_STOP_dependencies(self):
@@ -2111,7 +2019,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task9.status = self.status_oh
 
         self.test_task9.resume()
-        self.assertEqual(self.test_task9.status, self.status_wip)
+        assert self.test_task9.status == self.status_wip
 
     # OH: CMPL dependencies -> WIP
     def test_resume_in_OH_leaf_task_with_CMPL_dependencies(self):
@@ -2126,7 +2034,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task9.status = self.status_oh
 
         self.test_task9.resume()
-        self.assertEqual(self.test_task9.status, self.status_wip)
+        assert self.test_task9.status == self.status_wip
 
     # STOP: no dependency -> WIP
     def test_resume_in_STOP_leaf_task_with_no_dependencies(self):
@@ -2140,7 +2048,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # the test is wrong in the first place (no way to turn a task with no
         # time logs in to a OH task),
         # but checks a situation that the system needs to be more robust
-        self.assertEqual(self.test_task3.status, self.status_rts)
+        assert self.test_task3.status == self.status_rts
 
     # STOP: STOP dependencies -> WIP
     def test_resume_in_STOP_leaf_task_with_STOP_dependencies(self):
@@ -2155,7 +2063,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task9.status = self.status_stop
 
         self.test_task9.resume()
-        self.assertEqual(self.test_task9.status, self.status_wip)
+        assert self.test_task9.status == self.status_wip
 
     # STOP: CMPL dependencies -> WIP
     def test_resume_in_STOP_leaf_task_with_CMPL_dependencies(self):
@@ -2170,7 +2078,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task9.status = self.status_stop
 
         self.test_task9.resume()
-        self.assertEqual(self.test_task9.status, self.status_wip)
+        assert self.test_task9.status == self.status_wip
 
     # CMPL
     def test_resume_in_CMPL_leaf_task(self):
@@ -2180,53 +2088,45 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task3.status = self.status_drev
         self.test_task3.id = 37
         from stalker.exceptions import StatusError
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             self.test_task3.resume()
 
-        self.assertEqual(
-            str(cm.exception),
-            'Test Task 3 (id:37) is a DREV task, and it is not suitable to be '
-            'resumed, please supply an OH or STOP task'
-        )
+        assert str(cm.value) == \
+            'Test Task 3 (id:37) is a DREV task, and it is not suitable to ' \
+            'be resumed, please supply an OH or STOP task'
 
     def test_review_set_review_number_is_not_an_integer(self):
         """testing if a TypeError will be raised when the review_number
         argument value is not an integer in Task.review_set() method
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_task3.review_set('not an integer')
 
-        self.assertEqual(
-            'review_number argument in Task.review_set should be a positive '
-            'integer, not str',
-            str(cm.exception)
-        )
+        assert str(cm.value) == \
+            'review_number argument in Task.review_set should be a positive ' \
+            'integer, not str'
 
     def test_review_set_review_number_is_a_negative_integer(self):
         """testing if a ValueError will be raised when the review_number is a
         negative number
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_task3.review_set(-10)
 
-        self.assertEqual(
-            'review_number argument in Task.review_set should be a positive '
-            'integer, not -10',
-            str(cm.exception)
-        )
+        assert str(cm.value) == \
+            'review_number argument in Task.review_set should be a positive ' \
+            'integer, not -10'
 
     def test_review_set_review_number_is_zero(self):
         """testing if a ValueError will be raised when the review_number is
         zero
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_task3.review_set(0)
 
-        self.assertEqual(
-            'review_number argument in Task.review_set should be a positive '
-            'integer, not 0',
-            str(cm.exception)
-        )
+        assert str(cm.value) == \
+            'review_number argument in Task.review_set should be a positive ' \
+            'integer, not 0'
 
     def test_leaf_DREV_task_with_no_dependency_and_no_timelogs_update_status_with_dependent_statuses_fixes_status(self):
         """testing if a Task.update_status_with_dependent_statuses() will fix
@@ -2239,19 +2139,13 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # set the statuses
         self.test_task5.status = self.status_drev
 
-        self.assertEqual(
-            self.status_drev,
-            self.test_task5.status
-        )
+        assert self.status_drev == self.test_task5.status
 
         # fix status with dependencies
         self.test_task5.update_status_with_dependent_statuses()
 
         # check the status
-        self.assertEqual(
-            self.status_rts,
-            self.test_task5.status
-        )
+        assert self.status_rts == self.test_task5.status
 
     def test_leaf_DREV_task_with_no_dependency_but_with_timelogs_update_status_with_dependent_statuses_fixes_status(self):
         """testing if a Task.update_status_with_dependent_statuses() will fix
@@ -2274,19 +2168,13 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         # set the statuses
         self.test_task5.status = self.status_drev
 
-        self.assertEqual(
-            self.status_drev,
-            self.test_task5.status
-        )
+        assert self.status_drev == self.test_task5.status
 
         # fix status with dependencies
         self.test_task5.update_status_with_dependent_statuses()
 
         # check the status
-        self.assertEqual(
-            self.status_wip,
-            self.test_task5.status
-        )
+        assert self.status_wip == self.test_task5.status
 
     def test_leaf_WIP_task_with_no_dependency_and_no_timelogs_update_status_with_dependent_statuses_fixes_status(self):
         """testing if a Task.update_status_with_dependent_statuses() will fix
@@ -2297,24 +2185,18 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
         self.test_task5.depends = []
 
         # check if there is no time logs
-        self.assertEqual(self.test_task5.time_logs, [])
+        assert self.test_task5.time_logs == []
 
         # set the statuses
         self.test_task5.status = self.status_wip
 
-        self.assertEqual(
-            self.status_wip,
-            self.test_task5.status
-        )
+        assert self.status_wip == self.test_task5.status
 
         # fix status with dependencies
         self.test_task5.update_status_with_dependent_statuses()
 
         # check the status
-        self.assertEqual(
-            self.status_rts,
-            self.test_task5.status
-        )
+        assert self.status_rts == self.test_task5.status
 
 
 class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
@@ -2570,14 +2452,14 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         for review in reviews:
             review.approve()
 
-        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        assert self.test_task8.status == self.status_cmpl
 
         # find a RTS container task
-        self.assertEqual(self.test_task3.status, self.status_rts)
+        assert self.test_task3.status == self.status_rts
 
         # create dependency
         self.test_task3.depends.append(self.test_task8)
-        self.assertEqual(self.test_task3.status, self.status_rts)
+        assert self.test_task3.status == self.status_rts
 
     # WIP: review instances
     def test_request_review_in_WIP_leaf_task_review_instances(self):
@@ -2588,9 +2470,9 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         self.test_task3.responsible = [self.test_user1, self.test_user2]
         self.test_task3.status = self.status_wip
         reviews = self.test_task3.request_review()
-        self.assertEqual(len(reviews), 2)
-        self.assertTrue(isinstance(reviews[0], Review))
-        self.assertTrue(isinstance(reviews[1], Review))
+        assert len(reviews) == 2
+        assert isinstance(reviews[0], Review)
+        assert isinstance(reviews[1], Review)
 
     # WIP: review instances review_number is correct
     def test_request_review_in_WIP_leaf_task_review_instances_review_number(self):
@@ -2604,8 +2486,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         reviews = self.test_task3.request_review()
         review1 = reviews[0]
         review2 = reviews[1]
-        self.assertEqual(review1.review_number, 1)
-        self.assertEqual(review2.review_number, 1)
+        assert review1.review_number == 1
+        assert review2.review_number == 1
 
         # finalize reviews
         review1.approve()
@@ -2620,16 +2502,14 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # the new_review.revision number still should be 1
-        self.assertEqual(
-            review3.review_number, 2
-        )
+        assert review3.review_number == 2
 
         # and then ask a review again
         self.test_task3.status = self.status_wip
 
         reviews = self.test_task3.request_review()
-        self.assertEqual(reviews[0].review_number, 3)
-        self.assertEqual(reviews[1].review_number, 3)
+        assert reviews[0].review_number == 3
+        assert reviews[1].review_number == 3
 
     # WIP: status updated to PREV
     def test_request_review_in_WIP_leaf_task_status_updated_to_PREV(self):
@@ -2638,7 +2518,7 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         """
         self.test_task3.status = self.status_wip
         self.test_task3.request_review()
-        self.assertEqual(self.test_task3.status, self.status_prev)
+        assert self.test_task3.status == self.status_prev
 
     #CMPL: dependent task dependency_target update CMPL -> DREV
     def test_request_revision_in_CMPL_leaf_task_CMPL_dependent_task_dependency_target_updated_to_onstart(self):
@@ -2664,9 +2544,9 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         self.test_task5.depends = [self.test_task9]  # will be STOP
         self.test_task6.depends = [self.test_task9]  # will be OH
         self.test_task8.depends = [self.test_task9]  # will be DREV
-        self.assertTrue(self.test_task9 in self.test_task5.depends)
-        self.assertTrue(self.test_task9 in self.test_task6.depends)
-        self.assertTrue(self.test_task9 in self.test_task8.depends)
+        assert self.test_task9 in self.test_task5.depends
+        assert self.test_task9 in self.test_task6.depends
+        assert self.test_task9 in self.test_task8.depends
 
         self.test_task9.status = self.status_rts
         self.test_task9.create_time_log(
@@ -2683,18 +2563,18 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         reviews = self.test_task9.request_review()
         for r in reviews:
             r.approve()
-        self.assertEqual(self.test_task9.status, self.status_cmpl)
-        self.assertEqual(self.test_task8.status, self.status_rts)
+        assert self.test_task9.status == self.status_cmpl
+        assert self.test_task8.status == self.status_rts
 
         self.test_task8.create_time_log(
             resource=self.test_task8.resources[0],
             start=now + td(hours=2),
             end=now + td(hours=3)
         )
-        self.assertEqual(self.test_task8.status, self.status_wip)
+        assert self.test_task8.status == self.status_wip
 
         [r.approve() for r in self.test_task8.request_review()]
-        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        assert self.test_task8.status == self.status_cmpl
 
         # now work on task5
         self.test_task5.create_time_log(
@@ -2702,9 +2582,9 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
             start=now + td(hours=3),
             end=now + td(hours=4)
         )
-        self.assertEqual(self.test_task5.status, self.status_wip)
+        assert self.test_task5.status == self.status_wip
         self.test_task5.hold()
-        self.assertEqual(self.test_task5.status, self.status_oh)
+        assert self.test_task5.status == self.status_oh
 
         # now work on task6
         self.test_task6.create_time_log(
@@ -2712,9 +2592,9 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
             start=now + td(hours=4),
             end=now + td(hours=5)
         )
-        self.assertEqual(self.test_task6.status, self.status_wip)
+        assert self.test_task6.status == self.status_wip
         self.test_task6.stop()
-        self.assertEqual(self.test_task6.status, self.status_stop)
+        assert self.test_task6.status == self.status_stop
 
         # now work on task3
         self.test_task3.create_time_log(
@@ -2722,9 +2602,9 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
             start=now + td(hours=5),
             end=now + td(hours=6)
         )
-        self.assertEqual(self.test_task3.status, self.status_wip)
+        assert self.test_task3.status == self.status_wip
         self.test_task3.request_review()
-        self.assertEqual(self.test_task3.status, self.status_prev)
+        assert self.test_task3.status == self.status_prev
 
         # now work on task4
         self.test_task4.create_time_log(
@@ -2732,19 +2612,19 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
             start=now + td(hours=6),
             end=now + td(hours=7)
         )
-        self.assertEqual(self.test_task4.status, self.status_wip)
+        assert self.test_task4.status == self.status_wip
         reviews = self.test_task4.request_review()
         from stalker.db.session import DBSession
         DBSession.add_all(reviews)
         DBSession.commit()
 
-        self.assertEqual(self.test_task4.status, self.status_prev)
+        assert self.test_task4.status == self.status_prev
         for r in reviews:
             r.request_revision(
                 schedule_timing=1,
                 schedule_unit='h'
             )
-        self.assertEqual(self.test_task4.status, self.status_hrev)
+        assert self.test_task4.status == self.status_hrev
 
         kw = {
             'reviewer': self.test_user1,
@@ -2775,16 +2655,16 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
             .filter_by(task=self.test_task8)\
             .filter_by(depends_to=self.test_task9)\
             .first()
-        self.assertTrue(tdep_t3 is not None)
-        self.assertTrue(tdep_t4 is not None)
-        self.assertTrue(tdep_t5 is not None)
-        self.assertTrue(tdep_t6 is not None)
-        self.assertTrue(tdep_t8 is not None)
-        self.assertEqual(tdep_t3.dependency_target, 'onstart')
-        self.assertEqual(tdep_t4.dependency_target, 'onstart')
-        self.assertEqual(tdep_t5.dependency_target, 'onstart')
-        self.assertEqual(tdep_t6.dependency_target, 'onstart')
-        self.assertEqual(tdep_t8.dependency_target, 'onstart')
+        assert tdep_t3 is not None
+        assert tdep_t4 is not None
+        assert tdep_t5 is not None
+        assert tdep_t6 is not None
+        assert tdep_t8 is not None
+        assert tdep_t3.dependency_target == 'onstart'
+        assert tdep_t4.dependency_target == 'onstart'
+        assert tdep_t5.dependency_target == 'onstart'
+        assert tdep_t6.dependency_target == 'onstart'
+        assert tdep_t8.dependency_target == 'onstart'
 
     #CMPL: dependent task status update CMPL -> DREV
     def test_request_revision_in_CMPL_leaf_task_CMPL_dependent_task_updated_to_DREV(self):
@@ -2797,7 +2677,7 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         now = dt.now(pytz.utc)
 
         self.test_task8.depends = [self.test_task9]
-        self.assertTrue(self.test_task9 in self.test_task8.depends)
+        assert self.test_task9 in self.test_task8.depends
 
         self.test_task9.status = self.status_rts
         self.test_task9.create_time_log(
@@ -2814,18 +2694,18 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         reviews = self.test_task9.request_review()
         for r in reviews:
             r.approve()
-        self.assertEqual(self.test_task9.status, self.status_cmpl)
-        self.assertEqual(self.test_task8.status, self.status_rts)
+        assert self.test_task9.status == self.status_cmpl
+        assert self.test_task8.status == self.status_rts
 
         self.test_task8.create_time_log(
             resource=self.test_task8.resources[0],
             start=now + td(hours=2),
             end=now + td(hours=3)
         )
-        self.assertEqual(self.test_task8.status, self.status_wip)
+        assert self.test_task8.status == self.status_wip
 
         [r.approve() for r in self.test_task8.request_review()]
-        self.assertEqual(self.test_task8.status, self.status_cmpl)
+        assert self.test_task8.status == self.status_cmpl
 
         kw = {
             'reviewer': self.test_user1,
@@ -2835,8 +2715,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         }
         self.test_task9.request_revision(**kw)
 
-        self.assertEqual(self.test_task9.status, self.status_hrev)
-        self.assertEqual(self.test_task8.status, self.status_drev)
+        assert self.test_task9.status == self.status_hrev
+        assert self.test_task8.status == self.status_drev
 
     #CMPL: dependent task parent status updated to WIP
     def test_request_revision_in_CMPL_leaf_task_dependent_task_parent_status_updated_to_WIP(self):
@@ -2877,9 +2757,9 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         }
         review = self.test_task8.request_revision(**kw)
 
-        self.assertEqual(self.test_task9.status, self.status_drev)
-        self.assertEqual(self.test_asset1.status, self.status_wip)
-        self.assertEqual(self.test_task7.status, self.status_wip)
+        assert self.test_task9.status == self.status_drev
+        assert self.test_asset1.status == self.status_wip
+        assert self.test_task7.status == self.status_wip
 
     #CMPL: parent status update
     def test_request_revision_in_CMPL_leaf_task_parent_status_updated_to_WIP(self):
@@ -2916,7 +2796,7 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
             'schedule_unit': 'h'
         }
         review = self.test_task9.request_revision(**kw)
-        self.assertEqual(self.test_asset1.status, self.status_wip)
+        assert self.test_asset1.status == self.status_wip
 
     #CMPL: dependent task status update RTS -> WFD
     def test_request_revision_in_CMPL_leaf_task_RTS_dependent_task_updated_to_WFD(self):
@@ -2955,7 +2835,7 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
             'schedule_unit': 'h',
         }
         review = self.test_task9.request_revision(**kw)
-        self.assertEqual(self.test_task8.status, self.status_wfd)
+        assert self.test_task8.status == self.status_wfd
 
     # CMPL: schedule info update
     def test_request_revision_in_CMPL_leaf_task_schedule_info_update(self):
@@ -2980,7 +2860,7 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
         from stalker.db.session import DBSession
         DBSession.commit()
-        self.assertEqual(self.test_task3.total_logged_seconds, 7200)
+        assert self.test_task3.total_logged_seconds == 7200
 
         reviews = self.test_task3.request_review()
         review1 = reviews[0]
@@ -2995,8 +2875,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
             'schedule_unit': 'h'
         }
         self.test_task3.request_revision(**kw)
-        self.assertEqual(self.test_task3.schedule_unit, 'h')
-        self.assertEqual(self.test_task3.schedule_timing, 6)
+        assert self.test_task3.schedule_timing == 6
+        assert self.test_task3.schedule_unit == 'h'
 
     # CMPL: status update
     def test_request_revision_in_CMPL_leaf_task_status_updated_to_HREV(self):
@@ -3012,7 +2892,7 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
             'schedule_unit': 'h'
         }
         review = self.test_task3.request_revision(**kw)
-        self.assertEqual(self.test_task3.status, self.status_hrev)
+        assert self.test_task3.status == self.status_hrev
 
     # CMPL: dependent task status update WIP -> DREV
     def test_request_revision_in_CMPL_leaf_task_WIP_dependent_task_updated_to_DREV(self):
@@ -3051,7 +2931,7 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
             'schedule_unit': 'h'
         }
         review = self.test_task9.request_revision(**kw)
-        self.assertEqual(self.test_task8.status, self.status_drev)
+        assert self.test_task8.status == self.status_drev
 
     def test_request_revision_in_deeper_dependency_setup(self):
         """testing if all of the dependent task statuses are updated to DREV
@@ -3080,11 +2960,11 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         self.test_task8.update_status_with_dependent_statuses()
         self.test_task9.update_status_with_dependent_statuses()
 
-        self.assertEqual(self.test_task5.status, self.status_rts)
-        self.assertEqual(self.test_task6.status, self.status_wfd)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
+        assert self.test_task5.status == self.status_rts
+        assert self.test_task6.status == self.status_wfd
+        assert self.test_task3.status == self.status_wfd
+        assert self.test_task3.status == self.status_wfd
+        assert self.test_task3.status == self.status_wfd
         # DBSession.commit()
 
         # complete each of them first
@@ -3149,18 +3029,13 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
             self.test_user1
         )
 
-        self.assertEqual(
-            self.test_task6.task_depends_to[0].dependency_target, 'onend'
-        )
-        self.assertEqual(
-            self.test_task3.task_depends_to[0].dependency_target, 'onstart'
-        )
-        self.assertEqual(
-            self.test_task8.task_depends_to[0].dependency_target, 'onstart'
-        )
-        self.assertEqual(
-            self.test_task9.task_depends_to[0].dependency_target, 'onstart'
-        )
+        assert self.test_task6.task_depends_to[0].dependency_target == 'onend'
+        assert \
+            self.test_task3.task_depends_to[0].dependency_target == 'onstart'
+        assert \
+            self.test_task8.task_depends_to[0].dependency_target == 'onstart'
+        assert \
+            self.test_task9.task_depends_to[0].dependency_target == 'onstart'
 
     # PREV: Review instances statuses are updated
     def test_request_revision_in_PREV_leaf_task_new_review_instance_is_created(self):
@@ -3177,7 +3052,7 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
             schedule_unit='w'
         )
         from stalker import Review
-        self.assertTrue(isinstance(new_review, Review))
+        assert isinstance(new_review, Review)
 
     # PREV: Review instances statuses are updated
     def test_request_revision_in_PREV_leaf_task_review_instances_are_deleted(self):
@@ -3190,8 +3065,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         review1 = reviews[0]
         review2 = reviews[1]
 
-        self.assertEqual(review1.status, self.status_new)
-        self.assertEqual(review2.status, self.status_new)
+        assert review1.status == self.status_new
+        assert review2.status == self.status_new
 
         review3 = self.test_task3.request_revision(
             reviewer=self.test_user2,
@@ -3202,9 +3077,9 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
 
         # now check if the review instances are not in task3.reviews list
         # anymore
-        self.assertFalse(review1 in self.test_task3.reviews)
-        self.assertFalse(review2 in self.test_task3.reviews)
-        self.assertTrue(review3 in self.test_task3.reviews)
+        assert review1 not in self.test_task3.reviews
+        assert review2 not in self.test_task3.reviews
+        assert review3 in self.test_task3.reviews
 
     # PREV: Schedule info update also consider RREV Reviews
     def test_request_revision_in_PREV_leaf_task_schedule_info_update_also_considers_other_RREV_reviews_with_same_review_number(self):
@@ -3232,7 +3107,7 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # check the status
-        self.assertEqual(self.test_task3.status, self.status_wip)
+        assert self.test_task3.status == self.status_wip
 
         # first request a review
         reviews = self.test_task3.request_review()
@@ -3252,18 +3127,14 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
             schedule_timing=4,
             schedule_unit='h'
         )
-        self.assertEqual(
-            len(self.test_task3.reviews), 2
-        )
+        assert len(self.test_task3.reviews) == 2
 
         # check if they are in the same review set
-        self.assertEqual(
-            review1.review_number, review3.review_number
-        )
+        assert review1.review_number == review3.review_number
 
         # the final timing should be 12 hours
-        self.assertEqual(self.test_task3.schedule_timing, 10)
-        self.assertEqual(self.test_task3.schedule_unit, 'd')
+        assert self.test_task3.schedule_timing == 10
+        assert self.test_task3.schedule_unit == 'd'
 
     # PREV: Status updated to HREV
     def test_request_revision_in_PREV_leaf_task_status_updated_to_HREV(self):
@@ -3283,7 +3154,7 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
             schedule_timing=schedule_timing,
             schedule_unit=schedule_unit
         )
-        self.assertEqual(self.test_task3.status, self.status_hrev)
+        assert self.test_task3.status == self.status_hrev
 
     # PREV: Schedule info update
     def test_request_revision_in_PREV_leaf_task_timing_is_extended(self):
@@ -3303,8 +3174,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
             schedule_timing=schedule_timing,
             schedule_unit=schedule_unit
         )
-        self.assertEqual(self.test_task3.schedule_timing, 10)
-        self.assertEqual(self.test_task3.schedule_unit, 'd')
+        assert self.test_task3.schedule_timing == 10
+        assert self.test_task3.schedule_unit == 'd'
 
     # OH: DREV dependencies -> DREV
     def test_resume_in_OH_leaf_task_with_DREV_dependencies(self):
@@ -3318,9 +3189,9 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         self.test_task3.depends = [self.test_task6]
 
         # check statuses
-        self.assertEqual(self.test_task6.status, self.status_rts)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
-        self.assertEqual(self.test_task9.status, self.status_wfd)
+        assert self.test_task6.status == self.status_rts
+        assert self.test_task3.status == self.status_wfd
+        assert self.test_task9.status == self.status_wfd
 
         dt = datetime.datetime
         td = datetime.timedelta
@@ -3337,9 +3208,9 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
             r.approve()
 
         # check statuses
-        self.assertEqual(self.test_task6.status, self.status_cmpl)
-        self.assertEqual(self.test_task3.status, self.status_rts)
-        self.assertEqual(self.test_task9.status, self.status_wfd)
+        assert self.test_task6.status == self.status_cmpl
+        assert self.test_task3.status == self.status_rts
+        assert self.test_task9.status == self.status_wfd
 
         # start working on task3
         self.test_task3.create_time_log(
@@ -3354,9 +3225,9 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
             r.approve()
 
         # check statuses
-        self.assertEqual(self.test_task6.status, self.status_cmpl)
-        self.assertEqual(self.test_task3.status, self.status_cmpl)
-        self.assertEqual(self.test_task9.status, self.status_rts)
+        assert self.test_task6.status == self.status_cmpl
+        assert self.test_task3.status == self.status_cmpl
+        assert self.test_task9.status == self.status_rts
 
         # start working on task9
         self.test_task9.create_time_log(
@@ -3366,17 +3237,17 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # check statuses
-        self.assertEqual(self.test_task6.status, self.status_cmpl)
-        self.assertEqual(self.test_task3.status, self.status_cmpl)
-        self.assertEqual(self.test_task9.status, self.status_wip)
+        assert self.test_task6.status == self.status_cmpl
+        assert self.test_task3.status == self.status_cmpl
+        assert self.test_task9.status == self.status_wip
 
         # hold task9
         self.test_task9.hold()
 
         # check statuses
-        self.assertEqual(self.test_task6.status, self.status_cmpl)
-        self.assertEqual(self.test_task3.status, self.status_cmpl)
-        self.assertEqual(self.test_task9.status, self.status_oh)
+        assert self.test_task6.status == self.status_cmpl
+        assert self.test_task3.status == self.status_cmpl
+        assert self.test_task9.status == self.status_oh
 
         # request a revision to task6
         self.test_task6.request_revision(
@@ -3384,17 +3255,17 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # check statuses
-        self.assertEqual(self.test_task6.status, self.status_hrev)
-        self.assertEqual(self.test_task3.status, self.status_drev)
-        self.assertEqual(self.test_task9.status, self.status_oh)
+        assert self.test_task6.status == self.status_hrev
+        assert self.test_task3.status == self.status_drev
+        assert self.test_task9.status == self.status_oh
 
         # resume task9
         self.test_task9.resume()
 
         # check statuses
-        self.assertEqual(self.test_task6.status, self.status_hrev)
-        self.assertEqual(self.test_task3.status, self.status_drev)
-        self.assertEqual(self.test_task9.status, self.status_drev)
+        assert self.test_task6.status == self.status_hrev
+        assert self.test_task3.status == self.status_drev
+        assert self.test_task9.status == self.status_drev
 
     # OH: HREV dependencies -> DREV
     def test_resume_in_OH_leaf_task_with_HREV_dependencies(self):
@@ -3419,7 +3290,7 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
             r.approve()
 
         # task3 should be cmpl
-        self.assertEqual(self.test_task3.status, self.status_cmpl)
+        assert self.test_task3.status == self.status_cmpl
 
         # start working on task9
         self.test_task9.create_time_log(
@@ -3434,16 +3305,16 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_hrev)
-        self.assertEqual(self.test_task9.status, self.status_drev)
+        assert self.test_task3.status == self.status_hrev
+        assert self.test_task9.status == self.status_drev
 
         # hold task9
         self.test_task9.hold()
-        self.assertEqual(self.test_task9.status, self.status_oh)
+        assert self.test_task9.status == self.status_oh
 
         # resume task9
         self.test_task9.resume()
-        self.assertEqual(self.test_task9.status, self.status_drev)
+        assert self.test_task9.status == self.status_drev
 
     # OH: OH dependencies -> DREV
     def test_resume_in_OH_leaf_task_with_OH_dependencies(self):
@@ -3475,8 +3346,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
 
         # now request a revision for task3
         self.test_task3.request_revision(reviewer=self.test_user1)
-        self.assertEqual(self.test_task3.status, self.status_hrev)
-        self.assertEqual(self.test_task9.status, self.status_drev)
+        assert self.test_task3.status == self.status_hrev
+        assert self.test_task9.status == self.status_drev
 
         # enter a new time log for task3 to make it wip
         self.test_task3.create_time_log(
@@ -3489,11 +3360,11 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         self.test_task9.hold()
         self.test_task3.hold()
 
-        self.assertEqual(self.test_task3.status, self.status_oh)
-        self.assertEqual(self.test_task9.status, self.status_oh)
+        assert self.test_task3.status == self.status_oh
+        assert self.test_task9.status == self.status_oh
 
         self.test_task9.resume()
-        self.assertEqual(self.test_task9.status, self.status_drev)
+        assert self.test_task9.status == self.status_drev
 
     # OH: PREV dependencies -> DREV
     def test_resume_in_OH_leaf_task_with_PREV_dependencies(self):
@@ -3505,8 +3376,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         self.test_task9.depends = [self.test_task3]
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_rts)
-        self.assertEqual(self.test_task9.status, self.status_wfd)
+        assert self.test_task3.status == self.status_rts
+        assert self.test_task9.status == self.status_wfd
 
         dt = datetime.datetime
         td = datetime.timedelta
@@ -3520,8 +3391,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_wip)
-        self.assertEqual(self.test_task9.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wip
+        assert self.test_task9.status == self.status_wfd
 
         # complete task3
         reviews = self.test_task3.request_review()
@@ -3529,8 +3400,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
             r.approve()
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_cmpl)
-        self.assertEqual(self.test_task9.status, self.status_rts)
+        assert self.test_task3.status == self.status_cmpl
+        assert self.test_task9.status == self.status_rts
 
         # start working on task9
         self.test_task9.create_time_log(
@@ -3540,15 +3411,15 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_cmpl)
-        self.assertEqual(self.test_task9.status, self.status_wip)
+        assert self.test_task3.status == self.status_cmpl
+        assert self.test_task9.status == self.status_wip
 
         # hold task9
         self.test_task9.hold()
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_cmpl)
-        self.assertEqual(self.test_task9.status, self.status_oh)
+        assert self.test_task3.status == self.status_cmpl
+        assert self.test_task9.status == self.status_oh
 
         # request a revision to task3
         self.test_task3.request_revision(
@@ -3556,8 +3427,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_hrev)
-        self.assertEqual(self.test_task9.status, self.status_oh)
+        assert self.test_task3.status == self.status_hrev
+        assert self.test_task9.status == self.status_oh
 
         # now continue working on task3
         self.test_task3.create_time_log(
@@ -3567,22 +3438,22 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_wip)
-        self.assertEqual(self.test_task9.status, self.status_oh)
+        assert self.test_task3.status == self.status_wip
+        assert self.test_task9.status == self.status_oh
 
         # request a review for task3
         self.test_task3.request_review()
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_prev)
-        self.assertEqual(self.test_task9.status, self.status_oh)
+        assert self.test_task3.status == self.status_prev
+        assert self.test_task9.status == self.status_oh
 
         # now resume task9
         self.test_task9.resume()
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_prev)
-        self.assertEqual(self.test_task9.status, self.status_drev)
+        assert self.test_task3.status == self.status_prev
+        assert self.test_task9.status == self.status_drev
 
     # OH: WIP dependencies -> DREV
     def test_resume_in_OH_leaf_task_with_WIP_dependencies(self):
@@ -3594,8 +3465,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         self.test_task9.depends = [self.test_task3]
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_rts)
-        self.assertEqual(self.test_task9.status, self.status_wfd)
+        assert self.test_task3.status == self.status_rts
+        assert self.test_task9.status == self.status_wfd
 
         dt = datetime.datetime
         td = datetime.timedelta
@@ -3609,8 +3480,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_wip)
-        self.assertEqual(self.test_task9.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wip
+        assert self.test_task9.status == self.status_wfd
 
         # complete task3
         reviews = self.test_task3.request_review()
@@ -3618,8 +3489,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
             r.approve()
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_cmpl)
-        self.assertEqual(self.test_task9.status, self.status_rts)
+        assert self.test_task3.status == self.status_cmpl
+        assert self.test_task9.status == self.status_rts
 
         # start working on task9
         self.test_task9.create_time_log(
@@ -3629,15 +3500,15 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_cmpl)
-        self.assertEqual(self.test_task9.status, self.status_wip)
+        assert self.test_task3.status == self.status_cmpl
+        assert self.test_task9.status == self.status_wip
 
         # hold task9
         self.test_task9.hold()
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_cmpl)
-        self.assertEqual(self.test_task9.status, self.status_oh)
+        assert self.test_task3.status == self.status_cmpl
+        assert self.test_task9.status == self.status_oh
 
         # request a revision to task3
         self.test_task3.request_revision(
@@ -3645,8 +3516,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_hrev)
-        self.assertEqual(self.test_task9.status, self.status_oh)
+        assert self.test_task3.status == self.status_hrev
+        assert self.test_task9.status == self.status_oh
 
         # now continue working on task3
         self.test_task3.create_time_log(
@@ -3656,15 +3527,15 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_wip)
-        self.assertEqual(self.test_task9.status, self.status_oh)
+        assert self.test_task3.status == self.status_wip
+        assert self.test_task9.status == self.status_oh
 
         # now resume task9
         self.test_task9.resume()
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_wip)
-        self.assertEqual(self.test_task9.status, self.status_drev)
+        assert self.test_task3.status == self.status_wip
+        assert self.test_task9.status == self.status_drev
 
     # STOP: DREV dependencies -> DREV
     def test_resume_in_STOP_leaf_task_with_DREV_dependencies(self):
@@ -3678,9 +3549,9 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         self.test_task3.depends = [self.test_task6]
 
         # check statuses
-        self.assertEqual(self.test_task6.status, self.status_rts)
-        self.assertEqual(self.test_task3.status, self.status_wfd)
-        self.assertEqual(self.test_task9.status, self.status_wfd)
+        assert self.test_task6.status == self.status_rts
+        assert self.test_task3.status == self.status_wfd
+        assert self.test_task9.status == self.status_wfd
 
         dt = datetime.datetime
         td = datetime.timedelta
@@ -3697,9 +3568,9 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
             r.approve()
 
         # check statuses
-        self.assertEqual(self.test_task6.status, self.status_cmpl)
-        self.assertEqual(self.test_task3.status, self.status_rts)
-        self.assertEqual(self.test_task9.status, self.status_wfd)
+        assert self.test_task6.status == self.status_cmpl
+        assert self.test_task3.status == self.status_rts
+        assert self.test_task9.status == self.status_wfd
 
         # start working on task3
         self.test_task3.create_time_log(
@@ -3714,9 +3585,9 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
             r.approve()
 
         # check statuses
-        self.assertEqual(self.test_task6.status, self.status_cmpl)
-        self.assertEqual(self.test_task3.status, self.status_cmpl)
-        self.assertEqual(self.test_task9.status, self.status_rts)
+        assert self.test_task6.status == self.status_cmpl
+        assert self.test_task3.status == self.status_cmpl
+        assert self.test_task9.status == self.status_rts
 
         # start working on task9
         self.test_task9.create_time_log(
@@ -3726,17 +3597,17 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # check statuses
-        self.assertEqual(self.test_task6.status, self.status_cmpl)
-        self.assertEqual(self.test_task3.status, self.status_cmpl)
-        self.assertEqual(self.test_task9.status, self.status_wip)
+        assert self.test_task6.status == self.status_cmpl
+        assert self.test_task3.status == self.status_cmpl
+        assert self.test_task9.status == self.status_wip
 
         # stop task9
         self.test_task9.stop()
 
         # check statuses
-        self.assertEqual(self.test_task6.status, self.status_cmpl)
-        self.assertEqual(self.test_task3.status, self.status_cmpl)
-        self.assertEqual(self.test_task9.status, self.status_stop)
+        assert self.test_task6.status == self.status_cmpl
+        assert self.test_task3.status == self.status_cmpl
+        assert self.test_task9.status == self.status_stop
 
         # request a revision to task6
         self.test_task6.request_revision(
@@ -3744,17 +3615,17 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # check statuses
-        self.assertEqual(self.test_task6.status, self.status_hrev)
-        self.assertEqual(self.test_task3.status, self.status_drev)
-        self.assertEqual(self.test_task9.status, self.status_stop)
+        assert self.test_task6.status == self.status_hrev
+        assert self.test_task3.status == self.status_drev
+        assert self.test_task9.status == self.status_stop
 
         # resume task9
         self.test_task9.resume()
 
         # check statuses
-        self.assertEqual(self.test_task6.status, self.status_hrev)
-        self.assertEqual(self.test_task3.status, self.status_drev)
-        self.assertEqual(self.test_task9.status, self.status_drev)
+        assert self.test_task6.status == self.status_hrev
+        assert self.test_task3.status == self.status_drev
+        assert self.test_task9.status == self.status_drev
 
     # STOP: HREV dependencies -> DREV
     def test_resume_in_STOP_leaf_task_with_HREV_dependencies(self):
@@ -3766,8 +3637,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         self.test_task9.depends = [self.test_task3]
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_rts)
-        self.assertEqual(self.test_task9.status, self.status_wfd)
+        assert self.test_task3.status == self.status_rts
+        assert self.test_task9.status == self.status_wfd
 
         dt = datetime.datetime
         td = datetime.timedelta
@@ -3781,8 +3652,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_wip)
-        self.assertEqual(self.test_task9.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wip
+        assert self.test_task9.status == self.status_wfd
 
         # complete task3
         reviews = self.test_task3.request_review()
@@ -3790,8 +3661,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
             r.approve()
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_cmpl)
-        self.assertEqual(self.test_task9.status, self.status_rts)
+        assert self.test_task3.status == self.status_cmpl
+        assert self.test_task9.status == self.status_rts
 
         # start working on task9
         self.test_task9.create_time_log(
@@ -3801,15 +3672,15 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_cmpl)
-        self.assertEqual(self.test_task9.status, self.status_wip)
+        assert self.test_task3.status == self.status_cmpl
+        assert self.test_task9.status == self.status_wip
 
         # stop task9
         self.test_task9.stop()
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_cmpl)
-        self.assertEqual(self.test_task9.status, self.status_stop)
+        assert self.test_task3.status == self.status_cmpl
+        assert self.test_task9.status == self.status_stop
 
         # request a revision to task3
         self.test_task3.request_revision(
@@ -3817,8 +3688,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_hrev)
-        self.assertEqual(self.test_task9.status, self.status_stop)
+        assert self.test_task3.status == self.status_hrev
+        assert self.test_task9.status == self.status_stop
 
         # now continue working on task3
         self.test_task3.create_time_log(
@@ -3828,30 +3699,30 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_wip)
-        self.assertEqual(self.test_task9.status, self.status_stop)
+        assert self.test_task3.status == self.status_wip
+        assert self.test_task9.status == self.status_stop
 
         # request a review for task3
         reviews = self.test_task3.request_review()
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_prev)
-        self.assertEqual(self.test_task9.status, self.status_stop)
+        assert self.test_task3.status == self.status_prev
+        assert self.test_task9.status == self.status_stop
 
         # request revisions
         for r in reviews:
             r.request_revision()
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_hrev)
-        self.assertEqual(self.test_task9.status, self.status_stop)
+        assert self.test_task3.status == self.status_hrev
+        assert self.test_task9.status == self.status_stop
 
         # now resume task9
         self.test_task9.resume()
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_hrev)
-        self.assertEqual(self.test_task9.status, self.status_drev)
+        assert self.test_task3.status == self.status_hrev
+        assert self.test_task9.status == self.status_drev
 
     # STOP: OH dependencies -> DREV
     def test_resume_in_STOP_leaf_task_with_OH_dependencies(self):
@@ -3863,8 +3734,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         self.test_task9.depends = [self.test_task3]
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_rts)
-        self.assertEqual(self.test_task9.status, self.status_wfd)
+        assert self.test_task3.status == self.status_rts
+        assert self.test_task9.status == self.status_wfd
 
         dt = datetime.datetime
         td = datetime.timedelta
@@ -3878,8 +3749,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_wip)
-        self.assertEqual(self.test_task9.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wip
+        assert self.test_task9.status == self.status_wfd
 
         # complete task3
         reviews = self.test_task3.request_review()
@@ -3887,8 +3758,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
             r.approve()
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_cmpl)
-        self.assertEqual(self.test_task9.status, self.status_rts)
+        assert self.test_task3.status == self.status_cmpl
+        assert self.test_task9.status == self.status_rts
 
         # start working on task9
         self.test_task9.create_time_log(
@@ -3898,15 +3769,15 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_cmpl)
-        self.assertEqual(self.test_task9.status, self.status_wip)
+        assert self.test_task3.status == self.status_cmpl
+        assert self.test_task9.status == self.status_wip
 
         # stop task9
         self.test_task9.stop()
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_cmpl)
-        self.assertEqual(self.test_task9.status, self.status_stop)
+        assert self.test_task3.status == self.status_cmpl
+        assert self.test_task9.status == self.status_stop
 
         # request a revision to task3
         self.test_task3.request_revision(
@@ -3914,8 +3785,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_hrev)
-        self.assertEqual(self.test_task9.status, self.status_stop)
+        assert self.test_task3.status == self.status_hrev
+        assert self.test_task9.status == self.status_stop
 
         # now continue working on task3
         self.test_task3.create_time_log(
@@ -3925,22 +3796,22 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_wip)
-        self.assertEqual(self.test_task9.status, self.status_stop)
+        assert self.test_task3.status == self.status_wip
+        assert self.test_task9.status == self.status_stop
 
         # hold task3
         self.test_task3.hold()
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_oh)
-        self.assertEqual(self.test_task9.status, self.status_stop)
+        assert self.test_task3.status == self.status_oh
+        assert self.test_task9.status == self.status_stop
 
         # now resume task9
         self.test_task9.resume()
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_oh)
-        self.assertEqual(self.test_task9.status, self.status_drev)
+        assert self.test_task3.status == self.status_oh
+        assert self.test_task9.status == self.status_drev
 
     # STOP: PREV dependencies -> DREV
     def test_resume_in_STOP_leaf_task_with_PREV_dependencies(self):
@@ -3952,8 +3823,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         self.test_task9.depends = [self.test_task3]
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_rts)
-        self.assertEqual(self.test_task9.status, self.status_wfd)
+        assert self.test_task3.status == self.status_rts
+        assert self.test_task9.status == self.status_wfd
 
         dt = datetime.datetime
         td = datetime.timedelta
@@ -3967,8 +3838,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_wip)
-        self.assertEqual(self.test_task9.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wip
+        assert self.test_task9.status == self.status_wfd
 
         # complete task3
         reviews = self.test_task3.request_review()
@@ -3976,8 +3847,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
             r.approve()
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_cmpl)
-        self.assertEqual(self.test_task9.status, self.status_rts)
+        assert self.test_task3.status == self.status_cmpl
+        assert self.test_task9.status == self.status_rts
 
         # start working on task9
         self.test_task9.create_time_log(
@@ -3987,15 +3858,15 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_cmpl)
-        self.assertEqual(self.test_task9.status, self.status_wip)
+        assert self.test_task3.status == self.status_cmpl
+        assert self.test_task9.status == self.status_wip
 
         # stop task9
         self.test_task9.stop()
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_cmpl)
-        self.assertEqual(self.test_task9.status, self.status_stop)
+        assert self.test_task3.status == self.status_cmpl
+        assert self.test_task9.status == self.status_stop
 
         # request a revision to task3
         self.test_task3.request_revision(
@@ -4003,8 +3874,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_hrev)
-        self.assertEqual(self.test_task9.status, self.status_stop)
+        assert self.test_task3.status == self.status_hrev
+        assert self.test_task9.status == self.status_stop
 
         # now continue working on task3
         self.test_task3.create_time_log(
@@ -4014,22 +3885,22 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_wip)
-        self.assertEqual(self.test_task9.status, self.status_stop)
+        assert self.test_task3.status == self.status_wip
+        assert self.test_task9.status == self.status_stop
 
         # request a review for task3
         self.test_task3.request_review()
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_prev)
-        self.assertEqual(self.test_task9.status, self.status_stop)
+        assert self.test_task3.status == self.status_prev
+        assert self.test_task9.status == self.status_stop
 
         # now resume task9
         self.test_task9.resume()
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_prev)
-        self.assertEqual(self.test_task9.status, self.status_drev)
+        assert self.test_task3.status == self.status_prev
+        assert self.test_task9.status == self.status_drev
 
     # STOP: WIP dependencies -> DREV
     def test_resume_in_STOP_leaf_task_with_WIP_dependencies(self):
@@ -4041,8 +3912,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         self.test_task9.depends = [self.test_task3]
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_rts)
-        self.assertEqual(self.test_task9.status, self.status_wfd)
+        assert self.test_task3.status == self.status_rts
+        assert self.test_task9.status == self.status_wfd
 
         dt = datetime.datetime
         td = datetime.timedelta
@@ -4056,8 +3927,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_wip)
-        self.assertEqual(self.test_task9.status, self.status_wfd)
+        assert self.test_task3.status == self.status_wip
+        assert self.test_task9.status == self.status_wfd
 
         # complete task3
         reviews = self.test_task3.request_review()
@@ -4065,8 +3936,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
             r.approve()
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_cmpl)
-        self.assertEqual(self.test_task9.status, self.status_rts)
+        assert self.test_task3.status == self.status_cmpl
+        assert self.test_task9.status == self.status_rts
 
         # start working on task9
         self.test_task9.create_time_log(
@@ -4076,15 +3947,15 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_cmpl)
-        self.assertEqual(self.test_task9.status, self.status_wip)
+        assert self.test_task3.status == self.status_cmpl
+        assert self.test_task9.status == self.status_wip
 
         # stop task9
         self.test_task9.stop()
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_cmpl)
-        self.assertEqual(self.test_task9.status, self.status_stop)
+        assert self.test_task3.status == self.status_cmpl
+        assert self.test_task9.status == self.status_stop
 
         # request a revision to task3
         self.test_task3.request_revision(
@@ -4092,8 +3963,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_hrev)
-        self.assertEqual(self.test_task9.status, self.status_stop)
+        assert self.test_task3.status == self.status_hrev
+        assert self.test_task9.status == self.status_stop
 
         # now continue working on task3
         self.test_task3.create_time_log(
@@ -4103,15 +3974,15 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         )
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_wip)
-        self.assertEqual(self.test_task9.status, self.status_stop)
+        assert self.test_task3.status == self.status_wip
+        assert self.test_task9.status == self.status_stop
 
         # now resume task9
         self.test_task9.resume()
 
         # check statuses
-        self.assertEqual(self.test_task3.status, self.status_wip)
-        self.assertEqual(self.test_task9.status, self.status_drev)
+        assert self.test_task3.status == self.status_wip
+        assert self.test_task9.status == self.status_drev
 
     def test_review_set_method_is_working_properly(self):
         """testing if the review_set() method is working properly
@@ -4120,23 +3991,17 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
 
         # request a review
         reviews = self.test_task3.request_review()
-        self.assertEqual(2, len(reviews))
+        assert len(reviews) == 2
 
         # check the review_set() method with no review number
-        self.assertEqual(
-            reviews,
-            self.test_task3.review_set()
-        )
+        assert self.test_task3.review_set() == reviews
 
         # now finalize the reviews
         reviews[0].approve()
         reviews[1].request_revision()
 
         # task should have been set to hrev
-        self.assertEqual(
-            self.status_hrev,
-            self.test_task3.status
-        )
+        assert self.status_hrev == self.test_task3.status
 
         # set the status to wip again
         self.test_task3.status = self.status_wip
@@ -4145,24 +4010,15 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         reviews2 = self.test_task3.request_review()
 
         # confirm that they it is a different set of review
-        self.assertNotEqual(reviews, reviews2)
+        assert reviews != reviews2
 
         # now check if review_set() will return reviews2
-        self.assertEqual(
-            reviews2,
-            self.test_task3.review_set()
-        )
+        assert self.test_task3.review_set() == reviews2
 
         # and use a review_number
-        self.assertEqual(
-            reviews,
-            self.test_task3.review_set(1)
-        )
+        assert self.test_task3.review_set(1) == reviews
 
-        self.assertEqual(
-            reviews2,
-            self.test_task3.review_set(2)
-        )
+        assert self.test_task3.review_set(2) == reviews2
 
     def test_review_set_review_number_is_skipped(self):
         """testing if the latest review set will be returned if the
@@ -4172,23 +4028,17 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
 
         # request a review
         reviews = self.test_task3.request_review()
-        self.assertEqual(2, len(reviews))
+        assert len(reviews) == 2
 
         # check the review_set() method with no review number
-        self.assertEqual(
-            reviews,
-            self.test_task3.review_set()
-        )
+        assert self.test_task3.review_set() == reviews
 
         # now finalize the reviews
         reviews[0].approve()
         reviews[1].request_revision()
 
         # task should have been set to hrev
-        self.assertEqual(
-            self.status_hrev,
-            self.test_task3.status
-        )
+        assert self.test_task3.status == self.status_hrev
 
         # set the status to wip again
         self.test_task3.status = self.status_wip
@@ -4197,11 +4047,8 @@ class TaskStatusWorkflowDBTestDBCase(UnitTestDBBase):
         reviews2 = self.test_task3.request_review()
 
         # confirm that they it is a different set of review
-        self.assertNotEqual(reviews, reviews2)
+        assert reviews != reviews2
 
         # now check if review_set() will return reviews2
-        self.assertEqual(
-            reviews2,
-            self.test_task3.review_set()
-        )
+        assert self.test_task3.review_set() == reviews2
 

@@ -17,6 +17,7 @@
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
+import pytest
 from stalker.models.entity import EntityGroup
 
 
@@ -162,38 +163,34 @@ class EntityGroupTestCase(unittest.TestCase):
         entities argument is skipped
         """
         eg = EntityGroup()
-        self.assertEqual(eg.entities, [])
+        assert eg.entities == []
 
     def test_entities_argument_is_None(self):
         """testing if the entities attribute will be an empty list if the
         entities argument is None
         """
         eg = EntityGroup(entities=None)
-        self.assertEqual(eg.entities, [])
+        assert eg.entities == []
 
     def test_entities_argument_is_not_a_list(self):
         """testing if a TypeError will be raised if the entities argument is
         not a list
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             EntityGroup(entities='not a list of SimpleEntities')
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: str is not list-like'
-        )
 
     def test_entities_argument_is_not_a_list_of_SimpleEntity_instances(self):
         """testing if a TypeError will be raised when the entities argument is
         not a list of SimpleEntity instances
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             EntityGroup(entities=['not', 1, 'list', 'of', 'SimpleEntities'])
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'EntityGroup.entities should be a list of SimpleEntities, not str'
-        )
 
     def test_entities_argument_is_working_properly(self):
         """testing if the entities argument value is correctly passed to the
@@ -203,4 +200,4 @@ class EntityGroupTestCase(unittest.TestCase):
         eg = EntityGroup(
             entities=test_value
         )
-        self.assertEqual(eg.entities, test_value)
+        assert eg.entities == test_value

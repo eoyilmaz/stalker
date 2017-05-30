@@ -110,4 +110,4 @@ class ProjectMixinTester(unittest.TestCase):
         """testing if the project attribute is working properly
         """
 
-        self.assertEqual(self.test_a_obj.project, self.test_project)
+        assert self.test_a_obj.project == self.test_project

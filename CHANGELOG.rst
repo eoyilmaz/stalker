@@ -35,6 +35,13 @@ Stalker Changes
 * **Fix:** Fixed ``testing.create_db()`` and ``testing.drop_db()`` to fallback
   to ``subprocess.check_call`` method for Python 2.6.
 
+* **Fix:** Fixed ``stalker.models.auth.User._validate_password()`` method to
+  work with Python 2.6.
+
+* **Update:** Updated all of the tests to use ``pytest`` style assertions to
+  support Python 2.6 along with 2.7 and 3.0+.
+
+
 0.2.20
 ======
 

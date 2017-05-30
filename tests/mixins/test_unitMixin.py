@@ -17,8 +17,9 @@
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
-from stalker import UnitMixin, SimpleEntity
+import pytest
 from sqlalchemy import Column, Integer, ForeignKey
+from stalker import UnitMixin, SimpleEntity
 
 
 class UnitMixinFooMixedInClass(SimpleEntity, UnitMixin):
@@ -47,56 +48,52 @@ class UnitMixinTestCase(unittest.TestCase):
         """testing if the init is working properly
         """
         a = UnitMixinFooMixedInClass(unit='TRY')
-        self.assertIsInstance(a, UnitMixinFooMixedInClass)
-        self.assertEqual(a.unit, 'TRY')
+        assert isinstance(a, UnitMixinFooMixedInClass)
+        assert a.unit == 'TRY'
 
     def test_unit_argument_is_skipped(self):
         """testing if the unit attribute will be an empty string if the unit
         argument is skipped
         """
         g = UnitMixinFooMixedInClass()
-        self.assertEqual(g.unit, '')
+        assert g.unit == ''
 
     def test_unit_argument_is_None(self):
         """testing if the unit attribute will be an empty string if the unit
         argument is None
         """
         g = UnitMixinFooMixedInClass(unit=None)
-        self.assertEqual(g.unit, '')
+        assert g.unit == ''
 
     def test_unit_attribute_is_set_to_None(self):
         """testing if the unit attribute will be an empty string if it is set
         to None
         """
         g = UnitMixinFooMixedInClass(unit='TRY')
-        self.assertNotEqual(g.unit, '')
+        assert g.unit != ''
         g.unit = None
-        self.assertEqual(g.unit, '')
+        assert g.unit == ''
 
     def test_unit_argument_is_not_a_string(self):
         """testing if a TypeError will be raised if the unit argument is not a
         string
         """
-        with self.assertRaises(TypeError) as cm:
-            g = UnitMixinFooMixedInClass(unit=1234)
+        with pytest.raises(TypeError) as cm:
+            UnitMixinFooMixedInClass(unit=1234)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'UnitMixinFooMixedInClass.unit should be a string, not int'
-        )
 
     def test_unit_attribute_is_not_a_string(self):
         """testing if a TypeError will be raised if the unit attribute is set
         to a value which is not a string
         """
         g = UnitMixinFooMixedInClass(unit='TRY')
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             g.unit = 2342
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'UnitMixinFooMixedInClass.unit should be a string, not int'
-        )
 
     def test_unit_argument_is_working_properly(self):
         """testing if the unit argument value is properly passed to the unit
@@ -104,13 +101,13 @@ class UnitMixinTestCase(unittest.TestCase):
         """
         test_value = 'this is my unit'
         g = UnitMixinFooMixedInClass(unit=test_value)
-        self.assertEqual(g.unit, test_value)
+        assert g.unit == test_value
 
     def test_unit_attribute_is_working_properly(self):
         """testing if the unit attribute value can be changed properly
         """
         test_value = 'this is my unit'
         g = UnitMixinFooMixedInClass(unit='TRY')
-        self.assertNotEqual(g.unit, test_value)
+        assert g.unit != test_value
         g.unit = test_value
-        self.assertEqual(g.unit, test_value)
+        assert g.unit == test_value

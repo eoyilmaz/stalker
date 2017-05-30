@@ -16,17 +16,11 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-from stalker.testing import UnitTestDBBase
-from stalker import Role
 
-
-class RoleTestDBCase(UnitTestDBBase):
-    """testing the Role class
+def test_role_class_generic():
+    """testing of creation of a Role instance
     """
-
-    def test_role_class_generic(self):
-        """testing of creation of a Role instance
-        """
-        r = Role(name='Lead')
-        self.assertTrue(isinstance(r, Role))
-        self.assertEqual(r.name, 'Lead')
+    from stalker import Role
+    r = Role(name='Lead')
+    assert isinstance(r, Role)
+    assert r.name == 'Lead'

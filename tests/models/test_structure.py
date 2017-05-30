@@ -17,6 +17,9 @@
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
+
+import pytest
+
 from stalker import Structure
 
 
@@ -90,14 +93,14 @@ class StructureTester(unittest.TestCase):
         """testing if the __auto_name__ class attribute is set to False for
         Structure class
         """
-        self.assertFalse(Structure.__auto_name__)
+        assert Structure.__auto_name__ is False
 
     def test_custom_template_argument_can_be_skipped(self):
         """testing if the custom_template argument can be skipped
         """
         self.kwargs.pop("custom_template")
         new_structure = Structure(**self.kwargs)
-        self.assertEqual(new_structure.custom_template, "")
+        assert new_structure.custom_template == ""
 
     def test_custom_template_argument_is_None(self):
         """testing if no error will be raised when the custom_template argument
@@ -105,7 +108,7 @@ class StructureTester(unittest.TestCase):
         """
         self.kwargs["custom_template"] = None
         new_structure = Structure(**self.kwargs)
-        self.assertEqual(new_structure.custom_template, "")
+        assert new_structure.custom_template == ""
 
     def test_custom_template_argument_is_empty_string(self):
         """testing if no error will be raised when the custom_template argument
@@ -113,32 +116,28 @@ class StructureTester(unittest.TestCase):
         """
         self.kwargs["custom_template"] = ""
         new_structure = Structure(**self.kwargs)
-        self.assertEqual(new_structure.custom_template, "")
+        assert new_structure.custom_template == ""
 
     def test_custom_template_argument_is_not_a_string(self):
         """testing if a TypeError will be raised when the custom_template
         argument is not a string
         """
         self.kwargs['custom_template'] = ["this is not a string"]
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Structure(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Structure.custom_template should be a string not list'
-        )
 
     def test_custom_template_attribute_is_not_a_string(self):
         """testing if a TypeError will be raised when the custom_template
         attribute is not a string
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_structure.custom_template = ['this is not a string']
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Structure.custom_template should be a string not list'
-        )
 
     def test_templates_argument_can_be_skipped(self):
         """testing if no error will be raised when the templates argument is
@@ -146,7 +145,7 @@ class StructureTester(unittest.TestCase):
         """
         self.kwargs.pop("templates")
         new_structure = Structure(**self.kwargs)
-        self.assertTrue(isinstance(new_structure, Structure))
+        assert isinstance(new_structure, Structure)
 
     def test_templates_argument_can_be_None(self):
         """testing if no error will be raised when the templates argument is
@@ -154,54 +153,45 @@ class StructureTester(unittest.TestCase):
         """
         self.kwargs["templates"] = None
         new_structure = Structure(**self.kwargs)
-        self.assertTrue(isinstance(new_structure, Structure))
+        assert isinstance(new_structure, Structure)
 
     def test_templates_attribute_cannot_be_set_to_None(self):
         """testing if a TypeError will be raised when the templates attribute
         is set to None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_structure.templates = None
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: None is not list-like'
-        )
 
     def test_templates_argument_only_accepts_list(self):
         """testing if a TypeError will be raised when the given templates
         argument is not a list
         """
         self.kwargs["templates"] = 1
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Structure(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: int is not list-like'
-        )
 
     def test_templates_attribute_only_accepts_list_1(self):
         """testing if a TypeError will be raised when the templates attribute
         is tried to be set to an object which is not a list instance.
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_structure.templates = 1.121
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: float is not list-like'
-        )
 
     def test_templates_attribute_is_working_properly(self):
         """testing if templates attribute is working properly
         """
         # test the correct value
         self.test_structure.templates = self.test_templates
-        self.assertEqual(
-            self.test_structure.templates,
-            self.test_templates
-        )
+        assert self.test_structure.templates == self.test_templates
 
     def test_templates_argument_accepts_only_list_of_FilenameTemplate_instances(self):
         """testing if a TypeError will be raised when the templates argument is
@@ -210,14 +200,12 @@ class StructureTester(unittest.TestCase):
         """
         test_value = [1, 1.2, "a string"]
         self.kwargs["templates"] = test_value
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Structure(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'All the elements in the Structure.templates should be a '
+        assert str(cm.value) == \
+            'All the elements in the Structure.templates should be a ' \
             'stalker.models.template.FilenameTemplate instance not int'
-        )
 
     def test_templates_argument_is_working_properly(self):
         """testing if the templates argument value is correctly passed to the
@@ -226,10 +214,7 @@ class StructureTester(unittest.TestCase):
         # test the correct value
         self.kwargs["templates"] = self.test_templates
         new_structure = Structure(**self.kwargs)
-        self.assertEqual(
-            new_structure.templates,
-            self.test_templates
-        )
+        assert new_structure.templates ==self.test_templates
 
     def test_templates_attribute_accpets_only_list_of_FilenameTemplate_instances(self):
         """testing if a TypeError will be raised when the templates attribute
@@ -237,19 +222,17 @@ class StructureTester(unittest.TestCase):
         class.
         """
         test_value = [1, 1.2, "a string"]
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_structure.templates = test_value
 
-        self.assertEqual(
-            str(cm.exception),
-            'All the elements in the Structure.templates should be a '
+        assert str(cm.value) == \
+            'All the elements in the Structure.templates should be a ' \
             'stalker.models.template.FilenameTemplate instance not int'
-        )
 
     def test___strictly_typed___is_False(self):
         """testing if the __strictly_typed__ is False
         """
-        self.assertEqual(Structure.__strictly_typed__, False)
+        assert Structure.__strictly_typed__ is False
 
     def test_equality_operator(self):
         """testing equality of two Structure objects
@@ -263,9 +246,9 @@ class StructureTester(unittest.TestCase):
         self.kwargs["templates"] = self.test_templates2
         new_structure4 = Structure(**self.kwargs)
 
-        self.assertTrue(self.test_structure == new_structure2)
-        self.assertFalse(self.test_structure == new_structure3)
-        self.assertFalse(self.test_structure == new_structure4)
+        assert self.test_structure == new_structure2
+        assert not self.test_structure == new_structure3
+        assert not self.test_structure == new_structure4
 
     def test_inequality_operator(self):
         """testing inequality of two Structure objects
@@ -279,21 +262,20 @@ class StructureTester(unittest.TestCase):
         self.kwargs["templates"] = self.test_templates2
         new_structure4 = Structure(**self.kwargs)
 
-        self.assertFalse(self.test_structure != new_structure2)
-        self.assertTrue(self.test_structure != new_structure3)
-        self.assertTrue(self.test_structure != new_structure4)
+        assert not self.test_structure != new_structure2
+        assert self.test_structure != new_structure3
+        assert self.test_structure != new_structure4
 
     def test_plural_class_name(self):
         """testing the plural name of Structure class
         """
-        self.assertTrue(self.test_structure.plural_class_name, "Structures")
+        assert self.test_structure.plural_class_name == "Structures"
 
     # def test_hash_value(self):
     #     """testing if the hash value is correctly calculated
     #     """
-    #     self.assertEqual(
-    #         hash(self.test_structure),
+    #     assert \
+    #         hash(self.test_structure) == \
     #         hash(self.test_structure.id) +
     #         2 * hash(self.test_structure.name) +
     #         3 * hash(self.test_structure.entity_type)
-    #     )

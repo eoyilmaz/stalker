@@ -17,6 +17,7 @@
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
+import pytest
 from stalker import Entity
 
 
@@ -30,7 +31,7 @@ class EntityTester(unittest.TestCase):
         super(EntityTester, self).setUp()
 
         # create a user
-        from stalker import db, User
+        from stalker import User
         self.test_user = User(
             name="Test User",
             login="testuser",
@@ -71,7 +72,7 @@ class EntityTester(unittest.TestCase):
         """testing if the __auto_name__ class attribute is set to False for
         Entity class
         """
-        self.assertTrue(Entity.__auto_name__)
+        assert Entity.__auto_name__ is True
 
     def test_notes_argument_being_omitted(self):
         """testing if no error raised when omitted the notes argument
@@ -80,7 +81,7 @@ class EntityTester(unittest.TestCase):
         kwargs = copy.copy(self.kwargs)
         kwargs.pop("notes")
         new_entity = Entity(**kwargs)
-        self.assertTrue(isinstance(new_entity, Entity))
+        assert isinstance(new_entity, Entity)
 
     def test_notes_argument_is_set_to_None(self):
         """testing if the notes attribute will be set to an empty list when the
@@ -90,19 +91,17 @@ class EntityTester(unittest.TestCase):
         kwargs = copy.copy(self.kwargs)
         kwargs["notes"] = None
         new_entity = Entity(**kwargs)
-        self.assertEqual(new_entity.notes, [])
+        assert new_entity.notes == []
 
     def test_notes_attribute_is_set_to_None(self):
         """testing if a TypeError will be raised when the notes attribute is
         set to None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_entity.notes = None
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: None is not list-like'
-        )
 
     def test_notes_argument_set_to_something_other_than_a_list(self):
         """testing if a TypeError will be raised when setting the notes
@@ -111,27 +110,23 @@ class EntityTester(unittest.TestCase):
         import copy
         kwargs = copy.copy(self.kwargs)
         kwargs['notes'] = ["a string note"]
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Entity(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Entity.note should be a stalker.models.note.Note instance, not '
+        assert str(cm.value) == \
+            'Entity.note should be a stalker.models.note.Note instance, not ' \
             'str'
-        )
 
     def test_notes_attribute_set_to_something_other_than_a_list(self):
         """testing if a TypeError will be raised when setting the notes
         argument something other than a list
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
                 self.test_entity.notes = ["a string note"]
 
-        self.assertEqual(
-            str(cm.exception),
-            'Entity.note should be a stalker.models.note.Note instance, not '
+        assert str(cm.value) == \
+            'Entity.note should be a stalker.models.note.Note instance, not ' \
             'str'
-        )
 
     def test_notes_argument_set_to_a_list_of_other_objects(self):
         """testing if a TypeError will be raised when trying to set the notes
@@ -142,48 +137,42 @@ class EntityTester(unittest.TestCase):
         kwargs["notes"] = \
             [1, 12.2, "this is a string"]
 
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Entity(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Entity.note should be a stalker.models.note.Note instance, '
+        assert str(cm.value) == \
+            'Entity.note should be a stalker.models.note.Note instance, ' \
             'not int'
-        )
 
     def test_notes_attribute_set_to_a_list_of_other_objects(self):
         """testing if a TypeError will be raised when trying to set the notes
         attribute to a list of other kind of objects than Note objects
         """
         test_value = [1, 12.2, "this is a string"]
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_entity.notes = test_value
 
-        self.assertEqual(
-            str(cm.exception),
-            'Entity.note should be a stalker.models.note.Note instance, not '
+        assert str(cm.value) == \
+            'Entity.note should be a stalker.models.note.Note instance, not ' \
             'int'
-        )
 
     def test_notes_attribute_works_properly(self):
         """testing if the notes attribute works properly
         """
         test_value = [self.test_note3]
         self.test_entity.notes = test_value
-        self.assertEqual(self.test_entity.notes, test_value)
+        assert self.test_entity.notes == test_value
 
     def test_notes_attribute_element_is_set_to_something_other_than_a_note_object(self):
         """testing if a TypeError will be raised when trying to assign an
         element to the notes list which is not an instance of Note
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_entity.notes[0] = 0
 
-        self.assertEqual(
-            str(cm.exception),
-            'Entity.note should be a stalker.models.note.Note instance, not '
+        assert str(cm.value) == \
+            'Entity.note should be a stalker.models.note.Note instance, not ' \
             'int'
-        )
 
     def test_tags_argument_being_omitted(self):
         """testing if nothing is raised when creating an entity without setting
@@ -194,7 +183,7 @@ class EntityTester(unittest.TestCase):
         kwargs.pop("tags")
         # this should work without errors
         new_entity = Entity(**kwargs)
-        self.assertTrue(isinstance(new_entity, Entity))
+        assert isinstance(new_entity, Entity)
 
     def test_tags_argument_being_initialized_as_an_empty_list(self):
         """testing if nothing happens when tags argument an empty list
@@ -205,7 +194,7 @@ class EntityTester(unittest.TestCase):
         kwargs.pop("tags")
         new_entity = Entity(**kwargs)
         expected_result = []
-        self.assertEqual(new_entity.tags, expected_result)
+        assert new_entity.tags == expected_result
 
     def test_tags_argument_set_to_something_other_than_a_list(self):
         """testing if a TypeError is going to be raised when initializing the
@@ -214,44 +203,38 @@ class EntityTester(unittest.TestCase):
         import copy
         kwargs = copy.copy(self.kwargs)
         kwargs["tags"] = ["a tag", 1243, 12.12]
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Entity(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Entity.tag should be a stalker.models.tag.Tag instance, not str'
-        )
 
     def test_tags_attribute_works_properly(self):
         """testing if tags attribute works properly
         """
         test_value = [self.test_tag1]
         self.test_entity.tags = test_value
-        self.assertEqual(self.test_entity.tags, test_value)
+        assert self.test_entity.tags == test_value
 
     def test_tags_attribute_element_is_set_to_something_other_than_a_tag_object(self):
         """testing if a TypeError will be raised when trying to assign an
         element to the tags list which is not an instance of Tag
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_entity.tags[0] = 0
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Entity.tag should be a stalker.models.tag.Tag instance, not int'
-        )
 
     def test_tags_attribute_set_to_None(self):
         """testing if a TypeError will be raised when the tags attribute is set
         to None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_entity.tags = None
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: None is not list-like'
-        )
 
     def test_equality(self):
         """testing equality of two entities
@@ -268,8 +251,8 @@ class EntityTester(unittest.TestCase):
         kwargs["notes"] = []
         entity3 = Entity(**kwargs)
 
-        self.assertTrue(entity1 == entity2)
-        self.assertFalse(entity1 == entity3)
+        assert entity1 == entity2
+        assert not entity1 == entity3
 
     def test_inequality(self):
         """testing inequality of two entities
@@ -285,5 +268,5 @@ class EntityTester(unittest.TestCase):
         kwargs["notes"] = []
         entity3 = Entity(**kwargs)
 
-        self.assertFalse(entity1 != entity2)
-        self.assertTrue(entity1 != entity3)
+        assert not entity1 != entity2
+        assert entity1 != entity3

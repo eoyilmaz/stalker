@@ -17,6 +17,7 @@
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
+import pytest
 
 
 class ExceptionTester(unittest.TestCase):
@@ -28,64 +29,47 @@ class ExceptionTester(unittest.TestCase):
         """
         from stalker.exceptions import LoginError
         test_message = 'testing LoginError'
-        with self.assertRaises(LoginError) as cm:
+        with pytest.raises(LoginError) as cm:
             raise LoginError(test_message)
 
-        self.assertEqual(
-            str(cm.exception),
-            test_message
-        )
+        assert str(cm.value) == test_message
 
     def test_circular_dependency_error_is_working_properly(self):
         """testing if CircularDependencyError is working properly
         """
         from stalker.exceptions import CircularDependencyError
         test_message = 'testing CircularDependencyError'
-        with self.assertRaises(CircularDependencyError) as cm:
+        with pytest.raises(CircularDependencyError) as cm:
             raise CircularDependencyError(test_message)
 
-        self.assertEqual(
-            str(cm.exception),
-            test_message
-        )
+        assert str(cm.value) == test_message
 
     def test_over_booked_error_is_working_properly(self):
         """testing if OverBookedError is working properly
         """
         from stalker.exceptions import OverBookedError
         test_message = 'testing OverBookedError'
-        with self.assertRaises(OverBookedError) as cm:
+        with pytest.raises(OverBookedError) as cm:
             raise OverBookedError(test_message)
 
-        self.assertEqual(
-            str(cm.exception),
-            test_message
-        )
+        assert str(cm.value) ==test_message
 
     def test_status_error_is_working_properly(self):
         """testing if StatusError is working properly
         """
         from stalker.exceptions import StatusError
         test_message = 'testing StatusError'
-        with self.assertRaises(StatusError) as cm:
+        with pytest.raises(StatusError) as cm:
             raise StatusError(test_message)
 
-        self.assertEqual(
-            str(cm.exception),
-            test_message
-        )
+        assert str(cm.value) == test_message
 
     def test_dependency_violation_error_is_working_properly(self):
         """testing if DependencyViolationError is working properly
         """
         from stalker.exceptions import DependencyViolationError
         test_message = 'testing DependencyViolationError'
-        with self.assertRaises(DependencyViolationError) as cm:
+        with pytest.raises(DependencyViolationError) as cm:
             raise DependencyViolationError(test_message)
 
-        self.assertEqual(
-            str(cm.exception),
-            test_message
-        )
-
-    
+        assert str(cm.value) ==test_message

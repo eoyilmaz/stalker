@@ -17,6 +17,7 @@
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
+import pytest
 from stalker import FilenameTemplate
 
 
@@ -49,7 +50,7 @@ class FilenameTemplateTester(unittest.TestCase):
         Asset class
         """
         from stalker import FilenameTemplate
-        self.assertFalse(FilenameTemplate.__auto_name__)
+        assert FilenameTemplate.__auto_name__ is False
 
     def test_filename_template_is_not_strictly_typed(self):
         """testing if the FilenameTemplate class is not strictly typed
@@ -57,45 +58,38 @@ class FilenameTemplateTester(unittest.TestCase):
         self.kwargs.pop("type")
         # no errors
         ft = FilenameTemplate(**self.kwargs)
-        self.assertTrue(isinstance(ft, FilenameTemplate))
+        assert isinstance(ft, FilenameTemplate)
 
     def test_target_entity_type_argument_is_skipped(self):
         """testing if a TypeError will be raised when the target_entity_type
         argument is skipped
         """
         self.kwargs.pop("target_entity_type")
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             FilenameTemplate(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'FilenameTemplate.target_entity_type can not be None'
-        )
 
     def test_target_entity_type_argument_is_None(self):
         """testing if a TypeError will be raised when the target_entity_type
         argument is given as None
         """
         self.kwargs["target_entity_type"] = None
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             FilenameTemplate(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'FilenameTemplate.target_entity_type can not be None'
-        )
 
     def test_target_entity_type_attribute_is_read_only(self):
         """testing if a AttributeError will be raised when the
         target_entity_type attribute is tried to be changed
         """
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             self.filename_template.target_entity_type = "Asset"
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_target_entity_type_argument_accepts_Classes(self):
         """testing if the target_entity_type can be set to a class directly
@@ -109,14 +103,14 @@ class FilenameTemplateTester(unittest.TestCase):
         """
         self.kwargs["target_entity_type"] = 'Asset'
         ft = FilenameTemplate(**self.kwargs)
-        self.assertEqual(ft.target_entity_type, "Asset")
+        assert ft.target_entity_type == "Asset"
 
     def test_path_argument_is_skipped(self):
         """testing if nothing happens when the path argument is skipped
         """
         self.kwargs.pop("path")
         ft = FilenameTemplate(**self.kwargs)
-        self.assertTrue(isinstance(ft, FilenameTemplate))
+        assert isinstance(ft, FilenameTemplate)
 
     def test_path_argument_skipped_path_attribute_is_empty_string(self):
         """testing if the path attribute is an empty string if the
@@ -124,7 +118,7 @@ class FilenameTemplateTester(unittest.TestCase):
         """
         self.kwargs.pop("path")
         ft = FilenameTemplate(**self.kwargs)
-        self.assertEqual(ft.path, "")
+        assert ft.path == ""
 
     def test_path_argument_is_None_path_attribute_is_empty_string(self):
         """testing if the path attribute is an empty string when the
@@ -132,7 +126,7 @@ class FilenameTemplateTester(unittest.TestCase):
         """
         self.kwargs["path"] = None
         ft = FilenameTemplate(**self.kwargs)
-        self.assertEqual(ft.path, "")
+        assert ft.path == ""
 
     def test_path_argument_is_empty_string(self):
         """testing if nothing happens when the path argument is empty
@@ -140,7 +134,7 @@ class FilenameTemplateTester(unittest.TestCase):
         """
         self.kwargs["path"] = ""
         ft = FilenameTemplate(**self.kwargs)
-        self.assertTrue(isinstance(ft, FilenameTemplate))
+        assert isinstance(ft, FilenameTemplate)
 
     def test_path_attribute_is_empty_string(self):
         """testing if nothing happens when the path attribute is set to
@@ -154,33 +148,29 @@ class FilenameTemplateTester(unittest.TestCase):
         """
         test_value = list("a list from a string")
         self.kwargs["path"] = test_value
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             FilenameTemplate(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'FilenameTemplate.path attribute should be string not list'
-        )
 
     def test_path_attribute_is_not_string(self):
         """testing if a TypeError will be raised when the path attribute is not
         set to a string
         """
         test_value = list("a list from a string")
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.filename_template.path = test_value
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'FilenameTemplate.path attribute should be string not list'
-        )
 
     def test_filename_argument_is_skipped(self):
         """testing if nothing happens when the filename argument is skipped
         """
         self.kwargs.pop("filename")
         ft = FilenameTemplate(**self.kwargs)
-        self.assertTrue(isinstance(ft, FilenameTemplate))
+        assert isinstance(ft, FilenameTemplate)
 
     def test_filename_argument_skipped_filename_attribute_is_empty_string(self):
         """testing if the filename attribute is an empty string if the
@@ -188,7 +178,7 @@ class FilenameTemplateTester(unittest.TestCase):
         """
         self.kwargs.pop("filename")
         ft = FilenameTemplate(**self.kwargs)
-        self.assertEqual(ft.filename, "")
+        assert ft.filename == ""
 
     def test_filename_argument_is_None_filename_attribute_is_empty_string(self):
         """testing if the filename attribute is an empty string when the
@@ -196,7 +186,7 @@ class FilenameTemplateTester(unittest.TestCase):
         """
         self.kwargs["filename"] = None
         ft = FilenameTemplate(**self.kwargs)
-        self.assertEqual(ft.filename, "")
+        assert ft.filename == ""
 
     def test_filename_argument_is_empty_string(self):
         """testing if nothing happens when the filename argument is empty
@@ -204,7 +194,7 @@ class FilenameTemplateTester(unittest.TestCase):
         """
         self.kwargs["filename"] = ""
         ft = FilenameTemplate(**self.kwargs)
-        self.assertTrue(isinstance(ft, FilenameTemplate))
+        assert isinstance(ft, FilenameTemplate)
 
     def test_filename_attribute_is_empty_string(self):
         """testing if nothing happens when the filename attribute is set to
@@ -218,26 +208,22 @@ class FilenameTemplateTester(unittest.TestCase):
         """
         test_value = list("a list from a string")
         self.kwargs["filename"] = test_value
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             FilenameTemplate(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'FilenameTemplate.filename attribute should be string not list'
-        )
 
     def test_filename_attribute_is_not_string(self):
         """testing if the given value converted to string for the filename
         attribute
         """
         test_value = list("a list from a string")
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.filename_template.filename = test_value
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'FilenameTemplate.filename attribute should be string not list'
-        )
 
     def test_equality(self):
         """testing the equality of FilenameTemplate objects
@@ -256,11 +242,11 @@ class FilenameTemplateTester(unittest.TestCase):
         self.kwargs["filename"] = "different filename"
         ft4 = FilenameTemplate(**self.kwargs)
 
-        self.assertTrue(self.filename_template == ft1)
-        self.assertFalse(self.filename_template == new_entity)
-        self.assertFalse(ft1 == ft2)
-        self.assertFalse(ft2 == ft3)
-        self.assertFalse(ft3 == ft4)
+        assert self.filename_template == ft1
+        assert not self.filename_template == new_entity
+        assert not ft1 == ft2
+        assert not ft2 == ft3
+        assert not ft3 == ft4
 
     def test_inequality(self):
         """testing the inequality of FilenameTemplate objects
@@ -279,8 +265,8 @@ class FilenameTemplateTester(unittest.TestCase):
         self.kwargs["filename"] = "different filename"
         ft4 = FilenameTemplate(**self.kwargs)
 
-        self.assertFalse(self.filename_template != ft1)
-        self.assertTrue(self.filename_template != new_entity)
-        self.assertTrue(ft1 != ft2)
-        self.assertTrue(ft2 != ft3)
-        self.assertTrue(ft3 != ft4)
+        assert not self.filename_template != ft1
+        assert self.filename_template != new_entity
+        assert ft1 != ft2
+        assert ft2 != ft3
+        assert ft3 != ft4

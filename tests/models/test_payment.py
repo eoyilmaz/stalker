@@ -17,6 +17,7 @@
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
+import pytest
 
 
 class PaymentTestCase(unittest.TestCase):
@@ -27,7 +28,7 @@ class PaymentTestCase(unittest.TestCase):
         """run once
         """
         super(PaymentTestCase, self).setUp()
-        from stalker import db, Status
+        from stalker import Status
 
         self.status_new = Status(name='Mew', code='NEW')
         self.status_wfd = Status(name='Waiting For Dependency', code='WFD')
@@ -162,33 +163,29 @@ class PaymentTestCase(unittest.TestCase):
             amount=1000,
             unit='TRY'
         )
-        self.assertIsInstance(payment, Payment)
+        assert isinstance(payment, Payment)
 
     def test_invoice_argument_is_skipped(self):
         """testing if a TypeError will be raised when the invoice argument is
         skipped
         """
         from stalker import Payment
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             p = Payment(amount=1499, unit='TRY')
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Payment.invoice should be an Invoice instance, not NoneType'
-        )
 
     def test_invoice_argument_is_None(self):
         """testing if a TypeError will be raised when the invoice argument is
         None
         """
         from stalker import Payment
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             p = Payment(invoice=None, amount=1499, unit='TRY')
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Payment.invoice should be an Invoice instance, not NoneType'
-        )
 
     def test_invoice_attribute_is_None(self):
         """testing if a TypeError will be raised when the invoice attribute is
@@ -197,30 +194,26 @@ class PaymentTestCase(unittest.TestCase):
         from stalker import Payment
         p = Payment(invoice=self.test_invoice, amount=1499, unit='TRY')
 
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             p.invoice = None
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Payment.invoice should be an Invoice instance, not NoneType'
-        )
 
     def test_invoice_argument_is_not_an_invoice_instance(self):
         """testing if a TypeError will be raised when the invoice argument is
         not an Invoice instance
         """
         from stalker import Payment
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             p = Payment(
                 invoice='not an invoice instance',
                 amount=1499,
                 unit='TRY'
             )
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Payment.invoice should be an Invoice instance, not str'
-        )
 
     def test_invoice_attribute_is_set_to_a_value_other_than_an_invoice_instance(self):
         """testing if a TypeError will be raised when the invoice attribute is
@@ -229,13 +222,11 @@ class PaymentTestCase(unittest.TestCase):
         from stalker import Payment
         p = Payment(invoice=self.test_invoice, amount=1499, unit='TRY')
 
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             p.invoice = 'not an invoice instance'
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Payment.invoice should be an Invoice instance, not str'
-        )
 
     def test_invoice_argument_is_working_properly(self):
         """testing if the invoice argument value is correctly passed to the
@@ -243,7 +234,7 @@ class PaymentTestCase(unittest.TestCase):
         """
         from stalker import Payment
         p = Payment(invoice=self.test_invoice, amount=1499, unit='TRY')
-        self.assertEqual(p.invoice, self.test_invoice)
+        assert p.invoice == self.test_invoice
 
     def test_invoice_attribute_is_working_properly(self):
         """testing if the invoice attribute value can be correctly changed
@@ -256,6 +247,6 @@ class PaymentTestCase(unittest.TestCase):
             amount=2500,
             unit='TRY'
         )
-        self.assertNotEqual(p.invoice, new_invoice)
+        assert p.invoice != new_invoice
         p.invoice = new_invoice
-        self.assertEqual(p.invoice, new_invoice)
+        assert p.invoice == new_invoice

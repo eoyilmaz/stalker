@@ -20,6 +20,7 @@ import unittest
 
 import datetime
 
+import pytest
 import pytz
 from stalker.exceptions import CircularDependencyError
 from stalker.testing import UnitTestDBBase
@@ -181,7 +182,7 @@ class TaskTester(unittest.TestCase):
         """testing if the __auto_name__ class attribute is set to False for
         Task class
         """
-        self.assertFalse(Task.__auto_name__)
+        assert Task.__auto_name__ is False
 
     def test_priority_argument_is_skipped_defaults_to_task_priority(self):
         """testing if skipping the priority argument will default the priority
@@ -191,7 +192,7 @@ class TaskTester(unittest.TestCase):
         kwargs = copy.copy(self.kwargs)
         kwargs.pop("priority")
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.priority, defaults.task_priority)
+        assert new_task.priority == defaults.task_priority
 
     def test_priority_argument_is_given_as_None_will_default_to_task_priority(self):
         """testing if the priority argument is given as None will default the
@@ -201,7 +202,7 @@ class TaskTester(unittest.TestCase):
         kwargs = copy.copy(self.kwargs)
         kwargs["priority"] = None
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.priority, defaults.task_priority)
+        assert new_task.priority == defaults.task_priority
 
     def test_priority_attribute_is_given_as_None_will_default_to_task_priority(self):
         """testing if the priority attribute is given as None will default the
@@ -210,7 +211,7 @@ class TaskTester(unittest.TestCase):
         from stalker import defaults
         new_task = Task(**self.kwargs)
         new_task.priority = None
-        self.assertEqual(new_task.priority, defaults.task_priority)
+        assert new_task.priority == defaults.task_priority
 
     def test_priority_argument_any_given_other_value_then_integer_will_default_to_task_priority(self):
         """testing if a TypeError will be raised if the priority argument value
@@ -218,14 +219,12 @@ class TaskTester(unittest.TestCase):
         """
         kwargs = copy.copy(self.kwargs)
         kwargs["priority"] = "a324"
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Task(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Task.priority should be an integer value between 0 and 1000, not '
-            'str'
-        )
+        assert str(cm.value) == \
+            'Task.priority should be an integer value between 0 and 1000, ' \
+            'not str'
 
     def test_priority_attribute_is_not_an_integer(self):
         """testing if any other value then an positive integer for priority
@@ -233,14 +232,12 @@ class TaskTester(unittest.TestCase):
         """
         test_value = "sdfsdwe324"
         new_task = Task(**self.kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             new_task.priority = test_value
 
-        self.assertEqual(
-            str(cm.exception),
-            'Task.priority should be an integer value between 0 and 1000, not '
-            'str'
-        )
+        assert str(cm.value) == \
+            'Task.priority should be an integer value between 0 and 1000, ' \
+            'not str'
 
     def test_priority_argument_is_negative(self):
         """testing if the priority argument is given as a negative value will
@@ -249,7 +246,7 @@ class TaskTester(unittest.TestCase):
         kwargs = copy.copy(self.kwargs)
         kwargs["priority"] = -1
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.priority, 0)
+        assert new_task.priority == 0
 
     def test_priority_attribute_is_negative(self):
         """testing if the priority attribute is given as a negative value will
@@ -257,7 +254,7 @@ class TaskTester(unittest.TestCase):
         """
         new_task = Task(**self.kwargs)
         new_task.priority = -1
-        self.assertEqual(new_task.priority, 0)
+        assert new_task.priority == 0
 
     def test_priority_argument_is_too_big(self):
         """testing if the priority argument is given bigger then 1000 will
@@ -266,7 +263,7 @@ class TaskTester(unittest.TestCase):
         kwargs = copy.copy(self.kwargs)
         kwargs["priority"] = 1001
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.priority, 1000)
+        assert new_task.priority == 1000
 
     def test_priority_attribute_is_too_big(self):
         """testing if the priority attribute is set to a value bigger than 1000
@@ -274,7 +271,7 @@ class TaskTester(unittest.TestCase):
         """
         new_task = Task(**self.kwargs)
         new_task.priority = 1001
-        self.assertEqual(new_task.priority, 1000)
+        assert new_task.priority == 1000
 
     def test_priority_argument_is_float(self):
         """testing if float numbers for priority argument will be converted to
@@ -285,7 +282,7 @@ class TaskTester(unittest.TestCase):
         for test_value in test_values:
             kwargs["priority"] = test_value
             new_task = Task(**kwargs)
-            self.assertEqual(new_task.priority, int(test_value))
+            assert new_task.priority == int(test_value)
 
     def test_priority_attribute_is_float(self):
         """testing if float numbers for priority attribute will be converted to
@@ -295,7 +292,7 @@ class TaskTester(unittest.TestCase):
         test_values = [500.1, 334.23]
         for test_value in test_values:
             new_task.priority = test_value
-            self.assertEqual(new_task.priority, int(test_value))
+            assert new_task.priority == int(test_value)
 
     def test_priority_attribute_is_working_properly(self):
         """testing if the priority attribute is working properly
@@ -303,7 +300,7 @@ class TaskTester(unittest.TestCase):
         new_task = Task(**self.kwargs)
         test_value = 234
         new_task.priority = test_value
-        self.assertEqual(new_task.priority, test_value)
+        assert new_task.priority == test_value
 
     def test_resources_argument_is_skipped(self):
         """testing if the resources attribute will be an empty list when the
@@ -312,7 +309,7 @@ class TaskTester(unittest.TestCase):
         kwargs = copy.copy(self.kwargs)
         kwargs.pop("resources")
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.resources, [])
+        assert new_task.resources == []
 
     def test_resources_argument_is_None(self):
         """testing if the resources attribute will be an empty list when the
@@ -321,20 +318,18 @@ class TaskTester(unittest.TestCase):
         kwargs = copy.copy(self.kwargs)
         kwargs["resources"] = None
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.resources, [])
+        assert new_task.resources == []
 
     def test_resources_attribute_is_None(self):
         """testing if a TypeError will be raised whe the resources attribute
         is set to None
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             new_task.resources = None
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: None is not list-like'
-        )
 
     def test_resources_argument_is_not_list(self):
         """testing if a TypeError will be raised when the resources argument is
@@ -342,26 +337,22 @@ class TaskTester(unittest.TestCase):
         """
         kwargs = copy.copy(self.kwargs)
         kwargs["resources"] = "a resource"
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Task(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: str is not list-like'
-        )
 
     def test_resources_attribute_is_not_list(self):
         """testing if a TypeError will be raised when the resources attribute
         is set to any other value then a list
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             new_task.resources = "a resource"
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: str is not list-like'
-        )
 
     def test_resources_argument_is_set_to_a_list_of_other_values_then_User(self):
         """testing if a TypeError will be raised when the resources argument is
@@ -370,29 +361,25 @@ class TaskTester(unittest.TestCase):
         kwargs = copy.copy(self.kwargs)
         kwargs["resources"] = ["a", "list", "of", "resources",
                                self.test_user1]
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Task(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Task.resources should be a list of stalker.models.auth.User '
+        assert str(cm.value) == \
+            'Task.resources should be a list of stalker.models.auth.User ' \
             'instances, not str'
-        )
 
     def test_resources_attribute_is_set_to_a_list_of_other_values_then_User(self):
         """testing if a TypeError will be raised when the resources attribute
         is set to a list of other values then a User
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             new_task.resources = \
                 ["a", "list", "of", "resources", self.test_user1]
 
-        self.assertEqual(
-            str(cm.exception),
-            'Task.resources should be a list of stalker.models.auth.User '
+        assert str(cm.value) == \
+            'Task.resources should be a list of stalker.models.auth.User ' \
             'instances, not str'
-        )
 
     def test_resources_attribute_is_working_properly(self):
         """testing if the resources attribute is working properly
@@ -400,7 +387,7 @@ class TaskTester(unittest.TestCase):
         new_task = Task(**self.kwargs)
         test_value = [self.test_user1]
         new_task.resources = test_value
-        self.assertEqual(new_task.resources, test_value)
+        assert new_task.resources == test_value
 
     def test_resources_argument_backreferences_to_User(self):
         """testing if the User instances passed with the resources argument
@@ -428,16 +415,16 @@ class TaskTester(unittest.TestCase):
         new_task = Task(**kwargs)
 
         # now check if the user has the task in its tasks list
-        self.assertTrue(new_task in new_user1.tasks)
+        assert new_task in new_user1.tasks
 
         # now change the resources list
         new_task.resources = [new_user2]
-        self.assertTrue(new_task in new_user2.tasks)
-        self.assertFalse(new_task in new_user1.tasks)
+        assert new_task in new_user2.tasks
+        assert new_task not in new_user1.tasks
 
         # now append the new resource
         new_task.resources.append(new_user1)
-        self.assertTrue(new_task in new_user1.tasks)
+        assert new_task in new_user1.tasks
 
         # clean up test
         new_task.resources = []
@@ -462,7 +449,7 @@ class TaskTester(unittest.TestCase):
         new_task.resources = [new_user]
 
         # now check if the user has the task in its tasks list
-        self.assertTrue(new_task in new_user.tasks)
+        assert new_task in new_user.tasks
 
     def test_resources_attribute_will_clear_itself_from_the_previous_Users(self):
         """testing if the resources attribute is updated will clear itself from
@@ -505,19 +492,19 @@ class TaskTester(unittest.TestCase):
         new_task = Task(**kwargs)
 
         # now check if the user has the task in its tasks list
-        self.assertTrue(new_task in new_user1.tasks)
-        self.assertTrue(new_task in new_user2.tasks)
+        assert new_task in new_user1.tasks
+        assert new_task in new_user2.tasks
 
         # now update the resources list
         new_task.resources = [new_user3, new_user4]
 
         # now check if the new resources has the task in their tasks attribute
-        self.assertTrue(new_task in new_user3.tasks)
-        self.assertTrue(new_task in new_user4.tasks)
+        assert new_task in new_user3.tasks
+        assert new_task in new_user4.tasks
 
         # and if it is not in the previous users tasks
-        self.assertFalse(new_task in new_user1.tasks)
-        self.assertFalse(new_task in new_user2.tasks)
+        assert new_task not in new_user1.tasks
+        assert new_task not in new_user2.tasks
 
     def test_watchers_argument_is_skipped(self):
         """testing if the watchers attribute will be an empty list when the
@@ -526,7 +513,7 @@ class TaskTester(unittest.TestCase):
         kwargs = copy.copy(self.kwargs)
         kwargs.pop("watchers")
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.watchers, [])
+        assert new_task.watchers == []
 
     def test_watchers_argument_is_None(self):
         """testing if the watchers attribute will be an empty list when the
@@ -535,20 +522,18 @@ class TaskTester(unittest.TestCase):
         kwargs = copy.copy(self.kwargs)
         kwargs["watchers"] = None
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.watchers, [])
+        assert new_task.watchers == []
 
     def test_watchers_attribute_is_None(self):
         """testing if a TypeError will be raised whe the watchers attribute
         is set to None
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             new_task.watchers = None
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: None is not list-like'
-        )
 
     def test_watchers_argument_is_not_list(self):
         """testing if a TypeError will be raised when the watchers argument is
@@ -556,26 +541,22 @@ class TaskTester(unittest.TestCase):
         """
         kwargs = copy.copy(self.kwargs)
         kwargs["watchers"] = "a resource"
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Task(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: str is not list-like'
-        )
 
     def test_watchers_attribute_is_not_list(self):
         """testing if a TypeError will be raised when the watchers attribute
         is set to any other value then a list
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             new_task.watchers = "a resource"
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: str is not list-like'
-        )
 
     def test_watchers_argument_is_set_to_a_list_of_other_values_then_User(self):
         """testing if a TypeError will be raised when the watchers argument is
@@ -584,14 +565,12 @@ class TaskTester(unittest.TestCase):
         kwargs = copy.copy(self.kwargs)
         kwargs["watchers"] = ["a", "list", "of", "watchers",
                               self.test_user1]
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Task(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Task.watchers should be a list of stalker.models.auth.User '
+        assert str(cm.value) == \
+            'Task.watchers should be a list of stalker.models.auth.User ' \
             'instances not str'
-        )
 
     def test_watchers_attribute_is_set_to_a_list_of_other_values_then_User(self):
         """testing if a TypeError will be raised when the watchers attribute
@@ -601,7 +580,7 @@ class TaskTester(unittest.TestCase):
 
         test_values = ["a", "list", "of", "watchers", self.test_user1]
 
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             new_task.watchers = test_values
 
     def test_watchers_attribute_is_working_properly(self):
@@ -612,7 +591,7 @@ class TaskTester(unittest.TestCase):
         test_value = [self.test_user1]
 
         new_task.watchers = test_value
-        self.assertEqual(new_task.watchers, test_value)
+        assert new_task.watchers == test_value
 
     def test_watchers_argument_back_references_to_User(self):
         """testing if the User instances passed with the watchers argument
@@ -640,16 +619,16 @@ class TaskTester(unittest.TestCase):
         new_task = Task(**kwargs)
 
         # now check if the user has the task in its tasks list
-        self.assertTrue(new_task in new_user1.watching)
+        assert new_task in new_user1.watching
 
         # now change the watchers list
         new_task.watchers = [new_user2]
-        self.assertTrue(new_task in new_user2.watching)
-        self.assertFalse(new_task in new_user1.watching)
+        assert new_task in new_user2.watching
+        assert new_task not in new_user1.watching
 
         # now append the new user
         new_task.watchers.append(new_user1)
-        self.assertTrue(new_task in new_user1.watching)
+        assert new_task in new_user1.watching
 
     def test_watchers_attribute_back_references_to_User(self):
         """testing if the User instances passed with the watchers argument will
@@ -670,7 +649,7 @@ class TaskTester(unittest.TestCase):
         new_task.watchers = [new_user]
 
         # now check if the user has the task in its watching list
-        self.assertTrue(new_task in new_user.watching)
+        assert new_task in new_user.watching
 
     def test_watchers_attribute_will_clear_itself_from_the_previous_Users(self):
         """testing if the watchers attribute is updated will clear itself from
@@ -713,20 +692,20 @@ class TaskTester(unittest.TestCase):
         new_task = Task(**kwargs)
 
         # now check if the user has the task in its watching list
-        self.assertTrue(new_task in new_user1.watching)
-        self.assertTrue(new_task in new_user2.watching)
+        assert new_task in new_user1.watching
+        assert new_task in new_user2.watching
 
         # now update the watchers list
         new_task.watchers = [new_user3, new_user4]
 
         # now check if the new watchers has the task in their watching
         # attribute
-        self.assertTrue(new_task in new_user3.watching)
-        self.assertTrue(new_task in new_user4.watching)
+        assert new_task in new_user3.watching
+        assert new_task in new_user4.watching
 
         # and if it is not in the previous users watching list
-        self.assertFalse(new_task in new_user1.watching)
-        self.assertFalse(new_task in new_user2.watching)
+        assert new_task not in new_user1.watching
+        assert new_task not in new_user2.watching
 
     def test_depends_argument_is_skipped_depends_attribute_is_empty_list(self):
         """testing if the depends attribute is an empty list when the depends
@@ -735,7 +714,7 @@ class TaskTester(unittest.TestCase):
         kwargs = copy.copy(self.kwargs)
         kwargs.pop("depends")
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.depends, [])
+        assert new_task.depends == []
 
     def test_depends_argument_is_none_depends_attribute_is_empty_list(self):
         """testing if the depends attribute is an empty list when the depends
@@ -744,7 +723,7 @@ class TaskTester(unittest.TestCase):
         kwargs = copy.copy(self.kwargs)
         kwargs["depends"] = None
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.depends, [])
+        assert new_task.depends == []
 
     def test_depends_argument_is_not_a_list(self):
         """testing if a TypeError will be raised when the depends argument is
@@ -752,13 +731,10 @@ class TaskTester(unittest.TestCase):
         """
         kwargs = copy.copy(self.kwargs)
         kwargs["depends"] = self.test_dependent_task1
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Task(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            "'Task' object is not iterable"
-        )
+        assert str(cm.value) == "'Task' object is not iterable"
 
     def test_depends_attribute_is_not_a_list(self):
         """testing if a TypeError will be raised when the depends attribute is
@@ -766,13 +742,10 @@ class TaskTester(unittest.TestCase):
         """
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             new_task.depends = self.test_dependent_task1
 
-        self.assertEqual(
-            str(cm.exception),
-            "'Task' object is not iterable"
-        )
+        assert str(cm.value) == "'Task' object is not iterable"
 
     def test_depends_argument_is_a_list_of_other_objects_than_a_Task(self):
         """testing if a AttributeError will be raised when the depends argument is
@@ -781,14 +754,12 @@ class TaskTester(unittest.TestCase):
         test_value = ["a", "dependent", "task", 1, 1.2]
         kwargs = copy.copy(self.kwargs)
         kwargs["depends"] = test_value
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Task(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'TaskDependency.depends_to can should be and instance of '
+        assert str(cm.value) == \
+            'TaskDependency.depends_to can should be and instance of ' \
             'stalker.models.task.Task, not str'
-        )
 
     def test_depends_attribute_is_a_list_of_other_objects_than_a_Task(self):
         """testing if a AttributeError will be raised when the depends
@@ -797,14 +768,12 @@ class TaskTester(unittest.TestCase):
         test_value = ["a", "dependent", "task", 1, 1.2]
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             new_task.depends = test_value
 
-        self.assertEqual(
-            str(cm.exception),
-            'TaskDependency.depends_to can should be and instance of '
+        assert str(cm.value) == \
+            'TaskDependency.depends_to can should be and instance of ' \
             'stalker.models.task.Task, not str'
-        )
 
     def test_depends_attribute_doesnt_allow_simple_cyclic_dependencies(self):
         """testing if a CircularDependencyError will be raised when the depends
@@ -822,14 +791,12 @@ class TaskTester(unittest.TestCase):
 
         task_b.depends = [task_a]
 
-        with self.assertRaises(CircularDependencyError) as cm:
+        with pytest.raises(CircularDependencyError) as cm:
             task_a.depends = [task_b]
 
-        self.assertEqual(
-            str(cm.exception),
-            '<Modeling (Task)> (Task) and <Modeling (Task)> (Task) creates a '
-            'circular dependency in their "depends" attribute'
-        )
+        assert str(cm.value) == \
+            '<Modeling (Task)> (Task) and <Modeling (Task)> (Task) creates ' \
+            'a circular dependency in their "depends" attribute'
 
     def test_depends_attribute_doesnt_allow_cyclic_dependencies(self):
         """testing if a CircularDependencyError will be raised when the depends
@@ -855,14 +822,12 @@ class TaskTester(unittest.TestCase):
         task_b.depends = [task_a]
         task_c.depends = [task_b]
 
-        with self.assertRaises(CircularDependencyError) as cm:
+        with pytest.raises(CircularDependencyError) as cm:
             task_a.depends = [task_c]
 
-        self.assertEqual(
-            str(cm.exception),
-            '<taskC (Task)> (Task) and <taskA (Task)> (Task) creates a '
+        assert str(cm.value) == \
+            '<taskC (Task)> (Task) and <taskA (Task)> (Task) creates a ' \
             'circular dependency in their "depends" attribute'
-        )
 
     def test_depends_attribute_doesnt_allow_more_deeper_cyclic_dependencies(self):
         """testing if a CircularDependencyError will be raised when the depends
@@ -893,14 +858,12 @@ class TaskTester(unittest.TestCase):
         task_c.depends = [task_b]
         task_d.depends = [task_c]
 
-        with self.assertRaises(CircularDependencyError) as cm:
+        with pytest.raises(CircularDependencyError) as cm:
             task_a.depends = [task_d]
 
-        self.assertEqual(
-            str(cm.exception),
-            '<taskD (Task)> (Task) and <taskA (Task)> (Task) creates a '
+        assert str(cm.value) == \
+            '<taskD (Task)> (Task) and <taskA (Task)> (Task) creates a ' \
             'circular dependency in their "depends" attribute'
-        )
 
     def test_depends_argument_cyclic_dependency_bug_2(self):
         """testing if a CircularDependencyError will be raised in the following
@@ -924,13 +887,11 @@ class TaskTester(unittest.TestCase):
         kwargs['depends'] = [t3]
 
         # the following should generate the CircularDependencyError
-        with self.assertRaises(CircularDependencyError) as cm:
+        with pytest.raises(CircularDependencyError) as cm:
             Task(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'One of the parents of <T2 (Task)> is depending to <T3 (Task)>'
-        )
 
     def test_depends_argument_doesnt_allow_one_of_the_parents_of_the_task(self):
         """testing if a CircularDependencyError will be raised when the depends
@@ -950,26 +911,22 @@ class TaskTester(unittest.TestCase):
         task_b.parent = task_a
         task_a.parent = task_c
 
-        self.assertTrue(task_b in task_a.children)
-        self.assertTrue(task_a in task_c.children)
+        assert task_b in task_a.children
+        assert task_a in task_c.children
 
-        with self.assertRaises(CircularDependencyError) as cm:
+        with pytest.raises(CircularDependencyError) as cm:
             task_b.depends = [task_a]
 
-        self.assertEqual(
-            str(cm.exception),
-            '<Modeling (Task)> (Task) and <Modeling (Task)> (Task) creates a '
-            'circular dependency in their "children" attribute'
-        )
+        assert str(cm.value) == \
+            '<Modeling (Task)> (Task) and <Modeling (Task)> (Task) creates ' \
+            'a circular dependency in their "children" attribute'
 
-        with self.assertRaises(CircularDependencyError) as cm:
+        with pytest.raises(CircularDependencyError) as cm:
             task_b.depends = [task_c]
 
-        self.assertEqual(
-            str(cm.exception),
-            '<Modeling (Task)> (Task) and <Modeling (Task)> (Task) creates a '
-            'circular dependency in their "children" attribute'
-        )
+        assert str(cm.value) == \
+            '<Modeling (Task)> (Task) and <Modeling (Task)> (Task) creates ' \
+            'a circular dependency in their "children" attribute'
 
     def test_depends_argument_is_working_properly(self):
         """testing if the depends argument is working properly
@@ -982,9 +939,9 @@ class TaskTester(unittest.TestCase):
         kwargs['depends'] = [task_a, task_b]
         task_c = Task(**kwargs)
 
-        self.assertTrue(task_a in task_c.depends)
-        self.assertTrue(task_b in task_c.depends)
-        self.assertEqual(len(task_c.depends), 2)
+        assert task_a in task_c.depends
+        assert task_b in task_c.depends
+        assert len(task_c.depends) == 2
 
     def test_depends_attribute_is_working_properly(self):
         """testing if the depends attribute is working properly
@@ -999,8 +956,8 @@ class TaskTester(unittest.TestCase):
         task_a.depends = [task_b]
         task_a.depends.append(task_c)
 
-        self.assertTrue(task_b in task_a.depends)
-        self.assertTrue(task_c in task_a.depends)
+        assert task_b in task_a.depends
+        assert task_c in task_a.depends
 
     def test_percent_complete_attribute_is_read_only(self):
         """testing if the percent_complete attribute is a read-only attribute
@@ -1008,13 +965,10 @@ class TaskTester(unittest.TestCase):
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
 
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             new_task.percent_complete = 32
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_percent_complete_attribute_is_working_properly_for_a_duration_based_leaf_task_1(self):
         """testing if the percent_complete attribute is working properly for a
@@ -1038,7 +992,7 @@ class TaskTester(unittest.TestCase):
         new_task.computed_start = now - td(days=2)
         new_task.computed_end = now - td(days=1)
 
-        self.assertEqual(new_task.percent_complete, 100)
+        assert new_task.percent_complete == 100
 
     def test_percent_complete_attribute_is_working_properly_for_a_duration_based_leaf_task_2(self):
         """testing if the percent_complete attribute is working properly for a
@@ -1061,7 +1015,7 @@ class TaskTester(unittest.TestCase):
         new_task.start = now - td(days=1, hours=1)
         new_task.end = now - td(hours=1)
 
-        self.assertEqual(new_task.percent_complete, 100)
+        assert new_task.percent_complete == 100
 
     def test_percent_complete_attribute_is_working_properly_for_a_duration_based_leaf_task_3(self):
         """testing if the percent_complete attribute is working properly for a
@@ -1088,11 +1042,7 @@ class TaskTester(unittest.TestCase):
         # due to the timing resolution we can not know it exactly
         # and I don't want to patch datetime.datetime.now(pytz.utc)
         # this is a very simple test
-        self.assertAlmostEqual(
-            new_task.percent_complete,
-            50,
-            delta=5
-        )
+        assert abs(new_task.percent_complete - 50 < 5)
 
     def test_percent_complete_attribute_is_working_properly_for_a_duration_based_leaf_task_4(self):
         """testing if the percent_complete attribute is working properly for a
@@ -1115,11 +1065,7 @@ class TaskTester(unittest.TestCase):
         new_task.computed_start = now
         new_task.computed_end = now + td(days=1)
 
-        self.assertAlmostEqual(
-            new_task.percent_complete,
-            0,
-            delta=5
-        )
+        assert new_task.percent_complete < 5
 
     def test_percent_complete_attribute_is_working_properly_for_a_duration_based_leaf_task_5(self):
         """testing if the percent_complete attribute is working properly for a
@@ -1142,7 +1088,7 @@ class TaskTester(unittest.TestCase):
         new_task.computed_start = now + td(days=1)
         new_task.computed_end = now + td(days=2)
 
-        self.assertEqual(new_task.percent_complete, 0)
+        assert new_task.percent_complete == 0
 
     def test_is_milestone_argument_is_skipped(self):
         """testing if the default value of the is_milestone attribute is going
@@ -1151,7 +1097,7 @@ class TaskTester(unittest.TestCase):
         kwargs = copy.copy(self.kwargs)
         kwargs.pop("is_milestone")
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.is_milestone, False)
+        assert new_task.is_milestone is False
 
     def test_is_milestone_argument_is_None(self):
         """testing if the is_milestone attribute will be set to False when the
@@ -1160,7 +1106,7 @@ class TaskTester(unittest.TestCase):
         kwargs = copy.copy(self.kwargs)
         kwargs["is_milestone"] = None
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.is_milestone, False)
+        assert new_task.is_milestone is False
 
     def test_is_milestone_attribute_is_None(self):
         """testing if the is_milestone attribute will be False when set to None
@@ -1169,7 +1115,7 @@ class TaskTester(unittest.TestCase):
         new_task = Task(**kwargs)
 
         new_task.is_milestone = None
-        self.assertEqual(new_task.is_milestone, False)
+        assert new_task.is_milestone is False
 
     def test_is_milestone_argument_is_not_a_bool(self):
         """testing if a TypeError will be raised when the is_milestone argument
@@ -1178,13 +1124,11 @@ class TaskTester(unittest.TestCase):
         kwargs = copy.copy(self.kwargs)
         kwargs["name"] = "test" + str(0)
         kwargs["is_milestone"] = "A string"
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Task(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Task.is_milestone should be a bool value (True or False), not str'
-        )
 
     def test_is_milestone_attribute_is_not_a_bool(self):
         """testing if a TypeError will be raised when the is_milestone
@@ -1194,13 +1138,11 @@ class TaskTester(unittest.TestCase):
         new_task = Task(**kwargs)
 
         test_value = "A string"
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             new_task.is_milestone = test_value
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Task.is_milestone should be a bool value (True or False), not str'
-        )
 
     def test_is_milestone_argument_makes_the_resources_list_an_empty_list(self):
         """testing if the resources will be an empty list when the is_milestone
@@ -1211,7 +1153,7 @@ class TaskTester(unittest.TestCase):
         kwargs["resources"] = [self.test_user1, self.test_user2]
         new_task = Task(**kwargs)
 
-        self.assertEqual(new_task.resources, [])
+        assert new_task.resources == []
 
     def test_is_milestone_attribute_makes_the_resource_list_an_empty_list(self):
         """testing if the resources will be an empty list when the is_milestone
@@ -1222,47 +1164,41 @@ class TaskTester(unittest.TestCase):
 
         new_task.resources = [self.test_user1, self.test_user2]
         new_task.is_milestone = True
-        self.assertEqual(new_task.resources, [])
+        assert new_task.resources == []
 
     def test_time_logs_attribute_is_None(self):
         """testing if a TypeError will be raised when the time_logs attribute
         is set to None
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             new_task.time_logs = None
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: None is not list-like'
-        )
 
     def test_time_logs_attribute_is_not_a_list(self):
         """testing if a TypeError will be raised when the time_logs attribute
         is not set to a list
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             new_task.time_logs = 123
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: int is not list-like'
-        )
 
     def test_time_logs_attribute_is_not_a_list_of_TimeLog_instances(self):
         """testing if a TypeError will be raised when the time_logs attribute
         is not a list of TimeLog instances
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             new_task.time_logs = [1, "1", 1.2, "a time_log"]
 
-        self.assertEqual(
-            str(cm.exception),
-            'Task.time_logs should be all stalker.models.task.TimeLog '
+        assert str(cm.value) == \
+            'Task.time_logs should be all stalker.models.task.TimeLog ' \
             'instances, not int'
-        )
 
     def test_schedule_seconds_is_working_properly_for_an_effort_based_task_no_studio(self):
         """testing if schedule_seconds attribute is working properly for a
@@ -1276,46 +1212,39 @@ class TaskTester(unittest.TestCase):
         kwargs['schedule_unit'] = 'h'
         new_task = Task(**kwargs)
 
-        self.assertEqual(new_task.schedule_seconds, 10 * 3600)
+        assert new_task.schedule_seconds == 10 * 3600
 
         kwargs['schedule_timing'] = 23
         kwargs['schedule_unit'] = 'd'
         new_task = Task(**kwargs)
 
         from stalker import defaults
-        self.assertEqual(
-            new_task.schedule_seconds,
+        assert new_task.schedule_seconds == \
             23 * defaults.daily_working_hours * 3600
-        )
 
         kwargs['schedule_timing'] = 2
         kwargs['schedule_unit'] = 'w'
         new_task = Task(**kwargs)
 
-        self.assertEqual(
-            new_task.schedule_seconds,
+        assert new_task.schedule_seconds == \
             2 * defaults.weekly_working_hours * 3600
-        )
 
         kwargs['schedule_timing'] = 2.5
         kwargs['schedule_unit'] = 'm'
         new_task = Task(**kwargs)
 
-        self.assertEqual(
-            new_task.schedule_seconds,
+        assert new_task.schedule_seconds == \
             2.5 * 4 * defaults.weekly_working_hours * 3600
-        )
 
         kwargs['schedule_timing'] = 3.1
         kwargs['schedule_unit'] = 'y'
         new_task = Task(**kwargs)
 
-        self.assertAlmostEqual(
-            new_task.schedule_seconds,
-            3.1 * defaults.yearly_working_days *
-            defaults.daily_working_hours * 3600,
-            3
-        )
+        assert new_task.schedule_seconds == \
+            pytest.approx(
+                3.1 * defaults.yearly_working_days *
+                defaults.daily_working_hours * 3600
+            )
 
     def test_schedule_seconds_is_working_properly_for_an_effort_based_task_with_studio(self):
         """testing if schedule_seconds attribute is working properly for a
@@ -1338,45 +1267,38 @@ class TaskTester(unittest.TestCase):
         kwargs['schedule_unit'] = 'h'
         new_task = Task(**kwargs)
 
-        self.assertEqual(new_task.schedule_seconds, 10 * 3600)
+        assert new_task.schedule_seconds == 10 * 3600
 
         kwargs['schedule_timing'] = 23
         kwargs['schedule_unit'] = 'd'
         new_task = Task(**kwargs)
 
-        self.assertEqual(
-            new_task.schedule_seconds,
+        assert new_task.schedule_seconds == \
             23 * studio.daily_working_hours * 3600
-        )
 
         kwargs['schedule_timing'] = 2
         kwargs['schedule_unit'] = 'w'
         new_task = Task(**kwargs)
 
-        self.assertEqual(
-            new_task.schedule_seconds,
+        assert new_task.schedule_seconds == \
             2 * studio.weekly_working_hours * 3600
-        )
 
         kwargs['schedule_timing'] = 2.5
         kwargs['schedule_unit'] = 'm'
         new_task = Task(**kwargs)
 
-        self.assertEqual(
-            new_task.schedule_seconds,
+        assert new_task.schedule_seconds == \
             2.5 * 4 * studio.weekly_working_hours * 3600
-        )
 
         kwargs['schedule_timing'] = 3.1
         kwargs['schedule_unit'] = 'y'
         new_task = Task(**kwargs)
 
-        self.assertAlmostEqual(
-            new_task.schedule_seconds,
-            3.1 * studio.yearly_working_days * studio.daily_working_hours *
-            3600,
-            3
-        )
+        assert new_task.schedule_seconds == \
+            pytest.approx(
+                3.1 * studio.yearly_working_days *
+                studio.daily_working_hours * 3600,
+            )
 
     def test_schedule_seconds_is_working_properly_for_a_container_task(self):
         """testing if schedule_seconds attribute is working properly for a
@@ -1392,75 +1314,64 @@ class TaskTester(unittest.TestCase):
         kwargs['schedule_unit'] = 'h'
         new_task = Task(**kwargs)
 
-        self.assertEqual(new_task.schedule_seconds, 10 * 3600)
+        assert new_task.schedule_seconds == 10 * 3600
         new_task.parent = parent_task
-        self.assertEqual(parent_task.schedule_seconds, 10 * 3600)
+        assert parent_task.schedule_seconds == 10 * 3600
 
         kwargs['schedule_timing'] = 23
         kwargs['schedule_unit'] = 'd'
         new_task = Task(**kwargs)
 
         from stalker import defaults
-        self.assertEqual(
-            new_task.schedule_seconds,
+        assert new_task.schedule_seconds == \
             23 * defaults.daily_working_hours * 3600
-        )
         new_task.parent = parent_task
-        self.assertEqual(
-            parent_task.schedule_seconds,
+        assert parent_task.schedule_seconds == \
             10 * 3600 + 23 * defaults.daily_working_hours * 3600
-        )
 
         kwargs['schedule_timing'] = 2
         kwargs['schedule_unit'] = 'w'
         new_task = Task(**kwargs)
+        assert new_task.schedule_seconds == \
+            2 * defaults.weekly_working_hours * 3600
 
-        self.assertEqual(
-            new_task.schedule_seconds,
-            2 * defaults.weekly_working_hours * 3600
-        )
         new_task.parent = parent_task
-        self.assertEqual(
-            parent_task.schedule_seconds,
-            10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
+        assert parent_task.schedule_seconds == \
+            10 * 3600 + 23 * defaults.daily_working_hours * 3600 + \
             2 * defaults.weekly_working_hours * 3600
-        )
 
         kwargs['schedule_timing'] = 2.5
         kwargs['schedule_unit'] = 'm'
         new_task = Task(**kwargs)
 
-        self.assertEqual(
-            new_task.schedule_seconds,
+        assert new_task.schedule_seconds == \
             2.5 * 4 * defaults.weekly_working_hours * 3600
-        )
         new_task.parent = parent_task
-        self.assertEqual(
-            parent_task.schedule_seconds,
-            10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
-            2 * defaults.weekly_working_hours * 3600 +
+        assert parent_task.schedule_seconds == \
+            10 * 3600 + 23 * defaults.daily_working_hours * 3600 + \
+            2 * defaults.weekly_working_hours * 3600 + \
             2.5 * 4 * defaults.weekly_working_hours * 3600
-        )
 
         kwargs['schedule_timing'] = 3.1
         kwargs['schedule_unit'] = 'y'
         new_task = Task(**kwargs)
 
-        self.assertAlmostEqual(
-            new_task.schedule_seconds,
-            3.1 * defaults.yearly_working_days * defaults.daily_working_hours *
-            3600, 3
-        )
+        assert new_task.schedule_seconds == \
+            pytest.approx(
+                3.1 * defaults.yearly_working_days *
+                defaults.daily_working_hours *
+                3600
+            )
+
         new_task.parent = parent_task
-        self.assertAlmostEqual(
-            parent_task.schedule_seconds,
-            10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
-            2 * defaults.weekly_working_hours * 3600 +
-            2.5 * 4 * defaults.weekly_working_hours * 3600 +
-            3.1 * defaults.yearly_working_days *
-            defaults.daily_working_hours * 3600,
-            3
-        )
+        assert parent_task.schedule_seconds == \
+            pytest.approx(
+                10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
+                2 * defaults.weekly_working_hours * 3600 +
+                2.5 * 4 * defaults.weekly_working_hours * 3600 +
+                3.1 * defaults.yearly_working_days *
+                defaults.daily_working_hours * 3600
+            )
 
     def test_schedule_seconds_is_working_properly_for_a_container_task_when_the_child_is_updated(self):
         """testing if schedule_seconds attribute is working properly for a
@@ -1476,87 +1387,79 @@ class TaskTester(unittest.TestCase):
         kwargs['schedule_unit'] = 'h'
         new_task = Task(**kwargs)
 
-        self.assertEqual(new_task.schedule_seconds, 10 * 3600)
+        assert new_task.schedule_seconds == 10 * 3600
         new_task.parent = parent_task
-        self.assertEqual(parent_task.schedule_seconds, 10 * 3600)
+        assert parent_task.schedule_seconds == 10 * 3600
 
         # update the schedule_timing of the child
         new_task.schedule_timing = 5
-        self.assertEqual(new_task.schedule_seconds, 5 * 3600)
+        assert new_task.schedule_seconds == 5 * 3600
         new_task.parent = parent_task
-        self.assertEqual(parent_task.schedule_seconds, 5 * 3600)
+        assert parent_task.schedule_seconds == 5 * 3600
 
         # update it back to 10 hours
         new_task.schedule_timing = 10
-        self.assertEqual(new_task.schedule_seconds, 10 * 3600)
+        assert new_task.schedule_seconds == 10 * 3600
         new_task.parent = parent_task
-        self.assertEqual(parent_task.schedule_seconds, 10 * 3600)
+        assert parent_task.schedule_seconds == 10 * 3600
 
         kwargs['schedule_timing'] = 23
         kwargs['schedule_unit'] = 'd'
         new_task = Task(**kwargs)
 
         from stalker import defaults
-        self.assertEqual(
-            new_task.schedule_seconds,
+        assert new_task.schedule_seconds == \
             23 * defaults.daily_working_hours * 3600
-        )
+
         new_task.parent = parent_task
-        self.assertEqual(
-            parent_task.schedule_seconds,
+        assert parent_task.schedule_seconds == \
             10 * 3600 + 23 * defaults.daily_working_hours * 3600
-        )
 
         kwargs['schedule_timing'] = 2
         kwargs['schedule_unit'] = 'w'
         new_task = Task(**kwargs)
 
-        self.assertEqual(
-            new_task.schedule_seconds,
+        assert new_task.schedule_seconds == \
             2 * defaults.weekly_working_hours * 3600
-        )
+
         new_task.parent = parent_task
-        self.assertEqual(
-            parent_task.schedule_seconds,
-            10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
+        assert parent_task.schedule_seconds == \
+            10 * 3600 + 23 * defaults.daily_working_hours * 3600 + \
             2 * defaults.weekly_working_hours * 3600
-        )
 
         kwargs['schedule_timing'] = 2.5
         kwargs['schedule_unit'] = 'm'
         new_task = Task(**kwargs)
 
-        self.assertEqual(
-            new_task.schedule_seconds,
+        assert new_task.schedule_seconds == \
             2.5 * 4 * defaults.weekly_working_hours * 3600
-        )
+
         new_task.parent = parent_task
-        self.assertEqual(
-            parent_task.schedule_seconds,
-            10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
-            2 * defaults.weekly_working_hours * 3600 +
+        assert parent_task.schedule_seconds == \
+            10 * 3600 + 23 * defaults.daily_working_hours * 3600 + \
+            2 * defaults.weekly_working_hours * 3600 + \
             2.5 * 4 * defaults.weekly_working_hours * 3600
-        )
 
         kwargs['schedule_timing'] = 3.1
         kwargs['schedule_unit'] = 'y'
         new_task = Task(**kwargs)
 
-        self.assertAlmostEqual(
-            new_task.schedule_seconds,
-            3.1 * defaults.yearly_working_days * defaults.daily_working_hours *
-            3600
-        )
+        assert new_task.schedule_seconds == \
+            pytest.approx(
+                3.1 * defaults.yearly_working_days *
+                defaults.daily_working_hours *
+                3600
+            )
+
         new_task.parent = parent_task
-        self.assertAlmostEqual(
-            parent_task.schedule_seconds,
-            10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
-            2 * defaults.weekly_working_hours * 3600 +
-            2.5 * 4 * defaults.weekly_working_hours * 3600 +
-            3.1 * defaults.yearly_working_days *
-            defaults.daily_working_hours * 3600,
-            3
-        )
+        assert parent_task.schedule_seconds == \
+            pytest.approx(
+                10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
+                2 * defaults.weekly_working_hours * 3600 +
+                2.5 * 4 * defaults.weekly_working_hours * 3600 +
+                3.1 * defaults.yearly_working_days *
+                defaults.daily_working_hours * 3600
+            )
 
     def test_schedule_seconds_is_working_properly_for_a_container_task_when_the_child_is_updated_deeper(self):
         """testing if schedule_seconds attribute is working properly for a
@@ -1570,208 +1473,180 @@ class TaskTester(unittest.TestCase):
         # no studio, using defaults
         parent_task1 = Task(**kwargs)
 
-        self.assertEqual(parent_task1.schedule_seconds, 9 * 3600)
+        assert parent_task1.schedule_seconds == 9 * 3600
 
         parent_task2 = Task(**kwargs)
 
-        self.assertEqual(parent_task2.schedule_seconds, 9 * 3600)
+        assert parent_task2.schedule_seconds == 9 * 3600
         parent_task2.schedule_timing = 5
-        self.assertEqual(parent_task2.schedule_seconds, 5 * 9 * 3600)
+        assert parent_task2.schedule_seconds == 5 * 9 * 3600
         parent_task2.schedule_unit = 'h'
-        self.assertEqual(parent_task2.schedule_seconds, 5 * 3600)
+        assert parent_task2.schedule_seconds == 5 * 3600
 
         parent_task1.parent = parent_task2
-        self.assertEqual(parent_task2.schedule_seconds, 9 * 3600)
+        assert parent_task2.schedule_seconds == 9 * 3600
 
         # create another child task for parent_task2
         child_task = Task(**kwargs)
 
         child_task.schedule_timing = 10
         child_task.schedule_unit = 'h'
-        self.assertEqual(child_task.schedule_seconds, 10 * 3600)
+        assert child_task.schedule_seconds == 10 * 3600
 
         parent_task2.children.append(child_task)
-        self.assertEqual(parent_task2.schedule_seconds,
-                         10 * 3600 + 9 * 3600)
+        assert parent_task2.schedule_seconds, 10 * 3600 + 9 * 3600
 
         kwargs['schedule_model'] = 'effort'
         kwargs['schedule_timing'] = 10
         kwargs['schedule_unit'] = 'h'
         new_task = Task(**kwargs)
 
-        self.assertEqual(new_task.schedule_seconds, 10 * 3600)
+        assert new_task.schedule_seconds == 10 * 3600
         new_task.parent = parent_task1
-        self.assertEqual(parent_task1.schedule_seconds, 10 * 3600)
-        self.assertEqual(parent_task2.schedule_seconds,
-                         10 * 3600 + 10 * 3600)
+        assert parent_task1.schedule_seconds == 10 * 3600
+        assert parent_task2.schedule_seconds == 10 * 3600 + 10 * 3600
 
         # update the schedule_timing of the child
         new_task.schedule_timing = 5
-        self.assertEqual(new_task.schedule_seconds, 5 * 3600)
+        assert new_task.schedule_seconds == 5 * 3600
         new_task.parent = parent_task1
-        self.assertEqual(parent_task1.schedule_seconds, 5 * 3600)
-        self.assertEqual(parent_task2.schedule_seconds,
-                         5 * 3600 + 10 * 3600)
+        assert parent_task1.schedule_seconds == 5 * 3600
+        assert parent_task2.schedule_seconds == 5 * 3600 + 10 * 3600
 
         # update it back to 10 hours
         new_task.schedule_timing = 10
-        self.assertEqual(new_task.schedule_seconds, 10 * 3600)
+        assert new_task.schedule_seconds == 10 * 3600
         new_task.parent = parent_task1
-        self.assertEqual(parent_task1.schedule_seconds, 10 * 3600)
-        self.assertEqual(parent_task2.schedule_seconds,
-                         10 * 3600 + 10 * 3600)
+        assert parent_task1.schedule_seconds == 10 * 3600
+        assert parent_task2.schedule_seconds == 10 * 3600 + 10 * 3600
 
         kwargs['schedule_timing'] = 23
         kwargs['schedule_unit'] = 'd'
         new_task = Task(**kwargs)
 
-        self.assertEqual(
-            new_task.schedule_seconds,
+        assert new_task.schedule_seconds == \
             23 * defaults.daily_working_hours * 3600
-        )
+
         new_task.parent = parent_task1
-        self.assertEqual(
-            parent_task1.schedule_seconds,
+        assert parent_task1.schedule_seconds == \
             10 * 3600 + 23 * defaults.daily_working_hours * 3600
-        )
-        self.assertEqual(
-            parent_task2.schedule_seconds,
-            10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
+
+        assert parent_task2.schedule_seconds == \
+            10 * 3600 + 23 * defaults.daily_working_hours * 3600 + \
             10 * 3600
-        )
 
         kwargs['schedule_timing'] = 2
         kwargs['schedule_unit'] = 'w'
         new_task = Task(**kwargs)
 
-        self.assertEqual(
-            new_task.schedule_seconds,
+        assert new_task.schedule_seconds == \
             2 * defaults.weekly_working_hours * 3600
-        )
+
         new_task.parent = parent_task1
-        self.assertEqual(
-            parent_task1.schedule_seconds,
-            10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
+        assert parent_task1.schedule_seconds == \
+            10 * 3600 + 23 * defaults.daily_working_hours * 3600 + \
             2 * defaults.weekly_working_hours * 3600
-        )
 
         # update it to 1 week
         new_task.schedule_timing = 1
-        self.assertEqual(
-            parent_task1.schedule_seconds,
-            10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
+        assert parent_task1.schedule_seconds == \
+            10 * 3600 + 23 * defaults.daily_working_hours * 3600 + \
             1 * defaults.weekly_working_hours * 3600
-        )
-        self.assertEqual(
-            parent_task2.schedule_seconds,
-            10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
+
+        assert parent_task2.schedule_seconds == \
+            10 * 3600 + 23 * defaults.daily_working_hours * 3600 + \
             1 * defaults.weekly_working_hours * 3600 + 10 * 3600
-        )
 
         kwargs['schedule_timing'] = 2.5
         kwargs['schedule_unit'] = 'm'
         new_task = Task(**kwargs)
 
-        self.assertEqual(
-            new_task.schedule_seconds,
+        assert new_task.schedule_seconds == \
             2.5 * 4 * defaults.weekly_working_hours * 3600
-        )
+
         new_task.parent = parent_task1
-        self.assertEqual(
-            parent_task1.schedule_seconds,
-            10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
-            1 * defaults.weekly_working_hours * 3600 +
+        assert parent_task1.schedule_seconds == \
+            10 * 3600 + 23 * defaults.daily_working_hours * 3600 + \
+            1 * defaults.weekly_working_hours * 3600 + \
             2.5 * 4 * defaults.weekly_working_hours * 3600
-        )
-        self.assertEqual(
-            parent_task2.schedule_seconds,
-            10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
-            1 * defaults.weekly_working_hours * 3600 +
-            2.5 * 4 * defaults.weekly_working_hours * 3600 +
+
+        assert parent_task2.schedule_seconds == \
+            10 * 3600 + 23 * defaults.daily_working_hours * 3600 + \
+            1 * defaults.weekly_working_hours * 3600 + \
+            2.5 * 4 * defaults.weekly_working_hours * 3600 + \
             10 * 3600
-        )
 
         kwargs['schedule_timing'] = 3.1
         kwargs['schedule_unit'] = 'y'
         new_task = Task(**kwargs)
 
-        self.assertAlmostEqual(
-            new_task.schedule_seconds,
-            3.1 * defaults.yearly_working_days * defaults.daily_working_hours *
-            3600,
-            3
-        )
+        assert new_task.schedule_seconds == \
+            pytest.approx(
+                3.1 * defaults.yearly_working_days *
+                defaults.daily_working_hours * 3600
+            )
+
         new_task.parent = parent_task1
-        self.assertAlmostEqual(
-            parent_task1.schedule_seconds,
-            10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
-            1 * defaults.weekly_working_hours * 3600 +
-            2.5 * 4 * defaults.weekly_working_hours * 3600 +
-            3.1 * defaults.yearly_working_days *
-            defaults.daily_working_hours * 3600,
-            3
-        )
-        self.assertAlmostEqual(
-            parent_task2.schedule_seconds,
-            10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
-            1 * defaults.weekly_working_hours * 3600 +
-            2.5 * 4 * defaults.weekly_working_hours * 3600 +
-            3.1 * defaults.yearly_working_days *
-            defaults.daily_working_hours * 3600 + 10 * 3600,
-            3
-        )
+        assert parent_task1.schedule_seconds == \
+            pytest.approx(
+                10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
+                1 * defaults.weekly_working_hours * 3600 +
+                2.5 * 4 * defaults.weekly_working_hours * 3600 +
+                3.1 * defaults.yearly_working_days *
+                defaults.daily_working_hours * 3600
+            )
+
+        assert parent_task2.schedule_seconds == \
+            pytest.approx(
+                10 * 3600 + 23 * defaults.daily_working_hours * 3600 +
+                1 * defaults.weekly_working_hours * 3600 +
+                2.5 * 4 * defaults.weekly_working_hours * 3600 +
+                3.1 * defaults.yearly_working_days *
+                defaults.daily_working_hours * 3600 + 10 * 3600
+            )
 
     def test_remaining_seconds_attribute_is_a_read_only_attribute(self):
         """testing if the remaining hours is a read only attribute
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             setattr(new_task, 'remaining_seconds', 2342)
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_versions_attribute_is_None(self):
         """testing if a TypeError will be raised when the versions attribute
         is set to None
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             new_task.versions = None
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: None is not list-like'
-        )
 
     def test_versions_attribute_is_not_a_list(self):
         """testing if a TypeError will be raised when the versions attribute is
         set to a value other than a list
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             new_task.versions = 1
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: int is not list-like'
-        )
 
     def test_versions_attribute_is_not_a_list_of_Version_instances(self):
         """testing if a TypeError will be raised when the versions attribute is
         set to a list of other objects than Version instances
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             new_task.versions = [1, 1.2, "a version"]
 
-        self.assertEqual(
-            str(cm.exception),
-            'Task.versions should only have stalker.models.version.Version '
+        assert str(cm.value) == \
+            'Task.versions should only have stalker.models.version.Version ' \
             'instances, and not Task'
-        )
 
     def test_equality(self):
         """testing the equality operator
@@ -1795,21 +1670,21 @@ class TaskTester(unittest.TestCase):
         task5.children = [task6]
         task6.depends = [task2]
 
-        self.assertFalse(new_task == entity1)
-        self.assertTrue(new_task == task0)
-        self.assertFalse(new_task == task1)
-        self.assertFalse(new_task == task5)
+        assert not new_task == entity1
+        assert new_task == task0
+        assert not new_task == task1
+        assert not new_task == task5
 
-        self.assertFalse(task1 == task2)
-        self.assertFalse(task1 == task3)
-        self.assertFalse(task1 == task4)
+        assert not task1 == task2
+        assert not task1 == task3
+        assert not task1 == task4
 
-        self.assertFalse(task2 == task3)
-        self.assertFalse(task2 == task4)
+        assert not task2 == task3
+        assert not task2 == task4
 
-        self.assertFalse(task3 == task4)
+        assert not task3 == task4
 
-        self.assertFalse(task5 == task6)
+        assert not task5 == task6
 
         # check task with same names but different projects
 
@@ -1837,21 +1712,21 @@ class TaskTester(unittest.TestCase):
         task3.parent = task4
         task5.children = [task6]
 
-        self.assertTrue(new_task != entity1)
-        self.assertFalse(new_task != task0)
-        self.assertTrue(new_task != task1)
-        self.assertTrue(new_task != task5)
+        assert new_task != entity1
+        assert not new_task != task0
+        assert new_task != task1
+        assert new_task != task5
 
-        self.assertTrue(task1 != task2)
-        self.assertTrue(task1 != task3)
-        self.assertTrue(task1 != task4)
+        assert task1 != task2
+        assert task1 != task3
+        assert task1 != task4
 
-        self.assertTrue(task2 != task3)
-        self.assertTrue(task2 != task4)
+        assert task2 != task3
+        assert task2 != task4
 
-        self.assertTrue(task3 != task4)
+        assert task3 != task4
 
-        self.assertTrue(task5 != task6)
+        assert task5 != task6
 
     def test_parent_argument_is_skipped_there_is_a_project_arg(self):
         """testing if the Task is still be able to be created without a parent
@@ -1865,7 +1740,7 @@ class TaskTester(unittest.TestCase):
 
         kwargs['project'] = self.test_project1
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.project, self.test_project1)
+        assert new_task.project == self.test_project1
 
     # parent arg there but project skipped already tested
     # both skipped already tested
@@ -1878,7 +1753,7 @@ class TaskTester(unittest.TestCase):
         kwargs['parent'] = None
         kwargs['project'] = self.test_project1
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.project, self.test_project1)
+        assert new_task.project == self.test_project1
 
     def test_parent_attribute_is_set_to_None(self):
         """testing if the parent of a task can be set to None
@@ -1888,22 +1763,22 @@ class TaskTester(unittest.TestCase):
 
         kwargs['parent'] = new_task1
         new_task2 = Task(**kwargs)
-        self.assertEqual(new_task2.parent, new_task1)
+        assert new_task2.parent == new_task1
         # DBSession.add_all([new_task1, new_task2])
         # DBSession.commit()
 
         # store the id to be used later
         # id_ = new_task2.id
-        # self.assertTrue(id_ is not None)
+        # assert id_ is not None)
 
         new_task2.parent = None
-        self.assertTrue(new_task2.parent is None)
+        assert new_task2.parent is None
         # DBSession.commit()
 
         # we still should have this task
         # t = Task.query.get(id_)
-        # self.assertTrue(t is not None)
-        # self.assertEqual(t.name, kwargs['name'])
+        # assert t is not None
+        # assert t.name == kwargs['name']
 
     def test_parent_argument_is_not_a_Task_instance(self):
         """testing if a TypeError will be raised when the parent argument is
@@ -1911,14 +1786,12 @@ class TaskTester(unittest.TestCase):
         """
         kwargs = copy.copy(self.kwargs)
         kwargs['parent'] = 'not a task'
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Task(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Task.parent should be an instance of stalker.models.task.Task, '
+        assert str(cm.value) == \
+            'Task.parent should be an instance of stalker.models.task.Task, ' \
             'not str'
-        )
 
     def test_parent_attribute_is_not_a_Task_instance(self):
         """testing if a TypeError will be raised when the parent attribute is
@@ -1927,14 +1800,12 @@ class TaskTester(unittest.TestCase):
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
 
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             new_task.parent = 'not a task'
 
-        self.assertEqual(
-            str(cm.exception),
-            'Task.parent should be an instance of stalker.models.task.Task, '
+        assert str(cm.value) == \
+            'Task.parent should be an instance of stalker.models.task.Task, ' \
             'not str'
-        )
 
         # there is no way to generate a CycleError by using the parent argument
         # cause the Task is just created, it is not in relationship with other
@@ -1952,27 +1823,23 @@ class TaskTester(unittest.TestCase):
         kwargs['parent'] = new_task1
         new_task2 = Task(**kwargs)
 
-        with self.assertRaises(CircularDependencyError) as cm:
+        with pytest.raises(CircularDependencyError) as cm:
             new_task1.parent = new_task2
 
-        self.assertEqual(
-            str(cm.exception),
-            '<Modeling (Task)> (Task) and <New Task (Task)> (Task) creates a '
-            'circular dependency in their "children" attribute'
-        )
+        assert str(cm.value) == \
+            '<Modeling (Task)> (Task) and <New Task (Task)> (Task) creates ' \
+            'a circular dependency in their "children" attribute'
 
         # more deeper test
         kwargs['parent'] = new_task2
         new_task3 = Task(**kwargs)
 
-        with self.assertRaises(CircularDependencyError) as cm:
+        with pytest.raises(CircularDependencyError) as cm:
             new_task1.parent = new_task3
 
-        self.assertEqual(
-            str(cm.exception),
-            '<Modeling (Task)> (Task) and <New Task (Task)> (Task) creates a '
-            'circular dependency in their "children" attribute'
-        )
+        assert str(cm.value) == \
+            '<Modeling (Task)> (Task) and <New Task (Task)> (Task) creates ' \
+            'a circular dependency in their "children" attribute'
 
     def test_parent_argument_is_working_properly(self):
         """testing if the parent argument is working properly
@@ -1982,7 +1849,7 @@ class TaskTester(unittest.TestCase):
 
         kwargs['parent'] = new_task1
         new_task2 = Task(**kwargs)
-        self.assertEqual(new_task2.parent, new_task1)
+        assert new_task2.parent == new_task1
 
     def test_parent_attribute_is_working_properly(self):
         """testing if the parent attribute is working properly
@@ -1997,10 +1864,10 @@ class TaskTester(unittest.TestCase):
         kwargs['name'] = 'New Task 2'
         new_task2 = Task(**kwargs)
 
-        self.assertNotEqual(new_task.parent, new_task2)
+        assert new_task.parent != new_task2
 
         new_task.parent = new_task2
-        self.assertEqual(new_task.parent, new_task2)
+        assert new_task.parent == new_task2
 
     def test_parent_argument_will_not_allow_a_dependent_task_to_be_parent(self):
         """testing if a CircularDependencyError will be raised when one of the
@@ -2015,14 +1882,12 @@ class TaskTester(unittest.TestCase):
 
         kwargs['depends'] = [task_a, task_b, task_c]
         kwargs['parent'] = task_a
-        with self.assertRaises(CircularDependencyError) as cm:
+        with pytest.raises(CircularDependencyError) as cm:
             Task(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            '<Modeling (Task)> (Task) and <Modeling (Task)> (Task) creates a '
-            'circular dependency in their "children" attribute'
-        )
+        assert str(cm.value) == \
+            '<Modeling (Task)> (Task) and <Modeling (Task)> (Task) creates ' \
+            'a circular dependency in their "children" attribute'
 
     def test_parent_attribute_will_not_allow_a_dependent_task_to_be_parent(self):
         """testing if a CircularDependencyError will be raised when one of the
@@ -2037,46 +1902,40 @@ class TaskTester(unittest.TestCase):
 
         task_d.depends = [task_a, task_b, task_c]
 
-        with self.assertRaises(CircularDependencyError) as cm:
+        with pytest.raises(CircularDependencyError) as cm:
             task_d.parent = task_a
 
-        self.assertEqual(
-            str(cm.exception),
-            '<Modeling (Task)> (Task) and <Modeling (Task)> (Task) creates a '
-            'circular dependency in their "depends" attribute'
-        )
+        assert str(cm.value) == \
+            '<Modeling (Task)> (Task) and <Modeling (Task)> (Task) creates ' \
+            'a circular dependency in their "depends" attribute'
 
     def test_children_attribute_is_empty_list_by_default(self):
         """testing if the children attribute is an empty list by default
         """
         new_task = Task(**self.kwargs)
-        self.assertEqual(new_task.children, [])
+        assert new_task.children == []
 
     def test_children_attribute_is_set_to_None(self):
         """testing if a TypeError will be raised when the children attribute is
         set to None
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             new_task.children = None
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: None is not list-like'
-        )
 
     def test_children_attribute_accepts_Tasks_only(self):
         """testing if a TypeError will be raised when the item assigned to the
         children attribute is not a Task instance
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             new_task.children = 'no task'
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: str is not list-like'
-        )
 
     def test_children_attribute_is_working_properly(self):
         """testing if the children attribute is working properly
@@ -2094,27 +1953,24 @@ class TaskTester(unittest.TestCase):
         kwargs['name'] = 'Task 3'
         task3 = Task(**kwargs)
 
-        self.assertFalse(task2 in task1.children)
-        self.assertFalse(task3 in task1.children)
+        assert task2 not in task1.children
+        assert task3 not in task1.children
 
         task1.children.append(task2)
-        self.assertTrue(task2 in task1.children)
+        assert task2 in task1.children
 
         task3.parent = task1
-        self.assertTrue(task3 in task1.children)
+        assert task3 in task1.children
 
     def test_is_leaf_attribute_is_read_only(self):
         """testing if the is_leaf attribute is a read only attribute
         """
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             new_task.is_leaf = True
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_is_leaf_attribute_is_working_properly(self):
         """testing if the is_leaf attribute is True for a Task without a child
@@ -2136,9 +1992,9 @@ class TaskTester(unittest.TestCase):
         task2.parent = task1
         task3.parent = task1
 
-        self.assertTrue(task2.is_leaf)
-        self.assertTrue(task3.is_leaf)
-        self.assertFalse(task1.is_leaf)
+        assert task2.is_leaf
+        assert task3.is_leaf
+        assert not task1.is_leaf
 
     def test_is_root_attribute_is_read_only(self):
         """testing if the is_root attribute is a read only attribute
@@ -2146,13 +2002,10 @@ class TaskTester(unittest.TestCase):
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
 
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             new_task.is_root = True
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_is_root_attribute_is_working_properly(self):
         """testing if the is_root attribute is True for a Task without a parent
@@ -2174,10 +2027,10 @@ class TaskTester(unittest.TestCase):
         task2.parent = task1
         task3.parent = task1
 
-        self.assertFalse(task2.is_root)
-        self.assertFalse(task3.is_root)
-        self.assertFalse(task1.is_root)
-        self.assertTrue(new_task.is_root)
+        assert not task2.is_root
+        assert not task3.is_root
+        assert not task1.is_root
+        assert new_task.is_root
 
     def test_is_container_attribute_is_read_only(self):
         """testing if the is_container attribute is a read only attribute
@@ -2185,13 +2038,10 @@ class TaskTester(unittest.TestCase):
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
 
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             new_task.is_container = False
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_is_container_attribute_working_properly(self):
         """testing if the is_container attribute is True for a Task with at
@@ -2213,9 +2063,9 @@ class TaskTester(unittest.TestCase):
         task2.parent = task1
         task3.parent = task1
 
-        self.assertFalse(task2.is_container)
-        self.assertFalse(task3.is_container)
-        self.assertTrue(task1.is_container)
+        assert not task2.is_container
+        assert not task3.is_container
+        assert task1.is_container
 
     def test_project_and_parent_args_are_skipped(self):
         """testing if a TypeError will be raised when there is no project nor a
@@ -2229,16 +2079,14 @@ class TaskTester(unittest.TestCase):
         except KeyError:
             pass
 
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Task(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Task.project should be an instance of '
-            'stalker.models.project.Project, not NoneType. Or please supply a '
-            'stalker.models.task.Task with the parent argument, so Stalker '
-            'can use the project of the supplied parent task'
-        )
+        assert str(cm.value) == \
+            'Task.project should be an instance of ' \
+            'stalker.models.project.Project, not NoneType. Or please supply ' \
+            'a stalker.models.task.Task with the parent argument, so ' \
+            'Stalker can use the project of the supplied parent task'
 
     def test_project_arg_is_skipped_but_there_is_a_parent_arg(self):
         """testing if there is no problem creating a Task without a Project
@@ -2251,7 +2099,7 @@ class TaskTester(unittest.TestCase):
         kwargs['parent'] = new_task
 
         new_task2 = Task(**kwargs)
-        self.assertEqual(new_task2.project, self.test_project1)
+        assert new_task2.project == self.test_project1
 
     def test_project_argument_is_not_a_Project_instance(self):
         """testing if a TypeError will be raised if the given value for the
@@ -2260,26 +2108,22 @@ class TaskTester(unittest.TestCase):
         kwargs = copy.copy(self.kwargs)
         kwargs['name'] = 'New Task 1'
         kwargs['project'] = 'Not a Project instance'
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Task(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Task.project should be an instance of stalker.models.project.Project, not str'
-        )
+        assert str(cm.value) == \
+            'Task.project should be an instance of ' \
+            'stalker.models.project.Project, not str'
 
     def test_project_attribute_is_a_read_only_attribute(self):
         """testing if the project attribute is a read only attribute
         """
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             new_task.project = self.test_project1
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_project_argument_is_not_matching_the_given_parent_argument(self):
         """testing if a RuntimeWarning will be raised when the given project
@@ -2299,22 +2143,18 @@ class TaskTester(unittest.TestCase):
             repository=self.test_repository
         )
         # catching warnings are different then catching exceptions
-        # self.assertRaises(RuntimeWarning, Task, **self.kwargs)
+        # pytest.raises(RuntimeWarning, Task, **self.kwargs)
         import warnings
         warnings.simplefilter("always")
 
         with warnings.catch_warnings(record=True) as w:
             Task(**kwargs)
-            self.assertTrue(
-                issubclass(w[-1].category, RuntimeWarning)
-            )
+            assert issubclass(w[-1].category, RuntimeWarning)
 
-        self.assertEqual(
-            str(w[0].message),
-            'The supplied parent and the project is not matching in '
-            '<New Task (Task)>, Stalker will use the parents project '
+        assert str(w[0].message) == \
+            'The supplied parent and the project is not matching in ' \
+            '<New Task (Task)>, Stalker will use the parents project ' \
             '(<Test Project1 (Project)>) as the parent of this Task'
-        )
 
     def test_project_argument_is_not_matching_the_given_parent_argument_new_task_will_use_parents_project(self):
         """testing if the new task will use the parents project when the given
@@ -2333,7 +2173,7 @@ class TaskTester(unittest.TestCase):
             repository=self.test_repository
         )
         new_task2 = Task(**kwargs)
-        self.assertEqual(new_task2.project, new_task.project)
+        assert new_task2.project == new_task.project
 
     def test_start_and_end_attribute_values_of_a_container_task_are_defined_by_its_child_tasks(self):
         """testing if the start and end attribute values is defined by the
@@ -2370,30 +2210,30 @@ class TaskTester(unittest.TestCase):
         task3 = Task(**kwargs)
 
         # check start conditions
-        self.assertEqual(task1.start, now)
-        self.assertEqual(task1.end, now + dt(3))
+        assert task1.start == now
+        assert task1.end == now + dt(3)
 
         # now parent the task2 and task3 to task1
         task2.parent = task1
         task1.children.append(task3)
 
         # check if the start is not `now` anymore
-        self.assertNotEqual(task1.start, now)
-        self.assertNotEqual(task1.end, now + dt(3))
+        assert task1.start != now
+        assert task1.end != now + dt(3)
 
         # but
-        self.assertEqual(task1.start, now + dt(1))
-        self.assertEqual(task1.end, now + dt(8))
+        assert task1.start == now + dt(1)
+        assert task1.end == now + dt(8)
 
         kwargs['name'] = 'Task4'
         kwargs['start'] = now + dt(15)
         kwargs['end'] = now + dt(16)
         task4 = Task(**kwargs)
         task3.parent = task4
-        self.assertEqual(task4.start, task3.start)
-        self.assertEqual(task4.end, task3.end)
-        self.assertEqual(task1.start, task2.start)
-        self.assertEqual(task1.end, task2.end)
+        assert task4.start == task3.start
+        assert task4.end == task3.end
+        assert task1.start == task2.start
+        assert task1.end == task2.end
         # TODO: with SQLAlchemy 0.9 please also check if removing the last
         #       child from a parent will update the parents start and end date
         #       values
@@ -2411,18 +2251,14 @@ class TaskTester(unittest.TestCase):
         kwargs['schedule_unit'] = 'h'
 
         new_task = Task(**kwargs)
-        self.assertEqual(
-            new_task.end,
+        assert new_task.end == \
             datetime.datetime(2013, 4, 17, 10, 0, tzinfo=pytz.utc)
-        )
 
         kwargs['schedule_timing'] = 5
         kwargs['schedule_unit'] = 'd'
         new_task = Task(**kwargs)
-        self.assertEqual(
-            new_task.end,
+        assert new_task.end == \
             datetime.datetime(2013, 4, 22, 0, 0, tzinfo=pytz.utc)
-        )
 
     def test_start_value_is_calculated_with_the_schedule_timing_and_schedule_unit_if_schedule_constraint_is_set_to_end(self):
         """testing if the start date value will be recalculated from the
@@ -2441,14 +2277,10 @@ class TaskTester(unittest.TestCase):
         kwargs['schedule_unit'] = 'd'
 
         new_task = Task(**kwargs)
-        self.assertEqual(
-            new_task.end,
+        assert new_task.end == \
             datetime.datetime(2013, 4, 18, 0, 0, tzinfo=pytz.utc)
-        )
-        self.assertEqual(
-            new_task.start,
+        assert new_task.start == \
             datetime.datetime(2013, 4, 8, 0, 0, tzinfo=pytz.utc)
-        )
 
     def test_start_and_end_values_are_not_touched_if_the_schedule_constraint_is_set_to_both(self):
         """testing if the start and end date values are not touched if the
@@ -2467,14 +2299,10 @@ class TaskTester(unittest.TestCase):
         kwargs['schedule_unit'] = 'd'
 
         new_task = Task(**kwargs)
-        self.assertEqual(
-            new_task.start,
+        assert new_task.start == \
             datetime.datetime(2013, 4, 17, 0, 0, tzinfo=pytz.utc)
-        )
-        self.assertEqual(
-            new_task.end,
+        assert new_task.end == \
             datetime.datetime(2013, 4, 27, 0, 0, tzinfo=pytz.utc)
-        )
 
     def test_level_attribute_is_a_read_only_property(self):
         """testing if the level attribute is a read only property
@@ -2482,13 +2310,10 @@ class TaskTester(unittest.TestCase):
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
 
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             new_task.level = 0
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_level_attribute_returns_the_hierarchical_level_of_this_task(self):
         """testing if the level attribute returns the hierarchical level of
@@ -2499,17 +2324,17 @@ class TaskTester(unittest.TestCase):
 
         kwargs['name'] = 'T1'
         test_task1 = Task(**kwargs)
-        self.assertEqual(test_task1.level, 1)
+        assert test_task1.level == 1
 
         kwargs['name'] = 'T2'
         test_task2 = Task(**kwargs)
         test_task2.parent = test_task1
-        self.assertEqual(test_task2.level, 2)
+        assert test_task2.level == 2
 
         kwargs['name'] = 'T3'
         test_task3 = Task(**kwargs)
         test_task3.parent = test_task2
-        self.assertEqual(test_task3.level, 3)
+        assert test_task3.level == 3
 
     def test__check_circular_dependency_causes_recursion(self):
         """Bug ID: None
@@ -2571,14 +2396,12 @@ class TaskTester(unittest.TestCase):
             responsible=[self.test_user1]
         )
 
-        with self.assertRaises(CircularDependencyError) as cm:
+        with pytest.raises(CircularDependencyError) as cm:
             task1.parent = task1
 
-        self.assertEqual(
-            str(cm.exception),
-            '<Cekimler (Task)> (Task) and <Cekimler (Task)> (Task) creates a '
-            'circular dependency in their "children" attribute'
-        )
+        assert str(cm.value) == \
+            '<Cekimler (Task)> (Task) and <Cekimler (Task)> (Task) creates ' \
+            'a circular dependency in their "children" attribute'
 
     def test_bid_timing_argument_is_skipped(self):
         """testing if the bid_timing attribute value will be equal to
@@ -2588,9 +2411,8 @@ class TaskTester(unittest.TestCase):
         kwargs['schedule_timing'] = 155
         kwargs.pop('bid_timing')
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.schedule_timing,
-                         kwargs['schedule_timing'])
-        self.assertEqual(new_task.bid_timing, new_task.schedule_timing)
+        assert new_task.schedule_timing == kwargs['schedule_timing']
+        assert new_task.bid_timing == new_task.schedule_timing
 
     def test_bid_timing_argument_is_None(self):
         """testing if the bid_timing attribute value will be equal to
@@ -2600,16 +2422,15 @@ class TaskTester(unittest.TestCase):
         kwargs['bid_timing'] = None
         kwargs['schedule_timing'] = 1342
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.schedule_timing,
-                         kwargs['schedule_timing'])
-        self.assertEqual(new_task.bid_timing, new_task.schedule_timing)
+        assert new_task.schedule_timing == kwargs['schedule_timing']
+        assert new_task.bid_timing == new_task.schedule_timing
 
     def test_bid_timing_attribute_is_set_to_None(self):
         """testing if the bid_timing attribute can be set to None
         """
         new_task = Task(**self.kwargs)
         new_task.bid_timing = None
-        self.assertTrue(new_task.bid_timing is None)
+        assert new_task.bid_timing is None
 
     def test_bid_timing_argument_is_not_an_integer_or_float(self):
         """testing if a TypeError will be raised when the bid_timing argument
@@ -2617,28 +2438,24 @@ class TaskTester(unittest.TestCase):
         """
         kwargs = copy.copy(self.kwargs)
         kwargs['bid_timing'] = '10d'
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Task(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Task.bid_timing should be an integer or float showing the value '
-            'of the initial bid for this Task, not str'
-        )
+        assert str(cm.value) == \
+            'Task.bid_timing should be an integer or float showing the ' \
+            'value of the initial bid for this Task, not str'
 
     def test_bid_timing_attribute_is_not_an_integer_or_float(self):
         """testing if a TypeError will be raised when the bid_timing attribute
         is set to a value which is not an integer or float
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             new_task.bid_timing = '10d'
 
-        self.assertEqual(
-            str(cm.exception),
-            'Task.bid_timing should be an integer or float showing the value '
-            'of the initial bid for this Task, not str'
-        )
+        assert str(cm.value) == \
+            'Task.bid_timing should be an integer or float showing the ' \
+            'value of the initial bid for this Task, not str'
 
     def test_bid_timing_argument_is_working_properly(self):
         """testing if the bid_timing argument is working properly
@@ -2646,7 +2463,7 @@ class TaskTester(unittest.TestCase):
         kwargs = copy.copy(self.kwargs)
         kwargs['bid_timing'] = 23
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.bid_timing, kwargs['bid_timing'])
+        assert new_task.bid_timing == kwargs['bid_timing']
 
     def test_bid_timing_attribute_is_working_properly(self):
         """testing if the bid_timning attribute is working properly
@@ -2654,7 +2471,7 @@ class TaskTester(unittest.TestCase):
         new_task = Task(**self.kwargs)
         test_value = 23
         new_task.bid_timing = test_value
-        self.assertEqual(new_task.bid_timing, test_value)
+        assert new_task.bid_timing == test_value
 
     def test_bid_unit_argument_is_skipped(self):
         """testing if the bid_unit attribute value will be equal to
@@ -2664,8 +2481,8 @@ class TaskTester(unittest.TestCase):
         kwargs['schedule_unit'] = 'd'
         kwargs.pop('bid_unit')
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.schedule_unit, kwargs['schedule_unit'])
-        self.assertEqual(new_task.bid_unit, new_task.schedule_unit)
+        assert new_task.schedule_unit == kwargs['schedule_unit']
+        assert new_task.bid_unit == new_task.schedule_unit
 
     def test_bid_unit_argument_is_None(self):
         """testing if the bid_unit attribute value will be equal to
@@ -2675,15 +2492,15 @@ class TaskTester(unittest.TestCase):
         kwargs['bid_unit'] = None
         kwargs['schedule_unit'] = 'min'
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.schedule_unit, kwargs['schedule_unit'])
-        self.assertEqual(new_task.bid_unit, new_task.schedule_unit)
+        assert new_task.schedule_unit == kwargs['schedule_unit']
+        assert new_task.bid_unit == new_task.schedule_unit
 
     def test_bid_unit_attribute_is_set_to_None(self):
         """testing if the bid_unit attribute can be set to default value of 'h'
         """
         new_task = Task(**self.kwargs)
         new_task.bid_unit = None
-        self.assertEqual(new_task.bid_unit, 'h')
+        assert new_task.bid_unit == 'h'
 
     def test_bid_unit_argument_is_not_a_string(self):
         """testing if a TypeError will be raised when the bid_hour argument is
@@ -2691,30 +2508,26 @@ class TaskTester(unittest.TestCase):
         """
         kwargs = copy.copy(self.kwargs)
         kwargs['bid_unit'] = 10
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Task(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            "Task.bid_unit should be a string value one of ['min', 'h', 'd', "
-            "'w', 'm', 'y'] showing the unit of the bid timing of this Task, "
-            "not int"
-        )
+        assert str(cm.value) == \
+            "Task.bid_unit should be a string value one of ['min', 'h', " \
+            "'d', 'w', 'm', 'y'] showing the unit of the bid timing of this " \
+            "Task, not int"
 
     def test_bid_unit_attribute_is_not_a_string(self):
         """testing if a TypeError will be raised when the bid_unit attribute is
         set to a value which is not an integer
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             new_task.bid_unit = 10
 
-        self.assertEqual(
-            str(cm.exception),
-            "Task.bid_unit should be a string value one of ['min', 'h', 'd', "
-            "'w', 'm', 'y'] showing the unit of the bid timing of this Task, "
-            "not int"
-        )
+        assert str(cm.value) == \
+            "Task.bid_unit should be a string value one of ['min', 'h', " \
+            "'d', 'w', 'm', 'y'] showing the unit of the bid timing of this " \
+            "Task, not int"
 
     def test_bid_unit_argument_is_working_properly(self):
         """testing if the bid_unit argument is working properly
@@ -2722,7 +2535,7 @@ class TaskTester(unittest.TestCase):
         kwargs = copy.copy(self.kwargs)
         kwargs['bid_unit'] = 'h'
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.bid_unit, kwargs['bid_unit'])
+        assert new_task.bid_unit == kwargs['bid_unit']
 
     def test_bid_unit_attribute_is_working_properly(self):
         """testing if the bid_unit attribute is working properly
@@ -2730,7 +2543,7 @@ class TaskTester(unittest.TestCase):
         test_value = 'h'
         new_task = Task(**self.kwargs)
         new_task.bid_unit = test_value
-        self.assertEqual(new_task.bid_unit, test_value)
+        assert new_task.bid_unit == test_value
 
     def test_bid_unit_argument_value_not_in_defaults_datetime_units(self):
         """testing if a ValueError will be raised when the given unit value is
@@ -2738,49 +2551,42 @@ class TaskTester(unittest.TestCase):
         """
         kwargs = copy.copy(self.kwargs)
         kwargs['bid_unit'] = 'os'
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             Task(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            "Task.bid_unit should be a string value one of ['min', 'h', 'd', "
-            "'w', 'm', 'y'] showing the unit of the bid timing of this Task, "
-            "not str"
-        )
+        assert str(cm.value) == \
+            "Task.bid_unit should be a string value one of ['min', 'h', " \
+            "'d', 'w', 'm', 'y'] showing the unit of the bid timing of this " \
+            "Task, not str"
 
     def test_bid_unit_attribute_value_not_in_defaults_datetime_units(self):
         """testing if a ValueError will be raised when the bid_unit value is
         set to a value which is not in stalker.config.Config.datetime_units.
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             new_task.bid_unit = 'sys'
 
-        self.assertEqual(
-            str(cm.exception),
-            "Task.bid_unit should be a string value one of ['min', 'h', 'd', "
-            "'w', 'm', 'y'] showing the unit of the bid timing of this Task, "
-            "not str"
-        )
+        assert str(cm.value) == \
+            "Task.bid_unit should be a string value one of ['min', 'h', " \
+            "'d', 'w', 'm', 'y'] showing the unit of the bid timing of this " \
+            "Task, not str"
 
     def test_tjp_id_is_a_read_only_attribute(self):
         """testing if the tjp_id attribute is a read only attribute
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             new_task.tjp_id = 'some value'
 
     def test_tjp_abs_id_is_a_read_only_attribute(self):
         """testing if the tjp_abs_id attribute is a read only attribute
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             new_task.tjp_abs_id = 'some_value'
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_tjp_id_attribute_is_working_properly_for_a_root_task(self):
         """testing if the tjp_id is working properly for a root task
@@ -2788,7 +2594,7 @@ class TaskTester(unittest.TestCase):
         kwargs = copy.copy(self.kwargs)
         kwargs['parent'] = None
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.tjp_id, 'Task_%s' % new_task.id)
+        assert new_task.tjp_id == 'Task_%s' % new_task.id
 
     def test_tjp_id_attribute_is_working_properly_for_a_leaf_task(self):
         """testing if the tjp_id is working properly for a leaf task
@@ -2799,7 +2605,7 @@ class TaskTester(unittest.TestCase):
         kwargs['parent'] = new_task1
         kwargs['depends'] = None
         new_task2 = Task(**kwargs)
-        self.assertEqual(new_task2.tjp_id, 'Task_%s' % new_task2.id)
+        assert new_task2.tjp_id == 'Task_%s' % new_task2.id
 
     def test_tjp_abs_id_attribute_is_working_properly_for_a_root_task(self):
         """testing if the tjp_abs_id is working properly for a root task
@@ -2808,9 +2614,8 @@ class TaskTester(unittest.TestCase):
 
         kwargs['parent'] = None
         new_task = Task(**kwargs)
-        self.assertEqual(
-            new_task.tjp_abs_id,
-            'Project_%s.Task_%s' % (kwargs['project'].id, new_task.id))
+        assert new_task.tjp_abs_id == \
+            'Project_%s.Task_%s' % (kwargs['project'].id, new_task.id)
 
     def test_tjp_abs_id_attribute_is_working_properly_for_a_leaf_task(self):
         """testing if the tjp_abs_id is working properly for a leaf task
@@ -2825,13 +2630,11 @@ class TaskTester(unittest.TestCase):
         t2.parent = t1
         t3.parent = t2
 
-        self.assertEqual(
-            t3.tjp_abs_id,
+        assert t3.tjp_abs_id == \
             'Project_%s.Task_%s.Task_%s.Task_%s' % (
                 kwargs['project'].id,
                 t1.id, t2.id, t3.id
             )
-        )
 
     def test_to_tjp_attribute_is_working_properly_for_a_root_task(self):
         """testing if the to_tjp attribute is working properly for a root task
@@ -2896,7 +2699,7 @@ task Task_%(t1_id)s "Task_%(t1_id)s" {
         # print(t1.to_tjp)
         # print('---------------------------------')
         # print(expected_tjp)
-        self.assertEqual(t1.to_tjp, expected_tjp)
+        assert t1.to_tjp == expected_tjp
 
     def test_to_tjp_attribute_is_working_properly_for_a_leaf_task(self):
         """testing if the to_tjp attribute is working properly for a leaf task
@@ -2966,7 +2769,7 @@ task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
         # print(new_task2.to_tjp)
         # print('---------------------------------')
         # print(expected_tjp)
-        self.assertEqual(new_task2.to_tjp, expected_tjp)
+        assert new_task2.to_tjp == expected_tjp
 
     def test_to_tjp_attribute_is_working_properly_for_a_leaf_task_with_dependency_details(self):
         """testing if the to_tjp attribute is working properly for a leaf task
@@ -3048,7 +2851,7 @@ task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
         # print new_task.to_tjp
         # print '---------------------------------'
         # print expected_tjp
-        self.assertEqual(new_task2.to_tjp, expected_tjp)
+        assert new_task2.to_tjp == expected_tjp
 
     def test_to_tjp_attribute_is_working_properly_for_a_leaf_task_with_custom_allocation_strategy(self):
         """testing if the to_tjp attribute is working properly for a leaf task
@@ -3136,7 +2939,7 @@ task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
         # print(new_task2.to_tjp)
         # print('---------------------------------')
         # print(expected_tjp)
-        self.assertEqual(new_task2.to_tjp, expected_tjp)
+        assert new_task2.to_tjp == expected_tjp
 
     def test_to_tjp_attribute_is_working_properly_for_a_container_task(self):
         """testing if the to_tjp attribute is working properly for a container
@@ -3248,7 +3051,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         # print(t1.to_tjp)
         # print('---------------------------------')
         # print(expected_tjp)
-        self.assertEqual(t1.to_tjp, expected_tjp)
+        assert t1.to_tjp == expected_tjp
 
     def test_to_tjp_attribute_is_working_properly_for_a_container_task_with_dependency(self):
         """testing if the to_tjp attribute is working properly for a container
@@ -3382,7 +3185,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         # print(t1.to_tjp)
         # print('---------------------------------')
         # print(expected_tjp)
-        self.assertEqual(t1.to_tjp, expected_tjp)
+        assert t1.to_tjp == expected_tjp
 
     def test_to_tjp_schedule_constraint_is_reflected_in_tjp_file(self):
         """testing if the schedule_constraint is reflected in the tjp file
@@ -3509,7 +3312,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         # print('-----------------------')
         # print(expected_tjp)
         self.maxDiff = None
-        self.assertEqual(t1.to_tjp, expected_tjp)
+        assert t1.to_tjp == expected_tjp
 
     def test_is_scheduled_is_a_read_only_attribute(self):
         """testing if the is_scheduled is a read-only attribute
@@ -3517,13 +3320,10 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
 
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             new_task.is_scheduled = True
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_is_scheduled_is_true_if_the_computed_start_and_computed_end_is_not_None(self):
         """testing if the is_scheduled attribute value is True if the
@@ -3535,7 +3335,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         new_task.computed_start = datetime.datetime.now(pytz.utc)
         new_task.computed_end = \
             datetime.datetime.now(pytz.utc) + datetime.timedelta(10)
-        self.assertTrue(new_task.is_scheduled)
+        assert new_task.is_scheduled is True
 
     def test_is_scheduled_is_false_if_one_of_computed_start_and_computed_end_is_None(self):
         """testing if the is_scheduled attribute value is False if one of the
@@ -3546,11 +3346,11 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
 
         new_task.computed_start = None
         new_task.computed_end = datetime.datetime.now(pytz.utc)
-        self.assertFalse(new_task.is_scheduled)
+        assert new_task.is_scheduled is False
 
         new_task.computed_start = datetime.datetime.now(pytz.utc)
         new_task.computed_end = None
-        self.assertFalse(new_task.is_scheduled)
+        assert new_task.is_scheduled is False
 
     def test_parents_attribute_is_read_only(self):
         """testing if the parents attribute is read only
@@ -3558,13 +3358,10 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
 
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             new_task.parents = self.test_dependent_task1
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_parents_attribute_is_working_properly(self):
         """testing if the parents attribute is working properly
@@ -3579,10 +3376,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         t2.parent = t1
         t3.parent = t2
 
-        self.assertEqual(
-            t3.parents,
-            [t1, t2]
-        )
+        assert t3.parents == [t1, t2]
 
     def test_responsible_argument_is_skipped_for_a_root_task(self):
         """testing if the responsible list will be an empty list if a root task
@@ -3592,7 +3386,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs.pop('responsible')
         new_task = Task(**kwargs)
 
-        self.assertEqual(new_task.responsible, [])
+        assert new_task.responsible == []
 
     def test_responsible_argument_is_skipped_for_a_non_root_task(self):
         """testing if the parent tasks responsible will be used if the
@@ -3601,7 +3395,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         kwargs['name'] = 'Root Task'
         root_task = Task(**kwargs)
-        self.assertEqual(root_task.responsible, [self.test_user1])
+        assert root_task.responsible == [self.test_user1]
 
         kwargs.pop('responsible')
         kwargs['parent'] = root_task
@@ -3609,7 +3403,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
 
         new_task = Task(**kwargs)
 
-        self.assertEqual(new_task.responsible, root_task.responsible)
+        assert new_task.responsible == root_task.responsible
 
     def test_responsible_argument_is_None_for_a_root_task(self):
         """testing if a RuntimeError will be raised if the responsible argument
@@ -3619,7 +3413,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs['responsible'] = None
         new_task = Task(**kwargs)
 
-        self.assertEqual(new_task.responsible, [])
+        assert new_task.responsible == []
 
     def test_responsible_argument_is_none_for_a_non_root_task(self):
         """testing if the parent tasks responsible will be used if the
@@ -3628,7 +3422,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         kwargs['name'] = 'Root Task'
         root_task = Task(**kwargs)
-        self.assertEqual(root_task.responsible, [self.test_user1])
+        assert root_task.responsible == [self.test_user1]
 
         kwargs['responsible'] = None
         kwargs['parent'] = root_task
@@ -3636,7 +3430,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
 
         new_task = Task(**kwargs)
 
-        self.assertEqual(new_task.responsible, root_task.responsible)
+        assert new_task.responsible == root_task.responsible
 
     def test_responsible_argument_not_a_list_instance(self):
         """testing if a TypeError will be raised when the responsible argument
@@ -3644,13 +3438,11 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """
         kwargs = copy.copy(self.kwargs)
         kwargs['responsible'] = 'not a list'
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Task(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: str is not list-like'
-        )
 
     def test_responsible_attribute_not_a_list_instance(self):
         """testing if a TypeError will be raised when the responsible attribute
@@ -3659,13 +3451,11 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
 
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             new_task.responsible = 'not a list of users'
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: str is not list-like'
-        )
 
     def test_responsible_argument_is_not_a_list_of_User_instance(self):
         """testing if a TypeError will be raised if the responsible argument
@@ -3674,14 +3464,12 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         kwargs['responsible'] = ['not a user instance']
 
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Task(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Task.responsible should be a list of stalker.models.auth.User '
+        assert str(cm.value) == \
+            'Task.responsible should be a list of stalker.models.auth.User ' \
             'instances, not str'
-        )
 
     def test_responsible_attribute_is_set_to_something_other_than_a_list_of_User_instance(self):
         """testing if a TypeError will be raised if the responsible attribute
@@ -3690,14 +3478,12 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
 
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             new_task.responsible = ['not a user instance']
 
-        self.assertEqual(
-            str(cm.exception),
-            'Task.responsible should be a list of stalker.models.auth.User '
+        assert str(cm.value) == \
+            'Task.responsible should be a list of stalker.models.auth.User ' \
             'instances, not str'
-        )
 
     def test_responsible_argument_is_None_or_skipped_responsible_attribute_comes_from_parents(self):
         """testing if the responsible argument is None or skipped then the
@@ -3718,14 +3504,14 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs['parent'] = new_task2
         new_task3 = Task(**kwargs)
 
-        self.assertEqual(new_task1.responsible, [self.test_user1])
-        self.assertEqual(new_task2.responsible, [self.test_user1])
-        self.assertEqual(new_task3.responsible, [self.test_user1])
+        assert new_task1.responsible == [self.test_user1]
+        assert new_task2.responsible == [self.test_user1]
+        assert new_task3.responsible == [self.test_user1]
 
         new_task2.responsible = [self.test_user2]
-        self.assertEqual(new_task1.responsible, [self.test_user1])
-        self.assertEqual(new_task2.responsible, [self.test_user2])
-        self.assertEqual(new_task3.responsible, [self.test_user2])
+        assert new_task1.responsible == [self.test_user1]
+        assert new_task2.responsible == [self.test_user2]
+        assert new_task3.responsible == [self.test_user2]
 
     def test_responsible_attribute_is_set_to_None_responsible_attribute_comes_from_parents(self):
         """testing if the responsible attribute is None or skipped then its
@@ -3749,14 +3535,14 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         new_task3.responsible = []
         new_task.responsible = [self.test_user2]
 
-        self.assertEqual(new_task1.responsible, [self.test_user2])
-        self.assertEqual(new_task2.responsible, [self.test_user2])
-        self.assertEqual(new_task3.responsible, [self.test_user2])
+        assert new_task1.responsible == [self.test_user2]
+        assert new_task2.responsible == [self.test_user2]
+        assert new_task3.responsible == [self.test_user2]
 
         new_task2.responsible = [self.test_user1]
-        self.assertEqual(new_task1.responsible, [self.test_user2])
-        self.assertEqual(new_task2.responsible, [self.test_user1])
-        self.assertEqual(new_task3.responsible, [self.test_user1])
+        assert new_task1.responsible == [self.test_user2]
+        assert new_task2.responsible == [self.test_user1]
+        assert new_task3.responsible == [self.test_user1]
 
     def test_computed_start_also_sets_start(self):
         """testing if computed_start also sets the start value of the task
@@ -3764,10 +3550,10 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         new_task1 = Task(**kwargs)
         test_value = datetime.datetime(2013, 8, 2, 13, 0, tzinfo=pytz.utc)
-        self.assertNotEqual(new_task1.start, test_value)
+        assert new_task1.start != test_value
         new_task1.computed_start = test_value
-        self.assertEqual(new_task1.computed_start, test_value)
-        self.assertEqual(new_task1.start, test_value)
+        assert new_task1.computed_start == test_value
+        assert new_task1.start == test_value
 
     def test_computed_end_also_sets_end(self):
         """testing if computed_end also sets the end value of the task
@@ -3777,10 +3563,10 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
 
         new_task1 = Task(**kwargs)
         test_value = datetime.datetime(2013, 8, 2, 13, 0, tzinfo=pytz.utc)
-        self.assertNotEqual(new_task1.end, test_value)
+        assert new_task1.end != test_value
         new_task1.computed_end = test_value
-        self.assertEqual(new_task1.computed_end, test_value)
-        self.assertEqual(new_task1.end, test_value)
+        assert new_task1.computed_end == test_value
+        assert new_task1.end == test_value
 
     # TODO: please add tests for _total_logged_seconds for leaf tasks
 
@@ -3790,13 +3576,10 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
 
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             new_task.tickets = 'some value'
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_open_tickets_attribute_is_a_read_only_property(self):
         """testing if the open_tickets attribute is a read-only property
@@ -3804,21 +3587,17 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
 
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             new_task.open_tickets = 'some value'
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
-
+        assert str(cm.value) == "can't set attribute"
 
     def test_reviews_attribute_is_an_empty_list_by_default(self):
         """testing if the reviews attribute is an empty list by default
         """
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.reviews, [])
+        assert new_task.reviews == []
 
     def test_status_is_WFD_for_a_newly_created_task_with_dependencies(self):
         """testing if the status for a newly created task is WFD by default if
@@ -3828,7 +3607,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         kwargs['status'] = self.status_cmpl  # this will be ignored
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.status, self.status_wfd)
+        assert new_task.status == self.status_wfd
 
     def test_status_is_RTS_for_a_newly_created_task_without_dependency(self):
         """testing if the status for a newly created task is RTS by default if
@@ -3839,7 +3618,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs['status'] = self.status_cmpl
         kwargs.pop('depends')
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.status, self.status_rts)
+        assert new_task.status == self.status_rts
 
     def test_review_number_attribute_is_read_only(self):
         """testing if the review_number attribute is read-only
@@ -3847,13 +3626,10 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
 
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             new_task.review_number = 12
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_review_number_attribute_initializes_with_0(self):
         """testing if the review_number attribute initializes to 0
@@ -3861,7 +3637,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
 
-        self.assertEqual(new_task.review_number, 0)
+        assert new_task.review_number == 0
 
     def test_task_dependency_auto_generates_TaskDependency_object(self):
         """testing if a TaskDependency instance is automatically created when
@@ -3874,9 +3650,8 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         new_task.depends.append(self.test_dependent_task1)
 
         task_depends = new_task.task_depends_to[0]
-        self.assertEqual(task_depends.task, new_task)
-        self.assertEqual(task_depends.depends_to,
-                         self.test_dependent_task1)
+        assert task_depends.task == new_task
+        assert task_depends.depends_to == self.test_dependent_task1
 
     def test_alternative_resources_argument_is_skipped(self):
         """testing if the alternative_resources attribute will be an empty list
@@ -3885,7 +3660,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         kwargs.pop('alternative_resources')
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.alternative_resources, [])
+        assert new_task.alternative_resources == []
 
     def test_alternative_resources_argument_is_None(self):
         """testing if the alternative_resources attribute will be an empth list
@@ -3894,20 +3669,18 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         kwargs['alternative_resources'] = None
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.alternative_resources, [])
+        assert new_task.alternative_resources == []
 
     def test_alternative_resources_attribute_is_set_to_None(self):
         """testing if a TypeError will be raised when the alternative_resources
         attribute is set to None
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             new_task.alternative_resources = None
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: None is not list-like'
-        )
 
     def test_alternative_resources_argument_is_not_a_list(self):
         """testing if a TypeError will be raised when the alternative_resources
@@ -3915,26 +3688,22 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """
         kwargs = copy.copy(self.kwargs)
         kwargs['alternative_resources'] = self.test_user3
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Task(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: User is not list-like'
-        )
 
     def test_alternative_resources_attribute_is_not_a_list(self):
         """testing if a TypeError will be raised when the alternative_resources
         attribute is set to a value other than a list
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             new_task.alternative_resources = self.test_user3
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: User is not list-like'
-        )
 
     def test_alternative_resources_argument_elements_are_not_User_instances(self):
         """testing if a TypeError will be raised when the elements in the
@@ -3942,56 +3711,49 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """
         kwargs = copy.copy(self.kwargs)
         kwargs['alternative_resources'] = ['not', 1, 'user']
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Task(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Task.resources should be a list of stalker.models.auth.User '
+        assert str(cm.value) == \
+            'Task.resources should be a list of stalker.models.auth.User ' \
             'instances, not str'
-        )
 
     def test_alternative_resources_attribute_elements_are_not_all_User_instances(self):
         """testing if a TypeError will be raised when the elements in the
         alternative_resources attribute are not all User instances
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             new_task.alternative_resources = ['not', 1, 'user']
 
-        self.assertEqual(
-            str(cm.exception),
-            'Task.resources should be a list of stalker.models.auth.User '
+        assert str(cm.value) == \
+            'Task.resources should be a list of stalker.models.auth.User ' \
             'instances, not str'
-        )
 
     def test_alternative_resources_argument_is_working_properly(self):
         """testing if the alternative_resources argument value is correctly
         passed to the alternative_resources attribute
         """
         new_task = Task(**self.kwargs)
-        self.assertEqual(
+        assert \
             sorted([self.test_user3, self.test_user4, self.test_user5],
-                   key=lambda x: x.name),
+                   key=lambda x: x.name) == \
             sorted(new_task.alternative_resources, key=lambda x: x.name)
-        )
 
     def test_alternative_resources_attribute_is_working_properly(self):
         """testing if the alternative_resources attribute value can be
         correctly set
         """
         new_task = Task(**self.kwargs)
-        self.assertEqual(
-            sorted(new_task.alternative_resources, key=lambda x: x.name),
+        assert \
+            sorted(new_task.alternative_resources, key=lambda x: x.name) == \
             sorted([self.test_user3, self.test_user4, self.test_user5],
                    key=lambda x: x.name)
-        )
         alternative_resources = [self.test_user4, self.test_user5]
         new_task.alternative_resources = alternative_resources
-        self.assertEqual(
-            sorted(alternative_resources, key=lambda x: x.name),
+        assert \
+            sorted(alternative_resources, key=lambda x: x.name) == \
             sorted(new_task.alternative_resources, key=lambda x: x.name)
-        )
 
     def test_allocation_strategy_argument_is_skipped(self):
         """testing if the default value will be used for allocation_strategy
@@ -4001,8 +3763,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         kwargs.pop('allocation_strategy')
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.allocation_strategy,
-                         defaults.allocation_strategy[0])
+        assert new_task.allocation_strategy == defaults.allocation_strategy[0]
 
     def test_allocation_strategy_argument_is_none(self):
         """testing if the default value will be used for allocation_strategy
@@ -4012,8 +3773,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         kwargs['allocation_strategy'] = None
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.allocation_strategy,
-                         defaults.allocation_strategy[0])
+        assert new_task.allocation_strategy == defaults.allocation_strategy[0]
 
     def test_allocation_strategy_attribute_is_set_to_None(self):
         """testing if the default value will be used for the
@@ -4022,8 +3782,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         from stalker import defaults
         new_task = Task(**self.kwargs)
         new_task.allocation_strategy = None
-        self.assertEqual(new_task.allocation_strategy,
-                         defaults.allocation_strategy[0])
+        assert new_task.allocation_strategy == defaults.allocation_strategy[0]
 
     def test_allocation_strategy_argument_is_not_a_string(self):
         """testing if a TypeError will be raised when the allocation_strategy
@@ -4031,28 +3790,24 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """
         kwargs = copy.copy(self.kwargs)
         kwargs['allocation_strategy'] = 234
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Task(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            "Task.allocation_strategy should be one of ['minallocated', "
+        assert str(cm.value) == \
+            "Task.allocation_strategy should be one of ['minallocated', " \
             "'maxloaded', 'minloaded', 'order', 'random'], not int"
-        )
 
     def test_allocation_strategy_attribute_is_set_to_a_value_other_than_string(self):
         """testing if a TypeError will be used when the allocation_strategy
         attribute is set to a value other then a string
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             new_task.allocation_strategy = 234
 
-        self.assertEqual(
-            str(cm.exception),
-            "Task.allocation_strategy should be one of ['minallocated', "
+        assert str(cm.value) == \
+            "Task.allocation_strategy should be one of ['minallocated', " \
             "'maxloaded', 'minloaded', 'order', 'random'], not int"
-        )
 
     def test_allocation_strategy_argument_value_is_not_correct(self):
         """testing if a ValueError will be raised when the allocation_strategy
@@ -4061,14 +3816,12 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """
         kwargs = copy.copy(self.kwargs)
         kwargs['allocation_strategy'] = 'not in the list'
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             Task(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            "Task.allocation_strategy should be one of ['minallocated', "
+        assert str(cm.value) == \
+            "Task.allocation_strategy should be one of ['minallocated', " \
             "'maxloaded', 'minloaded', 'order', 'random'], not not in the list"
-        )
 
     def test_allocation_strategy_attribute_value_is_not_correct(self):
         """testing if a ValueError will be raised when the allocation_strategy
@@ -4076,14 +3829,12 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         maxloaded, minloaded, order, random]
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             new_task.allocation_strategy = 'not in the list'
 
-        self.assertEqual(
-            str(cm.exception),
-            "Task.allocation_strategy should be one of ['minallocated', "
+        assert str(cm.value) == \
+            "Task.allocation_strategy should be one of ['minallocated', " \
             "'maxloaded', 'minloaded', 'order', 'random'], not not in the list"
-        )
 
     def test_allocation_strategy_argument_is_working_properly(self):
         """testing if the allocation_strategy argument value is correctly
@@ -4094,7 +3845,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         kwargs['allocation_strategy'] = test_value
         new_task = Task(**kwargs)
-        self.assertEqual(test_value, new_task.allocation_strategy)
+        assert test_value == new_task.allocation_strategy
 
     def test_allocation_strategy_attribute_is_working_properly(self):
         """testing if the allocation_strategy attribute value can be correctly
@@ -4104,10 +3855,10 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
 
         from stalker import defaults
         test_value = defaults.allocation_strategy[1]
-        self.assertNotEqual(new_task.allocation_strategy, test_value)
+        assert new_task.allocation_strategy != test_value
 
         new_task.allocation_strategy = test_value
-        self.assertEqual(new_task.allocation_strategy, test_value)
+        assert new_task.allocation_strategy == test_value
 
     def test_computed_resources_attribute_value_is_equal_to_the_resources_attribute_for_a_new_task(self):
         """testing if the computed_resources attribute value is equal to the
@@ -4117,8 +3868,8 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         new_task = Task(**kwargs)
         # DBSession.commit()
 
-        self.assertFalse(new_task.is_scheduled)
-        self.assertEqual(new_task.resources, new_task.computed_resources)
+        assert new_task.is_scheduled is False
+        assert new_task.resources == new_task.computed_resources
 
     def test_computed_resources_attribute_value_will_be_updated_with_resources_attribute_if_is_scheduled_is_False_append(self):
         """testing if the computed_resources attribute will be updated with the
@@ -4127,15 +3878,14 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
 
-        self.assertFalse(new_task.is_scheduled)
+        assert new_task.is_scheduled is False
         test_value = [self.test_user3, self.test_user5]
-        self.assertNotEqual(new_task.resources, test_value)
-        self.assertNotEqual(new_task.computed_resources, test_value)
+        assert new_task.resources != test_value
+        assert new_task.computed_resources != test_value
         new_task.resources = test_value
-        self.assertEqual(
-            sorted(new_task.computed_resources, key=lambda x: x.name),
+        assert \
+            sorted(new_task.computed_resources, key=lambda x: x.name) == \
             sorted(test_value, key=lambda x: x.name)
-        )
 
     def test_computed_resources_attribute_value_will_be_updated_with_resources_attribute_if_is_scheduled_is_False_remove(self):
         """testing if the computed_resources attribute will be updated with the
@@ -4145,15 +3895,14 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
 
-        self.assertFalse(new_task.is_scheduled)
+        assert new_task.is_scheduled is False
         test_value = [self.test_user3, self.test_user5]
-        self.assertNotEqual(new_task.resources, test_value)
-        self.assertNotEqual(new_task.computed_resources, test_value)
+        assert new_task.resources != test_value
+        assert new_task.computed_resources != test_value
         new_task.resources = test_value
-        self.assertEqual(
-            sorted(new_task.computed_resources, key=lambda x: x.name),
+        assert \
+            sorted(new_task.computed_resources, key=lambda x: x.name) == \
             sorted(test_value, key=lambda x: x.name)
-        )
 
     def test_computed_resources_attribute_value_will_not_be_updated_with_resources_attribute_if_is_scheduled_is_True(self):
         """testing if the computed_resources attribute will be not be updated
@@ -4162,10 +3911,10 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         new_task = Task(**kwargs)
 
-        self.assertFalse(new_task.is_scheduled)
+        assert new_task.is_scheduled is False
         test_value = [self.test_user3, self.test_user5]
-        self.assertNotEqual(new_task.resources, test_value)
-        self.assertNotEqual(new_task.computed_resources, test_value)
+        assert new_task.resources != test_value
+        assert new_task.computed_resources != test_value
 
         # now set computed_start and computed_end to emulate a computation has
         # been done
@@ -4173,14 +3922,14 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         td = datetime.timedelta
         now = dt.now(pytz.utc)
 
-        self.assertFalse(new_task.is_scheduled)
+        assert new_task.is_scheduled is False
         new_task.computed_start = now
         new_task.computed_end = now + td(hours=1)
 
-        self.assertTrue(new_task.is_scheduled)
+        assert new_task.is_scheduled is True
 
         new_task.resources = test_value
-        self.assertNotEqual(new_task.computed_resources, test_value)
+        assert new_task.computed_resources != test_value
 
     def test_persistent_allocation_argument_is_skipped(self):
         """testing if the default value will be used for the
@@ -4189,7 +3938,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """
         self.kwargs.pop('persistent_allocation')
         new_task = Task(**self.kwargs)
-        self.assertTrue(new_task.persistent_allocation)
+        assert new_task.persistent_allocation is True
 
     def test_persistent_allocation_argument_is_None(self):
         """testing if the default value will be used for the
@@ -4198,7 +3947,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """
         self.kwargs['persistent_allocation'] = None
         new_task = Task(**self.kwargs)
-        self.assertTrue(new_task.persistent_allocation)
+        assert new_task.persistent_allocation is True
 
     def test_persistent_allocation_attribute_is_set_to_None(self):
         """testing if the default value will be used when for the
@@ -4206,7 +3955,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """
         new_task = Task(**self.kwargs)
         new_task.persistent_allocation = None
-        self.assertTrue(new_task.persistent_allocation)
+        assert new_task.persistent_allocation is True
 
     def test_persistent_allocation_argument_is_not_bool(self):
         """testing if the value will be converted to bool if the
@@ -4217,12 +3966,12 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         test_value = 'not a bool'
         kwargs['persistent_allocation'] = test_value
         new_task1 = Task(**kwargs)
-        self.assertEqual(bool(test_value), new_task1.persistent_allocation)
+        assert bool(test_value) == new_task1.persistent_allocation
 
         test_value = 0
         kwargs['persistent_allocation'] = test_value
         new_task2 = Task(**kwargs)
-        self.assertEqual(bool(test_value), new_task2.persistent_allocation)
+        assert bool(test_value) == new_task2.persistent_allocation
 
     def test_persistent_allocation_attribute_is_not_bool(self):
         """testing if the persistent_allocation attribute value will be
@@ -4232,17 +3981,11 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
 
         test_value = 'not a bool'
         new_task.persistent_allocation = test_value
-        self.assertEqual(
-            bool(test_value),
-            new_task.persistent_allocation
-        )
+        assert bool(test_value) ==  new_task.persistent_allocation
 
         test_value = 0
         new_task.persistent_allocation = test_value
-        self.assertEqual(
-            bool(test_value),
-            new_task.persistent_allocation
-        )
+        assert bool(test_value) == new_task.persistent_allocation
 
     def test_persistent_allocation_argument_is_working_properly(self):
         """testing if the persistent_allocation argument value is correctly
@@ -4251,7 +3994,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         kwargs = copy.copy(self.kwargs)
         kwargs['persistent_allocation'] = False
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.persistent_allocation, False)
+        assert new_task.persistent_allocation == False
 
     def test_persistent_allocation_attribute_is_working_properly(self):
         """testing if the persistent_allocation attribute value can be
@@ -4261,37 +4004,32 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         new_task = Task(**kwargs)
 
         new_task.persistent_allocation = False
-        self.assertEqual(new_task.persistent_allocation, False)
+        assert new_task.persistent_allocation is False
 
     def test_path_attribute_is_read_only(self):
         """testing if the path attribute is read only
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             new_task.path = 'some_path'
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_path_attribute_raises_a_RuntimeError_if_no_FilenameTemplate_found(self):
         """testing if the path attribute raises a RuntimeError if there is no
         FilenameTemplate matching the entity_type
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(RuntimeError) as cm:
+        with pytest.raises(RuntimeError) as cm:
             new_task.path
 
-        self.assertEqual(
-            str(cm.exception),
-            "There are no suitable FilenameTemplate (target_entity_type == "
-            "'Task') defined in the Structure of the related Project "
-            "instance, please create a new "
-            "stalker.models.template.FilenameTemplate instance with its "
-            "'target_entity_type' attribute is set to 'Task' and assign it to "
-            "the `templates` attribute of the structure of the project"
-        )
+        assert str(cm.value) == \
+            "There are no suitable FilenameTemplate (target_entity_type == " \
+            "'Task') defined in the Structure of the related Project " \
+            "instance, please create a new " \
+            "stalker.models.template.FilenameTemplate instance with its " \
+            "'target_entity_type' attribute is set to 'Task' and assign it " \
+            "to the `templates` attribute of the structure of the project"
 
     def test_path_attribute_raises_a_RuntimeError_if_no_matching_FilenameTemplate_found(self):
         """testing if the path attribute raises a RuntimeError if there is no
@@ -4313,18 +4051,16 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
             templates=[ft]
         )
         self.test_project1.structure = structure
-        with self.assertRaises(RuntimeError) as cm:
+        with pytest.raises(RuntimeError) as cm:
             new_task.path
 
-        self.assertEqual(
-            str(cm.exception),
-            "There are no suitable FilenameTemplate (target_entity_type == "
-            "'Task') defined in the Structure of the related Project "
-            "instance, please create a new "
-            "stalker.models.template.FilenameTemplate instance with its "
-            "'target_entity_type' attribute is set to 'Task' and assign it to "
-            "the `templates` attribute of the structure of the project"
-        )
+        assert str(cm.value) == \
+            "There are no suitable FilenameTemplate (target_entity_type == " \
+            "'Task') defined in the Structure of the related Project " \
+            "instance, please create a new " \
+            "stalker.models.template.FilenameTemplate instance with its " \
+            "'target_entity_type' attribute is set to 'Task' and assign it " \
+            "to the `templates` attribute of the structure of the project"
 
     def test_path_attribute_is_the_rendered_version_of_the_related_FilenameTemplate_object_in_the_related_project(self):
         """testing if the path attribute value is the rendered version of the
@@ -4350,38 +4086,33 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
 
         self.test_project1.structure = structure
 
-        self.assertEqual('tp1/Modeling', new_task.path)
+        assert new_task.path == 'tp1/Modeling'
         self.test_project1.structure = None
 
     def test_absolute_path_attribute_is_read_only(self):
         """testing if absolute_path is read only
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             new_task.absolute_path = 'some_path'
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_absolute_path_attribute_raises_a_RuntimeError_if_no_FilenameTemplate_found(self):
         """testing if the absolute_path attribute raises a RuntimeError if
         there is no FilenameTemplate matching the entity_type
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(RuntimeError) as cm:
+        with pytest.raises(RuntimeError) as cm:
             new_task.absolute_path
 
-        self.assertEqual(
-            str(cm.exception),
-            "There are no suitable FilenameTemplate (target_entity_type == "
-            "'Task') defined in the Structure of the related Project "
-            "instance, please create a new "
-            "stalker.models.template.FilenameTemplate instance with its "
-            "'target_entity_type' attribute is set to 'Task' and assign it to "
-            "the `templates` attribute of the structure of the project"
-        )
+        assert str(cm.value) == \
+            "There are no suitable FilenameTemplate (target_entity_type == " \
+            "'Task') defined in the Structure of the related Project " \
+            "instance, please create a new " \
+            "stalker.models.template.FilenameTemplate instance with its " \
+            "'target_entity_type' attribute is set to 'Task' and assign it " \
+            "to the `templates` attribute of the structure of the project"
 
     def test_absolute_path_attribute_raises_a_RuntimeError_if_no_matching_FilenameTemplate_found(self):
         """testing if the absolute_path attribute raises a RuntimeError if
@@ -4406,18 +4137,16 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         )
 
         self.test_project1.structure = structure
-        with self.assertRaises(RuntimeError) as cm:
+        with pytest.raises(RuntimeError) as cm:
             new_task.path
 
-        self.assertEqual(
-            str(cm.exception),
-            "There are no suitable FilenameTemplate (target_entity_type == "
-            "'Task') defined in the Structure of the related Project "
-            "instance, please create a new "
-            "stalker.models.template.FilenameTemplate instance with its "
-            "'target_entity_type' attribute is set to 'Task' and assign it to "
-            "the `templates` attribute of the structure of the project"
-        )
+        assert str(cm.value) == \
+            "There are no suitable FilenameTemplate (target_entity_type == " \
+            "'Task') defined in the Structure of the related Project " \
+            "instance, please create a new " \
+            "stalker.models.template.FilenameTemplate instance with its " \
+            "'target_entity_type' attribute is set to 'Task' and assign it " \
+            "to the `templates` attribute of the structure of the project"
 
     def test_absolute_path_attribute_is_the_rendered_version_of_the_related_FilenameTemplate_object_in_the_related_project(self):
         """testing if the absolute_path attribute value is the rendered version
@@ -4445,13 +4174,10 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         self.test_project1.structure = structure
 
         import os
-        self.assertEqual(
-            os.path.normpath(
+        assert os.path.normpath(
                 '%s/tp1/Modeling' % self.test_project1.repositories[0].path
-            ).replace('\\', '/'),
+            ).replace('\\', '/') == \
             new_task.absolute_path
-        )
-        self.test_project1.structure = None
 
     def test_good_argument_is_skipped(self):
         """testing if the good attribute will be None if good argument is
@@ -4466,7 +4192,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         new_task = Task(**kwargs)
         # DBSession.add(new_task)
         # DBSession.commit()
-        self.assertEqual(new_task.good, None)
+        assert new_task.good is None
 
     def test_good_argument_is_None(self):
         """testing if the good attribute will be None if good argument is None
@@ -4476,7 +4202,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         new_task = Task(**kwargs)
         # DBSession.add(new_task)
         # DBSession.commit()
-        self.assertEqual(new_task.good, None)
+        assert new_task.good is None
 
     def test_good_attribute_is_None(self):
         """testing if it is possible to set the good attribute to None
@@ -4487,9 +4213,9 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         new_task = Task(**kwargs)
         # DBSession.add(new_task)
         # DBSession.commit()
-        self.assertNotEqual(new_task.good, None)
+        assert new_task.good is not None
         new_task.good = None
-        self.assertEqual(new_task.good, None)
+        assert new_task.good is None
 
     def test_good_argument_is_not_a_good_instance(self):
         """testing if a TypeError will be raised when the good argument value
@@ -4497,28 +4223,24 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         """
         kwargs = copy.copy(self.kwargs)
         kwargs['good'] = 'not a good instance'
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Task(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Task.good should be a stalker.models.budget.Good instance, not '
+        assert str(cm.value) == \
+            'Task.good should be a stalker.models.budget.Good instance, not ' \
             'str'
-        )
 
     def test_good_attribute_is_not_a_good_instance(self):
         """testing if a TypeError will be raised when the good attribute is not
         set to a Good instance
         """
         new_task = Task(**self.kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             new_task.good = 'not a good instance'
 
-        self.assertEqual(
-            str(cm.exception),
-            'Task.good should be a stalker.models.budget.Good instance, not '
+        assert str(cm.value) == \
+            'Task.good should be a stalker.models.budget.Good instance, not ' \
             'str'
-        )
 
     def test_good_argument_is_working_properly(self):
         """testing if the good argument value is properly passed to the good
@@ -4529,7 +4251,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         new_good = Good(name='Some Good')
         kwargs['good'] = new_good
         new_task = Task(**kwargs)
-        self.assertEqual(new_task.good, new_good)
+        assert new_task.good == new_good
 
     def test_good_attribute_is_working_properly(self):
         """testing if the good attribute value can be correctly set
@@ -4537,9 +4259,9 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         from stalker import Good
         new_good = Good(name='Some Good')
         new_task = Task(**self.kwargs)
-        self.assertNotEqual(new_task.good, new_good)
+        assert new_task.good != new_good
         new_task.good = new_good
-        self.assertEqual(new_task.good, new_good)
+        assert new_task.good == new_good
 
 
 class TaskDBTestDBCase(UnitTestDBBase):
@@ -4724,10 +4446,7 @@ class TaskDBTestDBCase(UnitTestDBBase):
         DBSession.add(new_ticket3)
         DBSession.commit()
 
-        self.assertEqual(
-            new_task.open_tickets,
-            [new_ticket1]
-        )
+        assert new_task.open_tickets == [new_ticket1]
 
     def test_tickets_attribute_is_working_properly(self):
         """testing if the tickets attribute is working properly
@@ -4765,10 +4484,9 @@ class TaskDBTestDBCase(UnitTestDBBase):
         DBSession.add(new_ticket3)
         DBSession.commit()
 
-        self.assertEqual(
-            sorted(new_task.tickets, key=lambda x: x.name),
+        assert \
+            sorted(new_task.tickets, key=lambda x: x.name) == \
             sorted([new_ticket1, new_ticket2], key=lambda x: x.name)
-        )
 
     def test_percent_complete_attribute_is_not_using_any_time_logs_for_a_duration_task(self):
         """testing if the percent_complete attribute does not use any time log
@@ -4794,7 +4512,7 @@ class TaskDBTestDBCase(UnitTestDBBase):
             end=now + td(days=2)
         )
 
-        self.assertEqual(new_task.percent_complete, 0)
+        assert new_task.percent_complete == 0
 
     def test_percent_complete_attribute_is_working_properly_for_a_container_task(self):
         """testing if the percent complete attribute is working properly for a
@@ -4827,7 +4545,7 @@ class TaskDBTestDBCase(UnitTestDBBase):
             end=now - td(hours=2)
         )
 
-        self.assertTrue(tlog1 in new_task.time_logs)
+        assert tlog1 in new_task.time_logs
 
         tlog2 = TimeLog(
             task=new_task,
@@ -4842,19 +4560,11 @@ class TaskDBTestDBCase(UnitTestDBBase):
         new_task.parent = parent_task
         DBSession.commit()
 
-        self.assertTrue(tlog2 in new_task.time_logs)
-        self.assertEqual(new_task.total_logged_seconds, 7 * 3600)
-        self.assertEqual(new_task.schedule_seconds, 9 * 3600)
-        self.assertAlmostEqual(
-            new_task.percent_complete,
-            77.7777778,
-            delta=0.01
-        )
-        self.assertAlmostEqual(
-            parent_task.percent_complete,
-            77.7777778,
-            delta=0.01
-        )
+        assert tlog2 in new_task.time_logs
+        assert new_task.total_logged_seconds == 7 * 3600
+        assert new_task.schedule_seconds == 9 * 3600
+        assert new_task.percent_complete == pytest.approx(77.7777778)
+        assert parent_task.percent_complete == pytest.approx(77.7777778)
 
     def test_percent_complete_attribute_is_working_properly_for_a_leaf_task(self):
         """testing if the percent_complete attribute is working properly for a
@@ -4881,7 +4591,7 @@ class TaskDBTestDBCase(UnitTestDBBase):
         DBSession.add(tlog1)
         DBSession.commit()
 
-        self.assertTrue(tlog1 in new_task.time_logs)
+        assert tlog1 in new_task.time_logs
 
         tlog2 = TimeLog(
             task=new_task,
@@ -4892,9 +4602,9 @@ class TaskDBTestDBCase(UnitTestDBBase):
         DBSession.add(tlog2)
         DBSession.commit()
 
-        self.assertTrue(tlog2 in new_task.time_logs)
-        self.assertEqual(new_task.total_logged_seconds, 20 * 3600)
-        self.assertEqual(new_task.percent_complete, 20.0 / 9.0 * 100.0)
+        assert tlog2 in new_task.time_logs
+        assert new_task.total_logged_seconds == 20 * 3600
+        assert new_task.percent_complete == 20.0 / 9.0 * 100.0
 
     def test_time_logs_attribute_is_working_properly(self):
         """testing if the time_log attribute is working properly
@@ -4903,7 +4613,7 @@ class TaskDBTestDBCase(UnitTestDBBase):
         kwargs['depends'] = []
         new_task1 = Task(**kwargs)
 
-        self.assertEqual(new_task1.depends, [])
+        assert new_task1.depends == []
 
         now = datetime.datetime.now(pytz.utc)
         dt = datetime.timedelta
@@ -4936,24 +4646,24 @@ class TaskDBTestDBCase(UnitTestDBBase):
         )
         # logger.debug('Task.query.get(37): %s' % Task.query.get(37))
 
-        self.assertEqual(new_task2.depends, [])
+        assert new_task2.depends == []
 
         # check if everything is in place
-        self.assertTrue(new_time_log1 in new_task1.time_logs)
-        self.assertTrue(new_time_log2 in new_task1.time_logs)
-        self.assertTrue(new_time_log3 in new_task2.time_logs)
+        assert new_time_log1 in new_task1.time_logs
+        assert new_time_log2 in new_task1.time_logs
+        assert new_time_log3 in new_task2.time_logs
 
         # now move the time_log to test_task1
         new_task1.time_logs.append(new_time_log3)
 
         # check if new_time_log3 is in test_task1
-        self.assertTrue(new_time_log3 in new_task1.time_logs)
+        assert new_time_log3 in new_task1.time_logs
 
         # there needs to be a database session commit to remove the time_log
         # from the previous tasks time_logs attribute
 
-        self.assertTrue(new_time_log3 in new_task1.time_logs)
-        self.assertFalse(new_time_log3 in new_task2.time_logs)
+        assert new_time_log3 in new_task1.time_logs
+        assert new_time_log3 not in new_task2.time_logs
 
     def test_total_logged_seconds_attribute_is_working_properly_for_a_container_task_when_the_time_log_of_child_is_changed(self):
         """testing if the total_logged_seconds attribute is working properly
@@ -4982,15 +4692,11 @@ class TaskDBTestDBCase(UnitTestDBBase):
             end=now + td(hours=8)
         )
 
-        self.assertEqual(
-            parent_task.total_logged_seconds, 8 * 60 * 60
-        )
+        assert parent_task.total_logged_seconds == 8 * 60 * 60
 
         # now update the time log
         tlog1.end = now + td(hours=16)
-        self.assertEqual(
-            parent_task.total_logged_seconds, 16 * 60 * 60
-        )
+        assert parent_task.total_logged_seconds == 16 * 60 * 60
 
     def test_total_logged_seconds_is_the_sum_of_all_time_logs(self):
         """testing if the total_logged_seconds is the sum of all time_logs in
@@ -5019,7 +4725,7 @@ class TaskDBTestDBCase(UnitTestDBBase):
         DBSession.add(tlog1)
         DBSession.commit()
 
-        self.assertTrue(tlog1 in new_task.time_logs)
+        assert tlog1 in new_task.time_logs
 
         tlog2 = TimeLog(
             task=new_task,
@@ -5030,8 +4736,8 @@ class TaskDBTestDBCase(UnitTestDBBase):
         DBSession.add(tlog2)
         DBSession.commit()
 
-        self.assertTrue(tlog2 in new_task.time_logs)
-        self.assertEqual(new_task.total_logged_seconds, 20 * 3600)
+        assert tlog2 in new_task.time_logs
+        assert new_task.total_logged_seconds == 20 * 3600
 
     def test_total_logged_seconds_is_the_sum_of_all_time_logs_of_children_for_a_container_task(self):
         """testing if the total_logged_seconds is the sum of all time_logs of
@@ -5064,7 +4770,7 @@ class TaskDBTestDBCase(UnitTestDBBase):
         DBSession.add(tlog1)
         DBSession.commit()
 
-        self.assertTrue(tlog1 in new_task.time_logs)
+        assert tlog1 in new_task.time_logs
 
         tlog2 = TimeLog(
             task=new_task,
@@ -5075,9 +4781,9 @@ class TaskDBTestDBCase(UnitTestDBBase):
         DBSession.add(tlog2)
         DBSession.commit()
 
-        self.assertTrue(tlog2 in new_task.time_logs)
-        self.assertEqual(new_task.total_logged_seconds, 20 * 3600)
-        self.assertEqual(parent_task.total_logged_seconds, 20 * 3600)
+        assert tlog2 in new_task.time_logs
+        assert new_task.total_logged_seconds == 20 * 3600
+        assert parent_task.total_logged_seconds == 20 * 3600
 
     def test_total_logged_seconds_is_the_sum_of_all_time_logs_of_children_for_a_container_task_deeper(self):
         """testing if the total_logged_seconds is the sum of all time_logs of
@@ -5096,15 +4802,15 @@ class TaskDBTestDBCase(UnitTestDBBase):
         kwargs.pop('schedule_unit')
 
         parent_task1 = Task(**kwargs)
-        self.assertEqual(parent_task1.total_logged_seconds, 0)
+        assert parent_task1.total_logged_seconds == 0
 
         parent_task2 = Task(**kwargs)
-        self.assertEqual(parent_task2.total_logged_seconds, 0)
+        assert parent_task2.total_logged_seconds == 0
 
         # create some other child
         child = Task(**kwargs)
 
-        self.assertEqual(child.total_logged_seconds, 0)
+        assert child.total_logged_seconds == 0
         # create a TimeLog for that child
         from stalker import TimeLog
         tlog1 = TimeLog(
@@ -5117,16 +4823,16 @@ class TaskDBTestDBCase(UnitTestDBBase):
         DBSession.add(tlog1)
         DBSession.commit()
 
-        self.assertEqual(child.total_logged_seconds, 10 * 3600)
+        assert child.total_logged_seconds == 10 * 3600
         parent_task2.children.append(child)
-        self.assertEqual(parent_task2.total_logged_seconds, 10 * 3600)
+        assert parent_task2.total_logged_seconds == 10 * 3600
 
         # self.test_task1.parent = parent_task
         parent_task1.children.append(new_task)
-        self.assertEqual(parent_task1.total_logged_seconds, 0)
+        assert parent_task1.total_logged_seconds == 0
 
         parent_task1.parent = parent_task2
-        self.assertEqual(parent_task2.total_logged_seconds, 10 * 3600)
+        assert parent_task2.total_logged_seconds == 10 * 3600
 
         new_task.time_logs = []
         tlog2 = TimeLog(
@@ -5138,10 +4844,10 @@ class TaskDBTestDBCase(UnitTestDBBase):
         DBSession.add(tlog2)
         DBSession.commit()
 
-        self.assertTrue(tlog2 in new_task.time_logs)
-        self.assertEqual(new_task.total_logged_seconds, 8 * 3600)
-        self.assertEqual(parent_task1.total_logged_seconds, 8 * 3600)
-        self.assertEqual(parent_task2.total_logged_seconds, 18 * 3600)
+        assert tlog2 in new_task.time_logs
+        assert new_task.total_logged_seconds == 8 * 3600
+        assert parent_task1.total_logged_seconds == 8 * 3600
+        assert parent_task2.total_logged_seconds == 18 * 3600
 
         tlog3 = TimeLog(
             task=new_task,
@@ -5153,9 +4859,9 @@ class TaskDBTestDBCase(UnitTestDBBase):
         DBSession.add(tlog3)
         DBSession.commit()
 
-        self.assertEqual(new_task.total_logged_seconds, 20 * 3600)
-        self.assertEqual(parent_task1.total_logged_seconds, 20 * 3600)
-        self.assertEqual(parent_task2.total_logged_seconds, 30 * 3600)
+        assert new_task.total_logged_seconds == 20 * 3600
+        assert parent_task1.total_logged_seconds == 20 * 3600
+        assert parent_task2.total_logged_seconds ==  30 * 3600
 
     def test_remaining_seconds_is_working_properly(self):
         """testing if the remaining hours is working properly
@@ -5184,10 +4890,9 @@ class TaskDBTestDBCase(UnitTestDBBase):
         )
 
         # check
-        self.assertEqual(
-            new_task.remaining_seconds,
+        assert \
+            new_task.remaining_seconds == \
             new_task.schedule_seconds - new_task.total_logged_seconds
-        )
 
         # -------------- DAYS --------------
         kwargs['schedule_timing'] = 23
@@ -5203,10 +4908,9 @@ class TaskDBTestDBCase(UnitTestDBBase):
         )
 
         # check
-        self.assertEqual(
-            new_task.remaining_seconds,
+        assert \
+            new_task.remaining_seconds == \
             new_task.schedule_seconds - new_task.total_logged_seconds
-        )
 
         # add another 2 hours
         tlog3 = TimeLog(
@@ -5216,10 +4920,9 @@ class TaskDBTestDBCase(UnitTestDBBase):
             resource=new_task.resources[0]
         )
 
-        self.assertEqual(
-            new_task.remaining_seconds,
+        assert \
+            new_task.remaining_seconds == \
             new_task.schedule_seconds - new_task.total_logged_seconds
-        )
 
         # ------------------- WEEKS ------------------
         kwargs['schedule_timing'] = 2
@@ -5236,10 +4939,9 @@ class TaskDBTestDBCase(UnitTestDBBase):
         new_task.time_logs.append(tlog4)
 
         # check
-        self.assertEqual(
-            new_task.remaining_seconds,
+        assert \
+            new_task.remaining_seconds == \
             new_task.schedule_seconds - new_task.total_logged_seconds
-        )
 
         # create a time_log of 1 week
         tlog5 = TimeLog(
@@ -5251,10 +4953,9 @@ class TaskDBTestDBCase(UnitTestDBBase):
         new_task.time_logs.append(tlog5)
 
         # check
-        self.assertEqual(
-            new_task.remaining_seconds,
+        assert \
+            new_task.remaining_seconds == \
             new_task.schedule_seconds - new_task.total_logged_seconds
-        )
 
         # ------------------ MONTH -------------------
         kwargs['schedule_timing'] = 2.5
@@ -5272,10 +4973,9 @@ class TaskDBTestDBCase(UnitTestDBBase):
         new_task.time_logs.append(tlog6)
 
         # check
-        self.assertEqual(
-            new_task.remaining_seconds,
+        assert \
+            new_task.remaining_seconds == \
             new_task.schedule_seconds - new_task.total_logged_seconds
-        )
 
         # ------------------ YEARS ---------------------
         kwargs['schedule_timing'] = 3.1
@@ -5294,8 +4994,6 @@ class TaskDBTestDBCase(UnitTestDBBase):
         new_task.time_logs.append(tlog8)
 
         # check
-        self.assertEqual(
-            new_task.remaining_seconds,
+        assert \
+            new_task.remaining_seconds == \
             new_task.schedule_seconds - new_task.total_logged_seconds
-        )
-

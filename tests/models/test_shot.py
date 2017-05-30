@@ -205,33 +205,29 @@ class ShotTester(UnitTestDBBase):
         """testing if the __auto_name__ class attribute is set to True for Shot
         class
         """
-        self.assertTrue(Shot.__auto_name__)
+        assert Shot.__auto_name__ is True
 
     def test___hash___value_is_correctly_calculated(self):
         """testing if __hash__ value is correctly calculated
         """
-        self.assertTrue(
-            self.test_shot.__hash__(),
-            hash(self.test_shot.id) +
-            2 * hash(self.test_shot.name) +
+        assert self.test_shot.__hash__() == \
+            hash(self.test_shot.id) + \
+            2 * hash(self.test_shot.name) + \
             3 * hash(self.test_shot.entity_type)
-        )
 
     def test_project_argument_is_skipped(self):
         """testing if a TypeError will be raised when the project argument is
         skipped
         """
         self.kwargs.pop('project')
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Shot(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Shot.project should be an instance of '
-            'stalker.models.project.Project, not NoneType. Or please supply a '
-            'stalker.models.task.Task with the parent argument, so Stalker '
-            'can use the project of the supplied parent task'
-        )
+        assert str(cm.value) == \
+            'Shot.project should be an instance of ' \
+            'stalker.models.project.Project, not NoneType. Or please supply ' \
+            'a stalker.models.task.Task with the parent argument, so ' \
+            'Stalker can use the project of the supplied parent task'
 
     def test_project_argument_is_None(self):
         """testing if a TypeError will be raised when the project argument is
@@ -239,16 +235,14 @@ class ShotTester(UnitTestDBBase):
         """
         self.kwargs["project"] = None
 
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Shot(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Shot.project should be an instance of '
-            'stalker.models.project.Project, not NoneType. Or please supply a '
-            'stalker.models.task.Task with the parent argument, so Stalker '
-            'can use the project of the supplied parent task'
-        )
+        assert str(cm.value) == \
+            'Shot.project should be an instance of ' \
+            'stalker.models.project.Project, not NoneType. Or please supply ' \
+            'a stalker.models.task.Task with the parent argument, so ' \
+            'Stalker can use the project of the supplied parent task'
 
     def test_project_argument_is_not_Project_instance(self):
         """testing if a TypeError will be raised when the given project
@@ -257,10 +251,10 @@ class ShotTester(UnitTestDBBase):
         test_values = [1, 1.2, "project", ["a", "project"]]
         for test_value in test_values:
             self.kwargs["project"] = test_value
-            with self.assertRaises(TypeError) as cm:
+            with pytest.raises(TypeError) as cm:
                 Shot(self.kwargs)
 
-            assert str(cm.exception) == 'Shot.project should be an instance ' \
+            assert str(cm.value) == 'Shot.project should be an instance ' \
                                         'of stalker.models.project.Project, ' \
                                         'not NoneType. Or please supply a ' \
                                         'stalker.models.task.Task with the ' \
@@ -274,22 +268,16 @@ class ShotTester(UnitTestDBBase):
         """
         # lets try to assign the shot to the same sequence2 which has another
         # shot with the same code
-        self.assertEqual(
-            self.kwargs['code'],
-            self.test_shot.code
-        )
-        with self.assertRaises(ValueError) as cm:
+        assert self.kwargs['code'] == self.test_shot.code
+        with pytest.raises(ValueError) as cm:
             Shot(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'There is a Shot with the same code: SH123'
-        )
+        assert str(cm.value) == 'There is a Shot with the same code: SH123'
 
         # this should not raise a ValueError
         self.kwargs["code"] = "DifferentCode"
         new_shot2 = Shot(**self.kwargs)
-        self.assertTrue(isinstance(new_shot2, Shot))
+        assert isinstance(new_shot2, Shot)
 
     def test_code_attribute_is_set_to_the_same_value(self):
         """testing if a ValueError will NOT be raised when the shot.code is set
@@ -300,24 +288,21 @@ class ShotTester(UnitTestDBBase):
     def test_project_attribute_is_read_only(self):
         """testing if the project attribute is read only
         """
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             self.test_shot.project = self.test_project2
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_project_contains_shots(self):
         """testing if the current shot is going to be added to the Project, so
         the Project.shots list will contain the current shot
         """
-        self.assertTrue(self.test_shot in self.test_shot.project.shots)
+        assert self.test_shot in self.test_shot.project.shots
 
     def test_project_argument_is_working_properly(self):
         """testing if the project argument is working properly
         """
-        self.assertEqual(self.test_shot.project, self.kwargs["project"])
+        assert self.test_shot.project == self.kwargs["project"]
 
     def test_sequences_argument_is_skipped(self):
         """testing if the sequences attribute will be an empty list when the
@@ -326,7 +311,7 @@ class ShotTester(UnitTestDBBase):
         self.kwargs.pop('sequences')
         self.kwargs['code'] = 'DifferentCode'
         new_shot = Shot(**self.kwargs)
-        self.assertEqual(new_shot.sequences, [])
+        assert new_shot.sequences == []
 
     def test_sequences_argument_is_None(self):
         """testing if the sequences attribute will be an empty list when the
@@ -335,7 +320,7 @@ class ShotTester(UnitTestDBBase):
         self.kwargs['sequences'] = None
         self.kwargs['code'] = 'NewCode'
         new_shot = Shot(**self.kwargs)
-        self.assertEqual(new_shot.sequences, [])
+        assert new_shot.sequences == []
 
     def test_sequences_attribute_is_set_to_None(self):
         """testing if a TypeError will be raised when the sequences attribute
@@ -418,10 +403,9 @@ class ShotTester(UnitTestDBBase):
         self.kwargs['sequences'] = seqs
         new_shot = Shot(**self.kwargs)
 
-        self.assertEqual(
-            sorted(new_shot.sequences, key=lambda x: x.name),
+        assert \
+            sorted(new_shot.sequences, key=lambda x: x.name) == \
             sorted(seqs, key=lambda x: x.name)
-        )
 
     def test_sequences_attribute_is_working_properly(self):
         """testing if the sequences attribute is working properly
@@ -452,10 +436,9 @@ class ShotTester(UnitTestDBBase):
         new_shot.sequences.append(seq3)
 
         seqs = [seq1, seq2, seq3]
-        self.assertEqual(
-            sorted(new_shot.sequences, key=lambda x: x.name),
+        assert \
+            sorted(new_shot.sequences, key=lambda x: x.name) == \
             sorted(seqs, key=lambda x: x.name)
-        )
 
     def test_scenes_argument_is_skipped(self):
         """testing if the scenes attribute will be an empty list when the
@@ -464,7 +447,7 @@ class ShotTester(UnitTestDBBase):
         self.kwargs.pop('scenes')
         self.kwargs['code'] = 'DifferentCode'
         new_shot = Shot(**self.kwargs)
-        self.assertEqual(new_shot.scenes, [])
+        assert new_shot.scenes == []
 
     def test_scenes_argument_is_None(self):
         """testing if the scenes attribute will be an empty list when the
@@ -473,19 +456,17 @@ class ShotTester(UnitTestDBBase):
         self.kwargs['scenes'] = None
         self.kwargs['code'] = 'NewCode'
         new_shot = Shot(**self.kwargs)
-        self.assertEqual(new_shot.scenes, [])
+        assert new_shot.scenes == []
 
     def test_scenes_attribute_is_set_to_None(self):
         """testing if a TypeError will be raised when the scenes attribute
         is set to None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_shot.scenes = None
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: None is not list-like'
-        )
 
     def test_scenes_argument_is_not_a_list(self):
         """testing if a TypeError will be raised when the scenes argument is
@@ -493,25 +474,21 @@ class ShotTester(UnitTestDBBase):
         """
         self.kwargs['scenes'] = 'not a list'
         self.kwargs['code'] = 'NewCode'
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Shot(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: str is not list-like'
-        )
 
     def test_scenes_attribute_is_not_a_list(self):
         """testing if a TypeError will be raised when the scenes attribute
         is not a list
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_shot.scenes = 'not a list'
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: str is not list-like'
-        )
 
     def test_scenes_argument_is_not_a_list_of_Scene_instances(self):
         """testing if a TypeError will be raised when the scenes argument is
@@ -519,27 +496,23 @@ class ShotTester(UnitTestDBBase):
         """
         self.kwargs['scenes'] = ['not', 1, 'list', 'of', 'scenes']
         self.kwargs['code'] = 'NewShot'
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Shot(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Shot.scenes should all be stalker.models.scene.Scene instances, '
-            'not str'
-        )
+        assert str(cm.value) == \
+            'Shot.scenes should all be stalker.models.scene.Scene ' \
+            'instances, not str'
 
     def test_scenes_attribute_is_not_a_list_of_Scene_instances(self):
         """testing if a TypeError will be raised when the scenes attribute
         is not a list of Scene instances
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_shot.scenes = ['not', 1, 'list', 'of', 'scenes']
 
-        self.assertEqual(
-            str(cm.exception),
-            'Shot.scenes should all be stalker.models.scene.Scene '
+        assert str(cm.value) == \
+            'Shot.scenes should all be stalker.models.scene.Scene ' \
             'instances, not str'
-        )
 
     def test_scenes_argument_is_working_properly(self):
         """testing if the scenes attribute is working properly
@@ -554,10 +527,9 @@ class ShotTester(UnitTestDBBase):
         self.kwargs['scenes'] = seqs
         new_shot = Shot(**self.kwargs)
 
-        self.assertEqual(
-            sorted(new_shot.scenes, key=lambda x: x.name),
+        assert \
+            sorted(new_shot.scenes, key=lambda x: x.name) == \
             sorted(seqs, key=lambda x: x.name)
-        )
 
     def test_scenes_attribute_is_working_properly(self):
         """testing if the scenes attribute is working properly
@@ -576,10 +548,9 @@ class ShotTester(UnitTestDBBase):
         new_shot.scenes.append(sce3)
 
         seqs = [sce1, sce2, sce3]
-        self.assertEqual(
-            sorted(new_shot.scenes, key=lambda x: x.name),
+        assert \
+            sorted(new_shot.scenes, key=lambda x: x.name) == \
             sorted(seqs, key=lambda x: x.name)
-        )
 
     def test_cut_in_argument_is_skipped(self):
         """testing if the cut_in argument is skipped the cut_in argument will
@@ -590,8 +561,8 @@ class ShotTester(UnitTestDBBase):
         self.kwargs['source_in'] = None
         self.kwargs['source_out'] = None
         new_shot = Shot(**self.kwargs)
-        self.assertEqual(new_shot.cut_out, self.kwargs['cut_out'])
-        self.assertEqual(new_shot.cut_in, new_shot.cut_out)
+        assert new_shot.cut_out == self.kwargs['cut_out']
+        assert new_shot.cut_in == new_shot.cut_out
 
     def test_cut_in_argument_is_none(self):
         """testing if the cut_in attribute value will be calculated from the
@@ -602,20 +573,17 @@ class ShotTester(UnitTestDBBase):
         self.kwargs['source_in'] = None
         self.kwargs['source_out'] = None
         shot = Shot(**self.kwargs)
-        self.assertEqual(shot.cut_out, self.kwargs['cut_out'])
-        self.assertEqual(shot.cut_in, shot.cut_out)
+        assert shot.cut_out == self.kwargs['cut_out']
+        assert shot.cut_in == shot.cut_out
 
     def test_cut_in_attribute_is_set_to_none(self):
         """testing if a TypeError will be raised when the cut_in attribute is
         set to None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_shot.cut_in = None
 
-        self.assertEqual(
-            str(cm.exception),
-            'Shot.cut_in should be an int, not NoneType'
-        )
+        assert str(cm.value) == 'Shot.cut_in should be an int, not NoneType'
 
     def test_cut_in_argument_is_not_integer(self):
         """testing if a TypeError will be raised if the cut_in argument is not
@@ -624,25 +592,19 @@ class ShotTester(UnitTestDBBase):
         self.kwargs["code"] = "SH123A"
         self.kwargs["cut_in"] = "a string"
 
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Shot(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Shot.cut_in should be an int, not str'
-        )
+        assert str(cm.value) == 'Shot.cut_in should be an int, not str'
 
     def test_cut_in_attribute_is_not_integer(self):
         """testing if a TypeError will be raised if the cut_in attribute is set
         to a value other than an integer
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_shot.cut_in = 'a string'
 
-        self.assertEqual(
-            str(cm.exception),
-            'Shot.cut_in should be an int, not str'
-        )
+        assert str(cm.value) == 'Shot.cut_in should be an int, not str'
 
     def test_cut_in_argument_is_bigger_than_cut_out_argument(self):
         """testing if a cut_out will be offset when the cut_in argument
@@ -653,16 +615,16 @@ class ShotTester(UnitTestDBBase):
         self.kwargs['source_in'] = None
         self.kwargs['source_out'] = None
         shot = Shot(**self.kwargs)
-        self.assertEqual(shot.cut_in, 149)
-        self.assertEqual(shot.cut_out, 149)
+        assert shot.cut_in == 149
+        assert shot.cut_out == 149
 
     def test_cut_in_attribute_is_bigger_than_cut_out_attribute(self):
         """testing if a the cut_out attribute value will be offset when the
         cut_in attribute is set bigger than cut_out attribute value
         """
         self.test_shot.cut_in = self.test_shot.cut_out + 10
-        self.assertEqual(self.test_shot.cut_in, 159)
-        self.assertEqual(self.test_shot.cut_out, self.test_shot.cut_in)
+        assert self.test_shot.cut_in == 159
+        assert self.test_shot.cut_out == self.test_shot.cut_in
 
     def test_cut_out_argument_is_skipped(self):
         """testing if the cut_out attribute will be calculated from cut_in
@@ -673,8 +635,8 @@ class ShotTester(UnitTestDBBase):
         self.kwargs['source_in'] = None
         self.kwargs['source_out'] = None
         new_shot = Shot(**self.kwargs)
-        self.assertEqual(new_shot.cut_in, self.kwargs['cut_in'])
-        self.assertEqual(new_shot.cut_out, new_shot.cut_in)
+        assert new_shot.cut_in == self.kwargs['cut_in']
+        assert new_shot.cut_out == new_shot.cut_in
 
     def test_cut_out_argument_is_set_to_none(self):
         """testing if the cut_out argument is set to None the cut_out attribute
@@ -686,19 +648,16 @@ class ShotTester(UnitTestDBBase):
         self.kwargs['source_out'] = None
 
         shot = Shot(**self.kwargs)
-        self.assertEqual(shot.cut_in, self.kwargs['cut_in'])
-        self.assertEqual(shot.cut_out, shot.cut_in)
+        assert shot.cut_in == self.kwargs['cut_in']
+        assert shot.cut_out == shot.cut_in
 
     def test_cut_out_attribute_is_set_to_none(self):
         """testing if a TypeError will be raised if the cut_out attribute is
         set to None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_shot.cut_out = None
-        self.assertEqual(
-            str(cm.exception),
-            'Shot.cut_out should be an int, not NoneType'
-        )
+        assert str(cm.value) == 'Shot.cut_out should be an int, not NoneType'
 
     def test_cut_out_argument_is_not_integer(self):
         """testing if a TypeError will be raised when the cut_out argument is
@@ -706,24 +665,18 @@ class ShotTester(UnitTestDBBase):
         """
         self.kwargs["code"] = "SH123A"
         self.kwargs["cut_out"] = "a string"
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Shot(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Shot.cut_out should be an int, not str'
-        )
+        assert str(cm.value) == 'Shot.cut_out should be an int, not str'
 
     def test_cut_out_attribute_is_not_integer(self):
         """testing if a TypeError will be raised if the cut_out attribute is
         set to a value other than an integer
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_shot.cut_out = "a string"
-        self.assertEqual(
-            str(cm.exception),
-            'Shot.cut_out should be an int, not str'
-        )
+        assert str(cm.value) == 'Shot.cut_out should be an int, not str'
 
     def test_cut_out_argument_is_smaller_than_cut_in_argument(self):
         """testing if the cut_out attribute is updated when the cut_out
@@ -734,49 +687,42 @@ class ShotTester(UnitTestDBBase):
         self.kwargs['source_in'] = None
         self.kwargs['source_out'] = None
         shot = Shot(**self.kwargs)
-        self.assertEqual(shot.cut_in, 102)
-        self.assertEqual(shot.cut_out, 102)
+        assert shot.cut_in == 102
+        assert shot.cut_out == 102
 
     def test_cut_out_attribute_is_smaller_than_cut_in_attribute(self):
         """testing if the cut_out attribute is updated when it is smaller than
         cut_in attribute
         """
         self.test_shot.cut_out = self.test_shot.cut_in - 10
-        self.assertEqual(self.test_shot.cut_in, 102)
-        self.assertEqual(self.test_shot.cut_out, 102)
+        assert self.test_shot.cut_in == 102
+        assert self.test_shot.cut_out == 102
 
     def test_cut_duration_attribute_is_not_instance_of_int(self):
         """testing if a TypeError will be raised when the cut_duration
         attribute is set to a value other than an integer
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_shot.cut_duration = "a string"
 
-        self.assertEqual(
-            str(cm.exception),
-            'Shot.cut_duration should be a positive integer value, not '
-            'str'
-        )
+        assert str(cm.value) == \
+            'Shot.cut_duration should be a positive integer value, not str'
 
     def test_cut_duration_attribute_will_be_updated_when_cut_in_attribute_changed(self):
         """testing if the cut_duration attribute will be updated when the
         cut_in attribute changed
         """
         self.test_shot.cut_in = 1
-        self.assertEqual(
-            self.test_shot.cut_duration,
-            self.test_shot.cut_out -
-            self.test_shot.cut_in + 1
-        )
+        assert self.test_shot.cut_duration == \
+            self.test_shot.cut_out - self.test_shot.cut_in + 1
 
     def test_cut_duration_attribute_will_be_updated_when_cut_out_attribute_changed(self):
         """testing if the cut_duration attribute will be updated when the
         cut_out attribute changed
         """
         self.test_shot.cut_out = 1000
-        self.assertEqual(self.test_shot.cut_duration,
-                         self.test_shot.cut_out - \
-                         self.test_shot.cut_in + 1)
+        assert self.test_shot.cut_duration == \
+            self.test_shot.cut_out - self.test_shot.cut_in + 1
 
     def test_cut_duration_attribute_changes_cut_out_attribute(self):
         """testing if changes in cut_duration attribute will also affect
@@ -784,35 +730,29 @@ class ShotTester(UnitTestDBBase):
         """
         first_cut_out = self.test_shot.cut_out
         self.test_shot.cut_duration = 245
-        self.assertNotEqual(self.test_shot.cut_out, first_cut_out)
-        self.assertEqual(
-            self.test_shot.cut_out,
+        assert self.test_shot.cut_out != first_cut_out
+        assert self.test_shot.cut_out == \
             self.test_shot.cut_in + self.test_shot.cut_duration - 1
-        )
 
     def test_cut_duration_attribute_is_zero(self):
         """testing if a ValueError will be raised when the cut_duration
         attribute is set to zero
         """
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             self.test_shot.cut_duration = 0
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Shot.cut_duration can not be set to zero or a negative value'
-        )
 
     def test_cut_duration_attribute_is_negative(self):
         """testing if a ValueError will be raised when the cut_duration
         attribute is set to a negative value
         """
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             self.test_shot.cut_duration = -100
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Shot.cut_duration can not be set to zero or a negative value'
-        )
 
     def test_source_in_argument_is_skipped(self):
         """testing if the source_in argument is skipped the source_in argument
@@ -821,7 +761,7 @@ class ShotTester(UnitTestDBBase):
         self.kwargs["code"] = "SH123A"
         self.kwargs.pop('source_in')
         shot = Shot(**self.kwargs)
-        self.assertEqual(shot.source_in, shot.cut_in)
+        assert shot.source_in == shot.cut_in
 
     def test_source_in_argument_is_none(self):
         """testing if the source_in attribute value will be equal to the cut_in
@@ -830,19 +770,17 @@ class ShotTester(UnitTestDBBase):
         self.kwargs["code"] = "SH123A"
         self.kwargs["source_in"] = None
         shot = Shot(**self.kwargs)
-        self.assertEqual(shot.source_in, shot.cut_in)
+        assert shot.source_in == shot.cut_in
 
     def test_source_in_attribute_is_set_to_none(self):
         """testing if a TypeError will be raised when the source_in attribute
         is set to None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_shot.source_in = None
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Shot.source_in should be an int, not NoneType'
-        )
 
     def test_source_in_argument_is_not_integer(self):
         """testing if a TypeError will be raised if the source_in argument is
@@ -851,25 +789,21 @@ class ShotTester(UnitTestDBBase):
         self.kwargs["code"] = "SH123A"
         self.kwargs["source_in"] = "a string"
 
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Shot(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Shot.source_in should be an int, not str'
-        )
 
     def test_source_in_attribute_is_not_integer(self):
         """testing if a TypeError will be raised if the source_in attribute is
         set to a value other than an integer
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_shot.source_in = 'a string'
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Shot.source_in should be an int, not str'
-        )
 
     def test_source_in_argument_is_bigger_than_source_out_argument(self):
         """testing if a ValueError will be raised when the source_in argument
@@ -878,14 +812,12 @@ class ShotTester(UnitTestDBBase):
         self.kwargs['code'] = 'SH123A'
         self.kwargs['source_out'] = self.kwargs['cut_out'] - 10
         self.kwargs['source_in'] = self.kwargs['source_out'] + 5
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             Shot(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Shot.source_out can not be smaller than Shot.source_in, '
+        assert str(cm.value) == \
+            'Shot.source_out can not be smaller than Shot.source_in, ' \
             'source_in: 144 where as source_out: 139'
-        )
 
     def test_source_in_attribute_is_bigger_than_source_out_attribute(self):
         """testing if a ValueError will be raised when the source_ni attribute
@@ -894,14 +826,12 @@ class ShotTester(UnitTestDBBase):
         # give it a little bit of room, to be sure that the ValueError is not
         # due to the cut_out
         self.test_shot.source_out -= 5
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             self.test_shot.source_in = self.test_shot.source_out + 1
 
-        self.assertEqual(
-            str(cm.exception),
-            'Shot.source_in can not be bigger than Shot.source_out, '
+        assert str(cm.value) == \
+            'Shot.source_in can not be bigger than Shot.source_out, ' \
             'source_in: 136 where as source_out: 135'
-        )
 
     def test_source_in_argument_is_smaller_than_cut_in(self):
         """testing if a ValueError will be raised when the source_in argument
@@ -909,14 +839,12 @@ class ShotTester(UnitTestDBBase):
         """
         self.kwargs['code'] = 'SH123A'
         self.kwargs['source_in'] = self.kwargs['cut_in'] - 10
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             Shot(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Shot.source_in can not be smaller than Shot.cut_in, cut_in: 112 '
-            'where as source_in: 102'
-        )
+        assert str(cm.value) == \
+            'Shot.source_in can not be smaller than Shot.cut_in, cut_in: ' \
+            '112 where as source_in: 102'
 
     def test_source_in_argument_is_bigger_than_cut_out(self):
         """testing if a ValueError will be raised when the source_in argument
@@ -924,14 +852,12 @@ class ShotTester(UnitTestDBBase):
         """
         self.kwargs['code'] = 'SH123A'
         self.kwargs['source_in'] = self.kwargs['cut_out'] + 10
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             Shot(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Shot.source_in can not be bigger than Shot.cut_out, cut_out: 149 '
-            'where as source_in: 159'
-        )
+        assert str(cm.value) == \
+            'Shot.source_in can not be bigger than Shot.cut_out, cut_out: ' \
+            '149 where as source_in: 159'
 
     def test_source_out_argument_is_skipped(self):
         """testing if the source_out attribute will be equal to cut_out
@@ -940,7 +866,7 @@ class ShotTester(UnitTestDBBase):
         self.kwargs["code"] = "SH123A"
         self.kwargs.pop("source_out")
         new_shot = Shot(**self.kwargs)
-        self.assertEqual(new_shot.source_out, new_shot.cut_out)
+        assert new_shot.source_out == new_shot.cut_out
 
     def test_source_out_argument_is_none(self):
         """testing if the source_out attribute value will be equal to cut_out
@@ -950,18 +876,16 @@ class ShotTester(UnitTestDBBase):
         self.kwargs["source_out"] = None
 
         shot = Shot(**self.kwargs)
-        self.assertEqual(shot.source_out, shot.cut_out)
+        assert shot.source_out == shot.cut_out
 
     def test_source_out_attribute_is_set_to_none(self):
         """testing if a TypeError will be raised if the source_out attribute is
         set to None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_shot.source_out = None
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Shot.source_out should be an int, not NoneType'
-        )
 
     def test_source_out_argument_is_not_integer(self):
         """testing if a TypeError will be raised when the source_out argument
@@ -969,24 +893,18 @@ class ShotTester(UnitTestDBBase):
         """
         self.kwargs["code"] = "SH123A"
         self.kwargs["source_out"] = "a string"
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Shot(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Shot.source_out should be an int, not str'
-        )
+        assert str(cm.value) == 'Shot.source_out should be an int, not str'
 
     def test_source_out_attribute_is_not_integer(self):
         """testing if a TypeError will be raised if the source_out attribute is
         set to a value other than an integer
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_shot.source_out = "a string"
-        self.assertEqual(
-            str(cm.exception),
-            'Shot.source_out should be an int, not str'
-        )
+        assert str(cm.value) == 'Shot.source_out should be an int, not str'
 
     def test_source_out_argument_is_smaller_than_source_in_argument(self):
         """testing if a ValueError will be raised when the source_out argument
@@ -995,27 +913,23 @@ class ShotTester(UnitTestDBBase):
         self.kwargs["code"] = "SH123A"
         self.kwargs["source_in"] = self.kwargs['cut_in'] + 15
         self.kwargs["source_out"] = self.kwargs["source_in"] - 10
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             Shot(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Shot.source_out can not be smaller than Shot.source_in, '
+        assert str(cm.value) == \
+            'Shot.source_out can not be smaller than Shot.source_in, ' \
             'source_in: 127 where as source_out: 117'
-        )
 
     def test_source_out_attribute_is_smaller_than_source_in_attribute(self):
         """testing if a ValueError will be raised when the source_out attribute
         is set to a value smaller than source_in
         """
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             self.test_shot.source_out = self.test_shot.source_in - 2
 
-        self.assertEqual(
-            str(cm.exception),
-            'Shot.source_out can not be smaller than Shot.source_in, '
+        assert str(cm.value) == \
+            'Shot.source_out can not be smaller than Shot.source_in, ' \
             'source_in: 120 where as source_out: 118'
-        )
 
     def test_image_format_argument_is_skipped(self):
         """testing if the image_format is copied from the Project instance when
@@ -1024,8 +938,7 @@ class ShotTester(UnitTestDBBase):
         self.kwargs.pop('image_format')
         self.kwargs['code'] = 'TestShot'
         new_shot = Shot(**self.kwargs)
-        self.assertEqual(new_shot.image_format,
-                         self.kwargs['project'].image_format)
+        assert new_shot.image_format == self.kwargs['project'].image_format
 
     def test_image_format_argument_is_None(self):
         """testing if the image format is copied from the Project instance when
@@ -1034,19 +947,18 @@ class ShotTester(UnitTestDBBase):
         self.kwargs['image_format'] = None
         self.kwargs['code'] = 'newShot'
         new_shot = Shot(**self.kwargs)
-        self.assertEqual(new_shot.image_format,
-                         self.kwargs['project'].image_format)
+        assert new_shot.image_format == self.kwargs['project'].image_format
 
     def test_image_format_attribute_is_None(self):
         """testing if the image format is copied from the Project instance when
         the image_format attribute is set to None
         """
         # test start conditions
-        self.assertNotEqual(self.test_shot.image_format,
-                            self.test_shot.project.image_format)
+        assert self.test_shot.image_format != \
+            self.test_shot.project.image_format
         self.test_shot.image_format = None
-        self.assertEqual(self.test_shot.image_format,
-                         self.test_shot.project.image_format)
+        assert self.test_shot.image_format == \
+            self.test_shot.project.image_format
 
     def test_image_format_argument_is_not_a_ImageFormat_instance_and_not_None(self):
         """testing if a TypeError will be raised when the image_format argument
@@ -1054,43 +966,36 @@ class ShotTester(UnitTestDBBase):
         """
         self.kwargs['code'] = 'new_shot'
         self.kwargs['image_format'] = 'not an image format instance'
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Shot(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Shot.image_format should be an instance of '
+        assert str(cm.value) == \
+            'Shot.image_format should be an instance of ' \
             'stalker.models.format.ImageFormat, not str'
-        )
 
     def test_image_format_attribute_is_not_a_ImageFormat_instance_and_not_None(self):
         """testing if a TypeError will be raised when the image_format
         attribute is not a ImageFormat instance and not None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_shot.image_format = 'not an image f'
 
-        self.assertEqual(
-            str(cm.exception),
-            'Shot.image_format should be an instance of '
+        assert str(cm.value) == \
+            'Shot.image_format should be an instance of ' \
             'stalker.models.format.ImageFormat, not str'
-        )
 
     def test_image_format_argument_is_working_properly(self):
         """testing if the image_format argument value is passed to the
         image_format attribute correctly
         """
-        self.assertEqual(self.kwargs['image_format'],
-                         self.test_shot.image_format)
+        assert self.kwargs['image_format'] == self.test_shot.image_format
 
     def test_image_format_attribute_is_working_properly(self):
         """testing if the image_format attribute is working properly
         """
-        self.assertNotEqual(self.test_shot.image_format,
-                            self.test_image_format1)
+        assert self.test_shot.image_format != self.test_image_format1
         self.test_shot.image_format = self.test_image_format1
-        self.assertEqual(self.test_shot.image_format,
-                         self.test_image_format1)
+        assert self.test_shot.image_format == self.test_image_format1
 
     def test_equality(self):
         """testing equality of shot objects
@@ -1110,9 +1015,9 @@ class ShotTester(UnitTestDBBase):
         self.kwargs["code"] = "SHAnotherShot"
         new_shot3 = Shot(**self.kwargs)
 
-        self.assertFalse(new_shot1 == new_shot2)
-        self.assertFalse(new_shot1 == new_entity)
-        self.assertFalse(new_shot1 == new_shot3)
+        assert not new_shot1 == new_shot2
+        assert not new_shot1 == new_entity
+        assert not new_shot1 == new_shot3
 
     def test_inequality(self):
         """testing inequality of shot objects
@@ -1132,9 +1037,9 @@ class ShotTester(UnitTestDBBase):
         self.kwargs['code'] = 'SHAnotherShot'
         new_shot3 = Shot(**self.kwargs)
 
-        self.assertTrue(new_shot1 != new_shot2)
-        self.assertTrue(new_shot1 != new_entity)
-        self.assertTrue(new_shot1 != new_shot3)
+        assert new_shot1 != new_shot2
+        assert new_shot1 != new_entity
+        assert new_shot1 != new_shot3
 
     def test_ReferenceMixin_initialization(self):
         """testing if the ReferenceMixin part is initialized correctly
@@ -1159,7 +1064,7 @@ class ShotTester(UnitTestDBBase):
 
         new_shot = Shot(**self.kwargs)
 
-        self.assertEqual(new_shot.references, references)
+        assert new_shot.references == references
 
     def test_TaskMixin_initialization(self):
         """testing if the TaskMixin part is initialized correctly
@@ -1209,30 +1114,26 @@ class ShotTester(UnitTestDBBase):
 
         tasks = [task1, task2]
 
-        self.assertEqual(
-            sorted(new_shot.tasks, key=lambda x: x.name),
+        assert \
+            sorted(new_shot.tasks, key=lambda x: x.name) == \
             sorted(tasks, key=lambda x: x.name)
-        )
 
     def test__repr__(self):
-        """testing the represantation of Shot
+        """testing the representation of Shot
         """
-        self.assertEqual(
-            self.test_shot.__repr__(),
-            "<Shot (%s, %s)>" % (self.test_shot.code,
-                                 self.test_shot.code)
-        )
+        assert self.test_shot.__repr__() == \
+            "<Shot (%s, %s)>" % (self.test_shot.code, self.test_shot.code)
 
     def test_plural_class_name(self):
         """testing the plural name of Shot class
         """
-        self.assertTrue(self.test_shot.plural_class_name, "Shots")
+        assert self.test_shot.plural_class_name == "Shots"
 
     def test___strictly_typed___is_False(self):
         """testing if the __strictly_typed__ class attribute is False for
         Shot class
         """
-        self.assertEqual(Shot.__strictly_typed__, False)
+        assert Shot.__strictly_typed__ is False
 
     def test_cut_duration_initialization_bug_with_cut_in(self):
         """testing if the _cut_duration attribute is initialized correctly for
@@ -1267,11 +1168,11 @@ class ShotTester(UnitTestDBBase):
         """testing if the cut_in attribute is set correctly in db
         """
         self.test_shot.cut_in = 100
-        self.assertEqual(self.test_shot.cut_in, 100)
+        assert self.test_shot.cut_in == 100
 
         self.test_shot.cut_out = 153
-        self.assertEqual(self.test_shot.cut_in, 100)
-        self.assertEqual(self.test_shot.cut_out, 153)
+        assert self.test_shot.cut_in == 100
+        assert self.test_shot.cut_out == 153
 
         from stalker import Shot
         from stalker.db.session import DBSession
@@ -1281,8 +1182,8 @@ class ShotTester(UnitTestDBBase):
         # retrieve the shot back from DB
         test_shot_db = Shot.query.filter_by(name=self.kwargs['name']).first()
 
-        self.assertEqual(test_shot_db.cut_in, 100)
-        self.assertEqual(test_shot_db.cut_out, 153)
+        assert test_shot_db.cut_in == 100
+        assert test_shot_db.cut_out == 153
 
     def test_fps_argument_is_skipped(self):
         """testing if the default value will be used when fps is skipped
@@ -1292,7 +1193,7 @@ class ShotTester(UnitTestDBBase):
 
         self.kwargs['code'] = 'SHnew'
         new_shot = Shot(**self.kwargs)
-        self.assertEqual(new_shot.fps, self.test_project1.fps)
+        assert new_shot.fps == self.test_project1.fps
 
     def test_fps_attribute_is_set_to_None(self):
         """testing if the Project.fps will be used if the fps argument is None
@@ -1301,7 +1202,7 @@ class ShotTester(UnitTestDBBase):
         self.kwargs['code'] = 'SHnew'
         new_shot = Shot(**self.kwargs)
 
-        self.assertEqual(new_shot.fps, self.test_project1.fps)
+        assert new_shot.fps == self.test_project1.fps
 
     def test_fps_argument_is_given_as_non_float_or_integer(self):
         """testing if a TypeError will be raised when the fps argument is
@@ -1312,14 +1213,12 @@ class ShotTester(UnitTestDBBase):
         for i, test_value in enumerate(test_values):
             self.kwargs["fps"] = test_value
             self.kwargs['code'] = 'SH%i'
-            with self.assertRaises(TypeError) as cm:
+            with pytest.raises(TypeError) as cm:
                 Shot(**self.kwargs)
 
-            self.assertEqual(
-                str(cm.exception),
-                'Shot.fps should be a positive float or int, not %s' %
+            assert str(cm.value) == \
+                'Shot.fps should be a positive float or int, not %s' % \
                 test_value.__class__.__name__
-            )
 
     def test_fps_attribute_is_given_as_non_float_or_integer(self):
         """testing if a TypeError will be raised when the fps attribute is
@@ -1327,14 +1226,12 @@ class ShotTester(UnitTestDBBase):
         """
         test_values = ["a str", ["a", "list"], {"a": "list"}]
         for test_value in test_values:
-            with self.assertRaises(TypeError) as cm:
+            with pytest.raises(TypeError) as cm:
                 self.test_shot.fps = test_value
 
-            self.assertEqual(
-                str(cm.exception),
-                'Shot.fps should be a positive float or int, not %s' %
+            assert str(cm.value) == \
+                'Shot.fps should be a positive float or int, not %s' % \
                 test_value.__class__.__name__
-            )
 
     def test_fps_attribute_float_conversion(self):
         """testing if the fps attribute is converted to float when the float
@@ -1344,8 +1241,8 @@ class ShotTester(UnitTestDBBase):
         self.kwargs["fps"] = test_value
         self.kwargs['code'] = 'SHnew'
         new_shot = Shot(**self.kwargs)
-        self.assertIsInstance(new_shot.fps, float)
-        self.assertEqual(new_shot.fps, float(test_value))
+        assert isinstance(new_shot.fps, float)
+        assert new_shot.fps == float(test_value)
 
     def test_fps_attribute_float_conversion_2(self):
         """testing if the fps attribute is converted to float when it is set to
@@ -1353,33 +1250,29 @@ class ShotTester(UnitTestDBBase):
         """
         test_value = 1
         self.test_shot.fps = test_value
-        self.assertIsInstance(self.test_shot.fps, float)
-        self.assertEqual(self.test_shot.fps, float(test_value))
+        assert isinstance(self.test_shot.fps, float)
+        assert self.test_shot.fps == float(test_value)
 
     def test_fps_argument_is_zero(self):
         """testing if a ValueError will be raised when the fps is 0
         """
         self.kwargs['fps'] = 0
         self.kwargs['code'] = 'SHnew'
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             Shot(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Shot.fps should be a positive float or int, not 0.0'
-        )
 
     def test_fps_attribute_is_set_to_zero(self):
         """testing if a value error will be raised when the fps attribute is
         set to zero
         """
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             self.test_shot.fps = 0
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Shot.fps should be a positive float or int, not 0.0'
-        )
 
     def test_fps_argument_is_negative(self):
         """testing if a ValueError will be raised when the fps argument is
@@ -1387,25 +1280,21 @@ class ShotTester(UnitTestDBBase):
         """
         self.kwargs['fps'] = -1.0
         self.kwargs['code'] = 'SHrandom'
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             Shot(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Shot.fps should be a positive float or int, not -1.0'
-        )
 
     def test_fps_attribute_is_negative(self):
         """testing if a ValueError will be raised when the fps attribute is
         set to a negative value
         """
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             self.test_shot.fps = -1
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Shot.fps should be a positive float or int, not -1.0'
-        )
 
     def test_fps_changes_with_project(self):
         """testing if the fps reflects the project.fps unless it is set to a
@@ -1416,10 +1305,10 @@ class ShotTester(UnitTestDBBase):
             code='ns',
             project=self.test_project1
         )
-        self.assertEqual(new_shot.fps, self.test_project1.fps)
+        assert new_shot.fps == self.test_project1.fps
         self.test_project1.fps = 335
-        self.assertEqual(new_shot.fps, 335)
+        assert new_shot.fps == 335
         new_shot.fps = 12
-        self.assertEqual(new_shot.fps, 12)
+        assert new_shot.fps == 12
         self.test_project1.fps = 24
-        self.assertEqual(new_shot.fps, 12)
+        assert new_shot.fps == 12

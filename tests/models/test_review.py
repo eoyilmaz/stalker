@@ -16,6 +16,7 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
+import pytest
 from stalker.testing import UnitTestDBBase
 from stalker import Review
 
@@ -163,14 +164,12 @@ class ReviewTestDBCase(UnitTestDBBase):
         is not a Task instance
         """
         self.kwargs['task'] = 'not a Task instance'
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Review(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Review.task should be an instance of stalker.models.task.Task, '
+        assert str(cm.value) == \
+            'Review.task should be an instance of stalker.models.task.Task, ' \
             'not str'
-        )
 
     def test_task_argument_is_not_a_leaf_task(self):
         """testing if a ValueError will be raised when the task given in task
@@ -186,14 +185,12 @@ class ReviewTestDBCase(UnitTestDBBase):
             parent=task1
         )
         self.kwargs['task'] = task1
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             Review(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'It is only possible to create a review for a leaf tasks, and '
+        assert str(cm.value) == \
+            'It is only possible to create a review for a leaf tasks, and ' \
             '<Task1 (Task)> is not a leaf task.'
-        )
 
     def test_task_argument_is_working_properly(self):
         """testing if the task argument value is passed to the task argument
@@ -208,37 +205,34 @@ class ReviewTestDBCase(UnitTestDBBase):
             end=now + datetime.timedelta(hours=1)
         )
         reviews = self.task1.request_review()
-        self.assertEqual(reviews[0].task, self.task1)
+        assert reviews[0].task == self.task1
 
     def test_auto_name_is_true(self):
         """testing if review instances are named automatically
         """
-        self.assertTrue(Review.__auto_name__)
+        assert Review.__auto_name__ is True
 
     def test_status_is_new_for_a_newly_created_review_instance(self):
         """testing if the status is NEW for a newly created review instance
         """
         review = Review(**self.kwargs)
-        self.assertEqual(review.status, self.status_new)
+        assert review.status == self.status_new
 
     def test_review_number_attribute_is_a_read_only_attribute(self):
         """testing if the review_number attribute is a read only attribute
         """
         review = Review(**self.kwargs)
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             review.review_number = 2
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_review_number_attribute_is_initialized_to_the_task_review_number_plus_1(self):
         """testing if the review_number attribute is initialized with
         task.review_number + 1
         """
         review = Review(**self.kwargs)
-        self.assertEqual(1, review.review_number)
+        assert review.review_number == 1
 
     def test_review_number_for_multiple_responsible_task_is_equal_to_each_other(self):
         """testing if the review.review_number attribute for each review
@@ -257,92 +251,70 @@ class ReviewTestDBCase(UnitTestDBBase):
         reviews = self.task1.request_review()
         expected_review_number = self.task1.review_number + 1
 
-        self.assertEqual(3, len(reviews))
-
-        self.assertEqual(
-            expected_review_number,
-            reviews[0].review_number
-        )
-
-        self.assertEqual(
-            expected_review_number,
-            reviews[1].review_number
-        )
-
-        self.assertEqual(
-            expected_review_number,
-            reviews[2].review_number
-        )
+        assert len(reviews) == 3
+        assert reviews[0].review_number == expected_review_number
+        assert reviews[1].review_number == expected_review_number
+        assert reviews[2].review_number == expected_review_number
 
     def test_reviewer_argument_is_skipped(self):
         """testing if a TypeError will be raised when the reviewer argument is
         skipped
         """
         self.kwargs.pop('reviewer')
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Review(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Review.reviewer should be set to a stalker.models.auth.User '
+        assert str(cm.value) == \
+            'Review.reviewer should be set to a stalker.models.auth.User ' \
             'instance, not NoneType'
-        )
 
     def test_reviewer_argument_is_None(self):
         """testing if a TypeError will be raised when the reviewer argument is
         None
         """
         self.kwargs['reviewer'] = None
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Review(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Review.reviewer should be set to a stalker.models.auth.User '
+        assert str(cm.value) == \
+            'Review.reviewer should be set to a stalker.models.auth.User ' \
             'instance, not NoneType'
-        )
 
     def test_reviewer_attribute_is_set_to_None(self):
         """testing if a TypeError will be raised when the reviewer attribute is
         set to None
         """
         review = Review(**self.kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             review.reviewer = None
 
-        self.assertEqual(
-            str(cm.exception),
-            'Review.reviewer should be set to a stalker.models.auth.User '
+        assert str(cm.value) == \
+            'Review.reviewer should be set to a stalker.models.auth.User ' \
             'instance, not NoneType'
-        )
 
     def test_reviewer_argument_is_not_a_User_instance(self):
         """testing if a TypeError will be raised when the reviewer argument is
         not a User instance
         """
         self.kwargs['reviewer'] = 'not a user instance'
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Review(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Review.reviewer should be set to a stalker.models.auth.User '
+        assert str(cm.value) == \
+            'Review.reviewer should be set to a stalker.models.auth.User ' \
             'instance, not str'
-        )
 
     def test_reviewer_attribute_is_not_a_User_instance(self):
         """testing if a TypeError will be raised when the reviewer attribute is
         set to a value other than a User instance
         """
         review = Review(**self.kwargs)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             review.reviewer = 'not a user'
 
-        self.assertEqual(
-            str(cm.exception),
-            'Review.reviewer should be set to a stalker.models.auth.User '
+        assert str(cm.value) == \
+            'Review.reviewer should be set to a stalker.models.auth.User ' \
             'instance, not str'
-        )
 
     def test_reviewer_argument_is_not_in_Task_responsible_list(self):
         """testing if it is possible to use some other user which is not in the
@@ -351,7 +323,7 @@ class ReviewTestDBCase(UnitTestDBBase):
         self.task1.responsible = [self.user1]
         self.kwargs['reviewer'] = self.user2
         review = Review(**self.kwargs)
-        self.assertEqual(review.reviewer, self.user2)
+        assert review.reviewer == self.user2
 
     def test_reviewer_attribute_is_not_in_Task_responsible_list(self):
         """testing if it is possible to use some other user which is not in the
@@ -361,7 +333,7 @@ class ReviewTestDBCase(UnitTestDBBase):
         self.kwargs['reviewer'] = self.user1
         review = Review(**self.kwargs)
         review.reviewer = self.user2
-        self.assertEqual(review.reviewer, self.user2)
+        assert review.reviewer == self.user2
 
     def test_reviewer_argument_is_working_properly(self):
         """testing if the reviewer argument value is correctly passed to
@@ -370,10 +342,7 @@ class ReviewTestDBCase(UnitTestDBBase):
         self.task1.responsible = [self.user1]
         self.kwargs['reviewer'] = self.user1
         review = Review(**self.kwargs)
-        self.assertEqual(
-            self.user1,
-            review.reviewer
-        )
+        assert review.reviewer == self.user1
 
     def test_reviewer_attribute_is_working_properly(self):
         """testing if the reviewer attribute is working properly
@@ -382,10 +351,7 @@ class ReviewTestDBCase(UnitTestDBBase):
         self.kwargs['reviewer'] = self.user1
         review = Review(**self.kwargs)
         review.reviewer = self.user2
-        self.assertEqual(
-            self.user2,
-            review.reviewer
-        )
+        assert review.reviewer == self.user2
 
     # TODO: add tests for the same user is being the reviewer for all reviews
     #       at the same level with same task
@@ -396,16 +362,10 @@ class ReviewTestDBCase(UnitTestDBBase):
         """
         self.task1.responsible = [self.user1]
         self.kwargs['reviewer'] = self.user1
-        self.assertNotEqual(
-            self.status_cmpl,
-            self.task1.status
-        )
+        assert self.task1.status != self.status_cmpl
         review = Review(**self.kwargs)
         review.approve()
-        self.assertEqual(
-            self.status_cmpl,
-            self.task1.status
-        )
+        assert self.task1.status == self.status_cmpl
 
     def test_approve_method_updates_task_status_correctly_for_a_multi_responsible_task_when_all_approve(self):
         """testing if the Review.approve() method will update the task status
@@ -428,17 +388,11 @@ class ReviewTestDBCase(UnitTestDBBase):
 
         review1.approve()
         # still pending review
-        self.assertEqual(
-            self.status_prev,
-            self.task1.status
-        )
+        assert self.task1.status == self.status_prev
 
         # first reviewer
         review2.approve()
-        self.assertEqual(
-            self.status_cmpl,
-            self.task1.status
-        )
+        assert self.task1.status == self.status_cmpl
 
     def test_approve_method_updates_task_parent_status(self):
         """testing if approve method will also update the task parent status
@@ -455,20 +409,13 @@ class ReviewTestDBCase(UnitTestDBBase):
         )
 
         reviews = self.task3.request_review()
-        self.assertEqual(
-            self.task3.status, self.status_prev
-        )
+        assert self.task3.status == self.status_prev
 
         review1 = reviews[0]
         review1.approve()
 
-        self.assertEqual(
-            self.task3.status, self.status_cmpl
-        )
-
-        self.assertEqual(
-            self.task2.status, self.status_cmpl
-        )
+        assert self.task3.status == self.status_cmpl
+        assert self.task2.status == self.status_cmpl
 
     def test_approve_method_updates_task_dependent_statuses(self):
         """testing if approve method will also update the task dependent
@@ -486,27 +433,14 @@ class ReviewTestDBCase(UnitTestDBBase):
         )
 
         reviews = self.task3.request_review()
-        self.assertEqual(
-            self.task3.status, self.status_prev
-        )
+        assert self.task3.status == self.status_prev
         review1 = reviews[0]
         review1.approve()
 
-        self.assertEqual(
-            self.task3.status, self.status_cmpl
-        )
-
-        self.assertEqual(
-            self.task4.status, self.status_rts
-        )
-
-        self.assertEqual(
-            self.task5.status, self.status_rts
-        )
-
-        self.assertEqual(
-            self.task6.status, self.status_rts
-        )
+        assert self.task3.status == self.status_cmpl
+        assert self.task4.status == self.status_rts
+        assert self.task5.status == self.status_rts
+        assert self.task6.status == self.status_rts
 
         # create time logs for task4 to make it wip
         self.task4.create_time_log(
@@ -515,15 +449,15 @@ class ReviewTestDBCase(UnitTestDBBase):
             end=now + td(hours=2),
         )
 
-        self.assertEqual(self.task4.status, self.status_wip)
+        assert self.task4.status == self.status_wip
 
         # now request revision to task3
         self.task3.request_revision(reviewer=self.task3.responsible[0])
 
         # check statuses of task4 and task4
-        self.assertEqual(self.task4.status, self.status_drev)
-        self.assertEqual(self.task5.status, self.status_wfd)
-        self.assertEqual(self.task6.status, self.status_wfd)
+        assert self.task4.status == self.status_drev
+        assert self.task5.status == self.status_wfd
+        assert self.task6.status == self.status_wfd
 
         # now approve task3
         reviews = self.task3.review_set()
@@ -531,9 +465,9 @@ class ReviewTestDBCase(UnitTestDBBase):
             rev.approve()
 
         # check the task statuses again
-        self.assertEqual(self.task4.status, self.status_hrev)
-        self.assertEqual(self.task5.status, self.status_rts)
-        self.assertEqual(self.task5.status, self.status_rts)
+        assert self.task4.status == self.status_hrev
+        assert self.task5.status == self.status_rts
+        assert self.task5.status == self.status_rts
 
     def test_approve_method_updates_task_dependent_timings(self):
         """testing if approve method will also update the task dependent
@@ -551,28 +485,15 @@ class ReviewTestDBCase(UnitTestDBBase):
         )
 
         reviews = self.task3.request_review()
-        self.assertEqual(
-            self.task3.status, self.status_prev
-        )
+        assert self.task3.status == self.status_prev
 
         review1 = reviews[0]
         review1.approve()
 
-        self.assertEqual(
-            self.task3.status, self.status_cmpl
-        )
-
-        self.assertEqual(
-            self.task4.status, self.status_rts
-        )
-
-        self.assertEqual(
-            self.task5.status, self.status_rts
-        )
-
-        self.assertEqual(
-            self.task6.status, self.status_rts
-        )
+        assert self.task3.status == self.status_cmpl
+        assert self.task4.status == self.status_rts
+        assert self.task5.status == self.status_rts
+        assert self.task6.status == self.status_rts
 
         # create time logs for task4 and task5 to make them wip
         self.task4.create_time_log(
@@ -589,17 +510,17 @@ class ReviewTestDBCase(UnitTestDBBase):
 
         # no time log for task6
 
-        self.assertEqual(self.task4.status, self.status_wip)
-        self.assertEqual(self.task5.status, self.status_wip)
-        self.assertEqual(self.task6.status, self.status_rts)
+        assert self.task4.status == self.status_wip
+        assert self.task5.status == self.status_wip
+        assert self.task6.status == self.status_rts
 
         # now request revision to task3
         self.task3.request_revision(reviewer=self.task3.responsible[0])
 
         # check statuses of task4 and task4
-        self.assertEqual(self.task4.status, self.status_drev)
-        self.assertEqual(self.task5.status, self.status_drev)
-        self.assertEqual(self.task6.status, self.status_wfd)
+        assert self.task4.status == self.status_drev
+        assert self.task5.status == self.status_drev
+        assert self.task6.status == self.status_wfd
 
         # TODO: add a new dependent task with schedule_model is not 'effort'
         # enter a new time log for task4 to complete its allowed time
@@ -612,22 +533,14 @@ class ReviewTestDBCase(UnitTestDBBase):
         DBSession.commit()
 
         # the task should have not effort left
-        self.assertEqual(
-            self.task4.schedule_seconds,
-            self.task4.total_logged_seconds
-        )
+        assert self.task4.schedule_seconds == self.task4.total_logged_seconds
 
         # task5 should have an extra time
-        self.assertEqual(
-            self.task5.schedule_seconds,
+        assert self.task5.schedule_seconds == \
             self.task5.total_logged_seconds + 3600
-        )
 
         # task6 should be intact
-        self.assertEqual(
-            self.task6.total_logged_seconds,
-            0
-        )
+        assert self.task6.total_logged_seconds == 0
 
         # now approve task3
         reviews = self.task3.review_set()
@@ -636,27 +549,20 @@ class ReviewTestDBCase(UnitTestDBBase):
         DBSession.commit()
 
         # check the task statuses again
-        self.assertEqual(self.task4.status, self.status_hrev)
-        self.assertEqual(self.task5.status, self.status_hrev)
-        self.assertEqual(self.task6.status, self.status_rts)
+        assert self.task4.status == self.status_hrev
+        assert self.task5.status == self.status_hrev
+        assert self.task6.status == self.status_rts
 
         # and check if task4 is expanded by the timing resolution
-        self.assertEqual(
-            self.task4.schedule_seconds,
+        assert self.task4.schedule_seconds == \
             self.task4.total_logged_seconds + 3600
-        )
 
         # and task5 still has 1 hours
-        self.assertEqual(
-            self.task4.schedule_seconds,
+        assert self.task4.schedule_seconds == \
             self.task4.total_logged_seconds + 3600
-        )
 
         # and task6 intact
-        self.assertEqual(
-            self.task6.total_logged_seconds,
-            0
-        )
+        assert self.task6.total_logged_seconds == 0
 
     def test_approve_method_updates_task_timings(self):
         """testing if approve method will also update the task timings
@@ -677,27 +583,14 @@ class ReviewTestDBCase(UnitTestDBBase):
         )
 
         reviews = self.task3.request_review()
-        self.assertEqual(
-            self.task3.status, self.status_prev
-        )
-
-        self.assertNotEqual(
-            self.task3.total_logged_seconds,
-            self.task3.schedule_seconds
-        )
+        assert self.task3.status == self.status_prev
+        assert self.task3.total_logged_seconds != self.task3.schedule_seconds
 
         review1 = reviews[0]
         review1.approve()
 
-        self.assertEqual(
-            self.task3.status, self.status_cmpl
-        )
-
-        self.assertEqual(
-            self.task3.total_logged_seconds,
-            self.task3.schedule_seconds
-        )
-
+        assert self.task3.status == self.status_cmpl
+        assert self.task3.total_logged_seconds == self.task3.schedule_seconds
 
     def test_approve_method_updates_task_status_correctly_for_a_multi_responsible_task_when_one_approve(self):
         """testing if the Review.approve() method will update the task status
@@ -721,17 +614,11 @@ class ReviewTestDBCase(UnitTestDBBase):
         review1.request_revision()
         # one request review should be enough to set the status to hrev,
         # note that this is another tests duty to check
-        self.assertEqual(
-            self.status_prev,
-            self.task1.status
-        )
+        assert self.task1.status == self.status_prev
 
         # first reviewer
         review2.approve()
-        self.assertEqual(
-            self.status_hrev,
-            self.task1.status
-        )
+        assert self.task1.status == self.status_hrev
 
     def test_request_revision_method_updates_task_status_correctly_for_a_single_responsible_task(self):
         """testing if the Review.request_revision() method will update the task
@@ -750,10 +637,7 @@ class ReviewTestDBCase(UnitTestDBBase):
         reviews = self.task1.request_review()
         review = reviews[0]
         review.request_revision()
-        self.assertEqual(
-            self.status_hrev,
-            self.task1.status
-        )
+        assert self.task1.status == self.status_hrev
 
     def test_request_revision_method_updates_task_status_correctly_for_a_multi_responsible_task_when_one_request_revision(self):
         """testing if the Review.request_revision() method will update the
@@ -776,16 +660,10 @@ class ReviewTestDBCase(UnitTestDBBase):
         review2 = reviews[1]
 
         review1.approve()
-        self.assertEqual(
-            self.status_prev,
-            self.task1.status
-        )
+        assert self.task1.status == self.status_prev
 
         review2.request_revision()
-        self.assertEqual(
-            self.status_hrev,
-            self.task1.status
-        )
+        assert self.task1.status == self.status_hrev
 
     def test_request_revision_method_updates_task_status_correctly_for_a_multi_responsible_task_when_all_request_revision(self):
         """testing if the Review.request_revision() method will update the
@@ -808,17 +686,11 @@ class ReviewTestDBCase(UnitTestDBBase):
         review2 = reviews[1]
 
         review1.request_revision()
-        self.assertEqual(
-            self.status_prev,
-            self.task1.status
-        )
+        assert self.task1.status == self.status_prev
 
         # first reviewer
         review2.request_revision()
-        self.assertEqual(
-            self.status_hrev,
-            self.task1.status
-        )
+        assert self.task1.status == self.status_hrev
 
     def test_request_revision_method_updates_task_timing_correctly_for_a_multi_responsible_task_when_all_request_revision(self):
         """testing if the Review.request_revision() method will update the task
@@ -828,10 +700,8 @@ class ReviewTestDBCase(UnitTestDBBase):
         self.task1.schedule_timing = 3
         self.task1.schedule_unit = 'h'
 
-        self.assertEqual(
-            self.status_rts,
-            self.task1.status
-        )
+        assert self.task1.status == self.status_rts
+
         import datetime
         dt = datetime.datetime
         td = datetime.timedelta
@@ -849,7 +719,7 @@ class ReviewTestDBCase(UnitTestDBBase):
         # first reviewer requests a revision
         reviews = self.task1.request_review()
 
-        self.assertEqual(len(reviews), 2)
+        assert len(reviews) == 2
 
         review1 = reviews[0]
         review2 = reviews[1]
@@ -859,10 +729,7 @@ class ReviewTestDBCase(UnitTestDBBase):
             schedule_unit='h',
             description='do some 2 hours extra work'
         )
-        self.assertEqual(
-            self.status_prev,
-            self.task1.status
-        )
+        assert self.task1.status == self.status_prev
 
         # first reviewer
         review2.request_revision(
@@ -871,14 +738,11 @@ class ReviewTestDBCase(UnitTestDBBase):
             description='do some 5 hours extra work'
         )
 
-        self.assertEqual(
-            self.status_hrev,
-            self.task1.status
-        )
+        assert self.task1.status == self.status_hrev
 
         # check the timing values
-        self.assertEqual(self.task1.schedule_timing, 8)
-        self.assertEqual(self.task1.schedule_unit, 'h')
+        assert self.task1.schedule_timing == 8
+        assert self.task1.schedule_unit == 'h'
 
     def test_request_revision_method_updates_task_timing_correctly_for_a_multi_responsible_task_with_exactly_the_same_amount_of_schedule_timing_as_the_given_revision_timing(self):
         """testing if the Review.request_revision() method will update the task
@@ -890,10 +754,8 @@ class ReviewTestDBCase(UnitTestDBBase):
         self.task1.schedule_timing = 8
         self.task1.schedule_unit = 'h'
 
-        self.assertEqual(
-            self.status_rts,
-            self.task1.status
-        )
+        assert self.task1.status == self.status_rts
+
         import datetime
         dt = datetime.datetime
         td = datetime.timedelta
@@ -911,7 +773,7 @@ class ReviewTestDBCase(UnitTestDBBase):
         # first reviewer requests a revision
         reviews = self.task1.request_review()
 
-        self.assertEqual(len(reviews), 2)
+        assert len(reviews) == 2
 
         review1 = reviews[0]
         review2 = reviews[1]
@@ -921,10 +783,7 @@ class ReviewTestDBCase(UnitTestDBBase):
             schedule_unit='h',
             description='do some 2 hours extra work'
         )
-        self.assertEqual(
-            self.status_prev,
-            self.task1.status
-        )
+        assert self.task1.status == self.status_prev
 
         # first reviewer
         review2.request_revision(
@@ -933,14 +792,11 @@ class ReviewTestDBCase(UnitTestDBBase):
             description='do some 5 hours extra work'
         )
 
-        self.assertEqual(
-            self.status_hrev,
-            self.task1.status
-        )
+        assert self.task1.status == self.status_hrev
 
         # check the timing values
-        self.assertEqual(self.task1.schedule_timing, 8)
-        self.assertEqual(self.task1.schedule_unit, 'h')
+        assert self.task1.schedule_timing == 8
+        assert self.task1.schedule_unit == 'h'
 
     def test_request_revision_method_updates_task_timing_correctly_for_a_multi_responsible_task_with_more_schedule_timing_then_given_revision_timing(self):
         """testing if the Review.request_revision() method will update the task
@@ -952,10 +808,8 @@ class ReviewTestDBCase(UnitTestDBBase):
         self.task1.schedule_timing = 100
         self.task1.schedule_unit = 'h'
 
-        self.assertEqual(
-            self.status_rts,
-            self.task1.status
-        )
+        assert self.task1.status == self.status_rts
+
         import datetime
         dt = datetime.datetime
         td = datetime.timedelta
@@ -973,7 +827,7 @@ class ReviewTestDBCase(UnitTestDBBase):
         # first reviewer requests a revision
         reviews = self.task1.request_review()
 
-        self.assertEqual(len(reviews), 2)
+        assert len(reviews) == 2
 
         review1 = reviews[0]
         review2 = reviews[1]
@@ -983,10 +837,7 @@ class ReviewTestDBCase(UnitTestDBBase):
             schedule_unit='h',
             description='do some 2 hours extra work'
         )
-        self.assertEqual(
-            self.status_prev,
-            self.task1.status
-        )
+        assert self.task1.status == self.status_prev
 
         # first reviewer
         review2.request_revision(
@@ -995,14 +846,11 @@ class ReviewTestDBCase(UnitTestDBBase):
             description='do some 5 hours extra work'
         )
 
-        self.assertEqual(
-            self.status_hrev,
-            self.task1.status
-        )
+        assert self.task1.status == self.status_hrev
 
         # check the timing values
-        self.assertEqual(self.task1.schedule_timing, 100)
-        self.assertEqual(self.task1.schedule_unit, 'h')
+        assert self.task1.schedule_timing == 100
+        assert self.task1.schedule_unit == 'h'
 
     def test_review_set_property_return_all_the_revision_instances_with_same_review_number(self):
         """testing if review_set property returns all the Review instances of
@@ -1023,9 +871,9 @@ class ReviewTestDBCase(UnitTestDBBase):
         review2 = reviews[1]
         review3 = reviews[2]
 
-        self.assertEqual(review1.review_number, 1)
-        self.assertEqual(review2.review_number, 1)
-        self.assertEqual(review3.review_number, 1)
+        assert review1.review_number == 1
+        assert review2.review_number == 1
+        assert review3.review_number == 1
 
         review1.approve()
         review2.approve()
@@ -1034,7 +882,7 @@ class ReviewTestDBCase(UnitTestDBBase):
         review4 = self.task1.request_revision(reviewer=self.user1)
 
         self.task1.status = self.status_wip
-        self.assertEqual(review4.review_number, 2)
+        assert review4.review_number == 2
 
         # enter new time log to turn it into WIP
         self.task1.create_time_log(
@@ -1048,6 +896,6 @@ class ReviewTestDBCase(UnitTestDBBase):
         review6 = review_set2[1]
         review7 = review_set2[2]
 
-        self.assertEqual(review5.review_number, 3)
-        self.assertEqual(review6.review_number, 3)
-        self.assertEqual(review7.review_number, 3)
+        assert review5.review_number == 3
+        assert review6.review_number == 3
+        assert review7.review_number == 3

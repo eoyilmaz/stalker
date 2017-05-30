@@ -18,6 +18,8 @@
 
 
 import unittest
+import pytest
+
 from stalker.models.auth import User, Group
 
 
@@ -68,7 +70,7 @@ class GroupTester(unittest.TestCase):
         """testing if the __auto_name__ class attribute is set to False for
         Group class
         """
-        self.assertFalse(Group.__auto_name__)
+        assert Group.__auto_name__ is False
 
     def test_users_argument_is_skipped(self):
         """testing if the users argument is skipped the users attribute will be
@@ -76,34 +78,30 @@ class GroupTester(unittest.TestCase):
         """
         self.kwargs.pop('users')
         new_group = Group(**self.kwargs)
-        self.assertEqual(new_group.users, [])
+        assert new_group.users == []
 
     def test_users_argument_is_not_a_list_of_User_instances(self):
         """testing if a TypeError will be raised when the users argument is not
         a list of User instances
         """
         self.kwargs['users'] = [12, 'not a user']
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Group(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Group.users attribute must all be stalker.models.auth.User '
+        assert str(cm.value) == \
+            'Group.users attribute must all be stalker.models.auth.User ' \
             'instances not int'
-        )
 
     def test_users_attribute_is_not_a_list_of_User_instances(self):
         """testing if a TypeError will be raised when the users attribute is
         not a list of User instances
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_group.users = [12, 'not a user']
 
-        self.assertEqual(
-            str(cm.exception),
-            'Group.users attribute must all be stalker.models.auth.User '
+        assert str(cm.value) == \
+            'Group.users attribute must all be stalker.models.auth.User ' \
             'instances not int'
-        )
 
     def test_users_argument_updates_the_groups_attribute_in_the_given_User_instances(self):
         """testing if the Users given with the users argument will have the
@@ -113,7 +111,7 @@ class GroupTester(unittest.TestCase):
         new_group = Group(**self.kwargs)
 
         for user in self.kwargs['users']:
-            self.assertTrue(new_group in user.groups)
+            assert new_group in user.groups
 
     def test_users_attribute_updates_the_groups_attribute_in_the_given_User_instances(self):
         """testing if the Users given with the users attribute will have the
@@ -123,7 +121,7 @@ class GroupTester(unittest.TestCase):
         new_group = Group(**self.kwargs)
         new_group.users = test_users
         for user in test_users:
-            self.assertTrue(new_group in user.groups)
+            assert new_group in user.groups
 
     def test_permissions_argument_is_working_properly(self):
         """testing if permissions can be added to the Group on __init__()
@@ -140,7 +138,4 @@ class GroupTester(unittest.TestCase):
             permissions=[perm1, perm2, perm3]
         )
 
-        self.assertEqual(
-            new_group.permissions,
-            [perm1, perm2, perm3]
-        )
+        assert new_group.permissions == [perm1, perm2, perm3]

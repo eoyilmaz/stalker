@@ -17,6 +17,7 @@
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
+import pytest
 
 
 class InvoiceTestCase(unittest.TestCase):
@@ -158,31 +159,29 @@ class InvoiceTestCase(unittest.TestCase):
             client=self.test_client,
             date_created=datetime.datetime(2016, 11, 7, tzinfo=pytz.utc),
         )
-        self.assertIsInstance(invoice, Invoice)
+        assert isinstance(invoice, Invoice)
 
     def test_budget_argument_is_skipped(self):
         """testing if a TypeError will be raised when the budget argument is
         skipped
         """
         from stalker import Invoice
-        with self.assertRaises(TypeError) as cm:
-            test_invoice = Invoice(
+        with pytest.raises(TypeError) as cm:
+            Invoice(
                 client=self.test_client,
                 amount=1500,
                 unit='TRY'
             )
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Invoice.budget should be a Budget instance, not NoneType'
-        )
 
     def test_budget_argument_is_None(self):
         """testing if a TypeError will be raised when the budget argument is
         None
         """
         from stalker import Invoice
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             test_invoice = Invoice(
                 budget=None,
                 client=self.test_client,
@@ -190,10 +189,8 @@ class InvoiceTestCase(unittest.TestCase):
                 unit='TRY'
             )
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Invoice.budget should be a Budget instance, not NoneType'
-        )
 
     def test_budget_attribute_is_set_to_None(self):
         """testing if a TypeError will ve raised when the budget attribute is
@@ -206,20 +203,18 @@ class InvoiceTestCase(unittest.TestCase):
             amount=1500,
             unit='TRY'
         )
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             test_invoice.budget = None
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Invoice.budget should be a Budget instance, not NoneType'
-        )
 
     def test_budget_argument_is_not_a_budget_instance(self):
         """testing if a TypeError will be raised when the Budget argument is
         not a Budget instance
         """
         from stalker import Invoice
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             test_invoice = Invoice(
                 budget='Not a budget instance',
                 client=self.test_client,
@@ -227,10 +222,8 @@ class InvoiceTestCase(unittest.TestCase):
                 unit='TRY'
             )
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Invoice.budget should be a Budget instance, not str'
-        )
 
     def test_budget_attribute_is_set_to_a_value_other_than_a_budget_instance(self):
         """testing if a TypeError will be raised when the Budget attribute is
@@ -243,13 +236,11 @@ class InvoiceTestCase(unittest.TestCase):
             amount=1500,
             unit='TRY'
         )
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             test_invoice.budget = 'Not a budget instance'
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Invoice.budget should be a Budget instance, not str'
-        )
 
     def test_budget_argument_is_working_properly(self):
         """testing if the budget argument value is properly passed to the
@@ -262,31 +253,29 @@ class InvoiceTestCase(unittest.TestCase):
             amount=1500,
             unit='TRY'
         )
-        self.assertEqual(test_invoice.budget, self.test_budget)
+        assert test_invoice.budget == self.test_budget
 
     def test_client_argument_is_skipped(self):
         """testing if a TypeError will be raised when the client argument is
         skipped
         """
         from stalker import Invoice
-        with self.assertRaises(TypeError) as cm:
-            test_invoice = Invoice(
+        with pytest.raises(TypeError) as cm:
+            Invoice(
                 budget=self.test_budget,
                 amount=100,
                 unit='TRY'
             )
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Invoice.client should be a Client instance, not NoneType'
-        )
 
     def test_client_argument_is_None(self):
         """testing if a TypeError will be raised when the client argument is
         None
         """
         from stalker import Invoice
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             test_invoice = Invoice(
                 budget=self.test_budget,
                 client=None,
@@ -294,10 +283,8 @@ class InvoiceTestCase(unittest.TestCase):
                 unit='TRY'
             )
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Invoice.client should be a Client instance, not NoneType'
-        )
 
     def test_client_attribute_is_set_to_None(self):
         """testing if a TypeError will be raised when the client attribute is
@@ -310,20 +297,18 @@ class InvoiceTestCase(unittest.TestCase):
             amount=100,
             unit='TRY'
         )
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             test_invoice.client = None
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Invoice.client should be a Client instance, not NoneType'
-        )
 
     def test_client_argument_is_not_a_client_instance(self):
         """testing if a TypeError will be raised when the client argument is
         not a Client instance
         """
         from stalker import Invoice
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             test_invoice = Invoice(
                 budget=self.test_budget,
                 client='not a client instance',
@@ -331,10 +316,8 @@ class InvoiceTestCase(unittest.TestCase):
                 unit='TRY'
             )
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Invoice.client should be a Client instance, not str'
-        )
 
     def test_client_attribute_is_set_to_a_value_other_than_a_client_instance(self):
         """testing if a TypeError will be raised when the client attribute is
@@ -347,13 +330,11 @@ class InvoiceTestCase(unittest.TestCase):
             amount=100,
             unit='TRY'
         )
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             test_invoice.client = 'not a client instance'
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Invoice.client should be a Client instance, not str'
-        )
 
     def test_client_argument_is_working_properly(self):
         """testing if the client argument value is correctly passed to the
@@ -366,7 +347,7 @@ class InvoiceTestCase(unittest.TestCase):
             amount=100,
             unit='TRY'
         )
-        self.assertEqual(test_invoice.client, self.test_client)
+        assert test_invoice.client == self.test_client
 
     def test_client_attribute_is_working_properly(self):
         """testing if the client attribute value an be changed properly
@@ -380,6 +361,6 @@ class InvoiceTestCase(unittest.TestCase):
         )
         from stalker import Client
         test_client = Client(name='Test Client 2')
-        self.assertNotEqual(test_invoice.client, test_client)
+        assert test_invoice.client != test_client
         test_invoice.client = test_client
-        self.assertEqual(test_invoice.client, test_client)
+        assert test_invoice.client == test_client

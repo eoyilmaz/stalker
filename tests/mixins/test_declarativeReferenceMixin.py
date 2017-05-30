@@ -68,8 +68,8 @@ class ReferenceMixinTester(unittest.TestCase):
         a_ins.references.append(new_link1)
         b_ins.references.append(new_link2)
 
-        self.assertTrue(new_link1 in a_ins.references)
-        self.assertTrue(new_link2 in b_ins.references)
+        assert new_link1 in a_ins.references
+        assert new_link2 in b_ins.references
 
 
 

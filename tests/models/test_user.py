@@ -16,6 +16,7 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
+import pytest
 from stalker.testing import UnitTestDBBase
 from stalker import User
 
@@ -409,7 +410,7 @@ class UserTestDB(UnitTestDBBase):
         DBSession.commit()
 
         self.test_admin = self.admin
-        self.assertTrue(self.test_admin is not None)
+        assert self.test_admin is not None
 
         # create test company
         from stalker import Client
@@ -444,20 +445,18 @@ class UserTestDB(UnitTestDBBase):
         """testing if the __auto_name__ class attribute is set to False for
         User class
         """
-        self.assertFalse(User.__auto_name__)
+        assert User.__auto_name__ is False
 
     def test_email_argument_accepting_only_string(self):
         """testing if email argument accepting only string values
         """
         # try to create a new user with wrong attribute
         self.kwargs["email"] = 1.3
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             User(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'User.email should be an instance of str not float'
-        )
 
     def test_email_attribute_accepting_only_string_1(self):
         """testing if email attribute accepting only string values
@@ -465,13 +464,11 @@ class UserTestDB(UnitTestDBBase):
         # try to assign something else than a string
         test_value = 1
 
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_user.email = test_value
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'User.email should be an instance of str not int'
-        )
 
     def test_email_attribute_accepting_only_string_2(self):
         """testing if email attribute accepting only string values
@@ -479,138 +476,116 @@ class UserTestDB(UnitTestDBBase):
         # try to assign something else than a string
         test_value = ["an email"]
 
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_user.email = test_value
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'User.email should be an instance of str not list'
-        )
 
     def test_email_argument_format_1(self):
         """testing if given an email in wrong format will raise a ValueError
         """
         # any of this values should raise a ValueError
         self.kwargs["email"] = "an email in no format"
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             User(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'check the formatting of User.email, there is no @ sign'
-        )
 
     def test_email_argument_format_2(self):
         """testing if given an email in wrong format will raise a ValueError
         """
         # any of this values should raise a ValueError
         self.kwargs["email"] = "an_email_with_no_part2"
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             User(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'check the formatting of User.email, there is no @ sign'
-        )
 
     def test_email_argument_format_3(self):
         """testing if given an email in wrong format will raise a ValueError
         """
         # any of this values should raise a ValueError
         self.kwargs["email"] = "@an_email_with_only_part2"
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             User(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'check the formatting of User.email, the name part is missing'
-        )
 
     def test_email_argument_format_4(self):
         """testing if given an email in wrong format will raise a ValueError
         """
         # any of this values should raise a ValueError
         self.kwargs["email"] = "@"
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             User(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'check the formatting of User.email, the name part is missing'
-        )
 
     def test_email_attribute_format_1(self):
         """testing if given an email in wrong format will raise a ValueError
         """
         # any of these email values should raise a ValueError
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             self.test_user.email = "an email in no format"
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'check the formatting of User.email, there is no @ sign'
-        )
 
     def test_email_attribute_format_2(self):
         """testing if given an email in wrong format will raise a ValueError
         """
         # any of these email values should raise a ValueError
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             self.test_user.email = "an_email_with_no_part2"
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'check the formatting of User.email, there is no @ sign'
-        )
 
     def test_email_attribute_format_3(self):
         """testing if given an email in wrong format will raise a ValueError
         """
         # any of these email values should raise a ValueError
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             self.test_user.email = "@an_email_with_only_part2"
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'check the formatting of User.email, the name part is missing'
-        )
 
     def test_email_attribute_format_4(self):
         """testing if given an email in wrong format will raise a ValueError
         """
         # any of these email values should raise a ValueError
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             self.test_user.email = "@"
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'check the formatting of User.email, the name part is missing'
-        )
 
     def test_email_attribute_format_5(self):
         """testing if given an email in wrong format will raise a ValueError
         """
         # any of these email values should raise a ValueError
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             self.test_user.email = "eoyilmaz@"
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'check the formatting User.email, the domain part is missing'
-        )
 
     def test_email_attribute_format_6(self):
         """testing if given an email in wrong format will raise a ValueError
         """
         # any of these email values should raise a ValueError
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             self.test_user.email = "eoyilmaz@some.compony@com"
 
-        self.assertEqual(
-            str(cm.exception),
-            'check the formatting of User.email, there are more than one @ '
+        assert str(cm.value) == \
+            'check the formatting of User.email, there are more than one @ ' \
             'sign'
-        )
 
     def test_email_argument_should_be_a_unique_value(self):
         """testing if the email argument should be a unique value
@@ -630,98 +605,76 @@ class UserTestDB(UnitTestDBBase):
         DBSession.add(user2)
 
         from sqlalchemy.exc import IntegrityError
-        with self.assertRaises(IntegrityError) as cm:
+        with pytest.raises(IntegrityError) as cm:
             DBSession.commit()
 
-        self.assertTrue(
-            str(cm.exception).startswith(
-                '(psycopg2.IntegrityError) duplicate key value violates '
-                'unique constraint "Users_email_key"'
-            )
-        )
+        assert '(psycopg2.IntegrityError) duplicate key value violates ' \
+            'unique constraint "Users_email_key"' in str(cm.value)
 
     def test_email_attribute_is_working_properly(self):
         """testing if email attribute works properly
         """
         test_email = "eoyilmaz@somemail.com"
         self.test_user.email = test_email
-        self.assertEqual(self.test_user.email, test_email)
+        assert self.test_user.email == test_email
 
     def test_login_argument_conversion_to_strings(self):
         """testing if a ValueError will be raised when the given objects
         conversion to string results an empty string
         """
         self.kwargs["login"] = "----++==#@#$"
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             User(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'User.login can not be an empty string'
-        )
+        assert str(cm.value) == 'User.login can not be an empty string'
 
     def test_login_argument_for_empty_string(self):
         """testing if a ValueError will be raised when trying to assign an
         empty string to login argument
         """
         self.kwargs["login"] = ""
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             User(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'User.login can not be an empty string'
-        )
+        assert str(cm.value) == 'User.login can not be an empty string'
 
     def test_login_attribute_for_empty_string(self):
         """testing if a ValueError will be raised when trying to assign an
         empty string to login attribute
         """
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             self.test_user.login = ''
 
-        self.assertEqual(
-            str(cm.exception),
-            'User.login can not be an empty string'
-        )
+        assert str(cm.value) == 'User.login can not be an empty string'
 
     def test_login_argument_is_skipped(self):
         """testing if a TypeError will be raised when the login argument is
         skipped
         """
         self.kwargs.pop("login")
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             User(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'User.login can not be None'
-        )
+        assert str(cm.value) == 'User.login can not be None'
 
     def test_login_argument_is_None(self):
         """testing if a TypeError will be raised when trying to assign None
         to login argument
         """
         self.kwargs["login"] = None
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             User(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'User.login can not be None'
-        )
+        assert str(cm.value) == 'User.login can not be None'
 
     def test_login_attribute_is_None(self):
         """testing if a TypeError will be raised when trying to assign None
         to login attribute
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_user.login = None
 
-        self.assertEqual(
-            str(cm.exception),
-            'User.login can not be None'
-        )
+        assert str(cm.value) == 'User.login can not be None'
 
     def test_login_argument_formatted_correctly(self):
         """testing if login argument formatted correctly
@@ -743,10 +696,7 @@ class UserTestDB(UnitTestDBBase):
             # set the input and expect the expected output
             self.kwargs["login"] = valuePair[0]
             test_user = User(**self.kwargs)
-            self.assertEqual(
-                test_user.login,
-                valuePair[1]
-            )
+            assert test_user.login== valuePair[1]
 
     def test_login_attribute_formatted_correctly(self):
         """testing if login attribute formatted correctly
@@ -767,10 +717,7 @@ class UserTestDB(UnitTestDBBase):
             # set the input and expect the expected output
             self.test_user.login = valuePair[0]
 
-            self.assertEqual(
-                self.test_user.login,
-                valuePair[1]
-            )
+            assert self.test_user.login == valuePair[1]
 
     def test_login_argument_should_be_a_unique_value(self):
         """testing if the login argument should be a unique value
@@ -791,27 +738,23 @@ class UserTestDB(UnitTestDBBase):
         DBSession.add(user2)
 
         from sqlalchemy.exc import IntegrityError
-        with self.assertRaises(IntegrityError) as cm:
+        with pytest.raises(IntegrityError) as cm:
             DBSession.commit()
 
-        self.assertTrue(
-            str(cm.exception).startswith(
-                '(psycopg2.IntegrityError) duplicate key value violates '
-                'unique constraint "Users_login_key"'
-            )
-        )
+        assert '(psycopg2.IntegrityError) duplicate key value violates ' \
+            'unique constraint "Users_login_key"' in str(cm.value)
 
     def test_login_argument_is_working_properly(self):
         """testing if the login argument is working properly
         """
-        self.assertEqual(self.test_user.login, self.kwargs['login'])
+        assert self.test_user.login == self.kwargs['login']
 
     def test_login_attribute_is_working_properly(self):
         """testing if the login attribute is working properly
         """
         test_value = 'newlogin'
         self.test_user.login = test_value
-        self.assertEqual(self.test_user.login, test_value)
+        assert self.test_user.login == test_value
 
     def test_last_login_attribute_None(self):
         """testing if nothing happens when the last login attribute is set to
@@ -826,7 +769,7 @@ class UserTestDB(UnitTestDBBase):
         self.kwargs.pop('departments')
 
         new_user = User(**self.kwargs)
-        self.assertEqual(new_user.departments, [])
+        assert new_user.departments == []
 
     def test_departments_argument_is_None(self):
         """testing if a User can be created with the departments argument value
@@ -834,19 +777,16 @@ class UserTestDB(UnitTestDBBase):
         """
         self.kwargs['departments'] = None
         new_user = User(**self.kwargs)
-        self.assertEqual(new_user.departments, [])
+        assert new_user.departments == []
 
     def test_departments_attribute_is_set_None(self):
         """testing if a TypeError will be raised when the User's departments
         attribute set to None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_user.departments = None
 
-        self.assertEqual(
-            str(cm.exception),
-            "'NoneType' object is not iterable"
-        )
+        assert str(cm.value) == "'NoneType' object is not iterable"
 
     def test_departments_argument_is_an_empty_list(self):
         """testing if a User can be created with the departments argument is an
@@ -859,7 +799,7 @@ class UserTestDB(UnitTestDBBase):
         """testing if the departments attribute can be set to an empty list
         """
         self.test_user.departments = []
-        self.assertEqual(self.test_user.departments, [])
+        assert self.test_user.departments == []
 
     def test_departments_argument_only_accepts_list_of_department_objects(self):
         """testing if a TypeError will be raised when trying to assign
@@ -875,14 +815,12 @@ class UserTestDB(UnitTestDBBase):
         ]
 
         self.kwargs["departments"] = test_values
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             User(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'DepartmentUser.department should be a '
+        assert str(cm.value) == \
+            'DepartmentUser.department should be a ' \
             'stalker.models.department.Department instance, not str'
-        )
 
     def test_departments_attribute_only_accepts_department_objects(self):
         """testing if a TypeError will be raised when trying to assign
@@ -890,24 +828,21 @@ class UserTestDB(UnitTestDBBase):
         """
         # try to assign something other than a department
         test_value = "a department"
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_user.departments = test_value
 
-        self.assertEqual(
-            str(cm.exception),
-            'DepartmentUser.department should be a '
+        assert str(cm.value) == \
+            'DepartmentUser.department should be a ' \
             'stalker.models.department.Department instance, not str'
-        )
 
     def test_departments_attribute_works_properly(self):
         """testing if departments attribute works properly
         """
         # try to set and get the same value back
         self.test_user.departments = [self.test_department2]
-        self.assertEqual(
-            sorted(self.test_user.departments, key=lambda x: x.name),
+        assert \
+            sorted(self.test_user.departments, key=lambda x: x.name) == \
             sorted([self.test_department2], key=lambda x: x.name)
-        )
 
     def test_departments_attribute_supports_appending(self):
         """testing if departments attribute supports appending
@@ -915,11 +850,10 @@ class UserTestDB(UnitTestDBBase):
         self.test_user.departments = []
         self.test_user.departments.append(self.test_department1)
         self.test_user.departments.append(self.test_department2)
-        self.assertEqual(
-            sorted(self.test_user.departments, key=lambda x: x.name),
+        assert \
+            sorted(self.test_user.departments, key=lambda x: x.name) == \
             sorted([self.test_department1, self.test_department2],
                    key=lambda x: x.name)
-        )
 
     def test_password_argument_being_None(self):
         """testing if a TypeError will be raised when trying to assign None
@@ -928,13 +862,10 @@ class UserTestDB(UnitTestDBBase):
         import copy
         kwargs = copy.copy(self.kwargs)
         kwargs["password"] = None
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             User(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'User.password cannot be None'
-        )
+        assert str(cm.value) == 'User.password cannot be None'
 
     def test_password_argument_is_an_empty_string(self):
         """testing if a ValueError will be raised the password argument is an
@@ -944,32 +875,26 @@ class UserTestDB(UnitTestDBBase):
         kwargs = copy.copy(self.kwargs)
         kwargs["password"] = ''
 
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             User(**kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'User.password can not be an empty string'
-        )
+        assert str(cm.value) == 'User.password can not be an empty string'
 
     def test_password_attribute_being_None(self):
         """testing if a TypeError will be raised when tyring to assign None to
         the password attribute
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_user.password = None
 
-        self.assertEqual(
-            str(cm.exception),
-            'User.password cannot be None'
-        )
+        assert str(cm.value) == 'User.password cannot be None'
 
     def test_password_attribute_works_properly(self):
         """testing if password attribute works properly
         """
         test_password = "a new test password"
         self.test_user.password = test_password
-        self.assertNotEqual(self.test_user.password, test_password)
+        assert self.test_user.password != test_password
 
     def test_password_argument_being_scrambled(self):
         """testing if password is scrambled when trying to store it
@@ -977,7 +902,7 @@ class UserTestDB(UnitTestDBBase):
         test_password = "a new test password"
         self.kwargs["password"] = test_password
         new_user = User(**self.kwargs)
-        self.assertNotEqual(new_user.password, test_password)
+        assert new_user.password != test_password
 
     def test_password_attribute_being_scrambled(self):
         """testing if password is scrambled when trying to store it
@@ -986,7 +911,7 @@ class UserTestDB(UnitTestDBBase):
         self.test_user.password = test_password
 
         # test if they are not the same any more
-        self.assertNotEqual(self.test_user.password, test_password)
+        assert self.test_user.password != test_password
 
     def test_check_password_works_properly(self):
         """testing if check_password method works properly
@@ -995,13 +920,13 @@ class UserTestDB(UnitTestDBBase):
         self.test_user.password = test_password
 
         # check if it is scrambled
-        self.assertNotEqual(self.test_user.password, test_password)
+        assert self.test_user.password != test_password
 
         # check if check_password returns True
-        self.assertTrue(self.test_user.check_password(test_password))
+        assert self.test_user.check_password(test_password) is True
 
         # check if check_password returns False
-        self.assertFalse(self.test_user.check_password("wrong pass"))
+        assert self.test_user.check_password("wrong pass") is False
 
     def test_groups_argument_for_None(self):
         """testing if the groups attribute will be an empty list
@@ -1009,117 +934,100 @@ class UserTestDB(UnitTestDBBase):
         """
         self.kwargs["groups"] = None
         new_user = User(**self.kwargs)
-        self.assertEqual(new_user.groups, [])
+        assert new_user.groups == []
 
     def test_groups_attribute_for_None(self):
         """testing if a TypeError will be raised when groups attribute is set
         to None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_user.groups = None
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: None is not list-like'
-        )
 
     def test_groups_argument_accepts_only_Group_instances(self):
         """testing if a TypeError will be raised when trying to assign anything
         other then a Group instances to the group argument
         """
         self.kwargs["groups"] = "a_group"
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             User(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: str is not list-like'
-        )
 
     def test_groups_attribute_accepts_only_Group_instances(self):
         """testing if a TypeError will be raised when trying to assign anything
         other then a Group instances to the group attribute
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_user.groups = "a_group"
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: str is not list-like'
-        )
 
     def test_groups_attribute_works_properly(self):
         """testing if groups attribute works properly
         """
         test_pg = [self.test_group3]
         self.test_user.groups = test_pg
-        self.assertEqual(self.test_user.groups, test_pg)
+        assert self.test_user.groups == test_pg
 
     def test_groups_attribute_elements_accepts_Group_only_1(self):
         """testing if a TypeError will be raised when trying to assign
         something other than a Group instances to the groups list
         """
         # append
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_user.groups.append(0)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Any group in User.groups should be an instance of '
+        assert str(cm.value) == \
+            'Any group in User.groups should be an instance of ' \
             'stalker.models.auth.Group not int'
-        )
 
     def test_groups_attribute_elements_accepts_Group_only_2(self):
         """testing if a TypeError will be raised when trying to assign
         something other than a Group instances to the groups list
         """
         # __setitem__
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_user.groups[0] = 0
 
-        self.assertEqual(
-            str(cm.exception),
-            'Any group in User.groups should be an instance of '
+        assert str(cm.value) == \
+            'Any group in User.groups should be an instance of ' \
             'stalker.models.auth.Group not int'
-        )
 
     def test_projects_attribute_is_None(self):
         """testing if a TypeError will be raised when the projects attribute is
         set to None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_user.projects = None
 
-        self.assertEqual(
-            str(cm.exception),
-            "'NoneType' object is not iterable"
-        )
+        assert str(cm.value) == "'NoneType' object is not iterable"
 
     def test_projects_attribute_is_set_to_a_value_which_is_not_a_list(self):
         """testing if the projects attribute is accepting lists only
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_user.projects = 'not a list'
 
-        self.assertEqual(
-            str(cm.exception),
-            'ProjectUser.project should be a stalker.models.project.Project '
+        assert str(cm.value) == \
+            'ProjectUser.project should be a stalker.models.project.Project ' \
             'instance, not str'
-        )
 
     def test_projects_attribute_is_set_to_list_of_other_objects_than_Project_instances(self):
         """testing if a TypeError will be raised when the projects attribute is
         set to a value which is a list of other values than Projects instances
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_user.projects = \
                 ['not', 'a', 'list', 'of', 'projects', 32]
 
-        self.assertEqual(
-            str(cm.exception),
-            'ProjectUser.project should be a stalker.models.project.Project '
+        assert str(cm.value) == \
+            'ProjectUser.project should be a stalker.models.project.Project ' \
             'instance, not str'
-        )
 
     def test_projects_attribute_is_working_properly(self):
         """testing if the projects attribute is working properly
@@ -1127,40 +1035,35 @@ class UserTestDB(UnitTestDBBase):
         self.test_user.rate = 102.0
         test_list = [self.test_project1, self.test_project2]
         self.test_user.projects = test_list
-        self.assertEqual(
-            sorted(test_list, key=lambda x: x.name),
+        assert \
+            sorted(test_list, key=lambda x: x.name) == \
             sorted(self.test_user.projects, key=lambda x: x.name)
-        )
         self.test_user.projects.append(self.test_project3)
-        self.assertTrue(self.test_project3 in self.test_user.projects)
+        assert self.test_project3 in self.test_user.projects
         # also check the back ref
-        self.assertTrue(self.test_user in self.test_project1.users)
-        self.assertTrue(self.test_user in self.test_project2.users)
-        self.assertTrue(self.test_user in self.test_project3.users)
+        assert self.test_user in self.test_project1.users
+        assert self.test_user in self.test_project2.users
+        assert self.test_user in self.test_project3.users
 
     def test_tasks_attribute_None(self):
         """testing if a TypeError will be raised when the tasks attribute is
         set to None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_user.tasks = None
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: None is not list-like'
-        )
 
     def test_tasks_attribute_accepts_only_list_of_task_objects(self):
         """testing if a TypeError will be raised when trying to assign
         anything other than a list of task objects to the tasks argument
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_user.tasks = "aTask1"
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: str is not list-like'
-        )
 
     def test_tasks_attribute_accepts_an_empty_list(self):
         """testing if nothing happens when trying to assign an empty list to
@@ -1179,21 +1082,19 @@ class UserTestDB(UnitTestDBBase):
 
         self.test_user.tasks = tasks
 
-        self.assertEqual(self.test_user.tasks, tasks)
+        assert self.test_user.tasks == tasks
 
     def test_tasks_attribute_elements_accepts_Tasks_only(self):
         """testing if a TypeError will be raised when trying to assign
         something other than a Task object to the tasks list
         """
         # append
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_user.tasks.append(0)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Any element in User.tasks should be an instance of '
+        assert str(cm.value) == \
+            'Any element in User.tasks should be an instance of ' \
             'stalker.models.task.Task not int'
-        )
 
     def test_equality_operator(self):
         """testing equality of two users
@@ -1208,7 +1109,7 @@ class UserTestDB(UnitTestDBBase):
 
         new_user = User(**self.kwargs)
 
-        self.assertFalse(self.test_user == new_user)
+        assert not self.test_user == new_user
 
     def test_inequality_operator(self):
         """testing inequality of two users
@@ -1223,57 +1124,49 @@ class UserTestDB(UnitTestDBBase):
 
         new_user = User(**self.kwargs)
 
-        self.assertTrue(self.test_user != new_user)
+        assert self.test_user != new_user
 
     def test___repr__(self):
         """testing the representation
         """
-        self.assertEqual(
-            self.test_user.__repr__(),
+        assert self.test_user.__repr__() == \
             "<%s ('%s') (User)>" % (
                 self.test_user.name,
                 self.test_user.login)
-        )
 
     def test_tickets_attribute_is_an_empty_list_by_default(self):
         """testing if the User.tickets is an empty list by default
         """
-        self.assertEqual(self.test_user.tickets, [])
+        assert self.test_user.tickets == []
 
     def test_open_tickets_attribute_is_an_empty_list_by_default(self):
         """testing if the User.open_tickets is an empty list by default
         """
-        self.assertEqual(self.test_user.open_tickets, [])
+        assert self.test_user.open_tickets == []
 
     def test_tickets_attribute_is_read_only(self):
         """testing if the User.tickets attribute is a read only attribute
         """
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             self.test_user.tickets = []
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_open_tickets_attribute_is_read_only(self):
         """testing if the User.open_tickets attribute is a read only attribute
         """
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             self.test_user.open_tickets = []
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_tickets_attribute_returns_all_tickets_owned_by_this_user(self):
         """testing if User.tickets returns all the tickets owned by this user
         """
-        self.assertEqual(len(self.test_user.tasks), 0)
+        assert len(self.test_user.tasks) == 0
 
         # there should be no tickets assigned to this user
-        self.assertTrue(self.test_user.tickets == [])
+        assert self.test_user.tickets == []
 
         # be careful not all of these are open tickets
         self.test_ticket1.reassign(self.test_user, self.test_user)
@@ -1286,23 +1179,22 @@ class UserTestDB(UnitTestDBBase):
         self.test_ticket8.reassign(self.test_user, self.test_user)
 
         # now we should have some tickets
-        self.assertTrue(len(self.test_user.tickets) > 0)
+        assert len(self.test_user.tickets) > 0
 
         # now check for exact items
-        self.assertEqual(
-            sorted(self.test_user.tickets, key=lambda x: x.name),
+        assert \
+            sorted(self.test_user.tickets, key=lambda x: x.name) == \
             sorted([self.test_ticket2, self.test_ticket3, self.test_ticket4],
                    key=lambda x: x.name)
-        )
 
     def test_open_tickets_attribute_returns_all_open_tickets_owned_by_this_user(self):
         """testing if User.open_tickets returns all the open tickets owned by
         this user
         """
-        self.assertEqual(len(self.test_user.tasks), 0)
+        assert len(self.test_user.tasks) == 0
 
         # there should be no tickets assigned to this user
-        self.assertTrue(self.test_user.open_tickets == [])
+        assert self.test_user.open_tickets == []
 
         # assign the user to some tickets
         self.test_ticket1.reopen(self.test_user)
@@ -1325,11 +1217,11 @@ class UserTestDB(UnitTestDBBase):
         self.test_ticket8.reassign(self.test_user, self.test_user)
 
         # now we should have some open tickets
-        self.assertTrue(len(self.test_user.open_tickets) > 0)
+        assert len(self.test_user.open_tickets) > 0
 
         # now check for exact items
-        self.assertEqual(
-            sorted(self.test_user.open_tickets, key=lambda x: x.name),
+        assert \
+            sorted(self.test_user.open_tickets, key=lambda x: x.name) == \
             sorted([
                 self.test_ticket1,
                 self.test_ticket2,
@@ -1340,7 +1232,6 @@ class UserTestDB(UnitTestDBBase):
                 self.test_ticket7,
                 self.test_ticket8,
             ], key=lambda x: x.name)
-        )
 
         # close a couple of them
         from stalker.models.ticket import FIXED, CANTFIX, INVALID
@@ -1350,8 +1241,8 @@ class UserTestDB(UnitTestDBBase):
         self.test_ticket3.resolve(self.test_user, CANTFIX)
 
         # new check again
-        self.assertEqual(
-            sorted(self.test_user.open_tickets, key=lambda x: x.name),
+        assert \
+            sorted(self.test_user.open_tickets, key=lambda x: x.name) == \
             sorted([
                 self.test_ticket4,
                 self.test_ticket5,
@@ -1359,12 +1250,11 @@ class UserTestDB(UnitTestDBBase):
                 self.test_ticket7,
                 self.test_ticket8
             ], key=lambda x: x.name)
-        )
 
     def test_tjp_id_is_working_properly(self):
         """testing if the tjp_id is working properly
         """
-        self.assertEqual(self.test_user.tjp_id, 'User_%s' % self.test_user.id)
+        assert self.test_user.tjp_id == 'User_%s' % self.test_user.id
 
     def test_to_tjp_is_working_properly(self):
         """testing if the to_tjp property is working properly
@@ -1373,7 +1263,7 @@ class UserTestDB(UnitTestDBBase):
             'resource User_%s "User_%s" {\n    efficiency 1.0\n}' % \
             (self.test_user.id, self.test_user.id)
 
-        self.assertEqual(expected_tjp, self.test_user.to_tjp)
+        assert self.test_user.to_tjp == expected_tjp
 
     def test_to_tjp_is_working_properly_for_a_user_with_vacations(self):
         """testing if the to_tjp property is working properly for a user with
@@ -1413,47 +1303,38 @@ class UserTestDB(UnitTestDBBase):
         # print '---------------'
         # print self.test_user.to_tjp
 
-        self.assertEqual(
-            expected_tjp,
-            self.test_user.to_tjp
-        )
+        assert self.test_user.to_tjp == expected_tjp
 
     def test_vacations_attribute_is_set_to_None(self):
         """testing if a TypeError will be raised when the vacations attribute
         is set to None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_user.vacations = None
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: None is not list-like'
-        )
 
     def test_vacations_attribute_is_not_a_list(self):
         """testing if a TypeError will be raised when the vacations attribute
         is set to a value other than a list
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_user.vacations = 'not a list of Vacation instances'
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: str is not list-like'
-        )
 
     def test_vacations_attribute_is_not_a_list_of_Vacation_instances(self):
         """testing if a TypeError will be raised when the vacations attribute
         is set to a list of other objects than Vacation instances
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_user.vacations = ['list of', 'other', 'instances', 1]
 
-        self.assertEqual(
-            str(cm.exception),
-            'All of the elements in User.vacations should be a '
+        assert str(cm.value) == \
+            'All of the elements in User.vacations should be a ' \
             'stalker.models.studio.Vacation instance, not str'
-        )
 
     def test_vacations_attribute_is_working_properly(self):
         """testing if the vacations attribute is working properly
@@ -1481,15 +1362,9 @@ class UserTestDB(UnitTestDBBase):
             end=datetime.datetime(2013, 6, 10, tzinfo=pytz.utc)
         )
 
-        self.assertFalse(
-            vac1 in self.test_user.vacations
-        )
-
+        assert vac1 not in self.test_user.vacations
         self.test_user.vacations.append(vac1)
-
-        self.assertTrue(
-            vac1 in self.test_user.vacations
-        )
+        assert vac1 in self.test_user.vacations
 
     def test_efficiency_argument_skipped(self):
         """testing if the efficiency attribute value will be 1.0 if the
@@ -1497,7 +1372,7 @@ class UserTestDB(UnitTestDBBase):
         """
         self.kwargs.pop('efficiency')
         new_user = User(**self.kwargs)
-        self.assertEqual(1.0, new_user.efficiency)
+        assert new_user.efficiency == 1.0
 
     def test_efficiency_argument_is_None(self):
         """testing if the efficiency attribute value will be 1.0 if the
@@ -1505,7 +1380,7 @@ class UserTestDB(UnitTestDBBase):
         """
         self.kwargs['efficiency'] = None
         new_user = User(**self.kwargs)
-        self.assertEqual(1.0, new_user.efficiency)
+        assert new_user.efficiency == 1.0
 
     def test_efficiency_attribute_is_set_to_None(self):
         """testing if the efficiency attribute value will be 1.0 if it is set
@@ -1513,61 +1388,54 @@ class UserTestDB(UnitTestDBBase):
         """
         self.test_user.efficiency = 4.0
         self.test_user.efficiency = None
-        self.assertEqual(1.0, self.test_user.efficiency)
+        assert self.test_user.efficiency == 1.0
 
     def test_efficiency_argument_is_not_a_float_or_integer(self):
         """testing if a TypeError will be raised when the efficiency argument
         is not a float or integer
         """
         self.kwargs['efficiency'] = 'not a float or integer'
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             User(**self.kwargs)
 
-        self.assertEqual(
-            'User.efficiency should be a float number greater or equal to '
-            '0.0, not str',
-            str(cm.exception)
-        )
+        assert str(cm.value)  == \
+            'User.efficiency should be a float number greater or equal ' \
+            'to 0.0, not str'
 
     def test_efficiency_attribute_is_not_a_float_or_integer(self):
         """testing if a TypeError will be raised when the efficiency attribute
         is set to a value other than a float or integer
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_user.efficiency = 'not a float or integer'
 
-        self.assertEqual(
-            'User.efficiency should be a float number greater or equal to '
-            '0.0, not str',
-            str(cm.exception)
-        )
+        assert str(cm.value) == \
+            'User.efficiency should be a float number greater or equal to ' \
+            '0.0, not str'
 
     def test_efficiency_argument_is_a_negative_float_or_integer(self):
         """testing if a ValueError will be raised when the efficiency argument
         is a negative float or integer
         """
         self.kwargs['efficiency'] = -1
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             User(**self.kwargs)
 
-        self.assertEqual(
-            'User.efficiency should be a float number greater or equal to '
-            '0.0, not -1',
-            str(cm.exception)
-        )
+        assert str(cm.value) == \
+            'User.efficiency should be a float number greater or equal to ' \
+            '0.0, not -1'
+            
 
     def test_efficiency_attribute_is_a_negative_float_or_integer(self):
         """testing if a ValueError will be raised when the efficiency attribute
         is set to a negative float or integer
         """
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             self.test_user.efficiency = -2.0
 
-        self.assertEqual(
-            'User.efficiency should be a float number greater or equal to '
-            '0.0, not -2.0',
-            str(cm.exception)
-        )
+        assert str(cm.value) == \
+            'User.efficiency should be a float number greater or equal to ' \
+            '0.0, not -2.0'
 
     def test_efficiency_argument_is_working_properly(self):
         """testing if the efficiency argument value is correctly passed to the
@@ -1576,45 +1444,27 @@ class UserTestDB(UnitTestDBBase):
         # integer value
         self.kwargs['efficiency'] = 2
         new_user = User(**self.kwargs)
-        self.assertEqual(
-            2.0,
-            new_user.efficiency
-        )
+        assert new_user.efficiency == 2.0
 
         # float value
         self.kwargs['efficiency'] = 2.3
         new_user = User(**self.kwargs)
-        self.assertEqual(
-            2.3,
-            new_user.efficiency
-        )
+        assert new_user.efficiency == 2.3
 
     def test_efficiency_attribute_is_working_properly(self):
         """testing if the efficiency attribute value can correctly be changed
         """
         # integer
-        self.assertNotEqual(
-            2,
-            self.test_user.efficiency
-        )
+        assert self.test_user.efficiency != 2
 
         self.test_user.efficiency = 2
-        self.assertEqual(
-            2.0,
-            self.test_user.efficiency
-        )
+        assert self.test_user.efficiency == 2.0
 
         # float
-        self.assertNotEqual(
-            2.3,
-            self.test_user.efficiency
-        )
+        assert self.test_user.efficiency != 2.3
 
         self.test_user.efficiency = 2.3
-        self.assertEqual(
-            2.3,
-            self.test_user.efficiency
-        )
+        assert self.test_user.efficiency == 2.3
 
     def test_companies_argument_is_skipped(self):
         """testing if the companies attribute will be set to an empty list when
@@ -1622,7 +1472,7 @@ class UserTestDB(UnitTestDBBase):
         """
         self.kwargs.pop('companies')
         new_user = User(**self.kwargs)
-        self.assertEqual(new_user.companies, [])
+        assert new_user.companies == []
 
     def test_companies_argument_is_None(self):
         """testing if the companies argument is set to None the companies
@@ -1630,33 +1480,28 @@ class UserTestDB(UnitTestDBBase):
         """
         self.kwargs['companies'] = None
         new_user = User(**self.kwargs)
-        self.assertTrue(new_user.companies == [])
+        assert new_user.companies == []
 
     def test_companies_attribute_is_set_to_None(self):
         """testing if a the companies attribute will be an empty list if it is
         set to None
         """
-        self.assertTrue(self.test_user.companies is not None)
-        with self.assertRaises(TypeError) as cm:
+        assert self.test_user.companies is not None
+        with pytest.raises(TypeError) as cm:
             self.test_user.companies = None
-        self.assertEqual(
-            str(cm.exception),
-            "'NoneType' object is not iterable"
-        )
+        assert str(cm.value) == "'NoneType' object is not iterable"
 
     def test_companies_argument_is_not_a_list(self):
         """testing if a TypeError will be raised if the companies argument is
         not a list
         """
         self.kwargs['companies'] = 'not a list of clients'
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             User(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'ClientUser.client should be instance of '
+        assert str(cm.value) == \
+            'ClientUser.client should be instance of ' \
             'stalker.models.client.Client, not str'
-        )
 
     def test_companies_argument_is_not_a_list_of_client_instances(self):
         """testing if a TypeError will be raised when the companies argument is
@@ -1664,28 +1509,24 @@ class UserTestDB(UnitTestDBBase):
         """
         test_value = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
         self.kwargs["companies"] = test_value
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             User(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'ClientUser.client should be instance of '
+        assert str(cm.value) == \
+            'ClientUser.client should be instance of ' \
             'stalker.models.client.Client, not int'
-        )
 
     def test_companies_attribute_is_set_to_a_value_other_than_a_list_of_client_instances(self):
         """testing if a TypeError will be raised when the companies attribute
         is set to a value other than a list of Client instances
         """
         test_value = [1, 1.2, "a user", ["a", "user"], {"a": "user"}]
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_user.companies = test_value
 
-        self.assertEqual(
-            str(cm.exception),
-            'ClientUser.client should be instance of '
+        assert str(cm.value) == \
+            'ClientUser.client should be instance of ' \
             'stalker.models.client.Client, not int'
-        )
 
     def test_companies_attribute_is_working_properly(self):
         """from issue #27
@@ -1712,9 +1553,9 @@ class UserTestDB(UnitTestDBBase):
         user.companies = new_companies
         DBSession.commit()
 
-        self.assertTrue(c1 in user.companies)
-        self.assertTrue(c2 in user.companies)
-        self.assertTrue(c3 not in user.companies)
+        assert c1 in user.companies
+        assert c2 in user.companies
+        assert c3 not in user.companies
 
     def test_companies_attribute_is_working_properly_2(self):
         """from issue #27
@@ -1735,9 +1576,9 @@ class UserTestDB(UnitTestDBBase):
         from stalker.db.session import DBSession
         DBSession.add(user)
 
-        self.assertTrue(c1 in DBSession)
-        self.assertTrue(c2 in DBSession)
-        self.assertTrue(c3 in DBSession)
+        assert c1 in DBSession
+        assert c2 in DBSession
+        assert c3 in DBSession
 
         DBSession.commit()
 
@@ -1757,25 +1598,22 @@ class UserTestDB(UnitTestDBBase):
         """testing if a TypeError will be raised when the watching attribute is
         set to a list of other values than a Task
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_user.watching = ['not', 1, 'list of tasks']
 
-        self.assertEqual(
-            str(cm.exception),
-            'Any element in User.watching should be an instance of '
+        assert str(cm.value) == \
+            'Any element in User.watching should be an instance of ' \
             'stalker.models.task.Task not str'
-        )
 
     def test_watching_attribute_is_working_properly(self):
         """testing if the watching attribute is working properly
         """
         test_value = [self.test_task1, self.test_task2]
-        self.assertEqual(self.test_user.watching, [])
+        assert self.test_user.watching == []
         self.test_user.watching = test_value
-        self.assertEqual(
-            sorted(test_value, key=lambda x: x.name),
+        assert \
+            sorted(test_value, key=lambda x: x.name) == \
             sorted(self.test_user.watching, key=lambda x: x.name)
-        )
 
     def test_rate_argument_is_skipped(self):
         """testing if the rate attribute will be 0 when the rate argument is
@@ -1785,7 +1623,7 @@ class UserTestDB(UnitTestDBBase):
             self.kwargs.pop('rate')
 
         new_user = User(**self.kwargs)
-        self.assertEqual(new_user.rate, 0)
+        assert new_user.rate == 0
 
     def test_rate_argument_is_none(self):
         """testing if the rate attribute will be 0 when the rate argument is
@@ -1793,69 +1631,61 @@ class UserTestDB(UnitTestDBBase):
         """
         self.kwargs['rate'] = None
         new_user = User(**self.kwargs)
-        self.assertEqual(new_user.rate, 0)
+        assert new_user.rate == 0
 
     def test_rate_attribute_is_set_to_none(self):
         """testing if the rate will be set to 0 if it is set to None
         """
-        self.assertNotEqual(self.test_user.rate, None)
+        assert self.test_user.rate is not None
 
         self.test_user.rate = None
-        self.assertEqual(self.test_user.rate, 0)
+        assert self.test_user.rate == 0
 
     def test_rate_argument_is_not_a_float_or_integer_value(self):
         """testing if a TypeError will be raised when the rate argument is not
         an integer or float value
         """
         self.kwargs['rate'] = 'some string'
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             User(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'User.rate should be a float number greater or equal to 0.0, not '
-            'str'
-        )
+        assert str(cm.value) == \
+            'User.rate should be a float number greater or equal to 0.0, ' \
+            'not str'
 
     def test_rate_attribute_is_not_a_float_or_integer_value(self):
         """testing if a TypeError will be raised when the rate attribute is set
         to a value other than an integer or float
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_user.rate = 'some string'
 
-        self.assertEqual(
-            str(cm.exception),
-            'User.rate should be a float number greater or equal to 0.0, not '
-            'str'
-        )
+        assert str(cm.value) == \
+            'User.rate should be a float number greater or equal to 0.0, ' \
+            'not str'
 
     def test_rate_argument_is_a_negative_number(self):
         """testing if a ValueError will be raised when the rate argument is a
         negative value
         """
         self.kwargs['rate'] = -1
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             User(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'User.rate should be a float number greater or equal to 0.0, not '
-            '-1'
-        )
+        assert str(cm.value) == \
+            'User.rate should be a float number greater or equal to 0.0, ' \
+            'not -1'
 
     def test_rate_attribute_is_set_to_a_negative_number(self):
         """testing if a ValueError will be raised when the rate attribute is
         set to a negative number
         """
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             self.test_user.rate = -1
 
-        self.assertEqual(
-            str(cm.exception),
-            'User.rate should be a float number greater or equal to 0.0, not '
-            '-1'
-        )
+        assert str(cm.value) == \
+            'User.rate should be a float number greater or equal to 0.0, ' \
+            'not -1'
 
     def test_rate_argument_is_working_properly(self):
         """testing if the rate argument is working properly
@@ -1863,12 +1693,12 @@ class UserTestDB(UnitTestDBBase):
         test_value = 102.3
         self.kwargs['rate'] = test_value
         new_user = User(**self.kwargs)
-        self.assertEqual(new_user.rate, test_value)
+        assert new_user.rate == test_value
 
     def test_rate_attribute_is_working_properly(self):
         """testing if rate attribute is working properly
         """
         test_value = 212.5
-        self.assertNotEqual(self.test_user.rate, test_value)
+        assert self.test_user.rate != test_value
         self.test_user.rate = test_value
-        self.assertEqual(self.test_user.rate, test_value)
+        assert self.test_user.rate == test_value

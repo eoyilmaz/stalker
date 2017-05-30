@@ -722,7 +722,7 @@ class User(Entity, ACLMixin):
         # mangle the password
         mangled_password_bytes = base64.b64encode(password_in.encode('utf-8'))
 
-        if sys.version_info.major == 2:
+        if sys.version_info[0] == 2:
             mangled_password_str = str(mangled_password_bytes)
         else:
             # Assuming Python >= 3.5
@@ -746,7 +746,7 @@ class User(Entity, ACLMixin):
         raw_password_bytes = base64.b64encode(
             bytes(raw_password.encode('utf-8')))
 
-        if sys.version_info.major == 2:
+        if sys.version_info[0] == 2:
             raw_password_encrypted_str = str(raw_password_bytes)
         else:
             # Assuming Python >= 3.5

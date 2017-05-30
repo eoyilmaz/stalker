@@ -17,10 +17,9 @@
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
 import logging
-
+import pytest
 from stalker import log
 from stalker.testing import UnitTestDBBase
-
 logger = logging.getLogger('stalker.models.project')
 logger.setLevel(log.logging_level)
 
@@ -580,30 +579,27 @@ class ProjectTestDBCase(UnitTestDBBase):
         Project class
         """
         from stalker import Project
-        self.assertFalse(Project.__auto_name__)
+        assert Project.__auto_name__ is False
 
     def test_setup_is_working_correctly(self):
         """testing if the setup is done correctly
         """
         from stalker import Type
-        self.assertTrue(isinstance(self.test_project_type, Type))
-        self.assertTrue(isinstance(self.test_project_type2, Type))
+        assert isinstance(self.test_project_type, Type)
+        assert isinstance(self.test_project_type2, Type)
 
     def test_sequences_attribute_is_read_only(self):
         """testing if the sequence attribute is read-only
         """
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             self.test_project.sequences = ["some non sequence related data"]
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_assets_attribute_is_read_only(self):
         """testing if the assets attribute is read only
         """
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             self.test_project.assets = ["some list"]
 
     def test_image_format_argument_is_skipped(self):
@@ -613,7 +609,7 @@ class ProjectTestDBCase(UnitTestDBBase):
         self.kwargs.pop("image_format")
         from stalker import Project
         new_project = Project(**self.kwargs)
-        self.assertTrue(new_project.image_format is None)
+        assert new_project.image_format is None
 
     def test_image_format_argument_is_None(self):
         """testing if nothing is going to happen when the image_format is set
@@ -622,7 +618,7 @@ class ProjectTestDBCase(UnitTestDBBase):
         self.kwargs["image_format"] = None
         from stalker import Project
         new_project = Project(**self.kwargs)
-        self.assertTrue(new_project.image_format is None)
+        assert new_project.image_format is None
 
     def test_image_format_attribute_is_set_to_None(self):
         """testing if nothing will happen when the image_format attribute is
@@ -636,14 +632,12 @@ class ProjectTestDBCase(UnitTestDBBase):
         """
         from stalker import Project
         self.kwargs["image_format"] = "a str"
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Project(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Project.image_format should be an instance of '
+        assert str(cm.value) == \
+            'Project.image_format should be an instance of ' \
             'stalker.models.format.ImageFormat, not str'
-        )
 
     def test_image_format_argument_is_working_properly(self):
         """testing if the image_format argument value is correctly passed to
@@ -653,7 +647,7 @@ class ProjectTestDBCase(UnitTestDBBase):
         from stalker import Project
         self.kwargs["image_format"] = self.test_image_format
         new_project = Project(**self.kwargs)
-        self.assertEqual(new_project.image_format, self.test_image_format)
+        assert new_project.image_format == self.test_image_format
 
     def test_image_format_attribute_accepts_ImageFormat_only(self):
         """testing if a TypeError will be raised when the image_format
@@ -662,7 +656,7 @@ class ProjectTestDBCase(UnitTestDBBase):
         """
         test_values = [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
         for test_value in test_values:
-            with self.assertRaises(TypeError) as cm:
+            with pytest.raises(TypeError) as cm:
                 self.test_project.image_format = test_value
 
         # and a proper image format
@@ -678,7 +672,7 @@ class ProjectTestDBCase(UnitTestDBBase):
             height=10
         )
         self.test_project.image_format = new_image_format
-        self.assertEqual(self.test_project.image_format, new_image_format)
+        assert self.test_project.image_format == new_image_format
 
     def test_fps_argument_is_skipped(self):
         """testing if the default value will be used when fps is skipped
@@ -686,7 +680,7 @@ class ProjectTestDBCase(UnitTestDBBase):
         self.kwargs.pop("fps")
         from stalker import Project
         new_project = Project(**self.kwargs)
-        self.assertEqual(new_project.fps, 25.0)
+        assert new_project.fps == 25.0
 
     def test_fps_attribute_is_set_to_None(self):
         """testing if a TypeError will be raised when the fps attribute is set
@@ -694,13 +688,11 @@ class ProjectTestDBCase(UnitTestDBBase):
         """
         self.kwargs["fps"] = None
         from stalker import Project
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Project(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Project.fps should be a positive float or int, not NoneType'
-        )
 
     def test_fps_argument_is_given_as_non_float_or_integer_1(self):
         """testing if a TypeError will be raised when the fps argument is
@@ -709,13 +701,11 @@ class ProjectTestDBCase(UnitTestDBBase):
         """
         from stalker import Project
         self.kwargs["fps"] = "a str"
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Project(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Project.fps should be a positive float or int, not str'
-        )
 
     def test_fps_argument_is_given_as_non_float_or_integer_2(self):
         """testing if a TypeError will be raised when the fps argument is
@@ -724,37 +714,31 @@ class ProjectTestDBCase(UnitTestDBBase):
         """
         from stalker import Project
         self.kwargs["fps"] = ["a", "list"]
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Project(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Project.fps should be a positive float or int, not list'
-        )
 
     def test_fps_attribute_is_given_as_non_float_or_integer_1(self):
         """testing if a TypeError will be raised when the fps attribute is
         set to a value other than a float, integer or valid string literals
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_project.fps = "a str"
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Project.fps should be a positive float or int, not str'
-        )
 
     def test_fps_attribute_is_given_as_non_float_or_integer_2(self):
         """testing if a TypeError will be raised when the fps attribute is
         set to a value other than a float, integer or valid string literals
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_project.fps = ["a", "list"]
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Project.fps should be a positive float or int, not list'
-        )
 
     def test_fps_argument_string_to_float_conversion(self):
         """testing if a TypeError will be raised when a string containing a
@@ -762,25 +746,21 @@ class ProjectTestDBCase(UnitTestDBBase):
         """
         from stalker import Project
         self.kwargs["fps"] = "2.3"
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Project(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Project.fps should be a positive float or int, not str'
-        )
 
     def test_fps_attribute_string_to_float_conversion(self):
         """testing if a TypeError will be raised if a the fps attribute is set
         to a string containing a float
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_project.fps = "2.3"
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Project.fps should be a positive float or int, not str'
-        )
 
     def test_fps_attribute_float_conversion(self):
         """testing if the fps attribute is converted to float when the float
@@ -790,8 +770,8 @@ class ProjectTestDBCase(UnitTestDBBase):
         self.kwargs["fps"] = test_value
         from stalker import Project
         new_project = Project(**self.kwargs)
-        self.assertTrue(isinstance(new_project.fps, float))
-        self.assertEqual(new_project.fps, float(test_value))
+        assert isinstance(new_project.fps, float)
+        assert new_project.fps == float(test_value)
 
     def test_fps_attribute_float_conversion_2(self):
         """testing if the fps attribute is converted to float when it is set to
@@ -799,8 +779,8 @@ class ProjectTestDBCase(UnitTestDBBase):
         """
         test_value = 1
         self.test_project.fps = test_value
-        self.assertTrue(isinstance(self.test_project.fps, float))
-        self.assertEqual(self.test_project.fps, float(test_value))
+        assert isinstance(self.test_project.fps, float)
+        assert self.test_project.fps == float(test_value)
 
     def test_fps_argument_is_zero(self):
         """testing if a ValueError will be raised when the fps is 0
@@ -808,25 +788,21 @@ class ProjectTestDBCase(UnitTestDBBase):
         self.kwargs['fps'] = 0
         from stalker import Project
 
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             Project(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Project.fps should be a positive float or int, not 0.0'
-        )
 
     def test_fps_attribute_is_set_to_zero(self):
         """testing if a value error will be raised when the fps attribute is
         set to zero
         """
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             self.test_project.fps = 0
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Project.fps should be a positive float or int, not 0.0'
-        )
 
     def test_fps_argument_is_negative(self):
         """testing if a ValueError will be raised when the fps argument is
@@ -834,25 +810,21 @@ class ProjectTestDBCase(UnitTestDBBase):
         """
         self.kwargs['fps'] = -1.0
         from stalker import Project
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             Project(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Project.fps should be a positive float or int, not -1.0'
-        )
 
     def test_fps_attribute_is_negative(self):
         """testing if a ValueError will be raised when the fps attribute is
         set to a negative value
         """
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             self.test_project.fps = -1
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Project.fps should be a positive float or int, not -1.0'
-        )
 
     def test_repositories_argument_is_skipped(self):
         """testing if the repositories attribute will be an empty list if the
@@ -861,7 +833,7 @@ class ProjectTestDBCase(UnitTestDBBase):
         self.kwargs.pop("repositories")
         from stalker import Project
         p = Project(**self.kwargs)
-        self.assertEqual(p.repositories, [])
+        assert p.repositories == []
 
     def test_repositories_argument_is_None(self):
         """testing if a the repositories attribute will be an empty list if the
@@ -870,49 +842,43 @@ class ProjectTestDBCase(UnitTestDBBase):
         self.kwargs["repositories"] = None
         from stalker import Project
         p = Project(**self.kwargs)
-        self.assertEqual(p.repositories, [])
+        assert p.repositories == []
 
     def test_repositories_attribute_is_set_to_None(self):
         """testing if a TypeError will be raised when the repositories
         attribute is set to None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_project.repositories = None
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             "'NoneType' object is not iterable"
-        )
 
     def test_repositories_argument_is_not_a_list(self):
         """testing if a TypeError will be raised when the repositories argument
         value is not a list
         """
         self.kwargs['repositories'] = 'not a list'
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             from stalker import Project
             Project(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'ProjectRepository.repositories should be a list of '
-            'stalker.models.repository.Repository instances or derivatives, '
+        assert str(cm.value) == \
+            'ProjectRepository.repositories should be a list of ' \
+            'stalker.models.repository.Repository instances or derivatives, ' \
             'not str'
-        )
 
     def test_repositories_attribute_is_not_a_list(self):
         """testing if a TypeError will be raised when the repositories
         attribute is set to a value other than a list
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_project.repositories = 'not a list'
 
-        self.assertEqual(
-            str(cm.exception),
-            'ProjectRepository.repositories should be a list of '
-            'stalker.models.repository.Repository instances or derivatives, '
+        assert str(cm.value) == \
+            'ProjectRepository.repositories should be a list of ' \
+            'stalker.models.repository.Repository instances or derivatives, ' \
             'not str'
-        )
 
     def test_repositories_argument_is_not_a_list_of_repository_instances(self):
         """testing if a TypeError will be raised if the repositories argument
@@ -921,40 +887,33 @@ class ProjectTestDBCase(UnitTestDBBase):
         from stalker import Repository, Project
         self.kwargs['repositories'] = ['not', 1, 'list', 'of', Repository,
                                        'instances']
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Project(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'ProjectRepository.repositories should be a list of '
-            'stalker.models.repository.Repository instances or derivatives, '
+        assert str(cm.value) == \
+            'ProjectRepository.repositories should be a list of ' \
+            'stalker.models.repository.Repository instances or derivatives, ' \
             'not str'
-        )
 
     def test_repositories_attribute_is_not_a_list_of_repository_instances(self):
         """testing if a TypeError will be raised if the repositories attribute
         is set to a list that contains objects other than Repository instances
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             from stalker import Repository
             self.test_project.repositories = ['not', 1, 'list', 'of',
                                               Repository, 'instances']
 
-        self.assertEqual(
-            str(cm.exception),
-            'ProjectRepository.repositories should be a list of '
-            'stalker.models.repository.Repository instances or derivatives, '
+        assert str(cm.value) == \
+            'ProjectRepository.repositories should be a list of ' \
+            'stalker.models.repository.Repository instances or derivatives, ' \
             'not str'
-        )
 
     def test_repositories_argument_is_working_properly(self):
         """testing if the repositories argument value is properly passed to the
         repositories attribute value
         """
-        self.assertEqual(
-            self.test_project.repositories,
-            self.kwargs['repositories']
-        )
+        assert self.test_project.repositories == self.kwargs['repositories']
 
     def test_repositories_attribute_is_working_properly(self):
         """testing if the repository attribute is working properly
@@ -967,9 +926,9 @@ class ProjectTestDBCase(UnitTestDBBase):
             osx_path='/Volumes/S/random/repo'
         )
 
-        self.assertTrue(self.test_project.repositories != [new_repo1])
+        assert self.test_project.repositories != [new_repo1]
         self.test_project.repositories = [new_repo1]
-        self.assertTrue(self.test_project.repositories == [new_repo1])
+        assert self.test_project.repositories == [new_repo1]
 
     def test_repositories_attribute_value_order_is_not_changing(self):
         """testing if the order of the repositories attribute is not changing
@@ -989,10 +948,7 @@ class ProjectTestDBCase(UnitTestDBBase):
 
         for i in range(10):
             db_proj = Project.query.first()
-            self.assertEqual(
-                db_proj.repositories,
-                test_value
-            )
+            assert db_proj.repositories == test_value
             DBSession.commit()
 
     def test_is_stereoscopic_argument_skipped(self):
@@ -1002,7 +958,7 @@ class ProjectTestDBCase(UnitTestDBBase):
         self.kwargs.pop("is_stereoscopic")
         from stalker import Project
         new_project = Project(**self.kwargs)
-        self.assertEqual(new_project.is_stereoscopic, False)
+        assert new_project.is_stereoscopic is False
 
     def test_is_stereoscopic_argument_bool_conversion(self):
         """testing if all the given values for is_stereoscopic argument will be
@@ -1013,7 +969,7 @@ class ProjectTestDBCase(UnitTestDBBase):
         for test_value in test_values:
             self.kwargs["is_stereoscopic"] = test_value
             new_project = Project(**self.kwargs)
-            self.assertEqual(new_project.is_stereoscopic, bool(test_value))
+            assert new_project.is_stereoscopic == bool(test_value)
 
     def test_is_stereoscopic_attribute_bool_conversion(self):
         """testing if all the given values for is_stereoscopic attribute will
@@ -1022,10 +978,7 @@ class ProjectTestDBCase(UnitTestDBBase):
         test_values = [0, 1, 1.2, "", "str", ["a", "list"]]
         for test_value in test_values:
             self.test_project.is_stereoscopic = test_value
-            self.assertEqual(
-                self.test_project.is_stereoscopic,
-                bool(test_value)
-            )
+            assert self.test_project.is_stereoscopic == bool(test_value)
 
     def test_structure_argument_is_None(self):
         """testing if nothing happens when the structure argument is None
@@ -1033,7 +986,7 @@ class ProjectTestDBCase(UnitTestDBBase):
         self.kwargs["structure"] = None
         from stalker import Project
         new_project = Project(**self.kwargs)
-        self.assertTrue(isinstance(new_project, Project))
+        assert isinstance(new_project, Project)
 
     def test_structure_attribute_is_None(self):
         """testing if nothing happens when the structure attribute is set to
@@ -1047,34 +1000,29 @@ class ProjectTestDBCase(UnitTestDBBase):
         """
         from stalker import Project
         self.kwargs["structure"] = 1.215
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Project(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Project.structure should be an instance of '
+        assert str(cm.value) == \
+            'Project.structure should be an instance of ' \
             'stalker.models.structure.Structure, not float'
-        )
 
     def test_structure_attribute_not_instance_of_Structure(self):
         """testing if a TypeError will be raised when the structure attribute
         is not an instance of Structure
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_project.structure = 1.2
 
-        self.assertEqual(
-            str(cm.exception),
-            'Project.structure should be an instance of '
+        assert str(cm.value) == \
+            'Project.structure should be an instance of ' \
             'stalker.models.structure.Structure, not float'
-        )
 
     def test_structure_attribute_is_working_properly(self):
         """testing if the structure attribute is working properly
         """
         self.test_project.structure = self.test_project_structure2
-        self.assertEqual(self.test_project.structure,
-                         self.test_project_structure2)
+        assert self.test_project.structure == self.test_project_structure2
 
     def test_equality(self):
         """testing the equality of two projects
@@ -1090,9 +1038,9 @@ class ProjectTestDBCase(UnitTestDBBase):
         self.kwargs["name"] = "a different project"
         new_project2 = Project(**self.kwargs)
 
-        self.assertTrue(self.test_project == new_project1)
-        self.assertFalse(self.test_project == new_project2)
-        self.assertFalse(self.test_project == new_entity)
+        assert not self.test_project != new_project1
+        assert self.test_project != new_project2
+        assert self.test_project != new_entity
 
     def test_inequality(self):
         """testing the inequality of two projects
@@ -1108,9 +1056,9 @@ class ProjectTestDBCase(UnitTestDBBase):
         self.kwargs["name"] = "a different project"
         new_project2 = Project(**self.kwargs)
 
-        self.assertFalse(self.test_project != new_project1)
-        self.assertTrue(self.test_project != new_project2)
-        self.assertTrue(self.test_project != new_entity)
+        assert not self.test_project != new_project1
+        assert self.test_project != new_project2
+        assert self.test_project != new_entity
 
     def test_ReferenceMixin_initialization(self):
         """testing if the ReferenceMixin part is initialized correctly
@@ -1132,7 +1080,7 @@ class ProjectTestDBCase(UnitTestDBBase):
 
         self.kwargs["references"] = references
         new_project = Project(**self.kwargs)
-        self.assertEqual(new_project.references, references)
+        assert new_project.references == references
 
     def test_StatusMixin_initialization(self):
         """testing if the StatusMixin part is initialized correctly
@@ -1144,7 +1092,7 @@ class ProjectTestDBCase(UnitTestDBBase):
         self.kwargs["status_list"] = status_list
         from stalker import Project
         new_project = Project(**self.kwargs)
-        self.assertEqual(new_project.status_list, status_list)
+        assert new_project.status_list == status_list
 
     def test_ScheduleMixin_initialization(self):
         """testing if the DateRangeMixin part is initialized correctly
@@ -1161,15 +1109,15 @@ class ProjectTestDBCase(UnitTestDBBase):
 
         from stalker import Project
         new_project = Project(**self.kwargs)
-        self.assertEqual(new_project.start, start)
-        self.assertEqual(new_project.end, end)
-        self.assertEqual(new_project.duration, end - start)
+        assert new_project.start == start
+        assert new_project.end == end
+        assert new_project.duration == end - start
 
     def test___strictly_typed___is_False(self):
         """testing if the __strictly_typed__ is True for Project class
         """
         from stalker import Project
-        self.assertEqual(Project.__strictly_typed__, False)
+        assert Project.__strictly_typed__ is False
 
     def test___strictly_typed___not_forces_type_initialization(self):
         """testing if Project can not be created without defining a type for it
@@ -1183,54 +1131,54 @@ class ProjectTestDBCase(UnitTestDBBase):
         related to this Project instance.
         """
         # test if we are going to get all the Tasks for project.tasks
-        self.assertEqual(len(self.test_project.tasks), 43)
-        self.assertTrue(self.test_task1 in self.test_project.tasks)
-        self.assertTrue(self.test_task2 in self.test_project.tasks)
-        self.assertTrue(self.test_task3 in self.test_project.tasks)
-        self.assertTrue(self.test_task4 in self.test_project.tasks)
-        self.assertTrue(self.test_task5 in self.test_project.tasks)
-        self.assertTrue(self.test_task6 in self.test_project.tasks)
-        self.assertTrue(self.test_task7 in self.test_project.tasks)
-        self.assertTrue(self.test_task8 in self.test_project.tasks)
-        self.assertTrue(self.test_task9 in self.test_project.tasks)
-        self.assertTrue(self.test_task10 in self.test_project.tasks)
-        self.assertTrue(self.test_task11 in self.test_project.tasks)
-        self.assertTrue(self.test_task12 in self.test_project.tasks)
-        self.assertTrue(self.test_task13 in self.test_project.tasks)
-        self.assertTrue(self.test_task14 in self.test_project.tasks)
-        self.assertTrue(self.test_task15 in self.test_project.tasks)
-        self.assertTrue(self.test_task16 in self.test_project.tasks)
-        self.assertTrue(self.test_task17 in self.test_project.tasks)
-        self.assertTrue(self.test_task18 in self.test_project.tasks)
-        self.assertTrue(self.test_task19 in self.test_project.tasks)
-        self.assertTrue(self.test_task20 in self.test_project.tasks)
-        self.assertTrue(self.test_task21 in self.test_project.tasks)
-        self.assertTrue(self.test_task22 in self.test_project.tasks)
-        self.assertTrue(self.test_task23 in self.test_project.tasks)
-        self.assertTrue(self.test_task24 in self.test_project.tasks)
-        self.assertTrue(self.test_task25 in self.test_project.tasks)
-        self.assertTrue(self.test_task26 in self.test_project.tasks)
-        self.assertTrue(self.test_task27 in self.test_project.tasks)
+        assert len(self.test_project.tasks) == 43
+        assert self.test_task1 in self.test_project.tasks
+        assert self.test_task2 in self.test_project.tasks
+        assert self.test_task3 in self.test_project.tasks
+        assert self.test_task4 in self.test_project.tasks
+        assert self.test_task5 in self.test_project.tasks
+        assert self.test_task6 in self.test_project.tasks
+        assert self.test_task7 in self.test_project.tasks
+        assert self.test_task8 in self.test_project.tasks
+        assert self.test_task9 in self.test_project.tasks
+        assert self.test_task10 in self.test_project.tasks
+        assert self.test_task11 in self.test_project.tasks
+        assert self.test_task12 in self.test_project.tasks
+        assert self.test_task13 in self.test_project.tasks
+        assert self.test_task14 in self.test_project.tasks
+        assert self.test_task15 in self.test_project.tasks
+        assert self.test_task16 in self.test_project.tasks
+        assert self.test_task17 in self.test_project.tasks
+        assert self.test_task18 in self.test_project.tasks
+        assert self.test_task19 in self.test_project.tasks
+        assert self.test_task20 in self.test_project.tasks
+        assert self.test_task21 in self.test_project.tasks
+        assert self.test_task22 in self.test_project.tasks
+        assert self.test_task23 in self.test_project.tasks
+        assert self.test_task24 in self.test_project.tasks
+        assert self.test_task25 in self.test_project.tasks
+        assert self.test_task26 in self.test_project.tasks
+        assert self.test_task27 in self.test_project.tasks
 
         # assets, sequences and shots are also Tasks
-        self.assertTrue(self.test_seq1 in self.test_project.tasks)
-        self.assertTrue(self.test_seq2 in self.test_project.tasks)
-        self.assertTrue(self.test_seq3 in self.test_project.tasks)
-        self.assertTrue(self.test_seq4 in self.test_project.tasks)
-        self.assertTrue(self.test_seq5 in self.test_project.tasks)
-        self.assertTrue(self.test_seq6 in self.test_project.tasks)
-        self.assertTrue(self.test_seq7 in self.test_project.tasks)
-
-        self.assertTrue(self.test_asset1 in self.test_project.tasks)
-        self.assertTrue(self.test_asset2 in self.test_project.tasks)
-        self.assertTrue(self.test_asset3 in self.test_project.tasks)
-        self.assertTrue(self.test_asset4 in self.test_project.tasks)
-        self.assertTrue(self.test_asset5 in self.test_project.tasks)
-
-        self.assertTrue(self.test_shot1 in self.test_project.tasks)
-        self.assertTrue(self.test_shot2 in self.test_project.tasks)
-        self.assertTrue(self.test_shot3 in self.test_project.tasks)
-        self.assertTrue(self.test_shot4 in self.test_project.tasks)
+        assert self.test_seq1 in self.test_project.tasks
+        assert self.test_seq2 in self.test_project.tasks
+        assert self.test_seq3 in self.test_project.tasks
+        assert self.test_seq4 in self.test_project.tasks
+        assert self.test_seq5 in self.test_project.tasks
+        assert self.test_seq6 in self.test_project.tasks
+        assert self.test_seq7 in self.test_project.tasks
+ 
+        assert self.test_asset1 in self.test_project.tasks
+        assert self.test_asset2 in self.test_project.tasks
+        assert self.test_asset3 in self.test_project.tasks
+        assert self.test_asset4 in self.test_project.tasks
+        assert self.test_asset5 in self.test_project.tasks
+ 
+        assert self.test_shot1 in self.test_project.tasks
+        assert self.test_shot2 in self.test_project.tasks
+        assert self.test_shot3 in self.test_project.tasks
+        assert self.test_shot4 in self.test_project.tasks
 
     def test_root_tasks_attribute_returns_the_Tasks_instances_with_no_parent_in_this_project(self):
         """testing if the root_tasks attribute returns a list of Task instances
@@ -1238,30 +1186,30 @@ class ProjectTestDBCase(UnitTestDBBase):
         """
         # test if we are going to get all the Tasks for project.tasks
         root_tasks = self.test_project.root_tasks
-        self.assertEqual(len(root_tasks), 19)
-        self.assertTrue(self.test_task1 in root_tasks)
-        self.assertTrue(self.test_task2 in root_tasks)
-        self.assertTrue(self.test_task3 in root_tasks)
+        assert len(root_tasks) == 19
+        assert self.test_task1 in root_tasks
+        assert self.test_task2 in root_tasks
+        assert self.test_task3 in root_tasks
 
         # assets, sequences and shots are also Tasks
-        self.assertTrue(self.test_seq1 in root_tasks)
-        self.assertTrue(self.test_seq2 in root_tasks)
-        self.assertTrue(self.test_seq3 in root_tasks)
-        self.assertTrue(self.test_seq4 in root_tasks)
-        self.assertTrue(self.test_seq5 in root_tasks)
-        self.assertTrue(self.test_seq6 in root_tasks)
-        self.assertTrue(self.test_seq7 in root_tasks)
+        assert self.test_seq1 in root_tasks
+        assert self.test_seq2 in root_tasks
+        assert self.test_seq3 in root_tasks
+        assert self.test_seq4 in root_tasks
+        assert self.test_seq5 in root_tasks
+        assert self.test_seq6 in root_tasks
+        assert self.test_seq7 in root_tasks
 
-        self.assertTrue(self.test_asset1 in root_tasks)
-        self.assertTrue(self.test_asset2 in root_tasks)
-        self.assertTrue(self.test_asset3 in root_tasks)
-        self.assertTrue(self.test_asset4 in root_tasks)
-        self.assertTrue(self.test_asset5 in root_tasks)
+        assert self.test_asset1 in root_tasks
+        assert self.test_asset2 in root_tasks
+        assert self.test_asset3 in root_tasks
+        assert self.test_asset4 in root_tasks
+        assert self.test_asset5 in root_tasks
 
-        self.assertTrue(self.test_shot1 in root_tasks)
-        self.assertTrue(self.test_shot2 in root_tasks)
-        self.assertTrue(self.test_shot3 in root_tasks)
-        self.assertTrue(self.test_shot4 in root_tasks)
+        assert self.test_shot1 in root_tasks
+        assert self.test_shot2 in root_tasks
+        assert self.test_shot3 in root_tasks
+        assert self.test_shot4 in root_tasks
 
     def test_users_argument_is_skipped(self):
         """testing if the users attribute will be an empty list when the users
@@ -1274,7 +1222,7 @@ class ProjectTestDBCase(UnitTestDBBase):
             pass
         from stalker import Project
         new_project = Project(**self.kwargs)
-        self.assertEqual(new_project.users, [])
+        assert new_project.users == []
 
     def test_users_argument_is_None(self):
         """testing if a the users attribute will be an empty list when the
@@ -1284,19 +1232,16 @@ class ProjectTestDBCase(UnitTestDBBase):
         self.kwargs['users'] = None
         from stalker import Project
         new_project = Project(**self.kwargs)
-        self.assertEqual(new_project.users, [])
+        assert new_project.users == []
 
     def test_users_attribute_is_set_to_None(self):
         """testing if a TypeError will be raised when the users attribute is
         set to None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_project.users = None
 
-        self.assertEqual(
-            str(cm.exception),
-            "'NoneType' object is not iterable"
-        )
+        assert str(cm.value) == "'NoneType' object is not iterable"
 
     def test_users_argument_is_not_a_list_of_User_instances(self):
         """testing if a TypeError will be raised when the users argument is not
@@ -1305,27 +1250,23 @@ class ProjectTestDBCase(UnitTestDBBase):
         self.kwargs['name'] = 'New Project Name'
         self.kwargs['users'] = ['not a list of User instances']
         from stalker import Project
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Project(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'ProjectUser.user should be a stalker.models.auth.User '
+        assert str(cm.value) == \
+            'ProjectUser.user should be a stalker.models.auth.User ' \
             'instance, not str'
-        )
 
     def test_users_attribute_is_set_to_a_value_which_is_not_a_list_of_User_instances(self):
         """testing if a TypeError will be raised when the user attribute is set
         to a value which is not a list of User instances
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_project.users = ['not a list of Users']
 
-        self.assertEqual(
-            str(cm.exception),
-            'ProjectUser.user should be a stalker.models.auth.User instance, '
-            'not str'
-        )
+        assert str(cm.value) == \
+            'ProjectUser.user should be a stalker.models.auth.User ' \
+            'instance, not str'
 
     def test_users_argument_is_working_properly(self):
         """testing if the users argument value is passed to the users attribute
@@ -1336,10 +1277,9 @@ class ProjectTestDBCase(UnitTestDBBase):
                                 self.test_user3]
         from stalker import Project
         new_proj = Project(**self.kwargs)
-        self.assertEqual(
-            sorted(self.kwargs['users'], key=lambda x: x.name),
+        assert \
+            sorted(self.kwargs['users'], key=lambda x: x.name) == \
             sorted(new_proj.users, key=lambda x: x.name)
-        )
 
     def test_users_attribute_is_working_properly(self):
         """testing if the users attribute is working properly
@@ -1348,16 +1288,15 @@ class ProjectTestDBCase(UnitTestDBBase):
                  self.test_user2,
                  self.test_user3]
         self.test_project.users = users
-        self.assertEqual(
-            sorted(users, key=lambda x: x.name),
+        assert \
+            sorted(users, key=lambda x: x.name) == \
             sorted(self.test_project.users, key=lambda x: x.name)
-        )
 
     def test_tjp_id_is_working_properly(self):
         """testing if the tjp_id attribute is working properly
         """
         self.test_project.id = 654654
-        self.assertEqual(self.test_project.tjp_id, 'Project_654654')
+        assert self.test_project.tjp_id == 'Project_654654'
 
     def test_to_tjp_is_working_properly(self):
         """testing if the to_tjp attribute is working properly
@@ -1742,46 +1681,40 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
         # print self.test_project.to_tjp
         # self.maxDiff = None
 
-        self.assertEqual(self.test_project.to_tjp, expected_tjp)
+        assert self.test_project.to_tjp == expected_tjp
 
     def test_active_attribute_is_True_by_default(self):
         """testing if the active attribute is True by default
         """
         from stalker import Project
         new_project = Project(**self.kwargs)
-        self.assertEqual(new_project.active, True)
+        assert new_project.active == True
 
     def test_is_active_is_read_only(self):
         """testing if the is_active is a read only property
         """
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             self.test_project.is_active = True
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_is_active_is_working_properly(self):
         """testing if is_active is working properly
         """
         self.test_project.active = True
-        self.assertEqual(self.test_project.is_active, True)
+        assert self.test_project.is_active is True
 
         self.test_project.active = False
-        self.assertEqual(self.test_project.is_active, False)
+        assert self.test_project.is_active is False
 
     def test_total_logged_seconds_attribute_is_read_only(self):
         """testing if the total_logged_seconds attribute is a read-only
         attribute
         """
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             self.test_project.total_logged_seconds = 32.3
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_total_logged_seconds_is_0_for_a_project_with_no_child_tasks(self):
         """testing if the total_logged_seconds
@@ -1791,7 +1724,7 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
         new_project = Project(**self.kwargs)
         DBSession.add(new_project)
         DBSession.commit()
-        self.assertEqual(new_project.total_logged_seconds, 0)
+        assert new_project.total_logged_seconds == 0
 
     def test_total_logged_seconds_attribute_is_working_properly(self):
         """testing if the total_logged_seconds attribute is working properly
@@ -1808,7 +1741,7 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
         )
         from stalker.db.session import DBSession
         DBSession.commit()
-        self.assertEqual(self.test_project.total_logged_seconds, 3600)
+        assert self.test_project.total_logged_seconds == 3600
 
         # add more time logs
         TimeLog(
@@ -1818,7 +1751,7 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
             duration=datetime.timedelta(hours=1)
         )
         DBSession.commit()
-        self.assertEqual(self.test_project.total_logged_seconds, 7200)
+        assert self.test_project.total_logged_seconds == 7200
 
         # create more deeper time logs
         TimeLog(
@@ -1828,7 +1761,7 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
             duration=datetime.timedelta(hours=3)
         )
         DBSession.commit()
-        self.assertEqual(self.test_project.total_logged_seconds, 18000)
+        assert self.test_project.total_logged_seconds == 18000
 
         # create a time log for one asset
         TimeLog(
@@ -1838,18 +1771,15 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
             duration=datetime.timedelta(hours=10)
         )
         DBSession.commit()
-        self.assertEqual(self.test_project.total_logged_seconds, 15 * 3600)
+        assert self.test_project.total_logged_seconds == 15 * 3600
 
     def test_schedule_seconds_attribute_is_read_only(self):
         """testing if the schedule_seconds is a read-only attribute
         """
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             self.test_project.schedule_seconds = 3
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_schedule_seconds_attribute_value_is_0_for_a_project_with_no_tasks(self):
         """testing if the schedule_seconds attribute value is 0 for a project
@@ -1860,74 +1790,71 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
         new_project = Project(**self.kwargs)
         DBSession.add(new_project)
         DBSession.commit()
-        self.assertEqual(new_project.schedule_seconds, 0)
+        assert new_project.schedule_seconds == 0
 
     def test_schedule_seconds_attribute_is_working_properly(self):
         """testing if the schedule_seconds attribute value is gathered from the
         child tasks
         """
-        self.assertTrue(self.test_shot1.is_container)
-        self.assertEqual(self.test_task10.parent, self.test_shot1)
+        assert self.test_shot1.is_container
+        assert self.test_task10.parent == self.test_shot1
 
-        self.assertEqual(self.test_seq1.schedule_seconds, 3600)
-        self.assertEqual(self.test_seq2.schedule_seconds, 3600)
-        self.assertEqual(self.test_seq3.schedule_seconds, 3600)
-        self.assertEqual(self.test_seq4.schedule_seconds, 3 * 3600)
-        self.assertEqual(self.test_seq5.schedule_seconds, 3 * 3600)
-        self.assertEqual(self.test_seq6.schedule_seconds, 3600)
-        self.assertEqual(self.test_seq7.schedule_seconds, 3600)
+        assert self.test_seq1.schedule_seconds == 3600
+        assert self.test_seq2.schedule_seconds == 3600
+        assert self.test_seq3.schedule_seconds == 3600
+        assert self.test_seq4.schedule_seconds == 3 * 3600
+        assert self.test_seq5.schedule_seconds == 3 * 3600
+        assert self.test_seq6.schedule_seconds == 3600
+        assert self.test_seq7.schedule_seconds == 3600
 
-        self.assertEqual(self.test_shot1.schedule_seconds, 12 * 3600)
-        self.assertEqual(self.test_shot2.schedule_seconds, 3 * 3600)
-        self.assertEqual(self.test_shot3.schedule_seconds, 3 * 3600)
-        self.assertEqual(self.test_shot4.schedule_seconds, 3 * 3600)
+        assert self.test_shot1.schedule_seconds == 12 * 3600
+        assert self.test_shot2.schedule_seconds == 3 * 3600
+        assert self.test_shot3.schedule_seconds == 3 * 3600
+        assert self.test_shot4.schedule_seconds == 3 * 3600
 
-        self.assertEqual(self.test_asset1.schedule_seconds, 3600)
-        self.assertEqual(self.test_asset2.schedule_seconds, 3600)
-        self.assertEqual(self.test_asset3.schedule_seconds, 3600)
-        self.assertEqual(self.test_asset4.schedule_seconds, 3 * 3600)
-        self.assertEqual(self.test_asset5.schedule_seconds, 3 * 3600)
+        assert self.test_asset1.schedule_seconds == 3600
+        assert self.test_asset2.schedule_seconds == 3600
+        assert self.test_asset3.schedule_seconds == 3600
+        assert self.test_asset4.schedule_seconds == 3 * 3600
+        assert self.test_asset5.schedule_seconds == 3 * 3600
 
-        self.assertEqual(self.test_task1.schedule_seconds, 3600)
-        self.assertEqual(self.test_task2.schedule_seconds, 3600)
-        self.assertEqual(self.test_task3.schedule_seconds, 3600)
-        self.assertEqual(self.test_task4.schedule_seconds, 3600)
-        self.assertEqual(self.test_task5.schedule_seconds, 3600)
-        self.assertEqual(self.test_task6.schedule_seconds, 3600)
-        self.assertEqual(self.test_task7.schedule_seconds, 3600)
-        self.assertEqual(self.test_task8.schedule_seconds, 3600)
-        self.assertEqual(self.test_task9.schedule_seconds, 3600)
-        self.assertEqual(self.test_task10.schedule_seconds, 10 * 3600)
-        self.assertEqual(self.test_task11.schedule_seconds, 3600)
-        self.assertEqual(self.test_task12.schedule_seconds, 3600)
-        self.assertEqual(self.test_task13.schedule_seconds, 3600)
-        self.assertEqual(self.test_task14.schedule_seconds, 3600)
-        self.assertEqual(self.test_task15.schedule_seconds, 3600)
-        self.assertEqual(self.test_task16.schedule_seconds, 3600)
-        self.assertEqual(self.test_task17.schedule_seconds, 3600)
-        self.assertEqual(self.test_task18.schedule_seconds, 3600)
-        self.assertEqual(self.test_task19.schedule_seconds, 3600)
-        self.assertEqual(self.test_task20.schedule_seconds, 3600)
-        self.assertEqual(self.test_task21.schedule_seconds, 3600)
-        self.assertEqual(self.test_task22.schedule_seconds, 3600)
-        self.assertEqual(self.test_task23.schedule_seconds, 3600)
-        self.assertEqual(self.test_task24.schedule_seconds, 3600)
-        self.assertEqual(self.test_task25.schedule_seconds, 3600)
-        self.assertEqual(self.test_task26.schedule_seconds, 3600)
-        self.assertEqual(self.test_task27.schedule_seconds, 3600)
+        assert self.test_task1.schedule_seconds == 3600
+        assert self.test_task2.schedule_seconds == 3600
+        assert self.test_task3.schedule_seconds == 3600
+        assert self.test_task4.schedule_seconds == 3600
+        assert self.test_task5.schedule_seconds == 3600
+        assert self.test_task6.schedule_seconds == 3600
+        assert self.test_task7.schedule_seconds == 3600
+        assert self.test_task8.schedule_seconds == 3600
+        assert self.test_task9.schedule_seconds == 3600
+        assert self.test_task10.schedule_seconds == 10 * 3600
+        assert self.test_task11.schedule_seconds == 3600
+        assert self.test_task12.schedule_seconds == 3600
+        assert self.test_task13.schedule_seconds == 3600
+        assert self.test_task14.schedule_seconds == 3600
+        assert self.test_task15.schedule_seconds == 3600
+        assert self.test_task16.schedule_seconds == 3600
+        assert self.test_task17.schedule_seconds == 3600
+        assert self.test_task18.schedule_seconds == 3600
+        assert self.test_task19.schedule_seconds == 3600
+        assert self.test_task20.schedule_seconds == 3600
+        assert self.test_task21.schedule_seconds == 3600
+        assert self.test_task22.schedule_seconds == 3600
+        assert self.test_task23.schedule_seconds == 3600
+        assert self.test_task24.schedule_seconds == 3600
+        assert self.test_task25.schedule_seconds == 3600
+        assert self.test_task26.schedule_seconds == 3600
+        assert self.test_task27.schedule_seconds == 3600
 
-        self.assertEqual(self.test_project.schedule_seconds, 44 * 3600)
+        assert self.test_project.schedule_seconds == 44 * 3600
 
     def test_percent_complete_attribute_is_read_only(self):
         """testing if the percent_complete is a read-only attribute
         """
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             self.test_project.percent_complete = 32.3
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_percent_complete_is_0_for_a_project_with_no_tasks(self):
         """testing if the percent_complete attribute value is 0 for a project
@@ -1938,19 +1865,19 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
         new_project = Project(**self.kwargs)
         DBSession.add(new_project)
         DBSession.commit()
-        self.assertEqual(new_project.percent_complete, 0)
+        assert new_project.percent_complete == 0
 
     def test_percent_complete_attribute_is_working_properly(self):
         """testing if the percent_complete attribute is working properly
         """
-        self.assertEqual(self.test_project.percent_complete, 0)
+        assert self.test_project.percent_complete == 0
 
-        self.assertTrue(self.test_shot1.is_container)
-        self.assertEqual(self.test_task10.parent, self.test_shot1)
-        self.assertEqual(self.test_task10.schedule_seconds, 36000)
-        self.assertEqual(self.test_task11.schedule_seconds, 3600)
-        self.assertEqual(self.test_task12.schedule_seconds, 3600)
-        self.assertEqual(self.test_shot1.schedule_seconds, 12 * 3600)
+        assert self.test_shot1.is_container is True
+        assert self.test_task10.parent == self.test_shot1
+        assert self.test_task10.schedule_seconds == 36000
+        assert self.test_task11.schedule_seconds == 3600
+        assert self.test_task12.schedule_seconds == 3600
+        assert self.test_shot1.schedule_seconds == 12 * 3600
 
         # create some time logs
         from stalker import TimeLog
@@ -1967,8 +1894,7 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
         DBSession.add(t)
         DBSession.commit()
 
-        self.assertEqual(self.test_project.percent_complete,
-                         (1.0 / 44.0 * 100))
+        assert self.test_project.percent_complete == (1.0 / 44.0 * 100)
 
     def test_clients_argument_is_skipped(self):
         """testing if the clients attribute will be set to None when the
@@ -1981,7 +1907,7 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
             pass
         from stalker import Project
         new_project = Project(**self.kwargs)
-        self.assertEqual(new_project.clients, [])
+        assert new_project.clients == []
 
     def test_clients_argument_is_None(self):
         """testing if the clients argument can be None
@@ -1989,19 +1915,16 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
         self.kwargs['clients'] = None
         from stalker import Project
         new_project = Project(**self.kwargs)
-        self.assertTrue(new_project.clients == [])
+        assert new_project.clients == []
 
     def test_clients_attribute_is_set_to_None(self):
         """testing if it a TypeError will be raised when the clients attribute
         is set to None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_project.clients = None
 
-        self.assertEqual(
-            str(cm.exception),
-            "'NoneType' object is not iterable"
-        )
+        assert str(cm.value) == "'NoneType' object is not iterable"
 
     def test_clients_argument_is_given_as_something_other_than_a_client(self):
         """testing if a TypeError will be raised when the client argument is
@@ -2009,42 +1932,38 @@ task Task_{{task3.id}} "Task_{{task3.id}}" {
         """
         self.kwargs["clients"] = "a user"
         from stalker import Project
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Project(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'ProjectClient.client should be an instance of '
+        assert str(cm.value) == \
+            'ProjectClient.client should be an instance of ' \
             'stalker.models.auth.Client not str'
-        )
 
     def test_clients_attribute_is_not_a_client_instance(self):
         """testing if a TypeError will be raised when the client attribute is
         set to a value other than a Client instance
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_project.clients = "a user"
 
-        self.assertEqual(
-            str(cm.exception),
-            'ProjectClient.client should be an instance of '
+        assert str(cm.value) == \
+            'ProjectClient.client should be an instance of ' \
             'stalker.models.auth.Client not str'
-        )
 
     # def test_client_argument_is_working_properly(self):
     #     """testing if the client argument value is correctly passed to the
     #     client attribute
     #     """
-    #     self.assertEqual(self.test_project.client, self.kwargs['client'])
+    #     assert self.test_project.client == self.kwargs['client']
 
     def test_clients_attribute_is_working_properly(self):
         """testing if the clients attribute value can be updated correctly
         """
         from stalker import Client
         new_client = Client(name='New Client')
-        self.assertNotEqual(self.test_project.clients, [new_client])
+        assert self.test_project.clients != [new_client]
         self.test_project.clients = [new_client]
-        self.assertEqual(self.test_project.clients, [new_client])
+        assert self.test_project.clients == [new_client]
 
 
 class ProjectTicketsTestDBCase(UnitTestDBBase):
@@ -2307,7 +2226,7 @@ class ProjectTicketsTestDBCase(UnitTestDBBase):
         """
         from stalker import Project
         project1 = Project(**self.kwargs)
-        self.assertEqual(project1.tickets, [])
+        assert project1.tickets == []
 
     def test_open_tickets_attribute_is_an_empty_list_by_default(self):
         """testing if the Project.open_tickets is an empty list by default
@@ -2317,45 +2236,40 @@ class ProjectTicketsTestDBCase(UnitTestDBBase):
         from stalker.db.session import DBSession
         DBSession.add(project1)
         DBSession.commit()
-        self.assertEqual(project1.open_tickets, [])
+        assert project1.open_tickets == []
 
     def test_open_tickets_attribute_is_read_only(self):
         """testing if the Project.open_tickets attribute is a read only
         attribute
         """
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             self.test_project.open_tickets = []
-
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_tickets_attribute_returns_all_tickets_in_this_project(self):
         """testing if Project.tickets returns all the tickets in this project
         """
         # there should be tickets in this project already
-        self.assertTrue(self.test_project.tickets != [])
+        assert self.test_project.tickets != []
 
         # now we should have some tickets
-        self.assertTrue(len(self.test_project.tickets) > 0)
+        assert len(self.test_project.tickets) > 0
 
         # now check for exact items
-        self.assertEqual(
-            sorted(self.test_project.tickets, key=lambda x: x.name),
+        assert \
+            sorted(self.test_project.tickets, key=lambda x: x.name) == \
             sorted([
                 self.test_ticket1, self.test_ticket2, self.test_ticket3,
                 self.test_ticket4, self.test_ticket5, self.test_ticket6,
                 self.test_ticket7, self.test_ticket8, self.test_ticket9
             ], key=lambda x: x.name)
-        )
 
     def test_open_tickets_attribute_returns_all_open_tickets_owned_by_this_user(self):
         """testing if User.open_tickets returns all the open tickets owned by
         this user
         """
         # there should be tickets in this project already
-        self.assertTrue(self.test_project.open_tickets != [])
+        assert self.test_project.open_tickets != []
 
         # assign the user to some tickets
         self.test_ticket1.reopen(self.test_user1)
@@ -2378,11 +2292,11 @@ class ProjectTicketsTestDBCase(UnitTestDBBase):
         self.test_ticket8.reassign(self.test_user1, self.test_user1)
 
         # now we should have some open tickets
-        self.assertTrue(len(self.test_project.open_tickets) > 0)
+        assert len(self.test_project.open_tickets) > 0
 
         # now check for exact items
-        self.assertEqual(
-            sorted(self.test_project.open_tickets, key=lambda x: x.name),
+        assert \
+            sorted(self.test_project.open_tickets, key=lambda x: x.name) == \
             sorted([
                 self.test_ticket1,
                 self.test_ticket2,
@@ -2393,7 +2307,6 @@ class ProjectTicketsTestDBCase(UnitTestDBBase):
                 self.test_ticket7,
                 self.test_ticket8
             ], key=lambda x: x.name)
-        )
 
         # close a couple of them
         from stalker.models.ticket import (FIXED, CANTFIX, INVALID)
@@ -2403,8 +2316,8 @@ class ProjectTicketsTestDBCase(UnitTestDBBase):
         self.test_ticket3.resolve(self.test_user1, CANTFIX)
 
         # new check again
-        self.assertEqual(
-            sorted(self.test_project.open_tickets, key=lambda x: x.name),
+        assert \
+            sorted(self.test_project.open_tickets, key=lambda x: x.name) ==\
             sorted([
                 self.test_ticket4,
                 self.test_ticket5,
@@ -2412,4 +2325,3 @@ class ProjectTicketsTestDBCase(UnitTestDBBase):
                 self.test_ticket7,
                 self.test_ticket8
             ], key=lambda x: x.name)
-        )

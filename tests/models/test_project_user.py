@@ -16,6 +16,7 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
+import pytest
 from stalker.testing import UnitTestDBBase
 from stalker import ProjectUser
 
@@ -29,7 +30,7 @@ class ProjectUserTestDBCase(UnitTestDBBase):
         """
         super(ProjectUserTestDBCase, self).setUp()
 
-        from stalker import Status, StatusList, Repository
+        from stalker import Repository
         self.test_repo = Repository(
             name='Test Repo'
         )
@@ -37,10 +38,6 @@ class ProjectUserTestDBCase(UnitTestDBBase):
         from stalker.db.session import DBSession
         DBSession.add(self.test_repo)
         DBSession.commit()
-
-        self.status_new = Status.query.filter_by(code='NEW').first()
-        self.status_wip = Status.query.filter_by(code='WIP').first()
-        self.status_cmpl = Status.query.filter_by(code='CMPL').first()
 
         from stalker import User
         self.test_user1 = User(
@@ -75,24 +72,22 @@ class ProjectUserTestDBCase(UnitTestDBBase):
             role=self.test_role
         )
 
-        self.assertTrue(self.test_user1 in self.test_project.users)
+        assert self.test_user1 in self.test_project.users
 
     def test_role_argument_is_not_a_role_instance(self):
         """testing if a TypeError will be raised when the role argument is not
         a Role instance
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             ProjectUser(
                 project=self.test_project,
                 user=self.test_user1,
                 role='not a role instance'
             )
 
-        self.assertEqual(
-            str(cm.exception),
-            'ProjectUser.role should be a stalker.models.auth.Role instance, '
-            'not str'
-        )
+        assert str(cm.value) == \
+            'ProjectUser.role should be a stalker.models.auth.Role ' \
+            'instance, not str'
 
     def test_rate_attribute_is_copied_from_user(self):
         """testing if the rate attribute value is copied from the user on init
@@ -103,7 +98,7 @@ class ProjectUserTestDBCase(UnitTestDBBase):
             user=self.test_user1,
             role=self.test_role
         )
-        self.assertEqual(self.test_user1.rate, project_user1.rate)
+        assert self.test_user1.rate == project_user1.rate
 
     def test_rate_attribute_initialization_through_user(self):
         """testing of rate attribute initialization through user.projects
@@ -111,10 +106,7 @@ class ProjectUserTestDBCase(UnitTestDBBase):
         """
         self.test_user1.rate = 102.0
         self.test_user1.projects = [self.test_project]
-        self.assertEqual(
-            self.test_project.user_role[0].rate,
-            self.test_user1.rate
-        )
+        assert self.test_project.user_role[0].rate == self.test_user1.rate
 
     def test_rate_attribute_initialization_through_project(self):
         """testing of rate attribute initialization through project.users
@@ -123,7 +115,4 @@ class ProjectUserTestDBCase(UnitTestDBBase):
         self.test_user1.rate = 102.0
         self.test_project.users = [self.test_user1]
 
-        self.assertEqual(
-            self.test_project.user_role[0].rate,
-            self.test_user1.rate
-        )
+        assert self.test_project.user_role[0].rate == self.test_user1.rate

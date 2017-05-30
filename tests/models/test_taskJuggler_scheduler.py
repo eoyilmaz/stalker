@@ -16,6 +16,8 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 import os
+
+import pytest
 import pytz
 import datetime
 from stalker import TaskJugglerScheduler
@@ -170,7 +172,7 @@ class TaskJugglerSchedulerDBTester(UnitTestDBBase):
         tjp_sched._fill_tjp_file()
 
         # check
-        self.assertTrue(os.path.exists(tjp_sched.tjp_file_full_path))
+        assert os.path.exists(tjp_sched.tjp_file_full_path)
 
         # clean up the test
         tjp_sched._clean_up()
@@ -208,9 +210,7 @@ class TaskJugglerSchedulerDBTester(UnitTestDBBase):
         tjp_sched._create_tjp_file()
         tjp_sched._create_tjp_file_content()
 
-        self.assertTrue(
-            TimeLog.query.all()
-        )
+        assert TimeLog.query.all() != []
 
         import jinja2
         expected_tjp_template = jinja2.Template(
@@ -305,7 +305,7 @@ taskreport breakdown "{{csv_path}}"{
         # print(expected_tjp_content)
         # print('----------------')
         # print(tjp_content)
-        self.assertEqual(tjp_content, expected_tjp_content)
+        assert tjp_content == expected_tjp_content
 
     def test_schedule_will_not_work_when_the_studio_attribute_is_None(self):
         """testing if a TypeError will be raised when the studio attribute is
@@ -313,14 +313,13 @@ taskreport breakdown "{{csv_path}}"{
         """
         tjp_sched = TaskJugglerScheduler()
         tjp_sched.studio = None
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             tjp_sched.schedule()
 
-        self.assertEqual(
-            str(cm.exception),
-            'TaskJugglerScheduler.studio should be an instance of '
+        assert \
+            str(cm.value) == \
+            'TaskJugglerScheduler.studio should be an instance of ' \
             'stalker.models.studio.Studio, not NoneType'
-        )
 
     def test_tasks_are_correctly_scheduled(self):
         """testing if the tasks are correctly scheduled
@@ -344,45 +343,39 @@ taskreport breakdown "{{csv_path}}"{
         DBSession.commit()
 
         # check if the task and project timings are all adjusted
-        self.assertEqual(
-            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc),
+        assert \
+            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc) == \
             self.test_proj1.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc),
+        assert \
+            datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc) == \
             self.test_proj1.computed_end
-        )
 
-        self.assertEqual(
-            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc),
+        assert \
+            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc) == \
             self.test_task1.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc),
+        assert \
+            datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc) == \
             self.test_task1.computed_end
-        )
-        self.assertEqual(
-            sorted([self.test_user1, self.test_user2], key=lambda x: x.name),
+        assert \
+            sorted([self.test_user1, self.test_user2],
+                   key=lambda x: x.name) == \
             sorted(self.test_task1.computed_resources, key=lambda x: x.name)
-        )
 
-        self.assertEqual(
-            datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc),
+        assert \
+            datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc) == \
             self.test_task2.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc),
+        assert \
+            datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc) == \
             self.test_task2.computed_end
-        )
 
-        self.assertEqual(2, len(self.test_task2.computed_resources))
+        assert len(self.test_task2.computed_resources) == 2
 
         possible_resources = [
             self.test_user2, self.test_user3,
             self.test_user4, self.test_user5
         ]
         for r in self.test_task2.computed_resources:
-            self.assertIn(r, possible_resources)
+            assert r in possible_resources
 
     def test_tasks_are_correctly_scheduled_when_compute_resources_is_False(self):
         """testing if the tasks are correctly scheduled when the compute
@@ -406,40 +399,32 @@ taskreport breakdown "{{csv_path}}"{
         DBSession.commit()
 
         # check if the task and project timings are all adjusted
-        self.assertEqual(
-            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc),
+        assert \
+            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc) == \
             self.test_proj1.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc),
+        assert \
+            datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc) == \
             self.test_proj1.computed_end
-        )
 
-        self.assertEqual(
-            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc),
+        assert \
+            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc) == \
             self.test_task1.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc),
+        assert \
+            datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc) == \
             self.test_task1.computed_end
-        )
-        self.assertEqual(
-            sorted(self.test_task1.resources, key=lambda x: x.name),
+        assert \
+            sorted(self.test_task1.resources, key=lambda x: x.name) == \
             sorted(self.test_task1.computed_resources, key=lambda x: x.name)
-        )
 
-        self.assertEqual(
-            datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc),
+        assert \
+            datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc) == \
             self.test_task2.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc),
+        assert \
+            datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc) == \
             self.test_task2.computed_end
-        )
-        self.assertEqual(
-            sorted(self.test_task2.resources, key=lambda x: x.name),
+        assert \
+            sorted(self.test_task2.resources, key=lambda x: x.name) == \
             sorted(self.test_task2.computed_resources, key=lambda x: x.name)
-        )
 
     def test_tasks_are_correctly_scheduled_when_compute_resources_is_True(self):
         """testing if the tasks are correctly scheduled when the compute
@@ -463,42 +448,36 @@ taskreport breakdown "{{csv_path}}"{
         DBSession.commit()
 
         # check if the task and project timings are all adjusted
-        self.assertEqual(
-            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc),
+        assert \
+            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc) == \
             self.test_proj1.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc),
+        assert \
+            datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc) == \
             self.test_proj1.computed_end
-        )
 
-        self.assertEqual(
-            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc),
+        assert \
+            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc) == \
             self.test_task1.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc),
+        assert \
+            datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc) == \
             self.test_task1.computed_end
-        )
-        self.assertEqual(
-            sorted([self.test_user1, self.test_user2], key=lambda x: x.name),
+        assert \
+            sorted([self.test_user1, self.test_user2],
+                   key=lambda x: x.name) == \
             sorted(self.test_task1.computed_resources, key=lambda x: x.name)
-        )
 
-        self.assertEqual(
-            datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc),
+        assert \
+            datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc) == \
             self.test_task2.computed_start
-        )
-        self.assertEqual(
-            datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc),
+        assert \
+            datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc) == \
             self.test_task2.computed_end
-        )
         possible_resources = [
             self.test_user2, self.test_user3,
             self.test_user4, self.test_user5
         ]
         for r in self.test_task2.computed_resources:
-            self.assertIn(r, possible_resources)
+            assert r in possible_resources
 
     def test_tasks_of_given_projects_are_correctly_scheduled(self):
         """testing if the tasks of given projects are correctly scheduled
@@ -551,50 +530,46 @@ taskreport breakdown "{{csv_path}}"{
         DBSession.commit()
 
         # check if the task and project timings are all adjusted
-        self.assertEqual(self.test_proj1.computed_start, None)
-        self.assertEqual(self.test_proj1.computed_end, None)
+        assert self.test_proj1.computed_start is None
+        assert self.test_proj1.computed_end is None
 
-        self.assertEqual(self.test_task1.computed_start, None)
-        self.assertEqual(self.test_task1.computed_end, None)
-        self.assertEqual(self.test_task1.computed_resources,
-                         [self.test_user1, self.test_user2])
+        assert self.test_task1.computed_start is None
+        assert self.test_task1.computed_end is None
+        assert self.test_task1.computed_resources == \
+            [self.test_user1, self.test_user2]
 
-        self.assertEqual(self.test_task2.computed_start, None)
-        self.assertEqual(self.test_task2.computed_end, None)
-        self.assertEqual(self.test_task2.computed_resources,
-                         [self.test_user1, self.test_user2])
+        assert self.test_task2.computed_start is None
+        assert self.test_task2.computed_end is None
+        assert self.test_task2.computed_resources == \
+            [self.test_user1, self.test_user2]
 
-        self.assertEqual(
-            dt1.computed_start,
+        assert \
+            dt1.computed_start == \
             datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc)
-        )
-        self.assertEqual(
-            dt1.computed_end,
+        assert \
+            dt1.computed_end == \
             datetime.datetime(2013, 4, 16, 13, 0, tzinfo=pytz.utc)
-        )
 
-        self.assertEqual(
-            dt2.computed_start,
+        assert \
+            dt2.computed_start == \
             datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc)
-        )
-        self.assertEqual(
-            dt2.computed_end,
+        assert \
+            dt2.computed_end == \
             datetime.datetime(2013, 4, 16, 13, 0, tzinfo=pytz.utc)
-        )
 
     def test_projects_argument_is_skipped(self):
         """testing if the projects attribute will be an empty list if the
         projects argument is skipped
         """
         tjp_sched = TaskJugglerScheduler(compute_resources=True)
-        self.assertEqual(tjp_sched.projects, [])
+        assert tjp_sched.projects == []
 
     def test_projects_argument_is_None(self):
         """testing if the projects attribute will be an empty list if the
         projects argument is None
         """
         tjp_sched = TaskJugglerScheduler(compute_resources=True, projects=None)
-        self.assertEqual(tjp_sched.projects, [])
+        assert tjp_sched.projects == []
 
     def test_projects_attribute_is_set_to_None(self):
         """testing if the projects attribute will be an empty list if it is set
@@ -602,63 +577,55 @@ taskreport breakdown "{{csv_path}}"{
         """
         tjp_sched = TaskJugglerScheduler(compute_resources=True)
         tjp_sched.projects = None
-        self.assertEqual(tjp_sched.projects, [])
+        assert tjp_sched.projects == []
 
     def test_projects_argument_is_not_a_list(self):
         """testing if a TypeError will be raised when the projects argument
         value is not a list
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             TaskJugglerScheduler(compute_resources=True,
                                  projects='not a list of projects')
 
-        self.assertEqual(
-            str(cm.exception),
-            'TaskJugglerScheduler.projects should be a list of '
+        assert str(cm.value) == \
+            'TaskJugglerScheduler.projects should be a list of ' \
             'stalker.models.project.Project instances, not str'
-        )
 
     def test_projects_attribute_is_not_a_list(self):
         """testing if a TypeError will be raised when the projects attribute
         is set to something else than a list
         """
         tjp = TaskJugglerScheduler(compute_resources=True)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             tjp.projects = 'not a list of projects'
 
-        self.assertEqual(
-            str(cm.exception),
-            'TaskJugglerScheduler.projects should be a list of '
+        assert str(cm.value) == \
+            'TaskJugglerScheduler.projects should be a list of ' \
             'stalker.models.project.Project instances, not str'
-        )
 
     def test_projects_argument_is_not_a_list_of_all_projects(self):
         """testing if a TypeError will be raised when the elements in the
         projects argument is not all Project instances
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             TaskJugglerScheduler(compute_resources=True,
                                  projects=['not', 1, [], 'of', 'projects'])
 
-        self.assertEqual(
-            str(cm.exception),
-            'TaskJugglerScheduler.projects should be a list of '
+        assert str(cm.value) == \
+            'TaskJugglerScheduler.projects should be a list of ' \
             'stalker.models.project.Project instances, not str'
-        )
 
     def test_projects_attribute_is_not_list_of_all_projects(self):
         """testing if a TypeError will be raised when the elements in the
         projects attribute is not all Project instances
         """
         tjp = TaskJugglerScheduler(compute_resources=True)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             tjp.projects = ['not', 1, [], 'of', 'projects']
 
-        self.assertEqual(
-            str(cm.exception),
-            'TaskJugglerScheduler.projects should be a list of '
+        assert str(cm.value) == \
+            'TaskJugglerScheduler.projects should be a list of ' \
             'stalker.models.project.Project instances, not str'
-        )
 
     def test_projects_argument_is_working_properly(self):
         """testing if the projects argument value is correctly passed to the
@@ -680,7 +647,7 @@ taskreport breakdown "{{csv_path}}"{
         tjp = TaskJugglerScheduler(compute_resources=True,
                                    projects=[dp1, dp2])
 
-        self.assertEqual(tjp.projects, [dp1, dp2])
+        assert tjp.projects == [dp1, dp2]
 
     def test_projects_attribute_is_working_properly(self):
         """testing if the projects attribute is working properly
@@ -701,7 +668,7 @@ taskreport breakdown "{{csv_path}}"{
         tjp = TaskJugglerScheduler(compute_resources=True)
         tjp.projects = [dp1, dp2]
 
-        self.assertEqual(tjp.projects, [dp1, dp2])
+        assert tjp.projects == [dp1, dp2]
 
     def test_tjp_file_content_is_correct_2(self):
         """testing if the tjp file content is correct
@@ -815,4 +782,4 @@ taskreport breakdown "{{csv_path}}"{
         tjp_content = tjp_sched.tjp_content
         # print tjp_content
         tjp_sched._clean_up()
-        self.assertEqual(tjp_content, expected_tjp_content)
+        assert tjp_content == expected_tjp_content

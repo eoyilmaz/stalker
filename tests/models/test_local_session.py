@@ -53,12 +53,10 @@ class LocalSessionTester(unittest.TestCase):
         # check if a file is created in the users local storage
         import os
         from stalker import defaults
-        self.assertTrue(
-            os.path.exists(
-                os.path.join(
-                    defaults.local_storage_path,
-                    defaults.local_session_data_file_name
-                )
+        assert os.path.exists(
+            os.path.join(
+                defaults.local_storage_path,
+                defaults.local_session_data_file_name
             )
         )
 
@@ -81,10 +79,7 @@ class LocalSessionTester(unittest.TestCase):
         local_session2 = LocalSession()
 
         # now try to get the data back
-        self.assertEqual(
-            local_session2.logged_in_user_id,
-            logged_in_user_id
-        )
+        assert local_session2.logged_in_user_id == logged_in_user_id
 
     def test_delete_will_delete_the_session_cache(self):
         """testing if the LocalSession.delete() will delete the current cache
@@ -101,7 +96,7 @@ class LocalSessionTester(unittest.TestCase):
 
         # save it to the Database
         new_user.id = 1023
-        self.assertTrue(new_user.id is not None)
+        assert new_user.id is not None
 
         # save it to the local storage
         from stalker import LocalSession
@@ -115,12 +110,10 @@ class LocalSessionTester(unittest.TestCase):
         # check if a file is created in the users local storage
         import os
         from stalker import defaults
-        self.assertTrue(
-            os.path.exists(
-                os.path.join(
-                    defaults.local_storage_path,
-                    defaults.local_session_data_file_name
-                )
+        assert os.path.exists(
+            os.path.join(
+                defaults.local_storage_path,
+                defaults.local_session_data_file_name
             )
         )
 
@@ -129,12 +122,10 @@ class LocalSessionTester(unittest.TestCase):
 
         # check if the file is gone
         # check if a file is created in the users local storage
-        self.assertFalse(
-            os.path.exists(
-                os.path.join(
-                    defaults.local_storage_path,
-                    defaults.local_session_data_file_name
-                )
+        assert not os.path.exists(
+            os.path.join(
+                defaults.local_storage_path,
+                defaults.local_session_data_file_name
             )
         )
 
@@ -164,7 +155,7 @@ class LocalSessionDBTester(UnitTestDBBase):
         from stalker.db.session import DBSession
         DBSession.add(new_user)
         DBSession.commit()
-        self.assertTrue(new_user.id is not None)
+        assert new_user.id is not None
 
         # save it to the local storage
         local_session = LocalSession()
@@ -193,11 +184,8 @@ class LocalSessionDBTester(UnitTestDBBase):
         # now get it back with a new local_session
         local_session2 = LocalSession()
 
-        self.assertEqual(
-            local_session2.logged_in_user_id, None
-        )
-
-        self.assertTrue(local_session2.logged_in_user is None)
+        assert local_session2.logged_in_user_id is None
+        assert local_session2.logged_in_user is None
 
     def test_logged_in_user_returns_the_stored_User_instance_from_last_time(self):
         """testing if logged_in_user returns the logged in user
@@ -215,7 +203,7 @@ class LocalSessionDBTester(UnitTestDBBase):
         from stalker.db.session import DBSession
         DBSession.add(new_user)
         DBSession.commit()
-        self.assertTrue(new_user.id is not None)
+        assert new_user.id is not None
 
         # save it to the local storage
         from stalker import LocalSession
@@ -228,12 +216,5 @@ class LocalSessionDBTester(UnitTestDBBase):
         # now get it back with a new local_session
         local_session2 = LocalSession()
 
-        self.assertEqual(
-            local_session2.logged_in_user_id,
-            new_user.id
-        )
-
-        self.assertEqual(
-            local_session2.logged_in_user,
-            new_user
-        )
+        assert local_session2.logged_in_user_id == new_user.id
+        assert local_session2.logged_in_user == new_user

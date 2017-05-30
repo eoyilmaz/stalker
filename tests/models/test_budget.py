@@ -18,6 +18,9 @@
 
 
 import unittest
+
+import pytest
+
 from stalker import Budget, BudgetEntry, Good
 
 
@@ -164,13 +167,11 @@ class BudgetTestCase(BudgetTestBase):
         """testing if a TypeError will be raised when the entries attribute is
         set to something other than a list of BugdgetEntries.
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_budget.entries = ['some', 'string', 1, 2]
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Budget.entries should be a list of BudgetEntry instances, not str'
-        )
 
     def test_entries_attribute_is_working_properly(self):
         """testing if the entries attribute is working properly
@@ -192,29 +193,19 @@ class BudgetTestCase(BudgetTestBase):
 
         self.test_budget.entries = [entry1, entry2]
 
-        self.assertEqual(
-            self.test_budget.entries,
-            [entry1, entry2]
-        )
+        assert self.test_budget.entries == [entry1, entry2]
 
     def test_statuses_is_working_properly(self):
         """testing if Budget accepts statuses
         """
         self.test_budget.status = self.status_new
-        self.assertEqual(
-            self.test_budget.status,
-            self.status_new
-        )
+        assert self.test_budget.status == self.status_new
+
         self.test_budget.status = self.status_prev
-        self.assertEqual(
-            self.test_budget.status,
-            self.status_prev
-        )
+        assert self.test_budget.status == self.status_prev
+
         self.test_budget.status = self.status_app
-        self.assertEqual(
-            self.test_budget.status,
-            self.status_app
-        )
+        assert self.test_budget.status == self.status_app
 
 
 class BudgetEntryTestCase(BudgetTestBase):
@@ -225,25 +216,21 @@ class BudgetEntryTestCase(BudgetTestBase):
         """testing if a TypeError will be raised if the budget argument is
         skipped
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             BudgetEntry(amount=10.0)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'BudgetEntry.budget should be a Budget instance, not NoneType'
-        )
 
     def test_budget_argument_is_none(self):
         """testing if a TypeError will be raised if the budget argument is
         None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             BudgetEntry(budget=None, amount=10.0)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'BudgetEntry.budget should be a Budget instance, not NoneType'
-        )
 
     def test_budget_attribute_is_set_to_none(self):
         """testing if a TypeError will be raised if the budget attribute is
@@ -253,28 +240,24 @@ class BudgetEntryTestCase(BudgetTestBase):
             budget=self.test_budget,
             good=self.test_good,
         )
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             entry.budget = None
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'BudgetEntry.budget should be a Budget instance, not NoneType'
-        )
 
     def test_budget_argument_is_not_a_budget_instance(self):
         """testing if a TypeError will be raised if the budget argument is not
         a Budget instance
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             BudgetEntry(
                 budget='not a budget',
                 amount=10.0
             )
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'BudgetEntry.budget should be a Budget instance, not str'
-        )
 
     def test_budget_attribute_is_not_a_budget_instance(self):
         """testing if a TypeError will be raised if the budget attribute is not
@@ -285,13 +268,11 @@ class BudgetEntryTestCase(BudgetTestBase):
             good=self.test_good,
             amount=10.0
         )
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             entry.budget = 'not a budget instance'
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'BudgetEntry.budget should be a Budget instance, not str'
-        )
 
     def test_budget_argument_is_working_properly(self):
         """testing if the budget argument value is correctly passed to the
@@ -302,7 +283,7 @@ class BudgetEntryTestCase(BudgetTestBase):
             good=self.test_good,
             amount=10.0
         )
-        self.assertEqual(entry.budget, self.test_budget)
+        assert entry.budget == self.test_budget
 
     def test_budget_attribute_is_working_properly(self):
         """testing if the budget attribute value can correctly be changed
@@ -317,9 +298,9 @@ class BudgetEntryTestCase(BudgetTestBase):
             project=self.test_project,
             status_list=self.budget_status_list
         )
-        self.assertNotEqual(entry.budget, new_budget)
+        assert entry.budget != new_budget
         entry.budget = new_budget
-        self.assertEqual(entry.budget, new_budget)
+        assert entry.budget == new_budget
 
     def test_cost_attribute_value_will_be_copied_from_the_supplied_good_argument(self):
         """testing if the cost attribute value will be copied from the supplied
@@ -327,7 +308,7 @@ class BudgetEntryTestCase(BudgetTestBase):
         """
         good = Good(name='Some Good', cost=10, msrp=20, unit='$/hour')
         entry = BudgetEntry(budget=self.test_budget, good=good)
-        self.assertEqual(entry.cost, good.cost)
+        assert entry.cost == good.cost
 
     def test_cost_attribute_is_set_to_None(self):
         """testing if the cost attribute will be set to 0 if it is set to None
@@ -336,9 +317,9 @@ class BudgetEntryTestCase(BudgetTestBase):
             budget=self.test_budget,
             good=self.test_good,
         )
-        self.assertEqual(entry.cost, self.test_good.cost)
+        assert entry.cost == self.test_good.cost
         entry.cost = None
-        self.assertEqual(entry.cost, 0.0)
+        assert entry.cost == 0.0
 
     def test_cost_attribute_is_not_a_number(self):
         """testing if a TypeError will be raised if cost attribute is set to
@@ -348,13 +329,10 @@ class BudgetEntryTestCase(BudgetTestBase):
             budget=self.test_budget,
             good=self.test_good,
         )
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             entry.cost = 'some string'
 
-        self.assertEqual(
-            str(cm.exception),
-            'BudgetEntry.cost should be a number, not str'
-        )
+        assert str(cm.value) == 'BudgetEntry.cost should be a number, not str'
 
     def test_cost_attribute_is_working_properly(self):
         """testing if the cost attribute is working properly
@@ -364,9 +342,9 @@ class BudgetEntryTestCase(BudgetTestBase):
             good=self.test_good,
         )
         test_value = 5.0
-        self.assertNotEqual(entry.cost, test_value)
+        assert entry.cost != test_value
         entry.cost = test_value
-        self.assertEqual(entry.cost, test_value)
+        assert entry.cost == test_value
 
     def test_msrp_attribute_is_set_to_None(self):
         """testing if the msrp attribute will be set to 0 if msrp attribute is
@@ -376,9 +354,9 @@ class BudgetEntryTestCase(BudgetTestBase):
             budget=self.test_budget,
             good=self.test_good,
         )
-        self.assertEqual(entry.msrp, self.test_good.msrp)
+        assert entry.msrp == self.test_good.msrp
         entry.msrp = None
-        self.assertEqual(entry.msrp, 0.0)
+        assert entry.msrp == 0.0
 
     def test_msrp_attribute_is_not_a_number(self):
         """testing if a TypeError will be raised if msrp attribute is set to
@@ -388,13 +366,10 @@ class BudgetEntryTestCase(BudgetTestBase):
             budget=self.test_budget,
             good=self.test_good,
         )
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             entry.msrp = 'some string'
 
-        self.assertEqual(
-            str(cm.exception),
-            'BudgetEntry.msrp should be a number, not str'
-        )
+        assert str(cm.value) == 'BudgetEntry.msrp should be a number, not str'
 
     def test_msrp_attribute_is_working_properly(self):
         """testing if the msrp attribute is working properly
@@ -404,16 +379,16 @@ class BudgetEntryTestCase(BudgetTestBase):
             good=self.test_good,
         )
         test_value = 5.0
-        self.assertNotEqual(entry.msrp, test_value)
+        assert entry.msrp != test_value
         entry.msrp = test_value
-        self.assertEqual(entry.msrp, test_value)
+        assert entry.msrp == test_value
 
     def test_msrp_attribute_value_will_be_copied_from_the_supplied_good_argument(self):
         """testing if the msrp attribute value will be copied from the supplied
         good argument value
         """
         entry = BudgetEntry(budget=self.test_budget, good=self.test_good)
-        self.assertEqual(entry.msrp, self.test_good.msrp)
+        assert entry.msrp == self.test_good.msrp
 
     def test_price_argument_is_skipped(self):
         """testing if the price attribute will be 0 if the price argument is
@@ -423,7 +398,7 @@ class BudgetEntryTestCase(BudgetTestBase):
             budget=self.test_budget,
             good=self.test_good,
         )
-        self.assertEqual(entry.price, 0.0)
+        assert entry.price == 0.0
 
     def test_price_argument_is_set_to_None(self):
         """testing if the price attribute will be set to 0 if the price
@@ -434,7 +409,7 @@ class BudgetEntryTestCase(BudgetTestBase):
             good=self.test_good,
             price=None
         )
-        self.assertEqual(entry.price, 0.0)
+        assert entry.price == 0.0
 
     def test_price_attribute_is_set_to_None(self):
         """testing if the price attribute will be set to 0 if price attribute
@@ -445,25 +420,22 @@ class BudgetEntryTestCase(BudgetTestBase):
             good=self.test_good,
             price=10.0
         )
-        self.assertEqual(entry.price, 10.0)
+        assert entry.price == 10.0
         entry.price = None
-        self.assertEqual(entry.price, 0.0)
+        assert entry.price == 0.0
 
     def test_price_argument_is_not_a_number(self):
         """testing if a TypeError will be raised if the price argument is set
         to something other than a number
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             BudgetEntry(
                 budget=self.test_budget,
                 good=self.test_good,
                 price='some string'
             )
 
-        self.assertEqual(
-            str(cm.exception),
-            'BudgetEntry.price should be a number, not str'
-        )
+        assert str(cm.value) == 'BudgetEntry.price should be a number, not str'
 
     def test_price_attribute_is_not_a_number(self):
         """testing if a TypeError will be raised if price attribute is set to
@@ -474,13 +446,10 @@ class BudgetEntryTestCase(BudgetTestBase):
             good=self.test_good,
             price=10
         )
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             entry.price = 'some string'
 
-        self.assertEqual(
-            str(cm.exception),
-            'BudgetEntry.price should be a number, not str'
-        )
+        assert str(cm.value) == 'BudgetEntry.price should be a number, not str'
 
     def test_price_argument_is_working_properly(self):
         """testing if the price argument value is correctly passed to the price
@@ -491,7 +460,7 @@ class BudgetEntryTestCase(BudgetTestBase):
             good=self.test_good,
             price=10
         )
-        self.assertEqual(entry.price, 10.0)
+        assert entry.price == 10.0
 
     def test_price_attribute_is_working_properly(self):
         """testing if the price attribute is working properly
@@ -502,9 +471,9 @@ class BudgetEntryTestCase(BudgetTestBase):
             price=10
         )
         test_value = 5.0
-        self.assertNotEqual(entry.price, test_value)
+        assert entry.price != test_value
         entry.price = test_value
-        self.assertEqual(entry.price, test_value)
+        assert entry.price == test_value
 
     def test_realized_total_argument_is_skipped(self):
         """testing if the realized_total attribute will be 0 if the
@@ -514,7 +483,7 @@ class BudgetEntryTestCase(BudgetTestBase):
             budget=self.test_budget,
             good=self.test_good
         )
-        self.assertEqual(entry.realized_total, 0.0)
+        assert entry.realized_total == 0.0
 
     def test_realized_total_argument_is_set_to_None(self):
         """testing if the realized_total attribute will be set to 0 if the
@@ -525,7 +494,7 @@ class BudgetEntryTestCase(BudgetTestBase):
             good=self.test_good,
             realized_total=None
         )
-        self.assertEqual(entry.realized_total, 0.0)
+        assert entry.realized_total == 0.0
 
     def test_realized_total_attribute_is_set_to_None(self):
         """testing if the realized_total attribute will be set to 0 if it is
@@ -536,25 +505,23 @@ class BudgetEntryTestCase(BudgetTestBase):
             good=self.test_good,
             realized_total=10.0
         )
-        self.assertEqual(entry.realized_total, 10.0)
+        assert entry.realized_total == 10.0
         entry.realized_total = None
-        self.assertEqual(entry.realized_total, 0.0)
+        assert entry.realized_total == 0.0
 
     def test_realized_total_argument_is_not_a_number(self):
         """testing if a TypeError will be raised if the realized_total argument
         is set to something other than a number
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             BudgetEntry(
                 budget=self.test_budget,
                 good=self.test_good,
                 realized_total='some string'
             )
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'BudgetEntry.realized_total should be a number, not str'
-        )
 
     def test_realized_total_attribute_is_not_a_number(self):
         """testing if a TypeError will be raised if realized_total attribute is
@@ -565,13 +532,11 @@ class BudgetEntryTestCase(BudgetTestBase):
             good=self.test_good,
             realized_total=10
         )
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             entry.realized_total = 'some string'
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'BudgetEntry.realized_total should be a number, not str'
-        )
 
     def test_realized_total_argument_is_working_properly(self):
         """testing if the realized_total argument value is correctly passed to
@@ -582,7 +547,7 @@ class BudgetEntryTestCase(BudgetTestBase):
             good=self.test_good,
             realized_total=10
         )
-        self.assertEqual(entry.realized_total, 10.0)
+        assert entry.realized_total == 10.0
 
     def test_realized_total_attribute_is_working_properly(self):
         """testing if the realized_total attribute is working properly
@@ -593,47 +558,45 @@ class BudgetEntryTestCase(BudgetTestBase):
             realized_total=10
         )
         test_value = 5.0
-        self.assertNotEqual(entry.realized_total, test_value)
+        assert entry.realized_total != test_value
         entry.realized_total = test_value
-        self.assertEqual(entry.realized_total, test_value)
+        assert entry.realized_total == test_value
 
     def test_unit_attribute_is_set_to_None(self):
         """testing if the unit attribute will be set to an empty if it is set
         to None
         """
         entry = BudgetEntry(budget=self.test_budget, good=self.test_good)
-        self.assertEqual(entry.unit, self.test_good.unit)
+        assert entry.unit == self.test_good.unit
         entry.unit = None
-        self.assertEqual(entry.unit, '')
+        assert entry.unit == ''
 
     def test_unit_attribute_is_not_a_string(self):
         """testing if a TypeError will be raised if the unit attribute is set
         to something other than a string
         """
         entry = BudgetEntry(budget=self.test_budget, good=self.test_good)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             entry.unit = 100.212
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'BudgetEntry.unit should be a string, not float'
-        )
 
     def test_unit_attribute_is_working_properly(self):
         """testing if the unit attribute is working properly
         """
         entry = BudgetEntry(budget=self.test_budget, good=self.test_good)
         test_value = 'TL/hour'
-        self.assertNotEqual(entry.unit, test_value)
+        assert entry.unit != test_value
         entry.unit = test_value
-        self.assertEqual(entry.unit, test_value)
+        assert entry.unit == test_value
 
     def test_unit_attribute_value_will_be_copied_from_the_supplied_good(self):
         """testing if the unit attribute value will be copied from the good
         argument value
         """
         entry = BudgetEntry(budget=self.test_budget, good=self.test_good,)
-        self.assertEqual(entry.unit, self.test_good.unit)
+        assert entry.unit == self.test_good.unit
 
     def test_amount_argument_is_skipped(self):
         """testing if the amount attribute will be 0 if the amount argument is
@@ -643,7 +606,7 @@ class BudgetEntryTestCase(BudgetTestBase):
             budget=self.test_budget,
             good=self.test_good
         )
-        self.assertEqual(entry.amount, 0.0)
+        assert entry.amount == 0.0
 
     def test_amount_argument_is_set_to_None(self):
         """testing if the amount attribute will be set to 0 if the amount
@@ -654,7 +617,7 @@ class BudgetEntryTestCase(BudgetTestBase):
             good=self.test_good,
             amount=None
         )
-        self.assertEqual(entry.amount, 0.0)
+        assert entry.amount == 0.0
 
     def test_amount_attribute_is_set_to_None(self):
         """testing if the amount attribute will be set to 0 if it is set to
@@ -665,25 +628,23 @@ class BudgetEntryTestCase(BudgetTestBase):
             good=self.test_good,
             amount=10.0
         )
-        self.assertEqual(entry.amount, 10.0)
+        assert entry.amount == 10.0
         entry.amount = None
-        self.assertEqual(entry.amount, 0.0)
+        assert entry.amount == 0.0
 
     def test_amount_argument_is_not_a_number(self):
         """testing if a TypeError will be raised if the amount argument is set
         to something other than a number
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             BudgetEntry(
                 budget=self.test_budget,
                 good=self.test_good,
                 amount='some string'
             )
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'BudgetEntry.amount should be a number, not str'
-        )
 
     def test_amount_attribute_is_not_a_number(self):
         """testing if a TypeError will be raised if amount attribute is set to
@@ -694,13 +655,11 @@ class BudgetEntryTestCase(BudgetTestBase):
             good=self.test_good,
             amount=10
         )
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             entry.amount = 'some string'
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'BudgetEntry.amount should be a number, not str'
-        )
 
     def test_amount_argument_is_working_properly(self):
         """testing if the amount argument value is correctly passed to the
@@ -711,7 +670,7 @@ class BudgetEntryTestCase(BudgetTestBase):
             good=self.test_good,
             amount=10
         )
-        self.assertEqual(entry.amount, 10.0)
+        assert entry.amount == 10.0
 
     def test_amount_attribute_is_working_properly(self):
         """testing if the amount attribute is working properly
@@ -722,39 +681,34 @@ class BudgetEntryTestCase(BudgetTestBase):
             amount=10
         )
         test_value = 5.0
-        self.assertNotEqual(entry.amount, test_value)
+        assert entry.amount != test_value
         entry.amount = test_value
-        self.assertEqual(entry.amount, test_value)
+        assert entry.amount == test_value
 
     def test_good_argument_is_skipped(self):
         """testing if a TypeError will be raised when the good argument is
         skipped
         """
-        with self.assertRaises(TypeError) as cm:
-            entry = BudgetEntry(
-                budget=self.test_budget,
-            )
-        self.assertEqual(
-            str(cm.exception),
-            'BudgetEntry.good should be a stalker.models.budget.Good instance,'
-            ' not NoneType'
-        )
+        with pytest.raises(TypeError) as cm:
+            BudgetEntry(budget=self.test_budget)
+
+        assert str(cm.value) == \
+            'BudgetEntry.good should be a stalker.models.budget.Good ' \
+            'instance, not NoneType'
 
     def test_good_argument_is_None(self):
         """testing if a TypeError will be raised when the good argument is None
         """
-        with self.assertRaises(TypeError) as cm:
-            entry = BudgetEntry(
+        with pytest.raises(TypeError) as cm:
+            BudgetEntry(
                 budget=self.test_budget,
                 good=None,
                 amount=53,
             )
 
-        self.assertEqual(
-            str(cm.exception),
-            'BudgetEntry.good should be a stalker.models.budget.Good instance,'
-            ' not NoneType'
-        )
+        assert str(cm.value) == \
+            'BudgetEntry.good should be a stalker.models.budget.Good ' \
+            'instance, not NoneType'
 
     def test_good_attribute_is_set_to_None(self):
         """testing if a TypeError will be raised if the good attribute is set
@@ -765,31 +719,27 @@ class BudgetEntryTestCase(BudgetTestBase):
             good=Good(name='Some Good'),
             amount=53
         )
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             entry.good = None
 
-        self.assertEqual(
-            str(cm.exception),
-            'BudgetEntry.good should be a stalker.models.budget.Good instance,'
-            ' not NoneType'
-        )
+        assert str(cm.value) == \
+            'BudgetEntry.good should be a stalker.models.budget.Good ' \
+            'instance, not NoneType'
 
     def test_good_argument_is_not_a_good_instance(self):
         """testing if a TypeError will be raised when the good argument is not
         a Good instance
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             entry = BudgetEntry(
                 budget=self.test_budget,
                 good='this is not a Good instance',
                 amount=53,
             )
 
-        self.assertEqual(
-            str(cm.exception),
-            'BudgetEntry.good should be a stalker.models.budget.Good instance, '
-            'not str'
-        )
+        assert str(cm.value) == \
+            'BudgetEntry.good should be a stalker.models.budget.Good ' \
+            'instance, not str'
 
     def test_good_attribute_is_not_a_good_instance(self):
         """testing if a TypeError will be raised when the good attribute is set
@@ -800,14 +750,12 @@ class BudgetEntryTestCase(BudgetTestBase):
             good=self.test_good,
             amount=53,
         )
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             entry.good = 'this is not a Good instance'
 
-        self.assertEqual(
-            str(cm.exception),
-            'BudgetEntry.good should be a stalker.models.budget.Good instance, '
-            'not str'
-        )
+        assert str(cm.value) == \
+            'BudgetEntry.good should be a stalker.models.budget.Good ' \
+            'instance, not str'
 
     def test_good_argument_is_working_properly(self):
         """testing if the good argument value is correctly passed to the good
@@ -819,7 +767,7 @@ class BudgetEntryTestCase(BudgetTestBase):
             good=test_value,
             amount=53,
         )
-        self.assertEqual(entry.good, test_value)
+        assert entry.good == test_value
 
     def test_good_attribute_is_working_properly(self):
         """testing if the good attribute can be correctly set
@@ -830,9 +778,9 @@ class BudgetEntryTestCase(BudgetTestBase):
             good=self.test_good,
             amount=53
         )
-        self.assertNotEqual(entry.good, test_value)
+        assert entry.good != test_value
         entry.good = test_value
-        self.assertEqual(entry.good, test_value)
+        assert entry.good == test_value
 
 
 class BudgetDAGMixinTestCase(BudgetTestBase):
@@ -846,4 +794,4 @@ class BudgetDAGMixinTestCase(BudgetTestBase):
         b2 = Budget(**self.kwargs)
 
         b2.parent = b1
-        self.assertEqual(b1.children, [b2])
+        assert b1.children == [b2]

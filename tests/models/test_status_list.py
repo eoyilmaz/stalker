@@ -17,6 +17,9 @@
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
+
+import pytest
+
 from stalker import Status, StatusList
 
 
@@ -45,13 +48,12 @@ class StatusListTest(unittest.TestCase):
         }
 
         self.test_status_list = StatusList(**self.kwargs)
-        from stalker import db
 
     def test___auto_name__class_attribute_is_set_to_True(self):
         """testing if the __auto_name__ class attribute is set to True for
         StatusList class
         """
-        self.assertTrue(StatusList.__auto_name__)
+        assert StatusList.__auto_name__ is True
 
     def test_statuses_argument_accepts_statuses_only(self):
         """testing if statuses list argument accepts list of statuses only
@@ -62,13 +64,11 @@ class StatusListTest(unittest.TestCase):
         test_value = "a str"
         # it should only accept lists of statuses
         self.kwargs["statuses"] = test_value
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             StatusList(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: str is not list-like'
-        )
 
     def test_statuses_attribute_accepting_only_statuses(self):
         """testing the status_list attribute accepting Status objects only
@@ -76,13 +76,11 @@ class StatusListTest(unittest.TestCase):
         test_value = "1"
 
         # check the attribute
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_status_list.statuses = test_value
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: str is not list-like'
-        )
 
     def test_statuses_argument_elements_being_status_objects(self):
         """testing status_list elements against not being derived from Status
@@ -93,14 +91,12 @@ class StatusListTest(unittest.TestCase):
 
         self.kwargs["statuses"] = a_fake_status_list
 
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             StatusList(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'All of the elements in StatusList.statuses must be an instance '
+        assert str(cm.value) == \
+            'All of the elements in StatusList.statuses must be an instance ' \
             'of stalker.models.status.Status, and not int'
-        )
 
     def test_statuses_attribute_works_properly(self):
         """testing if status_list attribute is working properly
@@ -110,22 +106,19 @@ class StatusListTest(unittest.TestCase):
         ]
 
         self.test_status_list.statuses = new_list_of_statutes
-        self.assertEqual(self.test_status_list.statuses,
-                         new_list_of_statutes)
+        assert self.test_status_list.statuses == new_list_of_statutes
 
     def test_statuses_attributes_elements_changed_to_none_status_objects(self):
         """testing if a TypeError will be raised when trying to set an
         individual element in the statuses list to an object which is not a
         Status instance
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_status_list.statuses[0] = 0
 
-        self.assertEqual(
-            str(cm.exception),
-            'All of the elements in StatusList.statuses must be an instance '
+        assert str(cm.value) == \
+            'All of the elements in StatusList.statuses must be an instance ' \
             'of stalker.models.status.Status, and not int'
-        )
 
     def test_equality_operator(self):
         """testing equality of two status list object
@@ -146,9 +139,9 @@ class StatusListTest(unittest.TestCase):
 
         status_list4 = StatusList(**self.kwargs)
 
-        self.assertTrue(status_list1 == status_list2)
-        self.assertFalse(status_list1 == status_list3)
-        self.assertFalse(status_list1 == status_list4)
+        assert status_list1 == status_list2
+        assert not status_list1 == status_list3
+        assert not status_list1 == status_list4
 
     def test_inequality_operator(self):
         """testing equality of two status list object
@@ -169,9 +162,9 @@ class StatusListTest(unittest.TestCase):
 
         status_list4 = StatusList(**self.kwargs)
 
-        self.assertFalse(status_list1 != status_list2)
-        self.assertTrue(status_list1 != status_list3)
-        self.assertTrue(status_list1 != status_list4)
+        assert not status_list1 != status_list2
+        assert status_list1 != status_list3
+        assert status_list1 != status_list4
 
     def test_indexing_get(self):
         """testing indexing of statuses in the statusList, get
@@ -182,7 +175,7 @@ class StatusListTest(unittest.TestCase):
         status1 = self.test_status_list[0]
 
         # check the equality
-        self.assertEqual(self.test_status_list.statuses[0], status1)
+        assert self.test_status_list.statuses[0] == status1
 
     def test_indexing_get_string_indexes(self):
         """testing indexing of statuses in the statusList, get with string
@@ -196,8 +189,8 @@ class StatusListTest(unittest.TestCase):
                                    statuses=[status1, status2, status3],
                                    target_entity_type="Asset")
 
-        self.assertEqual(a_status_list[0], a_status_list["complete"])
-        self.assertEqual(a_status_list[1], a_status_list["wip"])
+        assert a_status_list[0] == a_status_list["complete"]
+        assert a_status_list[1] == a_status_list["wip"]
 
     def test_indexing_set(self):
         """testing indexing of statuses in the statusList, set
@@ -210,7 +203,7 @@ class StatusListTest(unittest.TestCase):
         self.test_status_list[0] = status
 
         # check the equality
-        self.assertEqual(self.test_status_list.statuses[0], status)
+        assert self.test_status_list.statuses[0] == status
 
     def test_indexing_del(self):
         """testing indexing of statuses in the statusList, del
@@ -220,12 +213,11 @@ class StatusListTest(unittest.TestCase):
 
         del self.test_status_list[-1]
 
-        self.assertEqual(len(self.test_status_list.statuses),
-                         len_statuses - 1)
+        assert len(self.test_status_list.statuses) == len_statuses - 1
 
     def test_indexing_len(self):
         """testing indexing of statuses in the statusList, len
         """
         # get the len and compare it wiht len(statuses)
-        self.assertEqual(len(self.test_status_list.statuses),
-                         len(self.test_status_list))
+        assert len(self.test_status_list.statuses) == \
+            len(self.test_status_list)

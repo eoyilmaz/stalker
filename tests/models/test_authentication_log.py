@@ -17,6 +17,7 @@
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
+import pytest
 
 
 class AuthenticationLogTestCase(unittest.TestCase):
@@ -51,16 +52,14 @@ class AuthenticationLogTestCase(unittest.TestCase):
         from stalker.models.auth import LOGIN
         import datetime
         import pytz
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             AuthenticationLog(
                 action=LOGIN,
                 date=datetime.datetime.now(pytz.utc)
             )
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'AuthenticationLog.user should be a User instance, not NoneType'
-        )
 
     def test_user_argument_is_None(self):
         """testing if a TypeError will be raised when the user argument is None
@@ -69,17 +68,15 @@ class AuthenticationLogTestCase(unittest.TestCase):
         from stalker.models.auth import LOGIN
         import datetime
         import pytz
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             AuthenticationLog(
                 user=None,
                 action=LOGIN,
                 date=datetime.datetime.now(pytz.utc)
             )
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'AuthenticationLog.user should be a User instance, not NoneType'
-        )
 
     def test_user_argument_is_not_a_user_instance(self):
         """testing if a TypeError will be raised when the user argument value
@@ -89,17 +86,15 @@ class AuthenticationLogTestCase(unittest.TestCase):
         from stalker.models.auth import LOGIN
         import datetime
         import pytz
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             AuthenticationLog(
                 user='not a user instance',
                 action=LOGIN,
                 date=datetime.datetime.now(pytz.utc)
             )
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'AuthenticationLog.user should be a User instance, not str'
-        )
 
     def test_user_attribute_is_not_a_user_instance(self):
         """testing if a TypeError will be raised when the user attribute is set
@@ -114,13 +109,11 @@ class AuthenticationLogTestCase(unittest.TestCase):
             action=LOGIN,
             date=datetime.datetime.now(pytz.utc)
         )
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             uli.user = 'not a user instance'
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'AuthenticationLog.user should be a User instance, not str'
-        )
 
     def test_user_argument_is_working_properly(self):
         """testing if the user argument value is correctly passed to the user
@@ -135,7 +128,7 @@ class AuthenticationLogTestCase(unittest.TestCase):
             action=LOGOUT,
             date=datetime.datetime.now(pytz.utc)
         )
-        self.assertEqual(uli.user, self.test_user1)
+        assert uli.user == self.test_user1
 
     def test_user_attribute_is_working_properly(self):
         """testing if the user attribute value is correctly passed to the user
@@ -150,9 +143,9 @@ class AuthenticationLogTestCase(unittest.TestCase):
             action=LOGOUT,
             date=datetime.datetime.now(pytz.utc)
         )
-        self.assertNotEqual(uli.user, self.test_user2)
+        assert uli.user != self.test_user2
         uli.user = self.test_user2
-        self.assertEqual(uli.user, self.test_user2)
+        assert uli.user == self.test_user2
 
     def test_action_argument_is_skipped(self):
         """testing if the action attribute value will be set to "login" when
@@ -166,7 +159,7 @@ class AuthenticationLogTestCase(unittest.TestCase):
             date=datetime.datetime.now(pytz.utc)
         )
         from stalker.models.auth import LOGIN
-        self.assertEqual(uli.action, LOGIN)
+        assert uli.action == LOGIN
 
     def test_action_argument_is_None(self):
         """testing if the action attribute value will be set to "login" when
@@ -181,7 +174,7 @@ class AuthenticationLogTestCase(unittest.TestCase):
             date=datetime.datetime.now(pytz.utc)
         )
         from stalker.models.auth import LOGIN
-        self.assertEqual(uli.action, LOGIN)
+        assert uli.action == LOGIN
 
     def test_action_argument_value_is_not_login_or_logout(self):
         """testing if a ValueError will be raised when the action attribute
@@ -190,18 +183,16 @@ class AuthenticationLogTestCase(unittest.TestCase):
         from stalker import AuthenticationLog
         import datetime
         import pytz
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             AuthenticationLog(
                 user=self.test_user1,
                 action='not login',
                 date=datetime.datetime.now(pytz.utc)
             )
 
-        self.assertEqual(
-            str(cm.exception),
-            'AuthenticationLog.action should be one of "login" or "logout", not '
-            '"not login"'
-        )
+        assert str(cm.value) == \
+            'AuthenticationLog.action should be one of "login" or "logout", ' \
+            'not "not login"'
 
     def test_action_attribute_value_is_not_login_or_logout(self):
         """testing if a ValueError will be raised when the action attribute
@@ -215,14 +206,12 @@ class AuthenticationLogTestCase(unittest.TestCase):
             action=LOGIN,
             date=datetime.datetime.now(pytz.utc)
         )
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             uli.action = 'not login'
 
-        self.assertEqual(
-            str(cm.exception),
-            'AuthenticationLog.action should be one of "login" or "logout", not '
-            '"not login"'
-        )
+        assert str(cm.value) == \
+            'AuthenticationLog.action should be one of "login" or "logout", ' \
+            'not "not login"'
 
     def test_action_argument_is_working_properly(self):
         """testing if the action argument value is properly passed to the
@@ -237,14 +226,14 @@ class AuthenticationLogTestCase(unittest.TestCase):
             action=LOGIN,
             date=datetime.datetime.now(pytz.utc)
         )
-        self.assertEqual(uli.action, LOGIN)
+        assert uli.action == LOGIN
 
         uli = AuthenticationLog(
             user=self.test_user1,
             action=LOGOUT,
             date=datetime.datetime.now(pytz.utc)
         )
-        self.assertEqual(uli.action, LOGOUT)
+        assert uli.action == LOGOUT
 
     def test_action_attribute_is_working_properly(self):
         """testing if the action attribute is working properly
@@ -258,9 +247,9 @@ class AuthenticationLogTestCase(unittest.TestCase):
             action=LOGIN,
             date=datetime.datetime.now(pytz.utc)
         )
-        self.assertNotEqual(uli.action, LOGOUT)
+        assert uli.action != LOGOUT
         uli.action = LOGOUT
-        self.assertEqual(uli.action, LOGOUT)
+        assert uli.action == LOGOUT
 
     def test_date_argument_is_skipped(self):
         """testing if the date attribute value will be set to
@@ -274,7 +263,7 @@ class AuthenticationLogTestCase(unittest.TestCase):
             action=LOGIN
         )
         diff = datetime.datetime.now(pytz.utc) - uli.date
-        self.assertTrue(diff.microseconds < 5000)
+        assert diff.microseconds < 5000
 
     def test_date_argument_is_None(self):
         """testing if the date attribute value will be set to
@@ -289,7 +278,7 @@ class AuthenticationLogTestCase(unittest.TestCase):
             date=None
         )
         diff = datetime.datetime.now(pytz.utc) - uli.date
-        self.assertTrue(diff < datetime.timedelta(seconds=1))
+        assert diff < datetime.timedelta(seconds=1)
 
     def test_date_attribute_is_None(self):
         """testing if the date attribute value is set to
@@ -305,29 +294,27 @@ class AuthenticationLogTestCase(unittest.TestCase):
         )
         diff = datetime.datetime.now(pytz.utc) - uli.date
         one_second = datetime.timedelta(seconds=1)
-        self.assertTrue(diff > one_second)
+        assert diff > one_second
 
         uli.date = None
         diff = datetime.datetime.now(pytz.utc) - uli.date
-        self.assertTrue(diff < one_second)
+        assert diff < one_second
 
     def test_date_argument_is_not_a_datetime_instance(self):
         """testing if a TypeError will be raised when the date argument value
         is not a ``datetime.datetime`` instance
         """
         from stalker.models.auth import AuthenticationLog, LOGIN
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             AuthenticationLog(
                 user=self.test_user1,
                 action=LOGIN,
                 date='not a datetime instance'
             )
 
-        self.assertEqual(
-            str(cm.exception),
-            'AuthenticationLog.date should be a "datetime.datetime" instance, not '
-            'str'
-        )
+        assert str(cm.value) == \
+            'AuthenticationLog.date should be a "datetime.datetime" ' \
+            'instance, not str'
 
     def test_date_attribute_is_not_a_datetime_instance(self):
         """testing if a TypeError will be raised when the date attribute is set
@@ -341,14 +328,12 @@ class AuthenticationLogTestCase(unittest.TestCase):
             action=LOGIN,
             date=datetime.datetime.now(pytz.utc)
         )
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             uli.date = 'not a datetime instance'
 
-        self.assertEqual(
-            str(cm.exception),
-            'AuthenticationLog.date should be a "datetime.datetime" instance, not '
-            'str'
-        )
+        assert str(cm.value) == \
+            'AuthenticationLog.date should be a "datetime.datetime" ' \
+            'instance, not str'
 
     def test_date_argument_is_working_properly(self):
         """testing if the date argument value is properly passed to the date
@@ -364,7 +349,7 @@ class AuthenticationLogTestCase(unittest.TestCase):
             date=date
         )
 
-        self.assertEqual(uli.date, date)
+        assert uli.date == date
 
     def test_date_attribute_is_working_properly(self):
         """testing if the date attribute value can be properly changed
@@ -379,9 +364,9 @@ class AuthenticationLogTestCase(unittest.TestCase):
             action=LOGIN,
             date=date1
         )
-        self.assertNotEqual(uli.date, date2)
+        assert uli.date != date2
         uli.date = date2
-        self.assertEqual(uli.date, date2)
+        assert uli.date == date2
 
     def test_date_argument_is_working_properly2(self):
         """testing if the date argument value is properly passed to the date
@@ -397,4 +382,4 @@ class AuthenticationLogTestCase(unittest.TestCase):
             action=LOGIN,
             date=date1
         )
-        self.assertEqual(uli.date, date1)
+        assert uli.date == date1

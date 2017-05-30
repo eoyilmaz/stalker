@@ -17,6 +17,7 @@
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 import unittest
 
+import pytest
 from sqlalchemy import Column, Integer, ForeignKey
 from stalker import SimpleEntity, ProjectMixin
 
@@ -110,71 +111,61 @@ class ProjectMixinTester(unittest.TestCase):
         skipped
         """
         self.kwargs.pop("project")
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             ProjMixClass(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'ProjMixClass.project can not be None it must be an instance of '
+        assert str(cm.value) == \
+            'ProjMixClass.project can not be None it must be an instance of ' \
             'stalker.models.project.Project'
-        )
 
     def test_project_argument_is_None(self):
         """testing if a TypeError will be raised when the project argument is
         None
         """
         self.kwargs["project"] = None
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             ProjMixClass(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'ProjMixClass.project can not be None it must be an instance of '
+        assert str(cm.value) == \
+            'ProjMixClass.project can not be None it must be an instance of ' \
             'stalker.models.project.Project'
-        )
 
     def test_project_attribute_is_None(self):
         """testing if a TypeError will be raised when the project attribute is
         set to None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_foo_obj.project = None
 
-        self.assertEqual(
-            str(cm.exception),
-            'ProjMixClass.project can not be None it must be an instance of '
+        assert str(cm.value) == \
+            'ProjMixClass.project can not be None it must be an instance of ' \
             'stalker.models.project.Project'
-        )
 
     def test_project_argument_is_not_a_Project_instance(self):
         """testing if a TypeError will be raised when the project argument is
         not a stalker.models.project.Project instance
         """
         self.kwargs["project"] = "a project"
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             ProjMixClass(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
-            'ProjMixClass.project should be an instance of '
+        assert str(cm.value) == \
+            'ProjMixClass.project should be an instance of ' \
             'stalker.models.project.Project instance not str'
-        )
 
     def test_project_attribute_is_not_a_Project_instance(self):
         """testing if a TypeError will be raised when the project attribute is
         set to something other than a stalker.models.project.Project instance
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_foo_obj.project = "a project"
 
-        self.assertEqual(
-            str(cm.exception),
-            'ProjMixClass.project should be an instance of '
+        assert str(cm.value) == \
+            'ProjMixClass.project should be an instance of ' \
             'stalker.models.project.Project instance not str'
-        )
 
     def test_project_attribute_is_working_properly(self):
         """testing if the project attribute is working properly
         """
         self.test_foo_obj.project = self.test_project2
-        self.assertEqual(self.test_foo_obj.project, self.test_project2)
+        assert self.test_foo_obj.project == self.test_project2

@@ -16,34 +16,29 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
-import unittest
-from stalker import DepartmentUser
+
+import pytest
 
 
-class DepartmentUserTestCase(unittest.TestCase):
-    """tests for DepartmentUser class
+def test_role_argument_is_not_a_role_instance():
+    """testing if a TypeError will be raised when the role argument is not
+    a Role instance
     """
+    from stalker import DepartmentUser
+    from stalker import Department, User
 
-    def test_role_argument_is_not_a_role_instance(self):
-        """testing if a TypeError will be raised when the role argument is not
-        a Role instance
-        """
-        from stalker import Department, User
-
-        with self.assertRaises(TypeError) as cm:
-            DepartmentUser(
-                department=Department(name='Test Department'),
-                user=User(
-                    name='Test User',
-                    login='tuser',
-                    email='u@u.com',
-                    password='secret'
-                ),
-                role='not a role instance'
-            )
-
-        self.assertEqual(
-            str(cm.exception),
-            'DepartmentUser.role should be a stalker.models.auth.Role '
-            'instance, not str'
+    with pytest.raises(TypeError) as cm:
+        DepartmentUser(
+            department=Department(name='Test Department'),
+            user=User(
+                name='Test User',
+                login='tuser',
+                email='u@u.com',
+                password='secret'
+            ),
+            role='not a role instance'
         )
+
+    assert str(cm.value) == \
+        'DepartmentUser.role should be a stalker.models.auth.Role ' \
+        'instance, not str'

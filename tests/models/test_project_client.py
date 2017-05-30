@@ -16,6 +16,7 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
+import pytest
 from stalker import ProjectClient
 from stalker.testing import UnitTestDBBase
 
@@ -77,15 +78,13 @@ class ProjectClientTestDBCase(UnitTestDBBase):
         """testing if a TypeError will be raised when the role argument is not
         a Role instance
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             ProjectClient(
                 project=self.test_project,
                 client=self.test_client,
                 role='not a role instance'
             )
 
-        self.assertEqual(
-            str(cm.exception),
-            'ProjectClient.role should be a stalker.models.auth.Role '
+        assert str(cm.value) == \
+            'ProjectClient.role should be a stalker.models.auth.Role ' \
             'instance, not str'
-        )

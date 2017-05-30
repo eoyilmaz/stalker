@@ -18,6 +18,7 @@
 
 import unittest
 
+import pytest
 from sqlalchemy import Column, Integer, ForeignKey
 from stalker.models.entity import Entity
 from stalker.models.link import Link
@@ -106,13 +107,11 @@ class ReferenceMixinTester(unittest.TestCase):
         """testing if references attribute accepts only list-like objects,
         (objects with __setitem__, __getitem__ methods
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_foo_obj.references = "a string"
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Incompatible collection type: str is not list-like'
-        )
 
     def test_references_attribute_accepting_only_lists_of_Link_instances(self):
         """testing if references attribute accepting only lists with Link
@@ -120,42 +119,37 @@ class ReferenceMixinTester(unittest.TestCase):
         """
         test_value = [1, 2.2, "some references"]
 
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_foo_obj.references = test_value
 
-        self.assertEqual(
-            str(cm.exception),
-            'All the elements in the RefMixFooClass.references should be '
+        assert str(cm.value) == \
+            'All the elements in the RefMixFooClass.references should be ' \
             'stalker.models.link.Link instances not int'
-        )
 
     def test_references_attribute_elements_accepts_Links_only(self):
         """testing if a TypeError will be raised when trying to assign
         something other than an instance of Link or its derived classes to
         the references list
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_foo_obj.references = \
                 [self.test_entity1, self.test_entity2]
 
-        self.assertEqual(
-            str(cm.exception),
-            'All the elements in the RefMixFooClass.references should be '
+        assert str(cm.value) == \
+            'All the elements in the RefMixFooClass.references should be ' \
             'stalker.models.link.Link instances not Entity'
-        )
 
     def test_references_attribute_is_working_properly(self):
         """testing if references attribute working properly
         """
         self.test_foo_obj.references = self.test_links
-        self.assertEqual(self.test_foo_obj.references, self.test_links)
+        assert self.test_foo_obj.references == self.test_links
 
         test_value = [self.test_link1, self.test_link2]
         self.test_foo_obj.references = test_value
-        self.assertEqual(
-            sorted(self.test_foo_obj.references, key=lambda x: x.name),
+        assert \
+            sorted(self.test_foo_obj.references, key=lambda x: x.name) == \
             sorted(test_value, key=lambda x: x.name)
-        )
 
     def test_references_application_test(self):
         """testing an example of ReferenceMixin usage
@@ -184,4 +178,4 @@ class ReferenceMixinTester(unittest.TestCase):
 
         my_ge.references = test_value
 
-        self.assertEqual(my_ge.references, test_value)
+        assert my_ge.references == test_value

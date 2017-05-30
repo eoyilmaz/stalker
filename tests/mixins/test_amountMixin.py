@@ -17,6 +17,9 @@
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
+
+import pytest
+
 from stalker import AmountMixin, SimpleEntity
 from sqlalchemy import Column, Integer, ForeignKey
 
@@ -47,69 +50,65 @@ class AmountMixinTestCase(unittest.TestCase):
         """testing if the init is working properly
         """
         a = AmountMixinFooMixedInClass(amount=1500)
-        self.assertIsInstance(a, AmountMixinFooMixedInClass)
-        self.assertEqual(a.amount, 1500)
+        assert isinstance(a, AmountMixinFooMixedInClass)
+        assert a.amount == 1500
 
     def test_amount_argument_is_skipped(self):
         """testing if the amount attribute will be 0 if the amount argument is
         skipped
         """
         entry = AmountMixinFooMixedInClass()
-        self.assertEqual(entry.amount, 0.0)
+        assert entry.amount == 0.0
 
     def test_amount_argument_is_set_to_None(self):
         """testing if the amount attribute will be set to 0 if the amount
         argument is set to None
         """
         entry = AmountMixinFooMixedInClass(amount=None)
-        self.assertEqual(entry.amount, 0.0)
+        assert entry.amount == 0.0
 
     def test_amount_attribute_is_set_to_None(self):
         """testing if the amount attribute will be set to 0 if it is set to
         None
         """
         entry = AmountMixinFooMixedInClass(amount=10.0)
-        self.assertEqual(entry.amount, 10.0)
+        assert entry.amount == 10.0
         entry.amount = None
-        self.assertEqual(entry.amount, 0.0)
+        assert entry.amount == 0.0
 
     def test_amount_argument_is_not_a_number(self):
         """testing if a TypeError will be raised if the amount argument is set
         to something other than a number
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             AmountMixinFooMixedInClass(amount='some string')
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'AmountMixinFooMixedInClass.amount should be a number, not str'
-        )
 
     def test_amount_attribute_is_not_a_number(self):
         """testing if a TypeError will be raised if amount attribute is set to
         something other than a number
         """
         entry = AmountMixinFooMixedInClass(amount=10)
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             entry.amount = 'some string'
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'AmountMixinFooMixedInClass.amount should be a number, not str'
-        )
 
     def test_amount_argument_is_working_properly(self):
         """testing if the amount argument value is correctly passed to the
         amount attribute
         """
         entry = AmountMixinFooMixedInClass(amount=10)
-        self.assertEqual(entry.amount, 10.0)
+        assert entry.amount == 10.0
 
     def test_amount_attribute_is_working_properly(self):
         """testing if the amount attribute is working properly
         """
         entry = AmountMixinFooMixedInClass(amount=10)
         test_value = 5.0
-        self.assertNotEqual(entry.amount, test_value)
+        assert entry.amount != test_value
         entry.amount = test_value
-        self.assertEqual(entry.amount, test_value)
+        assert entry.amount == test_value

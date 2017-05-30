@@ -15,13 +15,13 @@
 #
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
-import unittest
 
+import unittest
+import pytest
 from sqlalchemy import Column, Integer, ForeignKey
 from stalker.models.mixins import TargetEntityTypeMixin
 from stalker.models.project import Project
 from stalker.models.entity import SimpleEntity
-from stalker.testing import UnitTestDBBase
 
 
 class TestClass(object):
@@ -62,29 +62,23 @@ class TargetEntityMixinTester(unittest.TestCase):
         """testing if a TypeError will be raised when the target_entity_type 
         argument is skipped
         """
-        
         self.kwargs.pop("target_entity_type")
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             TargetEntityTypeMixedClass(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'TargetEntityTypeMixedClass.target_entity_type can not be None'
-        )
-    
+
     def test_target_entity_type_argument_being_empty_string(self):
         """testing if a ValueError will be raised when the target_entity_type
         argument is given as None
         """
-
         self.kwargs["target_entity_type"] = ""
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as cm:
             TargetEntityTypeMixedClass(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'TargetEntityTypeMixedClass.target_entity_type can not be empty'
-        )
 
     def test_target_entity_type_argument_being_None(self):
         """testing if a TypeError will be raised when the target_entity_type
@@ -92,26 +86,21 @@ class TargetEntityMixinTester(unittest.TestCase):
         """
 
         self.kwargs["target_entity_type"] = None
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             TargetEntityTypeMixedClass(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'TargetEntityTypeMixedClass.target_entity_type can not be None'
-        )
 
     def test_target_entity_type_attribute_is_read_only(self):
         """testing if a AttributeError will be raised when the
         target_entity_type argument is tried to be set
         """
         # try to set the target_entity_type attribute and expect AttributeError
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as cm:
             self.test_object.target_entity_type = "Project"
 
-        self.assertEqual(
-            str(cm.exception),
-            "can't set attribute"
-        )
+        assert str(cm.value) == "can't set attribute"
 
     def test_target_entity_type_argument_accepts_classes(self):
         """testing if the target_entity_type argument accepts classes
@@ -120,4 +109,4 @@ class TargetEntityMixinTester(unittest.TestCase):
         self.kwargs["target_entity_type"] = TestClass
         new_object = TargetEntityTypeMixedClass(**self.kwargs)
         
-        self.assertEqual(new_object.target_entity_type, "TestClass")
+        assert new_object.target_entity_type == "TestClass"

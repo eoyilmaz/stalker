@@ -17,6 +17,7 @@
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
+import pytest
 from stalker import Note
 
 
@@ -41,7 +42,7 @@ class NoteTester(unittest.TestCase):
         """testing if the __auto_name__ class attribute is set to True for
         Note class
         """
-        self.assertTrue(Note.__auto_name__)
+        assert Note.__auto_name__ is True
 
     def test_content_argument_is_missing(self):
         """testing if nothing is going to happen when no content argument is
@@ -49,7 +50,7 @@ class NoteTester(unittest.TestCase):
         """
         self.kwargs.pop("content")
         new_note = Note(**self.kwargs)
-        self.assertTrue(isinstance(new_note, Note))
+        assert isinstance(new_note, Note)
 
     def test_content_argument_is_set_to_None(self):
         """testing if nothing is going to happen when content argument is given
@@ -57,7 +58,7 @@ class NoteTester(unittest.TestCase):
         """
         self.kwargs["content"] = None
         new_note = Note(**self.kwargs)
-        self.assertTrue(isinstance(new_note, Note))
+        assert isinstance(new_note, Note)
 
     def test_content_attribute_is_set_to_None(self):
         """testing if nothing is going to happen when content attribute is set
@@ -87,13 +88,11 @@ class NoteTester(unittest.TestCase):
         test_value = 1.24
 
         self.kwargs["content"] = test_value
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Note(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Note.description should be a string, not float'
-        )
 
     def test_content_attribute_is_set_to_something_other_than_a_string(self):
         """testing if a TypeError will be raised when trying to set the
@@ -101,13 +100,11 @@ class NoteTester(unittest.TestCase):
         """
         test_value = 1
 
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_note.content = test_value
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Note.description should be a string, not int'
-        )
 
     def test_content_attribute_is_working_properly(self):
         """testing if the content attribute is working properly
@@ -115,7 +112,7 @@ class NoteTester(unittest.TestCase):
         new_content = "This is my new content for the note, and I expect it to\
         work fine when I assign it to a Note object"
         self.test_note.content = new_content
-        self.assertEqual(self.test_note.content, new_content)
+        assert self.test_note.content == new_content
 
     def test_equality_operator(self):
         """testing equality operator
@@ -126,8 +123,8 @@ class NoteTester(unittest.TestCase):
         self.kwargs["content"] = "this is a different content"
         note3 = Note(**self.kwargs)
 
-        self.assertTrue(note1 == note2)
-        self.assertFalse(note1 == note3)
+        assert note1 == note2
+        assert not note1 == note3
 
     def test_inequality_operator(self):
         """testing inequality operator
@@ -138,10 +135,10 @@ class NoteTester(unittest.TestCase):
         self.kwargs["content"] = "this is a different content"
         note3 = Note(**self.kwargs)
 
-        self.assertFalse(note1 != note2)
-        self.assertTrue(note1 != note3)
+        assert not note1 != note2
+        assert note1 != note3
 
     def test_plural_class_name(self):
         """testing the plural name of Note class
         """
-        self.assertTrue(self.test_note.plural_class_name, "Notes")
+        assert self.test_note.plural_class_name == "Notes"

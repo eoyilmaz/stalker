@@ -16,6 +16,7 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
+import pytest
 from stalker.testing import UnitTestDBBase, PlatformPatcher
 
 
@@ -60,7 +61,7 @@ class RepositoryTester(UnitTestDBBase):
         Repository class
         """
         from stalker import Repository
-        self.assertFalse(Repository.__auto_name__)
+        assert Repository.__auto_name__ is False
 
     def test_linux_path_argument_accepts_only_strings(self):
         """testing if linux_path argument accepts only string values
@@ -70,7 +71,7 @@ class RepositoryTester(UnitTestDBBase):
             self.kwargs["linux_path"] = test_value
             from stalker import Repository
 
-            with self.assertRaises(TypeError):
+            with pytest.raises(TypeError):
                 Repository(**self.kwargs)
 
     def test_linux_path_attribute_accepts_only_strings(self):
@@ -78,7 +79,7 @@ class RepositoryTester(UnitTestDBBase):
         """
         test_values = [123123, 123.1231, [], {}]
         for test_value in test_values:
-            with self.assertRaises(TypeError):
+            with pytest.raises(TypeError):
                 self.test_repo.linux_path = test_value
 
     def test_linux_path_attribute_is_working_properly(self):
@@ -86,7 +87,7 @@ class RepositoryTester(UnitTestDBBase):
         """
         test_value = "~/newRepoPath/Projects/"
         self.test_repo.linux_path = test_value
-        self.assertEqual(self.test_repo.linux_path, test_value)
+        assert self.test_repo.linux_path == test_value
 
     def test_linux_path_attribute_finishes_with_a_slash(self):
         """testing if the linux_path attribute will be finished with a slash
@@ -95,7 +96,7 @@ class RepositoryTester(UnitTestDBBase):
         test_value = '/mnt/T'
         expected_value = '/mnt/T/'
         self.test_repo.linux_path = test_value
-        self.assertEqual(self.test_repo.linux_path, expected_value)
+        assert self.test_repo.linux_path == expected_value
 
     def test_windows_path_argument_accepts_only_strings(self):
         """testing if windows_path argument accepts only string values
@@ -104,26 +105,24 @@ class RepositoryTester(UnitTestDBBase):
         test_values = [123123, 123.1231, [], {}]
         for test_value in test_values:
             self.kwargs["windows_path"] = test_value
-            with self.assertRaises(TypeError):
+            with pytest.raises(TypeError):
                 Repository(**self.kwargs)
 
     def test_windows_path_attribute_accepts_only_strings(self):
         """testing if windows_path attribute accepts only string values
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_repo.windows_path = 123123
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Repository.windows_path should be an instance of string not int'
-        )
 
     def test_windows_path_attribute_is_working_properly(self):
         """testing if windows_path attribute is working properly
         """
         test_value = "~/newRepoPath/Projects/"
         self.test_repo.windows_path = test_value
-        self.assertEqual(self.test_repo.windows_path, test_value)
+        assert self.test_repo.windows_path == test_value
 
     def test_windows_path_attribute_finishes_with_a_slash(self):
         """testing if the windows_path attribute will be finished with a slash
@@ -132,38 +131,34 @@ class RepositoryTester(UnitTestDBBase):
         test_value = 'T:'
         expected_value = 'T:/'
         self.test_repo.windows_path = test_value
-        self.assertEqual(self.test_repo.windows_path, expected_value)
+        assert self.test_repo.windows_path == expected_value
 
     def test_osx_path_argument_accepts_only_strings(self):
         """testing if osx_path argument accepts only string values
         """
         from stalker import Repository
         self.kwargs["osx_path"] = 123123
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             Repository(**self.kwargs)
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Repository.osx_path should be an instance of string not int'
-        )
 
     def test_osx_path_attribute_accepts_only_strings(self):
         """testing if osx_path attribute accepts only string values
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_repo.osx_path = 123123
 
-        self.assertEqual(
-            str(cm.exception),
+        assert str(cm.value) == \
             'Repository.osx_path should be an instance of string not int'
-        )
 
     def test_osx_path_attribute_is_working_properly(self):
         """testing if osx_path attribute is working properly
         """
         test_value = "~/newRepoPath/Projects/"
         self.test_repo.osx_path = test_value
-        self.assertEqual(self.test_repo.osx_path, test_value)
+        assert self.test_repo.osx_path == test_value
 
     def test_osx_path_attribute_finishes_with_a_slash(self):
         """testing if the osx_path attribute will be finished with a slash
@@ -172,58 +167,58 @@ class RepositoryTester(UnitTestDBBase):
         test_value = '/Volumes/T'
         expected_value = '/Volumes/T/'
         self.test_repo.osx_path = test_value
-        self.assertEqual(self.test_repo.osx_path, expected_value)
+        assert self.test_repo.osx_path == expected_value
 
     def test_path_returns_properly_for_windows(self):
         """testing if path returns the correct value for the os
         """
         self.patcher.patch('Windows')
-        self.assertEqual(self.test_repo.path, self.test_repo.windows_path)
+        assert self.test_repo.path == self.test_repo.windows_path
 
     def test_path_returns_properly_for_linux(self):
         """testing if path returns the correct value for the os
         """
         self.patcher.patch('Linux')
-        self.assertEqual(self.test_repo.path, self.test_repo.linux_path)
+        assert self.test_repo.path == self.test_repo.linux_path
 
     def test_path_returns_properly_for_osx(self):
         """testing if path returns the correct value for the os
         """
         self.patcher.patch('Darwin')
-        self.assertEqual(self.test_repo.path, self.test_repo.osx_path)
+        assert self.test_repo.path == self.test_repo.osx_path
 
     def test_path_attribute_sets_correct_path_for_windows(self):
         """testing if path property sets the correct attribute in windows
         """
         self.patcher.patch('Windows')
         test_value = 'S:/Projects/'
-        self.assertNotEqual(self.test_repo.path, test_value)
-        self.assertNotEqual(self.test_repo.windows_path, test_value)
+        assert self.test_repo.path != test_value
+        assert self.test_repo.windows_path != test_value
         self.test_repo.path = test_value
-        self.assertEqual(self.test_repo.windows_path, test_value)
-        self.assertEqual(self.test_repo.path, test_value)
+        assert self.test_repo.windows_path == test_value
+        assert self.test_repo.path == test_value
 
     def test_path_attribute_sets_correct_path_for_linux(self):
         """testing if path property sets the correct attribute in linux
         """
         self.patcher.patch('Linux')
         test_value = '/mnt/S/Projects/'
-        self.assertNotEqual(self.test_repo.path, test_value)
-        self.assertNotEqual(self.test_repo.linux_path, test_value)
+        assert self.test_repo.path != test_value
+        assert self.test_repo.linux_path != test_value
         self.test_repo.path = test_value
-        self.assertEqual(self.test_repo.linux_path, test_value)
-        self.assertEqual(self.test_repo.path, test_value)
+        assert self.test_repo.linux_path == test_value
+        assert self.test_repo.path == test_value
 
     def test_path_attribute_sets_correct_path_for_osx(self):
         """testing if path property sets the correct attribute in osx
         """
         self.patcher.patch('Darwin')
         test_value = '/Volumes/S/Projects/'
-        self.assertNotEqual(self.test_repo.path, test_value)
-        self.assertNotEqual(self.test_repo.osx_path, test_value)
+        assert self.test_repo.path != test_value
+        assert self.test_repo.osx_path != test_value
         self.test_repo.path = test_value
-        self.assertEqual(self.test_repo.osx_path, test_value)
-        self.assertEqual(self.test_repo.path, test_value)
+        assert self.test_repo.osx_path == test_value
+        assert self.test_repo.path == test_value
 
     def test_equality(self):
         """testing the equality of two repositories
@@ -242,8 +237,8 @@ class RepositoryTester(UnitTestDBBase):
 
         repo3 = Repository(**self.kwargs)
 
-        self.assertTrue(repo1 == repo2)
-        self.assertFalse(repo1 == repo3)
+        assert repo1 == repo2
+        assert not repo1 == repo3
 
     def test_inequality(self):
         """testing the inequality of two repositories
@@ -262,13 +257,13 @@ class RepositoryTester(UnitTestDBBase):
 
         repo3 = Repository(**self.kwargs)
 
-        self.assertFalse(repo1 != repo2)
-        self.assertTrue(repo1 != repo3)
+        assert not repo1 != repo2
+        assert repo1 != repo3
 
     def test_plural_class_name(self):
         """testing the plural name of Repository class
         """
-        self.assertTrue(self.test_repo.plural_class_name, "Repositories")
+        assert self.test_repo.plural_class_name == "Repositories"
 
     def test_linux_path_argument_backward_slashes_are_converted_to_forward_slashes(self):
         """testing if the backward slashes are converted to forward slashes
@@ -278,16 +273,16 @@ class RepositoryTester(UnitTestDBBase):
         from stalker import Repository
         new_repo = Repository(**self.kwargs)
 
-        self.assertFalse("\\" in new_repo.linux_path)
-        self.assertEqual(new_repo.linux_path, "/mnt/M/Projects/")
+        assert "\\" not in new_repo.linux_path
+        assert new_repo.linux_path == "/mnt/M/Projects/"
 
     def test_linux_path_attribute_backward_slashes_are_converted_to_forward_slashes(self):
         """testing if the backward slashes are converted to forward slashes
         in the linux_path attribute
         """
         self.test_repo.linux_path = r"\mnt\M\Projects"
-        self.assertFalse("\\" in self.test_repo.linux_path)
-        self.assertEqual(self.test_repo.linux_path, "/mnt/M/Projects/")
+        assert "\\" not in self.test_repo.linux_path
+        assert self.test_repo.linux_path == "/mnt/M/Projects/"
 
     def test_osx_path_argument_backward_slashes_are_converted_to_forward_slashes(self):
         """testing if the backward slashes are converted to forward slashes
@@ -297,16 +292,16 @@ class RepositoryTester(UnitTestDBBase):
         self.kwargs["osx_path"] = r"\Volumes\M\Projects"
         new_repo = Repository(**self.kwargs)
 
-        self.assertFalse("\\" in new_repo.linux_path)
-        self.assertEqual(new_repo.osx_path, "/Volumes/M/Projects/")
+        assert "\\" not in new_repo.linux_path
+        assert new_repo.osx_path == "/Volumes/M/Projects/"
 
     def test_osx_path_attribute_backward_slashes_are_converted_to_forward_slashes(self):
         """testing if the backward slashes are converted to forward slashes
         in the osx_path attribute
         """
         self.test_repo.osx_path = r"\Volumes\M\Projects"
-        self.assertFalse("\\" in self.test_repo.osx_path)
-        self.assertEqual(self.test_repo.osx_path, "/Volumes/M/Projects/")
+        assert "\\" not in self.test_repo.osx_path
+        assert self.test_repo.osx_path == "/Volumes/M/Projects/"
 
     def test_windows_path_argument_backward_slashes_are_converted_to_forward_slashes(self):
         """testing if the backward slashes are converted to forward slashes
@@ -316,26 +311,26 @@ class RepositoryTester(UnitTestDBBase):
         self.kwargs["windows_path"] = r"M:\Projects"
         new_repo = Repository(**self.kwargs)
 
-        self.assertFalse("\\" in new_repo.linux_path)
-        self.assertEqual(new_repo.windows_path, "M:/Projects/")
+        assert "\\" not in new_repo.linux_path
+        assert new_repo.windows_path == "M:/Projects/"
 
     def test_windows_path_attribute_backward_slashes_are_converted_to_forward_slashes(self):
         """testing if the backward slashes are converted to forward slashes
         in the windows_path attribute
         """
         self.test_repo.windows_path = r"M:\Projects"
-        self.assertFalse("\\" in self.test_repo.windows_path)
-        self.assertEqual(self.test_repo.windows_path, "M:/Projects/")
+        assert "\\" not in self.test_repo.windows_path
+        assert self.test_repo.windows_path == "M:/Projects/"
 
     def test_windows_path_with_more_than_one_slashes_converted_to_single_slash(self):
         """testing if the windows_path is set with more than one slashes is
         converted to single slash
         """
         self.test_repo.windows_path = r'M://'
-        self.assertEqual(self.test_repo.windows_path, 'M:/')
+        assert self.test_repo.windows_path == 'M:/'
 
         self.test_repo.windows_path = r'M://////////'
-        self.assertEqual(self.test_repo.windows_path, 'M:/')
+        assert self.test_repo.windows_path == 'M:/'
 
     def test_to_linux_path_returns_the_linux_version_of_the_given_windows_path(self):
         """testing if the to_linux_path returns the linux version of the given
@@ -347,10 +342,8 @@ class RepositoryTester(UnitTestDBBase):
                             'Some_file.ma'
         test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/' \
                           'Some_file.ma'
-        self.assertEqual(
-            self.test_repo.to_linux_path(test_windows_path),
-            test_linux_path
-        )
+        assert \
+            self.test_repo.to_linux_path(test_windows_path) == test_linux_path
 
     def test_to_linux_path_returns_the_linux_version_of_the_given_linux_path(self):
         """testing if the to_linux_path returns the linux version of the given
@@ -359,10 +352,7 @@ class RepositoryTester(UnitTestDBBase):
         self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
         test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/' \
                           'Some_file.ma'
-        self.assertEqual(
-            self.test_repo.to_linux_path(test_linux_path),
-            test_linux_path
-        )
+        assert self.test_repo.to_linux_path(test_linux_path) == test_linux_path
 
     def test_to_linux_path_returns_the_linux_version_of_the_given_osx_path(self):
         """testing if the to_linux_path returns the linux version of the given
@@ -374,10 +364,7 @@ class RepositoryTester(UnitTestDBBase):
                         'Some_file.ma'
         test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/' \
                           'Some_file.ma'
-        self.assertEqual(
-            self.test_repo.to_linux_path(test_osx_path),
-            test_linux_path
-        )
+        assert self.test_repo.to_linux_path(test_osx_path) == test_linux_path
 
     def test_to_linux_path_returns_the_linux_version_of_the_given_reverse_windows_path(self):
         """testing if the to_linux_path returns the linux version of the given
@@ -389,10 +376,8 @@ class RepositoryTester(UnitTestDBBase):
                           'Some_file.ma'
         test_windows_path_reverse = 'T:\\Stalker_Projects\\Sero\\Task1\\' \
                                     'Task2\\Some_file.ma'
-        self.assertEqual(
-            self.test_repo.to_linux_path(test_windows_path_reverse),
-            test_linux_path
-        )
+        assert self.test_repo.to_linux_path(test_windows_path_reverse) == \
+               test_linux_path
 
     def test_to_linux_path_returns_the_linux_version_of_the_given_reverse_linux_path(self):
         """testing if the to_linux_path returns the linux version of the given
@@ -403,10 +388,8 @@ class RepositoryTester(UnitTestDBBase):
                           'Some_file.ma'
         test_linux_path_reverse = '\\mnt\\T\\Stalker_Projects\\Sero\\Task1\\' \
                                   'Task2\\Some_file.ma'
-        self.assertEqual(
-            self.test_repo.to_linux_path(test_linux_path_reverse),
+        assert self.test_repo.to_linux_path(test_linux_path_reverse) == \
             test_linux_path
-        )
 
     def test_to_linux_path_returns_the_linux_version_of_the_given_reverse_osx_path(self):
         """testing if the to_linux_path returns the linux version of the given
@@ -418,10 +401,8 @@ class RepositoryTester(UnitTestDBBase):
                           'Some_file.ma'
         test_osx_path_reverse = '\\Volumes\\T\\Stalker_Projects\\Sero\\' \
                                 'Task1\\Task2\\Some_file.ma'
-        self.assertEqual(
-            self.test_repo.to_linux_path(test_osx_path_reverse),
+        assert self.test_repo.to_linux_path(test_osx_path_reverse) == \
             test_linux_path
-        )
 
     def test_to_linux_path_returns_the_linux_version_of_the_given_path_with_env_vars(self):
         """testing if the to_linux_path returns the linux version of the given
@@ -434,32 +415,24 @@ class RepositoryTester(UnitTestDBBase):
         test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/' \
                           'Some_file.ma'
         test_path_with_env_var = '$REPO1/Sero/Task1/Task2/Some_file.ma'
-        self.assertEqual(
-            self.test_repo.to_linux_path(test_path_with_env_var),
+        assert self.test_repo.to_linux_path(test_path_with_env_var) == \
             test_linux_path
-        )
 
     def test_to_linux_path_raises_TypeError_if_path_is_None(self):
         """testing if to_linux_path raises TypeError if path is None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_repo.to_linux_path(None)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Repository.path can not be None'
-        )
+        assert str(cm.value) == 'Repository.path can not be None'
 
     def test_to_linux_path_raises_TypeError_if_path_is_not_a_string(self):
         """testing if to_linux_path raises TypeError if path is None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_repo.to_linux_path(123)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Repository.path should be a string, not int'
-        )
+        assert str(cm.value) == 'Repository.path should be a string, not int'
 
     def test_to_windows_path_returns_the_windows_version_of_the_given_windows_path(self):
         """testing if the to_windows_path returns the windows version of the
@@ -467,10 +440,8 @@ class RepositoryTester(UnitTestDBBase):
         """
         self.test_repo.windows_path = 'T:/Stalker_Projects'
         test_windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
-        self.assertEqual(
-            self.test_repo.to_windows_path(test_windows_path),
+        assert self.test_repo.to_windows_path(test_windows_path) == \
             test_windows_path
-        )
 
     def test_to_windows_path_returns_the_windows_version_of_the_given_linux_path(self):
         """testing if the to_windows_path returns the windows version of the
@@ -481,10 +452,8 @@ class RepositoryTester(UnitTestDBBase):
         test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/' \
                           'Some_file.ma'
         test_windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
-        self.assertEqual(
-            self.test_repo.to_windows_path(test_linux_path),
+        assert self.test_repo.to_windows_path(test_linux_path) == \
             test_windows_path
-        )
 
     def test_to_windows_path_returns_the_windows_version_of_the_given_osx_path(self):
         """testing if the to_windows_path returns the windows version of the
@@ -495,10 +464,8 @@ class RepositoryTester(UnitTestDBBase):
         test_osx_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/' \
                         'Some_file.ma'
         test_windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
-        self.assertEqual(
-            self.test_repo.to_windows_path(test_osx_path),
+        assert self.test_repo.to_windows_path(test_osx_path) == \
             test_windows_path
-        )
 
     def test_to_windows_path_returns_the_windows_version_of_the_given_reverse_windows_path(self):
         """testing if the to_windows_path returns the windows version of the
@@ -508,10 +475,8 @@ class RepositoryTester(UnitTestDBBase):
         test_windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
         test_windows_path_reverse = 'T:\\Stalker_Projects\\Sero\\Task1\\' \
                                     'Task2\\Some_file.ma'
-        self.assertEqual(
-            self.test_repo.to_windows_path(test_windows_path_reverse),
+        assert self.test_repo.to_windows_path(test_windows_path_reverse) == \
             test_windows_path
-        )
 
     def test_to_windows_path_returns_the_windows_version_of_the_given_reverse_linux_path(self):
         """testing if the to_windows_path returns the windows version of the
@@ -522,10 +487,8 @@ class RepositoryTester(UnitTestDBBase):
         test_windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
         test_linux_path_reverse = '\\mnt\\T\\Stalker_Projects\\Sero\\Task1\\' \
                                   'Task2\\Some_file.ma'
-        self.assertEqual(
-            self.test_repo.to_windows_path(test_linux_path_reverse),
+        assert self.test_repo.to_windows_path(test_linux_path_reverse) == \
             test_windows_path
-        )
 
     def test_to_windows_path_returns_the_windows_version_of_the_given_reverse_osx_path(self):
         """testing if the to_windows_path returns the windows version of the
@@ -536,10 +499,8 @@ class RepositoryTester(UnitTestDBBase):
         test_windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
         test_osx_path_reverse = '\\Volumes\\T\\Stalker_Projects\\Sero\\' \
                                 'Task1\\Task2\\Some_file.ma'
-        self.assertEqual(
-            self.test_repo.to_windows_path(test_osx_path_reverse),
+        assert self.test_repo.to_windows_path(test_osx_path_reverse) == \
             test_windows_path
-        )
 
     def test_to_windows_path_returns_the_windows_version_of_the_given_path_with_env_vars(self):
         """testing if the to_windows_path returns the windows version of the
@@ -553,32 +514,24 @@ class RepositoryTester(UnitTestDBBase):
         test_windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/' \
                             'Some_file.ma'
         test_path_with_env_var = '$REPO1/Sero/Task1/Task2/Some_file.ma'
-        self.assertEqual(
-            self.test_repo.to_windows_path(test_path_with_env_var),
+        assert self.test_repo.to_windows_path(test_path_with_env_var) == \
             test_windows_path
-        )
 
     def test_to_windows_path_raises_TypeError_if_path_is_None(self):
         """testing if to_windows_path raises TypeError if path is None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_repo.to_windows_path(None)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Repository.path can not be None'
-        )
+        assert str(cm.value) == 'Repository.path can not be None'
 
     def test_to_windows_path_raises_TypeError_if_path_is_not_a_string(self):
         """testing if to_windows_path raises TypeError if path is None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_repo.to_windows_path(123)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Repository.path should be a string, not int'
-        )
+        assert str(cm.value) == 'Repository.path should be a string, not int'
 
     def test_to_osx_path_returns_the_osx_version_of_the_given_windows_path(self):
         """testing if the to_osx_path returns the osx version of the given
@@ -589,10 +542,7 @@ class RepositoryTester(UnitTestDBBase):
         test_windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
         test_osx_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/' \
                         'Some_file.ma'
-        self.assertEqual(
-            self.test_repo.to_osx_path(test_windows_path),
-            test_osx_path
-        )
+        assert self.test_repo.to_osx_path(test_windows_path) == test_osx_path
 
     def test_to_osx_path_returns_the_osx_version_of_the_given_linux_path(self):
         """testing if the to_osx_path returns the osx version of the given
@@ -604,10 +554,7 @@ class RepositoryTester(UnitTestDBBase):
                           'Some_file.ma'
         test_osx_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/' \
                         'Some_file.ma'
-        self.assertEqual(
-            self.test_repo.to_osx_path(test_linux_path),
-            test_osx_path
-        )
+        assert self.test_repo.to_osx_path(test_linux_path) == test_osx_path
 
     def test_to_osx_path_returns_the_osx_version_of_the_given_osx_path(self):
         """testing if the to_osx_path returns the osx version of the given
@@ -616,10 +563,7 @@ class RepositoryTester(UnitTestDBBase):
         self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
         test_osx_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/' \
                         'Some_file.ma'
-        self.assertEqual(
-            self.test_repo.to_osx_path(test_osx_path),
-            test_osx_path
-        )
+        assert self.test_repo.to_osx_path(test_osx_path) == test_osx_path
 
     def test_to_osx_path_returns_the_osx_version_of_the_given_reverse_windows_path(self):
         """testing if the to_osx_path returns the osx version of the given
@@ -631,10 +575,8 @@ class RepositoryTester(UnitTestDBBase):
                         'Some_file.ma'
         test_windows_path_reverse = 'T:\\Stalker_Projects\\Sero\\Task1\\' \
                                     'Task2\\Some_file.ma'
-        self.assertEqual(
-            self.test_repo.to_osx_path(test_windows_path_reverse),
+        assert self.test_repo.to_osx_path(test_windows_path_reverse) == \
             test_osx_path
-        )
 
     def test_to_osx_path_returns_the_osx_version_of_the_given_reverse_linux_path(self):
         """testing if the to_osx_path returns the osx version of the given
@@ -646,10 +588,8 @@ class RepositoryTester(UnitTestDBBase):
                         'Some_file.ma'
         test_linux_path_reverse = '\\mnt\\T\\Stalker_Projects\\Sero\\Task1\\' \
                                   'Task2\\Some_file.ma'
-        self.assertEqual(
-            self.test_repo.to_osx_path(test_linux_path_reverse),
+        assert self.test_repo.to_osx_path(test_linux_path_reverse) == \
             test_osx_path
-        )
 
     def test_to_osx_path_returns_the_osx_version_of_the_given_reverse_osx_path(self):
         """testing if the to_osx_path returns the osx version of the given
@@ -660,10 +600,8 @@ class RepositoryTester(UnitTestDBBase):
                         'Some_file.ma'
         test_osx_path_reverse = '\\Volumes\\T\\Stalker_Projects\\Sero\\' \
                                 'Task1\\Task2\\Some_file.ma'
-        self.assertEqual(
-            self.test_repo.to_osx_path(test_osx_path_reverse),
+        assert self.test_repo.to_osx_path(test_osx_path_reverse) == \
             test_osx_path
-        )
 
     def test_to_osx_path_returns_the_osx_version_of_the_given_path(self):
         """testing if the to_osx_path returns the osx version of the
@@ -687,35 +625,15 @@ class RepositoryTester(UnitTestDBBase):
         test_osx_path_reverse = '\\Volumes\\T\\Stalker_Projects\\Sero\\' \
                                 'Task1\\Task2\\Some_file.ma'
 
-        self.assertEqual(
-            self.test_repo.to_osx_path(test_windows_path),
+        assert self.test_repo.to_osx_path(test_windows_path) == test_osx_path
+        assert self.test_repo.to_osx_path(test_linux_path) == test_osx_path
+        assert self.test_repo.to_osx_path(test_osx_path) == test_osx_path
+        assert self.test_repo.to_osx_path(test_windows_path_reverse) == \
             test_osx_path
-        )
-
-        self.assertEqual(
-            self.test_repo.to_osx_path(test_linux_path),
+        assert self.test_repo.to_osx_path(test_linux_path_reverse) == \
             test_osx_path
-        )
-
-        self.assertEqual(
-            self.test_repo.to_osx_path(test_osx_path),
+        assert self.test_repo.to_osx_path(test_osx_path_reverse) == \
             test_osx_path
-        )
-
-        self.assertEqual(
-            self.test_repo.to_osx_path(test_windows_path_reverse),
-            test_osx_path
-        )
-
-        self.assertEqual(
-            self.test_repo.to_osx_path(test_linux_path_reverse),
-            test_osx_path
-        )
-
-        self.assertEqual(
-            self.test_repo.to_osx_path(test_osx_path_reverse),
-            test_osx_path
-        )
 
     def test_to_osx_path_returns_the_osx_version_of_the_given_path_with_env_vars(self):
         """testing if the to_osx_path returns the osx version of the given path
@@ -730,32 +648,24 @@ class RepositoryTester(UnitTestDBBase):
         test_windows_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/' \
                             'Some_file.ma'
         test_path_with_env_var = '$REPO1/Sero/Task1/Task2/Some_file.ma'
-        self.assertEqual(
-            self.test_repo.to_osx_path(test_path_with_env_var),
+        assert self.test_repo.to_osx_path(test_path_with_env_var) == \
             test_windows_path
-        )
 
     def test_to_osx_path_raises_TypeError_if_path_is_None(self):
         """testing if to_osx_path raises TypeError if path is None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_repo.to_osx_path(None)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Repository.path can not be None'
-        )
+        assert str(cm.value) == 'Repository.path can not be None'
 
     def test_to_osx_path_raises_TypeError_if_path_is_not_a_string(self):
         """testing if to_osx_path raises TypeError if path is None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_repo.to_osx_path(123)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Repository.path should be a string, not int'
-        )
+        assert str(cm.value) == 'Repository.path should be a string, not int'
 
     def test_to_native_path_returns_the_native_version_of_the_given_linux_path(self):
         """testing if the to_native_path returns the native version of the
@@ -770,10 +680,8 @@ class RepositoryTester(UnitTestDBBase):
         test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/' \
                           'Some_file.ma'
 
-        self.assertEqual(
-            self.test_repo.to_native_path(test_linux_path),
+        assert self.test_repo.to_native_path(test_linux_path) == \
             test_linux_path
-        )
 
     def test_to_native_path_returns_the_native_version_of_the_given_windows_path(self):
         """testing if the to_native_path returns the native version of the
@@ -787,10 +695,8 @@ class RepositoryTester(UnitTestDBBase):
 
         test_windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
 
-        self.assertEqual(
-            self.test_repo.to_native_path(test_windows_path),
+        assert self.test_repo.to_native_path(test_windows_path) == \
             '/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
-        )
 
     def test_to_native_path_returns_the_native_version_of_the_given_osx_path(self):
         """testing if the to_native_path returns the native version of the
@@ -804,10 +710,7 @@ class RepositoryTester(UnitTestDBBase):
                           'Some_file.ma'
         test_osx_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/' \
                         'Some_file.ma'
-        self.assertEqual(
-            self.test_repo.to_native_path(test_osx_path),
-            test_linux_path
-        )
+        assert self.test_repo.to_native_path(test_osx_path) == test_linux_path
 
     def test_to_native_path_returns_the_native_version_of_the_given_reverse_windows_path(self):
         """testing if the to_native_path returns the native version of the
@@ -821,10 +724,8 @@ class RepositoryTester(UnitTestDBBase):
                                     'Task2\\Some_file.ma'
         test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/' \
                           'Some_file.ma'
-        self.assertEqual(
-            self.test_repo.to_native_path(test_windows_path_reverse),
+        assert self.test_repo.to_native_path(test_windows_path_reverse) == \
             test_linux_path
-        )
 
     def test_to_native_path_returns_the_native_version_of_the_given_reverse_linux_path(self):
         """testing if the to_native_path returns the native version of the
@@ -837,10 +738,8 @@ class RepositoryTester(UnitTestDBBase):
                           'Some_file.ma'
         test_linux_path_reverse = '\\mnt\\T\\Stalker_Projects\\Sero\\Task1\\' \
                                   'Task2\\Some_file.ma'
-        self.assertEqual(
-            self.test_repo.to_native_path(test_linux_path_reverse),
+        assert self.test_repo.to_native_path(test_linux_path_reverse) == \
             test_linux_path
-        )
 
     def test_to_native_path_returns_the_native_version_of_the_given_reverse_osx_path(self):
         """testing if the to_native_path returns the native version of the
@@ -854,32 +753,24 @@ class RepositoryTester(UnitTestDBBase):
                           'Some_file.ma'
         test_osx_path_reverse = '\\Volumes\\T\\Stalker_Projects\\Sero\\' \
                                 'Task1\\Task2\\Some_file.ma'
-        self.assertEqual(
-            self.test_repo.to_native_path(test_osx_path_reverse),
+        assert self.test_repo.to_native_path(test_osx_path_reverse) == \
             test_linux_path
-        )
 
     def test_to_native_path_raises_TypeError_if_path_is_None(self):
         """testing if to_native_path raises TypeError if path is None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_repo.to_native_path(None)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Repository.path can not be None'
-        )
+        assert str(cm.value) == 'Repository.path can not be None'
 
     def test_to_native_path_raises_TypeError_if_path_is_not_a_string(self):
         """testing if to_native_path raises TypeError if path is None
         """
-        with self.assertRaises(TypeError) as cm:
+        with pytest.raises(TypeError) as cm:
             self.test_repo.to_native_path(123)
 
-        self.assertEqual(
-            str(cm.exception),
-            'Repository.path should be a string, not int'
-        )
+        assert str(cm.value) == 'Repository.path should be a string, not int'
 
     def test_is_in_repo_returns_True_if_the_given_linux_path_is_in_this_repo(self):
         """testing if is_in_repo returns True if the given linux path is in
@@ -888,7 +779,7 @@ class RepositoryTester(UnitTestDBBase):
         self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
         test_linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/' \
                           'Some_file.ma'
-        self.assertTrue(self.test_repo.is_in_repo(test_linux_path))
+        assert self.test_repo.is_in_repo(test_linux_path)
 
     def test_is_in_repo_returns_True_if_the_given_linux_reverse_path_is_in_this_repo(self):
         """testing if is_in_repo returns True if the given linux reverse path
@@ -897,7 +788,7 @@ class RepositoryTester(UnitTestDBBase):
         self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
         test_linux_path_reverse = '\\mnt\\T\\Stalker_Projects\\Sero\\Task1\\' \
                                   'Task2\\Some_file.ma'
-        self.assertTrue(self.test_repo.is_in_repo(test_linux_path_reverse))
+        assert self.test_repo.is_in_repo(test_linux_path_reverse)
 
     def test_is_in_repo_returns_False_if_the_given_linux_path_is_not_in_this_repo(self):
         """testing if is_in_repo returns False if the given linux path is not
@@ -906,8 +797,7 @@ class RepositoryTester(UnitTestDBBase):
         self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
         test_not_in_path_linux_path = '/mnt/T/Other_Projects/Sero/Task1/' \
                                       'Task2/Some_file.ma'
-        self.assertFalse(
-            self.test_repo.is_in_repo(test_not_in_path_linux_path))
+        assert self.test_repo.is_in_repo(test_not_in_path_linux_path) is False
 
     def test_is_in_repo_returns_True_if_the_given_windows_path_is_in_this_repo(self):
         """testing if is_in_repo returns True if the given windows path is in
@@ -915,7 +805,7 @@ class RepositoryTester(UnitTestDBBase):
         """
         self.test_repo.windows_path = 'T:/Stalker_Projects'
         test_windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
-        self.assertTrue(self.test_repo.is_in_repo(test_windows_path))
+        assert self.test_repo.is_in_repo(test_windows_path)
 
     def test_is_in_repo_returns_True_if_the_given_windows_reverse_path_is_in_this_repo(self):
         """testing if is_in_repo returns True if the given windows reverse path
@@ -924,7 +814,7 @@ class RepositoryTester(UnitTestDBBase):
         self.test_repo.windows_path = 'T:/Stalker_Projects'
         test_windows_path_reverse = 'T:\\Stalker_Projects\\Sero\\Task1\\' \
                                     'Task2\\Some_file.ma'
-        self.assertTrue(self.test_repo.is_in_repo(test_windows_path_reverse))
+        assert self.test_repo.is_in_repo(test_windows_path_reverse)
 
     def test_is_in_repo_returns_False_if_the_given_windows_path_is_not_in_this_repo(self):
         """testing if is_in_repo returns False if the given windows path is not
@@ -933,8 +823,8 @@ class RepositoryTester(UnitTestDBBase):
         self.test_repo.windows_path = 'T:/Stalker_Projects'
         test_not_in_path_windows_path = 'T:/Other_Projects/Sero/Task1/Task2/' \
                                         'Some_file.ma'
-        self.assertFalse(
-            self.test_repo.is_in_repo(test_not_in_path_windows_path))
+        assert \
+            self.test_repo.is_in_repo(test_not_in_path_windows_path) is False
 
     def test_is_in_repo_returns_True_if_the_given_osx_path_is_in_this_repo(self):
         """testing if is_in_repo returns True if the given osx path is in
@@ -943,7 +833,7 @@ class RepositoryTester(UnitTestDBBase):
         self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
         test_osx_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/' \
                         'Some_file.ma'
-        self.assertTrue(self.test_repo.is_in_repo(test_osx_path))
+        assert self.test_repo.is_in_repo(test_osx_path)
 
     def test_is_in_repo_returns_True_if_the_given_osx_reverse_path_is_in_this_repo(self):
         """testing if is_in_repo returns True if the given osx reverse path
@@ -952,7 +842,7 @@ class RepositoryTester(UnitTestDBBase):
         self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
         test_osx_path_reverse = '\\Volumes\\T\\Stalker_Projects\\Sero\\' \
                                 'Task1\\Task2\\Some_file.ma'
-        self.assertTrue(self.test_repo.is_in_repo(test_osx_path_reverse))
+        assert self.test_repo.is_in_repo(test_osx_path_reverse)
 
     def test_is_in_repo_returns_False_if_the_given_osx_path_is_not_in_this_repo(self):
         """testing if is_in_repo returns False if the given osx path is not
@@ -961,7 +851,7 @@ class RepositoryTester(UnitTestDBBase):
         self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
         test_not_in_path_osx_path = '/Volumes/T/Other_Projects/Sero/Task1/' \
                                     'Task2/Some_file.ma'
-        self.assertFalse(self.test_repo.is_in_repo(test_not_in_path_osx_path))
+        assert not self.test_repo.is_in_repo(test_not_in_path_osx_path)
 
     def test_make_relative_method_converts_the_given_linux_path_to_relative_to_repo_root(self):
         """testing if Repository.make_relative() will convert the given Linux
@@ -973,10 +863,7 @@ class RepositoryTester(UnitTestDBBase):
         self.test_repo.windows_path = 'T:/Stalker_Projects'
         self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
         result = self.test_repo.make_relative(linux_path)
-        self.assertEqual(
-            result,
-            'Sero/Task1/Task2/Some_file.ma'
-        )
+        assert result == 'Sero/Task1/Task2/Some_file.ma'
 
     def test_make_relative_method_converts_the_given_osx_path_to_relative_to_repo_root(self):
         """testing if Repository.make_relative() will convert the given OSX
@@ -986,10 +873,7 @@ class RepositoryTester(UnitTestDBBase):
         osx_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
         self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
         result = self.test_repo.make_relative(osx_path)
-        self.assertEqual(
-            result,
-            'Sero/Task1/Task2/Some_file.ma'
-        )
+        assert result == 'Sero/Task1/Task2/Some_file.ma'
 
     def test_make_relative_method_converts_the_given_windows_path_to_relative_to_repo_root(self):
         """testing if Repository.make_relative() will convert the given Windows
@@ -999,10 +883,7 @@ class RepositoryTester(UnitTestDBBase):
         windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
         self.test_repo.osx_path = 'T:/Stalker_Projects'
         result = self.test_repo.make_relative(windows_path)
-        self.assertEqual(
-            result,
-            'Sero/Task1/Task2/Some_file.ma'
-        )
+        assert result == 'Sero/Task1/Task2/Some_file.ma'
 
     def test_make_relative_method_converts_the_given_path_with_env_variable_to_native_path(self):
         """testing if Repository.make_relative() will convert the given path
@@ -1012,10 +893,7 @@ class RepositoryTester(UnitTestDBBase):
         # now create a path with env var
         path = '$REPO%s/Sero/Task1/Task2/Some_file.ma' % self.test_repo.id
         result = self.test_repo.make_relative(path)
-        self.assertEqual(
-            result,
-            'Sero/Task1/Task2/Some_file.ma'
-        )
+        assert result == 'Sero/Task1/Task2/Some_file.ma'
 
     def test_to_os_independent_path_is_working_properly(self):
         """testing if to_os_independent_path class method is working properly
@@ -1027,10 +905,8 @@ class RepositoryTester(UnitTestDBBase):
         relative_part = 'some/path/to/a/file.ma'
         test_path = '%s/%s' % (self.test_repo.path, relative_part)
         from stalker import Repository
-        self.assertEqual(
-            Repository.to_os_independent_path(test_path),
+        assert Repository.to_os_independent_path(test_path) == \
             '$REPO%s/%s' % (self.test_repo.id, relative_part)
-        )
 
     def test_find_repo_is_working_properly(self):
         """testing if the find_repo class method is working properly
@@ -1051,16 +927,10 @@ class RepositoryTester(UnitTestDBBase):
         DBSession.commit()
 
         test_path = '%s/some/path/to/a/file.ma' % self.test_repo.path
-        self.assertEqual(
-            Repository.find_repo(test_path),
-            self.test_repo
-        )
+        assert Repository.find_repo(test_path) == self.test_repo
 
         test_path = '%s/some/path/to/a/file.ma' % new_repo1.windows_path
-        self.assertEqual(
-            Repository.find_repo(test_path),
-            new_repo1
-        )
+        assert Repository.find_repo(test_path) == new_repo1
 
     def test_find_repo_is_working_properly_with_env_vars(self):
         """testing if the find_repo class method is working properly with paths
@@ -1082,24 +952,15 @@ class RepositoryTester(UnitTestDBBase):
         DBSession.commit()
 
         test_path = '$REPO%s/some/path/to/a/file.ma' % self.test_repo.id
-        self.assertEqual(
-            Repository.find_repo(test_path),
-            self.test_repo
-        )
+        assert Repository.find_repo(test_path) == self.test_repo
 
         test_path = '$REPO%s/some/path/to/a/file.ma' % new_repo1.id
-        self.assertEqual(
-            Repository.find_repo(test_path),
-            new_repo1
-        )
+        assert Repository.find_repo(test_path) == new_repo1
 
     def test_env_var_property_is_working_properly(self):
         """testing if the env_var property is working properly
         """
-        self.assertEqual(
-            self.test_repo.env_var,
-            'REPO31'
-        )
+        assert self.test_repo.env_var == 'REPO31'
 
     def test_creating_and_committing_a_new_repository_instance_will_create_env_var(self):
         """testing if an environment variable will be created when a new
@@ -1117,13 +978,10 @@ class RepositoryTester(UnitTestDBBase):
         DBSession.commit()
 
         import os
-        self.assertTrue(
-            defaults.repo_env_var_template % {'id': repo.id} in os.environ
-        )
-        self.assertEqual(
-            os.environ[defaults.repo_env_var_template % {'id': repo.id}],
+        assert defaults.repo_env_var_template % {'id': repo.id} in os.environ
+        assert \
+            os.environ[defaults.repo_env_var_template % {'id': repo.id}] == \
             repo.path
-        )
 
     def test_updating_a_repository_will_update_repo_path(self):
         """testing if the environment variable will be updated when the
@@ -1141,19 +999,16 @@ class RepositoryTester(UnitTestDBBase):
         DBSession.commit()
 
         import os
-        self.assertTrue(
-            defaults.repo_env_var_template % {'id': repo.id} in os.environ
-        )
+        assert defaults.repo_env_var_template % {'id': repo.id} in os.environ
 
         # now update the repository
         test_value = '/mnt/S/'
         repo.path = test_value
 
         # expect the environment variable is also updated
-        self.assertEqual(
-            os.environ[defaults.repo_env_var_template % {'id': repo.id}],
+        assert \
+            os.environ[defaults.repo_env_var_template % {'id': repo.id}] == \
             test_value
-        )
 
     def test_updating_windows_path_only_update_repo_path_if_on_windows(self):
         """testing if updating the windows path will only update the path if
@@ -1173,23 +1028,19 @@ class RepositoryTester(UnitTestDBBase):
 
         import os
         from stalker import defaults
-        self.assertTrue(
-            defaults.repo_env_var_template % {'id': repo.id} in os.environ
-        )
+        assert defaults.repo_env_var_template % {'id': repo.id} in os.environ
 
         # now update the repository
         test_value = 'S:/'
         repo.windows_path = test_value
 
         # expect the environment variable not updated
-        self.assertNotEqual(
-            os.environ[defaults.repo_env_var_template % {'id': repo.id}],
+        assert \
+            os.environ[defaults.repo_env_var_template % {'id': repo.id}] != \
             test_value
-        )
-        self.assertEqual(
-            os.environ[defaults.repo_env_var_template % {'id': repo.id}],
+        assert \
+            os.environ[defaults.repo_env_var_template % {'id': repo.id}] == \
             repo.linux_path
-        )
 
         # make it windows
         self.patcher.patch('Windows')
@@ -1199,14 +1050,12 @@ class RepositoryTester(UnitTestDBBase):
         repo.windows_path = test_value
 
         # expect the environment variable not updated
-        self.assertEqual(
-            os.environ[defaults.repo_env_var_template % {'id': repo.id}],
+        assert \
+            os.environ[defaults.repo_env_var_template % {'id': repo.id}] == \
             test_value
-        )
-        self.assertEqual(
-            os.environ[defaults.repo_env_var_template % {'id': repo.id}],
+        assert \
+            os.environ[defaults.repo_env_var_template % {'id': repo.id}] == \
             repo.windows_path
-        )
 
     def test_updating_osx_path_only_update_repo_path_if_on_osx(self):
         """testing if updating the osx path will only update the path if the
@@ -1226,23 +1075,19 @@ class RepositoryTester(UnitTestDBBase):
         DBSession.commit()
 
         import os
-        self.assertTrue(
-            defaults.repo_env_var_template % {'id': repo.id} in os.environ
-        )
+        assert defaults.repo_env_var_template % {'id': repo.id} in os.environ
 
         # now update the repository
         test_value = '/Volumes/S/'
         repo.osx_path = test_value
 
         # expect the environment variable not updated
-        self.assertNotEqual(
-            os.environ[defaults.repo_env_var_template % {'id': repo.id}],
+        assert \
+            os.environ[defaults.repo_env_var_template % {'id': repo.id}] != \
             test_value
-        )
-        self.assertEqual(
-            os.environ[defaults.repo_env_var_template % {'id': repo.id}],
+        assert \
+            os.environ[defaults.repo_env_var_template % {'id': repo.id}] == \
             repo.windows_path
-        )
 
         # make it osx
         self.patcher.patch('Darwin')
@@ -1252,14 +1097,12 @@ class RepositoryTester(UnitTestDBBase):
         repo.osx_path = test_value
 
         # expect the environment variable not updated
-        self.assertEqual(
-            os.environ[defaults.repo_env_var_template % {'id': repo.id}],
+        assert \
+            os.environ[defaults.repo_env_var_template % {'id': repo.id}] == \
             test_value
-        )
-        self.assertEqual(
-            os.environ[defaults.repo_env_var_template % {'id': repo.id}],
+        assert \
+            os.environ[defaults.repo_env_var_template % {'id': repo.id}] == \
             repo.osx_path
-        )
 
     def test_updating_linux_path_only_update_repo_path_if_on_linux(self):
         """testing if updating the linux path will only update the path if the
@@ -1279,23 +1122,19 @@ class RepositoryTester(UnitTestDBBase):
         DBSession.commit()
 
         import os
-        self.assertTrue(
-            defaults.repo_env_var_template % {'id': repo.id} in os.environ
-        )
+        assert defaults.repo_env_var_template % {'id': repo.id} in os.environ
 
         # now update the repository
         test_value = '/mnt/S/'
         repo.linux_path = test_value
 
         # expect the environment variable not updated
-        self.assertNotEqual(
-            os.environ[defaults.repo_env_var_template % {'id': repo.id}],
+        assert \
+            os.environ[defaults.repo_env_var_template % {'id': repo.id}] != \
             test_value
-        )
-        self.assertEqual(
-            os.environ[defaults.repo_env_var_template % {'id': repo.id}],
+        assert \
+            os.environ[defaults.repo_env_var_template % {'id': repo.id}] == \
             repo.osx_path
-        )
 
         # make it linux
         self.patcher.patch('Linux')
@@ -1305,11 +1144,9 @@ class RepositoryTester(UnitTestDBBase):
         repo.linux_path = test_value
 
         # expect the environment variable not updated
-        self.assertEqual(
-            os.environ[defaults.repo_env_var_template % {'id': repo.id}],
+        assert \
+            os.environ[defaults.repo_env_var_template % {'id': repo.id}] == \
             test_value
-        )
-        self.assertEqual(
-            os.environ[defaults.repo_env_var_template % {'id': repo.id}],
+        assert \
+            os.environ[defaults.repo_env_var_template % {'id': repo.id}] == \
             repo.linux_path
-        )

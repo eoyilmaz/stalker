@@ -17,6 +17,8 @@
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
+import pytest
+
 from stalker.testing import UnitTestDBBase
 
 import logging
@@ -63,7 +65,7 @@ class ConfigTester(unittest.TestCase):
         from stalker import config
         conf = config.Config()
 
-        self.assertEqual(test_value, conf.database_engine_settings)
+        assert test_value == conf.database_engine_settings
 
     def test_config_variable_does_create_new_variables_with_user_config(self):
         """testing if the config will be updated by the user config by adding
@@ -82,7 +84,7 @@ class ConfigTester(unittest.TestCase):
         from stalker import config
         conf = config.Config()
 
-        self.assertEqual(conf.test_value, test_value)
+        assert conf.test_value == test_value
 
     def test_env_variable_with_vars_module_import_with_shortcuts(self):
         """testing if the module path has shortcuts like ~ and other env
@@ -108,7 +110,7 @@ class ConfigTester(unittest.TestCase):
         from stalker import config
         conf = config.Config()
 
-        self.assertEqual(test_value, conf.database_url)
+        assert test_value == conf.database_url
 
     def test_env_variable_with_deep_vars_module_import_with_shortcuts(self):
         """testing if the module path has multiple shortcuts like ~ and other
@@ -136,7 +138,7 @@ class ConfigTester(unittest.TestCase):
         from stalker import config
         conf = config.Config()
 
-        self.assertEqual(test_value, conf.database_url)
+        assert test_value == conf.database_url
 
     def test_non_existing_path_in_environment_variable(self):
         """testing if the non existing path situation will be handled
@@ -163,28 +165,26 @@ class ConfigTester(unittest.TestCase):
         # now import the config.py and see if it updates the
         # database_file_name variable
         from stalker import config
-        with self.assertRaises(RuntimeError) as cm:
+        with pytest.raises(RuntimeError) as cm:
             config.Config()
 
-        self.assertEqual(
-            str(cm.exception),
-            'There is a syntax error in your configuration file: EOL while '
-            'scanning string literal (<string>, line 2)'
-        )
+        assert str(cm.value) == \
+               'There is a syntax error in your configuration file: EOL ' \
+               'while scanning string literal (<string>, line 2)'
 
     def test___getattr___is_working_properly(self):
         """testing if config.Config.__getattr__() method is working properly
         """
         from stalker import config
         c = config.Config()
-        self.assertEqual(c.admin_name, 'admin')
+        assert c.admin_name == 'admin'
 
     def test___getitem___is_working_properly(self):
         """testing if config.Config.__getitem__() method is working properly
         """
         from stalker import config
         c = config.Config()
-        self.assertEqual(c['admin_name'], 'admin')
+        assert c['admin_name'] == 'admin'
 
     def test___setitem__is_working_properly(self):
         """testing if config.Config.__setitem__() method is working properly
@@ -192,25 +192,25 @@ class ConfigTester(unittest.TestCase):
         from stalker import config
         c = config.Config()
         test_value = 'administrator'
-        self.assertNotEqual(c['admin_name'], test_value)
+        assert c['admin_name'] != test_value
         c['admin_name'] = test_value
-        self.assertEqual(c['admin_name'], test_value)
+        assert c['admin_name'] == test_value
 
     def test___delitem__is_working_properly(self):
         """testing if config.Config.__delitem__() method is working properly
         """
         from stalker import config
         c = config.Config()
-        self.assertIsNotNone(c['admin_name'])
+        assert c['admin_name'] is not None
         del c['admin_name']
-        self.assertTrue('admin_name' not in c)
+        assert 'admin_name' not in c
 
     def test___contains___is_working_properly(self):
         """testing if config.Config.__contains__() method is working properly
         """
         from stalker import config
         c = config.Config()
-        self.assertTrue('admin_name' in c)
+        assert 'admin_name' in c
 
 
 class ConfigTesterDB(UnitTestDBBase):
@@ -227,10 +227,7 @@ class ConfigTesterDB(UnitTestDBBase):
         from stalker.models.studio import Studio
 
         # check the defaults are still using them self
-        self.assertEqual(
-            defaults.timing_resolution,
-            datetime.timedelta(hours=1)
-        )
+        assert defaults.timing_resolution == datetime.timedelta(hours=1)
 
         studio = Studio(
             name='Test Studio',
@@ -240,7 +237,4 @@ class ConfigTesterDB(UnitTestDBBase):
         DBSession.commit()
 
         # now check it again
-        self.assertEqual(
-            defaults.timing_resolution,
-            studio.timing_resolution
-        )
+        assert defaults.timing_resolution ==studio.timing_resolution
