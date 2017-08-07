@@ -856,6 +856,6 @@ You can clone their repositories to see how PyQt4 and PySide UIs are created
 with Stalker (in Anima) and how it is used as the database model for a Web
 application in `Stalker Pyramid`_.
 
-.. _Stalker Pyramid: http://code.google.com/p/stalker-pyramid/
+.. _Stalker Pyramid: https://www.github.com/eoyilmaz/stalker_pyramid
 .. _Anima: https://github.com/eoyilmaz/anima
 .. _Pyramid: http://www.pylonsproject.org/

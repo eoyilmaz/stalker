@@ -169,6 +169,8 @@ Define the project resolution:
 
 Set the project resolution:
 
+.. code:: python
+
     new_project.image_format = hd1080
 
     # Save the project and all the other data it is connected to it

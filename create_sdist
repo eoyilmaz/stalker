@@ -1,3 +1,4 @@
+rm -rf build
 find -name "*.pyc" -delete
 ../bin/python setup.py clean --all
-../bin/python setup.py sdist
+../bin/python setup.py sdist bdist_wheel

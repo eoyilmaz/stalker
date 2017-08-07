@@ -1,0 +1,5 @@
+find -name *.pyc -delete
+../bin/python setup.py clean --all
+# ../bin/python setup.py sdist bdist_egg upload
+# ../bin/python setup.py sdist upload
+../bin/python setup.py sdist bdist_wheel upload

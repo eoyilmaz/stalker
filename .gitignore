@@ -13,7 +13,6 @@ docs/source/static/design
 dist/*
 build/*
 stalker.egg-info/*
-upload_to_pypi
 include/*
 local
 *.swp

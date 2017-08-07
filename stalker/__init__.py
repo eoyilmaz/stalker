@@ -23,7 +23,18 @@ See docs for more information.
 
 import sys
 
-__version__ = '0.2.21'
+__version__ = '0.2.22.dev0'
+
+__title__ = "stalker"
+__description__ = 'A Production Asset Management (ProdAM) System'
+__uri__ = 'http://github.com/eoyilmaz/stalker'
+__doc__ = __description__ + " <" + __uri__ + ">"
+
+__author__ = "Erkan Ozgur Yilmaz"
+__email__ = 'eoyilmaz@gmail.com'
+
+__license__ = 'LGPLv3'
+__copyright__ = "Copyright (C) 2009-2017 Erkan Ozgur Yilmaz"
 
 
 __string_types__ = []
