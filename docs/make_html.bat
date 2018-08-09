@@ -1,0 +1,1 @@
+..\..\sphinx-build.exe -b html -D graphviz_dot="dot.exe" source build\html
