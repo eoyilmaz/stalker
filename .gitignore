@@ -10,6 +10,7 @@ docs/source/static/design
 .cache/*
 .coverage
 .DS_Store
+.pytest_cache
 dist/*
 build/*
 stalker.egg-info/*
