@@ -1107,7 +1107,8 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         assert self.test_task24.computed_end == \
             datetime.datetime(2013, 4, 26, 17, 0, tzinfo=pytz.utc)
 
-        assert self.test_task24.computed_resources == [self.test_user1]
+        assert self.test_task24.computed_resources == [self.test_user1] or \
+            self.test_task24.computed_resources == [self.test_user2]
 
         # self.test_task25
         assert self.test_task25.computed_start == \
@@ -1125,7 +1126,8 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         assert self.test_task26.computed_end == \
             datetime.datetime(2013, 5, 17, 10, 0, tzinfo=pytz.utc)
 
-        assert self.test_task26.computed_resources == [self.test_user1]
+        assert self.test_task26.computed_resources == [self.test_user1] or \
+            self.test_task26.computed_resources == [self.test_user2]
 
         # self.test_task27
         assert self.test_task27.computed_start == \

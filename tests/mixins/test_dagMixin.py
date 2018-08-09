@@ -16,6 +16,7 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with Stalker.  If not, see <http://www.gnu.org/licenses/>
 
+import copy
 import unittest
 import pytest
 from sqlalchemy import Column, Integer, ForeignKey
@@ -64,24 +65,28 @@ class DAGMixinTestCase(unittest.TestCase):
         """testing if the parent attribute will be None if the parent argument
         is skipped
         """
-        d = DAGMixinFooMixedInClass(**self.kwargs)
+        kwargs = copy.copy(self.kwargs)
+        d = DAGMixinFooMixedInClass(**kwargs)
         assert d.parent is None
 
     def test_parent_argument_is_None(self):
         """testing if the parent attribute will be None if the parent argument
         is None
         """
-        self.kwargs['parent'] = None
-        d = DAGMixinFooMixedInClass(**self.kwargs)
+        kwargs = copy.copy(self.kwargs)
+        kwargs['parent'] = None
+        d = DAGMixinFooMixedInClass(**kwargs)
         assert d.parent is None
 
     def test_parent_argument_is_not_a_correct_class_instance(self):
         """testing if a TypeError will be raised if the parent argument is not
         in correct class
         """
-        self.kwargs['parent'] = 'not a correct type'
+        kwargs = copy.copy(self.kwargs)
+
+        kwargs['parent'] = 'not a correct type'
         with pytest.raises(TypeError) as cm:
-            d = DAGMixinFooMixedInClass(**self.kwargs)
+            d = DAGMixinFooMixedInClass(**kwargs)
 
         assert str(cm.value) == \
             'DAGMixinFooMixedInClass.parent should be an instance of ' \
@@ -91,7 +96,8 @@ class DAGMixinTestCase(unittest.TestCase):
         """testing if a TypeError will be raised if the parent attribute is set
         to a wrong class instance
         """
-        d = DAGMixinFooMixedInClass(**self.kwargs)
+        kwargs = copy.copy(self.kwargs)
+        d = DAGMixinFooMixedInClass(**kwargs)
         with pytest.raises(TypeError) as cm:
             d.parent = 'not a correct type'
 
@@ -103,10 +109,12 @@ class DAGMixinTestCase(unittest.TestCase):
         """testing if a CircularDependency will be raised if a child is tried
         to be set as the parent.
         """
-        d1 = DAGMixinFooMixedInClass(**self.kwargs)
+        kwargs = copy.copy(self.kwargs)
+        d1 = DAGMixinFooMixedInClass(**kwargs)
 
-        self.kwargs['parent'] = d1
-        d2 = DAGMixinFooMixedInClass(**self.kwargs)
+        kwargs = copy.copy(self.kwargs)
+        kwargs['parent'] = d1
+        d2 = DAGMixinFooMixedInClass(**kwargs)
 
         with pytest.raises(CircularDependencyError) as cm:
             d1.parent = d2
@@ -121,17 +129,21 @@ class DAGMixinTestCase(unittest.TestCase):
     def test_parent_argument_is_working_properly(self):
         """testing if the parent argument is working properly
         """
-        d1 = DAGMixinFooMixedInClass(**self.kwargs)
-        self.kwargs['parent'] = d1
+        kwargs = copy.copy(self.kwargs)
+        d1 = DAGMixinFooMixedInClass(**kwargs)
 
-        d2 = DAGMixinFooMixedInClass(**self.kwargs)
+        kwargs = copy.copy(self.kwargs)
+        kwargs['parent'] = d1
+
+        d2 = DAGMixinFooMixedInClass(**kwargs)
         assert d1 == d2.parent
 
     def test_parent_attribute_is_working_properly(self):
         """testing if the parent attribute is working properly
         """
-        d1 = DAGMixinFooMixedInClass(**self.kwargs)
-        d2 = DAGMixinFooMixedInClass(**self.kwargs)
+        kwargs = copy.copy(self.kwargs)
+        d1 = DAGMixinFooMixedInClass(**kwargs)
+        d2 = DAGMixinFooMixedInClass(**kwargs)
         assert d2.parent != d1
         d2.parent = d1
         assert d2.parent == d1
@@ -139,14 +151,16 @@ class DAGMixinTestCase(unittest.TestCase):
     def test_children_attribute_is_an_empty_list_by_default(self):
         """testing if the children attribute is an empty list by default
         """
-        d = DAGMixinFooMixedInClass(**self.kwargs)
+        kwargs = copy.copy(self.kwargs)
+        d = DAGMixinFooMixedInClass(**kwargs)
         assert d.children == []
 
     def test_children_attribute_is_set_to_None(self):
         """testing if a TypeError will be raised when the children attribute is
         set to None
         """
-        d = DAGMixinFooMixedInClass(**self.kwargs)
+        kwargs = copy.copy(self.kwargs)
+        d = DAGMixinFooMixedInClass(**kwargs)
         with pytest.raises(TypeError) as cm:
             d.children = None
 
@@ -157,7 +171,8 @@ class DAGMixinTestCase(unittest.TestCase):
         """testing if the children attribute accepts only correct class
         instances
         """
-        d = DAGMixinFooMixedInClass(**self.kwargs)
+        kwargs = copy.copy(self.kwargs)
+        d = DAGMixinFooMixedInClass(**kwargs)
         with pytest.raises(TypeError) as cm:
             d.children = ['not', 1, '', 'of', 'correct', 'instances']
 
@@ -168,9 +183,13 @@ class DAGMixinTestCase(unittest.TestCase):
     def test_children_attribute_is_working_properly(self):
         """testing if the children attribute is working properly
         """
-        d1 = DAGMixinFooMixedInClass(**self.kwargs)
-        d2 = DAGMixinFooMixedInClass(**self.kwargs)
-        d3 = DAGMixinFooMixedInClass(**self.kwargs)
+        kwargs = copy.copy(self.kwargs)
+        kwargs['name'] = 'Test DAG Mixin 1'
+        d1 = DAGMixinFooMixedInClass(**kwargs)
+        kwargs['name'] = 'Test DAG Mixin 2'
+        d2 = DAGMixinFooMixedInClass(**kwargs)
+        kwargs['name'] = 'Test DAG Mixin 3'
+        d3 = DAGMixinFooMixedInClass(**kwargs)
 
         assert d1.children == []
         d1.children.append(d2)
@@ -181,7 +200,8 @@ class DAGMixinTestCase(unittest.TestCase):
     def test_is_leaf_attribute_is_read_only(self):
         """testing if the is_leaf attribute is a read only attribute
         """
-        d1 = DAGMixinFooMixedInClass(**self.kwargs)
+        kwargs = copy.copy(self.kwargs)
+        d1 = DAGMixinFooMixedInClass(**kwargs)
         with pytest.raises(AttributeError) as cm:
             setattr(d1, 'is_leaf', 'this will not work')
 
@@ -191,9 +211,10 @@ class DAGMixinTestCase(unittest.TestCase):
         """testing if the is_leaf attribute is True for an instance without a
         child and False for another one with at least one child
         """
-        d1 = DAGMixinFooMixedInClass(**self.kwargs)
-        d2 = DAGMixinFooMixedInClass(**self.kwargs)
-        d3 = DAGMixinFooMixedInClass(**self.kwargs)
+        kwargs = copy.copy(self.kwargs)
+        d1 = DAGMixinFooMixedInClass(**kwargs)
+        d2 = DAGMixinFooMixedInClass(**kwargs)
+        d3 = DAGMixinFooMixedInClass(**kwargs)
         d1.children = [d2, d3]
         assert d1.is_leaf is False
         assert d2.is_leaf is True
@@ -202,7 +223,8 @@ class DAGMixinTestCase(unittest.TestCase):
     def test_is_root_attribute_is_read_only(self):
         """testing if the is_root attribute is a read only attribute
         """
-        d1 = DAGMixinFooMixedInClass(**self.kwargs)
+        kwargs = copy.copy(self.kwargs)
+        d1 = DAGMixinFooMixedInClass(**kwargs)
         with pytest.raises(AttributeError) as cm:
             setattr(d1, 'is_root', 'this will not work')
 
@@ -212,9 +234,10 @@ class DAGMixinTestCase(unittest.TestCase):
         """testing if the is_root attribute is True for an instance without a
         parent and False for another instance with a parent
         """
-        d1 = DAGMixinFooMixedInClass(**self.kwargs)
-        d2 = DAGMixinFooMixedInClass(**self.kwargs)
-        d3 = DAGMixinFooMixedInClass(**self.kwargs)
+        kwargs = copy.copy(self.kwargs)
+        d1 = DAGMixinFooMixedInClass(**kwargs)
+        d2 = DAGMixinFooMixedInClass(**kwargs)
+        d3 = DAGMixinFooMixedInClass(**kwargs)
         d1.children = [d2, d3]
         assert d1.is_root is True
         assert d2.is_root is False
@@ -223,7 +246,8 @@ class DAGMixinTestCase(unittest.TestCase):
     def test_is_container_attribute_is_read_only(self):
         """testing if the is_container attribute is a read only attribute
         """
-        d1 = DAGMixinFooMixedInClass(**self.kwargs)
+        kwargs = copy.copy(self.kwargs)
+        d1 = DAGMixinFooMixedInClass(**kwargs)
         with pytest.raises(AttributeError) as cm:
             setattr(d1, 'is_container', 'this will not work')
 
@@ -233,10 +257,11 @@ class DAGMixinTestCase(unittest.TestCase):
         """testing if the is_container attribute is True for an instance with
         at least one child and False for another with no child
         """
-        d1 = DAGMixinFooMixedInClass(**self.kwargs)
-        d2 = DAGMixinFooMixedInClass(**self.kwargs)
-        d3 = DAGMixinFooMixedInClass(**self.kwargs)
-        d4 = DAGMixinFooMixedInClass(**self.kwargs)
+        kwargs = copy.copy(self.kwargs)
+        d1 = DAGMixinFooMixedInClass(**kwargs)
+        d2 = DAGMixinFooMixedInClass(**kwargs)
+        d3 = DAGMixinFooMixedInClass(**kwargs)
+        d4 = DAGMixinFooMixedInClass(**kwargs)
 
         d1.children = [d2, d3]
         d2.children = [d4]
@@ -248,7 +273,8 @@ class DAGMixinTestCase(unittest.TestCase):
     def test_parents_property_is_read_only(self):
         """testing if the parents property is read-only
         """
-        d1 = DAGMixinFooMixedInClass(**self.kwargs)
+        kwargs = copy.copy(self.kwargs)
+        d1 = DAGMixinFooMixedInClass(**kwargs)
         with pytest.raises(AttributeError) as cm:
             setattr(d1, 'parents', 'this will not work')
 
@@ -257,10 +283,11 @@ class DAGMixinTestCase(unittest.TestCase):
     def test_parents_property_is_working_properly(self):
         """testing if the parents property is read-only
         """
-        d1 = DAGMixinFooMixedInClass(**self.kwargs)
-        d2 = DAGMixinFooMixedInClass(**self.kwargs)
-        d3 = DAGMixinFooMixedInClass(**self.kwargs)
-        d4 = DAGMixinFooMixedInClass(**self.kwargs)
+        kwargs = copy.copy(self.kwargs)
+        d1 = DAGMixinFooMixedInClass(**kwargs)
+        d2 = DAGMixinFooMixedInClass(**kwargs)
+        d3 = DAGMixinFooMixedInClass(**kwargs)
+        d4 = DAGMixinFooMixedInClass(**kwargs)
 
         d1.children = [d2, d3]
         d2.children = [d4]
@@ -273,10 +300,11 @@ class DAGMixinTestCase(unittest.TestCase):
     def test_walk_hierarchy_is_working_properly(self):
         """testing if the walk_hierarchy method is working properly
         """
-        d1 = DAGMixinFooMixedInClass(**self.kwargs)
-        d2 = DAGMixinFooMixedInClass(**self.kwargs)
-        d3 = DAGMixinFooMixedInClass(**self.kwargs)
-        d4 = DAGMixinFooMixedInClass(**self.kwargs)
+        kwargs = copy.copy(self.kwargs)
+        d1 = DAGMixinFooMixedInClass(**kwargs)
+        d2 = DAGMixinFooMixedInClass(**kwargs)
+        d3 = DAGMixinFooMixedInClass(**kwargs)
+        d4 = DAGMixinFooMixedInClass(**kwargs)
 
         d1.children = [d2, d3]
         d2.children = [d4]
@@ -322,10 +350,11 @@ class DAGMixinDBTestDBCase(UnitTestDBBase):
     def test_committing_data(self):
         """testing committing and retrieving data back
         """
-        d1 = DAGMixinFooMixedInClass(**self.kwargs)
-        d2 = DAGMixinFooMixedInClass(**self.kwargs)
-        d3 = DAGMixinFooMixedInClass(**self.kwargs)
-        d4 = DAGMixinFooMixedInClass(**self.kwargs)
+        kwargs = copy.copy(self.kwargs)
+        d1 = DAGMixinFooMixedInClass(**kwargs)
+        d2 = DAGMixinFooMixedInClass(**kwargs)
+        d3 = DAGMixinFooMixedInClass(**kwargs)
+        d4 = DAGMixinFooMixedInClass(**kwargs)
 
         d1.children = [d2, d3]
         d2.children = [d4]
@@ -347,10 +376,11 @@ class DAGMixinDBTestDBCase(UnitTestDBBase):
     def test_deleting_data(self):
         """testing deleting data
         """
-        d1 = DAGMixinFooMixedInClass(**self.kwargs)
-        d2 = DAGMixinFooMixedInClass(**self.kwargs)
-        d3 = DAGMixinFooMixedInClass(**self.kwargs)
-        d4 = DAGMixinFooMixedInClass(**self.kwargs)
+        kwargs = copy.copy(self.kwargs)
+        d1 = DAGMixinFooMixedInClass(**kwargs)
+        d2 = DAGMixinFooMixedInClass(**kwargs)
+        d3 = DAGMixinFooMixedInClass(**kwargs)
+        d4 = DAGMixinFooMixedInClass(**kwargs)
 
         d1.children = [d2, d3]
         d2.children = [d4]

@@ -77,7 +77,7 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
       given item. It is relative to the repository root. A typical example
       could be::
 
-        '$REPO{{project.repository.id}}/{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}"
+        '$REPO{{project.repository.id}}/{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}'
 
     :param str filename: A `Jinja2`_ template code which specifies the file
       name of the given item. It is relative to the

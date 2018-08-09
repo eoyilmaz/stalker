@@ -19,6 +19,7 @@
 import unittest
 import pytest
 from stalker import FilenameTemplate
+from stalker.testing import UnitTestDBBase
 
 
 class FilenameTemplateTester(unittest.TestCase):
@@ -270,3 +271,111 @@ class FilenameTemplateTester(unittest.TestCase):
         assert ft1 != ft2
         assert ft2 != ft3
         assert ft3 != ft4
+
+
+class FilenameTemplateDBTestDBCase(UnitTestDBBase):
+    """Tests the stalker.models.task.Task class with a DB
+    """
+
+    def setUp(self):
+        """run once
+        """
+        super(self.__class__, self).setUp()
+
+    def test_naming_case(self):
+        """Test the case where naming should contain both Sequence Shot and
+        other stuff
+        (this is based on https://github.com/eoyilmaz/anima/issues/23)
+        """
+        from stalker.db.session import DBSession
+        from stalker import Project, Task, Sequence, Shot, FilenameTemplate, \
+            Version, Structure
+
+        ft = FilenameTemplate(
+            name='Normal Naming Convention',
+            target_entity_type='Task',
+            path='$REPO{{project.repository.id}}/{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}',
+            filename="""{%- for p in parent_tasks -%}
+                {%- if p.entity_type == 'Sequence' -%}
+                    {{p.name}}
+                {%- elif p.entity_type == 'Shot' -%}
+                    _{{p.name}}{{p.children[0].name}}
+                {%- endif -%}
+            {%- endfor -%}
+            {%- set fx = parent_tasks[-2] -%}
+            _{{fx.name}}_{{version.take_name}}_v{{"%02d"|format(version.version_number)}}""",
+        )
+        DBSession.add(ft)
+
+        st = Structure(
+            name='Normal Project Structure',
+            templates=[ft]
+        )
+        DBSession.add(st)
+
+        test_project = Project(
+            name='test001',
+            code='test001',
+            structure=st
+        )
+        DBSession.add(test_project)
+
+        seq_task = Task(
+            name='seq',
+            project=test_project
+        )
+        DBSession.add(seq_task)
+
+        ep101 = Sequence(
+            name='ep101',
+            code='ep101',
+            parent=seq_task
+        )
+        DBSession.add(ep101)
+
+        shot_task = Task(
+            name='shot',
+            parent=ep101
+        )
+        DBSession.add(shot_task)
+
+        s001 = Shot(
+            name='s001',
+            code='s001',
+            parent=shot_task
+        )
+        DBSession.add(s001)
+
+        c001 = Task(
+            name='c001',
+            parent=s001
+        )
+        DBSession.add(c001)
+
+        effects_scene = Task(
+            name='effectScenes',
+            parent=c001
+        )
+        DBSession.add(effects_scene)
+
+        fxA = Task(
+            name='fxA',
+            parent=effects_scene
+        )
+        DBSession.add(fxA)
+
+        maya = Task(
+            name='maya',
+            parent=fxA
+        )
+        DBSession.add(maya)
+        DBSession.commit()
+
+        v = Version(task=maya)
+        v.update_paths()
+        v.extension = '.ma'
+        DBSession.add(v)
+        DBSession.commit()
+
+        assert v.filename == 'ep101_s001c001_fxA_Main_v01.ma'
+
