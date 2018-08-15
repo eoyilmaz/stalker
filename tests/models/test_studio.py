@@ -1107,8 +1107,10 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         assert self.test_task24.computed_end == \
             datetime.datetime(2013, 4, 26, 17, 0, tzinfo=pytz.utc)
 
-        assert self.test_task24.computed_resources == [self.test_user1] or \
-            self.test_task24.computed_resources == [self.test_user2]
+        possible_resources = \
+            [self.test_user1, self.test_user2, self.test_user3]
+        assert len(self.test_task24.computed_resources) == 1
+        assert self.test_task24.computed_resources[0] in possible_resources
 
         # self.test_task25
         assert self.test_task25.computed_start == \
@@ -1117,7 +1119,8 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         assert self.test_task25.computed_end == \
             datetime.datetime(2013, 5, 3, 12, 0, tzinfo=pytz.utc)
 
-        assert self.test_task25.computed_resources == [self.test_user3]
+        assert len(self.test_task25.computed_resources) == 1
+        assert self.test_task25.computed_resources[0] in possible_resources
 
         # self.test_task26
         assert self.test_task26.computed_start == \
@@ -1126,8 +1129,8 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         assert self.test_task26.computed_end == \
             datetime.datetime(2013, 5, 17, 10, 0, tzinfo=pytz.utc)
 
-        assert self.test_task26.computed_resources == [self.test_user1] or \
-            self.test_task26.computed_resources == [self.test_user2]
+        assert len(self.test_task26.computed_resources) == 1
+        assert self.test_task26.computed_resources[0] in possible_resources
 
         # self.test_task27
         assert self.test_task27.computed_start == \
@@ -1136,7 +1139,8 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         assert self.test_task27.computed_end == \
             datetime.datetime(2013, 5, 17, 18, 0, tzinfo=pytz.utc)
 
-        assert self.test_task27.computed_resources == [self.test_user3]
+        assert len(self.test_task27.computed_resources) == 1
+        assert self.test_task27.computed_resources[0] in possible_resources
 
         # self.test_shot2
         assert self.test_shot2.computed_start == \
@@ -1154,7 +1158,8 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         assert self.test_task8.computed_end == \
             datetime.datetime(2013, 4, 30, 15, 0, tzinfo=pytz.utc)
 
-        assert self.test_task8.computed_resources == [self.test_user1]
+        assert len(self.test_task8.computed_resources) == 1
+        assert self.test_task8.computed_resources[0] in possible_resources
 
         # self.test_task9
         assert self.test_task9.computed_start == \
@@ -1163,7 +1168,8 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         assert self.test_task9.computed_end == \
             datetime.datetime(2013, 6, 3, 15, 0, tzinfo=pytz.utc)
 
-        assert self.test_task9.computed_resources == [self.test_user3]
+        assert len(self.test_task9.computed_resources) == 1
+        assert self.test_task9.computed_resources[0] in possible_resources
 
         # self.test_task10
         assert self.test_task10.computed_start == \
@@ -1172,7 +1178,8 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         assert self.test_task10.computed_end == \
             datetime.datetime(2013, 6, 10, 10, 0, tzinfo=pytz.utc)
 
-        assert self.test_task10.computed_resources == [self.test_user3]
+        assert len(self.test_task10.computed_resources) == 1
+        assert self.test_task10.computed_resources[0] in possible_resources
 
         # self.test_task11
         assert self.test_task11.computed_start == \
@@ -1181,7 +1188,8 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         assert self.test_task11.computed_end == \
             datetime.datetime(2013, 6, 20, 10, 0, tzinfo=pytz.utc)
 
-        assert self.test_task11.computed_resources == [self.test_user2]
+        assert len(self.test_task11.computed_resources) == 1
+        assert self.test_task11.computed_resources[0] in possible_resources
 
         # self.test_shot1
         assert self.test_shot1.computed_start == \
@@ -1199,7 +1207,8 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         assert self.test_task4.computed_end == \
             datetime.datetime(2013, 5, 17, 18, 0, tzinfo=pytz.utc)
 
-        assert self.test_task4.computed_resources == [self.test_user2]
+        assert len(self.test_task4.computed_resources) == 1
+        assert self.test_task4.computed_resources[0] in possible_resources
 
         # self.test_task5
         assert self.test_task5.computed_start == \
@@ -1208,7 +1217,8 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         assert self.test_task5.computed_end == \
             datetime.datetime(2013, 6, 7, 11, 0, tzinfo=pytz.utc)
 
-        assert self.test_task5.computed_resources == [self.test_user2]
+        assert len(self.test_task5.computed_resources) == 1
+        assert self.test_task5.computed_resources[0] in possible_resources
 
         # self.test_task6
         assert self.test_task6.computed_start == \
@@ -1217,8 +1227,8 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         assert self.test_task6.computed_end == \
             datetime.datetime(2013, 6, 14, 14, 0, tzinfo=pytz.utc)
 
-        assert self.test_task6.computed_resources[0] in \
-            [self.test_user1, self.test_user2, self.test_user3]
+        assert len(self.test_task6.computed_resources) == 1
+        assert self.test_task6.computed_resources[0] in possible_resources
 
         # self.test_task7
         assert self.test_task7.computed_start == \
@@ -1227,8 +1237,8 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         assert self.test_task7.computed_end == \
             datetime.datetime(2013, 6, 24, 16, 0, tzinfo=pytz.utc)
 
-        assert self.test_task7.computed_resources[0] in \
-            [self.test_user1, self.test_user2, self.test_user3]
+        assert len(self.test_task7.computed_resources) == 1
+        assert self.test_task7.computed_resources[0] in possible_resources
 
         # self.test_task1
         assert self.test_task1.computed_start == \
@@ -1237,8 +1247,8 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         assert self.test_task1.computed_end == \
             datetime.datetime(2013, 5, 29, 18, 0, tzinfo=pytz.utc)
 
-        assert self.test_task1.computed_resources[0] in \
-            [self.test_user1, self.test_user2, self.test_user3]
+        assert len(self.test_task1.computed_resources) == 1
+        assert self.test_task1.computed_resources[0] in possible_resources
 
         # self.test_project2
         # assert self.test_project2.computed_start == \
@@ -1265,8 +1275,8 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         assert self.test_task28.computed_end == \
             datetime.datetime(2013, 4, 26, 17, 0, tzinfo=pytz.utc)
 
-        assert self.test_task28.computed_resources[0] in \
-            [self.test_user1, self.test_user2, self.test_user3]
+        assert len(self.test_task28.computed_resources) == 1
+        assert self.test_task28.computed_resources[0] in possible_resources
 
         # self.test_task29
         assert self.test_task29.computed_start == \
@@ -1275,8 +1285,8 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         assert self.test_task29.computed_end == \
             datetime.datetime(2013, 5, 16, 11, 0, tzinfo=pytz.utc)
 
-        assert self.test_task29.computed_resources[0] in \
-            [self.test_user1, self.test_user2, self.test_user3]
+        assert len(self.test_task29.computed_resources) == 1
+        assert self.test_task29.computed_resources[0] in possible_resources
 
         # self.test_task30
         assert self.test_task30.computed_start == \
@@ -1285,8 +1295,8 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         assert self.test_task30.computed_end == \
             datetime.datetime(2013, 5, 30, 17, 0, tzinfo=pytz.utc)
 
-        assert self.test_task30.computed_resources[0] in \
-            [self.test_user1, self.test_user2, self.test_user3]
+        assert len(self.test_task30.computed_resources) == 1
+        assert self.test_task30.computed_resources[0] in possible_resources
 
         # self.test_task31
         assert self.test_task31.computed_start == \
@@ -1295,8 +1305,8 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         assert self.test_task31.computed_end == \
             datetime.datetime(2013, 5, 30, 17, 0, tzinfo=pytz.utc)
 
-        assert self.test_task31.computed_resources[0] in \
-            [self.test_user1, self.test_user2, self.test_user3]
+        assert len(self.test_task31.computed_resources) == 1
+        assert self.test_task31.computed_resources[0] in possible_resources
 
         # self.test_shot3
         assert self.test_shot3.computed_start == \
@@ -1314,8 +1324,8 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         assert self.test_task12.computed_end == \
             datetime.datetime(2013, 5, 2, 13, 0, tzinfo=pytz.utc)
 
-        assert self.test_task12.computed_resources[0] in \
-            [self.test_user1, self.test_user2, self.test_user3]
+        assert len(self.test_task12.computed_resources) == 1
+        assert self.test_task12.computed_resources[0] in possible_resources
 
         # self.test_task13
         assert self.test_task13.computed_start == \
@@ -1324,8 +1334,8 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         assert self.test_task13.computed_end == \
             datetime.datetime(2013, 6, 3, 15, 0, tzinfo=pytz.utc)
 
-        assert self.test_task13.computed_resources[0] in \
-            [self.test_user1, self.test_user2, self.test_user3]
+        assert len(self.test_task13.computed_resources) == 1
+        assert self.test_task13.computed_resources[0] in possible_resources
 
         # self.test_task14
         assert self.test_task14.computed_start == \
@@ -1334,8 +1344,8 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         assert self.test_task14.computed_end == \
             datetime.datetime(2013, 6, 11, 17, 0, tzinfo=pytz.utc)
 
-        assert self.test_task14.computed_resources[0] in \
-            [self.test_user1, self.test_user2, self.test_user3]
+        assert len(self.test_task14.computed_resources) == 1
+        assert self.test_task14.computed_resources[0] in possible_resources
 
         # self.test_task15
         assert self.test_task15.computed_start == \
@@ -1344,8 +1354,8 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         assert self.test_task15.computed_end == \
             datetime.datetime(2013, 6, 20, 10, 0, tzinfo=pytz.utc)
 
-        assert self.test_task15.computed_resources[0] in \
-            [self.test_user1, self.test_user2, self.test_user3]
+        assert len(self.test_task15.computed_resources) == 1
+        assert self.test_task15.computed_resources[0] in possible_resources
 
         # self.test_shot4
         assert self.test_shot4.computed_start == \
@@ -1363,8 +1373,8 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         assert self.test_task16.computed_end == \
             datetime.datetime(2013, 5, 6, 11, 0, tzinfo=pytz.utc)
 
-        assert self.test_task16.computed_resources[0] in \
-            [self.test_user1, self.test_user2, self.test_user3]
+        assert len(self.test_task16.computed_resources) == 1
+        assert self.test_task16.computed_resources[0] in possible_resources
 
         # self.test_task17
         assert self.test_task17.computed_start == \
@@ -1373,8 +1383,8 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         assert self.test_task17.computed_end == \
             datetime.datetime(2013, 6, 5, 13, 0, tzinfo=pytz.utc)
 
-        assert self.test_task17.computed_resources[0] in \
-            [self.test_user1, self.test_user2, self.test_user3]
+        assert len(self.test_task17.computed_resources) == 1
+        assert self.test_task17.computed_resources[0] in possible_resources
 
         # self.test_task18
         assert self.test_task18.computed_start == \
@@ -1383,8 +1393,8 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         assert self.test_task18.computed_end == \
             datetime.datetime(2013, 6, 12, 16, 0, tzinfo=pytz.utc)
 
-        assert self.test_task18.computed_resources[0] in \
-            [self.test_user1, self.test_user2, self.test_user3]
+        assert len(self.test_task18.computed_resources) == 1
+        assert self.test_task18.computed_resources[0] in possible_resources
 
         # self.test_task19
         assert self.test_task19.computed_start == \
@@ -1393,8 +1403,8 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         assert self.test_task19.computed_end == \
             datetime.datetime(2013, 6, 24, 16, 0, tzinfo=pytz.utc)
 
-        assert self.test_task19.computed_resources[0] in \
-            [self.test_user1, self.test_user2, self.test_user3]
+        assert len(self.test_task19.computed_resources) == 1
+        assert self.test_task19.computed_resources[0] in possible_resources
 
         # self.test_task2
         assert self.test_task2.computed_start == \
@@ -1403,8 +1413,8 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         assert self.test_task2.computed_end == \
             datetime.datetime(2013, 6, 11, 17, 0, tzinfo=pytz.utc)
 
-        assert self.test_task2.computed_resources[0] in \
-            [self.test_user1, self.test_user2, self.test_user3]
+        assert len(self.test_task2.computed_resources) == 1
+        assert self.test_task2.computed_resources[0] in possible_resources
 
     def test_schedule_will_schedule_only_the_tasks_of_the_given_projects_with_the_given_scheduler(self):
         """testing if the schedule method will schedule the tasks of the given

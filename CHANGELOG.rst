@@ -5,10 +5,16 @@ Stalker Changes
 0.2.22
 ======
 
+* **Fix:** Fixed ``TaskJugglerScheduler.schedule()`` method to correctly decode
+  byte data from ``sys.stderr`` to string for Python 3.x.
+
 * **Fix:** Fixed a couple of tests for TaskJuggler.
 
 * **Update:** Updated Classifiers information in ``setup.py``, removed Python
   versions 2.6, 3.0, 3.1 and 3.2 from supported Python versions.
+
+* **Fix:** Removed Python 3.3 from TravisCI build which is not supported by
+  ``pytest`` apparently.
 
 * **Update:** Updated TravisCI config and removed Python 2.6 and added Python
   3.6.

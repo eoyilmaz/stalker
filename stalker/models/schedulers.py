@@ -698,7 +698,7 @@ order by path_as_text"""
                 self.temp_file_path,
             )
             logger.debug('tj3 command: %s' % command)
-            returncode = os.system(command)
+            return_code = os.system(command)
             stderr_buffer = ''
         else:
             process = subprocess.Popen(
@@ -718,23 +718,23 @@ order by path_as_text"""
                     break
 
                 if stderr != b'':
-                    stderr = stderr.strip()
+                    stderr = stderr.decode('utf-8').strip()
                     stderr_buffer.append(stderr)
-                    logger.debug(stderr.strip())
+                    logger.debug(stderr)
 
             # flatten the buffer
             stderr_buffer = '\n'.join(stderr_buffer)
 
-            returncode = process.returncode
+            return_code = process.returncode
 
-        if returncode:
+        if return_code:
             # there is an error
             raise RuntimeError(stderr_buffer)
 
         # read back the csv file
         self._parse_csv_file()
 
-        logger.debug('tj3 return code: %s' % returncode)
+        logger.debug('tj3 return code: %s' % return_code)
 
         # remove the tjp file
         self._clean_up()

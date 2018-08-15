@@ -316,8 +316,7 @@ taskreport breakdown "{{csv_path}}"{
         with pytest.raises(TypeError) as cm:
             tjp_sched.schedule()
 
-        assert \
-            str(cm.value) == \
+        assert str(cm.value) == \
             'TaskJugglerScheduler.studio should be an instance of ' \
             'stalker.models.studio.Studio, not NoneType'
 
@@ -350,16 +349,20 @@ taskreport breakdown "{{csv_path}}"{
             datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc) == \
             self.test_proj1.computed_end
 
+        possible_resources = [
+            self.test_user1, self.test_user2, self.test_user3, self.test_user4,
+            self.test_user5
+        ]
         assert \
             datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc) == \
             self.test_task1.computed_start
         assert \
             datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc) == \
             self.test_task1.computed_end
-        assert \
-            sorted([self.test_user1, self.test_user2],
-                   key=lambda x: x.name) == \
-            sorted(self.test_task1.computed_resources, key=lambda x: x.name)
+
+        assert len(self.test_task1.computed_resources) == 2
+        assert self.test_task1.computed_resources[0] in possible_resources
+        assert self.test_task1.computed_resources[1] in possible_resources
 
         assert \
             datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc) == \
@@ -369,13 +372,8 @@ taskreport breakdown "{{csv_path}}"{
             self.test_task2.computed_end
 
         assert len(self.test_task2.computed_resources) == 2
-
-        possible_resources = [
-            self.test_user2, self.test_user3,
-            self.test_user4, self.test_user5
-        ]
-        for r in self.test_task2.computed_resources:
-            assert r in possible_resources
+        assert self.test_task2.computed_resources[0] in possible_resources
+        assert self.test_task2.computed_resources[1] in possible_resources
 
     def test_tasks_are_correctly_scheduled_when_compute_resources_is_False(self):
         """testing if the tasks are correctly scheduled when the compute
@@ -412,9 +410,13 @@ taskreport breakdown "{{csv_path}}"{
         assert \
             datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc) == \
             self.test_task1.computed_end
-        assert \
-            sorted(self.test_task1.resources, key=lambda x: x.name) == \
-            sorted(self.test_task1.computed_resources, key=lambda x: x.name)
+        assert len(self.test_task1.computed_resources) == 2
+        assert self.test_task1.computed_resources[0] in \
+            [self.test_user1, self.test_user2, self.test_user3,
+             self.test_user4, self.test_user5]
+        assert self.test_task1.computed_resources[1] in \
+            [self.test_user1, self.test_user2, self.test_user3,
+             self.test_user4, self.test_user5]
 
         assert \
             datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc) == \
@@ -422,9 +424,13 @@ taskreport breakdown "{{csv_path}}"{
         assert \
             datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc) == \
             self.test_task2.computed_end
-        assert \
-            sorted(self.test_task2.resources, key=lambda x: x.name) == \
-            sorted(self.test_task2.computed_resources, key=lambda x: x.name)
+        assert len(self.test_task2.computed_resources) == 2
+        assert self.test_task2.computed_resources[0] in \
+            [self.test_user1, self.test_user2, self.test_user3,
+             self.test_user4, self.test_user5]
+        assert self.test_task2.computed_resources[1] in \
+            [self.test_user1, self.test_user2, self.test_user3,
+             self.test_user4, self.test_user5]
 
     def test_tasks_are_correctly_scheduled_when_compute_resources_is_True(self):
         """testing if the tasks are correctly scheduled when the compute
@@ -447,6 +453,11 @@ taskreport breakdown "{{csv_path}}"{
         tjp_sched.schedule()
         DBSession.commit()
 
+        possible_resources = [
+            self.test_user1, self.test_user2, self.test_user3, self.test_user4,
+            self.test_user5
+        ]
+
         # check if the task and project timings are all adjusted
         assert \
             datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc) == \
@@ -461,10 +472,9 @@ taskreport breakdown "{{csv_path}}"{
         assert \
             datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc) == \
             self.test_task1.computed_end
-        assert \
-            sorted([self.test_user1, self.test_user2],
-                   key=lambda x: x.name) == \
-            sorted(self.test_task1.computed_resources, key=lambda x: x.name)
+        assert len(self.test_task1.computed_resources) == 2
+        assert self.test_task1.computed_resources[0] in possible_resources
+        assert self.test_task1.computed_resources[1] in possible_resources
 
         assert \
             datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc) == \
@@ -472,12 +482,8 @@ taskreport breakdown "{{csv_path}}"{
         assert \
             datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc) == \
             self.test_task2.computed_end
-        possible_resources = [
-            self.test_user2, self.test_user3,
-            self.test_user4, self.test_user5
-        ]
-        for r in self.test_task2.computed_resources:
-            assert r in possible_resources
+        assert self.test_task2.computed_resources[0] in possible_resources
+        assert self.test_task2.computed_resources[1] in possible_resources
 
     def test_tasks_of_given_projects_are_correctly_scheduled(self):
         """testing if the tasks of given projects are correctly scheduled
