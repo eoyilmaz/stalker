@@ -2,6 +2,31 @@
 Stalker Changes
 ===============
 
+0.2.22
+======
+
+* **Fix:** Fixed a couple of tests for TaskJuggler.
+
+* **Update:** Updated Classifiers information in ``setup.py``, removed Python
+  versions 2.6, 3.0, 3.1 and 3.2 from supported Python versions.
+
+* **Update:** Updated TravisCI config and removed Python 2.6 and added Python
+  3.6.
+
+* **Update:** Added a test case for an edge usage of FilenameTemplate.
+
+* **Update:** Updated .gitignore file to ignore PyTest cache folder.
+
+* **Update:** Updated the License file to correctly reflect the project license
+  of LGPLv3.
+
+* **Update:** Update copyright information.
+
+* **New:** Created ``make_html.bat`` for Windows.
+
+* **New:** Added support for Python wheel.
+
+
 0.2.21
 ======
 
