@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Stalker a Production Asset Management System
-# Copyright (C) 2009-2017 Erkan Ozgur Yilmaz
+# Copyright (C) 2009-2018 Erkan Ozgur Yilmaz
 #
 # This file is part of Stalker.
 #
@@ -34,7 +34,7 @@ __author__ = "Erkan Ozgur Yilmaz"
 __email__ = 'eoyilmaz@gmail.com'
 
 __license__ = 'LGPLv3'
-__copyright__ = "Copyright (C) 2009-2017 Erkan Ozgur Yilmaz"
+__copyright__ = "Copyright (C) 2009-2018 Erkan Ozgur Yilmaz"
 
 
 __string_types__ = []
