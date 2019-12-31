@@ -319,6 +319,7 @@ class FilenameTemplateDBTestDBCase(UnitTestDBBase):
             structure=st
         )
         DBSession.add(test_project)
+        DBSession.commit()
 
         seq_task = Task(
             name='seq',
