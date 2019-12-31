@@ -23,7 +23,7 @@ See docs for more information.
 
 import sys
 
-__version__ = '0.2.22'
+__version__ = '0.2.23'
 
 __title__ = "stalker"
 __description__ = 'A Production Asset Management (ProdAM) System'
