@@ -14,7 +14,7 @@
       - postgresql
 
     addons:
-      postgresql: "11.0"
+      postgresql: "10.11"
 
     install:
       - gem install taskjuggler
