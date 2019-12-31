@@ -23,7 +23,7 @@ CLASSIFIERS = ["Programming Language :: Python",
                "Topic :: Utilities",
                "Topic :: Office/Business :: Scheduling", ]
 INSTALL_REQUIRES = [
-    'psycopg2', 'sqlalchemy', 'alembic', 'jinja2', 'pytz', 'tzlocal',
+    'psycopg2-binary', 'sqlalchemy', 'alembic', 'jinja2', 'pytz', 'tzlocal',
 ]
 TEST_REQUIRES = ['pytest', 'pytest-xdist', 'pytest-cov', 'coverage']
 DATA_FILES = [(
