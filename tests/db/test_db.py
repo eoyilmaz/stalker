@@ -3934,8 +3934,8 @@ class DatabaseModelsTester(UnitTestDBBase):
         with pytest.raises(IntegrityError) as cm:
             DBSession.commit()
 
-        assert '(psycopg2.IntegrityError) duplicate key value violates ' \
-               'unique constraint ' \
+        assert '(psycopg2.errors.UniqueViolation) duplicate key value ' \
+               'violates unique constraint ' \
                '"StatusLists_target_entity_type_key"' in str(cm.value)
 
         # roll it back

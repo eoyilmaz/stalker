@@ -726,8 +726,9 @@ class TimeLogDBTester(UnitTestDBBase):
         with pytest.raises(IntegrityError) as cm:
             DBSession.commit()
 
-        assert '(psycopg2.IntegrityError) conflicting key value violates ' \
-            'exclusion constraint "overlapping_time_logs"' in str(cm.value)
+        assert '(psycopg2.errors.ExclusionViolation) conflicting key value ' \
+            'violates exclusion constraint "overlapping_time_logs"' in \
+            str(cm.value)
 
     def test_OverbookedError_12(self):
         """testing if a IntegrityError will be raised by the database backend
@@ -767,8 +768,9 @@ class TimeLogDBTester(UnitTestDBBase):
         with pytest.raises(IntegrityError) as cm:
             DBSession.commit()
 
-        assert '(psycopg2.IntegrityError) conflicting key value violates ' \
-            'exclusion constraint "overlapping_time_logs"' in str(cm.value)
+        assert '(psycopg2.errors.ExclusionViolation) conflicting key value ' \
+            'violates exclusion constraint "overlapping_time_logs"' in \
+            str(cm.value)
 
     def test_timeLog_prevents_auto_flush_when_expanding_task_schedule_timing(self):
         """testing timeLog prevents auto flush when expanding task

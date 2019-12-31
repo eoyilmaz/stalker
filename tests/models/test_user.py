@@ -608,8 +608,8 @@ class UserTestDB(UnitTestDBBase):
         with pytest.raises(IntegrityError) as cm:
             DBSession.commit()
 
-        assert '(psycopg2.IntegrityError) duplicate key value violates ' \
-            'unique constraint "Users_email_key"' in str(cm.value)
+        assert '(psycopg2.errors.UniqueViolation) duplicate key value ' \
+            'violates unique constraint "Users_email_key"' in str(cm.value)
 
     def test_email_attribute_is_working_properly(self):
         """testing if email attribute works properly
@@ -741,8 +741,8 @@ class UserTestDB(UnitTestDBBase):
         with pytest.raises(IntegrityError) as cm:
             DBSession.commit()
 
-        assert '(psycopg2.IntegrityError) duplicate key value violates ' \
-            'unique constraint "Users_login_key"' in str(cm.value)
+        assert '(psycopg2.errors.UniqueViolation) duplicate key value ' \
+            'violates unique constraint "Users_login_key"' in str(cm.value)
 
     def test_login_argument_is_working_properly(self):
         """testing if the login argument is working properly
