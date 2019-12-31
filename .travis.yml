@@ -17,7 +17,7 @@
 
     install:
       - gem install taskjuggler
-      - pip install sqlalchemy psycopg2 jinja2 alembic Mako MarkupSafe python-editor pytz tzlocal pytest pytest-xdist pytest-cov codeclimate-test-reporter
+      - pip install sqlalchemy psycopg2-binary jinja2 alembic Mako MarkupSafe python-editor pytz tzlocal pytest pytest-xdist pytest-cov codeclimate-test-reporter
       - pip install pytest --upgrade
 
     before_script:

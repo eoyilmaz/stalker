@@ -23,7 +23,7 @@ init:
 install:
   - gem install mime-types -v 2.6.2  # Required to install taskjuggler
   - gem install taskjuggler
-  - "%PYTHON%/Scripts/pip.exe install sqlalchemy psycopg2 jinja2 alembic mako markupsafe python-editor coverage pytz tzlocal pytest pytest-xdist pytest-cov"
+  - "%PYTHON%/Scripts/pip.exe install sqlalchemy psycopg2-binary jinja2 alembic mako markupsafe python-editor coverage pytz tzlocal pytest pytest-xdist pytest-cov"
 
 services:
   - postgresql95

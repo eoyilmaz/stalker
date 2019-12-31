@@ -26,7 +26,7 @@ RUN apt-get update && \
     gem install taskjuggler && \
 
     pip install -U pip && \
-    pip install sqlalchemy psycopg2 jinja2 alembic mako markupsafe python-editor nose coverage
+    pip install sqlalchemy psycopg2-binary jinja2 alembic mako markupsafe python-editor nose coverage
 
 # Note: The official Debian and Ubuntu images automatically ``apt-get clean``
 # after each ``apt-get``
