@@ -2,6 +2,15 @@
 Stalker Changes
 ===============
 
+0.2.23
+======
+
+* **Update:** Updated the ``setup.py`` to require ``psycopg2-binary`` instead
+  of ``psycopg2``. Also updated the configuration files for Docker and Travis.
+  This changes the requirement of psycopg2 to psycopg2-binary, which will make
+  it easier to get the installation to complete on e.g. CentOS 7 without
+  requiring pg_config.
+
 0.2.22
 ======
 
