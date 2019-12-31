@@ -23,9 +23,9 @@ CLASSIFIERS = ["Programming Language :: Python",
                "Topic :: Utilities",
                "Topic :: Office/Business :: Scheduling", ]
 INSTALL_REQUIRES = [
-    'psycopg2', 'sqlalchemy', 'alembic', 'jinja2', 'pytz', 'tzlocal',
+    'psycopg2-binary', 'sqlalchemy', 'alembic', 'jinja2', 'pytz', 'tzlocal',
 ]
-TEST_REQUIRES = ['pytest', 'pytest-xdist', 'pytest-cov', 'coverage']
+TESTS_REQUIRE = ['pytest', 'pytest-xdist', 'pytest-cov', 'coverage']
 DATA_FILES = [(
     '',
     ['COPYING', 'COPYING.LESSER', 'INSTALL', 'MANIFEST.in', 'README.rst']),
@@ -44,7 +44,7 @@ def read(*parts):
 
 
 README = read(HERE, 'README.rst')
-CHANGES = open(os.path.join(HERE, 'CHANGELOG.rst')).read()
+CHANGES = read(HERE, 'CHANGELOG.rst')
 META_FILE = read(META_PATH)
 
 
@@ -80,6 +80,6 @@ if __name__ == '__main__':
         zip_safe=True,
         test_suite='stalker',
         install_requires=INSTALL_REQUIRES,
-        test_requires=TEST_REQUIRES
+        tests_require=TESTS_REQUIRE
     )
 
