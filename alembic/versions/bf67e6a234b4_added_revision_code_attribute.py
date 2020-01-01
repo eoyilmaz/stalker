@@ -1,4 +1,4 @@
-"""Added Revision.code attribute
+"""Added Repository.code attribute
 
 Revision ID: bf67e6a234b4
 Revises: ed0167fff399

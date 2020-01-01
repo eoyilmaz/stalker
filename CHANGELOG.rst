@@ -2,6 +2,13 @@
 Stalker Changes
 ===============
 
+0.2.24.1
+========
+
+* **Fix:** Fixed ``stalker.db`` module to check for the correct Alembic
+  revision id.
+
+
 0.2.24
 ======
 
