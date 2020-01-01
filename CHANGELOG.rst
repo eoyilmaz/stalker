@@ -19,6 +19,10 @@ Stalker Changes
 * **Fix:** ``Repository`` methods ``is_in_repo`` and ``find_repo`` are now case
   insensitive for Windows paths.
 
+* **Update:** Updated ``Project`` class documentation and included information
+  about what is going to be deleted or how the delete operation will be
+  cascaded when a ``Project`` instance is deleted.
+
 0.2.23
 ======
 

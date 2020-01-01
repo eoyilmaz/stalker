@@ -124,6 +124,8 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
     To manage all the studio projects at once (schedule them at once please use
     :class:`.Studio`).
 
+    **Repositories**
+
     .. versionadded:: 0.2.13
        Multiple Repositories per Project
 
@@ -136,6 +138,8 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
        Also the :attr:`.repositories` attribute is not a read-only attribute
        anymore.
 
+    **Clients**
+
     .. versionadded:: 0.2.15
        Multiple Clients per Project
 
@@ -143,6 +147,15 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
        :class:`.Project` allowing to hold complex Projects to Client relations
        by using the :attr:`.ProjectClient.role` attribute of the
        :class:`.ProjectClient` class.
+
+    **Deleting a Project**
+
+    Deleting a :class:`.Project` instance will cascade the delete operation to
+    all the :class:`.Task`\ s related to that particular Project and it will
+    cascade the delete operation to :class:`.TimeLog`\ s, :class:`.Version`\ s,
+    :class:`.Link`\ s and :class:`.Review`\ s etc.. So one can delete a
+    :class:`.Project` instance without worrying about the non-project related
+    data like :class:`.User`\ s or :class:`.Department`\ s to be deleted.
 
     :param clients: The clients which the project is affiliated with. Default
       value is an empty list.
