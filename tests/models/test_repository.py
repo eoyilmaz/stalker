@@ -824,6 +824,18 @@ class RepositoryTester(UnitTestDBBase):
                                     'Task2\\Some_file.ma'
         assert self.test_repo.is_in_repo(test_windows_path_reverse)
 
+    def test_is_in_repo_is_case_insensitive_under_windows(self):
+        """testing if is_in_repo is case-insensitive under windows
+        """
+        import platform
+        if platform.system() != "Windows":
+            pytest.skip("Test this only under Windows!")
+
+        self.test_repo.windows_path = 'T:/Stalker_Projects'
+        test_windows_path_reverse = 't:\\stalKer_ProjectS\\sErO\\task1\\' \
+                                    'Task2\\Some_file.ma'
+        assert self.test_repo.is_in_repo(test_windows_path_reverse)
+
     def test_is_in_repo_returns_False_if_the_given_windows_path_is_not_in_this_repo(self):
         """testing if is_in_repo returns False if the given windows path is not
         in this repo or False otherwise
@@ -899,6 +911,16 @@ class RepositoryTester(UnitTestDBBase):
         """
         # so we should have the env var to be configured
         # now create a path with env var
+        path = '$REPO%s/Sero/Task1/Task2/Some_file.ma' % self.test_repo.code
+        result = self.test_repo.make_relative(path)
+        assert result == 'Sero/Task1/Task2/Some_file.ma'
+
+    def test_make_relative_method_converts_the_given_path_with_old_env_variable_to_native_path(self):
+        """testing if Repository.make_relative() will convert the given path
+        with old environment variable to repository root relative path
+        """
+        # so we should have the env var to be configured
+        # now create a path with env var
         path = '$REPO%s/Sero/Task1/Task2/Some_file.ma' % self.test_repo.id
         result = self.test_repo.make_relative(path)
         assert result == 'Sero/Task1/Task2/Some_file.ma'
@@ -915,6 +937,80 @@ class RepositoryTester(UnitTestDBBase):
         from stalker import Repository
         assert Repository.to_os_independent_path(test_path) == \
             '$REPO%s/%s' % (self.test_repo.code, relative_part)
+
+    def test_to_os_independent_path_for_old_environment_vars(self):
+        """testing if to_os_independent_path class method is working properly
+        for paths that contain old env vars
+        """
+        from stalker.db.session import DBSession
+        DBSession.add(self.test_repo)
+        DBSession.commit()
+
+        relative_part = 'some/path/to/a/file.ma'
+        test_path = '$REPO%s/%s' % (self.test_repo.id, relative_part)
+        from stalker import Repository
+        assert Repository.to_os_independent_path(test_path) == \
+            '$REPO%s/%s' % (self.test_repo.code, relative_part)
+
+    def test_to_os_independent_path_method_converts_the_given_linux_path_to_universal(self):
+        """testing if Repository.to_os_independent_path() will convert the
+        given Linux path to a os independent path that uses the Repository
+        environment variable
+        """
+        # a Linux Path
+        linux_path = '/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        self.test_repo.linux_path = '/mnt/T/Stalker_Projects'
+        self.test_repo.windows_path = 'T:/Stalker_Projects'
+        self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
+        result = self.test_repo.to_os_independent_path(linux_path)
+        assert result == \
+               '$REPO%s/Sero/Task1/Task2/Some_file.ma' % self.test_repo.code
+
+    def test_to_os_independent_path_method_converts_the_given_osx_path_to_universal(self):
+        """testing if Repository.to_os_independent_path() will convert the
+        given OSX path to a os independent path that uses the Repository
+        environment variable
+        """
+        # an OSX Path
+        osx_path = '/Volumes/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        self.test_repo.osx_path = '/Volumes/T/Stalker_Projects'
+        result = self.test_repo.to_os_independent_path(osx_path)
+        assert result == \
+               '$REPO%s/Sero/Task1/Task2/Some_file.ma' % self.test_repo.code
+
+    def test_to_os_independent_path_method_converts_the_given_windows_path_to_universal(self):
+        """testing if Repository.to_os_independent_path() will convert the
+        given Windows path to a os independent path that uses the Repository
+        environment variable
+        """
+        # a Windows Path
+        windows_path = 'T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma'
+        self.test_repo.osx_path = 'T:/Stalker_Projects'
+        result = self.test_repo.to_os_independent_path(windows_path)
+        assert result == \
+               '$REPO%s/Sero/Task1/Task2/Some_file.ma' % self.test_repo.code
+
+    def test_to_os_independent_path_method_not_change_the_path_with_env_variable(self):
+        """testing if Repository.to_os_independent_path() will not change the
+        given path with environment variable
+        """
+        # so we should have the env var to be configured
+        # now create a path with env var
+        path = '$REPO%s/Sero/Task1/Task2/Some_file.ma' % self.test_repo.code
+        result = self.test_repo.to_os_independent_path(path)
+        assert result == \
+            '$REPO%s/Sero/Task1/Task2/Some_file.ma' % self.test_repo.code
+
+    def test_to_os_independent_path_method_converts_the_given_path_with_old_env_variable_new_env_variable(self):
+        """testing if Repository.to_os_independent_path() will convert the path
+        with old environment variable to a path with new environment variable
+        """
+        # so we should have the env var to be configured
+        # now create a path with env var
+        path = '$REPO%s/Sero/Task1/Task2/Some_file.ma' % self.test_repo.id
+        result = self.test_repo.to_os_independent_path(path)
+        assert result == \
+            '$REPO%s/Sero/Task1/Task2/Some_file.ma' % self.test_repo.code
 
     def test_find_repo_is_working_properly(self):
         """testing if the find_repo class method is working properly
@@ -939,6 +1035,37 @@ class RepositoryTester(UnitTestDBBase):
         assert Repository.find_repo(test_path) == self.test_repo
 
         test_path = '%s/some/path/to/a/file.ma' % new_repo1.windows_path
+        assert Repository.find_repo(test_path) == new_repo1
+
+    def test_find_repo_is_case_insensitive_under_windows(self):
+        """testing if the find_repo class method is case-insensitive under
+        windows
+        """
+        import platform
+        if platform.system() != "Windows":
+            pytest.skip("Test this only under Windows!")
+
+        from stalker.db.session import DBSession
+        DBSession.add(self.test_repo)
+        DBSession.commit()
+
+        # add some other repositories
+        from stalker import Repository
+        new_repo1 = Repository(
+            name='New Repository',
+            code='NR',
+            linux_path='/mnt/T/Projects',
+            osx_path='/Volumes/T/Projects',
+            windows_path='T:/Projects'
+        )
+        DBSession.add(new_repo1)
+        DBSession.commit()
+
+        test_path = '%s/some/path/to/a/file.ma' % self.test_repo.path.lower()
+        assert Repository.find_repo(test_path) == self.test_repo
+
+        test_path = '%s/some/path/to/a/file.ma' % \
+                    new_repo1.windows_path.lower()
         assert Repository.find_repo(test_path) == new_repo1
 
     def test_find_repo_is_working_properly_with_env_vars(self):

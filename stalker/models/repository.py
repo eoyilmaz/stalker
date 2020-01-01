@@ -101,9 +101,9 @@ class Repository(Entity, CodeMixin):
         ForeignKey('Entities.id'),
         primary_key=True,
     )
-    linux_path = Column(String(256))   # \
-    windows_path = Column(String(256)) # -> these should be all unique
-    osx_path = Column(String(256))     # /
+    linux_path = Column(String(256))
+    windows_path = Column(String(256))
+    osx_path = Column(String(256))
 
     def __init__(self,
                  code="",
@@ -247,7 +247,7 @@ class Repository(Entity, CodeMixin):
         :return:
         """
         path = path.replace('\\', '/')
-        return path.startswith(self.windows_path) or \
+        return path.lower().startswith(self.windows_path.lower()) or \
             path.startswith(self.linux_path) or \
             path.startswith(self.osx_path)
 
@@ -343,7 +343,7 @@ class Repository(Entity, CodeMixin):
         found_repo = None
         for repo in repos:
             if path.startswith(repo.path) \
-               or path.startswith(repo.windows_path) \
+               or path.lower().startswith(repo.windows_path.lower()) \
                or path.startswith(repo.linux_path) \
                or path.startswith(repo.osx_path):
                 found_repo = repo
@@ -392,8 +392,11 @@ class Repository(Entity, CodeMixin):
 def receive_after_insert(mapper, connection, repo):
     """listen for the 'after_insert' event
     """
-    logger.debug('auto creating env var for Repository with id: %s' % repo.id)
+    logger.debug('auto creating env var for Repository: %s' % repo.name)
     from stalker import defaults
-    os.environ[defaults.repo_env_var_template % {'code': repo.id}] = repo.path
-    os.environ[defaults.repo_env_var_template_old %
-               {'id': repo.id}] = repo.path
+    os.environ[
+        defaults.repo_env_var_template % {'code': repo.code}
+    ] = repo.path
+    os.environ[
+        defaults.repo_env_var_template_old % {'id': repo.id}
+    ] = repo.path

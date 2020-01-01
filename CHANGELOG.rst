@@ -16,6 +16,9 @@ Stalker Changes
   backwards incompatible and needs the database to be updated with Alembic
   (with the command ``alembic update head``).
 
+* **Fix:** ``Repository`` methods ``is_in_repo`` and ``find_repo`` are now case
+  insensitive for Windows paths.
+
 0.2.23
 ======
 
