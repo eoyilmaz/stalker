@@ -58,6 +58,7 @@ class ShotTester(UnitTestDBBase):
         from stalker import Repository
         self.test_repository = Repository(
             name="Test Repository",
+            code="TR",
             type=self.test_repository_type,
         )
         DBSession.add(self.test_repository)

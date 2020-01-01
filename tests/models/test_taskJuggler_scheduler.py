@@ -100,6 +100,7 @@ class TaskJugglerSchedulerDBTester(UnitTestDBBase):
         from stalker import Repository
         self.test_repo = Repository(
             name='Test Repository',
+            code='TR',
             linux_path='/mnt/T/',
             windows_path='T:/',
             osx_path='/Volumes/T/'

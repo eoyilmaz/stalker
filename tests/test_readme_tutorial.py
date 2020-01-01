@@ -41,6 +41,7 @@ def test_readme_tutorial_code(setup_sqlite3):
     from stalker import Repository
     repo = Repository(
         name='Commercial Projects Repository',
+        code='CPR',
         windows_path='Z:/Projects',
         linux_path='/mnt/Z/Projects',
         osx_path='/Volumes/Z/Projects'

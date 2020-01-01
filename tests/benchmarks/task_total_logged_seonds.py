@@ -88,6 +88,7 @@ test_repository_type = Type(
 
 test_repository = Repository(
     name="Test Repository",
+    code="TR",
     type=test_repository_type,
     linux_path='/mnt/T/',
     windows_path='T:/',

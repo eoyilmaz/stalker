@@ -86,6 +86,7 @@ class PaymentTestCase(unittest.TestCase):
 
         self.test_repository = Repository(
             name="Test Repository",
+            code='TR',
             type=self.test_repository_type,
         )
 

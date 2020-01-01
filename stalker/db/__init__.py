@@ -191,7 +191,12 @@ def create_repo_vars():
     from stalker import defaults, Repository
     all_repos = Repository.query.all()
     for repo in all_repos:
-        os.environ[defaults.repo_env_var_template % {'id': repo.id}] = \
+        os.environ[repo.env_var] = repo.path
+
+        # TODO: Remove this in upcoming versions.
+        # This is added for backwards compatibility
+        os.environ[
+            defaults.repo_env_var_template_old % {'id': repo.id}] = \
             repo.path
 
 

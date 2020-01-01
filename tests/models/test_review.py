@@ -75,6 +75,7 @@ class ReviewTestDBCase(UnitTestDBBase):
         from stalker import Repository
         self.repo = Repository(
             name='Test Repository',
+            code='TR',
             linux_path='/mnt/T/',
             windows_path='T:/',
             osx_path='/Volumes/T/'

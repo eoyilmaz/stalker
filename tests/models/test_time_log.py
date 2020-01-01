@@ -67,7 +67,7 @@ class TimeLogDBTester(UnitTestDBBase):
         DBSession.add(self.test_resource2)
 
         from stalker import Repository
-        self.test_repo = Repository(name="test repository")
+        self.test_repo = Repository(name="test repository", code="tr")
         DBSession.add(self.test_repo)
 
         # create a Project

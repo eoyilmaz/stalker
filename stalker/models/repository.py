@@ -21,6 +21,7 @@ import platform
 from sqlalchemy import event, Column, Integer, ForeignKey, String
 from sqlalchemy.orm import validates
 from stalker.models.entity import Entity
+from stalker.models.mixins import CodeMixin
 
 from stalker.log import logging_level
 import logging
@@ -29,7 +30,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
 
-class Repository(Entity):
+class Repository(Entity, CodeMixin):
     """Manages fileserver/repository related data.
 
     A repository is a network share that all users have access to.
@@ -43,6 +44,27 @@ class Repository(Entity):
     The path separator in the repository is always forward slashes ("/").
     Setting a path that contains backward slashes ("\\"), will be converted to
     a path with forward slashes.
+
+    .. versionadded:: 0.2.24
+       Code attribute
+
+       Starting with v0.2.24 Repository instances have a new :attr:`.code`
+       attribute whose value is used by the
+       :class:`stalker.models.studio.Studio` to generate environment variables
+       that contains the path of this
+       :class:`stalker.models.repository.Repository` (i.e.
+       $REPOCP/path/to/asset.ma ``CP`` here is the ``Repository.code``) so that
+       instead of using absolute full paths one can use the
+       :attr:`.make_relative`` path to generate a universal path that can be
+       used across OSes and different installations of Stalker.
+
+    :param code: The code of the :class:`stalker.models.repository.Repository`.
+      This attribute value is used by the :class:`stalker.models.studio.Studio`
+      to generate environment variables that contains the path of this
+      ``Repository`` (i.e. $REPOCP/path/to/asset.ma) so that instead of using
+      absolute full paths one can use the ``repository_relative`` path to
+      generate a universal path that can be used across OSes and different
+      installations of Stalker.
 
     :param linux_path: shows the linux path of the repository root, should be a
       string
@@ -84,11 +106,14 @@ class Repository(Entity):
     osx_path = Column(String(256))     # /
 
     def __init__(self,
+                 code="",
                  linux_path="",
                  windows_path="",
                  osx_path="",
                  **kwargs):
+        kwargs['code'] = code
         super(Repository, self).__init__(**kwargs)
+        CodeMixin.__init__(self, **kwargs)
 
         self.linux_path = linux_path
         self.windows_path = windows_path
@@ -109,11 +134,19 @@ class Repository(Entity):
 
         linux_path = linux_path.replace("\\", "/")
 
+        if self.code is not None and platform.system() == "Linux":
+            # update the environment variable
+            from stalker import defaults
+            os.environ[
+                defaults.repo_env_var_template % {'code': self.code}
+            ] = linux_path
+
         if self.id is not None and platform.system() == "Linux":
             # update the environment variable
             from stalker import defaults
-            os.environ[defaults.repo_env_var_template % {'id': self.id}] = \
-                linux_path
+            os.environ[
+                defaults.repo_env_var_template_old % {'id': self.id}
+            ] = linux_path
 
         return linux_path
 
@@ -132,14 +165,19 @@ class Repository(Entity):
 
         osx_path = osx_path.replace("\\", "/")
 
-        if self.id is not None and platform.system() == "Darwin":
+        from stalker import defaults
+        if self.code is not None and platform.system() == "Darwin":
             # update the environment variable
-            from stalker import defaults
-            os.environ[defaults.repo_env_var_template % {'id': self.id}] = \
-                osx_path
+            os.environ[
+                defaults.repo_env_var_template % {'code': self.code}
+            ] = osx_path
+
+        if self.id is not None and platform.system() == "Darwin":
+            os.environ[
+                defaults.repo_env_var_template_old % {'id': self.id}
+            ] = osx_path
 
         return osx_path
-
 
     @validates("windows_path")
     def _validate_windows_path(self, key, windows_path):
@@ -158,11 +196,19 @@ class Repository(Entity):
         if not windows_path.endswith('/'):
             windows_path += '/'
 
+        if self.code is not None and platform.system() == "Windows":
+            # update the environment variable
+            from stalker import defaults
+            os.environ[
+                defaults.repo_env_var_template % {'code': self.code}
+            ] = windows_path
+
         if self.id is not None and platform.system() == "Windows":
             # update the environment variable
             from stalker import defaults
-            os.environ[defaults.repo_env_var_template % {'id': self.id}] = \
-                windows_path
+            os.environ[
+                defaults.repo_env_var_template_old % {'id': self.id}
+            ] = windows_path
 
         return windows_path
 
@@ -325,7 +371,7 @@ class Repository(Entity):
         """returns the env var of this repo
         """
         from stalker import defaults
-        return defaults.repo_env_var_template % {'id': self.id}
+        return defaults.repo_env_var_template % {'code': self.code}
 
     def __eq__(self, other):
         """the equality operator
@@ -348,4 +394,6 @@ def receive_after_insert(mapper, connection, repo):
     """
     logger.debug('auto creating env var for Repository with id: %s' % repo.id)
     from stalker import defaults
-    os.environ[defaults.repo_env_var_template % {'id': repo.id}] = repo.path
+    os.environ[defaults.repo_env_var_template % {'code': repo.id}] = repo.path
+    os.environ[defaults.repo_env_var_template_old %
+               {'id': repo.id}] = repo.path

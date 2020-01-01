@@ -78,7 +78,8 @@ from stalker import Repository
 
 # and the repository itself
 commercial_repo = Repository(
-    name="Commercial Repository"
+    name="Commercial Repository",
+    code="CR"
 )
 
 new_project = Project(

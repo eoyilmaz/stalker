@@ -53,6 +53,7 @@ class ProjectMixinTester(unittest.TestCase):
         from stalker import Repository
         self.test_repository = Repository(
             name="Test Repository",
+            code='TR',
             type=self.repository_type,
         )
 

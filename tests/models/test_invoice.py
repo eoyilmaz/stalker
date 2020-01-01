@@ -74,18 +74,19 @@ class InvoiceTestCase(unittest.TestCase):
         self.test_movie_project_type = Type(
             name="Movie Project",
             code='movie',
-            target_entity_type=Project,
+            target_entity_type='Project',
         )
 
         from stalker import Repository
         self.test_repository_type = Type(
             name="Test Repository Type",
             code='test',
-            target_entity_type=Repository,
+            target_entity_type='Repository',
         )
 
         self.test_repository = Repository(
             name="Test Repository",
+            code='TR',
             type=self.test_repository_type,
         )
 
@@ -182,7 +183,7 @@ class InvoiceTestCase(unittest.TestCase):
         """
         from stalker import Invoice
         with pytest.raises(TypeError) as cm:
-            test_invoice = Invoice(
+            Invoice(
                 budget=None,
                 client=self.test_client,
                 amount=1500,
@@ -215,7 +216,7 @@ class InvoiceTestCase(unittest.TestCase):
         """
         from stalker import Invoice
         with pytest.raises(TypeError) as cm:
-            test_invoice = Invoice(
+            Invoice(
                 budget='Not a budget instance',
                 client=self.test_client,
                 amount=1500,
@@ -276,7 +277,7 @@ class InvoiceTestCase(unittest.TestCase):
         """
         from stalker import Invoice
         with pytest.raises(TypeError) as cm:
-            test_invoice = Invoice(
+            Invoice(
                 budget=self.test_budget,
                 client=None,
                 amount=100,
@@ -309,7 +310,7 @@ class InvoiceTestCase(unittest.TestCase):
         """
         from stalker import Invoice
         with pytest.raises(TypeError) as cm:
-            test_invoice = Invoice(
+            Invoice(
                 budget=self.test_budget,
                 client='not a client instance',
                 amount=100,

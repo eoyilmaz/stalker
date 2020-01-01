@@ -77,17 +77,18 @@ class ProjectMixinTester(unittest.TestCase):
         self.test_project_statuses = StatusList(
             name="Project Statuses",
             statuses=[self.test_stat2, self.test_stat3],
-            target_entity_type=Project
+            target_entity_type='Project'
         )
 
         self.test_project_type = Type(
             name='Test Project Type',
             code='testproj',
-            target_entity_type=Project,
+            target_entity_type='Project',
         )
 
         self.test_repository = Repository(
             name="Test Repo",
+            code='TR',
         )
 
         self.test_project = Project(

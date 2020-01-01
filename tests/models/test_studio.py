@@ -87,6 +87,7 @@ class StudioTester(UnitTestDBBase):
         from stalker import Repository
         self.test_repo = Repository(
             name='Test Repository',
+            code='TR',
             windows_path='T:/',
             linux_path='/mnt/T/',
             osx_path='/Volumes/T/'

@@ -229,8 +229,17 @@ workstations/render farmers::
   
   # and the repository itself
   commercial_repo = Repository(
-      name="Commercial Repository"
+      name="Commercial Repository",
+      code="CR"
   )
+
+.. versionadded:: 0.2.24
+
+   Starting with Stalker version 0.2.24 :class:`.Repository` instances have
+   :attr:`stalker.models.repository.Repository.code` attribute to help
+   generating universal paths (both across OSes and different installations of
+   Stalker).
+
 
 :class:`.Repository` class will be explained in detail in upcoming sections.
 

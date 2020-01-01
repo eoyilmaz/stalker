@@ -2,6 +2,20 @@
 Stalker Changes
 ===============
 
+0.2.24
+======
+
+* **New:** ``Repository`` instances now have a ``code`` attribute which is
+  used for generating the environment variables where in previous versions the
+  ``id`` attribute has been used which caused difficulties in transferring the
+  data to a different installation of Stalker. Also to make the system
+  backwards compatible, Stalker will still set the old ``id`` based environment
+  variables. But when asked for an environment variable it will return the
+  ``code`` based one. The ``code`` argument as usual has to be initialized on
+  ``Repository`` instance creation. That's why this version is slightly
+  backwards incompatible and needs the database to be updated with Alembic
+  (with the command ``alembic update head``).
+
 0.2.23
 ======
 

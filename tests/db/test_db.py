@@ -907,9 +907,9 @@ class DatabaseTester(UnitTestDBBase):
         """
         # create a couple of repositories
         from stalker import db, Repository
-        repo1 = Repository(name='Repo1')
-        repo2 = Repository(name='Repo2')
-        repo3 = Repository(name='Repo3')
+        repo1 = Repository(name='Repo1', code='R1')
+        repo2 = Repository(name='Repo2', code='R2')
+        repo3 = Repository(name='Repo3', code='R3')
 
         all_repos = [repo1, repo2, repo3]
         from stalker.db.session import DBSession
@@ -920,14 +920,14 @@ class DatabaseTester(UnitTestDBBase):
         import os
         for repo in all_repos:
             try:
-                os.environ.pop('REPO%s' % repo.id)
+                os.environ.pop('REPO%s' % repo.code)
             except KeyError:
                 pass
 
         # check if all removed
         for repo in all_repos:
             # check if environment vars are created
-            assert ('REPO%s' % repo.id) not in os.environ
+            assert ('REPO%s' % repo.code) not in os.environ
 
         # remove db connection
         DBSession.remove()
@@ -939,7 +939,7 @@ class DatabaseTester(UnitTestDBBase):
 
         for repo in all_repos:
             # check if environment vars are created
-            assert ('REPO%s' % repo.id) in os.environ
+            assert ('REPO%s' % repo.code) in os.environ
 
     def test_db_init_with_studio_instance(self):
         """testing db.init() using existing Studio instance for config values
@@ -1121,6 +1121,7 @@ class DatabaseModelsTester(UnitTestDBBase):
 
         test_repository = Repository(
             name='Test Repository A',
+            code='TRA',
             type=test_repository_type
         )
 
@@ -1266,6 +1267,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         from stalker import Repository
         test_repository = Repository(
             name='Test Repository A',
+            code='TRA',
             type=test_repository_type
         )
 
@@ -1403,6 +1405,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         from stalker import Repository
         test_repository = Repository(
             name='Test Repository A',
+            code='TRA',
             type=test_repository_type
         )
 
@@ -1548,6 +1551,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         from stalker import Repository
         test_repository = Repository(
             name='Test Repository A',
+            code='TRA',
             type=test_repository_type
         )
 
@@ -1702,6 +1706,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         from stalker import Repository
         test_repository = Repository(
             name='Test Repository A',
+            code='TRA',
             type=test_repository_type
         )
 
@@ -1822,6 +1827,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         from stalker import Repository
         repo = Repository(
             name='Commercials Repository',
+            code='CR',
             linux_path='/mnt/shows',
             windows_path='S:/',
             osx_path='/mnt/shows'
@@ -1914,6 +1920,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         from stalker import Repository
         repo = Repository(
             name='Commercials Repository',
+            code='CR',
             linux_path='/mnt/shows',
             windows_path='S:/',
             osx_path='/mnt/shows'
@@ -2145,7 +2152,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         )
 
         from stalker import Repository, Project
-        test_repo = Repository(name='Test Repository')
+        test_repo = Repository(name='Test Repository', code='TR')
         test_project = Project(
             name='Test Project',
             code='TP',
@@ -2546,6 +2553,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         from stalker import Repository
         repo = Repository(
             name='Test Repo',
+            code='TR',
             linux_path='/mnt/M/JOBs',
             windows_path='M:/JOBs',
             osx_path='/Users/Shared/Servers/M',
@@ -2826,7 +2834,7 @@ class DatabaseModelsTester(UnitTestDBBase):
 
         # use it as a task reference
         from stalker import Repository, Project, Task
-        repo1 = Repository(name='test repo')
+        repo1 = Repository(name='test repo', code='TR')
 
         project1 = Project(
             name='Test Project 1',
@@ -3154,6 +3162,7 @@ class DatabaseModelsTester(UnitTestDBBase):
 
         repo = Repository(
             name="Commercials Repository",
+            code='CR',
             linux_path="/mnt/M/Projects",
             windows_path="M:/Projects",
             osx_path="/mnt/M/Projects"
@@ -3354,6 +3363,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         # create a new Repository object and try to read it back
         kwargs = {
             "name": "Movie-Repo",
+            "code": "MR",
             "description": "test repository",
             "linux_path": "/mnt/M",
             "osx_path": "/mnt/M",
@@ -3371,6 +3381,7 @@ class DatabaseModelsTester(UnitTestDBBase):
 
         # store attributes
         created_by = repo.created_by
+        code = repo.code
         date_created = repo.date_created
         date_updated = repo.date_updated
         description = repo.description
@@ -3395,6 +3406,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert (isinstance(repo_db, Repository))
 
         assert repo_db.created_by == created_by
+        assert repo_db.code == code
         assert repo_db.date_created == date_created
         assert repo_db.date_updated == date_updated
         assert repo_db.description == description
@@ -3413,7 +3425,8 @@ class DatabaseModelsTester(UnitTestDBBase):
         """
         from stalker import Repository, User, Type, Project
         repo1 = Repository(
-            name="Commercial Repository"
+            name="Commercial Repository",
+            code='CR',
         )
 
         user1 = User(
@@ -3509,7 +3522,8 @@ class DatabaseModelsTester(UnitTestDBBase):
         """
         from stalker import Project, Repository, Type, User
         repo1 = Repository(
-            name="Commercial Repository"
+            name="Commercial Repository",
+            code='CR'
         )
 
         commercial_project_type = Type(
@@ -3639,7 +3653,8 @@ class DatabaseModelsTester(UnitTestDBBase):
         )
 
         repo1 = Repository(
-            name="Commercial Repository"
+            name="Commercial Repository",
+            code='CR'
         )
 
         lead = User(
@@ -4189,6 +4204,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         from stalker import Repository, Project
         repo = Repository(
             name='Test Repo',
+            code='TR',
             linux_path='/mnt/M/JOBs',
             windows_path='M:/JOBs',
             osx_path='/Users/Shared/Servers/M',
@@ -4452,6 +4468,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         from stalker import Repository
         repo = Repository(
             name='Test Repo',
+            code='TR',
             linux_path='/some/random/path',
             windows_path='/some/random/path',
             osx_path='/some/random/path',
@@ -4618,7 +4635,8 @@ class DatabaseModelsTester(UnitTestDBBase):
         """
         from stalker import Repository
         repo = Repository(
-            name='Test Repository'
+            name='Test Repository',
+            code='TR'
         )
 
         from stalker import Structure
@@ -4803,7 +4821,7 @@ class DatabaseModelsTester(UnitTestDBBase):
 
         # create a test project
         from stalker import Repository
-        repo1 = Repository(name='Test Repo')
+        repo1 = Repository(name='Test Repo', code='TR')
         from stalker import Project, Task, TimeLog
         project1 = Project(
             name='Test Project',
@@ -5031,6 +5049,7 @@ class DatabaseModelsTester(UnitTestDBBase):
             code='tp',
             repository=Repository(
                 name='Film Projects',
+                code='FP',
                 windows_path='M:/',
                 linux_path='/mnt/M/',
                 osx_path='/Users/Volumes/M/',

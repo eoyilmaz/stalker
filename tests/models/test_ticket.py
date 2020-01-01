@@ -57,7 +57,7 @@ class TicketTester(UnitTestDBBase):
 
         # create a Repository
         from stalker import Repository
-        self.test_repo = Repository(name="Test Repo")
+        self.test_repo = Repository(name="Test Repo", code='TR')
 
         # create a Project Type
         self.test_project_type = Type(

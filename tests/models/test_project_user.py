@@ -32,7 +32,8 @@ class ProjectUserTestDBCase(UnitTestDBBase):
 
         from stalker import Repository
         self.test_repo = Repository(
-            name='Test Repo'
+            name='Test Repo',
+            code='TR'
         )
 
         from stalker.db.session import DBSession

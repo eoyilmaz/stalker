@@ -57,7 +57,8 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
 
         from stalker import Repository
         self.test_repo = Repository(
-            name='Test Repository'
+            name='Test Repository',
+            code='TR',
         )
         DBSession.add(self.test_repo)
 

@@ -37,6 +37,7 @@ class RepositoryTester(UnitTestDBBase):
 
         self.kwargs = {
             "name": "a repository",
+            "code": "R1",
             "description": "this is for testing purposes",
             "tags": [self.test_tag1, self.test_tag2],
             "linux_path": "/mnt/M/Projects",
@@ -56,7 +57,14 @@ class RepositoryTester(UnitTestDBBase):
         self.patcher.restore()
         super(RepositoryTester, self).tearDown()
 
-    def test___auto_name__class_attribute_is_set_to_False(self):
+    def test_code_mixin_as_super(self):
+        """testing if CodeMixin is one of the supers of the Repository class
+        """
+        from stalker import Repository, CodeMixin
+        repo = Repository(**self.kwargs)
+        assert isinstance(repo, CodeMixin)
+
+    def test___auto_name__class_attribute_is_set_to_false(self):
         """testing if the __auto_name__ class attribute is set to False for
         Repository class
         """
@@ -906,7 +914,7 @@ class RepositoryTester(UnitTestDBBase):
         test_path = '%s/%s' % (self.test_repo.path, relative_part)
         from stalker import Repository
         assert Repository.to_os_independent_path(test_path) == \
-            '$REPO%s/%s' % (self.test_repo.id, relative_part)
+            '$REPO%s/%s' % (self.test_repo.code, relative_part)
 
     def test_find_repo_is_working_properly(self):
         """testing if the find_repo class method is working properly
@@ -919,6 +927,7 @@ class RepositoryTester(UnitTestDBBase):
         from stalker import Repository
         new_repo1 = Repository(
             name='New Repository',
+            code='NR',
             linux_path='/mnt/T/Projects',
             osx_path='/Volumes/T/Projects',
             windows_path='T:/Projects'
@@ -944,6 +953,7 @@ class RepositoryTester(UnitTestDBBase):
         from stalker import Repository
         new_repo1 = Repository(
             name='New Repository',
+            code='NR',
             linux_path='/mnt/T/Projects',
             osx_path='/Volumes/T/Projects',
             windows_path='T:/Projects'
@@ -951,6 +961,14 @@ class RepositoryTester(UnitTestDBBase):
         DBSession.add(new_repo1)
         DBSession.commit()
 
+        # Test with env var
+        test_path = '$REPO%s/some/path/to/a/file.ma' % self.test_repo.code
+        assert Repository.find_repo(test_path) == self.test_repo
+
+        test_path = '$REPO%s/some/path/to/a/file.ma' % new_repo1.code
+        assert Repository.find_repo(test_path) == new_repo1
+
+        # Test with old env var
         test_path = '$REPO%s/some/path/to/a/file.ma' % self.test_repo.id
         assert Repository.find_repo(test_path) == self.test_repo
 
@@ -960,7 +978,7 @@ class RepositoryTester(UnitTestDBBase):
     def test_env_var_property_is_working_properly(self):
         """testing if the env_var property is working properly
         """
-        assert self.test_repo.env_var == 'REPO31'
+        assert self.test_repo.env_var == 'REPOR1'
 
     def test_creating_and_committing_a_new_repository_instance_will_create_env_var(self):
         """testing if an environment variable will be created when a new
@@ -970,6 +988,7 @@ class RepositoryTester(UnitTestDBBase):
         from stalker.db.session import DBSession
         repo = Repository(
             name='Test Repo',
+            code='TR',
             linux_path='/mnt/T',
             osx_path='/Volumes/T',
             windows_path='T:/'
@@ -978,10 +997,14 @@ class RepositoryTester(UnitTestDBBase):
         DBSession.commit()
 
         import os
-        assert defaults.repo_env_var_template % {'id': repo.id} in os.environ
+        assert defaults.repo_env_var_template % {'code': repo.code} in \
+            os.environ
+
+        # check the old ID based env var
         assert \
-            os.environ[defaults.repo_env_var_template % {'id': repo.id}] == \
-            repo.path
+            os.environ[
+                defaults.repo_env_var_template_old % {'id': repo.id}
+            ] == repo.path
 
     def test_updating_a_repository_will_update_repo_path(self):
         """testing if the environment variable will be updated when the
@@ -990,6 +1013,7 @@ class RepositoryTester(UnitTestDBBase):
         from stalker import defaults, Repository
         repo = Repository(
             name='Test Repo',
+            code='TR',
             linux_path='/mnt/T',
             osx_path='/Volumes/T',
             windows_path='T:/'
@@ -999,7 +1023,10 @@ class RepositoryTester(UnitTestDBBase):
         DBSession.commit()
 
         import os
-        assert defaults.repo_env_var_template % {'id': repo.id} in os.environ
+        assert defaults.repo_env_var_template % {'code': repo.code} \
+            in os.environ
+        assert defaults.repo_env_var_template_old % {'id': repo.id} \
+            in os.environ
 
         # now update the repository
         test_value = '/mnt/S/'
@@ -1007,8 +1034,13 @@ class RepositoryTester(UnitTestDBBase):
 
         # expect the environment variable is also updated
         assert \
-            os.environ[defaults.repo_env_var_template % {'id': repo.id}] == \
-            test_value
+            os.environ[
+                defaults.repo_env_var_template % {'code': repo.code}
+            ] == test_value
+        assert \
+            os.environ[
+                defaults.repo_env_var_template_old % {'id': repo.id}
+            ] == test_value
 
     def test_updating_windows_path_only_update_repo_path_if_on_windows(self):
         """testing if updating the windows path will only update the path if
@@ -1018,6 +1050,7 @@ class RepositoryTester(UnitTestDBBase):
         from stalker import Repository
         repo = Repository(
             name='Test Repo',
+            code='TR',
             linux_path='/mnt/T',
             osx_path='/Volumes/T',
             windows_path='T:/'
@@ -1028,7 +1061,10 @@ class RepositoryTester(UnitTestDBBase):
 
         import os
         from stalker import defaults
-        assert defaults.repo_env_var_template % {'id': repo.id} in os.environ
+        assert \
+            defaults.repo_env_var_template % {'code': repo.code} in os.environ
+        assert \
+            defaults.repo_env_var_template_old % {'id': repo.id} in os.environ
 
         # now update the repository
         test_value = 'S:/'
@@ -1036,11 +1072,22 @@ class RepositoryTester(UnitTestDBBase):
 
         # expect the environment variable not updated
         assert \
-            os.environ[defaults.repo_env_var_template % {'id': repo.id}] != \
-            test_value
+            os.environ[
+                defaults.repo_env_var_template % {'code': repo.code}
+            ] != test_value
         assert \
-            os.environ[defaults.repo_env_var_template % {'id': repo.id}] == \
-            repo.linux_path
+            os.environ[
+                defaults.repo_env_var_template % {'code': repo.code}
+            ] == repo.linux_path
+
+        assert \
+            os.environ[
+                defaults.repo_env_var_template_old % {'id': repo.id}
+            ] != test_value
+        assert \
+            os.environ[
+                defaults.repo_env_var_template_old % {'id': repo.id}
+            ] == repo.linux_path
 
         # make it windows
         self.patcher.patch('Windows')
@@ -1051,11 +1098,21 @@ class RepositoryTester(UnitTestDBBase):
 
         # expect the environment variable not updated
         assert \
-            os.environ[defaults.repo_env_var_template % {'id': repo.id}] == \
-            test_value
+            os.environ[
+                defaults.repo_env_var_template % {'code': repo.code}
+            ] == test_value
         assert \
-            os.environ[defaults.repo_env_var_template % {'id': repo.id}] == \
-            repo.windows_path
+            os.environ[
+                defaults.repo_env_var_template % {'code': repo.code}
+            ] == repo.windows_path
+        assert \
+            os.environ[
+                defaults.repo_env_var_template_old % {'id': repo.id}
+            ] == test_value
+        assert \
+            os.environ[
+                defaults.repo_env_var_template_old % {'id': repo.id}
+            ] == repo.windows_path
 
     def test_updating_osx_path_only_update_repo_path_if_on_osx(self):
         """testing if updating the osx path will only update the path if the
@@ -1066,6 +1123,7 @@ class RepositoryTester(UnitTestDBBase):
         from stalker import defaults, Repository
         repo = Repository(
             name='Test Repo',
+            code='TR',
             linux_path='/mnt/T',
             osx_path='/Volumes/T',
             windows_path='T:/'
@@ -1075,7 +1133,10 @@ class RepositoryTester(UnitTestDBBase):
         DBSession.commit()
 
         import os
-        assert defaults.repo_env_var_template % {'id': repo.id} in os.environ
+        assert \
+            defaults.repo_env_var_template % {'code': repo.code} in os.environ
+        assert \
+            defaults.repo_env_var_template_old % {'id': repo.id} in os.environ
 
         # now update the repository
         test_value = '/Volumes/S/'
@@ -1083,11 +1144,22 @@ class RepositoryTester(UnitTestDBBase):
 
         # expect the environment variable not updated
         assert \
-            os.environ[defaults.repo_env_var_template % {'id': repo.id}] != \
-            test_value
+            os.environ[
+                defaults.repo_env_var_template % {'code': repo.code}
+            ] != test_value
         assert \
-            os.environ[defaults.repo_env_var_template % {'id': repo.id}] == \
-            repo.windows_path
+            os.environ[
+                defaults.repo_env_var_template % {'code': repo.code}
+            ] == repo.windows_path
+
+        assert \
+            os.environ[
+                defaults.repo_env_var_template_old % {'id': repo.id}
+            ] != test_value
+        assert \
+            os.environ[
+                defaults.repo_env_var_template_old % {'id': repo.id}
+            ] == repo.windows_path
 
         # make it osx
         self.patcher.patch('Darwin')
@@ -1098,11 +1170,22 @@ class RepositoryTester(UnitTestDBBase):
 
         # expect the environment variable not updated
         assert \
-            os.environ[defaults.repo_env_var_template % {'id': repo.id}] == \
-            test_value
+            os.environ[
+                defaults.repo_env_var_template % {'code': repo.code}
+            ] == test_value
         assert \
-            os.environ[defaults.repo_env_var_template % {'id': repo.id}] == \
-            repo.osx_path
+            os.environ[
+                defaults.repo_env_var_template % {'code': repo.code}
+            ] == repo.osx_path
+
+        assert \
+            os.environ[
+                defaults.repo_env_var_template_old % {'id': repo.id}
+            ] == test_value
+        assert \
+            os.environ[
+                defaults.repo_env_var_template_old % {'id': repo.id}
+            ] == repo.osx_path
 
     def test_updating_linux_path_only_update_repo_path_if_on_linux(self):
         """testing if updating the linux path will only update the path if the
@@ -1113,6 +1196,7 @@ class RepositoryTester(UnitTestDBBase):
         from stalker import defaults, Repository
         repo = Repository(
             name='Test Repo',
+            code='TR',
             linux_path='/mnt/T',
             osx_path='/Volumes/T',
             windows_path='T:/'
@@ -1122,7 +1206,10 @@ class RepositoryTester(UnitTestDBBase):
         DBSession.commit()
 
         import os
-        assert defaults.repo_env_var_template % {'id': repo.id} in os.environ
+        assert \
+            defaults.repo_env_var_template % {'code': repo.code} in os.environ
+        assert \
+            defaults.repo_env_var_template_old % {'id': repo.id} in os.environ
 
         # now update the repository
         test_value = '/mnt/S/'
@@ -1130,11 +1217,22 @@ class RepositoryTester(UnitTestDBBase):
 
         # expect the environment variable not updated
         assert \
-            os.environ[defaults.repo_env_var_template % {'id': repo.id}] != \
-            test_value
+            os.environ[
+                defaults.repo_env_var_template % {'code': repo.code}
+            ] != test_value
         assert \
-            os.environ[defaults.repo_env_var_template % {'id': repo.id}] == \
-            repo.osx_path
+            os.environ[
+                defaults.repo_env_var_template % {'code': repo.code}
+            ] == repo.osx_path
+
+        assert \
+            os.environ[
+                defaults.repo_env_var_template_old % {'id': repo.id}
+            ] != test_value
+        assert \
+            os.environ[
+                defaults.repo_env_var_template_old % {'id': repo.id}
+            ] == repo.osx_path
 
         # make it linux
         self.patcher.patch('Linux')
@@ -1145,8 +1243,20 @@ class RepositoryTester(UnitTestDBBase):
 
         # expect the environment variable not updated
         assert \
-            os.environ[defaults.repo_env_var_template % {'id': repo.id}] == \
-            test_value
+            os.environ[
+                defaults.repo_env_var_template % {'code': repo.code}
+            ] == test_value
         assert \
-            os.environ[defaults.repo_env_var_template % {'id': repo.id}] == \
-            repo.linux_path
+            os.environ[
+                defaults.repo_env_var_template % {'code': repo.code}
+            ] == repo.linux_path
+
+        # expect the environment variable not updated
+        assert \
+            os.environ[
+                defaults.repo_env_var_template_old % {'id': repo.id}
+            ] == test_value
+        assert \
+            os.environ[
+                defaults.repo_env_var_template_old % {'id': repo.id}
+            ] == repo.linux_path

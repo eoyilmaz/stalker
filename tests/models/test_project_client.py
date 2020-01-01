@@ -32,7 +32,8 @@ class ProjectClientTestDBCase(UnitTestDBBase):
 
         from stalker import Status, Repository
         self.test_repo = Repository(
-            name='Test Repo'
+            name='Test Repo',
+            code='TR'
         )
         self.status_new = Status(name='New', code='NEW')
         self.status_wip = Status(name='Work In Progress', code='WIP')

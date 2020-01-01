@@ -932,7 +932,8 @@ class SimpleEntityDBTester(UnitTestDBBase):
 
         from stalker import Repository
         test_repo = Repository(
-            name='Test Repository'
+            name='Test Repository',
+            code='TR',
         )
 
         from stalker import Structure

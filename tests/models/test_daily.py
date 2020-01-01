@@ -64,7 +64,7 @@ class DailyTestBase(unittest.TestCase):
         )
 
         from stalker import Repository, Project
-        self.test_repo = Repository(name='Test Repository')
+        self.test_repo = Repository(name='Test Repository', code='TR')
 
         self.test_project = Project(
             name='Test Project',
@@ -264,7 +264,7 @@ class DailyDBTestDBCase(UnitTestDBBase):
             StatusList.query.filter_by(target_entity_type='Task').first()
 
         from stalker import Repository, Project
-        self.test_repo = Repository(name='Test Repository')
+        self.test_repo = Repository(name='Test Repository', code='TR')
         from stalker.db.session import DBSession
         DBSession.add(self.test_repo)
 

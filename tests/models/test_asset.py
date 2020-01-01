@@ -87,6 +87,7 @@ class AssetTester(UnitTestDBBase):
         from stalker import Repository
         self.repository = Repository(
             name="Test Repository",
+            code='TR',
             type=self.repository_type,
         )
         DBSession.add(self.repository)

@@ -85,6 +85,7 @@ class TaskTester(unittest.TestCase):
         from stalker import Repository
         self.test_repository = Repository(
             name="Test Repository",
+            code="TR",
             type=self.test_repository_type,
             linux_path='/mnt/T/',
             windows_path='T:/',
@@ -4304,6 +4305,7 @@ class TaskDBTestDBCase(UnitTestDBBase):
         from stalker import Repository
         self.test_repository = Repository(
             name="Test Repository",
+            code="TR",
             type=self.test_repository_type,
             linux_path='/mnt/T/',
             windows_path='T:/',

@@ -71,6 +71,7 @@ class EntityGroupTestCase(unittest.TestCase):
 
         self.repo = Repository(
             name='Test Repo',
+            code='TR',
             linux_path='/mnt/M/JOBs',
             windows_path='M:/JOBs',
             osx_path='/Users/Shared/Servers/M',

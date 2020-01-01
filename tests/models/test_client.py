@@ -93,7 +93,8 @@ class ClientTestCase(unittest.TestCase):
 
         from stalker import Repository
         self.test_repo = Repository(
-            name="Test Repository"
+            name="Test Repository",
+            code="TR"
         )
 
         from stalker import Project

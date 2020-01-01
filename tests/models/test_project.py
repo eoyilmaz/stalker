@@ -179,10 +179,12 @@ class ProjectTestDBCase(UnitTestDBBase):
         from stalker import Repository
         self.test_repo1 = Repository(
             name="Commercials Repository 1",
+            code="CR1",
         )
 
         self.test_repo2 = Repository(
             name="Commercials Repository 2",
+            code="CR2"
         )
 
         from stalker import Client
@@ -921,6 +923,7 @@ class ProjectTestDBCase(UnitTestDBBase):
         from stalker import Repository
         new_repo1 = Repository(
             name='Some Random Repo',
+            code='SRP',
             linux_path='/mnt/S/random/repo',
             windows_path='S:/random/repo',
             osx_path='/Volumes/S/random/repo'
@@ -934,9 +937,9 @@ class ProjectTestDBCase(UnitTestDBBase):
         """testing if the order of the repositories attribute is not changing
         """
         from stalker import Repository, Project
-        repo1 = Repository(name='Repo1')
-        repo2 = Repository(name='Repo2')
-        repo3 = Repository(name='Repo3')
+        repo1 = Repository(name='Repo1', code='R1')
+        repo2 = Repository(name='Repo2', code='R1')
+        repo3 = Repository(name='Repo3', code='R1')
 
         from stalker.db.session import DBSession
         DBSession.add_all([repo1, repo2, repo3])
@@ -2107,6 +2110,7 @@ class ProjectTicketsTestDBCase(UnitTestDBBase):
         from stalker import Repository
         self.test_repo = Repository(
             name="Commercials Repository",
+            code="CR",
         )
 
         # create a project object
