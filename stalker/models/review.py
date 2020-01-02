@@ -317,7 +317,7 @@ class Daily(Entity, StatusMixin, ProjectMixin):
     The main purpose of a ``Daily`` is to gather a group of :class:`.Link`
     instances and introduce a simple way of presenting them as a group.
 
-    :class:`.Note`\ s created during a Daily session can be directly stored
+    :class:`.Note` s created during a Daily session can be directly stored
     both in the :class:`.Link` and the :class:`.Daily` instances and a *join*
     will reveal which :class:`.Note` is created in which :class:`.Daily`.
     """
@@ -404,8 +404,8 @@ class DailyLink(Base):
         doc="""stalker.models.link.Link instances related to the Daily
         instance.
 
-        Attach the same :class:`.Link`\ s that are linked as an output to a
-        certain :class:`.Version`\ s instance to this attribute.
+        Attach the same :class:`.Link` s that are linked as an output to a
+        certain :class:`.Version` s instance to this attribute.
 
         This attribute is an **association_proxy** so and the real attribute
         that the data is related to is the :attr:`.link_relations` attribute.

@@ -41,13 +41,13 @@ class Client(Entity):
     .. note::
        .. versionadded 0.2.20: Client Specific Goods
 
-       Clients now can own a list of :class:`.Good`\ s attached to them.
-       So one can define a list of class:`.Good`\ s with special prices
+       Clients now can own a list of :class:`.Good` s attached to them.
+       So one can define a list of class:`.Good` s with special prices
        adjusted for a particular ``Client``, then get them back from the db by
-       querying the :class:`.Good`\ s those have their ``client`` attribute set
+       querying the :class:`.Good` s those have their ``client`` attribute set
        to that particular ``Client`` instance. Removing a ``Good`` from a
        :class:`.Client` will not delete it from the database, but deleting a
-       :class:`.Client` will also delete the ``Good``\ s attached to that
+       :class:`.Client` will also delete the ``Good`` s attached to that
        particular :class:`.Client`.
 
     .. ::
@@ -62,13 +62,13 @@ class Client(Entity):
       without any user in it. But this parameter should be a list of User
       objects.
 
-    :type users: list of :class:`.User`\ s
+    :type users: list of :class:`.User` s
 
     :param projects: it can be an empty list, so one client can be created
       without any project in it. But this parameter should be a list of Project
       objects.
 
-    :type projects: :param type: list of :class:`.Project`\ s
+    :type projects: :param type: list of :class:`.Project` s
 
     """
 

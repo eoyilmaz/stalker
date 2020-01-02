@@ -151,11 +151,11 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
     **Deleting a Project**
 
     Deleting a :class:`.Project` instance will cascade the delete operation to
-    all the :class:`.Task`\ s related to that particular Project and it will
-    cascade the delete operation to :class:`.TimeLog`\ s, :class:`.Version`\ s,
-    :class:`.Link`\ s and :class:`.Review`\ s etc.. So one can delete a
+    all the :class:`.Task` s related to that particular Project and it will
+    cascade the delete operation to :class:`.TimeLog` s, :class:`.Version` s,
+    :class:`.Link` s and :class:`.Review` s etc.. So one can delete a
     :class:`.Project` instance without worrying about the non-project related
-    data like :class:`.User`\ s or :class:`.Department`\ s to be deleted.
+    data like :class:`.User` s or :class:`.Department` s to be deleted.
 
     :param clients: The clients which the project is affiliated with. Default
       value is an empty list.
@@ -191,7 +191,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
       to be a stereo 3D project, anything given as the argument will be
       converted to True or False. Default value is False.
 
-    :param users: A list of :class:`.User`\ s holding the users in this
+    :param users: A list of :class:`.User` s holding the users in this
       project. This will create a reduced or grouped list of studio workers and
       will make it easier to define the resources for a Task related to this
       project. The default value is an empty list.
@@ -525,7 +525,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
 
     @property
     def open_tickets(self):
-        """The list of open :class:`.Ticket`\ s in this project.
+        """The list of open :class:`.Ticket` s in this project.
 
         returns a list of :class:`.Ticket` instances which has a status of
         `Open` and created in this project.

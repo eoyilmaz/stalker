@@ -827,10 +827,6 @@ class RepositoryTester(UnitTestDBBase):
     def test_is_in_repo_is_case_insensitive_under_windows(self):
         """testing if is_in_repo is case-insensitive under windows
         """
-        import platform
-        if platform.system() != "Windows":
-            pytest.skip("Test this only under Windows!")
-
         self.test_repo.windows_path = 'T:/Stalker_Projects'
         test_windows_path_reverse = 't:\\stalKer_ProjectS\\sErO\\task1\\' \
                                     'Task2\\Some_file.ma'
@@ -1041,10 +1037,6 @@ class RepositoryTester(UnitTestDBBase):
         """testing if the find_repo class method is case-insensitive under
         windows
         """
-        import platform
-        if platform.system() != "Windows":
-            pytest.skip("Test this only under Windows!")
-
         from stalker.db.session import DBSession
         DBSession.add(self.test_repo)
         DBSession.commit()

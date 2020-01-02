@@ -45,11 +45,11 @@ class Structure(Entity):
     Every line of this rendered template will represent a folder and Stalker
     will create these folders on the attached :class:`.Repository`.
 
-    :param templates: A list of :class:`.FilenameTemplate`\ s which defines a
+    :param templates: A list of :class:`.FilenameTemplate` s which defines a
       specific template for the given
-      :attr:`.FilenameTemplate.target_entity_type`\ s.
+      :attr:`.FilenameTemplate.target_entity_type` s.
 
-    :type templates: list of :class:`.FilenameTemplate`\ s
+    :type templates: list of :class:`.FilenameTemplate` s
 
     :param str custom_template: A string containing several lines of folder
       names. The folders are relative to the :class:`.Project` root. It can
@@ -85,20 +85,20 @@ class Structure(Entity):
                     {{task_root}}
 
       The above example has gone far beyond deep than it is needed, where it
-      started to define paths for :class:`.Asset`\ s. Even it is possible to
+      started to define paths for :class:`.Asset` s. Even it is possible to
       create a :class:`.Project` structure like that, in general it is
       unnecessary. Because the above folders are going to be created but they
       are probably going to be empty for a while, because the
-      :class:`.Asset`\ s are not created yet (or in fact no
-      :class:`.Version`\ s are created for the :class:`.Task`\ s). Anyway, it
+      :class:`.Asset` s are not created yet (or in fact no
+      :class:`.Version` s are created for the :class:`.Task` s). Anyway, it
       is much suitable and desired to create this details by using
       :class:`.FilenameTemplate` objects. Which are specific to certain
-      :attr:`.FilenameTemplate.target_entity_type`\ s. And by using the
+      :attr:`.FilenameTemplate.target_entity_type` s. And by using the
       :attr:`.Structure.custom_template` attribute, Stalker can not place any
       source or output file of a :class:`.Version` in the :class:`.Repository`
-      where as it can by using :class:`.FilenameTemplate`\ s.
+      where as it can by using :class:`.FilenameTemplate` s.
 
-      But for certain types of :class:`.Task`\ s it is may be good to
+      But for certain types of :class:`.Task` s it is may be good to
       previously create the folder structure just because in certain
       environments (programs) it is not possible to run a Python code that will
       place the file in to the Repository like in Photoshop.
@@ -110,7 +110,7 @@ class Structure(Entity):
     (__strictly_typed__ = True). By giving a ``type`` to the
     :class:`.Structure`, you can create one structure for **Commercials** and
     another project structure for **Movies** and another one for **Print**
-    projects etc. and can reuse them with new :class:`.Project`\ s.
+    projects etc. and can reuse them with new :class:`.Project` s.
     """
 
     #__strictly_typed__ = True

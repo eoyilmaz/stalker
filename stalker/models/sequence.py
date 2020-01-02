@@ -54,7 +54,7 @@ class Sequence(Task, CodeMixin):
         "Shot",
         secondary='Shot_Sequences',
         back_populates="sequences",
-        doc="""The :class:`.Shot`\ s assigned to this Sequence.
+        doc="""The :class:`.Shot` s assigned to this Sequence.
 
         It is a list of :class:`.Shot` instances.
         """

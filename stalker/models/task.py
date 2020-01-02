@@ -354,7 +354,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
 
     Stalker uses TaskJuggler for task scheduling. After defining all the tasks,
     Stalker will convert them to a single tjp file along with the recorded
-    :class:`.TimeLog`\ s :class:`.Vacation`\ s etc. and let TaskJuggler to
+    :class:`.TimeLog` s :class:`.Vacation` s etc. and let TaskJuggler to
     solve the scheduling problem.
 
     During the auto scheduling (with TaskJuggler), the calculation of task
@@ -723,7 +723,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
           :class:`.Sequences` or anything that is derived from Task class) in
           the :class:`.Project` that this task belongs to. This property has
           been added to make it easier to write custom template codes for
-          Project :class:`.Structure`\ s.
+          Project :class:`.Structure` s.
 
           The :attr:`.path` attribute is a repository relative path, where as
           the :attr:`.absolute_path` is the full path and includs the OS
@@ -739,7 +739,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
        :class:`.BugdetEntry` instances from the tasks that are related to the
        same :class:`.Good` and because the Goods are defining the cost and MSRP
        of different things, it is possible to create BudgetEntries and thus
-       :class;`.Budget`\ s with this information.
+       :class;`.Budget` s with this information.
 
     **Arguments**
 
@@ -762,14 +762,14 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
 
     :type parent: :class:`.Task`
 
-    :param depends: A list of :class:`.Task`\ s that this :class:`.Task` is
+    :param depends: A list of :class:`.Task` s that this :class:`.Task` is
       depending on. A Task can not depend to itself or any other Task which are
       already depending to this one in anyway or a CircularDependency error
       will be raised.
 
     :type depends: [:class:`.Task`]
 
-    :param resources: The :class:`.User`\ s assigned to this :class:`.Task`. A
+    :param resources: The :class:`.User` s assigned to this :class:`.Task`. A
       :class:`.Task` without any resource can not be scheduled.
 
     :type resources: [:class:`.User`]
@@ -913,7 +913,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
         back_populates='task',
         cascade="all, delete-orphan",
         primaryjoin='Tasks.c.id==Task_Dependencies.c.task_id',
-        doc="""A list of :class:`.Task`\ s that this one is depending on.
+        doc="""A list of :class:`.Task` s that this one is depending on.
 
         A CircularDependencyError will be raised when the task dependency
         creates a circular dependency which means it is not allowed to create
@@ -926,7 +926,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
         back_populates='depends_to',
         cascade="all, delete-orphan",
         primaryjoin='Tasks.c.id==Task_Dependencies.c.depends_to_id',
-        doc="""A list of :class:`.Task`\ s that this one is being depended by.
+        doc="""A list of :class:`.Task` s that this one is being depended by.
 
         A CircularDependencyError will be raised when the task dependency
         creates a circular dependency which means it is not allowed to create
@@ -941,7 +941,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
         primaryjoin="Tasks.c.id==Task_Resources.c.task_id",
         secondaryjoin="Task_Resources.c.resource_id==Users.c.id",
         back_populates="tasks",
-        doc="The list of :class:`.User`\ s assigned to this Task."
+        doc="The list of :class:`.User` s assigned to this Task."
     )
 
     alternative_resources = relationship(
@@ -950,7 +950,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
         primaryjoin="Tasks.c.id==Task_Alternative_Resources.c.task_id",
         secondaryjoin="Task_Alternative_Resources.c.resource_id==Users.c.id",
         backref="alternative_resource_in_tasks",
-        doc="The list of :class:`.User`\ s assigned to this Task as an "
+        doc="The list of :class:`.User` s assigned to this Task as an "
             "alternative resource."
     )
 
@@ -975,7 +975,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
         primaryjoin='Tasks.c.id==Task_Watchers.c.task_id',
         secondaryjoin='Task_Watchers.c.watcher_id==Users.c.id',
         back_populates='watching',
-        doc="The list of :class:`.User`\ s watching this Task."
+        doc="The list of :class:`.User` s watching this Task."
     )
 
     _responsible = relationship(
@@ -984,7 +984,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
         primaryjoin='Tasks.c.id==Task_Responsible.c.task_id',
         secondaryjoin='Task_Responsible.c.responsible_id==Users.c.id',
         back_populates='responsible_of',
-        doc="The list of :class:`.User`\ s responsible from this Task."
+        doc="The list of :class:`.User` s responsible from this Task."
     )
 
     priority = Column(
@@ -1018,7 +1018,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
         primaryjoin="Tasks.c.id==Task_Computed_Resources.c.task_id",
         secondaryjoin="Task_Computed_Resources.c.resource_id==Users.c.id",
         backref="computed_resource_in_tasks",
-        doc="A list of :class:`.User`\ s computed by TaskJuggler. It is the "
+        doc="A list of :class:`.User` s computed by TaskJuggler. It is the "
             "result of scheduling."
     )
 

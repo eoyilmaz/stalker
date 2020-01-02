@@ -56,7 +56,7 @@ class Version(Link, DAGMixin):
        For projects those are created prior to Stalker version 0.2.13 and that
        has a :class:`.Structure` with :class:`.FilenameTemplate` that doesn't
        include the repository info, it is suggested to update the related
-       ``FilenameTemplate``\ s to include a the repository info manually.
+       ``FilenameTemplate`` s to include a the repository info manually.
 
        Example:
          pre 0.2.13 setup:

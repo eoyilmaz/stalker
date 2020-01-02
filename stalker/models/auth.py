@@ -231,7 +231,7 @@ class Permission(Base):
 class Group(Entity, ACLMixin):
     """Creates groups for users to be used in authorization system.
 
-    A Group instance is nothing more than a list of :class:`.User`\ s created
+    A Group instance is nothing more than a list of :class:`.User` s created
     to be able to assign permissions in a group level.
 
     The Group class, as with the :class:`.User` class, is mixed with the
@@ -365,7 +365,7 @@ class User(Entity, ACLMixin):
       should be a list of Department objects. One user can be listed in
       multiple departments.
 
-    :type departments: list of :class:`.Department`\ s
+    :type departments: list of :class:`.Department` s
 
     :param password: it is the password of the user, can contain any character.
       Stalker doesn't store the raw passwords of the users. To check a stored
@@ -382,7 +382,7 @@ class User(Entity, ACLMixin):
     :param tasks: it is a list of Task objects which holds the tasks that this
       user has been assigned to
 
-    :type tasks: list of :class:`.Task`\ s
+    :type tasks: list of :class:`.Task` s
 
     :param last_login: it is a datetime.datetime object holds the last login
       date of the user (not implemented yet)
@@ -411,7 +411,7 @@ class User(Entity, ACLMixin):
         back_populates='user',
         cascade='all, delete-orphan',
         primaryjoin='Users.c.id==Department_Users.c.uid',
-        doc="""A list of :class:`.Department`\ s that
+        doc="""A list of :class:`.Department` s that
         this user is a part of"""
     )
 
@@ -426,7 +426,7 @@ class User(Entity, ACLMixin):
         back_populates="user",
         cascade='all, delete-orphan',
         primaryjoin="Users.c.id==Client_Users.c.uid",
-        doc="""A list of :class:`.Client`\ s that this user is a part of."""
+        doc="""A list of :class:`.Client` s that this user is a part of."""
     )
 
     email = Column(
@@ -492,7 +492,7 @@ class User(Entity, ACLMixin):
         "Task",
         secondary="Task_Resources",
         back_populates="resources",
-        doc=""":class:`.Task`\ s assigned to this user.
+        doc=""":class:`.Task` s assigned to this user.
 
         It is a list of :class:`.Task` instances.
         """
@@ -502,7 +502,7 @@ class User(Entity, ACLMixin):
         'Task',
         secondary='Task_Watchers',
         back_populates='watchers',
-        doc=''':class:`.Tasks`\ s that this user is
+        doc=''':class:`.Tasks` s that this user is
         assigned as a watcher.
 
         It is a list of :class:`.Task` instances.
@@ -866,7 +866,7 @@ class User(Entity, ACLMixin):
 
     @property
     def tickets(self):
-        """The list of :class:`.Ticket`\ s that this user has.
+        """The list of :class:`.Ticket` s that this user has.
 
         returns a list of :class:`.Ticket` instances
         which this user is the owner of.
@@ -880,7 +880,7 @@ class User(Entity, ACLMixin):
 
     @property
     def open_tickets(self):
-        """The list of open :class:`.Ticket`\ s that this user has.
+        """The list of open :class:`.Ticket` s that this user has.
 
         returns a list of :class:`.Ticket` instances which has a status of
         `Open` that this user is assigned as the owner.
@@ -1044,7 +1044,7 @@ class Role(Entity):
 
     .. versionadded 0.2.11: Roles
 
-    When :class:`.User`\ s are assigned to a
+    When :class:`.User` s are assigned to a
     :class:`.Client`/:class:`.Department`, they also can be assigned to a role
     for that client/department.
 

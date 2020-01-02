@@ -29,7 +29,7 @@ logger.setLevel(logging_level)
 
 
 class ImageFormat(Entity):
-    """Common image formats for the :class:`.Project`\ s.
+    """Common image formats for the :class:`.Project` s.
 
     :param width: The width of the format, it cannot be zero or negative, if a
       float number is given it will be converted to integer

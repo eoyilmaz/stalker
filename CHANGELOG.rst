@@ -2,6 +2,25 @@
 Stalker Changes
 ===============
 
+0.2.24.2
+========
+
+This release is mainly related to cleaning up some complains that arose while
+testing the library.
+
+* **Fix:** Fixed two tests which are testing the ``stalker.db`` module to
+  check the system against the correct Alembic revision id.
+
+* **Update:** Removed the unnecessary ``pytest.skip`` commands in the
+  ``Repository`` class tests which were shipping the tests if the OS is not
+  Windows. But they should work fine under all OSes.
+
+* **Update:** Updated all class documentation and removed the cancellation
+  character (which was apparently not good for PEP8)
+
+* **Fix:** Fixed some warnings about some regular expressions.
+
+
 0.2.24.1
 ========
 

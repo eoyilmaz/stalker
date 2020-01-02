@@ -36,8 +36,8 @@ class Scene(Entity, ProjectMixin, CodeMixin):
     shots taking place in the same set configuration can be grouped together by
     using Scenes.
 
-    You can not replace :class:`.Sequence`\ s with Scenes, because Scene
-    instances doesn't have some key features that :class:`.Sequence`\ s have.
+    You can not replace :class:`.Sequence` s with Scenes, because Scene
+    instances doesn't have some key features that :class:`.Sequence` s have.
 
     A Scene needs to be tied to a :class:`.Project`
     instance, so it is not possible to create a Scene without a one.
@@ -52,7 +52,7 @@ class Scene(Entity, ProjectMixin, CodeMixin):
         "Shot",
         secondary='Shot_Scenes',
         back_populates="scenes",
-        doc="""The :class:`.Shot`\ s that is related with this Scene.
+        doc="""The :class:`.Shot` s that is related with this Scene.
 
         It is a list of :class:`.Shot` instances.
         """

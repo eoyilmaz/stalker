@@ -60,10 +60,10 @@ class Type(Entity, TargetEntityTypeMixin, CodeMixin):
       Type(name="Commercial", target_entity_type=Project)
       Type(name="Image", target_entity_type=Link)
 
-    By using :class:`.Type`\ s, one can able to sort and group same type of
+    By using :class:`.Type` s, one can able to sort and group same type of
     entities.
 
-    :class:`.Type`\ s are generally used in :class:`.Structure`\ s.
+    :class:`.Type` s are generally used in :class:`.Structure` s.
 
     :param string target_entity_type: The string defining the target type of
       this :class:`.Type`.

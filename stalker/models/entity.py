@@ -409,11 +409,11 @@ class SimpleEntity(Base):
         # remove multiple spaces
         nice_name_in = re.sub(r'[\s]+', ' ', nice_name_in)
 
-        ## replace camel case letters
+        # # replace camel case letters
         # nice_name_in = re.sub(r"(.+?[a-z]+)([A-Z])", r"\1_\2", nice_name_in)
 
         # replace white spaces and dashes with under score
-        nice_name_in = re.sub("([\s\-])+", r"_", nice_name_in)
+        nice_name_in = re.sub("([ -])+", r"_", nice_name_in)
 
         # remove multiple underscores
         nice_name_in = re.sub(r"([_]+)", r"_", nice_name_in)
@@ -430,7 +430,7 @@ class SimpleEntity(Base):
         it is always lower case.
         """
         # also set the nice_name
-        #if self._nice_name is None or self._nice_name == "":
+        # if self._nice_name is None or self._nice_name == "":
         self._nice_name = self._format_nice_name(self.name)
         return self._nice_name
 
@@ -626,7 +626,7 @@ class Entity(SimpleEntity):
         "Note",
         secondary="Entity_Notes",
         backref="entities",
-        doc="""All the :class:`.Notes`\ s attached to this entity.
+        doc="""All the :class:`.Notes` s attached to this entity.
 
         It is a list of :class:`.Note` instances or an
         empty list, setting it to None will raise a TypeError.

@@ -36,7 +36,7 @@ class Message(Entity, StatusMixin):
 
     :param from: the :class:`.User` object sending the message.
 
-    :param to: the list of :class:`.User`\ s to receive this message
+    :param to: the list of :class:`.User` s to receive this message
 
     :param subject: the subject of the message
 

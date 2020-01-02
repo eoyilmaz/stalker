@@ -34,13 +34,13 @@ class Good(Entity, UnitMixin):
     .. note::
        .. versionadded 0.2.20: Client Specific Goods
 
-       Clients now can own a list of :class:`.Good`\ s attached to them.
-       So one can define a list of :class:`.Good`\ s with special prices
+       Clients now can own a list of :class:`.Good` s attached to them.
+       So one can define a list of :class:`.Good` s with special prices
        adjusted for a particular ``Client``, then get them back from the db by
-       querying the :class:`.Good`\ s those have their ``client`` attribute set
+       querying the :class:`.Good` s those have their ``client`` attribute set
        to that particular ``Client`` instance. Removing a ``Good`` from a
        :class:`.Client` will not delete it from the database, but deleting a
-       :class:`.Client` will also delete the ``Good``\ s attached to that
+       :class:`.Client` will also delete the ``Good`` s attached to that
        particular :class:`.Client`.
 
     .. ::
@@ -464,7 +464,7 @@ class Invoice(Entity, AmountMixin, UnitMixin):
     """Holds information about invoices
 
     Invoices are part of :class:`.Budgets`. The main purpose of invoices are
-    to track the :class:`.Payment`\ s. It is a very primitive entity. It is
+    to track the :class:`.Payment` s. It is a very primitive entity. It is
     by no means designed to hold real financial information (at least for now).
 
     :param client: The :class:`.Client` instance that shows the payer for

@@ -483,8 +483,8 @@ def create_entity_statuses(entity_type='', status_names=None,
 def register(class_):
     """Registers the given class to the database.
 
-    It is mainly used to create the :class:`.Action`\ s needed for the
-    :class:`.User`\ s and :class:`.Group`\ s to be able to interact with the
+    It is mainly used to create the :class:`.Action` s needed for the
+    :class:`.User` s and :class:`.Group` s to be able to interact with the
     given class. Whatever class you have created needs to be registered.
 
     Example, lets say that you have a data class which is specific to your
@@ -510,16 +510,16 @@ def register(class_):
 
     Now because Stalker is using Pyramid authorization mechanism it needs to be
     able to have an :class:`.Permission` about your new class, so you can
-    assign this :class;`.Permission` to your :class:`.User`\ s or
-    :class:`.Group`\ s. So you ned to register your new class with
+    assign this :class;`.Permission` to your :class:`.User` s or
+    :class:`.Group` s. So you ned to register your new class with
     :func:`stalker.db.register` like shown below::
 
       from stalker import db
       db.register(MyDataClass)
 
     This will create the necessary Actions in the 'Actions' table on your
-    database, then you can create :class:`.Permission`\ s and assign these to
-    your :class:`.User`\ s and :class:`.Group`\ s so they are Allowed or Denied
+    database, then you can create :class:`.Permission` s and assign these to
+    your :class:`.User` s and :class:`.Group` s so they are Allowed or Denied
     to do the specified Action.
 
     :param class_: The class itself that needs to be registered.

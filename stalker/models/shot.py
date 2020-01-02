@@ -127,7 +127,7 @@ class Shot(Task, CodeMixin):
 
     :type project: :class:`.Project`
 
-    :param sequences: This is a list of :class:`.Sequence`\ s that this shot is
+    :param sequences: This is a list of :class:`.Sequence` s that this shot is
       assigned to. A Shot can be created without having a Sequence instance.
 
     :type sequences: list of :class:`.Sequence`
