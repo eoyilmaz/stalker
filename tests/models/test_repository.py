@@ -1037,6 +1037,10 @@ class RepositoryTester(UnitTestDBBase):
         """testing if the find_repo class method is case-insensitive under
         windows
         """
+        import platform
+        if platform.platform() != 'Windows':
+            pytest.skip("Test under Windows only!")
+
         from stalker.db.session import DBSession
         DBSession.add(self.test_repo)
         DBSession.commit()
