@@ -2,6 +2,11 @@
 Stalker Changes
 ===============
 
+0.2.24.3
+========
+
+This release is again mainly related to fixing failing tests.
+
 0.2.24.2
 ========
 
