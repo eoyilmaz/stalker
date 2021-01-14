@@ -1064,6 +1064,36 @@ class RepositoryTester(UnitTestDBBase):
                     new_repo1.windows_path.lower()
         assert Repository.find_repo(test_path) == new_repo1
 
+    def test_find_repo_is_working_properly_with_reverse_slashes(self):
+        """testing if the find_repo class method will work properly with paths
+        that contains reverse slashes
+        """
+        from stalker.db.session import DBSession
+        DBSession.add(self.test_repo)
+        DBSession.commit()
+
+        # add some other repositories
+        from stalker import Repository
+        new_repo1 = Repository(
+            name='New Repository',
+            code='NR',
+            linux_path='/mnt/T/Projects',
+            osx_path='/Volumes/T/Projects',
+            windows_path='T:/Projects'
+        )
+        DBSession.add(new_repo1)
+        DBSession.commit()
+
+        test_path = '%s\\some\\path\\to\\a\\file.ma' % \
+                    self.test_repo.path
+        test_path.replace('/', '\\')
+        assert Repository.find_repo(test_path) == self.test_repo
+
+        test_path = '%s\\some\\path\\to\\a\\file.ma' % \
+                    new_repo1.windows_path.lower()
+        test_path.replace('/', '\\')
+        assert Repository.find_repo(test_path) == new_repo1
+
     def test_find_repo_is_working_properly_with_env_vars(self):
         """testing if the find_repo class method is working properly with paths
         containing env vars
