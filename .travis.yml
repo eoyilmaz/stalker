@@ -1,7 +1,7 @@
     language: python
 
     sudo: required
-    dist: trusty
+    dist: focal
 
     python:
       - 2.7
@@ -14,7 +14,7 @@
       - postgresql
 
     addons:
-      postgresql: "13.6"
+      postgresql: "12.2"
 
     install:
       - gem install taskjuggler
