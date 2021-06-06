@@ -1,7 +1,7 @@
 |travis| |license| |pyversion| |pypiversion| |wheel|
 
-.. |travis| image:: https://travis-ci.org/eoyilmaz/stalker.svg?branch=master
-    :target: https://travis-ci.org/eoyilmaz/stalker
+.. |travis| image:: https://travis-ci.com/eoyilmaz/stalker.svg?branch=master
+    :target: https://travis-ci.com/eoyilmaz/stalker
     :alt: Travis-CI Build Status
 
 .. |license| image:: https://img.shields.io/badge/License-LGPL%20v3-blue.svg

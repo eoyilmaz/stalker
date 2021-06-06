@@ -5,9 +5,12 @@ Stalker Changes
 0.2.25.1
 ========
 
-* * **Fix:** Fixed the ``.travis.yml`` file.
+* **Update:** Updated the ``.travis.yml`` file to use PostgreSQL 13.3 and
+  Ubuntu 20.04 Focal Fossa.
 * **Update:** Updated the ``upload_to_pypi`` command to follow the current
   Python packaging guide.
+* **Update:** Migrated from ``TravisCI.org`` to ``TravisCI.com``.
+* **Update:** Re-enabled concurrent testing in ``.travis.yml``.
 
 0.2.25
 ======
