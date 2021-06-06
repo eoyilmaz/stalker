@@ -10,10 +10,10 @@ KEYWORDS = ['production', 'asset', 'management', 'vfx', 'animation', 'maya',
             'houdini', 'nuke', 'fusion', 'softimage', 'blender', 'vue']
 CLASSIFIERS = ["Programming Language :: Python",
                "Programming Language :: Python :: 2.7",
-               "Programming Language :: Python :: 3.3",
-               "Programming Language :: Python :: 3.4",
-               "Programming Language :: Python :: 3.5",
                "Programming Language :: Python :: 3.6",
+               "Programming Language :: Python :: 3.7",
+               "Programming Language :: Python :: 3.8",
+               "Programming Language :: Python :: 3.9",
                "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
                "Operating System :: OS Independent",
                "Development Status :: 5 - Production/Stable",
@@ -23,7 +23,7 @@ CLASSIFIERS = ["Programming Language :: Python",
                "Topic :: Utilities",
                "Topic :: Office/Business :: Scheduling", ]
 INSTALL_REQUIRES = [
-    'psycopg2-binary<=2.8.3', 'sqlalchemy', 'alembic', 'jinja2', 'pytz', 'tzlocal',
+    'psycopg2-binary', 'sqlalchemy', 'alembic', 'jinja2', 'pytz', 'tzlocal',
 ]
 TESTS_REQUIRE = ['pytest', 'pytest-xdist', 'pytest-cov', 'coverage']
 DATA_FILES = [(
@@ -35,8 +35,7 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 
 
 def read(*parts):
-    """
-    Build an absolute path from *parts* and and return the contents of the
+    """Build an absolute path from *parts* and and return the contents of the
     resulting file.  Assume UTF-8 encoding.
     """
     with codecs.open(os.path.join(HERE, *parts), "rb", "utf-8") as f:
@@ -49,8 +48,7 @@ META_FILE = read(META_PATH)
 
 
 def find_meta(meta):
-    """
-    Extract __*meta*__ from META_FILE.
+    """Extract __*meta*__ from META_FILE.
     """
     import re
     meta_match = re.search(
@@ -82,4 +80,3 @@ if __name__ == '__main__':
         install_requires=INSTALL_REQUIRES,
         tests_require=TESTS_REQUIRE
     )
-

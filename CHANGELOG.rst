@@ -2,6 +2,13 @@
 Stalker Changes
 ===============
 
+0.2.25
+======
+
+* **Update:** Stalker is now compatible with SQLAlchemy 1.4,
+  psycopg2-binary 2.86 and Python 3.9+. But more work still needs to be done to
+  make it SQLAlchemy 2.0 compatible.
+
 0.2.24.3
 ========
 

@@ -176,6 +176,11 @@ class ProjectTestDBCase(UnitTestDBBase):
             name='Test Company',
             users=[self.test_user_client]
         )
+        DBSession.save([
+            self.test_image_format, self.test_project_type, self.test_project_type2,
+            self.test_structure_type1, self.test_structure_type2, self.test_project_structure,
+            self.test_project_structure2, self.test_repo1, self.test_repo2, self.test_client
+        ])
 
         # create a project object
         self.kwargs = {
@@ -1259,25 +1264,17 @@ class ProjectTestDBCase(UnitTestDBBase):
         """testing if the users argument value is passed to the users attribute
         properly
         """
-        self.kwargs['users'] = [self.test_user1,
-                                self.test_user2,
-                                self.test_user3]
+        self.kwargs['users'] = [self.test_user1, self.test_user2, self.test_user3]
         from stalker import Project
         new_proj = Project(**self.kwargs)
-        assert \
-            sorted(self.kwargs['users'], key=lambda x: x.name) == \
-            sorted(new_proj.users, key=lambda x: x.name)
+        assert sorted(self.kwargs['users'], key=lambda x: x.name) == sorted(new_proj.users, key=lambda x: x.name)
 
     def test_users_attribute_is_working_properly(self):
         """testing if the users attribute is working properly
         """
-        users = [self.test_user1,
-                 self.test_user2,
-                 self.test_user3]
+        users = [self.test_user1, self.test_user2, self.test_user3]
         self.test_project.users = users
-        assert \
-            sorted(users, key=lambda x: x.name) == \
-            sorted(self.test_project.users, key=lambda x: x.name)
+        assert sorted(users, key=lambda x: x.name) == sorted(self.test_project.users, key=lambda x: x.name)
 
     def test_tjp_id_is_working_properly(self):
         """testing if the tjp_id attribute is working properly

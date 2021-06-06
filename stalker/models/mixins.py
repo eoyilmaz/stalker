@@ -457,7 +457,9 @@ class DateRangeMixin(object):
         will also set the end, so the timedelta between them is preserved,
         default value is 10 days
         """
-        return self._end
+        from stalker.db.session import DBSession
+        with DBSession.no_autoflush:
+            return self._end
 
     def _end_setter(self, end_in):
         self._start, self._end, self._duration = \
@@ -489,7 +491,9 @@ class DateRangeMixin(object):
         class:`datetime.datetime` and the default value is
         :func:`datetime.datetime.now(pytz.utc)`
         """
-        return self._start
+        from stalker.db.session import DBSession
+        with DBSession.no_autoflush:
+            return self._start
 
     def _start_setter(self, start_in):
         self._start, self._end, self._duration = \
@@ -510,7 +514,9 @@ class DateRangeMixin(object):
         return Column('duration', Interval)
 
     def _duration_getter(self):
-        return self._duration
+        from stalker.db.session import DBSession
+        with DBSession.no_autoflush:
+            return self._duration
 
     def _duration_setter(self, duration_in):
         if duration_in is not None:

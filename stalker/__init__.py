@@ -7,12 +7,12 @@ See docs for more information.
 
 import sys
 
-__version__ = '0.2.24.3'
+__version__ = '0.2.25'
 
 __title__ = "stalker"
 __description__ = 'A Production Asset Management (ProdAM) System'
 __uri__ = 'http://github.com/eoyilmaz/stalker'
-__doc__ = __description__ + " <" + __uri__ + ">"
+__doc__ = "%s <%s>" % (__description__, __uri__)
 
 __author__ = "Erkan Ozgur Yilmaz"
 __email__ = 'eoyilmaz@gmail.com'
@@ -33,11 +33,9 @@ else:  # Python 2
 from stalker import config
 defaults = config.Config()
 
-from stalker.models.auth import (Group, Permission, User, LocalSession, Role,
-                                 AuthenticationLog)
+from stalker.models.auth import Group, Permission, User, LocalSession, Role, AuthenticationLog
 from stalker.models.asset import Asset
-from stalker.models.budget import (Budget, BudgetEntry, Good, PriceList,
-                                   Invoice, Payment)
+from stalker.models.budget import Budget, BudgetEntry, Good, PriceList, Invoice, Payment
 from stalker.models.client import Client, ClientUser
 from stalker.models.department import Department, DepartmentUser
 from stalker.models.entity import SimpleEntity, Entity, EntityGroup
@@ -50,8 +48,7 @@ from stalker.models.mixins import (ACLMixin, AmountMixin, CodeMixin, DAGMixin,
                                    TargetEntityTypeMixin, UnitMixin,
                                    WorkingHoursMixin)
 from stalker.models.note import Note
-from stalker.models.project import (Project, ProjectUser, ProjectClient,
-                                    ProjectRepository)
+from stalker.models.project import Project, ProjectUser, ProjectClient, ProjectRepository
 from stalker.models.review import Review, Daily, DailyLink
 from stalker.models.repository import Repository
 from stalker.models.scene import Scene

@@ -6,8 +6,7 @@ import os
 
 from sqlalchemy import (Table, Column, Integer, ForeignKey, Boolean, Enum,
                         Float, event, CheckConstraint)
-from sqlalchemy.exc import UnboundExecutionError, OperationalError, \
-    InvalidRequestError
+from sqlalchemy.exc import UnboundExecutionError, OperationalError, InvalidRequestError, ProgrammingError
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship, validates, synonym, reconstructor
 
@@ -1878,7 +1877,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
                     engine = DBSession.connection().engine
                     result = engine.execute(text(sql), task_id=self.id).fetchone()
                     return result[0] if result[0] else 0
-                except (UnboundExecutionError, OperationalError) as e:
+                except (UnboundExecutionError, OperationalError, ProgrammingError) as e:
                     # no database connection
                     # fallback to Python
                     logger.debug('No session found! Falling back to Python')
@@ -3191,7 +3190,7 @@ def add_exclude_constraint(table, connection, **kwargs):
     """adds the PostgreSQL specific ExcludeConstraint
     """
     from sqlalchemy import DDL
-    from sqlalchemy.exc import ProgrammingError
+    from sqlalchemy.exc import ProgrammingError, InternalError
 
     if connection.engine.dialect.name == 'postgresql':
         logger.debug('add_exclude_constraint is Running!')
@@ -3201,7 +3200,7 @@ def add_exclude_constraint(table, connection, **kwargs):
             logger.debug('running "btree_gist" extension creation!')
             create_extension.execute(bind=connection)
             logger.debug('successfully created "btree_gist" extension!')
-        except ProgrammingError as e:
+        except (ProgrammingError, InternalError) as e:
             logger.debug('add_exclude_constraint: %s' % e)
 
         # create the ts_to_box sql function
@@ -3225,7 +3224,7 @@ IMMUTABLE;
             logger.debug(
                 'successfully created ts_to_box function'
             )
-        except ProgrammingError as e:
+        except (ProgrammingError, InternalError) as e:
             logger.debug(
                 'failed creating ts_to_box function!: %s' % e
             )
@@ -3246,7 +3245,7 @@ IMMUTABLE;
             logger.debug(
                 'successfully created ExcludeConstraint for "TimeLogs" table!'
             )
-        except ProgrammingError as e:
+        except (ProgrammingError, InternalError) as e:
             logger.debug(
                 'failed creating ExcludeConstraint for TimeLogs table!: %s' % e
             )

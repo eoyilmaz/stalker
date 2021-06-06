@@ -24,11 +24,7 @@ class TaskStatusWorkflowTestCase(unittest.TestCase):
     #     from sqlalchemy.orm import scoped_session, sessionmaker
     #     from stalker.db import session
     #     # SQLAlchemy session manager
-    #     session.DBSession = scoped_session(
-    #         sessionmaker(
-    #             extension=None
-    #         )
-    #     )
+    #     session.DBSession = scoped_session(sessionmaker())
 
     def setUp(self):
         """setup the test

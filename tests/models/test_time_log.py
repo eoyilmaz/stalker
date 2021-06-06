@@ -360,8 +360,7 @@ class TimeLogDBTester(UnitTestDBBase):
         import copy
         kwargs = copy.copy(self.kwargs)
         kwargs["resource"] = self.test_resource2
-        kwargs["start"] = \
-            datetime.datetime(2013, 3, 22, 4, 0, tzinfo=pytz.utc),
+        kwargs["start"] = datetime.datetime(2013, 3, 22, 4, 0, tzinfo=pytz.utc),
         kwargs["duration"] = datetime.timedelta(10)
         time_log1 = TimeLog(**kwargs)
 

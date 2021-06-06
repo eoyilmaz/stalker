@@ -3,7 +3,7 @@
 import pytest
 
 
-@pytest.fixture('module')
+@pytest.fixture(scope='module')
 def setup_sqlite3():
     """setup in memory SQLite3 database for tests
     """

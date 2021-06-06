@@ -191,6 +191,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         "inherit_condition": project_id == Entity.entity_id
     }
 
+    # TODO: Remove this attribute, because we have the statuses to control if a project is active or not
     active = Column(Boolean, default=True)
 
     clients = association_proxy(
@@ -603,7 +604,9 @@ class ProjectUser(Base):
                 )
 
             # also update rate attribute
-            self.rate = user.rate
+            from stalker.db.session import DBSession
+            with DBSession.no_autoflush:
+                self.rate = user.rate
 
         return user
 

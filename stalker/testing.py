@@ -34,9 +34,8 @@ def create_random_db():
     """
     # create a new database for this test only
     import uuid
-    database_name = 'stalker_test_%s' % uuid.uuid4().hex[:4]
-    database_url = \
-        'postgresql://stalker_admin:stalker@localhost/%s' % database_name
+    database_name = 'stalker_test_%s' % uuid.uuid4().hex[:8]
+    database_url = 'postgresql://stalker_admin:stalker@localhost/%s' % database_name
     create_db(database_name)
     return database_url, database_name
 
@@ -74,33 +73,34 @@ class UnitTestDBBase(unittest.TestCase):
     """the base for Stalker Pyramid Views unit tests
     """
 
-    config = {}
-    database_url = None
-    database_name = None
+    def __init__(self, *args, **kwargs):
+        super(UnitTestDBBase, self).__init__(*args, **kwargs)
+        self.config = {}
+        self.database_url = None
+        self.database_name = None
 
-    @classmethod
-    def setUpClass(cls):
+    def setUp(self):
         """setup once
         """
         # create a new database for this test only
-        cls.database_url, cls.database_name = create_random_db()
+        from subprocess import CalledProcessError
+
+        while True:
+            try:
+                self.database_url, self.database_name = create_random_db()
+            except CalledProcessError:
+                # in very rare cases the create_random_db generates an already
+                # existing database name
+                # call it again
+                pass
+            else:
+                break
 
         # update the config
-        cls.config['sqlalchemy.url'] = cls.database_url
+        self.config['sqlalchemy.url'] = self.database_url
         from sqlalchemy.pool import NullPool
-        cls.config['sqlalchemy.poolclass'] = NullPool
+        self.config['sqlalchemy.poolclass'] = NullPool
 
-    @classmethod
-    def tearDownClass(cls):
-        """tear down once
-        """
-        from stalker.db.session import DBSession
-        DBSession.close_all()
-        drop_db(cls.database_name)
-
-    def setUp(self):
-        """setup test
-        """
         import os
         from stalker.config import Config
         try:
@@ -136,10 +136,16 @@ class UnitTestDBBase(unittest.TestCase):
         engine = connection.engine
         connection.close()
 
-        Base.metadata.drop_all(engine, checkfirst=True)
-        DBSession.remove()
-
-        defaults.timing_resolution = datetime.timedelta(hours=1)
+        from sqlalchemy.exc import OperationalError
+        try:
+            Base.metadata.drop_all(engine, checkfirst=True)
+            DBSession.remove()
+            DBSession.close_all()
+            drop_db(self.database_name)
+        except OperationalError:
+            pass
+        finally:
+            defaults.timing_resolution = datetime.timedelta(hours=1)
 
     @property
     def admin(self):

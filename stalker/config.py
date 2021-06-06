@@ -110,6 +110,7 @@ class Config(ConfigBase):
         database_engine_settings={
             "sqlalchemy.url": "sqlite://",
             "sqlalchemy.echo": False,
+            # "sqlalchemy.pool_pre_ping": True,
         },
 
         database_session_settings={},

@@ -113,8 +113,8 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
             with pytest.warns(SAWarning) as cm2:
                 DBSession.commit()
 
-        assert '(psycopg2.errors.NotNullViolation) null value in column ' \
-               '"task_id" violates not-null constraint' in str(cm.value)
+        assert '(psycopg2.errors.NotNullViolation) null value in column "task_id" of relation "Task_Dependencies" ' \
+               'violates not-null constraint' in str(cm.value)
 
     def test_task_argument_is_not_a_task_instance(self):
         """testing if a TypeError will be raised when the task argument value
@@ -173,9 +173,8 @@ class TaskDependencyTestDBCase(UnitTestDBBase):
             with pytest.warns(SAWarning) as cm2:
                 DBSession.commit()
 
-        assert '(psycopg2.errors.NotNullViolation) null value in ' \
-               'column "depends_to_id" violates not-null ' \
-               'constraint' in str(cm.value)
+        assert '(psycopg2.errors.NotNullViolation) null value in column "depends_to_id" of relation ' \
+               '"Task_Dependencies" violates not-null constraint' in str(cm.value)
 
     def test_depends_to_argument_is_not_a_task_instance(self):
         """testing if a TypeError will be raised when the depends_to argument

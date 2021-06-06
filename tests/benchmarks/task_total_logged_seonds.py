@@ -9,15 +9,16 @@ from sqlalchemy.pool import NullPool
 
 import logging
 from stalker import log
-log.logging_level = logging.INFO
 
 import stalker
+from stalker.db.session import DBSession
 from stalker.config import Config
 from stalker import (db, Repository, Project, Status, StatusList, Task, Type,
                      TimeLog, User)
 from stalker.db.declarative import Base
 from stalker.testing import create_random_db, drop_db
 
+log.logging_level = logging.INFO
 logging.getLogger('stalker.models.task').setLevel(logging.INFO)
 
 
@@ -165,9 +166,8 @@ kwargs = {
 }
 
 
-from stalker.db.session import DBSession
 DBSession.add_all([
-    test_project_status_list, test_movie_project_type,
+    test_movie_project_type,
     test_repository_type, test_repository, test_user1,
     test_user2, test_user3, test_user4,
     test_user5, test_project1, test_dependent_task1,
@@ -199,7 +199,7 @@ start = now
 ten_minutes = datetime.timedelta(minutes=10)
 resource = kwargs['resources'][0]
 print('creating %s TimeLogs' % tl_count)
-for i in xrange(tl_count):
+for i in range(tl_count):
     end = start + ten_minutes
     tl = TimeLog(
         resource=resource,

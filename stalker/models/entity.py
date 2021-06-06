@@ -286,8 +286,9 @@ class SimpleEntity(Base):
     def __eq__(self, other):
         """the equality operator
         """
-        return isinstance(other, SimpleEntity) and \
-            self.name == other.name
+        from stalker.db.session import DBSession
+        with DBSession.no_autoflush:
+            return isinstance(other, SimpleEntity) and self.name == other.name
 
     def __ne__(self, other):
         """the inequality operator

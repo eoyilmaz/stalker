@@ -18,6 +18,7 @@ class ExtendedScopedSession(scoped_session):
         self.commit()
 
 
-DBSession = ExtendedScopedSession(
-    sessionmaker(extension=None)
-)
+# try:
+#     DBSession = ExtendedScopedSession(sessionmaker(extension=None))
+# except TypeError:
+DBSession = ExtendedScopedSession(sessionmaker())

@@ -43,10 +43,7 @@ def setup(settings=None):
     # create the Session class
     from stalker.db.session import DBSession
     DBSession.remove()
-    DBSession.configure(
-        bind=engine,
-        extension=None
-    )
+    DBSession.configure(bind=engine)
 
     # check alembic versions of the database
     # and raise an error if it is not matching with the system
@@ -192,10 +189,11 @@ def get_alembic_version():
     conn = DBSession.connection()
     engine = conn.engine
     if engine.dialect.has_table(conn, 'alembic_version'):
-        sql_query = 'select version_num from alembic_version'
+        sql_query = "select version_num from alembic_version"
+        from sqlalchemy import text
         from sqlalchemy.exc import OperationalError, ProgrammingError
         try:
-            return DBSession.connection().execute(sql_query).fetchone()[0]
+            return DBSession.connection().execute(text(sql_query)).fetchone()[0]
         except (OperationalError, ProgrammingError, TypeError):
             DBSession.rollback()
             return None
@@ -257,10 +255,10 @@ def create_alembic_table():
         Base.metadata.create_all(engine)
 
     # first try to query the version value
-    sql_query = 'select version_num from alembic_version'
+    from sqlalchemy import text
+    sql_query = "select version_num from alembic_version"
     try:
-        version_num = \
-            DBSession.connection().execute(sql_query).fetchone()[0]
+        version_num = DBSession.connection().execute(text(sql_query)).fetchone()[0]
     except TypeError:
         logger.debug('inserting %s to alembic_version table' % version_num)
         # the table is there but there is no value so insert it
@@ -279,6 +277,7 @@ def __create_admin__():
     """creates the admin
     """
     from stalker import defaults
+    from stalker.db.session import DBSession
     from stalker.models.auth import User
     from stalker.models.department import Department
 
@@ -291,7 +290,6 @@ def __create_admin__():
 
     if not admin_department:
         admin_department = Department(name=defaults.admin_department_name)
-        from stalker.db.session import DBSession
         DBSession.add(admin_department)
         # create the admins group
 
@@ -392,17 +390,20 @@ def create_ticket_statuses():
         logger.debug("Ticket Types are created successfully")
 
 
-def create_entity_statuses(entity_type='', status_names=None,
-                           status_codes=None, user=None):
+def create_entity_statuses(entity_type='', status_names=None, status_codes=None, user=None):
     """creates the default task statuses
     """
+    from stalker.db.session import DBSession
     if not entity_type:
+        DBSession.rollback()
         raise ValueError('Please supply entity_type')
 
     if not status_names:
+        DBSession.rollback()
         raise ValueError('Please supply status names')
 
     if not status_codes:
+        DBSession.rollback()
         raise ValueError('Please supply status codes')
 
     # create statuses for entity
@@ -410,7 +411,9 @@ def create_entity_statuses(entity_type='', status_names=None,
 
     logger.debug("Creating %s Statuses" % entity_type)
 
-    statuses = Status.query.filter(Status.name.in_(status_names)).all()
+    with DBSession.no_autoflush:
+        statuses = Status.query.filter(Status.name.in_(status_names)).all()
+
     logger.debug('status_names: %s' % status_names)
     logger.debug('statuses: %s' % statuses)
     status_names_in_db = list(map(lambda x: x.name, statuses))
@@ -434,8 +437,8 @@ def create_entity_statuses(entity_type='', status_names=None,
             )
 
     # create the Status List
-    status_list = StatusList.query\
-        .filter(StatusList.target_entity_type == entity_type)\
+    status_list = StatusList.query \
+        .filter(StatusList.target_entity_type == entity_type) \
         .first()
 
     if status_list is None:
@@ -453,10 +456,10 @@ def create_entity_statuses(entity_type='', status_names=None,
     status_list.statuses = statuses
     DBSession.add(status_list)
 
-    from sqlalchemy.exc import IntegrityError
+    from sqlalchemy.exc import IntegrityError, OperationalError
     try:
         DBSession.commit()
-    except IntegrityError as e:
+    except (IntegrityError, OperationalError) as e:
         logger.debug("error in DBSession.commit, rolling back: %s" % e)
         DBSession.rollback()
     else:

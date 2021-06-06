@@ -129,19 +129,37 @@ class DatabaseTester(UnitTestDBBase):
         """testing if there is no user if stalker.config.Conf.auto_create_admin
         is False
         """
+        self.tearDown()
+
         # turn down auto admin creation
         from stalker import db, defaults
         defaults.auto_create_admin = False
 
-        # create a clean database
-        self.tearDown()
+        # Setup
+        # update the config
+        from stalker.testing import create_random_db
+        self.database_url, self.database_name = create_random_db()
+
+        self.config['sqlalchemy.url'] = self.database_url
+        from sqlalchemy.pool import NullPool
+        self.config['sqlalchemy.poolclass'] = NullPool
+
+        import os
+        from stalker.config import Config
+        try:
+            os.environ.pop(Config.env_key)
+        except KeyError:
+            # already removed
+            pass
+
+        # regenerate the defaults
+        import stalker
+        import datetime
+        stalker.defaults.timing_resolution = datetime.timedelta(hours=1)
 
         # init the db
         db.setup(self.config)
         db.init()
-
-        # Restore auto admin creation
-        defaults.auto_create_admin = True
 
         # check if there is a use with name admin
         from stalker import User
@@ -150,8 +168,8 @@ class DatabaseTester(UnitTestDBBase):
         # check if there is a admins department
         from stalker import Department
         assert Department.query\
-                   .filter_by(name=defaults.admin_department_name)\
-                   .first() is None
+            .filter_by(name=defaults.admin_department_name)\
+            .first() is None
 
     def test_non_unique_names_on_different_entity_type(self):
         """testing if there can be non-unique names for different entity types
@@ -798,8 +816,7 @@ class DatabaseTester(UnitTestDBBase):
         """
         from stalker.db.session import DBSession
         sql_query = 'select version_num from "alembic_version"'
-        version_num = \
-            DBSession.connection().execute(sql_query).fetchone()[0]
+        version_num = DBSession.connection().execute(sql_query).fetchone()[0]
         assert 'bf67e6a234b4' == version_num
 
     def test_initialization_of_alembic_version_table_multiple_times(self):
@@ -818,8 +835,7 @@ class DatabaseTester(UnitTestDBBase):
         db.init()
         db.init()
 
-        version_nums = \
-            DBSession.connection().execute(sql_query).fetchall()
+        version_nums = DBSession.connection().execute(sql_query).fetchall()
 
         # no additional version is created
         assert len(version_nums) == 1
@@ -851,17 +867,16 @@ class DatabaseTester(UnitTestDBBase):
         with pytest.raises(ValueError) as cm:
             db.setup(self.config)
 
-        assert str(cm.value) == 'Please update the database to version: ' \
-                                '%s' % db.alembic_version
+        assert str(cm.value) == 'Please update the database to version: %s' % db.alembic_version
 
         # also it is not possible to continue with the current DBSession
-        from sqlalchemy.exc import StatementError
+        from sqlalchemy.exc import PendingRollbackError
         from stalker import User
-        with pytest.raises(StatementError) as cm:
+        with pytest.raises(PendingRollbackError) as cm:
             DBSession.query(User.id).all()
 
-        assert "(sqlalchemy.exc.InvalidRequestError) Can't reconnect until " \
-               "invalid transaction is rolled back" in str(cm.value)
+        assert "Can't reconnect until invalid transaction is rolled back. " \
+               "(Background on this error at: http://sqlalche.me/e/14/8s2b)" in str(cm.value)
 
         # rollback and reconnect to the database
         DBSession.rollback()
@@ -1050,7 +1065,7 @@ class DatabaseTester(UnitTestDBBase):
         """testing if db.setup() function will use the given settings if no
         setting is supplied
         """
-        self.tearDown()
+        # self.tearDown()
 
         # the default setup is already using the
         from stalker import db
