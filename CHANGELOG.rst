@@ -2,6 +2,13 @@
 Stalker Changes
 ===============
 
+0.2.25.1
+========
+
+* * **Fix:** Fixed the ``.travis.yml`` file.
+* **Update:** Updated the ``upload_to_pypi`` command to follow the current
+  Python packaging guide.
+
 0.2.25
 ======
 
