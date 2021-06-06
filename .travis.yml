@@ -14,7 +14,20 @@
       - postgresql
 
     addons:
-      postgresql: "13.3"
+        postgresql: "13"
+        apt:
+          sources:
+            - sourceline: deb http://apt.postgresql.org/pub/repos/apt/ focal-pgdg main 13
+              key_url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          packages:
+            - postgresql-13
+            - postgresql-client-13
+            - postgresql-contrib-13
+
+    env:
+          global:
+                - PGUSER=postgres
+                - PGPORT=5432
 
     install:
       - gem install taskjuggler
@@ -30,7 +43,7 @@
       - psql -c "CREATE DATABASE stalker_test WITH OWNER = stalker_admin ENCODING = 'UTF8' TABLESPACE = pg_default CONNECTION LIMIT = -1;" -U postgres
 
     script:
-      - py.test -n auto --cov-report= --cov=stalker tests
+      - py.test --cov-report= --cov=stalker tests
 
     after_sucess:
       - codeclimate-test-reporter
