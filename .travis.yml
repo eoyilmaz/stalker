@@ -13,6 +13,9 @@
     services:
       - postgresql
 
+    addons:
+      postgresql: "13.3"
+
     install:
       - gem install taskjuggler
       - pip install sqlalchemy psycopg2-binary jinja2 alembic Mako MarkupSafe python-editor pytz tzlocal pytest pytest-xdist pytest-cov codeclimate-test-reporter
