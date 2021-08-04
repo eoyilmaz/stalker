@@ -402,14 +402,14 @@ class DateRangeMixin(object):
     end values.
 
     The start and end attributes have a ``computed`` companion. Which are the
-    return values from TaskJuggler. so for start there is the
-    ``computed_start`` and for end there is the ``computed_end`` attributes.
-    These values are going to be used in Gantt Charts.
+    return values from TaskJuggler. so for ``start`` there is the
+    ``computed_start`` and for ``end`` there is the ``computed_end``
+    attributes.
 
     The date attributes can be managed with timezones. Follow the Python idioms
     shown in the `documentation of datetime`_
 
-    .. _documentation of datetime: http://docs.python.org/library/datetime.html
+    .. _documentation of datetime: https://docs.python.org/library/datetime.html
 
     :param start: the start date of the entity, should be a datetime.datetime
       instance, the start is the pin point for the date calculation. In
@@ -441,8 +441,7 @@ class DateRangeMixin(object):
             duration=None,
             **kwargs
     ):
-        self._start, self._end, self._duration = \
-            self._validate_dates(start, end, duration)
+        self._start, self._end, self._duration = self._validate_dates(start, end, duration)
 
     @declared_attr
     def _end(cls):
@@ -630,8 +629,7 @@ class DateRangeMixin(object):
         and computed_end if there are computed_start and computed_end otherwise
         returns None
         """
-        return self.computed_end - self.computed_start \
-            if self.computed_end and self.computed_start else None
+        return self.computed_end - self.computed_start if self.computed_end and self.computed_start else None
 
     @classmethod
     def round_time(cls, dt):
@@ -646,7 +644,7 @@ class DateRangeMixin(object):
 
         Based on Thierry Husson's answer in `Stackoverflow`_
 
-        _`Stackoverflow` : http://stackoverflow.com/a/10854034/1431079
+        _`Stackoverflow` : https://stackoverflow.com/a/10854034/1431079
         """
         # to be compatible with python 2.6 use the following instead of
         # total_seconds()
@@ -675,8 +673,7 @@ class DateRangeMixin(object):
     def computed_total_seconds(self):
         """returns the duration as seconds
         """
-        return self.computed_duration.days * 86400 + \
-            self.computed_duration.seconds
+        return self.computed_duration.days * 86400 + self.computed_duration.seconds
 
 
 class ProjectMixin(object):

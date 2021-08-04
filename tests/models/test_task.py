@@ -4553,6 +4553,146 @@ class TaskDBTestDBCase(UnitTestDBBase):
         assert new_task.percent_complete == pytest.approx(77.7777778)
         assert parent_task.percent_complete == pytest.approx(77.7777778)
 
+    def test_percent_complete_attribute_is_working_properly_for_a_container_task_with_both_effort_and_duration_based_child_tasks(self):
+        """testing if the percent complete attribute is working properly for a container task that has both effort and
+        duration based tasks
+        """
+        kwargs = copy.copy(self.kwargs)
+        kwargs['depends'] = []  # remove dependencies just to make it
+        # easy to create time logs after stalker
+        # v0.2.6.1
+        dt = datetime.datetime
+        td = datetime.timedelta
+
+        from stalker import defaults
+        defaults.timing_resolution = td(hours=1)
+        defaults.daily_working_hours = 9
+
+        from stalker.models.mixins import DateRangeMixin
+        now = DateRangeMixin.round_time(dt.now(pytz.utc))
+
+        new_task1 = Task(**kwargs)
+        new_task1.status = self.status_rts
+
+        parent_task = Task(**kwargs)
+
+        new_task1.time_logs = []
+        from stalker import TimeLog
+        tlog1 = TimeLog(
+            task=new_task1,
+            resource=new_task1.resources[0],
+            start=now - td(hours=4),
+            end=now - td(hours=2)
+        )
+
+        assert tlog1 in new_task1.time_logs
+
+        tlog2 = TimeLog(
+            task=new_task1,
+            resource=new_task1.resources[1],
+            start=now - td(hours=6),
+            end=now - td(hours=1)
+        )
+        from stalker.db.session import DBSession
+        DBSession.commit()
+
+        # create a duration based task
+        new_task2 = Task(**kwargs)
+        new_task2.status = self.status_rts
+        new_task2.schedule_model = 'duration'
+        new_task2.start = now - td(days=1, hours=1)
+        new_task2.end = now - td(hours=1)
+
+        from stalker.db.session import DBSession
+        DBSession.commit()
+
+        new_task1.parent = parent_task
+        DBSession.commit()
+
+        new_task2.parent = parent_task
+        DBSession.commit()
+
+        assert tlog2 in new_task1.time_logs
+        assert new_task1.total_logged_seconds == 7 * 3600
+        assert new_task1.schedule_seconds == 9 * 3600
+        assert new_task1.percent_complete == pytest.approx(77.7777778)
+        assert new_task2.total_logged_seconds == 24 * 3600  # 1 day for a duration task is 24 hours
+        assert new_task2.schedule_seconds == 24 * 3600  # 1 day for a duration task is 24 hours
+        assert new_task2.percent_complete == 100
+
+        # as if there are 9 * 3600 seconds of time logs entered to new_task2
+        assert parent_task.percent_complete == pytest.approx(93.939393939)
+
+    def test_percent_complete_attribute_is_working_properly_for_a_container_task_with_both_effort_and_length_based_child_tasks(self):
+        """testing if the percent complete attribute is working properly for a container task that has both effort and
+        length based tasks
+        """
+        kwargs = copy.copy(self.kwargs)
+        kwargs['depends'] = []  # remove dependencies just to make it
+        # easy to create time logs after stalker
+        # v0.2.6.1
+        dt = datetime.datetime
+        td = datetime.timedelta
+
+        from stalker import defaults
+        defaults.timing_resolution = td(hours=1)
+        defaults.daily_working_hours = 9
+
+        from stalker.models.mixins import DateRangeMixin
+        now = DateRangeMixin.round_time(dt.now(pytz.utc))
+
+        new_task1 = Task(**kwargs)
+        new_task1.status = self.status_rts
+
+        parent_task = Task(**kwargs)
+
+        new_task1.time_logs = []
+        from stalker import TimeLog
+        tlog1 = TimeLog(
+            task=new_task1,
+            resource=new_task1.resources[0],
+            start=now - td(hours=4),
+            end=now - td(hours=2)
+        )
+
+        assert tlog1 in new_task1.time_logs
+
+        tlog2 = TimeLog(
+            task=new_task1,
+            resource=new_task1.resources[1],
+            start=now - td(hours=6),
+            end=now - td(hours=1)
+        )
+        from stalker.db.session import DBSession
+        DBSession.commit()
+
+        # create a duration based task
+        new_task2 = Task(**kwargs)
+        new_task2.status = self.status_rts
+        new_task2.schedule_model = 'length'
+        new_task2.start = now - td(hours=10)
+        new_task2.end = now - td(hours=1)
+
+        from stalker.db.session import DBSession
+        DBSession.commit()
+
+        new_task1.parent = parent_task
+        DBSession.commit()
+
+        new_task2.parent = parent_task
+        DBSession.commit()
+
+        assert tlog2 in new_task1.time_logs
+        assert new_task1.total_logged_seconds == 7 * 3600
+        assert new_task1.schedule_seconds == 9 * 3600
+        assert new_task1.percent_complete == pytest.approx(77.7777778)
+        assert new_task2.total_logged_seconds == 9 * 3600  # 1 day for a length task is 9 hours
+        assert new_task2.schedule_seconds == 9 * 3600  # 1 day for a length task is 9 hours
+        assert new_task2.percent_complete == 100
+
+        # as if there are 9 * 3600 seconds of time logs entered to new_task2
+        assert parent_task.percent_complete == pytest.approx(88.8888889)
+
     def test_percent_complete_attribute_is_working_properly_for_a_leaf_task(self):
         """testing if the percent_complete attribute is working properly for a
         leaf task

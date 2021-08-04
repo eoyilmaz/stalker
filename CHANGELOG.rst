@@ -2,6 +2,12 @@
 Stalker Changes
 ===============
 
+0.2.26
+======
+
+* ``Task.percent_complete`` value is now properly calculated for a parent Task
+  that contains a mixed type of "effort", "duration" and "length" based tasks.
+
 0.2.25.1
 ========
 

@@ -520,6 +520,13 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
        Complete on a duration task is calculated directly from the
        :attr:`.start` and :attr:`.end` and ``datetime.datetime.now(pytz.utc)``.
 
+    .. versionadded:: 0.2.26
+       For parent tasks that have both effort based and duration based children
+       tasks the percent complete is calculated as if the
+       :attr:`.total_logged_seconds` is properly filled for duration based
+       tasks proportinal to the elapsed time from the :attr:`.start` attr
+       value.
+
     Even tough, the percent_complete attribute of a task is
     100% the task may not be considered as completed, because it may not be
     reviewed and approved by the responsible yet.
@@ -1399,7 +1406,6 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
                     (self.__class__.__name__, parent.__class__.__name__)
                 )
 
-            #with DBSession.no_autoflush:
             # check for cycle
             from stalker.models import check_circular_dependency
             check_circular_dependency(self, parent, 'children')
@@ -1866,24 +1872,53 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
         from stalker.db.session import DBSession
         with DBSession.no_autoflush:
             if self.is_leaf:
-                try:
-                    from sqlalchemy import text
-                    sql = """
-                    select
-                        extract(epoch from sum("TimeLogs".end - "TimeLogs".start))
-                    from "TimeLogs"
-                    where "TimeLogs".task_id = :task_id
-                    """
-                    engine = DBSession.connection().engine
-                    result = engine.execute(text(sql), task_id=self.id).fetchone()
-                    return result[0] if result[0] else 0
-                except (UnboundExecutionError, OperationalError, ProgrammingError) as e:
-                    # no database connection
-                    # fallback to Python
-                    logger.debug('No session found! Falling back to Python')
-                    seconds = 0
-                    for time_log in self.time_logs:
-                        seconds += time_log.total_seconds
+                if self.schedule_model in 'effort':
+                    logger.debug("effort based task detected!")
+                    try:
+                        from sqlalchemy import text
+                        sql = """
+                        select
+                            extract(epoch from sum("TimeLogs".end - "TimeLogs".start))
+                        from "TimeLogs"
+                        where "TimeLogs".task_id = :task_id
+                        """
+                        engine = DBSession.connection().engine
+                        result = engine.execute(text(sql), task_id=self.id).fetchone()
+                        return result[0] if result[0] else 0
+                    except (UnboundExecutionError, OperationalError, ProgrammingError) as e:
+                        # no database connection
+                        # fallback to Python
+                        logger.debug('No session found! Falling back to Python')
+                        seconds = 0
+                        for time_log in self.time_logs:
+                            seconds += time_log.total_seconds
+                        return seconds
+                else:
+                    import pytz
+                    now = datetime.datetime.now(pytz.utc)
+
+                    if self.schedule_model == 'duration':
+                        # directly return the difference between min(now - start, end - start)
+                        logger.debug('duration based task detected!, '
+                                     'calculating schedule_info from duration of the task')
+                        daily_working_hours = 86400.0
+                    elif self.schedule_model == 'length':
+                        # directly return the difference between min(now - start, end - start)
+                        # but use working days
+                        logger.debug('length based task detected!, '
+                                     'calculating schedule_info from duration of the task')
+                        from stalker import defaults
+                        daily_working_hours = defaults.daily_working_hours
+
+                    if self.end <= now:
+                        seconds = self.duration.days * daily_working_hours + self.duration.seconds
+                    elif self.start >= now:
+                        seconds = 0
+                    else:
+                        past = now - self.start
+                        past_as_seconds = past.days * daily_working_hours + past.seconds
+                        logger.debug('past_as_seconds : %s' % past_as_seconds)
+                        seconds = past_as_seconds
                     return seconds
             else:
                 if self._total_logged_seconds is None:
@@ -1971,10 +2006,14 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
                 # update children if they are a container task
                 if child.is_container:
                     child.update_schedule_info()
-                if child.schedule_seconds:
-                    schedule_seconds += child.schedule_seconds
-                if child.total_logged_seconds:
-                    total_logged_seconds += child.total_logged_seconds
+                    if child.schedule_seconds:
+                        schedule_seconds += child.schedule_seconds
+                    if child.total_logged_seconds:
+                        total_logged_seconds += child.total_logged_seconds
+                else:
+                    # DRY please!!!!
+                    schedule_seconds += child.schedule_seconds if child.schedule_seconds else 0
+                    total_logged_seconds += child.total_logged_seconds if child.total_logged_seconds else 0
 
             self._schedule_seconds = schedule_seconds
             self._total_logged_seconds = total_logged_seconds
@@ -1992,32 +2031,6 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
             if self.total_logged_seconds is None or \
                self.schedule_seconds is None:
                 self.update_schedule_info()
-        else:
-            if self.schedule_model == 'duration':
-                logger.debug('calculating percent_complete from duration')
-                import pytz
-                now = datetime.datetime.now(pytz.utc)
-                if self.end <= now:
-                    return 100.0
-                elif self.start >= now:
-                    return 0.0
-                else:
-                    past = now - self.start
-                    logger.debug('now        : %s' % now)
-                    logger.debug('self.start : %s' % self.start)
-                    logger.debug('now - self.start: %s' % past)
-                    logger.debug('past.days: %s' % past.days)
-                    logger.debug('past.seconds: %s' % past.seconds)
-                    past_as_seconds = \
-                        past.days * 86400.0 + past.seconds
-                    logger.debug('past_as_seconds : %s' % past_as_seconds)
-
-                    total = self.end - self.start
-                    total_as_seconds = \
-                        total.days * 86400.0 + total.seconds
-                    logger.debug('total_as_seconds: %s' % total_as_seconds)
-
-                    return past_as_seconds / float(total_as_seconds) * 100.0
 
         return self.total_logged_seconds / float(self.schedule_seconds) * 100.0
 

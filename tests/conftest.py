@@ -21,3 +21,8 @@ def setup_sqlite3():
 
     import datetime
     stalker.defaults.timing_resolution = datetime.timedelta(hours=1)
+
+    # Enable Debug logging
+    import logging
+    from stalker import logger
+    logger.setLevel(logging.DEBUG)
