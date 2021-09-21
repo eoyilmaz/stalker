@@ -3497,7 +3497,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         new_task2.responsible = [self.test_user2]
         assert new_task1.responsible == [self.test_user1]
         assert new_task2.responsible == [self.test_user2]
-        assert new_task3.responsible == [self.test_user2]
+        assert new_task3.responsible == [self.test_user1]
 
     def test_responsible_attribute_is_set_to_None_responsible_attribute_comes_from_parents(self):
         """testing if the responsible attribute is None or skipped then its
@@ -3528,7 +3528,37 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         new_task2.responsible = [self.test_user1]
         assert new_task1.responsible == [self.test_user2]
         assert new_task2.responsible == [self.test_user1]
-        assert new_task3.responsible == [self.test_user1]
+        assert new_task3.responsible == [self.test_user2]
+
+    def test_responsible_attribute_is_set_to_None_responsible_attribute_comes_from_parents_immutable(self):
+        """testing if the responsible attribute is None or skipped then its
+        value comes from parents
+        """
+        # create two new tasks
+        kwargs = copy.copy(self.kwargs)
+        new_task = Task(**kwargs)
+
+        kwargs['parent'] = new_task
+        new_task1 = Task(**kwargs)
+
+        kwargs['parent'] = new_task1
+        new_task2 = Task(**kwargs)
+
+        kwargs['parent'] = new_task2
+        new_task3 = Task(**kwargs)
+
+        new_task1.responsible = []
+        new_task2.responsible = []
+        new_task3.responsible = []
+        new_task.responsible = [self.test_user2]
+
+        # set the attribute now and expect the parent and the current tasks
+        # responsible are divergent
+        new_task1.responsible.append(self.test_user3)
+        assert self.test_user3 in new_task1.responsible
+        assert self.test_user2 in new_task1.responsible
+        assert self.test_user3 not in new_task.responsible
+        assert self.test_user2 in new_task.responsible
 
     def test_computed_start_also_sets_start(self):
         """testing if computed_start also sets the start value of the task

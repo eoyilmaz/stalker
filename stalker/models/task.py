@@ -500,8 +500,8 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
     who are responsible of the assigned task and all the hierarchy under it.
 
     If a task doesn't have any responsible, it will start looking to its
-    parent tasks and will return the responsible of its parent and it will be
-    an empty list if non of its parents has a responsible.
+    parent tasks and will return a copy of the responsible of its parent and it
+    will be an empty list if non of its parents has a responsible.
 
     You can create complex responsibility chains for different branches of
     Tasks.
@@ -2045,16 +2045,17 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
     def _responsible_getter(self):
         """returns the current responsible of this task
         """
-        if self._responsible:
-            return self._responsible
-        else:
+        if not self._responsible:
             # traverse parents
             for parent in reversed(self.parents):
                 if parent.responsible:
-                    return parent.responsible
+                    # TODO: This should return a copy of it not the attribute itself
+                    import copy
+                    self._responsible = copy.copy(parent.responsible)
+                    # return parent.responsible
 
         # so parents do not have a responsible
-        return []
+        return self._responsible
 
     def _responsible_setter(self, responsible):
         """sets the responsible attribute

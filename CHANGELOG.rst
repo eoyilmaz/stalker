@@ -2,6 +2,15 @@
 Stalker Changes
 ===============
 
+0.2.27
+======
+
+* Fixed a bug in ``Task.responsible`` attribute. This change has also slightly
+  changed how the ``Task.responsible`` attribute works. It still comes from the
+  parent if the ``Task.responsible`` is empty or None, but when queried it
+  causes the attribute to be filled with parent data. This is a slight change,
+  but may break some workflows.
+
 0.2.26
 ======
 
