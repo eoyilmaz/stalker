@@ -2049,10 +2049,8 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
             # traverse parents
             for parent in reversed(self.parents):
                 if parent.responsible:
-                    # TODO: This should return a copy of it not the attribute itself
                     import copy
                     self._responsible = copy.copy(parent.responsible)
-                    # return parent.responsible
 
         # so parents do not have a responsible
         return self._responsible
