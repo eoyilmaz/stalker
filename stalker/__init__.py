@@ -11,7 +11,7 @@ __version__ = '0.2.27'
 
 __title__ = "stalker"
 __description__ = 'A Production Asset Management (ProdAM) System'
-__uri__ = 'http://github.com/eoyilmaz/stalker'
+__uri__ = 'https://github.com/eoyilmaz/stalker'
 __doc__ = "%s <%s>" % (__description__, __uri__)
 
 __author__ = "Erkan Ozgur Yilmaz"

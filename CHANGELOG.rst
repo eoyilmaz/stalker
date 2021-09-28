@@ -11,6 +11,9 @@ Stalker Changes
   causes the attribute to be filled with parent data. This is a slight change,
   but may break some workflows.
 
+* Added ``ScheduleMixin.to_unit`` that converts the given ``seconds`` to the
+  given ``unit`` in consideration of the given ``schedule_model``.
+
 0.2.26
 ======
 

@@ -458,6 +458,56 @@ class ScheduleMixinTestCase(unittest.TestCase):
                     self.test_obj.schedule_model
                 )
 
+    def test_to_unit_is_working_properly(self):
+        """testing if the to_unit method is working properly
+        """
+        from stalker import defaults
+        defaults.daily_working_hours = 9
+        defaults.weekly_working_days = 5
+        defaults.weekly_working_hours = 45
+        defaults.yearly_working_days = 52.1428 * 5
+
+        test_values = [
+            # effort values
+            ['effort', 1, 'min', 60],
+            ['effort', 10, 'min', 600],
+            ['effort', 20, 'min', 1200],
+            ['effort', 1, 'h', 3600],
+            ['effort', 1.01, 'h', 3636],
+            ['effort', 2, 'h', 7200],
+            ['effort', 1, 'd', 32400],
+            ['effort', 1, 'w', 162000],
+            ['effort', 1, 'm', 648000],
+            ['effort', 1, 'y', 8424000],
+
+            # length values
+            ['length', 1, 'min', 60],
+            ['length', 540, 'min', 32400],
+            ['length', 1, 'h', 3600],
+            ['length', 1, 'd', 32400],
+            ['length', 1, 'w', 162000],
+            ['length', 1, 'm', 648000],
+            ['length', 1, 'y', 8424000],
+
+            # duration values
+            ['duration', 1, 'min', 60],
+            ['duration', 60, 'min', 3600],
+            ['duration', 1440, 'min', 86400],
+            ['duration', 1, 'h', 3600],
+            ['duration', 1.5, 'h', 5400],
+            ['duration', 2, 'h', 7200],
+            ['duration', 1, 'd', 86400],
+            ['duration', 1, 'w', 604800],
+            ['duration', 1, 'm', 2419200],
+            ['duration', 1, 'y', 31536000]
+        ]
+
+        for test_value in test_values:
+            schedule_model = test_value[0]
+            seconds = test_value[3]
+            schedule_unit = test_value[2]
+            assert test_value[1] == self.test_obj.to_unit(seconds, schedule_unit, schedule_model)
+
     def test_schedule_seconds_is_working_properly(self):
         """testing if the schedule_seconds property is working properly
         """
