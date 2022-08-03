@@ -1878,7 +1878,7 @@ class Task(Entity, StatusMixin, DateRangeMixin, ReferenceMixin, ScheduleMixin, D
                         from sqlalchemy import text
                         sql = """
                         select
-                            extract(epoch from sum("TimeLogs".end - "TimeLogs".start))
+                            extract(epoch from sum("TimeLogs".end - "TimeLogs".start))::int
                         from "TimeLogs"
                         where "TimeLogs".task_id = :task_id
                         """

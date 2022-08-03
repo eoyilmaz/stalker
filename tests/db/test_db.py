@@ -876,7 +876,8 @@ class DatabaseTester(UnitTestDBBase):
             DBSession.query(User.id).all()
 
         assert "Can't reconnect until invalid transaction is rolled back. " \
-               "(Background on this error at: http://sqlalche.me/e/14/8s2b)" in str(cm.value)
+               "(Background on this error at: " \
+               "https://sqlalche.me/e/14/8s2b)" in str(cm.value)
 
         # rollback and reconnect to the database
         DBSession.rollback()
