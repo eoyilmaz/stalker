@@ -520,7 +520,7 @@ class DateRangeMixinTester(unittest.TestCase):
         with pytest.raises(AttributeError) as cm:
             new_foo_obj.computed_duration = datetime.timedelta(10)
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'computed_duration'"
 
     def test_total_seconds_attribute_is_read_only(self):
         """testing if the total_seconds is read only
@@ -529,7 +529,7 @@ class DateRangeMixinTester(unittest.TestCase):
         with pytest.raises(AttributeError) as cm:
             new_foo_obj.total_seconds = 234234
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'total_seconds'"
 
     def test_total_seconds_attribute_is_working_properly(self):
         """testing is the total_seconds is read only
@@ -548,7 +548,7 @@ class DateRangeMixinTester(unittest.TestCase):
         with pytest.raises(AttributeError) as cm:
             new_foo_obj.computed_total_seconds = 234234
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'computed_total_seconds'"
 
     def test_computed_total_seconds_attribute_is_working_properly(self):
         """testing is the computed_total_seconds is read only

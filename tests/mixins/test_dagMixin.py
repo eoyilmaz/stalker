@@ -189,7 +189,7 @@ class DAGMixinTestCase(unittest.TestCase):
         with pytest.raises(AttributeError) as cm:
             setattr(d1, 'is_leaf', 'this will not work')
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'is_leaf'"
 
     def test_is_leaf_attribute_is_working_properly(self):
         """testing if the is_leaf attribute is True for an instance without a
@@ -212,7 +212,7 @@ class DAGMixinTestCase(unittest.TestCase):
         with pytest.raises(AttributeError) as cm:
             setattr(d1, 'is_root', 'this will not work')
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'is_root'"
 
     def test_is_root_attribute_is_working_properly(self):
         """testing if the is_root attribute is True for an instance without a
@@ -235,7 +235,7 @@ class DAGMixinTestCase(unittest.TestCase):
         with pytest.raises(AttributeError) as cm:
             setattr(d1, 'is_container', 'this will not work')
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'is_container'"
 
     def test_is_container_attribute_working_properly(self):
         """testing if the is_container attribute is True for an instance with
@@ -262,7 +262,7 @@ class DAGMixinTestCase(unittest.TestCase):
         with pytest.raises(AttributeError) as cm:
             setattr(d1, 'parents', 'this will not work')
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'parents'"
 
     def test_parents_property_is_working_properly(self):
         """testing if the parents property is read-only

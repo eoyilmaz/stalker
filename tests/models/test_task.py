@@ -954,7 +954,7 @@ class TaskTester(unittest.TestCase):
         with pytest.raises(AttributeError) as cm:
             new_task.percent_complete = 32
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'percent_complete'"
 
     def test_percent_complete_attribute_is_working_properly_for_a_duration_based_leaf_task_1(self):
         """testing if the percent_complete attribute is working properly for a
@@ -1598,7 +1598,7 @@ class TaskTester(unittest.TestCase):
         with pytest.raises(AttributeError) as cm:
             setattr(new_task, 'remaining_seconds', 2342)
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'remaining_seconds'"
 
     def test_versions_attribute_is_None(self):
         """testing if a TypeError will be raised when the versions attribute
@@ -1956,7 +1956,7 @@ class TaskTester(unittest.TestCase):
         with pytest.raises(AttributeError) as cm:
             new_task.is_leaf = True
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'is_leaf'"
 
     def test_is_leaf_attribute_is_working_properly(self):
         """testing if the is_leaf attribute is True for a Task without a child
@@ -1991,7 +1991,7 @@ class TaskTester(unittest.TestCase):
         with pytest.raises(AttributeError) as cm:
             new_task.is_root = True
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'is_root'"
 
     def test_is_root_attribute_is_working_properly(self):
         """testing if the is_root attribute is True for a Task without a parent
@@ -2027,7 +2027,7 @@ class TaskTester(unittest.TestCase):
         with pytest.raises(AttributeError) as cm:
             new_task.is_container = False
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'is_container'"
 
     def test_is_container_attribute_working_properly(self):
         """testing if the is_container attribute is True for a Task with at
@@ -2299,7 +2299,7 @@ class TaskTester(unittest.TestCase):
         with pytest.raises(AttributeError) as cm:
             new_task.level = 0
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'level'"
 
     def test_level_attribute_returns_the_hierarchical_level_of_this_task(self):
         """testing if the level attribute returns the hierarchical level of
@@ -2572,7 +2572,7 @@ class TaskTester(unittest.TestCase):
         with pytest.raises(AttributeError) as cm:
             new_task.tjp_abs_id = 'some_value'
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'tjp_abs_id'"
 
     def test_tjp_id_attribute_is_working_properly_for_a_root_task(self):
         """testing if the tjp_id is working properly for a root task
@@ -3309,7 +3309,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         with pytest.raises(AttributeError) as cm:
             new_task.is_scheduled = True
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'is_scheduled'"
 
     def test_is_scheduled_is_true_if_the_computed_start_and_computed_end_is_not_None(self):
         """testing if the is_scheduled attribute value is True if the
@@ -3347,7 +3347,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         with pytest.raises(AttributeError) as cm:
             new_task.parents = self.test_dependent_task1
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'parents'"
 
     def test_parents_attribute_is_working_properly(self):
         """testing if the parents attribute is working properly
@@ -3595,7 +3595,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         with pytest.raises(AttributeError) as cm:
             new_task.tickets = 'some value'
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'tickets'"
 
     def test_open_tickets_attribute_is_a_read_only_property(self):
         """testing if the open_tickets attribute is a read-only property
@@ -3606,7 +3606,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         with pytest.raises(AttributeError) as cm:
             new_task.open_tickets = 'some value'
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'open_tickets'"
 
     def test_reviews_attribute_is_an_empty_list_by_default(self):
         """testing if the reviews attribute is an empty list by default
@@ -4029,7 +4029,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         with pytest.raises(AttributeError) as cm:
             new_task.path = 'some_path'
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'path'"
 
     def test_path_attribute_raises_a_RuntimeError_if_no_FilenameTemplate_found(self):
         """testing if the path attribute raises a RuntimeError if there is no
@@ -4112,7 +4112,7 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
         with pytest.raises(AttributeError) as cm:
             new_task.absolute_path = 'some_path'
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'absolute_path'"
 
     def test_absolute_path_attribute_raises_a_RuntimeError_if_no_FilenameTemplate_found(self):
         """testing if the absolute_path attribute raises a RuntimeError if

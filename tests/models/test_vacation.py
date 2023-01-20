@@ -144,7 +144,7 @@ class VacationTestCase(unittest.TestCase):
         with pytest.raises(AttributeError) as cm:
             self.test_vacation.to_tjp = 'some value'
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'to_tjp'"
 
     def test_to_tjp_attribute_is_working_properly(self):
         """testing if the to_tjp attribute is working properly

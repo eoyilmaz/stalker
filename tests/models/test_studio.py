@@ -621,7 +621,7 @@ class StudioTester(UnitTestDBBase):
         with pytest.raises(AttributeError) as cm:
             self.test_studio.projects = [self.test_project1]
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'projects'"
 
     def test_projects_attribute_is_working_properly(self):
         """testing if the projects attribute is working properly
@@ -639,7 +639,7 @@ class StudioTester(UnitTestDBBase):
         with pytest.raises(AttributeError) as cm:
             self.test_studio.active_projects = [self.test_project1]
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'active_projects'"
 
     def test_active_projects_attribute_is_working_properly(self):
         """testing if the active_projects attribute is working properly
@@ -655,7 +655,7 @@ class StudioTester(UnitTestDBBase):
         with pytest.raises(AttributeError) as cm:
             self.test_studio.inactive_projects = [self.test_project1]
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'inactive_projects'"
 
     def test_inactive_projects_attribute_is_working_properly(self):
         """testing if the inactive_projects attribute is working properly
@@ -670,7 +670,7 @@ class StudioTester(UnitTestDBBase):
         with pytest.raises(AttributeError) as cm:
             self.test_studio.departments = [self.test_project1]
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'departments'"
 
     def test_departments_attribute_is_working_properly(self):
         """testing if the departments attribute is working properly
@@ -690,7 +690,7 @@ class StudioTester(UnitTestDBBase):
         with pytest.raises(AttributeError) as cm:
             self.test_studio.users = [self.test_project1]
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'users'"
 
     def test_users_attribute_is_working_properly(self):
         """testing if the users attribute is working properly
@@ -710,7 +710,7 @@ class StudioTester(UnitTestDBBase):
         with pytest.raises(AttributeError) as cm:
             self.test_studio.to_tjp = "some text"
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'to_tjp'"
 
     def test_now_argument_is_skipped(self):
         """testing if the now attribute will use the rounded
@@ -1765,7 +1765,7 @@ project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
         with pytest.raises(AttributeError) as cm:
             self.test_studio.vacations = 'some random value'
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'vacations'"
 
     def test_vacation_attribute_returns_studio_vacation_instances(self):
         """Testing if the vacation attribute is returning the Vacation

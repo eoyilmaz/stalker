@@ -191,7 +191,7 @@ class SimpleEntityTester(unittest.TestCase):
         with pytest.raises(AttributeError) as cm:
             self.test_simple_entity.nice_name = "a text"
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'nice_name'"
 
     def test_description_argument_None(self):
         """testing if description property will be converted to an empty string

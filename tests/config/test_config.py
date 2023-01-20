@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
-
-import unittest
+import datetime
+import logging
+import os
+import tempfile
 import pytest
+import unittest
 
+from stalker import config
 from stalker.testing import UnitTestDBBase
 
-import logging
 logger = logging.getLogger("stalker")
 logger.setLevel(logging.DEBUG)
 
@@ -18,12 +21,10 @@ class ConfigTester(unittest.TestCase):
         """setup the test
         """
         super(ConfigTester, self).setUp()
-        import tempfile
         # so we need a temp directory to be specified as our config folder
         self.temp_config_folder = tempfile.mkdtemp()
 
         # we should set the environment variable
-        import os
         os.environ["STALKER_PATH"] = self.temp_config_folder
 
         self.config_full_path = os.path.join(
@@ -46,7 +47,6 @@ class ConfigTester(unittest.TestCase):
 
         # now import the config.py and see if it updates the
         # database_file_name variable
-        from stalker import config
         conf = config.Config()
 
         assert test_value == conf.database_engine_settings
@@ -65,7 +65,6 @@ class ConfigTester(unittest.TestCase):
 
         # now import the config.py and see if it updates the
         # database_file_name variable
-        from stalker import config
         conf = config.Config()
 
         assert conf.test_value == test_value
@@ -74,7 +73,6 @@ class ConfigTester(unittest.TestCase):
         """testing if the module path has shortcuts like ~ and other env
         variables
         """
-        import os
         splits = os.path.split(self.temp_config_folder)
         var1 = splits[0]
         var2 = os.path.sep.join(splits[1:])
@@ -91,7 +89,6 @@ class ConfigTester(unittest.TestCase):
 
         # now import the config.py and see if it updates the
         # database_file_name variable
-        from stalker import config
         conf = config.Config()
 
         assert test_value == conf.database_url
@@ -100,7 +97,6 @@ class ConfigTester(unittest.TestCase):
         """testing if the module path has multiple shortcuts like ~ and other
         env variables
         """
-        import os
         splits = os.path.split(self.temp_config_folder)
         var1 = splits[0]
         var2 = os.path.sep.join(splits[1:])
@@ -119,7 +115,6 @@ class ConfigTester(unittest.TestCase):
 
         # now import the config.py and see if it updates the
         # database_file_name variable
-        from stalker import config
         conf = config.Config()
 
         assert test_value == conf.database_url
@@ -128,8 +123,6 @@ class ConfigTester(unittest.TestCase):
         """testing if the non existing path situation will be handled
         gracefully by warning the user
         """
-        import os
-        from stalker import config
         os.environ["STALKER_PATH"] = "/tmp/non_existing_path"
         config.Config()
 
@@ -148,32 +141,29 @@ class ConfigTester(unittest.TestCase):
 
         # now import the config.py and see if it updates the
         # database_file_name variable
-        from stalker import config
         with pytest.raises(RuntimeError) as cm:
             config.Config()
 
-        assert str(cm.value) == \
-               'There is a syntax error in your configuration file: EOL ' \
-               'while scanning string literal (<string>, line 2)'
+        assert str(cm.value) == (
+            'There is a syntax error in your configuration file: unterminated string '
+            'literal (detected at line 2) (<string>, line 2)'
+        )
 
     def test___getattr___is_working_properly(self):
         """testing if config.Config.__getattr__() method is working properly
         """
-        from stalker import config
         c = config.Config()
         assert c.admin_name == 'admin'
 
     def test___getitem___is_working_properly(self):
         """testing if config.Config.__getitem__() method is working properly
         """
-        from stalker import config
         c = config.Config()
         assert c['admin_name'] == 'admin'
 
     def test___setitem__is_working_properly(self):
         """testing if config.Config.__setitem__() method is working properly
         """
-        from stalker import config
         c = config.Config()
         test_value = 'administrator'
         assert c['admin_name'] != test_value
@@ -183,7 +173,6 @@ class ConfigTester(unittest.TestCase):
     def test___delitem__is_working_properly(self):
         """testing if config.Config.__delitem__() method is working properly
         """
-        from stalker import config
         c = config.Config()
         assert c['admin_name'] is not None
         del c['admin_name']
@@ -192,7 +181,6 @@ class ConfigTester(unittest.TestCase):
     def test___contains___is_working_properly(self):
         """testing if config.Config.__contains__() method is working properly
         """
-        from stalker import config
         c = config.Config()
         assert 'admin_name' in c
 
@@ -205,7 +193,6 @@ class ConfigTesterDB(UnitTestDBBase):
         """testing if the default values are updated with the Studio instance
         if there is a database connection and there is a Studio in there
         """
-        import datetime
         from stalker import defaults
         from stalker.db.session import DBSession
         from stalker.models.studio import Studio
@@ -221,4 +208,4 @@ class ConfigTesterDB(UnitTestDBBase):
         DBSession.commit()
 
         # now check it again
-        assert defaults.timing_resolution ==studio.timing_resolution
+        assert defaults.timing_resolution == studio.timing_resolution

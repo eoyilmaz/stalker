@@ -1042,7 +1042,7 @@ class VersionDBTester(UnitTestDBBase):
         with pytest.raises(AttributeError) as cm:
             self.test_version.latest_published_version = True
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'latest_published_version'"
 
     def test_latest_published_version_is_working_properly(self):
         """testing if the is_latest_published_version is working properly
@@ -1265,7 +1265,7 @@ class VersionDBTester(UnitTestDBBase):
         with pytest.raises(AttributeError) as cm:
             self.test_version.max_version_number = 20
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'max_version_number'"
 
     def test_max_version_number_attribute_is_working_properly(self):
         """testing if the max_version_number attribute is working properly
@@ -1306,7 +1306,7 @@ class VersionDBTester(UnitTestDBBase):
         with pytest.raises(AttributeError) as cm:
             self.test_version.latest_version = 3453
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'latest_version'"
 
     def test_latest_version_attribute_is_working_properly(self):
         """testing if the last_version attribute is working properly
@@ -1347,7 +1347,7 @@ class VersionDBTester(UnitTestDBBase):
         with pytest.raises(AttributeError) as cm:
             self.test_version.naming_parents = [self.test_task1]
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'naming_parents'"
 
     def test_naming_parents_attribute_is_working_properly(self):
         """testing if the naming_parents attribute is working properly

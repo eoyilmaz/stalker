@@ -1,93 +1,234 @@
 # -*- coding: utf-8 -*-
 """Helper classes for testing
 """
-
-import unittest
+import datetime
 import logging
-from stalker import log
+import os
+import re
+import subprocess
+import unittest
+import uuid
+from subprocess import CalledProcessError
+
+from sqlalchemy.pool import NullPool
+
+import stalker
+from stalker import db, log
+from stalker.config import Config
+
 logger = logging.getLogger(__name__)
 logger.setLevel(log.logging_level)
 
+# {dialect}://{username}:{password}@{address}/{database_name}
+DB_REGEX = re.compile(
+    r"(?P<dialect>[\w]+)"
+    r"://"
+    r"(?P<username>[\w]+)"
+    r":"
+    r"(?P<password>[\w\s#?!$%^&*\-]+)"
+    r"@*"
+    r"(?P<hostname>[\w.]+)"
+    r":*"
+    r"(?P<port>\d*)"
+    r"/*"
+    r"(?P<database_name>[\w_\-]*)"
+)
 
-def create_db(database_name):
-    """creates new PostgreSQL database
+
+def run_db_command(
+    database_name="testdb",
+    dialect="postgresql",
+    hostname="localhost",
+    port=5432,
+    username="postgres",
+    password="postgres",
+    command=""
+):
+    """Run db command on a Postgres database.
+
+    Args:
+        database_name (str): The database name to create.
+        dialect (str): The database dialect, default is postgresql and currently nothing
+            else is supported.
+        hostname (str): The DB server hostname, default is 'localhost'.
+        port (int): The port number, default is 5432.
+        username (str): The username, default is 'postgres'.
+        password (str): The password, default is 'postgres'.
+        command (str): The command to run.
+
+    Returns:
+        str: The database url.
     """
-    logger.debug('creating database: %s' % database_name)
-    import subprocess
+    if port == "":
+        port = 5432
 
-    # fallback to check_call for Python 2.6
-    try:
-        process_caller = subprocess.check_output
-    except AttributeError:
-        process_caller = subprocess.check_call
+    psql_command = [
+        "psql",
+        "--host",
+        hostname,
+        "--port",
+        str(port),
+        "--username",
+        username,
+        "--no-password",
+        "--command",
+        command,
+    ]
 
-    process_caller(
-        'psql -c "CREATE DATABASE %s;" -U postgres' % database_name,
-        shell=True
+    proc = subprocess.Popen(
+        psql_command,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
     )
+    stdout_buffer = []
+    stderr_buffer = []
+    while True:
+        stdout = proc.stdout.readline().strip()
+        stderr = proc.stderr.readline().strip()
+        if not isinstance(stdout, str):
+            stdout = stdout.decode("utf-8", "replace")
+        if not isinstance(stderr, str):
+            stderr = stderr.decode("utf-8", "replace")
+
+        if stdout == "" and stderr == "" and proc.poll() is not None:
+            break
+
+        if stdout != "":
+            stdout_buffer.append(stdout)
+        if stderr != "":
+            stderr_buffer.append(stderr)
+
+    return stdout_buffer, stderr_buffer
+
+
+def create_db(
+    database_name="testdb",
+    dialect="postgresql",
+    hostname="localhost",
+    port=5432,
+    username="postgres",
+    password="postgres",
+):
+    """Create a new Postgres database.
+
+    Args:
+        database_name (str): The database name to create.
+        dialect (str): The database dialect, default is postgresql and currently nothing
+            else is supported.
+        hostname (str): The DB server hostname, default is 'localhost'.
+        port (int): The port number, default is 5432.
+        username (str): The username, default is 'postgres'.
+        password (str): The password, default is 'postgres'.
+
+    Returns:
+        str: The database url.
+    """
+    logger.debug("Creating Database: {}".format(database_name))
+    if port == "":
+        port = 5432  # use default
+
+    database_url = (
+        f"{dialect}://{username}:{password}@{hostname}:{port}/{database_name}"
+    )
+
+    command = "CREATE DATABASE {};".format(database_name)
+    run_db_command(
+        database_name=database_name,
+        dialect=dialect,
+        hostname=hostname,
+        port=port,
+        username=username,
+        password=password,
+        command=command
+    )
+    return database_url
+
+
+def get_server_details_from_url(url):
+    """Return database details from the given url.
+
+    Args:
+        url (str): Database url in {dialect}://{user_name}:{password}@{address}/{database_name}
+            format.
+
+    Returns:
+        dict: Returns a dictionary with "dialect", "user_name", "password", "address",
+            "database_name" keys.
+    """
+    return_val = dict()
+    match = DB_REGEX.match(url)
+    if match:
+        return_val = match.groupdict()
+    return return_val
 
 
 def create_random_db():
-    """creates a random named PostgreSQL database
+    """creates a random named Postgres database
 
-    :returns (str, str): db_url, db_name
+    :returns (str): db_url
     """
     # create a new database for this test only
-    import uuid
-    database_name = 'stalker_test_%s' % uuid.uuid4().hex[:8]
-    database_url = 'postgresql://stalker_admin:stalker@localhost/%s' % database_name
-    create_db(database_name)
-    return database_url, database_name
+    database_url = os.environ.get(
+        "STALKER_TEST_DB", "postgresql://postgres:postgres@localhost/testdb"
+    )
+    database_name = "stalker_test_{}".format(uuid.uuid4().hex[:8])
+
+    # get server details
+    db_kwargs = get_server_details_from_url(database_url)
+
+    # replace database name
+    db_kwargs["database_name"] = database_name
+
+    return create_db(**db_kwargs)
 
 
-def drop_db(database_name):
-    """drops a PostgreSQL database
+def drop_db(
+    database_name="testdb",
+    dialect="postgresql",
+    hostname="localhost",
+    port=5432,
+    username="postgres",
+    password="postgres",
+):
+    """Drop the given Postgres database.
+
+    Args:
+        database_name (str): The database name to create.
+        dialect (str): The database dialect, default is postgresql and currently nothing
+            else is supported.
+        hostname (str): The DB server hostname, default is 'localhost'.
+        port (Union[str, int]): The port number, default is 5432.
+        username (str): The username, default is 'postgres'.
+        password (str): The password, default is 'postgres'.
     """
-    import subprocess
-    import time
+    logger.debug("Dropping Database: {}".format(database_name))
+    command = "DROP   DATABASE {};".format(database_name)
 
-    # fallback to check_call for Python 2.6
-    try:
-        process_caller = subprocess.check_output
-    except AttributeError:
-        process_caller = subprocess.check_call
-
-    while True:
-        output = ''
-        try:
-            output = process_caller(
-                'psql -c "DROP DATABASE %s;" -U postgres' % database_name,
-                # stderr=subprocess.PIPE,
-                shell=True
-            )
-        except subprocess.CalledProcessError as e:
-            # sleep for 1 seconds and run again
-            logger.debug(output)
-            logger.debug(str(e))
-            time.sleep(1)
-        else:
-            return
+    run_db_command(
+        database_name=database_name,
+        dialect=dialect,
+        hostname=hostname,
+        port=port,
+        username=username,
+        password=password,
+        command=command
+    )
 
 
 class UnitTestDBBase(unittest.TestCase):
-    """the base for Stalker Pyramid Views unit tests
-    """
+    """the base for Stalker Pyramid Views unit tests"""
 
     def __init__(self, *args, **kwargs):
         super(UnitTestDBBase, self).__init__(*args, **kwargs)
         self.config = {}
         self.database_url = None
-        self.database_name = None
 
     def setUp(self):
-        """setup once
-        """
+        """setup once"""
         # create a new database for this test only
-        from subprocess import CalledProcessError
-
         while True:
             try:
-                self.database_url, self.database_name = create_random_db()
+                self.database_url = create_random_db()
             except CalledProcessError:
                 # in very rare cases the create_random_db generates an already
                 # existing database name
@@ -97,12 +238,9 @@ class UnitTestDBBase(unittest.TestCase):
                 break
 
         # update the config
-        self.config['sqlalchemy.url'] = self.database_url
-        from sqlalchemy.pool import NullPool
-        self.config['sqlalchemy.poolclass'] = NullPool
+        self.config["sqlalchemy.url"] = self.database_url
+        self.config["sqlalchemy.poolclass"] = NullPool
 
-        import os
-        from stalker.config import Config
         try:
             os.environ.pop(Config.env_key)
         except KeyError:
@@ -110,22 +248,16 @@ class UnitTestDBBase(unittest.TestCase):
             pass
 
         # regenerate the defaults
-        import stalker
         stalker.defaults = Config()
-
-        import datetime
         stalker.defaults.timing_resolution = datetime.timedelta(hours=1)
 
         # init database
-        from stalker import db
         # remove anything beforehand
         db.setup(self.config)
         db.init()
 
     def tearDown(self):
-        """clean up the test
-        """
-        import datetime
+        """clean up the test"""
         from stalker import defaults
         from stalker.db.declarative import Base
         from stalker.db.session import DBSession
@@ -137,11 +269,13 @@ class UnitTestDBBase(unittest.TestCase):
         connection.close()
 
         from sqlalchemy.exc import OperationalError
+
         try:
             Base.metadata.drop_all(engine, checkfirst=True)
             DBSession.remove()
             DBSession.close_all()
-            drop_db(self.database_name)
+            db_kwargs = get_server_details_from_url(self.database_url)
+            drop_db(**db_kwargs)
         except OperationalError:
             pass
         finally:
@@ -149,28 +283,25 @@ class UnitTestDBBase(unittest.TestCase):
 
     @property
     def admin(self):
-        """returns the admin user
-        """
+        """returns the admin user"""
         from stalker import defaults, User
         from stalker.db.session import DBSession
+
         with DBSession.no_autoflush:
-            return User.query\
-                .filter(User.login == defaults.admin_login)\
-                .first()
+            return User.query.filter(User.login == defaults.admin_login).first()
 
 
 class PlatformPatcher(object):
-    """patches given callable
-    """
+    """patches given callable"""
 
     def __init__(self):
         self.callable = None
         self.original = None
 
     def patch(self, desired_result):
-        """
-        """
+        """ """
         import platform
+
         self.original = platform.system
 
         def f():
@@ -179,8 +310,8 @@ class PlatformPatcher(object):
         platform.system = f
 
     def restore(self):
-        """restores the given callable_
-        """
+        """restores the given callable_"""
         if self.original:
             import platform
+
             platform.system = self.original

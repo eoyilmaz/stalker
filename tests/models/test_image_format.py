@@ -273,7 +273,7 @@ class ImageFormatTest(unittest.TestCase):
         with pytest.raises(AttributeError) as cm:
             self.test_image_format.device_aspect = 10
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'device_aspect'"
 
     def test_pixel_aspect_int_float(self):
         """testing if a TypeError will be raised when the pixel aspect ratio

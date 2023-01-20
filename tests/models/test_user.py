@@ -1135,7 +1135,7 @@ class UserTestDB(UnitTestDBBase):
         with pytest.raises(AttributeError) as cm:
             self.test_user.tickets = []
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'tickets'"
 
     def test_open_tickets_attribute_is_read_only(self):
         """testing if the User.open_tickets attribute is a read only attribute
@@ -1143,7 +1143,7 @@ class UserTestDB(UnitTestDBBase):
         with pytest.raises(AttributeError) as cm:
             self.test_user.open_tickets = []
 
-        assert str(cm.value) == "can't set attribute"
+        assert str(cm.value) == "can't set attribute 'open_tickets'"
 
     def test_tickets_attribute_returns_all_tickets_owned_by_this_user(self):
         """testing if User.tickets returns all the tickets owned by this user

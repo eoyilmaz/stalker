@@ -73,7 +73,7 @@ class ConfigBase(object):
                 # append the data to the current settings
                 logger.debug("updating system config")
                 for key in self.user_config:
-                    #if key in self.config_values:
+                    # if key in self.config_values:
                     self.config_values[key] = self.user_config[key]
 
     def __getattr__(self, name):

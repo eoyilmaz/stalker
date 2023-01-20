@@ -12,18 +12,17 @@ logger.setLevel(log.logging_level)
 
 
 class DatabaseTester(UnitTestDBBase):
-    """tests the database and connection to the database
-    """
+    """tests the database and connection to the database"""
 
     def test_dbsession_save_method_is_correctly_created(self):
         """testing if the DBSession is correctly created from
         ExtendedScopedSession class
         """
         from stalker.db.session import DBSession, ExtendedScopedSession
+
         assert isinstance(DBSession, ExtendedScopedSession)
 
-    def test_dbsession_save_method_is_working_properly_for_single_entity(
-            self):
+    def test_dbsession_save_method_is_working_properly_for_single_entity(self):
         """testing if the DBSession.save() method is working properly for
         single entity
         """
@@ -31,15 +30,12 @@ class DatabaseTester(UnitTestDBBase):
         from stalker.db.session import DBSession
 
         test_user = User(
-            name='Test User',
-            login='tuser',
-            email='tuser@gmail.com',
-            password='12345'
+            name="Test User", login="tuser", email="tuser@gmail.com", password="12345"
         )
         DBSession.save(test_user)
 
         del test_user
-        test_user_db = User.query.filter(User.name == 'Test User').first()
+        test_user_db = User.query.filter(User.name == "Test User").first()
         assert test_user_db is not None
 
     def test_dbsession_save_method_is_working_properly_for_multiple_entity(self):
@@ -50,24 +46,24 @@ class DatabaseTester(UnitTestDBBase):
         from stalker.db.session import DBSession
 
         test_user1 = User(
-            name='Test User 1',
-            login='tuser1',
-            email='tuser1@gmail.com',
-            password='12345'
+            name="Test User 1",
+            login="tuser1",
+            email="tuser1@gmail.com",
+            password="12345",
         )
         test_user2 = User(
-            name='Test User 2',
-            login='tuser2',
-            email='tuser2@gmail.com',
-            password='12345'
+            name="Test User 2",
+            login="tuser2",
+            email="tuser2@gmail.com",
+            password="12345",
         )
 
         DBSession.save([test_user1, test_user2])
 
         del test_user1
         del test_user2
-        test_user1_db = User.query.filter(User.name == 'Test User 1').first()
-        test_user2_db = User.query.filter(User.name == 'Test User 2').first()
+        test_user1_db = User.query.filter(User.name == "Test User 1").first()
+        test_user2_db = User.query.filter(User.name == "Test User 2").first()
         assert test_user1_db is not None
         assert test_user2_db is not None
 
@@ -79,27 +75,25 @@ class DatabaseTester(UnitTestDBBase):
         from stalker.db.session import DBSession
 
         test_user = User(
-            name='Test User',
-            login='tuser',
-            email='tuser@gmail.com',
-            password='12345'
+            name="Test User", login="tuser", email="tuser@gmail.com", password="12345"
         )
         DBSession.add(test_user)
         DBSession.save()
 
         del test_user
-        test_user_db = User.query.filter(User.name == 'Test User').first()
+        test_user_db = User.query.filter(User.name == "Test User").first()
         assert test_user_db is not None
 
     def test_default_admin_creation(self):
-        """testing if a default admin is created
-        """
+        """testing if a default admin is created"""
         # set default admin creation to True
         from stalker import defaults
+
         defaults.auto_create_admin = True
 
         # check if there is an admin
         from stalker import User
+
         admin_db = User.query.filter(User.name == defaults.admin_name).first()
 
         assert admin_db.name == defaults.admin_name
@@ -110,6 +104,7 @@ class DatabaseTester(UnitTestDBBase):
         """
         # set default admin creation to True
         from stalker import db, defaults
+
         defaults.auto_create_admin = True
         db.init()
 
@@ -121,6 +116,7 @@ class DatabaseTester(UnitTestDBBase):
         # second one because the tables.simpleEntity.c.nam.unique=True
 
         from stalker import User
+
         admins = User.query.filter_by(name=defaults.admin_name).all()
 
         assert len(admins) == 1
@@ -133,19 +129,23 @@ class DatabaseTester(UnitTestDBBase):
 
         # turn down auto admin creation
         from stalker import db, defaults
+
         defaults.auto_create_admin = False
 
         # Setup
         # update the config
         from stalker.testing import create_random_db
-        self.database_url, self.database_name = create_random_db()
 
-        self.config['sqlalchemy.url'] = self.database_url
+        self.database_url = create_random_db()
+
+        self.config["sqlalchemy.url"] = self.database_url
         from sqlalchemy.pool import NullPool
-        self.config['sqlalchemy.poolclass'] = NullPool
+
+        self.config["sqlalchemy.poolclass"] = NullPool
 
         import os
         from stalker.config import Config
+
         try:
             os.environ.pop(Config.env_key)
         except KeyError:
@@ -155,6 +155,7 @@ class DatabaseTester(UnitTestDBBase):
         # regenerate the defaults
         import stalker
         import datetime
+
         stalker.defaults.timing_resolution = datetime.timedelta(hours=1)
 
         # init the db
@@ -163,39 +164,45 @@ class DatabaseTester(UnitTestDBBase):
 
         # check if there is a use with name admin
         from stalker import User
+
         assert User.query.filter_by(name=defaults.admin_name).first() is None
 
         # check if there is a admins department
         from stalker import Department
-        assert Department.query\
-            .filter_by(name=defaults.admin_department_name)\
-            .first() is None
+
+        assert (
+            Department.query.filter_by(name=defaults.admin_department_name).first()
+            is None
+        )
 
     def test_non_unique_names_on_different_entity_type(self):
-        """testing if there can be non-unique names for different entity types
-        """
+        """testing if there can be non-unique names for different entity types"""
         # try to create a user and an entity with same name
         # expect Nothing
         kwargs = {
             "name": "user1",
-            #"created_by": admin
+            # "created_by": admin
         }
 
         from stalker import Entity
         from stalker.db.session import DBSession
+
         entity1 = Entity(**kwargs)
         DBSession.add(entity1)
         DBSession.commit()
 
         # lets create the second user
-        kwargs.update({
-            "name": "User1 Name",
-            "login": "user1",
-            "email": "user1@gmail.com",
-            "password": "user1",
-        })
+        kwargs.update(
+            {
+                "name": "User1 Name",
+                "login": "user1",
+                "email": "user1@gmail.com",
+                "password": "user1",
+            }
+        )
 
         from stalker import User
+
         user1 = User(**kwargs)
         DBSession.add(user1)
 
@@ -203,41 +210,32 @@ class DatabaseTester(UnitTestDBBase):
         DBSession.commit()
 
     def test_ticket_status_initialization(self):
-        """testing if the ticket statuses are correctly created
-        """
+        """testing if the ticket statuses are correctly created"""
         from stalker import StatusList
-        ticket_status_list = StatusList.query \
-            .filter(StatusList.name == 'Ticket Statuses') \
-            .first()
+
+        ticket_status_list = StatusList.query.filter(
+            StatusList.name == "Ticket Statuses"
+        ).first()
 
         assert isinstance(ticket_status_list, StatusList)
 
-        expected_status_names = [
-            'New',
-            'Reopened',
-            'Closed',
-            'Accepted',
-            'Assigned'
-        ]
+        expected_status_names = ["New", "Reopened", "Closed", "Accepted", "Assigned"]
 
         assert len(ticket_status_list.statuses) == len(expected_status_names)
         for status in ticket_status_list.statuses:
             assert status.name in expected_status_names
 
     def test_daily_status_initialization(self):
-        """testing if the daily statuses are correctly created
-        """
+        """testing if the daily statuses are correctly created"""
         from stalker import StatusList
-        daily_status_list = StatusList.query \
-            .filter(StatusList.name == 'Daily Statuses') \
-            .first()
+
+        daily_status_list = StatusList.query.filter(
+            StatusList.name == "Daily Statuses"
+        ).first()
 
         assert isinstance(daily_status_list, StatusList)
 
-        expected_status_names = [
-            'Open',
-            'Closed'
-        ]
+        expected_status_names = ["Open", "Closed"]
 
         assert len(daily_status_list.statuses) == len(expected_status_names)
 
@@ -264,13 +262,15 @@ class DatabaseTester(UnitTestDBBase):
         # now check if the TestClass entry is created in Permission table
 
         from stalker import Permission
-        permissions_db = Permission.query \
-            .filter(Permission.class_name == 'TestClass') \
-            .all()
+
+        permissions_db = Permission.query.filter(
+            Permission.class_name == "TestClass"
+        ).all()
 
         logger.debug("%s" % permissions_db)
 
         from stalker import defaults
+
         actions = defaults.actions
 
         for action in permissions_db:
@@ -281,36 +281,70 @@ class DatabaseTester(UnitTestDBBase):
         not an instance of type or str
         """
         from stalker import db
+
         with pytest.raises(TypeError):
             db.register(23425)
 
     def test_permissions_created_for_all_the_classes(self):
-        """testing if Permission instances are created for classes in the SOM
-        """
+        """testing if Permission instances are created for classes in the SOM"""
         class_names = [
-            'Asset', 'AuthenticationLog', 'Budget', 'BudgetEntry', 'Client',
-            'Good', 'Group', 'Permission', 'User', 'Department',
-            'SimpleEntity', 'Entity', 'EntityGroup', 'ImageFormat', 'Link',
-            'Message', 'Note', 'Page', 'Project', 'PriceList', 'Repository',
-            'Review', 'Role', 'Scene', 'Sequence', 'Shot', 'Status',
-            'StatusList', 'Structure', 'Studio', 'Tag', 'TimeLog', 'Task',
-            'FilenameTemplate', 'Ticket', 'TicketLog', 'Type', 'Vacation',
-            'Version', 'Daily', 'Invoice', 'Payment',
+            "Asset",
+            "AuthenticationLog",
+            "Budget",
+            "BudgetEntry",
+            "Client",
+            "Good",
+            "Group",
+            "Permission",
+            "User",
+            "Department",
+            "SimpleEntity",
+            "Entity",
+            "EntityGroup",
+            "ImageFormat",
+            "Link",
+            "Message",
+            "Note",
+            "Page",
+            "Project",
+            "PriceList",
+            "Repository",
+            "Review",
+            "Role",
+            "Scene",
+            "Sequence",
+            "Shot",
+            "Status",
+            "StatusList",
+            "Structure",
+            "Studio",
+            "Tag",
+            "TimeLog",
+            "Task",
+            "FilenameTemplate",
+            "Ticket",
+            "TicketLog",
+            "Type",
+            "Vacation",
+            "Version",
+            "Daily",
+            "Invoice",
+            "Payment",
         ]
 
         from stalker import defaults, Permission
+
         permission_db = Permission.query.all()
 
-        assert \
-            len(permission_db) == len(class_names) * len(defaults.actions) * 2
+        assert len(permission_db) == len(class_names) * len(defaults.actions) * 2
 
         for permission in permission_db:
-            assert permission.access in ['Allow', 'Deny']
+            assert permission.access in ["Allow", "Deny"]
             assert permission.action in defaults.actions
             assert permission.class_name in class_names
-            logger.debug('permission.access: %s' % permission.access)
-            logger.debug('permission.action: %s' % permission.action)
-            logger.debug('permission.class_name: %s' % permission.class_name)
+            logger.debug("permission.access: %s" % permission.access)
+            logger.debug("permission.action: %s" % permission.action)
+            logger.debug("permission.class_name: %s" % permission.class_name)
 
     def test_permissions_not_created_over_and_over_again(self):
         """testing if the Permissions are created only once and trying to call
@@ -318,6 +352,7 @@ class DatabaseTester(UnitTestDBBase):
         """
         from stalker import db
         from stalker.db.session import DBSession
+
         DBSession.remove()
         # DBSession.close()
         db.setup(self.config)
@@ -331,6 +366,7 @@ class DatabaseTester(UnitTestDBBase):
 
         # and we still have correct amount of Permissions
         from stalker import Permission
+
         permissions = Permission.query.all()
         assert len(permissions) == 420
 
@@ -341,6 +377,7 @@ class DatabaseTester(UnitTestDBBase):
         # create the environment variable and point it to a temp directory
         from stalker import db
         from stalker.db.session import DBSession
+
         DBSession.remove()
 
         db.setup(self.config)
@@ -356,36 +393,29 @@ class DatabaseTester(UnitTestDBBase):
 
         # and we still have correct amount of Statuses
         from stalker import Status, StatusList
+
         statuses = Status.query.all()
         assert len(statuses) == 17
 
-        status_list = \
-            StatusList.query.filter_by(target_entity_type='Ticket').first()
+        status_list = StatusList.query.filter_by(target_entity_type="Ticket").first()
         assert status_list is not None
-        assert status_list.name == 'Ticket Statuses'
+        assert status_list.name == "Ticket Statuses"
 
     def test_project_status_list_initialization(self):
-        """testing if the project statuses are correctly created
-        """
+        """testing if the project statuses are correctly created"""
         from stalker import StatusList
-        project_status_list = StatusList.query \
-            .filter(StatusList.name == 'Project Statuses') \
-            .filter(StatusList.target_entity_type == 'Project') \
+
+        project_status_list = (
+            StatusList.query.filter(StatusList.name == "Project Statuses")
+            .filter(StatusList.target_entity_type == "Project")
             .first()
+        )
 
         assert isinstance(project_status_list, StatusList)
 
-        expected_status_names = [
-            'Ready To Start',
-            'Work In Progress',
-            'Completed'
-        ]
+        expected_status_names = ["Ready To Start", "Work In Progress", "Completed"]
 
-        expected_status_codes = [
-            'RTS',
-            'WIP',
-            'CMPL'
-        ]
+        expected_status_codes = ["RTS", "WIP", "CMPL"]
 
         assert len(project_status_list.statuses) == len(expected_status_names)
 
@@ -403,38 +433,39 @@ class DatabaseTester(UnitTestDBBase):
             assert status.updated_by == admin
 
     def test_task_status_initialization(self):
-        """testing if the task statuses are correctly created
-        """
+        """testing if the task statuses are correctly created"""
         from stalker import StatusList
-        task_status_list = StatusList.query \
-            .filter(StatusList.name == 'Task Statuses') \
-            .filter(StatusList.target_entity_type == 'Task') \
+
+        task_status_list = (
+            StatusList.query.filter(StatusList.name == "Task Statuses")
+            .filter(StatusList.target_entity_type == "Task")
             .first()
+        )
 
         assert isinstance(task_status_list, StatusList)
 
         expected_status_names = [
-            'Waiting For Dependency',
-            'Ready To Start',
-            'Work In Progress',
-            'Pending Review',
-            'Has Revision',
-            'Dependency Has Revision',
-            'On Hold',
-            'Stopped',
-            'Completed'
+            "Waiting For Dependency",
+            "Ready To Start",
+            "Work In Progress",
+            "Pending Review",
+            "Has Revision",
+            "Dependency Has Revision",
+            "On Hold",
+            "Stopped",
+            "Completed",
         ]
 
         expected_status_codes = [
-            'WFD',
-            'RTS',
-            'WIP',
-            'PREV',
-            'HREV',
-            'DREV',
-            'OH',
-            'STOP',
-            'CMPL'
+            "WFD",
+            "RTS",
+            "WIP",
+            "PREV",
+            "HREV",
+            "DREV",
+            "OH",
+            "STOP",
+            "CMPL",
         ]
 
         assert len(task_status_list.statuses) == len(expected_status_names)
@@ -453,38 +484,39 @@ class DatabaseTester(UnitTestDBBase):
             assert status.updated_by == admin
 
     def test_asset_status_initialization(self):
-        """testing if the asset statuses are correctly created
-        """
+        """testing if the asset statuses are correctly created"""
         from stalker import StatusList
-        asset_status_list = StatusList.query \
-            .filter(StatusList.name == 'Asset Statuses') \
-            .filter(StatusList.target_entity_type == 'Asset') \
+
+        asset_status_list = (
+            StatusList.query.filter(StatusList.name == "Asset Statuses")
+            .filter(StatusList.target_entity_type == "Asset")
             .first()
+        )
 
         assert isinstance(asset_status_list, StatusList)
 
         expected_status_names = [
-            'Waiting For Dependency',
-            'Ready To Start',
-            'Work In Progress',
-            'Pending Review',
-            'Has Revision',
-            'Dependency Has Revision',
-            'On Hold',
-            'Stopped',
-            'Completed'
+            "Waiting For Dependency",
+            "Ready To Start",
+            "Work In Progress",
+            "Pending Review",
+            "Has Revision",
+            "Dependency Has Revision",
+            "On Hold",
+            "Stopped",
+            "Completed",
         ]
 
         expected_status_codes = [
-            'WFD',
-            'RTS',
-            'WIP',
-            'PREV',
-            'HREV',
-            'DREV',
-            'OH',
-            'STOP',
-            'CMPL'
+            "WFD",
+            "RTS",
+            "WIP",
+            "PREV",
+            "HREV",
+            "DREV",
+            "OH",
+            "STOP",
+            "CMPL",
         ]
 
         assert len(asset_status_list.statuses) == len(expected_status_names)
@@ -495,38 +527,39 @@ class DatabaseTester(UnitTestDBBase):
         assert sorted(expected_status_codes) == sorted(db_status_codes)
 
     def test_shot_status_initialization(self):
-        """testing if the shot statuses are correctly created
-        """
+        """testing if the shot statuses are correctly created"""
         from stalker import StatusList
-        shot_status_list = StatusList.query \
-            .filter(StatusList.name == 'Shot Statuses') \
-            .filter(StatusList.target_entity_type == 'Shot') \
+
+        shot_status_list = (
+            StatusList.query.filter(StatusList.name == "Shot Statuses")
+            .filter(StatusList.target_entity_type == "Shot")
             .first()
+        )
 
         assert isinstance(shot_status_list, StatusList)
 
         expected_status_names = [
-            'Waiting For Dependency',
-            'Ready To Start',
-            'Work In Progress',
-            'Pending Review',
-            'Has Revision',
-            'Dependency Has Revision',
-            'On Hold',
-            'Stopped',
-            'Completed'
+            "Waiting For Dependency",
+            "Ready To Start",
+            "Work In Progress",
+            "Pending Review",
+            "Has Revision",
+            "Dependency Has Revision",
+            "On Hold",
+            "Stopped",
+            "Completed",
         ]
 
         expected_status_codes = [
-            'WFD',
-            'RTS',
-            'WIP',
-            'PREV',
-            'HREV',
-            'DREV',
-            'OH',
-            'STOP',
-            'CMPL'
+            "WFD",
+            "RTS",
+            "WIP",
+            "PREV",
+            "HREV",
+            "DREV",
+            "OH",
+            "STOP",
+            "CMPL",
         ]
 
         assert len(shot_status_list.statuses) == len(expected_status_names)
@@ -537,38 +570,39 @@ class DatabaseTester(UnitTestDBBase):
         assert sorted(expected_status_codes) == sorted(db_status_codes)
 
     def test_sequence_status_initialization(self):
-        """testing if the sequence statuses are correctly created
-        """
+        """testing if the sequence statuses are correctly created"""
         from stalker import StatusList
-        sequence_status_list = StatusList.query \
-            .filter(StatusList.name == 'Sequence Statuses') \
-            .filter(StatusList.target_entity_type == 'Sequence') \
+
+        sequence_status_list = (
+            StatusList.query.filter(StatusList.name == "Sequence Statuses")
+            .filter(StatusList.target_entity_type == "Sequence")
             .first()
+        )
 
         assert isinstance(sequence_status_list, StatusList)
 
         expected_status_names = [
-            'Waiting For Dependency',
-            'Ready To Start',
-            'Work In Progress',
-            'Pending Review',
-            'Has Revision',
-            'Dependency Has Revision',
-            'On Hold',
-            'Stopped',
-            'Completed'
+            "Waiting For Dependency",
+            "Ready To Start",
+            "Work In Progress",
+            "Pending Review",
+            "Has Revision",
+            "Dependency Has Revision",
+            "On Hold",
+            "Stopped",
+            "Completed",
         ]
 
         expected_status_codes = [
-            'WFD',
-            'RTS',
-            'WIP',
-            'PREV',
-            'HREV',
-            'DREV',
-            'OH',
-            'STOP',
-            'CMPL'
+            "WFD",
+            "RTS",
+            "WIP",
+            "PREV",
+            "HREV",
+            "DREV",
+            "OH",
+            "STOP",
+            "CMPL",
         ]
 
         assert len(sequence_status_list.statuses) == len(expected_status_names)
@@ -590,34 +624,35 @@ class DatabaseTester(UnitTestDBBase):
         StatusList for Sequence is already created
         """
         from stalker import StatusList
-        asset_status_list = StatusList.query \
-            .filter(StatusList.name == 'Asset Statuses') \
-            .first()
+
+        asset_status_list = StatusList.query.filter(
+            StatusList.name == "Asset Statuses"
+        ).first()
 
         assert isinstance(asset_status_list, StatusList)
 
         expected_status_names = [
-            'Waiting For Dependency',
-            'Ready To Start',
-            'Work In Progress',
-            'Pending Review',
-            'Has Revision',
-            'Dependency Has Revision',
-            'On Hold',
-            'Stopped',
-            'Completed'
+            "Waiting For Dependency",
+            "Ready To Start",
+            "Work In Progress",
+            "Pending Review",
+            "Has Revision",
+            "Dependency Has Revision",
+            "On Hold",
+            "Stopped",
+            "Completed",
         ]
 
         expected_status_codes = [
-            'WFD',
-            'RTS',
-            'WIP',
-            'PREV',
-            'HREV',
-            'DREV',
-            'OH',
-            'STOP',
-            'CMPL'
+            "WFD",
+            "RTS",
+            "WIP",
+            "PREV",
+            "HREV",
+            "DREV",
+            "OH",
+            "STOP",
+            "CMPL",
         ]
 
         assert len(asset_status_list.statuses) == len(expected_status_names)
@@ -639,34 +674,35 @@ class DatabaseTester(UnitTestDBBase):
         StatusList for Shot is already created
         """
         from stalker import StatusList
-        shot_status_list = StatusList.query \
-            .filter(StatusList.name == 'Shot Statuses') \
-            .first()
+
+        shot_status_list = StatusList.query.filter(
+            StatusList.name == "Shot Statuses"
+        ).first()
 
         assert isinstance(shot_status_list, StatusList)
 
         expected_status_names = [
-            'Waiting For Dependency',
-            'Ready To Start',
-            'Work In Progress',
-            'Pending Review',
-            'Has Revision',
-            'Dependency Has Revision',
-            'On Hold',
-            'Stopped',
-            'Completed'
+            "Waiting For Dependency",
+            "Ready To Start",
+            "Work In Progress",
+            "Pending Review",
+            "Has Revision",
+            "Dependency Has Revision",
+            "On Hold",
+            "Stopped",
+            "Completed",
         ]
 
         expected_status_codes = [
-            'WFD',
-            'RTS',
-            'WIP',
-            'PREV',
-            'HREV',
-            'DREV',
-            'OH',
-            'STOP',
-            'CMPL'
+            "WFD",
+            "RTS",
+            "WIP",
+            "PREV",
+            "HREV",
+            "DREV",
+            "OH",
+            "STOP",
+            "CMPL",
         ]
 
         assert len(shot_status_list.statuses) == len(expected_status_names)
@@ -688,34 +724,35 @@ class DatabaseTester(UnitTestDBBase):
         a StatusList for Sequence is already created
         """
         from stalker import StatusList
-        sequence_status_list = StatusList.query \
-            .filter(StatusList.name == 'Sequence Statuses') \
-            .first()
+
+        sequence_status_list = StatusList.query.filter(
+            StatusList.name == "Sequence Statuses"
+        ).first()
 
         assert isinstance(sequence_status_list, StatusList)
 
         expected_status_names = [
-            'Waiting For Dependency',
-            'Ready To Start',
-            'Work In Progress',
-            'Pending Review',
-            'Has Revision',
-            'Dependency Has Revision',
-            'On Hold',
-            'Stopped',
-            'Completed'
+            "Waiting For Dependency",
+            "Ready To Start",
+            "Work In Progress",
+            "Pending Review",
+            "Has Revision",
+            "Dependency Has Revision",
+            "On Hold",
+            "Stopped",
+            "Completed",
         ]
 
         expected_status_codes = [
-            'WFD',
-            'RTS',
-            'WIP',
-            'PREV',
-            'HREV',
-            'DREV',
-            'OH',
-            'STOP',
-            'CMPL'
+            "WFD",
+            "RTS",
+            "WIP",
+            "PREV",
+            "HREV",
+            "DREV",
+            "OH",
+            "STOP",
+            "CMPL",
         ]
 
         assert len(sequence_status_list.statuses) == len(expected_status_names)
@@ -733,26 +770,22 @@ class DatabaseTester(UnitTestDBBase):
             assert status.updated_by == admin
 
     def test_review_status_initialization(self):
-        """testing if the review statuses are correctly created
-        """
+        """testing if the review statuses are correctly created"""
         from stalker import StatusList
-        review_status_list = StatusList.query \
-            .filter(StatusList.name == 'Review Statuses') \
-            .first()
+
+        review_status_list = StatusList.query.filter(
+            StatusList.name == "Review Statuses"
+        ).first()
 
         assert isinstance(review_status_list, StatusList)
 
         expected_status_names = [
-            'New',
-            'Requested Revision',
-            'Approved',
+            "New",
+            "Requested Revision",
+            "Approved",
         ]
 
-        expected_status_codes = [
-            'NEW',
-            'RREV',
-            'APP'
-        ]
+        expected_status_codes = ["NEW", "RREV", "APP"]
 
         assert len(review_status_list.statuses) == len(expected_status_names)
 
@@ -773,51 +806,46 @@ class DatabaseTester(UnitTestDBBase):
         no entity_type is supplied
         """
         from stalker.db import create_entity_statuses
-        kwargs = {
-            'status_names': ['A', 'B'],
-            'status_codes': ['A', 'B']
-        }
+
+        kwargs = {"status_names": ["A", "B"], "status_codes": ["A", "B"]}
         with pytest.raises(ValueError) as cm:
             create_entity_statuses(**kwargs)
 
-        assert str(cm.value) == 'Please supply entity_type'
+        assert str(cm.value) == "Please supply entity_type"
 
     def test___create_entity_statuses_no_status_names_supplied(self):
         """testing db.__create_entity_statuses() will raise a ValueError when
         no status_names is supplied
         """
         from stalker.db import create_entity_statuses
-        kwargs = {
-            'entity_type': 'Hede Hodo',
-            'status_codes': ['A', 'B']
-        }
+
+        kwargs = {"entity_type": "Hede Hodo", "status_codes": ["A", "B"]}
         with pytest.raises(ValueError) as cm:
             create_entity_statuses(**kwargs)
 
-        assert str(cm.value) == 'Please supply status names'
+        assert str(cm.value) == "Please supply status names"
 
     def test___create_entity_statuses_no_status_codes_supplied(self):
         """testing db.__create_entity_statuses() will raise a ValueError when
         no status_codes is supplied
         """
         from stalker.db import create_entity_statuses
-        kwargs = {
-            'entity_type': 'Hede Hodo',
-            'status_names': ['A', 'B']
-        }
+
+        kwargs = {"entity_type": "Hede Hodo", "status_names": ["A", "B"]}
         with pytest.raises(ValueError) as cm:
             create_entity_statuses(**kwargs)
 
-        assert str(cm.value) == 'Please supply status codes'
+        assert str(cm.value) == "Please supply status codes"
 
     def test_initialization_of_alembic_version_table(self):
         """testing if the db.init() will also create a table called
         alembic_version
         """
         from stalker.db.session import DBSession
+
         sql_query = 'select version_num from "alembic_version"'
         version_num = DBSession.connection().execute(sql_query).fetchone()[0]
-        assert 'bf67e6a234b4' == version_num
+        assert "bf67e6a234b4" == version_num
 
     def test_initialization_of_alembic_version_table_multiple_times(self):
         """testing if the db.create_alembic_table() will handle initializing
@@ -825,10 +853,10 @@ class DatabaseTester(UnitTestDBBase):
         """
         from stalker import db
         from stalker.db.session import DBSession
+
         sql_query = 'select version_num from "alembic_version"'
-        version_num = \
-            DBSession.connection().execute(sql_query).fetchone()[0]
-        assert 'bf67e6a234b4' == version_num
+        version_num = DBSession.connection().execute(sql_query).fetchone()[0]
+        assert "bf67e6a234b4" == version_num
 
         DBSession.remove()
         db.init()
@@ -847,6 +875,7 @@ class DatabaseTester(UnitTestDBBase):
         """
         from stalker import db
         from stalker.db.session import DBSession
+
         db.init()
 
         # now change the alembic_version
@@ -857,7 +886,7 @@ class DatabaseTester(UnitTestDBBase):
         # check if it is updated correctly
         sql = "select version_num from alembic_version"
         result = DBSession.connection().execute(sql).fetchone()
-        assert result[0] == 'some_random_number'
+        assert result[0] == "some_random_number"
 
         # close the connection
         DBSession.connection().close()
@@ -867,17 +896,23 @@ class DatabaseTester(UnitTestDBBase):
         with pytest.raises(ValueError) as cm:
             db.setup(self.config)
 
-        assert str(cm.value) == 'Please update the database to version: %s' % db.alembic_version
+        assert (
+            str(cm.value)
+            == "Please update the database to version: %s" % db.alembic_version
+        )
 
         # also it is not possible to continue with the current DBSession
         from sqlalchemy.exc import PendingRollbackError
         from stalker import User
+
         with pytest.raises(PendingRollbackError) as cm:
             DBSession.query(User.id).all()
 
-        assert "Can't reconnect until invalid transaction is rolled back. " \
-               "(Background on this error at: " \
-               "https://sqlalche.me/e/14/8s2b)" in str(cm.value)
+        assert (
+            "Can't reconnect until invalid transaction is rolled back. "
+            "(Background on this error at: "
+            "https://sqlalche.me/e/14/8s2b)" in str(cm.value)
+        )
 
         # rollback and reconnect to the database
         DBSession.rollback()
@@ -886,12 +921,15 @@ class DatabaseTester(UnitTestDBBase):
         with pytest.raises(ValueError) as cm:
             db.setup(self.config)
 
-        assert str(cm.value) == 'Please update the database to version: ' \
-                                '%s' % db.alembic_version
+        assert (
+            str(cm.value) == "Please update the database to version: "
+            "%s" % db.alembic_version
+        )
 
         # rollback and insert the correct alembic version number
         DBSession.rollback()
         from stalker.db import alembic_version
+
         sql = "update alembic_version set version_num='%s'" % alembic_version
         DBSession.connection().execute(sql)
         DBSession.commit()
@@ -907,27 +945,30 @@ class DatabaseTester(UnitTestDBBase):
         """
         # create a couple of repositories
         from stalker import db, Repository
-        repo1 = Repository(name='Repo1', code='R1')
-        repo2 = Repository(name='Repo2', code='R2')
-        repo3 = Repository(name='Repo3', code='R3')
+
+        repo1 = Repository(name="Repo1", code="R1")
+        repo2 = Repository(name="Repo2", code="R2")
+        repo3 = Repository(name="Repo3", code="R3")
 
         all_repos = [repo1, repo2, repo3]
         from stalker.db.session import DBSession
+
         DBSession.add_all(all_repos)
         DBSession.commit()
 
         # remove any auto created repo vars
         import os
+
         for repo in all_repos:
             try:
-                os.environ.pop('REPO%s' % repo.code)
+                os.environ.pop("REPO%s" % repo.code)
             except KeyError:
                 pass
 
         # check if all removed
         for repo in all_repos:
             # check if environment vars are created
-            assert ('REPO%s' % repo.code) not in os.environ
+            assert ("REPO%s" % repo.code) not in os.environ
 
         # remove db connection
         DBSession.remove()
@@ -939,19 +980,20 @@ class DatabaseTester(UnitTestDBBase):
 
         for repo in all_repos:
             # check if environment vars are created
-            assert ('REPO%s' % repo.code) in os.environ
+            assert ("REPO%s" % repo.code) in os.environ
 
     def test_db_init_with_studio_instance(self):
-        """testing db.init() using existing Studio instance for config values
-        """
+        """testing db.init() using existing Studio instance for config values"""
         # check the defaults
         from stalker import defaults
+
         assert defaults.daily_working_hours != 8
         assert defaults.weekly_working_days != 4
         assert defaults.weekly_working_hours != 32
         assert defaults.yearly_working_days != 180
 
         import datetime
+
         assert defaults.timing_resolution != datetime.timedelta(minutes=5)
 
         from stalker import Studio, WorkingHours
@@ -962,25 +1004,26 @@ class DatabaseTester(UnitTestDBBase):
 
         wh = WorkingHours(
             working_hours={
-                'mon': [[10 * 60, 18 * 60]],
-                'tue': [[10 * 60, 18 * 60]],
-                'wed': [[10 * 60, 18 * 60]],
-                'thu': [[10 * 60, 18 * 60]],
-                'fri': [],
-                'sat': [],
-                'sun': [],
+                "mon": [[10 * 60, 18 * 60]],
+                "tue": [[10 * 60, 18 * 60]],
+                "wed": [[10 * 60, 18 * 60]],
+                "thu": [[10 * 60, 18 * 60]],
+                "fri": [],
+                "sat": [],
+                "sun": [],
             }
         )
         wh.daily_working_hours = 8
 
         test_studio = Studio(
-            name='Test Studio',
+            name="Test Studio",
         )
         test_studio.working_hours = wh
         test_studio.timing_resolution = datetime.timedelta(minutes=5)
 
         from stalker import db
         from stalker.db.session import DBSession
+
         DBSession.add(test_studio)
         DBSession.commit()
 
@@ -998,16 +1041,17 @@ class DatabaseTester(UnitTestDBBase):
         assert defaults.yearly_working_days == 209
         assert defaults.timing_resolution == datetime.timedelta(minutes=5)
 
-    def test_get_alembic_version_is_working_properly_when_there_is_no_alembic_version_table(self):
+    def test_get_alembic_version_is_working_properly_when_there_is_no_alembic_version_table(
+        self,
+    ):
         """testing if get_alembic_version() is working properly when there is
         no alembic_version table
         """
         # drop the table
         from stalker import db
         from stalker.db.session import DBSession
-        DBSession.connection().execute(
-            'DROP TABLE IF EXISTS alembic_version'
-        )
+
+        DBSession.connection().execute("DROP TABLE IF EXISTS alembic_version")
         # now get the alembic_version
         # this should not raise an OperationalError
         alembic_version = db.get_alembic_version()
@@ -1018,6 +1062,7 @@ class DatabaseTester(UnitTestDBBase):
         create_ticket_statuses() called multiple times
         """
         from stalker import db
+
         db.create_ticket_statuses()
         db.create_ticket_statuses()
         db.create_ticket_statuses()
@@ -1033,18 +1078,16 @@ class DatabaseTester(UnitTestDBBase):
         ticket_codes = defaults.ticket_status_codes
 
         from stalker import db
-        db.create_entity_statuses(
-            'Ticket', ticket_names, ticket_codes, self.admin
-        )
-        db.create_entity_statuses(
-            'Ticket', ticket_names, ticket_codes, self.admin
-        )
+
+        db.create_entity_statuses("Ticket", ticket_names, ticket_codes, self.admin)
+        db.create_entity_statuses("Ticket", ticket_names, ticket_codes, self.admin)
 
     def test_register_called_multiple_times(self):
         """testing if calling db.register() multiple times will not raise any
         errors
         """
         from stalker import db, User
+
         db.register(User)
         db.register(User)
         db.register(User)
@@ -1055,12 +1098,14 @@ class DatabaseTester(UnitTestDBBase):
         setting is supplied
         """
         from stalker import db
+
         db.setup()
         # db.init()
         from stalker.db.session import DBSession
+
         conn = DBSession.connection()
         engine = conn.engine
-        assert str(engine.url) == 'sqlite://'
+        assert str(engine.url) == "sqlite://"
 
     def test_setup_with_settings(self):
         """testing if db.setup() function will use the given settings if no
@@ -1073,10 +1118,11 @@ class DatabaseTester(UnitTestDBBase):
         from sqlalchemy.exc import ArgumentError
 
         with pytest.raises(ArgumentError) as cm:
-            db.setup({'sqlalchemy.url': 'random url'})
+            db.setup({"sqlalchemy.url": "random url"})
 
-        assert str(cm.value) == "Could not parse rfc1738 URL from string " \
-                                "'random url'"
+        assert (
+            str(cm.value) == "Could not parse SQLAlchemy URL from string 'random url'"
+        )
 
 
 class DatabaseModelsTester(UnitTestDBBase):
@@ -1095,65 +1141,61 @@ class DatabaseModelsTester(UnitTestDBBase):
     """
 
     def test_persistence_of_Asset(self):
-        """testing the persistence of Asset
-        """
+        """testing the persistence of Asset"""
         from stalker import User
+
         test_user = User(
-            name='Test User',
-            login='tu',
-            email='test@user.com',
-            password='secret'
+            name="Test User", login="tu", email="test@user.com", password="secret"
         )
 
         from stalker import Type
+
         asset_type = Type(
-            name='A new asset type A',
-            code='anata',
-            target_entity_type='Asset'
+            name="A new asset type A", code="anata", target_entity_type="Asset"
         )
 
         from stalker import Repository
+
         test_repository_type = Type(
-            name='Test Repository Type A',
-            code='trta',
-            target_entity_type='Repository',
+            name="Test Repository Type A",
+            code="trta",
+            target_entity_type="Repository",
         )
 
         test_repository = Repository(
-            name='Test Repository A',
-            code='TRA',
-            type=test_repository_type
+            name="Test Repository A", code="TRA", type=test_repository_type
         )
 
         commercial_type = Type(
-            name='Commercial A',
-            code='comm',
-            target_entity_type='Project'
+            name="Commercial A", code="comm", target_entity_type="Project"
         )
 
         from stalker import Project
+
         test_project = Project(
-            name='Test Project For Asset Creation',
-            code='TPFAC',
+            name="Test Project For Asset Creation",
+            code="TPFAC",
             type=commercial_type,
             repository=test_repository,
         )
 
         from stalker.db.session import DBSession
+
         DBSession.add(test_project)
         DBSession.commit()
 
         kwargs = {
-            'name': 'Test Asset',
-            'code': 'test_asset',
-            'description': 'This is a test Asset object',
-            'type': asset_type,
-            'project': test_project,
-            'created_by': test_user,
-            'responsible': [test_user]
+            "name": "Test Asset",
+            "code": "test_asset",
+            "description": "This is a test Asset object",
+            "type": asset_type,
+            "project": test_project,
+            "created_by": test_user,
+            "responsible": [test_user],
         }
 
         from stalker import Asset
+
         test_asset = Asset(**kwargs)
         # logger.debug('test_asset.project : %s' % test_asset.project)
 
@@ -1164,18 +1206,22 @@ class DatabaseModelsTester(UnitTestDBBase):
         #              test_asset.project)
 
         from stalker import Task
+
         test_task1 = Task(
-            name='test task 1', status=0,
+            name="test task 1",
+            status=0,
             parent=test_asset,
         )
 
         test_task2 = Task(
-            name='test task 2', status=0,
+            name="test task 2",
+            status=0,
             parent=test_asset,
         )
 
         test_task3 = Task(
-            name='test task 3', status=0,
+            name="test task 3",
+            status=0,
             parent=test_asset,
         )
 
@@ -1204,11 +1250,11 @@ class DatabaseModelsTester(UnitTestDBBase):
 
         del test_asset
 
-        test_asset_db = Asset.query.filter_by(name=kwargs['name']).one()
+        test_asset_db = Asset.query.filter_by(name=kwargs["name"]).one()
 
-        assert (isinstance(test_asset_db, Asset))
+        assert isinstance(test_asset_db, Asset)
 
-        #assert test_asset, test_asset_DB)
+        # assert test_asset, test_asset_DB)
         assert code == test_asset_db.code
         assert test_asset_db.created_by is not None
         assert created_by == test_asset_db.created_by
@@ -1238,85 +1284,86 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert User.query.filter(User.id == created_by.id).first() is not None
 
         # we should still have the project
-        assert Project.query.filter(
-            Project.id == project.id).first() is not None
+        assert Project.query.filter(Project.id == project.id).first() is not None
 
     def test_persistence_of_Budget_and_BudgetEntry(self):
-        """testing the persistence of Budget and BudgetEntry classes
-        """
+        """testing the persistence of Budget and BudgetEntry classes"""
         from stalker import User
+
         test_user = User(
-            name='Test User',
-            login='tu',
-            email='test@user.com',
-            password='secret'
+            name="Test User", login="tu", email="test@user.com", password="secret"
         )
 
         from stalker import Status
-        status1 = Status.query.filter_by(code='NEW').first()
-        status2 = Status.query.filter_by(code='WIP').first()
-        status3 = Status.query.filter_by(code='CMPL').first()
+
+        status1 = Status.query.filter_by(code="NEW").first()
+        status2 = Status.query.filter_by(code="WIP").first()
+        status3 = Status.query.filter_by(code="CMPL").first()
 
         from stalker import Type
+
         test_repository_type = Type(
-            name='Test Repository Type A',
-            code='trta',
-            target_entity_type='Repository',
+            name="Test Repository Type A",
+            code="trta",
+            target_entity_type="Repository",
         )
 
         from stalker import Repository
+
         test_repository = Repository(
-            name='Test Repository A',
-            code='TRA',
-            type=test_repository_type
+            name="Test Repository A", code="TRA", type=test_repository_type
         )
 
         from stalker import StatusList
+
         budget_status_list = StatusList(
-            name='Budget Statuses',
+            name="Budget Statuses",
             statuses=[status1, status2, status3],
-            target_entity_type='Budget'
+            target_entity_type="Budget",
         )
 
         commercial_type = Type(
-            name='Commercial A',
-            code='comm',
-            target_entity_type='Project'
+            name="Commercial A", code="comm", target_entity_type="Project"
         )
 
         from stalker import Project
+
         test_project = Project(
-            name='Test Project For Budget Creation',
-            code='TPFBC',
+            name="Test Project For Budget Creation",
+            code="TPFBC",
             type=commercial_type,
             repository=test_repository,
         )
 
         from stalker.db.session import DBSession
+
         DBSession.add(test_project)
         DBSession.commit()
 
         kwargs = {
-            'name': 'Test Budget',
-            'project': test_project,
-            'created_by': test_user,
-            'status_list': budget_status_list,
-            'status': status1
+            "name": "Test Budget",
+            "project": test_project,
+            "created_by": test_user,
+            "status_list": budget_status_list,
+            "status": status1,
         }
 
         from stalker import Budget
+
         test_budget = Budget(**kwargs)
 
         DBSession.add(test_budget)
         DBSession.commit()
 
         from stalker import Good
-        good = Good(name='Some Good', cost=9, msrp=10, unit='$/hour')
+
+        good = Good(name="Some Good", cost=9, msrp=10, unit="$/hour")
         DBSession.add(good)
         DBSession.commit()
 
         # create some entries
         from stalker import BudgetEntry
+
         entry1 = BudgetEntry(budget=test_budget, good=good, amount=5.0)
         entry2 = BudgetEntry(budget=test_budget, good=good, amount=1.0)
 
@@ -1337,9 +1384,9 @@ class DatabaseModelsTester(UnitTestDBBase):
 
         del test_budget
 
-        test_budget_db = Budget.query.filter_by(name=kwargs['name']).one()
+        test_budget_db = Budget.query.filter_by(name=kwargs["name"]).one()
 
-        assert (isinstance(test_budget_db, Budget))
+        assert isinstance(test_budget_db, Budget)
 
         assert test_budget_db.created_by is not None
         assert created_by == test_budget_db.created_by
@@ -1365,98 +1412,97 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert User.query.filter(User.id == created_by.id).first() is not None
 
         # we should still have the project
-        assert Project.query.filter(
-            Project.id == project.id).first() is not None
+        assert Project.query.filter(Project.id == project.id).first() is not None
 
         # and we should have our page deleted
-        assert Budget.query.filter(
-            Budget.name == kwargs['name']).first() is None
+        assert Budget.query.filter(Budget.name == kwargs["name"]).first() is None
 
         # and we should have our entries deleted
         assert BudgetEntry.query.all() == []
 
         # we still should have the good
-        good_db = Good.query.filter(Good.name == 'Some Good').first()
+        good_db = Good.query.filter(Good.name == "Some Good").first()
         assert good_db is not None
 
     def test_persistence_of_Invoice(self):
-        """testing the persistence of Invoice instances
-        """
+        """testing the persistence of Invoice instances"""
         from stalker import User
+
         test_user = User(
-            name='Test User',
-            login='tu',
-            email='test@user.com',
-            password='secret'
+            name="Test User", login="tu", email="test@user.com", password="secret"
         )
 
         from stalker import Status
-        status1 = Status.query.filter_by(code='NEW').first()
-        status2 = Status.query.filter_by(code='WIP').first()
-        status3 = Status.query.filter_by(code='CMPL').first()
+
+        status1 = Status.query.filter_by(code="NEW").first()
+        status2 = Status.query.filter_by(code="WIP").first()
+        status3 = Status.query.filter_by(code="CMPL").first()
 
         from stalker import Type
+
         test_repository_type = Type(
-            name='Test Repository Type A',
-            code='trta',
-            target_entity_type='Repository',
+            name="Test Repository Type A",
+            code="trta",
+            target_entity_type="Repository",
         )
 
         from stalker import Repository
+
         test_repository = Repository(
-            name='Test Repository A',
-            code='TRA',
-            type=test_repository_type
+            name="Test Repository A", code="TRA", type=test_repository_type
         )
 
         from stalker import StatusList
+
         budget_status_list = StatusList(
-            name='Budget Statuses',
+            name="Budget Statuses",
             statuses=[status1, status2, status3],
-            target_entity_type='Budget'
+            target_entity_type="Budget",
         )
 
         commercial_type = Type(
-            name='Commercial A',
-            code='comm',
-            target_entity_type='Project'
+            name="Commercial A", code="comm", target_entity_type="Project"
         )
 
         from stalker import Client, Project
         from stalker.db.session import DBSession
-        test_client = Client(name='Test Client')
+
+        test_client = Client(name="Test Client")
         DBSession.add(test_client)
 
         test_project = Project(
-            name='Test Project For Budget Creation',
-            code='TPFBC',
+            name="Test Project For Budget Creation",
+            code="TPFBC",
             type=commercial_type,
             repository=test_repository,
-            clients=[test_client]
+            clients=[test_client],
         )
 
         DBSession.add(test_project)
         DBSession.commit()
 
         from stalker import Budget
+
         test_budget = Budget(
-            name='Test Budget',
+            name="Test Budget",
             project=test_project,
             created_by=test_user,
             status_list=budget_status_list,
-            status=status1
+            status=status1,
         )
 
         DBSession.add(test_budget)
         DBSession.commit()
 
         from stalker import Good
-        good = Good(name='Some Good', cost=9, msrp=10, unit='$/hour')
+
+        good = Good(name="Some Good", cost=9, msrp=10, unit="$/hour")
         DBSession.add(good)
         DBSession.commit()
 
         # create some entries
         from stalker import BudgetEntry
+
         entry1 = BudgetEntry(budget=test_budget, good=good, amount=5.0)
         entry2 = BudgetEntry(budget=test_budget, good=good, amount=1.0)
 
@@ -1465,12 +1511,13 @@ class DatabaseModelsTester(UnitTestDBBase):
 
         # create an invoice
         from stalker import Invoice
+
         test_invoice = Invoice(
             created_by=test_user,
             budget=test_budget,
             client=test_client,
             amount=1232.4,
-            unit='TRY'
+            unit="TRY",
         )
         DBSession.add(test_invoice)
 
@@ -1486,15 +1533,13 @@ class DatabaseModelsTester(UnitTestDBBase):
         budget = test_budget
         client = test_client
         amount = 1232.4
-        unit = 'TRY'
+        unit = "TRY"
 
         del test_invoice
 
-        test_invoice_db = Invoice.query\
-            .filter(Invoice.name == name)\
-            .first()
+        test_invoice_db = Invoice.query.filter(Invoice.name == name).first()
 
-        assert(isinstance(test_invoice_db, Invoice))
+        assert isinstance(test_invoice_db, Invoice)
 
         assert test_user == test_invoice_db.created_by
         assert created_by == test_invoice_db.created_by
@@ -1522,88 +1567,91 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert Client.query.filter(Client.id == client.id).first() == client
 
         # and we should have the invoice deleted
-        assert Invoice.query.filter(
-            Invoice.name == test_invoice_db.name).first() is None
+        assert (
+            Invoice.query.filter(Invoice.name == test_invoice_db.name).first() is None
+        )
 
     def test_persistence_of_Payment(self):
-        """testing the persistence of Payment instances
-        """
+        """testing the persistence of Payment instances"""
         from stalker import User
+
         test_user = User(
-            name='Test User',
-            login='tu',
-            email='test@user.com',
-            password='secret'
+            name="Test User", login="tu", email="test@user.com", password="secret"
         )
 
         from stalker import Status
-        status1 = Status.query.filter_by(code='NEW').first()
-        status2 = Status.query.filter_by(code='WIP').first()
-        status3 = Status.query.filter_by(code='CMPL').first()
+
+        status1 = Status.query.filter_by(code="NEW").first()
+        status2 = Status.query.filter_by(code="WIP").first()
+        status3 = Status.query.filter_by(code="CMPL").first()
 
         from stalker import Type
+
         test_repository_type = Type(
-            name='Test Repository Type A',
-            code='trta',
-            target_entity_type='Repository',
+            name="Test Repository Type A",
+            code="trta",
+            target_entity_type="Repository",
         )
 
         from stalker import Repository
+
         test_repository = Repository(
-            name='Test Repository A',
-            code='TRA',
-            type=test_repository_type
+            name="Test Repository A", code="TRA", type=test_repository_type
         )
 
         from stalker import StatusList
+
         budget_status_list = StatusList(
-            name='Budget Statuses',
+            name="Budget Statuses",
             statuses=[status1, status2, status3],
-            target_entity_type='Budget'
+            target_entity_type="Budget",
         )
 
         commercial_type = Type(
-            name='Commercial A',
-            code='comm',
-            target_entity_type='Project'
+            name="Commercial A", code="comm", target_entity_type="Project"
         )
 
         from stalker import Client
         from stalker.db.session import DBSession
-        test_client = Client(name='Test Client')
+
+        test_client = Client(name="Test Client")
         DBSession.add(test_client)
 
         from stalker import Project
+
         test_project = Project(
-            name='Test Project For Budget Creation',
-            code='TPFBC',
+            name="Test Project For Budget Creation",
+            code="TPFBC",
             type=commercial_type,
             repository=test_repository,
-            clients=[test_client]
+            clients=[test_client],
         )
 
         DBSession.add(test_project)
         DBSession.commit()
 
         from stalker import Budget
+
         test_budget = Budget(
-            name='Test Budget',
+            name="Test Budget",
             project=test_project,
             created_by=test_user,
             status_list=budget_status_list,
-            status=status1
+            status=status1,
         )
 
         DBSession.add(test_budget)
         DBSession.commit()
 
         from stalker import Good
-        good = Good(name='Some Good', cost=9, msrp=10, unit='$/hour')
+
+        good = Good(name="Some Good", cost=9, msrp=10, unit="$/hour")
         DBSession.add(good)
         DBSession.commit()
 
         # create some entries
         from stalker import BudgetEntry
+
         entry1 = BudgetEntry(budget=test_budget, good=good, amount=5.0)
         entry2 = BudgetEntry(budget=test_budget, good=good, amount=1.0)
 
@@ -1612,21 +1660,20 @@ class DatabaseModelsTester(UnitTestDBBase):
 
         # create an invoice
         from stalker import Invoice
+
         test_invoice = Invoice(
             created_by=test_user,
             budget=test_budget,
             client=test_client,
             amount=1232.4,
-            unit='TRY'
+            unit="TRY",
         )
         DBSession.add(test_invoice)
 
         from stalker import Payment
+
         test_payment = Payment(
-            created_by=test_user,
-            invoice=test_invoice,
-            amount=123.4,
-            unit='TRY'
+            created_by=test_user, invoice=test_invoice, amount=123.4, unit="TRY"
         )
 
         created_by = test_payment.created_by
@@ -1640,15 +1687,13 @@ class DatabaseModelsTester(UnitTestDBBase):
 
         invoice = test_invoice
         amount = 123.4
-        unit = 'TRY'
+        unit = "TRY"
 
         del test_payment
 
-        test_payment_db = Payment.query\
-            .filter(Payment.name == name)\
-            .first()
+        test_payment_db = Payment.query.filter(Payment.name == name).first()
 
-        assert(isinstance(test_payment_db, Payment))
+        assert isinstance(test_payment_db, Payment)
 
         assert test_user == test_payment_db.created_by
         assert created_by == test_payment_db.created_by
@@ -1669,73 +1714,73 @@ class DatabaseModelsTester(UnitTestDBBase):
         DBSession.commit()
 
         # we should still have the budget
-        assert Budget.query.filter(
-            Budget.id == test_budget.id).first() == test_budget
+        assert Budget.query.filter(Budget.id == test_budget.id).first() == test_budget
 
         # we should still have the Invoice
-        assert Invoice.query.filter(
-            Invoice.id == test_invoice.id).first() == test_invoice
+        assert (
+            Invoice.query.filter(Invoice.id == test_invoice.id).first() == test_invoice
+        )
 
         # and we should have the payment deleted
-        assert Payment.query.filter(
-            Payment.name == test_payment_db.name).first() is None
+        assert (
+            Payment.query.filter(Payment.name == test_payment_db.name).first() is None
+        )
 
     def test_persistence_of_Page(self):
-        """testing the persistence of Page
-        """
+        """testing the persistence of Page"""
         from stalker import User
+
         test_user = User(
-            name='Test User',
-            login='tu',
-            email='test@user.com',
-            password='secret'
+            name="Test User", login="tu", email="test@user.com", password="secret"
         )
 
         from stalker import Status
-        status1 = Status.query.filter_by(code='NEW').first()
-        status2 = Status.query.filter_by(code='WIP').first()
-        status3 = Status.query.filter_by(code='CMPL').first()
+
+        status1 = Status.query.filter_by(code="NEW").first()
+        status2 = Status.query.filter_by(code="WIP").first()
+        status3 = Status.query.filter_by(code="CMPL").first()
 
         from stalker import Type
+
         test_repository_type = Type(
-            name='Test Repository Type A',
-            code='trta',
-            target_entity_type='Repository',
+            name="Test Repository Type A",
+            code="trta",
+            target_entity_type="Repository",
         )
 
         from stalker import Repository
+
         test_repository = Repository(
-            name='Test Repository A',
-            code='TRA',
-            type=test_repository_type
+            name="Test Repository A", code="TRA", type=test_repository_type
         )
 
         commercial_type = Type(
-            name='Commercial A',
-            code='comm',
-            target_entity_type='Project'
+            name="Commercial A", code="comm", target_entity_type="Project"
         )
 
         from stalker import Project
+
         test_project = Project(
-            name='Test Project For Asset Creation',
-            code='TPFAC',
+            name="Test Project For Asset Creation",
+            code="TPFAC",
             type=commercial_type,
             repository=test_repository,
         )
 
         from stalker.db.session import DBSession
+
         DBSession.add(test_project)
         DBSession.commit()
 
         kwargs = {
-            'title': 'Test Wiki Page',
-            'content': 'This is a test wiki page',
-            'project': test_project,
-            'created_by': test_user
+            "title": "Test Wiki Page",
+            "content": "This is a test wiki page",
+            "project": test_project,
+            "created_by": test_user,
         }
 
         from stalker import Page
+
         test_page = Page(**kwargs)
 
         DBSession.add(test_page)
@@ -1755,11 +1800,11 @@ class DatabaseModelsTester(UnitTestDBBase):
 
         del test_page
 
-        test_page_db = Page.query.filter_by(title=kwargs['title']).one()
+        test_page_db = Page.query.filter_by(title=kwargs["title"]).one()
 
-        assert (isinstance(test_page_db, Page))
+        assert isinstance(test_page_db, Page)
 
-        #assert test_asset, test_asset_DB)
+        # assert test_asset, test_asset_DB)
         assert test_page_db.created_by is not None
         assert created_by == test_page_db.created_by
         assert date_created == test_page_db.date_created
@@ -1781,91 +1826,78 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert User.query.filter(User.id == created_by.id).first() is not None
 
         # we should still have the project
-        assert Project.query.filter(
-            Project.id == project.id).first() is not None
+        assert Project.query.filter(Project.id == project.id).first() is not None
 
         # and we should have our page deleted
-        assert Page.query.filter(Page.title == kwargs['title']).first() is None
+        assert Page.query.filter(Page.title == kwargs["title"]).first() is None
 
     def test_persistence_of_TimeLog(self):
-        """testing the persistence of TimeLog
-        """
+        """testing the persistence of TimeLog"""
         logger.setLevel(log.logging_level)
 
-        description = 'this is a time log'
+        description = "this is a time log"
         import datetime
         import pytz
+
         start = datetime.datetime(2013, 1, 10, tzinfo=pytz.utc)
         end = datetime.datetime(2013, 1, 13, tzinfo=pytz.utc)
 
         from stalker import User
+
         user1 = User(
-            name='User1',
-            login='user1',
-            email='user1@users.com',
-            password='pass'
+            name="User1", login="user1", email="user1@users.com", password="pass"
         )
 
         user2 = User(
-            name='User2',
-            login='user2',
-            email='user2@users.com',
-            password='pass'
+            name="User2", login="user2", email="user2@users.com", password="pass"
         )
 
         from stalker import Status
-        stat1 = Status(
-            name='Work In Progress',
-            code='WIP'
-        )
 
-        stat2 = Status(
-            name='Completed',
-            code='CMPL'
-        )
+        stat1 = Status(name="Work In Progress", code="WIP")
+
+        stat2 = Status(name="Completed", code="CMPL")
 
         from stalker import Repository
+
         repo = Repository(
-            name='Commercials Repository',
-            code='CR',
-            linux_path='/mnt/shows',
-            windows_path='S:/',
-            osx_path='/mnt/shows'
+            name="Commercials Repository",
+            code="CR",
+            linux_path="/mnt/shows",
+            windows_path="S:/",
+            osx_path="/mnt/shows",
         )
 
         from stalker import Type
+
         projtype = Type(
-            name='Commercial Project',
-            code='comm',
-            target_entity_type='Project'
+            name="Commercial Project", code="comm", target_entity_type="Project"
         )
 
         from stalker import Project
-        proj1 = Project(
-            name='Test Project',
-            code='tp',
-            type=projtype,
-            repository=repo
-        )
+
+        proj1 = Project(name="Test Project", code="tp", type=projtype, repository=repo)
 
         from stalker import Task
+
         test_task = Task(
-            name='Test Task',
+            name="Test Task",
             start=start,
             end=end,
             resources=[user1, user2],
             project=proj1,
-            responsible=[user1]
+            responsible=[user1],
         )
         from stalker.db.session import DBSession
 
         from stalker import TimeLog
+
         test_time_log = TimeLog(
             task=test_task,
             resource=user1,
             start=datetime.datetime(2013, 1, 10, tzinfo=pytz.utc),
             end=datetime.datetime(2013, 1, 13, tzinfo=pytz.utc),
-            description=description
+            description=description,
         )
 
         DBSession.add(test_time_log)
@@ -1884,74 +1916,62 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert test_task == test_time_log_db.task
 
     def test_persistence_of_TimeLog_raw_sql(self):
-        """testing the persistence of TimeLog
-        """
+        """testing the persistence of TimeLog"""
         import datetime
         import pytz
+
         start = datetime.datetime(2013, 1, 10, tzinfo=pytz.utc)
         end = datetime.datetime(2013, 1, 13, tzinfo=pytz.utc)
 
         from stalker import User
+
         user1 = User(
-            name='User1',
-            login='user1',
-            email='user1@users.com',
-            password='pass'
+            name="User1", login="user1", email="user1@users.com", password="pass"
         )
 
         user2 = User(
-            name='User2',
-            login='user2',
-            email='user2@users.com',
-            password='pass'
+            name="User2", login="user2", email="user2@users.com", password="pass"
         )
 
         from stalker import Status
-        stat1 = Status(
-            name='Work In Progress',
-            code='WIP'
-        )
 
-        stat2 = Status(
-            name='Completed',
-            code='CMPL'
-        )
+        stat1 = Status(name="Work In Progress", code="WIP")
+
+        stat2 = Status(name="Completed", code="CMPL")
 
         from stalker import Repository
+
         repo = Repository(
-            name='Commercials Repository',
-            code='CR',
-            linux_path='/mnt/shows',
-            windows_path='S:/',
-            osx_path='/mnt/shows'
+            name="Commercials Repository",
+            code="CR",
+            linux_path="/mnt/shows",
+            windows_path="S:/",
+            osx_path="/mnt/shows",
         )
 
         from stalker import Type
+
         projtype = Type(
-            name='Commercial Project',
-            code='comm',
-            target_entity_type='Project'
+            name="Commercial Project", code="comm", target_entity_type="Project"
         )
 
         from stalker import Project
-        proj1 = Project(
-            name='Test Project',
-            code='tp',
-            type=projtype,
-            repository=repo
-        )
+
+        proj1 = Project(name="Test Project", code="tp", type=projtype, repository=repo)
 
         from stalker import Task
+
         test_task = Task(
-            name='Test Task',
+            name="Test Task",
             start=start,
             end=end,
             resources=[user1, user2],
             project=proj1,
-            responsible=[user1]
+            responsible=[user1],
         )
 
         from stalker.db.session import DBSession
+
         DBSession.add(test_task)
         DBSession.commit()
 
@@ -1961,12 +1981,8 @@ class DatabaseModelsTester(UnitTestDBBase):
 
         # try insert start = start
         from stalker import TimeLog
-        new_tl1 = TimeLog(
-            task=test_task,
-            resource=user1,
-            start=start,
-            end=end
-        )
+
+        new_tl1 = TimeLog(task=test_task, resource=user1, start=start, end=end)
         DBSession.add(new_tl1)
         DBSession.commit()
 
@@ -1975,21 +1991,21 @@ class DatabaseModelsTester(UnitTestDBBase):
             task=test_task,
             resource=user1,
             start=end,
-            end=end + datetime.timedelta(hours=3)
+            end=end + datetime.timedelta(hours=3),
         )
         DBSession.add(new_tl2)
         DBSession.commit()
 
         # update it to have overlapping timing values with new_tl1
         from sqlalchemy.exc import IntegrityError
+
         new_tl2.start = start + datetime.timedelta(hours=2)
 
         with pytest.raises(IntegrityError) as cm:
             DBSession.commit()
 
     def test_persistence_of_Client(self):
-        """testing the persistence of Client
-        """
+        """testing the persistence of Client"""
         logger.setLevel(log.logging_level)
 
         name = "TestClient"
@@ -1998,19 +2014,22 @@ class DatabaseModelsTester(UnitTestDBBase):
         updated_by = None
         import datetime
         import pytz
+
         date_created = datetime.datetime.now(pytz.utc)
         date_updated = datetime.datetime.now(pytz.utc)
 
         from stalker import Client
+
         test_client = Client(
             name=name,
             description=description,
             created_by=created_by,
             updated_by=updated_by,
             date_created=date_created,
-            date_updated=date_updated
+            date_updated=date_updated,
         )
         from stalker.db.session import DBSession
+
         DBSession.add(test_client)
         DBSession.commit()
 
@@ -2018,10 +2037,11 @@ class DatabaseModelsTester(UnitTestDBBase):
 
         # user1
         from stalker import User
+
         user1 = User(
             name="User1 Test Persistence Department",
-            login='u1tpd',
-            initials='u1tpd',
+            login="u1tpd",
+            initials="u1tpd",
             description="this is for testing purposes",
             created_by=None,
             updated_by=None,
@@ -2036,8 +2056,8 @@ class DatabaseModelsTester(UnitTestDBBase):
         # user2
         user2 = User(
             name="User2 Test Persistence Client",
-            login='u2tpd',
-            initials='u2tpd',
+            login="u2tpd",
+            initials="u2tpd",
             description="this is for testing purposes",
             created_by=None,
             updated_by=None,
@@ -2052,8 +2072,8 @@ class DatabaseModelsTester(UnitTestDBBase):
         # user3
         user3 = User(
             name="User3 Test Persistence Client",
-            login='u3tpd',
-            initials='u3tpd',
+            login="u3tpd",
+            initials="u3tpd",
             description="this is for testing purposes",
             created_by=None,
             updated_by=None,
@@ -2066,11 +2086,12 @@ class DatabaseModelsTester(UnitTestDBBase):
         )
 
         from stalker.models.budget import Good
-        good1 = Good(name='Test Good 1')
-        good2 = Good(name='Test Good 2')
-        good3 = Good(name='Test Good 3')
-        good4 = Good(name='Test Good 4')
-        good5 = Good(name='Test Good 5')
+
+        good1 = Good(name="Test Good 1")
+        good2 = Good(name="Test Good 2")
+        good3 = Good(name="Test Good 3")
+        good4 = Good(name="Test Good 4")
+        good5 = Good(name="Test Good 5")
         test_client.goods = [good1, good2, good3, good5]
 
         DBSession.add(good4)
@@ -2119,20 +2140,20 @@ class DatabaseModelsTester(UnitTestDBBase):
         DBSession.delete(client_db)
         DBSession.commit()
 
-        user1_db = User.query.filter_by(login='u1tpd').first()
-        user2_db = User.query.filter_by(login='u2tpd').first()
-        user3_db = User.query.filter_by(login='u3tpd').first()
+        user1_db = User.query.filter_by(login="u1tpd").first()
+        user2_db = User.query.filter_by(login="u2tpd").first()
+        user3_db = User.query.filter_by(login="u3tpd").first()
 
         assert user1_db is not None
         assert user2_db is not None
         assert user3_db is not None
 
         # goods should be deleted with client
-        good1 = Good.query.filter_by(name='Test Good 1').first()
-        good2 = Good.query.filter_by(name='Test Good 2').first()
-        good3 = Good.query.filter_by(name='Test Good 3').first()
-        good4 = Good.query.filter_by(name='Test Good 4').first()
-        good5 = Good.query.filter_by(name='Test Good 5').first()
+        good1 = Good.query.filter_by(name="Test Good 1").first()
+        good2 = Good.query.filter_by(name="Test Good 2").first()
+        good3 = Good.query.filter_by(name="Test Good 3").first()
+        good4 = Good.query.filter_by(name="Test Good 4").first()
+        good5 = Good.query.filter_by(name="Test Good 5").first()
 
         assert good1 is None
         assert good2 is None
@@ -2141,45 +2162,40 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert good5 is not None
 
     def test_persistence_of_Daily(self):
-        """testing the persistence of a Daily instance
-        """
+        """testing the persistence of a Daily instance"""
         from stalker import User
+
         test_user1 = User(
-            name='User1',
-            login='user1',
-            email='user1@user1.com',
-            password='12345'
+            name="User1", login="user1", email="user1@user1.com", password="12345"
         )
 
         from stalker import Repository, Project
-        test_repo = Repository(name='Test Repository', code='TR')
+
+        test_repo = Repository(name="Test Repository", code="TR")
         test_project = Project(
-            name='Test Project',
-            code='TP',
+            name="Test Project",
+            code="TP",
             repository=test_repo,
         )
 
         from stalker import Task
+
         test_task1 = Task(
-            name='Test Task 1',
-            project=test_project,
-            responsible=[test_user1]
+            name="Test Task 1", project=test_project, responsible=[test_user1]
         )
         test_task2 = Task(
-            name='Test Task 2',
-            project=test_project,
-            responsible=[test_user1]
+            name="Test Task 2", project=test_project, responsible=[test_user1]
         )
         test_task3 = Task(
-            name='Test Task 3',
-            project=test_project,
-            responsible=[test_user1]
+            name="Test Task 3", project=test_project, responsible=[test_user1]
         )
         from stalker.db.session import DBSession
+
         DBSession.add_all([test_task1, test_task2, test_task3])
         DBSession.commit()
 
         from stalker import Version
+
         test_version1 = Version(task=test_task1)
         DBSession.add(test_version1)
         DBSession.commit()
@@ -2197,33 +2213,38 @@ class DatabaseModelsTester(UnitTestDBBase):
         DBSession.commit()
 
         from stalker import Link
-        test_link1 = Link(original_filename='test_render1.jpg')
-        test_link2 = Link(original_filename='test_render2.jpg')
-        test_link3 = Link(original_filename='test_render3.jpg')
-        test_link4 = Link(original_filename='test_render4.jpg')
 
-        test_version1.outputs = [
-            test_link1,
-            test_link2,
-            test_link3
-        ]
-        test_version4.outputs = [
-            test_link4
-        ]
+        test_link1 = Link(original_filename="test_render1.jpg")
+        test_link2 = Link(original_filename="test_render2.jpg")
+        test_link3 = Link(original_filename="test_render3.jpg")
+        test_link4 = Link(original_filename="test_render4.jpg")
 
-        DBSession.add_all([
-            test_task1, test_task2, test_task3,
-            test_version1, test_version2, test_version3,
-            test_version4,
-            test_link1, test_link2, test_link3, test_link4
-        ])
+        test_version1.outputs = [test_link1, test_link2, test_link3]
+        test_version4.outputs = [test_link4]
+
+        DBSession.add_all(
+            [
+                test_task1,
+                test_task2,
+                test_task3,
+                test_version1,
+                test_version2,
+                test_version3,
+                test_version4,
+                test_link1,
+                test_link2,
+                test_link3,
+                test_link4,
+            ]
+        )
         DBSession.commit()
 
         # arguments
-        name = 'Test Daily'
+        name = "Test Daily"
         links = [test_link1, test_link2, test_link3]
 
         from stalker import Daily
+
         daily = Daily(name=name, project=test_project)
         daily.links = links
 
@@ -2251,6 +2272,7 @@ class DatabaseModelsTester(UnitTestDBBase):
 
         # test if links are still there
         from stalker import Link
+
         test_link1_db = Link.query.get(link1_id)
         test_link2_db = Link.query.get(link2_id)
         test_link3_db = Link.query.get(link3_id)
@@ -2269,13 +2291,13 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert isinstance(test_link4_db, Link)
 
         from stalker import DailyLink
+
         assert DailyLink.query.all() == []
 
         assert Link.query.count() == 8  # including versions
 
     def test_persistence_of_Department(self):
-        """testing the persistence of Department
-        """
+        """testing the persistence of Department"""
         logger.setLevel(log.logging_level)
 
         name = "TestDepartment_test_persistence_Department"
@@ -2284,19 +2306,22 @@ class DatabaseModelsTester(UnitTestDBBase):
         updated_by = None
         import datetime
         import pytz
+
         date_created = datetime.datetime.now(pytz.utc)
         date_updated = datetime.datetime.now(pytz.utc)
 
         from stalker import Department
+
         test_dep = Department(
             name=name,
             description=description,
             created_by=created_by,
             updated_by=updated_by,
             date_created=date_created,
-            date_updated=date_updated
+            date_updated=date_updated,
         )
         from stalker.db.session import DBSession
+
         DBSession.add(test_dep)
         DBSession.commit()
 
@@ -2304,10 +2329,11 @@ class DatabaseModelsTester(UnitTestDBBase):
 
         # user1
         from stalker import User
+
         user1 = User(
             name="User1 Test Persistence Department",
-            login='u1tpd',
-            initials='u1tpd',
+            login="u1tpd",
+            initials="u1tpd",
             description="this is for testing purposes",
             created_by=None,
             updated_by=None,
@@ -2322,8 +2348,8 @@ class DatabaseModelsTester(UnitTestDBBase):
         # user2
         user2 = User(
             name="User2 Test Persistence Department",
-            login='u2tpd',
-            initials='u2tpd',
+            login="u2tpd",
+            initials="u2tpd",
             description="this is for testing purposes",
             created_by=None,
             updated_by=None,
@@ -2339,8 +2365,8 @@ class DatabaseModelsTester(UnitTestDBBase):
         # create three users, one for lead and two for users
         user3 = User(
             name="User3 Test Persistence Department",
-            login='u3tpd',
-            initials='u3tpd',
+            login="u3tpd",
+            initials="u3tpd",
             description="this is for testing purposes",
             created_by=None,
             updated_by=None,
@@ -2391,8 +2417,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert updated_by == test_dep_db.updated_by
 
     def test_persistence_of_Entity(self):
-        """testing the persistence of Entity
-        """
+        """testing the persistence of Entity"""
         # create an Entity with a couple of tags
         # the Tag1
         name = "Tag1_test_creating_an_Entity"
@@ -2401,16 +2426,18 @@ class DatabaseModelsTester(UnitTestDBBase):
         updated_by = None
         import datetime
         import pytz
+
         date_created = date_updated = datetime.datetime.now(pytz.utc)
 
         from stalker import Tag
+
         tag1 = Tag(
             name=name,
             description=description,
             created_by=created_by,
             updated_by=updated_by,
             date_created=date_created,
-            date_updated=date_updated
+            date_updated=date_updated,
         )
 
         # the Tag2
@@ -2420,6 +2447,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         updated_by = None
         import datetime
         import pytz
+
         date_created = date_updated = datetime.datetime.now(pytz.utc)
 
         tag2 = Tag(
@@ -2428,11 +2456,12 @@ class DatabaseModelsTester(UnitTestDBBase):
             created_by=created_by,
             updated_by=updated_by,
             date_created=date_created,
-            date_updated=date_updated
+            date_updated=date_updated,
         )
 
         # the note
         from stalker import Note
+
         note1 = Note(content="content for note1")
         note2 = Note(content="content for note2")
 
@@ -2444,6 +2473,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         date_created = date_updated = datetime.datetime.now(pytz.utc)
 
         from stalker import Entity
+
         test_entity = Entity(
             name=name,
             description=description,
@@ -2456,13 +2486,11 @@ class DatabaseModelsTester(UnitTestDBBase):
         )
 
         # assign the note1 also to another entity
-        test_entity2 = Entity(
-            name='Test Entity 2',
-            notes=[note1]
-        )
+        test_entity2 = Entity(name="Test Entity 2", notes=[note1])
 
         # persist it to the database
         from stalker.db.session import DBSession
+
         DBSession.add_all([test_entity, test_entity2])
         DBSession.commit()
 
@@ -2482,9 +2510,10 @@ class DatabaseModelsTester(UnitTestDBBase):
 
         # now try to retrieve it
         from stalker import Entity
+
         test_entity_db = Entity.query.filter_by(name=name).first()
 
-        assert (isinstance(test_entity_db, Entity))
+        assert isinstance(test_entity_db, Entity)
 
         assert created_by == test_entity_db.created_by
         assert date_created == test_entity_db.date_created
@@ -2492,9 +2521,9 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert description == test_entity_db.description
         assert name == test_entity_db.name
         assert nice_name == test_entity_db.nice_name
-        assert \
-            sorted(notes, key=lambda x: x.name) == \
-            sorted([note1, note2], key=lambda x: x.name)
+        assert sorted(notes, key=lambda x: x.name) == sorted(
+            [note1, note2], key=lambda x: x.name
+        )
 
         assert notes == test_entity_db.notes
         assert tags == test_entity_db.tags
@@ -2507,21 +2536,22 @@ class DatabaseModelsTester(UnitTestDBBase):
         DBSession.commit()
 
         from stalker import Entity, Note
-        test_entity2_db = Entity.query.filter_by(name='Test Entity 2').first()
+
+        test_entity2_db = Entity.query.filter_by(name="Test Entity 2").first()
         assert isinstance(test_entity2_db, Entity)
 
-        assert \
-            sorted([note1, note2], key=lambda x: x.name) == \
-            sorted(Note.query.all(), key=lambda x: x.name)
-        assert \
-            sorted([note1], key=lambda x: x.name) == \
-            sorted(test_entity2_db.notes, key=lambda x: x.name)
+        assert sorted([note1, note2], key=lambda x: x.name) == sorted(
+            Note.query.all(), key=lambda x: x.name
+        )
+        assert sorted([note1], key=lambda x: x.name) == sorted(
+            test_entity2_db.notes, key=lambda x: x.name
+        )
 
     def test_persistence_of_EntityGroup(self):
-        """testing the persistence of EntityGroup
-        """
+        """testing the persistence of EntityGroup"""
         # create a couple of task
         from stalker import Status
+
         status1 = Status(name="stat1", code="STS1")
         status2 = Status(name="stat2", code="STS2")
         status3 = Status(name="stat3", code="STS3")
@@ -2529,6 +2559,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         status5 = Status(name="stat5", code="STS5")
 
         from stalker import User
+
         user1 = User(
             name="User1",
             login="user1",
@@ -2551,38 +2582,41 @@ class DatabaseModelsTester(UnitTestDBBase):
         )
 
         from stalker import Repository
+
         repo = Repository(
-            name='Test Repo',
-            code='TR',
-            linux_path='/mnt/M/JOBs',
-            windows_path='M:/JOBs',
-            osx_path='/Users/Shared/Servers/M',
+            name="Test Repo",
+            code="TR",
+            linux_path="/mnt/M/JOBs",
+            windows_path="M:/JOBs",
+            osx_path="/Users/Shared/Servers/M",
         )
 
         from stalker import Project
+
         project1 = Project(
-            name='Tests Project',
-            code='tp',
+            name="Tests Project",
+            code="tp",
             repository=repo,
         )
 
         from stalker import Type
+
         char_asset_type = Type(
-            name='Character Asset',
-            code='char',
-            target_entity_type='Asset'
+            name="Character Asset", code="char", target_entity_type="Asset"
         )
 
         from stalker import Asset
+
         asset1 = Asset(
-            name='Char1',
-            code='char1',
+            name="Char1",
+            code="char1",
             type=char_asset_type,
             project=project1,
-            responsible=[user1]
+            responsible=[user1],
         )
 
         from stalker import Task
+
         task1 = Task(
             name="Test Task",
             watchers=[user3],
@@ -2590,34 +2624,34 @@ class DatabaseModelsTester(UnitTestDBBase):
         )
 
         child_task1 = Task(
-            name='Child Task 1',
+            name="Child Task 1",
             resources=[user1, user2],
             parent=task1,
         )
 
         child_task2 = Task(
-            name='Child Task 2',
+            name="Child Task 2",
             resources=[user1, user2],
             parent=task1,
         )
 
         task2 = Task(
-            name='Another Task',
+            name="Another Task",
             project=project1,
             resources=[user1],
-            responsible=[user2]
+            responsible=[user2],
         )
 
         from stalker import EntityGroup
-        entity_group1 = EntityGroup(name='My Tasks')
-        entity_group1.entities = [
-            task1, child_task2, task2
-        ]
+
+        entity_group1 = EntityGroup(name="My Tasks")
+        entity_group1.entities = [task1, child_task2, task2]
 
         from stalker.db.session import DBSession
-        DBSession.add_all([
-            task1, child_task1, child_task2, task2, user1, user2, entity_group1
-        ])
+
+        DBSession.add_all(
+            [task1, child_task1, child_task2, task2, user1, user2, entity_group1]
+        )
         DBSession.commit()
 
         created_by = entity_group1.created_by
@@ -2634,17 +2668,17 @@ class DatabaseModelsTester(UnitTestDBBase):
         # now query it back
         entity_group1_db = EntityGroup.query.filter_by(name=name).first()
 
-        assert (isinstance(entity_group1_db, EntityGroup))
+        assert isinstance(entity_group1_db, EntityGroup)
 
         assert created_by == entity_group1_db.created_by
         assert date_created == entity_group1_db.date_created
         assert date_updated == entity_group1_db.date_updated
         assert name == entity_group1_db.name
         assert tags == entity_group1_db.tags
-        assert \
-            sorted(entities, key=lambda x: x.name) == \
-            sorted(entity_group1_db.entities, key=lambda x: x.name)
-        assert entities ==[task1, child_task2, task2]
+        assert sorted(entities, key=lambda x: x.name) == sorted(
+            entity_group1_db.entities, key=lambda x: x.name
+        )
+        assert entities == [task1, child_task2, task2]
         assert type_ == entity_group1_db.type
         assert updated_by == entity_group1_db.updated_by
 
@@ -2653,36 +2687,32 @@ class DatabaseModelsTester(UnitTestDBBase):
         DBSession.delete(entity_group1_db)
         DBSession.commit()
 
-        assert sorted([task1, asset1, child_task1, child_task2, task2],
-                      key=lambda x: x.name) == \
-            sorted(Task.query.all(), key=lambda x: x.name)
+        assert sorted(
+            [task1, asset1, child_task1, child_task2, task2], key=lambda x: x.name
+        ) == sorted(Task.query.all(), key=lambda x: x.name)
 
         # We still should have the users intact
-        admin = User.query.filter_by(name='admin').first()
-        assert \
-            sorted([user1, user2, user3, admin], key=lambda x: x.name) == \
-            sorted(User.query.all(), key=lambda x: x.name)
+        admin = User.query.filter_by(name="admin").first()
+        assert sorted([user1, user2, user3, admin], key=lambda x: x.name) == sorted(
+            User.query.all(), key=lambda x: x.name
+        )
 
-        assert \
-            sorted(
-                [asset1, task1, child_task1, child_task2, task2],
-                key=lambda x: x.name
-            ) == \
-            sorted(Task.query.all(), key=lambda x: x.name)
+        assert sorted(
+            [asset1, task1, child_task1, child_task2, task2], key=lambda x: x.name
+        ) == sorted(Task.query.all(), key=lambda x: x.name)
 
     def test_persistence_of_FilenameTemplate(self):
-        """testing the persistence of FilenameTemplate
-        """
+        """testing the persistence of FilenameTemplate"""
         from stalker import Type
+
         ref_type = Type.query.filter_by(name="Reference").first()
 
         # create a FilenameTemplate object for movie links
         kwargs = {
             "name": "Movie Links Template",
-            "target_entity_type": 'Link',
+            "target_entity_type": "Link",
             "type": ref_type,
-            "description": "this is a template to be used for links to movie"
-                           "files",
+            "description": "this is a template to be used for links to movie" "files",
             "path": "REFS/{{link_type.name}}",
             "filename": "{{link.file_name}}",
             "output_path": "OUTPUT",
@@ -2690,10 +2720,12 @@ class DatabaseModelsTester(UnitTestDBBase):
         }
 
         from stalker import FilenameTemplate
+
         new_type_template = FilenameTemplate(**kwargs)
 
         # persist it
         from stalker.db.session import DBSession
+
         DBSession.add(new_type_template)
         DBSession.commit()
 
@@ -2714,10 +2746,11 @@ class DatabaseModelsTester(UnitTestDBBase):
         del new_type_template
 
         # get it back
-        new_type_template_db = \
-            FilenameTemplate.query.filter_by(name=kwargs["name"]).first()
+        new_type_template_db = FilenameTemplate.query.filter_by(
+            name=kwargs["name"]
+        ).first()
 
-        assert (isinstance(new_type_template_db, FilenameTemplate))
+        assert isinstance(new_type_template_db, FilenameTemplate)
 
         assert new_type_template_db.created_by == created_by
         assert new_type_template_db.date_created == date_created
@@ -2734,8 +2767,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert new_type_template_db.type == type_
 
     def test_persistence_of_ImageFormat(self):
-        """testing the persistence of ImageFormat
-        """
+        """testing the persistence of ImageFormat"""
         # create a new ImageFormat object and try to read it back
         kwargs = {
             "name": "HD",
@@ -2743,15 +2775,17 @@ class DatabaseModelsTester(UnitTestDBBase):
             "width": 1920,
             "height": 1080,
             "pixel_aspect": 1.0,
-            "print_resolution": 300.0
+            "print_resolution": 300.0,
         }
 
         # create the ImageFormat object
         from stalker import ImageFormat
+
         im_format = ImageFormat(**kwargs)
 
         # persist it
         from stalker.db.session import DBSession
+
         DBSession.add(im_format)
         DBSession.commit()
 
@@ -2777,7 +2811,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         # get it back
         im_format_db = ImageFormat.query.filter_by(name=kwargs["name"]).first()
 
-        assert (isinstance(im_format_db, ImageFormat))
+        assert isinstance(im_format_db, ImageFormat)
 
         # just test the repository part of the attributes
         assert im_format_db.created_by == created_by
@@ -2796,36 +2830,32 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert im_format_db.width == width
 
     def test_persistence_of_Link(self):
-        """testing the persistence of Link
-        """
+        """testing the persistence of Link"""
         # user
         from stalker import User
+
         user1 = User(
-            name='Test User 1',
-            login='tu1',
-            email='test@users.com',
-            password='secret'
+            name="Test User 1", login="tu1", email="test@users.com", password="secret"
         )
         from stalker.db.session import DBSession
+
         DBSession.add(user1)
         DBSession.commit()
         # create a link Type
         from stalker import Type
-        sound_link_type = Type(
-            name='Sound',
-            code='sound',
-            target_entity_type='Link'
-        )
+
+        sound_link_type = Type(name="Sound", code="sound", target_entity_type="Link")
 
         # create a Link
         kwargs = {
-            'name': 'My Sound',
-            'full_path': 'M:/PROJECTS/my_movie_sound.wav',
-            'type': sound_link_type,
-            'created_by': user1
+            "name": "My Sound",
+            "full_path": "M:/PROJECTS/my_movie_sound.wav",
+            "type": sound_link_type,
+            "created_by": user1,
         }
 
         from stalker import Link
+
         link1 = Link(**kwargs)
 
         # persist it
@@ -2834,19 +2864,12 @@ class DatabaseModelsTester(UnitTestDBBase):
 
         # use it as a task reference
         from stalker import Repository, Project, Task
-        repo1 = Repository(name='test repo', code='TR')
 
-        project1 = Project(
-            name='Test Project 1',
-            code='TP1',
-            repository=repo1
-        )
+        repo1 = Repository(name="test repo", code="TR")
 
-        task1 = Task(
-            name='Test Task',
-            project=project1,
-            responsible=[user1]
-        )
+        project1 = Project(name="Test Project 1", code="TP1", repository=repo1)
+
+        task1 = Task(name="Test Task", project=project1, responsible=[user1])
         task1.references.append(link1)
 
         DBSession.add(task1)
@@ -2871,7 +2894,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         # retrieve it back
         link1_db = Link.query.filter_by(name=kwargs["name"]).first()
 
-        assert (isinstance(link1_db, Link))
+        assert isinstance(link1_db, Link)
 
         assert link1_db.created_by == created_by
         assert link1_db.date_created == date_created
@@ -2905,8 +2928,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert Task.query.get(task1.id) == task1
 
     def test_persistence_of_Note(self):
-        """testing the persistence of Note
-        """
+        """testing the persistence of Note"""
 
         # create a Note and attach it to an entity
 
@@ -2920,6 +2942,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         }
 
         from stalker import Note, Entity
+
         test_note = Note(**note_kwargs)
 
         # create an entity
@@ -2932,6 +2955,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         test_entity = Entity(**entity_kwargs)
 
         from stalker.db.session import DBSession
+
         DBSession.add_all([test_entity, test_note])
         DBSession.commit()
 
@@ -2949,10 +2973,9 @@ class DatabaseModelsTester(UnitTestDBBase):
         del test_note
 
         # try to get the note directly
-        test_note_db = \
-            Note.query.filter(Note.name == note_kwargs["name"]).first()
+        test_note_db = Note.query.filter(Note.name == note_kwargs["name"]).first()
 
-        assert (isinstance(test_note_db, Note))
+        assert isinstance(test_note_db, Note)
 
         assert test_note_db.content == content
         assert test_note_db.created_by == created_by
@@ -2964,17 +2987,13 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert test_note_db.updated_by == updated_by
 
     def test_persistence_of_Good(self):
-        """testing hte persistence of Good
-        """
+        """testing hte persistence of Good"""
         from stalker import Good
-        g1 = Good(
-            name='Test Good 1',
-            cost=10,
-            msrp=100,
-            unit='TRY'
-        )
+
+        g1 = Good(name="Test Good 1", cost=10, msrp=100, unit="TRY")
 
         from stalker.db.session import DBSession
+
         DBSession.add(g1)
         DBSession.commit()
 
@@ -2994,7 +3013,8 @@ class DatabaseModelsTester(UnitTestDBBase):
 
         # attach a client
         from stalker.models.client import Client
-        client = Client(name='Test Client')
+
+        client = Client(name="Test Client")
         DBSession.add(client)
 
         g1_db.client = client
@@ -3009,35 +3029,23 @@ class DatabaseModelsTester(UnitTestDBBase):
         DBSession.commit()
 
         # except the client still exist
-        client_db = Client.query.filter(Client.name == 'Test Client').first()
+        client_db = Client.query.filter(Client.name == "Test Client").first()
 
         assert client_db is not None
 
     def test_persistence_of_Group(self):
-        """testing the persistence of Group
-        """
+        """testing the persistence of Group"""
         from stalker import Group, User
 
-        group1 = Group(
-            name='Test Group'
-        )
+        group1 = Group(name="Test Group")
 
-        user1 = User(
-            name='User1',
-            login='user1',
-            email='user1@test.com',
-            password='12'
-        )
-        user2 = User(
-            name='User2',
-            login='user2',
-            email='user2@test.com',
-            password='34'
-        )
+        user1 = User(name="User1", login="user1", email="user1@test.com", password="12")
+        user2 = User(name="User2", login="user2", email="user2@test.com", password="34")
 
         group1.users = [user1, user2]
 
         from stalker.db.session import DBSession
+
         DBSession.add(group1)
         DBSession.commit()
 
@@ -3051,19 +3059,17 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert group_db.users == users
 
     def test_persistence_of_PriceList(self):
-        """testing the persistence of PriceList
-        """
+        """testing the persistence of PriceList"""
         from stalker import Good, PriceList
-        g1 = Good(name='Test Good 1')
-        g2 = Good(name='Test Good 2')
-        g3 = Good(name='Test Good 3')
 
-        p = PriceList(
-            name='Test Price List',
-            goods=[g1, g2, g3]
-        )
+        g1 = Good(name="Test Good 1")
+        g2 = Good(name="Test Good 2")
+        g3 = Good(name="Test Good 3")
+
+        p = PriceList(name="Test Price List", goods=[g1, g2, g3])
 
         from stalker.db.session import DBSession
+
         DBSession.add_all([p, g1, g2, g3])
         DBSession.commit()
 
@@ -3071,7 +3077,7 @@ class DatabaseModelsTester(UnitTestDBBase):
 
         p_db = PriceList.query.first()
 
-        assert p_db.name == 'Test Price List'
+        assert p_db.name == "Test Price List"
         assert p_db.goods == [g1, g2, g3]
 
         DBSession.delete(p_db)
@@ -3082,148 +3088,130 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert g2 is not None
         assert g3 is not None
 
-        g1_db = Good.query.filter_by(name='Test Good 1').first()
+        g1_db = Good.query.filter_by(name="Test Good 1").first()
         assert g1_db is not None
-        assert g1_db.name == 'Test Good 1'
+        assert g1_db.name == "Test Good 1"
 
-        g2_db = Good.query.filter_by(name='Test Good 2').first()
+        g2_db = Good.query.filter_by(name="Test Good 2").first()
         assert g2_db is not None
-        assert g2_db.name == 'Test Good 2'
+        assert g2_db.name == "Test Good 2"
 
-        g3_db = Good.query.filter_by(name='Test Good 3').first()
+        g3_db = Good.query.filter_by(name="Test Good 3").first()
         assert g3_db is not None
-        assert g3_db.name == 'Test Good 3'
+        assert g3_db.name == "Test Good 3"
 
     def test_persistence_of_Project(self):
-        """testing the persistence of Project
-        """
+        """testing the persistence of Project"""
         # create mock objects
         import datetime
         import pytz
-        start = datetime.datetime(2016, 11, 17, tzinfo=pytz.utc) + \
-            datetime.timedelta(10)
+
+        start = datetime.datetime(2016, 11, 17, tzinfo=pytz.utc) + datetime.timedelta(
+            10
+        )
         end = start + datetime.timedelta(days=20)
 
         from stalker import User
+
         lead = User(
-            name="lead",
-            login="lead",
-            email="lead@lead.com",
-            password="password"
+            name="lead", login="lead", email="lead@lead.com", password="password"
         )
 
         user1 = User(
-            name="user1",
-            login="user1",
-            email="user1@user1.com",
-            password="password"
+            name="user1", login="user1", email="user1@user1.com", password="password"
         )
 
         user2 = User(
-            name="user2",
-            login="user2",
-            email="user1@user2.com",
-            password="password"
+            name="user2", login="user2", email="user1@user2.com", password="password"
         )
 
         user3 = User(
-            name="user3",
-            login="user3",
-            email="user3@user3.com",
-            password="password"
+            name="user3", login="user3", email="user3@user3.com", password="password"
         )
 
         from stalker import ImageFormat, Type, Project, Structure, Repository
-        image_format = ImageFormat(
-            name="HD",
-            width=1920,
-            height=1080
-        )
+
+        image_format = ImageFormat(name="HD", width=1920, height=1080)
 
         project_type = Type(
-            name='Commercial Project',
-            code='commproj',
-            target_entity_type='Project'
+            name="Commercial Project", code="commproj", target_entity_type="Project"
         )
 
         structure_type = Type(
-            name='Commercial Structure',
-            code='commstr',
-            target_entity_type='Project'
+            name="Commercial Structure", code="commstr", target_entity_type="Project"
         )
 
         project_structure = Structure(
             name="Commercial Structure",
             custom_templates="{{project.code}}\n"
-                             "{{project.code}}/ASSETS\n"
-                             "{{project.code}}/SEQUENCES\n",
+            "{{project.code}}/ASSETS\n"
+            "{{project.code}}/SEQUENCES\n",
             type=structure_type,
         )
 
         repo = Repository(
             name="Commercials Repository",
-            code='CR',
+            code="CR",
             linux_path="/mnt/M/Projects",
             windows_path="M:/Projects",
-            osx_path="/mnt/M/Projects"
+            osx_path="/mnt/M/Projects",
         )
 
         # create data for mixins
         # Reference Mixin
-        link_type = Type(
-            name='Image',
-            code='image',
-            target_entity_type='Link'
-        )
+        link_type = Type(name="Image", code="image", target_entity_type="Link")
 
         from stalker import Link
+
         ref1 = Link(
             name="Ref1",
             full_path="/mnt/M/JOBs/TEST_PROJECT",
             filename="1.jpg",
-            type=link_type
+            type=link_type,
         )
 
         ref2 = Link(
             name="Ref2",
             full_path="/mnt/M/JOBs/TEST_PROJECT",
             filename="1.jpg",
-            type=link_type
+            type=link_type,
         )
 
         from stalker.db.session import DBSession
+
         DBSession.save([lead, ref1, ref2])
 
         from stalker import WorkingHours
+
         working_hours = WorkingHours(
             working_hours={
-                'mon': [[570, 720], [780, 1170]],
-                'tue': [[570, 720], [780, 1170]],
-                'wed': [[570, 720], [780, 1170]],
-                'thu': [[570, 720], [780, 1170]],
-                'fri': [[570, 720], [780, 1170]],
-                'sat': [[570, 720], [780, 1170]],
-                'sun': [],
+                "mon": [[570, 720], [780, 1170]],
+                "tue": [[570, 720], [780, 1170]],
+                "wed": [[570, 720], [780, 1170]],
+                "thu": [[570, 720], [780, 1170]],
+                "fri": [[570, 720], [780, 1170]],
+                "sat": [[570, 720], [780, 1170]],
+                "sun": [],
             }
         )
 
         # create a project object
         kwargs = {
-            'name': 'Test Project',
-            'code': 'TP',
-            'description': 'This is a project object for testing purposes',
-            'image_format': image_format,
-            'fps': 25,
-            'type': project_type,
-            'structure': project_structure,
-            'repositories': [repo],
-            'is_stereoscopic': False,
-            'display_width': 1.0,
-            'start': start,
-            'end': end,
-            'status': 0,
-            'references': [ref1, ref2],
-            'working_hours': working_hours
+            "name": "Test Project",
+            "code": "TP",
+            "description": "This is a project object for testing purposes",
+            "image_format": image_format,
+            "fps": 25,
+            "type": project_type,
+            "structure": project_structure,
+            "repositories": [repo],
+            "is_stereoscopic": False,
+            "display_width": 1.0,
+            "start": start,
+            "end": end,
+            "status": 0,
+            "references": [ref1, ref2],
+            "working_hours": working_hours,
         }
 
         new_project = Project(**kwargs)
@@ -3233,12 +3221,13 @@ class DatabaseModelsTester(UnitTestDBBase):
         DBSession.commit()
 
         from stalker import Task
+
         task1 = Task(
             name="task1",
             status=0,
             project=new_project,
             resources=[user1, user2],
-            responsible=[user1]
+            responsible=[user1],
         )
 
         task2 = Task(
@@ -3246,7 +3235,7 @@ class DatabaseModelsTester(UnitTestDBBase):
             status=0,
             project=new_project,
             resources=[user3],
-            responsible=[user1]
+            responsible=[user1],
         )
         dt = datetime.datetime
         td = datetime.timedelta
@@ -3258,17 +3247,17 @@ class DatabaseModelsTester(UnitTestDBBase):
 
         # add tickets
         from stalker import Ticket
-        ticket1 = Ticket(
-            project=new_project
-        )
+
+        ticket1 = Ticket(project=new_project)
         DBSession.add(ticket1)
         DBSession.commit()
 
         # create dailies
         from stalker import Daily
-        d1 = Daily(name='Daily1', project=new_project)
-        d2 = Daily(name='Daily2', project=new_project)
-        d3 = Daily(name='Daily3', project=new_project)
+
+        d1 = Daily(name="Daily1", project=new_project)
+        d2 = Daily(name="Daily2", project=new_project)
+        d3 = Daily(name="Daily3", project=new_project)
         DBSession.add_all([d1, d2, d3])
         DBSession.commit()
 
@@ -3306,8 +3295,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         del new_project
 
         # now get it
-        new_project_db = DBSession.query(Project). \
-            filter_by(name=kwargs["name"]).first()
+        new_project_db = DBSession.query(Project).filter_by(name=kwargs["name"]).first()
 
         assert isinstance(new_project_db, Project)
 
@@ -3358,8 +3346,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert Daily.query.all() == []
 
     def test_persistence_of_Repository(self):
-        """testing the persistence of Repository
-        """
+        """testing the persistence of Repository"""
         # create a new Repository object and try to read it back
         kwargs = {
             "name": "Movie-Repo",
@@ -3367,15 +3354,17 @@ class DatabaseModelsTester(UnitTestDBBase):
             "description": "test repository",
             "linux_path": "/mnt/M",
             "osx_path": "/mnt/M",
-            "windows_path": "M:/"
+            "windows_path": "M:/",
         }
 
         # create the repository object
         from stalker import Repository
+
         repo = Repository(**kwargs)
 
         # save it to database
         from stalker.db.session import DBSession
+
         DBSession.add(repo)
         DBSession.commit()
 
@@ -3399,11 +3388,9 @@ class DatabaseModelsTester(UnitTestDBBase):
         del repo
 
         # get it back
-        repo_db = Repository.query\
-            .filter_by(name=kwargs["name"]) \
-            .first()
+        repo_db = Repository.query.filter_by(name=kwargs["name"]).first()
 
-        assert (isinstance(repo_db, Repository))
+        assert isinstance(repo_db, Repository)
 
         assert repo_db.created_by == created_by
         assert repo_db.code == code
@@ -3421,12 +3408,12 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert repo_db.windows_path == windows_path
 
     def test_persistence_of_Scene(self):
-        """testing the persistence of Scene
-        """
+        """testing the persistence of Scene"""
         from stalker import Repository, User, Type, Project
+
         repo1 = Repository(
             name="Commercial Repository",
-            code='CR',
+            code="CR",
         )
 
         user1 = User(
@@ -3437,49 +3424,49 @@ class DatabaseModelsTester(UnitTestDBBase):
         )
 
         commercial_project_type = Type(
-            name='Commercial Project',
-            code='commproj',
-            target_entity_type='Project'
+            name="Commercial Project", code="commproj", target_entity_type="Project"
         )
 
         test_project1 = Project(
-            name='Test Project',
-            code='TP',
+            name="Test Project",
+            code="TP",
             type=commercial_project_type,
             repository=repo1,
         )
         from stalker.db.session import DBSession
+
         DBSession.add(test_project1)
         DBSession.commit()
 
         kwargs = {
-            'name': 'Test Scene',
-            'code': 'TSce',
-            'description': 'this is a test scene',
-            'project': test_project1,
+            "name": "Test Scene",
+            "code": "TSce",
+            "description": "this is a test scene",
+            "project": test_project1,
         }
 
         from stalker import Shot, Scene
+
         test_scene = Scene(**kwargs)
 
         # now add the shots
         shot1 = Shot(
-            code='SH001',
+            code="SH001",
             project=test_project1,
             scenes=[test_scene],
-            responsible=[user1]
+            responsible=[user1],
         )
         shot2 = Shot(
-            code='SH002',
+            code="SH002",
             project=test_project1,
             scenes=[test_scene],
-            responsible=[user1]
+            responsible=[user1],
         )
         shot3 = Shot(
-            code='SH003',
+            code="SH003",
             project=test_project1,
             scenes=[test_scene],
-            responsible=[user1]
+            responsible=[user1],
         )
         DBSession.add_all([shot1, shot2, shot3])
         DBSession.add(test_scene)
@@ -3502,7 +3489,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         # delete the test_sequence
         del test_scene
 
-        test_scene_db = Scene.query.filter_by(name=kwargs['name']).first()
+        test_scene_db = Scene.query.filter_by(name=kwargs["name"]).first()
 
         assert test_scene_db.code == code
         assert test_scene_db.created_by == created_by
@@ -3518,70 +3505,65 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert test_scene_db.updated_by == updated_by
 
     def test_persistence_of_Sequence(self):
-        """testing the persistence of Sequence
-        """
+        """testing the persistence of Sequence"""
         from stalker import Project, Repository, Type, User
-        repo1 = Repository(
-            name="Commercial Repository",
-            code='CR'
-        )
+
+        repo1 = Repository(name="Commercial Repository", code="CR")
 
         commercial_project_type = Type(
-            name='Commercial Project',
-            code='commproj',
-            target_entity_type='Project'
+            name="Commercial Project", code="commproj", target_entity_type="Project"
         )
 
         lead = User(
-            name="lead",
-            login="lead",
-            email="lead@lead.com",
-            password="password"
+            name="lead", login="lead", email="lead@lead.com", password="password"
         )
 
         test_project1 = Project(
-            name='Test Project',
-            code='TP',
+            name="Test Project",
+            code="TP",
             type=commercial_project_type,
             repository=repo1,
         )
         from stalker.db.session import DBSession
+
         DBSession.add(test_project1)
         DBSession.commit()
 
         kwargs = {
-            'name': 'Test Sequence',
-            'code': 'TS',
-            'description': 'this is a test sequence',
-            'project': test_project1,
-            'schedule_model': 'effort',
-            'schedule_timing': 50,
-            'schedule_unit': 'd',
-            'responsible': [lead],
+            "name": "Test Sequence",
+            "code": "TS",
+            "description": "this is a test sequence",
+            "project": test_project1,
+            "schedule_model": "effort",
+            "schedule_timing": 50,
+            "schedule_unit": "d",
+            "responsible": [lead],
         }
 
         from stalker import Sequence
+
         test_sequence = Sequence(**kwargs)
 
         # now add the shots
         from stalker import Shot
+
         shot1 = Shot(
-            code='SH001',
+            code="SH001",
             project=test_project1,
             sequences=[test_sequence],
-            responsible=[lead]
+            responsible=[lead],
         )
         shot2 = Shot(
-            code='SH002',
+            code="SH002",
             project=test_project1,
             sequences=[test_sequence],
-            responsible=[lead]
+            responsible=[lead],
         )
         shot3 = Shot(
-            code='SH003',
+            code="SH003",
             project=test_project1,
             sequence=test_sequence,
-            responsible=[lead]
+            responsible=[lead],
         )
 
         DBSession.add_all([shot1, shot2, shot3])
@@ -3615,8 +3597,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         # delete the test_sequence
         del test_sequence
 
-        test_sequence_db = Sequence.query \
-            .filter_by(name=kwargs['name']).first()
+        test_sequence_db = Sequence.query.filter_by(name=kwargs["name"]).first()
 
         assert test_sequence_db.code == code
         assert test_sequence_db.created_by == created_by
@@ -3642,73 +3623,60 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert test_sequence_db.schedule_unit == schedule_unit
 
     def test_persistence_of_Shot(self):
-        """testing the persistence of Shot
-        """
+        """testing the persistence of Shot"""
         from stalker import Project, Type, Repository, User
 
         commercial_project_type = Type(
-            name='Commercial Project',
-            code='commproj',
-            target_entity_type='Project',
+            name="Commercial Project",
+            code="commproj",
+            target_entity_type="Project",
         )
 
-        repo1 = Repository(
-            name="Commercial Repository",
-            code='CR'
-        )
+        repo1 = Repository(name="Commercial Repository", code="CR")
 
         lead = User(
-            name="lead",
-            login="lead",
-            email="lead@lead.com",
-            password="password"
+            name="lead", login="lead", email="lead@lead.com", password="password"
         )
 
         test_project1 = Project(
-            name='Test project',
-            code='tp',
+            name="Test project",
+            code="tp",
             type=commercial_project_type,
             repository=repo1,
         )
         from stalker.db.session import DBSession
+
         DBSession.add(test_project1)
         DBSession.commit()
 
         kwargs = {
-            'name': "Test Sequence 1",
-            'code': 'tseq1',
-            'description': 'this is a test sequence',
-            'project': test_project1,
-            'responsible': [lead]
+            "name": "Test Sequence 1",
+            "code": "tseq1",
+            "description": "this is a test sequence",
+            "project": test_project1,
+            "responsible": [lead],
         }
 
         from stalker import Sequence, Scene, Shot
+
         test_seq1 = Sequence(**kwargs)
 
-        kwargs['name'] = 'Test Sequence 2'
-        kwargs['code'] = 'tseq2'
+        kwargs["name"] = "Test Sequence 2"
+        kwargs["code"] = "tseq2"
         test_seq2 = Sequence(**kwargs)
 
-        test_sce1 = Scene(
-            name='Test Scene 1',
-            code='tsce1',
-            project=test_project1
-        )
+        test_sce1 = Scene(name="Test Scene 1", code="tsce1", project=test_project1)
 
-        test_sce2 = Scene(
-            name='Test Scene 2',
-            code='tsce2',
-            project=test_project1
-        )
+        test_sce2 = Scene(name="Test Scene 2", code="tsce2", project=test_project1)
 
         # now add the shots
         shot_kwargs = {
-            'code': 'SH001',
-            'project': test_project1,
-            'sequences': [test_seq1, test_seq2],
-            'scenes': [test_sce1, test_sce2],
-            'status': 0,
-            'responsible': [lead]
+            "code": "SH001",
+            "project": test_project1,
+            "sequences": [test_seq1, test_seq2],
+            "scenes": [test_sce1, test_sce2],
+            "status": 0,
+            "responsible": [lead],
         }
 
         test_shot = Shot(**shot_kwargs)
@@ -3764,30 +3732,26 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert test_shot_db.fps == fps
 
     def test_persistence_of_SimpleEntity(self):
-        """testing the persistence of SimpleEntity
-        """
+        """testing the persistence of SimpleEntity"""
         import json
         from stalker import SimpleEntity, Link
+
         thumbnail = Link()
 
         kwargs = {
             "name": "Simple Entity 1",
             "description": "this is for testing purposes",
-            'thumbnail': thumbnail,
-            'html_style': 'width: 100px; color: purple',
-            'html_class': 'purple',
-            'generic_text': json.dumps(
-                {
-                    'some_string': 'hello world'
-                },
-                sort_keys=True
-            ),
+            "thumbnail": thumbnail,
+            "html_style": "width: 100px; color: purple",
+            "html_class": "purple",
+            "generic_text": json.dumps({"some_string": "hello world"}, sort_keys=True),
         }
 
         test_simple_entity = SimpleEntity(**kwargs)
 
         # persist it to the database
         from stalker.db.session import DBSession
+
         DBSession.add(test_simple_entity)
         DBSession.commit()
 
@@ -3806,10 +3770,11 @@ class DatabaseModelsTester(UnitTestDBBase):
         del test_simple_entity
 
         # now try to retrieve it
-        test_simple_entity_db = SimpleEntity.query\
-            .filter(SimpleEntity.name == kwargs["name"]).first()
+        test_simple_entity_db = SimpleEntity.query.filter(
+            SimpleEntity.name == kwargs["name"]
+        ).first()
 
-        assert (isinstance(test_simple_entity_db, SimpleEntity))
+        assert isinstance(test_simple_entity_db, SimpleEntity)
 
         assert test_simple_entity_db.created_by == created_by
         assert test_simple_entity_db.date_created == date_created
@@ -3827,20 +3792,21 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert test_simple_entity_db.generic_text == generic_text
 
     def test_persistence_of_Status(self):
-        """testing the persistence of Status
-        """
+        """testing the persistence of Status"""
         # the status
         kwargs = {
             "name": "TestStatus_test_creating_Status",
             "description": "this is for testing purposes",
-            "code": "TSTST"
+            "code": "TSTST",
         }
 
         from stalker import Status
+
         test_status = Status(**kwargs)
 
         # persist it to the database
         from stalker.db.session import DBSession
+
         DBSession.add(test_status)
         DBSession.commit()
 
@@ -3860,10 +3826,9 @@ class DatabaseModelsTester(UnitTestDBBase):
         del test_status
 
         # now try to retrieve it
-        test_status_db = Status.query\
-            .filter(Status.name == kwargs["name"]).first()
+        test_status_db = Status.query.filter(Status.name == kwargs["name"]).first()
 
-        assert (isinstance(test_status_db, Status))
+        assert isinstance(test_status_db, Status)
 
         # just test the status part of the object
         assert test_status_db.code == code
@@ -3878,10 +3843,10 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert test_status_db.updated_by == updated_by
 
     def test_persistence_of_StatusList(self):
-        """testing the persistence of StatusList
-        """
+        """testing the persistence of StatusList"""
         # create a couple of statuses
         from stalker import Status, StatusList
+
         statuses = [
             Status(name="Waiting To Start", code="WTS"),
             Status(name="On Hold A", code="OHA"),
@@ -3892,12 +3857,13 @@ class DatabaseModelsTester(UnitTestDBBase):
         kwargs = dict(
             name="Hede Hodo Status List",
             statuses=statuses,
-            target_entity_type="Hede Hodo"
+            target_entity_type="Hede Hodo",
         )
 
         sequence_status_list = StatusList(**kwargs)
 
         from stalker.db.session import DBSession
+
         DBSession.add(sequence_status_list)
         DBSession.commit()
 
@@ -3918,11 +3884,11 @@ class DatabaseModelsTester(UnitTestDBBase):
         del sequence_status_list
 
         # now get it back
-        sequence_status_list_db = StatusList.query \
-            .filter_by(name=kwargs["name"]) \
-            .first()
+        sequence_status_list_db = StatusList.query.filter_by(
+            name=kwargs["name"]
+        ).first()
 
-        assert (isinstance(sequence_status_list_db, StatusList))
+        assert isinstance(sequence_status_list_db, StatusList)
 
         assert sequence_status_list_db.created_by == created_by
         assert sequence_status_list_db.date_created == date_created
@@ -3946,54 +3912,58 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert new_sequence_list in DBSession
 
         from sqlalchemy.exc import IntegrityError
+
         with pytest.raises(IntegrityError) as cm:
             DBSession.commit()
 
-        assert '(psycopg2.errors.UniqueViolation) duplicate key value ' \
-               'violates unique constraint ' \
-               '"StatusLists_target_entity_type_key"' in str(cm.value)
+        assert (
+            "(psycopg2.errors.UniqueViolation) duplicate key value "
+            "violates unique constraint "
+            '"StatusLists_target_entity_type_key"' in str(cm.value)
+        )
 
         # roll it back
         DBSession.rollback()
 
     def test_persistence_of_Structure(self):
-        """testing the persistence of Structure
-        """
+        """testing the persistence of Structure"""
         from stalker import Type
+
         # create pipeline steps for character
         modeling_task_type = Type(
-            name='Modeling',
-            code='model',
-            description='This is the step where all the modeling job is done',
-            target_entity_type='Task'
+            name="Modeling",
+            code="model",
+            description="This is the step where all the modeling job is done",
+            target_entity_type="Task",
         )
 
         animation_task_type = Type(
-            name='Animation',
-            description='This is the step where all the animation job is '
-                        'done it is not limited with characters, other '
-                        'things can also be animated',
-            code='Anim',
-            target_entity_type='Task'
+            name="Animation",
+            description="This is the step where all the animation job is "
+            "done it is not limited with characters, other "
+            "things can also be animated",
+            code="Anim",
+            target_entity_type="Task",
         )
 
         # create a new asset Type
         char_asset_type = Type(
-            name='Character',
-            code='char',
-            description="This is the asset type which covers animated "
-                        "characters",
-            target_entity_type='Asset',
+            name="Character",
+            code="char",
+            description="This is the asset type which covers animated " "characters",
+            target_entity_type="Asset",
         )
 
         # get the Version Type for FilenameTemplates
-        v_type = Type.query \
-            .filter_by(target_entity_type="FilenameTemplate") \
-            .filter_by(name="Version") \
+        v_type = (
+            Type.query.filter_by(target_entity_type="FilenameTemplate")
+            .filter_by(name="Version")
             .first()
+        )
 
         # create a new type template for character assets
         from stalker import FilenameTemplate
+
         asset_template = FilenameTemplate(
             name="Character Asset Template",
             description="This is the template for character assets",
@@ -4001,61 +3971,67 @@ class DatabaseModelsTester(UnitTestDBBase):
             filename="{{asset.name}}_{{take.name}}_{{asset_type.name}}_\
             v{{version.version_number}}",
             target_entity_type="Asset",
-            type=v_type
+            type=v_type,
         )
 
         # create a new link type
         image_link_type = Type(
-            name='Image',
-            code='image',
+            name="Image",
+            code="image",
             description="It is used for links showing an image",
-            target_entity_type='Link'
+            target_entity_type="Link",
         )
 
         # get reference Type of FilenameTemplates
-        r_type = Type.query \
-            .filter_by(target_entity_type="FilenameTemplate") \
-            .filter_by(name="Reference") \
+        r_type = (
+            Type.query.filter_by(target_entity_type="FilenameTemplate")
+            .filter_by(name="Reference")
             .first()
+        )
 
         # create a new template for references
         image_reference_template = FilenameTemplate(
             name="Image Reference Template",
             description="this is the template for image references, it "
-                        "shows where to place the image files",
+            "shows where to place the image files",
             path="REFS/{{reference.type.name}}",
             filename="{{reference.file_name}}",
-            target_entity_type='Link',
-            type=r_type
+            target_entity_type="Link",
+            type=r_type,
         )
 
         commercial_structure_type = Type(
-            name='Commercial',
-            code='commercial',
-            target_entity_type='Structure'
+            name="Commercial", code="commercial", target_entity_type="Structure"
         )
 
         # create a new structure
         kwargs = {
-            'name': 'Commercial Structure',
-            'description': 'The structure for commercials',
-            'custom_template': """
+            "name": "Commercial Structure",
+            "description": "The structure for commercials",
+            "custom_template": """
                 Assets
                 Sequences
                 Sequences/{% for sequence in project.sequences %}
                 {{sequence.code}}""",
-            'templates': [asset_template, image_reference_template],
-            'type': commercial_structure_type
+            "templates": [asset_template, image_reference_template],
+            "type": commercial_structure_type,
         }
 
         from stalker import Structure
+
         new_structure = Structure(**kwargs)
 
         from stalker.db.session import DBSession
-        DBSession.add_all([
-            new_structure, modeling_task_type, animation_task_type,
-            char_asset_type, image_link_type
-        ])
+
+        DBSession.add_all(
+            [
+                new_structure,
+                modeling_task_type,
+                animation_task_type,
+                char_asset_type,
+                image_link_type,
+            ]
+        )
         DBSession.commit()
 
         # store the attributes
@@ -4074,10 +4050,9 @@ class DatabaseModelsTester(UnitTestDBBase):
         # delete the new_structure
         del new_structure
 
-        new_structure_db = Structure.query\
-            .filter_by(name=kwargs["name"]).first()
+        new_structure_db = Structure.query.filter_by(name=kwargs["name"]).first()
 
-        assert (isinstance(new_structure_db, Structure))
+        assert isinstance(new_structure_db, Structure)
 
         assert new_structure_db.templates == templates
         assert new_structure_db.created_by == created_by
@@ -4092,24 +4067,23 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert new_structure_db.updated_by == updated_by
 
     def test_persistence_of_Studio(self):
-        """testing the persistence of Studio
-        """
+        """testing the persistence of Studio"""
         from stalker import Studio
         from stalker.db.session import DBSession
-        test_studio = Studio(name='Test Studio')
+
+        test_studio = Studio(name="Test Studio")
         DBSession.add(test_studio)
         DBSession.commit()
 
         # customize attributes
         from stalker import WorkingHours
+
         test_studio.daily_working_hours = 11
         test_studio.working_hours = WorkingHours(
-            working_hours={
-                'mon': [],
-                'sat': [[100, 1300]]
-            }
+            working_hours={"mon": [], "sat": [[100, 1300]]}
         )
         import datetime
+
         test_studio.timing_resolution = datetime.timedelta(hours=1, minutes=30)
 
         name = test_studio.name
@@ -4129,27 +4103,30 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert test_studio_db.working_hours == working_hours
 
     def test_persistence_of_Tag(self):
-        """testing the persistence of Tag
-        """
+        """testing the persistence of Tag"""
         name = "Tag_test_creating_a_Tag"
         description = "this is for testing purposes"
         created_by = None
         updated_by = None
         import datetime
         import pytz
+
         date_created = date_updated = datetime.datetime.now(pytz.utc)
 
         from stalker import Tag
+
         tag = Tag(
             name=name,
             description=description,
             created_by=created_by,
             updated_by=updated_by,
             date_created=date_created,
-            date_updated=date_updated)
+            date_updated=date_updated,
+        )
 
         # persist it to the database
         from stalker.db.session import DBSession
+
         DBSession.add(tag)
         DBSession.commit()
 
@@ -4166,7 +4143,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         # now try to retrieve it
         tag_db = DBSession.query(Tag).filter_by(name=name).first()
 
-        assert (isinstance(tag_db, Tag))
+        assert isinstance(tag_db, Tag)
 
         assert tag_db.name == name
         assert tag_db.description == description
@@ -4176,10 +4153,10 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert tag_db.date_updated == date_updated
 
     def test_persistence_of_Task(self):
-        """testing the persistence of Task
-        """
+        """testing the persistence of Task"""
         # create a task
         from stalker import User
+
         user1 = User(
             name="User1",
             login="user1",
@@ -4202,61 +4179,58 @@ class DatabaseModelsTester(UnitTestDBBase):
         )
 
         from stalker import Repository, Project
+
         repo = Repository(
-            name='Test Repo',
-            code='TR',
-            linux_path='/mnt/M/JOBs',
-            windows_path='M:/JOBs',
-            osx_path='/Users/Shared/Servers/M',
+            name="Test Repo",
+            code="TR",
+            linux_path="/mnt/M/JOBs",
+            windows_path="M:/JOBs",
+            osx_path="/Users/Shared/Servers/M",
         )
 
         project1 = Project(
-            name='Tests Project',
-            code='tp',
+            name="Tests Project",
+            code="tp",
             repository=repo,
         )
         from stalker.db.session import DBSession
+
         DBSession.add(project1)
         DBSession.commit()
 
         from stalker import Type, Asset, Task, TimeLog
+
         char_asset_type = Type(
-            name='Character Asset',
-            code='char',
-            target_entity_type='Asset'
+            name="Character Asset", code="char", target_entity_type="Asset"
         )
 
         asset1 = Asset(
-            name='Char1',
-            code='char1',
+            name="Char1",
+            code="char1",
             type=char_asset_type,
             project=project1,
-            responsible=[user1]
+            responsible=[user1],
         )
 
-        task1 = Task(
-            name="Test Task",
-            watchers=[user3],
-            parent=asset1
-        )
+        task1 = Task(name="Test Task", watchers=[user3], parent=asset1)
 
         child_task1 = Task(
-            name='Child Task 1',
+            name="Child Task 1",
             resources=[user1, user2],
             parent=task1,
         )
 
         child_task2 = Task(
-            name='Child Task 2',
+            name="Child Task 2",
             resources=[user1, user2],
             parent=task1,
         )
 
         task2 = Task(
-            name='Another Task',
+            name="Another Task",
             project=project1,
             resources=[user1],
-            responsible=[user2]
+            responsible=[user2],
         )
         DBSession.add_all([asset1, task1, child_task1, child_task2, task2])
         DBSession.commit()
@@ -4264,21 +4238,21 @@ class DatabaseModelsTester(UnitTestDBBase):
         # time logs
         import datetime
         import pytz
+
         time_log1 = TimeLog(
             task=child_task1,
             resource=user1,
             start=datetime.datetime.now(pytz.utc),
-            end=datetime.datetime.now(pytz.utc) + datetime.timedelta(1)
+            end=datetime.datetime.now(pytz.utc) + datetime.timedelta(1),
         )
         task1.computed_start = datetime.datetime.now(pytz.utc)
-        task1.computed_end = \
-            datetime.datetime.now(pytz.utc) + datetime.timedelta(10)
+        task1.computed_end = datetime.datetime.now(pytz.utc) + datetime.timedelta(10)
 
         time_log2 = TimeLog(
             task=child_task2,
             resource=user1,
             start=datetime.datetime.now(pytz.utc) + datetime.timedelta(1),
-            end=datetime.datetime.now(pytz.utc) + datetime.timedelta(2)
+            end=datetime.datetime.now(pytz.utc) + datetime.timedelta(2),
         )
 
         # time log for another task
@@ -4286,32 +4260,25 @@ class DatabaseModelsTester(UnitTestDBBase):
             task=task2,
             resource=user1,
             start=datetime.datetime.now(pytz.utc) + datetime.timedelta(2),
-            end=datetime.datetime.now(pytz.utc) + datetime.timedelta(3)
+            end=datetime.datetime.now(pytz.utc) + datetime.timedelta(3),
         )
 
         # Versions
         from stalker import Version
-        version1 = Version(
-            task=task1
-        )
+
+        version1 = Version(task=task1)
         DBSession.add(version1)
         DBSession.commit()
 
-        version2 = Version(
-            task=task1
-        )
+        version2 = Version(task=task1)
         DBSession.add(version2)
         DBSession.commit()
 
-        version3 = Version(
-            task=task2
-        )
+        version3 = Version(task=task2)
         DBSession.add(version3)
         DBSession.commit()
 
-        version4 = Version(
-            task=task2
-        )
+        version4 = Version(task=task2)
         DBSession.add(version4)
         DBSession.commit()
 
@@ -4323,24 +4290,33 @@ class DatabaseModelsTester(UnitTestDBBase):
 
         # references
         from stalker import Link
-        ref1 = Link(
-            full_path='some_path',
-            original_filename='original_filename'
-        )
 
-        ref2 = Link(
-            full_path='some_path',
-            original_filename='original_filename'
-        )
+        ref1 = Link(full_path="some_path", original_filename="original_filename")
+
+        ref2 = Link(full_path="some_path", original_filename="original_filename")
 
         task1.references.append(ref1)
         task1.references.append(ref2)
 
-        DBSession.add_all([
-            task1, child_task1, child_task2, task2, time_log1,
-            time_log2, time_log3, user1, user2, version1, version2, version3,
-            version4, ref1, ref2
-        ])
+        DBSession.add_all(
+            [
+                task1,
+                child_task1,
+                child_task2,
+                task2,
+                time_log1,
+                time_log2,
+                time_log3,
+                user1,
+                user2,
+                version1,
+                version2,
+                version3,
+                version4,
+                ref1,
+                ref2,
+            ]
+        )
         DBSession.commit()
 
         computed_start = task1.computed_start
@@ -4374,7 +4350,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         # now query it back
         task1_db = Task.query.filter_by(name=name).first()
 
-        assert (isinstance(task1_db, Task))
+        assert isinstance(task1_db, Task)
 
         assert task1_db.time_logs == time_logs
         assert task1_db.created_by == created_by
@@ -4394,9 +4370,9 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert task1_db.status == status
         assert task1_db.status_list == status_list
         assert task1_db.tags == tags
-        assert \
-            sorted(tasks, key=lambda x: x.name) == \
-            sorted(task1_db.tasks, key=lambda x: x.name)
+        assert sorted(tasks, key=lambda x: x.name) == sorted(
+            task1_db.tasks, key=lambda x: x.name
+        )
         assert [child_task1, child_task2] == tasks
         assert task1_db.type == type_
         assert task1_db.updated_by == updated_by
@@ -4434,18 +4410,18 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert Version.query.get(version4.id) is not None
 
         # Expect to have all child tasks also to be deleted
-        assert \
-            sorted([asset1, task2], key=lambda x: x.name) == \
-            sorted(Task.query.all(), key=lambda x: x.name)
+        assert sorted([asset1, task2], key=lambda x: x.name) == sorted(
+            Task.query.all(), key=lambda x: x.name
+        )
 
         # Expect to have time logs related to this task are deleted
         assert TimeLog.query.all() == [time_log3]
 
         # We still should have the users intact
-        admin = User.query.filter_by(name='admin').first()
-        assert \
-            sorted([user1, user2, user3, admin], key=lambda x: x.name) == \
-            sorted(User.query.all(), key=lambda x: x.name)
+        admin = User.query.filter_by(name="admin").first()
+        assert sorted([user1, user2, user3, admin], key=lambda x: x.name) == sorted(
+            User.query.all(), key=lambda x: x.name
+        )
 
         # When updating the test to include deletion, the test task became a
         # parent task, so all the resources are removed, thus the resource
@@ -4462,19 +4438,20 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert version4.inputs == []
 
     def test_persistence_of_Review(self):
-        """testing the persistence of Review
-        """
+        """testing the persistence of Review"""
         # create a task
         from stalker import Repository
+
         repo = Repository(
-            name='Test Repo',
-            code='TR',
-            linux_path='/some/random/path',
-            windows_path='/some/random/path',
-            osx_path='/some/random/path',
+            name="Test Repo",
+            code="TR",
+            linux_path="/some/random/path",
+            windows_path="/some/random/path",
+            osx_path="/some/random/path",
         )
 
         from stalker import User
+
         user1 = User(
             name="User1",
             login="user1",
@@ -4497,75 +4474,77 @@ class DatabaseModelsTester(UnitTestDBBase):
         )
 
         from stalker import Project
+
         project1 = Project(
-            name='Tests Project',
-            code='tp',
+            name="Tests Project",
+            code="tp",
             repository=repo,
         )
 
         from stalker import Type
+
         char_asset_type = Type(
-            name='Character Asset',
-            code='char',
-            target_entity_type='Asset'
+            name="Character Asset", code="char", target_entity_type="Asset"
         )
 
         from stalker import Asset
+
         asset1 = Asset(
-            name='Char1',
-            code='char1',
+            name="Char1",
+            code="char1",
             type=char_asset_type,
             project=project1,
-            responsible=[user1]
+            responsible=[user1],
         )
 
         from stalker import Task
+
         task1 = Task(
             name="Test Task",
             watchers=[user3],
             parent=asset1,
             schedule_timing=5,
-            schedule_unit='h',
+            schedule_unit="h",
         )
 
         child_task1 = Task(
-            name='Child Task 1',
+            name="Child Task 1",
             resources=[user1, user2],
             parent=task1,
         )
 
         child_task2 = Task(
-            name='Child Task 2',
+            name="Child Task 2",
             resources=[user1, user2],
             parent=task1,
         )
 
         task2 = Task(
-            name='Another Task',
+            name="Another Task",
             project=project1,
             resources=[user1],
-            responsible=[user1]
+            responsible=[user1],
         )
 
         # time logs
         import datetime
         import pytz
         from stalker import TimeLog
+
         time_log1 = TimeLog(
             task=child_task1,
             resource=user1,
             start=datetime.datetime.now(pytz.utc),
-            end=datetime.datetime.now(pytz.utc) + datetime.timedelta(1)
+            end=datetime.datetime.now(pytz.utc) + datetime.timedelta(1),
         )
         task1.computed_start = datetime.datetime.now(pytz.utc)
-        task1.computed_end = \
-            datetime.datetime.now(pytz.utc) + datetime.timedelta(10)
+        task1.computed_end = datetime.datetime.now(pytz.utc) + datetime.timedelta(10)
 
         time_log2 = TimeLog(
             task=child_task2,
             resource=user1,
             start=datetime.datetime.now(pytz.utc) + datetime.timedelta(1),
-            end=datetime.datetime.now(pytz.utc) + datetime.timedelta(2)
+            end=datetime.datetime.now(pytz.utc) + datetime.timedelta(2),
         )
 
         # time log for another task
@@ -4573,22 +4552,29 @@ class DatabaseModelsTester(UnitTestDBBase):
             task=task2,
             resource=user1,
             start=datetime.datetime.now(pytz.utc) + datetime.timedelta(2),
-            end=datetime.datetime.now(pytz.utc) + datetime.timedelta(3)
+            end=datetime.datetime.now(pytz.utc) + datetime.timedelta(3),
         )
 
         from stalker import Review
-        rev1 = Review(
-            task=task2,
-            reviewer=user1,
-            schedule_timing=1,
-            schedule_unit='h'
-        )
+
+        rev1 = Review(task=task2, reviewer=user1, schedule_timing=1, schedule_unit="h")
 
         from stalker.db.session import DBSession
-        DBSession.add_all([
-            task1, child_task1, child_task2, task2, time_log1,
-            time_log2, time_log3, user1, user2, rev1
-        ])
+
+        DBSession.add_all(
+            [
+                task1,
+                child_task1,
+                child_task2,
+                task2,
+                time_log1,
+                time_log2,
+                time_log3,
+                user1,
+                user2,
+                rev1,
+            ]
+        )
         DBSession.commit()
 
         created_by = rev1.created_by
@@ -4605,7 +4591,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         # now query it back
         rev1_db = Review.query.filter_by(name=name).first()
 
-        assert (isinstance(rev1_db, Review))
+        assert isinstance(rev1_db, Review)
 
         assert rev1_db.created_by == created_by
         assert rev1_db.date_created == date_created
@@ -4623,64 +4609,52 @@ class DatabaseModelsTester(UnitTestDBBase):
         DBSession.commit()
 
         # Expect to have no task is deleted
-        assert \
-            sorted(
-                [asset1, task1, task2, child_task1, child_task2],
-                key=lambda x: x.name
-            ) == \
-            sorted(Task.query.all(), key=lambda x: x.name)
+        assert sorted(
+            [asset1, task1, task2, child_task1, child_task2], key=lambda x: x.name
+        ) == sorted(Task.query.all(), key=lambda x: x.name)
 
     def test_persistence_of_Ticket(self):
-        """testing the persistence of Ticket
-        """
+        """testing the persistence of Ticket"""
         from stalker import Repository
-        repo = Repository(
-            name='Test Repository',
-            code='TR'
-        )
+
+        repo = Repository(name="Test Repository", code="TR")
 
         from stalker import Structure
-        proj_structure = Structure(
-            name='Commercials Structure'
-        )
+
+        proj_structure = Structure(name="Commercials Structure")
 
         from stalker import Project
+
         proj1 = Project(
-            name='Test Project 1',
-            code='TP1',
+            name="Test Project 1",
+            code="TP1",
             repository=repo,
             structure=proj_structure,
         )
 
         from stalker import SimpleEntity, Entity
-        simple_entity = SimpleEntity(
-            name='Test Simple Entity'
-        )
 
-        entity = Entity(
-            name='Test Entity'
-        )
+        simple_entity = SimpleEntity(name="Test Simple Entity")
+
+        entity = Entity(name="Test Entity")
 
         from stalker import User
+
         user1 = User(
-            name='user 1',
-            login='user1',
-            email='user1@users.com',
-            password='pass'
+            name="user 1", login="user1", email="user1@users.com", password="pass"
         )
         user2 = User(
-            name='user 2',
-            login='user2',
-            email='user2@users.com',
-            password='pass'
+            name="user 2", login="user2", email="user2@users.com", password="pass"
         )
 
         from stalker import Note
-        note1 = Note(content='This is the content of the note 1')
-        note2 = Note(content='This is the content of the note 2')
+
+        note1 = Note(content="This is the content of the note 1")
+        note2 = Note(content="This is the content of the note 2")
 
         from stalker import Ticket
         from stalker.db.session import DBSession
+
         related_ticket1 = Ticket(project=proj1)
         DBSession.add(related_ticket1)
         DBSession.commit()
@@ -4695,12 +4669,11 @@ class DatabaseModelsTester(UnitTestDBBase):
             links=[simple_entity, entity],
             notes=[note1, note2],
             reported_by=user1,
-            related_tickets=[related_ticket1,
-                             related_ticket2]
+            related_tickets=[related_ticket1, related_ticket2],
         )
 
         test_ticket.reassign(user1, user2)
-        test_ticket.priority = 'MAJOR'
+        test_ticket.priority = "MAJOR"
 
         DBSession.add(test_ticket)
         DBSession.commit()
@@ -4729,6 +4702,7 @@ class DatabaseModelsTester(UnitTestDBBase):
 
         # now query it back
         from stalker import Ticket
+
         test_ticket_db = Ticket.query.filter_by(name=name).first()
 
         assert comments == test_ticket_db.comments
@@ -4755,19 +4729,19 @@ class DatabaseModelsTester(UnitTestDBBase):
         # delete tests
         # Deleting a Ticket should also delete all the logs related to the
         # ticket
-        assert \
-            sorted(test_ticket_db.logs, key=lambda x: x.name) == \
-            sorted(logs, key=lambda x: x.name)
+        assert sorted(test_ticket_db.logs, key=lambda x: x.name) == sorted(
+            logs, key=lambda x: x.name
+        )
 
         DBSession.delete(test_ticket_db)
         DBSession.commit()
 
         from stalker import TicketLog
+
         assert TicketLog.query.all() == []
 
     def test_persistence_of_User(self):
-        """testing the persistence of User
-        """
+        """testing the persistence of User"""
         # create a new user save and retrieve it back
 
         # create a Department for the user
@@ -4778,6 +4752,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         }
 
         from stalker import Department
+
         new_department = Department(**dep_kwargs)
 
         # create the user
@@ -4788,7 +4763,7 @@ class DatabaseModelsTester(UnitTestDBBase):
             "password": "12345",
             "description": "This user has been created for testing purposes",
             "departments": [new_department],
-            'efficiency': 2.5
+            "efficiency": 2.5,
         }
 
         from stalker import User
@@ -4802,16 +4777,17 @@ class DatabaseModelsTester(UnitTestDBBase):
         import datetime
         import pytz
         from stalker import Vacation
+
         vacation1 = Vacation(
             user=user1,
             start=datetime.datetime.now(pytz.utc),
-            end=datetime.datetime.now(pytz.utc) + datetime.timedelta(1)
+            end=datetime.datetime.now(pytz.utc) + datetime.timedelta(1),
         )
 
         vacation2 = Vacation(
             user=user1,
             start=datetime.datetime.now(pytz.utc) + datetime.timedelta(2),
-            end=datetime.datetime.now(pytz.utc) + datetime.timedelta(3)
+            end=datetime.datetime.now(pytz.utc) + datetime.timedelta(3),
         )
 
         user1.vacations.append(vacation1)
@@ -4821,18 +4797,17 @@ class DatabaseModelsTester(UnitTestDBBase):
 
         # create a test project
         from stalker import Repository
-        repo1 = Repository(name='Test Repo', code='TR')
+
+        repo1 = Repository(name="Test Repo", code="TR")
         from stalker import Project, Task, TimeLog
+
         project1 = Project(
-            name='Test Project',
-            code='TP',
+            name="Test Project",
+            code="TP",
             repository=repo1,
         )
         task1 = Task(
-            name='Test Task 1',
-            project=project1,
-            resources=[user1],
-            responsible=[user1]
+            name="Test Task 1", project=project1, resources=[user1], responsible=[user1]
         )
         dt = datetime.datetime
         td = datetime.timedelta
@@ -4840,7 +4815,7 @@ class DatabaseModelsTester(UnitTestDBBase):
             task=task1,
             resource=user1,
             start=dt.now(pytz.utc),
-            end=dt.now(pytz.utc) + td(1)
+            end=dt.now(pytz.utc) + td(1),
         )
         DBSession.add(time_log1)
         DBSession.add(task1)
@@ -4871,14 +4846,12 @@ class DatabaseModelsTester(UnitTestDBBase):
         # delete new_user
         del user1
 
-        user1_db = User.query\
-            .filter(User.name == user_kwargs["name"]) \
-            .first()
+        user1_db = User.query.filter(User.name == user_kwargs["name"]).first()
 
-        assert (isinstance(user1_db, User))
+        assert isinstance(user1_db, User)
 
         # the user itself
-        #assert new_user, new_user_DB)
+        # assert new_user, new_user_DB)
         assert user1_db.created_by == created_by
         assert user1_db.date_created == date_created
         assert user1_db.date_updated == date_updated
@@ -4896,23 +4869,23 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert user1_db.projects == projects
         assert user1_db.tags == tags
         assert user1_db.tasks == tasks
-        assert \
-            sorted(vacations, key=lambda x: x.name) == \
-            sorted(user1_db.vacations, key=lambda x: x.name)
+        assert sorted(vacations, key=lambda x: x.name) == sorted(
+            user1_db.vacations, key=lambda x: x.name
+        )
         assert user1_db.watching == watching
         assert user1_db.updated_by == updated_by
 
         # as the member of a department
-        department_db = Department.query\
-            .filter(Department.name == dep_kwargs["name"]) \
-            .first()
+        department_db = Department.query.filter(
+            Department.name == dep_kwargs["name"]
+        ).first()
 
         assert user1_db == department_db.users[0]
 
         # delete tests
-        assert \
-            sorted([vacation1, vacation2], key=lambda x: x.name) == \
-            sorted(Vacation.query.all(), key=lambda x: x.name)
+        assert sorted([vacation1, vacation2], key=lambda x: x.name) == sorted(
+            Vacation.query.all(), key=lambda x: x.name
+        )
 
         # deleting a user should also delete its vacations
         DBSession.delete(user1_db)
@@ -4924,32 +4897,31 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert TimeLog.query.all() == []
 
     def test_persistence_of_AuthenticationLog(self):
-        """testing the persistence of AuthenticationLog
-        """
+        """testing the persistence of AuthenticationLog"""
         import datetime
         import pytz
         from stalker import User, AuthenticationLog
         from stalker.db.session import DBSession
+
         user1 = User(
-            name='Test User 1',
-            login='tuser1',
-            email='tuser1@users.com',
-            password='sosecret'
+            name="Test User 1",
+            login="tuser1",
+            email="tuser1@users.com",
+            password="sosecret",
         )
         DBSession.add(user1)
         DBSession.commit()
 
         from stalker.models.auth import LOGIN, LOGOUT
+
         al1 = AuthenticationLog(
-            user=user1,
-            action=LOGIN,
-            date=datetime.datetime.now(pytz.utc)
+            user=user1, action=LOGIN, date=datetime.datetime.now(pytz.utc)
         )
 
         al2 = AuthenticationLog(
             user=user1,
             action=LOGOUT,
-            date=datetime.datetime.now(pytz.utc) + datetime.timedelta(minutes=10)
+            date=datetime.datetime.now(pytz.utc) + datetime.timedelta(minutes=10),
         )
 
         DBSession.add_all([al1, al2])
@@ -4968,8 +4940,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert al1_from_db.action == action
 
         # check if users data is also updated
-        assert \
-            sorted(user1.authentication_logs) == sorted([al1_from_db, al2])
+        assert sorted(user1.authentication_logs) == sorted([al1_from_db, al2])
 
         # delete tests
         DBSession.delete(al1_from_db)
@@ -4992,37 +4963,29 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert user1_from_db is not None
 
     def test_persistence_of_Vacation(self):
-        """testing the persistence of Vacation instances
-        """
+        """testing the persistence of Vacation instances"""
         # create a User
         from stalker import User, Type, Vacation
+
         new_user = User(
-            name='Test User',
-            login='testuser',
-            email='test@user.com',
-            password='secret'
+            name="Test User", login="testuser", email="test@user.com", password="secret"
         )
 
         # personal vacation type
         personal_vacation = Type(
-            name='Personal',
-            code='PERS',
-            target_entity_type='Vacation'
+            name="Personal", code="PERS", target_entity_type="Vacation"
         )
 
         import datetime
         import pytz
+
         start = datetime.datetime(2013, 6, 7, 15, 0, tzinfo=pytz.utc)
         end = datetime.datetime(2013, 6, 21, 0, 0, tzinfo=pytz.utc)
 
-        vacation = Vacation(
-            user=new_user,
-            type=personal_vacation,
-            start=start,
-            end=end
-        )
+        vacation = Vacation(user=new_user, type=personal_vacation, start=start, end=end)
 
         from stalker.db.session import DBSession
+
         DBSession.add(vacation)
         DBSession.commit()
 
@@ -5040,66 +5003,68 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert vacation_db.type == personal_vacation
 
     def test_persistence_of_Version(self):
-        """testing the persistence of Version instances
-        """
+        """testing the persistence of Version instances"""
         # create a project
         from stalker import Project, Repository
+
         test_project = Project(
-            name='Test Project',
-            code='tp',
+            name="Test Project",
+            code="tp",
             repository=Repository(
-                name='Film Projects',
-                code='FP',
-                windows_path='M:/',
-                linux_path='/mnt/M/',
-                osx_path='/Users/Volumes/M/',
-            )
+                name="Film Projects",
+                code="FP",
+                windows_path="M:/",
+                linux_path="/mnt/M/",
+                osx_path="/Users/Volumes/M/",
+            ),
         )
         from stalker.db.session import DBSession
+
         DBSession.add(test_project)
 
         # create a task
         from stalker import Task, User
+
         test_task = Task(
-            name='Modeling',
+            name="Modeling",
             project=test_project,
-            responsible=[
-                User(name='user1', login='user1', email='u@u', password='12')
-            ]
+            responsible=[User(name="user1", login="user1", email="u@u", password="12")],
         )
         DBSession.add(test_task)
         DBSession.commit()
 
         # create a new version
         from stalker import Version, Link
+
         test_version = Version(
-            name='version for task modeling',
+            name="version for task modeling",
             task=test_task,
-            take='MAIN',
-            full_path='M:/Shows/Proj1/Seq1/Shots/SH001/Lighting'
-            '/Proj1_Seq1_Sh001_MAIN_Lighting_v001.ma',
+            take="MAIN",
+            full_path="M:/Shows/Proj1/Seq1/Shots/SH001/Lighting"
+            "/Proj1_Seq1_Sh001_MAIN_Lighting_v001.ma",
             outputs=[
                 Link(
-                    name='Renders',
-                    full_path='M:/Shows/Proj1/Seq1/Shots/SH001/Lighting/'
-                    'Output/test1.###.jpg'
+                    name="Renders",
+                    full_path="M:/Shows/Proj1/Seq1/Shots/SH001/Lighting/"
+                    "Output/test1.###.jpg",
                 ),
-            ]
+            ],
         )
 
         # now save it to the database
         from stalker.db.session import DBSession
+
         DBSession.add(test_version)
         DBSession.commit()
 
         # create a new version
         test_version_2 = Version(
-            name='version for task modeling',
+            name="version for task modeling",
             task=test_task,
-            take='MAIN',
-            full_path='M:/Shows/Proj1/Seq1/Shots/SH001/Lighting'
-            '/Proj1_Seq1_Sh001_MAIN_Lighting_v001.ma',
-            inputs=[test_version]
+            take="MAIN",
+            full_path="M:/Shows/Proj1/Seq1/Shots/SH001/Lighting"
+            "/Proj1_Seq1_Sh001_MAIN_Lighting_v001.ma",
+            inputs=[test_version],
         )
         assert test_version_2.inputs == [test_version]
         DBSession.add(test_version_2)
@@ -5127,7 +5092,7 @@ class DatabaseModelsTester(UnitTestDBBase):
         # get it back from the db
         test_version_db = Version.query.filter_by(name=name).first()
 
-        assert (isinstance(test_version_db, Version))
+        assert isinstance(test_version_db, Version)
 
         assert test_version_db.created_by == created_by
         assert test_version_db.date_created == date_created
@@ -5155,11 +5120,11 @@ class DatabaseModelsTester(UnitTestDBBase):
         # create a new version append it to version_2.inputs and then delete
         # version_2
         test_version_3 = Version(
-            name='version for task modeling',
+            name="version for task modeling",
             task=test_task,
-            take='MAIN',
-            full_path='M:/Shows/Proj1/Seq1/Shots/SH001/Lighting'
-            '/Proj1_Seq1_Sh001_MAIN_Lighting_v003.ma'
+            take="MAIN",
+            full_path="M:/Shows/Proj1/Seq1/Shots/SH001/Lighting"
+            "/Proj1_Seq1_Sh001_MAIN_Lighting_v003.ma",
         )
         test_version_2.inputs.append(test_version_3)
         assert test_version_2.inputs == [test_version_3]
@@ -5171,23 +5136,21 @@ class DatabaseModelsTester(UnitTestDBBase):
         DBSession.commit()
 
         # and check if test_version_3 is still present in the database
-        test_version_3_db = Version.query\
-            .filter(Version.name == test_version_3.name)\
-            .filter(Version.task == test_version_3.task)\
-            .filter(Version.version_number == test_version_3.version_number)\
+        test_version_3_db = (
+            Version.query.filter(Version.name == test_version_3.name)
+            .filter(Version.task == test_version_3.task)
+            .filter(Version.version_number == test_version_3.version_number)
             .first()
+        )
 
         assert test_version_3_db is not None
         assert test_version_3_db.task == test_version_3.task
-        assert \
-            test_version_3_db.version_number == test_version_3.version_number
+        assert test_version_3_db.version_number == test_version_3.version_number
 
         # create a new version append it to version_3.children and then delete
         # version_3
         test_version_4 = Version(
-            name='version for task modeling',
-            task=test_task,
-            take='MAIN'
+            name="version for task modeling", task=test_task, take="MAIN"
         )
         test_version_3.children.append(test_version_4)
         DBSession.save(test_version_4)
@@ -5195,16 +5158,16 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert test_version_4.parent == test_version_3
 
         # and check if test_version_4 is still present in the database
-        test_version_4_db = Version.query\
-            .filter(Version.name == test_version_4.name)\
-            .filter(Version.task == test_version_4.task)\
-            .filter(Version.version_number == test_version_4.version_number)\
+        test_version_4_db = (
+            Version.query.filter(Version.name == test_version_4.name)
+            .filter(Version.task == test_version_4.task)
+            .filter(Version.version_number == test_version_4.version_number)
             .first()
+        )
 
         assert test_version_4_db is not None
         assert test_version_4_db.task == test_version_4.task
-        assert test_version_4_db.version_number == \
-               test_version_4.version_number
+        assert test_version_4_db.version_number == test_version_4.version_number
         assert test_version_4_db.parent == test_version_3
 
         # now delete test_version_3
@@ -5212,23 +5175,20 @@ class DatabaseModelsTester(UnitTestDBBase):
         DBSession.commit()
 
         # and check if test_version_4 is still present in the database
-        test_version_4_db = Version.query\
-            .filter(Version.name == test_version_4.name)\
-            .filter(Version.task == test_version_4.task)\
-            .filter(Version.version_number == test_version_4.version_number)\
+        test_version_4_db = (
+            Version.query.filter(Version.name == test_version_4.name)
+            .filter(Version.task == test_version_4.task)
+            .filter(Version.version_number == test_version_4.version_number)
             .first()
+        )
 
         assert test_version_4_db is not None
         assert test_version_4_db.task == test_version_4.task
-        assert test_version_4_db.version_number == \
-               test_version_4.version_number
+        assert test_version_4_db.version_number == test_version_4.version_number
         assert test_version_4_db.parent is None
 
         # create a new version and assign it as a child of version_5
-        test_version_5 = Version(
-            task=test_task,
-            take='MAIN'
-        )
+        test_version_5 = Version(task=test_task, take="MAIN")
         DBSession.save(test_version_5)
         test_version_4.children = [test_version_5]
         DBSession.commit()
@@ -5243,24 +5203,25 @@ class DatabaseModelsTester(UnitTestDBBase):
         assert test_version_4.children == []
 
     def test_persistence_of_WorkingHours(self):
-        """testing the persistence of WorkingHours instances
-        """
+        """testing the persistence of WorkingHours instances"""
         from stalker import WorkingHours
+
         wh = WorkingHours(
-            name='Default Working Hours',
+            name="Default Working Hours",
             working_hours={
-                'mon': [[9, 12], [13, 18]],
-                'tue': [[9, 12], [13, 18]],
-                'wed': [[9, 12], [13, 18]],
-                'thu': [[9, 12], [13, 18]],
-                'fri': [[9, 12], [13, 18]],
-                'sat': [],
-                'sun': [],
+                "mon": [[9, 12], [13, 18]],
+                "tue": [[9, 12], [13, 18]],
+                "wed": [[9, 12], [13, 18]],
+                "thu": [[9, 12], [13, 18]],
+                "fri": [[9, 12], [13, 18]],
+                "sat": [],
+                "sun": [],
             },
-            daily_working_hours=8
+            daily_working_hours=8,
         )
 
         from stalker.db.session import DBSession
+
         DBSession.add(wh)
         DBSession.commit()
 
@@ -5278,9 +5239,9 @@ class DatabaseModelsTester(UnitTestDBBase):
 
 
 def test_timezones_with_sqlite3(setup_sqlite3):
-    """testing if timezones will be correctly handled in SQLite3
-    """
+    """testing if timezones will be correctly handled in SQLite3"""
     from stalker import db
+
     db.setup()
     db.init()
 
@@ -5288,13 +5249,14 @@ def test_timezones_with_sqlite3(setup_sqlite3):
     from stalker import SimpleEntity
 
     # check if we're really using SQLite3
-    assert str(DBSession.connection().engine.url) == 'sqlite://'
+    assert str(DBSession.connection().engine.url) == "sqlite://"
 
     # create a simple entity
-    test_se_1 = SimpleEntity(name='Test Entry 1')
+    test_se_1 = SimpleEntity(name="Test Entry 1")
 
     # check if it has UTC as timezone
     import pytz
+
     assert test_se_1.date_created.tzinfo == pytz.utc
 
     # commit to database
@@ -5303,12 +5265,14 @@ def test_timezones_with_sqlite3(setup_sqlite3):
     # now delete the local copy and retrieve it back
     del test_se_1
 
-    test_se_1_db = SimpleEntity.query.filter_by(name='Test Entry 1').first()
+    test_se_1_db = SimpleEntity.query.filter_by(name="Test Entry 1").first()
 
     # now check if the test_se_1_db has the local time zone in its
     # date_created field
     import tzlocal
+
     local_tz = tzlocal.get_localzone()
     import datetime
+
     now = datetime.datetime.now(local_tz)
     assert test_se_1_db.date_created.tzinfo == now.tzinfo

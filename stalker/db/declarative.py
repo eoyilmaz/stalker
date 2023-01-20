@@ -23,4 +23,5 @@ class ORMClass(object):
         """
         return make_plural(self.__class__.__name__)
 
+
 Base = declarative_base(cls=ORMClass)
