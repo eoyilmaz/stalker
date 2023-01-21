@@ -14,7 +14,7 @@ def setup_logging():
     log.loggers = []
 
 
-def test_register_logger_1(setup_logging):
+def test_register_logger_simple(setup_logging):
     """Test register logger adds the given logger to the list."""
     logger = logging.getLogger("test_logger")
     assert logger not in log.loggers
@@ -22,7 +22,7 @@ def test_register_logger_1(setup_logging):
     assert logger in log.loggers
 
 
-def test_register_logger_2(setup_logging):
+def test_register_logger_called_multiple_times(setup_logging):
     """Test register logger adds the logger only once."""
     logger = logging.getLogger("test_logger")
     assert logger not in log.loggers
@@ -45,6 +45,15 @@ def test_register_logger_only_accept_loggers(setup_logging):
         log.register_logger("not a logger")
 
     assert str(cm.value) == "logger should be a logging.Logger instance, not str"
+
+
+def test_register_logger_sets_the_level_to_the_default_level(setup_logging):
+    """Test register_logger set the level to the default level."""
+    logger = logging.getLogger("logger1")
+    logger.setLevel(logging.WARNING)
+    assert log.logging_level != logging.WARNING
+    log.register_logger(logger)
+    assert logger.level == log.logging_level
 
 
 def test_set_level_sets_all_logger_levels(setup_logging):

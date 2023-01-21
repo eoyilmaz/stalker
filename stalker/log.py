@@ -24,6 +24,8 @@ def register_logger(logger):
     if logger not in loggers:
         loggers.append(logger)
 
+    logger.setLevel(logging_level)
+
 
 def set_level(level):
     """Update all registered loggers to the given level.
