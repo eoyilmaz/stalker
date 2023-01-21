@@ -82,7 +82,7 @@ def test_set_level_sets_all_logger_levels(setup_logging):
 
 
 def test_set_level_level_is_not_an_integer(setup_logging):
-    """Testing if a TypeError will be raised if the logging level is not and integer."""
+    """Test if a TypeError will be raised if the logging level is not and integer."""
     with pytest.raises(TypeError) as cm:
         log.set_level("not a logging level")
 
@@ -94,7 +94,7 @@ def test_set_level_level_is_not_an_integer(setup_logging):
 
 
 def test_set_level_level_is_not_a_proper_logging_level(setup_logging):
-    """Testing if a ValueError will be raised if the logging level is not in correct
+    """Test if a ValueError will be raised if the logging level is not in correct
     value."""
     with pytest.raises(ValueError) as cm:
         log.set_level(1000)
@@ -104,3 +104,30 @@ def test_set_level_level_is_not_a_proper_logging_level(setup_logging):
         "or [NOTSET, DEBUG, INFO, WARN, WARNING, ERROR, FATAL, CRITICAL] of the "
         "logging library, not 1000."
     )
+
+
+def test_get_logger_name_is_not_a_string(setup_logging):
+    """Test if stalker.get_logger() will raise a TypeError if the name attribute is not
+    a str."""
+    with pytest.raises(TypeError) as cm:
+        log.get_logger(2123)
+    assert str(cm.value) == "A logger name must be a string"
+
+
+def test_get_logger_will_create_a_logger(setup_logging):
+    """Test if stalker.log.get_logger() will return a Logger instance."""
+    logger = log.get_logger("logger")
+    assert isinstance(logger, logging.Logger)
+
+
+def test_get_logger_will_register_the_new_logger_already(setup_logging):
+    """Test if stalker.log.get_logger() will already register the new loggger."""
+    logger = log.get_logger("logger")
+    assert logger in log.loggers
+
+
+def test_get_logger_will_set_the_logging_level_to_the_default_one(setup_logging):
+    """Test if stalker.log.get_logger() will set the logging level to the default
+    one."""
+    logger = log.get_logger("logger")
+    assert logger.level == log.logging_level

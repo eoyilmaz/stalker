@@ -1,11 +1,26 @@
 # -*- coding: utf-8 -*-
 """This module allows registering any number of logger so that it is possible to update
 the logging level all together at runtime (without relaying on weird hacks.)"""
+import six
 import logging
 
 logging.basicConfig()
 logging_level = logging.INFO
 loggers = []
+
+
+def get_logger(name):
+    """Get a logger.
+
+    Args:
+        name (str): The name of the logger.
+
+    Returns:
+        logging.Logger: The logger.
+    """
+    logger = logging.getLogger(name)
+    register_logger(logger)
+    return logger
 
 
 def register_logger(logger):
