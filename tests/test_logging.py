@@ -86,8 +86,8 @@ def test_set_level_level_is_not_an_integer(setup_logging):
         log.set_level("not a logging level")
 
     assert str(cm.value) == (
-        "logging_level should be an integer value one of [0, 10, 20, 30, 40, 50] "
-        "or [NOTSET, DEBUG, INFO, WARN, WARNING, ERROR, FATAL, CRITICAL] of the "
+        "level should be an integer value one of [0, 10, 20, 30, 40, 50] or "
+        "[NOTSET, DEBUG, INFO, WARN, WARNING, ERROR, FATAL, CRITICAL] of the "
         "logging library, not str."
     )
 
@@ -98,8 +98,8 @@ def test_set_level_level_is_not_a_proper_logging_level(setup_logging):
         log.set_level(1000)
 
     assert str(cm.value) == (
-        "logging_level should be an integer value one of [0, 10, 20, 30, 40, 50] "
-        "or [NOTSET, DEBUG, INFO, WARN, WARNING, ERROR, FATAL, CRITICAL] of the "
+        "level should be an integer value one of [0, 10, 20, 30, 40, 50] or "
+        "[NOTSET, DEBUG, INFO, WARN, WARNING, ERROR, FATAL, CRITICAL] of the "
         "logging library, not 1000."
     )
 
