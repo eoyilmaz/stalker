@@ -15,7 +15,7 @@ def setup_logging():
 
 
 def test_register_logger_simple(setup_logging):
-    """Test register logger adds the given logger to the list."""
+    """register logger adds the given logger to the list."""
     logger = logging.getLogger("test_logger")
     assert logger not in log.loggers
     log.register_logger(logger)
@@ -23,7 +23,7 @@ def test_register_logger_simple(setup_logging):
 
 
 def test_register_logger_called_multiple_times(setup_logging):
-    """Test register logger adds the logger only once."""
+    """register logger adds the logger only once."""
     logger = logging.getLogger("test_logger")
     assert logger not in log.loggers
     assert 0 == len(log.loggers)
@@ -39,8 +39,7 @@ def test_register_logger_called_multiple_times(setup_logging):
 
 
 def test_register_logger_only_accept_loggers(setup_logging):
-    """Test register_logger will raise a TypeError if the given logger is not a Logger
-    instance."""
+    """register_logger raise a TypeError if the logger is not a Logger instance."""
     with pytest.raises(TypeError) as cm:
         log.register_logger("not a logger")
 
@@ -48,7 +47,7 @@ def test_register_logger_only_accept_loggers(setup_logging):
 
 
 def test_register_logger_sets_the_level_to_the_default_level(setup_logging):
-    """Test register_logger set the level to the default level."""
+    """register_logger set the level to the default level."""
     logger = logging.getLogger("logger1")
     logger.setLevel(logging.WARNING)
     assert log.logging_level != logging.WARNING
@@ -57,7 +56,7 @@ def test_register_logger_sets_the_level_to_the_default_level(setup_logging):
 
 
 def test_set_level_sets_all_logger_levels(setup_logging):
-    """Test set_level sets all logger levels all together."""
+    """set_level sets all logger levels all together."""
     logger1 = logging.getLogger("test_logger1")
     logger2 = logging.getLogger("test_logger2")
     logger3 = logging.getLogger("test_logger3")
@@ -82,7 +81,7 @@ def test_set_level_sets_all_logger_levels(setup_logging):
 
 
 def test_set_level_level_is_not_an_integer(setup_logging):
-    """Test if a TypeError will be raised if the logging level is not and integer."""
+    """TypeError raised if the logging level is not an integer."""
     with pytest.raises(TypeError) as cm:
         log.set_level("not a logging level")
 
@@ -94,8 +93,7 @@ def test_set_level_level_is_not_an_integer(setup_logging):
 
 
 def test_set_level_level_is_not_a_proper_logging_level(setup_logging):
-    """Test if a ValueError will be raised if the logging level is not in correct
-    value."""
+    """ValueError raised if the logging level is not in correct value."""
     with pytest.raises(ValueError) as cm:
         log.set_level(1000)
 
@@ -107,27 +105,26 @@ def test_set_level_level_is_not_a_proper_logging_level(setup_logging):
 
 
 def test_get_logger_name_is_not_a_string(setup_logging):
-    """Test if stalker.get_logger() will raise a TypeError if the name attribute is not
+    """stalker.get_logger() raises a TypeError if the name attribute is not
     a str."""
     with pytest.raises(TypeError) as cm:
         log.get_logger(2123)
     assert str(cm.value) == "A logger name must be a string"
 
 
-def test_get_logger_will_create_a_logger(setup_logging):
-    """Test if stalker.log.get_logger() will return a Logger instance."""
+def test_get_logger_creates_a_logger(setup_logging):
+    """stalker.log.get_logger() returns a Logger instance."""
     logger = log.get_logger("logger")
     assert isinstance(logger, logging.Logger)
 
 
-def test_get_logger_will_register_the_new_logger_already(setup_logging):
-    """Test if stalker.log.get_logger() will already register the new loggger."""
+def test_get_logger_registers_the_new_logger_already(setup_logging):
+    """stalker.log.get_logger() registers the new logger."""
     logger = log.get_logger("logger")
     assert logger in log.loggers
 
 
-def test_get_logger_will_set_the_logging_level_to_the_default_one(setup_logging):
-    """Test if stalker.log.get_logger() will set the logging level to the default
-    one."""
+def test_get_logger_sets_the_logging_level_to_the_default_one(setup_logging):
+    """stalker.log.get_logger() sets the logging level to the default one."""
     logger = log.get_logger("logger")
     assert logger.level == log.logging_level
