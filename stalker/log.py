@@ -62,7 +62,13 @@ def set_level(level):
             "logging library, not {}.".format(level.__class__.__name__)
         )
 
-    if level not in logging._levelToName:
+    try:
+        level_names = logging._levelToName
+    except AttributeError:
+        # Python 2
+        level_names = logging._levelNames
+
+    if level not in level_names:
         raise ValueError(
             "level should be an integer value one of [0, 10, 20, 30, 40, 50] or "
             "[NOTSET, DEBUG, INFO, WARN, WARNING, ERROR, FATAL, CRITICAL] of the "
