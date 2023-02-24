@@ -69,11 +69,10 @@ class Camera(Entity):
     :param web_page: the web page of the camera
     """
 
-    __tablename__ = 'Cameras'
-    __mapper_args__ = {'polymorphic_identity': 'Camera'}
+    __tablename__ = "Cameras"
+    __mapper_args__ = {"polymorphic_identity": "Camera"}
 
-    camera_id = Column('id', Integer, ForeignKey('Entities.id'),
-                       primary_key=True)
+    camera_id = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
     make = Column(String)
     model = Column(String)
     aperture_gate = Column(Float(precision=4), default=0)
@@ -81,14 +80,16 @@ class Camera(Entity):
     vertical_film_back = Column(Float(precision=4), default=0)
     web_page = Column(String)
 
-    def __init__(self,
-                 make="",
-                 model="",
-                 aperture_gate=0,
-                 horizontal_film_back=0,
-                 vertical_film_back=0,
-                 web_page="",
-                 **kwargs):
+    def __init__(
+        self,
+        make="",
+        model="",
+        aperture_gate=0,
+        horizontal_film_back=0,
+        vertical_film_back=0,
+        web_page="",
+        **kwargs
+    ):
         # pass all the extra data to the super (which is Entity)
         super(Camera, self).__init__(**kwargs)
 
@@ -114,24 +115,25 @@ class Lens(Entity):
     :param web_page: the product web page
     """
 
-    __tablename__ = 'Lenses'
-    __mapper_args__ = {'polymorphic_identity': 'Lens'}
+    __tablename__ = "Lenses"
+    __mapper_args__ = {"polymorphic_identity": "Lens"}
 
-    lens_id = Column('id', Integer, ForeignKey('Entities.id'),
-                     primary_key=True)
+    lens_id = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
     make = Column(String)
     model = Column(String)
     min_focal_length = Column(Float(precision=1))
     max_focal_length = Column(Float(precision=1))
     web_page = Column(String)
 
-    def __init__(self,
-                 make="",
-                 model="",
-                 min_focal_length=0,
-                 max_focal_length=0,
-                 web_page="",
-                 **kwargs):
+    def __init__(
+        self,
+        make="",
+        model="",
+        min_focal_length=0,
+        max_focal_length=0,
+        web_page="",
+        **kwargs
+    ):
         # pass all the extra data to the super (which is Entity)
         super(Lens, self).__init__(**kwargs)
 
@@ -140,5 +142,6 @@ class Lens(Entity):
         self.min_focal_length = min_focal_length
         self.max_focal_length = max_focal_length
         self.web_page = web_page
+
 
 # now we have extended SOM with two new classes

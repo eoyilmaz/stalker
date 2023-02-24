@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from six import string_types
 from sqlalchemy import Column, Integer, ForeignKey, Text
 from sqlalchemy.orm import validates
 from stalker import ProjectMixin, Entity
@@ -22,60 +22,52 @@ class Page(Entity, ProjectMixin):
     """
 
     __auto_name__ = True
-    __tablename__ = 'Pages'
-    __mapper_args__ = {'polymorphic_identity': 'Page'}
-    page_id = Column('id', Integer, ForeignKey('Entities.id'),
-                     primary_key=True)
+    __tablename__ = "Pages"
+    __mapper_args__ = {"polymorphic_identity": "Page"}
+    page_id = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
 
     title = Column(Text)
     content = Column(Text)
 
-    def __init__(self, title='', content='', project=None, **kwargs):
-        kwargs['project'] = project
+    def __init__(self, title="", content="", project=None, **kwargs):
+        kwargs["project"] = project
         super(Page, self).__init__(**kwargs)
         ProjectMixin.__init__(self, **kwargs)
 
         self.title = title
         self.content = content
 
-    @validates('title')
+    @validates("title")
     def _validate_title(self, key, title):
-        """validates the given title value
-        """
-        from stalker import __string_types__
-        if not isinstance(title, __string_types__):
+        """validates the given title value"""
+        if not isinstance(title, string_types):
             raise TypeError(
-                '%(class)s.title should be a string, not %(title_class)s' %
-                {
-                    'class': self.__class__.__name__,
-                    'title_class': title.__class__.__name__
+                "%(class)s.title should be a string, not %(title_class)s"
+                % {
+                    "class": self.__class__.__name__,
+                    "title_class": title.__class__.__name__,
                 }
             )
 
         if not title:
             raise ValueError(
-                '%(class)s.title can not be empty' %
-                {
-                    'class': self.__class__.__name__
-                }
+                "%(class)s.title can not be empty" % {"class": self.__class__.__name__}
             )
 
         return title
 
-    @validates('content')
+    @validates("content")
     def _validate_content(self, key, content):
-        """validates the given content value
-        """
+        """validates the given content value"""
         if content is None:
-            content = ''
+            content = ""
 
-        from stalker import __string_types__
-        if not isinstance(content, __string_types__):
+        if not isinstance(content, string_types):
             raise TypeError(
-                '%(class)s.content should be a string, not %(content_class)s' %
-                {
-                    'class': self.__class__.__name__,
-                    'content_class': content.__class__.__name__
+                "%(class)s.content should be a string, not %(content_class)s"
+                % {
+                    "class": self.__class__.__name__,
+                    "content_class": content.__class__.__name__,
                 }
             )
 

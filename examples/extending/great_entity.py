@@ -15,6 +15,7 @@ class GreatEntity(SimpleEntity, ReferenceMixin):
     ReferenceMixin
     """
 
-    __tablename__ = 'GreatEntities'
-    great_entity_id = Column('id', Integer, ForeignKey('SimpleEntities.c.id'),
-                             primary_key=True)
+    __tablename__ = "GreatEntities"
+    great_entity_id = Column(
+        "id", Integer, ForeignKey("SimpleEntities.c.id"), primary_key=True
+    )

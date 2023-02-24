@@ -1,206 +1,212 @@
 # -*- coding: utf-8 -*-
+"""Tests for the stalker.models.scheduler.TaskJugglerScheduler class."""
 
+import datetime
 import os
 
+import jinja2
+
 import pytest
+
 import pytz
-import datetime
+
+import stalker
 from stalker import TaskJugglerScheduler
-from stalker.testing import UnitTestDBBase
+from stalker import Department
+from stalker import User
+from stalker import Repository
+from stalker import Status
+from stalker import Studio
+from stalker import Project
+from stalker import Task
+from stalker import TimeLog
+from stalker.db.session import DBSession
 
 
-class TaskJugglerSchedulerDBTester(UnitTestDBBase):
-    """tests the stalker.models.scheduler.TaskJugglerScheduler class
-    """
+@pytest.fixture(scope="function")
+def setup_tsk_juggler_scheduler_db_tests(setup_postgresql_db):
+    """Set up tests for the  TaskJugglerScheduler class."""
+    data = dict()
 
-    def setUp(self):
-        """set up the test
-        """
-        super(self.__class__, self).setUp()
+    # create departments
+    data["test_dep1"] = Department(name="Dep1")
+    data["test_dep2"] = Department(name="Dep2")
 
-        # create departments
-        from stalker import Department
-        self.test_dep1 = Department(name='Dep1')
-        self.test_dep2 = Department(name='Dep2')
+    # create resources
+    data["test_user1"] = User(
+        login="user1",
+        name="User1",
+        email="user1@users.com",
+        password="1234",
+        departments=[data["test_dep1"]],
+    )
+    DBSession.add(data["test_user1"])
 
-        # create resources
-        from stalker import User
-        self.test_user1 = User(
-            login='user1',
-            name='User1',
-            email='user1@users.com',
-            password='1234',
-            departments=[self.test_dep1]
-        )
-        from stalker.db.session import DBSession
-        DBSession.add(self.test_user1)
+    data["test_user2"] = User(
+        login="user2",
+        name="User2",
+        email="user2@users.com",
+        password="1234",
+        departments=[data["test_dep1"]],
+    )
+    DBSession.add(data["test_user2"])
 
-        self.test_user2 = User(
-            login='user2',
-            name='User2',
-            email='user2@users.com',
-            password='1234',
-            departments=[self.test_dep1]
-        )
-        DBSession.add(self.test_user2)
+    data["test_user3"] = User(
+        login="user3",
+        name="User3",
+        email="user3@users.com",
+        password="1234",
+        departments=[data["test_dep2"]],
+    )
+    DBSession.add(data["test_user3"])
 
-        self.test_user3 = User(
-            login='user3',
-            name='User3',
-            email='user3@users.com',
-            password='1234',
-            departments=[self.test_dep2]
-        )
-        DBSession.add(self.test_user3)
+    data["test_user4"] = User(
+        login="user4",
+        name="User4",
+        email="user4@users.com",
+        password="1234",
+        departments=[data["test_dep2"]],
+    )
+    DBSession.add(data["test_user4"])
 
-        self.test_user4 = User(
-            login='user4',
-            name='User4',
-            email='user4@users.com',
-            password='1234',
-            departments=[self.test_dep2]
-        )
-        DBSession.add(self.test_user4)
+    # user with two departments
+    data["test_user5"] = User(
+        login="user5",
+        name="User5",
+        email="user5@users.com",
+        password="1234",
+        departments=[data["test_dep1"], data["test_dep2"]],
+    )
+    DBSession.add(data["test_user5"])
 
-        # user with two departments
-        self.test_user5 = User(
-            login='user5',
-            name='User5',
-            email='user5@users.com',
-            password='1234',
-            departments=[self.test_dep1, self.test_dep2]
-        )
-        DBSession.add(self.test_user5)
+    # user with no departments
+    data["test_user6"] = User(
+        login="user6", name="User6", email="user6@users.com", password="1234"
+    )
+    DBSession.add(data["test_user6"])
 
-        # user with no departments
-        self.test_user6 = User(
-            login='user6',
-            name='User6',
-            email='user6@users.com',
-            password='1234'
-        )
-        DBSession.add(self.test_user6)
+    # repository
+    data["test_repo"] = Repository(
+        name="Test Repository",
+        code="TR",
+        linux_path="/mnt/T/",
+        windows_path="T:/",
+        osx_path="/Volumes/T/",
+    )
+    DBSession.add(data["test_repo"])
 
-        # repository
-        from stalker import Repository
-        self.test_repo = Repository(
-            name='Test Repository',
-            code='TR',
-            linux_path='/mnt/T/',
-            windows_path='T:/',
-            osx_path='/Volumes/T/'
-        )
-        DBSession.add(self.test_repo)
+    # statuses
+    data["test_status1"] = Status(name="Status 1", code="STS1")
+    data["test_status2"] = Status(name="Status 2", code="STS2")
+    data["test_status3"] = Status(name="Status 3", code="STS3")
+    data["test_status4"] = Status(name="Status 4", code="STS4")
+    data["test_status5"] = Status(name="Status 5", code="STS5")
+    DBSession.add_all(
+        [
+            data["test_status1"],
+            data["test_status2"],
+            data["test_status3"],
+            data["test_status4"],
+            data["test_status5"],
+        ]
+    )
 
-        # statuses
-        from stalker import Status
-        self.test_status1 = Status(name='Status 1', code='STS1')
-        self.test_status2 = Status(name='Status 2', code='STS2')
-        self.test_status3 = Status(name='Status 3', code='STS3')
-        self.test_status4 = Status(name='Status 4', code='STS4')
-        self.test_status5 = Status(name='Status 5', code='STS5')
-        DBSession.add_all([
-            self.test_status1, self.test_status2, self.test_status3,
-            self.test_status4, self.test_status5
-        ])
+    # create one project
+    data["test_proj1"] = Project(
+        name="Test Project 1",
+        code="TP1",
+        repository=data["test_repo"],
+        start=datetime.datetime(2013, 4, 4, tzinfo=pytz.utc),
+        end=datetime.datetime(2013, 5, 4, tzinfo=pytz.utc),
+    )
+    DBSession.add(data["test_proj1"])
+    data["test_proj1"].now = datetime.datetime(2013, 4, 4, tzinfo=pytz.utc)
 
-        # create one project
-        from stalker import Project
-        self.test_proj1 = Project(
-            name='Test Project 1',
-            code='TP1',
-            repository=self.test_repo,
-            start=datetime.datetime(2013, 4, 4, tzinfo=pytz.utc),
-            end=datetime.datetime(2013, 5, 4, tzinfo=pytz.utc)
-        )
-        DBSession.add(self.test_proj1)
-        self.test_proj1.now = datetime.datetime(2013, 4, 4, tzinfo=pytz.utc)
+    # create two tasks with the same resources
+    data["test_task1"] = Task(
+        name="Task1",
+        project=data["test_proj1"],
+        resources=[data["test_user1"], data["test_user2"]],
+        alternative_resources=[
+            data["test_user3"],
+            data["test_user4"],
+            data["test_user5"],
+        ],
+        schedule_model=0,
+        schedule_timing=50,
+        schedule_unit="h",
+    )
+    DBSession.add(data["test_task1"])
 
-        # create two tasks with the same resources
-        from stalker import Task
-        self.test_task1 = Task(
-            name='Task1',
-            project=self.test_proj1,
-            resources=[self.test_user1, self.test_user2],
-            alternative_resources=[
-                self.test_user3, self.test_user4, self.test_user5
-            ],
-            schedule_model=0,
-            schedule_timing=50,
-            schedule_unit='h',
-        )
-        DBSession.add(self.test_task1)
+    data["test_task2"] = Task(
+        name="Task2",
+        project=data["test_proj1"],
+        resources=[data["test_user1"], data["test_user2"]],
+        alternative_resources=[
+            data["test_user3"],
+            data["test_user4"],
+            data["test_user5"],
+        ],
+        depends=[data["test_task1"]],
+        schedule_model=0,
+        schedule_timing=60,
+        schedule_unit="h",
+        priority=800,
+    )
+    DBSession.save(data["test_task2"])
+    return data
 
-        self.test_task2 = Task(
-            name='Task2',
-            project=self.test_proj1,
-            resources=[self.test_user1, self.test_user2],
-            alternative_resources=[
-                self.test_user3, self.test_user4, self.test_user5
-            ],
-            depends=[self.test_task1],
-            schedule_model=0,
-            schedule_timing=60,
-            schedule_unit='h',
-            priority=800
-        )
-        DBSession.save(self.test_task2)
 
-    def test_tjp_file_is_created(self):
-        """testing if the tjp file is correctly created
-        """
-        # create the scheduler
-        tjp_sched = TaskJugglerScheduler()
-        tjp_sched.projects = [self.test_proj1]
+def test_tjp_file_is_created(setup_tsk_juggler_scheduler_db_tests):
+    """tjp file is correctly created."""
+    data = setup_tsk_juggler_scheduler_db_tests
+    # create the scheduler
+    tjp_sched = TaskJugglerScheduler()
+    tjp_sched.projects = [data["test_proj1"]]
 
-        tjp_sched._create_tjp_file()
-        tjp_sched._create_tjp_file_content()
-        tjp_sched._fill_tjp_file()
+    tjp_sched._create_tjp_file()
+    tjp_sched._create_tjp_file_content()
+    tjp_sched._fill_tjp_file()
 
-        # check
-        assert os.path.exists(tjp_sched.tjp_file_full_path)
+    # check
+    assert os.path.exists(tjp_sched.tjp_file_full_path)
 
-        # clean up the test
-        tjp_sched._clean_up()
+    # clean up the test
+    tjp_sched._clean_up()
 
-    def test_tjp_file_content_is_correct(self):
-        """testing if the tjp file content is correct
-        """
-        # enter a couple of time logs
-        from stalker import TimeLog
-        tlog1 = TimeLog(
-            resource=self.test_user1,
-            task=self.test_task1,
-            start=datetime.datetime(2013, 4, 16, 6, 0, tzinfo=pytz.utc),
-            end=datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc)
-        )
-        from stalker.db.session import DBSession
-        DBSession.add(tlog1)
-        DBSession.commit()
 
-        tjp_sched = TaskJugglerScheduler()
-        from stalker import Studio
-        test_studio = Studio(
-            name='Test Studio',
-            timing_resolution=datetime.timedelta(minutes=30)
-        )
-        test_studio.daily_working_hours = 9
+def test_tjp_file_content_is_correct(setup_tsk_juggler_scheduler_db_tests):
+    """tjp file content is correct."""
+    data = setup_tsk_juggler_scheduler_db_tests
+    # enter a couple of time_logs
+    tlog1 = TimeLog(
+        resource=data["test_user1"],
+        task=data["test_task1"],
+        start=datetime.datetime(2013, 4, 16, 6, 0, tzinfo=pytz.utc),
+        end=datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc),
+    )
+    DBSession.add(tlog1)
+    DBSession.commit()
 
-        test_studio.id = 564
-        test_studio.start = \
-            datetime.datetime(2013, 4, 16, 0, 7, tzinfo=pytz.utc)
-        test_studio.end = datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc)
-        test_studio.now = datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
-        tjp_sched.studio = test_studio
+    tjp_sched = TaskJugglerScheduler()
+    test_studio = Studio(
+        name="Test Studio", timing_resolution=datetime.timedelta(minutes=30)
+    )
+    test_studio.daily_working_hours = 9
 
-        tjp_sched._create_tjp_file()
-        tjp_sched._create_tjp_file_content()
+    test_studio.id = 564
+    test_studio.start = datetime.datetime(2013, 4, 16, 0, 7, tzinfo=pytz.utc)
+    test_studio.end = datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc)
+    test_studio.now = datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
+    tjp_sched.studio = test_studio
 
-        assert TimeLog.query.all() != []
+    tjp_sched._create_tjp_file()
+    tjp_sched._create_tjp_file_content()
 
-        import jinja2
-        expected_tjp_template = jinja2.Template(
-            """# Generated By Stalker v{{stalker.__version__}}
+    assert TimeLog.query.all() != []
+
+    expected_tjp_template = jinja2.Template(
+        """# Generated By Stalker v{{stalker.__version__}}
         
 project Studio_564 "Studio_564" 2013-04-16 - 2013-06-30 {
     timingresolution 30min
@@ -265,430 +271,420 @@ taskreport breakdown "{{csv_path}}"{
     timeformat "%Y-%m-%d-%H:%M"
     columns id, start, end
 }
-""")
-        import stalker
-        expected_tjp_content = expected_tjp_template.render(
-            {
-                'stalker': stalker,
-                'studio': test_studio,
-                'csv_path': tjp_sched.temp_file_name,
-                'user1': self.test_user1,
-                'user2': self.test_user2,
-                'user3': self.test_user3,
-                'user4': self.test_user4,
-                'user5': self.test_user5,
-                'user6': self.test_user6,
-                'proj': self.test_proj1,
-                'task1': self.test_task1,
-                'task2': self.test_task2,
-            }
-        )
+"""
+    )
+    expected_tjp_content = expected_tjp_template.render(
+        {
+            "stalker": stalker,
+            "studio": test_studio,
+            "csv_path": tjp_sched.temp_file_name,
+            "user1": data["test_user1"],
+            "user2": data["test_user2"],
+            "user3": data["test_user3"],
+            "user4": data["test_user4"],
+            "user5": data["test_user5"],
+            "user6": data["test_user6"],
+            "proj": data["test_proj1"],
+            "task1": data["test_task1"],
+            "task2": data["test_task2"],
+        }
+    )
 
-        self.maxDiff = None
-        tjp_content = tjp_sched.tjp_content
-        # print tjp_content
-        tjp_sched._clean_up()
-        # print(expected_tjp_content)
-        # print('----------------')
-        # print(tjp_content)
-        assert tjp_content == expected_tjp_content
+    data["maxDiff"] = None
+    tjp_content = tjp_sched.tjp_content
+    # print tjp_content
+    tjp_sched._clean_up()
+    # print(expected_tjp_content)
+    # print('----------------')
+    # print(tjp_content)
+    assert tjp_content == expected_tjp_content
 
-    def test_schedule_will_not_work_when_the_studio_attribute_is_None(self):
-        """testing if a TypeError will be raised when the studio attribute is
-        None
-        """
-        tjp_sched = TaskJugglerScheduler()
-        tjp_sched.studio = None
-        with pytest.raises(TypeError) as cm:
-            tjp_sched.schedule()
 
-        assert str(cm.value) == \
-            'TaskJugglerScheduler.studio should be an instance of ' \
-            'stalker.models.studio.Studio, not NoneType'
-
-    def test_tasks_are_correctly_scheduled(self):
-        """testing if the tasks are correctly scheduled
-        """
-        tjp_sched = TaskJugglerScheduler(compute_resources=True)
-        from stalker import Studio
-        test_studio = Studio(
-            name='Test Studio',
-            now=datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
-        )
-        test_studio.start = \
-            datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
-        test_studio.end = \
-            datetime.datetime(2013, 4, 30, 0, 0, tzinfo=pytz.utc)
-        test_studio.daily_working_hours = 9
-        from stalker.db.session import DBSession
-        DBSession.add(test_studio)
-
-        tjp_sched.studio = test_studio
+def test_schedule_will_not_work_if_the_studio_attribute_is_None(
+    setup_tsk_juggler_scheduler_db_tests,
+):
+    """TypeError raised if the studio attribute is None."""
+    tjp_sched = TaskJugglerScheduler()
+    tjp_sched.studio = None
+    with pytest.raises(TypeError) as cm:
         tjp_sched.schedule()
-        DBSession.commit()
 
-        # check if the task and project timings are all adjusted
-        assert \
-            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc) == \
-            self.test_proj1.computed_start
-        assert \
-            datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc) == \
-            self.test_proj1.computed_end
+    assert (
+        str(cm.value) == "TaskJugglerScheduler.studio should be an instance of "
+        "stalker.models.studio.Studio, not NoneType"
+    )
 
-        possible_resources = [
-            self.test_user1, self.test_user2, self.test_user3, self.test_user4,
-            self.test_user5
-        ]
-        assert \
-            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc) == \
-            self.test_task1.computed_start
-        assert \
-            datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc) == \
-            self.test_task1.computed_end
 
-        assert len(self.test_task1.computed_resources) == 2
-        assert self.test_task1.computed_resources[0] in possible_resources
-        assert self.test_task1.computed_resources[1] in possible_resources
+def test_tasks_are_correctly_scheduled(setup_tsk_juggler_scheduler_db_tests):
+    """tasks are correctly scheduled."""
+    data = setup_tsk_juggler_scheduler_db_tests
+    tjp_sched = TaskJugglerScheduler(compute_resources=True)
+    test_studio = Studio(
+        name="Test Studio", now=datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
+    )
+    test_studio.start = datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
+    test_studio.end = datetime.datetime(2013, 4, 30, 0, 0, tzinfo=pytz.utc)
+    test_studio.daily_working_hours = 9
+    DBSession.add(test_studio)
 
-        assert \
-            datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc) == \
-            self.test_task2.computed_start
-        assert \
-            datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc) == \
-            self.test_task2.computed_end
+    tjp_sched.studio = test_studio
+    tjp_sched.schedule()
+    DBSession.commit()
 
-        assert len(self.test_task2.computed_resources) == 2
-        assert self.test_task2.computed_resources[0] in possible_resources
-        assert self.test_task2.computed_resources[1] in possible_resources
+    # check if the task and project timings are all adjusted
+    assert (
+        datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc)
+        == data["test_proj1"].computed_start
+    )
+    assert (
+        datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc)
+        == data["test_proj1"].computed_end
+    )
 
-    def test_tasks_are_correctly_scheduled_when_compute_resources_is_False(self):
-        """testing if the tasks are correctly scheduled when the compute
-        resources is False
-        """
-        tjp_sched = TaskJugglerScheduler(compute_resources=False)
-        from stalker import Studio
-        test_studio = Studio(
-            name='Test Studio',
-            now=datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
-        )
-        test_studio.start = \
-            datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
-        test_studio.end = datetime.datetime(2013, 4, 30, 0, 0, tzinfo=pytz.utc)
-        test_studio.daily_working_hours = 9
-        from stalker.db.session import DBSession
-        DBSession.add(test_studio)
+    possible_resources = [
+        data["test_user1"],
+        data["test_user2"],
+        data["test_user3"],
+        data["test_user4"],
+        data["test_user5"],
+    ]
+    assert (
+        datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc)
+        == data["test_task1"].computed_start
+    )
+    assert (
+        datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc)
+        == data["test_task1"].computed_end
+    )
 
-        tjp_sched.studio = test_studio
-        tjp_sched.schedule()
-        DBSession.commit()
+    assert len(data["test_task1"].computed_resources) == 2
+    assert data["test_task1"].computed_resources[0] in possible_resources
+    assert data["test_task1"].computed_resources[1] in possible_resources
 
-        # check if the task and project timings are all adjusted
-        assert \
-            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc) == \
-            self.test_proj1.computed_start
-        assert \
-            datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc) == \
-            self.test_proj1.computed_end
+    assert (
+        datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc)
+        == data["test_task2"].computed_start
+    )
+    assert (
+        datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc)
+        == data["test_task2"].computed_end
+    )
 
-        assert \
-            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc) == \
-            self.test_task1.computed_start
-        assert \
-            datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc) == \
-            self.test_task1.computed_end
-        assert len(self.test_task1.computed_resources) == 2
-        assert self.test_task1.computed_resources[0] in \
-            [self.test_user1, self.test_user2, self.test_user3,
-             self.test_user4, self.test_user5]
-        assert self.test_task1.computed_resources[1] in \
-            [self.test_user1, self.test_user2, self.test_user3,
-             self.test_user4, self.test_user5]
+    assert len(data["test_task2"].computed_resources) == 2
+    assert data["test_task2"].computed_resources[0] in possible_resources
+    assert data["test_task2"].computed_resources[1] in possible_resources
 
-        assert \
-            datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc) == \
-            self.test_task2.computed_start
-        assert \
-            datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc) == \
-            self.test_task2.computed_end
-        assert len(self.test_task2.computed_resources) == 2
-        assert self.test_task2.computed_resources[0] in \
-            [self.test_user1, self.test_user2, self.test_user3,
-             self.test_user4, self.test_user5]
-        assert self.test_task2.computed_resources[1] in \
-            [self.test_user1, self.test_user2, self.test_user3,
-             self.test_user4, self.test_user5]
 
-    def test_tasks_are_correctly_scheduled_when_compute_resources_is_True(self):
-        """testing if the tasks are correctly scheduled when the compute
-        resources is True
-        """
-        tjp_sched = TaskJugglerScheduler(compute_resources=True)
-        from stalker import Studio
-        test_studio = Studio(
-            name='Test Studio',
-            now=datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
-        )
-        test_studio.start = \
-            datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
-        test_studio.end = datetime.datetime(2013, 4, 30, 0, 0, tzinfo=pytz.utc)
-        test_studio.daily_working_hours = 9
-        from stalker.db.session import DBSession
-        DBSession.add(test_studio)
+def test_tasks_are_correctly_scheduled_if_compute_resources_is_False(
+    setup_tsk_juggler_scheduler_db_tests,
+):
+    """tasks are correctly scheduled if the compute_resources is False."""
+    data = setup_tsk_juggler_scheduler_db_tests
+    tjp_sched = TaskJugglerScheduler(compute_resources=False)
+    test_studio = Studio(
+        name="Test Studio", now=datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
+    )
+    test_studio.start = datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
+    test_studio.end = datetime.datetime(2013, 4, 30, 0, 0, tzinfo=pytz.utc)
+    test_studio.daily_working_hours = 9
+    DBSession.add(test_studio)
 
-        tjp_sched.studio = test_studio
-        tjp_sched.schedule()
-        DBSession.commit()
+    tjp_sched.studio = test_studio
+    tjp_sched.schedule()
+    DBSession.commit()
 
-        possible_resources = [
-            self.test_user1, self.test_user2, self.test_user3, self.test_user4,
-            self.test_user5
-        ]
+    # check if the task and project timings are all adjusted
+    assert (
+        datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc)
+        == data["test_proj1"].computed_start
+    )
+    assert (
+        datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc)
+        == data["test_proj1"].computed_end
+    )
 
-        # check if the task and project timings are all adjusted
-        assert \
-            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc) == \
-            self.test_proj1.computed_start
-        assert \
-            datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc) == \
-            self.test_proj1.computed_end
+    assert (
+        datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc)
+        == data["test_task1"].computed_start
+    )
+    assert (
+        datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc)
+        == data["test_task1"].computed_end
+    )
+    assert len(data["test_task1"].computed_resources) == 2
+    assert data["test_task1"].computed_resources[0] in [
+        data["test_user1"],
+        data["test_user2"],
+        data["test_user3"],
+        data["test_user4"],
+        data["test_user5"],
+    ]
+    assert data["test_task1"].computed_resources[1] in [
+        data["test_user1"],
+        data["test_user2"],
+        data["test_user3"],
+        data["test_user4"],
+        data["test_user5"],
+    ]
 
-        assert \
-            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc) == \
-            self.test_task1.computed_start
-        assert \
-            datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc) == \
-            self.test_task1.computed_end
-        assert len(self.test_task1.computed_resources) == 2
-        assert self.test_task1.computed_resources[0] in possible_resources
-        assert self.test_task1.computed_resources[1] in possible_resources
+    assert (
+        datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc)
+        == data["test_task2"].computed_start
+    )
+    assert (
+        datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc)
+        == data["test_task2"].computed_end
+    )
+    assert len(data["test_task2"].computed_resources) == 2
+    assert data["test_task2"].computed_resources[0] in [
+        data["test_user1"],
+        data["test_user2"],
+        data["test_user3"],
+        data["test_user4"],
+        data["test_user5"],
+    ]
+    assert data["test_task2"].computed_resources[1] in [
+        data["test_user1"],
+        data["test_user2"],
+        data["test_user3"],
+        data["test_user4"],
+        data["test_user5"],
+    ]
 
-        assert \
-            datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc) == \
-            self.test_task2.computed_start
-        assert \
-            datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc) == \
-            self.test_task2.computed_end
-        assert self.test_task2.computed_resources[0] in possible_resources
-        assert self.test_task2.computed_resources[1] in possible_resources
 
-    def test_tasks_of_given_projects_are_correctly_scheduled(self):
-        """testing if the tasks of given projects are correctly scheduled
-        """
-        # create a dummy project
-        # create a dummy Project to schedule
-        from stalker import Project
-        dummy_project = Project(
-            name='Dummy Project',
-            code='DP',
-            repository=self.test_repo
-        )
+def test_tasks_are_correctly_scheduled_if_compute_resources_is_True(
+    setup_tsk_juggler_scheduler_db_tests,
+):
+    """tasks are correctly scheduled if the compute_resources is True."""
+    data = setup_tsk_juggler_scheduler_db_tests
+    tjp_sched = TaskJugglerScheduler(compute_resources=True)
+    test_studio = Studio(
+        name="Test Studio", now=datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
+    )
+    test_studio.start = datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
+    test_studio.end = datetime.datetime(2013, 4, 30, 0, 0, tzinfo=pytz.utc)
+    test_studio.daily_working_hours = 9
+    DBSession.add(test_studio)
 
-        from stalker import Task
-        dt1 = Task(
-            name='Dummy Task 1',
-            project=dummy_project,
-            schedule_timing=4,
-            schedule_unit='h',
-            resources=[self.test_user1]
-        )
+    tjp_sched.studio = test_studio
+    tjp_sched.schedule()
+    DBSession.commit()
 
-        dt2 = Task(
-            name='Dummy Task 2',
-            project=dummy_project,
-            schedule_timing=4,
-            schedule_unit='h',
-            resources=[self.test_user2]
-        )
-        from stalker.db.session import DBSession
-        DBSession.add_all([dummy_project, dt1, dt2])
-        DBSession.commit()
+    possible_resources = [
+        data["test_user1"],
+        data["test_user2"],
+        data["test_user3"],
+        data["test_user4"],
+        data["test_user5"],
+    ]
 
-        tjp_sched = TaskJugglerScheduler(compute_resources=True,
-                                         projects=[dummy_project])
-        from stalker import Studio
-        test_studio = Studio(
-            name='Test Studio',
-            now=datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
-        )
-        test_studio.start = \
-            datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
-        test_studio.end = datetime.datetime(2013, 4, 30, 0, 0, tzinfo=pytz.utc)
-        test_studio.daily_working_hours = 9
-        DBSession.add(test_studio)
-        DBSession.commit()
+    # check if the task and project timings are all adjusted
+    assert (
+        datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc)
+        == data["test_proj1"].computed_start
+    )
+    assert (
+        datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc)
+        == data["test_proj1"].computed_end
+    )
 
-        tjp_sched.studio = test_studio
-        tjp_sched.schedule()
-        DBSession.commit()
+    assert (
+        datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc)
+        == data["test_task1"].computed_start
+    )
+    assert (
+        datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc)
+        == data["test_task1"].computed_end
+    )
+    assert len(data["test_task1"].computed_resources) == 2
+    assert data["test_task1"].computed_resources[0] in possible_resources
+    assert data["test_task1"].computed_resources[1] in possible_resources
 
-        # check if the task and project timings are all adjusted
-        assert self.test_proj1.computed_start is None
-        assert self.test_proj1.computed_end is None
+    assert (
+        datetime.datetime(2013, 4, 18, 16, 0, tzinfo=pytz.utc)
+        == data["test_task2"].computed_start
+    )
+    assert (
+        datetime.datetime(2013, 4, 24, 10, 0, tzinfo=pytz.utc)
+        == data["test_task2"].computed_end
+    )
+    assert data["test_task2"].computed_resources[0] in possible_resources
+    assert data["test_task2"].computed_resources[1] in possible_resources
 
-        assert self.test_task1.computed_start is None
-        assert self.test_task1.computed_end is None
-        assert self.test_task1.computed_resources == \
-            [self.test_user1, self.test_user2]
 
-        assert self.test_task2.computed_start is None
-        assert self.test_task2.computed_end is None
-        assert self.test_task2.computed_resources == \
-            [self.test_user1, self.test_user2]
+def test_tasks_of_given_projects_are_correctly_scheduled(
+    setup_tsk_juggler_scheduler_db_tests,
+):
+    """tasks of given projects are correctly scheduled."""
+    data = setup_tsk_juggler_scheduler_db_tests
+    # create a dummy project
+    # create a dummy Project to schedule
+    dummy_project = Project(
+        name="Dummy Project", code="DP", repository=data["test_repo"]
+    )
 
-        assert \
-            dt1.computed_start == \
-            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc)
-        assert \
-            dt1.computed_end == \
-            datetime.datetime(2013, 4, 16, 13, 0, tzinfo=pytz.utc)
+    dt1 = Task(
+        name="Dummy Task 1",
+        project=dummy_project,
+        schedule_timing=4,
+        schedule_unit="h",
+        resources=[data["test_user1"]],
+    )
 
-        assert \
-            dt2.computed_start == \
-            datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc)
-        assert \
-            dt2.computed_end == \
-            datetime.datetime(2013, 4, 16, 13, 0, tzinfo=pytz.utc)
+    dt2 = Task(
+        name="Dummy Task 2",
+        project=dummy_project,
+        schedule_timing=4,
+        schedule_unit="h",
+        resources=[data["test_user2"]],
+    )
+    DBSession.add_all([dummy_project, dt1, dt2])
+    DBSession.commit()
 
-    def test_projects_argument_is_skipped(self):
-        """testing if the projects attribute will be an empty list if the
-        projects argument is skipped
-        """
-        tjp_sched = TaskJugglerScheduler(compute_resources=True)
-        assert tjp_sched.projects == []
+    tjp_sched = TaskJugglerScheduler(compute_resources=True, projects=[dummy_project])
+    test_studio = Studio(
+        name="Test Studio", now=datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
+    )
+    test_studio.start = datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
+    test_studio.end = datetime.datetime(2013, 4, 30, 0, 0, tzinfo=pytz.utc)
+    test_studio.daily_working_hours = 9
+    DBSession.add(test_studio)
+    DBSession.commit()
 
-    def test_projects_argument_is_None(self):
-        """testing if the projects attribute will be an empty list if the
-        projects argument is None
-        """
-        tjp_sched = TaskJugglerScheduler(compute_resources=True, projects=None)
-        assert tjp_sched.projects == []
+    tjp_sched.studio = test_studio
+    tjp_sched.schedule()
+    DBSession.commit()
 
-    def test_projects_attribute_is_set_to_None(self):
-        """testing if the projects attribute will be an empty list if it is set
-        to None
-        """
-        tjp_sched = TaskJugglerScheduler(compute_resources=True)
-        tjp_sched.projects = None
-        assert tjp_sched.projects == []
+    # check if the task and project timings are all adjusted
+    assert data["test_proj1"].computed_start is None
+    assert data["test_proj1"].computed_end is None
 
-    def test_projects_argument_is_not_a_list(self):
-        """testing if a TypeError will be raised when the projects argument
-        value is not a list
-        """
-        with pytest.raises(TypeError) as cm:
-            TaskJugglerScheduler(compute_resources=True,
-                                 projects='not a list of projects')
+    assert data["test_task1"].computed_start is None
+    assert data["test_task1"].computed_end is None
+    assert data["test_task1"].computed_resources == [
+        data["test_user1"],
+        data["test_user2"],
+    ]
 
-        assert str(cm.value) == \
-            'TaskJugglerScheduler.projects should be a list of ' \
-            'stalker.models.project.Project instances, not str'
+    assert data["test_task2"].computed_start is None
+    assert data["test_task2"].computed_end is None
+    assert data["test_task2"].computed_resources == [
+        data["test_user1"],
+        data["test_user2"],
+    ]
 
-    def test_projects_attribute_is_not_a_list(self):
-        """testing if a TypeError will be raised when the projects attribute
-        is set to something else than a list
-        """
-        tjp = TaskJugglerScheduler(compute_resources=True)
-        with pytest.raises(TypeError) as cm:
-            tjp.projects = 'not a list of projects'
+    assert dt1.computed_start == datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc)
+    assert dt1.computed_end == datetime.datetime(2013, 4, 16, 13, 0, tzinfo=pytz.utc)
 
-        assert str(cm.value) == \
-            'TaskJugglerScheduler.projects should be a list of ' \
-            'stalker.models.project.Project instances, not str'
+    assert dt2.computed_start == datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc)
+    assert dt2.computed_end == datetime.datetime(2013, 4, 16, 13, 0, tzinfo=pytz.utc)
 
-    def test_projects_argument_is_not_a_list_of_all_projects(self):
-        """testing if a TypeError will be raised when the elements in the
-        projects argument is not all Project instances
-        """
-        with pytest.raises(TypeError) as cm:
-            TaskJugglerScheduler(compute_resources=True,
-                                 projects=['not', 1, [], 'of', 'projects'])
 
-        assert str(cm.value) == \
-            'TaskJugglerScheduler.projects should be a list of ' \
-            'stalker.models.project.Project instances, not str'
+def test_projects_argument_is_skipped(setup_tsk_juggler_scheduler_db_tests):
+    """projects attribute an empty list if the projects argument is skipped."""
+    tjp_sched = TaskJugglerScheduler(compute_resources=True)
+    assert tjp_sched.projects == []
 
-    def test_projects_attribute_is_not_list_of_all_projects(self):
-        """testing if a TypeError will be raised when the elements in the
-        projects attribute is not all Project instances
-        """
-        tjp = TaskJugglerScheduler(compute_resources=True)
-        with pytest.raises(TypeError) as cm:
-            tjp.projects = ['not', 1, [], 'of', 'projects']
 
-        assert str(cm.value) == \
-            'TaskJugglerScheduler.projects should be a list of ' \
-            'stalker.models.project.Project instances, not str'
+def test_projects_argument_is_None(setup_tsk_juggler_scheduler_db_tests):
+    """projects attribute an empty list if the projects argument is None."""
+    tjp_sched = TaskJugglerScheduler(compute_resources=True, projects=None)
+    assert tjp_sched.projects == []
 
-    def test_projects_argument_is_working_properly(self):
-        """testing if the projects argument value is correctly passed to the
-        projects attribute
-        """
-        from stalker import Project
-        dp1 = Project(
-            name='Dummy Project',
-            code='DP',
-            repository=self.test_repo
-        )
 
-        dp2 = Project(
-            name='Dummy Project',
-            code='DP',
-            repository=self.test_repo
-        )
+def test_projects_attribute_is_set_to_None(setup_tsk_juggler_scheduler_db_tests):
+    """projects attribute an empty list if it is set to None."""
+    tjp_sched = TaskJugglerScheduler(compute_resources=True)
+    tjp_sched.projects = None
+    assert tjp_sched.projects == []
 
-        tjp = TaskJugglerScheduler(compute_resources=True,
-                                   projects=[dp1, dp2])
 
-        assert tjp.projects == [dp1, dp2]
+def test_projects_argument_is_not_a_list(setup_tsk_juggler_scheduler_db_tests):
+    """TypeError raised if the projects argument value is not a list."""
+    with pytest.raises(TypeError) as cm:
+        TaskJugglerScheduler(compute_resources=True, projects="not a list of projects")
 
-    def test_projects_attribute_is_working_properly(self):
-        """testing if the projects attribute is working properly
-        """
-        from stalker import Project
-        dp1 = Project(
-            name='Dummy Project',
-            code='DP',
-            repository=self.test_repo
+    assert (
+        str(cm.value) == "TaskJugglerScheduler.projects should be a list of "
+        "stalker.models.project.Project instances, not str"
+    )
+
+
+def test_projects_attribute_is_not_a_list(setup_tsk_juggler_scheduler_db_tests):
+    """TypeError raised if the projects attribute not a list."""
+    tjp = TaskJugglerScheduler(compute_resources=True)
+    with pytest.raises(TypeError) as cm:
+        tjp.projects = "not a list of projects"
+
+    assert (
+        str(cm.value) == "TaskJugglerScheduler.projects should be a list of "
+        "stalker.models.project.Project instances, not str"
+    )
+
+
+def test_projects_argument_is_not_a_list_of_all_projects():
+    """TypeError raised if the items in the projects arg are not all Projects."""
+    with pytest.raises(TypeError) as cm:
+        TaskJugglerScheduler(
+            compute_resources=True, projects=["not", 1, [], "of", "projects"]
         )
 
-        dp2 = Project(
-            name='Dummy Project',
-            code='DP',
-            repository=self.test_repo
-        )
+    assert (
+        str(cm.value) == "TaskJugglerScheduler.projects should be a list of "
+        "stalker.models.project.Project instances, not str"
+    )
 
-        tjp = TaskJugglerScheduler(compute_resources=True)
-        tjp.projects = [dp1, dp2]
 
-        assert tjp.projects == [dp1, dp2]
+def test_projects_attribute_is_not_list_of_all_projects():
+    """TypeError raised if the items in the projects attr is not all Projects."""
+    tjp = TaskJugglerScheduler(compute_resources=True)
+    with pytest.raises(TypeError) as cm:
+        tjp.projects = ["not", 1, [], "of", "projects"]
 
-    def test_tjp_file_content_is_correct_2(self):
-        """testing if the tjp file content is correct
-        """
-        tjp_sched = TaskJugglerScheduler()
-        from stalker import Studio
-        test_studio = Studio(
-            name='Test Studio',
-            timing_resolution=datetime.timedelta(minutes=30)
-        )
-        test_studio.daily_working_hours = 9
+    assert (
+        str(cm.value) == "TaskJugglerScheduler.projects should be a list of "
+        "stalker.models.project.Project instances, not str"
+    )
 
-        test_studio.id = 564
-        test_studio.start = \
-            datetime.datetime(2013, 4, 16, 0, 7, tzinfo=pytz.utc)
-        test_studio.end = \
-            datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc)
-        test_studio.now = \
-            datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
-        tjp_sched.studio = test_studio
 
-        tjp_sched._create_tjp_file()
-        tjp_sched._create_tjp_file_content()
+def test_projects_argument_is_working_properly(setup_tsk_juggler_scheduler_db_tests):
+    """projects argument value is correctly passed to the projects attribute."""
+    data = setup_tsk_juggler_scheduler_db_tests
+    dp1 = Project(name="Dummy Project", code="DP", repository=data["test_repo"])
+    dp2 = Project(name="Dummy Project", code="DP", repository=data["test_repo"])
+    tjp = TaskJugglerScheduler(compute_resources=True, projects=[dp1, dp2])
+    assert tjp.projects == [dp1, dp2]
 
-        import jinja2
 
-        expected_tjp_template = jinja2.Template(
-            """# Generated By Stalker v{{stalker.__version__}}
+def test_projects_attribute_is_working_properly(setup_tsk_juggler_scheduler_db_tests):
+    """projects attribute is working properly."""
+    data = setup_tsk_juggler_scheduler_db_tests
+    dp1 = Project(name="Dummy Project", code="DP", repository=data["test_repo"])
+    dp2 = Project(name="Dummy Project", code="DP", repository=data["test_repo"])
+    tjp = TaskJugglerScheduler(compute_resources=True)
+    tjp.projects = [dp1, dp2]
+    assert tjp.projects == [dp1, dp2]
+
+
+def test_tjp_file_content_is_correct_2(setup_tsk_juggler_scheduler_db_tests):
+    """tjp file content is correct."""
+    data = setup_tsk_juggler_scheduler_db_tests
+    tjp_sched = TaskJugglerScheduler()
+    test_studio = Studio(
+        name="Test Studio", timing_resolution=datetime.timedelta(minutes=30)
+    )
+    test_studio.daily_working_hours = 9
+    test_studio.id = 564
+    test_studio.start = datetime.datetime(2013, 4, 16, 0, 7, tzinfo=pytz.utc)
+    test_studio.end = datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc)
+    test_studio.now = datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
+    tjp_sched.studio = test_studio
+
+    tjp_sched._create_tjp_file()
+    tjp_sched._create_tjp_file_content()
+
+    expected_tjp_template = jinja2.Template(
+        """# Generated By Stalker v{{stalker.__version__}}
         
 project Studio_564 "Studio_564" 2013-04-16 - 2013-06-30 {
     timingresolution 30min
@@ -751,27 +747,27 @@ taskreport breakdown "{{csv_path}}"{
     formats csv
     timeformat "%Y-%m-%d-%H:%M"
     columns id, start, end
-}""")
-        import stalker
-        expected_tjp_content = expected_tjp_template.render(
-            {
-                'stalker': stalker,
-                'studio': test_studio,
-                'csv_path': tjp_sched.temp_file_name,
-                'user1': self.test_user1,
-                'user2': self.test_user2,
-                'user3': self.test_user3,
-                'user4': self.test_user4,
-                'user5': self.test_user5,
-                'user6': self.test_user6,
-                'proj1': self.test_proj1,
-                'task1': self.test_task1,
-                'task2': self.test_task2,
-            }
-        )
+}"""
+    )
+    expected_tjp_content = expected_tjp_template.render(
+        {
+            "stalker": stalker,
+            "studio": test_studio,
+            "csv_path": tjp_sched.temp_file_name,
+            "user1": data["test_user1"],
+            "user2": data["test_user2"],
+            "user3": data["test_user3"],
+            "user4": data["test_user4"],
+            "user5": data["test_user5"],
+            "user6": data["test_user6"],
+            "proj1": data["test_proj1"],
+            "task1": data["test_task1"],
+            "task2": data["test_task2"],
+        }
+    )
 
-        self.maxDiff = None
-        tjp_content = tjp_sched.tjp_content
-        # print tjp_content
-        tjp_sched._clean_up()
-        assert tjp_content == expected_tjp_content
+    data["maxDiff"] = None
+    tjp_content = tjp_sched.tjp_content
+    # print tjp_content
+    tjp_sched._clean_up()
+    assert tjp_content == expected_tjp_content

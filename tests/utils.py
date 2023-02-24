@@ -1,29 +1,27 @@
 # -*- coding: utf-8 -*-
-"""Helper classes for testing
-"""
 import datetime
-import logging
 import os
+import platform
 import re
 import subprocess
-import unittest
 import uuid
-from subprocess import CalledProcessError
 
-from sqlalchemy.pool import NullPool
+from sqlalchemy.exc import OperationalError
+from sqlalchemy.orm import close_all_sessions
 
-import stalker
-from stalker import db, log
-from stalker.config import Config
+from stalker import log, defaults, User
+from stalker.db.declarative import Base
+from stalker.db.session import DBSession
 
-logger = logging.getLogger(__name__)
+logger = log.get_logger(__name__)
 logger.setLevel(log.logging_level)
+
 
 # {dialect}://{username}:{password}@{address}/{database_name}
 DB_REGEX = re.compile(
-    r"(?P<dialect>[\w]+)"
+    r"(?P<dialect>\w+)"
     r"://"
-    r"(?P<username>[\w]+)"
+    r"(?P<username>\w+)"
     r":"
     r"(?P<password>[\w\s#?!$%^&*\-]+)"
     r"@*"
@@ -42,7 +40,7 @@ def run_db_command(
     port=5432,
     username="postgres",
     password="postgres",
-    command=""
+    command="",
 ):
     """Run db command on a Postgres database.
 
@@ -76,9 +74,7 @@ def run_db_command(
     ]
 
     proc = subprocess.Popen(
-        psql_command,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
+        psql_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
     stdout_buffer = []
     stderr_buffer = []
@@ -139,7 +135,7 @@ def create_db(
         port=port,
         username=username,
         password=password,
-        command=command
+        command=command,
     )
     return database_url
 
@@ -148,8 +144,8 @@ def get_server_details_from_url(url):
     """Return database details from the given url.
 
     Args:
-        url (str): Database url in {dialect}://{user_name}:{password}@{address}/{database_name}
-            format.
+        url (str): Database url in
+            dialect}://{user_name}:{password}@{address}/{database_name} format.
 
     Returns:
         dict: Returns a dictionary with "dialect", "user_name", "password", "address",
@@ -202,7 +198,7 @@ def drop_db(
         password (str): The password, default is 'postgres'.
     """
     logger.debug("Dropping Database: {}".format(database_name))
-    command = "DROP   DATABASE {};".format(database_name)
+    command = "DROP DATABASE {};".format(database_name)
 
     run_db_command(
         database_name=database_name,
@@ -211,84 +207,8 @@ def drop_db(
         port=port,
         username=username,
         password=password,
-        command=command
+        command=command,
     )
-
-
-class UnitTestDBBase(unittest.TestCase):
-    """the base for Stalker Pyramid Views unit tests"""
-
-    def __init__(self, *args, **kwargs):
-        super(UnitTestDBBase, self).__init__(*args, **kwargs)
-        self.config = {}
-        self.database_url = None
-
-    def setUp(self):
-        """setup once"""
-        # create a new database for this test only
-        while True:
-            try:
-                self.database_url = create_random_db()
-            except CalledProcessError:
-                # in very rare cases the create_random_db generates an already
-                # existing database name
-                # call it again
-                pass
-            else:
-                break
-
-        # update the config
-        self.config["sqlalchemy.url"] = self.database_url
-        self.config["sqlalchemy.poolclass"] = NullPool
-
-        try:
-            os.environ.pop(Config.env_key)
-        except KeyError:
-            # already removed
-            pass
-
-        # regenerate the defaults
-        stalker.defaults = Config()
-        stalker.defaults.timing_resolution = datetime.timedelta(hours=1)
-
-        # init database
-        # remove anything beforehand
-        db.setup(self.config)
-        db.init()
-
-    def tearDown(self):
-        """clean up the test"""
-        from stalker import defaults
-        from stalker.db.declarative import Base
-        from stalker.db.session import DBSession
-
-        # clean up test database
-        DBSession.rollback()
-        connection = DBSession.connection()
-        engine = connection.engine
-        connection.close()
-
-        from sqlalchemy.exc import OperationalError
-
-        try:
-            Base.metadata.drop_all(engine, checkfirst=True)
-            DBSession.remove()
-            DBSession.close_all()
-            db_kwargs = get_server_details_from_url(self.database_url)
-            drop_db(**db_kwargs)
-        except OperationalError:
-            pass
-        finally:
-            defaults.timing_resolution = datetime.timedelta(hours=1)
-
-    @property
-    def admin(self):
-        """returns the admin user"""
-        from stalker import defaults, User
-        from stalker.db.session import DBSession
-
-        with DBSession.no_autoflush:
-            return User.query.filter(User.login == defaults.admin_login).first()
 
 
 class PlatformPatcher(object):
@@ -299,9 +219,7 @@ class PlatformPatcher(object):
         self.original = None
 
     def patch(self, desired_result):
-        """ """
-        import platform
-
+        """Patch platform."""
         self.original = platform.system
 
         def f():
@@ -312,6 +230,34 @@ class PlatformPatcher(object):
     def restore(self):
         """restores the given callable_"""
         if self.original:
-            import platform
-
             platform.system = self.original
+
+
+def tear_down_db(data):
+    """Utility function to tear a test setup down."""
+    # clean up test database
+    DBSession.rollback()
+    connection = DBSession.connection()
+    engine = connection.engine
+    connection.close()
+
+    try:
+        Base.metadata.drop_all(engine, checkfirst=True)
+        DBSession.remove()
+        close_all_sessions()
+        db_kwargs = get_server_details_from_url(data["database_url"])
+        drop_db(**db_kwargs)
+    except OperationalError:
+        pass
+    finally:
+        defaults.timing_resolution = datetime.timedelta(hours=1)
+
+
+def get_admin_user():
+    """Return admin user from database.
+
+    Returns:
+         stalker.User: The admin user
+    """
+    with DBSession.no_autoflush:
+        return User.query.filter(User.login == defaults.admin_login).first()

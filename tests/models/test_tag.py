@@ -1,33 +1,24 @@
 # -*- coding: utf-8 -*-
+"""Tests for the Tag class."""
 
 from stalker import Tag, SimpleEntity
 
 
 def test___auto_name__class_attribute_is_set_to_false():
-    """testing if the __auto_name__ class attribute is set to False for Tag
-    class
-    """
+    """__auto_name__ class attribute is set to False for Tag class."""
     assert Tag.__auto_name__ is False
 
 
 def test_tag_init():
-    """testing if tag inits properly
-    """
+    """tag inits properly."""
     # this should work without any error
-    tag = Tag(
-        name="a test tag",
-        description="this is a test tag"
-    )
+    tag = Tag(name="a test tag", description="this is a test tag")
     assert isinstance(tag, Tag)
 
 
 def test_equality():
-    """testing the equality of two Tags
-    """
-    kwargs = dict(
-        name="a test tag",
-        description="this is a test tag"
-    )
+    """equality of two Tags."""
+    kwargs = dict(name="a test tag", description="this is a test tag")
 
     simple_entity = SimpleEntity(**kwargs)
 
@@ -45,12 +36,8 @@ def test_equality():
 
 
 def test_inequality():
-    """testing the inequality of two Tags
-    """
-    kwargs = dict(
-        name="a test tag",
-        description="this is a test tag"
-    )
+    """inequality of two Tags."""
+    kwargs = dict(name="a test tag", description="this is a test tag")
 
     simple_entity = SimpleEntity(**kwargs)
 
@@ -68,11 +55,7 @@ def test_inequality():
 
 
 def test_plural_class_name():
-    """testing the plural name of Tag class
-    """
-    kwargs = dict(
-        name="a test tag",
-        description="this is a test tag"
-    )
+    """plural name of Tag class."""
+    kwargs = dict(name="a test tag", description="this is a test tag")
     test_tag = Tag(**kwargs)
     assert test_tag.plural_class_name == "Tags"

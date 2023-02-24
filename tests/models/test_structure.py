@@ -1,265 +1,220 @@
 # -*- coding: utf-8 -*-
-
-import unittest
+"""Tests for the Structure class."""
 
 import pytest
 
-from stalker import Structure
+from stalker import FilenameTemplate, Structure, Type
 
 
-class StructureTester(unittest.TestCase):
-    """tests the stalker.models.structure.Structure class
-    """
+@pytest.fixture(scope="function")
+def setup_structure_tests():
+    """stalker.models.structure.Structure class."""
+    data = dict()
+    vers_type = Type(name="Version", code="vers", target_entity_type="FilenameTemplate")
+    ref_type = Type(name="Reference", code="ref", target_entity_type="FilenameTemplate")
+    # type templates
+    data["asset_template"] = FilenameTemplate(
+        name="Test Asset Template", target_entity_type="Asset", type=vers_type
+    )
+    data["shot_template"] = FilenameTemplate(
+        name="Test Shot Template", target_entity_type="Shot", type=vers_type
+    )
+    data["reference_template"] = FilenameTemplate(
+        name="Test Reference Template", target_entity_type="Link", type=ref_type
+    )
+    data["test_templates"] = [
+        data["asset_template"],
+        data["shot_template"],
+        data["reference_template"],
+    ]
+    data["test_templates2"] = [data["asset_template"]]
+    data["custom_template"] = "a custom template"
+    data["test_type"] = Type(
+        name="Commercial Structure",
+        code="comm",
+        target_entity_type="Structure",
+    )
+    # keyword arguments
+    data["kwargs"] = {
+        "name": "Test Structure",
+        "description": "This is a test structure",
+        "templates": data["test_templates"],
+        "custom_template": data["custom_template"],
+        "type": data["test_type"],
+    }
+    data["test_structure"] = Structure(**data["kwargs"])
+    return data
 
-    def setUp(self):
-        """setting up the tests
-        """
-        super(StructureTester, self).setUp()
 
-        from stalker import Type
-        vers_type = Type(
-            name="Version",
-            code='vers',
-            target_entity_type="FilenameTemplate"
-        )
+def test___auto_name__class_attribute_is_set_to_false():
+    """__auto_name__ class attribute is set to False for Structure class."""
+    assert Structure.__auto_name__ is False
 
-        ref_type = Type(
-            name="Reference",
-            code='ref',
-            target_entity_type="FilenameTemplate"
-        )
 
-        # type templates
-        from stalker import FilenameTemplate
-        self.asset_template = FilenameTemplate(
-            name="Test Asset Template",
-            target_entity_type="Asset",
-            type=vers_type
-        )
+def test_custom_template_argument_can_be_skipped(setup_structure_tests):
+    """custom_template argument can be skipped."""
+    data = setup_structure_tests
+    data["kwargs"].pop("custom_template")
+    new_structure = Structure(**data["kwargs"])
+    assert new_structure.custom_template == ""
 
-        self.shot_template = FilenameTemplate(
-            name="Test Shot Template",
-            target_entity_type="Shot",
-            type=vers_type
-        )
 
-        self.reference_template = FilenameTemplate(
-            name="Test Reference Template",
-            target_entity_type="Link",
-            type=ref_type
-        )
+def test_custom_template_argument_is_none(setup_structure_tests):
+    """no error raised if the custom_template argument is None."""
+    data = setup_structure_tests
+    data["kwargs"]["custom_template"] = None
+    new_structure = Structure(**data["kwargs"])
+    assert new_structure.custom_template == ""
 
-        self.test_templates = [self.asset_template,
-                               self.shot_template,
-                               self.reference_template]
 
-        self.test_templates2 = [self.asset_template]
+def test_custom_template_argument_is_empty_string(setup_structure_tests):
+    """no error raised if the custom_template argument is an empty string."""
+    data = setup_structure_tests
+    data["kwargs"]["custom_template"] = ""
+    new_structure = Structure(**data["kwargs"])
+    assert new_structure.custom_template == ""
 
-        self.custom_template = "a custom template"
 
-        self.test_type = Type(
-            name="Commercial Structure",
-            code='comm',
-            target_entity_type='Structure',
-        )
+def test_custom_template_argument_is_not_a_string(setup_structure_tests):
+    """TypeError raised if the custom_template argument is not a string."""
+    data = setup_structure_tests
+    data["kwargs"]["custom_template"] = ["this is not a string"]
+    with pytest.raises(TypeError) as cm:
+        Structure(**data["kwargs"])
 
-        # keyword arguments
-        self.kwargs = {
-            "name": "Test Structure",
-            "description": "This is a test structure",
-            "templates": self.test_templates,
-            "custom_template": self.custom_template,
-            "type": self.test_type,
-        }
-        self.test_structure = Structure(**self.kwargs)
+    assert str(cm.value) == "Structure.custom_template should be a string not list"
 
-    def test___auto_name__class_attribute_is_set_to_False(self):
-        """testing if the __auto_name__ class attribute is set to False for
-        Structure class
-        """
-        assert Structure.__auto_name__ is False
 
-    def test_custom_template_argument_can_be_skipped(self):
-        """testing if the custom_template argument can be skipped
-        """
-        self.kwargs.pop("custom_template")
-        new_structure = Structure(**self.kwargs)
-        assert new_structure.custom_template == ""
+def test_custom_template_attribute_is_not_a_string(setup_structure_tests):
+    """TypeError raised if the custom_template attribute is not a string."""
+    data = setup_structure_tests
+    with pytest.raises(TypeError) as cm:
+        data["test_structure"].custom_template = ["this is not a string"]
+    assert str(cm.value) == "Structure.custom_template should be a string not list"
 
-    def test_custom_template_argument_is_None(self):
-        """testing if no error will be raised when the custom_template argument
-        is None.
-        """
-        self.kwargs["custom_template"] = None
-        new_structure = Structure(**self.kwargs)
-        assert new_structure.custom_template == ""
 
-    def test_custom_template_argument_is_empty_string(self):
-        """testing if no error will be raised when the custom_template argument
-        is an empty string
-        """
-        self.kwargs["custom_template"] = ""
-        new_structure = Structure(**self.kwargs)
-        assert new_structure.custom_template == ""
+def test_templates_argument_can_be_skipped(setup_structure_tests):
+    """no error raised if the templates argument is skipped."""
+    data = setup_structure_tests
+    data["kwargs"].pop("templates")
+    new_structure = Structure(**data["kwargs"])
+    assert isinstance(new_structure, Structure)
 
-    def test_custom_template_argument_is_not_a_string(self):
-        """testing if a TypeError will be raised when the custom_template
-        argument is not a string
-        """
-        self.kwargs['custom_template'] = ["this is not a string"]
-        with pytest.raises(TypeError) as cm:
-            Structure(**self.kwargs)
 
-        assert str(cm.value) == \
-            'Structure.custom_template should be a string not list'
+def test_templates_argument_can_be_none(setup_structure_tests):
+    """no error raised if the templates argument is None."""
+    data = setup_structure_tests
+    data["kwargs"]["templates"] = None
+    new_structure = Structure(**data["kwargs"])
+    assert isinstance(new_structure, Structure)
 
-    def test_custom_template_attribute_is_not_a_string(self):
-        """testing if a TypeError will be raised when the custom_template
-        attribute is not a string
-        """
-        with pytest.raises(TypeError) as cm:
-            self.test_structure.custom_template = ['this is not a string']
 
-        assert str(cm.value) == \
-            'Structure.custom_template should be a string not list'
+def test_templates_attribute_cannot_be_set_to_none(setup_structure_tests):
+    """TypeError raised if the templates attribute is set to None."""
+    data = setup_structure_tests
+    with pytest.raises(TypeError) as cm:
+        data["test_structure"].templates = None
+    assert str(cm.value) == "Incompatible collection type: None is not list-like"
 
-    def test_templates_argument_can_be_skipped(self):
-        """testing if no error will be raised when the templates argument is
-        skipped
-        """
-        self.kwargs.pop("templates")
-        new_structure = Structure(**self.kwargs)
-        assert isinstance(new_structure, Structure)
 
-    def test_templates_argument_can_be_None(self):
-        """testing if no error will be raised when the templates argument is
-        None
-        """
-        self.kwargs["templates"] = None
-        new_structure = Structure(**self.kwargs)
-        assert isinstance(new_structure, Structure)
+def test_templates_argument_only_accepts_list(setup_structure_tests):
+    """TypeError raised if the given templates argument is not a list."""
+    data = setup_structure_tests
+    data["kwargs"]["templates"] = 1
+    with pytest.raises(TypeError) as cm:
+        Structure(**data["kwargs"])
+    assert str(cm.value) == "Incompatible collection type: int is not list-like"
 
-    def test_templates_attribute_cannot_be_set_to_None(self):
-        """testing if a TypeError will be raised when the templates attribute
-        is set to None
-        """
-        with pytest.raises(TypeError) as cm:
-            self.test_structure.templates = None
 
-        assert str(cm.value) == \
-            'Incompatible collection type: None is not list-like'
+def test_templates_attribute_only_accepts_list_1(setup_structure_tests):
+    """TypeError raised if the templates attr is set to none list."""
+    data = setup_structure_tests
+    with pytest.raises(TypeError) as cm:
+        data["test_structure"].templates = 1.121
+    assert str(cm.value) == "Incompatible collection type: float is not list-like"
 
-    def test_templates_argument_only_accepts_list(self):
-        """testing if a TypeError will be raised when the given templates
-        argument is not a list
-        """
-        self.kwargs["templates"] = 1
-        with pytest.raises(TypeError) as cm:
-            Structure(**self.kwargs)
 
-        assert str(cm.value) == \
-            'Incompatible collection type: int is not list-like'
+def test_templates_attribute_is_working_properly(setup_structure_tests):
+    """templates attribute is working properly."""
+    data = setup_structure_tests
+    # test the correct value
+    data["test_structure"].templates = data["test_templates"]
+    assert data["test_structure"].templates == data["test_templates"]
 
-    def test_templates_attribute_only_accepts_list_1(self):
-        """testing if a TypeError will be raised when the templates attribute
-        is tried to be set to an object which is not a list instance.
-        """
-        with pytest.raises(TypeError) as cm:
-            self.test_structure.templates = 1.121
 
-        assert str(cm.value) == \
-            'Incompatible collection type: float is not list-like'
+def test_templates_argument_accepts_only_list_of_filename_template_instances(
+    setup_structure_tests,
+):
+    """TypeError raised if the templates arg is a list of none FilenameTemplate."""
+    data = setup_structure_tests
+    test_value = [1, 1.2, "a string"]
+    data["kwargs"]["templates"] = test_value
+    with pytest.raises(TypeError) as cm:
+        Structure(**data["kwargs"])
+    assert str(cm.value) == (
+        "All the elements in the Structure.templates should be a "
+        "stalker.models.template.FilenameTemplate instance not int"
+    )
 
-    def test_templates_attribute_is_working_properly(self):
-        """testing if templates attribute is working properly
-        """
-        # test the correct value
-        self.test_structure.templates = self.test_templates
-        assert self.test_structure.templates == self.test_templates
 
-    def test_templates_argument_accepts_only_list_of_FilenameTemplate_instances(self):
-        """testing if a TypeError will be raised when the templates argument is
-        a list but the elements are not all instances of FilenameTemplate
-        class.
-        """
-        test_value = [1, 1.2, "a string"]
-        self.kwargs["templates"] = test_value
-        with pytest.raises(TypeError) as cm:
-            Structure(**self.kwargs)
+def test_templates_argument_is_working_properly(setup_structure_tests):
+    """templates argument value is correctly passed to the templates attribute."""
+    data = setup_structure_tests
+    # test the correct value
+    data["kwargs"]["templates"] = data["test_templates"]
+    new_structure = Structure(**data["kwargs"])
+    assert new_structure.templates == data["test_templates"]
 
-        assert str(cm.value) == \
-            'All the elements in the Structure.templates should be a ' \
-            'stalker.models.template.FilenameTemplate instance not int'
 
-    def test_templates_argument_is_working_properly(self):
-        """testing if the templates argument value is correctly passed to the
-        templates attribute
-        """
-        # test the correct value
-        self.kwargs["templates"] = self.test_templates
-        new_structure = Structure(**self.kwargs)
-        assert new_structure.templates ==self.test_templates
+def test_templates_attribute_accpets_only_list_of_filename_template_instances(
+    setup_structure_tests,
+):
+    """TypeError raised if the templates attr is a list of none FilenameTemplate."""
+    data = setup_structure_tests
+    test_value = [1, 1.2, "a string"]
+    with pytest.raises(TypeError) as cm:
+        data["test_structure"].templates = test_value
 
-    def test_templates_attribute_accpets_only_list_of_FilenameTemplate_instances(self):
-        """testing if a TypeError will be raised when the templates attribute
-        is a list but the elements are not all instances of FilenameTemplate
-        class.
-        """
-        test_value = [1, 1.2, "a string"]
-        with pytest.raises(TypeError) as cm:
-            self.test_structure.templates = test_value
+    assert str(cm.value) == (
+        "All the elements in the Structure.templates should be a "
+        "stalker.models.template.FilenameTemplate instance not int"
+    )
 
-        assert str(cm.value) == \
-            'All the elements in the Structure.templates should be a ' \
-            'stalker.models.template.FilenameTemplate instance not int'
 
-    def test___strictly_typed___is_False(self):
-        """testing if the __strictly_typed__ is False
-        """
-        assert Structure.__strictly_typed__ is False
+def test___strictly_typed___is_false():
+    """__strictly_typed__ is False."""
+    assert Structure.__strictly_typed__ is False
 
-    def test_equality_operator(self):
-        """testing equality of two Structure objects
-        """
-        new_structure2 = Structure(**self.kwargs)
 
-        self.kwargs["custom_template"] = "a test custom template"
-        new_structure3 = Structure(**self.kwargs)
+def test_equality_operator(setup_structure_tests):
+    """equality of two Structure objects."""
+    data = setup_structure_tests
+    new_structure2 = Structure(**data["kwargs"])
+    data["kwargs"]["custom_template"] = "a test custom template"
+    new_structure3 = Structure(**data["kwargs"])
+    data["kwargs"]["custom_template"] = data["test_structure"].custom_template
+    data["kwargs"]["templates"] = data["test_templates2"]
+    new_structure4 = Structure(**data["kwargs"])
+    assert data["test_structure"] == new_structure2
+    assert not data["test_structure"] == new_structure3
+    assert not data["test_structure"] == new_structure4
 
-        self.kwargs["custom_template"] = self.test_structure.custom_template
-        self.kwargs["templates"] = self.test_templates2
-        new_structure4 = Structure(**self.kwargs)
 
-        assert self.test_structure == new_structure2
-        assert not self.test_structure == new_structure3
-        assert not self.test_structure == new_structure4
+def test_inequality_operator(setup_structure_tests):
+    """inequality of two Structure objects."""
+    data = setup_structure_tests
+    new_structure2 = Structure(**data["kwargs"])
+    data["kwargs"]["custom_template"] = "a test custom template"
+    new_structure3 = Structure(**data["kwargs"])
+    data["kwargs"]["custom_template"] = data["test_structure"].custom_template
+    data["kwargs"]["templates"] = data["test_templates2"]
+    new_structure4 = Structure(**data["kwargs"])
+    assert not data["test_structure"] != new_structure2
+    assert data["test_structure"] != new_structure3
+    assert data["test_structure"] != new_structure4
 
-    def test_inequality_operator(self):
-        """testing inequality of two Structure objects
-        """
-        new_structure2 = Structure(**self.kwargs)
 
-        self.kwargs["custom_template"] = "a test custom template"
-        new_structure3 = Structure(**self.kwargs)
-
-        self.kwargs["custom_template"] = self.test_structure.custom_template
-        self.kwargs["templates"] = self.test_templates2
-        new_structure4 = Structure(**self.kwargs)
-
-        assert not self.test_structure != new_structure2
-        assert self.test_structure != new_structure3
-        assert self.test_structure != new_structure4
-
-    def test_plural_class_name(self):
-        """testing the plural name of Structure class
-        """
-        assert self.test_structure.plural_class_name == "Structures"
-
-    # def test_hash_value(self):
-    #     """testing if the hash value is correctly calculated
-    #     """
-    #     assert \
-    #         hash(self.test_structure) == \
-    #         hash(self.test_structure.id) +
-    #         2 * hash(self.test_structure.name) +
-    #         3 * hash(self.test_structure.entity_type)
+def test_plural_class_name(setup_structure_tests):
+    """plural name of Structure class."""
+    data = setup_structure_tests
+    assert data["test_structure"].plural_class_name == "Structures"

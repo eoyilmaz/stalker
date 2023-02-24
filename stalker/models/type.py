@@ -52,38 +52,38 @@ class Type(Entity, TargetEntityTypeMixin, CodeMixin):
     :param string target_entity_type: The string defining the target type of
       this :class:`.Type`.
     """
+
     __auto_name__ = False
     __tablename__ = "Types"
     __mapper_args__ = {"polymorphic_identity": "Type"}
-    type_id_local = Column("id", Integer, ForeignKey("Entities.id"),
-                           primary_key=True)
+    type_id_local = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
 
-    def __init__(self, name=None, code=None, target_entity_type=None,
-                 **kwargs):
-        kwargs['name'] = name
-        kwargs['target_entity_type'] = target_entity_type
+    def __init__(self, name=None, code=None, target_entity_type=None, **kwargs):
+        kwargs["name"] = name
+        kwargs["target_entity_type"] = target_entity_type
         super(Type, self).__init__(**kwargs)
         TargetEntityTypeMixin.__init__(self, **kwargs)
-        #CodeMixin.__init__(self, **kwargs)
+        # CodeMixin.__init__(self, **kwargs)
         self.code = code
 
     def __eq__(self, other):
-        """the equality operator
-        """
-        return super(Type, self).__eq__(other) and isinstance(other, Type) \
+        """the equality operator"""
+        return (
+            super(Type, self).__eq__(other)
+            and isinstance(other, Type)
             and self.target_entity_type == other.target_entity_type
+        )
 
     def __hash__(self):
-        """the overridden __hash__ method
-        """
+        """the overridden __hash__ method"""
         return super(Type, self).__hash__()
 
 
 class EntityType(Base):
-    """A simple class just to hold the registered class names in Stalker
-    """
-    __tablename__ = 'EntityTypes'
-    __table_args__ = ({"extend_existing": True})
+    """A simple class just to hold the registered class names in Stalker"""
+
+    __tablename__ = "EntityTypes"
+    __table_args__ = {"extend_existing": True}
 
     id = Column("id", Integer, primary_key=True)
     name = Column(String(128), nullable=False, unique=True)
@@ -93,11 +93,8 @@ class EntityType(Base):
     accepts_references = Column(Boolean, default=False)
 
     def __init__(
-            self,
-            name,
-            statusable=False,
-            schedulable=False,
-            accepts_references=False):
+        self, name, statusable=False, schedulable=False, accepts_references=False
+    ):
         self.name = name
         self.statusable = statusable
         self.schedulable = schedulable

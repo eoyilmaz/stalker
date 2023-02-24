@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Test stalker.testing module."""
+"""stalker.testing module."""
 
 import pytest
-from stalker import testing
+from tests.utils import get_server_details_from_url
 
 
 @pytest.mark.parametrize(
@@ -33,5 +33,5 @@ from stalker import testing
     ],
 )
 def test_get_server_details_from_url(url, expected):
-    """test get_server_details_from_url."""
-    assert testing.get_server_details_from_url(url) == expected
+    """get_server_details_from_url."""
+    assert get_server_details_from_url(url) == expected

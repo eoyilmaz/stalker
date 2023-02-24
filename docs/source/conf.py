@@ -18,6 +18,7 @@
 
 import os
 import sys
+
 # sys.path.insert(0, os.path.abspath('.'))
 
 # -- General configuration ------------------------------------------------
@@ -30,40 +31,40 @@ import sys
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.todo',
-    'sphinx.ext.coverage',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.githubpages',
-    'sphinx.ext.graphviz',
-    'sphinx.ext.inheritance_diagram',
+    "sphinx.ext.autodoc",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.todo",
+    "sphinx.ext.coverage",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.githubpages",
+    "sphinx.ext.graphviz",
+    "sphinx.ext.inheritance_diagram",
     # 'sphinx.ext.imgmath',
-    'sphinx.ext.mathjax',
-    'sphinx.ext.ifconfig'
+    "sphinx.ext.mathjax",
+    "sphinx.ext.ifconfig",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = ".rst"
 
 # The encoding of source files.
 #
 # source_encoding = 'utf-8-sig'
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = "index"
 
 # General information about the project.
-project = u'Stalker'
-copyright = u'2009-2016, Erkan Ozgur Yilmaz'
-author = u'Erkan Ozgur Yilmaz'
+project = "Stalker"
+copyright = "2009-2016, Erkan Ozgur Yilmaz"
+author = "Erkan Ozgur Yilmaz"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -74,7 +75,7 @@ author = u'Erkan Ozgur Yilmaz'
 # find stalkers path
 dirName = os.path.dirname(__file__)
 modulePath = os.path.sep.join(dirName.split(os.path.sep)[:-2])
-sys.path.append( modulePath )
+sys.path.append(modulePath)
 import stalker
 
 version = stalker.__version__
@@ -100,7 +101,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ['build', 'templates']
+exclude_patterns = ["build", "templates"]
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -122,7 +123,7 @@ exclude_patterns = ['build', 'templates']
 # show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = "sphinx"
 
 # A list of ignored prefixes for module index sorting.
 # modindex_common_prefix = []
@@ -142,7 +143,7 @@ todo_include_todos = True
 # html_theme = 'scrolls'
 # html_theme = 'agogo'
 # html_theme = 'sphinxdoc'
-html_theme = 'pyramid'
+html_theme = "pyramid"
 # html_theme = 'alabaster'
 
 # Theme options are theme-specific and customize the look and feel of a theme
@@ -177,7 +178,7 @@ html_theme = 'pyramid'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["_static"]
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
@@ -257,35 +258,37 @@ html_static_path = ['_static']
 # html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Stalkerdoc'
+htmlhelp_basename = "Stalkerdoc"
 
 
 # -- Options for LaTeX output ---------------------------------------------
 
 latex_elements = {
-     # The paper size ('letterpaper' or 'a4paper').
-     #
-     'papersize': 'a4paper',
-
-     # The font size ('10pt', '11pt' or '12pt').
-     #
-     # 'pointsize': '10pt',
-
-     # Additional stuff for the LaTeX preamble.
-     #
-     # 'preamble': '',
-
-     # Latex figure (float) alignment
-     #
-     # 'figure_align': 'htbp',
+    # The paper size ('letterpaper' or 'a4paper').
+    #
+    "papersize": "a4paper",
+    # The font size ('10pt', '11pt' or '12pt').
+    #
+    # 'pointsize': '10pt',
+    # Additional stuff for the LaTeX preamble.
+    #
+    # 'preamble': '',
+    # Latex figure (float) alignment
+    #
+    # 'figure_align': 'htbp',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    ('contents', 'Stalker.tex', u'Stalker Documentation',
-     u'Erkan Ozgur Yilmaz', 'manual'),
+    (
+        "contents",
+        "Stalker.tex",
+        "Stalker Documentation",
+        "Erkan Ozgur Yilmaz",
+        "manual",
+    ),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -329,10 +332,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    (master_doc, 'stalker', u'Stalker Documentation',
-     [author], 1)
-]
+man_pages = [(master_doc, "stalker", "Stalker Documentation", [author], 1)]
 
 # If true, show URL addresses after external links.
 #
@@ -345,9 +345,15 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'Stalker', u'Stalker Documentation',
-     author, 'Stalker', 'One line description of project.',
-     'Miscellaneous'),
+    (
+        master_doc,
+        "Stalker",
+        "Stalker Documentation",
+        author,
+        "Stalker",
+        "One line description of project.",
+        "Miscellaneous",
+    ),
 ]
 
 # Documents to append as an appendix to all manuals.
@@ -370,75 +376,75 @@ texinfo_documents = [
 # -- Options for Epub output ----------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = 'Stalker'
-epub_author = 'Erkan Ozgur Yilmaz'
-epub_publisher = 'Erkan Ozgur Yilmaz'
-epub_copyright = '2014, Erkan Ozgur Yilmaz'
+epub_title = "Stalker"
+epub_author = "Erkan Ozgur Yilmaz"
+epub_publisher = "Erkan Ozgur Yilmaz"
+epub_copyright = "2014, Erkan Ozgur Yilmaz"
 
 # The basename for the epub file. It defaults to the project name.
-#epub_basename = u'Stalker'
+# epub_basename = u'Stalker'
 
 # The HTML theme for the epub output. Since the default themes are not optimized
 # for small screen space, using the same theme for HTML and epub output is
 # usually not wise. This defaults to 'epub', a theme designed to save visual
 # space.
-#epub_theme = 'epub'
+# epub_theme = 'epub'
 
 # The language of the text. It defaults to the language option
 # or en if the language is not set.
-#epub_language = ''
+# epub_language = ''
 
 # The scheme of the identifier. Typical schemes are ISBN or URL.
-#epub_scheme = ''
+# epub_scheme = ''
 
 # The unique identifier of the text. This can be a ISBN number
 # or the project homepage.
-#epub_identifier = ''
+# epub_identifier = ''
 
 # A unique identification for the text.
-#epub_uid = ''
+# epub_uid = ''
 
 # A tuple containing the cover image and cover page html template filenames.
-#epub_cover = ()
+# epub_cover = ()
 
 # A sequence of (type, uri, title) tuples for the guide element of content.opf.
-#epub_guide = ()
+# epub_guide = ()
 
 # HTML files that should be inserted before the pages created by sphinx.
 # The format is a list of tuples containing the path and title.
-#epub_pre_files = []
+# epub_pre_files = []
 
 # HTML files shat should be inserted after the pages created by sphinx.
 # The format is a list of tuples containing the path and title.
-#epub_post_files = []
+# epub_post_files = []
 
 # A list of files that should not be packed into the epub file.
-#epub_exclude_files = []
+# epub_exclude_files = []
 
 # The depth of the table of contents in toc.ncx.
-#epub_tocdepth = 3
+# epub_tocdepth = 3
 
 # Allow duplicate toc entries.
-#epub_tocdup = True
+# epub_tocdup = True
 
 # Choose between 'default' and 'includehidden'.
-#epub_tocscope = 'default'
+# epub_tocscope = 'default'
 
 # Fix unsupported image types using the PIL.
-#epub_fix_images = False
+# epub_fix_images = False
 
 # Scale large images.
-#epub_max_image_width = 0
+# epub_max_image_width = 0
 
 # How to display URL addresses: 'footnote', 'no', or 'inline'.
-#epub_show_urls = 'inline'
+# epub_show_urls = 'inline'
 
 # If false, no index is generated.
-#epub_use_index = True
+# epub_use_index = True
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None}
+intersphinx_mapping = {"https://docs.python.org/": None}
 
 autosummary_generate = True
 autodoc_member_order = "bysource"
@@ -446,12 +452,14 @@ autodoc_member_order = "bysource"
 
 def setup(app):
     app.add_object_type(
-        'confval', 'confval',
-        objname='configuration value',
-        indextemplate='pair: %s; configuration value'
+        "confval",
+        "confval",
+        objname="configuration value",
+        indextemplate="pair: %s; configuration value",
     )
 
     # this next two lines are for Sphinx 1.2 to work
     import sqlalchemy.ext.declarative.api
     from stalker.db.declarative import Base
+
     sqlalchemy.ext.declarative.api.Base = Base

@@ -7,6 +7,7 @@ import uuid
 import pytz
 import functools
 
+from six import string_types
 from sqlalchemy import Table, Column, Integer, String, Text, ForeignKey
 from sqlalchemy.orm import relationship, validates
 
@@ -108,6 +109,7 @@ class SimpleEntity(Base):
 
     :type type: :class:`.Type`
     """
+
     # auto generate name values
     __auto_name__ = True
     __strictly_typed__ = False
@@ -122,26 +124,18 @@ class SimpleEntity(Base):
     entity_type = Column(String(128), nullable=False)
     __mapper_args__ = {
         "polymorphic_on": entity_type,
-        "polymorphic_identity": "SimpleEntity"
+        "polymorphic_identity": "SimpleEntity",
     }
 
-    name = Column(
-        String(256),
-        nullable=False,
-        doc="""Name of this object"""
-    )
+    name = Column(String(256), nullable=False, doc="""Name of this object""")
 
-    description = Column(
-        "description",
-        Text,
-        doc="""Description of this object."""
-    )
+    description = Column("description", Text, doc="""Description of this object.""")
 
     created_by_id = Column(
         "created_by_id",
         Integer,
         ForeignKey("Users.id", use_alter=True, name="xc"),
-        doc="""The id of the :class:`.User` who has created this entity."""
+        doc="""The id of the :class:`.User` who has created this entity.""",
     )
 
     created_by = relationship(
@@ -149,14 +143,14 @@ class SimpleEntity(Base):
         backref="entities_created",
         primaryjoin="SimpleEntity.created_by_id==User.user_id",
         post_update=True,
-        doc="""The :class:`.User` who has created this object."""
+        doc="""The :class:`.User` who has created this object.""",
     )
 
     updated_by_id = Column(
         "updated_by_id",
         Integer,
         ForeignKey("Users.id", use_alter=True, name="xu"),
-        doc="""The id of the :class:`.User` who has updated this entity."""
+        doc="""The id of the :class:`.User` who has updated this entity.""",
     )
 
     updated_by = relationship(
@@ -164,22 +158,21 @@ class SimpleEntity(Base):
         backref="entities_updated",
         primaryjoin="SimpleEntity.updated_by_id==User.user_id",
         post_update=True,
-        doc="""The :class:`.User` who has updated this object."""
+        doc="""The :class:`.User` who has updated this object.""",
     )
 
     date_created = Column(
         GenericDateTime,
         default=functools.partial(datetime.datetime.now, pytz.utc),
         doc="""A :class:`datetime.datetime` instance showing the creation date
-        and time of this object."""
+        and time of this object.""",
     )
 
     date_updated = Column(
         GenericDateTime,
         default=functools.partial(datetime.datetime.now, pytz.utc),
         doc="""A :class:`datetime.datetime` instance showing the update date
-        and time of this object."""
-        ,
+        and time of this object.""",
     )
 
     type_id = Column(
@@ -189,7 +182,7 @@ class SimpleEntity(Base):
         doc="""The id of the :class:`.Type` of this entity. Mainly used by
         SQLAlchemy to create a Many-to-One relates between SimpleEntities and
         Types.
-        """
+        """,
     )
 
     type = relationship(
@@ -200,58 +193,54 @@ class SimpleEntity(Base):
 
         It is a :class:`.Type` instance with a proper
         :attr:`.Type.target_entity_type`.
-        """
+        """,
     )
 
     generic_data = relationship(
-        'SimpleEntity',
-        secondary='SimpleEntity_GenericData',
-        primaryjoin='SimpleEntities.c.id=='
-                    'SimpleEntity_GenericData.c.simple_entity_id',
-        secondaryjoin='SimpleEntity_GenericData.c.other_simple_entity_id=='
-                      'SimpleEntities.c.id',
+        "SimpleEntity",
+        secondary="SimpleEntity_GenericData",
+        primaryjoin="SimpleEntities.c.id=="
+        "SimpleEntity_GenericData.c.simple_entity_id",
+        secondaryjoin="SimpleEntity_GenericData.c.other_simple_entity_id=="
+        "SimpleEntities.c.id",
         post_update=True,
-        doc='''This attribute can hold any kind of data which exists in SOM.
-        '''
+        doc="""This attribute can hold any kind of data which exists in SOM.
+        """,
     )
 
     generic_text = Column(
-        "generic_text",
-        Text,
-        doc="""This attribute can hold any text."""
+        "generic_text", Text, doc="""This attribute can hold any text."""
     )
 
     thumbnail_id = Column(
-        'thumbnail_id',
-        Integer,
-        ForeignKey('Links.id', use_alter=True, name='z')
+        "thumbnail_id", Integer, ForeignKey("Links.id", use_alter=True, name="z")
     )
 
     thumbnail = relationship(
-        'Link',
-        primaryjoin='SimpleEntities.c.thumbnail_id==Links.c.id',
-        post_update=True
+        "Link",
+        primaryjoin="SimpleEntities.c.thumbnail_id==Links.c.id",
+        post_update=True,
     )
 
-    html_style = Column(String(64), nullable=True, default='')
-    html_class = Column(String(64), nullable=True, default='')
+    html_style = Column(String(64), nullable=True, default="")
+    html_class = Column(String(64), nullable=True, default="")
 
     __stalker_version__ = Column("stalker_version", String(256))
 
     def __init__(
-            self,
-            name=None,
-            description="",
-            generic_text="",
-            type=None,
-            created_by=None,
-            updated_by=None,
-            date_created=None,
-            date_updated=None,
-            thumbnail=None,
-            html_style='',
-            html_class='',
-            **kwargs
+        self,
+        name=None,
+        description="",
+        generic_text="",
+        type=None,
+        created_by=None,
+        updated_by=None,
+        date_created=None,
+        date_updated=None,
+        thumbnail=None,
+        html_style="",
+        html_class="",
+        **kwargs
     ):  # pylint: disable=W0613
 
         # name and nice_name
@@ -276,81 +265,73 @@ class SimpleEntity(Base):
         self.html_class = html_class
 
         import stalker
+
         self.__stalker_version__ = stalker.__version__
 
     def __repr__(self):
-        """the representation of the SimpleEntity
-        """
+        """the representation of the SimpleEntity"""
         return "<%s (%s)>" % (self.name, self.entity_type)
 
     def __eq__(self, other):
-        """the equality operator
-        """
+        """the equality operator"""
         from stalker.db.session import DBSession
+
         with DBSession.no_autoflush:
             return isinstance(other, SimpleEntity) and self.name == other.name
 
     def __ne__(self, other):
-        """the inequality operator
-        """
+        """the inequality operator"""
         return not self.__eq__(other)
 
     def __hash__(self):
-        """the overridden __hash__ method
-        """
+        """the overridden __hash__ method"""
         return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)
 
     @validates("description")
     def _validate_description(self, key, description):
-        """validates the given description value
-        """
+        """validates the given description value"""
         if description is None:
             description = ""
 
-        from stalker import __string_types__
-        if not isinstance(description, __string_types__):
+        if not isinstance(description, string_types):
             raise TypeError(
-                '%s.description should be a string, not %s' %
-                (self.__class__.__name__, description.__class__.__name__)
+                "%s.description should be a string, not %s"
+                % (self.__class__.__name__, description.__class__.__name__)
             )
         return description
 
     @validates("generic_text")
     def _validate_generic_text(self, key, generic_text):
-        """validates the given generic_text value
-        """
+        """validates the given generic_text value"""
         if generic_text is None:
             generic_text = ""
 
-        from stalker import __string_types__
-        if not isinstance(generic_text, __string_types__):
+        if not isinstance(generic_text, string_types):
             raise TypeError(
-                '%s.generic_text should be a string, not %s' %
-                (self.__class__.__name__, generic_text.__class__.__name__)
+                "%s.generic_text should be a string, not %s"
+                % (self.__class__.__name__, generic_text.__class__.__name__)
             )
         return generic_text
 
     @validates("name")
     def _validate_name(self, key, name):
-        """validates the given name_in value
-        """
+        """validates the given name_in value"""
         if self.__auto_name__:
-            if name is None or name == '':
+            if name is None or name == "":
                 # generate a uuid4
-                name = '%s_%s' % (self.__class__.__name__,
-                                  uuid.uuid4().urn.split(':')[2])
+                name = "%s_%s" % (
+                    self.__class__.__name__,
+                    uuid.uuid4().urn.split(":")[2],
+                )
 
         # it is None
         if name is None:
-            raise TypeError(
-                "%s.name can not be None" % self.__class__.__name__
-            )
+            raise TypeError("%s.name can not be None" % self.__class__.__name__)
 
-        from stalker import __string_types__
-        if not isinstance(name, __string_types__):
+        if not isinstance(name, string_types):
             raise TypeError(
-                "%s.name should be a string not %s" %
-                (self.__class__.__name__, name.__class__.__name__)
+                "%s.name should be a string not %s"
+                % (self.__class__.__name__, name.__class__.__name__)
             )
 
         name = self._format_name(name)
@@ -368,31 +349,28 @@ class SimpleEntity(Base):
 
     @classmethod
     def _format_name(cls, name_in):
-        """formats the name_in value
-        """
+        """formats the name_in value"""
         # remove unnecessary characters from the string
         name_in = name_in.strip()
 
         # remove multiple spaces
-        name_in = re.sub(r'[\s]+', ' ', name_in)
+        name_in = re.sub(r"[\s]+", " ", name_in)
 
         return name_in
 
     @classmethod
     def _format_nice_name(cls, nice_name_in):
-        """formats the given nice name
-        """
+        """formats the given nice name"""
         # remove unnecessary characters from the string
         nice_name_in = nice_name_in.strip()
-        nice_name_in = re.sub(r'([^a-zA-Z0-9\s_\-@]+)', '',
-                              nice_name_in).strip()
+        nice_name_in = re.sub(r"([^a-zA-Z0-9\s_\-@]+)", "", nice_name_in).strip()
 
         # remove all the characters which are not alphabetic from the start of
         # the string
-        nice_name_in = re.sub(r"(^[^a-zA-Z0-9]+)", '', nice_name_in)
+        nice_name_in = re.sub(r"(^[^a-zA-Z0-9]+)", "", nice_name_in)
 
         # remove multiple spaces
-        nice_name_in = re.sub(r'[\s]+', ' ', nice_name_in)
+        nice_name_in = re.sub(r"[\s]+", " ", nice_name_in)
 
         # # replace camel case letters
         # nice_name_in = re.sub(r"(.+?[a-z]+)([A-Z])", r"\1_\2", nice_name_in)
@@ -421,23 +399,21 @@ class SimpleEntity(Base):
 
     @validates("created_by")
     def _validate_created_by(self, key, created_by_in):
-        """validates the given created_by_in attribute
-        """
+        """validates the given created_by_in attribute"""
         from stalker.models.auth import User
 
         if created_by_in is not None:
             if not isinstance(created_by_in, User):
                 raise TypeError(
                     "%s.created_by should be a stalker.models.auth.User "
-                    "instance, not %s" % (self.__class__.__name__,
-                                          created_by_in.__class__.__name__)
+                    "instance, not %s"
+                    % (self.__class__.__name__, created_by_in.__class__.__name__)
                 )
         return created_by_in
 
     @validates("updated_by")
     def _validate_updated_by(self, key, updated_by_in):
-        """validates the given updated_by_in attribute
-        """
+        """validates the given updated_by_in attribute"""
         from stalker.models.auth import User
 
         if updated_by_in is None:
@@ -448,43 +424,37 @@ class SimpleEntity(Base):
             if not isinstance(updated_by_in, User):
                 raise TypeError(
                     "%s.updated_by should be a stalker.models.auth.User "
-                    "instance, not %s" % (self.__class__.__name__,
-                                          updated_by_in.__class__.__name__)
+                    "instance, not %s"
+                    % (self.__class__.__name__, updated_by_in.__class__.__name__)
                 )
         return updated_by_in
 
     @validates("date_created")
     def _validate_date_created(self, key, date_created_in):
-        """validates the given date_created_in
-        """
+        """validates the given date_created_in"""
         if date_created_in is None:
-            raise TypeError(
-                "%s.date_created can not be None" % self.__class__.__name__
-            )
+            raise TypeError("%s.date_created can not be None" % self.__class__.__name__)
 
         if not isinstance(date_created_in, datetime.datetime):
             raise TypeError(
-                "%s.date_created should be a datetime.datetime instance" %
-                self.__class__.__name__
+                "%s.date_created should be a datetime.datetime instance"
+                % self.__class__.__name__
             )
 
         return date_created_in
 
     @validates("date_updated")
     def _validate_date_updated(self, key, date_updated_in):
-        """validates the given date_updated_in
-        """
+        """validates the given date_updated_in"""
         # it is None
         if date_updated_in is None:
-            raise TypeError(
-                "%s.date_updated can not be None" % self.__class__.__name__
-            )
+            raise TypeError("%s.date_updated can not be None" % self.__class__.__name__)
 
         # it is not a datetime.datetime instance
         if not isinstance(date_updated_in, datetime.datetime):
             raise TypeError(
-                "%s.date_updated should be a datetime.datetime instance" %
-                self.__class__.__name__
+                "%s.date_updated should be a datetime.datetime instance"
+                % self.__class__.__name__
             )
 
         # lower than date_created
@@ -492,46 +462,44 @@ class SimpleEntity(Base):
             raise ValueError(
                 "%(class)s.date_updated could not be set to a date before "
                 "%(class)s.date_created, try setting the ``date_created`` "
-                "first."
-                % {'class': self.__class__.__name__}
+                "first." % {"class": self.__class__.__name__}
             )
         return date_updated_in
 
     @validates("type")
     def _validate_type(self, key, type_in):
-        """validates the given type value
-        """
+        """validates the given type value"""
         check_for_type_class = True
         if not self.__strictly_typed__ and type_in is None:
             check_for_type_class = False
 
         if check_for_type_class:
             from stalker.models.type import Type
+
             if not isinstance(type_in, Type):
                 raise TypeError(
                     "%s.type must be a stalker.models.type.Type instance, not "
-                    "%s" % (self.__class__.__name__, type_in))
+                    "%s" % (self.__class__.__name__, type_in)
+                )
         return type_in
 
-    @validates('thumbnail')
+    @validates("thumbnail")
     def _validate_thumbnail(self, key, thumb):
-        """validates the given thumb value
-        """
+        """validates the given thumb value"""
         if thumb is not None:
             from stalker import Link
 
             if not isinstance(thumb, Link):
                 raise TypeError(
-                    '%s.thumbnail should be a stalker.models.link.Link '
-                    'instance, not %s' %
-                    (self.__class__.__name__, thumb.__class__.__name__)
+                    "%s.thumbnail should be a stalker.models.link.Link "
+                    "instance, not %s"
+                    % (self.__class__.__name__, thumb.__class__.__name__)
                 )
         return thumb
 
     @property
     def tjp_id(self):
-        """returns TaskJuggler compatible id
-        """
+        """returns TaskJuggler compatible id"""
         return "%s_%s" % (self.__class__.__name__, self.id)
 
     @property
@@ -540,36 +508,32 @@ class SimpleEntity(Base):
         integration. Needs to be overridden in inherited classes.
         """
         raise NotImplementedError(
-            'This property is not implemented in %s' % self.__class__.__name__
+            "This property is not implemented in %s" % self.__class__.__name__
         )
 
-    @validates('html_style')
+    @validates("html_style")
     def _validate_html_style(self, key, html_style):
-        """validates the given html_style value
-        """
+        """validates the given html_style value"""
         if html_style is None:
-            html_style = ''
+            html_style = ""
 
-        from stalker import __string_types__
-        if not isinstance(html_style, __string_types__):
+        if not isinstance(html_style, string_types):
             raise TypeError(
-                '%s.html_style should be a basestring instance, not %s' %
-                (self.__class__.__name__, html_style.__class__.__name__)
+                "%s.html_style should be a basestring instance, not %s"
+                % (self.__class__.__name__, html_style.__class__.__name__)
             )
         return html_style
 
-    @validates('html_class')
+    @validates("html_class")
     def _validate_html_class(self, key, html_class):
-        """validates the given html_class value
-        """
+        """validates the given html_class value"""
         if html_class is None:
-            html_class = ''
+            html_class = ""
 
-        from stalker import __string_types__
-        if not isinstance(html_class, __string_types__):
+        if not isinstance(html_class, string_types):
             raise TypeError(
-                '%s.html_class should be a basestring instance, not %s' %
-                (self.__class__.__name__, html_class.__class__.__name__)
+                "%s.html_class should be a basestring instance, not %s"
+                % (self.__class__.__name__, html_class.__class__.__name__)
             )
         return html_class
 
@@ -591,11 +555,11 @@ class Entity(SimpleEntity):
       list, or when omitted it will be set to an empty list, when set to None
       it will be converted to an empty list.
     """
+
     __auto_name__ = True
     __tablename__ = "Entities"
     __mapper_args__ = {"polymorphic_identity": "Entity"}
-    entity_id = Column("id", Integer, ForeignKey("SimpleEntities.id"),
-                       primary_key=True)
+    entity_id = Column("id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True)
 
     tags = relationship(
         "Tag",
@@ -604,7 +568,7 @@ class Entity(SimpleEntity):
         doc="""A list of tags attached to this object.
 
         It is a list of :class:`.Tag` instances which shows
-        the tags of this object"""
+        the tags of this object""",
     )
 
     notes = relationship(
@@ -615,13 +579,10 @@ class Entity(SimpleEntity):
 
         It is a list of :class:`.Note` instances or an
         empty list, setting it to None will raise a TypeError.
-        """
+        """,
     )
 
-    def __init__(self,
-                 tags=None,
-                 notes=None,
-                 **kwargs):
+    def __init__(self, tags=None, notes=None, **kwargs):
         super(Entity, self).__init__(**kwargs)
 
         if tags is None:
@@ -635,9 +596,9 @@ class Entity(SimpleEntity):
 
     @validates("notes")
     def _validate_notes(self, key, note):
-        """validates the given note value
-        """
+        """validates the given note value"""
         from stalker.models.note import Note
+
         if not isinstance(note, Note):
             raise TypeError(
                 "%s.note should be a stalker.models.note.Note instance, not "
@@ -647,25 +608,22 @@ class Entity(SimpleEntity):
 
     @validates("tags")
     def _validate_tags(self, key, tag):
-        """validates the given tag
-        """
+        """validates the given tag"""
         from stalker.models.tag import Tag
+
         if not isinstance(tag, Tag):
             raise TypeError(
-                "%s.tag should be a stalker.models.tag.Tag instance, not %s" %
-                (self.__class__.__name__, tag.__class__.__name__)
+                "%s.tag should be a stalker.models.tag.Tag instance, not %s"
+                % (self.__class__.__name__, tag.__class__.__name__)
             )
         return tag
 
     def __eq__(self, other):
-        """the equality operator
-        """
-        return super(Entity, self).__eq__(other) \
-            and isinstance(other, Entity)
+        """the equality operator"""
+        return super(Entity, self).__eq__(other) and isinstance(other, Entity)
 
     def __hash__(self):
-        """the overridden __hash__ method
-        """
+        """the overridden __hash__ method"""
         return super(Entity, self).__hash__()
 
 
@@ -679,8 +637,7 @@ class EntityGroup(Entity):
     __auto_name__ = True
     __tablename__ = "EntityGroups"
     __mapper_args__ = {"polymorphic_identity": "EntityGroup"}
-    entity_group_id = Column("id", Integer, ForeignKey("Entities.id"),
-                             primary_key=True)
+    entity_group_id = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
 
     entities = relationship(
         "SimpleEntity",
@@ -692,7 +649,7 @@ class EntityGroup(Entity):
         post_update=True,
         backref="entity_groups",
         doc="""All the :class:`.SimpleEntity`s grouped in this EntityGroup.
-        """
+        """,
     )
 
     def __init__(self, entities=None, **kwargs):
@@ -703,98 +660,85 @@ class EntityGroup(Entity):
 
         self.entities = entities
 
-    @validates('entities')
+    @validates("entities")
     def _validate_entities(self, key, entity):
-        """validates the given entity value
-        """
+        """validates the given entity value"""
         if not isinstance(entity, SimpleEntity):
             raise TypeError(
-                '%s.entities should be a list of SimpleEntities, not %s' % (
-                    self.__class__.__name__,
-                    entity.__class__.__name__
-                )
+                "%s.entities should be a list of SimpleEntities, not %s"
+                % (self.__class__.__name__, entity.__class__.__name__)
             )
 
         return entity
 
     def __eq__(self, other):
-        """the equality operator
-        """
-        return super(SimpleEntity, self).__eq__(other) \
-            and isinstance(other, EntityGroup)
+        """the equality operator"""
+        return super(SimpleEntity, self).__eq__(other) and isinstance(
+            other, EntityGroup
+        )
 
     def __hash__(self):
-        """the overridden __hash__ method
-        """
+        """the overridden __hash__ method"""
         return super(SimpleEntity, self).__hash__()
 
 
 # Entity Tags
 Entity_Tags = Table(
-    "Entity_Tags", Base.metadata,
+    "Entity_Tags",
+    Base.metadata,
     Column(
         "entity_id",
         Integer,
         ForeignKey("Entities.id"),
         primary_key=True,
     ),
-
     Column(
         "tag_id",
         Integer,
         ForeignKey("Tags.id"),
         primary_key=True,
-    )
+    ),
 )
 
 # Entity Notes
 Entity_Notes = Table(
-    "Entity_Notes", Base.metadata,
+    "Entity_Notes",
+    Base.metadata,
     Column(
         "entity_id",
         Integer,
         ForeignKey("Entities.id"),
         primary_key=True,
     ),
-
     Column(
         "note_id",
         Integer,
         ForeignKey("Notes.id"),
         primary_key=True,
-    )
+    ),
 )
 
 # SimpleEntity Generic Data
 SimpleEntity_GenericData = Table(
-    'SimpleEntity_GenericData', Base.metadata,
+    "SimpleEntity_GenericData",
+    Base.metadata,
     Column(
-        'simple_entity_id',
-        Integer,
-        ForeignKey('SimpleEntities.id'),
-        primary_key=True
+        "simple_entity_id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True
     ),
     Column(
-        'other_simple_entity_id',
+        "other_simple_entity_id",
         Integer,
-        ForeignKey('SimpleEntities.id'),
-        primary_key=True
-    )
+        ForeignKey("SimpleEntities.id"),
+        primary_key=True,
+    ),
 )
 
 # EntityGroup Entities
 EntityGroup_Entities = Table(
-    'EntityGroup_Entities', Base.metadata,
+    "EntityGroup_Entities",
+    Base.metadata,
+    Column("entity_group_id", Integer, ForeignKey("EntityGroups.id"), primary_key=True),
     Column(
-        'entity_group_id',
-        Integer,
-        ForeignKey('EntityGroups.id'),
-        primary_key=True
+        "other_entity_id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True
     ),
-    Column(
-        'other_entity_id',
-        Integer,
-        ForeignKey('SimpleEntities.id'),
-        primary_key=True
-    )
 )

@@ -2,13 +2,10 @@
 
 import os
 import datetime
-import logging
 
+from stalker import log
 
-logger = logging.getLogger(__name__)
-
-from stalker.log import logging_level
-logger.setLevel(logging_level)
+logger = log.get_logger(__name__)
 
 
 class ConfigBase(object):
@@ -16,6 +13,7 @@ class ConfigBase(object):
 
     Idea is coming from Sphinx config.
     """
+
     default_config_values = {}
 
     def __init__(self):
@@ -40,10 +38,7 @@ class ConfigBase(object):
             logger.debug("environment key found")
 
             resolved_path = os.path.expanduser(
-                os.path.join(
-                    os.environ[self.env_key],
-                    "config.py"
-                )
+                os.path.join(os.environ[self.env_key], "config.py")
             )
 
             # using `while` is not safe to expand variables
@@ -51,10 +46,8 @@ class ConfigBase(object):
             # complex
             max_recursion = 100
             i = 0
-            while '$' in resolved_path and i < max_recursion:
-                resolved_path = os.path.expandvars(
-                    resolved_path
-                )
+            while "$" in resolved_path and i < max_recursion:
+                resolved_path = os.path.expandvars(resolved_path)
                 i += 1
 
             try:
@@ -62,12 +55,13 @@ class ConfigBase(object):
                 with open(resolved_path) as f:
                     exec(f.read(), self.user_config)
             except IOError:
-                logger.warning("The $STALKER_PATH: %s doesn't exists! "
-                               "skipping user config" % resolved_path)
+                logger.warning(
+                    "The $STALKER_PATH: %s doesn't exists! "
+                    "skipping user config" % resolved_path
+                )
             except SyntaxError as e:
                 raise RuntimeError(
-                    "There is a syntax error in your configuration file: %s" %
-                    str(e)
+                    "There is a syntax error in your configuration file: %s" % str(e)
                 )
             finally:
                 # append the data to the current settings
@@ -94,15 +88,15 @@ class ConfigBase(object):
 
 
 class Config(ConfigBase):
-    """Holds system wide configuration variables. See
+    """Holds system-wide configuration variables. See
     `configuring stalker`_ for more detail.
 
     .. _configuring stalker: ../configure.html
     """
+
     env_key = "STALKER_PATH"
 
     default_config_values = dict(
-
         #
         # The default settings for the database, see sqlalchemy.create_engine
         # for possible parameters
@@ -112,220 +106,137 @@ class Config(ConfigBase):
             "sqlalchemy.echo": False,
             # "sqlalchemy.pool_pre_ping": True,
         },
-
         database_session_settings={},
         # Local storage path
-        local_storage_path=os.path.expanduser('~/.strc'),
-        local_session_data_file_name='local_session_data',
-
+        local_storage_path=os.path.expanduser("~/.strc"),
+        local_session_data_file_name="local_session_data",
         # Storage for uploaded files
-        server_side_storage_path=os.path.expanduser('~/Stalker_Storage'),
-
-        repo_env_var_template='REPO%(code)s',
-        repo_env_var_template_old='REPO%(id)s',
-
+        server_side_storage_path=os.path.expanduser("~/Stalker_Storage"),
+        repo_env_var_template="REPO%(code)s",
+        repo_env_var_template_old="REPO%(id)s",
         #
         # Tells Stalker to create an admin by default
         #
         auto_create_admin=True,
-
         #
         # these are for new projects
         # after creating the project you can change them from the interface
         #
-        admin_name='admin',
-        admin_login='admin',
-        admin_password='admin',
-        admin_email='admin@admin.com',
-        admin_department_name='admins',
-        admin_group_name='admins',
-
+        admin_name="admin",
+        admin_login="admin",
+        admin_password="admin",
+        admin_email="admin@admin.com",
+        admin_department_name="admins",
+        admin_group_name="admins",
         # the default keyword which is going to be used in password scrambling
         key="stalker_default_key",
-
         version_take_name="Main",
-
-        actions=['Create', 'Read', 'Update', 'Delete', 'List'],  # CRUDL
-
+        actions=["Create", "Read", "Update", "Delete", "List"],  # CRUDL
         # Tickets
         ticket_label="Ticket",
-
         # define the available actions per Status
-        ticket_status_names=[
-            'New', 'Accepted', 'Assigned', 'Reopened', 'Closed'
-        ],
-
-        ticket_status_codes=[
-            'NEW', 'ACP', 'ASG', 'ROP', 'CLS'
-        ],
-
+        ticket_status_names=["New", "Accepted", "Assigned", "Reopened", "Closed"],
+        ticket_status_codes=["NEW", "ACP", "ASG", "ROP", "CLS"],
         ticket_resolutions=[
-            'fixed', 'invalid', 'wontfix', 'duplicate', 'worksforme', 'cantfix'
+            "fixed",
+            "invalid",
+            "wontfix",
+            "duplicate",
+            "worksforme",
+            "cantfix",
         ],
-
         ticket_workflow={
-            'resolve': {
-                'New': {
-                    'new_status': 'Closed',
-                    'action': 'set_resolution'
-                },
-                'Accepted': {
-                    'new_status': 'Closed',
-                    'action': 'set_resolution'
-                },
-                'Assigned': {
-                    'new_status': 'Closed',
-                    'action': 'set_resolution'
-                },
-                'Reopened': {
-                    'new_status': 'Closed',
-                    'action': 'set_resolution'
-                },
+            "resolve": {
+                "New": {"new_status": "Closed", "action": "set_resolution"},
+                "Accepted": {"new_status": "Closed", "action": "set_resolution"},
+                "Assigned": {"new_status": "Closed", "action": "set_resolution"},
+                "Reopened": {"new_status": "Closed", "action": "set_resolution"},
             },
-            'accept': {
-                'New': {
-                    'new_status': 'Accepted',
-                    'action': 'set_owner'
-                },
-                'Accepted': {
-                    'new_status': 'Accepted',
-                    'action': 'set_owner'
-                },
-                'Assigned': {
-                    'new_status': 'Accepted',
-                    'action': 'set_owner'
-                },
-                'Reopened': {
-                    'new_status': 'Accepted',
-                    'action': 'set_owner'
-                },
+            "accept": {
+                "New": {"new_status": "Accepted", "action": "set_owner"},
+                "Accepted": {"new_status": "Accepted", "action": "set_owner"},
+                "Assigned": {"new_status": "Accepted", "action": "set_owner"},
+                "Reopened": {"new_status": "Accepted", "action": "set_owner"},
             },
-            'reassign': {
-                'New': {
-                    'new_status': 'Assigned',
-                    'action': 'set_owner'
-                },
-                'Accepted': {
-                    'new_status': 'Assigned',
-                    'action': 'set_owner'
-                },
-                'Assigned': {
-                    'new_status': 'Assigned',
-                    'action': 'set_owner'
-                },
-                'Reopened': {
-                    'new_status': 'Assigned',
-                    'action': 'set_owner'
-                },
+            "reassign": {
+                "New": {"new_status": "Assigned", "action": "set_owner"},
+                "Accepted": {"new_status": "Assigned", "action": "set_owner"},
+                "Assigned": {"new_status": "Assigned", "action": "set_owner"},
+                "Reopened": {"new_status": "Assigned", "action": "set_owner"},
             },
-            'reopen': {
-                'Closed': {
-                    'new_status': 'Reopened',
-                    'action': 'del_resolution'
-                }
-            }
+            "reopen": {
+                "Closed": {"new_status": "Reopened", "action": "del_resolution"}
+            },
         },
-
         # Task Management
         timing_resolution=datetime.timedelta(hours=1),
-
         task_priority=500,
-
         working_hours={
-            'mon': [[540, 1080]],  # 9:00 - 18:00
-            'tue': [[540, 1080]],  # 9:00 - 18:00
-            'wed': [[540, 1080]],  # 9:00 - 18:00
-            'thu': [[540, 1080]],  # 9:00 - 18:00
-            'fri': [[540, 1080]],  # 9:00 - 18:00
-            'sat': [],  # saturday off
-            'sun': [],  # sunday off
+            "mon": [[540, 1080]],  # 9:00 - 18:00
+            "tue": [[540, 1080]],  # 9:00 - 18:00
+            "wed": [[540, 1080]],  # 9:00 - 18:00
+            "thu": [[540, 1080]],  # 9:00 - 18:00
+            "fri": [[540, 1080]],  # 9:00 - 18:00
+            "sat": [],  # saturday off
+            "sun": [],  # sunday off
         },
-
         # this is strongly related with the working_hours settings,
         # this should match each other
         daily_working_hours=9,
         weekly_working_days=5,
         weekly_working_hours=45,
         yearly_working_days=261,  # math.ceil(5 * 52.1428)
-
-        day_order=['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'],
-
-        datetime_units=['min', 'h', 'd', 'w', 'm', 'y'],
-        datetime_unit_names=['minute', 'hour', 'day', 'week', 'month', 'year'],
-
+        day_order=["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+        datetime_units=["min", "h", "d", "w", "m", "y"],
+        datetime_unit_names=["minute", "hour", "day", "week", "month", "year"],
         datetime_units_to_timedelta_kwargs={
-            'min': {'name': 'minutes', 'multiplier': 1},
-            'h': {'name': 'hours', 'multiplier': 1},
-            'd': {'name': 'days', 'multiplier': 1},
-            'w': {'name': 'weeks', 'multiplier': 1},
-            'm': {'name': 'days', 'multiplier': 30},
-            'y': {'name': 'days', 'multiplier': 365}
+            "min": {"name": "minutes", "multiplier": 1},
+            "h": {"name": "hours", "multiplier": 1},
+            "d": {"name": "days", "multiplier": 1},
+            "w": {"name": "weeks", "multiplier": 1},
+            "m": {"name": "days", "multiplier": 30},
+            "y": {"name": "days", "multiplier": 365},
         },
-
         task_status_names=[
-            'Waiting For Dependency',
-            'Ready To Start',
-            'Work In Progress',
-            'Pending Review',
-            'Has Revision',
-            'Dependency Has Revision',
-            'On Hold',
-            'Stopped',
-            'Completed'
+            "Waiting For Dependency",
+            "Ready To Start",
+            "Work In Progress",
+            "Pending Review",
+            "Has Revision",
+            "Dependency Has Revision",
+            "On Hold",
+            "Stopped",
+            "Completed",
         ],
-
         task_status_codes=[
-            'WFD',
-            'RTS',
-            'WIP',
-            'PREV',
-            'HREV',
-            'DREV',
-            'OH',
-            'STOP',
-            'CMPL'
+            "WFD",
+            "RTS",
+            "WIP",
+            "PREV",
+            "HREV",
+            "DREV",
+            "OH",
+            "STOP",
+            "CMPL",
         ],
-    
-        project_status_names=[
-            'Ready To Start',
-            'Work In Progress',
-            'Completed'
+        project_status_names=["Ready To Start", "Work In Progress", "Completed"],
+        project_status_codes=["RTS", "WIP", "CMPL"],
+        review_status_names=["New", "Requested Revision", "Approved"],
+        review_status_codes=["NEW", "RREV", "APP"],
+        daily_status_names=["Open", "Closed"],
+        daily_status_codes=["OPEN", "CLS"],
+        task_schedule_constraints=["none", "start", "end", "both"],
+        task_schedule_models=["effort", "length", "duration"],
+        task_dependency_gap_models=["length", "duration"],
+        task_dependency_targets=["onend", "onstart"],
+        allocation_strategy=[
+            "minallocated",
+            "maxloaded",
+            "minloaded",
+            "order",
+            "random",
         ],
-
-        project_status_codes=[
-            'RTS',
-            'WIP',
-            'CMPL'
-        ],
-
-        review_status_names=[
-            'New',
-            'Requested Revision',
-            'Approved'
-        ],
-        review_status_codes=[
-            'NEW',
-            'RREV',
-            'APP'
-        ],
-
-        daily_status_names=[
-            'Open',
-            'Closed'
-        ],
-        daily_status_codes=[
-            'OPEN',
-            'CLS'
-        ],
-
-        task_schedule_constraints=['none', 'start', 'end', 'both'],
-        task_schedule_models=['effort', 'length', 'duration'],
-        task_dependency_gap_models=['length', 'duration'],
-        task_dependency_targets=['onend', 'onstart'],
-        allocation_strategy=['minallocated', 'maxloaded', 'minloaded', 'order',
-                             'random'],
         persistent_allocation=True,
-
         tjp_working_hours_template="""
 {%- macro wh(wh, day) -%}
 {%- if wh[day]|length %}    workinghours {{day}} {% for part in wh[day] -%}
@@ -342,7 +253,6 @@ class Config(ConfigBase):
 {{wh(workinghours, 'fri')}}
 {{wh(workinghours, 'sat')}}
 {{wh(workinghours, 'sun')}}""",
-
         tjp_studio_template="""
 project {{ studio.tjp_id }} "{{ studio.tjp_id }}" {{ studio.start.date() }} - {{ studio.end.date() }} {
     timingresolution {{ '%i'|format((studio.timing_resolution.days * 86400 + studio.timing_resolution.seconds)//60|int) }}min
@@ -355,7 +265,6 @@ project {{ studio.tjp_id }} "{{ studio.tjp_id }}" {{ studio.start.date() }} - {{
     trackingscenario plan
 }
 """,
-
         tjp_project_template="""
 task {{project.tjp_id}} "{{project.tjp_id}}" {
     {% for task in project.root_tasks %}
@@ -363,7 +272,6 @@ task {{project.tjp_id}} "{{project.tjp_id}}" {
     {%- endfor %}
 }
 """,
-
         tjp_task_template="""
 task {{task.tjp_id}} "{{task.tjp_id}}" {
 
@@ -396,7 +304,7 @@ task {{task.tjp_id}} "{{task.tjp_id}}" {
 
             {{task.schedule_model}} {{task.schedule_timing}}{{task.schedule_unit}}
             allocate {# #}
-            {%- for resource in task.resources -%}
+            {%- for resource in task.resources|sort(attribute='id') -%}
                 {%- if loop.index != 1 %}, {% endif %}{{ resource.tjp_id }} {# #}
                 {%- if task.alternative_resources %}{
                     alternative
@@ -420,9 +328,7 @@ task {{task.tjp_id}} "{{task.tjp_id}}" {
 
 }
 """,
-
         tjp_task_dependency_template="""{{depends_to.tjp_abs_id}} { {{- dependency_target}}{%if gap_timing %} gap{{gap_model}} {{gap_timing}}{{gap_unit -}}{%endif -%}}""",
-
         tjp_department_template="""
 resource {{department.tjp_id}} "{{department.tjp_id}}" {
 {% for resource in department.users %}
@@ -430,17 +336,14 @@ resource {{department.tjp_id}} "{{department.tjp_id}}" {
 {% endfor -%}
 }
 """,
-
-        tjp_vacation_template='''vacation {{ vacation.start.astimezone(utc).strftime('%Y-%m-%d-%H:%M:%S') }} - {{ vacation.end.astimezone(utc).strftime('%Y-%m-%d-%H:%M:%S') }}''',
-
-        tjp_user_template='''resource {{user.tjp_id}} "{{user.tjp_id}}" {
+        tjp_vacation_template="""vacation {{ vacation.start.astimezone(utc).strftime('%Y-%m-%d-%H:%M:%S') }} - {{ vacation.end.astimezone(utc).strftime('%Y-%m-%d-%H:%M:%S') }}""",
+        tjp_user_template="""resource {{user.tjp_id}} "{{user.tjp_id}}" {
     efficiency {{user.efficiency}}
 {% if user.vacations %}
 {% for vacation in user.vacations %}
     {{vacation.to_tjp}}
 {% endfor %}
-{% endif -%} }''',
-
+{% endif -%} }""",
         tjp_main_template="""# Generated By Stalker v{{stalker.__version__}}
         {{studio.to_tjp}}
 
@@ -466,7 +369,6 @@ resource {{department.tjp_id}} "{{department.tjp_id}}" {
             columns id, start, end {%- if compute_resources %}, resources{% endif %}
         }
         """,
-
         tjp_main_template2="""# Generated By Stalker v{{stalker.__version__}}
         {{studio.to_tjp}}
 
@@ -489,18 +391,14 @@ taskreport breakdown "{{csv_file_name}}"{
     timeformat "%Y-%m-%d-%H:%M"
     columns id, start, end {%- if compute_resources %}, resources{% endif %}
 }""",
-
-        tj_command='tj3' if os.name == 'nt' else '/usr/local/bin/tj3',
-
-        path_template='{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}',
+        tj_command="tj3" if os.name == "nt" else "/usr/local/bin/tj3",
+        path_template="{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}",
         filename_template='{{task.entity_type}}_{{task.id}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}',
-
         # --------------------------------------------
         # the following settings came from oyProjectManager
         sequence_format="%h%p%t %R",
         file_size_format="%.2f MB",
-        date_time_format='%Y.%m.%d %H:%M',
-
+        date_time_format="%Y.%m.%d %H:%M",
         resolution_presets={
             "PC Video": [640, 480, 1.0],
             "NTSC": [720, 486, 0.91],
@@ -527,9 +425,7 @@ taskreport breakdown "{{csv_file_name}}"{
             "3k Square": [3072, 3072, 1.0],
             "4k Square": [4096, 4096, 1.0],
         },
-
         default_resolution_preset="HD 1080",
-
         project_structure="""{% for shot in project.shots %}
                 Shots/{{shot.code}}
                 Shots/{{shot.code}}/Plate
@@ -542,7 +438,6 @@ taskreport breakdown "{{csv_file_name}}"{
             {{asset_path}}/Reference
         {% endfor %}
         """,
-
         thumbnail_format="jpg",
         thumbnail_quality=70,
         thumbnail_size=[320, 180],

@@ -1,25 +1,27 @@
 # -*- coding: utf-8 -*-
+"""TargetEntityTypeMixin related tests."""
 
-import unittest
 import pytest
-from sqlalchemy import Column, Integer, ForeignKey
+
+from sqlalchemy import Column, ForeignKey, Integer
+
+from stalker import Project, SimpleEntity
 from stalker.models.mixins import TargetEntityTypeMixin
-from stalker.models.project import Project
-from stalker.models.entity import SimpleEntity
 
 
 class TestClass(object):
+    """A simple class for testing purposes."""
+
     pass
 
 
 class TargetEntityTypeMixedClass(SimpleEntity, TargetEntityTypeMixin):
+    """A simple class for TargetEntityTypeMixin tests."""
+
     __tablename__ = "TarEntMixClasses"
     __mapper_args__ = {"polymorphic_identity": "TarEntMixClass"}
     tarMixClass_id = Column(
-        "id",
-        Integer,
-        ForeignKey("SimpleEntities.id"),
-        primary_key=True
+        "id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True
     )
 
     def __init__(self, **kwargs):
@@ -27,70 +29,69 @@ class TargetEntityTypeMixedClass(SimpleEntity, TargetEntityTypeMixin):
         TargetEntityTypeMixin.__init__(self, **kwargs)
 
 
-class TargetEntityMixinTester(unittest.TestCase):
-    """Tests the TargetEntityMixin
+@pytest.fixture(scope="function")
+def setup_target_entity_mixin_tests():
+    """Set up tests for the TargetEntityMixin.
+
+    Returns:
+        dict: Test data.
     """
-    def setUp(self):
-        """setup the test
-        """
-        super(TargetEntityMixinTester, self).setUp()
+    data = dict()
+    data["kwargs"] = {"name": "Test object", "target_entity_type": Project}
+    data["test_object"] = TargetEntityTypeMixedClass(**data["kwargs"])
+    return data
 
-        self.kwargs = {
-            "name": "Test object",
-            "target_entity_type": Project
-        }
 
-        self.test_object = TargetEntityTypeMixedClass(**self.kwargs)
-    
-    def test_target_entity_type_argument_is_skipped(self):
-        """testing if a TypeError will be raised when the target_entity_type 
-        argument is skipped
-        """
-        self.kwargs.pop("target_entity_type")
-        with pytest.raises(TypeError) as cm:
-            TargetEntityTypeMixedClass(**self.kwargs)
+def test_target_entity_type_argument_is_skipped(setup_target_entity_mixin_tests):
+    """TypeError is raised if target_entity_type argument is skipped."""
+    data = setup_target_entity_mixin_tests
+    data["kwargs"].pop("target_entity_type")
+    with pytest.raises(TypeError) as cm:
+        TargetEntityTypeMixedClass(**data["kwargs"])
 
-        assert str(cm.value) == \
-            'TargetEntityTypeMixedClass.target_entity_type can not be None'
+    assert (
+        str(cm.value) == "TargetEntityTypeMixedClass.target_entity_type can not be None"
+    )
 
-    def test_target_entity_type_argument_being_empty_string(self):
-        """testing if a ValueError will be raised when the target_entity_type
-        argument is given as None
-        """
-        self.kwargs["target_entity_type"] = ""
-        with pytest.raises(ValueError) as cm:
-            TargetEntityTypeMixedClass(**self.kwargs)
 
-        assert str(cm.value) == \
-            'TargetEntityTypeMixedClass.target_entity_type can not be empty'
+def test_target_entity_type_argument_being_empty_string(
+    setup_target_entity_mixin_tests,
+):
+    """ValueError is raised if the target_entity_type argument is given as None."""
+    data = setup_target_entity_mixin_tests
+    data["kwargs"]["target_entity_type"] = ""
+    with pytest.raises(ValueError) as cm:
+        TargetEntityTypeMixedClass(**data["kwargs"])
+    assert (
+        str(cm.value)
+        == "TargetEntityTypeMixedClass.target_entity_type can not be empty"
+    )
 
-    def test_target_entity_type_argument_being_None(self):
-        """testing if a TypeError will be raised when the target_entity_type
-        argument is given as None
-        """
 
-        self.kwargs["target_entity_type"] = None
-        with pytest.raises(TypeError) as cm:
-            TargetEntityTypeMixedClass(**self.kwargs)
+def test_target_entity_type_argument_being_none(setup_target_entity_mixin_tests):
+    """TypeError is raised if target_entity_type argument is given as None."""
+    data = setup_target_entity_mixin_tests
+    data["kwargs"]["target_entity_type"] = None
+    with pytest.raises(TypeError) as cm:
+        TargetEntityTypeMixedClass(**data["kwargs"])
+    assert (
+        str(cm.value) == "TargetEntityTypeMixedClass.target_entity_type can not be None"
+    )
 
-        assert str(cm.value) == \
-            'TargetEntityTypeMixedClass.target_entity_type can not be None'
 
-    def test_target_entity_type_attribute_is_read_only(self):
-        """testing if a AttributeError will be raised when the
-        target_entity_type argument is tried to be set
-        """
-        # try to set the target_entity_type attribute and expect AttributeError
-        with pytest.raises(AttributeError) as cm:
-            self.test_object.target_entity_type = "Project"
+def test_target_entity_type_attribute_is_read_only(setup_target_entity_mixin_tests):
+    """target_entity_type argument is read-only."""
+    data = setup_target_entity_mixin_tests
+    # try to set the target_entity_type attribute and expect AttributeError
+    with pytest.raises(AttributeError) as cm:
+        data["test_object"].target_entity_type = "Project"
 
-        assert str(cm.value) == "can't set attribute"
+    assert str(cm.value) == "can't set attribute"
 
-    def test_target_entity_type_argument_accepts_classes(self):
-        """testing if the target_entity_type argument accepts classes
-        """
 
-        self.kwargs["target_entity_type"] = TestClass
-        new_object = TargetEntityTypeMixedClass(**self.kwargs)
-        
-        assert new_object.target_entity_type == "TestClass"
+def test_target_entity_type_argument_accepts_classes(setup_target_entity_mixin_tests):
+    """target_entity_type argument accepts classes."""
+    data = setup_target_entity_mixin_tests
+    data["kwargs"]["target_entity_type"] = TestClass
+    new_object = TargetEntityTypeMixedClass(**data["kwargs"])
+    assert new_object.target_entity_type == "TestClass"

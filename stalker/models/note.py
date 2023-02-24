@@ -20,24 +20,20 @@ class Note(SimpleEntity):
 
     :param attached_to: The object that this note is attached to.
     """
+
     __auto_name__ = True
     __tablename__ = "Notes"
     __mapper_args__ = {"polymorphic_identity": "Note"}
 
-    note_id = Column(
-        "id",
-        Integer,
-        ForeignKey("SimpleEntities.id"),
-        primary_key=True
-    )
+    note_id = Column("id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True)
 
     content = synonym(
-        'description',
+        "description",
         doc="""The content of this :class:`.Note` instance.
 
         Content is a string representing the content of this Note, can be an
         empty.
-        """
+        """,
     )
 
     def __init__(self, content="", **kwargs):
@@ -45,13 +41,13 @@ class Note(SimpleEntity):
         self.content = content
 
     def __eq__(self, other):
-        """the equality operator
-        """
-        return super(Note, self).__eq__(other) and \
-            isinstance(other, Note) and \
-            self.content == other.content
+        """the equality operator"""
+        return (
+            super(Note, self).__eq__(other)
+            and isinstance(other, Note)
+            and self.content == other.content
+        )
 
     def __hash__(self):
-        """the overridden __hash__ method
-        """
+        """the overridden __hash__ method"""
         return super(Note, self).__hash__()

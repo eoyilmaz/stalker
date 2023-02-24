@@ -3,6 +3,7 @@
 import os
 import logging
 
+from six import string_types
 from sqlalchemy import Column, Integer, ForeignKey, String, Text
 from sqlalchemy.orm import validates
 
@@ -53,6 +54,7 @@ class Link(Entity):
     .. _PySeq Documentation: http://packages.python.org/pyseq/
 
     """
+
     __auto_name__ = True
     __tablename__ = "Links"
     __mapper_args__ = {"polymorphic_identity": "Link"}
@@ -65,52 +67,42 @@ class Link(Entity):
     )
 
     original_filename = Column(String(256))  # this is a limit for most
-                                             # filesystems
-    full_path = Column(
-        Text,
-        doc="""The full path of the url to the link."""
-    )
+    # filesystems
+    full_path = Column(Text, doc="""The full path of the url to the link.""")
 
-    def __init__(self, full_path='', original_filename='', **kwargs):
+    def __init__(self, full_path="", original_filename="", **kwargs):
         super(Link, self).__init__(**kwargs)
         self.full_path = full_path
         self.original_filename = original_filename
 
-    @validates('full_path')
+    @validates("full_path")
     def _validate_full_path(self, key, full_path):
-        """validates the given full_path value
-        """
+        """validates the given full_path value"""
         if full_path is None:
-            full_path = ''
+            full_path = ""
 
-        from stalker import __string_types__
-        if not isinstance(full_path, __string_types__):
+        if not isinstance(full_path, string_types):
             raise TypeError(
-                "%s.full_path should be an instance of string not %s" %
-                (self.__class__.__name__, full_path.__class__.__name__)
+                "%s.full_path should be an instance of string not %s"
+                % (self.__class__.__name__, full_path.__class__.__name__)
             )
 
         return self._format_path(full_path)
 
-    @validates('original_filename')
+    @validates("original_filename")
     def _validate_original_filename(self, key, original_filename):
-        """validates the given original_filename value
-        """
+        """validates the given original_filename value"""
         filename_from_path = os.path.basename(self.full_path)
         if original_filename is None:
             original_filename = filename_from_path
 
-        if original_filename == '':
+        if original_filename == "":
             original_filename = filename_from_path
 
-        from stalker import __string_types__
-        if not isinstance(original_filename, __string_types__):
+        if not isinstance(original_filename, string_types):
             raise TypeError(
-                '%s.original_filename should be an instance of str and not '
-                '%s' % (
-                    self.__class__.__name__,
-                    original_filename.__class__.__name__
-                )
+                "%s.original_filename should be an instance of str and not "
+                "%s" % (self.__class__.__name__, original_filename.__class__.__name__)
             )
 
         return original_filename
@@ -120,16 +112,14 @@ class Link(Entity):
         """formats the path to internal format, which is Linux forward slashes
         for path separation
         """
-        from stalker import __string_types__
-        if not isinstance(path, __string_types__):
-            path = path.encode('utf-8')
+        if not isinstance(path, string_types):
+            path = path.encode("utf-8")
 
         return path.replace("\\", "/")
 
     @property
     def path(self):
-        """the path property
-        """
+        """the path property"""
         return os.path.split(self.full_path)[0]
 
     @path.setter
@@ -139,30 +129,24 @@ class Link(Entity):
         :param str path: the new path
         """
         if path is None:
+            raise TypeError("%s.path can not be set to None" % self.__class__.__name__)
+
+        if not isinstance(path, string_types):
             raise TypeError(
-                '%s.path can not be set to None' % self.__class__.__name__
+                "%s.path should be an instance of str, not %s"
+                % (self.__class__.__name__, path.__class__.__name__)
             )
 
-        from stalker import __string_types__
-        if not isinstance(path, __string_types__):
-            raise TypeError(
-                '%s.path should be an instance of str, not %s' %
-                (self.__class__.__name__, path.__class__.__name__)
-            )
-
-        if path == '':
+        if path == "":
             raise ValueError(
-                '%s.path can not be an empty string' % self.__class__.__name__
+                "%s.path can not be an empty string" % self.__class__.__name__
             )
 
-        self.full_path = self._format_path(
-            os.path.join(path, self.filename)
-        )
+        self.full_path = self._format_path(os.path.join(path, self.filename))
 
     @property
     def filename(self):
-        """the filename property
-        """
+        """the filename property"""
         return os.path.split(self.full_path)[1]
 
     @filename.setter
@@ -172,23 +156,19 @@ class Link(Entity):
         :param str filename: the new filename
         """
         if filename is None:
-            filename = ''
+            filename = ""
 
-        from stalker import __string_types__
-        if not isinstance(filename, __string_types__):
+        if not isinstance(filename, string_types):
             raise TypeError(
-                '%s.filename should be an instance of str, not %s' %
-                (self.__class__.__name__, filename.__class__.__name__)
+                "%s.filename should be an instance of str, not %s"
+                % (self.__class__.__name__, filename.__class__.__name__)
             )
 
-        self.full_path = self._format_path(
-            os.path.join(self.path, filename)
-        )
+        self.full_path = self._format_path(os.path.join(self.path, filename))
 
     @property
     def extension(self):
-        """the extension property
-        """
+        """the extension property"""
         return os.path.splitext(self.full_path)[1]
 
     @extension.setter
@@ -198,32 +178,29 @@ class Link(Entity):
         :param extension: the new extension
         """
         if extension is None:
-            extension = ''
+            extension = ""
 
-        from stalker import __string_types__
-        if not isinstance(extension, __string_types__):
+        if not isinstance(extension, string_types):
             raise TypeError(
-                '%s.extension should be an instance of str, not %s' % (
-                    self.__class__.__name__,
-                    extension.__class__.__name__
-                )
+                "%s.extension should be an instance of str, not %s"
+                % (self.__class__.__name__, extension.__class__.__name__)
             )
 
-        if extension != '':
+        if extension != "":
             if not extension.startswith(os.path.extsep):
                 extension = os.path.extsep + extension
 
         self.filename = os.path.splitext(self.filename)[0] + extension
 
     def __eq__(self, other):
-        """the equality operator
-        """
-        return super(Link, self).__eq__(other) and \
-            isinstance(other, Link) and \
-            self.full_path == other.full_path and \
-            self.type == other.type
+        """the equality operator"""
+        return (
+            super(Link, self).__eq__(other)
+            and isinstance(other, Link)
+            and self.full_path == other.full_path
+            and self.type == other.type
+        )
 
     def __hash__(self):
-        """the overridden __hash__ method
-        """
+        """the overridden __hash__ method"""
         return super(Link, self).__hash__()

@@ -36,11 +36,11 @@ class Message(Entity, StatusMixin):
       this message (so anything can be attached to a message)
 
     """
+
     __auto_name__ = True
     __tablename__ = "Messages"
     __mapper_args__ = {"polymorphic_identity": "Message"}
-    message_id = Column("id", Integer, ForeignKey("Entities.id"),
-                        primary_key=True)
+    message_id = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
 
     def __init__(self, **kwargs):
         super(Message, self).__init__(**kwargs)

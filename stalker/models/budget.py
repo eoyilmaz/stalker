@@ -5,8 +5,13 @@ from sqlalchemy.orm import relationship, validates
 from stalker.db.declarative import Base
 
 from stalker.models.entity import Entity
-from stalker.models.mixins import (ProjectMixin, DAGMixin, StatusMixin,
-                                   AmountMixin, UnitMixin)
+from stalker.models.mixins import (
+    ProjectMixin,
+    DAGMixin,
+    StatusMixin,
+    AmountMixin,
+    UnitMixin,
+)
 
 
 class Good(Entity, UnitMixin):
@@ -43,102 +48,88 @@ class Good(Entity, UnitMixin):
     """
 
     __auto_name__ = False
-    __tablename__ = 'Goods'
-    __mapper_args__ = {'polymorphic_identity': 'Good'}
+    __tablename__ = "Goods"
+    __mapper_args__ = {"polymorphic_identity": "Good"}
 
-    good_id = Column(
-        'id',
-        Integer,
-        ForeignKey('Entities.id'),
-        primary_key=True
-    )
+    good_id = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
 
     price_lists = relationship(
-        'PriceList',
-        secondary='PriceList_Goods',
-        primaryjoin='Goods.c.id==PriceList_Goods.c.good_id',
-        secondaryjoin='PriceList_Goods.c.price_list_id==PriceLists.c.id',
-        back_populates='goods',
-        doc='PriceLists that this good is related to.'
+        "PriceList",
+        secondary="PriceList_Goods",
+        primaryjoin="Goods.c.id==PriceList_Goods.c.good_id",
+        secondaryjoin="PriceList_Goods.c.price_list_id==PriceLists.c.id",
+        back_populates="goods",
+        doc="PriceLists that this good is related to.",
     )
 
     cost = Column(Float, default=0.0)
     msrp = Column(Float, default=0.0)
     unit = Column(String(64))
 
-    client_id = Column('client_id', Integer, ForeignKey('Clients.id'))
+    client_id = Column("client_id", Integer, ForeignKey("Clients.id"))
     client = relationship(
-        'Client',
-        primaryjoin='Goods.c.client_id==Clients.c.id',
-        back_populates='goods',
-        uselist=False
+        "Client",
+        primaryjoin="Goods.c.client_id==Clients.c.id",
+        back_populates="goods",
+        uselist=False,
     )
 
-    def __init__(self, cost=0.0, msrp=0.0, unit='', client=None, **kwargs):
+    def __init__(self, cost=0.0, msrp=0.0, unit="", client=None, **kwargs):
         super(Good, self).__init__(**kwargs)
         UnitMixin.__init__(self, unit=unit)
         self.cost = cost
         self.msrp = msrp
         self.client = client
 
-    @validates('cost')
+    @validates("cost")
     def _validate_cost(self, key, cost):
-        """validates the given cost value
-        """
+        """validates the given cost value"""
         if cost is None:
             cost = 0.0
 
         if not isinstance(cost, (float, int)):
             raise TypeError(
-                '%s.cost should be a non-negative number, not %s' % (
-                    self.__class__.__name__,
-                    cost.__class__.__name__
-                )
+                "%s.cost should be a non-negative number, not %s"
+                % (self.__class__.__name__, cost.__class__.__name__)
             )
 
         if cost < 0.0:
             raise ValueError(
-                '%s.cost should be a non-negative number' %
-                self.__class__.__name__
+                "%s.cost should be a non-negative number" % self.__class__.__name__
             )
 
         return cost
 
-    @validates('msrp')
+    @validates("msrp")
     def _validate_msrp(self, key, msrp):
-        """validates the given msrp value
-        """
+        """validates the given msrp value"""
         if msrp is None:
             msrp = 0.0
 
         if not isinstance(msrp, (float, int)):
             raise TypeError(
-                '%s.msrp should be a non-negative number, not %s' % (
-                    self.__class__.__name__,
-                    msrp.__class__.__name__
-                )
+                "%s.msrp should be a non-negative number, not %s"
+                % (self.__class__.__name__, msrp.__class__.__name__)
             )
 
         if msrp < 0.0:
             raise ValueError(
-                '%s.msrp should be a non-negative number' %
-                self.__class__.__name__
+                "%s.msrp should be a non-negative number" % self.__class__.__name__
             )
 
         return msrp
 
-    @validates('client')
+    @validates("client")
     def _validate_client(self, key, client):
-        """validates the given client value
-        """
+        """validates the given client value"""
         if client is not None:
             from stalker import Client
+
             if not isinstance(client, Client):
                 raise TypeError(
-                    '%s.client attribute should be a '
-                    'stalker.models.client.Client instance, not %s' % (
-                        self.__class__.__name__, client.__class__.__name__
-                    )
+                    "%s.client attribute should be a "
+                    "stalker.models.client.Client instance, not %s"
+                    % (self.__class__.__name__, client.__class__.__name__)
                 )
         return client
 
@@ -151,23 +142,18 @@ class PriceList(Entity):
     """
 
     __auto_name__ = False
-    __tablename__ = 'PriceLists'
-    __mapper_args__ = {'polymorphic_identity': 'PriceList'}
+    __tablename__ = "PriceLists"
+    __mapper_args__ = {"polymorphic_identity": "PriceList"}
 
-    price_list_id = Column(
-        'id',
-        Integer,
-        ForeignKey('Entities.id'),
-        primary_key=True
-    )
+    price_list_id = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
 
     goods = relationship(
-        'Good',
-        secondary='PriceList_Goods',
-        primaryjoin='PriceLists.c.id==PriceList_Goods.c.price_list_id',
-        secondaryjoin='PriceList_Goods.c.good_id==Goods.c.id',
-        back_populates='price_lists',
-        doc='Goods in this list.'
+        "Good",
+        secondary="PriceList_Goods",
+        primaryjoin="PriceLists.c.id==PriceList_Goods.c.price_list_id",
+        secondaryjoin="PriceList_Goods.c.good_id==Goods.c.id",
+        back_populates="price_lists",
+        doc="Goods in this list.",
     )
 
     def __init__(self, goods=None, **kwargs):
@@ -176,36 +162,25 @@ class PriceList(Entity):
             goods = []
         self.goods = goods
 
-    @validates('goods')
+    @validates("goods")
     def _validate_goods(self, key, good):
-        """validates the given good value
-        """
+        """validates the given good value"""
         from stalker import Good
+
         if not isinstance(good, Good):
             raise TypeError(
-                '%s.goods should be a list of stalker.model.bugdet.Good '
-                'instances, not %s' % (
-                    self.__class__.__name__,
-                    good.__class__.__name__
-                )
+                "%s.goods should be a list of stalker.model.budget.Good "
+                "instances, not %s" % (self.__class__.__name__, good.__class__.__name__)
             )
 
         return good
 
+
 PriceList_Goods = Table(
-    'PriceList_Goods', Base.metadata,
-    Column(
-        'price_list_id',
-        Integer,
-        ForeignKey('PriceLists.id'),
-        primary_key=True
-    ),
-    Column(
-        'good_id',
-        Integer,
-        ForeignKey('Goods.id'),
-        primary_key=True
-    )
+    "PriceList_Goods",
+    Base.metadata,
+    Column("price_list_id", Integer, ForeignKey("PriceLists.id"), primary_key=True),
+    Column("good_id", Integer, ForeignKey("Goods.id"), primary_key=True),
 )
 
 
@@ -220,27 +195,22 @@ class Budget(Entity, ProjectMixin, DAGMixin, StatusMixin):
     __tablename__ = "Budgets"
     __mapper_args__ = {"polymorphic_identity": "Budget"}
 
-    budget_id = Column(
-        "id",
-        Integer,
-        ForeignKey("Entities.id"),
-        primary_key=True
-    )
+    budget_id = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
 
-    __id_column__ = 'budget_id'
+    __id_column__ = "budget_id"
 
     entries = relationship(
-        'BudgetEntry',
-        primaryjoin='BudgetEntries.c.budget_id==Budgets.c.id',
+        "BudgetEntry",
+        primaryjoin="BudgetEntries.c.budget_id==Budgets.c.id",
         uselist=True,
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
     )
 
     invoices = relationship(
-        'Invoice',
-        primaryjoin='Invoices.c.budget_id==Budgets.c.id',
+        "Invoice",
+        primaryjoin="Invoices.c.budget_id==Budgets.c.id",
         uselist=True,
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
     )
 
     def __init__(self, **kwargs):
@@ -249,16 +219,16 @@ class Budget(Entity, ProjectMixin, DAGMixin, StatusMixin):
         DAGMixin.__init__(self, **kwargs)
         StatusMixin.__init__(self, **kwargs)
 
-    @validates('entries')
+    @validates("entries")
     def _validate_entry(self, key, entry):
-        """validates the given entry value
-        """
+        """validates the given entry value"""
         if not isinstance(entry, BudgetEntry):
             raise TypeError(
-                '%(class)s.entries should be a list of BudgetEntry instances, '
-                'not %(entry_class)s' % {
-                    'class': self.__class__.__name__,
-                    'entry_class': entry.__class__.__name__
+                "%(class)s.entries should be a list of BudgetEntry instances, "
+                "not %(entry_class)s"
+                % {
+                    "class": self.__class__.__name__,
+                    "entry_class": entry.__class__.__name__,
                 }
             )
         return entry
@@ -293,34 +263,21 @@ class BudgetEntry(Entity, AmountMixin, UnitMixin):
     __tablename__ = "BudgetEntries"
     __mapper_args__ = {"polymorphic_identity": "BudgetEntry"}
 
-    entry_id = Column(
-        "id",
-        Integer,
-        ForeignKey("Entities.id"),
-        primary_key=True
-    )
+    entry_id = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
 
-    budget_id = Column(
-        Integer,
-        ForeignKey('Budgets.id')
-    )
+    budget_id = Column(Integer, ForeignKey("Budgets.id"))
 
     budget = relationship(
-        'Budget',
-        primaryjoin='BudgetEntries.c.budget_id==Budgets.c.id',
-        back_populates='entries',
-        uselist=False
+        "Budget",
+        primaryjoin="BudgetEntries.c.budget_id==Budgets.c.id",
+        back_populates="entries",
+        uselist=False,
     )
 
-    good_id = Column(
-        Integer,
-        ForeignKey('Goods.id')
-    )
+    good_id = Column(Integer, ForeignKey("Goods.id"))
 
     good = relationship(
-        'Good',
-        primaryjoin='BudgetEntries.c.good_id==Goods.c.id',
-        uselist=False
+        "Good", primaryjoin="BudgetEntries.c.good_id==Goods.c.id", uselist=False
     )
 
     cost = Column(Float, default=0.0)
@@ -329,13 +286,9 @@ class BudgetEntry(Entity, AmountMixin, UnitMixin):
     price = Column(Float, default=0.0)
     realized_total = Column(Float, default=0.0)
 
-    def __init__(self,
-                 budget=None,
-                 good=None,
-                 price=0,
-                 realized_total=0,
-                 amount=0.0,
-                 **kwargs):
+    def __init__(
+        self, budget=None, good=None, price=0, realized_total=0, amount=0.0, **kwargs
+    ):
         super(BudgetEntry, self).__init__(**kwargs)
 
         self.budget = budget
@@ -343,8 +296,8 @@ class BudgetEntry(Entity, AmountMixin, UnitMixin):
         self.cost = good.cost
         self.msrp = good.msrp
 
-        kwargs['unit'] = good.unit
-        kwargs['amount'] = amount
+        kwargs["unit"] = good.unit
+        kwargs["amount"] = amount
 
         AmountMixin.__init__(self, **kwargs)
         UnitMixin.__init__(self, **kwargs)
@@ -352,93 +305,79 @@ class BudgetEntry(Entity, AmountMixin, UnitMixin):
         self.price = price
         self.realized_total = realized_total
 
-    @validates('budget')
+    @validates("budget")
     def _validate_budget(self, key, budget):
-        """validates the given budget value
-        """
+        """validates the given budget value"""
         if not isinstance(budget, Budget):
             raise TypeError(
-                '%s.budget should be a Budget instance, not %s' % (
-                    self.__class__.__name__, budget.__class__.__name__
-                )
+                "%s.budget should be a Budget instance, not %s"
+                % (self.__class__.__name__, budget.__class__.__name__)
             )
         return budget
 
-    @validates('cost')
+    @validates("cost")
     def _validate_cost(self, key, cost):
-        """validates the given cost value
-        """
+        """validates the given cost value"""
         if cost is None:
             cost = 0.0
 
         if not isinstance(cost, (int, float)):
             raise TypeError(
-                '%s.cost should be a number, not %s' % (
-                    self.__class__.__name__, cost.__class__.__name__
-                )
+                "%s.cost should be a number, not %s"
+                % (self.__class__.__name__, cost.__class__.__name__)
             )
 
         return float(cost)
 
-    @validates('msrp')
+    @validates("msrp")
     def _validate_msrp(self, key, msrp):
-        """validates the given msrp value
-        """
+        """validates the given msrp value"""
         if msrp is None:
             msrp = 0.0
 
         if not isinstance(msrp, (int, float)):
             raise TypeError(
-                '%s.msrp should be a number, not %s' % (
-                    self.__class__.__name__, msrp.__class__.__name__
-                )
+                "%s.msrp should be a number, not %s"
+                % (self.__class__.__name__, msrp.__class__.__name__)
             )
 
         return float(msrp)
 
-    @validates('price')
+    @validates("price")
     def _validate_price(self, key, price):
-        """validates the given price value
-        """
+        """validates the given price value"""
         if price is None:
             price = 0.0
 
         if not isinstance(price, (int, float)):
             raise TypeError(
-                '%s.price should be a number, not %s' % (
-                    self.__class__.__name__, price.__class__.__name__
-                )
+                "%s.price should be a number, not %s"
+                % (self.__class__.__name__, price.__class__.__name__)
             )
 
         return float(price)
 
-    @validates('realized_total')
+    @validates("realized_total")
     def _validate_realized_total(self, key, realized_total):
-        """validates the given realized_total value
-        """
+        """validates the given realized_total value"""
         if realized_total is None:
             realized_total = 0.0
 
         if not isinstance(realized_total, (int, float)):
             raise TypeError(
-                '%s.realized_total should be a number, not %s' % (
-                    self.__class__.__name__,
-                    realized_total.__class__.__name__
-                )
+                "%s.realized_total should be a number, not %s"
+                % (self.__class__.__name__, realized_total.__class__.__name__)
             )
 
         return float(realized_total)
 
-    @validates('good')
+    @validates("good")
     def _validate_good(self, key, good):
-        """validates the given good value
-        """
+        """validates the given good value"""
         if not isinstance(good, Good):
             raise TypeError(
-                '%s.good should be a stalker.models.budget.Good instance, '
-                'not %s' % (
-                    self.__class__.__name__, good.__class__.__name__
-                )
+                "%s.good should be a stalker.models.budget.Good instance, "
+                "not %s" % (self.__class__.__name__, good.__class__.__name__)
             )
 
         return good
@@ -466,80 +405,56 @@ class Invoice(Entity, AmountMixin, UnitMixin):
     __tablename__ = "Invoices"
     __mapper_args__ = {"polymorphic_identity": "Invoice"}
 
-    invoice_id = Column(
-        "id",
-        Integer,
-        ForeignKey("Entities.id"),
-        primary_key=True
-    )
+    invoice_id = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
 
-    budget_id = Column(
-        Integer,
-        ForeignKey('Budgets.id')
-    )
+    budget_id = Column(Integer, ForeignKey("Budgets.id"))
 
     budget = relationship(
-        'Budget',
-        primaryjoin='Invoices.c.budget_id==Budgets.c.id',
-        back_populates='invoices',
-        uselist=False
+        "Budget",
+        primaryjoin="Invoices.c.budget_id==Budgets.c.id",
+        back_populates="invoices",
+        uselist=False,
     )
 
-    client_id = Column(
-        Integer,
-        ForeignKey('Clients.id')
-    )
+    client_id = Column(Integer, ForeignKey("Clients.id"))
 
     client = relationship(
-        'Client',
-        primaryjoin='Invoices.c.client_id==Clients.c.id',
-        uselist=False
+        "Client", primaryjoin="Invoices.c.client_id==Clients.c.id", uselist=False
     )
 
     payments = relationship(
-        'Payment',
-        primaryjoin='Payments.c.invoice_id==Invoices.c.id',
+        "Payment",
+        primaryjoin="Payments.c.invoice_id==Invoices.c.id",
         uselist=True,
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
     )
 
-    def __init__(
-            self,
-            budget=None,
-            client=None,
-            amount=0,
-            unit=None,
-            **kwargs):
+    def __init__(self, budget=None, client=None, amount=0, unit=None, **kwargs):
         super(Invoice, self).__init__(**kwargs)
         AmountMixin.__init__(self, amount=amount)
         UnitMixin.__init__(self, unit=unit)
         self.budget = budget
         self.client = client
 
-    @validates('budget')
+    @validates("budget")
     def _validate_budget(self, key, budget):
-        """validates the given budget value
-        """
+        """validates the given budget value"""
         if not isinstance(budget, Budget):
             raise TypeError(
-                '%s.budget should be a Budget instance, not %s' % (
-                    self.__class__.__name__,
-                    budget.__class__.__name__
-                )
+                "%s.budget should be a Budget instance, not %s"
+                % (self.__class__.__name__, budget.__class__.__name__)
             )
         return budget
 
-    @validates('client')
+    @validates("client")
     def _validate_client(self, key, client):
-        """validates the given client value
-        """
+        """validates the given client value"""
         from stalker import Client
+
         if not isinstance(client, Client):
             raise TypeError(
-                '%s.client should be a Client instance, not %s' % (
-                    self.__class__.__name__,
-                    client.__class__.__name__
-                )
+                "%s.client should be a Client instance, not %s"
+                % (self.__class__.__name__, client.__class__.__name__)
             )
         return client
 
@@ -559,23 +474,15 @@ class Payment(Entity, AmountMixin, UnitMixin):
     __tablename__ = "Payments"
     __mapper_args__ = {"polymorphic_identity": "Payment"}
 
-    payment_id = Column(
-        "id",
-        Integer,
-        ForeignKey("Entities.id"),
-        primary_key=True
-    )
+    payment_id = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
 
-    invoice_id = Column(
-        Integer,
-        ForeignKey('Invoices.id')
-    )
+    invoice_id = Column(Integer, ForeignKey("Invoices.id"))
 
     invoice = relationship(
-        'Invoice',
-        primaryjoin='Payments.c.invoice_id==Invoices.c.id',
-        back_populates='payments',
-        uselist=False
+        "Invoice",
+        primaryjoin="Payments.c.invoice_id==Invoices.c.id",
+        back_populates="payments",
+        uselist=False,
     )
 
     def __init__(self, invoice=None, amount=0, unit=None, **kwargs):
@@ -584,15 +491,12 @@ class Payment(Entity, AmountMixin, UnitMixin):
         UnitMixin.__init__(self, unit=unit)
         self.invoice = invoice
 
-    @validates('invoice')
+    @validates("invoice")
     def _validate_invoice(self, key, invoice):
-        """validates the invoice value
-        """
+        """validates the invoice value"""
         if not isinstance(invoice, Invoice):
             raise TypeError(
-                '%s.invoice should be an Invoice instance, not %s' % (
-                    self.__class__.__name__,
-                    invoice.__class__.__name__
-                )
+                "%s.invoice should be an Invoice instance, not %s"
+                % (self.__class__.__name__, invoice.__class__.__name__)
             )
         return invoice

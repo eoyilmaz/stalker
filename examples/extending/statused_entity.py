@@ -13,12 +13,13 @@ class NewStatusedEntity(SimpleEntity, StatusMixin):
     abilities.
     """
 
-    __tablename__ = 'NewStatusedEntities'
-    __mapper_args__ = {'polymorphic_identity': 'NewStatusedEntity'}
+    __tablename__ = "NewStatusedEntities"
+    __mapper_args__ = {"polymorphic_identity": "NewStatusedEntity"}
 
-    new_statused_entity_id = Column('id', Integer,
-                                    ForeignKey('SimpleEntities.id'),
-                                    primary_key=True)
+    new_statused_entity_id = Column(
+        "id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True
+    )
+
 
 # voila now we have introduced a new type to the SOM and also mixed it with a
 # StatusMixin

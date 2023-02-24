@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from six import string_types
 from sqlalchemy import Table, Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship, validates
 
@@ -42,6 +42,7 @@ class Status(Entity, CodeMixin):
     :param code: The code of this Status, its generally the short version of
       the name attribute.
     """
+
     __auto_name__ = False
     __tablename__ = "Statuses"
     __mapper_args__ = {"polymorphic_identity": "Status"}
@@ -52,30 +53,24 @@ class Status(Entity, CodeMixin):
         primary_key=True,
     )
 
-    def __init__(self,
-                 name=None,
-                 code=None,
-                 **kwargs):
-        kwargs['name'] = name
-        kwargs['code'] = code
+    def __init__(self, name=None, code=None, **kwargs):
+        kwargs["name"] = name
+        kwargs["code"] = code
 
         super(Status, self).__init__(**kwargs)
         self.code = code
 
     def __eq__(self, other):
-        """the equality operator
-        """
-        from stalker import __string_types__
-        if isinstance(other, __string_types__):
-            return self.name.lower() == other.lower() or \
-                self.code.lower() == other.lower()
+        """the equality operator"""
+        if isinstance(other, string_types):
+            return (
+                self.name.lower() == other.lower() or self.code.lower() == other.lower()
+            )
         else:
-            return super(Status, self).__eq__(other) and \
-                isinstance(other, Status)
+            return super(Status, self).__eq__(other) and isinstance(other, Status)
 
     def __hash__(self):
-        """the overridden __hash__ method
-        """
+        """the overridden __hash__ method"""
         return super(Status, self).__hash__()
 
 
@@ -148,23 +143,19 @@ class StatusList(Entity, TargetEntityTypeMixin):
       its :attr:`.StatusList.statuses`. But it is useless. The validation for
       empty statuses list is left to the SOM user.
     """
+
     __auto_name__ = True
     __tablename__ = "StatusLists"
     __mapper_args__ = {"polymorphic_identity": "StatusList"}
 
     __unique_target__ = True
 
-    status_list_id = Column(
-        "id",
-        Integer,
-        ForeignKey("Entities.id"),
-        primary_key=True
-    )
+    status_list_id = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
 
     statuses = relationship(
         "Status",
         secondary="StatusList_Statuses",
-        doc="List of :class:`.Status` objects, showing the possible statuses"
+        doc="List of :class:`.Status` objects, showing the possible statuses",
     )
 
     def __init__(self, statuses=None, target_entity_type=None, **kwargs):
@@ -177,36 +168,33 @@ class StatusList(Entity, TargetEntityTypeMixin):
 
     @validates("statuses")
     def _validate_statuses(self, key, status):
-        """validates the given status
-        """
+        """validates the given status"""
         if not isinstance(status, Status):
             raise TypeError(
                 "All of the elements in %s.statuses must be an instance of "
-                "stalker.models.status.Status, and not %s" %
-                (self.__class__.__name__, status.__class__.__name__)
+                "stalker.models.status.Status, and not %s"
+                % (self.__class__.__name__, status.__class__.__name__)
             )
         return status
 
     def __eq__(self, other):
-        """the equality operator
-        """
-        return super(StatusList, self).__eq__(other) and \
-            isinstance(other, StatusList) and \
-            self.statuses == other.statuses and \
-            self.target_entity_type == other.target_entity_type
+        """the equality operator"""
+        return (
+            super(StatusList, self).__eq__(other)
+            and isinstance(other, StatusList)
+            and self.statuses == other.statuses
+            and self.target_entity_type == other.target_entity_type
+        )
 
     def __hash__(self):
-        """the overridden __hash__ method
-        """
+        """the overridden __hash__ method"""
         return super(StatusList, self).__hash__()
 
     def __getitem__(self, key):
-        """the indexing attributes for getting item
-        """
+        """the indexing attributes for getting item"""
         with DBSession.no_autoflush:
             return_item = None
-            from stalker import __string_types__
-            if isinstance(key, __string_types__):
+            if isinstance(key, string_types):
                 for item in self.statuses:
                     if item == key:
                         return_item = item
@@ -216,34 +204,22 @@ class StatusList(Entity, TargetEntityTypeMixin):
         return return_item
 
     def __setitem__(self, key, value):
-        """the indexing attributes for setting item
-        """
+        """the indexing attributes for setting item"""
         self.statuses[key] = value
 
     def __delitem__(self, key):
-        """the indexing attributes for deleting item
-        """
+        """the indexing attributes for deleting item"""
         del self.statuses[key]
 
     def __len__(self):
-        """the indexing attributes for getting the length
-        """
+        """the indexing attributes for getting the length"""
         return len(self.statuses)
 
 
 # StatusList_Statuses Table
 StatusList_Statuses = Table(
-    "StatusList_Statuses", Base.metadata,
-    Column(
-        "status_list_id",
-        Integer,
-        ForeignKey("StatusLists.id"),
-        primary_key=True
-    ),
-    Column(
-        "status_id",
-        Integer,
-        ForeignKey("Statuses.id"),
-        primary_key=True
-    )
+    "StatusList_Statuses",
+    Base.metadata,
+    Column("status_list_id", Integer, ForeignKey("StatusLists.id"), primary_key=True),
+    Column("status_id", Integer, ForeignKey("Statuses.id"), primary_key=True),
 )

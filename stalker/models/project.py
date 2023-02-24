@@ -9,8 +9,7 @@ from sqlalchemy.orm import relationship, validates
 
 from stalker.db.declarative import Base
 from stalker.models.entity import Entity
-from stalker.models.mixins import (StatusMixin, DateRangeMixin, ReferenceMixin,
-                                   CodeMixin)
+from stalker.models.mixins import StatusMixin, DateRangeMixin, ReferenceMixin, CodeMixin
 from stalker.log import logging_level
 
 logger = logging.getLogger(__name__)
@@ -18,32 +17,23 @@ logger.setLevel(logging_level)
 
 
 class ProjectRepository(Base):
-    """The association object for Project to Repository instances
-    """
-    __tablename__ = 'Project_Repositories'
+    """The association object for Project to Repository instances"""
 
-    project_id = Column(
-        Integer,
-        ForeignKey('Projects.id'),
-        primary_key=True
-    )
+    __tablename__ = "Project_Repositories"
+
+    project_id = Column(Integer, ForeignKey("Projects.id"), primary_key=True)
 
     project = relationship(
-        'Project',
-        back_populates='repositories_proxy',
-        primaryjoin='Project.project_id==ProjectRepository.project_id',
+        "Project",
+        back_populates="repositories_proxy",
+        primaryjoin="Project.project_id==ProjectRepository.project_id",
     )
 
-    repository_id = Column(
-        Integer,
-        ForeignKey('Repositories.id'),
-        primary_key=True
-    )
+    repository_id = Column(Integer, ForeignKey("Repositories.id"), primary_key=True)
 
     repository = relationship(
-        'Repository',
-        primaryjoin=
-        'ProjectRepository.repository_id==Repository.repository_id',
+        "Repository",
+        primaryjoin="ProjectRepository.repository_id==Repository.repository_id",
     )
 
     position = Column(Integer)
@@ -53,24 +43,23 @@ class ProjectRepository(Base):
         self.repository = repository
         self.position = position
 
-    @validates('project')
+    @validates("project")
     def _validate_project(self, key, project):
-        """validates the given project value
-        """
+        """validates the given project value"""
         return project
 
     @validates("repository")
     def _validate_repository(self, key, repository):
-        """validates the given repository value
-        """
+        """validates the given repository value"""
         if repository is not None:
             from stalker.models.repository import Repository
+
             if not isinstance(repository, Repository):
                 raise TypeError(
                     "%s.repositories should be a list of "
                     "stalker.models.repository.Repository instances or "
-                    "derivatives, not %s" %
-                    (self.__class__.__name__, repository.__class__.__name__)
+                    "derivatives, not %s"
+                    % (self.__class__.__name__, repository.__class__.__name__)
                 )
 
         return repository
@@ -183,70 +172,65 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
 
     __auto_name__ = False
     __tablename__ = "Projects"
-    project_id = Column("id", Integer, ForeignKey("Entities.id"),
-                        primary_key=True)
+    project_id = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
 
     __mapper_args__ = {
         "polymorphic_identity": "Project",
-        "inherit_condition": project_id == Entity.entity_id
+        "inherit_condition": project_id == Entity.entity_id,
     }
 
     # TODO: Remove this attribute, because we have the statuses to control if a project is active or not
     active = Column(Boolean, default=True)
 
     clients = association_proxy(
-        'client_role',
-        'client',
-        creator=lambda n: ProjectClient(client=n)
+        "client_role", "client", creator=lambda n: ProjectClient(client=n)
     )
 
     client_role = relationship(
-        'ProjectClient',
-        back_populates='project',
-        cascade='all, delete-orphan',
+        "ProjectClient",
+        back_populates="project",
+        cascade="all, delete-orphan",
         cascade_backrefs=False,
-        primaryjoin='Projects.c.id==Project_Clients.c.project_id'
+        primaryjoin="Projects.c.id==Project_Clients.c.project_id",
     )
 
     tasks = relationship(
-        'Task',
-        primaryjoin='Tasks.c.project_id==Projects.c.id',
+        "Task",
+        primaryjoin="Tasks.c.project_id==Projects.c.id",
         uselist=True,
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
     )
 
     users = association_proxy(
-        'user_role',
-        'user',
-        creator=lambda n: ProjectUser(user=n)
+        "user_role", "user", creator=lambda n: ProjectUser(user=n)
     )
 
     user_role = relationship(
-        'ProjectUser',
-        back_populates='project',
-        cascade='all, delete-orphan',
+        "ProjectUser",
+        back_populates="project",
+        cascade="all, delete-orphan",
         cascade_backrefs=False,
-        primaryjoin='Projects.c.id==Project_Users.c.project_id'
+        primaryjoin="Projects.c.id==Project_Users.c.project_id",
     )
 
     repositories_proxy = relationship(
-        'ProjectRepository',
-        back_populates='project',
-        cascade='all, delete-orphan',
+        "ProjectRepository",
+        back_populates="project",
+        cascade="all, delete-orphan",
         cascade_backrefs=False,
-        order_by='ProjectRepository.position',
-        primaryjoin='Projects.c.id==Project_Repositories.c.project_id',
-        collection_class=ordering_list('position'),
+        order_by="ProjectRepository.position",
+        primaryjoin="Projects.c.id==Project_Repositories.c.project_id",
+        collection_class=ordering_list("position"),
         doc="""The :class:`.Repository` that this project files should reside.
 
         Should be a list of :class:`.Repository`\ instances.
-        """
+        """,
     )
 
     repositories = association_proxy(
-        'repositories_proxy',
-        'repository',
-        creator=lambda n: ProjectRepository(repository=n)
+        "repositories_proxy",
+        "repository",
+        creator=lambda n: ProjectRepository(repository=n),
     )
 
     structure_id = Column(Integer, ForeignKey("Structures.id"))
@@ -254,7 +238,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         "Structure",
         primaryjoin="Project.structure_id==Structure.structure_id",
         doc="""The structure of the project. Should be an instance of
-        :class:`.Structure` class"""
+        :class:`.Structure` class""",
     )
 
     image_format_id = Column(Integer, ForeignKey("ImageFormats.id"))
@@ -265,7 +249,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
 
         This value defines the output image format of the project, should be an
         instance of :class:`.ImageFormat`.
-        """
+        """,
     )
 
     fps = Column(
@@ -274,36 +258,37 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
 
         It is a float value, any other types will be converted to float. The
         default value is 25.0.
-        """
+        """,
     )
 
     is_stereoscopic = Column(
-        Boolean,
-        doc="""True if the project is a stereoscopic project"""
+        Boolean, doc="""True if the project is a stereoscopic project"""
     )
 
     tickets = relationship(
-        'Ticket',
-        primaryjoin='Tickets.c.project_id==Projects.c.id',
+        "Ticket",
+        primaryjoin="Tickets.c.project_id==Projects.c.id",
         uselist=True,
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
     )
 
-    def __init__(self,
-                 name=None,
-                 code=None,
-                 clients=None,
-                 repositories=None,
-                 structure=None,
-                 image_format=None,
-                 fps=25.0,
-                 is_stereoscopic=False,
-                 users=None,
-                 **kwargs):
+    def __init__(
+        self,
+        name=None,
+        code=None,
+        clients=None,
+        repositories=None,
+        structure=None,
+        image_format=None,
+        fps=25.0,
+        is_stereoscopic=False,
+        users=None,
+        **kwargs
+    ):
         # a projects project should be self
         # initialize the project argument to self
-        kwargs['project'] = self
-        kwargs['name'] = name
+        kwargs["project"] = self
+        kwargs["name"] = name
 
         super(Project, self).__init__(**kwargs)
         # call the mixin __init__ methods
@@ -337,133 +322,115 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         self.active = True
 
     def __eq__(self, other):
-        """the equality operator
-        """
-        return super(Project, self).__eq__(other) and \
-            isinstance(other, Project)
+        """the equality operator"""
+        return super(Project, self).__eq__(other) and isinstance(other, Project)
 
     def __hash__(self):
-        """the overridden __hash__ method
-        """
+        """the overridden __hash__ method"""
         return super(Project, self).__hash__()
 
     @validates("fps")
     def _validate_fps(self, key, fps):
-        """validates the given fps_in value
-        """
+        """validates the given fps_in value"""
         if not isinstance(fps, (int, float)):
             raise TypeError(
-                '%s.fps should be a positive float or int, not %s' % (
-                    self.__class__.__name__,
-                    fps.__class__.__name__
-                )
+                "%s.fps should be a positive float or int, not %s"
+                % (self.__class__.__name__, fps.__class__.__name__)
             )
 
         fps = float(fps)
         if fps <= 0:
             raise ValueError(
-                '%s.fps should be a positive float or int, not %s' %
-                (self.__class__.__name__, fps)
+                "%s.fps should be a positive float or int, not %s"
+                % (self.__class__.__name__, fps)
             )
         return float(fps)
 
     @validates("image_format")
     def _validate_image_format(self, key, image_format):
-        """validates the given image format
-        """
+        """validates the given image format"""
         from stalker.models.format import ImageFormat
 
-        if image_format is not None and \
-           not isinstance(image_format, ImageFormat):
+        if image_format is not None and not isinstance(image_format, ImageFormat):
             raise TypeError(
                 "%s.image_format should be an instance of "
-                "stalker.models.format.ImageFormat, not %s" %
-                (self.__class__.__name__, image_format.__class__.__name__)
+                "stalker.models.format.ImageFormat, not %s"
+                % (self.__class__.__name__, image_format.__class__.__name__)
             )
         return image_format
 
     @validates("structure")
     def _validate_structure(self, key, structure_in):
-        """validates the given structure_in value
-        """
+        """validates the given structure_in value"""
         from stalker.models.structure import Structure
 
         if structure_in is not None:
             if not isinstance(structure_in, Structure):
                 raise TypeError(
                     "%s.structure should be an instance of "
-                    "stalker.models.structure.Structure, not %s" %
-                    (self.__class__.__name__, structure_in.__class__.__name__)
+                    "stalker.models.structure.Structure, not %s"
+                    % (self.__class__.__name__, structure_in.__class__.__name__)
                 )
         return structure_in
 
-    @validates('is_stereoscopic')
+    @validates("is_stereoscopic")
     def _validate_is_stereoscopic(self, key, is_stereoscopic_in):
         return bool(is_stereoscopic_in)
 
     @property
     def root_tasks(self):
-        """returns a list of Tasks which have no parent
-        """
+        """returns a list of Tasks which have no parent"""
         from stalker import Task
         from stalker.db.session import DBSession
 
         # TODO: add a fallback method
         with DBSession.no_autoflush:
-            return Task.query \
-                .filter(Task.project == self) \
-                .filter(Task.parent == None) \
+            return (
+                Task.query.filter(Task.project == self)
+                .filter(Task.parent == None)
                 .all()
+            )
 
     @property
     def assets(self):
-        """returns the assets related to this project
-        """
+        """returns the assets related to this project"""
         from stalker.models.asset import Asset
         from stalker.db.session import DBSession
 
         # TODO: add a fallback method
         with DBSession.no_autoflush:
-            return Asset.query \
-                .filter(Asset.project == self) \
-                .all()
+            return Asset.query.filter(Asset.project == self).all()
 
     @property
     def sequences(self):
-        """returns the sequences related to this project
-        """
+        """returns the sequences related to this project"""
         # sequences are tasks, use self.tasks
         from stalker.models.sequence import Sequence
 
-        return Sequence.query \
-            .filter(Sequence.project == self) \
-            .all()
+        return Sequence.query.filter(Sequence.project == self).all()
 
     @property
     def shots(self):
-        """returns the shots related to this project
-        """
+        """returns the shots related to this project"""
         # shots are tasks, use self.tasks
         from stalker.models.shot import Shot
 
-        return Shot.query \
-            .filter(Shot.project == self) \
-            .all()
+        return Shot.query.filter(Shot.project == self).all()
 
     @property
     def to_tjp(self):
-        """returns a TaskJuggler compatible string representing this project
-        """
+        """returns a TaskJuggler compatible string representing this project"""
         from jinja2 import Template
         from stalker import defaults
-        temp = Template(defaults.tjp_project_template, trim_blocks=True,
-                        lstrip_blocks=True)
-        return temp.render({'project': self})
+
+        temp = Template(
+            defaults.tjp_project_template, trim_blocks=True, lstrip_blocks=True
+        )
+        return temp.render({"project": self})
 
     @property
     def is_active(self):
-        """predicate for Project.active attribute
-        """
+        """predicate for Project.active attribute"""
         return self.active
 
     @property
@@ -477,7 +444,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
                 task.update_schedule_info()
             total_logged_seconds += task.total_logged_seconds
 
-        logger.debug('project.total_logged_seconds: %s' % total_logged_seconds)
+        logger.debug("project.total_logged_seconds: %s" % total_logged_seconds)
 
         return total_logged_seconds
 
@@ -492,7 +459,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
                 task.update_schedule_info()
             schedule_seconds += task.schedule_seconds
 
-        logger.debug('project.schedule_seconds: %s' % schedule_seconds)
+        logger.debug("project.schedule_seconds: %s" % schedule_seconds)
 
         return schedule_seconds
 
@@ -516,11 +483,13 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         `Open` and created in this project.
         """
         from stalker import Ticket, Status
-        return Ticket.query \
-            .join(Status, Ticket.status) \
-            .filter(Ticket.project == self) \
-            .filter(Status.code != 'CLS') \
+
+        return (
+            Ticket.query.join(Status, Ticket.status)
+            .filter(Ticket.project == self)
+            .filter(Status.code != "CLS")
             .all()
+        )
 
     @property
     def repository(self):
@@ -535,50 +504,34 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
 
 
 class ProjectUser(Base):
-    """The association object used in User-to-Project relation
-    """
+    """The association object used in User-to-Project relation"""
 
-    __tablename__ = 'Project_Users'
+    __tablename__ = "Project_Users"
 
-    user_id = Column(
-        'user_id',
-        Integer,
-        ForeignKey('Users.id'),
-        primary_key=True
-    )
+    user_id = Column("user_id", Integer, ForeignKey("Users.id"), primary_key=True)
 
     user = relationship(
-        'User',
-        back_populates='project_role',
+        "User",
+        back_populates="project_role",
         cascade_backrefs=False,
-        primaryjoin='ProjectUser.user_id==User.user_id'
+        primaryjoin="ProjectUser.user_id==User.user_id",
     )
 
     project_id = Column(
-        'project_id',
-        Integer,
-        ForeignKey('Projects.id'),
-        primary_key=True
+        "project_id", Integer, ForeignKey("Projects.id"), primary_key=True
     )
 
     project = relationship(
-        'Project',
-        back_populates='user_role',
+        "Project",
+        back_populates="user_role",
         cascade_backrefs=False,
-        primaryjoin='ProjectUser.project_id==Project.project_id'
+        primaryjoin="ProjectUser.project_id==Project.project_id",
     )
 
-    role_id = Column(
-        'rid',
-        Integer,
-        ForeignKey('Roles.id'),
-        nullable=True
-    )
+    role_id = Column("rid", Integer, ForeignKey("Roles.id"), nullable=True)
 
     role = relationship(
-        'Role',
-        cascade_backrefs=False,
-        primaryjoin='ProjectUser.role_id==Role.role_id'
+        "Role", cascade_backrefs=False, primaryjoin="ProjectUser.role_id==Role.role_id"
     )
 
     rate = Column(Float, default=0.0)
@@ -592,19 +545,19 @@ class ProjectUser(Base):
 
     @validates("user")
     def _validate_user(self, key, user):
-        """validates the given user value
-        """
+        """validates the given user value"""
         if user is not None:
             from stalker.models.auth import User
+
             if not isinstance(user, User):
                 raise TypeError(
                     "%s.user should be a stalker.models.auth.User instance, "
-                    "not %s" %
-                    (self.__class__.__name__, user.__class__.__name__)
+                    "not %s" % (self.__class__.__name__, user.__class__.__name__)
                 )
 
             # also update rate attribute
             from stalker.db.session import DBSession
+
             with DBSession.no_autoflush:
                 self.rate = user.rate
 
@@ -612,105 +565,88 @@ class ProjectUser(Base):
 
     @validates("project")
     def _validate_project(self, key, project):
-        """validates the given project value
-        """
+        """validates the given project value"""
         if project is not None:
             # check if it is instance of Project object
             if not isinstance(project, Project):
                 raise TypeError(
                     "%s.project should be a "
-                    "stalker.models.project.Project instance, not %s" %
-                    (self.__class__.__name__, project.__class__.__name__)
+                    "stalker.models.project.Project instance, not %s"
+                    % (self.__class__.__name__, project.__class__.__name__)
                 )
         return project
 
-    @validates('role')
+    @validates("role")
     def _validate_role(self, key, role):
-        """validates the given role instance
-        """
+        """validates the given role instance"""
         if role is not None:
             from stalker import Role
+
             if not isinstance(role, Role):
                 raise TypeError(
-                    '%s.role should be a '
-                    'stalker.models.auth.Role instance, not %s' %
-                    (self.__class__.__name__, role.__class__.__name__)
+                    "%s.role should be a "
+                    "stalker.models.auth.Role instance, not %s"
+                    % (self.__class__.__name__, role.__class__.__name__)
                 )
         return role
 
-    @validates('rate')
+    @validates("rate")
     def _validate_rate(self, key, rate):
-        """validates the given rate value
-        """
+        """validates the given rate value"""
         if rate is None:
             rate = 0.0
 
         if not isinstance(rate, (int, float)):
             raise TypeError(
-                '%(class)s.rate should be a float number greater or '
-                'equal to 0.0, not %(rate_class)s' % {
-                    'class': self.__class__.__name__,
-                    'rate_class': rate.__class__.__name__
+                "%(class)s.rate should be a float number greater or "
+                "equal to 0.0, not %(rate_class)s"
+                % {
+                    "class": self.__class__.__name__,
+                    "rate_class": rate.__class__.__name__,
                 }
             )
 
         if rate < 0:
             raise ValueError(
-                '%(class)s.rate should be a float number greater or '
-                'equal to 0.0, not %(rate)s' % {
-                    'class': self.__class__.__name__,
-                    'rate': rate
-                }
+                "%(class)s.rate should be a float number greater or "
+                "equal to 0.0, not %(rate)s"
+                % {"class": self.__class__.__name__, "rate": rate}
             )
 
         return rate
 
 
 class ProjectClient(Base):
-    """The association object used in Client-to-Project relation
-    """
+    """The association object used in Client-to-Project relation"""
 
-    __tablename__ = 'Project_Clients'
+    __tablename__ = "Project_Clients"
 
-    client_id = Column(
-        'client_id',
-        Integer,
-        ForeignKey('Clients.id'),
-        primary_key=True
-    )
+    client_id = Column("client_id", Integer, ForeignKey("Clients.id"), primary_key=True)
 
     client = relationship(
-        'Client',
-        back_populates='project_role',
+        "Client",
+        back_populates="project_role",
         cascade_backrefs=False,
-        primaryjoin='Project_Clients.c.client_id==Clients.c.id'
+        primaryjoin="Project_Clients.c.client_id==Clients.c.id",
     )
 
     project_id = Column(
-        'project_id',
-        Integer,
-        ForeignKey('Projects.id'),
-        primary_key=True
+        "project_id", Integer, ForeignKey("Projects.id"), primary_key=True
     )
 
     project = relationship(
-        'Project',
-        back_populates='client_role',
+        "Project",
+        back_populates="client_role",
         cascade_backrefs=False,
-        primaryjoin='ProjectClient.project_id==Project.project_id'
+        primaryjoin="ProjectClient.project_id==Project.project_id",
     )
 
-    role_id = Column(
-        'rid',
-        Integer,
-        ForeignKey('Roles.id'),
-        nullable=True
-    )
+    role_id = Column("rid", Integer, ForeignKey("Roles.id"), nullable=True)
 
     role = relationship(
-        'Role',
+        "Role",
         cascade_backrefs=False,
-        primaryjoin='ProjectClient.role_id==Role.role_id'
+        primaryjoin="ProjectClient.role_id==Role.role_id",
     )
 
     def __init__(self, project=None, client=None, role=None):
@@ -720,42 +656,41 @@ class ProjectClient(Base):
 
     @validates("client")
     def _validate_client(self, key, client):
-        """validates the given client value
-        """
+        """validates the given client value"""
         if client is not None:
             from stalker.models.client import Client
+
             if not isinstance(client, Client):
                 raise TypeError(
                     "%s.client should be an instance of "
-                    "stalker.models.auth.Client not %s" %
-                    (self.__class__.__name__, client.__class__.__name__)
+                    "stalker.models.auth.Client not %s"
+                    % (self.__class__.__name__, client.__class__.__name__)
                 )
         return client
 
     @validates("project")
     def _validate_project(self, key, project):
-        """validates the given project value
-        """
+        """validates the given project value"""
         if project is not None:
             # check if it is instance of Project object
             if not isinstance(project, Project):
                 raise TypeError(
                     "%s.project should be a "
-                    "stalker.models.project.Project instance, not %s" %
-                    (self.__class__.__name__, project.__class__.__name__)
+                    "stalker.models.project.Project instance, not %s"
+                    % (self.__class__.__name__, project.__class__.__name__)
                 )
         return project
 
-    @validates('role')
+    @validates("role")
     def _validate_role(self, key, role):
-        """validates the given role instance
-        """
+        """validates the given role instance"""
         if role is not None:
             from stalker import Role
+
             if not isinstance(role, Role):
                 raise TypeError(
-                    '%s.role should be a '
-                    'stalker.models.auth.Role instance, not %s' %
-                    (self.__class__.__name__, role.__class__.__name__)
+                    "%s.role should be a "
+                    "stalker.models.auth.Role instance, not %s"
+                    % (self.__class__.__name__, role.__class__.__name__)
                 )
         return role

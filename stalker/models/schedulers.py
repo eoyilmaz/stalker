@@ -12,6 +12,7 @@ import pytz
 from stalker.log import logging_level
 
 import logging
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
@@ -27,28 +28,26 @@ class SchedulerBase(object):
         self.studio = studio
 
     def _validate_studio(self, studio_in):
-        """validates the given studio_in value
-        """
+        """validates the given studio_in value"""
         if studio_in is not None:
             from stalker import Studio
+
             if not isinstance(studio_in, Studio):
                 raise TypeError(
-                    '%s.studio should be an instance of '
-                    'stalker.models.studio.Studio, not %s' %
-                    (self.__class__.__name__, studio_in.__class__.__name__)
+                    "%s.studio should be an instance of "
+                    "stalker.models.studio.Studio, not %s"
+                    % (self.__class__.__name__, studio_in.__class__.__name__)
                 )
         return studio_in
 
     @property
     def studio(self):
-        """studio getter
-        """
+        """studio getter"""
         return self._studio
 
     @studio.setter
     def studio(self, studio_in):
-        """studio setter
-        """
+        """studio setter"""
         self._studio = self._validate_studio(studio_in)
 
     def schedule(self):
@@ -154,14 +153,12 @@ class TaskJugglerScheduler(SchedulerBase):
       parsing. The default is SQL.
     """
 
-    def __init__(self,
-                 studio=None,
-                 compute_resources=False,
-                 parsing_method=0,
-                 projects=None):
+    def __init__(
+        self, studio=None, compute_resources=False, parsing_method=0, projects=None
+    ):
         super(TaskJugglerScheduler, self).__init__(studio)
 
-        self.tjp_content = ''
+        self.tjp_content = ""
 
         self.temp_file_full_path = None
         self.temp_file_path = None
@@ -180,17 +177,15 @@ class TaskJugglerScheduler(SchedulerBase):
         self.projects = projects
 
     def _create_tjp_file(self):
-        """creates the tjp file
-        """
-        self.temp_file_full_path = tempfile.mktemp(prefix='Stalker_')
+        """creates the tjp file"""
+        self.temp_file_full_path = tempfile.mktemp(prefix="Stalker_")
         self.temp_file_path = os.path.dirname(self.temp_file_full_path)
         self.temp_file_name = os.path.basename(self.temp_file_full_path)
         self.tjp_file_full_path = self.temp_file_full_path + ".tjp"
         self.csv_file_full_path = self.temp_file_full_path + ".csv"
 
     def _create_tjp_file_content(self):
-        """creates the tjp file content
-        """
+        """creates the tjp file content"""
         from jinja2 import Template
 
         start = time.time()
@@ -199,12 +194,15 @@ class TaskJugglerScheduler(SchedulerBase):
         import json
         from stalker import defaults
         from stalker.db.session import DBSession
+
         template = Template(defaults.tjp_main_template2)
 
         if not self.projects:
-            project_ids = DBSession.connection().execute(
-                'select id, code from "Projects"'
-            ).fetchall()
+            project_ids = (
+                DBSession.connection()
+                .execute('select id, code from "Projects"')
+                .fetchall()
+            )
         else:
             project_ids = [[project.id] for project in self.projects]
 
@@ -329,16 +327,15 @@ order by path_as_text"""
 
         # run it per project
         from sqlalchemy import text
+
         for pr in project_ids:
             p_id = pr[0]
-            #p_code = pr[1]
+            # p_code = pr[1]
 
             result = DBSession.connection().execute(text(sql_query), id=p_id)
 
             # start by adding the project first
-            result_buffer.append(
-                'task Project_%s "Project_%s" {' % (p_id, p_id)
-            )
+            result_buffer.append('task Project_%s "Project_%s" {' % (p_id, p_id))
 
             # now start jumping around
             previous_level = 0
@@ -348,7 +345,7 @@ order by path_as_text"""
                 # path = r[1]
                 # parent_id = r[2]
                 # entity_type = r[3]
-                #name = r[4]
+                # name = r[4]
                 priority = r[5]
                 schedule_timing = r[6]
                 schedule_unit = r[7]
@@ -362,112 +359,105 @@ order by path_as_text"""
                 dependency_info = r[15]
                 is_leaf = r[16]
 
-                tab = '  ' * depth
+                tab = "  " * depth
 
                 # close the previous level if necessary
                 for i in range(previous_level - depth + 1):
-                    i_tab = '  ' * (previous_level - i)
-                    result_buffer.append('%s}' % i_tab)
+                    i_tab = "  " * (previous_level - i)
+                    result_buffer.append("%s}" % i_tab)
 
                 result_buffer.append(
-                    """%(tab)stask Task_%(id)s "Task_%(id)s" {""" % {
-                        'tab': tab,
-                        'id': task_id
-                    }
+                    """%(tab)stask Task_%(id)s "Task_%(id)s" {"""
+                    % {"tab": tab, "id": task_id}
                 )
 
                 # append priority if it is different then 500
                 if priority != 500:
-                    result_buffer.append(
-                        '%s  priority %s' % (tab, priority))
+                    result_buffer.append("%s  priority %s" % (tab, priority))
 
                 # append dependency information
                 if dependency_info:
-                    dep_buffer = ['%s  depends ' % tab]
+                    dep_buffer = ["%s  depends " % tab]
 
                     json_data = json.loads(
-                        dependency_info.replace('{', '[')
-                        .replace('}', ']')
-                        .replace('(', '')
-                        .replace(')', '')
+                        dependency_info.replace("{", "[")
+                        .replace("}", "]")
+                        .replace("(", "")
+                        .replace(")", "")
                     )  # it is an array of string
 
                     for i, dep in enumerate(json_data):
                         if i > 0:
-                            dep_buffer.append(', ')
+                            dep_buffer.append(", ")
 
-                        dep_full_ids, \
-                            dependency_target, \
-                            gap_timing, \
-                            gap_unit, \
-                            gap_model = dep.split(',')
+                        (
+                            dep_full_ids,
+                            dependency_target,
+                            gap_timing,
+                            gap_unit,
+                            gap_model,
+                        ) = dep.split(",")
 
-                        dep_full_path = '.'.join(
-                            map(lambda x: 'Task_%s' % x,
-                                dep_full_ids.split('-'))
+                        dep_full_path = ".".join(
+                            map(lambda x: "Task_%s" % x, dep_full_ids.split("-"))
                         )
                         # fix for Project id
-                        dep_full_path = 'Project_%s' % dep_full_path[5:]
+                        dep_full_path = "Project_%s" % dep_full_path[5:]
 
-                        dep_string = '%s {%s}' % (
-                            dep_full_path, dependency_target)
+                        dep_string = "%s {%s}" % (dep_full_path, dependency_target)
 
                         dep_buffer.append(dep_string)
 
-                    result_buffer.append(''.join(dep_buffer))
+                    result_buffer.append("".join(dep_buffer))
 
                 # append schedule model and timing information
                 # if this is a leaf task and has resources
                 if is_leaf and resource_ids:
                     result_buffer.append(
-                        '%s  %s %s%s' % (
-                            tab, schedule_model, schedule_timing,
-                            schedule_unit
-                        )
+                        "%s  %s %s%s"
+                        % (tab, schedule_model, schedule_timing, schedule_unit)
                     )
 
-                    resource_buffer = ['%s  allocate ' % tab]
+                    resource_buffer = ["%s  allocate " % tab]
                     for i, resource_id in enumerate(resource_ids):
                         if i > 0:
-                            resource_buffer.append(', ')
-                        resource_buffer.append('User_%s' % resource_id)
+                            resource_buffer.append(", ")
+                        resource_buffer.append("User_%s" % resource_id)
 
                         # now go through alternatives
                         if alternative_resource_ids:
-                            resource_buffer.append(' { alternative ')
-                            for j, alt_resource_id in \
-                                    enumerate(alternative_resource_ids):
+                            resource_buffer.append(" { alternative ")
+                            for j, alt_resource_id in enumerate(
+                                alternative_resource_ids
+                            ):
                                 if j > 0:
-                                    resource_buffer.append(', ')
-                                resource_buffer.append(
-                                    'User_%s' % alt_resource_id)
+                                    resource_buffer.append(", ")
+                                resource_buffer.append("User_%s" % alt_resource_id)
 
                             # set the allocation strategy
-                            resource_buffer.append(
-                                ' select %s' % allocation_strategy)
+                            resource_buffer.append(" select %s" % allocation_strategy)
 
                             # is is persistent
                             if persistent_allocation:
-                                resource_buffer.append(' persistent')
-                            resource_buffer.append(' }')
+                                resource_buffer.append(" persistent")
+                            resource_buffer.append(" }")
 
-                    result_buffer.append(''.join(resource_buffer))
+                    result_buffer.append("".join(resource_buffer))
 
                     # append any time log information
                     if time_log_array:
                         json_data = json.loads(
-                            time_log_array.replace('{', '[')
-                            .replace('}', ']')
-                            .replace('(', '')
-                            .replace(')', '')
+                            time_log_array.replace("{", "[")
+                            .replace("}", "]")
+                            .replace("(", "")
+                            .replace(")", "")
                         )  # it is an array of string
 
                         for tlog in json_data:
-                            user_id, t_start, t_end = tlog.split(',')
+                            user_id, t_start, t_end = tlog.split(",")
                             result_buffer.append(
-                                '%s  booking %s %s - %s { overtime 2 }' % (
-                                    tab, user_id, t_start, t_end
-                                )
+                                "%s  booking %s %s - %s { overtime 2 }"
+                                % (tab, user_id, t_start, t_end)
                             )
 
                 previous_level = depth
@@ -477,55 +467,50 @@ order by path_as_text"""
             depth = 0  # current depth is 0 (Project)
             # previous_level is the last task
             for i in range(previous_level - depth + 1):
-                i_tab = '  ' * (previous_level - i)
-                result_buffer.append('%s}' % i_tab)
+                i_tab = "  " * (previous_level - i)
+                result_buffer.append("%s}" % i_tab)
 
-        tasks_buffer = '\n'.join(result_buffer)
+        tasks_buffer = "\n".join(result_buffer)
 
         import stalker
-        self.tjp_content = template.render({
-            'stalker': stalker,
-            'studio': self.studio,
-            'csv_file_name': self.temp_file_name,
-            'csv_file_full_path': self.temp_file_full_path,
-            'compute_resources': self.compute_resources,
-            'tasks_buffer': tasks_buffer
-        })
 
-        logger.debug(
-            'total number of records: %s' % num_of_records
+        self.tjp_content = template.render(
+            {
+                "stalker": stalker,
+                "studio": self.studio,
+                "csv_file_name": self.temp_file_name,
+                "csv_file_full_path": self.temp_file_full_path,
+                "compute_resources": self.compute_resources,
+                "tasks_buffer": tasks_buffer,
+            }
         )
+
+        logger.debug("total number of records: %s" % num_of_records)
 
         end = time.time()
-        logger.debug(
-            'rendering the whole tjp file took : %s seconds' % (end - start)
-        )
+        logger.debug("rendering the whole tjp file took : %s seconds" % (end - start))
 
     def _fill_tjp_file(self):
-        """fills the tjp file with content
-        """
-        with open(self.tjp_file_full_path, 'w+') as self.tjp_file:
+        """fills the tjp file with content"""
+        with open(self.tjp_file_full_path, "w+") as self.tjp_file:
             self.tjp_file.write(self.tjp_content)
 
     def _delete_tjp_file(self):
-        """deletes the temp tjp file
-        """
+        """deletes the temp tjp file"""
         try:
             os.remove(self.tjp_file_full_path)
         except OSError:
             pass
 
     def _delete_csv_file(self):
-        """deletes the temp csv file
-        """
+        """deletes the temp csv file"""
         try:
             os.remove(self.csv_file_full_path)
         except OSError:
             pass
 
     def _clean_up(self):
-        """removes the temp files
-        """
+        """removes the temp files"""
         self._delete_tjp_file()
         self._delete_csv_file()
 
@@ -535,10 +520,9 @@ order by path_as_text"""
         """
         parsing_start = time.time()
 
-        logger.debug('csv_file_full_path : %s' % self.csv_file_full_path)
+        logger.debug("csv_file_full_path : %s" % self.csv_file_full_path)
         if not os.path.exists(self.csv_file_full_path):
-            logger.debug('could not find CSV file, '
-                         'returning without updating db!')
+            logger.debug("could not find CSV file, " "returning without updating db!")
             return
 
         from stalker import Task, Project
@@ -548,8 +532,8 @@ order by path_as_text"""
         update_data = []
         update_user_data = []
 
-        with open(self.csv_file_full_path, 'r') as self.csv_file:
-            csv_content = csv.reader(self.csv_file, delimiter=';')
+        with open(self.csv_file_full_path, "r") as self.csv_file:
+            csv_content = csv.reader(self.csv_file, delimiter=";")
 
             lines = [line for line in csv_content]
             lines.pop(0)
@@ -557,17 +541,12 @@ order by path_as_text"""
         for data in lines:
             id_line = data[0]
 
-            entity_id = int(id_line.split('.')[-1].split('_')[-1])
+            entity_id = int(id_line.split(".")[-1].split("_")[-1])
 
             if entity_id:
                 entity_ids.append(entity_id)
-                start_date = datetime.datetime.strptime(
-                    data[1], "%Y-%m-%d-%H:%M"
-                )
-                end_date = datetime.datetime.strptime(
-                    data[2],
-                    "%Y-%m-%d-%H:%M"
-                )
+                start_date = datetime.datetime.strptime(data[1], "%Y-%m-%d-%H:%M")
+                end_date = datetime.datetime.strptime(data[2], "%Y-%m-%d-%H:%M")
 
                 # implement time zone info
                 start_date = start_date.replace(tzinfo=pytz.utc)
@@ -575,90 +554,83 @@ order by path_as_text"""
 
                 # computed_resources
                 if self.compute_resources:
-                    if data[3] != '':
+                    if data[3] != "":
                         resources_data = map(
-                            lambda x: x.split('_')[-1].split(')')[0],
-                            data[3].split(',')
+                            lambda x: x.split("_")[-1].split(")")[0], data[3].split(",")
                         )
                         for rid in resources_data:
-                            update_user_data.append({
-                                'task_id': entity_id,
-                                'resource_id': rid
-                            })
+                            update_user_data.append(
+                                {"task_id": entity_id, "resource_id": rid}
+                            )
 
-                update_data.append({
-                    'b_id': entity_id,
-                    'start': start_date,
-                    'end': end_date,
-                    'computed_start': start_date,
-                    'computed_end': end_date
-                })
+                update_data.append(
+                    {
+                        "b_id": entity_id,
+                        "start": start_date,
+                        "end": end_date,
+                        "computed_start": start_date,
+                        "computed_end": end_date,
+                    }
+                )
 
         from sqlalchemy import bindparam
 
         # update date values
-        update_statement = Task.__table__.update()\
-            .where(Task.__table__.c.id == bindparam('b_id'))\
+        update_statement = (
+            Task.__table__.update()
+            .where(Task.__table__.c.id == bindparam("b_id"))
             .values(
-                start=bindparam('start'),
-                end=bindparam('end'),
-                computed_start=bindparam('computed_start'),
-                computed_end=bindparam('computed_end')
+                start=bindparam("start"),
+                end=bindparam("end"),
+                computed_start=bindparam("computed_start"),
+                computed_end=bindparam("computed_end"),
             )
-        from stalker.db.session import DBSession
-        DBSession.connection().execute(
-            update_statement,
-            update_data
         )
+        from stalker.db.session import DBSession
+
+        DBSession.connection().execute(update_statement, update_data)
 
         # update project dates
-        update_project_statement = Project.__table__.update()\
-            .where(Project.__table__.c.id == bindparam('b_id'))\
+        update_project_statement = (
+            Project.__table__.update()
+            .where(Project.__table__.c.id == bindparam("b_id"))
             .values(
-                start=bindparam('start'),
-                end=bindparam('end'),
-                computed_start=bindparam('computed_start'),
-                computed_end=bindparam('computed_end')
+                start=bindparam("start"),
+                end=bindparam("end"),
+                computed_start=bindparam("computed_start"),
+                computed_end=bindparam("computed_end"),
             )
-        DBSession.connection().execute(
-            update_project_statement,
-            update_data
         )
+        DBSession.connection().execute(update_project_statement, update_data)
 
         # update computed resources data
         # first delete everything
         if self.compute_resources:
             delete_resources_statement = Task_Computed_Resources.delete()
 
-            update_resources_statement = Task_Computed_Resources.insert()\
-                .values(
-                    task_id=bindparam('task_id'),
-                    resource_id=bindparam('resource_id')
-                )
+            update_resources_statement = Task_Computed_Resources.insert().values(
+                task_id=bindparam("task_id"), resource_id=bindparam("resource_id")
+            )
 
             DBSession.connection().execute(delete_resources_statement)
-            DBSession.connection().execute(
-                update_resources_statement,
-                update_user_data
-            )
+            DBSession.connection().execute(update_resources_statement, update_user_data)
 
         parsing_end = time.time()
         logger.debug(
-            'completed parsing csv file in (SQL): %s seconds' %
-            (parsing_end - parsing_start)
+            "completed parsing csv file in (SQL): %s seconds"
+            % (parsing_end - parsing_start)
         )
 
     def schedule(self):
-        """Does the scheduling.
-        """
+        """Does the scheduling."""
         # check the studio attribute
         from stalker import Studio
 
         if not isinstance(self.studio, Studio):
             raise TypeError(
-                '%s.studio should be an instance of '
-                'stalker.models.studio.Studio, not %s' %
-                (self.__class__.__name__, self.studio.__class__.__name__)
+                "%s.studio should be an instance of "
+                "stalker.models.studio.Studio, not %s"
+                % (self.__class__.__name__, self.studio.__class__.__name__)
             )
 
         # create a tjp file
@@ -670,27 +642,30 @@ order by path_as_text"""
         # fill it with data
         self._fill_tjp_file()
 
-        logger.debug('tjp_file_full_path: %s' % self.tjp_file_full_path)
+        logger.debug("tjp_file_full_path: %s" % self.tjp_file_full_path)
 
         # pass it to tj3
         from stalker import defaults
-        if os.name == 'nt':
-            logger.debug('tj3 using fallback mode for Windows!')
-            command = '%s %s -o %s' % (
+
+        if os.name == "nt":
+            logger.debug("tj3 using fallback mode for Windows!")
+            command = "%s %s -o %s" % (
                 defaults.tj_command,
                 self.tjp_file_full_path,
                 self.temp_file_path,
             )
-            logger.debug('tj3 command: %s' % command)
+            logger.debug("tj3 command: %s" % command)
             return_code = os.system(command)
-            stderr_buffer = ''
+            stderr_buffer = ""
         else:
             process = subprocess.Popen(
-                [defaults.tj_command,
-                 self.tjp_file_full_path,
-                 '-o',
-                 self.temp_file_path],
-                stderr=subprocess.PIPE
+                [
+                    defaults.tj_command,
+                    self.tjp_file_full_path,
+                    "-o",
+                    self.temp_file_path,
+                ],
+                stderr=subprocess.PIPE,
             )
 
             # loop until process finishes and capture stderr output
@@ -698,16 +673,16 @@ order by path_as_text"""
             while True:
                 stderr = process.stderr.readline()
 
-                if stderr == b'' and process.poll() is not None:
+                if stderr == b"" and process.poll() is not None:
                     break
 
-                if stderr != b'':
-                    stderr = stderr.decode('utf-8').strip()
+                if stderr != b"":
+                    stderr = stderr.decode("utf-8").strip()
                     stderr_buffer.append(stderr)
                     logger.debug(stderr)
 
             # flatten the buffer
-            stderr_buffer = '\n'.join(stderr_buffer)
+            stderr_buffer = "\n".join(stderr_buffer)
 
             return_code = process.returncode
 
@@ -718,7 +693,7 @@ order by path_as_text"""
         # read back the csv file
         self._parse_csv_file()
 
-        logger.debug('tj3 return code: %s' % return_code)
+        logger.debug("tj3 return code: %s" % return_code)
 
         # remove the tjp file
         self._clean_up()
@@ -726,30 +701,34 @@ order by path_as_text"""
         return stderr_buffer
 
     def _validate_projects(self, projects):
-        """validates the given projects value
-        """
+        """validates the given projects value"""
         if projects is None:
             projects = []
 
-        msg = '%(class)s.projects should be a list of ' \
-            'stalker.models.project.Project instances, not ' \
-            '%(projects_class)s'
+        msg = (
+            "%(class)s.projects should be a list of "
+            "stalker.models.project.Project instances, not "
+            "%(projects_class)s"
+        )
 
         if not isinstance(projects, list):
             raise TypeError(
-                msg % {
-                    'class': self.__class__.__name__,
-                    'projects_class': projects.__class__.__name__
+                msg
+                % {
+                    "class": self.__class__.__name__,
+                    "projects_class": projects.__class__.__name__,
                 }
             )
 
         from stalker import Project
+
         for item in projects:
             if not isinstance(item, Project):
                 raise TypeError(
-                    msg % {
-                        'class': self.__class__.__name__,
-                        'projects_class': item.__class__.__name__
+                    msg
+                    % {
+                        "class": self.__class__.__name__,
+                        "projects_class": item.__class__.__name__,
                     }
                 )
 
@@ -757,12 +736,10 @@ order by path_as_text"""
 
     @property
     def projects(self):
-        """getter for the _project attribute
-        """
+        """getter for the _project attribute"""
         return self._projects
 
     @projects.setter
     def projects(self, projects):
-        """setter for the _project attribute
-        """
+        """setter for the _project attribute"""
         self._projects = self._validate_projects(projects)

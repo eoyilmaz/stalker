@@ -7,31 +7,28 @@ Create Date: 2013-05-22 16:51:53.136718
 """
 
 # revision identifiers, used by Alembic.
-revision = '25b3eba6ffe7'
-down_revision = '53d8127d8560'
+revision = "25b3eba6ffe7"
+down_revision = "53d8127d8560"
 
 from alembic import op
 import sqlalchemy as sa
 
-from stalker import defaults
+from stalker import defaults, log
 
-import logging
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger = log.get_logger(__name__)
 
 
 def upgrade():
     try:
-        op.drop_column('Versions', 'source_file_id')
+        op.drop_column("Versions", "source_file_id")
     except (sa.exc.OperationalError, sa.exc.InternalError):
         # SQLite doesnt support it
         pass
 
     try:
         op.create_foreign_key(None, "Versions", "Links", ["id"], ["id"])
-        #FOREIGN KEY ( id ) REFERENCES Entities ( id ) DEFERRABLE INITIALLY DEFERRED
-        #FOREIGN KEY ( id ) REFERENCES Links ( id ) DEFERRABLE INITIALLY DEFERRED
+        # FOREIGN KEY ( id ) REFERENCES Entities ( id ) DEFERRABLE INITIALLY DEFERRED
+        # FOREIGN KEY ( id ) REFERENCES Links ( id ) DEFERRABLE INITIALLY DEFERRED
     except NotImplementedError:
         # there is no way to create the foreign key in SQLite
         # and it is incredibly hard to upgrade it
@@ -54,15 +51,24 @@ def upgrade():
         # + FOREIGN KEY ( id ) REFERENCES Links ( id ) DEFERRABLE INITIALLY DEFERRED
 
         op.create_table(
-            'Versions_New',
-            sa.Column('id', sa.Integer, sa.ForeignKey('Links.id'), primary_key=True),
-            sa.Column('version_of_id', sa.Integer, sa.ForeignKey('Tasks.id'), nullable=False),
-            sa.Column('take_name', sa.String(256), default=defaults.version_take_name),
-            sa.Column('version_number', sa.Integer, default=1, nullable=False),
-            sa.Column('parent_id', sa.Integer, sa.ForeignKey('Versions.id')),
-            sa.Column('is_published', sa.Boolean, default=False),
-            sa.Column('status_id', sa.Integer, sa.ForeignKey('Statuses.id'), nullable=False),
-            sa.Column('status_list_id', sa.Integer, sa.ForeignKey('StatusLists.id'), nullable=False)
+            "Versions_New",
+            sa.Column("id", sa.Integer, sa.ForeignKey("Links.id"), primary_key=True),
+            sa.Column(
+                "version_of_id", sa.Integer, sa.ForeignKey("Tasks.id"), nullable=False
+            ),
+            sa.Column("take_name", sa.String(256), default=defaults.version_take_name),
+            sa.Column("version_number", sa.Integer, default=1, nullable=False),
+            sa.Column("parent_id", sa.Integer, sa.ForeignKey("Versions.id")),
+            sa.Column("is_published", sa.Boolean, default=False),
+            sa.Column(
+                "status_id", sa.Integer, sa.ForeignKey("Statuses.id"), nullable=False
+            ),
+            sa.Column(
+                "status_list_id",
+                sa.Integer,
+                sa.ForeignKey("StatusLists.id"),
+                nullable=False,
+            ),
         )
 
         # *********************************************************************
@@ -70,7 +76,7 @@ def upgrade():
         # then copy the data from the original table to the new table
         # s = sa.sql.select(['Versions', 'Links']).where('Versions.c.source_link_id == Links.c.id')
         # result = op.execute(s)
-        # 
+        #
         # if result:
         #     data = []
         #     for row in result:
@@ -79,14 +85,11 @@ def upgrade():
         # *********************************************************************
 
         # and then delete the original table
-        op.drop_table('Versions')
+        op.drop_table("Versions")
         # and rename the new table to the old one
-        op.rename_table('Versions_New', 'Versions')
+        op.rename_table("Versions_New", "Versions")
 
 
 def downgrade():
-    op.add_column(
-        'Versions', sa.Column('source_file_id', sa.INTEGER(), nullable=True)
-    )
+    op.add_column("Versions", sa.Column("source_file_id", sa.INTEGER(), nullable=True))
     op.create_foreign_key(None, "Versions", "Entities", ["id"], ["id"])
-

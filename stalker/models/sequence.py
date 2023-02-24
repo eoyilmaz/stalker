@@ -28,20 +28,20 @@ class Sequence(Task, CodeMixin):
        Sequences do not have a lead anymore. Use the :class:`.Task.responsible`
        attribute of the super (:class:`.Task`).
     """
+
     __auto_name__ = False
     __tablename__ = "Sequences"
     __mapper_args__ = {"polymorphic_identity": "Sequence"}
-    sequence_id = Column("id", Integer, ForeignKey("Tasks.id"),
-                         primary_key=True)
+    sequence_id = Column("id", Integer, ForeignKey("Tasks.id"), primary_key=True)
 
     shots = relationship(
         "Shot",
-        secondary='Shot_Sequences',
+        secondary="Shot_Sequences",
         back_populates="sequences",
         doc="""The :class:`.Shot` s assigned to this Sequence.
 
         It is a list of :class:`.Shot` instances.
-        """
+        """,
     )
 
     def __init__(self, **kwargs):
@@ -54,24 +54,20 @@ class Sequence(Task, CodeMixin):
 
     @validates("shots")
     def _validate_shots(self, key, shot):
-        """validates the given shot value
-        """
+        """validates the given shot value"""
         from stalker.models.shot import Shot
 
         if not isinstance(shot, Shot):
             raise TypeError(
-                '%s.shots should be all stalker.models.shot.Shot instances, '
-                'not %s' % (self.__class__.__name__, shot.__class__.__name__)
+                "%s.shots should be all stalker.models.shot.Shot instances, "
+                "not %s" % (self.__class__.__name__, shot.__class__.__name__)
             )
         return shot
 
     def __eq__(self, other):
-        """the equality operator
-        """
-        return isinstance(other, Sequence) and \
-            super(Sequence, self).__eq__(other)
+        """the equality operator"""
+        return isinstance(other, Sequence) and super(Sequence, self).__eq__(other)
 
     def __hash__(self):
-        """the overridden __hash__ method
-        """
+        """the overridden __hash__ method"""
         return super(Sequence, self).__hash__()

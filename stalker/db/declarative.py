@@ -12,15 +12,13 @@ logger.setLevel(log.logging_level)
 
 
 class ORMClass(object):
-    """The base of the Base class
-    """
+    """The base of the Base class"""
 
     query = DBSession.query_property()
 
     @property
     def plural_class_name(self):
-        """the plural name of this class
-        """
+        """the plural name of this class"""
         return make_plural(self.__class__.__name__)
 
 

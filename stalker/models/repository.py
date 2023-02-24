@@ -2,6 +2,8 @@
 
 import os
 import platform
+
+from six import string_types
 from sqlalchemy import event, Column, Integer, ForeignKey, String
 from sqlalchemy.orm import validates
 from stalker.models.entity import Entity
@@ -77,25 +79,20 @@ class Repository(Entity, CodeMixin):
     #
 
     __auto_name__ = False
-    __tablename__ = 'Repositories'
-    __mapper_args__ = {'polymorphic_identity': 'Repository'}
+    __tablename__ = "Repositories"
+    __mapper_args__ = {"polymorphic_identity": "Repository"}
     repository_id = Column(
-        'id',
+        "id",
         Integer,
-        ForeignKey('Entities.id'),
+        ForeignKey("Entities.id"),
         primary_key=True,
     )
     linux_path = Column(String(256))
     windows_path = Column(String(256))
     osx_path = Column(String(256))
 
-    def __init__(self,
-                 code="",
-                 linux_path="",
-                 windows_path="",
-                 osx_path="",
-                 **kwargs):
-        kwargs['code'] = code
+    def __init__(self, code="", linux_path="", windows_path="", osx_path="", **kwargs):
+        kwargs["code"] = code
         super(Repository, self).__init__(**kwargs)
         CodeMixin.__init__(self, **kwargs)
 
@@ -105,101 +102,95 @@ class Repository(Entity, CodeMixin):
 
     @validates("linux_path")
     def _validate_linux_path(self, key, linux_path):
-        """validates the given linux path
-        """
-        from stalker import __string_types__
-        if not isinstance(linux_path, __string_types__):
+        """validates the given linux path"""
+        if not isinstance(linux_path, string_types):
             raise TypeError(
-                "%s.linux_path should be an instance of string not %s" %
-                (self.__class__.__name__, linux_path.__class__.__name__)
+                "%s.linux_path should be an instance of string not %s"
+                % (self.__class__.__name__, linux_path.__class__.__name__)
             )
 
-        linux_path = os.path.normpath(linux_path) + '/'
+        linux_path = os.path.normpath(linux_path) + "/"
 
         linux_path = linux_path.replace("\\", "/")
 
         if self.code is not None and platform.system() == "Linux":
             # update the environment variable
             from stalker import defaults
+
             os.environ[
-                defaults.repo_env_var_template % {'code': self.code}
+                defaults.repo_env_var_template % {"code": self.code}
             ] = linux_path
 
         if self.id is not None and platform.system() == "Linux":
             # update the environment variable
             from stalker import defaults
+
             os.environ[
-                defaults.repo_env_var_template_old % {'id': self.id}
+                defaults.repo_env_var_template_old % {"id": self.id}
             ] = linux_path
 
         return linux_path
 
     @validates("osx_path")
     def _validate_osx_path(self, key, osx_path):
-        """validates the given osx path
-        """
-        from stalker import __string_types__
-        if not isinstance(osx_path, __string_types__):
+        """validates the given osx path"""
+        if not isinstance(osx_path, string_types):
             raise TypeError(
-                "%s.osx_path should be an instance of string not %s" %
-                (self.__class__.__name__, osx_path.__class__.__name__)
+                "%s.osx_path should be an instance of string not %s"
+                % (self.__class__.__name__, osx_path.__class__.__name__)
             )
 
-        osx_path = os.path.normpath(osx_path) + '/'
+        osx_path = os.path.normpath(osx_path) + "/"
 
         osx_path = osx_path.replace("\\", "/")
 
         from stalker import defaults
+
         if self.code is not None and platform.system() == "Darwin":
             # update the environment variable
-            os.environ[
-                defaults.repo_env_var_template % {'code': self.code}
-            ] = osx_path
+            os.environ[defaults.repo_env_var_template % {"code": self.code}] = osx_path
 
         if self.id is not None and platform.system() == "Darwin":
-            os.environ[
-                defaults.repo_env_var_template_old % {'id': self.id}
-            ] = osx_path
+            os.environ[defaults.repo_env_var_template_old % {"id": self.id}] = osx_path
 
         return osx_path
 
     @validates("windows_path")
     def _validate_windows_path(self, key, windows_path):
-        """validates the given windows path
-        """
-        from stalker import __string_types__
-        if not isinstance(windows_path, __string_types__):
+        """validates the given windows path"""
+        if not isinstance(windows_path, string_types):
             raise TypeError(
-                "%s.windows_path should be an instance of string not %s" %
-                (self.__class__.__name__, windows_path.__class__.__name__)
+                "%s.windows_path should be an instance of string not %s"
+                % (self.__class__.__name__, windows_path.__class__.__name__)
             )
 
         windows_path = os.path.normpath(windows_path)
         windows_path = windows_path.replace("\\", "/")
 
-        if not windows_path.endswith('/'):
-            windows_path += '/'
+        if not windows_path.endswith("/"):
+            windows_path += "/"
 
         if self.code is not None and platform.system() == "Windows":
             # update the environment variable
             from stalker import defaults
+
             os.environ[
-                defaults.repo_env_var_template % {'code': self.code}
+                defaults.repo_env_var_template % {"code": self.code}
             ] = windows_path
 
         if self.id is not None and platform.system() == "Windows":
             # update the environment variable
             from stalker import defaults
+
             os.environ[
-                defaults.repo_env_var_template_old % {'id': self.id}
+                defaults.repo_env_var_template_old % {"id": self.id}
             ] = windows_path
 
         return windows_path
 
     @property
     def path(self):
-        """Returns the path for the current os
-        """
+        """Returns the path for the current os"""
         # return the proper value according to the current os
         platform_system = platform.system()
 
@@ -212,8 +203,7 @@ class Repository(Entity, CodeMixin):
 
     @path.setter
     def path(self, path):
-        """Sets the path for the current os
-        """
+        """Sets the path for the current os"""
         # return the proper value according to the current os
         platform_system = platform.system()
 
@@ -230,10 +220,12 @@ class Repository(Entity, CodeMixin):
         :param path: The path to be investigated
         :return:
         """
-        path = path.replace('\\', '/')
-        return path.lower().startswith(self.windows_path.lower()) or \
-            path.startswith(self.linux_path) or \
-            path.startswith(self.osx_path)
+        path = path.replace("\\", "/")
+        return (
+            path.lower().startswith(self.windows_path.lower())
+            or path.startswith(self.linux_path)
+            or path.startswith(self.osx_path)
+        )
 
     def _to_path(self, path, replace_with):
         """Helper function fot to_*_path functions
@@ -243,24 +235,18 @@ class Repository(Entity, CodeMixin):
         :return:
         """
         if path is None:
-            raise TypeError(
-                '%s.path can not be None' % self.__class__.__name__
-            )
+            raise TypeError("%s.path can not be None" % self.__class__.__name__)
 
-        from stalker import __string_types__
-        if not isinstance(path, __string_types__):
+        if not isinstance(path, string_types):
             raise TypeError(
-                '%s.path should be a string, not %s' % (
-                    self.__class__.__name__, path.__class__.__name__
-                )
+                "%s.path should be a string, not %s"
+                % (self.__class__.__name__, path.__class__.__name__)
             )
 
         # expand all variables
-        path = os.path.normpath(
-            os.path.expandvars(
-                os.path.expanduser(path)
-            )
-        ).replace('\\', '/')
+        path = os.path.normpath(os.path.expandvars(os.path.expanduser(path))).replace(
+            "\\", "/"
+        )
 
         if path.startswith(self.windows_path):
             return path.replace(self.windows_path, replace_with)
@@ -310,7 +296,7 @@ class Repository(Entity, CodeMixin):
         :return: str
         """
         path = self.to_native_path(path)
-        return os.path.relpath(path, self.path).replace('\\', '/')
+        return os.path.relpath(path, self.path).replace("\\", "/")
 
     @classmethod
     def find_repo(cls, path):
@@ -326,10 +312,12 @@ class Repository(Entity, CodeMixin):
         repos = Repository.query.all()
         found_repo = None
         for repo in repos:
-            if path.startswith(repo.path) \
-               or path.lower().startswith(repo.windows_path.lower()) \
-               or path.startswith(repo.linux_path) \
-               or path.startswith(repo.osx_path):
+            if (
+                path.startswith(repo.path)
+                or path.lower().startswith(repo.windows_path.lower())
+                or path.startswith(repo.linux_path)
+                or path.startswith(repo.osx_path)
+            ):
                 found_repo = repo
                 break
         return found_repo
@@ -346,41 +334,37 @@ class Repository(Entity, CodeMixin):
         repo = cls.find_repo(path)
 
         if repo:
-            return '$%s/%s' % (repo.env_var, repo.make_relative(path))
+            return "$%s/%s" % (repo.env_var, repo.make_relative(path))
         else:
             return path
 
     @property
     def env_var(self):
-        """returns the env var of this repo
-        """
+        """returns the env var of this repo"""
         from stalker import defaults
-        return defaults.repo_env_var_template % {'code': self.code}
+
+        return defaults.repo_env_var_template % {"code": self.code}
 
     def __eq__(self, other):
-        """the equality operator
-        """
-        return super(Repository, self).__eq__(other) and \
-            isinstance(other, Repository) and \
-            self.linux_path == other.linux_path and \
-            self.osx_path == other.osx_path and \
-            self.windows_path == other.windows_path
+        """the equality operator"""
+        return (
+            super(Repository, self).__eq__(other)
+            and isinstance(other, Repository)
+            and self.linux_path == other.linux_path
+            and self.osx_path == other.osx_path
+            and self.windows_path == other.windows_path
+        )
 
     def __hash__(self):
-        """the overridden __hash__ method
-        """
+        """the overridden __hash__ method"""
         return super(Repository, self).__hash__()
 
 
-@event.listens_for(Repository, 'after_insert')
+@event.listens_for(Repository, "after_insert")
 def receive_after_insert(mapper, connection, repo):
-    """listen for the 'after_insert' event
-    """
-    logger.debug('auto creating env var for Repository: %s' % repo.name)
+    """listen for the 'after_insert' event"""
+    logger.debug("auto creating env var for Repository: %s" % repo.name)
     from stalker import defaults
-    os.environ[
-        defaults.repo_env_var_template % {'code': repo.code}
-    ] = repo.path
-    os.environ[
-        defaults.repo_env_var_template_old % {'id': repo.id}
-    ] = repo.path
+
+    os.environ[defaults.repo_env_var_template % {"code": repo.code}] = repo.path
+    os.environ[defaults.repo_env_var_template_old % {"id": repo.id}] = repo.path

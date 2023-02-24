@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from six import string_types
 from sqlalchemy import Column, Integer, ForeignKey, Text
 from sqlalchemy.orm import validates
 from stalker.models.entity import Entity
@@ -75,28 +75,24 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
 
     .. _Jinja2: http://jinja.pocoo.org/docs/
     """
+
     __auto_name__ = False
     __strictly_typed__ = False
     __tablename__ = "FilenameTemplates"
     __mapper_args__ = {"polymorphic_identity": "FilenameTemplate"}
-    filenameTemplate_id = Column("id", Integer, ForeignKey("Entities.id"),
-                                 primary_key=True)
+    filenameTemplate_id = Column(
+        "id", Integer, ForeignKey("Entities.id"), primary_key=True
+    )
 
     path = Column(
-        Text,
-        doc="""The template code for the path of this FilenameTemplate."""
+        Text, doc="""The template code for the path of this FilenameTemplate."""
     )
 
     filename = Column(
-        Text,
-        doc="""The template code for the file part of the FilenameTemplate."""
+        Text, doc="""The template code for the file part of the FilenameTemplate."""
     )
 
-    def __init__(self,
-                 target_entity_type=None,
-                 path=None,
-                 filename=None,
-                 **kwargs):
+    def __init__(self, target_entity_type=None, path=None, filename=None, **kwargs):
         super(FilenameTemplate, self).__init__(**kwargs)
         TargetEntityTypeMixin.__init__(self, target_entity_type, **kwargs)
         self.path = path
@@ -104,48 +100,44 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
 
     @validates("path")
     def _validate_path(self, key, path_in):
-        """validates the given path attribute for several conditions
-        """
+        """validates the given path attribute for several conditions"""
         # check if it is None
         if path_in is None:
             path_in = ""
 
-        from stalker import __string_types__
-        if not isinstance(path_in, __string_types__):
+        if not isinstance(path_in, string_types):
             raise TypeError(
-                "%s.path attribute should be string not %s" %
-                (self.__class__.__name__, path_in.__class__.__name__)
+                "%s.path attribute should be string not %s"
+                % (self.__class__.__name__, path_in.__class__.__name__)
             )
 
         return path_in
 
     @validates("filename")
     def _validate_filename(self, key, filename_in):
-        """validates the given filename attribute for several conditions
-        """
+        """validates the given filename attribute for several conditions"""
         # check if it is None
         if filename_in is None:
             filename_in = ""
 
-        from stalker import __string_types__
-        if not isinstance(filename_in, __string_types__):
+        if not isinstance(filename_in, string_types):
             raise TypeError(
-                "%s.filename attribute should be string not %s" %
-                (self.__class__.__name__, filename_in.__class__.__name__)
+                "%s.filename attribute should be string not %s"
+                % (self.__class__.__name__, filename_in.__class__.__name__)
             )
 
         return filename_in
 
     def __eq__(self, other):
-        """checks the equality of the given object to this one
-        """
-        return super(FilenameTemplate, self).__eq__(other) and \
-            isinstance(other, FilenameTemplate) and \
-            self.target_entity_type == other.target_entity_type and \
-            self.path == other.path and \
-            self.filename == other.filename
+        """checks the equality of the given object to this one"""
+        return (
+            super(FilenameTemplate, self).__eq__(other)
+            and isinstance(other, FilenameTemplate)
+            and self.target_entity_type == other.target_entity_type
+            and self.path == other.path
+            and self.filename == other.filename
+        )
 
     def __hash__(self):
-        """the overridden __hash__ method
-        """
+        """the overridden __hash__ method"""
         return super(FilenameTemplate, self).__hash__()

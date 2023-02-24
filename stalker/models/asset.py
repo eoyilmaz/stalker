@@ -38,28 +38,29 @@ class Asset(Task, CodeMixin):
         which shots are referencing this Asset by querying with a join of Shot
         Versions referencing this Asset.
     """
+
     __auto_name__ = False
     __strictly_typed__ = True
     __tablename__ = "Assets"
     __mapper_args__ = {"polymorphic_identity": "Asset"}
 
-    asset_id = Column("id", Integer, ForeignKey("Tasks.id"),
-                      primary_key=True)
+    asset_id = Column("id", Integer, ForeignKey("Tasks.id"), primary_key=True)
 
     def __init__(self, code, **kwargs):
-        kwargs['code'] = code
+        kwargs["code"] = code
 
         super(Asset, self).__init__(**kwargs)
         CodeMixin.__init__(self, **kwargs)
         ReferenceMixin.__init__(self, **kwargs)
 
     def __eq__(self, other):
-        """the equality operator
-        """
-        return super(Asset, self).__eq__(other) and \
-            isinstance(other, Asset) and self.type == other.type
+        """the equality operator"""
+        return (
+            super(Asset, self).__eq__(other)
+            and isinstance(other, Asset)
+            and self.type == other.type
+        )
 
     def __hash__(self):
-        """the overridden __hash__ method
-        """
+        """the overridden __hash__ method"""
         return super(Asset, self).__hash__()

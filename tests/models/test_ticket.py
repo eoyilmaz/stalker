@@ -1,762 +1,784 @@
 # -*- coding: utf-8 -*-
-
-import pytest
-from stalker import log
-from stalker.testing import UnitTestDBBase
+"""Tests for the Ticket class."""
 
 import logging
+
+import pytest
+
+from stalker import log
+from stalker import Asset
+from stalker import Note
+from stalker import Project
+from stalker import Repository
+from stalker import Status
+from stalker import Task
+from stalker import Ticket
+from stalker import TicketLog
+from stalker import Type
+from stalker import User
+from stalker import Version
+from stalker.db.session import DBSession
+
 logger = logging.getLogger("stalker.models.ticket")
 logger.setLevel(log.logging_level)
 
 
-class TicketTester(UnitTestDBBase):
-    """Tests the :class:`~stalker.models.ticket.Ticket` class
-    """
-
-    def setUp(self):
-        """set up the test
-        """
-        super(TicketTester, self).setUp()
-
-        # create statuses
-        from stalker import Status
-        self.test_status1 = Status(name='N', code='N')
-        self.test_status2 = Status(name='R', code='R')
-
-        # get the ticket types
-        from stalker import Type
-        ticket_types = Type.query \
-            .filter(Type.target_entity_type == 'Ticket').all()
-        self.ticket_type_1 = ticket_types[0]
-        self.ticket_type_2 = ticket_types[1]
-
-        # create a User
-        from stalker import User
-        self.test_user = User(
-            name='Test User',
-            login='testuser1',
-            email='test1@user.com',
-            password='secret'
-        )
-
-        # create a Repository
-        from stalker import Repository
-        self.test_repo = Repository(name="Test Repo", code='TR')
-
-        # create a Project Type
-        self.test_project_type = Type(
-            name='Commercial Project',
-            code='comm',
-            target_entity_type='Project',
-        )
-
-        # create a Project StatusList
-        self.test_project_status1 = Status(name='PrjStat1', code='PrjStat1')
-        self.test_project_status2 = Status(name='PrjStat2', code='PrjStat2')
-
-        # create a Project
-        from stalker import Project
-        self.test_project = Project(
-            name="Test Project 1",
-            code="TEST_PROJECT_1",
-            type=self.test_project_type,
-            repository=self.test_repo,
-        )
-        from stalker.db.session import DBSession
-        DBSession.add(self.test_project)
-        DBSession.commit()
-
-        self.test_asset_type = Type(
-            name='Character Asset',
-            code='char',
-            target_entity_type='Asset'
-        )
-
-        from stalker import Asset
-        self.test_asset = Asset(
-            name="Test Asset",
-            code='ta',
-            project=self.test_project,
-            type=self.test_asset_type
-        )
-        DBSession.add(self.test_asset)
-        DBSession.commit()
-
-        # create a Task
-        from stalker import Task
-        self.test_task = Task(
-            name="Modeling of Asset 1",
-            resources=[self.test_user],
-            parent=self.test_asset
-        )
-        DBSession.add(self.test_task)
-        DBSession.commit()
-
-        from stalker import Version
-        self.test_version = Version(
-            name='Test Version',
-            task=self.test_task,
-            version=1,
-            full_path='some/path'
-        )
-
-        # create the Ticket
-        self.kwargs = {
-            'project': self.test_project,
-            'links': [self.test_version],
-            'summary': 'This is a test ticket',
-            'description': 'This is the long description',
-            'priority': 'TRIVIAL',
-            'reported_by': self.test_user,
-        }
-
-        from stalker import Ticket
-        self.test_ticket = Ticket(**self.kwargs)
-        DBSession.add(self.test_ticket)
-        DBSession.commit()
-
-        # get the Ticket Statuses
-        self.status_new = Status.query.filter_by(name='New').first()
-        self.status_accepted = Status.query.filter_by(name='Accepted').first()
-        self.status_assigned = Status.query.filter_by(name='Assigned').first()
-        self.status_reopened = Status.query.filter_by(name='Reopened').first()
-        self.status_closed = Status.query.filter_by(name='Closed').first()
-
-    def test___auto_name__class_attribute_is_set_to_True(self):
-        """testing if the __auto_name__ class attribute is set to True for
-        Ticket class
-        """
-        from stalker import Ticket
-        assert Ticket.__auto_name__ is True
-
-    def test_name_argument_is_not_used(self):
-        """testing if the given name argument is not used
-        """
-        from stalker import Ticket
-        test_value = 'Test Name'
-        self.kwargs['name'] = test_value
-        new_ticket = Ticket(**self.kwargs)
-        assert new_ticket.name != test_value
-
-    def test_name_argument_is_skipped_will_not_raise_error(self):
-        """testing if skipping the name argument is not important and an
-        automatically generated name will be used in that case
-        """
-        from stalker import Ticket
-        if 'name' in self.kwargs:
-            self.kwargs.pop('name')
-            # expect no errors
-        Ticket(**self.kwargs)
-
-    def test_number_attribute_is_not_created_per_project(self):
-        """testing if the number attribute is not created per project and
-        continues to increase for every created ticket
-        """
-        from stalker import Project
-        proj1 = Project(
-            name='Test Project 1',
-            code='TP1',
-            repository=self.test_repo,
-        )
-
-        proj2 = Project(
-            name='Test Project 2',
-            code='TP2',
-            repository=self.test_repo,
-        )
-
-        proj3 = Project(
-            name='Test Project 3',
-            code='TP3',
-            repository=self.test_repo,
-        )
-
-        from stalker import Ticket
-        p1_t1 = Ticket(project=proj1)
-        from stalker.db.session import DBSession
-        DBSession.add(p1_t1)
-        DBSession.commit()
-        assert p1_t1.number == 2
-
-        p1_t2 = Ticket(project=proj1)
-        DBSession.add(p1_t2)
-        DBSession.commit()
-        assert p1_t2.number == 3
-
-        p2_t1 = Ticket(project=proj2)
-        DBSession.add(p2_t1)
-        DBSession.commit()
-        assert p2_t1.number == 4
-
-        p1_t3 = Ticket(project=proj1)
-        DBSession.add(p1_t3)
-        DBSession.commit()
-        assert p1_t3.number == 5
-
-        p3_t1 = Ticket(project=proj3)
-        DBSession.add(p3_t1)
-        DBSession.commit()
-        assert p3_t1.number == 6
-
-        p2_t2 = Ticket(project=proj2)
-        DBSession.add(p2_t2)
-        DBSession.commit()
-        assert p2_t2.number == 7
-
-        p3_t2 = Ticket(project=proj3)
-        DBSession.add(p3_t2)
-        DBSession.commit()
-        assert p3_t2.number == 8
-
-        p2_t3 = Ticket(project=proj2)
-        DBSession.add(p2_t3)
-        DBSession.commit()
-        assert p2_t3.number == 9
-
-    def test_number_attribute_is_read_only(self):
-        """testing if the number attribute is read-only
-        """
-        with pytest.raises(AttributeError) as cm:
-            self.test_ticket.number = 234
-
-        assert str(cm.value) == "can't set attribute"
-
-    def test_number_attribute_is_automatically_increased(self):
-        """testing if the number attribute is automatically increased
-        """
-        # create two new tickets
-        from stalker import Ticket
-        ticket1 = Ticket(**self.kwargs)
-        from stalker.db.session import DBSession
-        DBSession.add(ticket1)
-        DBSession.commit()
-
-        ticket2 = Ticket(**self.kwargs)
-        DBSession.add(ticket2)
-        DBSession.commit()
-
-        assert ticket1.number + 1 == ticket2.number
-        assert ticket1.number == 2
-        assert ticket2.number == 3
-
-    def test_links_argument_accepts_anything_derived_from_SimpleEntity(self):
-        """testing if links accepting anything derived from SimpleEntity
-        """
-        self.kwargs['links'] = [
-            self.test_project,
-            self.test_project_status1,
-            self.test_project_status2,
-            self.test_repo,
-            self.test_version
-        ]
-
-        from stalker import Ticket
-        new_ticket = Ticket(**self.kwargs)
-        assert \
-            sorted(self.kwargs['links'], key=lambda x: x.name) == \
-            sorted(new_ticket.links, key=lambda x: x.name)
-
-    def test_links_attribute_accepts_anything_derived_from_SimpleEntity(self):
-        """testing if links attribute is accepting anything derived from
-        SimpleEntity
-        """
-        links = [
-            self.test_project,
-            self.test_project_status1,
-            self.test_project_status2,
-            self.test_repo,
-            self.test_version
-        ]
-        self.test_ticket.links = links
-        assert \
-            sorted(links, key=lambda x: x.name) == \
-            sorted(self.test_ticket.links, key=lambda x: x.name)
-
-    def test_related_tickets_attribute_is_an_empty_list_on_init(self):
-        """testing if the related_tickets attribute is an empty list on init
-        """
-        assert self.test_ticket.related_tickets == []
-
-    def test_related_tickets_attribute_is_set_to_something_other_then_a_list_of_Tickets(self):
-        """testing if a TypeError will be raised when the related_tickets
-        attribute is set to something other than a list of Tickets
-        """
-        with pytest.raises(TypeError) as cm:
-            self.test_ticket.related_tickets = ['a ticket']
-
-        assert str(cm.value) == \
-            'Ticket.related_ticket attribute should be a list of other ' \
-            'stalker.models.ticket.Ticket instances not str'
-
-    def test_related_tickets_attribute_accepts_list_of_Ticket_instances(self):
-        """testing if the related tickets attribute accepts only list of
-        stalker.models.ticket.Ticket instances
-        """
-        from stalker import Ticket
-        new_ticket1 = Ticket(**self.kwargs)
-        from stalker.db.session import DBSession
-        DBSession.add(new_ticket1)
-        DBSession.commit()
-
-        new_ticket2 = Ticket(**self.kwargs)
-        DBSession.add(new_ticket2)
-        DBSession.commit()
-
-        self.test_ticket.related_tickets = [new_ticket1, new_ticket2]
-
-    def test_related_ticket_attribute_will_not_accept_self(self):
-        """testing if the related_tickets attribute will not accept the Ticket
-        itself and will raise ValueError
-        """
-        with pytest.raises(ValueError) as cm:
-            self.test_ticket.related_tickets = [self.test_ticket]
-
-        assert str(cm.value) == 'Ticket.related_ticket attribute can not ' \
-                                'have itself in the list'
-
-    def test_priority_argument_is_skipped_will_set_it_to_zero(self):
-        """testing if the priority argument is skipped will set the priority
-        of the Ticket to 0 or TRIVIAL
-        """
-        from stalker import Ticket
-        self.kwargs.pop('priority')
-        new_ticket = Ticket(**self.kwargs)
-        assert new_ticket.priority == 'TRIVIAL'
-
-    def test_comments_attribute_is_synonym_for_notes_attribute(self):
-        """testing if the comments attribute is the synonym for the notes
-        attribute, so setting one will also set the other
-        """
-        from stalker import Note
-        note1 = Note(name='Test Note 1', content='Test note 1')
-        note2 = Note(name='Test Note 2', content='Test note 2')
-
-        self.test_ticket.comments.append(note1)
-        self.test_ticket.comments.append(note2)
-
-        assert note1 in self.test_ticket.notes
-        assert note2 in self.test_ticket.notes
-
-        self.test_ticket.notes.remove(note1)
-        assert note1 not in self.test_ticket.comments
-
-        self.test_ticket.notes.remove(note2)
-        assert note2 not in self.test_ticket.comments
-
-    def test_reported_by_attribute_is_synonym_of_created_by(self):
-        """testing if the reported_by attribute is a synonym for the created_by
-        attribute
-        """
-        from stalker import User
-        user1 = User(
-            name='user1',
-            login='user1',
-            password='secret',
-            email='user1@test.com'
-        )
-
-        self.test_ticket.reported_by = user1
-        assert user1 == self.test_ticket.created_by
-
-    def test_status_for_newly_created_tickets_will_be_NEW_when_skipped(self):
-        """testing if the status of newly created tickets will be New
-        """
-        # get the status NEW from the session
-        from stalker import Ticket
-        new_ticket = Ticket(**self.kwargs)
-        assert new_ticket.status == self.status_new
-
-    def test_project_argument_is_skipped(self):
-        """testing if a TypeError will be raised when the project argument is
-        skipped
-        """
-        from stalker import Ticket
-        self.kwargs.pop('project')
-        with pytest.raises(TypeError) as cm:
-            Ticket(**self.kwargs)
-
-        assert str(cm.value) == \
-            'Ticket.project should be an instance of ' \
-            'stalker.models.project.Project, not NoneType'
-
-    def test_project_argument_is_None(self):
-        """testing if a TypeError will be raised when the project argument is
-        None
-        """
-        from stalker import Ticket
-        self.kwargs['project'] = None
-        with pytest.raises(TypeError) as cm:
-            Ticket(**self.kwargs)
-
-        assert str(cm.value) == \
-            'Ticket.project should be an instance of ' \
-            'stalker.models.project.Project, not NoneType'
-
-    def test_project_argument_accepts_Project_instances_only(self):
-        """testing if the project argument accepts Project instances only
-        """
-        from stalker import Ticket
-        self.kwargs['project'] = 'Not a Project instance'
-        with pytest.raises(TypeError) as cm:
-            Ticket(**self.kwargs)
-
-        assert str(cm.value) == \
-            'Ticket.project should be an instance of ' \
-            'stalker.models.project.Project, not str'
-
-    def test_project_argument_is_working_properly(self):
-        """testing if the project argument is working properly
-        """
-        from stalker import Ticket
-        self.kwargs['project'] = self.test_project
-        new_ticket = Ticket(**self.kwargs)
-        assert new_ticket.project == self.test_project
-
-    def test_project_attribute_is_read_only(self):
-        """testing if the project attribute is read only
-        """
-        with pytest.raises(AttributeError) as cm:
-            self.test_ticket.project = self.test_project
-
-        assert str(cm.value) == "can't set attribute"
-
-    # STATUSES
-
-    # resolve
-    def test_resolve_method_will_change_the_status_from_New_to_Closed_and_creates_a_log(self):
-        """testing if invoking the resolve method will change the status of the
-        Ticket from New to Closed
-        """
-        assert self.test_ticket.status == self.status_new
-        ticket_log = self.test_ticket.resolve()
-        assert self.test_ticket.status == self.status_closed
-        assert ticket_log.from_status == self.status_new
-        assert ticket_log.to_status == self.status_closed
-        assert ticket_log.action == 'resolve'
-
-    def test_resolve_method_will_change_the_status_from_Accepted_to_Closed(self):
-        """testing if invoking the resolve method will change the status of the
-        Ticket from Accepted to Closed
-        """
-        self.test_ticket.status = self.status_accepted
-        assert self.test_ticket.status == self.status_accepted
-        ticket_log = self.test_ticket.resolve()
-        assert self.test_ticket.status == self.status_closed
-        assert ticket_log.from_status == self.status_accepted
-        assert ticket_log.to_status == self.status_closed
-        assert ticket_log.action == 'resolve'
-
-    def test_resolve_method_will_change_the_status_from_Assigned_to_Closed(self):
-        """testing if invoking the resolve method will change the status of the
-        Ticket from Assigned to Closed
-        """
-        self.test_ticket.status = self.status_assigned
-        assert self.test_ticket.status == self.status_assigned
-        ticket_log = self.test_ticket.resolve()
-        assert self.test_ticket.status == self.status_closed
-        assert ticket_log.from_status == self.status_assigned
-        assert ticket_log.to_status == self.status_closed
-        assert ticket_log.action == 'resolve'
-
-    def test_resolve_method_will_change_the_status_from_Reopened_to_Closed(self):
-        """testing if invoking the accept method will change the status of the
-        Ticket from Reopened to closed
-        """
-        self.test_ticket.status = self.status_reopened
-        assert self.test_ticket.status == self.status_reopened
-        ticket_log = self.test_ticket.resolve()
-        assert self.test_ticket.status == self.status_closed
-        assert ticket_log.from_status == self.status_reopened
-        assert ticket_log.to_status == self.status_closed
-        assert ticket_log.action == 'resolve'
-
-    def test_resolve_method_will_not_change_the_status_from_Closed_to_anything(self):
-        """testing if invoking the resolve method will not change the status of
-        the Ticket from Closed to anything
-        """
-        self.test_ticket.status = self.status_closed
-        assert self.test_ticket.status == self.status_closed
-        ticket_log = self.test_ticket.resolve()
-        assert ticket_log is None
-        assert self.test_ticket.status == self.status_closed
-
-    # reopen
-    def test_reopen_method_will_not_change_the_status_from_New_to_anything(self):
-        """testing if invoking the reopen method will not change the status of
-        the Ticket from New to anything
-        """
-        self.test_ticket.status = self.status_new
-        assert self.test_ticket.status == self.status_new
-        ticket_log = self.test_ticket.reopen()
-        assert ticket_log is None
-        assert self.test_ticket.status == self.status_new
-
-    def test_reopen_method_will_not_change_the_status_from_Accepted_to_anything(self):
-        """testing if invoking the reopen method will not change the status of
-        the Ticket from Accepted to anything
-        """
-        self.test_ticket.status = self.status_accepted
-        assert self.test_ticket.status == self.status_accepted
-        ticket_log = self.test_ticket.reopen()
-        assert ticket_log is None
-        assert self.test_ticket.status == self.status_accepted
-
-    def test_reopen_method_will_not_change_the_status_from_Assigned_to_anything(self):
-        """testing if invoking the reopen method will not change the status of
-        the Ticket from Assigned to anything
-        """
-        self.test_ticket.status = self.status_assigned
-        assert self.test_ticket.status == self.status_assigned
-        ticket_log = self.test_ticket.reopen()
-        assert ticket_log is None
-        assert self.test_ticket.status == self.status_assigned
-
-    def test_reopen_method_will_not_change_the_status_from_Reopened_to_anything(self):
-        """testing if invoking the reopen method will not change the status of
-        the Ticket from Reopened to anything
-        """
-        self.test_ticket.status = self.status_reopened
-        assert self.test_ticket.status == self.status_reopened
-        ticket_log = self.test_ticket.reopen()
-        assert ticket_log is None
-        assert self.test_ticket.status == self.status_reopened
-
-    def test_reopen_method_will_change_the_status_from_Closed_to_Reopened(self):
-        """testing if invoking the reopen method will change the status of the
-        Ticket from Closed to Reopened
-        """
-        self.test_ticket.status = self.status_closed
-        assert self.test_ticket.status == self.status_closed
-        ticket_log = self.test_ticket.reopen()
-        assert self.test_ticket.status == self.status_reopened
-        assert ticket_log.from_status == self.status_closed
-        assert ticket_log.to_status == self.status_reopened
-        assert ticket_log.action == 'reopen'
-
-    # accept
-    def test_accept_method_will_change_the_status_from_New_to_Accepted(self):
-        """testing if invoking the accept method will change the status of the
-        Ticket from New to Accepted
-        """
-        self.test_ticket.status = self.status_new
-        assert self.test_ticket.status == self.status_new
-        ticket_log = self.test_ticket.accept()
-        assert self.test_ticket.status == self.status_accepted
-        assert ticket_log.from_status == self.status_new
-        assert ticket_log.to_status == self.status_accepted
-        assert ticket_log.action == 'accept'
-
-    def test_accept_method_will_change_the_status_from_Accepted_to_Accepted(self):
-        """testing if invoking the accept method will change the status of the
-        Ticket from Accepted to Accepted
-        """
-        self.test_ticket.status = self.status_accepted
-        assert self.test_ticket.status == self.status_accepted
-        ticket_log = self.test_ticket.accept()
-        assert self.test_ticket.status == self.status_accepted
-        assert ticket_log.from_status == self.status_accepted
-        assert ticket_log.to_status == self.status_accepted
-        assert ticket_log.action == 'accept'
-
-    def test_accept_method_will_change_the_status_from_Assigned_to_Accepted(self):
-        """testing if invoking the accept method will change the status of the
-        Ticket from Assigned to Accepted
-        """
-        self.test_ticket.status = self.status_assigned
-        assert self.test_ticket.status == self.status_assigned
-        ticket_log = self.test_ticket.accept()
-        assert self.test_ticket.status == self.status_accepted
-        assert ticket_log.from_status == self.status_assigned
-        assert ticket_log.to_status == self.status_accepted
-        assert ticket_log.action == 'accept'
-
-    def test_accept_method_will_change_the_status_from_Reopened_to_Accepted(self):
-        """testing if invoking the accept method will change the status of the
-        Ticket from Reopened to Accepted
-        """
-        self.test_ticket.status = self.status_reopened
-        assert self.test_ticket.status == self.status_reopened
-        ticket_log = self.test_ticket.accept()
-        assert self.test_ticket.status == self.status_accepted
-        assert ticket_log.from_status == self.status_reopened
-        assert ticket_log.to_status == self.status_accepted
-        assert ticket_log.action == 'accept'
-
-    def test_accept_method_will_not_change_the_status_of_Closed_to_Anything(self):
-        """testing if invoking the accept method will not change the status of
-        the Ticket from Closed to Anything
-        """
-        self.test_ticket.status = self.status_closed
-        assert self.test_ticket.status == self.status_closed
-        ticket_log = self.test_ticket.accept()
-        assert ticket_log is None
-        assert self.test_ticket.status == self.status_closed
-
-    # reassign
-    def test_reassign_method_will_change_the_status_from_New_to_Assigned(self):
-        """testing if invoking the reassign method will change the status of
-        the Ticket from New to Assigned
-        """
-        self.test_ticket.status = self.status_new
-        assert self.test_ticket.status == self.status_new
-        ticket_log = self.test_ticket.reassign()
-        assert self.test_ticket.status == self.status_assigned
-        assert ticket_log.from_status == self.status_new
-        assert ticket_log.to_status == self.status_assigned
-        assert ticket_log.action == 'reassign'
-
-    def test_reassign_method_will_change_the_status_from_Accepted_to_Assigned(self):
-        """testing if invoking the reassign method will change the status of
-        the Ticket from Accepted to Accepted
-        """
-        self.test_ticket.status = self.status_accepted
-        assert self.test_ticket.status == self.status_accepted
-        ticket_log = self.test_ticket.reassign()
-        assert self.test_ticket.status == self.status_assigned
-        assert ticket_log.from_status == self.status_accepted
-        assert ticket_log.to_status == self.status_assigned
-        assert ticket_log.action == 'reassign'
-
-    def test_reassign_method_will_change_the_status_from_Assigned_to_Assigned(self):
-        """testing if invoking the reassign method will change the status of
-        the Ticket from Assigned to Accepted
-        """
-        self.test_ticket.status = self.status_assigned
-        assert self.test_ticket.status == self.status_assigned
-        ticket_log = self.test_ticket.reassign()
-        assert self.test_ticket.status == self.status_assigned
-        assert ticket_log.from_status == self.status_assigned
-        assert ticket_log.to_status == self.status_assigned
-        assert ticket_log.action == 'reassign'
-
-    def test_reassign_method_will_change_the_status_from_Reopened_to_Assigned(self):
-        """testing if invoking the accept method will change the status of the
-        Ticket from Reopened to Assigned
-        """
-        self.test_ticket.status = self.status_reopened
-        assert self.test_ticket.status == self.status_reopened
-        ticket_log = self.test_ticket.reassign()
-        assert self.test_ticket.status == self.status_assigned
-        assert ticket_log.from_status == self.status_reopened
-        assert ticket_log.to_status == self.status_assigned
-        assert ticket_log.action == 'reassign'
-
-    def test_reassign_method_will_not_change_the_status_of_Closed_to_Anything(self):
-        """testing if invoking the reassign method will not change the status
-        of the Ticket from Closed to Anything
-        """
-        self.test_ticket.status = self.status_closed
-        assert self.test_ticket.status == self.status_closed
-        ticket_log = self.test_ticket.reassign()
-        assert ticket_log is None
-        assert self.test_ticket.status == self.status_closed
-
-    def test_resolve_method_will_set_the_resolution(self):
-        """testing if invoking the resolve method will change the status of the
-        Ticket from New to Closed
-        """
-        assert self.test_ticket.status == self.status_new
-        ticket_log = self.test_ticket.resolve(resolution='fixed')
-        assert self.test_ticket.status == self.status_closed
-        assert ticket_log.from_status == self.status_new
-        assert ticket_log.to_status == self.status_closed
-        assert ticket_log.action == 'resolve'
-        assert self.test_ticket.resolution == 'fixed'
-
-    def test_reopen_will_clear_resolution(self):
-        """testing if invoking the reopen method will clear the
-        timing_resolution
-        """
-        from stalker import TicketLog
-        assert self.test_ticket.status == self.status_new
-        self.test_ticket.resolve(resolution='fixed')
-        assert self.test_ticket.resolution == 'fixed'
-        ticket_log = self.test_ticket.reopen()
-        assert isinstance(ticket_log, TicketLog)
-        assert self.test_ticket.resolution == ''
-
-    def test_reassign_will_set_the_owner(self):
-        """testing if invoking the reassign method will set the owner
-        """
-        from stalker import TicketLog
-        assert self.test_ticket.status == self.status_new
-        assert self.test_ticket.owner != self.test_user
-        ticket_log = self.test_ticket.reassign(assign_to=self.test_user)
-        assert isinstance(ticket_log, TicketLog)
-        assert self.test_ticket.owner == self.test_user
-
-    def test_accept_will_set_the_owner(self):
-        """testing if invoking the accept method will set the owner
-        """
-        from stalker import TicketLog
-        assert self.test_ticket.status == self.status_new
-        assert self.test_ticket.owner != self.test_user
-        ticket_log = self.test_ticket.accept(created_by=self.test_user)
-        assert isinstance(ticket_log, TicketLog)
-        assert self.test_ticket.owner == self.test_user
-
-    def test_summary_argument_skipped(self):
-        """testing if the summary argument can be skipped
-        """
-        from stalker import Ticket
-        try:
-            self.kwargs.pop('summary')
-        except KeyError:
-            pass
-        new_ticket = Ticket(**self.kwargs)
-        assert new_ticket.summary == ''
-
-    def test_summary_argument_can_be_None(self):
-        """testing if the summary argument can be None
-        """
-        from stalker import Ticket
-        self.kwargs['summary'] = None
-        new_ticket = Ticket(**self.kwargs)
-        assert new_ticket.summary == ''
-
-    def test_summary_attribute_can_be_set_to_None(self):
-        """testing if the summary attribute can be set to None
-        """
-        self.test_ticket.summary = None
-        assert self.test_ticket.summary == ''
-
-    def test_summary_argument_is_not_a_string(self):
-        """testing if a TypeError will be raised when the summary argument
-        value is not a string
-        """
-        from stalker import Ticket
-        self.kwargs['summary'] = ['not a string instance']
-        with pytest.raises(TypeError) as cm:
-            Ticket(self.kwargs)
-
-        assert str(cm.value) == \
-            'Ticket.project should be an instance of ' \
-            'stalker.models.project.Project, not dict'
-
-    def test_summary_attribute_is_set_to_a_value_other_than_a_string(self):
-        """testing if the summary attribute is set to a value other than a
-        string
-        """
-        with pytest.raises(TypeError) as cm:
-            self.test_ticket.summary = ['not a string']
-
-        assert str(cm.value) == \
-            'Ticket.summary should be an instance of str, not list'
-
-    def test_summary_argument_is_working_properly(self):
-        """testing if the summary argument value is passed to summary attribute
-        correctly
-        """
-        from stalker import Ticket
-        test_value = 'test summary'
-        self.kwargs['summary'] = test_value
-        new_ticket = Ticket(**self.kwargs)
-        assert new_ticket.summary == test_value
-
-    def test_summary_attribute_is_working_properly(self):
-        """testing if the summary attribute is working properly
-        """
-        test_value = 'test_summary'
-        assert self.test_ticket.summary != test_value
-        self.test_ticket.summary = test_value
-        assert self.test_ticket.summary == test_value
+@pytest.fixture(scope="function")
+def setup_ticket_tests(setup_postgresql_db):
+    """Set up the tests for the Ticket class."""
+    data = dict()
+    # create statuses
+    data["test_status1"] = Status(name="N", code="N")
+    data["test_status2"] = Status(name="R", code="R")
+
+    # get the ticket types
+    ticket_types = Type.query.filter(Type.target_entity_type == "Ticket").all()
+    data["ticket_type_1"] = ticket_types[0]
+    data["ticket_type_2"] = ticket_types[1]
+
+    # create a User
+    data["test_user"] = User(
+        name="Test User", login="test_user1", email="test1@user.com", password="secret"
+    )
+
+    # create a Repository
+    data["test_repo"] = Repository(name="Test Repo", code="TR")
+
+    # create a Project Type
+    data["test_project_type"] = Type(
+        name="Commercial Project",
+        code="comm",
+        target_entity_type="Project",
+    )
+
+    # create a Project StatusList
+    data["test_project_status1"] = Status(name="PrjStat1", code="PrjStat1")
+    data["test_project_status2"] = Status(name="PrjStat2", code="PrjStat2")
+
+    # create a Project
+    data["test_project"] = Project(
+        name="Test Project 1",
+        code="TEST_PROJECT_1",
+        type=data["test_project_type"],
+        repository=data["test_repo"],
+    )
+    DBSession.add(data["test_project"])
+    DBSession.commit()
+
+    data["test_asset_type"] = Type(
+        name="Character Asset", code="char", target_entity_type="Asset"
+    )
+
+    data["test_asset"] = Asset(
+        name="Test Asset",
+        code="ta",
+        project=data["test_project"],
+        type=data["test_asset_type"],
+    )
+    DBSession.add(data["test_asset"])
+    DBSession.commit()
+
+    # create a Task
+    data["test_task"] = Task(
+        name="Modeling of Asset 1",
+        resources=[data["test_user"]],
+        parent=data["test_asset"],
+    )
+    DBSession.add(data["test_task"])
+    DBSession.commit()
+
+    data["test_version"] = Version(
+        name="Test Version", task=data["test_task"], version=1, full_path="some/path"
+    )
+
+    # create the Ticket
+    data["kwargs"] = {
+        "project": data["test_project"],
+        "links": [data["test_version"]],
+        "summary": "This is a test ticket",
+        "description": "This is the long description",
+        "priority": "TRIVIAL",
+        "reported_by": data["test_user"],
+    }
+
+    data["test_ticket"] = Ticket(**data["kwargs"])
+    DBSession.add(data["test_ticket"])
+    DBSession.commit()
+
+    # get the Ticket Statuses
+    data["status_new"] = Status.query.filter_by(name="New").first()
+    data["status_accepted"] = Status.query.filter_by(name="Accepted").first()
+    data["status_assigned"] = Status.query.filter_by(name="Assigned").first()
+    data["status_reopened"] = Status.query.filter_by(name="Reopened").first()
+    data["status_closed"] = Status.query.filter_by(name="Closed").first()
+
+    return data
+
+
+def test___auto_name__class_attribute_is_set_to_true():
+    """__auto_name__ class attribute is set to True for Ticket class."""
+    assert Ticket.__auto_name__ is True
+
+
+def test_name_argument_is_not_used(setup_ticket_tests):
+    """name argument is not used."""
+    data = setup_ticket_tests
+    test_value = "Test Name"
+    data["kwargs"]["name"] = test_value
+    new_ticket = Ticket(**data["kwargs"])
+    assert new_ticket.name != test_value
+
+
+def test_name_argument_is_skipped_will_not_raise_error(setup_ticket_tests):
+    """name arg skipped an automatically generated name is used."""
+    data = setup_ticket_tests
+    if "name" in data["kwargs"]:
+        data["kwargs"].pop("name")
+        # expect no errors
+    Ticket(**data["kwargs"])
+
+
+def test_number_attribute_is_not_created_per_project(setup_ticket_tests):
+    """number attr is not per project and uniquely increment for every new ticket."""
+    data = setup_ticket_tests
+    proj1 = Project(
+        name="Test Project 1",
+        code="TP1",
+        repository=data["test_repo"],
+    )
+
+    proj2 = Project(
+        name="Test Project 2",
+        code="TP2",
+        repository=data["test_repo"],
+    )
+
+    proj3 = Project(
+        name="Test Project 3",
+        code="TP3",
+        repository=data["test_repo"],
+    )
+
+    p1_t1 = Ticket(project=proj1)
+    DBSession.add(p1_t1)
+    DBSession.commit()
+    assert p1_t1.number == 2
+
+    p1_t2 = Ticket(project=proj1)
+    DBSession.add(p1_t2)
+    DBSession.commit()
+    assert p1_t2.number == 3
+
+    p2_t1 = Ticket(project=proj2)
+    DBSession.add(p2_t1)
+    DBSession.commit()
+    assert p2_t1.number == 4
+
+    p1_t3 = Ticket(project=proj1)
+    DBSession.add(p1_t3)
+    DBSession.commit()
+    assert p1_t3.number == 5
+
+    p3_t1 = Ticket(project=proj3)
+    DBSession.add(p3_t1)
+    DBSession.commit()
+    assert p3_t1.number == 6
+
+    p2_t2 = Ticket(project=proj2)
+    DBSession.add(p2_t2)
+    DBSession.commit()
+    assert p2_t2.number == 7
+
+    p3_t2 = Ticket(project=proj3)
+    DBSession.add(p3_t2)
+    DBSession.commit()
+    assert p3_t2.number == 8
+
+    p2_t3 = Ticket(project=proj2)
+    DBSession.add(p2_t3)
+    DBSession.commit()
+    assert p2_t3.number == 9
+
+
+def test_number_attribute_is_read_only(setup_ticket_tests):
+    """number attribute is read-only."""
+    data = setup_ticket_tests
+    with pytest.raises(AttributeError) as cm:
+        data["test_ticket"].number = 234
+
+    assert str(cm.value) == "can't set attribute"
+
+
+def test_number_attribute_is_automatically_increased(setup_ticket_tests):
+    """number attribute is automatically increased."""
+    data = setup_ticket_tests
+    # create two new tickets
+    ticket1 = Ticket(**data["kwargs"])
+    DBSession.add(ticket1)
+    DBSession.commit()
+
+    ticket2 = Ticket(**data["kwargs"])
+    DBSession.add(ticket2)
+    DBSession.commit()
+
+    assert ticket1.number + 1 == ticket2.number
+    assert ticket1.number == 2
+    assert ticket2.number == 3
+
+
+def test_links_argument_accepts_anything_derived_from_simple_entity(setup_ticket_tests):
+    """links accepting anything derived from SimpleEntity."""
+    data = setup_ticket_tests
+    data["kwargs"]["links"] = [
+        data["test_project"],
+        data["test_project_status1"],
+        data["test_project_status2"],
+        data["test_repo"],
+        data["test_version"],
+    ]
+
+    new_ticket = Ticket(**data["kwargs"])
+    assert sorted(data["kwargs"]["links"], key=lambda x: x.name) == sorted(
+        new_ticket.links, key=lambda x: x.name
+    )
+
+
+def test_links_attribute_accepts_anything_derived_from_simple_entity(
+    setup_ticket_tests,
+):
+    """links attribute is accepting anything derived from SimpleEntity."""
+    data = setup_ticket_tests
+    links = [
+        data["test_project"],
+        data["test_project_status1"],
+        data["test_project_status2"],
+        data["test_repo"],
+        data["test_version"],
+    ]
+    data["test_ticket"].links = links
+    assert sorted(links, key=lambda x: x.name) == sorted(
+        data["test_ticket"].links, key=lambda x: x.name
+    )
+
+
+def test_related_tickets_attribute_is_an_empty_list_on_init(setup_ticket_tests):
+    """related_tickets attribute is an empty list on init."""
+    data = setup_ticket_tests
+    assert data["test_ticket"].related_tickets == []
+
+
+def test_related_tickets_attribute_is_set_to_something_other_then_a_list_of_tickets(
+    setup_ticket_tests,
+):
+    """TypeError raised if the related_tickets attr is not a list of Tickets."""
+    data = setup_ticket_tests
+    with pytest.raises(TypeError) as cm:
+        data["test_ticket"].related_tickets = ["a ticket"]
+
+    assert (
+        str(cm.value) == "Ticket.related_ticket attribute should be a list of other "
+        "stalker.models.ticket.Ticket instances not str"
+    )
+
+
+def test_related_tickets_attribute_accepts_list_of_ticket_instances(setup_ticket_tests):
+    """related tickets attr accepts only list of Ticket instances."""
+    data = setup_ticket_tests
+    new_ticket1 = Ticket(**data["kwargs"])
+    DBSession.add(new_ticket1)
+    DBSession.commit()
+
+    new_ticket2 = Ticket(**data["kwargs"])
+    DBSession.add(new_ticket2)
+    DBSession.commit()
+
+    data["test_ticket"].related_tickets = [new_ticket1, new_ticket2]
+
+
+def test_related_ticket_attribute_will_not_accept_self(setup_ticket_tests):
+    """related_tickets attr don't accept the Ticket itself and raises ValueError."""
+    data = setup_ticket_tests
+    with pytest.raises(ValueError) as cm:
+        data["test_ticket"].related_tickets = [data["test_ticket"]]
+
+    assert (
+        str(cm.value) == "Ticket.related_ticket attribute can not "
+        "have itself in the list"
+    )
+
+
+def test_priority_argument_is_skipped_will_set_it_to_zero(setup_ticket_tests):
+    """priority arg is skipped will set the priority of the Ticket to 0 or TRIVIAL."""
+    data = setup_ticket_tests
+    data["kwargs"].pop("priority")
+    new_ticket = Ticket(**data["kwargs"])
+    assert new_ticket.priority == "TRIVIAL"
+
+
+def test_comments_attribute_is_synonym_for_notes_attribute(setup_ticket_tests):
+    """comments attr is the synonym for the notes attr."""
+    data = setup_ticket_tests
+    note1 = Note(name="Test Note 1", content="Test note 1")
+    note2 = Note(name="Test Note 2", content="Test note 2")
+
+    data["test_ticket"].comments.append(note1)
+    data["test_ticket"].comments.append(note2)
+
+    assert note1 in data["test_ticket"].notes
+    assert note2 in data["test_ticket"].notes
+
+    data["test_ticket"].notes.remove(note1)
+    assert note1 not in data["test_ticket"].comments
+
+    data["test_ticket"].notes.remove(note2)
+    assert note2 not in data["test_ticket"].comments
+
+
+def test_reported_by_attribute_is_synonym_of_created_by(setup_ticket_tests):
+    """reported_by attribute is a synonym for the created_by attribute."""
+    data = setup_ticket_tests
+    user1 = User(name="user1", login="user1", password="secret", email="user1@test.com")
+    data["test_ticket"].reported_by = user1
+    assert user1 == data["test_ticket"].created_by
+
+
+def test_status_for_newly_created_tickets_will_be_new_if_skipped(setup_ticket_tests):
+    """status of newly created tickets New."""
+    data = setup_ticket_tests
+    # get the status NEW from the session
+    new_ticket = Ticket(**data["kwargs"])
+    assert new_ticket.status == data["status_new"]
+
+
+def test_project_argument_is_skipped(setup_ticket_tests):
+    """TypeError raised if the project argument is skipped."""
+    data = setup_ticket_tests
+    data["kwargs"].pop("project")
+    with pytest.raises(TypeError) as cm:
+        Ticket(**data["kwargs"])
+
+    assert (
+        str(cm.value) == "Ticket.project should be an instance of "
+        "stalker.models.project.Project, not NoneType"
+    )
+
+
+def test_project_argument_is_none(setup_ticket_tests):
+    """TypeError raised if the project argument is None."""
+    data = setup_ticket_tests
+    data["kwargs"]["project"] = None
+    with pytest.raises(TypeError) as cm:
+        Ticket(**data["kwargs"])
+
+    assert (
+        str(cm.value) == "Ticket.project should be an instance of "
+        "stalker.models.project.Project, not NoneType"
+    )
+
+
+def test_project_argument_accepts_project_instances_only(setup_ticket_tests):
+    """project argument accepts Project instances only."""
+    data = setup_ticket_tests
+    data["kwargs"]["project"] = "Not a Project instance"
+    with pytest.raises(TypeError) as cm:
+        Ticket(**data["kwargs"])
+
+    assert (
+        str(cm.value) == "Ticket.project should be an instance of "
+        "stalker.models.project.Project, not str"
+    )
+
+
+def test_project_argument_is_working_properly(setup_ticket_tests):
+    """project argument is working properly."""
+    data = setup_ticket_tests
+    data["kwargs"]["project"] = data["test_project"]
+    new_ticket = Ticket(**data["kwargs"])
+    assert new_ticket.project == data["test_project"]
+
+
+def test_project_attribute_is_read_only(setup_ticket_tests):
+    """project attribute is read only."""
+    data = setup_ticket_tests
+    with pytest.raises(AttributeError) as cm:
+        data["test_ticket"].project = data["test_project"]
+
+    assert str(cm.value) == "can't set attribute"
+
+
+# STATUSES
+
+# resolve
+def test_resolve_method_will_change_the_status_from_new_to_closed_and_creates_a_log(
+    setup_ticket_tests,
+):
+    """resolve action changes Ticket status from New to Closed."""
+    data = setup_ticket_tests
+    assert data["test_ticket"].status == data["status_new"]
+    ticket_log = data["test_ticket"].resolve()
+    assert data["test_ticket"].status == data["status_closed"]
+    assert ticket_log.from_status == data["status_new"]
+    assert ticket_log.to_status == data["status_closed"]
+    assert ticket_log.action == "resolve"
+
+
+def test_resolve_method_will_change_the_status_from_accepted_to_closed(
+    setup_ticket_tests,
+):
+    """resolve action changes Ticket status from Accepted to Closed."""
+    data = setup_ticket_tests
+    data["test_ticket"].status = data["status_accepted"]
+    assert data["test_ticket"].status == data["status_accepted"]
+    ticket_log = data["test_ticket"].resolve()
+    assert data["test_ticket"].status == data["status_closed"]
+    assert ticket_log.from_status == data["status_accepted"]
+    assert ticket_log.to_status == data["status_closed"]
+    assert ticket_log.action == "resolve"
+
+
+def test_resolve_method_will_change_the_status_from_assigned_to_closed(
+    setup_ticket_tests,
+):
+    """resolve action changes Ticket status from Assigned to Closed."""
+    data = setup_ticket_tests
+    data["test_ticket"].status = data["status_assigned"]
+    assert data["test_ticket"].status == data["status_assigned"]
+    ticket_log = data["test_ticket"].resolve()
+    assert data["test_ticket"].status == data["status_closed"]
+    assert ticket_log.from_status == data["status_assigned"]
+    assert ticket_log.to_status == data["status_closed"]
+    assert ticket_log.action == "resolve"
+
+
+def test_resolve_method_will_change_the_status_from_reopened_to_closed(
+    setup_ticket_tests,
+):
+    """accept action changes Ticket status from Reopened to closed."""
+    data = setup_ticket_tests
+    data["test_ticket"].status = data["status_reopened"]
+    assert data["test_ticket"].status == data["status_reopened"]
+    ticket_log = data["test_ticket"].resolve()
+    assert data["test_ticket"].status == data["status_closed"]
+    assert ticket_log.from_status == data["status_reopened"]
+    assert ticket_log.to_status == data["status_closed"]
+    assert ticket_log.action == "resolve"
+
+
+def test_resolve_method_will_not_change_the_status_from_closed_to_anything(
+    setup_ticket_tests,
+):
+    """resolve action don't change Ticket status from Closed to anything."""
+    data = setup_ticket_tests
+    data["test_ticket"].status = data["status_closed"]
+    assert data["test_ticket"].status == data["status_closed"]
+    ticket_log = data["test_ticket"].resolve()
+    assert ticket_log is None
+    assert data["test_ticket"].status == data["status_closed"]
+
+
+# reopen
+def test_reopen_method_will_not_change_the_status_from_new_to_anything(
+    setup_ticket_tests,
+):
+    """reopen action will not change Ticket status from New to anything."""
+    data = setup_ticket_tests
+    data["test_ticket"].status = data["status_new"]
+    assert data["test_ticket"].status == data["status_new"]
+    ticket_log = data["test_ticket"].reopen()
+    assert ticket_log is None
+    assert data["test_ticket"].status == data["status_new"]
+
+
+def test_reopen_method_will_not_change_the_status_from_accepted_to_anything(
+    setup_ticket_tests,
+):
+    """reopen action will not change Ticket status from Accepted to anything."""
+    data = setup_ticket_tests
+    data["test_ticket"].status = data["status_accepted"]
+    assert data["test_ticket"].status == data["status_accepted"]
+    ticket_log = data["test_ticket"].reopen()
+    assert ticket_log is None
+    assert data["test_ticket"].status == data["status_accepted"]
+
+
+def test_reopen_method_will_not_change_the_status_from_assigned_to_anything(
+    setup_ticket_tests,
+):
+    """reopen action will not change Ticket status from Assigned to anything."""
+    data = setup_ticket_tests
+    data["test_ticket"].status = data["status_assigned"]
+    assert data["test_ticket"].status == data["status_assigned"]
+    ticket_log = data["test_ticket"].reopen()
+    assert ticket_log is None
+    assert data["test_ticket"].status == data["status_assigned"]
+
+
+def test_reopen_method_will_not_change_the_status_from_reopened_to_anything(
+    setup_ticket_tests,
+):
+    """reopen action will not change Ticket status from Reopened to anything."""
+    data = setup_ticket_tests
+    data["test_ticket"].status = data["status_reopened"]
+    assert data["test_ticket"].status == data["status_reopened"]
+    ticket_log = data["test_ticket"].reopen()
+    assert ticket_log is None
+    assert data["test_ticket"].status == data["status_reopened"]
+
+
+def test_reopen_method_will_change_the_status_from_closed_to_reopened(
+    setup_ticket_tests,
+):
+    """reopen action changes Ticket status from Closed to "Reopened"."""
+    data = setup_ticket_tests
+    data["test_ticket"].status = data["status_closed"]
+    assert data["test_ticket"].status == data["status_closed"]
+    ticket_log = data["test_ticket"].reopen()
+    assert data["test_ticket"].status == data["status_reopened"]
+    assert ticket_log.from_status == data["status_closed"]
+    assert ticket_log.to_status == data["status_reopened"]
+    assert ticket_log.action == "reopen"
+
+
+# accept
+def test_accept_method_will_change_the_status_from_new_to_accepted(setup_ticket_tests):
+    """accept action changes Ticket status from New to Accepted."""
+    data = setup_ticket_tests
+    data["test_ticket"].status = data["status_new"]
+    assert data["test_ticket"].status == data["status_new"]
+    ticket_log = data["test_ticket"].accept()
+    assert data["test_ticket"].status == data["status_accepted"]
+    assert ticket_log.from_status == data["status_new"]
+    assert ticket_log.to_status == data["status_accepted"]
+    assert ticket_log.action == "accept"
+
+
+def test_accept_method_will_change_the_status_from_accepted_to_accepted(
+    setup_ticket_tests,
+):
+    """accept action changes Ticket status from Accepted to Accepted."""
+    data = setup_ticket_tests
+    data["test_ticket"].status = data["status_accepted"]
+    assert data["test_ticket"].status == data["status_accepted"]
+    ticket_log = data["test_ticket"].accept()
+    assert data["test_ticket"].status == data["status_accepted"]
+    assert ticket_log.from_status == data["status_accepted"]
+    assert ticket_log.to_status == data["status_accepted"]
+    assert ticket_log.action == "accept"
+
+
+def test_accept_method_will_change_the_status_from_assigned_to_accepted(
+    setup_ticket_tests,
+):
+    """accept action changes Ticket status from Assigned to Accepted."""
+    data = setup_ticket_tests
+    data["test_ticket"].status = data["status_assigned"]
+    assert data["test_ticket"].status == data["status_assigned"]
+    ticket_log = data["test_ticket"].accept()
+    assert data["test_ticket"].status == data["status_accepted"]
+    assert ticket_log.from_status == data["status_assigned"]
+    assert ticket_log.to_status == data["status_accepted"]
+    assert ticket_log.action == "accept"
+
+
+def test_accept_method_will_change_the_status_from_reopened_to_accepted(
+    setup_ticket_tests,
+):
+    """accept action changes Ticket status from Reopened to Accepted."""
+    data = setup_ticket_tests
+    data["test_ticket"].status = data["status_reopened"]
+    assert data["test_ticket"].status == data["status_reopened"]
+    ticket_log = data["test_ticket"].accept()
+    assert data["test_ticket"].status == data["status_accepted"]
+    assert ticket_log.from_status == data["status_reopened"]
+    assert ticket_log.to_status == data["status_accepted"]
+    assert ticket_log.action == "accept"
+
+
+def test_accept_method_will_not_change_the_status_of_closed_to_anything(
+    setup_ticket_tests,
+):
+    """accept action will not change Ticket status from Closed to Anything."""
+    data = setup_ticket_tests
+    data["test_ticket"].status = data["status_closed"]
+    assert data["test_ticket"].status == data["status_closed"]
+    ticket_log = data["test_ticket"].accept()
+    assert ticket_log is None
+    assert data["test_ticket"].status == data["status_closed"]
+
+
+# reassign
+def test_reassign_method_will_change_the_status_from_new_to_assigned(
+    setup_ticket_tests,
+):
+    """reassign action changes Ticket status from New to Assigned."""
+    data = setup_ticket_tests
+    data["test_ticket"].status = data["status_new"]
+    assert data["test_ticket"].status == data["status_new"]
+    ticket_log = data["test_ticket"].reassign()
+    assert data["test_ticket"].status == data["status_assigned"]
+    assert ticket_log.from_status == data["status_new"]
+    assert ticket_log.to_status == data["status_assigned"]
+    assert ticket_log.action == "reassign"
+
+
+def test_reassign_method_will_change_the_status_from_accepted_to_assigned(
+    setup_ticket_tests,
+):
+    """reassign action changes Ticket status from Accepted to Accepted."""
+    data = setup_ticket_tests
+    data["test_ticket"].status = data["status_accepted"]
+    assert data["test_ticket"].status == data["status_accepted"]
+    ticket_log = data["test_ticket"].reassign()
+    assert data["test_ticket"].status == data["status_assigned"]
+    assert ticket_log.from_status == data["status_accepted"]
+    assert ticket_log.to_status == data["status_assigned"]
+    assert ticket_log.action == "reassign"
+
+
+def test_reassign_method_will_change_the_status_from_assigned_to_assigned(
+    setup_ticket_tests,
+):
+    """reassign action changes Ticket status from Assigned to Accepted."""
+    data = setup_ticket_tests
+    data["test_ticket"].status = data["status_assigned"]
+    assert data["test_ticket"].status == data["status_assigned"]
+    ticket_log = data["test_ticket"].reassign()
+    assert data["test_ticket"].status == data["status_assigned"]
+    assert ticket_log.from_status == data["status_assigned"]
+    assert ticket_log.to_status == data["status_assigned"]
+    assert ticket_log.action == "reassign"
+
+
+def test_reassign_method_will_change_the_status_from_reopened_to_assigned(
+    setup_ticket_tests,
+):
+    """accept action changes Ticket status from Reopened to Assigned."""
+    data = setup_ticket_tests
+    data["test_ticket"].status = data["status_reopened"]
+    assert data["test_ticket"].status == data["status_reopened"]
+    ticket_log = data["test_ticket"].reassign()
+    assert data["test_ticket"].status == data["status_assigned"]
+    assert ticket_log.from_status == data["status_reopened"]
+    assert ticket_log.to_status == data["status_assigned"]
+    assert ticket_log.action == "reassign"
+
+
+def test_reassign_method_will_not_change_the_status_of_closed_to_anything(
+    setup_ticket_tests,
+):
+    """reassign action will not change Ticket status from Closed to Anything."""
+    data = setup_ticket_tests
+    data["test_ticket"].status = data["status_closed"]
+    assert data["test_ticket"].status == data["status_closed"]
+    ticket_log = data["test_ticket"].reassign()
+    assert ticket_log is None
+    assert data["test_ticket"].status == data["status_closed"]
+
+
+def test_resolve_method_will_set_the_resolution(setup_ticket_tests):
+    """resolve action changes Ticket status from New to Closed."""
+    data = setup_ticket_tests
+    assert data["test_ticket"].status == data["status_new"]
+    ticket_log = data["test_ticket"].resolve(resolution="fixed")
+    assert data["test_ticket"].status == data["status_closed"]
+    assert ticket_log.from_status == data["status_new"]
+    assert ticket_log.to_status == data["status_closed"]
+    assert ticket_log.action == "resolve"
+    assert data["test_ticket"].resolution == "fixed"
+
+
+def test_reopen_will_clear_resolution(setup_ticket_tests):
+    """reopen method will clear the timing_resolution."""
+    data = setup_ticket_tests
+    assert data["test_ticket"].status == data["status_new"]
+    data["test_ticket"].resolve(resolution="fixed")
+    assert data["test_ticket"].resolution == "fixed"
+    ticket_log = data["test_ticket"].reopen()
+    assert isinstance(ticket_log, TicketLog)
+    assert data["test_ticket"].resolution == ""
+
+
+def test_reassign_will_set_the_owner(setup_ticket_tests):
+    """reassign method will set the owner."""
+    data = setup_ticket_tests
+    assert data["test_ticket"].status == data["status_new"]
+    assert data["test_ticket"].owner != data["test_user"]
+    ticket_log = data["test_ticket"].reassign(assign_to=data["test_user"])
+    assert isinstance(ticket_log, TicketLog)
+    assert data["test_ticket"].owner == data["test_user"]
+
+
+def test_accept_will_set_the_owner(setup_ticket_tests):
+    """accept method will set the owner."""
+    data = setup_ticket_tests
+    assert data["test_ticket"].status == data["status_new"]
+    assert data["test_ticket"].owner != data["test_user"]
+    ticket_log = data["test_ticket"].accept(created_by=data["test_user"])
+    assert isinstance(ticket_log, TicketLog)
+    assert data["test_ticket"].owner == data["test_user"]
+
+
+def test_summary_argument_skipped(setup_ticket_tests):
+    """summary argument can be skipped."""
+    data = setup_ticket_tests
+    try:
+        data["kwargs"].pop("summary")
+    except KeyError:
+        pass
+    new_ticket = Ticket(**data["kwargs"])
+    assert new_ticket.summary == ""
+
+
+def test_summary_argument_can_be_none(setup_ticket_tests):
+    """summary argument can be None."""
+    data = setup_ticket_tests
+    data["kwargs"]["summary"] = None
+    new_ticket = Ticket(**data["kwargs"])
+    assert new_ticket.summary == ""
+
+
+def test_summary_attribute_can_be_set_to_none(setup_ticket_tests):
+    """summary attribute can be set to None."""
+    data = setup_ticket_tests
+    data["test_ticket"].summary = None
+    assert data["test_ticket"].summary == ""
+
+
+def test_summary_argument_is_not_a_string(setup_ticket_tests):
+    """TypeError raised if the summary argument value is not a str."""
+    data = setup_ticket_tests
+    data["kwargs"]["summary"] = ["not a string instance"]
+    with pytest.raises(TypeError) as cm:
+        Ticket(data["kwargs"])
+
+    assert (
+        str(cm.value) == "Ticket.project should be an instance of "
+        "stalker.models.project.Project, not dict"
+    )
+
+
+def test_summary_attribute_is_set_to_a_value_other_than_a_string(setup_ticket_tests):
+    """summary attribute is set to a value other than a str."""
+    data = setup_ticket_tests
+    with pytest.raises(TypeError) as cm:
+        data["test_ticket"].summary = ["not a string"]
+
+    assert str(cm.value) == "Ticket.summary should be an instance of str, not list"
+
+
+def test_summary_argument_is_working_properly(setup_ticket_tests):
+    """summary argument value is passed to summary attribute correctly."""
+    data = setup_ticket_tests
+    test_value = "test summary"
+    data["kwargs"]["summary"] = test_value
+    new_ticket = Ticket(**data["kwargs"])
+    assert new_ticket.summary == test_value
+
+
+def test_summary_attribute_is_working_properly(setup_ticket_tests):
+    """summary attribute is working properly."""
+    data = setup_ticket_tests
+    test_value = "test_summary"
+    assert data["test_ticket"].summary != test_value
+    data["test_ticket"].summary = test_value
+    assert data["test_ticket"].summary == test_value

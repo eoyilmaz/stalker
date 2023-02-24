@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
+"""Tests for the Role class."""
+
+from stalker import Role
 
 
 def test_role_class_generic():
-    """testing of creation of a Role instance
-    """
-    from stalker import Role
-    r = Role(name='Lead')
+    """creation of a Role instance."""
+    r = Role(name="Lead")
     assert isinstance(r, Role)
-    assert r.name == 'Lead'
+    assert r.name == "Lead"

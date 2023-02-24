@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from six import string_types
 from sqlalchemy import Table, Column, Integer, ForeignKey, Text
 from sqlalchemy.orm import relationship, validates
 
@@ -97,7 +97,7 @@ class Structure(Entity):
     projects etc. and can reuse them with new :class:`.Project` s.
     """
 
-    #__strictly_typed__ = True
+    # __strictly_typed__ = True
     __auto_name__ = False
     __tablename__ = "Structures"
     __mapper_args__ = {"polymorphic_identity": "Structure"}
@@ -110,8 +110,7 @@ class Structure(Entity):
     )
 
     templates = relationship(
-        "FilenameTemplate",
-        secondary="Structure_FilenameTemplates"
+        "FilenameTemplate", secondary="Structure_FilenameTemplates"
     )
 
     custom_template = Column("custom_template", Text)
@@ -126,57 +125,56 @@ class Structure(Entity):
         self.custom_template = custom_template
 
     def __eq__(self, other):
-        """the equality operator
-        """
-        return super(Structure, self).__eq__(other) and \
-            isinstance(other, Structure) and \
-            self.templates == other.templates and \
-            self.custom_template == other.custom_template
+        """the equality operator"""
+        return (
+            super(Structure, self).__eq__(other)
+            and isinstance(other, Structure)
+            and self.templates == other.templates
+            and self.custom_template == other.custom_template
+        )
 
     def __hash__(self):
-        """the overridden __hash__ method
-        """
+        """the overridden __hash__ method"""
         return super(Structure, self).__hash__()
 
     @validates("custom_template")
     def _validate_custom_template(self, key, custom_template_in):
-        """validates the given custom_template value
-        """
+        """validates the given custom_template value"""
         if custom_template_in is None:
             custom_template_in = ""
 
-        from stalker import __string_types__
-        if not isinstance(custom_template_in, __string_types__):
+        if not isinstance(custom_template_in, string_types):
             raise TypeError(
-                "%s.custom_template should be a string not %s" %
-                (
-                    self.__class__.__name__,
-                    custom_template_in.__class__.__name__
-                )
+                "%s.custom_template should be a string not %s"
+                % (self.__class__.__name__, custom_template_in.__class__.__name__)
             )
         return custom_template_in
 
     @validates("templates")
     def _validate_templates(self, key, template_in):
-        """validates the given template value
-        """
+        """validates the given template value"""
 
         from stalker.models.template import FilenameTemplate
 
         if not isinstance(template_in, FilenameTemplate):
             raise TypeError(
                 "All the elements in the %s.templates should be a "
-                "stalker.models.template.FilenameTemplate instance not %s" %
-                (self.__class__.__name__, template_in.__class__.__name__)
+                "stalker.models.template.FilenameTemplate instance not %s"
+                % (self.__class__.__name__, template_in.__class__.__name__)
             )
 
         return template_in
 
+
 # Structure_FilenameTemplates Table
 Structure_FilenameTemplates = Table(
-    "Structure_FilenameTemplates", Base.metadata,
-    Column("structure_id", Integer, ForeignKey("Structures.id"),
-           primary_key=True),
-    Column("filenametemplate_id", Integer, ForeignKey("FilenameTemplates.id"),
-           primary_key=True)
+    "Structure_FilenameTemplates",
+    Base.metadata,
+    Column("structure_id", Integer, ForeignKey("Structures.id"), primary_key=True),
+    Column(
+        "filenametemplate_id",
+        Integer,
+        ForeignKey("FilenameTemplates.id"),
+        primary_key=True,
+    ),
 )

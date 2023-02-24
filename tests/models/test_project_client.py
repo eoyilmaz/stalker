@@ -1,75 +1,60 @@
 # -*- coding: utf-8 -*-
+"""Tests related to the ProjectClient class."""
 
 import pytest
-from stalker import ProjectClient
-from stalker.testing import UnitTestDBBase
+
+from stalker import Client, Project, ProjectClient, Repository, Role, Status, User
 
 
-class ProjectClientTestDBCase(UnitTestDBBase):
-    """tests for ProjectClient class
-    """
+@pytest.fixture(scope="function")
+def setup_project_client_db_test(setup_postgresql_db):
+    """Set the test up ProjectClient class tests with a DB."""
+    data = dict()
+    data["test_repo"] = Repository(name="Test Repo", code="TR")
+    data["status_new"] = Status(name="New", code="NEW")
+    data["status_wip"] = Status(name="Work In Progress", code="WIP")
+    data["status_cmpl"] = Status(name="Completed", code="CMPL")
 
-    def setUp(self):
-        """set the test up
-        """
-        super(ProjectClientTestDBCase, self).setUp()
+    data["test_user1"] = User(
+        name="Test User 1",
+        login="testuser1",
+        email="testuser1@users.com",
+        password="secret",
+    )
 
-        from stalker import Status, Repository
-        self.test_repo = Repository(
-            name='Test Repo',
-            code='TR'
-        )
-        self.status_new = Status(name='New', code='NEW')
-        self.status_wip = Status(name='Work In Progress', code='WIP')
-        self.status_cmpl = Status(name='Completed', code='CMPL')
+    data["test_client"] = Client(name="Test Client")
 
-        from stalker import User
-        self.test_user1 = User(
-            name='Test User 1',
-            login='testuser1',
-            email='testuser1@users.com',
-            password='secret'
-        )
+    data["test_project"] = Project(
+        name="Test Project 1",
+        code="TP1",
+        repositories=[data["test_repo"]],
+    )
 
-        from stalker import Client
-        self.test_client = Client(
-            name='Test Client'
-        )
+    data["test_role"] = Role(name="Test Client")
+    return data
 
-        from stalker import Project
-        self.test_project = Project(
-            name='Test Project 1',
-            code='TP1',
-            repositories=[self.test_repo],
-        )
 
-        from stalker import Role
-        self.test_role = Role(
-            name='Test Client'
-        )
+def test_project_client_creation(setup_project_client_db_test):
+    """Project client creation."""
+    data = setup_project_client_db_test
+    ProjectClient(
+        project=data["test_project"], client=data["test_client"], role=data["test_role"]
+    )
 
-    def test_project_client_creation(self):
-        """testing project client creation
-        """
+    assert data["test_client"] in data["test_project"].clients
+
+
+def test_role_argument_is_not_a_role_instance(setup_project_client_db_test):
+    """TypeError will be raised when the role argument is not a Role instance."""
+    data = setup_project_client_db_test
+    with pytest.raises(TypeError) as cm:
         ProjectClient(
-            project=self.test_project,
-            client=self.test_client,
-            role=self.test_role
+            project=data["test_project"],
+            client=data["test_client"],
+            role="not a role instance",
         )
 
-        assert self.test_client in self.test_project.clients
-
-    def test_role_argument_is_not_a_role_instance(self):
-        """testing if a TypeError will be raised when the role argument is not
-        a Role instance
-        """
-        with pytest.raises(TypeError) as cm:
-            ProjectClient(
-                project=self.test_project,
-                client=self.test_client,
-                role='not a role instance'
-            )
-
-        assert str(cm.value) == \
-            'ProjectClient.role should be a stalker.models.auth.Role ' \
-            'instance, not str'
+    assert (
+        str(cm.value) == "ProjectClient.role should be a stalker.models.auth.Role "
+        "instance, not str"
+    )

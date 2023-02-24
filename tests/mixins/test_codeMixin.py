@@ -1,20 +1,19 @@
 # -*- coding: utf-8 -*-
-
-import unittest
+"""CodeMixin related tests."""
 import pytest
-from sqlalchemy import Column, Integer, ForeignKey
+
+from sqlalchemy import Column, ForeignKey, Integer
+
 from stalker import CodeMixin, SimpleEntity
 
 
 class CodeMixFooMixedInClass(SimpleEntity, CodeMixin):
-    """a class which derives from another which has and __init__ already
-    """
+    """A class which derives from another which has and __init__ already."""
+
     __tablename__ = "CodeMixFooMixedInClasses"
     __mapper_args__ = {"polymorphic_identity": "CodeMixFooMixedInClass"}
     codeMixFooMixedInClass_id = Column(
-        "id", Integer,
-        ForeignKey("SimpleEntities.id"),
-        primary_key=True
+        "id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True
     )
 
     def __init__(self, **kwargs):
@@ -22,101 +21,101 @@ class CodeMixFooMixedInClass(SimpleEntity, CodeMixin):
         CodeMixin.__init__(self, **kwargs)
 
 
-class CodeMixinTester(unittest.TestCase):
-    """Tests the CodeMixin
+@pytest.fixture(scope="function")
+def code_mixin_tester_setup():
+    """Set up the test.
+
+    Returns:
+        dict: Test data.
     """
+    data = {
+        "kwargs": {
+            "name": "Test Code Mixin",
+            "code": "this_is_a_test_code",
+            "description": "This is a simple entity object for testing "
+            "DateRangeMixin",
+        },
+    }
+    data["test_foo_obj"] = CodeMixFooMixedInClass(**data["kwargs"])
+    return data
 
-    def setUp(self):
-        """setup the test
-        """
-        self.kwargs = {
-            'name': 'Test Code Mixin',
-            'code': 'this_is_a_test_code',
-            'description': 'This is a simple entity object for testing '
-                           'DateRangeMixin',
-        }
 
-        self.test_foo_obj = CodeMixFooMixedInClass(**self.kwargs)
+def test_code_argument_is_skipped(code_mixin_tester_setup):
+    """TypeError is raised if the code argument is skipped."""
+    data = code_mixin_tester_setup
+    data["kwargs"].pop("code")
+    with pytest.raises(TypeError) as cm:
+        CodeMixFooMixedInClass(**data["kwargs"])
 
-    def test_code_argument_is_skipped(self):
-        """testing if a TypeError will be raised when the code argument is
-        skipped
-        """
-        self.kwargs.pop('code')
-        with pytest.raises(TypeError) as cm:
-            CodeMixFooMixedInClass(**self.kwargs)
+    assert str(cm.value) == "CodeMixFooMixedInClass.code cannot be None"
 
-        assert str(cm.value) == 'CodeMixFooMixedInClass.code cannot be None'
 
-    def test_code_argument_is_None(self):
-        """testing if a TypeError will be raised when the code argument is None
-        """
-        self.kwargs['code'] = None
-        with pytest.raises(TypeError) as cm:
-            CodeMixFooMixedInClass(**self.kwargs)
+def test_code_argument_is_none(code_mixin_tester_setup):
+    """TypeError is raised if the code argument is None."""
+    data = code_mixin_tester_setup
+    data["kwargs"]["code"] = None
+    with pytest.raises(TypeError) as cm:
+        CodeMixFooMixedInClass(**data["kwargs"])
 
-        assert str(cm.value) == 'CodeMixFooMixedInClass.code cannot be None'
+    assert str(cm.value) == "CodeMixFooMixedInClass.code cannot be None"
 
-    def test_code_attribute_is_None(self):
-        """testing if a TypeError will be raised when teh code attribute is set
-        to None
-        """
-        with pytest.raises(TypeError) as cm:
-            self.test_foo_obj.code = None
 
-        assert str(cm.value) == 'CodeMixFooMixedInClass.code cannot be None'
+def test_code_attribute_is_none(code_mixin_tester_setup):
+    """TypeError is raised if teh code attribute is set to None."""
+    data = code_mixin_tester_setup
+    with pytest.raises(TypeError) as cm:
+        data["test_foo_obj"].code = None
 
-    def test_code_argument_is_not_a_string(self):
-        """testing if a TypeError will be raised when the code argument is not
-        a string
-        """
-        self.kwargs['code'] = 123
-        with pytest.raises(TypeError) as cm:
-            CodeMixFooMixedInClass(**self.kwargs)
+    assert str(cm.value) == "CodeMixFooMixedInClass.code cannot be None"
 
-        assert str(cm.value) == \
-            'CodeMixFooMixedInClass.code should be a string not int'
 
-    def test_code_attribute_is_not_a_string(self):
-        """testing if a TypeError will be raised when the code attribute is set
-        to None
-        """
-        with pytest.raises(TypeError) as cm:
-            self.test_foo_obj.code = 2342
+def test_code_argument_is_not_a_string(code_mixin_tester_setup):
+    """TypeError is raised if the code argument is not a string."""
+    data = code_mixin_tester_setup
+    data["kwargs"]["code"] = 123
+    with pytest.raises(TypeError) as cm:
+        CodeMixFooMixedInClass(**data["kwargs"])
 
-        assert str(cm.value) == \
-            'CodeMixFooMixedInClass.code should be a string not int'
+    assert str(cm.value) == "CodeMixFooMixedInClass.code should be a string not int"
 
-    def test_code_argument_is_an_empty_string(self):
-        """testing if a ValueError will be raised when the code attribute is an
-        empty string
-        """
-        self.kwargs['code'] = ''
-        with pytest.raises(ValueError) as cm:
-            CodeMixFooMixedInClass(**self.kwargs)
 
-        assert str(cm.value) == \
-            'CodeMixFooMixedInClass.code can not be an empty string'
+def test_code_attribute_is_not_a_string(code_mixin_tester_setup):
+    """TypeError is raised if the code attribute is set to None."""
+    data = code_mixin_tester_setup
+    with pytest.raises(TypeError) as cm:
+        data["test_foo_obj"].code = 2342
 
-    def test_code_attribute_is_set_to_an_empty_string(self):
-        """testing if a ValueError will be raised when the code attribute is
-        set to an empty string
-        """
-        with pytest.raises(ValueError) as cm:
-            self.test_foo_obj.code = ''
+    assert str(cm.value) == "CodeMixFooMixedInClass.code should be a string not int"
 
-        assert str(cm.value) == \
-            'CodeMixFooMixedInClass.code can not be an empty string'
 
-    def test_code_argument_is_working_properly(self):
-        """testing if the code argument value is passed to the code attribute
-        properly
-        """
-        assert self.test_foo_obj.code == self.kwargs['code']
+def test_code_argument_is_an_empty_string(code_mixin_tester_setup):
+    """ValueError is raised if the code attribute is an empty string."""
+    data = code_mixin_tester_setup
+    data["kwargs"]["code"] = ""
+    with pytest.raises(ValueError) as cm:
+        CodeMixFooMixedInClass(**data["kwargs"])
 
-    def test_code_attribute_is_working_properly(self):
-        """testing if the code attribute is working properly
-        """
-        test_value = 'new code'
-        self.test_foo_obj.code = test_value
-        assert self.test_foo_obj.code == test_value
+    assert str(cm.value) == "CodeMixFooMixedInClass.code can not be an empty string"
+
+
+def test_code_attribute_is_set_to_an_empty_string(code_mixin_tester_setup):
+    """ValueError is raised if the code attribute is set to an empty string."""
+    data = code_mixin_tester_setup
+    with pytest.raises(ValueError) as cm:
+        data["test_foo_obj"].code = ""
+
+    assert str(cm.value) == "CodeMixFooMixedInClass.code can not be an empty string"
+
+
+def test_code_argument_is_working_properly(code_mixin_tester_setup):
+    """code argument value is passed to the code attribute properly."""
+    data = code_mixin_tester_setup
+    assert data["test_foo_obj"].code == data["kwargs"]["code"]
+
+
+def test_code_attribute_is_working_properly(code_mixin_tester_setup):
+    """code attribute is working properly."""
+    data = code_mixin_tester_setup
+    test_value = "new code"
+    data["test_foo_obj"].code = test_value
+    assert data["test_foo_obj"].code == test_value

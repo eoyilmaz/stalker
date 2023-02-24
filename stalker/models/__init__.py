@@ -2,8 +2,7 @@
 
 
 def make_plural(name):
-    """Returns the plural version of the given name argument.
-    """
+    """Returns the plural version of the given name argument."""
     plural_name = name + "s"
 
     if name[-1] == "y":
@@ -54,16 +53,17 @@ def check_circular_dependency(entity, other_entity, attr_name):
     for e in walk_hierarchy(entity, attr_name):
         if e is other_entity:
             from stalker.exceptions import CircularDependencyError
+
             raise CircularDependencyError(
-                '%(entity_name)s (%(entity_class)s) and '
-                '%(other_entity_name)s (%(other_entity_class)s) creates a '
-                'circular dependency in their "%(attr_name)s" attribute' %
-                {
-                    'entity_name': entity,
-                    'entity_class': entity.__class__.__name__,
-                    'other_entity_name': other_entity,
-                    'other_entity_class': other_entity.__class__.__name__,
-                    'attr_name': attr_name
+                "%(entity_name)s (%(entity_class)s) and "
+                "%(other_entity_name)s (%(other_entity_class)s) creates a "
+                'circular dependency in their "%(attr_name)s" attribute'
+                % {
+                    "entity_name": entity,
+                    "entity_class": entity.__class__.__name__,
+                    "other_entity_name": other_entity,
+                    "other_entity_class": other_entity.__class__.__name__,
+                    "attr_name": attr_name,
                 }
             )
 
@@ -77,6 +77,7 @@ def utc_to_local(utc_dt):
     # get integer timestamp to avoid precision lost
     import calendar
     import datetime
+
     timestamp = calendar.timegm(utc_dt.timetuple())
     local_dt = datetime.datetime.fromtimestamp(timestamp)
     return local_dt.replace(microsecond=utc_dt.microsecond)

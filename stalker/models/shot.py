@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship, validates, reconstructor, synonym
 from stalker import ImageFormat
 from stalker.db.declarative import Base
 from stalker.models.task import Task
-from stalker.models.mixins import (StatusMixin, ReferenceMixin, CodeMixin)
+from stalker.models.mixins import StatusMixin, ReferenceMixin, CodeMixin
 
 from stalker.log import logging_level
 import logging
@@ -139,27 +139,27 @@ class Shot(Task, CodeMixin):
     :param float fps: The FPS of this shot. Default value is the same with the
       :class:`.Project`\ .
     """
-    __auto_name__ = True
-    __tablename__ = 'Shots'
-    __mapper_args__ = {'polymorphic_identity': 'Shot'}
 
-    shot_id = Column('id', Integer, ForeignKey('Tasks.id'),
-                     primary_key=True)
+    __auto_name__ = True
+    __tablename__ = "Shots"
+    __mapper_args__ = {"polymorphic_identity": "Shot"}
+
+    shot_id = Column("id", Integer, ForeignKey("Tasks.id"), primary_key=True)
 
     sequences = relationship(
-        'Sequence',
-        secondary='Shot_Sequences',
-        primaryjoin='Shots.c.id==Shot_Sequences.c.shot_id',
-        secondaryjoin='Shot_Sequences.c.sequence_id==Sequences.c.id',
-        back_populates='shots'
+        "Sequence",
+        secondary="Shot_Sequences",
+        primaryjoin="Shots.c.id==Shot_Sequences.c.shot_id",
+        secondaryjoin="Shot_Sequences.c.sequence_id==Sequences.c.id",
+        back_populates="shots",
     )
 
     scenes = relationship(
-        'Scene',
-        secondary='Shot_Scenes',
-        primaryjoin='Shots.c.id==Shot_Scenes.c.shot_id',
-        secondaryjoin='Shot_Scenes.c.scene_id==Scenes.c.id',
-        back_populates='shots'
+        "Scene",
+        secondary="Shot_Scenes",
+        primaryjoin="Shots.c.id==Shot_Scenes.c.shot_id",
+        secondaryjoin="Shot_Scenes.c.scene_id==Scenes.c.id",
+        back_populates="shots",
     )
 
     image_format_id = Column(Integer, ForeignKey("ImageFormats.id"))
@@ -170,7 +170,7 @@ class Shot(Task, CodeMixin):
 
         This value defines the output image format of this shot, should be an
         instance of :class:`.ImageFormat`.
-        """
+        """,
     )
 
     # the cut_duration attribute is not going to be stored in the database,
@@ -178,60 +178,62 @@ class Shot(Task, CodeMixin):
     cut_in = Column(
         Integer,
         doc="The start frame of this shot. It is the start frame of the "
-            "playback range in the application (Maya, Nuke etc.).",
-        default=1
+        "playback range in the application (Maya, Nuke etc.).",
+        default=1,
     )
     cut_out = Column(
         Integer,
         doc="The end frame of this shot. It is the end frame of the "
-            "playback range in the application (Maya, Nuke etc.).",
-        default=1
+        "playback range in the application (Maya, Nuke etc.).",
+        default=1,
     )
 
     source_in = Column(
         Integer,
         doc="The start frame of the used range, should be in between"
-            ":attr:`.cut_in` and :attr:`.cut_out`"
+        ":attr:`.cut_in` and :attr:`.cut_out`",
     )
     source_out = Column(
         Integer,
         doc="The end frame of the used range, should be in between"
-            ":attr:`.cut_in and :attr:`.cut_out`"
+        ":attr:`.cut_in and :attr:`.cut_out`",
     )
     record_in = Column(
         Integer,
         doc="The start frame in the Editors timeline specifying the start "
-            "frame general placement of this shot."
+        "frame general placement of this shot.",
     )
-    #record_out = Column(Integer)
+    # record_out = Column(Integer)
 
     _fps = Column(
-        'fps',
+        "fps",
         Float(precision=3),
         doc="""The fps of the project.
 
         It is a float value, any other types will be converted to float. The
         default value is equal to :attr:`stalker.modesl.project..Project.fps`.
-        """
+        """,
     )
 
-    def __init__(self,
-                 code=None,
-                 project=None,
-                 sequences=None,
-                 scenes=None,
-                 cut_in=None,
-                 cut_out=None,
-                 source_in=None,
-                 source_out=None,
-                 record_in=None,
-                 image_format=None,
-                 fps=None,
-                 **kwargs):
+    def __init__(
+        self,
+        code=None,
+        project=None,
+        sequences=None,
+        scenes=None,
+        cut_in=None,
+        cut_out=None,
+        source_in=None,
+        source_out=None,
+        record_in=None,
+        image_format=None,
+        fps=None,
+        **kwargs
+    ):
 
         # initialize TaskableMixin
-        kwargs['project'] = project
-        kwargs['code'] = code
+        kwargs["project"] = project
+        kwargs["code"] = code
 
         self._updating_cut_in_cut_out = False
 
@@ -280,25 +282,24 @@ class Shot(Task, CodeMixin):
 
     @reconstructor
     def __init_on_load__(self):
-        """initialize on DB load
-        """
+        """initialize on DB load"""
         super(Shot, self).__init_on_load__()
         self._updating_cut_in_cut_out = False
 
     def __repr__(self):
-        """the representation of the Shot
-        """
+        """the representation of the Shot"""
         return "<%s (%s, %s)>" % (self.entity_type, self.name, self.code)
 
     def __eq__(self, other):
-        """equality operator
-        """
-        return isinstance(other, Shot) and self.code == other.code and \
-            self.project == other.project
+        """equality operator"""
+        return (
+            isinstance(other, Shot)
+            and self.code == other.code
+            and self.project == other.project
+        )
 
     def __hash__(self):
-        """the overridden __hash__ method
-        """
+        """the overridden __hash__ method"""
         return super(Shot, self).__hash__()
 
     @classmethod
@@ -313,12 +314,15 @@ class Shot(Task, CodeMixin):
         if project and code:
             from stalker.db.session import DBSession
             from sqlalchemy.exc import UnboundExecutionError, OperationalError
+
             try:
                 with DBSession.no_autoflush:
-                    return Shot.query\
-                               .filter(Shot.project == project)\
-                               .filter(Shot.code == code)\
-                               .first() is None
+                    return (
+                        Shot.query.filter(Shot.project == project)
+                        .filter(Shot.code == code)
+                        .first()
+                        is None
+                    )
             except (UnboundExecutionError, OperationalError) as e:
                 # Fallback to Python
                 for t in project.tasks:
@@ -337,48 +341,44 @@ class Shot(Task, CodeMixin):
             return self._fps
 
     def _fps_setter(self, fps_in):
-        """sets the fps value
-        """
+        """sets the fps value"""
         self._fps = self._validate_fps(fps_in)
 
     fps = synonym(
-        '_fps',
+        "_fps",
         descriptor=property(_fps_getter, _fps_setter),
-        doc='The fps of this shot.'
+        doc="The fps of this shot.",
     )
 
     def _validate_fps(self, fps):
-        """validates the given fps_in value
-        """
+        """validates the given fps_in value"""
         if fps is None:
             # fps = self.project.fps
             return None
 
         if not isinstance(fps, (int, float)):
             raise TypeError(
-                '%s.fps should be a positive float or int, not %s' % (
-                    self.__class__.__name__,
-                    fps.__class__.__name__
-                )
+                "%s.fps should be a positive float or int, not %s"
+                % (self.__class__.__name__, fps.__class__.__name__)
             )
 
         fps = float(fps)
         if fps <= 0:
             raise ValueError(
-                '%s.fps should be a positive float or int, not %s' %
-                (self.__class__.__name__, fps)
+                "%s.fps should be a positive float or int, not %s"
+                % (self.__class__.__name__, fps)
             )
         return float(fps)
 
-    @validates('cut_in')
+    @validates("cut_in")
     def _validate_cut_in(self, key, cut_in):
-        """validates the cut_in value
-        """
+        """validates the cut_in value"""
         if not isinstance(cut_in, int):
             raise TypeError(
-                '%(class)s.cut_in should be an int, not %(cut_in_class)s' % {
-                    'class': self.__class__.__name__,
-                    'cut_in_class': cut_in.__class__.__name__
+                "%(class)s.cut_in should be an int, not %(cut_in_class)s"
+                % {
+                    "class": self.__class__.__name__,
+                    "cut_in_class": cut_in.__class__.__name__,
                 }
             )
 
@@ -391,15 +391,15 @@ class Shot(Task, CodeMixin):
 
         return cut_in
 
-    @validates('cut_out')
+    @validates("cut_out")
     def _validate_cut_out(self, key, cut_out):
-        """validates the cut_out value
-        """
+        """validates the cut_out value"""
         if not isinstance(cut_out, int):
             raise TypeError(
-                '%(class)s.cut_out should be an int, not %(cut_out_class)s' % {
-                    'class': self.__class__.__name__,
-                    'cut_out_class': cut_out.__class__.__name__
+                "%(class)s.cut_out should be an int, not %(cut_out_class)s"
+                % {
+                    "class": self.__class__.__name__,
+                    "cut_out_class": cut_out.__class__.__name__,
                 }
             )
 
@@ -412,99 +412,105 @@ class Shot(Task, CodeMixin):
 
         return cut_out
 
-    @validates('source_in')
+    @validates("source_in")
     def _validate_source_in(self, key, source_in):
-        """validates the source_in value
-        """
+        """validates the source_in value"""
         if not isinstance(source_in, int):
             raise TypeError(
-                '%(class)s.source_in should be an int, not '
-                '%(source_in_class)s' % {
-                    'class': self.__class__.__name__,
-                    'source_in_class': source_in.__class__.__name__
+                "%(class)s.source_in should be an int, not "
+                "%(source_in_class)s"
+                % {
+                    "class": self.__class__.__name__,
+                    "source_in_class": source_in.__class__.__name__,
                 }
             )
 
         if source_in < self.cut_in:
             raise ValueError(
-                '%(class)s.source_in can not be smaller than '
-                '%(class)s.cut_in, cut_in: %(cut_in)s where as '
-                'source_in: %(source_in)s' % {
-                    'class': self.__class__.__name__,
-                    'cut_in': self.cut_in,
-                    'source_in': source_in
+                "%(class)s.source_in can not be smaller than "
+                "%(class)s.cut_in, cut_in: %(cut_in)s where as "
+                "source_in: %(source_in)s"
+                % {
+                    "class": self.__class__.__name__,
+                    "cut_in": self.cut_in,
+                    "source_in": source_in,
                 }
             )
 
         if source_in > self.cut_out:
             raise ValueError(
-                '%(class)s.source_in can not be bigger than '
-                '%(class)s.cut_out, cut_out: %(cut_out)s where as '
-                'source_in: %(source_in)s' % {
-                    'class': self.__class__.__name__,
-                    'cut_out': self.cut_out,
-                    'source_in': source_in
+                "%(class)s.source_in can not be bigger than "
+                "%(class)s.cut_out, cut_out: %(cut_out)s where as "
+                "source_in: %(source_in)s"
+                % {
+                    "class": self.__class__.__name__,
+                    "cut_out": self.cut_out,
+                    "source_in": source_in,
                 }
             )
 
         if self.source_out:
             if source_in > self.source_out:
                 raise ValueError(
-                    '%(class)s.source_in can not be bigger than '
-                    '%(class)s.source_out, source_in: %(source_in)s where '
-                    'as source_out: %(source_out)s' % {
-                        'class': self.__class__.__name__,
-                        'source_out': self.source_out,
-                        'source_in': source_in
+                    "%(class)s.source_in can not be bigger than "
+                    "%(class)s.source_out, source_in: %(source_in)s where "
+                    "as source_out: %(source_out)s"
+                    % {
+                        "class": self.__class__.__name__,
+                        "source_out": self.source_out,
+                        "source_in": source_in,
                     }
                 )
 
         return source_in
 
-    @validates('source_out')
+    @validates("source_out")
     def _validate_source_out(self, key, source_out):
-        """validates the source_out value
-        """
+        """validates the source_out value"""
         if not isinstance(source_out, int):
             raise TypeError(
-                '%(class)s.source_out should be an int, not '
-                '%(source_out_class)s' % {
-                    'class': self.__class__.__name__,
-                    'source_out_class': source_out.__class__.__name__
+                "%(class)s.source_out should be an int, not "
+                "%(source_out_class)s"
+                % {
+                    "class": self.__class__.__name__,
+                    "source_out_class": source_out.__class__.__name__,
                 }
             )
 
         if source_out < self.cut_in:
             raise ValueError(
-                '%(class)s.source_out can not be smaller than '
-                '%(class)s.cut_in, cut_in: %(cut_in)s where as '
-                'source_out: %(source_out)s' % {
-                    'class': self.__class__.__name__,
-                    'cut_in': self.cut_in,
-                    'source_out': source_out
+                "%(class)s.source_out can not be smaller than "
+                "%(class)s.cut_in, cut_in: %(cut_in)s where as "
+                "source_out: %(source_out)s"
+                % {
+                    "class": self.__class__.__name__,
+                    "cut_in": self.cut_in,
+                    "source_out": source_out,
                 }
             )
 
         if source_out > self.cut_out:
             raise ValueError(
-                '%(class)s.source_out can not be bigger than '
-                '%(class)s.cut_out, cut_out: %(cut_out)s where as '
-                'source_out: %(source_out)s' % {
-                    'class': self.__class__.__name__,
-                    'cut_out': self.cut_out,
-                    'source_out': source_out
+                "%(class)s.source_out can not be bigger than "
+                "%(class)s.cut_out, cut_out: %(cut_out)s where as "
+                "source_out: %(source_out)s"
+                % {
+                    "class": self.__class__.__name__,
+                    "cut_out": self.cut_out,
+                    "source_out": source_out,
                 }
             )
 
         if self.source_in:
             if source_out < self.source_in:
                 raise ValueError(
-                    '%(class)s.source_out can not be smaller than '
-                    '%(class)s.source_in, source_in: %(source_in)s where '
-                    'as source_out: %(source_out)s' % {
-                        'class': self.__class__.__name__,
-                        'source_in': self.source_in,
-                        'source_out': source_out
+                    "%(class)s.source_out can not be smaller than "
+                    "%(class)s.source_in, source_in: %(source_in)s where "
+                    "as source_out: %(source_out)s"
+                    % {
+                        "class": self.__class__.__name__,
+                        "source_in": self.source_in,
+                        "source_out": source_out,
                     }
                 )
 
@@ -520,59 +526,54 @@ class Shot(Task, CodeMixin):
 
     @property
     def cut_duration(self):
-        """getter for the cut_duration property
-        """
+        """getter for the cut_duration property"""
         return self.cut_out - self.cut_in + 1
 
     @cut_duration.setter
     def cut_duration(self, cut_duration):
-        """setter for the cut_duration property
-        """
+        """setter for the cut_duration property"""
         if not isinstance(cut_duration, int):
             raise TypeError(
-                '%(class)s.cut_duration should be a positive integer value, '
-                'not %(cut_duration_class)s' % {
-                    'class': self.__class__.__name__,
-                    'cut_duration_class': cut_duration.__class__.__name__
+                "%(class)s.cut_duration should be a positive integer value, "
+                "not %(cut_duration_class)s"
+                % {
+                    "class": self.__class__.__name__,
+                    "cut_duration_class": cut_duration.__class__.__name__,
                 }
             )
 
         if cut_duration < 1:
             raise ValueError(
-                '%(class)s.cut_duration can not be set to zero or a negative '
-                'value' % {
-                    'class': self.__class__.__name__
-                }
+                "%(class)s.cut_duration can not be set to zero or a negative "
+                "value" % {"class": self.__class__.__name__}
             )
 
         # always extend or contract the shot from end
         self.cut_out = self.cut_in + cut_duration - 1
 
-    @validates('sequences')
+    @validates("sequences")
     def _validate_sequence(self, key, sequence):
-        """validates the given sequence value
-        """
+        """validates the given sequence value"""
         from stalker.models.sequence import Sequence
 
         if not isinstance(sequence, Sequence):
             raise TypeError(
                 "%s.sequences should all be stalker.models.sequence.Sequence "
-                "instances, not %s" %
-                (self.__class__.__name__, sequence.__class__.__name__)
+                "instances, not %s"
+                % (self.__class__.__name__, sequence.__class__.__name__)
             )
         return sequence
 
-    @validates('scenes')
+    @validates("scenes")
     def _validate_scenes(self, key, scene):
-        """validates the given scene value
-        """
+        """validates the given scene value"""
         from stalker.models.scene import Scene
 
         if not isinstance(scene, Scene):
             raise TypeError(
                 "%s.scenes should all be stalker.models.scene.Scene "
-                "instances, not %s" %
-                (self.__class__.__name__, scene.__class__.__name__)
+                "instances, not %s"
+                % (self.__class__.__name__, scene.__class__.__name__)
             )
         return scene
 
@@ -586,20 +587,18 @@ class Shot(Task, CodeMixin):
             return self._image_format
 
     def _image_format_setter(self, imf_in):
-        """sets the image_format value
-        """
+        """sets the image_format value"""
         self._image_format = self._validate_image_format(imf_in)
 
     image_format = synonym(
-        '_image_format',
+        "_image_format",
         descriptor=property(_image_format_getter, _image_format_setter),
-        doc='The image_format of this shot. Set it to None to re-sync with '
-            'Project.image_format.'
+        doc="The image_format of this shot. Set it to None to re-sync with "
+        "Project.image_format.",
     )
 
     def _validate_image_format(self, imf):
-        """validates the given imf value
-        """
+        """validates the given imf value"""
         if imf is None:
             # do not set it to anything it will automatically use the proejct
             # image format
@@ -607,38 +606,36 @@ class Shot(Task, CodeMixin):
 
         if not isinstance(imf, ImageFormat):
             raise TypeError(
-                '%s.image_format should be an instance of '
-                'stalker.models.format.ImageFormat, not %s' %
-                (self.__class__.__name__, imf.__class__.__name__)
+                "%s.image_format should be an instance of "
+                "stalker.models.format.ImageFormat, not %s"
+                % (self.__class__.__name__, imf.__class__.__name__)
             )
 
         return imf
 
-    @validates('code')
+    @validates("code")
     def _validate_code(self, key, code):
-        """validates the given code attribute
-        """
+        """validates the given code attribute"""
         code = super(Shot, self)._validate_code(key, code)
 
         # check code uniqueness
         if code != self.code:
             if not self._check_code_availability(code, self.project):
-                raise ValueError(
-                    'There is a Shot with the same code: %s' % code
-                )
+                raise ValueError("There is a Shot with the same code: %s" % code)
 
         return code
 
 
 Shot_Sequences = Table(
-    'Shot_Sequences', Base.metadata,
-    Column('shot_id', Integer, ForeignKey('Shots.id'), primary_key=True),
-    Column('sequence_id', Integer, ForeignKey('Sequences.id'),
-           primary_key=True)
+    "Shot_Sequences",
+    Base.metadata,
+    Column("shot_id", Integer, ForeignKey("Shots.id"), primary_key=True),
+    Column("sequence_id", Integer, ForeignKey("Sequences.id"), primary_key=True),
 )
 
 Shot_Scenes = Table(
-    'Shot_Scenes', Base.metadata,
-    Column('shot_id', Integer, ForeignKey('Shots.id'), primary_key=True),
-    Column('scene_id', Integer, ForeignKey('Scenes.id'), primary_key=True)
+    "Shot_Scenes",
+    Base.metadata,
+    Column("shot_id", Integer, ForeignKey("Shots.id"), primary_key=True),
+    Column("scene_id", Integer, ForeignKey("Scenes.id"), primary_key=True),
 )

@@ -10,10 +10,5 @@ include COPYING.LESSER
 include doTests
 include alembic.ini
 
-recursive-include alembic *
-recursive-include docs *
-recursive-include examples *
-recursive-include tests *
-
 prune docs/build
 prune docs/source/generated

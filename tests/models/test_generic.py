@@ -1,50 +1,54 @@
 # -*- coding: utf-8 -*-
+"""Tests utility functions."""
+
+import datetime
+
+import pytest
+
+import pytz
+
+from stalker.models import local_to_utc, make_plural, utc_to_local
 
 
-def test_make_plural_is_working_properly():
-    """testing if stalker.models.make_plural() function is working properly
-    """
-    from stalker.models import make_plural
-    test_words = [
-        ('asset', 'assets'),
-        ('client', 'clients'),
-        ('department', 'departments'),
-        ('entity', 'entities'),
-        ('template', 'templates'),
-        ('group', 'groups'),
-        ('format', 'formats'),
-        ('link', 'links'),
-        ('session', 'sessions'),
-        ('note', 'notes'),
-        ('permission', 'permissions'),
-        ('project', 'projects'),
-        ('repository', 'repositories'),
-        ('review', 'reviews'),
-        ('scene', 'scenes'),
-        ('sequence', 'sequences'),
-        ('shot', 'shots'),
-        ('status', 'statuses'),
-        ('list', 'lists'),
-        ('structure', 'structures'),
-        ('studio', 'studios'),
-        ('tag', 'tags'),
-        ('task', 'tasks'),
-        ('dependency', 'dependencies'),
-        ('type', 'types'),
-        ('bench', 'benches'),
-        ('thief', 'thieves')
-    ]
-    for t, e in test_words:
-        r = make_plural(t)
-        assert r == e
+@pytest.mark.parametrize(
+    "test_value,expected",
+    [
+        ("asset", "assets"),
+        ("client", "clients"),
+        ("department", "departments"),
+        ("entity", "entities"),
+        ("template", "templates"),
+        ("group", "groups"),
+        ("format", "formats"),
+        ("link", "links"),
+        ("session", "sessions"),
+        ("note", "notes"),
+        ("permission", "permissions"),
+        ("project", "projects"),
+        ("repository", "repositories"),
+        ("review", "reviews"),
+        ("scene", "scenes"),
+        ("sequence", "sequences"),
+        ("shot", "shots"),
+        ("status", "statuses"),
+        ("list", "lists"),
+        ("structure", "structures"),
+        ("studio", "studios"),
+        ("tag", "tags"),
+        ("task", "tasks"),
+        ("dependency", "dependencies"),
+        ("type", "types"),
+        ("bench", "benches"),
+        ("thief", "thieves"),
+    ],
+)
+def test_make_plural_is_working_properly(test_value, expected):
+    """make_plural() is working properly."""
+    assert expected == make_plural(test_value)
 
 
 def test_utc_to_local_is_working_properly():
-    """testing if utc_to_local() function is working properly
-    """
-    from stalker.models import utc_to_local
-    import datetime
-    import pytz
+    """utc_to_local() is working properly."""
     local_now = datetime.datetime.now()
     utc_now = datetime.datetime.now(pytz.utc)
 
@@ -65,11 +69,7 @@ def test_utc_to_local_is_working_properly():
 
 
 def test_local_to_utc_is_working_properly():
-    """testing if local_to_utc() function is working properly
-    """
-    from stalker.models import local_to_utc
-    import datetime
-    import pytz
+    """local_to_utc() is working properly."""
     local_now = datetime.datetime.now()
     utc_now = datetime.datetime.now(pytz.utc)
 

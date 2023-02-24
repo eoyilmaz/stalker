@@ -28,6 +28,7 @@ class ImageFormat(Entity):
     :param print_resolution: The print resolution of the ImageFormat given as
       DPI (dot-per-inch). It cannot be zero or negative
     """
+
     __auto_name__ = False
     __tablename__ = "ImageFormats"
     __mapper_args__ = {"polymorphic_identity": "ImageFormat"}
@@ -46,7 +47,7 @@ class ImageFormat(Entity):
         * the width should be set to a positive non-zero integer
         * integers are also accepted but will be converted to float
         * for improper inputs the object will raise an exception.
-        """
+        """,
     )
 
     height = Column(
@@ -56,7 +57,7 @@ class ImageFormat(Entity):
         * the height should be set to a positive non-zero integer
         * integers are also accepted but will be converted to float
         * for improper inputs the object will raise an exception.
-        """
+        """,
     )
 
     pixel_aspect = Column(
@@ -67,7 +68,7 @@ class ImageFormat(Entity):
         * the pixel_aspect should be set to a positive non-zero float
         * integers are also accepted but will be converted to float
         * for improper inputs the object will raise an exception
-        """
+        """,
     )
 
     print_resolution = Column(
@@ -78,15 +79,12 @@ class ImageFormat(Entity):
         * it should be set to a positive non-zero float or integer
         * integers are also accepted but will be converted to float
         * for improper inputs the object will raise an exception.
-        """
+        """,
     )
 
-    def __init__(self,
-                 width=None,
-                 height=None,
-                 pixel_aspect=1.0,
-                 print_resolution=300,
-                 **kwargs):
+    def __init__(
+        self, width=None, height=None, pixel_aspect=1.0, print_resolution=300, **kwargs
+    ):
         super(ImageFormat, self).__init__(**kwargs)
 
         self.width = width
@@ -97,75 +95,69 @@ class ImageFormat(Entity):
 
     @validates("width")
     def _validate_width(self, key, width):
-        """validates the given width
-        """
+        """validates the given width"""
         if not isinstance(width, (int, float)):
             raise TypeError(
-                '%s.width should be an instance of int or float not %s' %
-                (self.__class__.__name__, width.__class__.__name__)
+                "%s.width should be an instance of int or float not %s"
+                % (self.__class__.__name__, width.__class__.__name__)
             )
 
         if width <= 0:
             raise ValueError(
-                '%s.width cannot be zero or negative' %
-                self.__class__.__name__
+                "%s.width cannot be zero or negative" % self.__class__.__name__
             )
 
         return int(width)
 
     @validates("height")
     def _validate_height(self, key, height):
-        """validates the given height
-        """
+        """validates the given height"""
         if not isinstance(height, (int, float)):
             raise TypeError(
-                '%s.height should be an instance of int or float not %s' %
-                (self.__class__.__name__, height.__class__.__name__)
+                "%s.height should be an instance of int or float not %s"
+                % (self.__class__.__name__, height.__class__.__name__)
             )
 
         if height <= 0:
             raise ValueError(
-                '%s.height cannot be zero or negative' %
-                self.__class__.__name__
+                "%s.height cannot be zero or negative" % self.__class__.__name__
             )
 
         return int(height)
 
     @validates("pixel_aspect")
     def _validate_pixel_aspect(self, key, pixel_aspect):
-        """validates the given pixel aspect
-        """
+        """validates the given pixel aspect"""
 
         if not isinstance(pixel_aspect, (int, float)):
             raise TypeError(
-                '%s.pixel_aspect should be an instance of int or float not %s'
+                "%s.pixel_aspect should be an instance of int or float not %s"
                 % (self.__class__.__name__, pixel_aspect.__class__.__name__)
             )
 
         if pixel_aspect <= 0:
             raise ValueError(
-                "%s.pixel_aspect cannot be zero or a negative value" %
-                self.__class__.__name__
+                "%s.pixel_aspect cannot be zero or a negative value"
+                % self.__class__.__name__
             )
 
         return float(pixel_aspect)
 
     @validates("print_resolution")
     def _validate_print_resolution(self, key, print_resolution):
-        """validates the print resolution
-        """
+        """validates the print resolution"""
 
         if not isinstance(print_resolution, (int, float)):
             raise TypeError(
                 "%s.print_resolution should be an instance of int or float "
-                "not %s" %
-                (self.__class__.__name__, print_resolution.__class__.__name__)
+                "not %s"
+                % (self.__class__.__name__, print_resolution.__class__.__name__)
             )
 
         if print_resolution <= 0:
             raise ValueError(
-                "%s.print_resolution cannot be zero or negative" %
-                self.__class__.__name__
+                "%s.print_resolution cannot be zero or negative"
+                % self.__class__.__name__
             )
 
         return float(print_resolution)
@@ -180,15 +172,15 @@ class ImageFormat(Entity):
         return float(self.width) / float(self.height) * self.pixel_aspect
 
     def __eq__(self, other):
-        """the equality operator
-        """
-        return super(ImageFormat, self).__eq__(other) and \
-            isinstance(other, ImageFormat) and \
-            self.width == other.width and \
-            self.height == other.height and \
-            self.pixel_aspect == other.pixel_aspect
+        """the equality operator"""
+        return (
+            super(ImageFormat, self).__eq__(other)
+            and isinstance(other, ImageFormat)
+            and self.width == other.width
+            and self.height == other.height
+            and self.pixel_aspect == other.pixel_aspect
+        )
 
     def __hash__(self):
-        """the overridden __hash__ method
-        """
+        """the overridden __hash__ method"""
         return super(ImageFormat, self).__hash__()

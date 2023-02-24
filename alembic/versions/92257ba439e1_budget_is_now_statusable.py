@@ -7,28 +7,18 @@ Create Date: 2016-07-28 13:20:27.397000
 """
 
 # revision identifiers, used by Alembic.
-revision = '92257ba439e1'
-down_revision = 'f2005d1fbadc'
+revision = "92257ba439e1"
+down_revision = "f2005d1fbadc"
 
 from alembic import op
 import sqlalchemy as sa
 
 
 def upgrade():
-    op.add_column(
-        'Budgets',
-        sa.Column('status_id', sa.Integer(), nullable=True)
-    )
-    op.add_column(
-        'Budgets',
-        sa.Column('status_list_id', sa.Integer(), nullable=True)
-    )
-    op.create_foreign_key(
-        None, 'Budgets', 'Statuses', ['status_id'], ['id']
-    )
-    op.create_foreign_key(
-        None, 'Budgets', 'StatusLists', ['status_list_id'], ['id']
-    )
+    op.add_column("Budgets", sa.Column("status_id", sa.Integer(), nullable=True))
+    op.add_column("Budgets", sa.Column("status_list_id", sa.Integer(), nullable=True))
+    op.create_foreign_key(None, "Budgets", "Statuses", ["status_id"], ["id"])
+    op.create_foreign_key(None, "Budgets", "StatusLists", ["status_list_id"], ["id"])
 
     # create a dummy status list for budgets
     op.execute(
@@ -75,17 +65,19 @@ def upgrade():
         """
     )
     # now alter column to be non nullable
-    op.alter_column('Budgets', 'status_id', nullable=False)
-    op.alter_column('Budgets', 'status_list_id', nullable=False)
+    op.alter_column("Budgets", "status_id", nullable=False)
+    op.alter_column("Budgets", "status_list_id", nullable=False)
 
 
 def downgrade():
-    op.execute("""
+    op.execute(
+        """
     ALTER TABLE public."Budgets" DROP CONSTRAINT "Budgets_status_id_fkey";
     ALTER TABLE public."Budgets" DROP CONSTRAINT "Budgets_status_list_id_fkey";
     ALTER TABLE public."Budgets" DROP COLUMN status_id;
     ALTER TABLE public."Budgets" DROP COLUMN status_list_id;
-    """)
+    """
+    )
 
     # remove 'Dummy Budget StatusList' if it exists
     op.execute(

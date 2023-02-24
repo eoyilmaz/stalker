@@ -9,6 +9,7 @@ from stalker.models.entity import Entity
 
 from stalker.log import logging_level
 import logging
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
 
@@ -59,53 +60,38 @@ class Client(Entity):
     __auto_name__ = False
     __tablename__ = "Clients"
     __mapper_args__ = {"polymorphic_identity": "Client"}
-    client_id = Column(
-        "id",
-        Integer,
-        ForeignKey("Entities.id"),
-        primary_key=True
-    )
+    client_id = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
 
-    users = association_proxy(
-        'user_role',
-        'user',
-        creator=lambda n: ClientUser(user=n)
-    )
+    users = association_proxy("user_role", "user", creator=lambda n: ClientUser(user=n))
 
     user_role = relationship(
         "ClientUser",
         back_populates="client",
-        cascade='all, delete-orphan',
-        primaryjoin='Clients.c.id==Client_Users.c.cid',
-        doc="""List of users representing the members of this client."""
+        cascade="all, delete-orphan",
+        primaryjoin="Clients.c.id==Client_Users.c.cid",
+        doc="""List of users representing the members of this client.""",
     )
 
     projects = association_proxy(
-        'project_role',
-        'project',
-        creator=lambda p: create_project_client(p)
+        "project_role", "project", creator=lambda p: create_project_client(p)
     )
 
     project_role = relationship(
-        'ProjectClient',
-        back_populates='client',
-        cascade='all, delete-orphan',
-        primaryjoin='Clients.c.id==Project_Clients.c.client_id'
+        "ProjectClient",
+        back_populates="client",
+        cascade="all, delete-orphan",
+        primaryjoin="Clients.c.id==Project_Clients.c.client_id",
     )
 
     goods = relationship(
-        'Good',
-        back_populates='client',
-        cascade='all',  # do not include "delete-orphan" we want to keep goods
-                        # if they are detached on purpose
-        primaryjoin='Clients.c.id==Goods.c.client_id'
+        "Good",
+        back_populates="client",
+        cascade="all",  # do not include "delete-orphan" we want to keep goods
+        # if they are detached on purpose
+        primaryjoin="Clients.c.id==Goods.c.client_id",
     )
 
-    def __init__(
-            self,
-            users=None,
-            projects=None,
-            **kwargs):
+    def __init__(self, users=None, projects=None, **kwargs):
         super(Client, self).__init__(**kwargs)
 
         if users is None:
@@ -118,30 +104,25 @@ class Client(Entity):
         self.projects = projects
 
     def __eq__(self, other):
-        """the equality operator
-        """
-        return super(Client, self).__eq__(other) and \
-            isinstance(other, Client)
+        """the equality operator"""
+        return super(Client, self).__eq__(other) and isinstance(other, Client)
 
     def __hash__(self):
-        """the overridden __hash__ method
-        """
+        """the overridden __hash__ method"""
         return super(Client, self).__hash__()
 
     def to_tjp(self):
-        return ''
+        return ""
 
-    @validates('goods')
+    @validates("goods")
     def _validate_good(self, key, good):
-        """validates the given good value
-        """
+        """validates the given good value"""
         from stalker.models.budget import Good
+
         if not isinstance(good, Good):
             raise TypeError(
                 "%s.goods attribute should be all stalker.models.budget.Good "
-                "instances, not %s" % (
-                    self.__class__.__name__, good.__class__.__name__
-                )
+                "instances, not %s" % (self.__class__.__name__, good.__class__.__name__)
             )
 
         return good
@@ -160,45 +141,27 @@ class ClientUser(Base):
 
     """
 
-    __tablename__ = 'Client_Users'
+    __tablename__ = "Client_Users"
 
-    user_id = Column(
-        'uid',
-        Integer,
-        ForeignKey('Users.id'),
-        primary_key=True
-    )
+    user_id = Column("uid", Integer, ForeignKey("Users.id"), primary_key=True)
 
     user = relationship(
-        'User',
-        back_populates='company_role',
-        primaryjoin='ClientUser.user_id==User.user_id'
+        "User",
+        back_populates="company_role",
+        primaryjoin="ClientUser.user_id==User.user_id",
     )
 
-    client_id = Column(
-        'cid',
-        Integer,
-        ForeignKey('Clients.id'),
-        primary_key=True
-    )
+    client_id = Column("cid", Integer, ForeignKey("Clients.id"), primary_key=True)
 
     client = relationship(
-        'Client',
-        back_populates='user_role',
-        primaryjoin='ClientUser.client_id==Client.client_id',
+        "Client",
+        back_populates="user_role",
+        primaryjoin="ClientUser.client_id==Client.client_id",
     )
 
-    role_id = Column(
-        'rid',
-        Integer,
-        ForeignKey('Roles.id'),
-        nullable=True
-    )
+    role_id = Column("rid", Integer, ForeignKey("Roles.id"), nullable=True)
 
-    role = relationship(
-        'Role',
-        primaryjoin='ClientUser.role_id==Role.role_id'
-    )
+    role = relationship("Role", primaryjoin="ClientUser.role_id==Role.role_id")
 
     def __init__(self, client=None, user=None, role=None):
         self.user = user
@@ -207,48 +170,47 @@ class ClientUser(Base):
 
     @validates("client")
     def _validate_client(self, key, client):
-        """validates the given client value
-        """
+        """validates the given client value"""
         if client is not None:
             if not isinstance(client, Client):
                 raise TypeError(
                     "%s.client should be instance of "
-                    "stalker.models.client.Client, not %s" %
-                    (self.__class__.__name__, client.__class__.__name__)
+                    "stalker.models.client.Client, not %s"
+                    % (self.__class__.__name__, client.__class__.__name__)
                 )
         return client
 
     @validates("user")
     def _validate_user(self, key, user):
-        """validates the given user value
-        """
+        """validates the given user value"""
         if user is not None:
             from stalker.models.auth import User
+
             if not isinstance(user, User):
                 raise TypeError(
                     "%s.user should be an instance of "
-                    "stalker.models.auth.User, not %s" %
-                    (self.__class__.__name__, user.__class__.__name__)
+                    "stalker.models.auth.User, not %s"
+                    % (self.__class__.__name__, user.__class__.__name__)
                 )
         return user
 
-    @validates('role')
+    @validates("role")
     def _validate_role(self, key, role):
-        """validates the given role instance
-        """
+        """validates the given role instance"""
         if role is not None:
             from stalker import Role
+
             if not isinstance(role, Role):
                 raise TypeError(
-                    '%s.role should be a '
-                    'stalker.models.auth.Role instance, not %s' %
-                    (self.__class__.__name__, role.__class__.__name__)
+                    "%s.role should be a "
+                    "stalker.models.auth.Role instance, not %s"
+                    % (self.__class__.__name__, role.__class__.__name__)
                 )
         return role
 
 
 def create_project_client(project):
-    """helper function to create ProjectClient instance on association proxy
-    """
+    """helper function to create ProjectClient instance on association proxy"""
     from stalker.models.project import ProjectClient
+
     return ProjectClient(project=project)
