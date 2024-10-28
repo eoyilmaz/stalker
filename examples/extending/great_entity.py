@@ -11,9 +11,7 @@ from stalker import SimpleEntity, ReferenceMixin
 
 
 class GreatEntity(SimpleEntity, ReferenceMixin):
-    """The new great entity class, which is a new simpleEntity with
-    ReferenceMixin
-    """
+    """The new great entity class, which is a new simpleEntity with ReferenceMixin."""
 
     __tablename__ = "GreatEntities"
     great_entity_id = Column(
