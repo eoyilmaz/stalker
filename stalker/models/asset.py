@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
+"""Asset related classes."""
 
-from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy import Column, ForeignKey, Integer
+
+from stalker import log
+from stalker.models.mixins import CodeMixin, ReferenceMixin
 from stalker.models.task import Task
-from stalker.models.mixins import ReferenceMixin, CodeMixin
 
-from stalker.log import logging_level
-import logging
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging_level)
+logger = log.get_logger(__name__)
+log.set_level(log.logging_level)
 
 
 class Asset(Task, CodeMixin):
@@ -46,21 +46,34 @@ class Asset(Task, CodeMixin):
 
     asset_id = Column("id", Integer, ForeignKey("Tasks.id"), primary_key=True)
 
-    def __init__(self, code, **kwargs):
+    def __init__(self, code, **kwargs) -> None:
         kwargs["code"] = code
 
         super(Asset, self).__init__(**kwargs)
         CodeMixin.__init__(self, **kwargs)
         ReferenceMixin.__init__(self, **kwargs)
 
-    def __eq__(self, other):
-        """the equality operator"""
+    def __eq__(self, other) -> bool:
+        """Check the equality.
+
+        Args:
+            other (object): The other object.
+
+        Returns:
+            bool: True if the other object equals to this asset.
+        """
         return (
             super(Asset, self).__eq__(other)
             and isinstance(other, Asset)
             and self.type == other.type
         )
 
-    def __hash__(self):
-        """the overridden __hash__ method"""
+    def __hash__(self) -> int:
+        """Return the hash value of this instance.
+
+        Because the __eq__ is overridden the __hash__ also needs to be overridden.
+
+        Returns:
+            int: The hash value.
+        """
         return super(Asset, self).__hash__()
