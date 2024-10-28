@@ -1,7 +1,8 @@
+import stalker.db.setup
 from stalker import db
 
-db.setup({"sqlalchemy.url": "sqlite:///"})
-db.init()
+stalker.db.setup.setup({"sqlalchemy.url": "sqlite:///"})
+stalker.db.setup.init()
 
 
 from stalker import Studio
