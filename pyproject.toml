@@ -6,3 +6,21 @@ build-backend = "setuptools.build_meta"
 pythonpath = ["."]
 
 [tool.black]
+
+[tool.flake8]
+exclude = [
+    ".github",
+    "__pycache__",
+    ".coverage",
+    ".DS_Store",
+    ".pytest_cache",
+    ".venv",
+    ".vscode",
+    "build",
+    "dist",
+    "stalker.egg-info",
+]
+extend-select = ["B950"]
+ignore = ["D107", "E203", "E501", "E701", "SC200", "W503"]
+max-complexity = 12
+max-line-length = 80
