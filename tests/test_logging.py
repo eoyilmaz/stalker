@@ -9,6 +9,7 @@ from stalker import log
 @pytest.fixture(scope="function")
 def setup_logging():
     """Set up stalker log module."""
+    log.loggers = []
     yield
     # clean loggers list after every test
     log.loggers = []
