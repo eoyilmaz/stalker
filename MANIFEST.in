@@ -7,7 +7,6 @@ include INSTALL
 include MANIFEST.in
 include COPYING
 include COPYING.LESSER
-include doTests
 include alembic.ini
 
 prune docs/build
