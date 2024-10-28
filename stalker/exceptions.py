@@ -19,7 +19,7 @@ class LoginError(Exception):
 
 
 class CircularDependencyError(Exception):
-    """Raised when there is circular dependencies within Tasks"""
+    """Raised when there is circular dependencies within Tasks."""
 
     def __init__(self, value=""):
         super(CircularDependencyError, self).__init__(value)
@@ -30,7 +30,7 @@ class CircularDependencyError(Exception):
 
 
 class OverBookedError(Exception):
-    """Raised when a resource is booked more than once for the same time period"""
+    """Raised when a resource is booked more than once for the same time period."""
 
     def __init__(self, value=""):
         super(OverBookedError, self).__init__(value)
@@ -41,9 +41,7 @@ class OverBookedError(Exception):
 
 
 class StatusError(Exception):
-    """Raised when the status of an entity is not suitable for the desired
-    action
-    """
+    """Raised when the status of an entity is not suitable for the desired action."""
 
     def __init__(self, value=""):
         super(StatusError, self).__init__(value)
@@ -54,7 +52,7 @@ class StatusError(Exception):
 
 
 class DependencyViolationError(Exception):
-    """Raised when a TimeLog violates the dependency relation between tasks"""
+    """Raised when a TimeLog violates the dependency relation between tasks."""
 
     def __init__(self, value=""):
         super(DependencyViolationError, self).__init__(value)
