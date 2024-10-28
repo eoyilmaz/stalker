@@ -1,17 +1,16 @@
-"""Budget is now statusable
+"""Budget is now statusable.
 
 Revision ID: 92257ba439e1
 Revises: f2005d1fbadc
 Create Date: 2016-07-28 13:20:27.397000
-
 """
+from alembic import op
+
+import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "92257ba439e1"
 down_revision = "f2005d1fbadc"
-
-from alembic import op
-import sqlalchemy as sa
 
 
 def upgrade():

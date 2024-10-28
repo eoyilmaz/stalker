@@ -1,17 +1,16 @@
-"""removed Tasks.is_complete column
+"""Removed Tasks.is_complete column.
 
 Revision ID: 23dff41c95ff
 Revises: 5999269aad30
 Create Date: 2014-06-11 14:00:00.559122
-
 """
+from alembic import op
+
+import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "23dff41c95ff"
 down_revision = "5999269aad30"
-
-from alembic import op
-import sqlalchemy as sa
 
 
 def upgrade():

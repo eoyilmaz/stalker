@@ -1,17 +1,16 @@
-"""Added position column to Project_Repositories table
+"""Added position column to Project_Repositories table.
 
 Revision ID: eaed49db6d9
 Revises: 583875229230
 Create Date: 2015-02-10 16:08:03.449570
-
 """
+from alembic import op
+
+import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "eaed49db6d9"
 down_revision = "583875229230"
-
-from alembic import op
-import sqlalchemy as sa
 
 
 def upgrade():

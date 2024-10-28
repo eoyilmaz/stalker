@@ -1,17 +1,14 @@
-"""create enum types
+"""Create enum types.
 
 Revision ID: 46775e4a3d96
 Revises: 2aeab8b376dc
 Create Date: 2014-01-31 03:08:36.445876
-
 """
+from alembic import op
 
 # revision identifiers, used by Alembic.
-
 revision = "46775e4a3d96"
 down_revision = "2aeab8b376dc"
-
-from alembic import op
 
 
 def upgrade():

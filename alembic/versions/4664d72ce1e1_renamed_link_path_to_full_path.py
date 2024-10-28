@@ -1,21 +1,20 @@
-"""renamed Link.path to Link.full_path
+"""Renamed "Link.path" to" Link.full_path".
 
 Revision ID: 4664d72ce1e1
 Revises: 25b3eba6ffe7
 Create Date: 2013-05-23 18:46:18.218662
-
 """
+from alembic import op
+
+import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "4664d72ce1e1"
 down_revision = "25b3eba6ffe7"
 
-from alembic import op
-import sqlalchemy as sa
-
 
 def upgrade():
-    # create full_path column
+    """Create full_path column."""
     try:
         op.alter_column("Links", "path", new_column_name="full_path")
     except sa.exc.OperationalError:

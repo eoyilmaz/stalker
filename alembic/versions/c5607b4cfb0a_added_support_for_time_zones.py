@@ -1,19 +1,18 @@
-"""Added support for time zones
+"""Added support for time zones.
 
 Revision ID: c5607b4cfb0a
 Revises: 0063f547dc2e
 Create Date: 2017-03-09 02:17:08.209000
-
 """
+import logging
+
+from alembic import op
+
+import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "c5607b4cfb0a"
 down_revision = "0063f547dc2e"
-
-from alembic import op
-import sqlalchemy as sa
-
-import logging
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

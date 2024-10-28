@@ -1,19 +1,19 @@
-"""derive Version from Link instead of Entity
+"""Derive Version from Link instead of Entity.
 
 Revision ID: 25b3eba6ffe7
 Revises: 53d8127d8560
 Create Date: 2013-05-22 16:51:53.136718
-
 """
+from alembic import op
+
+import sqlalchemy as sa
+
+from stalker import defaults, log
+
 
 # revision identifiers, used by Alembic.
 revision = "25b3eba6ffe7"
 down_revision = "53d8127d8560"
-
-from alembic import op
-import sqlalchemy as sa
-
-from stalker import defaults, log
 
 logger = log.get_logger(__name__)
 

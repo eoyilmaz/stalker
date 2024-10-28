@@ -1,21 +1,19 @@
-"""task review/status workflow
+"""Task review/status workflow.
 
 Revision ID: 433d9caaafab
 Revises: 46775e4a3d96
 Create Date: 2014-01-31 01:51:08.457109
-
 """
-
-# revision identifiers, used by Alembic.
-from sqlalchemy.exc import ProgrammingError, IntegrityError
-import stalker
-
-revision = "433d9caaafab"
-down_revision = "46775e4a3d96"
-
 from alembic import op
+
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
+
+import stalker
+
+# revision identifiers, used by Alembic.
+revision = "433d9caaafab"
+down_revision = "46775e4a3d96"
 
 
 def upgrade():
@@ -484,7 +482,7 @@ where status_id = (select id from "Statuses" where code='PREV')"""
 
 
 def downgrade():
-    """downgrade"""
+    """Downgrade."""
     op.add_column(
         "Vacations",
         sa.Column("timing_resolution", postgresql.INTERVAL(), nullable=True),

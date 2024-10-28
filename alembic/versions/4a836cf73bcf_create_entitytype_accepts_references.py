@@ -1,17 +1,17 @@
-"""create EntityType.accepts_references
+"""Create EntityType.accepts_references.
 
 Revision ID: 4a836cf73bcf
 Revises: None
 Create Date: 2013-05-15 16:27:05.983849
-
 """
+from alembic import op
+
+import sqlalchemy as sa
+
 
 # revision identifiers, used by Alembic.
 revision = "4a836cf73bcf"
 down_revision = None
-
-from alembic import op
-import sqlalchemy as sa
 
 
 def upgrade():

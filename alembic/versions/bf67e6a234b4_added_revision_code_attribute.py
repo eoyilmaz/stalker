@@ -1,19 +1,19 @@
-"""Added Repository.code attribute
+"""Added "Repository.code" attribute.
 
 Revision ID: bf67e6a234b4
 Revises: ed0167fff399
 Create Date: 2020-01-01 09:50:19.086342
-
 """
+import logging
+
+from alembic import op
+
+import sqlalchemy as sa
+
 
 # revision identifiers, used by Alembic.
 revision = "bf67e6a234b4"
 down_revision = "ed0167fff399"
-
-from alembic import op
-import sqlalchemy as sa
-
-import logging
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

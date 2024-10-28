@@ -1,17 +1,17 @@
-"""Added ReferenceMixin to Task
+"""Added ReferenceMixin to Task.
 
 Revision ID: 21b88ed3da95
 Revises: 4664d72ce1e1
 Create Date: 2013-05-31 12:08:59.425539
-
 """
+from alembic import op
+
+import sqlalchemy as sa
+
 
 # revision identifiers, used by Alembic.
 revision = "21b88ed3da95"
 down_revision = "4664d72ce1e1"
-
-from alembic import op
-import sqlalchemy as sa
 
 
 def upgrade():

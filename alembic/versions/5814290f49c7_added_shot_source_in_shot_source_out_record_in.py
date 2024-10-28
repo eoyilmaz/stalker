@@ -1,17 +1,16 @@
-"""Added Shot.source_in, Shot.source_out and Shot.record_in attributes
+"""Added Shot.source_in, Shot.source_out and Shot.record_in attributes.
 
 Revision ID: 5814290f49c7
 Revises: 2e4a3813ae76
 Create Date: 2014-09-22 15:25:29.618377
-
 """
+from alembic import op
+
+import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "5814290f49c7"
 down_revision = "2e4a3813ae76"
-
-from alembic import op
-import sqlalchemy as sa
 
 
 def upgrade():

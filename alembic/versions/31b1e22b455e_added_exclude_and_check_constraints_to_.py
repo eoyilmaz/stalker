@@ -1,20 +1,18 @@
-"""Added exclude and check constraints to TimeLogs table
+"""Added exclude and check constraints to TimeLogs table.
 
 Revision ID: 31b1e22b455e
 Revises: c5607b4cfb0a
 Create Date: 2017-03-10 02:14:38.330000
-
 """
-
-# revision identifiers, used by Alembic.
-from sqlalchemy import CheckConstraint
-from stalker import log
-
-revision = "31b1e22b455e"
-down_revision = "c5607b4cfb0a"
-
 from alembic import op
 
+from sqlalchemy import CheckConstraint
+
+from stalker import log
+
+# revision identifiers, used by Alembic.
+revision = "31b1e22b455e"
+down_revision = "c5607b4cfb0a"
 logger = log.get_logger(__name__)
 
 

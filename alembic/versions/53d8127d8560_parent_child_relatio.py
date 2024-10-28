@@ -1,17 +1,16 @@
-"""parent child relation in Versions
+"""parent child relation in Versions.
 
 Revision ID: 53d8127d8560
 Revises: 4a836cf73bcf
 Create Date: 2013-05-22 12:44:05.626047
-
 """
+from alembic import op
+
+import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "53d8127d8560"
 down_revision = "4a836cf73bcf"
-
-from alembic import op
-import sqlalchemy as sa
 
 
 def upgrade():

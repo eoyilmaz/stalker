@@ -1,17 +1,16 @@
-"""Added Invoices table
+"""Added Invoices table.
 
 Revision ID: ea28a39ba3f5
 Revises: 92257ba439e1
 Create Date: 2016-08-17 19:21:40.428000
-
 """
+from alembic import op
+
+import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "ea28a39ba3f5"
 down_revision = "d8421de6a206"
-
-from alembic import op
-import sqlalchemy as sa
 
 
 def upgrade():

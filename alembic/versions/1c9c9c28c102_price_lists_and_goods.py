@@ -1,17 +1,16 @@
-"""add PriceLists and Goods
+"""Add PriceLists and Goods.
 
 Revision ID: 1c9c9c28c102
 Revises: 856e70016b2
 Create Date: 2015-01-26 13:05:50.050345
-
 """
+from alembic import op
+
+import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "1c9c9c28c102"
 down_revision = "856e70016b2"
-
-from alembic import op
-import sqlalchemy as sa
 
 
 def upgrade():

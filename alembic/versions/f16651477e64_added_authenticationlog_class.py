@@ -1,18 +1,17 @@
-"""Added AuthenticationLog class
+"""Added AuthenticationLog class.
 
 Revision ID: f16651477e64
 Revises: 255ee1f9c7b3
 Create Date: 2016-11-15 00:22:16.438000
-
 """
+from alembic import op
+
+import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = "f16651477e64"
 down_revision = "255ee1f9c7b3"
-
-from alembic import op
-import sqlalchemy as sa
-from sqlalchemy.dialects import postgresql
 
 
 def upgrade():

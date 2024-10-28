@@ -1,17 +1,16 @@
-"""added Budget and BudgetEntry tables
+"""Added Budget and BudgetEntry tables.
 
 Revision ID: 30c576f3691
 Revises: 409d2d73ca30
 Create Date: 2014-11-20 22:49:37.015323
-
 """
+from alembic import op
+
+import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "30c576f3691"
 down_revision = "409d2d73ca30"
-
-from alembic import op
-import sqlalchemy as sa
 
 
 def upgrade():

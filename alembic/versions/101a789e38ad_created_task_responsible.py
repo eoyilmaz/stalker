@@ -1,17 +1,16 @@
-"""Created Task.responsible attribute
+"""Created "Task.responsible" attribute.
 
 Revision ID: 101a789e38ad
 Revises: 59092d41175c
 Create Date: 2013-06-24 12:32:04.852386
-
 """
+from alembic import op
+
+import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "101a789e38ad"
 down_revision = "59092d41175c"
-
-from alembic import op
-import sqlalchemy as sa
 
 
 def upgrade():

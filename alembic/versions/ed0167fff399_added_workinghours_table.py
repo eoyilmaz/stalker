@@ -1,18 +1,17 @@
-"""Added WorkingHours table
+"""Added WorkingHours table.
 
 Revision ID: ed0167fff399
 Revises: 1181305d3001
 Create Date: 2017-05-20 14:32:48.388000
-
 """
+from alembic import op
+
+import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = "ed0167fff399"
 down_revision = "1181305d3001"
-
-from alembic import op
-import sqlalchemy as sa
-from sqlalchemy.dialects import postgresql
 
 
 def upgrade():

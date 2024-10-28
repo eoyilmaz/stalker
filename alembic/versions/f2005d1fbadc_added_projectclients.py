@@ -1,18 +1,17 @@
-"""added ProjectClients
+"""Added ProjectClients.
 
 Revision ID: f2005d1fbadc
 Revises: 258985128aff
 Create Date: 2016-06-27 14:33:10.642000
-
 """
+from alembic import op
+
+import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = "f2005d1fbadc"
 down_revision = "745b210e6907"
-
-from alembic import op
-import sqlalchemy as sa
-from sqlalchemy.dialects import postgresql
 
 
 def upgrade():

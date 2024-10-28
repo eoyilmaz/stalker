@@ -1,17 +1,16 @@
-"""added Roles
+"""Added Roles.
 
 Revision ID: 856e70016b2
 Revises: 30c576f3691
 Create Date: 2014-11-26 00:25:29.543411
-
 """
+from alembic import op
+
+import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "856e70016b2"
 down_revision = "30c576f3691"
-
-from alembic import op
-import sqlalchemy as sa
 
 
 def upgrade():

@@ -1,19 +1,19 @@
-"""created Daily class and the "Daily Statuses" status list and the status Open
+"""Created Daily class and the "Daily Statuses" status list and the status Open.
 
 Revision ID: 2e4a3813ae76
 Revises: 23dff41c95ff
 Create Date: 2014-06-23 17:14:33.013543
-
 """
+from alembic import op
 
-# revision identifiers, used by Alembic.
+import sqlalchemy as sa
+
 import stalker
 
+
+# revision identifiers, used by Alembic.
 revision = "2e4a3813ae76"
 down_revision = "23dff41c95ff"
-
-from alembic import op
-import sqlalchemy as sa
 
 
 def upgrade():

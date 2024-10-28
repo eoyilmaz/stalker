@@ -1,17 +1,16 @@
-"""Added Vacation class
+"""Added Vacation class.
 
 Revision ID: 6297277da38
 Revises: 21b88ed3da95
 Create Date: 2013-06-07 16:03:08.412610
-
 """
+from alembic import op
+
+import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "6297277da38"
 down_revision = "21b88ed3da95"
-
-from alembic import op
-import sqlalchemy as sa
 
 
 def upgrade():

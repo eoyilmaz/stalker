@@ -1,17 +1,16 @@
-"""create EntityGroups table
+"""create EntityGroups table.
 
 Revision ID: 258985128aff
 Revises: 39d3c16ff005
 Create Date: 2016-05-16 16:06:39.389000
-
 """
+from alembic import op
+
+import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "258985128aff"
 down_revision = "39d3c16ff005"
-
-from alembic import op
-import sqlalchemy as sa
 
 
 def upgrade():

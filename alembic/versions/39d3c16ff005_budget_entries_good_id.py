@@ -1,17 +1,16 @@
-"""Added BudgetEntries.good_id
+"""Added BudgetEntries.good_id.
 
 Revision ID: 39d3c16ff005
 Revises: eaed49db6d9
 Create Date: 2015-02-15 02:29:26.301437
-
 """
+from alembic import op
+
+import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "39d3c16ff005"
 down_revision = "eaed49db6d9"
-
-from alembic import op
-import sqlalchemy as sa
 
 
 def upgrade():

@@ -1,17 +1,16 @@
-"""Added Tasks.good_id column
+"""Added Tasks.good_id column.
 
 Revision ID: 583875229230
 Revises: 2252e51506de
 Create Date: 2015-02-07 18:53:04.343928
-
 """
+from alembic import op
+
+import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "583875229230"
 down_revision = "2252e51506de"
-
-from alembic import op
-import sqlalchemy as sa
 
 
 def upgrade():
