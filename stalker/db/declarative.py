@@ -1,24 +1,26 @@
 # -*- coding: utf-8 -*-
-
-import logging
-
+"""The declarative base class is situated here."""
 from sqlalchemy.ext.declarative import declarative_base
-from stalker.db.session import DBSession
-from stalker import log
-from stalker.models import make_plural
 
-logger = logging.getLogger(__name__)
-logger.setLevel(log.logging_level)
+from stalker.log import get_logger
+from stalker.db.session import DBSession
+from stalker.utils import make_plural
+
+logger = get_logger(__name__)
 
 
 class ORMClass(object):
-    """The base of the Base class"""
+    """The base of the Base class."""
 
     query = DBSession.query_property()
 
     @property
     def plural_class_name(self):
-        """the plural name of this class"""
+        """Return plural name of this class.
+
+        Returns:
+            str: The plural version of this class.
+        """
         return make_plural(self.__class__.__name__)
 
 
