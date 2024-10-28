@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
-
-from sqlalchemy.types import TypeDecorator, TEXT, JSON, DateTime
+"""Stalker specific data types are situated here."""
 import json
+
+import pytz
+
+from sqlalchemy.types import DateTime, JSON, TEXT, TypeDecorator
 
 
 class JSONEncodedDict(TypeDecorator):
@@ -10,11 +13,29 @@ class JSONEncodedDict(TypeDecorator):
     impl = TEXT
 
     def process_bind_param(self, value, dialect):
+        """Process bind param.
+
+        Args:
+            value (object): The object to convert to JSON.
+            dialect (str): The dialect.
+
+        Returns:
+            str: The str representation of the JSON data.
+        """
         if value is not None:
             value = json.dumps(value)
         return value
 
     def process_result_value(self, value, dialect):
+        """Process result value.
+
+        Args:
+            value (str): The str reprsentation of the JSON data.
+            dialect (str): The dialect.
+
+        Returns:
+            dict: The dict representation of the JSON data.
+        """
         if value is not None:
             value = json.loads(value)
         return value
@@ -28,22 +49,39 @@ It will be native JSON for PostgreSQL and JSONEncodedDict for SQLite3
 
 
 class DateTimeUTC(TypeDecorator):
-    """Stores UTC internally without the timezone info and injects timezone
-    info as the data comes back from db.
+    """Store UTC internally without the timezone info.
+
+    Inject timezone info as the data comes back from db.
     """
 
     impl = DateTime
 
     def process_bind_param(self, value, dialect):
+        """Process bind param.
+
+        Args:
+            value (any): The value.
+            dialect (str): The dialect.
+
+        Returns:
+            datetime.datetime: The datetime value with UTC timezone.
+        """
         if value is not None:
             # convert the datetime object to have UTC
             # and strip the datetime value out (which is automatic for SQLite3)
-            import pytz
-
             value = value.astimezone(pytz.utc)
         return value
 
     def process_result_value(self, value, dialect):
+        """Process result value.
+
+        Args:
+            value (any): The value.
+            dialect (str): The dialect.
+
+        Returns:
+            datetime.datetime: The datetime value with UTC timezone.
+        """
         if value is not None:
             # inject utc and then convert to local timezone
             import pytz
