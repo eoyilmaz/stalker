@@ -1,21 +1,25 @@
 # -*- coding: utf-8 -*-
+"""Mixins are situated here."""
 
-import logging
+import datetime
 
 import pytz
+
 from six import string_types
-from sqlalchemy import Table, Column, String, Integer, ForeignKey, Interval, Float, Enum
-from sqlalchemy.exc import UnboundExecutionError, OperationalError
+
+from sqlalchemy import Column, Enum, Float, ForeignKey, Integer, Interval, String, Table
+from sqlalchemy.exc import OperationalError, UnboundExecutionError
 from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy.orm import synonym, relationship, validates
+from sqlalchemy.orm import backref, relationship, synonym, validates
 
-
+from stalker import defaults
 from stalker.db.declarative import Base
+from stalker.db.session import DBSession
 from stalker.db.types import GenericDateTime
-from stalker.log import logging_level
+from stalker.log import get_logger
+from stalker.utils import check_circular_dependency, make_plural, walk_hierarchy
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging_level)
+logger = get_logger(__name__)
 
 
 def create_secondary_table(
@@ -25,9 +29,18 @@ def create_secondary_table(
     secondary_cls_table_name,
     secondary_table_name=None,
 ):
-    """creates any secondary table"""
-    from stalker.models import make_plural
+    """Create any secondary table.
 
+    Args:
+        primary_cls_name (str): The primary class name.
+        secondary_cls_name (str): The secondary class name.
+        primary_cls_table_name (str): The primary class table name.
+        secondary_cls_table_name (str): The secondary class table name.
+        secondary_table_name (Union[None, str]): Optional secondary table name.
+
+    Returns:
+        Table: The secondary table.
+    """
     plural_secondary_cls_name = make_plural(secondary_cls_name)
 
     # use the given class_name and the class_table
@@ -61,36 +74,35 @@ def create_secondary_table(
 class TargetEntityTypeMixin(object):
     """Adds target_entity_type attribute to mixed in class.
 
-    :param target_entity_type: The target entity type which this class is
-      designed for. Should be a class or a class name.
+    Args:
+        target_entity_type (Union[str, type]): The target entity type which this class
+            is designed for. Should be a class or a class name.
 
-      For example::
+        For example::
 
-        from stalker import SimpleEntity, TargetEntityTypeMixin, Project
+            from stalker import SimpleEntity, TargetEntityTypeMixin, Project
 
-        class A(SimpleEntity, TargetEntityTypeMixin):
-            __tablename__ = "As"
-            __mapper_args__ = {"polymorphic_identity": "A"}
+            class A(SimpleEntity, TargetEntityTypeMixin):
+                __tablename__ = "As"
+                __mapper_args__ = {"polymorphic_identity": "A"}
 
-            def __init__(self, **kwargs):
-                super(A, self).__init__(**kwargs)
-                TargetEntityTypeMixin.__init__(self, **kwargs)
+                def __init__(self, **kwargs):
+                    super(A, self).__init__(**kwargs)
+                    TargetEntityTypeMixin.__init__(self, **kwargs)
 
-        a_obj = A(target_entity_type=Project)
+            a_obj = A(target_entity_type=Project)
 
-      The ``a_obj`` will only be accepted by
-      :class:`.Project` instances. You can not assign it to any other class
-      which accepts a :class:`.Type` instance.
+        The ``a_obj`` will only be accepted by :class:`.Project` instances. You can not
+        assign it to any other class which accepts a :class:`.Type` instance.
 
-    To control the mixed-in class behaviour add these class variables to the
-    mixed in class:
+        To control the mixed-in class behaviour add these class variables to the
+        mixed in class:
 
-      __nullable_target__ : controls if the target_entity_type can be
-                            nullable or not. Default is False.
+            __nullable_target__ : controls if the target_entity_type can be
+                nullable or not. Default is False.
 
-      __unique_target__ : controls if the target_entity_type should be
-                          unique, so there is only one object for one type.
-                          Default is False.
+            __unique_target__ : controls if the target_entity_type should be unique, so
+                there is only one object for one type. Default is False.
     """
 
     __nullable_target__ = False
@@ -98,6 +110,11 @@ class TargetEntityTypeMixin(object):
 
     @declared_attr
     def _target_entity_type(cls):
+        """Create the _target_entity_type attribute as a declared attribute.
+
+        Returns:
+            Column: The Column related to the _target_entity_type attribute.
+        """
         return Column(
             "target_entity_type",
             String(128),
@@ -109,7 +126,19 @@ class TargetEntityTypeMixin(object):
         self._target_entity_type = self._validate_target_entity_type(target_entity_type)
 
     def _validate_target_entity_type(self, target_entity_type_in):
-        """validates the given target_entity_type value"""
+        """Validate the given target_entity_type value.
+
+        Args:
+            target_entity_type_in (Union[str, type]): The target_entity_type that this
+                entity is valid for.
+
+        Raises:
+            TypeError: If the given target_entity_type_in value is None.
+            ValueError: If the given target_entity_type_in value is an empty str.
+
+        Returns:
+            str: The validated target_entity_type value.
+        """
         # it can not be None
         if target_entity_type_in is None:
             raise TypeError(
@@ -128,10 +157,20 @@ class TargetEntityTypeMixin(object):
         return target_entity_type_in
 
     def _target_entity_type_getter(self):
+        """Return the _target_entity_type attribute value.
+
+        Returns:
+            str: The _target_entity_type attribute value.
+        """
         return self._target_entity_type
 
     @declared_attr
     def target_entity_type(cls):
+        """Create the target_entity_type attribute as a declared attribute.
+
+        Returns:
+            SynonymProperty: The target_entity_type property.
+        """
         return synonym(
             "_target_entity_type",
             descriptor=property(
@@ -190,6 +229,11 @@ class StatusMixin(object):
 
     @declared_attr
     def status_id(cls):
+        """Create the status_id attribute as a declared attribute.
+
+        Returns:
+            Column: The Column related to the status_id attribute.
+        """
         return Column(
             "status_id",
             Integer,
@@ -206,6 +250,11 @@ class StatusMixin(object):
 
     @declared_attr
     def status(cls):
+        """Create the status attribute as a declared attribute.
+
+        Returns:
+            relationship: The relationship object related to the status attribute.
+        """
         return relationship(
             "Status",
             primaryjoin="%s.status_id==Status.status_id" % cls.__name__,
@@ -219,12 +268,22 @@ class StatusMixin(object):
 
     @declared_attr
     def status_list_id(cls):
+        """Create the status_list_id attribute as a declared attribute.
+
+        Returns:
+            Column: The Column related to the status_list_id attribute.
+        """
         return Column(
             "status_list_id", Integer, ForeignKey("StatusLists.id"), nullable=False
         )
 
     @declared_attr
     def status_list(cls):
+        """Create the status_list attribute as a declared attribute.
+
+        Returns:
+            relationship: The relationship object related to the status_list attribute.
+        """
         return relationship(
             "StatusList",
             primaryjoin="%s.status_list_id==StatusList.status_list_id" % cls.__name__,
@@ -232,7 +291,18 @@ class StatusMixin(object):
 
     @validates("status_list")
     def _validate_status_list(self, key, status_list):
-        """validates the given status_list_in value"""
+        """Validate the given status_list_in value.
+
+        Args:
+            key (str): The name of the validated column.
+            status_list (StatusList): The status_list value to be validated.
+
+        Raises:
+            TypeError: If the given status_list value is not a StatusList instance.
+
+        Returns:
+            StatusList: The validated status_list value.
+        """
         from stalker.models.status import StatusList
 
         if status_list is None:
@@ -240,8 +310,6 @@ class StatusMixin(object):
             # StatusList from the database
 
             # disable autoflush to prevent premature class initialization
-            from stalker.db.session import DBSession
-
             with DBSession.no_autoflush:
                 try:
                     # try to get a StatusList with the target_entity_type is
@@ -286,10 +354,22 @@ class StatusMixin(object):
 
     @validates("status")
     def _validate_status(self, key, status):
-        """validates the given status value"""
-        from stalker.models.status import Status
-        from stalker.db.session import DBSession
+        """Validate the given status value.
 
+        Args:
+            key (str): The name of the validated column.
+            status (Status): The status value to be validated.
+
+        Raises:
+            TypeError: If the given status value is not a Status instance or an int.
+            ValueError: If the status is a negative int value or the given int value
+                is equal or bigger than the length of the `StatusList.statuses` or if
+                the given Status instance is not in the `StatusList.statuses` list.
+
+        Returns:
+            Status: The validated status value.
+        """
+        from stalker.models.status import Status
         # it is set to None
         if status is None:
             with DBSession.no_autoflush:
@@ -433,46 +513,60 @@ class DateRangeMixin(object):
         return Column("end", GenericDateTime)
 
     def _end_getter(self):
-        """The date that the entity should be delivered.
+        """Return the date that the entity should be delivered.
 
         The end can be set to a datetime.timedelta and in this case it will be
-        calculated as an offset from the start and converted to
-        datetime.datetime again. Setting the start to a date passing the end
-        will also set the end, so the timedelta between them is preserved,
-        default value is 10 days
-        """
-        from stalker.db.session import DBSession
+        calculated as an offset from the start and converted to datetime.datetime again.
+        Setting the start to a date passing the end will also set the end, so the
+        timedelta between them is preserved, default value is 10 days.
 
+        Returns:
+            datetime.datetime: The end datetime.
+        """
         with DBSession.no_autoflush:
             return self._end
 
     def _end_setter(self, end_in):
+        """Set the end attribute value.
+
+        Args:
+            end_in (datetime.datetime): The end datetime value.
+        """
         self._start, self._end, self._duration = self._validate_dates(
             self.start, end_in, self.duration
         )
 
     @declared_attr
     def end(cls):
+        """Create the end attribute as a declared attribute.
+
+        Returns:
+            SynonymProperty: The end property.
+        """
         return synonym("_end", descriptor=property(cls._end_getter, cls._end_setter))
 
     @declared_attr
     def _start(cls):
+        """Create the start attribute as a declared attribute.
+
+        Returns:
+            Column: The Column related to the start attribute.
+        """
         return Column("start", GenericDateTime)
 
     def _start_getter(self):
-        """The date that this entity should start.
+        """Return the date that this entity should start.
 
         Also effects the :attr:`.DateRangeMixin.end` attribute value in certain
-        conditions, if the :attr:`.DateRangeMixin.start` is set to a time
-        passing the :attr:`.DateRangeMixin.end` it will also offset the
-        :attr:`.DateRangeMixin.end` to keep the
-        :attr:`.DateRangeMixin.duration` value fixed.
-        :attr:`.DateRangeMixin.start` should be an instance of
-        class:`datetime.datetime` and the default value is
-        :func:`datetime.datetime.now(pytz.utc)`
-        """
-        from stalker.db.session import DBSession
+        conditions, if the :attr:`.DateRangeMixin.start` is set to a time passing the
+        :attr:`.DateRangeMixin.end` it will also offset the :attr:`.DateRangeMixin.end`
+        to keep the :attr:`.DateRangeMixin.duration` value fixed.
+        :attr:`.DateRangeMixin.start` should be an instance of class:`datetime.datetime`
+        and the default value is :func:`datetime.datetime.now(pytz.utc)`.
 
+        Returns:
+            datetime.datetime: The start datetime value.
+        """
         with DBSession.no_autoflush:
             return self._start
 
@@ -483,6 +577,11 @@ class DateRangeMixin(object):
 
     @declared_attr
     def start(cls):
+        """Create the start attribute as a declared attribute.
+
+        Returns:
+            SynonymProperty: The start property.
+        """
         return synonym(
             "_start",
             descriptor=property(
@@ -493,18 +592,29 @@ class DateRangeMixin(object):
 
     @declared_attr
     def _duration(cls):
+        """Create the duration attribute as a declared attribute.
+
+        Returns:
+            Column: The Column related to the duration attribute.
+        """
         return Column("duration", Interval)
 
     def _duration_getter(self):
-        from stalker.db.session import DBSession
+        """Return the duration value.
 
+        Returns:
+            datetime.timedelta: The duration value.
+        """
         with DBSession.no_autoflush:
             return self._duration
 
     def _duration_setter(self, duration_in):
-        if duration_in is not None:
-            import datetime
+        """Set the duration value.
 
+        Args:
+            duration_in (datetime.timedelta): The duration_in value.
+        """
+        if duration_in is not None:
             if isinstance(duration_in, datetime.timedelta):
                 # set the end to None
                 # to make it recalculated
@@ -523,6 +633,11 @@ class DateRangeMixin(object):
 
     @declared_attr
     def duration(self):
+        """Return the duration attr as a synonym.
+
+        Returns:
+            SynonymProperty: The duration property.
+        """
         return synonym(
             "_duration",
             descriptor=property(
@@ -537,14 +652,20 @@ class DateRangeMixin(object):
         )
 
     def _validate_dates(self, start, end, duration):
-        """updates the date values"""
+        """Update the date values.
+
+        Args:
+            start (datetime.datetime): The start datetime value.
+            end (datetime.datetime): The end datetime value.
+            duration (datetime.timedelta): The duration value.
+
+        Returns:
+            Tuple(datetime.datetime, datetime.datetime, datetime.timedelta): The
+                validated and calculated start, end dates and duration value.
+        """
         # logger.debug('start    : %s' % start)
         # logger.debug('end      : %s' % end)
         # logger.debug('duration : %s' % duration)
-
-        from stalker import defaults
-        import datetime
-
         if not isinstance(start, datetime.datetime):
             start = None
 
@@ -605,17 +726,34 @@ class DateRangeMixin(object):
 
     @declared_attr
     def computed_start(cls):
+        """Create the computed_start attribute as a declared attribute.
+
+        Returns:
+            Column: The Column related to the computed_start attribute.
+        """
         return Column("computed_start", GenericDateTime)
 
     @declared_attr
     def computed_end(cls):
+        """Create the computed_end attribute as a declared attribute.
+
+        Returns:
+            Column: The Column related to the computed_end attribute.
+        """
         return Column("computed_end", GenericDateTime)
 
     @property
     def computed_duration(self):
-        """returns the computed_duration as the difference of computed_start
-        and computed_end if there are computed_start and computed_end otherwise
-        returns None
+        """Calculate the computed duration.
+
+        The computed_duration is calculated as the difference of computed_start and
+        computed_end if there are computed_start and computed_end otherwise returns
+        None.
+
+        Returns:
+            Union[None, datetime.timedelta]: None if one of computed_start or
+                computed_end value is None else the difference as datetime.timedelta
+                instance.
         """
         return (
             self.computed_end - self.computed_start
@@ -627,28 +765,25 @@ class DateRangeMixin(object):
     def round_time(cls, dt):
         """Round the given datetime object to the defaults.timing_resolution.
 
-        Uses :class:`stalker.defaults.timing_resolution` as the closest number
-        of seconds to round to.
-
-        :param dt: datetime.datetime object, defaults to now.
-
-        :type dt: datetime.datetime
+        Use the  :class:`stalker.defaults.timing_resolution` as the closest number of
+        seconds to round to.
 
         Based on Thierry Husson's answer in `Stackoverflow`_
 
         _`Stackoverflow` : https://stackoverflow.com/a/10854034/1431079
+
+        Args:
+            dt (datetime.datetime): The datetime object, defaults to now.
+
+        Returns:
+            datetime.datetime: The rounded datetime.datetime instance.
         """
         # to be compatible with python 2.6 use the following instead of
         # total_seconds()
-        from stalker import defaults
-
         timing_resolution = defaults.timing_resolution
         trs = timing_resolution.days * 86400 + timing_resolution.seconds
 
         # convert to seconds
-        import datetime
-        import pytz
-
         epoch = datetime.datetime(1970, 1, 1, tzinfo=pytz.utc)
 
         diff = dt - epoch
@@ -659,29 +794,36 @@ class DateRangeMixin(object):
 
     @property
     def total_seconds(self):
-        """returns the duration as seconds"""
+        """Return the duration as seconds.
+
+        Returns:
+            float: The calculated total seconds value.
+        """
         return self.duration.days * 86400 + self.duration.seconds
 
     @property
     def computed_total_seconds(self):
-        """returns the duration as seconds"""
+        """Return the computed_total_seconds as seconds.
+
+        Returns:
+            float: The computed_total_seconds value.
+        """
         return self.computed_duration.days * 86400 + self.computed_duration.seconds
 
 
 class ProjectMixin(object):
     """Allows connecting a :class:`.Project` to the mixed in object.
 
-    This also forces a ``all, delete-orphan`` cascade, so when a
-    :class:``.Project`` instance is deleted then all the class instances that
-    are inherited from ``ProjectMixin`` will also be deleted. Meaning that, a
-    class which also derives from ``ProjectMixin`` will not be able to exists
-    without a project (``delete-orphan`` case).
+    This also forces a ``all, delete-orphan`` cascade, so when a :class:``.Project``
+    instance is deleted then all the class instances that are inherited from
+    ``ProjectMixin`` will also be deleted. Meaning that, a class which also derives from
+    ``ProjectMixin`` will not be able to exists without a project (``delete-orphan``
+    case).
 
-    :param project: A :class:`.Project` instance holding the project which this
-      object is related to. It can not be None, or anything other than a
-      :class:`.Project` instance.
-
-    :type project: :class:`.Project`
+    Args:
+        project (Project): A :class:`.Project` instance holding the project which this
+            object is related to. It can not be None, or anything other than a
+            :class:`.Project` instance.
     """
 
     #    # add this lines for Sphinx
@@ -689,6 +831,11 @@ class ProjectMixin(object):
 
     @declared_attr
     def project_id(cls):
+        """Create the project_id attribute as a declared attribute.
+
+        Returns:
+            Column: The Column related to the project_id attribute.
+        """
         return Column(
             "project_id",
             Integer,
@@ -700,8 +847,11 @@ class ProjectMixin(object):
 
     @declared_attr
     def project(cls):
-        from sqlalchemy.orm import backref
+        """Create the project attribute as a declared attribute.
 
+        Returns:
+            relationship: The relationship object related to the project attribute.
+        """
         backref_table_name = cls.__tablename__.lower()
         doc = """The :class:`.Project` instance that
         this object belongs to.
@@ -721,7 +871,18 @@ class ProjectMixin(object):
 
     @validates("project")
     def _validate_project(self, key, project):
-        """validates the given project value"""
+        """Validate the given project value.
+
+        Args:
+            key (str): The name of the validated column.
+            project (Project): The project value to be validated.
+
+        Raises:
+            TypeError: If the project is None or not a Project instance.
+
+        Returns:
+            Project: The validated project value.
+        """
         from stalker.models.project import Project
 
         if project is None:
@@ -747,9 +908,8 @@ class ReferenceMixin(object):
     the References are generally to give more info to direct the evolution of
     the object.
 
-    :param references: A list of :class:`.Link` instances.
-
-    :type references: list of :class:`.Link` instances.
+    Args:
+        references (Link): A list of :class:`.Link` instances.
     """
 
     # add this lines for Sphinx
@@ -763,6 +923,11 @@ class ReferenceMixin(object):
 
     @declared_attr
     def references(cls):
+        """Create the references attribute as a declared attribute.
+
+        Returns:
+            relationship: The relationship object related to the references attribute.
+        """
         # get secondary table
         secondary_table = create_secondary_table(
             cls.__name__,
@@ -782,7 +947,18 @@ class ReferenceMixin(object):
 
     @validates("references")
     def _validate_references(self, key, reference):
-        """validates the given reference"""
+        """Validate the given reference.
+
+        Args:
+            key (str): The name of the validated column.
+            reference (Link): The reference value to be validated.
+
+        Raises:
+            TypeError: If the reference is not a Link instance.
+
+        Returns:
+            Link: The validated reference value.
+        """
         from stalker.models.link import Link
 
         # all the elements should be instance of stalker.models.entity.Entity
@@ -798,17 +974,21 @@ class ReferenceMixin(object):
 class ACLMixin(object):
     """A Mixin for adding ACLs to mixed in class.
 
-    Access control lists or ACLs are used to determine if the given resource
-    has the permission to access the given data. It is based on Pyramids
-    Authorization system but organized to fit in Stalker style.
+    Access control lists or ACLs are used to determine if the given resource has the
+    permission to access the given data. It is based on Pyramids Authorization system
+    but organized to fit in Stalker style.
 
-    The ACLMixin adds an attribute called ``permissions`` and a
-    property called ``__acl__`` to be able to pass the permission data to
-    Pyramid framework.
+    The ACLMixin adds an attribute called ``permissions`` and a property called
+    ``__acl__`` to be able to pass the permission data to Pyramid framework.
     """
 
     @declared_attr
     def permissions(cls):
+        """Create the permissions attribute as a declared attribute.
+
+        Returns:
+            relationship: The relationship object related to the permissions attribute.
+        """
         # get the secondary table
         secondary_table = create_secondary_table(
             cls.__name__, "Permission", cls.__tablename__, "Permissions"
@@ -817,7 +997,18 @@ class ACLMixin(object):
 
     @validates("permissions")
     def _validate_permissions(self, key, permission):
-        """validates the given permission value"""
+        """Validate the given permission value.
+
+        Args:
+            key (str): The name of the validated column.
+            permission (Permission): The permission value to be validated.
+
+        Raises:
+            TypeError: If the given permission value is not a Permission instance.
+
+        Returns:
+            Permission: The validated permission value.
+        """
         from stalker.models.auth import Permission
 
         if not isinstance(permission, Permission):
@@ -831,13 +1022,15 @@ class ACLMixin(object):
 
     @property
     def __acl__(self):
-        """Returns Pyramid friendly ACL list composed by the:
+        """Return Pyramid friendly ACL list.
+
+        The ACL list is composed by the:
 
           * Permission.access (Ex: 'Allow' or 'Deny')
           * The Mixed in class name and the object name (Ex: 'User:eoyilmaz')
           * The Action and the target class name (Ex: 'Create_Asset')
 
-        Thus a list of tuple is returned as follows::
+        Thus, a list of tuple is returned as follows::
 
           __acl__ = [
               ('Allow', 'User:eoyilmaz', 'Create_Asset'),
@@ -845,6 +1038,9 @@ class ACLMixin(object):
 
         For the last example user eoyilmaz can grant access to views requiring
         'Add_Project' permission.
+
+        Returns:
+            list: A list of tuples containing the ACL .
         """
         return [
             (
@@ -864,15 +1060,15 @@ class CodeMixin(object):
       The code attribute of the SimpleEntity is now introduced as a separate
       mixin. To let it be used by the classes it is really needed.
 
-    The CodeMixin just adds a new field called ``code``. It is a very simple
-    attribute and is used for simplifying long names (like Project.name etc.).
+    The CodeMixin just adds a new field called ``code``. It is a very simple attribute
+    and is used for simplifying long names (like Project.name etc.).
 
-    Contrary to previous implementations the code attribute is not formatted in
-    anyway, so care needs to be taken if the code attribute is going to be used
-    in filesystem as file and directory names.
+    Contrary to previous implementations the code attribute is not formatted in any way,
+    so care needs to be taken if the code attribute is going to be used in filesystem as
+    file and directory names.
 
-    :param str code: The code attribute is a string, can not be empty or can
-      not be None.
+    Args:
+        code (str): The code attribute is a string, can not be empty or can not be None.
     """
 
     def __init__(self, code: str = None, **kwargs):
@@ -881,6 +1077,11 @@ class CodeMixin(object):
 
     @declared_attr
     def code(cls):
+        """Create the code attribute as a declared attribute.
+
+        Returns:
+            Column: The Column related to the code attribute.
+        """
         return Column(
             "code",
             String(256),
@@ -892,7 +1093,19 @@ class CodeMixin(object):
 
     @validates("code")
     def _validate_code(self, key, code):
-        """validates the given code attribute"""
+        """Validate the given code attribute.
+
+        Args:
+            key (str): The name of the validated column.
+            code (str): The code value to be validated.
+
+        Raises:
+            TypeError: If the given code is not a str.
+            ValueError: If the given code value is an empty str.
+
+        Returns:
+            str: The validated code value.
+        """
         logger.debug("validating code value of: %s" % code)
         if code is None:
             raise TypeError("%s.code cannot be None" % self.__class__.__name__)
@@ -912,12 +1125,13 @@ class CodeMixin(object):
 
 
 class WorkingHoursMixin(object):
-    """Sets working hours for the mixed in class.
+    """Set working hours for the mixed in class.
 
     Generally is meaningful for users, departments and studio.
 
-    :param working_hours: A :class:`.WorkingHours` instance showing the working
-      hours settings.
+    Args:
+        working_hours (WorkingHours): A :class:`.WorkingHours` instance showing the
+            working hours settings.
     """
 
     def __init__(self, working_hours=None, **kwargs):
@@ -925,11 +1139,21 @@ class WorkingHoursMixin(object):
 
     @declared_attr
     def working_hours_id(cls):
-        """the id of the related working hours"""
+        """Create the working_hours_id attribute as a declared attribute.
+
+        Returns:
+            Column: The Column related to the working_hours_id attribute.
+        """
         return Column("working_hours_id", Integer, ForeignKey("WorkingHours.id"))
 
     @declared_attr
     def working_hours(cls):
+        """Create the working_hours attribute as a declared attribute.
+
+        Returns:
+            relationship: The relationship object related to the working_hours
+                attribute.
+        """
         return relationship(
             "WorkingHours",
             primaryjoin="%s.working_hours_id==WorkingHours.working_hours_id"
@@ -938,7 +1162,18 @@ class WorkingHoursMixin(object):
 
     @validates("working_hours")
     def _validate_working_hours(self, key, wh):
-        """validates the given working hours value"""
+        """Validate the given working hours value.
+
+        Args:
+            key (str): The name of the validated column.
+            wh (WorkingHours): The working hours value to be validated.
+
+        Raises:
+            TypeError: If the working hours is not None and not a WorkingHours instance.
+
+        Returns:
+            WorkingHours: The validated WorkingHours value.
+        """
         from stalker import WorkingHours
 
         if wh is None:
@@ -955,9 +1190,9 @@ class WorkingHoursMixin(object):
 
 
 class ScheduleMixin(object):
-    """Adds schedule info to the mixed in class.
+    """Add schedule info to the mixed in class.
 
-    Adds attributes like schedule_timing, schedule_unit and schedule_model
+    Add attributes like schedule_timing, schedule_unit and schedule_model
     attributes to the mixed in class.
 
     Use the ``__default_schedule_attr_name__`` attribute to customize the
@@ -965,8 +1200,6 @@ class ScheduleMixin(object):
     """
 
     # some default values that can be overridden in Mixed in classes
-    from stalker import defaults
-
     __default_schedule_attr_name__ = "schedule"
     __default_schedule_timing__ = defaults.timing_resolution.seconds / 60
     __default_schedule_unit__ = "h"
@@ -987,6 +1220,11 @@ class ScheduleMixin(object):
 
     @declared_attr
     def schedule_timing(cls):
+        """Create the schedule_timing attribute as a declared attribute.
+
+        Returns:
+            Column: The Column related to the schedule_timing attribute.
+        """
         return Column(
             "%s_timing" % cls.__default_schedule_attr_name__,
             Float,
@@ -1006,8 +1244,11 @@ class ScheduleMixin(object):
 
     @declared_attr
     def schedule_unit(cls):
-        from stalker import defaults
+        """Create the schedule_unit attribute as a declared attribute.
 
+        Returns:
+            Column: The Column related to the schedule_unit attribute.
+        """
         return Column(
             "%s_unit" % cls.__default_schedule_attr_name__,
             Enum(*defaults.datetime_units, name="TimeUnit"),
@@ -1020,6 +1261,11 @@ class ScheduleMixin(object):
 
     @declared_attr
     def schedule_model(cls):
+        """Create the schedule_model attribute as a declared attribute.
+
+        Returns:
+            Column: The Column related to the schedule_model attribute.
+        """
         return Column(
             "%s_model" % cls.__default_schedule_attr_name__,
             Enum(
@@ -1071,6 +1317,11 @@ class ScheduleMixin(object):
 
     @declared_attr
     def schedule_constraint(cls):
+        """Create the schedule_constraint attribute as a declared attribute.
+
+        Returns:
+            Column: The Column related to the schedule_constraint attribute.
+        """
         return Column(
             "%s_constraint" % cls.__default_schedule_attr_name__,
             Integer,
@@ -1109,7 +1360,18 @@ class ScheduleMixin(object):
 
     @validates("schedule_constraint")
     def _validate_schedule_constraint(self, key, schedule_constraint):
-        """validates the given schedule_constraint value"""
+        """Validate the given schedule_constraint value.
+
+        Args:
+            key (str): The name of the validated column.
+            schedule_constraint (int): The schedule_constraint value to be validated.
+
+        Raises:
+            TypeError: If the schedule_constraint is not an int.
+
+        Returns:
+            int: The validated schedule_constraint value.
+        """
         if not schedule_constraint:
             schedule_constraint = 0
 
@@ -1131,7 +1393,20 @@ class ScheduleMixin(object):
 
     @validates("schedule_model")
     def _validate_schedule_model(self, key, schedule_model):
-        """validates the given schedule_model value"""
+        """Validate the given schedule_model value.
+
+        Args:
+            key (str): The name of the validated column.
+            schedule_model (str): The schedule_model value to be validated.
+
+        Raises:
+            TypeError: If the schedule_model is not a str.
+            ValueError: If the schedule_model value is not one of the values in the
+                self.__default_schedule_models__ list.
+
+        Returns:
+            str: The validated schedule_model value.
+        """
         if not schedule_model:
             schedule_model = self.__default_schedule_models__[0]
 
@@ -1156,9 +1431,20 @@ class ScheduleMixin(object):
 
     @validates("schedule_unit")
     def _validate_schedule_unit(self, key, schedule_unit):
-        """validates the given schedule_unit"""
-        from stalker import defaults
+        """Validate the given schedule_unit.
 
+        Args:
+            key (str): The name of the validated column.
+            schedule_unit (str): The schedule_unit value to be validated.
+
+        Raises:
+            TypeError: If the schedule_unit is not a str.
+            ValueError: If the schedule_unit value is not one of the
+                defaults.datetime_units.
+
+        Returns:
+            str: The validated schedule_unit value.
+        """
         if schedule_unit is None:
             schedule_unit = self.__default_schedule_unit__
 
@@ -1192,7 +1478,19 @@ class ScheduleMixin(object):
 
     @validates("schedule_timing")
     def _validate_schedule_timing(self, key, schedule_timing):
-        """validates the given schedule_timing"""
+        """Validate the given schedule_timing.
+
+        Args:
+            key (str): The name of the validated column.
+            schedule_timing (Union[int, float]): The schedule_timing value to be
+                validated.
+
+        Raises:
+            TypeError: If the given schedule_timing is not an int or float.
+
+        Returns:
+            float: The validated schedule_timing value.
+        """
         if schedule_timing is None:
             schedule_timing = self.__default_schedule_timing__
             self.schedule_unit = self.__default_schedule_unit__
@@ -1213,16 +1511,17 @@ class ScheduleMixin(object):
 
     @classmethod
     def least_meaningful_time_unit(cls, seconds, as_work_time=True):
-        """returns the least meaningful timing unit that corresponds to the
-        given seconds. So if:
+        """Return the least meaningful time unit that corresponds to the given seconds.
+
+        So if:
 
           as_work_time == True
-              seconds % (1 years work time as seconds) == 0 --> 'y' else:
+              seconds % (1 year work time as seconds) == 0 --> 'y' else:
               seconds % (1 month work time as seconds) == 0 --> 'm' else:
               seconds % (1 week work time as seconds) == 0 --> 'w' else:
               seconds % (1 day work time as seconds) == 0 --> 'd' else:
               seconds % (1 hour work time as seconds) == 0 --> 'h' else:
-              seconds % (1 minutes work time as seconds) == 0 --> 'min' else:
+              seconds % (1 minute work time as seconds) == 0 --> 'min' else:
               raise RuntimeError
           as_work_time == False
               seconds % (1 years as seconds) == 0 --> 'y' else:
@@ -1233,15 +1532,15 @@ class ScheduleMixin(object):
               seconds % (1 minutes as seconds) == 0 --> 'min' else:
               raise RuntimeError
 
-        :param int seconds: An integer showing the total seconds to be
-          converted.
-        :param bool as_work_time: Should the input be considered as work time
-          or calendar time.
-        :returns int, string: Returns one integer and one string, showing the
-          timing value and the unit.
-        """
-        from stalker import defaults
+        Args:
+            seconds (int): An integer showing the total seconds to be converted.
+            as_work_time (bool): Should the input be considered as work time or calendar
+                time.
 
+        Returns:
+            int, string: Returns one integer and one string, showing the timing value
+                and the unit.
+        """
         minutes = 60
         hour = 3600
         day = 86400
@@ -1285,12 +1584,21 @@ class ScheduleMixin(object):
 
     @classmethod
     def to_seconds(cls, timing, unit, model):
-        """converts the schedule values to seconds, depending on to the
-        schedule_model the value will differ. So if the schedule_model is
-        'effort' or 'length' then the schedule_time and schedule_unit values
-        are interpreted as work time, if the schedule_model is 'duration' then
-        the schedule_time and schedule_unit values are considered as calendar
-        time.
+        """Convert the schedule values to seconds.
+
+        Depending on to the schedule_model the value will differ. So if the
+        schedule_model is 'effort' or 'length' then the schedule_time and schedule_unit
+        values are interpreted as work time, if the schedule_model is 'duration' then
+        the schedule_time and schedule_unit values are considered as calendar time.
+
+        Args:
+            timing (float): The timing value.
+            unit (str): The unit value, one of 'min', 'h', 'd', 'w', 'm', 'y'.
+            model (str): The schedule model, one of 'effort', 'length' or 'duration'.
+
+
+        Returns:
+            float: The converted seconds value.
         """
         if not unit:
             return None
@@ -1305,8 +1613,6 @@ class ScheduleMixin(object):
         }
 
         if model in ["effort", "length"]:
-            from stalker import defaults
-
             day_wt = defaults.daily_working_hours * 3600
             week_wt = defaults.weekly_working_days * day_wt
             month_wt = 4 * week_wt
@@ -1325,17 +1631,21 @@ class ScheduleMixin(object):
 
     @classmethod
     def to_unit(cls, seconds, unit, model):
-        """converts the ``seconds`` value to the given ``unit``, depending on
-        to the ``schedule_model`` the value will differ. So if the
+        """Convert the ``seconds`` value to the given ``unit``.
+
+        Depending on to the ``schedule_model`` the value will differ. So if the
         ``schedule_model`` is 'effort' or 'length' then the ``seconds`` and
         ``schedule_unit`` values are interpreted as work time, if the
         ``schedule_model`` is 'duration' then the ``seconds`` and
         ``schedule_unit`` values are considered as calendar time.
 
-        :param int seconds: The seconds to convert
-        :param str unit: The unit value, one of 'min', 'h', 'd', 'w', 'm', 'y'
-        :param str model: The schedule model, one of 'effort', 'length' or
-          'duration'
+        Args:
+            seconds (int): The seconds to convert.
+            unit (str): The unit value, one of 'min', 'h', 'd', 'w', 'm', 'y'.
+            model (str): The schedule model, one of 'effort', 'length' or 'duration'.
+
+        Returns:
+            float: The seconds converted to the given unit considering the given model.
         """
         if not unit:
             return None
@@ -1350,8 +1660,6 @@ class ScheduleMixin(object):
         }
 
         if model in ["effort", "length"]:
-            from stalker import defaults
-
             day_wt = defaults.daily_working_hours * 3600
             week_wt = defaults.weekly_working_days * day_wt
             month_wt = 4 * week_wt
@@ -1370,12 +1678,15 @@ class ScheduleMixin(object):
 
     @property
     def schedule_seconds(self):
-        """Returns the schedule values as seconds, depending on to the
-        schedule_model the value will differ. So if the schedule_model is
-        'effort' or 'length' then the schedule_time and schedule_unit values
-        are interpreted as work time, if the schedule_model is 'duration' then
-        the schedule_time and schedule_unit values are considered as calendar
-        time.
+        """Return the schedule values as seconds.
+
+        Depending on to the schedule_model the value will differ. So if the
+        schedule_model is 'effort' or 'length' then the schedule_time and schedule_unit
+        values are interpreted as work time, if the schedule_model is 'duration' then
+        the schedule_time and schedule_unit values are considered as calendar time.
+
+        Returns:
+            float: The schedule_seconds as seconds.
         """
         return self.to_seconds(
             self.schedule_timing, self.schedule_unit, self.schedule_model
@@ -1383,9 +1694,10 @@ class ScheduleMixin(object):
 
 
 class DAGMixin(object):
-    """Creates a parent/child or a directed acyclic graph (DAG) relation on the
-    mixed in class by introducing two new attributes called parent and
-    children.
+    """DAG mixin adds attributes required for parent/child relationship.
+
+    Create a parent/child or a directed acyclic graph (DAG) relation on the mixed in
+    class by introducing two new attributes called parent and children.
 
     Please set the ``__id_column__`` attribute to the id column of the mixed in
     class to be able to use this mixin::
@@ -1402,10 +1714,20 @@ class DAGMixin(object):
 
     @declared_attr
     def parent_id(cls):
+        """Create the parent_id attribute as a declared attribute.
+
+        Returns:
+            Column: The Column related to the parent_id attribute.
+        """
         return Column("parent_id", Integer, ForeignKey("%s.id" % cls.__tablename__))
 
     @declared_attr
     def parent(cls):
+        """Create the parent attribute as a declared attribute.
+
+        Returns:
+            relationship: The relationship object related to the parent attribute.
+        """
         return relationship(
             cls.__name__,
             remote_side=[getattr(cls, cls.__id_column__)],
@@ -1420,6 +1742,11 @@ class DAGMixin(object):
 
     @declared_attr
     def children(cls):
+        """Create the children attribute as a declared attribute.
+
+        Returns:
+            relationship: The relationship object related to the parent attribute.
+        """
         return relationship(
             cls.__name__,
             primaryjoin="%(ct)s.c.id==%(ct)s.c.parent_id" % {"ct": cls.__tablename__},
@@ -1437,7 +1764,19 @@ class DAGMixin(object):
 
     @validates("parent")
     def _validate_parent(self, key, parent):
-        """validates the given parent value"""
+        """Validate the given parent value.
+
+        Args:
+            key (str): The name of the validated column.
+            parent (object): The parent object to be validated.
+
+        Raises:
+            TypeError: If the parent is not None and not deriving from the same class
+                with this instance.
+
+        Returns:
+            Union[None, object]: The validated parent value.
+        """
         if parent is not None:
             if not isinstance(parent, self.__class__):
                 raise TypeError(
@@ -1448,20 +1787,29 @@ class DAGMixin(object):
                         "parent_cls": parent.__class__.__name__,
                     }
                 )
-
-            from stalker.models import check_circular_dependency
-
             check_circular_dependency(self, parent, "children")
 
         return parent
 
     @validates("children")
     def _validate_children(self, key, child):
-        """validates the given child"""
+        """Validate the given child.
+
+        Args:
+            key (str): The name of the validated column.
+            child (object): The child value to be validated.
+
+        Raises:
+            TypeError: If any of the child objects are not deriving from the same class
+                as this one.
+
+        Returns:
+            object: The validated child instance.
+        """
         if not isinstance(child, self.__class__):
             raise TypeError(
-                "%(cls)s.children should be a list of %(cls)s (or "
-                "derivative) instances, not %(child_cls)s"
+                "%(cls)s.children should be a list of %(cls)s (or derivative) "
+                "instances, not %(child_cls)s"
                 % {
                     "cls": self.__class__.__name__,
                     "child_cls": child.__class__.__name__,
@@ -1472,26 +1820,38 @@ class DAGMixin(object):
 
     @property
     def is_root(self):
-        """Returns True if the Task has no parent"""
+        """Return True if the Task has no parent.
+
+        Returns:
+            bool: True if the Task has no parent.
+        """
         return not bool(self.parent)
 
     @property
     def is_container(self):
-        """Returns True if the Task has children Tasks"""
-        from stalker.db.session import DBSession
+        """Return True if the Task has children Tasks.
 
+        Returns:
+            bool: True if the Task has children Tasks.
+        """
         with DBSession.no_autoflush:
             return bool(len(self.children))
 
     @property
     def is_leaf(self):
-        """Returns True if the Task has no children Tasks"""
+        """Return True if the Task has no children Tasks.
+
+        Returns:
+            bool: True if the Task has no children Tasks.
+        """
         return not self.is_container
 
     @property
     def parents(self):
-        """Returns all of the parents of this mixed in class starting from the
-        root
+        """Return all of the parents of this mixed in class starting from the root.
+
+        Returns:
+            List[Task]: List of tasks showing the parent of this Task.
         """
         parents = []
         entity = self.parent
@@ -1503,12 +1863,14 @@ class DAGMixin(object):
         return parents
 
     def walk_hierarchy(self, method=0):
-        """Walks the hierarchy of this task.
+        """Walk the hierarchy of this task.
 
-        :param method: The walk method, 0: Depth First, 1: Breadth First
+        Args:
+            method (int): The walk method, 0: Depth First, 1: Breadth First.
+
+        Yields:
+            Task: The child Task.
         """
-        from stalker.models import walk_hierarchy
-
         for c in walk_hierarchy(self, "children", method=method):
             yield c
 
@@ -1516,7 +1878,8 @@ class DAGMixin(object):
 class AmountMixin(object):
     """Adds ``amount`` attribute to the mixed in class.
 
-    :param int float amount:
+    Args:
+        amount (Union[int, float]): The amount value.
     """
 
     def __init__(self, amount=0, **kwargs):
@@ -1524,11 +1887,27 @@ class AmountMixin(object):
 
     @declared_attr
     def amount(cls):
+        """Create the amount attribute as a declared attribute.
+
+        Returns:
+            Column: The Column related to the amount attribute.
+        """
         return Column(Float, default=0.0)
 
     @validates("amount")
     def _validate_amount(self, key, amount):
-        """validates the given amount value"""
+        """Validate the given amount value.
+
+        Args:
+            key (str): The name of the validated column.
+            amount (Union[int, float]): The amount value to be validated.
+
+        Raises:
+            TypeError: If the given amount value is not a int or float.
+
+        Returns:
+            float: The validated amount value.
+        """
         if amount is None:
             amount = 0.0
 
@@ -1544,7 +1923,8 @@ class AmountMixin(object):
 class UnitMixin(object):
     """Adds ``unit`` attribute to the mixed in class.
 
-    :param str unit:
+    Args:
+        unit (str): The unit of this mixed in class.
     """
 
     def __init__(self, unit="", **kwargs):
@@ -1552,11 +1932,27 @@ class UnitMixin(object):
 
     @declared_attr
     def unit(cls):
+        """Create the unit attribute as a declared attribute.
+
+        Returns:
+            Column: The Column related to the unit attribute.
+        """
         return Column(String(64))
 
     @validates("unit")
     def _validate_unit(self, key, unit):
-        """validates the given unit value"""
+        """Validate the given unit value.
+
+        Args:
+            key (str): The name of the validated column.
+            unit (str): The unit value to be validated.
+
+        Raises:
+            TypeError: If the given unit is not a str.
+
+        Returns:
+            str: The validated unit value.
+        """
         if unit is None:
             unit = ""
 

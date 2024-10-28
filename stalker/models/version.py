@@ -15,11 +15,9 @@ from stalker.models.link import Link
 
 from stalker import DAGMixin
 
-from stalker.log import logging_level
-import logging
+from stalker.log import get_logger
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging_level)
+logger = get_logger(__name__)
 
 
 class Version(Link, DAGMixin):
@@ -488,7 +486,16 @@ class Version(Link, DAGMixin):
         return created_with
 
     def __eq__(self, other):
-        """checks equality of two version instances"""
+        """Check the equality.
+
+        Args:
+            other (object): The other object.
+
+        Returns:
+            bool: True if the other object is equal to this one as an Entity, is a
+                Version instance, has the same task, same take_name and same
+                version_number.
+        """
         return (
             super(Version, self).__eq__(other)
             and isinstance(other, Version)
@@ -498,7 +505,13 @@ class Version(Link, DAGMixin):
         )
 
     def __hash__(self):
-        """the overridden __hash__ method"""
+        """Return the hash value of this instance.
+
+        Because the __eq__ is overridden the __hash__ also needs to be overridden.
+
+        Returns:
+            int: The hash value.
+        """
         return super(Version, self).__hash__()
 
     @property
@@ -542,7 +555,7 @@ class Version(Link, DAGMixin):
 
         :param method: The walk method, 0: Depth First, 1: Breadth First
         """
-        from stalker.models import walk_hierarchy
+        from stalker.utils import walk_hierarchy
 
         for v in walk_hierarchy(self, "inputs", method=method):
             yield v

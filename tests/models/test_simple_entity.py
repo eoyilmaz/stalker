@@ -2,6 +2,7 @@
 """Tests for the SimpleEntity class."""
 import json
 import datetime
+import sys
 
 import pytest
 
@@ -176,7 +177,14 @@ def test_nice_name_attr_is_read_only(setup_simple_entity_tests):
     data = setup_simple_entity_tests
     with pytest.raises(AttributeError) as cm:
         data["test_simple_entity"].nice_name = "a text"
-    assert str(cm.value) == "can't set attribute 'nice_name'"
+
+    error_message = (
+        "can't set attribute 'nice_name'"
+        if sys.version_info.minor < 11
+        else "property 'nice_name' of 'SimpleEntity' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_description_arg_none(setup_simple_entity_tests):

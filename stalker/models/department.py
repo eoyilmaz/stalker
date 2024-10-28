@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
+"""Department related classes and functions are situated here."""
 
-from sqlalchemy import Column, Integer, ForeignKey
+from jinja2 import Template
+
+from sqlalchemy import Column, ForeignKey, Integer
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship, validates
 
+from stalker import defaults
 from stalker.db.declarative import Base
+from stalker.log import get_logger
 from stalker.models.auth import User
 from stalker.models.entity import Entity
 
-from stalker.log import logging_level
-import logging
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging_level)
+logger = get_logger(__name__)
 
 
 class Department(Entity):
@@ -66,31 +67,56 @@ class Department(Entity):
         self.users = users
 
     def __eq__(self, other):
-        """the equality operator"""
+        """Check if the other is equal to this one.
+
+        Args:
+            other (Department): The other Department instance.
+
+        Returns:
+            bool: True if the other object is also a Department and all the attributes
+                are equal.
+        """
         return super(Department, self).__eq__(other) and isinstance(other, Department)
 
     def __hash__(self):
-        """the overridden __hash__ method"""
+        """Return the hash value of this instance.
+
+        Because the __eq__ is overridden the __hash__ also needs to be overridden.
+
+        Returns:
+            int: The hash value.
+        """
         return super(Department, self).__hash__()
 
     @validates("user_role")
     def _validate_user_role(self, key, user_role):
-        """validates the given user_role variable"""
+        """Validate the given user_role value.
+
+        Args:
+            key (str): The name of the validated column.
+            user_role (DepartmentUser): The user_role value to be validated.
+
+        Returns:
+            DepartmentUser: The validated user_role value.
+        """
         return user_role
 
     @property
     def to_tjp(self):
-        """outputs a TaskJuggler compatible string"""
-        from jinja2 import Template
-        from stalker import defaults
+        """Output a TaskJuggler compatible representation.
 
+        This uses the ``defaults.tjp_department_template``.
+
+        Returns:
+            str: The TaskJuggler compatible representation.
+        """
         temp = Template(defaults.tjp_department_template, trim_blocks=True)
         return temp.render({"department": self})
 
 
 # DEPARTMENTS_USERS
 class DepartmentUser(Base):
-    """The association object used in Department-to-User relation"""
+    """The association object used in Department-to-User relation."""
 
     __tablename__ = "Department_Users"
 
@@ -123,7 +149,18 @@ class DepartmentUser(Base):
 
     @validates("department")
     def _validate_department(self, key, department):
-        """validates the given department value"""
+        """Validate the given department value.
+
+        Args:
+            key (str): The name of the validated column.
+            department (Department): The department value to be validated.
+
+        Raises:
+            TypeError: If the given user value is not a :class:`.Department` instance.
+
+        Returns:
+            Department: The validated department value.
+        """
         if department is not None:
             # check if it is instance of Department object
             if not isinstance(department, Department):
@@ -136,7 +173,19 @@ class DepartmentUser(Base):
 
     @validates("user")
     def _validate_user(self, key, user):
-        """validates the given user value"""
+        """Validate the given user value.
+
+        Args:
+            key (str): The name of the validated column.
+            user (User): The user value to be validated.
+
+        Raises:
+            TypeError: If the given user value is not a
+                :class:`stalker.models.auth.User` instance.
+
+        Returns:
+            User: The validated user value.
+        """
         if user is not None:
             if not isinstance(user, User):
                 raise TypeError(
@@ -147,7 +196,19 @@ class DepartmentUser(Base):
 
     @validates("role")
     def _validate_role(self, key, role):
-        """validates the given role instance"""
+        """Validate the given role instance.
+
+        Args:
+            key (str): The name of the validated column.
+            role (Role): The role value to be validated.
+
+        Raises:
+            TypeError: If the given role value is not a
+                :class:`stalker.models.auth.Role` instance.
+
+        Returns:
+            Role: The validated role value.
+        """
         if role is not None:
             from stalker import Role
 

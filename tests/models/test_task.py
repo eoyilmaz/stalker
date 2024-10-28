@@ -4,6 +4,7 @@
 import copy
 import datetime
 import os
+import sys
 import warnings
 
 import pytest
@@ -11,6 +12,7 @@ import pytest
 import pytz
 
 import stalker
+import stalker.db.setup
 from stalker import (
     Entity,
     FilenameTemplate,
@@ -940,7 +942,13 @@ def test_percent_complete_attr_is_read_only(setup_task_tests):
     with pytest.raises(AttributeError) as cm:
         new_task.percent_complete = 32
 
-    assert str(cm.value) == "can't set attribute 'percent_complete'"
+    error_message = (
+        "can't set attribute 'percent_complete'"
+        if sys.version_info.minor < 11
+        else "property 'percent_complete' of 'Task' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_percent_complete_attr_is_working_properly_for_a_duration_based_leaf_task_1(
@@ -1554,7 +1562,13 @@ def test_remaining_seconds_attr_is_a_read_only_attr(setup_task_tests):
     with pytest.raises(AttributeError) as cm:
         setattr(new_task, "remaining_seconds", 2342)
 
-    assert str(cm.value) == "can't set attribute 'remaining_seconds'"
+    error_message = (
+        "can't set attribute 'remaining_seconds'"
+        if sys.version_info.minor < 11
+        else "property 'remaining_seconds' of 'Task' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_versions_attr_is_none(setup_task_tests):
@@ -1927,7 +1941,13 @@ def test_is_leaf_attr_is_read_only(setup_task_tests):
     with pytest.raises(AttributeError) as cm:
         new_task.is_leaf = True
 
-    assert str(cm.value) == "can't set attribute 'is_leaf'"
+    error_message = (
+        "can't set attribute 'is_leaf'"
+        if sys.version_info.minor < 11
+        else "property 'is_leaf' of 'Task' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_is_leaf_attr_is_working_properly(setup_task_tests):
@@ -1963,7 +1983,13 @@ def test_is_root_attr_is_read_only(setup_task_tests):
     with pytest.raises(AttributeError) as cm:
         new_task.is_root = True
 
-    assert str(cm.value) == "can't set attribute 'is_root'"
+    error_message = (
+        "can't set attribute 'is_root'"
+        if sys.version_info.minor < 11
+        else "property 'is_root' of 'Task' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_is_root_attr_is_working_properly(setup_task_tests):
@@ -2000,7 +2026,13 @@ def test_is_container_attr_is_read_only(setup_task_tests):
     with pytest.raises(AttributeError) as cm:
         new_task.is_container = False
 
-    assert str(cm.value) == "can't set attribute 'is_container'"
+    error_message = (
+        "can't set attribute 'is_container'"
+        if sys.version_info.minor < 11
+        else "property 'is_container' of 'Task' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_is_container_attr_working_properly(setup_task_tests):
@@ -2088,7 +2120,13 @@ def test_project_attr_is_a_read_only_attr(setup_task_tests):
     with pytest.raises(AttributeError) as cm:
         new_task.project = data["test_project1"]
 
-    assert str(cm.value) == "can't set attribute"
+    error_message = (
+        "can't set attribute"
+        if sys.version_info.minor < 11
+        else "property '_project_getter' of 'Task' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_project_arg_is_not_matching_the_given_parent_arg(setup_task_tests):
@@ -2279,7 +2317,13 @@ def test_level_attr_is_a_read_only_property(setup_task_tests):
     with pytest.raises(AttributeError) as cm:
         new_task.level = 0
 
-    assert str(cm.value) == "can't set attribute 'level'"
+    error_message = (
+        "can't set attribute 'level'"
+        if sys.version_info.minor < 11
+        else "property 'level' of 'Task' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_level_attr_returns_the_hierarchical_level_of_this_task(setup_task_tests):
@@ -2580,7 +2624,13 @@ def test_tjp_abs_id_is_a_read_only_attr(setup_task_tests):
     with pytest.raises(AttributeError) as cm:
         new_task.tjp_abs_id = "some_value"
 
-    assert str(cm.value) == "can't set attribute 'tjp_abs_id'"
+    error_message = (
+        "can't set attribute 'tjp_abs_id'"
+        if sys.version_info.minor < 11
+        else "property 'tjp_abs_id' of 'Task' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_tjp_id_attr_is_working_properly_for_a_root_task(setup_task_tests):
@@ -3302,7 +3352,13 @@ def test_is_scheduled_is_a_read_only_attr(setup_task_tests):
     with pytest.raises(AttributeError) as cm:
         new_task.is_scheduled = True
 
-    assert str(cm.value) == "can't set attribute 'is_scheduled'"
+    error_message = (
+        "can't set attribute 'is_scheduled'"
+        if sys.version_info.minor < 11
+        else "property 'is_scheduled' of 'Task' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_is_scheduled_is_true_if_the_computed_start_and_computed_end_is_not_none(
@@ -3340,7 +3396,13 @@ def test_parents_attr_is_read_only(setup_task_tests):
     with pytest.raises(AttributeError) as cm:
         new_task.parents = data["test_dependent_task1"]
 
-    assert str(cm.value) == "can't set attribute 'parents'"
+    error_message = (
+        "can't set attribute 'parents'"
+        if sys.version_info.minor < 11
+        else "property 'parents' of 'Task' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_parents_attr_is_working_properly(setup_task_tests):
@@ -3594,7 +3656,13 @@ def test_tickets_attr_is_a_read_only_property(setup_task_tests):
     with pytest.raises(AttributeError) as cm:
         new_task.tickets = "some value"
 
-    assert str(cm.value) == "can't set attribute 'tickets'"
+    error_message = (
+        "can't set attribute 'tickets'"
+        if sys.version_info.minor < 11
+        else "property 'tickets' of 'Task' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_open_tickets_attr_is_a_read_only_property(setup_task_tests):
@@ -3606,7 +3674,13 @@ def test_open_tickets_attr_is_a_read_only_property(setup_task_tests):
     with pytest.raises(AttributeError) as cm:
         new_task.open_tickets = "some value"
 
-    assert str(cm.value) == "can't set attribute 'open_tickets'"
+    error_message = (
+        "can't set attribute 'open_tickets'"
+        if sys.version_info.minor < 11
+        else "property 'open_tickets' of 'Task' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_reviews_attr_is_an_empty_list_by_default(setup_task_tests):
@@ -3647,7 +3721,13 @@ def test_review_number_attr_is_read_only(setup_task_tests):
     with pytest.raises(AttributeError) as cm:
         new_task.review_number = 12
 
-    assert str(cm.value) == "can't set attribute"
+    error_message = (
+        "can't set attribute"
+        if sys.version_info.minor < 11
+        else "property '_review_number_getter' of 'Task' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_review_number_attr_initializes_with_0(setup_task_tests):
@@ -4037,7 +4117,13 @@ def test_path_attr_is_read_only(setup_task_tests):
     with pytest.raises(AttributeError) as cm:
         new_task.path = "some_path"
 
-    assert str(cm.value) == "can't set attribute 'path'"
+    error_message = (
+        "can't set attribute 'path'"
+        if sys.version_info.minor < 11
+        else "property 'path' of 'Task' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_path_attr_raises_a_runtime_error_if_no_filename_template_found(
@@ -4121,7 +4207,14 @@ def test_absolute_path_attr_is_read_only(setup_task_tests):
     with pytest.raises(AttributeError) as cm:
         new_task.absolute_path = "some_path"
 
-    assert str(cm.value) == "can't set attribute 'absolute_path'"
+    error_message = (
+        "can't set attribute 'absolute_path'"
+        if sys.version_info.minor < 11
+        else "property 'absolute_path' of 'Task' object has no setter"
+    )
+
+
+    assert str(cm.value) == error_message
 
 
 def test_absolute_path_attr_raises_a_runtime_error_if_no_filename_template_found(
@@ -4420,7 +4513,7 @@ def test_open_tickets_attr_is_working_properly(setup_task_db_tests):
     DBSession.commit()
 
     # create ticket statuses
-    db.init()
+    stalker.db.setup.init()
 
     new_ticket1 = Ticket(project=new_task.project, links=[new_task])
     DBSession.add(new_ticket1)
@@ -4454,7 +4547,7 @@ def test_tickets_attr_is_working_properly(setup_task_db_tests):
     DBSession.commit()
 
     # create ticket statuses
-    db.init()
+    stalker.db.setup.init()
 
     new_ticket1 = Ticket(project=new_task.project, links=[new_task])
     DBSession.add(new_ticket1)

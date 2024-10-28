@@ -65,7 +65,14 @@ def test_access_attribute_is_read_only(setup_permission_tests):
     data = setup_permission_tests
     with pytest.raises(AttributeError) as cm:
         data["test_permission"].access = "Deny"
-    assert str(cm.value) == "can't set attribute"
+
+    error_message = (
+        "can't set attribute"
+        if sys.version_info.minor < 11
+        else "property '_access_getter' of 'Permission' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_action_argument_is_skipped_will_raise_a_type_error(setup_permission_tests):
@@ -121,7 +128,14 @@ def test_action_attribute_is_read_only(setup_permission_tests):
     data = setup_permission_tests
     with pytest.raises(AttributeError) as cm:
         data["test_permission"].action = "Add"
-    assert str(cm.value) == "can't set attribute"
+
+    error_message = (
+        "can't set attribute"
+        if sys.version_info.minor < 11
+        else "property '_action_getter' of 'Permission' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_class_name_argument_skipped(setup_permission_tests):
@@ -178,4 +192,10 @@ def test_class_name_attribute_is_read_only(setup_permission_tests):
     with pytest.raises(AttributeError) as cm:
         data["test_permission"].class_name = "Asset"
 
-    assert str(cm.value) == "can't set attribute"
+    error_message = (
+        "can't set attribute"
+        if sys.version_info.minor < 11
+        else "property '_class_name_getter' of 'Permission' object has no setter"
+    )
+
+    assert str(cm.value) == error_message

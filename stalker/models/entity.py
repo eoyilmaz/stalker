@@ -1,28 +1,27 @@
 # -*- coding: utf-8 -*-
+"""SimpleEntity, Entity, EntityGroup and other related functions are situated here."""
 
 import datetime
+import functools
 import re
 import uuid
 
 import pytz
-import functools
 
 from six import string_types
-from sqlalchemy import Table, Column, Integer, String, Text, ForeignKey
+
+from sqlalchemy import Column, ForeignKey, Integer, String, Table, Text
 from sqlalchemy.orm import relationship, validates
 
 from stalker.db.declarative import Base
 from stalker.db.types import GenericDateTime
-from stalker.log import logging_level
+from stalker.log import get_logger
 
-import logging
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging_level)
+logger = get_logger(__name__)
 
 
 class SimpleEntity(Base):
-    """The base class of all the others
+    """The base class of all the others.
 
     The ``SimpleEntity`` is the starting point of the Stalker Object Model, it
     starts by adding the basic information about an entity which are
@@ -65,13 +64,13 @@ class SimpleEntity(Base):
 
     :param string name: A string value that holds the name of this entity.
       It should not contain any white space at the beginning and at the end of
-      the string. Valid characters are [a-zA-Z0-9\_/S].
+      the string. Valid characters are [a-zA-Z0-9_/S].
 
       Advanced::
 
         For classes derived from the SimpleEntity, if an automatic name is
         desired, the ``__auto_name__`` class attribute can be set to True. Then
-        Stalker will automatically generate a uuid4 sequence for the name
+        Stalker will automatically generate an uuid4 sequence for the name
         attribute.
 
     :param str description: A string attribute that holds the description of
@@ -269,27 +268,64 @@ class SimpleEntity(Base):
         self.__stalker_version__ = stalker.__version__
 
     def __repr__(self):
-        """the representation of the SimpleEntity"""
+        """Return the str representation of this SimpleEntity.
+
+        Returns:
+            str: The str representation of this SimpleEntity.
+        """
         return "<%s (%s)>" % (self.name, self.entity_type)
 
     def __eq__(self, other):
-        """the equality operator"""
+        """Check equality.
+
+        Args:
+            other (object): An object to check the equality of.
+
+        Returns:
+            bool: If the other is a SimpleEntity and its name equals to this one.
+        """
         from stalker.db.session import DBSession
 
         with DBSession.no_autoflush:
             return isinstance(other, SimpleEntity) and self.name == other.name
 
     def __ne__(self, other):
-        """the inequality operator"""
+        """Check inequality.
+
+        This uses the __eq__ operator to get the inequality.
+
+        Args:
+            other (object): An object to check the inequality of.
+
+        Returns:
+            bool: True if other is not equal to this instance.
+        """
         return not self.__eq__(other)
 
     def __hash__(self):
-        """the overridden __hash__ method"""
+        """Return the hash value of this instance.
+
+        Because the __eq__ is overridden the __hash__ also needs to be overridden.
+
+        Returns:
+            int: The hash value.
+        """
         return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)
 
     @validates("description")
     def _validate_description(self, key, description):
-        """validates the given description value"""
+        """Validate the given description value.
+
+        Args:
+            key (str): The name of the validated column.
+            description (str): The description value to be validated.
+
+        Raises:
+            TypeError: If the description is not None and not a str.
+
+        Returns:
+            str: The validated description value.
+        """
         if description is None:
             description = ""
 
@@ -302,7 +338,18 @@ class SimpleEntity(Base):
 
     @validates("generic_text")
     def _validate_generic_text(self, key, generic_text):
-        """validates the given generic_text value"""
+        """Validate the given generic_text value.
+
+        Args:
+            key (str): The name of the validated column.
+            generic_text (str): The generic_text value to be validated.
+
+        Raises:
+            TypeError: If the generic_text is not None and not a str.
+
+        Returns:
+            str: The validated generic_text value.
+        """
         if generic_text is None:
             generic_text = ""
 
@@ -315,7 +362,19 @@ class SimpleEntity(Base):
 
     @validates("name")
     def _validate_name(self, key, name):
-        """validates the given name_in value"""
+        """Validate the name_in value.
+
+        Args:
+            key (str): The name of the validated column.
+            name (str): The name value to be validated.
+
+        Raises:
+            TypeError: If the name is not a str.
+            ValueError: If the name becomes an empty str after formatting.
+
+        Returns:
+            str: The validated name value.
+        """
         if self.__auto_name__:
             if name is None or name == "":
                 # generate a uuid4
@@ -349,18 +408,32 @@ class SimpleEntity(Base):
 
     @classmethod
     def _format_name(cls, name_in):
-        """formats the name_in value"""
+        """Format the name_in value.
+
+        Args:
+            name_in (str): The name_in value.
+
+        Returns:
+            str: The formatted name_in value.
+        """
         # remove unnecessary characters from the string
         name_in = name_in.strip()
 
         # remove multiple spaces
-        name_in = re.sub(r"[\s]+", " ", name_in)
+        name_in = re.sub(r"\s+", " ", name_in)
 
         return name_in
 
     @classmethod
     def _format_nice_name(cls, nice_name_in):
-        """formats the given nice name"""
+        """Format the given nice name value.
+
+        Args:
+            nice_name_in (str): The nice_name_in value to be formatted.
+
+        Returns:
+            str: The formatted nice name.
+        """
         # remove unnecessary characters from the string
         nice_name_in = nice_name_in.strip()
         nice_name_in = re.sub(r"([^a-zA-Z0-9\s_\-@]+)", "", nice_name_in).strip()
@@ -370,16 +443,16 @@ class SimpleEntity(Base):
         nice_name_in = re.sub(r"(^[^a-zA-Z0-9]+)", "", nice_name_in)
 
         # remove multiple spaces
-        nice_name_in = re.sub(r"[\s]+", " ", nice_name_in)
+        nice_name_in = re.sub(r"\s+", " ", nice_name_in)
 
         # # replace camel case letters
         # nice_name_in = re.sub(r"(.+?[a-z]+)([A-Z])", r"\1_\2", nice_name_in)
 
-        # replace white spaces and dashes with under score
+        # replace white spaces and dashes with underscore
         nice_name_in = re.sub("([ -])+", r"_", nice_name_in)
 
         # remove multiple underscores
-        nice_name_in = re.sub(r"([_]+)", r"_", nice_name_in)
+        nice_name_in = re.sub(r"(_+)", r"_", nice_name_in)
 
         return nice_name_in
 
@@ -388,9 +461,12 @@ class SimpleEntity(Base):
         """Nice name of this object.
 
         It has the same value with the name (contextually) but with a different
-        format like, all the white spaces replaced by underscores ("\_"), all
-        the CamelCase form will be expanded by underscore (\_) characters and
-        it is always lower case.
+        format like, all the white spaces replaced by underscores ("_"), all the
+        CamelCase form will be expanded by underscore (_) characters, and it is always
+        lower case.
+
+        Returns:
+            str: The nice name value.
         """
         # also set the nice_name
         # if self._nice_name is None or self._nice_name == "":
@@ -399,7 +475,19 @@ class SimpleEntity(Base):
 
     @validates("created_by")
     def _validate_created_by(self, key, created_by_in):
-        """validates the given created_by_in attribute"""
+        """Validate the given created_by_in value.
+
+        Args:
+            key (str): The name of the validated column.
+            created_by_in (Union[None, User]): The created_by_in value to be validated.
+
+        Raises:
+            TypeError: If the created_by_in value is not None and not a
+                :class:`stalker.models.auth.User` instance.
+
+        Returns:
+            Union [None, User]: The validated created_by_in value.
+        """
         from stalker.models.auth import User
 
         if created_by_in is not None:
@@ -413,7 +501,19 @@ class SimpleEntity(Base):
 
     @validates("updated_by")
     def _validate_updated_by(self, key, updated_by_in):
-        """validates the given updated_by_in attribute"""
+        """Validate the given updated_by_in value.
+
+        Args:
+            key (str): The name of the validated column.
+            updated_by_in (Union[None, User]): The updated_by_in value to be validated.
+
+        Raises:
+            TypeError: If the updated_by_in value is not None and not a
+                :class:`stalker.models.auth.User` instance.
+
+        Returns:
+            Union [None, User]: The validated updated_by_in value.
+        """
         from stalker.models.auth import User
 
         if updated_by_in is None:
@@ -431,7 +531,19 @@ class SimpleEntity(Base):
 
     @validates("date_created")
     def _validate_date_created(self, key, date_created_in):
-        """validates the given date_created_in"""
+        """Validate the given date_created_in value.
+
+        Args:
+            key (str): The name of the validated column.
+            date_created_in (datetime.datetime): The value to be validated.
+
+        Raises:
+            TypeError: If the given date_created_in value is None or not a datetime
+                instance.
+
+        Returns:
+            datetime.datetime: The validated date_created_in value.
+        """
         if date_created_in is None:
             raise TypeError("%s.date_created can not be None" % self.__class__.__name__)
 
@@ -445,7 +557,20 @@ class SimpleEntity(Base):
 
     @validates("date_updated")
     def _validate_date_updated(self, key, date_updated_in):
-        """validates the given date_updated_in"""
+        """Validate the given date_updated_in.
+
+        Args:
+            key (str): The name of the validated column.
+            date_updated_in (datetime.datetime): The date_updated_in to be validated.
+
+        Raises:
+            TypeError: If the date_updated_in value is ``None`` or date_updated_in is
+                not a ``datetime.datetime`` instance.
+            ValueError: If the date_updated_in is before than the date_created.
+
+        Returns:
+            datetime.datetime: The validated datetime_updated_in value.
+        """
         # it is None
         if date_updated_in is None:
             raise TypeError("%s.date_updated can not be None" % self.__class__.__name__)
@@ -468,12 +593,20 @@ class SimpleEntity(Base):
 
     @validates("type")
     def _validate_type(self, key, type_in):
-        """validates the given type value"""
-        check_for_type_class = True
-        if not self.__strictly_typed__ and type_in is None:
-            check_for_type_class = False
+        """Validate the given type value.
 
-        if check_for_type_class:
+        Args:
+            key (str): The name of the validated column.
+            type_in (Type): The type_in value to be validated.
+
+        Raises:
+            TypeError: If this class is a strictly typed class and the type_in is not
+                None and not a Type instance.
+
+        Returns:
+            Type: The validated type_in value.
+        """
+        if self.__strictly_typed__ or type_in is not None:
             from stalker.models.type import Type
 
             if not isinstance(type_in, Type):
@@ -485,7 +618,18 @@ class SimpleEntity(Base):
 
     @validates("thumbnail")
     def _validate_thumbnail(self, key, thumb):
-        """validates the given thumb value"""
+        """Validate the given thumb value.
+
+        Args:
+            key (str): The name of the validated column.
+            thumb (Link): The thumb value to be validated.
+
+        Raises:
+            TypeError: If the given thumb value is not None and not a Link instance.
+
+        Returns:
+            Union[None, Link]: The validated thumb value.
+        """
         if thumb is not None:
             from stalker import Link
 
@@ -499,13 +643,21 @@ class SimpleEntity(Base):
 
     @property
     def tjp_id(self):
-        """returns TaskJuggler compatible id"""
+        """Return TaskJuggler compatible id.
+
+        Returns:
+            str: The TaskJuggler compatible id.
+        """
         return "%s_%s" % (self.__class__.__name__, self.id)
 
     @property
     def to_tjp(self):
-        """renders a TaskJuggler compliant string used for TaskJuggler
-        integration. Needs to be overridden in inherited classes.
+        """Render a TaskJuggler compliant str used for TaskJuggler integration.
+
+        Needs to be overridden in inherited classes.
+
+        Raises:
+            NotImplementedError: Always.
         """
         raise NotImplementedError(
             "This property is not implemented in %s" % self.__class__.__name__
@@ -513,7 +665,18 @@ class SimpleEntity(Base):
 
     @validates("html_style")
     def _validate_html_style(self, key, html_style):
-        """validates the given html_style value"""
+        """Validate the given html_style value.
+
+        Args:
+            key (str): The name of the validated column.
+            html_style (str): The html_style to be validated.
+
+        Raises:
+            TypeError: If the given html_style is not a str.
+
+        Returns:
+            str: The validated html_style value.
+        """
         if html_style is None:
             html_style = ""
 
@@ -526,7 +689,18 @@ class SimpleEntity(Base):
 
     @validates("html_class")
     def _validate_html_class(self, key, html_class):
-        """validates the given html_class value"""
+        """Validate the given html_class value.
+
+        Args:
+            key (str): The name of the validated column.
+            html_class (str): The html_class to be validated.
+
+        Raises:
+            TypeError: If the html_class is not a str.
+
+        Returns:
+            str: The validated html_class value.
+        """
         if html_class is None:
             html_class = ""
 
@@ -596,7 +770,18 @@ class Entity(SimpleEntity):
 
     @validates("notes")
     def _validate_notes(self, key, note):
-        """validates the given note value"""
+        """Validate the given note value.
+
+        Args:
+            key (str): The name of the validated column.
+            note (Note): The note value to be validated.
+
+        Raises:
+            TypeError: If the given note value is not a Note instance.
+
+        Returns:
+            Note: The validated note value.
+        """
         from stalker.models.note import Note
 
         if not isinstance(note, Note):
@@ -608,7 +793,18 @@ class Entity(SimpleEntity):
 
     @validates("tags")
     def _validate_tags(self, key, tag):
-        """validates the given tag"""
+        """Validate the given tag value.
+
+        Args:
+            key (str): The name of the validated column.
+            tag (Tag): The tag value to be validated.
+
+        Raises:
+            TypeError: If the given tag value is not a Tag instance.
+
+        Returns:
+            Tag: The validated tag value.
+        """
         from stalker.models.tag import Tag
 
         if not isinstance(tag, Tag):
@@ -619,19 +815,33 @@ class Entity(SimpleEntity):
         return tag
 
     def __eq__(self, other):
-        """the equality operator"""
+        """Check if the other object is equal to this one.
+
+        Args:
+            other (object): An object.
+
+        Returns:
+            bool: True if the other object is also an Entity instance and has the same
+                basic attribute values.
+        """
         return super(Entity, self).__eq__(other) and isinstance(other, Entity)
 
     def __hash__(self):
-        """the overridden __hash__ method"""
+        """Return the hash value of this instance.
+
+        Because the __eq__ is overridden the __hash__ also needs to be overridden.
+
+        Returns:
+            int: The hash value.
+        """
         return super(Entity, self).__hash__()
 
 
 class EntityGroup(Entity):
     """Groups a wide variety of objects together to let one easily reach them.
 
-    :class:`.EntityGroup` helps grouping different types of entities together
-    to let one easily reach to them.
+    :class:`.EntityGroup` helps to group different types of entities together to let one
+    easily reach to them.
     """
 
     __auto_name__ = True
@@ -642,10 +852,6 @@ class EntityGroup(Entity):
     entities = relationship(
         "SimpleEntity",
         secondary="EntityGroup_Entities",
-        # primaryjoin='EntityGroups.c.id=='
-        #             'EntityGroup_Entities.c.entity_group_id',
-        # secondaryjoin='EntityGroup_Entities.c.other_entity_id=='
-        #               'SimpleEntities.c.id',
         post_update=True,
         backref="entity_groups",
         doc="""All the :class:`.SimpleEntity`s grouped in this EntityGroup.
@@ -662,7 +868,18 @@ class EntityGroup(Entity):
 
     @validates("entities")
     def _validate_entities(self, key, entity):
-        """validates the given entity value"""
+        """Validate the given entity value.
+
+        Args:
+            key (str): The name of the validated column.
+            entity (Entity): The entity value to be validated.
+
+        Raises:
+            TypeError: If the entity is not a SimpleEntity instance.
+
+        Returns:
+            SimpleEntity: The validated entity value.
+        """
         if not isinstance(entity, SimpleEntity):
             raise TypeError(
                 "%s.entities should be a list of SimpleEntities, not %s"
@@ -672,13 +889,27 @@ class EntityGroup(Entity):
         return entity
 
     def __eq__(self, other):
-        """the equality operator"""
+        """Check if the other is equal to this instance.
+
+        Args:
+            other (EntityGroup): The other EntityGroup to check the equality of.
+
+        Returns:
+            bool: True if the other is also a EntityGroup instance and has the same
+                attribute values.
+        """
         return super(SimpleEntity, self).__eq__(other) and isinstance(
             other, EntityGroup
         )
 
     def __hash__(self):
-        """the overridden __hash__ method"""
+        """Return the hash value of this instance.
+
+        Because the __eq__ is overridden the __hash__ also needs to be overridden.
+
+        Returns:
+            int: The hash value.
+        """
         return super(SimpleEntity, self).__hash__()
 
 

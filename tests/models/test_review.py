@@ -2,6 +2,7 @@
 """Tests related to Review class."""
 
 import datetime
+import sys
 
 import pytest
 
@@ -185,7 +186,14 @@ def test_review_number_attribute_is_a_read_only_attribute(setup_review_db_test):
     review = Review(**data["kwargs"])
     with pytest.raises(AttributeError) as cm:
         review.review_number = 2
-    assert str(cm.value) == "can't set attribute"
+
+    error_message = (
+        "can't set attribute"
+        if sys.version_info.minor < 11
+        else "property '_review_number_getter' of 'Review' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_review_number_attribute_is_initialized_to_the_task_review_number_plus_1(

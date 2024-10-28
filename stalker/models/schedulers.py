@@ -9,12 +9,9 @@ import csv
 
 import pytz
 
-from stalker.log import logging_level
+from stalker.log import get_logger
 
-import logging
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging_level)
+logger = get_logger(__name__)
 
 
 class SchedulerBase(object):

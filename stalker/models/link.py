@@ -1,58 +1,57 @@
 # -*- coding: utf-8 -*-
+"""Link related classes and utility functions are situated here."""
 
 import os
-import logging
 
 from six import string_types
-from sqlalchemy import Column, Integer, ForeignKey, String, Text
+
+from sqlalchemy import Column, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import validates
 
+from stalker.log import get_logger
 from stalker.models.entity import Entity
-from stalker.log import logging_level
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging_level)
+logger = get_logger(__name__)
 
 
 class Link(Entity):
     """Holds data about external links.
 
-    Links are all about giving some external information to the current entity
-    (external to the database, so it can be something on the
-    :class:`.Repository` or in the Web or anywhere that the server can reach).
-    The type of the link (general, file, folder, web page, image, image
-    sequence, video, movie, sound, text etc.) can be defined by a
-    :class:`.Type` instance (you can also use multiple :class:`.Tag` instances
-    to add more information, and to filter them back). Again it is defined by
-    the needs of the studio.
+    Links are all about giving some external information to the current entity (external
+    to the database, so it can be something on the :class:`.Repository` or in the Web or
+    anywhere that the server can reach). The type of the link (general, file, folder,
+    web page, image, image sequence, video, movie, sound, text etc.) can be defined by a
+    :class:`.Type` instance (you can also use multiple :class:`.Tag` instances to add
+    more information, and to filter them back). Again it is defined by the needs of the
+    studio.
 
-    For sequences of files the file name should be in "%h%p%t %R" format in
-    PySeq_ formatting rules.
+    For sequences of files the file name should be in "%h%p%t %R" format in PySeq_
+    formatting rules.
 
-    There are three secondary attributes (properties to be more precise)
-    ``path``, ``filename`` and ``extension``. These attributes are derived from
-    the :attr:`.full_path` attribute and they modify it.
+    There are three secondary attributes (properties to be more precise) ``path``,
+    ``filename`` and ``extension``. These attributes are derived from the
+    :attr:`.full_path` attribute and they modify it.
 
     Path
-      It is the path part of the full_path
+        It is the path part of the full_path
 
     Filename
-      It is the filename part of the full_path, also includes the extension,
-      so changing the filename also changes the extension part.
+        It is the filename part of the full_path, also includes the extension, so
+        changing the filename also changes the extension part.
 
     Extension
-      It is the extension part of the full_path. It also includes the extension
-      separator ('.' for most of the file systems).
+        It is the extension part of the full_path. It also includes the extension
+        separator ('.' for most of the file systems).
 
-    :param full_path: The full path to the link, it can be a path to a folder
-      or a file in the file system, or a web page. For file sequences use
-      "%h%p%t %R" format, for more information see `PySeq Documentation`_.
-      It can be set to empty string (or None which will be converted to an
-      empty string automatically).
+    Args:
+        full_path (str): The full path to the link, it can be a path to a folder or a
+            file in the file system, or a web page. For file sequences use "%h%p%t %R"
+            format, for more information see `PySeq Documentation`_. It can be set to
+            empty string (or None which will be converted to an empty string
+            automatically).
 
     .. _PySeq: http://packages.python.org/pyseq/
     .. _PySeq Documentation: http://packages.python.org/pyseq/
-
     """
 
     __auto_name__ = True
@@ -77,7 +76,18 @@ class Link(Entity):
 
     @validates("full_path")
     def _validate_full_path(self, key, full_path):
-        """validates the given full_path value"""
+        """Validate the given full_path value.
+
+        Args:
+            key (str): The name of the validated column.
+            full_path (str): The full_path value to be validated.
+
+        Raises:
+            TypeError: If the given full_path is not a str.
+
+        Returns:
+            str: The validated full_path value.
+        """
         if full_path is None:
             full_path = ""
 
@@ -91,7 +101,18 @@ class Link(Entity):
 
     @validates("original_filename")
     def _validate_original_filename(self, key, original_filename):
-        """validates the given original_filename value"""
+        """Validate the given original_filename value.
+
+        Args:
+            key (str): The name of the validated column.
+            original_filename (str): The original filename value to be validated.
+
+        Raises:
+            TypeError: If the given original_filename value is not a str.
+
+        Returns:
+            str: The validated original_filename value.
+        """
         filename_from_path = os.path.basename(self.full_path)
         if original_filename is None:
             original_filename = filename_from_path
@@ -109,8 +130,15 @@ class Link(Entity):
 
     @staticmethod
     def _format_path(path):
-        """formats the path to internal format, which is Linux forward slashes
-        for path separation
+        """Format the path to internal format.
+
+        The path is using the Linux forward slashes for path separation.
+
+        Args:
+            path (str): The path value to be formatted.
+
+        Returns:
+            str: The formatted path value.
         """
         if not isinstance(path, string_types):
             path = path.encode("utf-8")
@@ -119,14 +147,23 @@ class Link(Entity):
 
     @property
     def path(self):
-        """the path property"""
+        """Return the path part of the full_path.
+
+        Returns:
+            str: The path part of the full_path value.
+        """
         return os.path.split(self.full_path)[0]
 
     @path.setter
     def path(self, path):
-        """setter for the path
+        """Set the path part of the full_path attribute.
 
-        :param str path: the new path
+        Args:
+            path (str): The new path value.
+
+        Raises:
+            TypeError: If the given path value is not a str.
+            ValueError: If the given path is an empty str.
         """
         if path is None:
             raise TypeError("%s.path can not be set to None" % self.__class__.__name__)
@@ -146,14 +183,22 @@ class Link(Entity):
 
     @property
     def filename(self):
-        """the filename property"""
+        """Return the filename part of the full_path attribute.
+
+        Returns:
+            str: The filename part of the full_path attribute.
+        """
         return os.path.split(self.full_path)[1]
 
     @filename.setter
     def filename(self, filename):
-        """filename setter
+        """Set the filename part of the full_path attr.
 
-        :param str filename: the new filename
+        Args:
+            filename (str): The new filename.
+
+        Raises:
+            TypeError: If the given filename is not a str.
         """
         if filename is None:
             filename = ""
@@ -168,14 +213,22 @@ class Link(Entity):
 
     @property
     def extension(self):
-        """the extension property"""
+        """Return the extension value.
+
+        Returns:
+            str: The extension extracted from the full_path value.
+        """
         return os.path.splitext(self.full_path)[1]
 
     @extension.setter
     def extension(self, extension):
-        """extension setter
+        """Set the extension value.
 
-        :param extension: the new extension
+        Args:
+            extension (str): The new extension value.
+
+        Raises:
+            TypeError: If the given extension value is not a str.
         """
         if extension is None:
             extension = ""
@@ -193,7 +246,15 @@ class Link(Entity):
         self.filename = os.path.splitext(self.filename)[0] + extension
 
     def __eq__(self, other):
-        """the equality operator"""
+        """Check if the other is equal to this Link.
+
+        Args:
+            other (object): The other object to be checked for equality.
+
+        Returns:
+            bool: If the other object is a Link instance and has the same full_path and
+                type value.
+        """
         return (
             super(Link, self).__eq__(other)
             and isinstance(other, Link)
@@ -202,5 +263,11 @@ class Link(Entity):
         )
 
     def __hash__(self):
-        """the overridden __hash__ method"""
+        """Return the hash value of this instance.
+
+        Because the __eq__ is overridden the __hash__ also needs to be overridden.
+
+        Returns:
+            int: The hash value.
+        """
         return super(Link, self).__hash__()

@@ -2,6 +2,7 @@
 """Tests for the Ticket class."""
 
 import logging
+import sys
 
 import pytest
 
@@ -206,7 +207,13 @@ def test_number_attribute_is_read_only(setup_ticket_tests):
     with pytest.raises(AttributeError) as cm:
         data["test_ticket"].number = 234
 
-    assert str(cm.value) == "can't set attribute"
+    error_message = (
+        "can't set attribute"
+        if sys.version_info.minor < 11
+        else "property '_number_getter' of 'Ticket' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_number_attribute_is_automatically_increased(setup_ticket_tests):
@@ -403,7 +410,13 @@ def test_project_attribute_is_read_only(setup_ticket_tests):
     with pytest.raises(AttributeError) as cm:
         data["test_ticket"].project = data["test_project"]
 
-    assert str(cm.value) == "can't set attribute"
+    error_message = (
+        "can't set attribute"
+        if sys.version_info.minor < 11
+        else "property '_project_getter' of 'Ticket' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 # STATUSES

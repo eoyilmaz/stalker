@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
+"""Note class lies here."""
 
-from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy import Column, ForeignKey, Integer
 from sqlalchemy.orm import synonym
+
+from stalker.log import get_logger
 from stalker.models.entity import SimpleEntity
 
-from stalker.log import logging_level
-import logging
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging_level)
+logger = get_logger(__name__)
 
 
 class Note(SimpleEntity):
@@ -16,9 +15,9 @@ class Note(SimpleEntity):
 
     To leave notes in Stalker use the Note class.
 
-    :param content: the content of the note
-
-    :param attached_to: The object that this note is attached to.
+    Args:
+        content (str): The content of the note.
+        attached_to (Entity): The object that this note is attached to.
     """
 
     __auto_name__ = True
@@ -41,7 +40,14 @@ class Note(SimpleEntity):
         self.content = content
 
     def __eq__(self, other):
-        """the equality operator"""
+        """Check the equality.
+
+        Args:
+            other (object): The other object.
+
+        Returns:
+            bool: True if the other object is a Note instance and has the same content.
+        """
         return (
             super(Note, self).__eq__(other)
             and isinstance(other, Note)
@@ -49,5 +55,11 @@ class Note(SimpleEntity):
         )
 
     def __hash__(self):
-        """the overridden __hash__ method"""
+        """Return the hash value of this instance.
+
+        Because the __eq__ is overridden the __hash__ also needs to be overridden.
+
+        Returns:
+            int: The hash value.
+        """
         return super(Note, self).__hash__()

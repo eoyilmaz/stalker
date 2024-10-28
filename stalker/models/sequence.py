@@ -6,11 +6,9 @@ from sqlalchemy.orm import relationship, validates
 from stalker.models.mixins import ReferenceMixin, CodeMixin
 from stalker.models.task import Task
 
-from stalker.log import logging_level
-import logging
+from stalker.log import get_logger
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging_level)
+logger = get_logger(__name__)
 
 
 class Sequence(Task, CodeMixin):
@@ -65,9 +63,23 @@ class Sequence(Task, CodeMixin):
         return shot
 
     def __eq__(self, other):
-        """the equality operator"""
+        """Check the equality.
+
+        Args:
+            other (object): The other object.
+
+        Returns:
+            bool: True if the other object is a Sequence instance and has the same
+                attributes.
+        """
         return isinstance(other, Sequence) and super(Sequence, self).__eq__(other)
 
     def __hash__(self):
-        """the overridden __hash__ method"""
+        """Return the hash value of this instance.
+
+        Because the __eq__ is overridden the __hash__ also needs to be overridden.
+
+        Returns:
+            int: The hash value.
+        """
         return super(Sequence, self).__hash__()

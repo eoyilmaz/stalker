@@ -1,22 +1,20 @@
 # -*- coding: utf-8 -*-
+"""Review related classes and functions are situated here."""
 
-import logging
-
-from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy import Column, ForeignKey, Integer
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import relationship, validates, synonym
+from sqlalchemy.orm import relationship, synonym, validates
 
 from stalker.db.declarative import Base
 from stalker.db.session import DBSession
-from stalker.log import logging_level
-from stalker.models import walk_hierarchy
+from stalker.log import get_logger
 from stalker.models.entity import Entity, SimpleEntity
 from stalker.models.link import Link
+from stalker.models.mixins import ProjectMixin, ScheduleMixin, StatusMixin
 from stalker.models.status import Status
-from stalker.models.mixins import ScheduleMixin, StatusMixin, ProjectMixin
+from stalker.utils import walk_hierarchy
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging_level)
+logger = get_logger(__name__)
 
 
 class Review(SimpleEntity, ScheduleMixin, StatusMixin):
@@ -119,7 +117,19 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
 
     @validates("task")
     def _validate_task(self, key, task):
-        """validates the given task value"""
+        """Validate the given task value.
+
+        Args:
+            key (str): The name of the validated column.
+            task (Task): The task value to be validated.
+
+        Raises:
+            TypeError: If the given task value is not a Task instance.
+            ValueError: If the given task is not a leaf task.
+
+        Returns:
+            Task: The validated Task instance.
+        """
         if task is not None:
             from stalker.models.task import Task
 
@@ -144,7 +154,18 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
 
     @validates("reviewer")
     def _validate_reviewer(self, key, reviewer):
-        """validates the given reviewer value"""
+        """Validate the given reviewer value.
+
+        Args:
+            key (str): The name of the validated column.
+            reviewer (User): The reviewer value to validate.
+
+        Raises:
+            TypeError: If the given reviewer is not a User instance.
+
+        Returns:
+            User: The validated reviewer value.
+        """
         from stalker.models.auth import User
 
         if not isinstance(reviewer, User):
@@ -156,7 +177,11 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
         return reviewer
 
     def _review_number_getter(self):
-        """returns the review_number value"""
+        """Return the review number value.
+
+        Returns:
+            int: The review_number value.
+        """
         return self._review_number
 
     review_number = synonym(
@@ -167,7 +192,11 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
 
     @property
     def review_set(self):
-        """returns the Review instances in the same review set"""
+        """Return all the reviews in the same review set with this one.
+
+        Returns:
+            List[Review]: The Review instances in the same review set with this one.
+        """
         logger.debug(
             "finding revisions with the same review_number of: %s" % self.review_number
         )
@@ -182,13 +211,22 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
         return reviews
 
     def is_finalized(self):
-        """A predicate method that checks if all reviews in the same set with
-        this one is finalized
+        """Check if all reviews in the same set with this one are finalized.
+
+        Returns:
+            bool: True if all the reviews in the same review set with this one are
+                finalized, False otherwise.
         """
         return all([review.status.code != "NEW" for review in self.review_set])
 
     def request_revision(self, schedule_timing=1, schedule_unit="h", description=""):
-        """Finalizes the review by requesting a revision"""
+        """Finalize the review by requesting a revision.
+
+        Args:
+            schedule_timing (float): The schedule timing value for this Review instance.
+            schedule_unit (str): The schedule unit value for this Review instance.
+            description (str): The description for this Review instance.
+        """
         # set self timing values
         self.schedule_timing = schedule_timing
         self.schedule_unit = schedule_unit
@@ -205,7 +243,7 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
         self.finalize_review_set()
 
     def approve(self):
-        """Finalizes the review by approving the task"""
+        """Finalize the review by approving the task."""
         # set self status to APP
         with DBSession.no_autoflush:
             app = Status.query.filter_by(code="APP").first()
@@ -215,7 +253,7 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
         self.finalize_review_set()
 
     def finalize_review_set(self):
-        """finalizes the current review set Review decisions"""
+        """Finalize the current review set Review decisions."""
         with DBSession.no_autoflush:
             hrev = Status.query.filter_by(code="HREV").first()
             cmpl = Status.query.filter_by(code="CMPL").first()
@@ -327,8 +365,11 @@ class Daily(Entity, StatusMixin, ProjectMixin):
 
     @property
     def versions(self):
-        """returns a list of :class:`.Version` instances that this Daily is
-        related to (through the outputs of the versions)
+        """Return the Version instances related to this Daily.
+
+        Returns:
+             List[Task]: A list of :class:`.Version` instances that this Daily is
+                related to (through the outputs of the versions).
         """
         from stalker import Version
 
@@ -342,8 +383,11 @@ class Daily(Entity, StatusMixin, ProjectMixin):
 
     @property
     def tasks(self):
-        """returns a list of :class:`.Task` instances that this Daily is
-        related to (through the outputs of the versions)
+        """Return the Task's related this Daily instance.
+
+        Returns:
+             List[Task]: A list of :class:`.Task` instances that this Daily is
+                related to (through the outputs of the versions)
         """
         from stalker import Task, Version
 
@@ -358,7 +402,7 @@ class Daily(Entity, StatusMixin, ProjectMixin):
 
 
 class DailyLink(Base):
-    """The association object used in Daily-to-Link relation"""
+    """The association object used in Daily-to-Link relation."""
 
     __tablename__ = "Daily_Links"
 
@@ -403,7 +447,18 @@ class DailyLink(Base):
 
     @validates("link")
     def _validate_link(self, key, link):
-        """validates the given link instance"""
+        """Validate the given link instance.
+
+        Args:
+            key (str): The name of the validated column.
+            link (Link): The like value to be validated.
+
+        Raises:
+            TypeError: When the given like value is not a Link instance.
+
+        Returns:
+            Like: The validated Link instance.
+        """
         from stalker import Link
 
         if link is not None:
@@ -421,7 +476,18 @@ class DailyLink(Base):
 
     @validates("daily")
     def _validate_daily(self, key, daily):
-        """validates the given daily instance"""
+        """Validate the given daily instance.
+
+        Args:
+            key (str): The name of the validated column.
+            daily (Daily): The daily value to be validated.
+
+        Raises:
+            TypeError: If the given daily value is not a Daily instance.
+
+        Returns:
+            Daily: The validated daily instance.
+        """
         if daily is not None:
             if not isinstance(daily, Daily):
                 raise TypeError(

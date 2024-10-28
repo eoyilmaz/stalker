@@ -6,11 +6,9 @@ from sqlalchemy.orm import relationship, validates
 from stalker.db.declarative import Base
 from stalker.models.entity import Entity
 
-from stalker.log import logging_level
-import logging
+from stalker.log import get_logger
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging_level)
+logger = get_logger(__name__)
 
 
 class Structure(Entity):
@@ -125,7 +123,15 @@ class Structure(Entity):
         self.custom_template = custom_template
 
     def __eq__(self, other):
-        """the equality operator"""
+        """Check the equality.
+
+        Args:
+            other (object): The other object.
+
+        Returns:
+            bool: True if the other object is a Structure instance and has the same
+                templates, custom_template.
+        """
         return (
             super(Structure, self).__eq__(other)
             and isinstance(other, Structure)
@@ -134,7 +140,13 @@ class Structure(Entity):
         )
 
     def __hash__(self):
-        """the overridden __hash__ method"""
+        """Return the hash value of this instance.
+
+        Because the __eq__ is overridden the __hash__ also needs to be overridden.
+
+        Returns:
+            int: The hash value.
+        """
         return super(Structure, self).__hash__()
 
     @validates("custom_template")

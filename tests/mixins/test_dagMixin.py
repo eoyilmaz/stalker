@@ -2,6 +2,7 @@
 """DAGMixin related tests."""
 
 import copy
+import sys
 
 import pytest
 
@@ -204,7 +205,13 @@ def test_is_leaf_attribute_is_read_only(dag_mixin_test_case):
     with pytest.raises(AttributeError) as cm:
         d1.is_leaf = "this will not work"
 
-    assert str(cm.value) == "can't set attribute 'is_leaf'"
+    error_message = (
+        "can't set attribute 'is_leaf'"
+        if sys.version_info.minor < 11
+        else "property 'is_leaf' of 'DAGMixinFooMixedInClass' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_is_leaf_attribute_is_working_properly(dag_mixin_test_case):
@@ -228,7 +235,14 @@ def test_is_root_attribute_is_read_only(dag_mixin_test_case):
     d1 = DAGMixinFooMixedInClass(**kwargs)
     with pytest.raises(AttributeError) as cm:
         d1.is_root = "this will not work"
-    assert str(cm.value) == "can't set attribute 'is_root'"
+
+    error_message = (
+        "can't set attribute 'is_root'"
+        if sys.version_info.minor < 11
+        else "property 'is_root' of 'DAGMixinFooMixedInClass' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_is_root_attribute_is_working_properly(dag_mixin_test_case):
@@ -252,7 +266,13 @@ def test_is_container_attribute_is_read_only(dag_mixin_test_case):
     with pytest.raises(AttributeError) as cm:
         d1.is_container = "this will not work"
 
-    assert str(cm.value) == "can't set attribute 'is_container'"
+    error_message = (
+        "can't set attribute 'is_container'"
+        if sys.version_info.minor < 11
+        else "property 'is_container' of 'DAGMixinFooMixedInClass' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_is_container_attribute_working_properly(dag_mixin_test_case):
@@ -280,7 +300,13 @@ def test_parents_property_is_read_only(dag_mixin_test_case):
     with pytest.raises(AttributeError) as cm:
         d1.parents = "this will not work"
 
-    assert str(cm.value) == "can't set attribute 'parents'"
+    error_message = (
+        "can't set attribute 'parents'"
+        if sys.version_info.minor < 11
+        else "property 'parents' of 'DAGMixinFooMixedInClass' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_parents_property_is_working_properly(dag_mixin_test_case):

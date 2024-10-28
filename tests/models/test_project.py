@@ -3,6 +3,7 @@
 
 import datetime
 import logging
+import sys
 
 from jinja2 import Template
 
@@ -567,7 +568,13 @@ def test_sequences_attribute_is_read_only(setup_project_db_test):
     with pytest.raises(AttributeError) as cm:
         data["test_project"].sequences = ["some non sequence related data"]
 
-    assert str(cm.value) == "can't set attribute 'sequences'"
+    error_message = (
+        "can't set attribute 'sequences'"
+        if sys.version_info.minor < 11
+        else "property 'sequences' of 'Project' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_assets_attribute_is_read_only(setup_project_db_test):
@@ -1346,7 +1353,14 @@ def test_is_active_is_read_only(setup_project_db_test):
     data = setup_project_db_test
     with pytest.raises(AttributeError) as cm:
         data["test_project"].is_active = True
-    assert str(cm.value) == "can't set attribute 'is_active'"
+
+    error_message = (
+        "can't set attribute 'is_active'"
+        if sys.version_info.minor < 11
+        else "property 'is_active' of 'Project' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_is_active_is_working_properly(setup_project_db_test):
@@ -1364,7 +1378,13 @@ def test_total_logged_seconds_attribute_is_read_only(setup_project_db_test):
     with pytest.raises(AttributeError) as cm:
         data["test_project"].total_logged_seconds = 32.3
 
-    assert str(cm.value) == "can't set attribute 'total_logged_seconds'"
+    error_message = (
+        "can't set attribute 'total_logged_seconds'"
+        if sys.version_info.minor < 11
+        else "property 'total_logged_seconds' of 'Project' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_total_logged_seconds_is_0_for_a_project_with_no_child_tasks(
@@ -1428,7 +1448,13 @@ def test_schedule_seconds_attribute_is_read_only(setup_project_db_test):
     with pytest.raises(AttributeError) as cm:
         data["test_project"].schedule_seconds = 3
 
-    assert str(cm.value) == "can't set attribute 'schedule_seconds'"
+    error_message = (
+        "can't set attribute 'schedule_seconds'"
+        if sys.version_info.minor < 11
+        else "property 'schedule_seconds' of 'Project' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_schedule_seconds_attribute_value_is_0_for_a_project_with_no_tasks(
@@ -1508,7 +1534,13 @@ def test_percent_complete_attribute_is_read_only(setup_project_db_test):
     with pytest.raises(AttributeError) as cm:
         data["test_project"].percent_complete = 32.3
 
-    assert str(cm.value) == "can't set attribute 'percent_complete'"
+    error_message = (
+        "can't set attribute 'percent_complete'"
+        if sys.version_info.minor < 11
+        else "property 'percent_complete' of 'Project' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_percent_complete_is_0_for_a_project_with_no_tasks(setup_project_db_test):
@@ -1824,7 +1856,14 @@ def test_open_tickets_attribute_is_read_only(setup_project_tickets_db_tests):
     data = setup_project_tickets_db_tests
     with pytest.raises(AttributeError) as cm:
         data["test_project"].open_tickets = []
-    assert str(cm.value) == "can't set attribute 'open_tickets'"
+
+    error_message = (
+        "can't set attribute 'open_tickets'"
+        if sys.version_info.minor < 11
+        else "property 'open_tickets' of 'Project' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_tickets_attribute_returns_all_tickets_in_this_project(

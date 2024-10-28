@@ -545,7 +545,15 @@ class WorkingHours(Entity):
         self.daily_working_hours = daily_working_hours
 
     def __eq__(self, other):
-        """overridden equality operator"""
+        """Check the equality.
+
+        Args:
+            other (object): The other object.
+
+        Returns:
+            bool: True if the other object is a WorkingHours instance and has the same
+                working_hours.
+        """
         return (
             isinstance(other, WorkingHours)
             and other.working_hours == self.working_hours

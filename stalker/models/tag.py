@@ -4,11 +4,9 @@ from sqlalchemy import Column, Integer, ForeignKey
 
 from stalker.models.entity import SimpleEntity
 
-from stalker.log import logging_level
-import logging
+from stalker.log import get_logger
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging_level)
+logger = get_logger(__name__)
 
 
 class Tag(SimpleEntity):
@@ -27,7 +25,15 @@ class Tag(SimpleEntity):
         super(Tag, self).__init__(**kwargs)
 
     def __eq__(self, other):
-        """the equality operator"""
+        """Check the equality.
+
+        Args:
+            other (object): The other object.
+
+        Returns:
+            bool: True if the other object is a Tag instance and has the same
+                attributes.
+        """
         return super(Tag, self).__eq__(other) and isinstance(other, Tag)
 
     def __hash__(self):

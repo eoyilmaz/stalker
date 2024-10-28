@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tests for the ImageFormat class."""
 
+import sys
 import pytest
 
 from stalker import ImageFormat
@@ -278,7 +279,13 @@ def test_device_aspect_attribute_write_protected(setup_image_format_tests):
     with pytest.raises(AttributeError) as cm:
         data["test_image_format"].device_aspect = 10
 
-    assert str(cm.value) == "can't set attribute 'device_aspect'"
+    error_message = (
+        "can't set attribute 'device_aspect'"
+        if sys.version_info.minor < 11
+        else "property 'device_aspect' of 'ImageFormat' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_pixel_aspect_int_float(setup_image_format_tests):

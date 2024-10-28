@@ -14,11 +14,9 @@ from stalker.db.declarative import Base
 from stalker.models.entity import Entity, SimpleEntity
 from stalker.models.mixins import StatusMixin
 
-from stalker.log import logging_level
-import logging
+from stalker.log import get_logger
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging_level)
+logger = get_logger(__name__)
 
 # RESOLUTIONS
 FIXED = "fixed"
@@ -387,7 +385,15 @@ class Ticket(Entity, StatusMixin):
         self.resolution = ""
 
     def __eq__(self, other):
-        """the equality operator"""
+        """Check the equality.
+
+        Args:
+            other (object): The other object.
+
+        Returns:
+            bool: True if the other object is a Ticket instance and has the same name,
+                number, status, logs and priority.
+        """
         return (
             super(Ticket, self).__eq__(other)
             and isinstance(other, Ticket)
@@ -399,7 +405,13 @@ class Ticket(Entity, StatusMixin):
         )
 
     def __hash__(self):
-        """the overridden __hash__ method"""
+        """Return the hash value of this instance.
+
+        Because the __eq__ is overridden the __hash__ also needs to be overridden.
+
+        Returns:
+            int: The hash value.
+        """
         return super(Ticket, self).__hash__()
 
 

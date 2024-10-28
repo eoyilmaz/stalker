@@ -8,11 +8,9 @@ from stalker.db.declarative import Base
 from stalker.models.task import Task
 from stalker.models.mixins import StatusMixin, ReferenceMixin, CodeMixin
 
-from stalker.log import logging_level
-import logging
+from stalker.log import get_logger
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging_level)
+logger = get_logger(__name__)
 
 
 class Shot(Task, CodeMixin):
@@ -291,7 +289,15 @@ class Shot(Task, CodeMixin):
         return "<%s (%s, %s)>" % (self.entity_type, self.name, self.code)
 
     def __eq__(self, other):
-        """equality operator"""
+        """Check the equality.
+
+        Args:
+            other (object): The other object.
+
+        Returns:
+            bool: True if the other object is a Shot instance and has the same code and
+                project.
+        """
         return (
             isinstance(other, Shot)
             and self.code == other.code
@@ -299,7 +305,13 @@ class Shot(Task, CodeMixin):
         )
 
     def __hash__(self):
-        """the overridden __hash__ method"""
+        """Return the hash value of this instance.
+
+        Because the __eq__ is overridden the __hash__ also needs to be overridden.
+
+        Returns:
+            int: The hash value.
+        """
         return super(Shot, self).__hash__()
 
     @classmethod

@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
+"""Client related classes and functions are situated here."""
 
-from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy import Column, ForeignKey, Integer
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship, validates
+
+from stalker import log
 from stalker.db.declarative import Base
-
 from stalker.models.entity import Entity
+from stalker.models.project import create_project_client
 
-from stalker.log import logging_level
-import logging
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging_level)
+logger = log.get_logger(__name__)
 
 
 class Client(Entity):
@@ -43,18 +42,13 @@ class Client(Entity):
 
     So creating a client object needs the following parameters:
 
-    :param users: It can be an empty list, so one client can be created
-      without any user in it. But this parameter should be a list of User
-      objects.
+    Args:
+        users (:class:`.User`): It can be an empty list, so one client can be created
+            without any user in it. But this parameter should be a list of User objects.
 
-    :type users: list of :class:`.User` s
-
-    :param projects: it can be an empty list, so one client can be created
-      without any project in it. But this parameter should be a list of Project
-      objects.
-
-    :type projects: :param type: list of :class:`.Project` s
-
+        projects (List[Project]): it can be an empty list, so one client can be created
+            without any project in it. But this parameter should be a list of Project
+            objects.
     """
 
     __auto_name__ = False
@@ -104,19 +98,50 @@ class Client(Entity):
         self.projects = projects
 
     def __eq__(self, other):
-        """the equality operator"""
+        """Check if the other Client is equal to this once.
+
+        Args:
+            other (Client): The other Client instance.
+
+        Returns:
+            bool: Returns True, if other object is a Client instance and equal to this
+                one.
+        """
         return super(Client, self).__eq__(other) and isinstance(other, Client)
 
     def __hash__(self):
-        """the overridden __hash__ method"""
+        """Return the hash value of this instance.
+
+        Because the __eq__ is overridden the __hash__ also needs to be overridden.
+
+        Returns:
+            int: The hash value.
+        """
         return super(Client, self).__hash__()
 
     def to_tjp(self):
+        """Return a TaskJuggler compatible str representation of this Client instance.
+
+        Returns:
+            str: The TaskJuggler compatible representation of this Client instance.
+        """
         return ""
 
     @validates("goods")
     def _validate_good(self, key, good):
-        """validates the given good value"""
+        """Validate the given good value.
+
+        Args:
+            key (str): The name of the validated column.
+            good (Good): The good value to be validated.
+
+        Raises:
+            TypeError: If the given good is not a :class:`stalker.models.budget.Good`
+                instance.
+
+        Returns:
+            Good: The validated good value.
+        """
         from stalker.models.budget import Good
 
         if not isinstance(good, Good):
@@ -129,38 +154,27 @@ class Client(Entity):
 
 
 class ClientUser(Base):
-    """The association object used in Client-to-User relation
+    """The association object used in Client-to-User relation.
 
-    :param client: The client which the user is affiliated with.
-
-    :type client: :class:`.Client`
-
-    :param user: A :class:`.User` instance.
-
-    :type user: :class:`.User`
-
+    Args:
+        client (Client): The client which the user is affiliated with.
+        user (User): A :class:`.User` instance.
     """
 
     __tablename__ = "Client_Users"
-
     user_id = Column("uid", Integer, ForeignKey("Users.id"), primary_key=True)
-
     user = relationship(
         "User",
         back_populates="company_role",
         primaryjoin="ClientUser.user_id==User.user_id",
     )
-
     client_id = Column("cid", Integer, ForeignKey("Clients.id"), primary_key=True)
-
     client = relationship(
         "Client",
         back_populates="user_role",
         primaryjoin="ClientUser.client_id==Client.client_id",
     )
-
     role_id = Column("rid", Integer, ForeignKey("Roles.id"), nullable=True)
-
     role = relationship("Role", primaryjoin="ClientUser.role_id==Role.role_id")
 
     def __init__(self, client=None, user=None, role=None):
@@ -170,7 +184,18 @@ class ClientUser(Base):
 
     @validates("client")
     def _validate_client(self, key, client):
-        """validates the given client value"""
+        """Validate the given client value.
+
+        Args:
+            key (str): The name of the validated column.
+            client (Client): The client instance to be validated.
+
+        Raises:
+            TypeError: If the given client value is not a :class:`.Client` instance.
+
+        Returns:
+            Client: The validated client instance.
+        """
         if client is not None:
             if not isinstance(client, Client):
                 raise TypeError(
@@ -182,7 +207,19 @@ class ClientUser(Base):
 
     @validates("user")
     def _validate_user(self, key, user):
-        """validates the given user value"""
+        """Validate the given user value.
+
+        Args:
+            key (str): The name of the validated column.
+            user (User): The user instance to validate.
+
+        Raises:
+            TypeError: If the given user value is not a
+                :class:`stalker.models.auth.User` instance.
+
+        Returns:
+            User: The validated user value.
+        """
         if user is not None:
             from stalker.models.auth import User
 
@@ -196,7 +233,19 @@ class ClientUser(Base):
 
     @validates("role")
     def _validate_role(self, key, role):
-        """validates the given role instance"""
+        """Validate the given role instance.
+
+        Args:
+            key (str): The name of the validated column.
+            role (Role): The role value to be validated.
+
+        Raises:
+            TypeError: If the given role value is not a
+                :class:`stalker.models.auth.Role` instance.
+
+        Returns:
+            Role: The validated :class:`stalker.models.auth.Role` instance.
+        """
         if role is not None:
             from stalker import Role
 
@@ -207,10 +256,3 @@ class ClientUser(Base):
                     % (self.__class__.__name__, role.__class__.__name__)
                 )
         return role
-
-
-def create_project_client(project):
-    """helper function to create ProjectClient instance on association proxy"""
-    from stalker.models.project import ProjectClient
-
-    return ProjectClient(project=project)

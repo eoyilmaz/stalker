@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-import logging
 import os
 
 from six import string_types
@@ -34,10 +33,9 @@ from stalker.models.mixins import (
     ScheduleMixin,
     DAGMixin,
 )
-from stalker.log import logging_level
+from stalker.log import get_logger
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging_level)
+logger = get_logger(__name__)
 
 
 # schedule constraints
@@ -266,7 +264,15 @@ class TimeLog(Entity, DateRangeMixin):
         return resource
 
     def __eq__(self, other):
-        """equality of TimeLog instances"""
+        """Check the equality.
+
+        Args:
+            other (object): The other object.
+
+        Returns:
+            bool: True if the other object is a TimeLog instance and has the same task,
+                resource, start, end and name.
+        """
         return (
             isinstance(other, TimeLog)
             and self.task is other.task
@@ -1201,7 +1207,15 @@ class Task(
         self._previously_removed_dependent_tasks = []
 
     def __eq__(self, other):
-        """the equality operator"""
+        """Check the equality.
+
+        Args:
+            other (object): The other object.
+
+        Returns:
+            bool: True if the other object is a Task instance and has the same project,
+                parent, depends, start and end value and resources.
+        """
         return (
             super(Task, self).__eq__(other)
             and isinstance(other, Task)
@@ -1214,7 +1228,13 @@ class Task(
         )
 
     def __hash__(self):
-        """the overridden __hash__ method"""
+        """Return the hash value of this instance.
+
+        Because the __eq__ is overridden the __hash__ also needs to be overridden.
+
+        Returns:
+            int: The hash value.
+        """
         return super(Task, self).__hash__()
 
     @validates("time_logs")
@@ -1299,7 +1319,7 @@ class Task(
             )
 
         # check for the circular dependency
-        from stalker.models import check_circular_dependency
+        from stalker.utils import check_circular_dependency
 
         with DBSession.no_autoflush:
             check_circular_dependency(depends, self, "depends")
@@ -1432,7 +1452,7 @@ class Task(
                 )
 
             # check for cycle
-            from stalker.models import check_circular_dependency
+            from stalker.utils import check_circular_dependency
 
             check_circular_dependency(self, parent, "children")
             check_circular_dependency(self, parent, "depends")
@@ -2137,7 +2157,7 @@ class Task(
 
         :param method: The walk method, 0: Depth First, 1: Breadth First
         """
-        from stalker.models import walk_hierarchy
+        from stalker.utils import walk_hierarchy
 
         for t in walk_hierarchy(self, "depends", method=method):
             yield t

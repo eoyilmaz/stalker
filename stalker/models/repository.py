@@ -1,23 +1,23 @@
 # -*- coding: utf-8 -*-
-
+"""Repository related functionality is situated here."""
 import os
 import platform
 
 from six import string_types
-from sqlalchemy import event, Column, Integer, ForeignKey, String
+
+from sqlalchemy import Column, ForeignKey, Integer, String, event
 from sqlalchemy.orm import validates
+
+from stalker import defaults
+from stalker.log import get_logger
 from stalker.models.entity import Entity
 from stalker.models.mixins import CodeMixin
 
-from stalker.log import logging_level
-import logging
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging_level)
+logger = get_logger(__name__)
 
 
 class Repository(Entity, CodeMixin):
-    """Manages fileserver/repository related data.
+    r"""Manage fileserver/repository related data.
 
     A repository is a network share that all users have access to.
 
@@ -28,7 +28,7 @@ class Repository(Entity, CodeMixin):
     foreshores.
 
     The path separator in the repository is always forward slashes ("/").
-    Setting a path that contains backward slashes ("\\"), will be converted to
+    Setting a path that contains backward slashes ("\"), will be converted to
     a path with forward slashes.
 
     .. versionadded:: 0.2.24
@@ -102,7 +102,18 @@ class Repository(Entity, CodeMixin):
 
     @validates("linux_path")
     def _validate_linux_path(self, key, linux_path):
-        """validates the given linux path"""
+        """Validate the given Linux path.
+
+        Args:
+            key (str): The name of the validated column.
+            linux_path (str): The Linux path to validated.
+
+        Raises:
+            TypeError: If the given Linux path is not a str.
+
+        Returns:
+            str: The validated Linux path.
+        """
         if not isinstance(linux_path, string_types):
             raise TypeError(
                 "%s.linux_path should be an instance of string not %s"
@@ -115,25 +126,32 @@ class Repository(Entity, CodeMixin):
 
         if self.code is not None and platform.system() == "Linux":
             # update the environment variable
-            from stalker import defaults
-
             os.environ[
-                defaults.repo_env_var_template % {"code": self.code}
+                defaults.repo_env_var_template.format(code=self.code)
             ] = linux_path
 
         if self.id is not None and platform.system() == "Linux":
             # update the environment variable
-            from stalker import defaults
-
             os.environ[
-                defaults.repo_env_var_template_old % {"id": self.id}
+                defaults.repo_env_var_template_old.format(id=self.id)
             ] = linux_path
 
         return linux_path
 
     @validates("osx_path")
     def _validate_osx_path(self, key, osx_path):
-        """validates the given osx path"""
+        """Validate the given macOS path.
+
+        Args:
+            key (str): The name of the validated column.
+            osx_path (str): The OSX path to validate.
+
+        Raises:
+            TypeError: If the given OSX path is not a str.
+
+        Returns:
+            str: The validated OSX path.
+        """
         if not isinstance(osx_path, string_types):
             raise TypeError(
                 "%s.osx_path should be an instance of string not %s"
@@ -141,23 +159,30 @@ class Repository(Entity, CodeMixin):
             )
 
         osx_path = os.path.normpath(osx_path) + "/"
-
         osx_path = osx_path.replace("\\", "/")
-
-        from stalker import defaults
-
         if self.code is not None and platform.system() == "Darwin":
             # update the environment variable
-            os.environ[defaults.repo_env_var_template % {"code": self.code}] = osx_path
+            os.environ[defaults.repo_env_var_template.format(code=self.code)] = osx_path
 
         if self.id is not None and platform.system() == "Darwin":
-            os.environ[defaults.repo_env_var_template_old % {"id": self.id}] = osx_path
+            os.environ[defaults.repo_env_var_template_old.format(id=self.id)] = osx_path
 
         return osx_path
 
     @validates("windows_path")
     def _validate_windows_path(self, key, windows_path):
-        """validates the given windows path"""
+        """Validate the given Windows path.
+
+        Args:
+            key (str): The name of the validated column.
+            windows_path (str): The Windows path to validate.
+
+        Raises:
+            TypeError: If the given Windows path is not a str.
+
+        Returns:
+            str: The validated Windows path.
+        """
         if not isinstance(windows_path, string_types):
             raise TypeError(
                 "%s.windows_path should be an instance of string not %s"
@@ -172,25 +197,21 @@ class Repository(Entity, CodeMixin):
 
         if self.code is not None and platform.system() == "Windows":
             # update the environment variable
-            from stalker import defaults
-
-            os.environ[
-                defaults.repo_env_var_template % {"code": self.code}
-            ] = windows_path
+            os.environ[defaults.repo_env_var_template.format(code=self.code)] = windows_path
 
         if self.id is not None and platform.system() == "Windows":
             # update the environment variable
-            from stalker import defaults
-
-            os.environ[
-                defaults.repo_env_var_template_old % {"id": self.id}
-            ] = windows_path
+            os.environ[defaults.repo_env_var_template_old.format(id=self.id)] = windows_path
 
         return windows_path
 
     @property
     def path(self):
-        """Returns the path for the current os"""
+        """Return the repository path for the current OS.
+
+        Returns:
+            str: The repository path for the current OS.
+        """
         # return the proper value according to the current os
         platform_system = platform.system()
 
@@ -203,7 +224,11 @@ class Repository(Entity, CodeMixin):
 
     @path.setter
     def path(self, path):
-        """Sets the path for the current os"""
+        """Set the path for the current OS.
+
+        Args:
+            path (str): The path.
+        """
         # return the proper value according to the current os
         platform_system = platform.system()
 
@@ -215,10 +240,13 @@ class Repository(Entity, CodeMixin):
             self.osx_path = path
 
     def is_in_repo(self, path):
-        """Returns True or False depending of the given is in this repo or not
+        """Return True or False depending on the given is in this repo or not.
 
-        :param path: The path to be investigated
-        :return:
+        Args:
+            path: The path to be investigated.
+
+        Returns:
+            bool: Return True if the given path is in this repository.
         """
         path = path.replace("\\", "/")
         return (
@@ -228,11 +256,17 @@ class Repository(Entity, CodeMixin):
         )
 
     def _to_path(self, path, replace_with):
-        """Helper function fot to_*_path functions
+        """Return the path replacing the OS related part with the given str.
 
-        :param path: the input path
-        :param replace_with: replace_with path
-        :return:
+        Args:
+            path (str): The input path.
+            replace_with (str): replace_with path
+
+        Raises:
+            TypeError: When the given path is not a str.
+
+        Returns:
+            str: The converted path.
         """
         if path is None:
             raise TypeError("%s.path can not be None" % self.__class__.__name__)
@@ -258,55 +292,75 @@ class Repository(Entity, CodeMixin):
         return path
 
     def to_linux_path(self, path):
-        """Returns the linux version of the given path
+        """Return the Linux version of the given path.
 
-        :param path: The path that needs to be converted to linux path.
-        :return:
+        Args:
+            path (str): The path that needs to be converted to Linux path.
+
+        Returns:
+            str: The Linux path.
         """
         return self._to_path(path, self.linux_path)
 
     def to_windows_path(self, path):
-        """Returns the windows version of the given path
+        """Return the Windows version of the given path.
 
-        :param path: The path that needs to be converted to windows path.
-        :return:
+        Args:
+            path (str): The path that needs to be converted to windows path.
+
+        Returns:
+            str: The Windows path.
         """
         return self._to_path(path, self.windows_path)
 
     def to_osx_path(self, path):
-        """Returns the osx version of the given path
+        """Return the OSX version of the given path.
 
-        :param path: The path that needs to be converted to osx path.
-        :return:
+        Args:
+            path (str): The path that needs to be converted to OSX path.
+
+        Returns:
+            str: The OSX path.
         """
         return self._to_path(path, self.osx_path)
 
     def to_native_path(self, path):
-        """Returns the native version of the given path
+        """Return the native version of the given path.
 
-        :param path: The path that needs to be converted to native path.
-        :return:
+        Args:
+            path (str): The path that needs to be converted to native path.
+
+        Returns:
+            str: The native path.
         """
         return self._to_path(path, self.path)
 
     def make_relative(self, path):
-        """makes the given path relative to the repository root
+        """Make the given path relative to the repository root.
 
-        :param path: The path to be made relative
-        :return: str
+        Args:
+            path (str): The path to be made relative.
+
+        Returns:
+            str: The relative path.
         """
         path = self.to_native_path(path)
         return os.path.relpath(path, self.path).replace("\\", "/")
 
     @classmethod
     def find_repo(cls, path):
-        """returns the repository from the given path
+        """Return the repository from the given path.
 
-        :param str path: path in a repository
-        :return: stalker.models.repository.Repository
+        Args:
+            path (str): Path in a repository.
+
+        Returns:
+            Repository:
         """
+        logger.debug(f"Looking for a repo for path: {path}")
         # path could be using environment variables so expand them
         path = os.path.expandvars(path)
+        logger.debug(f"path after expanding vars  : {path}")
 
         # first find the repository
         repos = Repository.query.all()
@@ -320,33 +374,53 @@ class Repository(Entity, CodeMixin):
             ):
                 found_repo = repo
                 break
+
+        if found_repo is None:
+            logger.debug(f"Couldn't find a repo for path: {path}")
+
         return found_repo
 
     @classmethod
     def to_os_independent_path(cls, path):
-        """Replaces the part of the given path with repository environment
-        variable which makes the given path OS independent.
+        """Replace the part of the given path with repository environment var.
 
-        :param path: path to make OS independent
-        :return:
+         This makes the given path OS independent.
+
+        Args:
+            path (str): path to make OS independent.
+
+        Returns:
+            str: OS independent path.
         """
         # find the related repo
         repo = cls.find_repo(path)
 
         if repo:
-            return "$%s/%s" % (repo.env_var, repo.make_relative(path))
+            logger.debug("Found repo for path: {}".format(repo))
+            return "${}/{}".format(repo.env_var, repo.make_relative(path))
         else:
+            logger.debug("Can't find repor for path: {}".format(path))
             return path
 
     @property
     def env_var(self):
-        """returns the env var of this repo"""
-        from stalker import defaults
+        """Return the env var of this repo.
 
-        return defaults.repo_env_var_template % {"code": self.code}
+        Returns:
+            str: The env_var corresponding to this repo.
+        """
+        return defaults.repo_env_var_template.format(code=self.code)
 
     def __eq__(self, other):
-        """the equality operator"""
+        """Check the equality.
+
+        Args:
+            other (object): The other object.
+
+        Returns:
+            bool: True if the other object is equal to this one as an Entity, is a
+                Repository instance and has the same linux_path, osx_path, windows_path.
+        """
         return (
             super(Repository, self).__eq__(other)
             and isinstance(other, Repository)
@@ -356,15 +430,28 @@ class Repository(Entity, CodeMixin):
         )
 
     def __hash__(self):
-        """the overridden __hash__ method"""
+        """Return the hash value of this instance.
+
+        Because the __eq__ is overridden the __hash__ also needs to be overridden.
+
+        Returns:
+            int: The hash value.
+        """
         return super(Repository, self).__hash__()
 
 
 @event.listens_for(Repository, "after_insert")
 def receive_after_insert(mapper, connection, repo):
-    """listen for the 'after_insert' event"""
-    logger.debug("auto creating env var for Repository: %s" % repo.name)
-    from stalker import defaults
+    """Listen for the 'after_insert' event and update environment variables.
 
-    os.environ[defaults.repo_env_var_template % {"code": repo.code}] = repo.path
-    os.environ[defaults.repo_env_var_template_old % {"id": repo.id}] = repo.path
+    This is a mapper event to update the environment variables with the newly inserted
+    Repository data.
+
+    Args:
+        mapper (sqlalchemy.orm.Mapper): The mapper object.
+        connection (sqlalchemy.engine.Connection): The connection object.
+        repo (Repository): The Repository instance that is just inserted to the DB.
+    """
+    logger.debug("auto creating env var for Repository: {}".format(repo.name))
+    os.environ[defaults.repo_env_var_template.format(code=repo.code)] = repo.path
+    os.environ[defaults.repo_env_var_template_old.format(id=repo.id)] = repo.path

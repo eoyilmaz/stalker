@@ -8,12 +8,9 @@ from stalker.db.declarative import Base
 from stalker.models.entity import Entity
 from stalker.models.mixins import TargetEntityTypeMixin
 from stalker.models.mixins import CodeMixin
+from stalker.log import get_logger
 
-from stalker.log import logging_level
-import logging
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging_level)
+logger = get_logger(__name__)
 
 
 class Status(Entity, CodeMixin):
@@ -61,7 +58,15 @@ class Status(Entity, CodeMixin):
         self.code = code
 
     def __eq__(self, other):
-        """the equality operator"""
+        """Check the equality.
+
+        Args:
+            other (object): The other object.
+
+        Returns:
+            bool: True if the other object is a Status instance and has the same
+                attributes.
+        """
         if isinstance(other, string_types):
             return (
                 self.name.lower() == other.lower() or self.code.lower() == other.lower()
@@ -70,7 +75,13 @@ class Status(Entity, CodeMixin):
             return super(Status, self).__eq__(other) and isinstance(other, Status)
 
     def __hash__(self):
-        """the overridden __hash__ method"""
+        """Return the hash value of this instance.
+
+        Because the __eq__ is overridden the __hash__ also needs to be overridden.
+
+        Returns:
+            int: The hash value.
+        """
         return super(Status, self).__hash__()
 
 
@@ -178,7 +189,15 @@ class StatusList(Entity, TargetEntityTypeMixin):
         return status
 
     def __eq__(self, other):
-        """the equality operator"""
+        """Check the equality.
+
+        Args:
+            other (object): The other object.
+
+        Returns:
+            bool: True if the other object is a StatusList instance and has the same
+                statuses, target_entity_type.
+        """
         return (
             super(StatusList, self).__eq__(other)
             and isinstance(other, StatusList)
@@ -187,7 +206,13 @@ class StatusList(Entity, TargetEntityTypeMixin):
         )
 
     def __hash__(self):
-        """the overridden __hash__ method"""
+        """Return the hash value of this instance.
+
+        Because the __eq__ is overridden the __hash__ also needs to be overridden.
+
+        Returns:
+            int: The hash value.
+        """
         return super(StatusList, self).__hash__()
 
     def __getitem__(self, key):

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import stalker.db.setup
 from stalker import db
 from stalker.db.session import DBSession
 from stalker import (
@@ -18,8 +19,8 @@ from stalker import (
 
 def test_readme_tutorial_code(setup_sqlite3):
     """the tutorial code in README.rst."""
-    db.setup()
-    db.init()
+    stalker.db.setup.setup()
+    stalker.db.setup.init()
 
     assert str(DBSession.connection().engine.url) == "sqlite://"
 

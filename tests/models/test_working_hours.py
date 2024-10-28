@@ -2,6 +2,7 @@
 """Tests related to the WorkingHours class."""
 import copy
 import datetime
+import sys
 
 import pytest
 
@@ -467,7 +468,14 @@ def test_to_tjp_attribute_is_read_only():
     wh = WorkingHours()
     with pytest.raises(AttributeError) as cm:
         wh.to_tjp = "some value"
-    assert str(cm.value) == "can't set attribute 'to_tjp'"
+
+    error_message = (
+        "can't set attribute 'to_tjp'"
+        if sys.version_info.minor < 11
+        else "property 'to_tjp' of 'WorkingHours' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_to_tjp_attribute_is_working_properly():
@@ -520,7 +528,13 @@ def test_weekly_working_hours_attribute_is_read_only():
     with pytest.raises(AttributeError) as cm:
         wh.weekly_working_hours = 232
 
-    assert str(cm.value) == "can't set attribute 'weekly_working_hours'"
+    error_message = (
+        "can't set attribute 'weekly_working_hours'"
+        if sys.version_info.minor < 11
+        else "property 'weekly_working_hours' of 'WorkingHours' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_weekly_working_hours_attribute_is_working_properly():
@@ -593,7 +607,13 @@ def test_weekly_working_days_is_a_read_only_attribute():
     with pytest.raises(AttributeError) as cm:
         wh.weekly_working_days = 6
 
-    assert str(cm.value) == "can't set attribute 'weekly_working_days'"
+    error_message = (
+        "can't set attribute 'weekly_working_days'"
+        if sys.version_info.minor < 11
+        else "property 'weekly_working_days' of 'WorkingHours' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_weekly_working_days_is_calculated_correctly():
@@ -634,7 +654,14 @@ def test_yearly_working_days_is_a_read_only_attribute():
     wh = WorkingHours()
     with pytest.raises(AttributeError) as cm:
         wh.yearly_working_days = 260.1
-    assert str(cm.value) == "can't set attribute 'yearly_working_days'"
+
+    error_message = (
+        "can't set attribute 'yearly_working_days'"
+        if sys.version_info.minor < 11
+        else "property 'yearly_working_days' of 'WorkingHours' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_yearly_working_days_is_calculated_correctly():

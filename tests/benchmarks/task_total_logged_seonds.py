@@ -11,6 +11,7 @@ from sqlalchemy.orm import close_all_sessions
 from sqlalchemy.pool import NullPool
 
 import stalker
+import stalker.db.setup
 from stalker import (
     Project,
     Repository,
@@ -52,8 +53,8 @@ stalker.defaults.config_values = stalker.defaults.default_config_values.copy()
 stalker.defaults.timing_resolution = datetime.timedelta(minutes=10)
 
 # init database
-db.setup(config)
-db.init()
+stalker.db.setup.setup(config)
+stalker.db.setup.init()
 
 status_wfd = Status.query.filter_by(code="WFD").first()
 status_rts = Status.query.filter_by(code="RTS").first()

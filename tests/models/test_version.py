@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import sys
 
 import pytest
 
@@ -1009,7 +1010,14 @@ def test_latest_published_version_is_read_only(setup_version_db_tests):
     data = setup_version_db_tests
     with pytest.raises(AttributeError) as cm:
         data["test_version"].latest_published_version = True
-    assert str(cm.value) == "can't set attribute 'latest_published_version'"
+
+    error_message = (
+        "can't set attribute 'latest_published_version'"
+        if sys.version_info.minor < 11
+        else "property 'latest_published_version' of 'Version' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_latest_published_version_is_working_properly(setup_version_db_tests):
@@ -1225,7 +1233,14 @@ def test_max_version_number_attribute_is_read_only(setup_version_db_tests):
     data = setup_version_db_tests
     with pytest.raises(AttributeError) as cm:
         data["test_version"].max_version_number = 20
-    assert str(cm.value) == "can't set attribute 'max_version_number'"
+
+    error_message = (
+        "can't set attribute 'max_version_number'"
+        if sys.version_info.minor < 11
+        else "property 'max_version_number' of 'Version' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_max_version_number_attribute_is_working_properly(setup_version_db_tests):
@@ -1265,7 +1280,14 @@ def test_latest_version_attribute_is_read_only(setup_version_db_tests):
     data = setup_version_db_tests
     with pytest.raises(AttributeError) as cm:
         data["test_version"].latest_version = 3453
-    assert str(cm.value) == "can't set attribute 'latest_version'"
+
+    error_message = (
+        "can't set attribute 'latest_version'"
+        if sys.version_info.minor < 11
+        else "property 'latest_version' of 'Version' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_latest_version_attribute_is_working_properly(setup_version_db_tests):
@@ -1305,7 +1327,14 @@ def test_naming_parents_attribute_is_a_read_only_property(setup_version_db_tests
     data = setup_version_db_tests
     with pytest.raises(AttributeError) as cm:
         data["test_version"].naming_parents = [data["test_task1"]]
-    assert str(cm.value) == "can't set attribute 'naming_parents'"
+
+    error_message = (
+        "can't set attribute 'naming_parents'"
+        if sys.version_info.minor < 11
+        else "property 'naming_parents' of 'Version' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_naming_parents_attribute_is_working_properly(setup_version_db_tests):

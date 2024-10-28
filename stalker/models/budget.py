@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
-
-from sqlalchemy import Column, Integer, ForeignKey, Float, String, Table
+"""Budget related classes and functions are situated here."""
+from sqlalchemy import Column, Float, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import relationship, validates
-from stalker.db.declarative import Base
 
+from stalker.db.declarative import Base
 from stalker.models.entity import Entity
 from stalker.models.mixins import (
-    ProjectMixin,
-    DAGMixin,
-    StatusMixin,
     AmountMixin,
+    DAGMixin,
+    ProjectMixin,
+    StatusMixin,
     UnitMixin,
 )
 
@@ -38,13 +38,12 @@ class Good(Entity, UnitMixin):
 
     A Good has the following attributes
 
-    :param msrp: The suggested retail price for this item.
-
-    :param cost: The cost of this item to the Studio, so generally it is better
-      to keep price of the related BudgetEntry bigger than this value to get
-      profit by selling this item.
-
-    :param unit: The unit of this item.
+    Args:
+        msrp (float): The suggested retail price for this item.
+        cost (float): The cost of this item to the Studio, so generally it is better
+            to keep price of the related BudgetEntry bigger than this value to get
+            profit by selling this item.
+        unit (str): The unit of this item.
     """
 
     __auto_name__ = False
@@ -83,7 +82,19 @@ class Good(Entity, UnitMixin):
 
     @validates("cost")
     def _validate_cost(self, key, cost):
-        """validates the given cost value"""
+        """Validate the given cost value.
+
+        Args:
+            key (str): The name of the validated column.
+            cost (Union[int, float]): The cost value to be validated.
+
+        Raises:
+            TypeError: If the given cost value is not an int or float.
+            ValueError: If the given cost is a negative value.
+
+        Returns:
+            float: The validated cost value.
+        """
         if cost is None:
             cost = 0.0
 
@@ -102,7 +113,19 @@ class Good(Entity, UnitMixin):
 
     @validates("msrp")
     def _validate_msrp(self, key, msrp):
-        """validates the given msrp value"""
+        """Validate the given msrp value.
+
+        Args:
+            key (str): The name of the validated column.
+            msrp (Union[int, float]): The msrp value to be validated.
+
+        Raises:
+            TypeError: If the given msrp value is not an int or float.
+            ValueError: If the msrp is a negative value.
+
+        Returns:
+            float: The validated msrp value.
+        """
         if msrp is None:
             msrp = 0.0
 
@@ -121,7 +144,19 @@ class Good(Entity, UnitMixin):
 
     @validates("client")
     def _validate_client(self, key, client):
-        """validates the given client value"""
+        """Validate the given client value.
+
+        Args:
+            key (str): The name of the validated column.
+            client (Client): The client value to be validated.
+
+        Raises:
+            TypeError: If the given client arg value is not a
+                :class:`stalker.models.client.Client` instance.
+
+        Returns:
+            Client: The validated :class:`stalker.models.client.Client` instance.
+        """
         if client is not None:
             from stalker import Client
 
@@ -135,10 +170,13 @@ class Good(Entity, UnitMixin):
 
 
 class PriceList(Entity):
-    """Contains CommercialItems to create a list of items that is sold by the
-    Studio.
+    """Contains CommercialItems to create a list of items that is sold by the Studio.
 
     You can create different lists for items sold in this studio.
+
+    Args:
+        goods (List[Good]): A list of :class:`.Good` instances to be put into this
+            :class:`.PriceList` instance.
     """
 
     __auto_name__ = False
@@ -164,15 +202,23 @@ class PriceList(Entity):
 
     @validates("goods")
     def _validate_goods(self, key, good):
-        """validates the given good value"""
-        from stalker import Good
+        """Validate the given good value.
 
+        Args:
+            key (str): The name of the validated column.
+            good (Good): The good value to be validated.
+
+        Raises:
+            TypeError: If the given good arg value is not a :class:`.Good` instance.
+
+        Returns:
+            Good: The validated :class:`.Good` instance.
+        """
         if not isinstance(good, Good):
             raise TypeError(
                 "%s.goods should be a list of stalker.model.budget.Good "
                 "instances, not %s" % (self.__class__.__name__, good.__class__.__name__)
             )
-
         return good
 
 
@@ -185,7 +231,7 @@ PriceList_Goods = Table(
 
 
 class Budget(Entity, ProjectMixin, DAGMixin, StatusMixin):
-    """Manages project budgets
+    """Manages project budgets.
 
     Budgets manager :class:`.Project` budgets. You can create entries as
     instances of :class:`.BudgetEntry` class.
@@ -221,7 +267,18 @@ class Budget(Entity, ProjectMixin, DAGMixin, StatusMixin):
 
     @validates("entries")
     def _validate_entry(self, key, entry):
-        """validates the given entry value"""
+        """Validate the given entry value.
+
+        Args:
+            key (str): The name of the validated column.
+            entry (BudgetEntry): The entry value to be validated.
+
+        Raises:
+            TypeError: If the given entry value is not a :class:`.BudgetEntry` instance.
+
+        Returns:
+            BudgetEntry: The validated BudgetEntry instance.
+        """
         if not isinstance(entry, BudgetEntry):
             raise TypeError(
                 "%(class)s.entries should be a list of BudgetEntry instances, "
@@ -243,20 +300,21 @@ class BudgetEntry(Entity, AmountMixin, UnitMixin):
     been included in this Budget, and what was the discounted price of that
     Good.
 
-    :param budget: The :class:`.Budget` that this entry is a part of.
-    :param good: Stores a :class:`.Good` instance to carry all the
-      cost/msrp/unit data from.
-    :param float price: The decided price of this entry. This is generally
-      bigger than the :attr:`.cost` and should be also bigger than
-      :attr:`.msrp` but the person that is editing the budget which this entry
-      is related to can decide to do a discount on this entry and give a
-      different price. This attribute holds the proposed final price.
-    :param float realized_total: This attribute is for holding the realized
-      price of this entry. It can be the same number of the :attr:`.price`
-      multiplied by the :attr:`.amount` or can be something else that reflects
-      the reality. Generally it is for calculating the "service" cost/profit.
-    :param float amount: Defines the amount of :class:`Good` that is in
-      consideration for this entry.
+    Args:
+        budget (Budget): The :class:`.Budget` that this entry is a part of.
+        good (Good): Stores a :class:`.Good` instance to carry all the cost/msrp/unit
+            data from.
+        price (float): The decided price of this entry. This is generally bigger than
+            the :attr:`.cost` and should be also bigger than :attr:`.msrp` but the
+            person that is editing the budget which this entry is related to can decide
+            to do a discount on this entry and give a different price. This attribute
+            holds the proposed final price.
+        realized_total (float): This attribute is for holding the realized price of this
+            entry. It can be the same number of the :attr:`.price` multiplied by the
+            :attr:`.amount` or can be something else that reflects the reality.
+            Generally it is for calculating the "service" cost/profit.
+        amount (float): Defines the amount of :class:`Good` that is in consideration for
+            this entry.
     """
 
     __auto_name__ = True
@@ -307,7 +365,18 @@ class BudgetEntry(Entity, AmountMixin, UnitMixin):
 
     @validates("budget")
     def _validate_budget(self, key, budget):
-        """validates the given budget value"""
+        """Validate the given budget value.
+
+        Args:
+            key (str): The name of the validated column.
+            budget (Budget): The budget that needs to be validated.
+
+        Raises:
+            TypeError: If the given budget is not a :class:`.Budget` instance.
+
+        Returns:
+            Budget: The validated :class:`.Budget` instance.
+        """
         if not isinstance(budget, Budget):
             raise TypeError(
                 "%s.budget should be a Budget instance, not %s"
@@ -317,7 +386,18 @@ class BudgetEntry(Entity, AmountMixin, UnitMixin):
 
     @validates("cost")
     def _validate_cost(self, key, cost):
-        """validates the given cost value"""
+        """Validate the given cost value.
+
+        Args:
+            key (str): The name of the validated column.
+            cost (Union[int, float]): The cost value to be validated.
+
+        Raises:
+            TypeError: If the given cost value is not an int or float.
+
+        Returns:
+            float: The validated cost value.
+        """
         if cost is None:
             cost = 0.0
 
@@ -331,7 +411,18 @@ class BudgetEntry(Entity, AmountMixin, UnitMixin):
 
     @validates("msrp")
     def _validate_msrp(self, key, msrp):
-        """validates the given msrp value"""
+        """Validate the given msrp value.
+
+        Args:
+            key (str): The name of the validated column.
+            msrp (Union[int, float]): The msrp value to be validated.
+
+        Raises:
+            TypeError: If the given msrp value is not an int or float.
+
+        Returns:
+            float: The validated msrp value.
+        """
         if msrp is None:
             msrp = 0.0
 
@@ -345,7 +436,18 @@ class BudgetEntry(Entity, AmountMixin, UnitMixin):
 
     @validates("price")
     def _validate_price(self, key, price):
-        """validates the given price value"""
+        """Validate the given price value.
+
+        Args:
+            key (str): The name of the validated column.
+            price (Union[int, float]): The price value to be validated.
+
+        Raises:
+            TypeError: If the given price value is not an int or float.
+
+        Returns:
+            float: The validated price value.
+        """
         if price is None:
             price = 0.0
 
@@ -359,7 +461,19 @@ class BudgetEntry(Entity, AmountMixin, UnitMixin):
 
     @validates("realized_total")
     def _validate_realized_total(self, key, realized_total):
-        """validates the given realized_total value"""
+        """Validate  the given realized_total value.
+
+        Args:
+            key (str): The name of the validated column.
+            realized_total (Union[int, float]): The realized_total value to be
+                validated.
+
+        Raises:
+            TypeError: If the given realized_total value is not an int or float.
+
+        Returns:
+            float: The validated realized_total value.
+        """
         if realized_total is None:
             realized_total = 0.0
 
@@ -373,7 +487,18 @@ class BudgetEntry(Entity, AmountMixin, UnitMixin):
 
     @validates("good")
     def _validate_good(self, key, good):
-        """validates the given good value"""
+        """Validate the given good value.
+
+        Args:
+            key (str): The name of the validated column.
+            good (Good): The good to be validated.
+
+        Raises:
+            TypeError: If the given good is not a :class:`.Good` instance.
+
+        Returns:
+            Good: Returns the validated :class:`.Good` instance.
+        """
         if not isinstance(good, Good):
             raise TypeError(
                 "%s.good should be a stalker.models.budget.Good instance, "
@@ -384,21 +509,19 @@ class BudgetEntry(Entity, AmountMixin, UnitMixin):
 
 
 class Invoice(Entity, AmountMixin, UnitMixin):
-    """Holds information about invoices
+    """Holds information about invoices.
 
     Invoices are part of :class:`.Budgets`. The main purpose of invoices are
     to track the :class:`.Payment` s. It is a very primitive entity. It is
     by no means designed to hold real financial information (at least for now).
 
-    :param client: The :class:`.Client` instance that shows the payer for
-      this invoice.
-    :type client: :class:`.Client`
-    :param budget: The :class:`.Budget` instance that owns this invoice.
-    :type budget: :class:`.Budget`
-    :param int float amount: The amount of this invoice. Without the
-      :attr:`.Invoice.unit` attribute it is meaningless. This can not be
-      skipped.
-    :param str unit: The unit of the issued amount. This can not be skipped.
+    Args:
+        client (Client): The :class:`.Client` instance that shows the payer for this
+            invoice.
+        budget (Budget): The :class:`.Budget` instance that owns this invoice.
+        amount (Union[int, float]): The amount of this invoice. Without the
+            :attr:`.Invoice.unit` attribute it is meaningless. This can not be skipped.
+        unit (str): The unit of the issued amount. This can not be skipped.
     """
 
     __auto_name__ = True
@@ -438,7 +561,18 @@ class Invoice(Entity, AmountMixin, UnitMixin):
 
     @validates("budget")
     def _validate_budget(self, key, budget):
-        """validates the given budget value"""
+        """Validate the given budget value.
+
+        Args:
+            key (str): The name of the validated column.
+            budget (Budget): The :class:`.Budget` instance to be validated.
+
+        Raises:
+            TypeError: If the given budget arg value is not a :class:`.Budget` instance.
+
+        Returns:
+            Budget: The validated :class:`.Budget` instance.
+        """
         if not isinstance(budget, Budget):
             raise TypeError(
                 "%s.budget should be a Budget instance, not %s"
@@ -448,7 +582,20 @@ class Invoice(Entity, AmountMixin, UnitMixin):
 
     @validates("client")
     def _validate_client(self, key, client):
-        """validates the given client value"""
+        """Validate the given client value.
+
+        Args:
+            key (str): The name of the validated column.
+            client (Client): The :class:`stalker.models.client.Client` instance to be
+                validated.
+
+        Raises:
+            TypeError: If the ``client`` is not a :class:`stalker.models.client.Client`
+                instance.
+
+        Returns:
+            Client: The validated :class:`stalker.models.client.Client` instance.
+        """
         from stalker import Client
 
         if not isinstance(client, Client):
@@ -465,9 +612,9 @@ class Payment(Entity, AmountMixin, UnitMixin):
     Each payment should be related with an :class:`.Invoice` instance. Use the
     :attr:`.type` attribute to diversify payments (ex. "Advance").
 
-    :param invoice: The :class:`.Invoice` instance that this payment is related
-      to. This can not be skipped.
-    :type invoice: :class:`.Invoice`
+    Args:
+        invoice (Invoice): The :class:`.Invoice` instance that this payment is related
+            to. This can not be skipped.
     """
 
     __auto_name__ = True
@@ -493,7 +640,18 @@ class Payment(Entity, AmountMixin, UnitMixin):
 
     @validates("invoice")
     def _validate_invoice(self, key, invoice):
-        """validates the invoice value"""
+        """Validate the invoice value.
+
+        Args:
+            key (str): The name of the validated column.
+            invoice (Invoice): The :class:`.Invoice` instance to validate.
+
+        Raises:
+            TypeError: The :class:`.Invoice` instance to be validated.
+
+        Returns:
+            Invoice: The validated :class:`.Invoice` instance.
+        """
         if not isinstance(invoice, Invoice):
             raise TypeError(
                 "%s.invoice should be an Invoice instance, not %s"

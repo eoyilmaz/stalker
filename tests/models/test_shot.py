@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tests for the Shot class."""
 
+import sys
 import pytest
 
 from stalker import (
@@ -268,7 +269,14 @@ def test_project_attribute_is_read_only(setup_shot_db_tests):
     data = setup_shot_db_tests
     with pytest.raises(AttributeError) as cm:
         data["test_shot"].project = data["test_project2"]
-    assert str(cm.value) == "can't set attribute"
+
+    error_message = (
+        "can't set attribute"
+        if sys.version_info.minor < 11
+        else "property '_project_getter' of 'Shot' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_project_contains_shots(setup_shot_db_tests):

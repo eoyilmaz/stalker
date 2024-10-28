@@ -6,11 +6,9 @@ from sqlalchemy.orm import relationship, validates
 from stalker.models.entity import Entity
 from stalker.models.mixins import CodeMixin, ProjectMixin
 
-from stalker.log import logging_level
-import logging
+from stalker.log import get_logger
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging_level)
+logger = get_logger(__name__)
 
 
 class Scene(Entity, ProjectMixin, CodeMixin):
@@ -71,5 +69,11 @@ class Scene(Entity, ProjectMixin, CodeMixin):
         return isinstance(other, Scene) and super(Scene, self).__eq__(other)
 
     def __hash__(self):
-        """the overridden __hash__ method"""
+        """Return the hash value of this instance.
+
+        Because the __eq__ is overridden the __hash__ also needs to be overridden.
+
+        Returns:
+            int: The hash value.
+        """
         return super(Scene, self).__hash__()

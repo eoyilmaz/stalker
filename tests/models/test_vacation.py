@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tests for the Vacation class."""
 import datetime
+import sys
 
 import pytest
 import pytz
@@ -131,7 +132,14 @@ def test_to_tjp_attribute_is_a_read_only_property(setup_vacation_tests):
     data = setup_vacation_tests
     with pytest.raises(AttributeError) as cm:
         data["test_vacation"].to_tjp = "some value"
-    assert str(cm.value) == "can't set attribute 'to_tjp'"
+
+    error_message = (
+        "can't set attribute 'to_tjp'"
+        if sys.version_info.minor < 11
+        else "property 'to_tjp' of 'Vacation' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_to_tjp_attribute_is_working_properly(setup_vacation_tests):

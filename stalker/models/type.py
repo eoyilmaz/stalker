@@ -6,11 +6,9 @@ from stalker.db.declarative import Base
 from stalker.models.entity import Entity
 from stalker.models.mixins import TargetEntityTypeMixin, CodeMixin
 
-from stalker.log import logging_level
-import logging
+from stalker.log import get_logger
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging_level)
+logger = get_logger(__name__)
 
 
 class Type(Entity, TargetEntityTypeMixin, CodeMixin):
@@ -67,7 +65,15 @@ class Type(Entity, TargetEntityTypeMixin, CodeMixin):
         self.code = code
 
     def __eq__(self, other):
-        """the equality operator"""
+        """Check the equality.
+
+        Args:
+            other (object): The other object.
+
+        Returns:
+            bool: True if the other object is equal to this Type instance as an Entity
+                and has the same target_entity_type.
+        """
         return (
             super(Type, self).__eq__(other)
             and isinstance(other, Type)
@@ -75,7 +81,13 @@ class Type(Entity, TargetEntityTypeMixin, CodeMixin):
         )
 
     def __hash__(self):
-        """the overridden __hash__ method"""
+        """Return the hash value of this instance.
+
+        Because the __eq__ is overridden the __hash__ also needs to be overridden.
+
+        Returns:
+            int: The hash value.
+        """
         return super(Type, self).__hash__()
 
 
