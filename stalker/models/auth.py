@@ -148,16 +148,14 @@ class Permission(Base):
         """
         if not isinstance(access, string_types):
             raise TypeError(
-                "{}.access should be an instance of str not {}".format(
-                    self.__class__.__name__, access.__class__.__name__
-                )
+                f"{self.__class__.__name__}.access should be an instance of str "
+                f"not {access.__class__.__name__}"
             )
 
         if access not in ["Allow", "Deny"]:
             raise ValueError(
-                '{}.access should be "Allow" or "Deny" not {}'.format(
-                    self.__class__.__name__, access
-                )
+                f'{self.__class__.__name__}.access should be "Allow" or "Deny" '
+                f'not {access}'
             )
 
         return access
@@ -187,7 +185,7 @@ class Permission(Base):
         if not isinstance(class_name, string_types):
             raise TypeError(
                 f"{self.__class__.__name__}.class_name should be an instance of str "
-                "not {class_name.__class__.__name__}"
+                f"not {class_name.__class__.__name__}"
             )
 
         return class_name
@@ -217,9 +215,8 @@ class Permission(Base):
         """
         if not isinstance(action, string_types):
             raise TypeError(
-                "{}.action should be an instance of str not {}".format(
-                    self.__class__.__name__, action.__class__.__name__
-                )
+                f"{self.__class__.__name__}.action should be an instance of str "
+                f"not {action.__class__.__name__}"
             )
 
         if action not in defaults.actions:
@@ -626,7 +623,7 @@ class User(Entity, ACLMixin):
         Returns:
             str: The str representation of this User.
         """
-        return "<{} ('{}') (User)>".format(self.name, self.login)
+        return f"<{self.name} ('{self.login}') (User)>"
 
     def __eq__(self, other):
         """Check if the other User is equal to this one.
@@ -1332,8 +1329,8 @@ class AuthenticationLog(SimpleEntity):
             Tuple(str, str): The str key to be used for ordering.
         """
         return (
-            "{} {} {}".format(self.date, self.action, self.user.name),
-            "{} {} {}".format(other.date, other.action, other.user.name),
+            f"{self.date} {self.action} {self.user.name}",
+            f"{other.date} {other.action} {other.user.name}",
         )
 
     @validates("user")
