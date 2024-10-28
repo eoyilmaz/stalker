@@ -19,10 +19,16 @@ def setup_authentication_log_tests():
     """
     data = dict()
     data["test_user1"] = User(
-        name="Test User 1", login="tuser1", email="tuser1@users.com", password="secret"
+        name="Test User 1",
+        login="tuser1",
+        email="tuser1@users.com",
+        password="secret",
     )
     data["test_user2"] = User(
-        name="Test User 2", login="tuser2", email="tuser2@users.com", password="secret"
+        name="Test User 2",
+        login="tuser2",
+        email="tuser2@users.com",
+        password="secret",
     )
     return data
 

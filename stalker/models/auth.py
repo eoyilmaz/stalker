@@ -1,16 +1,21 @@
 # -*- coding: utf-8 -*-
-
-import sys
-import os
-import json
-import re
+"""Authentication related classes and functions situated here."""
 import base64
+import calendar
+import copy
 import datetime
+import json
+import os
+import re
+import sys
+
+from jinja2 import Template
+
 import pytz
 
 from six import string_types
 
-from sqlalchemy import Table, Column, Integer, ForeignKey, String, Enum, Float
+from sqlalchemy import Column, Enum, Float, ForeignKey, Integer, String, Table
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship, synonym, validates
 from sqlalchemy.schema import UniqueConstraint
@@ -18,11 +23,10 @@ from sqlalchemy.schema import UniqueConstraint
 from stalker import defaults, log
 from stalker.db.declarative import Base
 from stalker.db.types import GenericDateTime
-from stalker.models.mixins import ACLMixin
 from stalker.models.entity import Entity, SimpleEntity
+from stalker.models.mixins import ACLMixin
 
 logger = log.get_logger(__name__)
-
 
 LOGIN = "login"
 LOGOUT = "logout"
@@ -120,73 +124,132 @@ class Permission(Base):
         self._class_name = self._validate_class_name(class_name)
 
     def __hash__(self):
-        """returns the hash value for this instance"""
+        """Return the hash value of this instance.
+
+        Because the __eq__ is overridden the __hash__ also needs to be overridden.
+
+        Returns:
+            int: The hash value.
+        """
         return hash(self.access + self.action + self.class_name)
 
     def _validate_access(self, access):
-        """validates the given access value"""
+        """Validate the given access value.
+
+        Args:
+            access (str): The access value to be validated.
+
+        Raises:
+            TypeError: If the given access value is not a str.
+            ValueError: If the access is not a one of ["Access", "Deny"].
+
+        Returns:
+            str: The access value.
+        """
         if not isinstance(access, string_types):
             raise TypeError(
-                "%s.access should be an instance of str not %s"
-                % (self.__class__.__name__, access.__class__.__name__)
+                "{}.access should be an instance of str not {}".format(
+                    self.__class__.__name__, access.__class__.__name__
+                )
             )
 
         if access not in ["Allow", "Deny"]:
             raise ValueError(
-                '%s.access should be "Allow" or "Deny" not %s'
-                % (self.__class__.__name__, access)
+                '{}.access should be "Allow" or "Deny" not {}'.format(
+                    self.__class__.__name__, access
+                )
             )
 
         return access
 
     def _access_getter(self):
-        """returns the _access value"""
+        """Return the _access value.
+
+        Returns:
+            str: Returns the access value.
+        """
         return self._access
 
     access = synonym("_access", descriptor=property(_access_getter))
 
     def _validate_class_name(self, class_name):
-        """validates the given class_name value"""
+        """Validate the given class_name value.
+
+        Args:
+            class_name (str): The class name.
+
+        Raises:
+            TypeError: If the class_name is not a str.
+
+        Returns:
+            str: The validated class_name.
+        """
         if not isinstance(class_name, string_types):
             raise TypeError(
-                "%s.class_name should be an instance of str not %s"
-                % (self.__class__.__name__, class_name.__class__.__name__)
+                f"{self.__class__.__name__}.class_name should be an instance of str "
+                "not {class_name.__class__.__name__}"
             )
 
         return class_name
 
     def _class_name_getter(self):
-        """returns the _class_name attribute value"""
+        """Return the _class_name attribute value.
+
+        Returns:
+            str: The class name.
+        """
         return self._class_name
 
     class_name = synonym("_class_name", descriptor=property(_class_name_getter))
 
     def _validate_action(self, action):
-        """validates the given action value"""
+        """Validate the given action value.
+
+        Args:
+            action (str): The action value.
+
+        Raises:
+            TypeError: If the action is not a str value.
+            ValueError: If the given action is not in the "defaults.actions" list.
+
+        Returns:
+            str: The validated action value.
+        """
         if not isinstance(action, string_types):
             raise TypeError(
-                "%s.action should be an instance of str not %s"
-                % (self.__class__.__name__, action.__class__.__name__)
+                "{}.action should be an instance of str not {}".format(
+                    self.__class__.__name__, action.__class__.__name__
+                )
             )
-
-        from stalker import defaults
 
         if action not in defaults.actions:
             raise ValueError(
-                "%s.action should be one of the values of %s not '%s'"
-                % (self.__class__.__name__, defaults.actions, action)
+                f"{self.__class__.__name__}.action should be one of the values of "
+                f"{defaults.actions} not '{action}'"
             )
 
         return action
 
     def _action_getter(self):
-        """returns the _action value"""
+        """Return the _action value.
+
+        Returns:
+            str: Returns the action value.
+        """
         return self._action
 
     action = synonym("_action", descriptor=property(_action_getter))
 
     def __eq__(self, other):
-        """the equality of two Permissions"""
+        """Check if the other Permission is equal to this one.
+
+        Args:
+            other (object): The other object.
+
+        Returns:
+            bool: True if the other object is a Permission instance and has the same
+                access, action and class_name attributes.
+        """
         return (
             isinstance(other, Permission)
             and other.access == self.access
@@ -241,17 +304,35 @@ class Group(Entity, ACLMixin):
 
     @validates("users")
     def _validate_users(self, key, user):
-        """validates the given user instance"""
+        """Validate the given user value.
+
+        Args:
+            key (str): The name of the validated column.
+            user (User): The :class:`.User` instance.
+
+        Raises:
+            TypeError: If the given user is not a :class:`.User` instance.
+
+        Returns:
+            User: The validated :class:`.User` instance.
+        """
         if not isinstance(user, User):
             raise TypeError(
-                "%s.users attribute must all be stalker.models.auth.User "
-                "instances not %s" % (self.__class__.__name__, user.__class__.__name__)
+                f"{self.__class__.__name__}.users attribute must all be "
+                "stalker.models.auth.User "
+                f"instances not {user.__class__.__name__}"
             )
 
         return user
 
     def __hash__(self):
-        """the overridden __hash__ method"""
+        """Return the hash value of this instance.
+
+        Because the __eq__ is overridden the __hash__ also needs to be overridden.
+
+        Returns:
+            int: The hash value.
+        """
         return super(Group, self).__hash__()
 
 
@@ -519,11 +600,6 @@ class User(Entity, ACLMixin):
         if departments is None:
             departments = []
 
-        # from stalker import DepartmentUser
-        # for department in departments:
-        #     self.department_role.append(
-        #         DepartmentUser(user=self, department=department)
-        #     )
         self.departments = departments
 
         if companies is None:
@@ -545,11 +621,23 @@ class User(Entity, ACLMixin):
         self.rate = rate
 
     def __repr__(self):
-        """return the representation of the current User"""
-        return "<%s ('%s') (User)>" % (self.name, self.login)
+        """Return the representation of the current User.
+
+        Returns:
+            str: The str representation of this User.
+        """
+        return "<{} ('{}') (User)>".format(self.name, self.login)
 
     def __eq__(self, other):
-        """the equality operator"""
+        """Check if the other User is equal to this one.
+
+        Args:
+            other (User): The other user instance.
+
+        Returns:
+            bool: If the other object is equal to this one, meaning that it is a User
+                instance, has the same name, login and email values then returns True.
+        """
         return (
             super(User, self).__eq__(other)
             and isinstance(other, User)
@@ -559,40 +647,81 @@ class User(Entity, ACLMixin):
         )
 
     def __hash__(self):
-        """the overridden __hash__ method"""
+        """Return the hash value of this instance.
+
+        Because the __eq__ is overridden the __hash__ also needs to be overridden.
+
+        Returns:
+            int: The hash value.
+        """
         return super(User, self).__hash__()
 
     @validates("login")
     def _validate_login(self, key, login):
-        """validates the given login value"""
+        """Validate and format the given login value.
+
+        Args:
+            key (str): The name of the validated column.
+            login (str): The login to be validated.
+
+        Raises:
+            TypeError: If the login is not a str.
+            ValueError: If the login is an empty string after formatting.
+
+        Returns:
+            str: The validated and formatted login value.
+        """
         if login is None:
-            raise TypeError("%s.login can not be None" % self.__class__.__name__)
+            raise TypeError(f"{self.__class__.__name__}.login can not be None")
 
         login = self._format_login(login)
 
         # raise a ValueError if the login is an empty string after formatting
         if login == "":
             raise ValueError(
-                "%s.login can not be an empty string" % self.__class__.__name__
+                f"{self.__class__.__name__}.login can not be an empty string"
             )
 
-        logger.debug("name out: %s" % login)
+        logger.debug(f"name out: {login}")
 
         return login
 
     @validates("email")
     def _validate_email(self, key, email_in):
-        """validates the given email value"""
+        """Validate the given email value.
+
+        Args:
+            key (str): The name of the validated column.
+            email_in (str): The email to be validated.
+
+        Raises:
+            TypeError: If the given email is not a str.
+
+        Returns:
+            str: The validated email value.
+        """
         # check if email_in is an instance of string
         if not isinstance(email_in, string_types):
             raise TypeError(
-                "%s.email should be an instance of str not %s"
-                % (self.__class__.__name__, email_in.__class__.__name__)
+                f"{self.__class__.__name__}.email should be an instance of str not "
+                f"{email_in.__class__.__name__}"
             )
         return self._validate_email_format(email_in)
 
     def _validate_email_format(self, email_in):
-        """formats the email"""
+        """Validate the email format.
+
+        Args:
+            email_in (str): The email value to be validated.
+
+        Raises:
+            ValueError: If the email doesn't have a "@" sign in it, or it has more than
+                one "@" sign in it, or after formatting the account name part or the
+                domain name part becomes an empty string.
+
+        Returns:
+            str: The validated email value.
+        """
         # split the mail from @ sign
         splits = email_in.split("@")
         len_splits = len(splits)
@@ -600,33 +729,40 @@ class User(Entity, ACLMixin):
         # there should be one and only one @ sign
         if len_splits > 2:
             raise ValueError(
-                "check the formatting of %s.email, there are more than one @ "
-                "sign" % self.__class__.__name__
+                f"check the formatting of {self.__class__.__name__}.email, "
+                "there are more than one @ sign"
             )
 
         if len_splits < 2:
             raise ValueError(
-                "check the formatting of %s.email, there is no @ sign"
-                % self.__class__.__name__
+                f"check the formatting of {self.__class__.__name__}.email, "
+                "there is no @ sign"
             )
 
         if splits[0] == "":
             raise ValueError(
-                "check the formatting of %s.email, the name part is missing"
-                % self.__class__.__name__
+                f"check the formatting of {self.__class__.__name__}.email, "
+                "the name part is missing"
             )
 
         if splits[1] == "":
             raise ValueError(
-                "check the formatting %s.email, the domain part is missing"
-                % self.__class__.__name__
+                f"check the formatting {self.__class__.__name__}.email, "
+                "the domain part is missing"
             )
 
         return email_in
 
     @classmethod
     def _format_login(cls, login):
-        """formats the given login value"""
+        """Format the given login value.
+
+        Args:
+            login (str): The login value.
+
+        Returns:
+            str: The formatted login value.
+        """
         # strip white spaces from start and end
         login = login.strip()
 
@@ -646,19 +782,29 @@ class User(Entity, ACLMixin):
 
     @validates("password")
     def _validate_password(self, key, password_in):
-        """validates the given password
+        """Validate the given password value.
 
         Note:
-            This function was updated to support both Python 2.7 and 3.5.
-            It will now explicitly convert the base64 bytes object into
-            a string object.
+            This function was updated to support both Python 2.7 and 3.5+. It will now
+            explicitly convert the base64 bytes object into a string object.
+
+        Args:
+            key (str): The name of the validated column.
+            password_in (str): The password value.
+
+        Raises:
+            TypeError: If the given password_in is None.
+            ValueError: If the given password_in is an empty string.
+
+        Returns:
+            str: The mangled password.
         """
         if password_in is None:
-            raise TypeError("%s.password cannot be None" % self.__class__.__name__)
+            raise TypeError(f"{self.__class__.__name__}.password cannot be None")
 
         if password_in == "":
             raise ValueError(
-                "%s.password can not be an empty string" % self.__class__.__name__
+                f"{self.__class__.__name__}.password can not be an empty string"
             )
 
         # mangle the password
@@ -673,15 +819,21 @@ class User(Entity, ACLMixin):
         return mangled_password_str
 
     def check_password(self, raw_password):
-        """Checks the given raw_password.
+        """Check the given raw_password.
 
-        Checks the given raw_password with the current User object's mangled
-        password. Handles the encryption process behind the scene.
+        Check the given raw_password with the current User object's mangled password.
+        Handles the encryption process behind the scene.
 
         Note:
-            This function was updated to support both Python 2.7 and 3.5.
+            This function was updated to support both Python 2.7 and 3.5+.
             It will now compare the string (str) versions of the given
             raw_password and the current Users object encrypted password.
+
+        Args:
+            raw_password (str): The raw password.
+
+        Returns:
+            bool: If the given raw password matches the password stored in the db.
         """
         mangled_password_str = str(self.password)
         raw_password_bytes = base64.b64encode(bytes(raw_password.encode("utf-8")))
@@ -696,111 +848,176 @@ class User(Entity, ACLMixin):
 
     @validates("groups")
     def _validate_groups(self, key, group):
-        """check the given group"""
+        """Validate the given group value.
+
+        Args:
+            key (str): The name of the validated column.
+            group (Group): The :class:`.Group` instance to be validated.
+
+        Raises:
+            TypeError: If the given group arg value is not a :class:`.Group` instance.
+
+        Returns:
+            Group: The validated :class:`.Group` instance.
+        """
         if not isinstance(group, Group):
             raise TypeError(
-                "Any group in %s.groups should be an instance of "
-                "stalker.models.auth.Group not %s"
-                % (self.__class__.__name__, group.__class__.__name__)
+                f"Any group in {self.__class__.__name__}.groups should be an instance "
+                f"of stalker.models.auth.Group not {group.__class__.__name__}"
             )
 
         return group
 
     @validates("tasks")
     def _validate_tasks(self, key, task):
-        """validates the given tasks attribute"""
+        """Validate the given tasks attribute.
+
+        Args:
+            key (str): The name of the validated column.
+            task (stalker.models.task.Task): The :class:`stalker.models.task.Task`
+                instance to be validated.
+
+        Raises:
+            TypeError: If the given task arg value is not a
+                :class:`stalker.models.task.Task` instance.
+
+        Returns:
+            Task: The validated :class:`stalker.models.task.Task` instance.
+        """
         from stalker.models.task import Task
 
         if not isinstance(task, Task):
             raise TypeError(
-                "Any element in %s.tasks should be an instance of "
-                "stalker.models.task.Task not %s"
-                % (self.__class__.__name__, task.__class__.__name__)
+                f"Any element in {self.__class__.__name__}.tasks should be an instance "
+                f"of stalker.models.task.Task not {task.__class__.__name__}"
             )
         return task
 
     @validates("watching")
     def _validate_watching(self, key, task):
-        """validates the given watching attribute"""
+        """Validate the given watching attribute.
+
+        Args:
+            key (str): The name of the validated column.
+            task (stalker.models.task.Task): The :class:`stalker.models.task.Task`
+                instance that the user will watch.
+
+        Raises:
+            TypeError: If the given task arg value is not a
+                :class:`stalker.models.task.Task` instance.
+
+        Returns:
+            Task: The validated :class:`stalker.models.task.Task` instance.
+        """
         from stalker.models.task import Task
 
         if not isinstance(task, Task):
             raise TypeError(
-                "Any element in %s.watching should be an instance of "
-                "stalker.models.task.Task not %s"
-                % (self.__class__.__name__, task.__class__.__name__)
+                f"Any element in {self.__class__.__name__}.watching should be an "
+                f"instance of stalker.models.task.Task not {task.__class__.__name__}"
             )
         return task
 
     @validates("vacations")
     def _validate_vacations(self, key, vacation):
-        """validates the given vacation value"""
+        """Validate the given vacation value.
+
+        Args:
+            key (str): The name of the validated column.
+            vacation (stalker.models.studio.Vacation): The
+                :class:`stalker.models.studio.Vacation` instance.
+
+        Raises:
+            TypeError: If the given vacation argument value is not a
+                :class:`stalker.models.vacation.Vacation` instance.
+
+        Returns:
+            Vacation: The validated vacation value.
+        """
         from stalker.models.studio import Vacation
 
         if not isinstance(vacation, Vacation):
             raise TypeError(
-                "All of the elements in %s.vacations should be a "
-                "stalker.models.studio.Vacation instance, not %s"
-                % (self.__class__.__name__, vacation.__class__.__name__)
+                f"All of the elements in {self.__class__.__name__}.vacations should be "
+                "a stalker.models.studio.Vacation instance, "
+                f"not {vacation.__class__.__name__}"
             )
         return vacation
 
     @validates("efficiency")
     def _validate_efficiency(self, key, efficiency):
-        """validates the given efficiency value"""
+        """Validate the given efficiency value.
+
+        Args:
+            key (str): The name of the validated column.
+            efficiency (Union[int, float, None]): The efficiency of this User instance.
+                This shows how efficient the user works. It is a number between 0-1. If
+                None given, a default value of 1.0 will be used.
+
+        Raises:
+            TypeError: If the given efficiency is not one of [None, int, float].
+            ValueError: If the given efficiency is a negative value.
+
+        Returns:
+            float: The validated efficiency value.
+        """
         if efficiency is None:
             efficiency = 1.0
 
         if not isinstance(efficiency, (int, float)):
             raise TypeError(
-                "%(class)s.efficiency should be a float number greater or "
-                "equal to 0.0, not %(efficiency_class)s"
-                % {
-                    "class": self.__class__.__name__,
-                    "efficiency_class": efficiency.__class__.__name__,
-                }
+                f"{self.__class__.__name__}.efficiency should be a float number "
+                f"greater or equal to 0.0, not {efficiency.__class__.__name__}"
             )
 
         if efficiency < 0:
             raise ValueError(
-                "%(class)s.efficiency should be a float number greater or "
-                "equal to 0.0, not %(efficiency)s"
-                % {"class": self.__class__.__name__, "efficiency": efficiency}
+                f"{self.__class__.__name__}.efficiency should be a float number "
+                f"greater or equal to 0.0, not {efficiency}"
             )
 
         return efficiency
 
     @validates("rate")
     def _validate_rate(self, key, rate):
-        """validates the given rate value"""
+        """Validate the given rate value.
+
+        Args:
+            key (str): The name of the validated column.
+            rate (Union[int, float]): An int or float value representing the User hourly
+                rate.
+
+        Raises:
+            TypeError: If the given rate is not an int or float.
+            ValueError: If the given rate is a negative number.
+
+        Returns:
+            Union[int, float]: The validated rate value.
+        """
         if rate is None:
             rate = 0.0
 
         if not isinstance(rate, (int, float)):
             raise TypeError(
-                "%(class)s.rate should be a float number greater or "
-                "equal to 0.0, not %(rate_class)s"
-                % {
-                    "class": self.__class__.__name__,
-                    "rate_class": rate.__class__.__name__,
-                }
+                f"{self.__class__.__name__}.rate should be a float number greater or "
+                f"equal to 0.0, not {rate.__class__.__name__}"
             )
 
         if rate < 0:
             raise ValueError(
-                "%(class)s.rate should be a float number greater or "
-                "equal to 0.0, not %(rate)s"
-                % {"class": self.__class__.__name__, "rate": rate}
+                f"{self.__class__.__name__}.rate should be a float number greater or "
+                f"equal to 0.0, not {rate}"
             )
 
         return rate
 
     @property
     def tickets(self):
-        """The list of :class:`.Ticket` s that this user has.
+        """Return the list of :class:`.Ticket` s that this user has.
 
-        returns a list of :class:`.Ticket` instances
-        which this user is the owner of.
+        Returns:
+            List[Ticket]: The list of :class:`.Ticket` instances which this user is the
+                owner of.
         """
         # do it with sqlalchemy
         from stalker import Ticket
@@ -809,10 +1026,11 @@ class User(Entity, ACLMixin):
 
     @property
     def open_tickets(self):
-        """The list of open :class:`.Ticket` s that this user has.
+        """Return the list of open :class:`.Ticket` s that this user has.
 
-        returns a list of :class:`.Ticket` instances which has a status of
-        `Open` that this user is assigned as the owner.
+        Returns:
+             List[Ticket]: A list of :class:`.Ticket` instances which are not closed and
+                this user is assigned as the owner.
         """
         from stalker import Ticket, Status
 
@@ -825,10 +1043,13 @@ class User(Entity, ACLMixin):
 
     @property
     def to_tjp(self):
-        """outputs a TaskJuggler formatted string"""
-        from jinja2 import Template
-        from stalker import defaults
+        """Return a TaskJuggler compatible str representation of this User instance.
 
+        Uses the ``defaults.tjp_user_template`` value.
+
+        Returns:
+            str: The TaskJuggler compatible representation of this User instance.
+        """
         temp = Template(defaults.tjp_user_template, trim_blocks=True)
         return temp.render({"user": self})
 
@@ -850,7 +1071,17 @@ class LocalSession(object):
 
     @classmethod
     def default_json_serializer(cls, obj):
-        """default serializer for json data"""
+        """Convert the given object to JSON serializable format.
+
+        This is the default serializer for json data
+
+        Args:
+            obj (Union[datetime.datetime, User, int]): Either a ``datetime.datetime``
+                or :class:`.User` or an int value.
+
+        Returns:
+            int: The int correspondence of the given data.
+        """
         if isinstance(obj, datetime.datetime):
             return cls.datetime_to_millis(obj)
         elif isinstance(obj, User):
@@ -860,15 +1091,19 @@ class LocalSession(object):
 
     @classmethod
     def datetime_to_millis(cls, dt):
-        """Default JSON serializer for datetime objects.
+        """Calculate the milliseconds since epoch for the given datetime value.
 
-        code is based on the answer of Jay Taylor in
+        This is used as the default JSON serializer for datetime objects.
+
+        Code is based on the answer of Jay Taylor in
         http://stackoverflow.com/questions/11875770/how-to-overcome-datetime-datetime-not-json-serializable-in-python
 
-        :param dt: datetime.datetime instance
-        """
-        import calendar
+        Args:
+            dt (datetime.datetime): The ``datetime.datetime`` instance.
 
+        Returns:
+            int: The int value of milliseconds since epoch.
+        """
         if isinstance(dt, datetime.datetime):
             if dt.utcoffset() is not None:
                 dt = dt - dt.utcoffset()
@@ -877,15 +1112,20 @@ class LocalSession(object):
 
     @classmethod
     def millis_to_datetime(cls, millis):
-        """
-        :param int millis: an int value showing the millis from unix EPOCH
-        :return:
+        """Calculate the datetime from the given milliseconds value.
+
+        Args:
+            millis (int): An int value showing the millis from unix EPOCH
+
+        Returns:
+            datetime.datetime: The corresponding ``datetime.datetime`` instance to the
+                given milliseconds.
         """
         epoch = datetime.datetime(1970, 1, 1, tzinfo=pytz.utc)
         return epoch + datetime.timedelta(milliseconds=millis)
 
     def load(self):
-        """loads the data from the saved local session"""
+        """Load the data from the saved local session."""
         try:
             with open(LocalSession.session_file_full_path(), "r") as s:
                 # try:
@@ -900,30 +1140,35 @@ class LocalSession(object):
 
     @property
     def logged_in_user(self):
-        """returns the logged in user"""
+        """Return the logged-in user.
+
+        Returns:
+            User: The logged-in user.
+        """
         return User.query.filter_by(id=self.logged_in_user_id).first()
 
     def store_user(self, user):
-        """stores the given user instance
+        """Store the given user instance.
 
-        :param user: The user instance.
+        Args:
+            user (User): The :class:`.User` instance.
         """
         if user:
             self.logged_in_user_id = user.id
 
     def save(self):
-        """remembers the data in user local file system"""
+        """Remember the data in user local file system."""
         self.valid_to = datetime.datetime.now(pytz.utc) + datetime.timedelta(days=10)
         # serialize self
         dumped_data = json.dumps(
             {"valid_to": self.valid_to, "logged_in_user_id": self.logged_in_user_id},
             default=self.default_json_serializer,
         )
-        logger.debug("dumped session data : %s" % dumped_data)
+        logger.debug(f"dumped session data : {dumped_data}")
         self._write_data(dumped_data)
 
     def delete(self):
-        """removes the cache file"""
+        """Remove the cache file."""
         try:
             os.remove(self.session_file_full_path())
         except OSError:
@@ -931,11 +1176,11 @@ class LocalSession(object):
 
     @classmethod
     def session_file_full_path(cls):
-        """
-        :return str: the session file full path
-        """
-        from stalker import defaults
+        """Return the session file full path.
 
+        Returns:
+            str: The session file full path.
+        """
         return os.path.normpath(
             os.path.join(
                 defaults.local_storage_path, defaults.local_session_data_file_name
@@ -943,10 +1188,11 @@ class LocalSession(object):
         )
 
     def _write_data(self, data):
-        """Writes the given data to the local session file
+        """Write the given data to the local session file.
 
-        :param data: the data to be written (generally serialized LocalSession
-          class itself)
+        Args:
+            data (str): The data to be written (generally serialized LocalSession class
+                itself)
         """
         file_full_path = self.session_file_full_path()
 
@@ -991,21 +1237,48 @@ class Role(Entity):
 
 
 def create_department_user(department):
-    """helper function to create DepartmentUser instance on association proxy"""
+    """Create DepartmentUser instance on association proxy.
+
+    Args:
+        department (stalker.models.department.Department): The
+            :class:`stalker.models.department.Department` instance.
+
+    Returns:
+        stalker.models.department.DepartmentUser: The
+            :class:`stalker.models.department.DepartmentUser` instance.
+    """
     from stalker.models.department import DepartmentUser
 
     return DepartmentUser(department=department)
 
 
 def create_client_user(client):
-    """helper function to create ClientUser instance on association proxy"""
+    """Create ClientUser instance on association proxy.
+
+    Args:
+        client (stalker.models.client.Client): The
+            :class:`stalker.models.project.Project` instance.
+
+    Returns:
+        stalker.models.client.ClientUser: The
+            :class:`stalker.models.client.ClientUser` instance.
+    """
     from stalker.models.client import ClientUser
 
     return ClientUser(client=client)
 
 
 def create_project_user(project):
-    """helper function to create ProjectUser instance on association proxy"""
+    """Create ProjectUser instance on association proxy.
+
+    Args:
+        project (stalker.models.project.Project): The
+            :class:`stalker.models.project.Project` instance.
+
+    Returns:
+        stalker.models.project.ProjectUser: The
+            :class:`stalker.models.project.ProjectUser` instance.
+    """
     from stalker.models.project import ProjectUser
 
     return ProjectUser(project=project)
@@ -1050,49 +1323,87 @@ class AuthenticationLog(SimpleEntity):
         self.action = action
 
     def __lt__(self, other):
-        """make this orderable"""
+        """Make this object order-able.
+
+        Args:
+            other (.AuthenticationLog): The other :class:`.AuthenticationLog` instance.
+
+        Returns:
+            Tuple(str, str): The str key to be used for ordering.
+        """
         return (
-            "%s %s %s" % (self.date, self.action, self.user.name),
-            "%s %s %s" % (other.date, other.action, other.user.name),
+            "{} {} {}".format(self.date, self.action, self.user.name),
+            "{} {} {}".format(other.date, other.action, other.user.name),
         )
 
     @validates("user")
     def __validate_user__(self, key, user):
-        """validates the given user argument value"""
+        """Validate the given user argument value.
+
+        Args:
+            key (str): The name of the validated column.
+            user (User): The :class:`.User` instance to be validated.
+
+        Raises:
+            TypeError: If the given user args is not a :class:`.User` instance.
+
+        Returns:
+            .User: The validated :class:`.User` instance.
+        """
         if not isinstance(user, User):
             raise TypeError(
-                "%s.user should be a User instance, not %s"
-                % (self.__class__.__name__, user.__class__.__name__)
+                f"{self.__class__.__name__}.user should be a User instance, "
+                f"not {user.__class__.__name__}"
             )
 
         return user
 
     @validates("action")
     def __validate_action__(self, key, action):
-        """validates the given action argument value"""
-        if action is None:
-            import copy
+        """Validate the given action argument value.
 
+        Args:
+            key (str): The name of the validated column.
+            action (str): One of LOGIN or LOGOUT enum values.
+
+        Raises:
+            ValueError: If the given value is not one of LOGIN or LOGOUT.
+
+        Returns:
+            str: The validated action value.
+        """
+        if action is None:
             action = copy.copy(LOGIN)
 
         if action not in [LOGIN, LOGOUT]:
             raise ValueError(
-                '%s.action should be one of "login" or "logout", not "%s"'
-                % (self.__class__.__name__, action)
+                f'{self.__class__.__name__}.action should be one of "login" or '
+                f'"logout", not "{action}"'
             )
 
         return action
 
     @validates("date")
     def __validate_date__(self, key, date):
-        """validates the given date value"""
+        """Validate the given date value.
+
+        Args:
+            key (str): The name of the validated column.
+            date (datetime.datetime): The datetime.datetime instance.
+
+        Raises:
+            TypeError: If the given date is not a datetime.datetime instance.
+
+        Returns:
+            datetime.datetime: Returns the validated datetime.datetime instance.
+        """
         if date is None:
             date = datetime.datetime.now(pytz.utc)
 
         if not isinstance(date, datetime.datetime):
             raise TypeError(
-                '%s.date should be a "datetime.datetime" instance, not %s'
-                % (self.__class__.__name__, date.__class__.__name__)
+                f'{self.__class__.__name__}.date should be a "datetime.datetime" '
+                f'instance, not {date.__class__.__name__}'
             )
 
         return date
