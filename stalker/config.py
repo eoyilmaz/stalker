@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import os
 import datetime
+import os
+import sys
 
 from stalker import log
 
@@ -19,17 +20,19 @@ class ConfigBase(object):
     def __init__(self):
         self.config_values = self.default_config_values.copy()
         self.user_config = {}
-
-        # the priority order is
-        # stalker.config
-        # config.py under .stalker_rc directory
-        # config.py under $STALKER_PATH
-
         self._parse_settings()
 
-    def _parse_settings(self):
-        # for now just use $STALKER_PATH
+    def _parse_settings(self) -> None:
+        """Parse the settings.
 
+        The priority order is:
+
+            stalker.config
+            config.py under .stalker_rc directory
+            config.py under $STALKER_PATH
+
+        """
+        # for now just use $STALKER_PATH
         # try to get the environment variable
         if self.env_key not in os.environ:
             # don't do anything
@@ -112,8 +115,8 @@ class Config(ConfigBase):
         local_session_data_file_name="local_session_data",
         # Storage for uploaded files
         server_side_storage_path=os.path.expanduser("~/Stalker_Storage"),
-        repo_env_var_template="REPO%(code)s",
-        repo_env_var_template_old="REPO%(id)s",
+        repo_env_var_template="REPO{code}",
+        repo_env_var_template_old="REPO{id}",
         #
         # Tells Stalker to create an admin by default
         #
@@ -391,7 +394,7 @@ taskreport breakdown "{{csv_file_name}}"{
     timeformat "%Y-%m-%d-%H:%M"
     columns id, start, end {%- if compute_resources %}, resources{% endif %}
 }""",
-        tj_command="tj3" if os.name == "nt" else "/usr/local/bin/tj3",
+        tj_command="tj3" if sys.platform == "win32" else "/usr/local/bin/tj3",
         path_template="{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}",
         filename_template='{{task.entity_type}}_{{task.id}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}',
         # --------------------------------------------
