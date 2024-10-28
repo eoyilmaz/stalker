@@ -2,7 +2,7 @@
 """Tests related to the Repository class."""
 
 import os
-import platform
+import sys
 
 import pytest
 
@@ -1115,12 +1115,10 @@ def test_find_repo_is_working_properly(setup_repository_db_tests):
     assert Repository.find_repo(test_path) == new_repo1
 
 
+@pytest.mark.skipif(sys.platform != "win32", reason="Test under Windows only!")
 def test_find_repo_is_case_insensitive_under_windows(setup_repository_db_tests):
-    """find_repo class method is case-insensitive under windows."""
+    """find_repo() is case-insensitive under windows."""
     data = setup_repository_db_tests
-    if platform.platform() != "Windows":
-        pytest.skip("Test under Windows only!")
-
     DBSession.add(data["test_repo"])
     DBSession.commit()
 
@@ -1135,10 +1133,10 @@ def test_find_repo_is_case_insensitive_under_windows(setup_repository_db_tests):
     DBSession.add(new_repo1)
     DBSession.commit()
 
-    test_path = "%s/some/path/to/a/file.ma" % data["test_repo"].path.lower()
+    test_path = "{}/some/path/to/a/file.ma".format(data["test_repo"].path.lower())
     assert Repository.find_repo(test_path) == data["test_repo"]
 
-    test_path = "%s/some/path/to/a/file.ma" % new_repo1.windows_path.lower()
+    test_path = "{}/some/path/to/a/file.ma".format(new_repo1.windows_path.lower())
     assert Repository.find_repo(test_path) == new_repo1
 
 
