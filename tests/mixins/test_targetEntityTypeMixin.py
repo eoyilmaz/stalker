@@ -98,6 +98,7 @@ def test_target_entity_type_attribute_is_read_only(setup_target_entity_mixin_tes
 
     assert str(cm.value) == error_message
 
+
 def test_target_entity_type_argument_accepts_classes(setup_target_entity_mixin_tests):
     """target_entity_type argument accepts classes."""
     data = setup_target_entity_mixin_tests

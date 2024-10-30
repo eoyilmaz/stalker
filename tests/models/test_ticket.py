@@ -422,6 +422,7 @@ def test_project_attribute_is_read_only(setup_ticket_tests):
 
 # STATUSES
 
+
 # resolve
 def test_resolve_method_will_change_the_status_from_new_to_closed_and_creates_a_log(
     setup_ticket_tests,

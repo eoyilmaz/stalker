@@ -1002,8 +1002,8 @@ def test_to_os_independent_path_is_working_properly(setup_repository_db_tests):
     DBSession.add(data["test_repo"])
     DBSession.commit()
     relative_part = "some/path/to/a/file.ma"
-    test_path = "%s/%s" % (data["test_repo"].path, relative_part)
-    assert Repository.to_os_independent_path(test_path) == "$REPO%s/%s" % (
+    test_path = "{}/{}".format(data["test_repo"].path, relative_part)
+    assert Repository.to_os_independent_path(test_path) == "$REPO{}/{}".format(
         data["test_repo"].code,
         relative_part,
     )
@@ -1033,7 +1033,9 @@ def test_to_os_independent_path_method_converts_the_given_linux_path_to_universa
     data["test_repo"].windows_path = "T:/Stalker_Projects"
     data["test_repo"].osx_path = "/Volumes/T/Stalker_Projects"
     result = data["test_repo"].to_os_independent_path(linux_path)
-    assert result == "$REPO%s/Sero/Task1/Task2/Some_file.ma" % data["test_repo"].code
+    assert result == (
+        "$REPO{}/Sero/Task1/Task2/Some_file.ma".format(data["test_repo"].code)
+    )
 
 
 def test_to_os_independent_path_method_converts_the_given_osx_path_to_universal(
@@ -1045,7 +1047,9 @@ def test_to_os_independent_path_method_converts_the_given_osx_path_to_universal(
     osx_path = "/Volumes/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma"
     data["test_repo"].osx_path = "/Volumes/T/Stalker_Projects"
     result = data["test_repo"].to_os_independent_path(osx_path)
-    assert result == "$REPO%s/Sero/Task1/Task2/Some_file.ma" % data["test_repo"].code
+    assert result == (
+        "$REPO{}/Sero/Task1/Task2/Some_file.ma".format(data["test_repo"].code)
+    )
 
 
 def test_to_os_independent_path_method_converts_the_given_windows_path_to_universal(
@@ -1107,10 +1111,10 @@ def test_find_repo_is_working_properly(setup_repository_db_tests):
     DBSession.add(new_repo1)
     DBSession.commit()
 
-    test_path = "%s/some/path/to/a/file.ma" % data["test_repo"].path
+    test_path = "{}/some/path/to/a/file.ma".format(data["test_repo"].path)
     assert Repository.find_repo(test_path) == data["test_repo"]
 
-    test_path = "%s/some/path/to/a/file.ma" % new_repo1.windows_path
+    test_path = "{}/some/path/to/a/file.ma".format(new_repo1.windows_path)
     assert Repository.find_repo(test_path) == new_repo1
 
 
@@ -1156,11 +1160,11 @@ def test_find_repo_is_working_properly_with_reverse_slashes(setup_repository_db_
     DBSession.add(new_repo1)
     DBSession.commit()
 
-    test_path = "%s\\some\\path\\to\\a\\file.ma" % data["test_repo"].path
+    test_path = "{}\\some\\path\\to\\a\\file.ma".format(data["test_repo"].path)
     test_path.replace("/", "\\")
     assert Repository.find_repo(test_path) == data["test_repo"]
 
-    test_path = "%s\\some\\path\\to\\a\\file.ma" % new_repo1.windows_path.lower()
+    test_path = "{}\\some\\path\\to\\a\\file.ma".format(new_repo1.windows_path.lower())
     test_path.replace("/", "\\")
     assert Repository.find_repo(test_path) == new_repo1
 
@@ -1220,7 +1224,9 @@ def test_creating_and_committing_a_new_repository_instance_will_create_env_var(
     assert defaults.repo_env_var_template.format(code=repo.code) in os.environ
 
     # check the old ID based env var
-    assert os.environ[defaults.repo_env_var_template_old.format(id=repo.id)] == repo.path
+    assert (
+        os.environ[defaults.repo_env_var_template_old.format(id=repo.id)] == repo.path
+    )
 
 
 def test_updating_a_repository_will_update_repo_path(setup_repository_db_tests):

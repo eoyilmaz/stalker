@@ -626,7 +626,7 @@ def test_active_projects_attribute_is_read_only(setup_studio_db_tests):
         data["test_studio"].active_projects = [data["test_project1"]]
 
     error_message = (
-       "can't set attribute 'active_projects'"
+        "can't set attribute 'active_projects'"
         if sys.version_info.minor < 11
         else "property 'active_projects' of 'Studio' object has no setter"
     )

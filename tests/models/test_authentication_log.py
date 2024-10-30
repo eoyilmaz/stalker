@@ -213,7 +213,7 @@ def test_date_argument_is_not_a_datetime_instance(setup_authentication_log_tests
             user=data["test_user1"], action=LOGIN, date="not a datetime instance"
         )
     assert str(cm.value) == (
-        'AuthenticationLog.date should be a datetime.datetime instance, '
+        "AuthenticationLog.date should be a datetime.datetime instance, "
         "not str: 'not a datetime instance'"
     )
 
@@ -228,7 +228,7 @@ def test_date_attribute_is_not_a_datetime_instance(setup_authentication_log_test
         uli.date = "not a datetime instance"
 
     assert str(cm.value) == (
-        'AuthenticationLog.date should be a datetime.datetime instance, '
+        "AuthenticationLog.date should be a datetime.datetime instance, "
         "not str: 'not a datetime instance'"
     )
 

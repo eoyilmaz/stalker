@@ -1110,7 +1110,7 @@ def test_TaskMixin_initialization(setup_shot_db_tests):
 def test__repr__(setup_shot_db_tests):
     """representation of Shot."""
     data = setup_shot_db_tests
-    assert data["test_shot"].__repr__() == "<Shot (%s, %s)>" % (
+    assert data["test_shot"].__repr__() == "<Shot ({}, {})>".format(
         data["test_shot"].code,
         data["test_shot"].code,
     )

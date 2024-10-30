@@ -402,8 +402,8 @@ class StatusMixin(object):
             status = self.status_list[status]
 
         # check if the given status is in the status_list
-        # logger.debug('self.status_list: %s' % self.status_list)
-        # logger.debug('given status: %s' % status)
+        # logger.debug(f'self.status_list: {self.status_list}')
+        # logger.debug(f'given status: {status}')
 
         if status not in self.status_list:
             raise ValueError(
@@ -666,9 +666,9 @@ class DateRangeMixin(object):
             Tuple(datetime.datetime, datetime.datetime, datetime.timedelta): The
                 validated and calculated start, end dates and duration value.
         """
-        # logger.debug('start    : %s' % start)
-        # logger.debug('end      : %s' % end)
-        # logger.debug('duration : %s' % duration)
+        # logger.debug(f"start    : {start}")
+        # logger.debug(f"end      : {end}")
+        # logger.debug(f"duration : {duration}")
         if not isinstance(start, datetime.datetime):
             start = None
 

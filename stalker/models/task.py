@@ -2919,9 +2919,9 @@ class Task(
         #             join "Tasks" as "Dependent_Tasks"
         #                 on "Task_Dependencies".depends_to_id = "Dependent_Tasks".id
         #             join "Statuses" on "Dependent_Tasks".status_id = "Statuses".id
-        #         where "Tasks".id = %s
+        #         where "Tasks".id = {}
         #         group by "Statuses".code
-        #     """ % self.id
+        #     """.format(self.id)
         #
         #     result = DBSession.connection().execute(sql_query)
         #

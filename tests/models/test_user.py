@@ -1225,7 +1225,7 @@ def test_open_tickets_attribute_returns_all_open_tickets_owned_by_this_user(
 def test_tjp_id_is_working_properly(setup_user_db_tests):
     """tjp_id is working properly."""
     data = setup_user_db_tests
-    assert data["test_user"].tjp_id == "User_%s" % data["test_user"].id
+    assert data["test_user"].tjp_id == "User_{}".format(data["test_user"].id)
 
 
 def test_to_tjp_is_working_properly(setup_user_db_tests):
@@ -1259,11 +1259,11 @@ def test_to_tjp_is_working_properly_for_a_user_with_vacations(setup_user_db_test
         end=datetime.datetime(2013, 7, 15, 0, 0, tzinfo=pytz.utc),
     )
 
-    expected_tjp = """resource User_%s "User_%s" {
+    expected_tjp = """resource User_{} "User_{}" {
     efficiency 1.0
     vacation 2013-06-07-00:00:00 - 2013-06-21-00:00:00
     vacation 2013-07-01-00:00:00 - 2013-07-15-00:00:00
-}""" % (
+}""".format(
         data["test_user"].id,
         data["test_user"].id,
     )

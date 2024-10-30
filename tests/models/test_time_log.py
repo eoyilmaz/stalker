@@ -359,7 +359,7 @@ def test_overbooked_error_1(setup_time_log_db_tests):
     with pytest.raises(OverBookedError) as cm:
         TimeLog(**kwargs)
 
-    assert str(cm.value) == "The resource has another TimeLog between %s and %s" % (
+    assert str(cm.value) == "The resource has another TimeLog between {} and {}".format(
         time_log1.start,
         time_log1.end,
     )
@@ -388,7 +388,7 @@ def test_overbooked_error_2(setup_time_log_db_tests):
     with pytest.raises(OverBookedError) as cm:
         TimeLog(**kwargs)
 
-    assert str(cm.value) == "The resource has another TimeLog between %s and %s" % (
+    assert str(cm.value) == "The resource has another TimeLog between {} and {}".format(
         time_log1.start,
         time_log1.end,
     )
@@ -417,7 +417,7 @@ def test_overbooked_error_3(setup_time_log_db_tests):
     with pytest.raises(OverBookedError) as cm:
         TimeLog(**kwargs)
 
-    assert str(cm.value) == "The resource has another TimeLog between %s and %s" % (
+    assert str(cm.value) == "The resource has another TimeLog between {} and {}".format(
         time_log1.start,
         time_log1.end,
     )
@@ -451,7 +451,7 @@ def test_overbooked_error_4(setup_time_log_db_tests):
         TimeLog(**kwargs)
 
     local_tz = tzlocal.get_localzone()
-    assert str(cm.value) == "The resource has another TimeLog between %s and %s" % (
+    assert str(cm.value) == "The resource has another TimeLog between {} and {}".format(
         datetime.datetime(2013, 3, 20, 4, 0, tzinfo=pytz.utc).astimezone(local_tz),
         (
             datetime.datetime(2013, 3, 20, 4, 0, tzinfo=pytz.utc)
@@ -489,7 +489,7 @@ def test_overbooked_error_5(setup_time_log_db_tests):
         TimeLog(**kwargs)
 
     local_tz = tzlocal.get_localzone()
-    assert str(cm.value) == "The resource has another TimeLog between %s and %s" % (
+    assert str(cm.value) == "The resource has another TimeLog between {} and {}".format(
         datetime.datetime(2013, 3, 22, 4, 0, tzinfo=pytz.utc).astimezone(local_tz),
         datetime.datetime(2013, 4, 1, 4, 0, tzinfo=pytz.utc).astimezone(local_tz),
     )
@@ -524,7 +524,7 @@ def test_overbooked_error_6(setup_time_log_db_tests):
         TimeLog(**kwargs)
 
     local_tz = tzlocal.get_localzone()
-    assert str(cm.value) == "The resource has another TimeLog between %s and %s" % (
+    assert str(cm.value) == "The resource has another TimeLog between {} and {}".format(
         datetime.datetime(2013, 3, 22, 4, 0, tzinfo=pytz.utc).astimezone(local_tz),
         datetime.datetime(2013, 4, 6, 4, 0, tzinfo=pytz.utc).astimezone(local_tz),
     )
@@ -559,7 +559,7 @@ def test_overbooked_error_7(setup_time_log_db_tests):
         TimeLog(**kwargs)
 
     local_tz = tzlocal.get_localzone()
-    assert str(cm.value) == "The resource has another TimeLog between %s and %s" % (
+    assert str(cm.value) == "The resource has another TimeLog between {} and {}".format(
         datetime.datetime(2013, 3, 17, 4, 0, tzinfo=pytz.utc).astimezone(local_tz),
         datetime.datetime(2013, 4, 1, 4, 0, tzinfo=pytz.utc).astimezone(local_tz),
     )
@@ -1011,15 +1011,13 @@ def test_time_log_creation_that_violates_dependency_condition_wip_cmpl_onend(
             datetime.datetime(2014, 3, 25, 19, 0, tzinfo=pytz.utc),
         )
 
-    assert (
-        "It is not possible to create a TimeLog before %s, which "
-        'violates the dependency relation of "%s" to "%s"'
-        % (
+    assert str(cm.value) == (
+        "It is not possible to create a TimeLog before {}, which "
+        'violates the dependency relation of "{}" to "{}"'.format(
             datetime.datetime(2014, 3, 25, 19, 0, tzinfo=pytz.utc),
             dep_task.name,
             task.name,
         )
-        == str(cm.value)
     )
 
     # and creating a TimeLog after that is possible
@@ -1071,15 +1069,13 @@ def test_time_log_creation_that_violates_dependency_condition_wip_cmpl_onstart(
             datetime.datetime(2014, 3, 16, 10, 0, tzinfo=pytz.utc),
         )
 
-    assert (
-        "It is not possible to create a TimeLog before %s, which "
-        'violates the dependency relation of "%s" to "%s"'
-        % (
+    assert str(cm.value) == (
+        "It is not possible to create a TimeLog before {}, which "
+        'violates the dependency relation of "{}" to "{}"'.format(
             datetime.datetime(2014, 3, 16, 10, 0, tzinfo=pytz.utc),
             dep_task.name,
             task.name,
         )
-        == str(cm.value)
     )
 
     # and creating a TimeLog after that is possible

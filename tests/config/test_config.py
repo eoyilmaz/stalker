@@ -40,7 +40,7 @@ def test_config_variable_updates_with_user_config(prepare_config_file):
     config_file.writelines(
         [
             "#-*- coding: utf-8 -*-\n",
-            'database_engine_settings = "%s"\n' % test_value,
+            f'database_engine_settings = "{test_value}"\n',
         ]
     )
     config_file.close()

@@ -273,6 +273,7 @@ def test_daily_status_initialization(setup_postgresql_db):
 
 def test_register_creates_suitable_permissions(setup_postgresql_db):
     """stalker.db.register is able to create suitable Permissions."""
+
     # create a new dummy class
     class TestClass(object):
         pass
@@ -282,7 +283,7 @@ def test_register_creates_suitable_permissions(setup_postgresql_db):
     # now check if the TestClass entry is created in Permission table
     permissions_db = Permission.query.filter(Permission.class_name == "TestClass").all()
 
-    logger.debug("%s" % permissions_db)
+    logger.debug(f"{permissions_db}")
 
     actions = defaults.actions
 
@@ -349,9 +350,9 @@ def test_permissions_created_for_all_the_classes(setup_postgresql_db):
         assert permission.access in ["Allow", "Deny"]
         assert permission.action in defaults.actions
         assert permission.class_name in class_names
-        logger.debug("permission.access: %s" % permission.access)
-        logger.debug("permission.action: %s" % permission.action)
-        logger.debug("permission.class_name: %s" % permission.class_name)
+        logger.debug(f"permission.access: {permission.access}")
+        logger.debug(f"permission.action: {permission.action}")
+        logger.debug(f"permission.class_name: {permission.class_name}")
 
 
 def test_permissions_not_created_over_and_over_again(setup_postgresql_db):
@@ -814,9 +815,8 @@ def test_alembic_version_mismatch(setup_postgresql_db):
     with pytest.raises(ValueError) as cm:
         stalker.db.setup.setup(data["config"])
 
-    assert (
-            str(cm.value)
-            == "Please update the database to version: %s" % stalker.db.setup.alembic_version
+    assert str(cm.value) == (
+        f"Please update the database to version: {stalker.db.setup.alembic_version}"
     )
 
     # also it is not possible to continue with the current DBSession
@@ -836,15 +836,14 @@ def test_alembic_version_mismatch(setup_postgresql_db):
     with pytest.raises(ValueError) as cm:
         stalker.db.setup.setup(data["config"])
 
-    assert (
-            str(cm.value) == "Please update the database to version: "
-        "%s" % stalker.db.setup.alembic_version
+    assert str(cm.value) == (
+        f"Please update the database to version: {stalker.db.setup.alembic_version}"
     )
 
     # rollback and insert the correct alembic version number
     DBSession.rollback()
 
-    sql = "update alembic_version set version_num='%s'" % alembic_version
+    sql = f"update alembic_version set version_num='{alembic_version}'"
     DBSession.connection().execute(sql)
     DBSession.commit()
 
@@ -869,14 +868,14 @@ def test_initialization_of_repo_environment_variables(setup_postgresql_db):
     # remove any auto created repo vars
     for repo in all_repos:
         try:
-            os.environ.pop("REPO%s" % repo.code)
+            os.environ.pop(f"REPO{repo.code}")
         except KeyError:
             pass
 
     # check if all removed
     for repo in all_repos:
         # check if environment vars are created
-        assert ("REPO%s" % repo.code) not in os.environ
+        assert (f"REPO{repo.code}") not in os.environ
 
     # remove db connection
     DBSession.remove()
@@ -888,7 +887,7 @@ def test_initialization_of_repo_environment_variables(setup_postgresql_db):
 
     for repo in all_repos:
         # check if environment vars are created
-        assert ("REPO%s" % repo.code) in os.environ
+        assert (f"REPO{repo.code}") in os.environ
 
 
 def test_db_init_with_studio_instance(setup_postgresql_db):
@@ -1056,13 +1055,12 @@ def test_persistence_of_asset(setup_postgresql_db):
     }
 
     test_asset = Asset(**kwargs)
-    # logger.debug('test_asset.project : %s' % test_asset.project)
+    # logger.debug(f'test_asset.project : {test_asset.project}')
 
     DBSession.add(test_asset)
     DBSession.commit()
 
-    # logger.debug('test_asset.project (after commit): %s' %
-    #              test_asset.project)
+    # logger.debug(f'test_asset.project (after commit): {test_asset.project}')
 
     test_task1 = Task(
         name="test task 1",

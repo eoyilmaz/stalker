@@ -2636,7 +2636,7 @@ def test_tjp_id_attr_is_working_properly_for_a_root_task(setup_task_tests):
     kwargs = copy.copy(data["kwargs"])
     kwargs["parent"] = None
     new_task = Task(**kwargs)
-    assert new_task.tjp_id == "Task_%s" % new_task.id
+    assert new_task.tjp_id == f"Task_{new_task.id}"
 
 
 def test_tjp_id_attr_is_working_properly_for_a_leaf_task(setup_task_tests):
@@ -2647,7 +2647,7 @@ def test_tjp_id_attr_is_working_properly_for_a_leaf_task(setup_task_tests):
     kwargs["parent"] = new_task1
     kwargs["depends"] = None
     new_task2 = Task(**kwargs)
-    assert new_task2.tjp_id == "Task_%s" % new_task2.id
+    assert new_task2.tjp_id == f"Task_{new_task2.id}"
 
 
 def test_tjp_abs_id_attr_is_working_properly_for_a_root_task(setup_task_tests):
@@ -2656,7 +2656,7 @@ def test_tjp_abs_id_attr_is_working_properly_for_a_root_task(setup_task_tests):
     kwargs = copy.copy(data["kwargs"])
     kwargs["parent"] = None
     new_task = Task(**kwargs)
-    assert new_task.tjp_abs_id == "Project_%s.Task_%s" % (
+    assert new_task.tjp_abs_id == "Project_{}.Task_{}".format(
         kwargs["project"].id,
         new_task.id,
     )
@@ -2675,7 +2675,7 @@ def test_tjp_abs_id_attr_is_working_properly_for_a_leaf_task(setup_task_tests):
     t2.parent = t1
     t3.parent = t2
 
-    assert t3.tjp_abs_id == "Project_%s.Task_%s.Task_%s.Task_%s" % (
+    assert t3.tjp_abs_id == "Project_{}.Task_{}.Task_{}.Task_{}".format(
         kwargs["project"].id,
         t1.id,
         t2.id,
@@ -4234,7 +4234,6 @@ def test_absolute_path_attr_is_read_only(setup_task_tests):
         else "property 'absolute_path' of 'Task' object has no setter"
     )
 
-
     assert str(cm.value) == error_message
 
 
@@ -4318,7 +4317,7 @@ def test_absolute_path_attr_is_rendered_version_of_related_filename_template_in_
 
     assert (
         os.path.normpath(
-            "%s/tp1/Modeling" % data["test_project1"].repositories[0].path
+            "{}/tp1/Modeling".format(data["test_project1"].repositories[0].path)
         ).replace("\\", "/")
         == new_task.absolute_path
     )
@@ -4877,7 +4876,7 @@ def test_time_logs_attr_is_working_properly(setup_task_db_tests):
         start=now + dt(102),
         end=now + dt(103),
     )
-    # logger.debug('Task.query.get(37): %s' % Task.query.get(37))
+    # logger.debug('Task.query.get(37): {}'.format(Task.query.get(37)))
 
     assert new_task2.depends == []
 

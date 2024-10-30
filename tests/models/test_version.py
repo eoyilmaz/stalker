@@ -1441,7 +1441,7 @@ def test_nice_name_attribute_is_working_properly(setup_version_db_tests):
     DBSession.add(version1)
     DBSession.commit()
 
-    assert version1.nice_name == "%s_%s_%s_%s" % (
+    assert version1.nice_name == "{}_{}_{}_{}".format(
         task1.nice_name,
         task2.nice_name,
         task3.nice_name,
@@ -1455,7 +1455,7 @@ def test_nice_name_attribute_is_working_properly(setup_version_db_tests):
     DBSession.commit()
 
     version2 = Version(task=asset1)
-    assert version2.nice_name == "%s_%s" % (asset1.nice_name, version2.take_name)
+    assert version2.nice_name == "{}_{}".format(asset1.nice_name, version2.take_name)
 
     # for a version of a task of a shot
     shot2 = Shot(
@@ -1475,7 +1475,7 @@ def test_nice_name_attribute_is_working_properly(setup_version_db_tests):
 
     version3 = Version(task=task4)
 
-    assert version3.nice_name == "%s_%s_%s" % (
+    assert version3.nice_name == "{}_{}_{}".format(
         shot2.nice_name,
         task4.nice_name,
         version3.take_name,
@@ -1487,13 +1487,13 @@ def test_nice_name_attribute_is_working_properly(setup_version_db_tests):
     DBSession.commit()
 
     version4 = Version(task=asset2)
-    assert version4.nice_name == "%s_%s" % (asset2.nice_name, version4.take_name)
+    assert version4.nice_name == "{}_{}".format(asset2.nice_name, version4.take_name)
 
 
 def test_string_representation_is_a_little_bit_meaningful(setup_version_db_tests):
     """__str__ or __repr__ result is meaningful."""
     data = setup_version_db_tests
-    assert "<tp_SH001_Task1_TestTake_v001 (Version)>" == "%s" % data["test_version"]
+    assert "<tp_SH001_Task1_TestTake_v001 (Version)>" == f'{data["test_version"]}'
 
 
 def test_walk_hierarchy_is_working_properly_in_dfs_mode(setup_version_db_tests):
@@ -1548,7 +1548,7 @@ def test_walk_inputs_is_working_properly_in_dfs_mode(setup_version_db_tests):
 #     DBSession.add(data["test_project"])
 #     DBSession.commit()
 #
-#     print 'entity_type: %s' % data["test_task1"].entity_type
+#     print('entity_type: {}'.format(data["test_task1"].entity_type))
 #
 #     # v1 = Version(task=data["test_task1"])
 #     # assert 'tp/SH001/task1/task1_Main_v001' == v1.path
