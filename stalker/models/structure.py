@@ -173,7 +173,7 @@ class Structure(Entity):
                 "{}.custom_template should be a string, not {}: '{}'".format(
                     self.__class__.__name__,
                     custom_template.__class__.__name__,
-                    custom_template
+                    custom_template,
                 )
             )
         return custom_template

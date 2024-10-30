@@ -746,7 +746,7 @@ order by path_as_text"""  # noqa: B950
                 msg.format(
                     cls=self.__class__.__name__,
                     projects_class=projects.__class__.__name__,
-                    projects=projects
+                    projects=projects,
                 )
             )
 
@@ -756,7 +756,7 @@ order by path_as_text"""  # noqa: B950
                     msg.format(
                         cls=self.__class__.__name__,
                         projects_class=item.__class__.__name__,
-                        projects=item
+                        projects=item,
                     )
                 )
 

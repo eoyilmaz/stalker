@@ -2275,8 +2275,7 @@ class Task(
 
                 if self.end <= now:
                     seconds = (
-                        self.duration.days * daily_working_hours
-                        + self.duration.seconds
+                        self.duration.days * daily_working_hours + self.duration.seconds
                     )
                 elif self.start >= now:
                     seconds = 0
@@ -3522,7 +3521,7 @@ def update_parents_schedule_seconds_with_schedule_unit(
     task: Task,
     new_schedule_unit: str,
     old_schedule_unit: str,
-    initiator: sqlalchemy.orm.attributes.AttributeEvent
+    initiator: sqlalchemy.orm.attributes.AttributeEvent,
 ) -> None:
     """Update parent task's schedule_seconds attr if new_schedule_unit attr is updated.
 
@@ -3617,7 +3616,7 @@ def removed_a_dependency(
 def add_exclude_constraint(
     table: sqlalchemy.sql.schema.Table,
     connection: sqlalchemy.engine.base.Connection,
-    **kwargs
+    **kwargs,
 ) -> None:
     """Add the PostgreSQL specific ExcludeConstraint.
 

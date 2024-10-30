@@ -239,7 +239,7 @@ class SimpleEntity(Base):
         thumbnail=None,
         html_style="",
         html_class="",
-        **kwargs
+        **kwargs,
     ):  # noqa: W0613
 
         # name and nice_name

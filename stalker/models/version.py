@@ -156,7 +156,7 @@ class Version(Link, DAGMixin):
         parent=None,
         full_path=None,
         created_with=None,
-        **kwargs
+        **kwargs,
     ):
         # call supers __init__
         kwargs["full_path"] = full_path
@@ -550,7 +550,7 @@ class Version(Link, DAGMixin):
                 "{}.created_with should be an instance of str, not {}: '{}'".format(
                     self.__class__.__name__,
                     created_with.__class__.__name__,
-                    created_with
+                    created_with,
                 )
             )
         return created_with
@@ -624,8 +624,7 @@ class Version(Link, DAGMixin):
         naming_parents = self.naming_parents
         return self._format_nice_name(
             "{}_{}".format(
-                "_".join(map(lambda x: x.nice_name, naming_parents)),
-                self.take_name
+                "_".join(map(lambda x: x.nice_name, naming_parents)), self.take_name
             )
         )
 

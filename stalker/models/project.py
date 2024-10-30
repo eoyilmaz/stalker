@@ -293,7 +293,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         fps=25.0,
         is_stereoscopic=False,
         users=None,
-        **kwargs
+        **kwargs,
     ):
         # a projects project should be self
         # initialize the project argument to self

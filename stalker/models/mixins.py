@@ -1159,7 +1159,7 @@ class WorkingHoursMixin(object):
         """
         return relationship(
             "WorkingHours",
-            primaryjoin=f"{cls.__name__}.working_hours_id==WorkingHours.working_hours_id"
+            primaryjoin=f"{cls.__name__}.working_hours_id==WorkingHours.working_hours_id",
         )
 
     @validates("working_hours")
@@ -1239,7 +1239,9 @@ class ScheduleMixin(object):
             is `duration` then the value of this attribute is in Calendar Time,
             and if the {attr}_model is either `length` or `effort` then the
             value is considered as Work Time.
-            """.format(attr=cls.__default_schedule_attr_name__),
+            """.format(
+                attr=cls.__default_schedule_attr_name__
+            ),
         )
 
     @declared_attr
@@ -1255,7 +1257,8 @@ class ScheduleMixin(object):
             nullable=True,
             default="h",
             doc=f"It is the unit of the {cls.__default_schedule_attr_name__} timing."
-            "It is a string value. And should be one of 'min', 'h', 'd', 'w', 'm', 'y'."
+            "It is a string value. And should be one of 'min', 'h', 'd', 'w', 'm', "
+            "'y'.",
         )
 
     @declared_attr
@@ -1377,7 +1380,7 @@ class ScheduleMixin(object):
                     cls=self.__class__.__name__,
                     attr=self.__default_schedule_attr_name__,
                     constraint_class=schedule_constraint.__class__.__name__,
-                    constraint=schedule_constraint
+                    constraint=schedule_constraint,
                 )
             )
 
@@ -1412,7 +1415,7 @@ class ScheduleMixin(object):
                 attr=self.__default_schedule_attr_name__,
                 defaults=self.__default_schedule_models__,
                 model_class=schedule_model.__class__.__name__,
-                model=schedule_model
+                model=schedule_model,
             )
         )
 
@@ -1779,7 +1782,7 @@ class DAGMixin(object):
                     "derivative, not {parent_cls}: '{parent}'".format(
                         cls=self.__class__.__name__,
                         parent_cls=parent.__class__.__name__,
-                        parent=parent
+                        parent=parent,
                     )
                 )
             check_circular_dependency(self, parent, "children")

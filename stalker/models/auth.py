@@ -155,7 +155,7 @@ class Permission(Base):
         if access not in ["Allow", "Deny"]:
             raise ValueError(
                 f'{self.__class__.__name__}.access should be "Allow" or "Deny" '
-                f'not {access}'
+                f"not {access}"
             )
 
         return access
@@ -586,7 +586,7 @@ class User(Entity, ACLMixin):
         groups=None,
         efficiency=1.0,
         rate=0.0,
-        **kwargs
+        **kwargs,
     ):
         kwargs["name"] = name
 

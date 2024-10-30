@@ -4,6 +4,7 @@
 See docs for more information.
 """
 from stalker import config, log
+
 if True:
     defaults = config.Config()
 from stalker.models.asset import Asset
