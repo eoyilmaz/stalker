@@ -38,8 +38,8 @@ def register_logger(logger):
     """
     if not isinstance(logger, logging.Logger):
         raise TypeError(
-            "logger should be a logging.Logger instance, not {}".format(
-                logger.__class__.__name__
+            "logger should be a logging.Logger instance, not {}: '{}'".format(
+                logger.__class__.__name__, logger
             )
         )
 
@@ -66,7 +66,9 @@ def set_level(level):
         raise TypeError(
             "level should be an integer value one of [0, 10, 20, 30, 40, 50] "
             "or [NOTSET, DEBUG, INFO, WARN, WARNING, ERROR, FATAL, CRITICAL] "
-            "of the logging library, not {}.".format(level.__class__.__name__)
+            "of the logging library, not {}: '{}'".format(
+                level.__class__.__name__, level
+            )
         )
 
     try:

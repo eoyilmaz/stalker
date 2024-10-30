@@ -159,7 +159,7 @@ def test_templates_argument_accepts_only_list_of_filename_template_instances(
         Structure(**data["kwargs"])
     assert str(cm.value) == (
         "All the elements in the Structure.templates should be a "
-        "stalker.models.template.FilenameTemplate instance not int"
+        "stalker.models.template.FilenameTemplate instance, not int: '1'"
     )
 
 
@@ -183,7 +183,7 @@ def test_templates_attribute_accpets_only_list_of_filename_template_instances(
 
     assert str(cm.value) == (
         "All the elements in the Structure.templates should be a "
-        "stalker.models.template.FilenameTemplate instance not int"
+        "stalker.models.template.FilenameTemplate instance, not int: '1'"
     )
 
 

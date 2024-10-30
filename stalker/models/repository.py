@@ -116,8 +116,8 @@ class Repository(Entity, CodeMixin):
         """
         if not isinstance(linux_path, string_types):
             raise TypeError(
-                f"{self.__class__.__name__}.linux_path should be an instance of string "
-                f"not {linux_path.__class__.__name__}"
+                f"{self.__class__.__name__}.linux_path should be an instance of string, "
+                f"not {linux_path.__class__.__name__}: '{linux_path}'"
             )
 
         linux_path = os.path.normpath(linux_path) + "/"
@@ -154,8 +154,8 @@ class Repository(Entity, CodeMixin):
         """
         if not isinstance(osx_path, string_types):
             raise TypeError(
-                f"{self.__class__.__name__}.osx_path should be an instance of string "
-                f"not {osx_path.__class__.__name__}"
+                f"{self.__class__.__name__}.osx_path should be an instance of string, "
+                f"not {osx_path.__class__.__name__}: '{osx_path}'"
             )
 
         osx_path = os.path.normpath(osx_path) + "/"
@@ -186,7 +186,7 @@ class Repository(Entity, CodeMixin):
         if not isinstance(windows_path, string_types):
             raise TypeError(
                 f"{self.__class__.__name__}.windows_path should be an instance of "
-                f"string not {windows_path.__class__.__name__}"
+                f"string, not {windows_path.__class__.__name__}: '{windows_path}'"
             )
 
         windows_path = os.path.normpath(windows_path)
@@ -278,7 +278,7 @@ class Repository(Entity, CodeMixin):
         if not isinstance(path, string_types):
             raise TypeError(
                 f"{self.__class__.__name__}.path should be a string, "
-                f"not {path.__class__.__name__}"
+                f"not {path.__class__.__name__}: '{path}'"
             )
 
         # expand all variables

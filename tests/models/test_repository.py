@@ -107,9 +107,8 @@ def test_windows_path_attribute_accepts_only_strings(setup_repository_db_tests):
     with pytest.raises(TypeError) as cm:
         data["test_repo"].windows_path = 123123
 
-    assert (
-        str(cm.value)
-        == "Repository.windows_path should be an instance of string not int"
+    assert str(cm.value) == (
+        "Repository.windows_path should be an instance of string, not int: '123123'"
     )
 
 
@@ -137,8 +136,8 @@ def test_osx_path_argument_accepts_only_strings(setup_repository_db_tests):
     with pytest.raises(TypeError) as cm:
         Repository(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "Repository.osx_path should be an instance of string not int"
+    assert str(cm.value) == (
+        "Repository.osx_path should be an instance of string, not int: '123123'"
     )
 
 
@@ -148,8 +147,8 @@ def test_osx_path_attribute_accepts_only_strings(setup_repository_db_tests):
     with pytest.raises(TypeError) as cm:
         data["test_repo"].osx_path = 123123
 
-    assert (
-        str(cm.value) == "Repository.osx_path should be an instance of string not int"
+    assert str(cm.value) == (
+        "Repository.osx_path should be an instance of string, not int: '123123'"
     )
 
 
@@ -461,7 +460,7 @@ def test_to_linux_path_raises_type_error_if_path_is_not_a_string(
     data = setup_repository_db_tests
     with pytest.raises(TypeError) as cm:
         data["test_repo"].to_linux_path(123)
-    assert str(cm.value) == "Repository.path should be a string, not int"
+    assert str(cm.value) == "Repository.path should be a string, not int: '123'"
 
 
 def test_to_windows_path_returns_the_windows_version_of_the_given_windows_path(
@@ -575,7 +574,7 @@ def test_to_windows_path_raises_type_error_if_path_is_not_a_string(
     data = setup_repository_db_tests
     with pytest.raises(TypeError) as cm:
         data["test_repo"].to_windows_path(123)
-    assert str(cm.value) == "Repository.path should be a string, not int"
+    assert str(cm.value) == "Repository.path should be a string, not int: '123'"
 
 
 def test_to_osx_path_returns_the_osx_version_of_the_given_windows_path(
@@ -714,7 +713,7 @@ def test_to_osx_path_raises_type_error_if_path_is_not_a_string(
     data = setup_repository_db_tests
     with pytest.raises(TypeError) as cm:
         data["test_repo"].to_osx_path(123)
-    assert str(cm.value) == "Repository.path should be a string, not int"
+    assert str(cm.value) == "Repository.path should be a string, not int: '123'"
 
 
 def test_to_native_path_returns_the_native_version_of_the_given_linux_path(
@@ -822,7 +821,7 @@ def test_to_native_path_raises_type_error_if_path_is_not_a_string(
     data = setup_repository_db_tests
     with pytest.raises(TypeError) as cm:
         data["test_repo"].to_native_path(123)
-    assert str(cm.value) == "Repository.path should be a string, not int"
+    assert str(cm.value) == "Repository.path should be a string, not int: '123'"
 
 
 def test_is_in_repo_returns_true_if_the_given_linux_path_is_in_this_repo(

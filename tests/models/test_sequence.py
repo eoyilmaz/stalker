@@ -111,9 +111,8 @@ def test_shots_attribute_is_a_list_of_other_objects(setup_sequence_db_tests):
     with pytest.raises(TypeError) as cm:
         data["test_sequence"].shots = test_value
 
-    assert (
-        str(cm.value)
-        == "Sequence.shots should be all stalker.models.shot.Shot instances, not int"
+    assert str(cm.value) == (
+        "Sequence.shots should be all stalker.models.shot.Shot instances, not int: '1'"
     )
 
 
@@ -126,9 +125,9 @@ def test_shots_attribute_elements_tried_to_be_set_to_non_Shot_object(
     with pytest.raises(TypeError) as cm:
         data["test_sequence"].shots.append(test_value)
 
-    assert (
-        str(cm.value)
-        == "Sequence.shots should be all stalker.models.shot.Shot instances, not str"
+    assert str(cm.value) == (
+        "Sequence.shots should be all stalker.models.shot.Shot instances, "
+        "not str: 'a string'"
     )
 
 

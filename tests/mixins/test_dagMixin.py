@@ -80,9 +80,9 @@ def test_parent_argument_is_not_a_correct_class_instance(dag_mixin_test_case):
     with pytest.raises(TypeError) as cm:
         _ = DAGMixinFooMixedInClass(**kwargs)
 
-    assert (
-        str(cm.value) == "DAGMixinFooMixedInClass.parent should be an instance of "
-        "DAGMixinFooMixedInClass class or derivative, not str"
+    assert str(cm.value) == (
+        "DAGMixinFooMixedInClass.parent should be an instance of "
+        "DAGMixinFooMixedInClass class or derivative, not str: 'not a correct type'"
     )
 
 
@@ -94,9 +94,9 @@ def test_parent_attribute_is_not_a_correct_class_instance(dag_mixin_test_case):
     with pytest.raises(TypeError) as cm:
         d.parent = "not a correct type"
 
-    assert (
-        str(cm.value) == "DAGMixinFooMixedInClass.parent should be an instance of "
-        "DAGMixinFooMixedInClass class or derivative, not str"
+    assert str(cm.value) == (
+        "DAGMixinFooMixedInClass.parent should be an instance of "
+        "DAGMixinFooMixedInClass class or derivative, not str: 'not a correct type'"
     )
 
 
@@ -173,9 +173,9 @@ def test_children_attribute_accepts_correct_class_instances_only(dag_mixin_test_
     with pytest.raises(TypeError) as cm:
         d.children = ["not", 1, "", "of", "correct", "instances"]
 
-    assert (
-        str(cm.value) == "DAGMixinFooMixedInClass.children should be a list of "
-        "DAGMixinFooMixedInClass (or derivative) instances, not str"
+    assert str(cm.value) == (
+        "DAGMixinFooMixedInClass.children should be a list of "
+        "DAGMixinFooMixedInClass (or derivative) instances, not str: 'not'"
     )
 
 

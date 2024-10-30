@@ -167,7 +167,7 @@ class DepartmentUser(Base):
                 raise TypeError(
                     f"{self.__class__.__name__}.department should be a "
                     "stalker.models.department.Department instance, "
-                    f"not {department.__class__.__name__}"
+                    f"not {department.__class__.__name__}: '{department}'"
                 )
         return department
 
@@ -190,7 +190,8 @@ class DepartmentUser(Base):
             if not isinstance(user, User):
                 raise TypeError(
                     f"{self.__class__.__name__}.user should be a "
-                    f"stalker.models.auth.User instance, not {user.__class__.__name__}"
+                    "stalker.models.auth.User instance, "
+                    f"not {user.__class__.__name__}: '{user}'"
                 )
         return user
 
@@ -215,6 +216,7 @@ class DepartmentUser(Base):
             if not isinstance(role, Role):
                 raise TypeError(
                     f"{self.__class__.__name__}.role should be a "
-                    f"stalker.models.auth.Role instance, not {role.__class__.__name__}"
+                    "stalker.models.auth.Role instance, "
+                    f"not {role.__class__.__name__}: '{role}'"
                 )
         return role

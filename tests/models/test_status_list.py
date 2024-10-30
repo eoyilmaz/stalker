@@ -70,7 +70,7 @@ def test_statuses_argument_elements_being_status_objects(setup_status_list_tests
 
     assert str(cm.value) == (
         "All of the elements in StatusList.statuses must be an instance "
-        "of stalker.models.status.Status, and not int"
+        "of stalker.models.status.Status, not int: '1'"
     )
 
 
@@ -91,7 +91,7 @@ def test_statuses_attributes_elements_changed_to_none_status_objects(
         data["test_status_list"].statuses[0] = 0
     assert str(cm.value) == (
         "All of the elements in StatusList.statuses must be an instance "
-        "of stalker.models.status.Status, and not int"
+        "of stalker.models.status.Status, not int: '0'"
     )
 
 
@@ -169,7 +169,7 @@ def test_indexing_setitem_validates_the_given_value(setup_status_list_tests):
 
     assert str(cm.value) == (
         "All of the elements in StatusList.statuses must be an instance of "
-        "stalker.models.status.Status, and not str"
+        "stalker.models.status.Status, not str: 'PRev'"
     )
 
 

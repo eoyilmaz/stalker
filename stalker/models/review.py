@@ -136,7 +136,7 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
             if not isinstance(task, Task):
                 raise TypeError(
                     f"{self.__class__.__name__}.task should be an instance of "
-                    f"stalker.models.task.Task, not {task.__class__.__name__}"
+                    f"stalker.models.task.Task, not {task.__class__.__name__}: '{task}'"
                 )
 
             # is it a leaf task
@@ -170,7 +170,8 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
         if not isinstance(reviewer, User):
             raise TypeError(
                 f"{self.__class__.__name__}.reviewer should be set to a "
-                f"stalker.models.auth.User instance, not {reviewer.__class__.__name__}"
+                "stalker.models.auth.User instance, "
+                f"not {reviewer.__class__.__name__}: '{reviewer}'"
             )
         return reviewer
 
@@ -464,7 +465,8 @@ class DailyLink(Base):
         if link is not None and not isinstance(link, Link):
             raise TypeError(
                 f"{self.__class__.__name__}.link should be an instance of "
-                f"stalker.models.link.Link instance, not {link.__class__.__name__}"
+                "stalker.models.link.Link instance, "
+                f"not {link.__class__.__name__}: '{link}'"
             )
 
         return link
@@ -487,8 +489,8 @@ class DailyLink(Base):
             if not isinstance(daily, Daily):
                 raise TypeError(
                     f"{self.__class__.__name__}.daily should be an instance of "
-                    "stalker.models.review.Daily instance, not "
-                    f"{daily.__class__.__name__}"
+                    "stalker.models.review.Daily instance, "
+                    f"not {daily.__class__.__name__}: '{daily}'"
                 )
 
         return daily

@@ -365,13 +365,13 @@ class Shot(Task, CodeMixin):
         else:
             return self._fps
 
-    def _fps_setter(self, fps_in):
+    def _fps_setter(self, fps):
         """Set the fps value.
 
         Args:
-            fps_in (Union[int, float]): The fps value to set the fps attribute to.
+            fps (Union[int, float]): The fps value to set the fps attribute to.
         """
-        self._fps = self._validate_fps(fps_in)
+        self._fps = self._validate_fps(fps)
 
     fps = synonym(
         "_fps",
@@ -380,7 +380,7 @@ class Shot(Task, CodeMixin):
     )
 
     def _validate_fps(self, fps: Union[int, float]) -> float:
-        """Validate the given fps_in value.
+        """Validate the given fps value.
 
         Args:
             fps (Union[int, float]): Either an integer or float value to used as the
@@ -399,8 +399,8 @@ class Shot(Task, CodeMixin):
 
         if not isinstance(fps, (int, float)):
             raise TypeError(
-                "{}.fps should be a positive float or int, not {}".format(
-                    self.__class__.__name__, fps.__class__.__name__
+                "{}.fps should be a positive float or int, not {}: '{}'".format(
+                    self.__class__.__name__, fps.__class__.__name__, fps
                 )
             )
 
@@ -429,10 +429,8 @@ class Shot(Task, CodeMixin):
         """
         if not isinstance(cut_in, int):
             raise TypeError(
-                "{cls}.cut_in should be an int, not {cut_in_class}".format(
-                    cls=self.__class__.__name__,
-                    cut_in_class=cut_in.__class__.__name__,
-                )
+                f"{self.__class__.__name__}.cut_in should be an int, "
+                f"not {cut_in.__class__.__name__}: '{cut_in}'"
             )
 
         if self.cut_out is not None and not self._updating_cut_in_cut_out:
@@ -460,10 +458,8 @@ class Shot(Task, CodeMixin):
         """
         if not isinstance(cut_out, int):
             raise TypeError(
-                "{cls}.cut_out should be an int, not {cut_out_class}".format(
-                    cls=self.__class__.__name__,
-                    cut_out_class=cut_out.__class__.__name__,
-                )
+                f"{self.__class__.__name__}.cut_out should be an int, "
+                f"not {cut_out.__class__.__name__}: '{cut_out}'"
             )
 
         if (
@@ -500,10 +496,8 @@ class Shot(Task, CodeMixin):
         """
         if not isinstance(source_in, int):
             raise TypeError(
-                "{cls}.source_in should be an int, not {source_in_class}".format(
-                    cls=self.__class__.__name__,
-                    source_in_class=source_in.__class__.__name__,
-                )
+                f"{self.__class__.__name__}.source_in should be an int, "
+                f"not {source_in.__class__.__name__}: '{source_in}'"
             )
 
         if source_in < self.cut_in:
@@ -561,11 +555,8 @@ class Shot(Task, CodeMixin):
         """
         if not isinstance(source_out, int):
             raise TypeError(
-                "{cls}.source_out should be an int, not "
-                "{source_out_class}".format(
-                    cls=self.__class__.__name__,
-                    source_out_class=source_out.__class__.__name__,
-                )
+                f"{self.__class__.__name__}.source_out should be an int, "
+                f"not {source_out.__class__.__name__}: '{source_out}'"
             )
 
         if source_out < self.cut_in:
@@ -634,7 +625,7 @@ class Shot(Task, CodeMixin):
         if not isinstance(cut_duration, int):
             raise TypeError(
                 f"{self.__class__.__name__}.cut_duration should be a positive integer "
-                f"value, not {cut_duration.__class__.__name__}"
+                f"value, not {cut_duration.__class__.__name__}: '{cut_duration}'"
             )
 
         if cut_duration < 1:
@@ -666,7 +657,7 @@ class Shot(Task, CodeMixin):
             raise TypeError(
                 f"{self.__class__.__name__}.sequences should all be "
                 "stalker.models.sequence.Sequence instances, "
-                f"not {sequence.__class__.__name__}"
+                f"not {sequence.__class__.__name__}: '{sequence}'"
             )
         return sequence
 
@@ -689,7 +680,8 @@ class Shot(Task, CodeMixin):
         if not isinstance(scene, Scene):
             raise TypeError(
                 f"{self.__class__.__name__}.scenes should all be "
-                f"stalker.models.scene.Scene instances, not {scene.__class__.__name__}"
+                "stalker.models.scene.Scene instances, "
+                f"not {scene.__class__.__name__}: '{scene}'"
             )
         return scene
 
@@ -705,14 +697,14 @@ class Shot(Task, CodeMixin):
         else:
             return self._image_format
 
-    def _image_format_setter(self, imf_in) -> None:
+    def _image_format_setter(self, imf: ImageFormat) -> None:
         """Set the image_format value.
 
         Args:
-            imf_in (ImageFormat): The ImageFormat instance to set the image_format
+            imf (ImageFormat): The ImageFormat instance to set the image_format
                 attribute value.
         """
-        self._image_format = self._validate_image_format(imf_in)
+        self._image_format = self._validate_image_format(imf)
 
     image_format = synonym(
         "_image_format",
@@ -741,7 +733,8 @@ class Shot(Task, CodeMixin):
         if not isinstance(imf, ImageFormat):
             raise TypeError(
                 f"{self.__class__.__name__}.image_format should be an instance of "
-                f"stalker.models.format.ImageFormat, not {imf.__class__.__name__}"
+                "stalker.models.format.ImageFormat, "
+                f"not {imf.__class__.__name__}: '{imf}'"
             )
 
         return imf

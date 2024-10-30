@@ -86,10 +86,9 @@ def test_notes_argument_set_to_something_other_than_a_list(setup_entity_tests):
     with pytest.raises(TypeError) as cm:
         Entity(**kwargs)
 
-    assert (
-        str(cm.value)
-        == "Entity.note should be a stalker.models.note.Note instance, not "
-        "str"
+    assert str(cm.value) == (
+        "Entity.note should be a stalker.models.note.Note instance, "
+        "not str: 'a string note'"
     )
 
 
@@ -100,7 +99,8 @@ def test_notes_attribute_set_to_something_other_than_a_list(setup_entity_tests):
         data["test_entity"].notes = ["a string note"]
 
     assert str(cm.value) == (
-        "Entity.note should be a stalker.models.note.Note instance, not str"
+        "Entity.note should be a stalker.models.note.Note instance, "
+        "not str: 'a string note'"
     )
 
 
@@ -114,7 +114,7 @@ def test_notes_argument_set_to_a_list_of_other_objects(setup_entity_tests):
         Entity(**kwargs)
 
     assert str(cm.value) == (
-        "Entity.note should be a stalker.models.note.Note instance, not int"
+        "Entity.note should be a stalker.models.note.Note instance, not int: '1'"
     )
 
 
@@ -126,7 +126,7 @@ def test_notes_attribute_set_to_a_list_of_other_objects(setup_entity_tests):
         data["test_entity"].notes = test_value
 
     assert str(cm.value) == (
-        "Entity.note should be a stalker.models.note.Note instance, not int"
+        "Entity.note should be a stalker.models.note.Note instance, not int: '1'"
     )
 
 
@@ -145,7 +145,7 @@ def test_notes_attribute_element_is_set_to_non_note_object(setup_entity_tests):
         data["test_entity"].notes[0] = 0
 
     assert str(cm.value) == (
-        "Entity.note should be a stalker.models.note.Note instance, not int"
+        "Entity.note should be a stalker.models.note.Note instance, not int: '0'"
     )
 
 
@@ -179,7 +179,7 @@ def test_tags_argument_set_to_something_other_than_a_list(setup_entity_tests):
         Entity(**kwargs)
 
     assert str(cm.value) == (
-        "Entity.tag should be a stalker.models.tag.Tag instance, not str"
+        "Entity.tag should be a stalker.models.tag.Tag instance, not str: 'a tag'"
     )
 
 
@@ -197,9 +197,8 @@ def test_tags_attribute_element_is_set_to_non_tag_object(setup_entity_tests):
     with pytest.raises(TypeError) as cm:
         data["test_entity"].tags[0] = 0
 
-    assert (
-        str(cm.value)
-        == "Entity.tag should be a stalker.models.tag.Tag instance, not int"
+    assert str(cm.value) == (
+        "Entity.tag should be a stalker.models.tag.Tag instance, not int: '0'"
     )
 
 

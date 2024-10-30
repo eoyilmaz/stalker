@@ -1340,8 +1340,8 @@ class Task(
         if not isinstance(review, Review):
             raise TypeError(
                 "{}.reviews should be all stalker.models.review.Review "
-                "instances, not {}".format(
-                    self.__class__.__name__, review.__class__.__name__
+                "instances, not {}: '{}'".format(
+                    self.__class__.__name__, review.__class__.__name__, review
                 )
             )
         return review

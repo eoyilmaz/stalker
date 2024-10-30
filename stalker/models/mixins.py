@@ -125,36 +125,36 @@ class TargetEntityTypeMixin(object):
     def __init__(self, target_entity_type=None, **kwargs):
         self._target_entity_type = self._validate_target_entity_type(target_entity_type)
 
-    def _validate_target_entity_type(self, target_entity_type_in):
+    def _validate_target_entity_type(self, target_entity_type):
         """Validate the given target_entity_type value.
 
         Args:
-            target_entity_type_in (Union[str, type]): The target_entity_type that this
+            target_entity_type (Union[str, type]): The target_entity_type that this
                 entity is valid for.
 
         Raises:
-            TypeError: If the given target_entity_type_in value is None.
-            ValueError: If the given target_entity_type_in value is an empty str.
+            TypeError: If the given target_entity_type value is None.
+            ValueError: If the given target_entity_type value is an empty str.
 
         Returns:
             str: The validated target_entity_type value.
         """
         # it can not be None
-        if target_entity_type_in is None:
+        if target_entity_type is None:
             raise TypeError(
                 f"{self.__class__.__name__}.target_entity_type can not be None"
             )
 
         # check if it is a class
-        if isinstance(target_entity_type_in, type):
-            target_entity_type_in = target_entity_type_in.__name__
+        if isinstance(target_entity_type, type):
+            target_entity_type = target_entity_type.__name__
 
-        if target_entity_type_in == "":
+        if target_entity_type == "":
             raise ValueError(
                 f"{self.__class__.__name__}.target_entity_type can not be empty"
             )
 
-        return target_entity_type_in
+        return target_entity_type
 
     def _target_entity_type_getter(self):
         """Return the _target_entity_type attribute value.
@@ -291,7 +291,7 @@ class StatusMixin(object):
 
     @validates("status_list")
     def _validate_status_list(self, key, status_list):
-        """Validate the given status_list_in value.
+        """Validate the given status_list value.
 
         Args:
             key (str): The name of the validated column.
@@ -337,8 +337,8 @@ class StatusMixin(object):
             if not isinstance(status_list, StatusList):
                 raise TypeError(
                     f"{self.__class__.__name__}.status_list should be an instance of "
-                    "stalker.models.status.StatusList not "
-                    f"{status_list.__class__.__name__}"
+                    "stalker.models.status.StatusList, "
+                    f"not {status_list.__class__.__name__}: '{status_list}'"
                 )
 
             # check if the entity_type matches to the
@@ -380,12 +380,10 @@ class StatusMixin(object):
         # it is not an instance of status or int
         if not isinstance(status, (Status, int)):
             raise TypeError(
-                "{cls}.status must be an instance of stalker.models.status.Status or "
-                "an integer showing the index of the Status object in the "
-                "{cls}.status_list, not {status}".format(
-                    cls=self.__class__.__name__,
-                    status=status.__class__.__name__,
-                )
+                f"{self.__class__.__name__}.status must be an instance of "
+                "stalker.models.status.Status or an integer showing the index of the "
+                f"Status object in the {self.__class__.__name__}.status_list, "
+                f"not {status.__class__.__name__}: '{status}'"
             )
 
         if isinstance(status, int):
@@ -526,14 +524,14 @@ class DateRangeMixin(object):
         with DBSession.no_autoflush:
             return self._end
 
-    def _end_setter(self, end_in):
+    def _end_setter(self, end):
         """Set the end attribute value.
 
         Args:
-            end_in (datetime.datetime): The end datetime value.
+            end (datetime.datetime): The end datetime value.
         """
         self._start, self._end, self._duration = self._validate_dates(
-            self.start, end_in, self.duration
+            self.start, end, self.duration
         )
 
     @declared_attr
@@ -570,9 +568,14 @@ class DateRangeMixin(object):
         with DBSession.no_autoflush:
             return self._start
 
-    def _start_setter(self, start_in):
+    def _start_setter(self, start):
+        """Set the start attribute.
+
+        Args:
+            start (datetime.datetime): The start date and time.
+        """
         self._start, self._end, self._duration = self._validate_dates(
-            start_in, self.end, self.duration
+            start, self.end, self.duration
         )
 
     @declared_attr
@@ -608,27 +611,27 @@ class DateRangeMixin(object):
         with DBSession.no_autoflush:
             return self._duration
 
-    def _duration_setter(self, duration_in):
+    def _duration_setter(self, duration):
         """Set the duration value.
 
         Args:
-            duration_in (datetime.timedelta): The duration_in value.
+            duration (datetime.timedelta): The duration value.
         """
-        if duration_in is not None:
-            if isinstance(duration_in, datetime.timedelta):
+        if duration is not None:
+            if isinstance(duration, datetime.timedelta):
                 # set the end to None
                 # to make it recalculated
                 self._start, self._end, self._duration = self._validate_dates(
-                    self.start, None, duration_in
+                    self.start, None, duration
                 )
             else:
                 # use the end
                 self._start, self._end, self._duration = self._validate_dates(
-                    self.start, self.end, duration_in
+                    self.start, self.end, duration
                 )
         else:
             self._start, self._end, self._duration = self._validate_dates(
-                self.start, self.end, duration_in
+                self.start, self.end, duration
             )
 
     @declared_attr
@@ -895,7 +898,7 @@ class ProjectMixin(object):
             raise TypeError(
                 f"{self.__class__.__name__}.project should be an instance of "
                 "stalker.models.project.Project instance, "
-                f"not {project.__class__.__name__}"
+                f"not {project.__class__.__name__}: '{project}'"
             )
         return project
 
@@ -966,7 +969,7 @@ class ReferenceMixin(object):
             raise TypeError(
                 f"All the elements in the {self.__class__.__name__}.references should "
                 "be stalker.models.link.Link instances, "
-                f"not {reference.__class__.__name__}"
+                f"not {reference.__class__.__name__}: '{reference}'"
             )
         return reference
 
@@ -1014,7 +1017,8 @@ class ACLMixin(object):
         if not isinstance(permission, Permission):
             raise TypeError(
                 f"{self.__class__.__name__}.permissions should be all instances of "
-                f"stalker.models.auth.Permission not {permission.__class__.__name__}"
+                "stalker.models.auth.Permission, "
+                f"not {permission.__class__.__name__}: '{permission}'"
             )
 
         return permission
@@ -1111,8 +1115,8 @@ class CodeMixin(object):
 
         if not isinstance(code, string_types):
             raise TypeError(
-                f"{self.__class__.__name__}.code should be a string "
-                f"not {code.__class__.__name__}"
+                f"{self.__class__.__name__}.code should be a string, "
+                f"not {code.__class__.__name__}: '{code}'"
             )
 
         if code == "":
@@ -1181,7 +1185,7 @@ class WorkingHoursMixin(object):
             raise TypeError(
                 f"{self.__class__.__name__}.working_hours should be a "
                 "stalker.models.studio.WorkingHours instance, "
-                f"not {wh.__class__.__name__}"
+                f"not {wh.__class__.__name__}: '{wh}'"
             )
 
         return wh
@@ -1369,10 +1373,11 @@ class ScheduleMixin(object):
         if not isinstance(schedule_constraint, int):
             raise TypeError(
                 "{cls}.{attr}_constraint should be an integer "
-                "between 0 and 3, not {constraint_class}".format(
+                "between 0 and 3, not {constraint_class}: '{constraint}'".format(
                     cls=self.__class__.__name__,
                     attr=self.__default_schedule_attr_name__,
                     constraint_class=schedule_constraint.__class__.__name__,
+                    constraint=schedule_constraint
                 )
             )
 
@@ -1402,11 +1407,12 @@ class ScheduleMixin(object):
 
         error_message = (
             "{cls}.{attr}_model should be one of {defaults}, not "
-            "{model_class}".format(
+            "{model_class}: '{model}'".format(
                 cls=self.__class__.__name__,
                 attr=self.__default_schedule_attr_name__,
                 defaults=self.__default_schedule_models__,
                 model_class=schedule_model.__class__.__name__,
+                model=schedule_model
             )
         )
 
@@ -1441,11 +1447,12 @@ class ScheduleMixin(object):
             raise TypeError(
                 "{cls}.{attr}_unit should be a string value one of "
                 "{defaults} showing the unit of the {attr} timing of this "
-                "{cls}, not {unit_class}".format(
+                "{cls}, not {unit_class}: '{unit}'".format(
                     cls=self.__class__.__name__,
                     attr=self.__default_schedule_attr_name__,
                     defaults=defaults.datetime_units,
                     unit_class=schedule_unit.__class__.__name__,
+                    unit=schedule_unit,
                 )
             )
 
@@ -1486,10 +1493,11 @@ class ScheduleMixin(object):
             raise TypeError(
                 "{cls}.{attr}_timing should be an integer or float "
                 "number showing the value of the {attr} timing of this "
-                "{cls}, not {timing_class}".format(
+                "{cls}, not {timing_class}: '{timing}'".format(
                     cls=self.__class__.__name__,
                     attr=self.__default_schedule_attr_name__,
                     timing_class=schedule_timing.__class__.__name__,
+                    timing=schedule_timing,
                 )
             )
 
@@ -1768,9 +1776,10 @@ class DAGMixin(object):
             if not isinstance(parent, self.__class__):
                 raise TypeError(
                     "{cls}.parent should be an instance of {cls} class or "
-                    "derivative, not {parent_cls}".format(
+                    "derivative, not {parent_cls}: '{parent}'".format(
                         cls=self.__class__.__name__,
                         parent_cls=parent.__class__.__name__,
+                        parent=parent
                     )
                 )
             check_circular_dependency(self, parent, "children")
@@ -1795,9 +1804,10 @@ class DAGMixin(object):
         if not isinstance(child, self.__class__):
             raise TypeError(
                 "{cls}.children should be a list of {cls} (or derivative) "
-                "instances, not {child_cls}".format(
+                "instances, not {child_cls}: '{child}'".format(
                     cls=self.__class__.__name__,
                     child_cls=child.__class__.__name__,
+                    child=child,
                 )
             )
 
@@ -1899,7 +1909,7 @@ class AmountMixin(object):
         if not isinstance(amount, (int, float)):
             raise TypeError(
                 f"{self.__class__.__name__}.amount should be a number, "
-                f"not {amount.__class__.__name__}"
+                f"not {amount.__class__.__name__}: '{amount}'"
             )
 
         return float(amount)
@@ -1944,7 +1954,7 @@ class UnitMixin(object):
         if not isinstance(unit, string_types):
             raise TypeError(
                 f"{self.__class__.__name__}.unit should be a string, "
-                f"not {unit.__class__.__name__}"
+                f"not {unit.__class__.__name__}: '{unit}'"
             )
 
         return unit

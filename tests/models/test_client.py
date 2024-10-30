@@ -136,9 +136,9 @@ def test_users_argument_accepts_only_a_list_of_user_objects(setup_client_tests):
     with pytest.raises(TypeError) as cm:
         Client(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "ClientUser.user should be an instance of "
-        "stalker.models.auth.User, not int"
+    assert str(cm.value) == (
+        "ClientUser.user should be an instance of stalker.models.auth.User, "
+        "not int: '1'"
     )
 
 
@@ -150,9 +150,9 @@ def test_users_attribute_accepts_only_a_list_of_user_objects(setup_client_tests)
     with pytest.raises(TypeError) as cm:
         data["test_client"].users = test_value
 
-    assert (
-        str(cm.value) == "ClientUser.user should be an instance of "
-        "stalker.models.auth.User, not int"
+    assert str(cm.value) == (
+        "ClientUser.user should be an instance of stalker.models.auth.User, "
+        "not int: '1'"
     )
 
 
@@ -164,7 +164,8 @@ def test_users_attribute_elements_accepts_user_only_append(setup_client_tests):
         data["test_client"].users.append(0)
 
     assert str(cm.value) == (
-        "ClientUser.user should be an instance of stalker.models.auth.User, not int"
+        "ClientUser.user should be an instance of stalker.models.auth.User, "
+        "not int: '0'"
     )
 
 
@@ -176,7 +177,8 @@ def test_users_attribute_elements_accepts_user_only_setitem(setup_client_tests):
         data["test_client"].users[0] = 0
 
     assert str(cm.value) == (
-        "ClientUser.user should be an instance of stalker.models.auth.User, not int"
+        "ClientUser.user should be an instance of stalker.models.auth.User, "
+        "not int: '0'"
     )
 
 
@@ -188,7 +190,8 @@ def test_users_argument_is_not_iterable(setup_client_tests):
         Client(**data["kwargs"])
 
     assert str(cm.value) == (
-        "ClientUser.user should be an instance of stalker.models.auth.User, not str"
+        "ClientUser.user should be an instance of stalker.models.auth.User, "
+        "not str: 'a'"
     )
 
 
@@ -200,7 +203,8 @@ def test_users_attribute_is_not_iterable(setup_client_tests):
         data["test_client"].users = test_value
 
     assert str(cm.value) == (
-        "ClientUser.user should be an instance of stalker.models.auth.User, not str"
+        "ClientUser.user should be an instance of stalker.models.auth.User, "
+        "not str: 'a'"
     )
 
 
@@ -247,7 +251,7 @@ def test_projects_argument_accepts_only_a_list_of_project_objects(setup_client_t
 
     assert str(cm.value) == (
         "ProjectClient.project should be a stalker.models.project.Project instance, "
-        "not int"
+        "not int: '1'"
     )
 
 
@@ -260,8 +264,8 @@ def test_projects_attribute_accepts_only_a_list_of_project_objects(setup_client_
         data["test_client"].projects = test_value
 
     assert str(cm.value) == (
-        "ProjectClient.project should be a "
-        "stalker.models.project.Project instance, not int"
+        "ProjectClient.project should be a stalker.models.project.Project instance, "
+        "not int: '1'"
     )
 
 
@@ -273,8 +277,8 @@ def test_projects_attribute_elements_accepts_project_only_append(setup_client_te
         data["test_client"].projects.append(0)
 
     assert str(cm.value) == (
-        "ProjectClient.project should be a "
-        "stalker.models.project.Project instance, not int"
+        "ProjectClient.project should be a stalker.models.project.Project instance, "
+        "not int: '0'"
     )
 
 
@@ -285,9 +289,9 @@ def test_projects_attribute_elements_accepts_project_only_setitem(setup_client_t
     with pytest.raises(TypeError) as cm:
         data["test_client"].projects[0] = 0
 
-    assert (
-        str(cm.value) == "ProjectClient.project should be a "
-        "stalker.models.project.Project instance, not int"
+    assert str(cm.value) == (
+        "ProjectClient.project should be a stalker.models.project.Project instance, "
+        "not int: '0'"
     )
 
 
@@ -299,8 +303,8 @@ def test_projects_argument_is_not_iterable(setup_client_tests):
         Client(**data["kwargs"])
 
     assert str(cm.value) == (
-        "ProjectClient.project should be a "
-        "stalker.models.project.Project instance, not str"
+        "ProjectClient.project should be a stalker.models.project.Project instance, "
+        "not str: 'a'"
     )
 
 
@@ -312,8 +316,8 @@ def test_projects_attribute_is_not_iterable(setup_client_tests):
         data["test_client"].projects = test_value
 
     assert str(cm.value) == (
-        "ProjectClient.project should be a "
-        "stalker.models.project.Project instance, not str"
+        "ProjectClient.project should be a stalker.models.project.Project instance, "
+        "not str: 'a'"
     )
 
 
@@ -446,7 +450,7 @@ def test_goods_attribute_is_set_to_a_list_of_non_good_instances(setup_client_tes
 
     assert str(cm.value) == (
         "Client.goods attribute should be all "
-        "stalker.models.budget.Good instances, not str"
+        "stalker.models.budget.Good instances, not str: 'not'"
     )
 
 

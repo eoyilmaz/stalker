@@ -545,9 +545,9 @@ def test_working_hours_arg_is_not_a_working_hours_instance(setup_studio_db_tests
     with pytest.raises(TypeError) as cm:
         Studio(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "Studio.working_hours should be a "
-        "stalker.models.studio.WorkingHours instance, not str"
+    assert str(cm.value) == (
+        "Studio.working_hours should be a stalker.models.studio.WorkingHours instance, "
+        "not str: 'not a working hours instance'"
     )
 
 
@@ -557,9 +557,9 @@ def test_working_hours_attribute_is_not_a_working_hours_instance(setup_studio_db
     with pytest.raises(TypeError) as cm:
         data["test_studio"].working_hours = "not a working hours instance"
 
-    assert (
-        str(cm.value) == "Studio.working_hours should be a "
-        "stalker.models.studio.WorkingHours instance, not str"
+    assert str(cm.value) == (
+        "Studio.working_hours should be a stalker.models.studio.WorkingHours instance, "
+        "not str: 'not a working hours instance'"
     )
 
 

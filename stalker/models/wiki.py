@@ -83,14 +83,11 @@ class Page(Entity, ProjectMixin):
         Returns:
             str: The validated content value.
         """
-        if content is None:
-            content = ""
-
+        content = "" if content is None else content
         if not isinstance(content, string_types):
             raise TypeError(
                 "{}.content should be a string, not {}: '{}'".format(
                     self.__class__.__name__, content.__class__.__name__, content
                 )
             )
-
         return content

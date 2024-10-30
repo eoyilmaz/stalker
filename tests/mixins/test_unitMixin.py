@@ -55,7 +55,9 @@ def test_unit_argument_is_not_a_string():
     with pytest.raises(TypeError) as cm:
         UnitMixinFooMixedInClass(unit=1234)
 
-    assert str(cm.value) == "UnitMixinFooMixedInClass.unit should be a string, not int"
+    assert str(cm.value) == (
+        "UnitMixinFooMixedInClass.unit should be a string, not int: '1234'"
+    )
 
 
 def test_unit_attribute_is_not_a_string():
@@ -64,7 +66,9 @@ def test_unit_attribute_is_not_a_string():
     with pytest.raises(TypeError) as cm:
         g.unit = 2342
 
-    assert str(cm.value) == "UnitMixinFooMixedInClass.unit should be a string, not int"
+    assert str(cm.value) == (
+        "UnitMixinFooMixedInClass.unit should be a string, not int: '2342'"
+    )
 
 
 def test_unit_argument_is_working_properly():

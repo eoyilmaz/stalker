@@ -124,9 +124,8 @@ def test_height_argument_int_or_float(setup_image_format_tests):
     with pytest.raises(TypeError) as cm:
         ImageFormat(**data["kwargs"])
 
-    assert (
-        str(cm.value)
-        == "ImageFormat.height should be an instance of int or float, not str"
+    assert str(cm.value) == (
+        "ImageFormat.height should be an instance of int or float, not str: '1080'"
     )
 
 
@@ -138,9 +137,8 @@ def test_height_attribute_int_or_float(setup_image_format_tests):
     with pytest.raises(TypeError) as cm:
         data["test_image_format"].height = test_value
 
-    assert (
-        str(cm.value)
-        == "ImageFormat.height should be an instance of int or float, not str"
+    assert str(cm.value) == (
+        "ImageFormat.height should be an instance of int or float, not str: '1080'"
     )
 
 
@@ -297,10 +295,9 @@ def test_pixel_aspect_int_float(setup_image_format_tests):
     with pytest.raises(TypeError) as cm:
         ImageFormat(**data["kwargs"])
 
-    assert (
-        str(cm.value)
-        == "ImageFormat.pixel_aspect should be an instance of int or float "
-        "not str"
+    assert str(cm.value) == (
+        "ImageFormat.pixel_aspect should be an instance of int or float, "
+        "not str: '1.0'"
     )
 
 
@@ -428,9 +425,9 @@ def test_print_resolution_argument_accepts_int_float_only(setup_image_format_tes
     with pytest.raises(TypeError) as cm:
         ImageFormat(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "ImageFormat.print_resolution should be an instance of int or "
-        "float not str"
+    assert str(cm.value) == (
+        "ImageFormat.print_resolution should be an instance of int or float, "
+        "not str: '300.0'"
     )
 
 

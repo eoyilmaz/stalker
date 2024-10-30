@@ -70,9 +70,9 @@ def test_schedule_model_argument_is_not_a_string(setup_schedule_mixin_tests):
     with pytest.raises(TypeError) as cm:
         MixedInClass(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "MixedInClass.schedule_model should be one of ['effort', "
-        "'length', 'duration'], not int"
+    assert str(cm.value) == (
+        "MixedInClass.schedule_model should be one of ['effort', 'length', "
+        "'duration'], not int: '234'"
     )
 
 
@@ -82,9 +82,9 @@ def test_schedule_model_attribute_is_not_a_string(setup_schedule_mixin_tests):
     with pytest.raises(TypeError) as cm:
         data["test_obj"].schedule_model = 2343
 
-    assert (
-        str(cm.value) == "MixedInClass.schedule_model should be one of ['effort', "
-        "'length', 'duration'], not int"
+    assert str(cm.value) == (
+        "MixedInClass.schedule_model should be one of ['effort', 'length', "
+        "'duration'], not int: '2343'"
     )
 
 
@@ -95,9 +95,9 @@ def test_schedule_model_argument_is_not_in_correct_value(setup_schedule_mixin_te
     with pytest.raises(ValueError) as cm:
         MixedInClass(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "MixedInClass.schedule_model should be one of ['effort', "
-        "'length', 'duration'], not str"
+    assert str(cm.value) == (
+        "MixedInClass.schedule_model should be one of ['effort', 'length', "
+        "'duration'], not str: 'not in the list'"
     )
 
 
@@ -107,9 +107,9 @@ def test_schedule_model_attribute_is_not_in_correct_value(setup_schedule_mixin_t
     with pytest.raises(ValueError) as cm:
         data["test_obj"].schedule_model = "not in the list"
 
-    assert (
-        str(cm.value) == "MixedInClass.schedule_model should be one of ['effort', "
-        "'length', 'duration'], not str"
+    assert str(cm.value) == (
+        "MixedInClass.schedule_model should be one of ['effort', 'length', "
+        "'duration'], not str: 'not in the list'"
     )
 
 
@@ -170,10 +170,9 @@ def test_schedule_constraint_argument_is_not_an_integer(setup_schedule_mixin_tes
     with pytest.raises(TypeError) as cm:
         MixedInClass(**data["kwargs"])
 
-    assert (
-        str(cm.value)
-        == "MixedInClass.schedule_constraint should be an integer between "
-        "0 and 3, not str"
+    assert str(cm.value) == (
+        "MixedInClass.schedule_constraint should be an integer between "
+        "0 and 3, not str: 'not an int'"
     )
 
 
@@ -183,10 +182,9 @@ def test_schedule_constraint_attribute_is_not_an_integer(setup_schedule_mixin_te
     with pytest.raises(TypeError) as cm:
         data["test_obj"].schedule_constraint = "not an int"
 
-    assert (
-        str(cm.value)
-        == "MixedInClass.schedule_constraint should be an integer between "
-        "0 and 3, not str"
+    assert str(cm.value) == (
+        "MixedInClass.schedule_constraint should be an integer between "
+        "0 and 3, not str: 'not an int'"
     )
 
 
@@ -266,9 +264,9 @@ def test_schedule_timing_argument_is_not_an_integer_or_float(
     with pytest.raises(TypeError) as cm:
         MixedInClass(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "MixedInClass.schedule_timing should be an integer or float "
-        "number showing the value of the schedule timing of this MixedInClass, not str"
+    assert str(cm.value) == (
+        "MixedInClass.schedule_timing should be an integer or float number showing the "
+        "value of the schedule timing of this MixedInClass, not str: '10d'"
     )
 
 
@@ -280,9 +278,9 @@ def test_schedule_timing_attribute_is_not_an_int_or_float(
     with pytest.raises(TypeError) as cm:
         data["test_obj"].schedule_timing = "10d"
 
-    assert (
-        str(cm.value) == "MixedInClass.schedule_timing should be an integer or float "
-        "number showing the value of the schedule timing of this MixedInClass, not str"
+    assert str(cm.value) == (
+        "MixedInClass.schedule_timing should be an integer or float number showing the "
+        "value of the schedule timing of this MixedInClass, not str: '10d'"
     )
 
 
@@ -326,7 +324,7 @@ def test_schedule_unit_argument_is_not_a_string(setup_schedule_mixin_tests):
     assert (
         str(cm.value) == "MixedInClass.schedule_unit should be a string value one of "
         "['min', 'h', 'd', 'w', 'm', 'y'] showing the unit of the "
-        "schedule timing of this MixedInClass, not int"
+        "schedule timing of this MixedInClass, not int: '10'"
     )
 
 
@@ -338,7 +336,7 @@ def test_schedule_unit_attribute_is_not_a_string(setup_schedule_mixin_tests):
     assert (
         str(cm.value) == "MixedInClass.schedule_unit should be a string value one of "
         "['min', 'h', 'd', 'w', 'm', 'y'] showing the unit of the "
-        "schedule timing of this MixedInClass, not int"
+        "schedule timing of this MixedInClass, not int: '23'"
     )
 
 

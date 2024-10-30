@@ -152,58 +152,55 @@ class Structure(Entity):
         return super(Structure, self).__hash__()
 
     @validates("custom_template")
-    def _validate_custom_template(self, key, custom_template_in):
+    def _validate_custom_template(self, key, custom_template):
         """Validate the given custom_template value.
 
         Args:
             key (str): The name of the validated column.
-            custom_template_in (str): The custom template value to be validated.
+            custom_template (str): The custom template value to be validated.
 
         Raises:
-            TypeError: If the given custom_template_in value is not a str.
+            TypeError: If the given custom_template value is not a str.
 
         Returns:
-            str: The validated `custom_template_in` value.
+            str: The validated `custom_template` value.
         """
-        if custom_template_in is None:
-            custom_template_in = ""
+        if custom_template is None:
+            custom_template = ""
 
-        if not isinstance(custom_template_in, string_types):
+        if not isinstance(custom_template, string_types):
             raise TypeError(
                 "{}.custom_template should be a string, not {}: '{}'".format(
                     self.__class__.__name__,
-                    custom_template_in.__class__.__name__,
-                    custom_template_in
+                    custom_template.__class__.__name__,
+                    custom_template
                 )
             )
-        return custom_template_in
+        return custom_template
 
     @validates("templates")
-    def _validate_templates(self, key, template_in):
+    def _validate_templates(self, key, template):
         """Validate the given template value.
 
         Args:
             key (str): The name of the validated column.
-            template_in (FilenameTemplate): The validated template_in value.
+            template (FilenameTemplate): The validated template value.
 
         Raises:
-            TypeError: If the given template_in value is not a FilenameTemplate
+            TypeError: If the given template value is not a FilenameTemplate
                 instance.
 
         Returns:
-            FilenameTemplate: Return the validated template_in value.
+            FilenameTemplate: Return the validated template value.
         """
-        if not isinstance(template_in, FilenameTemplate):
+        if not isinstance(template, FilenameTemplate):
             raise TypeError(
-                "All the elements in the {cls}.templates should be a "
-                "stalker.models.template.FilenameTemplate instance not "
-                "{template}".format(
-                    cls=self.__class__.__name__,
-                    template=template_in.__class__.__name__
-                )
+                f"All the elements in the {self.__class__.__name__}.templates should "
+                "be a stalker.models.template.FilenameTemplate instance, not "
+                f"{template.__class__.__name__}: '{template}'"
             )
 
-        return template_in
+        return template
 
 
 # Structure_FilenameTemplates Table

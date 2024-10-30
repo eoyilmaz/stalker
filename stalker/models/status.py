@@ -194,11 +194,9 @@ class StatusList(Entity, TargetEntityTypeMixin):
         """
         if not isinstance(status, Status):
             raise TypeError(
-                "All of the elements in {cls}.statuses must be an instance of "
-                "stalker.models.status.Status, and not {status}".format(
-                    cls=self.__class__.__name__,
-                    status=status.__class__.__name__,
-                )
+                f"All of the elements in {self.__class__.__name__}.statuses must be an "
+                "instance of stalker.models.status.Status, "
+                f"not {status.__class__.__name__}: '{status}'"
             )
         return status
 

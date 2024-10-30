@@ -101,7 +101,7 @@ class Good(Entity, UnitMixin):
         if not isinstance(cost, (float, int)):
             raise TypeError(
                 f"{self.__class__.__name__}.cost should be a non-negative number, "
-                f"not {cost.__class__.__name__}"
+                f"not {cost.__class__.__name__}: '{cost}'"
             )
 
         if cost < 0.0:
@@ -132,7 +132,7 @@ class Good(Entity, UnitMixin):
         if not isinstance(msrp, (float, int)):
             raise TypeError(
                 f"{self.__class__.__name__}.msrp should be a non-negative number, "
-                f"not {msrp.__class__.__name__}"
+                f"not {msrp.__class__.__name__}: '{msrp}'"
             )
 
         if msrp < 0.0:
@@ -164,7 +164,7 @@ class Good(Entity, UnitMixin):
                 raise TypeError(
                     f"{self.__class__.__name__}.client attribute should be a "
                     "stalker.models.client.Client instance, "
-                    f"not {client.__class__.__name__}"
+                    f"not {client.__class__.__name__}: '{client}'"
                 )
         return client
 
@@ -217,7 +217,8 @@ class PriceList(Entity):
         if not isinstance(good, Good):
             raise TypeError(
                 f"{self.__class__.__name__}.goods should be a list of "
-                f"stalker.model.budget.Good instances, not {good.__class__.__name__}"
+                "stalker.model.budget.Good instances, "
+                f"not {good.__class__.__name__}: '{good}'"
             )
         return good
 
@@ -282,7 +283,7 @@ class Budget(Entity, ProjectMixin, DAGMixin, StatusMixin):
         if not isinstance(entry, BudgetEntry):
             raise TypeError(
                 f"{self.__class__.__name__}.entries should be a list of BudgetEntry "
-                f"instances, not {entry.__class__.__name__}"
+                f"instances, not {entry.__class__.__name__}: '{entry}'"
             )
         return entry
 
@@ -376,7 +377,7 @@ class BudgetEntry(Entity, AmountMixin, UnitMixin):
         if not isinstance(budget, Budget):
             raise TypeError(
                 f"{self.__class__.__name__}.budget should be a Budget instance, "
-                f"not {budget.__class__.__name__}"
+                f"not {budget.__class__.__name__}: '{budget}'"
             )
         return budget
 
@@ -400,7 +401,7 @@ class BudgetEntry(Entity, AmountMixin, UnitMixin):
         if not isinstance(cost, (int, float)):
             raise TypeError(
                 f"{self.__class__.__name__}.cost should be a number, "
-                f"not {cost.__class__.__name__}"
+                f"not {cost.__class__.__name__}: '{cost}'"
             )
 
         return float(cost)
@@ -425,7 +426,7 @@ class BudgetEntry(Entity, AmountMixin, UnitMixin):
         if not isinstance(msrp, (int, float)):
             raise TypeError(
                 f"{self.__class__.__name__}.msrp should be a number, "
-                f"not {msrp.__class__.__name__}"
+                f"not {msrp.__class__.__name__}: '{msrp}'"
             )
 
         return float(msrp)
@@ -450,7 +451,7 @@ class BudgetEntry(Entity, AmountMixin, UnitMixin):
         if not isinstance(price, (int, float)):
             raise TypeError(
                 f"{self.__class__.__name__}.price should be a number, "
-                f"not {price.__class__.__name__}"
+                f"not {price.__class__.__name__}: '{price}'"
             )
 
         return float(price)
@@ -476,7 +477,7 @@ class BudgetEntry(Entity, AmountMixin, UnitMixin):
         if not isinstance(realized_total, (int, float)):
             raise TypeError(
                 f"{self.__class__.__name__}.realized_total should be a number, "
-                f"not {realized_total.__class__.__name__}"
+                f"not {realized_total.__class__.__name__}: '{realized_total}'"
             )
 
         return float(realized_total)
@@ -498,7 +499,8 @@ class BudgetEntry(Entity, AmountMixin, UnitMixin):
         if not isinstance(good, Good):
             raise TypeError(
                 f"{self.__class__.__name__}.good should be a "
-                f"stalker.models.budget.Good instance, not {good.__class__.__name__}"
+                "stalker.models.budget.Good instance, "
+                f"not {good.__class__.__name__}: '{good}'"
             )
 
         return good
@@ -572,7 +574,7 @@ class Invoice(Entity, AmountMixin, UnitMixin):
         if not isinstance(budget, Budget):
             raise TypeError(
                 f"{self.__class__.__name__}.budget should be a Budget instance, "
-                f"not {budget.__class__.__name__}"
+                f"not {budget.__class__.__name__}: '{budget}'"
             )
         return budget
 
@@ -597,7 +599,7 @@ class Invoice(Entity, AmountMixin, UnitMixin):
         if not isinstance(client, Client):
             raise TypeError(
                 f"{self.__class__.__name__}.client should be a Client instance, "
-                f"not {client.__class__.__name__}"
+                f"not {client.__class__.__name__}: '{client}'"
             )
         return client
 
@@ -651,6 +653,6 @@ class Payment(Entity, AmountMixin, UnitMixin):
         if not isinstance(invoice, Invoice):
             raise TypeError(
                 f"{self.__class__.__name__}.invoice should be an Invoice instance, "
-                f"not {invoice.__class__.__name__}"
+                f"not {invoice.__class__.__name__}: '{invoice}'"
             )
         return invoice

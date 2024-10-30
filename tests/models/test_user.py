@@ -394,7 +394,7 @@ def test_email_argument_accepting_only_string(setup_user_db_tests):
     with pytest.raises(TypeError) as cm:
         User(**data["kwargs"])
 
-    assert str(cm.value) == "User.email should be an instance of str not float"
+    assert str(cm.value) == "User.email should be an instance of str, not float: '1.3'"
 
 
 def test_email_attribute_accepting_only_string_1(setup_user_db_tests):
@@ -406,7 +406,7 @@ def test_email_attribute_accepting_only_string_1(setup_user_db_tests):
     with pytest.raises(TypeError) as cm:
         data["test_user"].email = test_value
 
-    assert str(cm.value) == "User.email should be an instance of str not int"
+    assert str(cm.value) == "User.email should be an instance of str, not int: '1'"
 
 
 def test_email_attribute_accepting_only_string_2(setup_user_db_tests):
@@ -418,7 +418,9 @@ def test_email_attribute_accepting_only_string_2(setup_user_db_tests):
     with pytest.raises(TypeError) as cm:
         data["test_user"].email = test_value
 
-    assert str(cm.value) == "User.email should be an instance of str not list"
+    assert str(cm.value) == (
+        "User.email should be an instance of str, not list: '['an email']'"
+    )
 
 
 def test_email_argument_format_1(setup_user_db_tests):
@@ -762,9 +764,9 @@ def test_departments_argument_only_accepts_list_of_department_objects(
     with pytest.raises(TypeError) as cm:
         User(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "DepartmentUser.department should be a "
-        "stalker.models.department.Department instance, not str"
+    assert str(cm.value) == (
+        "DepartmentUser.department should be a "
+        "stalker.models.department.Department instance, not str: 'A department'"
     )
 
 
@@ -776,9 +778,9 @@ def test_departments_attribute_only_accepts_department_objects(setup_user_db_tes
     with pytest.raises(TypeError) as cm:
         data["test_user"].departments = test_value
 
-    assert (
-        str(cm.value) == "DepartmentUser.department should be a "
-        "stalker.models.department.Department instance, not str"
+    assert str(cm.value) == (
+        "DepartmentUser.department should be a "
+        "stalker.models.department.Department instance, not str: 'a'"
     )
 
 
@@ -923,9 +925,9 @@ def test_groups_attribute_elements_accepts_group_only_1(setup_user_db_tests):
     # append
     with pytest.raises(TypeError) as cm:
         data["test_user"].groups.append(0)
-    assert (
-        str(cm.value) == "Any group in User.groups should be an instance of "
-        "stalker.models.auth.Group not int"
+    assert str(cm.value) == (
+        "Any group in User.groups should be an instance of "
+        "stalker.models.auth.Group, not int: '0'"
     )
 
 
@@ -935,9 +937,9 @@ def test_groups_attribute_elements_accepts_group_only_2(setup_user_db_tests):
     # __setitem__
     with pytest.raises(TypeError) as cm:
         data["test_user"].groups[0] = 0
-    assert (
-        str(cm.value) == "Any group in User.groups should be an instance of "
-        "stalker.models.auth.Group not int"
+    assert str(cm.value) == (
+        "Any group in User.groups should be an instance of "
+        "stalker.models.auth.Group, not int: '0'"
     )
 
 
@@ -955,10 +957,9 @@ def test_projects_attribute_is_set_to_a_value_which_is_not_a_list(setup_user_db_
     with pytest.raises(TypeError) as cm:
         data["test_user"].projects = "not a list"
 
-    assert (
-        str(cm.value)
-        == "ProjectUser.project should be a stalker.models.project.Project "
-        "instance, not str"
+    assert str(cm.value) == (
+        "ProjectUser.project should be a stalker.models.project.Project "
+        "instance, not str: 'n'"
     )
 
 
@@ -973,7 +974,7 @@ def test_projects_attribute_is_set_to_list_of_other_objects_than_project_instanc
     assert (
         str(cm.value)
         == "ProjectUser.project should be a stalker.models.project.Project "
-        "instance, not str"
+        "instance, not str: 'not'"
     )
 
 
@@ -1039,9 +1040,9 @@ def test_tasks_attribute_elements_accepts_tasks_only(setup_user_db_tests):
     with pytest.raises(TypeError) as cm:
         data["test_user"].tasks.append(0)
 
-    assert (
-        str(cm.value) == "Any element in User.tasks should be an instance of "
-        "stalker.models.task.Task not int"
+    assert str(cm.value) == (
+        "Any element in User.tasks should be an instance of "
+        "stalker.models.task.Task, not int: '0'"
     )
 
 
@@ -1297,9 +1298,9 @@ def test_vacations_attribute_is_not_a_list_of_vacation_instances(setup_user_db_t
     with pytest.raises(TypeError) as cm:
         data["test_user"].vacations = ["list of", "other", "instances", 1]
 
-    assert (
-        str(cm.value) == "All of the elements in User.vacations should be a "
-        "stalker.models.studio.Vacation instance, not str"
+    assert str(cm.value) == (
+        "All of the elements in User.vacations should be a "
+        "stalker.models.studio.Vacation instance, not str: 'list of'"
     )
 
 
@@ -1360,9 +1361,9 @@ def test_efficiency_argument_is_not_a_float_or_integer(setup_user_db_tests):
     with pytest.raises(TypeError) as cm:
         User(**data["kwargs"])
 
-    assert (
-        str(cm.value)
-        == "User.efficiency should be a float number greater or equal to 0.0, not str"
+    assert str(cm.value) == (
+        "User.efficiency should be a float number greater or equal to 0.0, "
+        "not str: 'not a float or integer'"
     )
 
 
@@ -1372,9 +1373,9 @@ def test_efficiency_attribute_is_not_a_float_or_integer(setup_user_db_tests):
     with pytest.raises(TypeError) as cm:
         data["test_user"].efficiency = "not a float or integer"
 
-    assert (
-        str(cm.value)
-        == "User.efficiency should be a float number greater or equal to 0.0, not str"
+    assert str(cm.value) == (
+        "User.efficiency should be a float number greater or equal to 0.0, "
+        "not str: 'not a float or integer'"
     )
 
 
@@ -1465,9 +1466,9 @@ def test_companies_argument_is_not_a_list(setup_user_db_tests):
     with pytest.raises(TypeError) as cm:
         User(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "ClientUser.client should be instance of "
-        "stalker.models.client.Client, not str"
+    assert str(cm.value) == (
+        "ClientUser.client should be instance of stalker.models.client.Client, "
+        "not str: 'n'"
     )
 
 
@@ -1481,7 +1482,7 @@ def test_companies_argument_is_not_a_list_of_client_instances(setup_user_db_test
 
     assert (
         str(cm.value) == "ClientUser.client should be instance of "
-        "stalker.models.client.Client, not int"
+        "stalker.models.client.Client, not int: '1'"
     )
 
 
@@ -1494,9 +1495,9 @@ def test_companies_attribute_is_set_to_a_value_other_than_a_list_of_client_insta
     with pytest.raises(TypeError) as cm:
         data["test_user"].companies = test_value
 
-    assert (
-        str(cm.value) == "ClientUser.client should be instance of "
-        "stalker.models.client.Client, not int"
+    assert str(cm.value) == (
+        "ClientUser.client should be instance of stalker.models.client.Client, "
+        "not int: '1'"
     )
 
 
@@ -1573,9 +1574,9 @@ def test_watching_attribute_is_a_list_of_other_values_than_task(setup_user_db_te
     with pytest.raises(TypeError) as cm:
         data["test_user"].watching = ["not", 1, "list of tasks"]
 
-    assert (
-        str(cm.value) == "Any element in User.watching should be an instance of "
-        "stalker.models.task.Task not str"
+    assert str(cm.value) == (
+        "Any element in User.watching should be an instance of "
+        "stalker.models.task.Task, not str: 'not'"
     )
 
 
@@ -1623,9 +1624,9 @@ def test_rate_argument_is_not_a_float_or_integer_value(setup_user_db_tests):
     with pytest.raises(TypeError) as cm:
         User(**data["kwargs"])
 
-    assert (
-        str(cm.value)
-        == "User.rate should be a float number greater or equal to 0.0, not str"
+    assert str(cm.value) == (
+        "User.rate should be a float number greater or equal to 0.0, "
+        "not str: 'some string'"
     )
 
 
@@ -1635,9 +1636,9 @@ def test_rate_attribute_is_not_a_float_or_integer_value(setup_user_db_tests):
     with pytest.raises(TypeError) as cm:
         data["test_user"].rate = "some string"
 
-    assert (
-        str(cm.value)
-        == "User.rate should be a float number greater or equal to 0.0, not str"
+    assert str(cm.value) == (
+        "User.rate should be a float number greater or equal to 0.0, "
+        "not str: 'some string'"
     )
 
 

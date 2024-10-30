@@ -76,7 +76,9 @@ def test_code_argument_is_not_a_string(code_mixin_tester_setup):
     with pytest.raises(TypeError) as cm:
         CodeMixFooMixedInClass(**data["kwargs"])
 
-    assert str(cm.value) == "CodeMixFooMixedInClass.code should be a string not int"
+    assert str(cm.value) == (
+        "CodeMixFooMixedInClass.code should be a string, not int: '123'"
+    )
 
 
 def test_code_attribute_is_not_a_string(code_mixin_tester_setup):
@@ -85,7 +87,9 @@ def test_code_attribute_is_not_a_string(code_mixin_tester_setup):
     with pytest.raises(TypeError) as cm:
         data["test_foo_obj"].code = 2342
 
-    assert str(cm.value) == "CodeMixFooMixedInClass.code should be a string not int"
+    assert str(cm.value) == (
+        "CodeMixFooMixedInClass.code should be a string, not int: '2342'"
+    )
 
 
 def test_code_argument_is_an_empty_string(code_mixin_tester_setup):

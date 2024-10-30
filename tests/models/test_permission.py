@@ -40,8 +40,8 @@ def test_access_argument_is_none(setup_permission_tests):
     with pytest.raises(TypeError) as cm:
         Permission(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "Permission.access should be an instance of str not NoneType"
+    assert str(cm.value) == (
+        "Permission.access should be an instance of str, not NoneType: 'None'"
     )
 
 
@@ -99,8 +99,8 @@ def test_action_argument_is_none(setup_permission_tests):
     with pytest.raises(TypeError) as cm:
         Permission(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "Permission.action should be an instance of str not NoneType"
+    assert str(cm.value) == (
+        "Permission.action should be an instance of str, not NoneType: 'None'"
     )
 
 
@@ -162,9 +162,8 @@ def test_class_name_argument_is_none(setup_permission_tests):
     with pytest.raises(TypeError) as cm:
         Permission(**data["kwargs"])
 
-    assert (
-        str(cm.value)
-        == "Permission.class_name should be an instance of str not NoneType"
+    assert str(cm.value) == (
+        "Permission.class_name should be an instance of str, not NoneType: 'None'"
     )
 
 
@@ -175,7 +174,9 @@ def test_class_name_argument_is_not_a_string(setup_permission_tests):
     with pytest.raises(TypeError) as cm:
         Permission(**data["kwargs"])
 
-    assert str(cm.value) == "Permission.class_name should be an instance of str not int"
+    assert str(cm.value) == (
+        "Permission.class_name should be an instance of str, not int: '10'"
+    )
 
 
 def test_class_name_argument_is_setting_the_class_name_attribute_value(

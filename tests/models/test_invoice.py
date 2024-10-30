@@ -143,7 +143,9 @@ def test_budget_argument_is_skipped(setup_invoice_tests):
     with pytest.raises(TypeError) as cm:
         Invoice(client=data["test_client"], amount=1500, unit="TRY")
 
-    assert str(cm.value) == "Invoice.budget should be a Budget instance, not NoneType"
+    assert str(cm.value) == (
+        "Invoice.budget should be a Budget instance, not NoneType: 'None'"
+    )
 
 
 def test_budget_argument_is_none(setup_invoice_tests):
@@ -151,7 +153,9 @@ def test_budget_argument_is_none(setup_invoice_tests):
     data = setup_invoice_tests
     with pytest.raises(TypeError) as cm:
         Invoice(budget=None, client=data["test_client"], amount=1500, unit="TRY")
-    assert str(cm.value) == "Invoice.budget should be a Budget instance, not NoneType"
+    assert str(cm.value) == (
+        "Invoice.budget should be a Budget instance, not NoneType: 'None'"
+    )
 
 
 def test_budget_attribute_is_set_to_none(setup_invoice_tests):
@@ -163,7 +167,9 @@ def test_budget_attribute_is_set_to_none(setup_invoice_tests):
     with pytest.raises(TypeError) as cm:
         test_invoice.budget = None
 
-    assert str(cm.value) == "Invoice.budget should be a Budget instance, not NoneType"
+    assert str(cm.value) == (
+        "Invoice.budget should be a Budget instance, not NoneType: 'None'"
+    )
 
 
 def test_budget_argument_is_not_a_budget_instance(setup_invoice_tests):
@@ -176,7 +182,9 @@ def test_budget_argument_is_not_a_budget_instance(setup_invoice_tests):
             amount=1500,
             unit="TRY",
         )
-    assert str(cm.value) == "Invoice.budget should be a Budget instance, not str"
+    assert str(cm.value) == (
+        "Invoice.budget should be a Budget instance, not str: 'Not a budget instance'"
+    )
 
 
 def test_budget_attribute_is_set_to_a_value_other_than_a_budget_instance(
@@ -190,7 +198,9 @@ def test_budget_attribute_is_set_to_a_value_other_than_a_budget_instance(
     with pytest.raises(TypeError) as cm:
         test_invoice.budget = "Not a budget instance"
 
-    assert str(cm.value) == "Invoice.budget should be a Budget instance, not str"
+    assert str(cm.value) == (
+        "Invoice.budget should be a Budget instance, not str: 'Not a budget instance'"
+    )
 
 
 def test_budget_argument_is_working_properly(setup_invoice_tests):
@@ -207,7 +217,9 @@ def test_client_argument_is_skipped(setup_invoice_tests):
     data = setup_invoice_tests
     with pytest.raises(TypeError) as cm:
         Invoice(budget=data["test_budget"], amount=100, unit="TRY")
-    assert str(cm.value) == "Invoice.client should be a Client instance, not NoneType"
+    assert str(cm.value) == (
+        "Invoice.client should be a Client instance, not NoneType: 'None'"
+    )
 
 
 def test_client_argument_is_none(setup_invoice_tests):
@@ -215,7 +227,9 @@ def test_client_argument_is_none(setup_invoice_tests):
     data = setup_invoice_tests
     with pytest.raises(TypeError) as cm:
         Invoice(budget=data["test_budget"], client=None, amount=100, unit="TRY")
-    assert str(cm.value) == "Invoice.client should be a Client instance, not NoneType"
+    assert str(cm.value) == (
+        "Invoice.client should be a Client instance, not NoneType: 'None'"
+    )
 
 
 def test_client_attribute_is_set_to_none(setup_invoice_tests):
@@ -226,7 +240,9 @@ def test_client_attribute_is_set_to_none(setup_invoice_tests):
     )
     with pytest.raises(TypeError) as cm:
         test_invoice.client = None
-    assert str(cm.value) == "Invoice.client should be a Client instance, not NoneType"
+    assert str(cm.value) == (
+        "Invoice.client should be a Client instance, not NoneType: 'None'"
+    )
 
 
 def test_client_argument_is_not_a_client_instance(setup_invoice_tests):
@@ -239,7 +255,9 @@ def test_client_argument_is_not_a_client_instance(setup_invoice_tests):
             amount=100,
             unit="TRY",
         )
-    assert str(cm.value) == "Invoice.client should be a Client instance, not str"
+    assert str(cm.value) == (
+        "Invoice.client should be a Client instance, not str: 'not a client instance'"
+    )
 
 
 def test_client_attribute_is_set_to_a_value_other_than_a_client_instance(
@@ -252,7 +270,9 @@ def test_client_attribute_is_set_to_a_value_other_than_a_client_instance(
     )
     with pytest.raises(TypeError) as cm:
         test_invoice.client = "not a client instance"
-    assert str(cm.value) == "Invoice.client should be a Client instance, not str"
+    assert str(cm.value) == (
+        "Invoice.client should be a Client instance, not str: 'not a client instance'"
+    )
 
 
 def test_client_argument_is_working_properly(setup_invoice_tests):

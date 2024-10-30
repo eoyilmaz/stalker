@@ -194,11 +194,10 @@ def test___setitem__checks_the_given_data_1():
     with pytest.raises(TypeError) as cm:
         wh[0] = "not a proper data"
 
-    assert (
-        str(cm.value)
-        == "WorkingHours.working_hours value should be a list of lists of "
+    assert str(cm.value) == (
+        "WorkingHours.working_hours value should be a list of lists of "
         "two integers between and the range of integers should be 0-1440, "
-        "not str"
+        "not str: 'not a proper data'"
     )
 
 
@@ -213,7 +212,7 @@ def test___setitem__checks_the_given_data_2():
         str(cm.value)
         == "WorkingHours.working_hours value should be a list of lists of "
         "two integers between and the range of integers should be 0-1440, "
-        "not str"
+        "not str: 'not a proper data'"
     )
 
 
@@ -222,11 +221,10 @@ def test___setitem__checks_the_given_data_3():
     wh = WorkingHours()
     with pytest.raises(TypeError) as cm:
         wh[0] = ["no proper data"]
-    assert (
-        str(cm.value)
-        == "WorkingHours.working_hours value should be a list of lists of "
+    assert str(cm.value) == (
+        "WorkingHours.working_hours value should be a list of lists of "
         "two integers between and the range of integers should be 0-1440, "
-        "not str"
+        "not str: 'no proper data'"
     )
 
 
@@ -239,7 +237,7 @@ def test___setitem__checks_the_given_data_4():
         str(cm.value)
         == "WorkingHours.working_hours value should be a list of lists of "
         "two integers between and the range of integers should be 0-1440, "
-        "not str"
+        "not str: 'no proper data'"
     )
 
 

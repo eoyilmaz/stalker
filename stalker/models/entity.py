@@ -331,8 +331,8 @@ class SimpleEntity(Base):
 
         if not isinstance(description, string_types):
             raise TypeError(
-                "{}.description should be a string, not {}".format(
-                    self.__class__.__name__, description.__class__.__name__
+                "{}.description should be a string, not {}: '{}'".format(
+                    self.__class__.__name__, description.__class__.__name__, description
                 )
             )
         return description
@@ -356,15 +356,17 @@ class SimpleEntity(Base):
 
         if not isinstance(generic_text, string_types):
             raise TypeError(
-                "{}.generic_text should be a string, not {}".format(
-                    self.__class__.__name__, generic_text.__class__.__name__
+                "{}.generic_text should be a string, not {}: '{}'".format(
+                    self.__class__.__name__,
+                    generic_text.__class__.__name__,
+                    generic_text,
                 )
             )
         return generic_text
 
     @validates("name")
     def _validate_name(self, key, name):
-        """Validate the name_in value.
+        """Validate the name value.
 
         Args:
             key (str): The name of the validated column.
@@ -392,7 +394,7 @@ class SimpleEntity(Base):
         if not isinstance(name, string_types):
             raise TypeError(
                 f"{self.__class__.__name__}.name should be a string, "
-                f"not {name.__class__.__name__}"
+                f"not {name.__class__.__name__}: '{name}'"
             )
 
         name = self._format_name(name)
@@ -409,54 +411,54 @@ class SimpleEntity(Base):
         return name
 
     @classmethod
-    def _format_name(cls, name_in):
-        """Format the name_in value.
+    def _format_name(cls, name):
+        """Format the name value.
 
         Args:
-            name_in (str): The name_in value.
+            name (str): The name value.
 
         Returns:
-            str: The formatted name_in value.
+            str: The formatted name value.
         """
         # remove unnecessary characters from the string
-        name_in = name_in.strip()
+        name = name.strip()
 
         # remove multiple spaces
-        name_in = re.sub(r"\s+", " ", name_in)
+        name = re.sub(r"\s+", " ", name)
 
-        return name_in
+        return name
 
     @classmethod
-    def _format_nice_name(cls, nice_name_in):
+    def _format_nice_name(cls, nice_name):
         """Format the given nice name value.
 
         Args:
-            nice_name_in (str): The nice_name_in value to be formatted.
+            nice_name (str): The nice_name value to be formatted.
 
         Returns:
             str: The formatted nice name.
         """
         # remove unnecessary characters from the string
-        nice_name_in = nice_name_in.strip()
-        nice_name_in = re.sub(r"([^a-zA-Z0-9\s_\-@]+)", "", nice_name_in).strip()
+        nice_name = nice_name.strip()
+        nice_name = re.sub(r"([^a-zA-Z0-9\s_\-@]+)", "", nice_name).strip()
 
         # remove all the characters which are not alphabetic from the start of
         # the string
-        nice_name_in = re.sub(r"(^[^a-zA-Z0-9]+)", "", nice_name_in)
+        nice_name = re.sub(r"(^[^a-zA-Z0-9]+)", "", nice_name)
 
         # remove multiple spaces
-        nice_name_in = re.sub(r"\s+", " ", nice_name_in)
+        nice_name = re.sub(r"\s+", " ", nice_name)
 
         # # replace camel case letters
-        # nice_name_in = re.sub(r"(.+?[a-z]+)([A-Z])", r"\1_\2", nice_name_in)
+        # nice_name = re.sub(r"(.+?[a-z]+)([A-Z])", r"\1_\2", nice_name)
 
         # replace white spaces and dashes with underscore
-        nice_name_in = re.sub("([ -])+", r"_", nice_name_in)
+        nice_name = re.sub("([ -])+", r"_", nice_name)
 
         # remove multiple underscores
-        nice_name_in = re.sub(r"(_+)", r"_", nice_name_in)
+        nice_name = re.sub(r"(_+)", r"_", nice_name)
 
-        return nice_name_in
+        return nice_name
 
     @property
     def nice_name(self):
@@ -476,147 +478,150 @@ class SimpleEntity(Base):
         return self._nice_name
 
     @validates("created_by")
-    def _validate_created_by(self, key, created_by_in):
-        """Validate the given created_by_in value.
+    def _validate_created_by(self, key, created_by):
+        """Validate the given created_by value.
 
         Args:
             key (str): The name of the validated column.
-            created_by_in (Union[None, User]): The created_by_in value to be validated.
+            created_by (Union[None, User]): The created_by value to be validated.
 
         Raises:
-            TypeError: If the created_by_in value is not None and not a
+            TypeError: If the created_by value is not None and not a
                 :class:`stalker.models.auth.User` instance.
 
         Returns:
-            Union [None, User]: The validated created_by_in value.
+            Union [None, User]: The validated created_by value.
         """
         from stalker.models.auth import User
 
-        if created_by_in is not None:
-            if not isinstance(created_by_in, User):
+        if created_by is not None:
+            if not isinstance(created_by, User):
                 raise TypeError(
                     f"{self.__class__.__name__}.created_by should be a "
                     "stalker.models.auth.User instance, "
-                    f"not {created_by_in.__class__.__name__}"
+                    f"not {created_by.__class__.__name__}: '{created_by}'"
                 )
-        return created_by_in
+        return created_by
 
     @validates("updated_by")
-    def _validate_updated_by(self, key, updated_by_in):
-        """Validate the given updated_by_in value.
+    def _validate_updated_by(self, key, updated_by):
+        """Validate the given updated_by value.
 
         Args:
             key (str): The name of the validated column.
-            updated_by_in (Union[None, User]): The updated_by_in value to be validated.
+            updated_by (Union[None, User]): The updated_by value to be validated.
 
         Raises:
-            TypeError: If the updated_by_in value is not None and not a
+            TypeError: If the updated_by value is not None and not a
                 :class:`stalker.models.auth.User` instance.
 
         Returns:
-            Union [None, User]: The validated updated_by_in value.
+            Union [None, User]: The validated updated_by value.
         """
         from stalker.models.auth import User
 
-        if updated_by_in is None:
+        if updated_by is None:
             # set it to what created_by attribute has
-            updated_by_in = self.created_by
+            updated_by = self.created_by
 
-        if updated_by_in is not None:
-            if not isinstance(updated_by_in, User):
+        if updated_by is not None:
+            if not isinstance(updated_by, User):
                 raise TypeError(
                     f"{self.__class__.__name__}.updated_by should be a "
                     "stalker.models.auth.User instance, "
-                    f"not {updated_by_in.__class__.__name__}"
+                    f"not {updated_by.__class__.__name__}: '{updated_by}'"
                 )
-        return updated_by_in
+        return updated_by
 
     @validates("date_created")
-    def _validate_date_created(self, key, date_created_in):
-        """Validate the given date_created_in value.
+    def _validate_date_created(self, key, date_created):
+        """Validate the given date_created value.
 
         Args:
             key (str): The name of the validated column.
-            date_created_in (datetime.datetime): The value to be validated.
+            date_created (datetime.datetime): The value to be validated.
 
         Raises:
-            TypeError: If the given date_created_in value is None or not a datetime
+            TypeError: If the given date_created value is None or not a datetime
                 instance.
 
         Returns:
-            datetime.datetime: The validated date_created_in value.
+            datetime.datetime: The validated date_created value.
         """
-        if date_created_in is None:
+        if date_created is None:
             raise TypeError(f"{self.__class__.__name__}.date_created can not be None")
 
-        if not isinstance(date_created_in, datetime.datetime):
+        if not isinstance(date_created, datetime.datetime):
             raise TypeError(
                 f"{self.__class__.__name__}.date_created should be a "
-                "datetime.datetime instance"
+                "datetime.datetime instance, "
+                f"not {date_created.__class__.__name__}: '{date_created}'"
             )
 
-        return date_created_in
+        return date_created
 
     @validates("date_updated")
-    def _validate_date_updated(self, key, date_updated_in):
-        """Validate the given date_updated_in.
+    def _validate_date_updated(self, key, date_updated):
+        """Validate the given date_updated.
 
         Args:
             key (str): The name of the validated column.
-            date_updated_in (datetime.datetime): The date_updated_in to be validated.
+            date_updated (datetime.datetime): The date_updated to be validated.
 
         Raises:
-            TypeError: If the date_updated_in value is ``None`` or date_updated_in is
+            TypeError: If the date_updated value is ``None`` or date_updated is
                 not a ``datetime.datetime`` instance.
-            ValueError: If the date_updated_in is before than the date_created.
+            ValueError: If the date_updated is before than the date_created.
 
         Returns:
-            datetime.datetime: The validated datetime_updated_in value.
+            datetime.datetime: The validated datetime_updated value.
         """
         # it is None
-        if date_updated_in is None:
+        if date_updated is None:
             raise TypeError(f"{self.__class__.__name__}.date_updated can not be None")
 
         # it is not a datetime.datetime instance
-        if not isinstance(date_updated_in, datetime.datetime):
+        if not isinstance(date_updated, datetime.datetime):
             raise TypeError(
                 f"{self.__class__.__name__}.date_updated should be a "
-                "datetime.datetime instance"
+                "datetime.datetime instance, "
+                f"not {date_updated.__class__.__name__}: '{date_updated}'"
             )
 
         # lower than date_created
-        if date_updated_in < self.date_created:
+        if date_updated < self.date_created:
             raise ValueError(
                 "{class_name}.date_updated could not be set to a date before "
                 "{class_name}.date_created, try setting the ``date_created`` "
                 "first.".format(class_name=self.__class__.__name__)
             )
-        return date_updated_in
+        return date_updated
 
     @validates("type")
-    def _validate_type(self, key, type_in):
+    def _validate_type(self, key, type_):
         """Validate the given type value.
 
         Args:
             key (str): The name of the validated column.
-            type_in (Type): The type_in value to be validated.
+            type_ (Type): The type value to be validated.
 
         Raises:
-            TypeError: If this class is a strictly typed class and the type_in is not
+            TypeError: If this class is a strictly typed class and the type_ is not
                 None and not a Type instance.
 
         Returns:
-            Type: The validated type_in value.
+            Type: The validated type_ value.
         """
-        if self.__strictly_typed__ or type_in is not None:
+        if self.__strictly_typed__ or type_ is not None:
             from stalker.models.type import Type
 
-            if not isinstance(type_in, Type):
+            if not isinstance(type_, Type):
                 raise TypeError(
                     f"{self.__class__.__name__}.type must be a "
-                    f"stalker.models.type.Type instance, not {type_in}"
+                    "stalker.models.type.Type instance, "
+                    f"not {type_.__class__.__name__}: '{type_}'"
                 )
-        return type_in
+        return type_
 
     @validates("thumbnail")
     def _validate_thumbnail(self, key, thumb):
@@ -638,7 +643,8 @@ class SimpleEntity(Base):
             if not isinstance(thumb, Link):
                 raise TypeError(
                     f"{self.__class__.__name__}.thumbnail should be a "
-                    f"stalker.models.link.Link instance, not {thumb.__class__.__name__}"
+                    "stalker.models.link.Link instance, "
+                    f"not {thumb.__class__.__name__}: '{thumb}'"
                 )
         return thumb
 
@@ -684,7 +690,7 @@ class SimpleEntity(Base):
         if not isinstance(html_style, string_types):
             raise TypeError(
                 f"{self.__class__.__name__}.html_style should be a basestring "
-                f"instance, not {html_style.__class__.__name__}"
+                f"instance, not {html_style.__class__.__name__}: '{html_style}'"
             )
         return html_style
 
@@ -708,7 +714,7 @@ class SimpleEntity(Base):
         if not isinstance(html_class, string_types):
             raise TypeError(
                 f"{self.__class__.__name__}.html_class should be a basestring "
-                f"instance, not {html_class.__class__.__name__}"
+                f"instance, not {html_class.__class__.__name__}: '{html_class}'"
             )
         return html_class
 
@@ -788,7 +794,7 @@ class Entity(SimpleEntity):
         if not isinstance(note, Note):
             raise TypeError(
                 f"{self.__class__.__name__}.note should be a stalker.models.note.Note "
-                f"instance, not {note.__class__.__name__}"
+                f"instance, not {note.__class__.__name__}: '{note}'"
             )
         return note
 
@@ -811,7 +817,7 @@ class Entity(SimpleEntity):
         if not isinstance(tag, Tag):
             raise TypeError(
                 f"{self.__class__.__name__}.tag should be a stalker.models.tag.Tag "
-                f"instance, not {tag.__class__.__name__}"
+                f"instance, not {tag.__class__.__name__}: '{tag}'"
             )
         return tag
 
@@ -884,7 +890,7 @@ class EntityGroup(Entity):
         if not isinstance(entity, SimpleEntity):
             raise TypeError(
                 f"{self.__class__.__name__}.entities should be a list of "
-                f"SimpleEntities, not {entity.__class__.__name__}"
+                f"SimpleEntities, not {entity.__class__.__name__}: '{entity}'"
             )
 
         return entity

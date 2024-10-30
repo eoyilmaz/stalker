@@ -147,7 +147,8 @@ class Client(Entity):
         if not isinstance(good, Good):
             raise TypeError(
                 f"{self.__class__.__name__}.goods attribute should be all "
-                f"stalker.models.budget.Good instances, not {good.__class__.__name__}"
+                "stalker.models.budget.Good instances, "
+                f"not {good.__class__.__name__}: '{good}'"
             )
 
         return good
@@ -200,7 +201,8 @@ class ClientUser(Base):
             if not isinstance(client, Client):
                 raise TypeError(
                     f"{self.__class__.__name__}.client should be instance of "
-                    f"stalker.models.client.Client, not {client.__class__.__name__}"
+                    "stalker.models.client.Client, "
+                    f"not {client.__class__.__name__}: '{client}'"
                 )
         return client
 
@@ -225,7 +227,8 @@ class ClientUser(Base):
             if not isinstance(user, User):
                 raise TypeError(
                     f"{self.__class__.__name__}.user should be an instance of "
-                    f"stalker.models.auth.User, not {user.__class__.__name__}"
+                    "stalker.models.auth.User, "
+                    f"not {user.__class__.__name__}: '{user}'"
                 )
         return user
 
@@ -250,6 +253,7 @@ class ClientUser(Base):
             if not isinstance(role, Role):
                 raise TypeError(
                     f"{self.__class__.__name__}.role should be a "
-                    f"stalker.models.auth.Role instance, not {role.__class__.__name__}"
+                    "stalker.models.auth.Role instance, "
+                    f"not {role.__class__.__name__}: '{role}'"
                 )
         return role

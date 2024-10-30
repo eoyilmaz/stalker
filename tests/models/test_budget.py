@@ -115,9 +115,8 @@ def test_entries_attribute_is_set_to_a_list_of_other_instances_than_a_budget_ent
     with pytest.raises(TypeError) as cm:
         data["test_budget"].entries = ["some", "string", 1, 2]
 
-    assert (
-        str(cm.value)
-        == "Budget.entries should be a list of BudgetEntry instances, not str"
+    assert str(cm.value) == (
+        "Budget.entries should be a list of BudgetEntry instances, not str: 'some'"
     )
 
 
@@ -156,8 +155,8 @@ def test_budget_argument_is_skipped(setup_budget_test_base):
     """TypeError is raised if the budget argument is skipped."""
     with pytest.raises(TypeError) as cm:
         BudgetEntry(amount=10.0)
-    assert (
-        str(cm.value) == "BudgetEntry.budget should be a Budget instance, not NoneType"
+    assert str(cm.value) == (
+        "BudgetEntry.budget should be a Budget instance, not NoneType: 'None'"
     )
 
 
@@ -165,8 +164,8 @@ def test_budget_argument_is_none(setup_budget_test_base):
     """TypeError is raised if the budget argument is None."""
     with pytest.raises(TypeError) as cm:
         BudgetEntry(budget=None, amount=10.0)
-    assert (
-        str(cm.value) == "BudgetEntry.budget should be a Budget instance, not NoneType"
+    assert str(cm.value) == (
+        "BudgetEntry.budget should be a Budget instance, not NoneType: 'None'"
     )
 
 
@@ -179,8 +178,8 @@ def test_budget_attribute_is_set_to_none(setup_budget_test_base):
     )
     with pytest.raises(TypeError) as cm:
         entry.budget = None
-    assert (
-        str(cm.value) == "BudgetEntry.budget should be a Budget instance, not NoneType"
+    assert str(cm.value) == (
+        "BudgetEntry.budget should be a Budget instance, not NoneType: 'None'"
     )
 
 
@@ -188,7 +187,9 @@ def test_budget_argument_is_not_a_budget_instance(setup_budget_test_base):
     """TypeError is raised if the budget argument is not a Budget instance."""
     with pytest.raises(TypeError) as cm:
         BudgetEntry(budget="not a budget", amount=10.0)
-    assert str(cm.value) == "BudgetEntry.budget should be a Budget instance, not str"
+    assert str(cm.value) == (
+        "BudgetEntry.budget should be a Budget instance, not str: 'not a budget'"
+    )
 
 
 def test_budget_attribute_is_not_a_budget_instance(setup_budget_test_base):
@@ -197,7 +198,10 @@ def test_budget_attribute_is_not_a_budget_instance(setup_budget_test_base):
     entry = BudgetEntry(budget=data["test_budget"], good=data["test_good"], amount=10.0)
     with pytest.raises(TypeError) as cm:
         entry.budget = "not a budget instance"
-    assert str(cm.value) == "BudgetEntry.budget should be a Budget instance, not str"
+    assert str(cm.value) == (
+        "BudgetEntry.budget should be a Budget instance, "
+        "not str: 'not a budget instance'"
+    )
 
 
 def test_budget_argument_is_working_properly(setup_budget_test_base):
@@ -252,7 +256,9 @@ def test_cost_attribute_is_not_a_number(setup_budget_test_base):
     )
     with pytest.raises(TypeError) as cm:
         entry.cost = "some string"
-    assert str(cm.value) == "BudgetEntry.cost should be a number, not str"
+    assert str(cm.value) == (
+        "BudgetEntry.cost should be a number, not str: 'some string'"
+    )
 
 
 def test_cost_attribute_is_working_properly(setup_budget_test_base):
@@ -289,7 +295,9 @@ def test_msrp_attribute_is_not_a_number(setup_budget_test_base):
     )
     with pytest.raises(TypeError) as cm:
         entry.msrp = "some string"
-    assert str(cm.value) == "BudgetEntry.msrp should be a number, not str"
+    assert str(cm.value) == (
+        "BudgetEntry.msrp should be a number, not str: 'some string'"
+    )
 
 
 def test_msrp_attribute_is_working_properly(setup_budget_test_base):
@@ -347,8 +355,9 @@ def test_price_argument_is_not_a_number(setup_budget_test_base):
         BudgetEntry(
             budget=data["test_budget"], good=data["test_good"], price="some string"
         )
-
-    assert str(cm.value) == "BudgetEntry.price should be a number, not str"
+    assert str(cm.value) == (
+        "BudgetEntry.price should be a number, not str: 'some string'"
+    )
 
 
 def test_price_attribute_is_not_a_number(setup_budget_test_base):
@@ -357,7 +366,9 @@ def test_price_attribute_is_not_a_number(setup_budget_test_base):
     entry = BudgetEntry(budget=data["test_budget"], good=data["test_good"], price=10)
     with pytest.raises(TypeError) as cm:
         entry.price = "some string"
-    assert str(cm.value) == "BudgetEntry.price should be a number, not str"
+    assert str(cm.value) == (
+        "BudgetEntry.price should be a number, not str: 'some string'"
+    )
 
 
 def test_price_argument_is_working_properly(setup_budget_test_base):
@@ -414,7 +425,9 @@ def test_realized_total_argument_is_not_a_number(setup_budget_test_base):
             realized_total="some string",
         )
 
-    assert str(cm.value) == "BudgetEntry.realized_total should be a number, not str"
+    assert str(cm.value) == (
+        "BudgetEntry.realized_total should be a number, not str: 'some string'"
+    )
 
 
 def test_realized_total_attribute_is_not_a_number(setup_budget_test_base):
@@ -425,7 +438,9 @@ def test_realized_total_attribute_is_not_a_number(setup_budget_test_base):
     )
     with pytest.raises(TypeError) as cm:
         entry.realized_total = "some string"
-    assert str(cm.value) == "BudgetEntry.realized_total should be a number, not str"
+    assert str(cm.value) == (
+        "BudgetEntry.realized_total should be a number, not str: 'some string'"
+    )
 
 
 def test_realized_total_argument_is_working_properly(setup_budget_test_base):
@@ -464,7 +479,9 @@ def test_unit_attribute_is_not_a_string(setup_budget_test_base):
     entry = BudgetEntry(budget=data["test_budget"], good=data["test_good"])
     with pytest.raises(TypeError) as cm:
         entry.unit = 100.212
-    assert str(cm.value) == "BudgetEntry.unit should be a string, not float"
+    assert str(cm.value) == (
+        "BudgetEntry.unit should be a string, not float: '100.212'"
+    )
 
 
 def test_unit_attribute_is_working_properly(setup_budget_test_base):
@@ -519,7 +536,9 @@ def test_amount_argument_is_not_a_number(setup_budget_test_base):
         BudgetEntry(
             budget=data["test_budget"], good=data["test_good"], amount="some string"
         )
-    assert str(cm.value) == "BudgetEntry.amount should be a number, not str"
+    assert str(cm.value) == (
+        "BudgetEntry.amount should be a number, not str: 'some string'"
+    )
 
 
 def test_amount_attribute_is_not_a_number(setup_budget_test_base):
@@ -528,7 +547,9 @@ def test_amount_attribute_is_not_a_number(setup_budget_test_base):
     entry = BudgetEntry(budget=data["test_budget"], good=data["test_good"], amount=10)
     with pytest.raises(TypeError) as cm:
         entry.amount = "some string"
-    assert str(cm.value) == "BudgetEntry.amount should be a number, not str"
+    assert str(cm.value) == (
+        "BudgetEntry.amount should be a number, not str: 'some string'"
+    )
 
 
 def test_amount_argument_is_working_properly(setup_budget_test_base):
@@ -553,9 +574,9 @@ def test_good_argument_is_skipped(setup_budget_test_base):
     data = setup_budget_test_base
     with pytest.raises(TypeError) as cm:
         BudgetEntry(budget=data["test_budget"])
-    assert (
-        str(cm.value) == "BudgetEntry.good should be a stalker.models.budget.Good "
-        "instance, not NoneType"
+    assert str(cm.value) == (
+        "BudgetEntry.good should be a stalker.models.budget.Good instance, "
+        "not NoneType: 'None'"
     )
 
 
@@ -568,9 +589,9 @@ def test_good_argument_is_none(setup_budget_test_base):
             good=None,
             amount=53,
         )
-    assert (
-        str(cm.value) == "BudgetEntry.good should be a stalker.models.budget.Good "
-        "instance, not NoneType"
+    assert str(cm.value) == (
+        "BudgetEntry.good should be a stalker.models.budget.Good instance, "
+        "not NoneType: 'None'"
     )
 
 
@@ -582,9 +603,9 @@ def test_good_attribute_is_set_to_none(setup_budget_test_base):
     )
     with pytest.raises(TypeError) as cm:
         entry.good = None
-    assert (
-        str(cm.value) == "BudgetEntry.good should be a stalker.models.budget.Good "
-        "instance, not NoneType"
+    assert str(cm.value) == (
+        "BudgetEntry.good should be a stalker.models.budget.Good instance, "
+        "not NoneType: 'None'"
     )
 
 
@@ -597,9 +618,9 @@ def test_good_argument_is_not_a_good_instance(setup_budget_test_base):
             good="this is not a Good instance",
             amount=53,
         )
-    assert (
-        str(cm.value) == "BudgetEntry.good should be a stalker.models.budget.Good "
-        "instance, not str"
+    assert str(cm.value) == (
+        "BudgetEntry.good should be a stalker.models.budget.Good instance, "
+        "not str: 'this is not a Good instance'"
     )
 
 
@@ -615,7 +636,7 @@ def test_good_attribute_is_not_a_good_instance(setup_budget_test_base):
         entry.good = "this is not a Good instance"
     assert (
         str(cm.value) == "BudgetEntry.good should be a stalker.models.budget.Good "
-        "instance, not str"
+        "instance, not str: 'this is not a Good instance'"
     )
 
 

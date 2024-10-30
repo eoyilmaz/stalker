@@ -221,11 +221,10 @@ def test_gap_timing_argument_is_not_a_float(setup_task_dependency_db_test):
     with pytest.raises(TypeError) as cm:
         TaskDependency(**data["kwargs"])
 
-    assert (
-        str(cm.value)
-        == "TaskDependency.gap_timing should be an integer or float number "
-        "showing the value of the gap timing of this TaskDependency, "
-        "not str"
+    assert str(cm.value) == (
+        "TaskDependency.gap_timing should be an integer or float number showing the "
+        "value of the gap timing of this TaskDependency, "
+        "not str: 'not a time delta'"
     )
 
 
@@ -236,11 +235,9 @@ def test_gap_timing_attribute_is_not_a_float(setup_task_dependency_db_test):
     with pytest.raises(TypeError) as cm:
         tdep.gap_timing = "not float"
 
-    assert (
-        str(cm.value)
-        == "TaskDependency.gap_timing should be an integer or float number "
-        "showing the value of the gap timing of this TaskDependency, "
-        "not str"
+    assert str(cm.value) == (
+        "TaskDependency.gap_timing should be an integer or float number showing the "
+        "value of the gap timing of this TaskDependency, not str: 'not float'"
     )
 
 
@@ -296,7 +293,7 @@ def test_gap_unit_argument_is_not_a_str_instance(setup_task_dependency_db_test):
     assert (
         str(cm.value) == "TaskDependency.gap_unit should be a string value one of "
         "['min', 'h', 'd', 'w', 'm', 'y'] showing the unit of the gap "
-        "timing of this TaskDependency, not int"
+        "timing of this TaskDependency, not int: '231'"
     )
 
 
@@ -307,10 +304,10 @@ def test_gap_unit_attribute_is_not_a_str_instance(setup_task_dependency_db_test)
     with pytest.raises(TypeError) as cm:
         tdep.gap_unit = 2342
 
-    assert (
-        str(cm.value) == "TaskDependency.gap_unit should be a string value one of "
+    assert str(cm.value) == (
+        "TaskDependency.gap_unit should be a string value one of "
         "['min', 'h', 'd', 'w', 'm', 'y'] showing the unit of the gap "
-        "timing of this TaskDependency, not int"
+        "timing of this TaskDependency, not int: '2342'"
     )
 
 
@@ -396,7 +393,7 @@ def test_gap_model_argument_is_not_a_str_instance(setup_task_dependency_db_test)
 
     assert (
         str(cm.value) == "TaskDependency.gap_model should be one of ['length', "
-        "'duration'], not int"
+        "'duration'], not int: '231'"
     )
 
 
@@ -409,7 +406,7 @@ def test_gap_model_attribute_is_not_a_str_instance(setup_task_dependency_db_test
 
     assert (
         str(cm.value) == "TaskDependency.gap_model should be one of ['length', "
-        "'duration'], not int"
+        "'duration'], not int: '2342'"
     )
 
 
@@ -424,7 +421,7 @@ def test_gap_model_argument_value_is_not_in_the_enum_list(
 
     assert (
         str(cm.value) == "TaskDependency.gap_model should be one of ['length', "
-        "'duration'], not str"
+        "'duration'], not str: 'not in the list'"
     )
 
 
@@ -439,7 +436,7 @@ def test_gap_model_attribute_value_is_not_in_the_enum_list(
 
     assert (
         str(cm.value) == "TaskDependency.gap_model should be one of ['length', "
-        "'duration'], not str"
+        "'duration'], not str: 'not in the list'"
     )
 
 

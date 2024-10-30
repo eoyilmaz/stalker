@@ -71,7 +71,8 @@ class Scene(Entity, ProjectMixin, CodeMixin):
         if not isinstance(shot, Shot):
             raise TypeError(
                 f"{self.__class__.__name__}.shots needs to be all "
-                f"stalker.models.shot.Shot instances, not {shot.__class__.__name__}"
+                "stalker.models.shot.Shot instances, "
+                f"not {shot.__class__.__name__}: '{shot}'"
             )
         return shot
 

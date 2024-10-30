@@ -148,8 +148,8 @@ class Permission(Base):
         """
         if not isinstance(access, string_types):
             raise TypeError(
-                f"{self.__class__.__name__}.access should be an instance of str "
-                f"not {access.__class__.__name__}"
+                f"{self.__class__.__name__}.access should be an instance of str, "
+                f"not {access.__class__.__name__}: '{access}'"
             )
 
         if access not in ["Allow", "Deny"]:
@@ -184,8 +184,8 @@ class Permission(Base):
         """
         if not isinstance(class_name, string_types):
             raise TypeError(
-                f"{self.__class__.__name__}.class_name should be an instance of str "
-                f"not {class_name.__class__.__name__}"
+                f"{self.__class__.__name__}.class_name should be an instance of str, "
+                f"not {class_name.__class__.__name__}: '{class_name}'"
             )
 
         return class_name
@@ -215,8 +215,8 @@ class Permission(Base):
         """
         if not isinstance(action, string_types):
             raise TypeError(
-                f"{self.__class__.__name__}.action should be an instance of str "
-                f"not {action.__class__.__name__}"
+                f"{self.__class__.__name__}.action should be an instance of str, "
+                f"not {action.__class__.__name__}: '{action}'"
             )
 
         if action not in defaults.actions:
@@ -317,7 +317,7 @@ class Group(Entity, ACLMixin):
             raise TypeError(
                 f"{self.__class__.__name__}.users attribute must all be "
                 "stalker.models.auth.User "
-                f"instances not {user.__class__.__name__}"
+                f"instances, not {user.__class__.__name__}: '{user}'"
             )
 
         return user
@@ -684,12 +684,12 @@ class User(Entity, ACLMixin):
         return login
 
     @validates("email")
-    def _validate_email(self, key, email_in):
+    def _validate_email(self, key, email):
         """Validate the given email value.
 
         Args:
             key (str): The name of the validated column.
-            email_in (str): The email to be validated.
+            email (str): The email to be validated.
 
         Raises:
             TypeError: If the given email is not a str.
@@ -697,19 +697,19 @@ class User(Entity, ACLMixin):
         Returns:
             str: The validated email value.
         """
-        # check if email_in is an instance of string
-        if not isinstance(email_in, string_types):
+        # check if email is an instance of string
+        if not isinstance(email, string_types):
             raise TypeError(
-                f"{self.__class__.__name__}.email should be an instance of str not "
-                f"{email_in.__class__.__name__}"
+                f"{self.__class__.__name__}.email should be an instance of str, not "
+                f"{email.__class__.__name__}: '{email}'"
             )
-        return self._validate_email_format(email_in)
+        return self._validate_email_format(email)
 
-    def _validate_email_format(self, email_in):
+    def _validate_email_format(self, email):
         """Validate the email format.
 
         Args:
-            email_in (str): The email value to be validated.
+            email (str): The email value to be validated.
 
         Raises:
             ValueError: If the email doesn't have a "@" sign in it, or it has more than
@@ -720,7 +720,7 @@ class User(Entity, ACLMixin):
             str: The validated email value.
         """
         # split the mail from @ sign
-        splits = email_in.split("@")
+        splits = email.split("@")
         len_splits = len(splits)
 
         # there should be one and only one @ sign
@@ -748,7 +748,7 @@ class User(Entity, ACLMixin):
                 "the domain part is missing"
             )
 
-        return email_in
+        return email
 
     @classmethod
     def _format_login(cls, login):
@@ -778,7 +778,7 @@ class User(Entity, ACLMixin):
         return login
 
     @validates("password")
-    def _validate_password(self, key, password_in):
+    def _validate_password(self, key, password):
         """Validate the given password value.
 
         Note:
@@ -787,32 +787,26 @@ class User(Entity, ACLMixin):
 
         Args:
             key (str): The name of the validated column.
-            password_in (str): The password value.
+            password (str): The password value.
 
         Raises:
-            TypeError: If the given password_in is None.
-            ValueError: If the given password_in is an empty string.
+            TypeError: If the given password is None.
+            ValueError: If the given password is an empty string.
 
         Returns:
             str: The mangled password.
         """
-        if password_in is None:
+        if password is None:
             raise TypeError(f"{self.__class__.__name__}.password cannot be None")
 
-        if password_in == "":
+        if password == "":
             raise ValueError(
                 f"{self.__class__.__name__}.password can not be an empty string"
             )
 
         # mangle the password
-        mangled_password_bytes = base64.b64encode(password_in.encode("utf-8"))
-
-        if sys.version_info[0] == 2:
-            mangled_password_str = str(mangled_password_bytes)
-        else:
-            # Assuming Python >= 3.5
-            mangled_password_str = str(mangled_password_bytes.decode("utf-8"))
-
+        mangled_password_bytes = base64.b64encode(password.encode("utf-8"))
+        mangled_password_str = str(mangled_password_bytes.decode("utf-8"))
         return mangled_password_str
 
     def check_password(self, raw_password):
@@ -834,13 +828,7 @@ class User(Entity, ACLMixin):
         """
         mangled_password_str = str(self.password)
         raw_password_bytes = base64.b64encode(bytes(raw_password.encode("utf-8")))
-
-        if sys.version_info[0] == 2:
-            raw_password_encrypted_str = str(raw_password_bytes)
-        else:
-            # Assuming Python >= 3.5
-            raw_password_encrypted_str = str(raw_password_bytes.decode("utf-8"))
-
+        raw_password_encrypted_str = str(raw_password_bytes.decode("utf-8"))
         return mangled_password_str == raw_password_encrypted_str
 
     @validates("groups")
@@ -860,7 +848,8 @@ class User(Entity, ACLMixin):
         if not isinstance(group, Group):
             raise TypeError(
                 f"Any group in {self.__class__.__name__}.groups should be an instance "
-                f"of stalker.models.auth.Group not {group.__class__.__name__}"
+                "of stalker.models.auth.Group, "
+                f"not {group.__class__.__name__}: '{group}'"
             )
 
         return group
@@ -886,7 +875,7 @@ class User(Entity, ACLMixin):
         if not isinstance(task, Task):
             raise TypeError(
                 f"Any element in {self.__class__.__name__}.tasks should be an instance "
-                f"of stalker.models.task.Task not {task.__class__.__name__}"
+                f"of stalker.models.task.Task, not {task.__class__.__name__}: '{task}'"
             )
         return task
 
@@ -911,7 +900,8 @@ class User(Entity, ACLMixin):
         if not isinstance(task, Task):
             raise TypeError(
                 f"Any element in {self.__class__.__name__}.watching should be an "
-                f"instance of stalker.models.task.Task not {task.__class__.__name__}"
+                "instance of stalker.models.task.Task, "
+                f"not {task.__class__.__name__}: '{task}'"
             )
         return task
 
@@ -937,7 +927,7 @@ class User(Entity, ACLMixin):
             raise TypeError(
                 f"All of the elements in {self.__class__.__name__}.vacations should be "
                 "a stalker.models.studio.Vacation instance, "
-                f"not {vacation.__class__.__name__}"
+                f"not {vacation.__class__.__name__}: '{vacation}'"
             )
         return vacation
 
@@ -964,7 +954,8 @@ class User(Entity, ACLMixin):
         if not isinstance(efficiency, (int, float)):
             raise TypeError(
                 f"{self.__class__.__name__}.efficiency should be a float number "
-                f"greater or equal to 0.0, not {efficiency.__class__.__name__}"
+                "greater or equal to 0.0, "
+                f"not {efficiency.__class__.__name__}: '{efficiency}'"
             )
 
         if efficiency < 0:
@@ -997,7 +988,7 @@ class User(Entity, ACLMixin):
         if not isinstance(rate, (int, float)):
             raise TypeError(
                 f"{self.__class__.__name__}.rate should be a float number greater or "
-                f"equal to 0.0, not {rate.__class__.__name__}"
+                f"equal to 0.0, not {rate.__class__.__name__}: '{rate}'"
             )
 
         if rate < 0:
@@ -1350,7 +1341,7 @@ class AuthenticationLog(SimpleEntity):
         if not isinstance(user, User):
             raise TypeError(
                 f"{self.__class__.__name__}.user should be a User instance, "
-                f"not {user.__class__.__name__}"
+                f"not {user.__class__.__name__}: '{user}'"
             )
 
         return user
@@ -1399,8 +1390,8 @@ class AuthenticationLog(SimpleEntity):
 
         if not isinstance(date, datetime.datetime):
             raise TypeError(
-                f'{self.__class__.__name__}.date should be a "datetime.datetime" '
-                f'instance, not {date.__class__.__name__}'
+                f"{self.__class__.__name__}.date should be a datetime.datetime "
+                f"instance, not {date.__class__.__name__}: '{date}'"
             )
 
         return date

@@ -36,11 +36,11 @@ class SchedulerBase(object):
         self._studio = None
         self.studio = studio
 
-    def _validate_studio(self, studio_in):
-        """Validate the given studio_in value.
+    def _validate_studio(self, studio):
+        """Validate the given studio value.
 
         Args:
-            studio_in (Studio): The Studio instance to set the studio attribute to.
+            studio (Studio): The Studio instance to set the studio attribute to.
 
         Raises:
             TypeError: If the given value is not a Studio instance.
@@ -48,15 +48,16 @@ class SchedulerBase(object):
         Returns:
             Studio: The validated Studio instance.
         """
-        if studio_in is not None:
+        if studio is not None:
             from stalker import Studio
 
-            if not isinstance(studio_in, Studio):
+            if not isinstance(studio, Studio):
                 raise TypeError(
                     f"{self.__class__.__name__}.studio should be an instance of "
-                    f"stalker.models.studio.Studio, not {studio_in.__class__.__name__}"
+                    "stalker.models.studio.Studio, "
+                    f"not {studio.__class__.__name__}: '{studio}'"
                 )
-        return studio_in
+        return studio
 
     @property
     def studio(self):
@@ -68,13 +69,13 @@ class SchedulerBase(object):
         return self._studio
 
     @studio.setter
-    def studio(self, studio_in):
+    def studio(self, studio):
         """Set studio attribute.
 
         Args:
-            studio_in (Studio): The Studio instance to set the studio attribute to.
+            studio (Studio): The Studio instance to set the studio attribute to.
         """
-        self._studio = self._validate_studio(studio_in)
+        self._studio = self._validate_studio(studio)
 
     def schedule(self):
         """Schedule function that needs to be implemented in the derivatives.
@@ -649,7 +650,8 @@ order by path_as_text"""  # noqa: B950
         if not isinstance(self.studio, Studio):
             raise TypeError(
                 f"{self.__class__.__name__}.studio should be an instance of "
-                f"stalker.models.studio.Studio, not {self.studio.__class__.__name__}"
+                "stalker.models.studio.Studio, "
+                f"not {self.studio.__class__.__name__}: '{self.studio}'"
             )
 
         # create a tjp file
@@ -736,7 +738,7 @@ order by path_as_text"""  # noqa: B950
         msg = (
             "{cls}.projects should be a list of "
             "stalker.models.project.Project instances, not "
-            "{projects_class}"
+            "{projects_class}: '{projects}'"
         )
 
         if not isinstance(projects, list):
@@ -744,6 +746,7 @@ order by path_as_text"""  # noqa: B950
                 msg.format(
                     cls=self.__class__.__name__,
                     projects_class=projects.__class__.__name__,
+                    projects=projects
                 )
             )
 
@@ -753,6 +756,7 @@ order by path_as_text"""  # noqa: B950
                     msg.format(
                         cls=self.__class__.__name__,
                         projects_class=item.__class__.__name__,
+                        projects=item
                     )
                 )
 

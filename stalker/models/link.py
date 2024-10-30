@@ -93,8 +93,8 @@ class Link(Entity):
 
         if not isinstance(full_path, string_types):
             raise TypeError(
-                f"{self.__class__.__name__}.full_path should be an instance of string "
-                f"not {full_path.__class__.__name__}"
+                f"{self.__class__.__name__}.full_path should be an instance of string, "
+                f"not {full_path.__class__.__name__}: '{full_path}'"
             )
 
         return self._format_path(full_path)
@@ -123,7 +123,8 @@ class Link(Entity):
         if not isinstance(original_filename, string_types):
             raise TypeError(
                 f"{self.__class__.__name__}.original_filename should be an instance of "
-                f"str and not {original_filename.__class__.__name__}"
+                "string, "
+                f"not {original_filename.__class__.__name__}: '{original_filename}'"
             )
 
         return original_filename
@@ -171,7 +172,7 @@ class Link(Entity):
         if not isinstance(path, string_types):
             raise TypeError(
                 f"{self.__class__.__name__}.path should be an instance of str, "
-                f"not {path.__class__.__name__}"
+                f"not {path.__class__.__name__}: '{path}'"
             )
 
         if path == "":
@@ -206,7 +207,7 @@ class Link(Entity):
         if not isinstance(filename, string_types):
             raise TypeError(
                 f"{self.__class__.__name__}.filename should be an instance of str, "
-                f"not {filename.__class__.__name__}"
+                f"not {filename.__class__.__name__}: '{filename}'"
             )
 
         self.full_path = self._format_path(os.path.join(self.path, filename))
@@ -236,7 +237,7 @@ class Link(Entity):
         if not isinstance(extension, string_types):
             raise TypeError(
                 f"{self.__class__.__name__}.extension should be an instance of str, "
-                f"not {extension.__class__.__name__}"
+                f"not {extension.__class__.__name__}: '{extension}'"
             )
 
         if extension != "":

@@ -137,7 +137,7 @@ class ImageFormat(Entity):
         if not isinstance(height, (int, float)):
             raise TypeError(
                 f"{self.__class__.__name__}.height should be an instance of int or "
-                f"float, not {height.__class__.__name__}"
+                f"float, not {height.__class__.__name__}: '{height}'"
             )
 
         if height <= 0:
@@ -165,7 +165,7 @@ class ImageFormat(Entity):
         if not isinstance(pixel_aspect, (int, float)):
             raise TypeError(
                 f"{self.__class__.__name__}.pixel_aspect should be an instance of int "
-                f"or float not {pixel_aspect.__class__.__name__}"
+                f"or float, not {pixel_aspect.__class__.__name__}: '{pixel_aspect}'"
             )
 
         if pixel_aspect <= 0:
@@ -195,7 +195,8 @@ class ImageFormat(Entity):
         if not isinstance(print_resolution, (int, float)):
             raise TypeError(
                 f"{self.__class__.__name__}.print_resolution should be an instance of "
-                f"int or float not {print_resolution.__class__.__name__}"
+                "int or float, "
+                f"not {print_resolution.__class__.__name__}: '{print_resolution}'"
             )
 
         if print_resolution <= 0:

@@ -76,9 +76,9 @@ def test_goods_argument_is_a_list_of_objects_which_are_not_goods(
     with pytest.raises(TypeError) as cm:
         PriceList(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "PriceList.goods should be a list of "
-        "stalker.model.budget.Good instances, not str"
+    assert str(cm.value) == (
+        "PriceList.goods should be a list of stalker.model.budget.Good instances, "
+        "not str: 'not'"
     )
 
 
@@ -93,7 +93,7 @@ def test_good_attribute_is_a_list_of_objects_which_are_not_goods(
 
     assert str(cm.value) == (
         "PriceList.goods should be a list of "
-        "stalker.model.budget.Good instances, not str"
+        "stalker.model.budget.Good instances, not str: 'not'"
     )
 
 

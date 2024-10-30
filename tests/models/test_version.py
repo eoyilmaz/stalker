@@ -580,9 +580,9 @@ def test_parent_argument_is_not_a_version_instance(setup_version_db_tests):
     with pytest.raises(TypeError) as cm:
         Version(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "Version.parent should be an instance of Version class or "
-        "derivative, not str"
+    assert str(cm.value) == (
+        "Version.parent should be an instance of Version class or "
+        "derivative, not str: 'not a version instance'"
     )
 
 
@@ -592,9 +592,9 @@ def test_parent_attribute_is_not_set_to_a_version_instance(setup_version_db_test
     with pytest.raises(TypeError) as cm:
         data["test_version"].parent = "not a version instance"
 
-    assert (
-        str(cm.value) == "Version.parent should be an instance of Version class or "
-        "derivative, not str"
+    assert str(cm.value) == (
+        "Version.parent should be an instance of Version class or "
+        "derivative, not str: 'not a version instance'"
     )
 
 
@@ -697,9 +697,9 @@ def test_children_attribute_is_not_set_to_a_list_of_version_instances(
     with pytest.raises(TypeError) as cm:
         data["test_version"].children = ["not a Version instance", 3]
 
-    assert (
-        str(cm.value) == "Version.children should be a list of Version (or derivative) "
-        "instances, not str"
+    assert str(cm.value) == (
+        "Version.children should be a list of Version (or derivative) "
+        "instances, not str: 'not a Version instance'"
     )
 
 

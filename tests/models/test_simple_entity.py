@@ -209,7 +209,9 @@ def test_description_arg_is_not_a_string(setup_simple_entity_tests):
     with pytest.raises(TypeError) as cm:
         SimpleEntity(**data["kwargs"])
 
-    assert str(cm.value) == "SimpleEntity.description should be a string, not dict"
+    assert str(cm.value) == (
+        "SimpleEntity.description should be a string, not dict: '{'a': 'description'}'"
+    )
 
 
 def test_description_attr_is_not_a_string(setup_simple_entity_tests):
@@ -217,7 +219,9 @@ def test_description_attr_is_not_a_string(setup_simple_entity_tests):
     data = setup_simple_entity_tests
     with pytest.raises(TypeError) as cm:
         data["test_simple_entity"].description = ["a description"]
-    assert str(cm.value) == "SimpleEntity.description should be a string, not list"
+    assert str(cm.value) == (
+        "SimpleEntity.description should be a string, not list: '['a description']'"
+    )
 
 
 def test_generic_text_arg_none(setup_simple_entity_tests):
@@ -242,7 +246,10 @@ def test_generic_text_arg_is_not_a_string(setup_simple_entity_tests):
     with pytest.raises(TypeError) as cm:
         SimpleEntity(**data["kwargs"])
 
-    assert str(cm.value) == "SimpleEntity.generic_text should be a string, not dict"
+    assert str(cm.value) == (
+        "SimpleEntity.generic_text should be a string, "
+        "not dict: '{'a': 'generic_text'}'"
+    )
 
 
 def test_generic_text_attr_is_not_a_string(setup_simple_entity_tests):
@@ -297,7 +304,8 @@ def test_created_by_arg_is_not_a_user_instance(setup_simple_entity_tests):
         data["test_simple_entity"].created_by = test_value
 
     assert str(cm.value) == (
-        "SimpleEntity.created_by should be a stalker.models.auth.User instance, not str"
+        "SimpleEntity.created_by should be a stalker.models.auth.User instance, "
+        "not str: 'A User Name'"
     )
 
 
@@ -316,7 +324,8 @@ def test_created_by_attr_instance_of_user(setup_simple_entity_tests):
         data["test_simple_entity"].created_by = test_value
 
     assert str(cm.value) == (
-        "SimpleEntity.created_by should be a stalker.models.auth.User instance, not str"
+        "SimpleEntity.created_by should be a stalker.models.auth.User instance, "
+        "not str: 'A User Name'"
     )
 
 
@@ -335,7 +344,8 @@ def test_updated_by_arg_instance_of_user(setup_simple_entity_tests):
         data["test_simple_entity"].updated_by = test_value
 
     assert str(cm.value) == (
-        "SimpleEntity.updated_by should be a stalker.models.auth.User instance, not str"
+        "SimpleEntity.updated_by should be a stalker.models.auth.User instance, "
+        "not str: 'A User Name'"
     )
 
 
@@ -354,7 +364,8 @@ def test_updated_by_attr_instance_of_user(setup_simple_entity_tests):
         data["test_simple_entity"].updated_by = test_value
 
     assert str(cm.value) == (
-        "SimpleEntity.updated_by should be a stalker.models.auth.User instance, not str"
+        "SimpleEntity.updated_by should be a stalker.models.auth.User instance, "
+        "not str: 'A User Name'"
     )
 
 
@@ -381,7 +392,8 @@ def test_date_created_arg_accepts_datetime_only(setup_simple_entity_tests):
         data["test_simple_entity"].date_created = test_value
 
     assert str(cm.value) == (
-        "SimpleEntity.date_created should be a datetime.datetime instance"
+        "SimpleEntity.date_created should be a datetime.datetime instance, "
+        "not str: 'a string date time 2010-10-26 etc.'"
     )
 
 
@@ -397,7 +409,8 @@ def test_date_created_attr_accepts_datetime_only(setup_simple_entity_tests):
         data["test_simple_entity"].date_created = test_value
 
     assert str(cm.value) == (
-        "SimpleEntity.date_created should be a datetime.datetime instance"
+        "SimpleEntity.date_created should be a datetime.datetime instance, "
+        "not str: 'a string date time 2010-10-26 etc.'"
     )
 
 
@@ -423,7 +436,8 @@ def test_date_updated_arg_accepts_datetime_only(setup_simple_entity_tests):
         data["test_simple_entity"].date_updated = test_value
 
     assert str(cm.value) == (
-        "SimpleEntity.date_updated should be a datetime.datetime instance"
+        "SimpleEntity.date_updated should be a datetime.datetime instance, "
+        "not str: 'a string date time 2010-10-26 etc.'"
     )
 
 
@@ -440,7 +454,8 @@ def test_date_updated_attr_being_datetime(setup_simple_entity_tests):
         data["test_simple_entity"].date_updated = test_value
 
     assert str(cm.value) == (
-        "SimpleEntity.date_updated should be a datetime.datetime instance"
+        "SimpleEntity.date_updated should be a datetime.datetime instance, "
+        "not str: 'a string date time 2010-10-26 etc.'"
     )
 
 
@@ -450,7 +465,8 @@ def test_date_updated_attr_is_set_to_none(setup_simple_entity_tests):
     with pytest.raises(TypeError) as cm:
         data["test_simple_entity"].date_updated = "date_updated"
     assert str(cm.value) == (
-        "SimpleEntity.date_updated should be a datetime.datetime instance"
+        "SimpleEntity.date_updated should be a datetime.datetime instance, "
+        "not str: 'date_updated'"
     )
 
 
@@ -561,7 +577,8 @@ def test___strictly_typed___attr_set_to_true_and_no_type_arg(setup_simple_entity
         NewClass(**data["kwargs"])
 
     assert str(cm.value) == (
-        "NewClass.type must be a stalker.models.type.Type instance, not None"
+        "NewClass.type must be a stalker.models.type.Type instance, "
+        "not NoneType: 'None'"
     )
 
 
@@ -576,7 +593,8 @@ def test___strictly_typed___attr_set_to_true_and_type_arg_is_none(
         NewClass(**data["kwargs"])
 
     assert str(cm.value) == (
-        "NewClass.type must be a stalker.models.type.Type instance, not None"
+        "NewClass.type must be a stalker.models.type.Type instance, "
+        "not NoneType: 'None'"
     )
 
 
@@ -652,7 +670,8 @@ def test_thumbnail_arg_is_not_a_link_instance(setup_simple_entity_tests):
         SimpleEntity(**data["kwargs"])
 
     assert str(cm.value) == (
-        "SimpleEntity.thumbnail should be a stalker.models.link.Link instance, not str"
+        "SimpleEntity.thumbnail should be a stalker.models.link.Link instance, "
+        "not str: 'not a Link'"
     )
 
 
@@ -663,7 +682,8 @@ def test_thumbnail_attr_is_not_a_link_instance(setup_simple_entity_tests):
         data["test_simple_entity"].thumbnail = "not a Link"
 
     assert str(cm.value) == (
-        "SimpleEntity.thumbnail should be a stalker.models.link.Link instance, not str"
+        "SimpleEntity.thumbnail should be a stalker.models.link.Link instance, "
+        "not str: 'not a Link'"
     )
 
 
@@ -716,7 +736,7 @@ def test_html_style_arg_is_not_a_string(setup_simple_entity_tests):
     with pytest.raises(TypeError) as cm:
         SimpleEntity(**data["kwargs"])
     assert str(cm.value) == (
-        "SimpleEntity.html_style should be a basestring instance, not int"
+        "SimpleEntity.html_style should be a basestring instance, not int: '123'"
     )
 
 
@@ -726,7 +746,7 @@ def test_html_style_attr_is_not_set_to_a_string(setup_simple_entity_tests):
     with pytest.raises(TypeError) as cm:
         data["test_simple_entity"].html_style = 34324
     assert str(cm.value) == (
-        "SimpleEntity.html_style should be a basestring instance, not int"
+        "SimpleEntity.html_style should be a basestring instance, not int: '34324'"
     )
 
 
@@ -778,7 +798,7 @@ def test_html_class_arg_is_not_a_string(setup_simple_entity_tests):
     with pytest.raises(TypeError) as cm:
         SimpleEntity(**data["kwargs"])
     assert str(cm.value) == (
-        "SimpleEntity.html_class should be a basestring instance, not int"
+        "SimpleEntity.html_class should be a basestring instance, not int: '123'"
     )
 
 
@@ -788,7 +808,7 @@ def test_html_class_attr_is_not_set_to_a_string(setup_simple_entity_tests):
     with pytest.raises(TypeError) as cm:
         data["test_simple_entity"].html_class = 34324
     assert str(cm.value) == (
-        "SimpleEntity.html_class should be a basestring instance, not int"
+        "SimpleEntity.html_class should be a basestring instance, not int: '34324'"
     )
 
 

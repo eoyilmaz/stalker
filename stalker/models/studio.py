@@ -347,14 +347,14 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         return self._scheduler
 
     @scheduler.setter
-    def scheduler(self, scheduler_in: Union[None, SchedulerBase]):
+    def scheduler(self, scheduler: Union[None, SchedulerBase]):
         """Set the scheduler.
 
         Args:
-            scheduler_in (Union[None, SchedulerBase]): The SchedulerBase derivative as
+            scheduler (Union[None, SchedulerBase]): The SchedulerBase derivative as
                 the scheduler.
         """
-        self._scheduler = self._validate_scheduler(scheduler_in)
+        self._scheduler = self._validate_scheduler(scheduler)
 
     @property
     def to_tjp(self) -> str:
@@ -859,34 +859,35 @@ class WorkingHours(Entity):
         Returns:
             List[List[int, int]]
         """
-        err = (
+        err1 = (
             "{}.working_hours value should be a list of lists of two "
             "integers between and the range of integers should be 0-1440, "
             "not {}"
         )
+        err2 = f"{err1}: '{{}}'"
 
         if not isinstance(value, list):
             raise TypeError(
-                err.format(self.__class__.__name__, value.__class__.__name__)
+                err2.format(self.__class__.__name__, value.__class__.__name__, value)
             )
 
         for i in value:
             if not isinstance(i, list):
                 raise TypeError(
-                    err.format(self.__class__.__name__, i.__class__.__name__)
+                    err2.format(self.__class__.__name__, i.__class__.__name__, i)
                 )
 
             # check list length
             if len(i) != 2:
-                raise RuntimeError(err.format(self.__class__.__name__, value))
+                raise RuntimeError(err1.format(self.__class__.__name__, value))
 
             # check type
             if not isinstance(i[0], int) or not isinstance(i[1], int):
-                raise TypeError(err.format(self.__class__.__name__, value))
+                raise TypeError(err1.format(self.__class__.__name__, value))
 
             # check range
             if i[0] < 0 or i[0] > 1440 or i[1] < 0 or i[1] > 1440:
-                raise ValueError(err.format(self.__class__.__name__, value))
+                raise ValueError(err1.format(self.__class__.__name__, value))
 
         return value
 

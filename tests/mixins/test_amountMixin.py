@@ -55,8 +55,8 @@ def test_amount_argument_is_not_a_number():
     with pytest.raises(TypeError) as cm:
         AmountMixinFooMixedInClass(amount="some string")
 
-    assert (
-        str(cm.value) == "AmountMixinFooMixedInClass.amount should be a number, not str"
+    assert str(cm.value) == (
+        "AmountMixinFooMixedInClass.amount should be a number, not str: 'some string'"
     )
 
 
@@ -66,8 +66,8 @@ def test_amount_attribute_is_not_a_number():
     with pytest.raises(TypeError) as cm:
         entry.amount = "some string"
 
-    assert (
-        str(cm.value) == "AmountMixinFooMixedInClass.amount should be a number, not str"
+    assert str(cm.value) == (
+        "AmountMixinFooMixedInClass.amount should be a number, not str: 'some string'"
     )
 
 

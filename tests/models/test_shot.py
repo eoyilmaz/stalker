@@ -346,7 +346,7 @@ def test_sequences_argument_is_not_a_list_of_Sequence_instances(setup_shot_db_te
 
     assert str(cm.value) == (
         "Shot.sequences should all be stalker.models.sequence.Sequence instances, "
-        "not str"
+        "not str: 'not'"
     )
 
 
@@ -358,7 +358,7 @@ def test_sequences_attribute_is_not_a_list_of_Sequence_instances(setup_shot_db_t
 
     assert str(cm.value) == (
         "Shot.sequences should all be stalker.models.sequence.Sequence instances, "
-        "not str"
+        "not str: 'not'"
     )
 
 
@@ -479,7 +479,7 @@ def test_scenes_argument_is_not_a_list_of_Scene_instances(setup_shot_db_tests):
         Shot(**data["kwargs"])
 
     assert str(cm.value) == (
-        "Shot.scenes should all be stalker.models.scene.Scene instances, not str"
+        "Shot.scenes should all be stalker.models.scene.Scene instances, not str: 'not'"
     )
 
 
@@ -490,7 +490,7 @@ def test_scenes_attribute_is_not_a_list_of_Scene_instances(setup_shot_db_tests):
         data["test_shot"].scenes = ["not", 1, "list", "of", "scenes"]
 
     assert str(cm.value) == (
-        "Shot.scenes should all be stalker.models.scene.Scene instances, not str"
+        "Shot.scenes should all be stalker.models.scene.Scene instances, not str: 'not'"
     )
 
 
@@ -561,7 +561,7 @@ def test_cut_in_attribute_is_set_to_none(setup_shot_db_tests):
     data = setup_shot_db_tests
     with pytest.raises(TypeError) as cm:
         data["test_shot"].cut_in = None
-    assert str(cm.value) == "Shot.cut_in should be an int, not NoneType"
+    assert str(cm.value) == "Shot.cut_in should be an int, not NoneType: 'None'"
 
 
 def test_cut_in_argument_is_not_integer(setup_shot_db_tests):
@@ -571,7 +571,7 @@ def test_cut_in_argument_is_not_integer(setup_shot_db_tests):
     data["kwargs"]["cut_in"] = "a string"
     with pytest.raises(TypeError) as cm:
         Shot(**data["kwargs"])
-    assert str(cm.value) == "Shot.cut_in should be an int, not str"
+    assert str(cm.value) == "Shot.cut_in should be an int, not str: 'a string'"
 
 
 def test_cut_in_attribute_is_not_integer(setup_shot_db_tests):
@@ -579,7 +579,7 @@ def test_cut_in_attribute_is_not_integer(setup_shot_db_tests):
     data = setup_shot_db_tests
     with pytest.raises(TypeError) as cm:
         data["test_shot"].cut_in = "a string"
-    assert str(cm.value) == "Shot.cut_in should be an int, not str"
+    assert str(cm.value) == "Shot.cut_in should be an int, not str: 'a string'"
 
 
 def test_cut_in_argument_is_bigger_than_cut_out_argument(setup_shot_db_tests):
@@ -632,7 +632,7 @@ def test_cut_out_attribute_is_set_to_none(setup_shot_db_tests):
     data = setup_shot_db_tests
     with pytest.raises(TypeError) as cm:
         data["test_shot"].cut_out = None
-    assert str(cm.value) == "Shot.cut_out should be an int, not NoneType"
+    assert str(cm.value) == "Shot.cut_out should be an int, not NoneType: 'None'"
 
 
 def test_cut_out_argument_is_not_integer(setup_shot_db_tests):
@@ -642,7 +642,7 @@ def test_cut_out_argument_is_not_integer(setup_shot_db_tests):
     data["kwargs"]["cut_out"] = "a string"
     with pytest.raises(TypeError) as cm:
         Shot(**data["kwargs"])
-    assert str(cm.value) == "Shot.cut_out should be an int, not str"
+    assert str(cm.value) == "Shot.cut_out should be an int, not str: 'a string'"
 
 
 def test_cut_out_attribute_is_not_integer(setup_shot_db_tests):
@@ -650,7 +650,7 @@ def test_cut_out_attribute_is_not_integer(setup_shot_db_tests):
     data = setup_shot_db_tests
     with pytest.raises(TypeError) as cm:
         data["test_shot"].cut_out = "a string"
-    assert str(cm.value) == "Shot.cut_out should be an int, not str"
+    assert str(cm.value) == "Shot.cut_out should be an int, not str: 'a string'"
 
 
 def test_cut_out_argument_is_smaller_than_cut_in_argument(setup_shot_db_tests):
@@ -679,7 +679,7 @@ def test_cut_duration_attribute_is_not_instance_of_int(setup_shot_db_tests):
     with pytest.raises(TypeError) as cm:
         data["test_shot"].cut_duration = "a string"
     assert str(cm.value) == (
-        "Shot.cut_duration should be a positive integer value, not str"
+        "Shot.cut_duration should be a positive integer value, not str: 'a string'"
     )
 
 
@@ -764,7 +764,7 @@ def test_source_in_attribute_is_set_to_none(setup_shot_db_tests):
     with pytest.raises(TypeError) as cm:
         data["test_shot"].source_in = None
 
-    assert str(cm.value) == "Shot.source_in should be an int, not NoneType"
+    assert str(cm.value) == "Shot.source_in should be an int, not NoneType: 'None'"
 
 
 def test_source_in_argument_is_not_integer(setup_shot_db_tests):
@@ -776,7 +776,7 @@ def test_source_in_argument_is_not_integer(setup_shot_db_tests):
     with pytest.raises(TypeError) as cm:
         Shot(**data["kwargs"])
 
-    assert str(cm.value) == "Shot.source_in should be an int, not str"
+    assert str(cm.value) == "Shot.source_in should be an int, not str: 'a string'"
 
 
 def test_source_in_attribute_is_not_integer(setup_shot_db_tests):
@@ -785,7 +785,7 @@ def test_source_in_attribute_is_not_integer(setup_shot_db_tests):
     with pytest.raises(TypeError) as cm:
         data["test_shot"].source_in = "a string"
 
-    assert str(cm.value) == "Shot.source_in should be an int, not str"
+    assert str(cm.value) == "Shot.source_in should be an int, not str: 'a string'"
 
 
 def test_source_in_argument_is_bigger_than_source_out_argument(setup_shot_db_tests):
@@ -869,7 +869,7 @@ def test_source_out_attribute_is_set_to_none(setup_shot_db_tests):
     data = setup_shot_db_tests
     with pytest.raises(TypeError) as cm:
         data["test_shot"].source_out = None
-    assert str(cm.value) == "Shot.source_out should be an int, not NoneType"
+    assert str(cm.value) == "Shot.source_out should be an int, not NoneType: 'None'"
 
 
 def test_source_out_argument_is_not_integer(setup_shot_db_tests):
@@ -880,7 +880,7 @@ def test_source_out_argument_is_not_integer(setup_shot_db_tests):
     with pytest.raises(TypeError) as cm:
         Shot(**data["kwargs"])
 
-    assert str(cm.value) == "Shot.source_out should be an int, not str"
+    assert str(cm.value) == "Shot.source_out should be an int, not str: 'a string'"
 
 
 def test_source_out_attribute_is_not_integer(setup_shot_db_tests):
@@ -888,7 +888,7 @@ def test_source_out_attribute_is_not_integer(setup_shot_db_tests):
     data = setup_shot_db_tests
     with pytest.raises(TypeError) as cm:
         data["test_shot"].source_out = "a string"
-    assert str(cm.value) == "Shot.source_out should be an int, not str"
+    assert str(cm.value) == "Shot.source_out should be an int, not str: 'a string'"
 
 
 def test_source_out_argument_is_smaller_than_source_in_argument(setup_shot_db_tests):
@@ -957,7 +957,7 @@ def test_image_format_argument_is_not_a_image_format_instance_and_not_none(
 
     assert str(cm.value) == (
         "Shot.image_format should be an instance of "
-        "stalker.models.format.ImageFormat, not str"
+        "stalker.models.format.ImageFormat, not str: 'not an image format instance'"
     )
 
 
@@ -971,7 +971,7 @@ def test_image_format_attribute_is_not_a_ImageFormat_instance_and_not_none(
 
     assert str(cm.value) == (
         "Shot.image_format should be an instance of "
-        "stalker.models.format.ImageFormat, not str"
+        "stalker.models.format.ImageFormat, not str: 'not an image f'"
     )
 
 
@@ -1202,8 +1202,8 @@ def test_fps_argument_is_given_as_non_float_or_integer(test_value, setup_shot_db
         Shot(**data["kwargs"])
 
     assert str(cm.value) == (
-        "Shot.fps should be a positive float or int, not {}".format(
-            test_value.__class__.__name__
+        "Shot.fps should be a positive float or int, not {}: '{}'".format(
+            test_value.__class__.__name__, test_value
         )
     )
 
@@ -1218,8 +1218,8 @@ def test_fps_attribute_is_given_as_non_float_or_integer(
         data["test_shot"].fps = test_value
 
     assert str(cm.value) == (
-        "Shot.fps should be a positive float or int, not {}".format(
-            test_value.__class__.__name__
+        "Shot.fps should be a positive float or int, not {}: '{}'".format(
+            test_value.__class__.__name__, test_value
         )
     )
 
