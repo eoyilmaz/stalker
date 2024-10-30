@@ -82,7 +82,10 @@ def test_custom_template_argument_is_not_a_string(setup_structure_tests):
     with pytest.raises(TypeError) as cm:
         Structure(**data["kwargs"])
 
-    assert str(cm.value) == "Structure.custom_template should be a string not list"
+    assert str(cm.value) == (
+        "Structure.custom_template should be a string, "
+        "not list: '['this is not a string']'"
+    )
 
 
 def test_custom_template_attribute_is_not_a_string(setup_structure_tests):
@@ -90,7 +93,10 @@ def test_custom_template_attribute_is_not_a_string(setup_structure_tests):
     data = setup_structure_tests
     with pytest.raises(TypeError) as cm:
         data["test_structure"].custom_template = ["this is not a string"]
-    assert str(cm.value) == "Structure.custom_template should be a string not list"
+    assert str(cm.value) == (
+        "Structure.custom_template should be a string, "
+        "not list: '['this is not a string']'"
+    )
 
 
 def test_templates_argument_can_be_skipped(setup_structure_tests):

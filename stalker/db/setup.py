@@ -53,13 +53,13 @@ def setup(settings=None):
         settings = defaults.database_engine_settings
         logger.debug("no settings given, using the default setting")
 
-    # logger.debug("settings: %s" % settings)
+    # logger.debug(f"settings: {settings}")
     # create engine
 
-    logger.debug("settings: {}".format(settings))
+    logger.debug(f"settings: {settings}")
     engine = engine_from_config(settings, "sqlalchemy.")
 
-    logger.debug("engine: %s" % engine)
+    logger.debug(f"engine: {engine}")
 
     # create the Session class
     DBSession.remove()
@@ -222,7 +222,7 @@ def create_repo_vars():
 
         # TODO: Remove this in upcoming versions.
         # This is added for backwards compatibility
-        os.environ[defaults.repo_env_var_template_old % {"id": repo.id}] = repo.path
+        os.environ[defaults.repo_env_var_template_old.format(id=repo.id)] = repo.path
 
 
 def get_alembic_version():
@@ -253,13 +253,13 @@ def check_alembic_version():
             Stalker.
     """
     current_alembic_version = get_alembic_version()
-    logger.debug("current_alembic_version: %s" % current_alembic_version)
+    logger.debug(f"current_alembic_version: {current_alembic_version}")
     if current_alembic_version and current_alembic_version != alembic_version:
         # invalidate the connection
         DBSession.connection().invalidate()
 
         # and raise a ValueError (which I'm not sure is the correct exception)
-        raise ValueError("Please update the database to version: %s" % alembic_version)
+        raise ValueError(f"Please update the database to version: {alembic_version}")
 
 
 def create_alembic_table():
@@ -297,7 +297,7 @@ def create_alembic_table():
     try:
         version_num = DBSession.connection().execute(text(sql_query)).fetchone()[0]
     except TypeError:
-        logger.debug("inserting %s to alembic_version table" % version_num)
+        logger.debug(f"inserting {version_num} to alembic_version table")
         # the table is there but there is no value so insert it
         ins = table.insert().values(version_num=version_num)
         DBSession.connection().execute(ins)
@@ -438,24 +438,24 @@ def create_entity_statuses(
         raise ValueError("Please supply status codes")
 
     # create statuses for entity
-    logger.debug("Creating %s Statuses" % entity_type)
+    logger.debug(f"Creating {entity_type} Statuses")
 
     with DBSession.no_autoflush:
         statuses = Status.query.filter(Status.name.in_(status_names)).all()
 
-    logger.debug("status_names: %s" % status_names)
-    logger.debug("statuses: %s" % statuses)
+    logger.debug(f"status_names: {status_names}")
+    logger.debug(f"statuses: {statuses}")
     status_names_in_db = list(map(lambda x: x.name, statuses))
-    logger.debug("statuses_names_in_db: %s" % status_names_in_db)
+    logger.debug(f"statuses_names_in_db: {status_names_in_db}")
 
     for name, code in zip(status_names, status_codes):
         if name not in status_names_in_db:
-            logger.debug("Creating Status: %s (%s)" % (name, code))
+            logger.debug(f"Creating Status: {name} ({code})")
             new_status = Status(name=name, code=code, created_by=user, updated_by=user)
             statuses.append(new_status)
             DBSession.add(new_status)
         else:
-            logger.debug("Status %s (%s) is already created skipping!" % (name, code))
+            logger.debug(f"Status {name} ({code}) is already created skipping!")
 
     # create the Status List
     status_list = StatusList.query.filter(
@@ -463,15 +463,15 @@ def create_entity_statuses(
     ).first()
 
     if status_list is None:
-        logger.debug("No %s Status List found, creating new!" % entity_type)
+        logger.debug(f"No {entity_type} Status List found, creating new!")
         status_list = StatusList(
-            name="%s Statuses" % entity_type,
+            name=f"{entity_type} Statuses",
             target_entity_type=entity_type,
             created_by=user,
             updated_by=user,
         )
     else:
-        logger.debug("%s Status List already created, updating statuses" % entity_type)
+        logger.debug(f"{entity_type} Status List already created, updating statuses")
 
     status_list.statuses = statuses
     DBSession.add(status_list)
@@ -479,10 +479,10 @@ def create_entity_statuses(
     try:
         DBSession.commit()
     except (IntegrityError, OperationalError) as e:
-        logger.debug("error in DBSession.commit, rolling back: %s" % e)
+        logger.debug(f"error in DBSession.commit, rolling back: {e}")
         DBSession.rollback()
     else:
-        logger.debug("Created %s Statuses successfully" % entity_type)
+        logger.debug(f"Created {entity_type} Statuses successfully")
         DBSession.flush()
 
 

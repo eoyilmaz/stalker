@@ -36,7 +36,10 @@ def test_working_hours_argument_is_not_a_dictionary():
     with pytest.raises(TypeError) as cm:
         WorkingHours(working_hours="not a dictionary of proper values")
 
-    assert str(cm.value) == "WorkingHours.working_hours should be a dictionary, not str"
+    assert str(cm.value) == (
+        "WorkingHours.working_hours should be a dictionary, "
+        "not str: 'not a dictionary of proper values'"
+    )
 
 
 def test_working_hours_attribute_is_not_a_dictionary():
@@ -45,7 +48,10 @@ def test_working_hours_attribute_is_not_a_dictionary():
     with pytest.raises(TypeError) as cm:
         wh.working_hours = "not a dictionary of proper values"
 
-    assert str(cm.value) == "WorkingHours.working_hours should be a dictionary, not str"
+    assert str(cm.value) == (
+        "WorkingHours.working_hours should be a dictionary, "
+        "not str: 'not a dictionary of proper values'"
+    )
 
 
 def test_working_hours_argument_value_is_dictionary_of_other_formatted_data():
@@ -53,10 +59,11 @@ def test_working_hours_argument_value_is_dictionary_of_other_formatted_data():
     with pytest.raises(TypeError) as cm:
         WorkingHours(working_hours={"not": "properly valued"})
 
-    assert (
-        str(cm.value) == "WorkingHours.working_hours should be a dictionary with keys "
+    assert str(cm.value) == (
+        "WorkingHours.working_hours should be a dictionary with keys "
         '"mon, tue, wed, thu, fri, sat, sun" and the values should a list '
-        "of lists of two integers like [[540, 720], [800, 1080]], not str"
+        "of lists of two integers like [[540, 720], [800, 1080]], "
+        "not str: 'properly valued'"
     )
 
 
@@ -70,7 +77,7 @@ def test_working_hours_attribute_is_set_to_a_dictionary_of_other_formatted_data(
         str(cm.value) == "WorkingHours.working_hours should be a dictionary with keys "
         '"mon, tue, wed, thu, fri, sat, sun" and the values should a '
         "list of lists of two integers like [[540, 720], [800, 1080]], "
-        "not str"
+        "not str: 'properly valued'"
     )
 
 
@@ -726,9 +733,9 @@ def test_daily_working_hours_argument_is_not_integer():
     kwargs["daily_working_hours"] = "not an integer"
     with pytest.raises(TypeError) as cm:
         WorkingHours(**kwargs)
-    assert (
-        str(cm.value)
-        == "WorkingHours.daily_working_hours should be an integer, not str"
+    assert str(cm.value) == (
+        "WorkingHours.daily_working_hours should be an integer, "
+        "not str: 'not an integer'"
     )
 
 
@@ -738,9 +745,9 @@ def test_daily_working_hours_attribute_is_not_an_integer():
     with pytest.raises(TypeError) as cm:
         wh.daily_working_hours = "not an integer"
 
-    assert (
-        str(cm.value)
-        == "WorkingHours.daily_working_hours should be an integer, not str"
+    assert str(cm.value) == (
+        "WorkingHours.daily_working_hours should be an integer, "
+        "not str: 'not an integer'"
     )
 
 

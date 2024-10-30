@@ -113,7 +113,7 @@ def test_references_attribute_accepting_only_lists_of_link_instances(
 
     assert (
         str(cm.value) == "All the elements in the RefMixFooClass.references should be "
-        "stalker.models.link.Link instances not int"
+        "stalker.models.link.Link instances, not int"
     )
 
 
@@ -125,7 +125,7 @@ def test_references_attribute_elements_accepts_links_only(setup_reference_mixin_
 
     assert (
         str(cm.value) == "All the elements in the RefMixFooClass.references should be "
-        "stalker.models.link.Link instances not Entity"
+        "stalker.models.link.Link instances, not Entity"
     )
 
 

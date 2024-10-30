@@ -194,7 +194,7 @@ def test_take_name_argument_is_none(setup_version_db_tests):
     data["kwargs"]["take_name"] = None
     with pytest.raises(TypeError) as cm:
         Version(**data["kwargs"])
-    assert str(cm.value) == "Version.take_name should be a string, not NoneType"
+    assert str(cm.value) == "Version.take_name should be a string, not NoneType: 'None'"
 
 
 def test_take_name_attribute_is_none(setup_version_db_tests):
@@ -203,7 +203,7 @@ def test_take_name_attribute_is_none(setup_version_db_tests):
     with pytest.raises(TypeError) as cm:
         data["test_version"].take_name = None
 
-    assert str(cm.value) == "Version.take_name should be a string, not NoneType"
+    assert str(cm.value) == "Version.take_name should be a string, not NoneType: 'None'"
 
 
 def test_take_name_argument_is_empty_string(setup_version_db_tests):
@@ -307,9 +307,8 @@ def test_task_argument_is_not_a_task(setup_version_db_tests):
     data["kwargs"]["task"] = "a task"
     with pytest.raises(TypeError) as cm:
         Version(**data["kwargs"])
-    assert (
-        str(cm.value)
-        == "Version.task should be a stalker.models.task.Task instance not str"
+    assert str(cm.value) == (
+        "Version.task should be a stalker.models.task.Task instance, not str: 'a task'"
     )
 
 
@@ -318,9 +317,8 @@ def test_task_attribute_is_not_a_task(setup_version_db_tests):
     data = setup_version_db_tests
     with pytest.raises(TypeError) as cm:
         data["test_version"].task = "a task"
-    assert (
-        str(cm.value)
-        == "Version.task should be a stalker.models.task.Task instance not str"
+    assert str(cm.value) == (
+        "Version.task should be a stalker.models.task.Task instance, not str: 'a task'"
     )
 
 
@@ -440,7 +438,7 @@ def test_inputs_argument_is_not_a_list_of_link_instances(setup_version_db_tests)
 
     assert (
         str(cm.value) == "All elements in Version.inputs should be all "
-        "stalker.models.link.Link instances not int"
+        "stalker.models.link.Link instances, not int: '132'"
     )
 
 
@@ -453,7 +451,7 @@ def test_inputs_attribute_is_not_a_list_of_link_instances(setup_version_db_tests
 
     assert (
         str(cm.value) == "All elements in Version.inputs should be all "
-        "stalker.models.link.Link instances not int"
+        "stalker.models.link.Link instances, not int: '132'"
     )
 
 
@@ -504,7 +502,7 @@ def test_outputs_argument_is_not_a_list_of_link_instances(setup_version_db_tests
 
     assert (
         str(cm.value) == "All elements in Version.outputs should be all "
-        "stalker.models.link.Link instances not int"
+        "stalker.models.link.Link instances, not int: '132'"
     )
 
 
@@ -517,7 +515,7 @@ def test_outputs_attribute_is_not_a_list_of_link_instances(setup_version_db_test
 
     assert (
         str(cm.value) == "All elements in Version.outputs should be all "
-        "stalker.models.link.Link instances not int"
+        "stalker.models.link.Link instances, not int: '132'"
     )
 
 
@@ -1198,7 +1196,9 @@ def test_created_with_argument_accepts_only_string_or_none(setup_version_db_test
     data["kwargs"]["created_with"] = 234
     with pytest.raises(TypeError) as cm:
         Version(**data["kwargs"])
-    assert str(cm.value) == "Version.created_with should be an instance of str, not int"
+    assert str(cm.value) == (
+        "Version.created_with should be an instance of str, not int: '234'"
+    )
 
 
 def test_created_with_attribute_accepts_only_string_or_none(setup_version_db_tests):
@@ -1207,7 +1207,9 @@ def test_created_with_attribute_accepts_only_string_or_none(setup_version_db_tes
     with pytest.raises(TypeError) as cm:
         data["test_version"].created_with = 234
 
-    assert str(cm.value) == "Version.created_with should be an instance of str, not int"
+    assert str(cm.value) == (
+        "Version.created_with should be an instance of str, not int: '234'"
+    )
 
 
 def test_created_with_argument_is_working_properly(setup_version_db_tests):

@@ -1,39 +1,66 @@
 # -*- coding: utf-8 -*-
-
+"""Task related functions and classes are situated here."""
+import copy
 import datetime
 import os
+from typing import Generator, List, Union
+
+from jinja2 import Template
+
+import pytz
 
 from six import string_types
+
+import sqlalchemy
 from sqlalchemy import (
-    Table,
-    Column,
-    Integer,
-    ForeignKey,
     Boolean,
+    CheckConstraint,
+    Column,
+    DDL,
     Enum,
     Float,
+    ForeignKey,
+    Integer,
+    Table,
     event,
-    CheckConstraint,
+    text,
 )
 from sqlalchemy.exc import (
-    UnboundExecutionError,
-    OperationalError,
+    InternalError,
     InvalidRequestError,
+    OperationalError,
     ProgrammingError,
+    UnboundExecutionError,
 )
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import relationship, validates, synonym, reconstructor
+from sqlalchemy.orm import reconstructor, relationship, synonym, validates
+from sqlalchemy.orm.attributes import AttributeEvent
 
+import stalker
 from stalker.db.declarative import Base
-from stalker.models.entity import Entity
-from stalker.models.mixins import (
-    DateRangeMixin,
-    StatusMixin,
-    ReferenceMixin,
-    ScheduleMixin,
-    DAGMixin,
+from stalker.db.session import DBSession
+from stalker.exceptions import (
+    CircularDependencyError,
+    DependencyViolationError,
+    OverBookedError,
+    StatusError,
 )
 from stalker.log import get_logger
+from stalker.models.auth import User
+from stalker.models.budget import Good
+from stalker.models.entity import Entity
+from stalker.models.mixins import (
+    DAGMixin,
+    DateRangeMixin,
+    ReferenceMixin,
+    ScheduleMixin,
+    StatusMixin,
+)
+from stalker.models.review import Review
+from stalker.models.status import Status
+from stalker.models.ticket import Ticket
+from stalker.utils import check_circular_dependency, walk_hierarchy
+
 
 logger = get_logger(__name__)
 
@@ -45,9 +72,61 @@ CONSTRAIN_END = 2
 CONSTRAIN_BOTH = 3
 
 
+BINARY_STATUS_VALUES = {
+    "WFD": 0b100000000,
+    "RTS": 0b010000000,
+    "WIP": 0b001000000,
+    "PREV": 0b000100000,
+    "HREV": 0b000010000,
+    "DREV": 0b000001000,
+    "OH": 0b000000100,
+    "STOP": 0b000000010,
+    "CMPL": 0b000000001,
+}
+"""
+  +--------- WFD
+  |+-------- RTS
+  ||+------- WIP
+  |||+------ PREV
+  ||||+----- HREV
+  |||||+---- DREV
+  ||||||+--- OH
+  |||||||+-- STOP
+  ||||||||+- CMPL
+  |||||||||
+0b000000000
+"""  # noqa: SC100
+
+
+CHILDREN_TO_PARENT_STATUSES_MAP = {
+    0b000000000: 0,
+    0b000000001: 3,
+    0b000000010: 3,
+    0b000000011: 3,
+    0b010000000: 1,
+    0b010000010: 1,
+    0b100000000: 0,
+    0b100000010: 0,
+    0b110000000: 1,
+    0b110000010: 1,
+}
+"""Although the  dictionary seems cryptic, it shows the final status index in
+parent_statuses_map[] list.
+
+So by using the cumulative statuses of children we got an index from the following
+table, and use the found element (integer) as the index for the parent_statuses_map[]
+list, and we find the desired status.
+
+We are doing it in this way for a couple of reasons:
+
+  1. We shouldn't hold the statuses in the following list,
+  2. We are using a sparse dictionary which is more efficient than storing
+     all the data in a single list.
+"""
+
+
 class TimeLog(Entity, DateRangeMixin):
-    """Holds information about the uninterrupted time spent on a specific
-    :class:`.Task` by a specific :class:`.User`.
+    """Time entry for the time spent on a :class:`.Task` by a specific :class:`.User`.
 
     It is so important to note that the TimeLog reports the **uninterrupted**
     time interval that is spent for a Task. Thus it doesn't care about the
@@ -73,10 +152,10 @@ class TimeLog(Entity, DateRangeMixin):
       of the assigned Task if the :attr:`.Task.total_logged_seconds` is getting
       bigger than the :attr:`.Task.schedule_timing` after this TimeLog.
 
-    :param task: The :class:`.Task` instance that this time log belongs to.
-
-    :param resource: The :class:`.User` instance that this time log is created
-      for.
+    Args:
+        task (Task): The :class:`.Task` instance that this time log belongs to.
+        resource (User): The :class:`.User` instance that this time log is created
+            for.
     """
 
     __auto_name__ = True
@@ -123,45 +202,58 @@ class TimeLog(Entity, DateRangeMixin):
         self.resource = resource
 
     @validates("task")
-    def _validate_task(self, key, task):
-        """validates the given task value"""
+    def _validate_task(self, key, task: "Task") -> "Task":
+        """Validate the given task value.
+
+        Args:
+            key (str): The name of the validated column.
+            task (Task): The Task instance to be validated.
+
+        Raises:
+            TypeError: If the given task is not a Task instance.
+            ValueError: If this is a container task.
+            StatusError: If the Task.status is one of [WDF, OH, STOP, CMPL] where it is
+                not allowed to entry any further TimeLog information.
+            DependencyViolationError: If this TimeLog overlaps with one of the
+                dependencies start and end time, essentially forcing this Task to start
+                or end before its dependencies start or end.
+
+        Returns:
+            Task: The validated task value.
+        """
         if not isinstance(task, Task):
             raise TypeError(
-                "%s.task should be an instance of stalker.models.task.Task "
-                "not %s" % (self.__class__.__name__, task.__class__.__name__)
+                "{}.task should be an instance of stalker.models.task.Task, "
+                "not {}: '{}'".format(
+                    self.__class__.__name__, task.__class__.__name__, task
+                )
             )
 
         if task.is_container:
             raise ValueError(
-                "%(task)s (id: %(id)s) is a container task, and it is not "
+                f"{task.name} (id: {task.id}) is a container task, and it is not "
                 "allowed to create TimeLogs for a container task"
-                % {"task": task.name, "id": task.id}
             )
 
         # check status
         logger.debug("checking task status!")
-        from stalker.db.session import DBSession
-
         with DBSession.no_autoflush:
             task_status_list = task.status_list
             WFD = task_status_list["WFD"]
             RTS = task_status_list["RTS"]
             WIP = task_status_list["WIP"]
-            PREV = task_status_list["PREV"]
+            # PREV = task_status_list["PREV"]
             HREV = task_status_list["HREV"]
-            DREV = task_status_list["DREV"]
+            # DREV = task_status_list["DREV"]
             OH = task_status_list["OH"]
             STOP = task_status_list["STOP"]
             CMPL = task_status_list["CMPL"]
 
             if task.status in [WFD, OH, STOP, CMPL]:
-                from stalker.exceptions import StatusError
-
                 raise StatusError(
-                    "%(task)s is a %(status)s task, and it is not allowed to "
-                    "create TimeLogs for a %(status)s task, please supply a "
-                    "RTS, WIP, HREV or DREV task!"
-                    % {"task": task.name, "status": task.status.code}
+                    f"{task.name} is a {task.status.code} task, and it is not allowed "
+                    f"to create TimeLogs for a {task.status.code} task, please supply "
+                    "a RTS, WIP, HREV or DREV task!"
                 )
             elif task.status in [RTS, HREV]:
                 # update task status
@@ -187,17 +279,10 @@ class TimeLog(Entity, DateRangeMixin):
                         violation_date = dep_task.start
 
                 if raise_violation_error:
-                    from stalker.exceptions import DependencyViolationError
-
                     raise DependencyViolationError(
                         "It is not possible to create a TimeLog before "
-                        "%s, which violates the dependency relation of "
-                        '"%s" to "%s"'
-                        % (
-                            violation_date,
-                            task.name,
-                            dep_task.name,
-                        )
+                        f"{violation_date}, which violates the dependency relation of "
+                        f'"{task.name}" to "{dep_task.name}"'
                     )
 
         # this may need to be in an external event, it needs to trigger a flush
@@ -208,22 +293,32 @@ class TimeLog(Entity, DateRangeMixin):
 
     @validates("resource")
     def _validate_resource(self, key, resource):
-        """validates the given resource value"""
-        if resource is None:
-            raise TypeError("%s.resource can not be None" % self.__class__.__name__)
+        """Validate the given resource value.
 
-        from stalker import User
+        Args:
+            key (str): The name of the validated column.
+            resource (User): The User instance as the resource of this TimeLog.
+
+        raises:
+            TypeError: If the resource is None or is not a User instance.
+            OverBookedError: If the resource has already a clashing TimeLog.
+
+        Returns:
+            User: The validated User instance.
+        """
+        if resource is None:
+            raise TypeError(f"{self.__class__.__name__}.resource can not be None")
 
         if not isinstance(resource, User):
             raise TypeError(
-                "%s.resource should be a stalker.models.auth.User instance "
-                "not %s" % (self.__class__.__name__, resource.__class__.__name__)
+                "{}.resource should be a stalker.models.auth.User instance, "
+                "not {}: '{}'".format(
+                    self.__class__.__name__, resource.__class__.__name__, resource
+                )
             )
 
         # check for overbooking
         clashing_time_log_data = None
-        from stalker.db.session import DBSession
-
         with DBSession.no_autoflush:
             try:
                 from sqlalchemy import or_, and_
@@ -241,7 +336,7 @@ class TimeLog(Entity, DateRangeMixin):
                     .first()
                 )
 
-            except (UnboundExecutionError, OperationalError) as e:
+            except (UnboundExecutionError, OperationalError):
                 # fallback to Python
                 for time_log in resource.time_logs:
                     if time_log != self:
@@ -254,11 +349,10 @@ class TimeLog(Entity, DateRangeMixin):
                             clashing_time_log_data = [time_log.start, time_log.end]
 
             if clashing_time_log_data:
-                from stalker.exceptions import OverBookedError
-
                 raise OverBookedError(
-                    "The resource has another TimeLog between %s and %s"
-                    % (clashing_time_log_data[0], clashing_time_log_data[1])
+                    "The resource has another TimeLog between {} and {}".format(
+                        clashing_time_log_data[0], clashing_time_log_data[1]
+                    )
                 )
 
         return resource
@@ -728,7 +822,7 @@ class Task(
           Task.path and Task.absolute_path properties
 
           Task instances now have two new properties called :attr:`.path` and
-          :attr:`.absolute_path`\ . The value of these attributes are the
+          :attr:`.absolute_path` . The value of these attributes are the
           rendered version of the related :class:`.FilenameTemplate` which
           has its target_entity_type attribute set to "Task" (or "Asset",
           "Shot" or "Sequence" or anything matching to the derived class name,
@@ -754,115 +848,78 @@ class Task(
        of different things, it is possible to create BudgetEntries and thus
        :class;`.Budget` s with this information.
 
-    **Arguments**
+    Args:
+        project (Project): A Task which doesn't have a parent (a root task) should be
+            created with a :class:`.Project` instance. If it is skipped an no
+            :attr:`.parent` is given then Stalker will raise a RuntimeError. If both
+            the ``project`` and the :attr:`.parent` argument contains data and the
+            project of the Task instance given with parent argument is different than
+            the Project instance given with the ``project`` argument then a
+            RuntimeWarning will be raised and the project of the parent task will be
+            used.
+        parent (Task): The parent Task or Project of this Task. Every Task in
+            Stalker should be related with a :class:`.Project` instance. So if no
+            parent task is desired, at least a Project instance should be passed as
+            the parent of the created Task or the Task will be an orphan task and
+            Stalker will raise a RuntimeError.
+        depends (List[Task]): A list of :class:`.Task` s that this :class:`.Task` is
+            depending on. A Task can not depend to itself or any other Task which are
+            already depending to this one in anyway or a CircularDependency error
+            will be raised.
+        resources (List[User]): The :class:`.User` s assigned to this :class:`.Task`. A
+            :class:`.Task` without any resource can not be scheduled.
+        responsible (List[User]): A list of :class:`.User` instances that is responsible
+            of this task.
+        watchers (List[User]): A list of :class:`.User` those are added this Task
+            instance to their watchlist.
+        start (datetime.datetime): The start date and time of this task instance. It is
+            only used if the :attr:`.schedule_constraint` attribute is set to
+            :attr:`.CONSTRAIN_START` or :attr:`.CONSTRAIN_BOTH`. The default value
+            is `datetime.datetime.now(pytz.utc)`.
+        end (datetime.datetime): The end date and time of this task instance. It is only
+            used if the :attr:`.schedule_constraint` attribute is set to
+            :attr:`.CONSTRAIN_END` or :attr:`.CONSTRAIN_BOTH`. The default value is
+            `datetime.datetime.now(pytz.utc)`.
+        schedule_timing (int): The value of the schedule timing.
+        schedule_unit (str): The unit value of the schedule timing. Should be
+            one of 'min', 'h', 'd', 'w', 'm', 'y'.
+        schedule_constraint (int): The schedule constraint. It is the index
+            of the schedule constraints value in
+            :class:`stalker.config.Config.task_schedule_constraints`.
+        bid_timing (int): The initial bid for this Task. It can be used in measuring how
+            accurate the initial guess was. It will be compared against the total amount
+            of effort spend doing this task. Can be set to None, which will be set to
+            the schedule_timing_day argument value if there is one or 0.
+        bid_unit (str): The unit of the bid value for this Task. Should be one of the
+            'min', 'h', 'd', 'w', 'm', 'y'.
+        is_milestone (bool): A bool (True or False) value showing if this task is a
+            milestone which doesn't need any resource and effort.
+        priority (int): It is a number between 0 to 1000 which defines the priority of
+            the :class:`.Task`. The higher the value the higher its priority. The
+            default value is 500. Mainly used by TaskJuggler.
 
-    :param project: A Task which doesn't have a parent (a root task) should be
-      created with a :class:`.Project` instance. If it is skipped an no
-      :attr:`.parent` is given then Stalker will raise a RuntimeError. If both
-      the ``project`` and the :attr:`.parent` argument contains data and the
-      project of the Task instance given with parent argument is different than
-      the Project instance given with the ``project`` argument then a
-      RuntimeWarning will be raised and the project of the parent task will be
-      used.
+            Higher priority tasks will be scheduled to an early date or at least will
+            tried to be scheduled to an early date then a lower priority task (a task
+            that is using the same resources).
 
-    :type project: :class:`.Project`
-
-    :param parent: The parent Task or Project of this Task. Every Task in
-      Stalker should be related with a :class:`.Project` instance. So if no
-      parent task is desired, at least a Project instance should be passed as
-      the parent of the created Task or the Task will be an orphan task and
-      Stalker will raise a RuntimeError.
-
-    :type parent: :class:`.Task`
-
-    :param depends: A list of :class:`.Task` s that this :class:`.Task` is
-      depending on. A Task can not depend to itself or any other Task which are
-      already depending to this one in anyway or a CircularDependency error
-      will be raised.
-
-    :type depends: [:class:`.Task`]
-
-    :param resources: The :class:`.User` s assigned to this :class:`.Task`. A
-      :class:`.Task` without any resource can not be scheduled.
-
-    :type resources: [:class:`.User`]
-
-    :param responsible: A list of :class:`.User` instances that is responsible
-      of this task.
-
-    :type responsible: [:class:`.User`]
-
-    :param watchers: A list of :class:`.User` those are added this Task
-      instance to their watchlist.
-
-    :type watchers: [:class:`.User`]
-
-    :param start: The start date and time of this task instance. It is only
-      used if the :attr:`.schedule_constraint` attribute is set to
-      :attr:`.CONSTRAIN_START` or :attr:`.CONSTRAIN_BOTH`. The default value
-      is `datetime.datetime.now(pytz.utc)`.
-
-    :type start: :class:`datetime.datetime`
-
-    :param end: The end date and time of this task instance. It is only used if
-      the :attr:`.schedule_constraint` attribute is set to
-      :attr:`.CONSTRAIN_END` or :attr:`.CONSTRAIN_BOTH`. The default value is
-      `datetime.datetime.now(pytz.utc)`.
-
-    :type end: :class:`datetime.datetime`
-
-    :param int schedule_timing: The value of the schedule timing.
-
-    :param str schedule_unit: The unit value of the schedule timing. Should be
-      one of 'min', 'h', 'd', 'w', 'm', 'y'.
-
-    :param int schedule_constraint: The schedule constraint. It is the index
-      of the schedule constraints value in
-      :class:`stalker.config.Config.task_schedule_constraints`.
-
-    :param int bid_timing: The initial bid for this Task. It can be used in
-      measuring how accurate the initial guess was. It will be compared against
-      the total amount of effort spend doing this task. Can be set to None,
-      which will be set to the schedule_timing_day argument value if there is
-      one or 0.
-
-    :param str bid_unit: The unit of the bid value for this Task. Should be one
-      of the 'min', 'h', 'd', 'w', 'm', 'y'.
-
-    :param bool is_milestone: A bool (True or False) value showing if this task
-      is a milestone which doesn't need any resource and effort.
-
-    :param int priority: It is a number between 0 to 1000 which defines the
-      priority of the :class:`.Task`. The higher the value the higher its
-      priority. The default value is 500. Mainly used by TaskJuggler.
-
-      Higher priority tasks will be scheduled to an early date or at least will
-      tried to be scheduled to an early date then a lower priority task (a task
-      that is using the same resources).
-
-      In complex projects, a task with a lower priority task may steal
-      resources from a higher priority task, this is due to the internals of
-      TaskJuggler, it tries to increase the resource utilization by letting the
-      lower priority task to be completed earlier than the higher priority
-      task. This is done in that way if the lower priority task is dependent of
-      more important tasks (tasks in critical path or tasks with critical
-      resources). Read TaskJuggler documentation for more information on how
-      TaskJuggler schedules tasks.
-
-    :param allocation_strategy: Defines the allocation strategy for resources
-      of a task with alternative resources. Should be one of ['minallocated',
-      'maxloaded', 'minloaded', 'order', 'random'] and the default value is
-      'minallocated'. For more information read the :class:`.Task` class
-      documetation.
-
-    :param persistent_allocation: Specifies that once a resource is picked from
-      the list of alternatives this resource is used for the whole task. The
-      default value is True. For more information read the :class:`.Task` class
-      documentation.
-
-    :param good: It is possible to attach a good to this Task to be able to
-      filter and group them later on.
-
+            In complex projects, a task with a lower priority task may steal resources
+            from a higher priority task, this is due to the internals of TaskJuggler, it
+            tries to increase the resource utilization by letting the lower priority
+            task to be completed earlier than the higher priority task. This is done in
+            that way if the lower priority task is dependent of more important tasks
+            (tasks in critical path or tasks with critical resources). Read TaskJuggler
+            documentation for more information on how TaskJuggler schedules tasks.
+        allocation_strategy (str): Defines the allocation strategy for resources
+            of a task with alternative resources. Should be one of ['minallocated',
+            'maxloaded', 'minloaded', 'order', 'random'] and the default value is
+            'minallocated'. For more information read the :class:`.Task` class
+            documetation.
+        persistent_allocation (bool): Specifies that once a resource is picked from the
+            list of alternatives this resource is used for the whole task. The default
+            value is True. For more information read the :class:`.Task` class
+            documentation.
+        good (stalker.models.budget.Good): It is possible to attach a good to this Task
+            to be able to filter and group them later on.
     """
 
     from stalker import defaults
@@ -1117,7 +1174,7 @@ class Task(
         allocation_strategy=defaults.allocation_strategy[0],
         persistent_allocation=True,
         good=None,
-        **kwargs
+        **kwargs,
     ):
         # temp attribute for remove event
         self._previously_removed_dependent_tasks = []
@@ -1152,8 +1209,6 @@ class Task(
         self.is_milestone = is_milestone
 
         # update the status
-        from stalker.db.session import DBSession
-
         with DBSession.no_autoflush:
             self.status = self.status_list["WFD"]
 
@@ -1202,7 +1257,7 @@ class Task(
 
     @reconstructor
     def __init_on_load__(self):
-        """update defaults on load"""
+        """Update defaults on load."""
         # temp attribute for remove event
         self._previously_removed_dependent_tasks = []
 
@@ -1227,7 +1282,7 @@ class Task(
             and self.resources == other.resources
         )
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """Return the hash value of this instance.
 
         Because the __eq__ is overridden the __hash__ also needs to be overridden.
@@ -1238,19 +1293,29 @@ class Task(
         return super(Task, self).__hash__()
 
     @validates("time_logs")
-    def _validate_time_logs(self, key, time_log):
-        """validates the given time_logs value"""
+    def _validate_time_logs(self, key, time_log) -> TimeLog:
+        """Validate the given time_log value.
+
+        Args:
+            key (str): The name of the validated column.
+            time_log (TimeLog): A TimeLog instance to validate.
+
+        Raises:
+            TypeError: If the given time_log value is not a :class:`.TimeLog` instance.
+
+        Returns:
+            TimeLog: The validated TimeLog instance.
+        """
         if not isinstance(time_log, TimeLog):
             raise TypeError(
-                "%s.time_logs should be all stalker.models.task.TimeLog "
-                "instances, not %s"
-                % (self.__class__.__name__, time_log.__class__.__name__)
+                "{}.time_logs should be all stalker.models.task.TimeLog instances, "
+                "not {}: '{}'".format(
+                    self.__class__.__name__, time_log.__class__.__name__, time_log
+                )
             )
 
         # TODO: convert this to an event
         # update parents total_logged_second attribute
-        from stalker.db.session import DBSession
-
         with DBSession.no_autoflush:
             if self.parent:
                 self.parent.total_logged_seconds += time_log.total_seconds
@@ -1258,21 +1323,50 @@ class Task(
         return time_log
 
     @validates("_reviews")
-    def _validate_reviews(self, key, review):
-        """validates the given review value"""
-        from stalker.models.review import Review
+    def _validate_reviews(self, key, review) -> Review:
+        """Validate the given review value.
 
+        Args:
+            key (str): The name of the validated column.
+            review (stalker.models.review.Review): The validtaed review value.
+
+        Raises:
+            TypeError: If the review is not a :class:`stalker.models.review.Review`
+                instance.
+
+        Returns:
+            Review: The validated review instance.
+        """
         if not isinstance(review, Review):
             raise TypeError(
-                "%s.reviews should be all stalker.models.review.Review "
-                "instances, not %s"
-                % (self.__class__.__name__, review.__class__.__name__)
+                "{}.reviews should be all stalker.models.review.Review "
+                "instances, not {}".format(
+                    self.__class__.__name__, review.__class__.__name__
+                )
             )
         return review
 
     @validates("task_depends_to")
-    def _validate_task_depends_to(self, key, task_depends_to):
-        """validates the given task_depends_to value"""
+    def _validate_task_depends_to(self, key: str, task_depends_to: "Task") -> "Task":
+        """Validate the given task_depends_to value.
+
+        Args:
+            key (str): The name of the validated column.
+            task_depends_to (Task): The Task instance that this Task is depending on.
+
+        Raises:
+            TypeError: If the `task_depends_to.depends_to` is not a Task instance.
+            StatusError: If the status of the current task is one of WIP, PREV, HREV,
+                OH, STOP or CMPL as this means the Task has been started to be worked on
+                and it is not allowed to change the dependency chain of an already
+                started task.
+            StatusError: If the current task is a container and its status is CMPL.
+            CircularDependencyError: If the given task is in circular relation with this
+                Task instance.
+
+        Returns:
+            Task: The validated task_dependes_to value.
+        """
         depends = task_depends_to.depends_to
         if not depends:
             # the relation is still not setup yet
@@ -1280,9 +1374,15 @@ class Task(
             # depends_to attribute
             return task_depends_to
 
-        # check the status of the current task
-        from stalker.db.session import DBSession
+        if not isinstance(depends, Task):
+            raise TypeError(
+                "All the elements in the {}.depends should be an instance of "
+                "stalker.models.task.Task, not {}: '{}'".format(
+                    self.__class__.__name__, depends.__class__.__name__, depends
+                )
+            )
 
+        # check the status of the current task
         with DBSession.no_autoflush:
             wfd = self.status_list["WFD"]
             rts = self.status_list["RTS"]
@@ -1294,33 +1394,19 @@ class Task(
             stop = self.status_list["STOP"]
             cmpl = self.status_list["CMPL"]
 
-            from stalker.exceptions import StatusError
-
             if self.status in [wip, prev, hrev, drev, oh, stop, cmpl]:
                 raise StatusError(
-                    "This is a %(status)s task and it is not allowed to "
-                    "change the dependencies of a %(status)s task"
-                    % {"status": self.status.code}
+                    f"This is a {self.status.code} task and it is not allowed to "
+                    f"change the dependencies of a {self.status.code} task"
                 )
 
-        if self.is_container:
-            if self.status == cmpl:
-                raise StatusError(
-                    "This is a %(status)s container task and it is not "
-                    "allowed to change the dependency in %(status)s container "
-                    "tasks" % {"status": self.status.code}
-                )
-
-        if not isinstance(depends, Task):
-            raise TypeError(
-                "All the elements in the %s.depends should be an instance of "
-                "stalker.models.task.Task, not %s"
-                % (self.__class__.__name__, depends.__class__.__name__)
+        if self.is_container and self.status == cmpl:
+            raise StatusError(
+                f"This is a {self.status.code} container task and it is not allowed to "
+                f"change the dependency in {self.status.code} container tasks"
             )
 
         # check for the circular dependency
-        from stalker.utils import check_circular_dependency
-
         with DBSession.no_autoflush:
             check_circular_dependency(depends, self, "depends")
             check_circular_dependency(depends, self, "children")
@@ -1331,10 +1417,8 @@ class Task(
             parent = self.parent
             while parent:
                 if parent in depends.depends:
-                    from stalker.exceptions import CircularDependencyError
-
                     raise CircularDependencyError(
-                        "One of the parents of %s is depending to %s" % (self, depends)
+                        f"One of the parents of {self} is depending to {depends}"
                     )
                 parent = parent.parent
 
@@ -1358,7 +1442,16 @@ class Task(
 
     @validates("schedule_timing")
     def _validate_schedule_timing(self, key, schedule_timing):
-        """validates the given schedule_timing"""
+        """Validate the given schedule_timing value.
+
+        Args:
+            key (str): The name of the validated column.
+            schedule_timing (Union[int, float]): The schedule_timing value to be
+                validated.
+
+        Returns:
+            float: The validated schedule_timing value.
+        """
         schedule_timing = ScheduleMixin._validate_schedule_timing(
             self, key, schedule_timing
         )
@@ -1370,7 +1463,15 @@ class Task(
 
     @validates("schedule_unit")
     def _validate_schedule_unit(self, key, schedule_unit):
-        """validates the given schedule_unit"""
+        """Validate the given schedule_unit value.
+
+        Args:
+            key (str): The name of the validated column.
+            schedule_unit (str): The schedule_unit value to be validated.
+
+        Returns:
+            str: The validated schedule_unit value.
+        """
         schedule_unit = ScheduleMixin._validate_schedule_unit(self, key, schedule_unit)
 
         if self.schedule_timing:
@@ -1378,14 +1479,13 @@ class Task(
 
         return schedule_unit
 
-    def _reschedule(self, schedule_timing, schedule_unit):
-        """Updates the start and end date values by using the schedule_timing
-        and schedule_unit values.
+    def _reschedule(self, schedule_timing, schedule_unit) -> None:
+        """Update the start and end date with schedule_timing and schedule_unit values.
 
-        :param schedule_timing: An integer or float value showing the value of
-          the schedule timing.
-        :type schedule_timing: int, float
-        :param str schedule_unit: one of 'min', 'h', 'd', 'w', 'm', 'y'
+        Args:
+            schedule_timing (Union[int, float]): An integer or float value showing the
+                value of the schedule timing.
+            schedule_unit (str): One of 'min', 'h', 'd', 'w', 'm', 'y'
         """
         # update end date value by using the start and calculated duration
         if self.is_leaf:
@@ -1421,18 +1521,29 @@ class Task(
 
     @validates("is_milestone")
     def _validate_is_milestone(self, key, is_milestone):
-        """validates the given milestone value"""
+        """Validate the given is_milestone value.
+
+        Args:
+            key (str): The name of the validated column.
+            is_milestone (Union[None, bool]): The value to validated.
+
+        Raises:
+            TypeError: If the is_milestone value is not None and not a bool value.
+
+        Returns:
+            bool: The validated value.
+        """
         if is_milestone is None:
             is_milestone = False
 
         if not isinstance(is_milestone, bool):
             raise TypeError(
-                "%(class)s.is_milestone should be a bool value (True or "
-                "False), not %(is_milestone_class)s"
-                % {
-                    "class": self.__class__.__name__,
-                    "is_milestone_class": is_milestone.__class__.__name__,
-                }
+                "{}.is_milestone should be a bool value (True or False), "
+                "not {}: '{}'".format(
+                    self.__class__.__name__,
+                    is_milestone.__class__.__name__,
+                    is_milestone,
+                )
             )
 
         if is_milestone:
@@ -1441,19 +1552,30 @@ class Task(
         return bool(is_milestone)
 
     @validates("parent")
-    def _validate_parent(self, key, parent):
-        """validates the given parent value"""
+    def _validate_parent(self, key: str, parent: "Task") -> "Task":
+        """Validate the given parent value.
+
+        Args:
+            key (str): The name of the validated column.
+            parent (Task): The parent value to be validated.
+
+        Raises:
+            TypeError: If the parent value is not None and not a :class:`.Task`
+                instance.
+
+        Returns:
+            Task: The validated parent value.
+        """
         if parent is not None:
             if not isinstance(parent, Task):
                 raise TypeError(
-                    "%s.parent should be an instance of "
-                    "stalker.models.task.Task, not %s"
-                    % (self.__class__.__name__, parent.__class__.__name__)
+                    "{}.parent should be an instance of "
+                    "stalker.models.task.Task, not {}: '{}'".format(
+                        self.__class__.__name__, parent.__class__.__name__, parent
+                    )
                 )
 
             # check for cycle
-            from stalker.utils import check_circular_dependency
-
             check_circular_dependency(self, parent, "children")
             check_circular_dependency(self, parent, "depends")
 
@@ -1478,10 +1600,26 @@ class Task(
         return parent
 
     @validates("_project")
-    def _validates_project(self, key, project):
-        """validates the given project instance"""
-        from stalker.db.session import DBSession
+    def _validates_project(
+        self, key: str, project: "stalker.models.project.Project"
+    ) -> "stalker.models.project.Project":
+        """Validate the given project value.
 
+        Args:
+            key (str): The name of the validated column.
+            project (stalker.models.project.Project): The project value to validate.
+
+        Raises:
+            TypeError: If the project is None and a
+                :class:`stalker.models.project.Project` cannot be found through the
+                parents of this current task.
+            TypeError: If the project is not a :class:`stalker.models.project.Project`
+                instance.
+
+        Returns:
+            stalker.models.project.Project: The validated
+                :class:`stalker.models.project.Project` instance.
+        """
         if project is None:
             # check if there is a parent defined
             if self.parent:
@@ -1494,48 +1632,67 @@ class Task(
             else:
                 # no project, no task, go mad again!!!
                 raise TypeError(
-                    "%s.project should be an instance of "
-                    "stalker.models.project.Project, not %s. Or please supply "
+                    "{}.project should be an instance of "
+                    "stalker.models.project.Project, not {}: '{}'.\n\nOr please supply "
                     "a stalker.models.task.Task with the parent argument, so "
-                    "Stalker can use the project of the supplied parent task"
-                    % (self.__class__.__name__, project.__class__.__name__)
+                    "Stalker can use the project of the supplied parent task".format(
+                        self.__class__.__name__, project.__class__.__name__, project
+                    )
                 )
 
-        from stalker import Project
+        from stalker.models.project import Project
 
         if not isinstance(project, Project):
             # go mad again it is not a project instance
             raise TypeError(
-                "%s.project should be an instance of "
-                "stalker.models.project.Project, not %s"
-                % (self.__class__.__name__, project.__class__.__name__)
+                "{}.project should be an instance of stalker.models.project.Project, "
+                "not {}: '{}'".format(
+                    self.__class__.__name__, project.__class__.__name__, project
+                )
             )
-        else:
-            # check if there is a parent
-            if self.parent:
-                # check if given project is matching the parent.project
-                with DBSession.no_autoflush:
-                    if self.parent.project != project:
-                        # don't go mad again, but warn the user that there is
-                        # an ambiguity!!!
-                        import warnings
 
-                        message = (
-                            "The supplied parent and the project is not "
-                            "matching in %s, Stalker will use the parents "
-                            "project (%s) as the parent of this %s"
-                            % (self, self.parent.project, self.__class__.__name__)
-                        )
+        # check if there is a parent
+        if not self.parent:
+            return project
 
-                        warnings.warn(message, RuntimeWarning)
+        # check if given project is matching the parent.project
+        with DBSession.no_autoflush:
+            if self.parent.project != project:
+                # don't go mad again, but warn the user that there is
+                # an ambiguity!!!
+                import warnings
 
-                        # use the parent.project
-                        project = self.parent.project
+                message = (
+                    "The supplied parent and the project is not matching in "
+                    "{}, Stalker will use the parent's project ({}) as the "
+                    "parent of this {}".format(
+                        self, self.parent.project, self.__class__.__name__
+                    )
+                )
+
+                warnings.warn(message, RuntimeWarning, stacklevel=2)
+
+                # use the parent.project
+                project = self.parent.project
+
         return project
 
     @validates("priority")
-    def _validate_priority(self, key, priority):
-        """validates the given priority value"""
+    def _validate_priority(self, key: str, priority: Union[int, float]) -> int:
+        """Validate the given priority value.
+
+        Args:
+            key (str): The name of the validated column.
+            priority (int): The priority value to be validated. It should be a float or
+                integer value between 0 and 1000, any other value will be clamped to
+                this range.
+
+        Raises:
+            TypeError: If the given priorty value is not an integer or float.
+
+        Returns:
+            int: The validated priority value.
+        """
         if priority is None:
             from stalker import defaults
 
@@ -1543,12 +1700,10 @@ class Task(
 
         if not isinstance(priority, (int, float)):
             raise TypeError(
-                "%(class)s.priority should be an integer value between 0 and "
-                "1000, not %(priority_class)s"
-                % {
-                    "class": self.__class__.__name__,
-                    "priority_class": priority.__class__.__name__,
-                }
+                "{}.priority should be an integer value between 0 and 1000, "
+                "not {}: '{}'".format(
+                    self.__class__.__name__, priority.__class__.__name__, priority
+                )
             )
 
         if priority < 0:
@@ -1560,11 +1715,17 @@ class Task(
 
     @validates("children")
     def _validate_children(self, key, child):
-        """validates the given child"""
+        """Validate the given child value.
+
+        Args:
+            key (str): The name of the validated column.
+            child (Task): The child Task to be validated.
+
+        Returns:
+            Task: The validated child Task instance.
+        """
         # just empty the resources list
         # do it without a flush
-        from stalker.db.session import DBSession
-
         with DBSession.no_autoflush:
             self.resources = []
 
@@ -1584,8 +1745,6 @@ class Task(
 
                 # it was a leaf but now a parent, so set the start to max and
                 # end to min
-                import pytz
-
                 self._start = datetime.datetime.max.replace(tzinfo=pytz.utc)
                 self._end = datetime.datetime.min.replace(tzinfo=pytz.utc)
 
@@ -1595,63 +1754,98 @@ class Task(
         return child
 
     @validates("resources")
-    def _validate_resources(self, key, resource):
-        """validates the given resources value"""
-        from stalker.models.auth import User
+    def _validate_resources(self, key: str, resource: User) -> User:
+        """Validate the given resources value.
 
+        Args:
+            key (str): The name of the validated column.
+            resource (User): The value to validate.
+
+        Raises:
+            TypeError: If the given resource value is not a
+                :class:`stalker.models.auth.User` instance.
+
+        Returns:
+            User: The validated :class:`stalker.models.auth.User` instance.
+        """
         if not isinstance(resource, User):
             raise TypeError(
-                "%(class)s.resources should be a list of "
-                "stalker.models.auth.User instances, not %(resource_class)s"
-                % {
-                    "class": self.__class__.__name__,
-                    "resource_class": resource.__class__.__name__,
-                }
+                "{}.resources should be a list of stalker.models.auth.User instances, "
+                "not {}: '{}'".format(
+                    self.__class__.__name__, resource.__class__.__name__, resource
+                )
             )
         return resource
 
     @validates("alternative_resources")
-    def _validate_alternative_resources(self, key, alt_resource):
-        """validates the given alt_resource value"""
-        from stalker.models.auth import User
+    def _validate_alternative_resources(self, key, resource):
+        """Validate the given resource value.
 
-        if not isinstance(alt_resource, User):
+        Args:
+            key (str): The name of the validated column.
+            resource (User): The value to validate.
+
+        Raises:
+            TypeError: If the given resource value is not a
+                :class:`stalker.models.auth.User` instance.
+
+        Returns:
+            stalker.models.auth.User: The validated User instance.
+        """
+        if not isinstance(resource, User):
             raise TypeError(
-                "%(class)s.resources should be a list of "
-                "stalker.models.auth.User instances, not "
-                "%(alt_resource_class)s"
-                % {
-                    "class": self.__class__.__name__,
-                    "alt_resource_class": alt_resource.__class__.__name__,
-                }
+                "{}.alternative_resources should be a list of stalker.models.auth.User "
+                "instances, not {}: '{}'".format(
+                    self.__class__.__name__,
+                    resource.__class__.__name__,
+                    resource,
+                )
             )
-        return alt_resource
+        return resource
 
     @validates("_computed_resources")
     def _validate_computed_resources(self, key, resource):
-        """validates the computed resources value"""
-        from stalker.models.auth import User
+        """Validate the computed resources value.
 
+        Args:
+            key (str): The name of the validated column.
+            resource (User): The value to validate.
+
+        Raises:
+            TypeError: If the given resource value is not a
+                :class:`stalker.models.auth.User` instance.
+
+        Returns:
+            stalker.models.auth.User: The validated User instance.
+        """
         if not isinstance(resource, User):
             raise TypeError(
-                "%(class)s.computed_resources should be a list of "
-                "stalker.models.auth.User instances, not %(resource_class)s"
-                % {
-                    "class": self.__class__.__name__,
-                    "resource_class": resource.__class__.__name__,
-                }
+                "{}.computed_resources should be a list of stalker.models.auth.User "
+                "instances, not {}: '{}'".format(
+                    self.__class__.__name__, resource.__class__.__name__, resource
+                )
             )
         return resource
 
     def _computed_resources_getter(self):
-        """getter for the _computed_resources attribute"""
+        """Return the _computed_resources attribute value.
+
+        Returns:
+            stalker.models.auth.User: The computed_user attribute value if there are any
+                else the same content of the resources attribute.
+        """
         if not self.is_scheduled:
             self._computed_resources = self.resources
         return self._computed_resources
 
-    def _computed_resources_setter(self, new_list):
-        """setter for the _computed_resources attribute"""
-        self._computed_resources = new_list
+    def _computed_resources_setter(self, resources: List[User]):
+        """Set the _computed_resources attribute value.
+
+        Args:
+            resources (List[User]): List of User instances to set the computed resources
+                too.
+        """
+        self._computed_resources = resources
 
     computed_resources = synonym(
         "_computed_resources",
@@ -1660,7 +1854,20 @@ class Task(
 
     @validates("allocation_strategy")
     def _validate_allocation_strategy(self, key, strategy):
-        """validates the given allocation_strategy value"""
+        """Validate the given allocation_strategy value.
+
+        Args:
+            key (str): The name of the validated column.
+            strategy (str): The allocation strategy value to validate.
+
+        Raises:
+            TypeError: If the given allocation strategy value is not a string.
+            ValueError: If the given allocation strategy value is not one of
+                [ "minallocated", "maxloaded", "minloaded", "order", "random"].
+
+        Returns:
+            str: The validated allocation strategy value.
+        """
         from stalker import defaults
 
         if strategy is None:
@@ -1668,31 +1875,37 @@ class Task(
 
         if not isinstance(strategy, string_types):
             raise TypeError(
-                "%(class)s.allocation_strategy should be one of %(defaults)s, "
-                "not %(strategy_class)s"
-                % {
-                    "class": self.__class__.__name__,
-                    "defaults": defaults.allocation_strategy,
-                    "strategy_class": strategy.__class__.__name__,
-                }
+                "{}.allocation_strategy should be one of {}, not {}: '{}'".format(
+                    self.__class__.__name__,
+                    defaults.allocation_strategy,
+                    strategy.__class__.__name__,
+                    strategy,
+                )
             )
 
         if strategy not in defaults.allocation_strategy:
             raise ValueError(
-                "%(class)s.allocation_strategy should be one of %(defaults)s, "
-                "not %(strategy)s"
-                % {
-                    "class": self.__class__.__name__,
-                    "defaults": defaults.allocation_strategy,
-                    "strategy": strategy,
-                }
+                "{}.allocation_strategy should be one of {}, not '{}'".format(
+                    self.__class__.__name__,
+                    defaults.allocation_strategy,
+                    strategy,
+                )
             )
 
         return strategy
 
     @validates("persistent_allocation")
     def _validate_persistent_allocation(self, key, persistent_allocation):
-        """validates the given persistent_allocation value"""
+        """Validate the given persistent_allocation value.
+
+        Args:
+            key (str): The name of the validate column.
+            persistent_allocation (bool): The persistent allocation value to be
+                validated.
+
+        Returns:
+            bool: The validated persistent allocation value.
+        """
         if persistent_allocation is None:
             from stalker import defaults
 
@@ -1702,50 +1915,101 @@ class Task(
 
     @validates("watchers")
     def _validate_watchers(self, key, watcher):
-        """validates the given watcher value"""
-        from stalker.models.auth import User
+        """Validate the given watcher value.
 
+        Args:
+            key (str): The name of the validated column.
+            watcher (stalker.models.auth.User): The watcher value to be validated.
+
+        Raises:
+            TypeError: If the watcher is not a :class:`stalker.models.auth.User`
+                instance.
+
+        Returns:
+            User: The validated :class:`stalker.models.auth.User` instance.
+        """
         if not isinstance(watcher, User):
             raise TypeError(
-                "%s.watchers should be a list of "
-                "stalker.models.auth.User instances not %s"
-                % (self.__class__.__name__, watcher.__class__.__name__)
+                "{}.watchers should be a list of stalker.models.auth.User instances, "
+                "not {}: '{}'".format(
+                    self.__class__.__name__, watcher.__class__.__name__, watcher
+                )
             )
         return watcher
 
     @validates("versions")
     def _validate_versions(self, key, version):
-        """validates the given version value"""
+        """Validate the given version value.
+
+        Args:
+            key (str): The name of the validated column.
+            version (stalker.models.version.Version): The version value to be validated.
+
+        Raises:
+            TypeError: If the version is not an Version instance.
+
+        Returns:
+            stalker.models.version.Version: The validated
+                :class:`stalker.models.version.Version` value.
+        """
         from stalker.models.version import Version
 
         if not isinstance(version, Version):
             raise TypeError(
-                "%(class)s.versions should only have "
-                "stalker.models.version.Version instances, and not %(class)s"
-                % {"class": self.__class__.__name__}
+                "{}.versions should only have stalker.models.version.Version "
+                "instances, and not {}: '{}'".format(
+                    self.__class__.__name__, version.__class__.__name__, version
+                )
             )
 
         return version
 
     @validates("bid_timing")
-    def _validate_bid_timing(self, key, bid_timing):
-        """validates the given bid_timing value"""
+    def _validate_bid_timing(
+        self, key: str, bid_timing: Union[None, int, float]
+    ) -> Union[None, int, float]:
+        """Validate the given bid_timing value.
+
+        Args:
+            key (str): The name of the validated column.
+            bid_timing (Union[int, float]): The bid_timing value to be validated.
+
+        Raises:
+            TypeError: If the bid_timing is not None and not an integer or float.
+
+        Returns:
+            Union[int, float]: The validated bid_timing value.
+        """
         if bid_timing is not None:
             if not isinstance(bid_timing, (int, float)):
                 raise TypeError(
-                    "%(class)s.bid_timing should be an integer or float "
-                    "showing the value of the initial bid for this %(class)s, "
-                    "not %(bid)s"
-                    % {
-                        "class": self.__class__.__name__,
-                        "bid": bid_timing.__class__.__name__,
-                    }
+                    "{}.bid_timing should be an integer or float showing the value of "
+                    "the initial bid for this {}, not {}: '{}'".format(
+                        self.__class__.__name__,
+                        self.__class__.__name__,
+                        bid_timing.__class__.__name__,
+                        bid_timing,
+                    )
                 )
         return bid_timing
 
     @validates("bid_unit")
     def _validate_bid_unit(self, key, bid_unit):
-        """validates the given bid_unit value"""
+        """Validate the given bid_unit value.
+
+        Args:
+            key (str): The name of the validated column.
+            bid_unit (str): The timing unit of the bid value, should be one of
+                ["min", "h", "d", "w", "m", "y"].
+
+        Raises:
+            TypeError: If the given bid_unit is not a str.
+            ValueError: If the given bid_unit is not one of the values ["min", "h", "d",
+                "w", "m", "y"].
+
+        Returns:
+            str: The validated bid_unit value.
+        """
         if bid_unit is None:
             bid_unit = "h"
 
@@ -1753,34 +2017,38 @@ class Task(
 
         if not isinstance(bid_unit, string_types):
             raise TypeError(
-                "%(class)s.bid_unit should be a string value one of %(units)s "
-                "showing the unit of the bid timing of this %(class)s, not "
-                "%(bid)s"
-                % {
-                    "class": self.__class__.__name__,
-                    "units": defaults.datetime_units,
-                    "bid": bid_unit.__class__.__name__,
-                }
+                "{cls}.bid_unit should be a string value one of {units} showing the "
+                "unit of the bid timing of this {cls}, not {bid_cls}: '{bid}'".format(
+                    cls=self.__class__.__name__,
+                    units=defaults.datetime_units,
+                    bid_cls=bid_unit.__class__.__name__,
+                    bid=bid_unit,
+                )
             )
 
         if bid_unit not in defaults.datetime_units:
             raise ValueError(
-                "%(class)s.bid_unit should be a string value one of %(units)s "
-                "showing the unit of the bid timing of this %(class)s, not "
-                "%(bid)s"
-                % {
-                    "class": self.__class__.__name__,
-                    "units": defaults.datetime_units,
-                    "bid": bid_unit.__class__.__name__,
-                }
+                "{cls}.bid_unit should be a string value one of {units} showing the "
+                "unit of the bid timing of this {cls}, not {bid_cls}: '{bid}'".format(
+                    cls=self.__class__.__name__,
+                    units=defaults.datetime_units,
+                    bid_cls=bid_unit.__class__.__name__,
+                    bid=bid_unit,
+                )
             )
 
         return bid_unit
 
     @classmethod
-    def _expand_dates(cls, task, start, end):
-        """extends the given tasks date values with the given start and end
-        values
+    def _expand_dates(
+        cls, task: "Task", start: datetime.datetime, end: datetime.datetime
+    ) -> None:
+        """Extend the given tasks date values with the given start and end values.
+
+        Args:
+            task (Task): The Task instance.
+            start (datetime.datetime): The start datetime.datetime instance.
+            end (datetime.datetime): The end datetime.datetime instance.
         """
         # update parents start and end date
         if task:
@@ -1792,53 +2060,102 @@ class Task(
     # TODO: Why these methods are not in the DateRangeMixin class.
     @validates("computed_start")
     def _validate_computed_start(self, key, computed_start):
-        """validates the given computed_start value"""
+        """Validate the given computed_start value.
+
+        Args:
+            key (str): The name of the validated column.
+            computed_start (datetime.datetime): The computed start as a
+                datetime.datetime instance.
+
+        Returns:
+            datetime.datetime: The validated computed start value.
+        """
         self.start = computed_start
         return computed_start
 
     @validates("computed_end")
     def _validate_computed_end(self, key, computed_end):
-        """validates the given computed_end value"""
+        """Validate the given computed_end value.
+
+        Args:
+            key (str): The name of the validated column.
+            computed_end (datetime.datetime): The computed start as a
+                datetime.datetime instance.
+
+        Returns:
+            datetime.datetime: The validated computed end value.
+        """
         self.end = computed_end
         return computed_end
 
-    def _validate_start(self, start_in):
-        """validates the given start value"""
-        if start_in is None:
-            import pytz
+    def _validate_start(self, start):
+        """Validate the given start value.
 
-            start_in = self.project.round_time(datetime.datetime.now(pytz.utc))
-        elif not isinstance(start_in, datetime.datetime):
+        Args:
+            start (datetime.datetime): The start value to be validated.
+
+        Raises:
+            TypeError: If the start value is not None and not a datetime.datetime
+                instance.
+
+        Returns:
+            datetime.datetime: The validated start value.
+        """
+        if start is None:
+            start = self.project.round_time(datetime.datetime.now(pytz.utc))
+        elif not isinstance(start, datetime.datetime):
             raise TypeError(
-                "%s.start should be an instance of datetime.datetime, not %s"
-                % (self.__class__.__name__, start_in.__class__.__name__)
+                "{}.start should be an instance of datetime.datetime, "
+                "not {}: '{}'".format(self.__class__.__name__, start.__name__, start)
             )
-        return start_in
+        return start
 
-    def _start_getter(self):
-        """overridden start getter"""
+    def _start_getter(self) -> datetime.datetime:
+        """Return the start value.
+
+        Returns:
+            datetime.datetime: The start date and time value.
+        """
         return self._start
 
-    def _start_setter(self, start_in):
-        """overridden start setter"""
+    def _start_setter(self, start):
+        """Set the start value.
+
+        Args:
+            start (datetime.datetime): The start date and time value to be validated.
+        """
         self._start, self._end, self._duration = self._validate_dates(
-            start_in, self._end, self._duration
+            start, self._end, self._duration
         )
         self._expand_dates(self.parent, self.start, self.end)
 
     def _end_getter(self):
-        """overridden end getter"""
+        """Return the end value.
+
+        Returns:
+            datetime.datetime: The end date and time value.
+        """
         return self._end
 
-    def _end_setter(self, end_in):
-        """overridden end setter"""
+    def _end_setter(self, end):
+        """Set the end value.
+
+        Args:
+            end (datetime.datetime): The end date and time value to be validated.
+        """
         # update the end only if this is not a container task
         self._start, self._end, self._duration = self._validate_dates(
-            self.start, end_in, self.duration
+            self.start, end, self.duration
         )
         self._expand_dates(self.parent, self.start, self.end)
 
     def _project_getter(self):
+        """Return the project value.
+
+        Returns:
+            stalker.models.project.Project: The :class:`stalker.models.project.Project`
+                instance.
+        """
         return self._project
 
     project = synonym(
@@ -1852,127 +2169,131 @@ class Task(
     )
 
     @property
-    def tjp_abs_id(self):
-        """returns the calculated absolute id of this task"""
-        if self.parent:
-            abs_id = self.parent.tjp_abs_id
-        else:
-            abs_id = self.project.tjp_id
+    def tjp_abs_id(self) -> str:
+        """Return the calculated absolute id of this task.
 
-        return "%s.%s" % (abs_id, self.tjp_id)
+        Returns:
+            str: The calculated absolute id of this task.
+        """
+        abs_id = self.parent.tjp_abs_id if self.parent else self.project.tjp_id
+        return f"{abs_id}.{self.tjp_id}"
 
     @property
     def to_tjp(self):
-        """TaskJuggler representation of this task"""
-        from jinja2 import Template
+        """Return the TaskJuggler representation of this task.
+
+        Returns:
+            str: The TaskJuggler representation of this task.
+        """
         from stalker import defaults
-        import pytz
 
         temp = Template(defaults.tjp_task_template, trim_blocks=True)
         return temp.render({"task": self, "utc": pytz.utc})
 
     @property
-    def level(self):
-        """Returns the level of this task. It is a temporary property and will
-        be useless when Stalker has its own implementation of a proper Gantt
-        Chart. Write now it is used by the jQueryGantt.
+    def level(self) -> int:
+        """Returns the hierarchical level of this task.
+
+        It is a temporary property and will be useless when Stalker has its own
+        implementation of a proper Gantt Chart. Right now it is used by the jQueryGantt.
+
+        Returns:
+            int: The hierarchical level of this task.
         """
         i = 0
-        current = self
-        while current:
+        current_task = self
+        while current_task:
             i += 1
-            current = current.parent
+            current_task = current_task.parent
         return i
 
     @property
-    def is_scheduled(self):
-        """A predicate which returns True if this task has both a
-        computed_start and computed_end values
+    def is_scheduled(self) -> bool:
+        """Return if this task has both a computed_start and computed_end values.
+
+        Returns:
+            bool: Return True if this task has both a computed_start and computed_end
+                values.
         """
         return self.computed_start is not None and self.computed_end is not None
 
-    def _total_logged_seconds_getter(self):
-        """The total effort spent for this Task. It is the sum of all the
-        TimeLogs recorded for this task as seconds.
+    def _total_logged_seconds_getter(self) -> int:
+        """Return the total effort spent for this Task.
 
-        :returns int: An integer showing the total seconds spent.
+        It is the sum of all the TimeLogs recorded for this task as seconds.
+
+        Returns:
+            int: An integer showing the total seconds spent.
         """
-        from stalker.db.session import DBSession
-
         with DBSession.no_autoflush:
-            if self.is_leaf:
-                if self.schedule_model in "effort":
-                    logger.debug("effort based task detected!")
-                    try:
-                        from sqlalchemy import text
-
-                        sql = """
-                        select
-                            extract(epoch from sum("TimeLogs".end - "TimeLogs".start))::int
-                        from "TimeLogs"
-                        where "TimeLogs".task_id = :task_id
-                        """
-                        engine = DBSession.connection().engine
-                        result = engine.execute(text(sql), task_id=self.id).fetchone()
-                        return result[0] if result[0] else 0
-                    except (
-                        UnboundExecutionError,
-                        OperationalError,
-                        ProgrammingError,
-                    ) as e:
-                        # no database connection
-                        # fallback to Python
-                        logger.debug("No session found! Falling back to Python")
-                        seconds = 0
-                        for time_log in self.time_logs:
-                            seconds += time_log.total_seconds
-                        return seconds
-                else:
-                    import pytz
-
-                    now = datetime.datetime.now(pytz.utc)
-
-                    if self.schedule_model == "duration":
-                        # directly return the difference between min(now - start, end - start)
-                        logger.debug(
-                            "duration based task detected!, "
-                            "calculating schedule_info from duration of the task"
-                        )
-                        daily_working_hours = 86400.0
-                    elif self.schedule_model == "length":
-                        # directly return the difference between min(now - start, end - start)
-                        # but use working days
-                        logger.debug(
-                            "length based task detected!, "
-                            "calculating schedule_info from duration of the task"
-                        )
-                        from stalker import defaults
-
-                        daily_working_hours = defaults.daily_working_hours
-
-                    if self.end <= now:
-                        seconds = (
-                            self.duration.days * daily_working_hours
-                            + self.duration.seconds
-                        )
-                    elif self.start >= now:
-                        seconds = 0
-                    else:
-                        past = now - self.start
-                        past_as_seconds = past.days * daily_working_hours + past.seconds
-                        logger.debug("past_as_seconds : %s" % past_as_seconds)
-                        seconds = past_as_seconds
-                    return seconds
-            else:
+            if not self.is_leaf:
                 if self._total_logged_seconds is None:
                     self.update_schedule_info()
                 return self._total_logged_seconds
 
-    def _total_logged_seconds_setter(self, seconds):
-        """Setter for total_logged_seconds. Mainly used for container tasks, to
-        cache the child logged_seconds
+            if self.schedule_model in "effort":
+                logger.debug("effort based task detected!")
+                try:
+                    sql = """
+                    select
+                        extract(epoch from sum("TimeLogs".end - "TimeLogs".start))::int
+                    from "TimeLogs"
+                    where "TimeLogs".task_id = :task_id
+                    """
+                    engine = DBSession.connection().engine
+                    result = engine.execute(text(sql), task_id=self.id).fetchone()
+                    return result[0] if result[0] else 0
+                except (UnboundExecutionError, OperationalError, ProgrammingError):
+                    # no database connection
+                    # fallback to Python
+                    logger.debug("No session found! Falling back to Python")
+                    seconds = 0
+                    for time_log in self.time_logs:
+                        seconds += time_log.total_seconds
+                    return seconds
+            else:
+                now = datetime.datetime.now(pytz.utc)
+                if self.schedule_model == "duration":
+                    # directly return the difference between
+                    # min(now - start, end - start)
+                    logger.debug(
+                        "duration based task detected!, "
+                        "calculating schedule_info from duration of the task"
+                    )
+                    daily_working_hours = 86400.0
+                elif self.schedule_model == "length":
+                    # directly return the difference between
+                    # min(now - start, end - start)
+                    # but use working days
+                    logger.debug(
+                        "length based task detected!, "
+                        "calculating schedule_info from duration of the task"
+                    )
+                    from stalker import defaults
 
-        :param seconds: An integer value for the seconds
+                    daily_working_hours = defaults.daily_working_hours
+
+                if self.end <= now:
+                    seconds = (
+                        self.duration.days * daily_working_hours
+                        + self.duration.seconds
+                    )
+                elif self.start >= now:
+                    seconds = 0
+                else:
+                    past = now - self.start
+                    past_as_seconds = past.days * daily_working_hours + past.seconds
+                    logger.debug(f"past_as_seconds: {past_as_seconds}")
+                    seconds = past_as_seconds
+                return seconds
+
+    def _total_logged_seconds_setter(self, seconds: int):
+        """Set the total_logged_seconds value.
+
+        This is mainly used for container tasks, to cache the child logged_seconds
+
+        Args:
+            seconds (int): An integer value for the seconds.
         """
         # only set for container tasks
         if self.is_container:
@@ -1991,9 +2312,13 @@ class Task(
         descriptor=property(_total_logged_seconds_getter, _total_logged_seconds_setter),
     )
 
-    def _schedule_seconds_getter(self):
-        """returns the total effort, length or duration in seconds, for
-        completeness calculation
+    def _schedule_seconds_getter(self) -> int:
+        """Return the total effort, length or duration in seconds.
+
+        This is used for calculating the percent_complete value.
+
+        Returns:
+            int: The total effort, length or duration in seconds.
         """
         # for container tasks use the children schedule_seconds attribute
         if self.is_container:
@@ -2005,18 +2330,17 @@ class Task(
                 self.schedule_timing, self.schedule_unit, self.schedule_model
             )
 
-    def _schedule_seconds_setter(self, seconds):
-        """Sets the schedule_seconds of this task. Mainly used for container
-        tasks.
+    def _schedule_seconds_setter(self, seconds: int):
+        """Set the schedule_seconds of this task.
 
-        :param seconds: An integer value of schedule_seconds for this task.
-        :return:
+        Mainly used for container tasks.
+
+        Args:
+            seconds (int): An integer value of schedule_seconds for this task.
         """
         # do it only for container tasks
         if self.is_container:
             # also update the parents
-            from stalker.db.session import DBSession
-
             with DBSession.no_autoflush:
                 if self.parent:
                     current_value = 0
@@ -2032,14 +2356,16 @@ class Task(
         descriptor=property(_schedule_seconds_getter, _schedule_seconds_setter),
     )
 
-    def update_schedule_info(self):
-        """updates the total_logged_seconds and schedule_seconds attributes by
-        using the children info and triggers an update on every children
+    def update_schedule_info(self) -> None:
+        """Update the total_logged_seconds and schedule_seconds attributes.
+
+        This updates the total_logged_seconds and schedule_seconds attributes by using
+        the children info and triggers an update on every children.
         """
         if self.is_container:
             total_logged_seconds = 0
             schedule_seconds = 0
-            logger.debug("updating schedule info for : %s" % self.name)
+            logger.debug(f"updating schedule info for: {self.name}")
             for child in self.children:
                 # update children if they are a container task
                 if child.is_container:
@@ -2064,55 +2390,84 @@ class Task(
             self._total_logged_seconds = self.total_logged_seconds
 
     @property
-    def percent_complete(self):
-        """returns the percent_complete based on the total_logged_seconds and
-        schedule_seconds of the task. Container tasks will use info from their
-        children
+    def percent_complete(self) -> float:
+        """Calcualte and return the percent_complete value.
+
+        The percent_complete value is based on the total_logged_seconds and
+        schedule_seconds of the task.
+
+        Container tasks will use info from their children.
+
+        Returns:
+            float: The percent complet value between 0 and 1.
         """
-        if self.is_container:
-            if self.total_logged_seconds is None or self.schedule_seconds is None:
-                self.update_schedule_info()
+        if (
+            self.is_container
+            and self.total_logged_seconds is None
+            or self.schedule_seconds is None
+        ):
+            self.update_schedule_info()
 
         return self.total_logged_seconds / float(self.schedule_seconds) * 100.0
 
     @property
-    def remaining_seconds(self):
-        """returns the remaining amount of efforts, length or duration left
-        in this Task as seconds.
+    def remaining_seconds(self) -> int:
+        """Return the remaining amount of effort, length or duration left as seconds.
+
+        Returns:
+            int: The remaining amount of effort, length or duration in seconds.
         """
         # for effort based tasks use the time_logs
         return self.schedule_seconds - self.total_logged_seconds
 
-    def _responsible_getter(self):
-        """returns the current responsible of this task"""
+    def _responsible_getter(self) -> List[User]:
+        """Return the current responsible of this task.
+
+        Returns:
+            List[User]: The list of :class:`stalker.models.auth.User` instances that are
+                the responsible of this task. If no stored value is found the same list
+                of Users from the parents will be returned.
+        """
         if not self._responsible:
             # traverse parents
             for parent in reversed(self.parents):
                 if parent.responsible:
-                    import copy
-
                     self._responsible = copy.copy(parent.responsible)
+                    break
 
         # so parents do not have a responsible
         return self._responsible
 
-    def _responsible_setter(self, responsible):
-        """sets the responsible attribute
+    def _responsible_setter(self, responsible: List[User]):
+        """Set the responsible attribute.
 
-        :param responsible: A :class:`.User` instance
+        Args:
+            responsible (List[User]): A list of :class:`.User` instances to be the
+                responsible of this Task.
         """
         self._responsible = responsible
 
     @validates("_responsible")
-    def _validate_responsible(self, key, responsible):
-        """validates the given responsible value (each responsible)"""
-        from stalker.models.auth import User
+    def _validate_responsible(self, key, responsible: User) -> User:
+        """Validate the given responsible value (each responsible).
 
+        Args:
+            key (str): The name of the validated column.
+            responsible (User): A :class:`stalker.models.auth.User` instance to be
+                validated.
+
+        Raises:
+            TypeError: If the given responsible value is not a User instance.
+
+        Returns:
+            User: The validated :class:`stalker.models.auth.User` instance.
+        """
         if not isinstance(responsible, User):
             raise TypeError(
-                "%s.responsible should be a list of "
-                "stalker.models.auth.User instances, not %s"
-                % (self.__class__.__name__, responsible.__class__.__name__)
+                "{}.responsible should be a list of stalker.models.auth.User "
+                "instances, not {}: '{}'".format(
+                    self.__class__.__name__, responsible.__class__.__name__, responsible
+                )
             )
         return responsible
 
@@ -2132,19 +2487,23 @@ class Task(
     )
 
     @property
-    def tickets(self):
-        """returns the tickets referencing this task in their links attribute"""
-        from stalker import Ticket
+    def tickets(self) -> List[Ticket]:
+        """Return the tickets referencing this Task in their links attribute.
 
+        Returns:
+            List[Ticket]: List of :class:`stalker.models.ticket.Ticket` instances that
+                are referencing this Task in their links attribute.
+        """
         return Ticket.query.filter(Ticket.links.contains(self)).all()
 
     @property
-    def open_tickets(self):
-        """returns the open tickets referencing this task in their links
-        attribute
-        """
-        from stalker import Ticket, Status
+    def open_tickets(self) -> List[Ticket]:
+        """Return the open tickets referencing this task in their links attribute.
 
+        Returns:
+            List[Ticket]: List of open :class:`stalker.models.ticket.Ticket` instances
+                that are referencing this Task in their links attribute.
+        """
         status_closed = Status.query.filter(Status.name == "Closed").first()
         return (
             Ticket.query.filter(Ticket.links.contains(self))
@@ -2152,34 +2511,59 @@ class Task(
             .all()
         )
 
-    def walk_dependencies(self, method=1):
-        """Walks the dependencies of this task
+    def walk_dependencies(self, method: int = 1) -> Generator[None, "Task", None]:
+        """Walk the dependencies of this task.
 
-        :param method: The walk method, 0: Depth First, 1: Breadth First
+        Args:
+            method (int): The walk method, 0: Depth First, 1: Breadth First.
+
+        Yields:
+            Task: Yields Task instances.
         """
-        from stalker.utils import walk_hierarchy
-
         for t in walk_hierarchy(self, "depends", method=method):
             yield t
 
     @validates("good")
-    def _validate_good(self, key, good):
-        """validates the given good value"""
-        from stalker import Good
+    def _validate_good(self, key: str, good: Good) -> Good:
+        """Validate the given good value.
 
+        Args:
+            key (str): The name of the validated column.
+            good (Good): The validated good value.
+
+        Raises:
+            TypeError: If the given good is not None and not a Good instance.
+
+        Returns:
+            Good: The validated good value.
+        """
         if good is not None and not isinstance(good, Good):
             raise TypeError(
-                "%s.good should be a stalker.models.budget.Good instance, not "
-                "%s" % (self.__class__.__name__, good.__class__.__name__)
+                "{}.good should be a stalker.models.budget.Good instance, "
+                "not {}: '{}'".format(
+                    self.__class__.__name__, good.__class__.__name__, good
+                )
             )
         return good
 
     # =============
     # ** ACTIONS **
     # =============
-    def create_time_log(self, resource, start, end):
-        """A helper method to create TimeLogs, this will ease creating TimeLog
-        instances for task.
+    def create_time_log(
+        self, resource: User, start: datetime.datetime, end: datetime.datetime
+    ) -> TimeLog:
+        """Create a TimeLog with the given information.
+
+        This will ease creating TimeLog instances for task.
+
+        Args:
+            resource (User): The :class:`stalker.models.auth.User` instance as the
+                resource for the TimeLog.
+            start (datetime.datetime): The start date and time.
+            end (datetime.datetime): The end date and time.
+
+        Returns:
+            TimeLog: The created TimeLog instance.
         """
         # all the status checks are now part of TimeLog._validate_task
         # create a TimeLog
@@ -2187,34 +2571,39 @@ class Task(
         # also updating parent statuses are done in TimeLog._validate_task
 
     def request_review(self):
-        """Creates and returns Review instances for each of the responsible of
-        this task and sets the task status to PREV.
+        """Create and return Review instances for each of the responsible of this task.
+
+        Also set the task status to PREV.
 
         .. versionadded:: 0.2.0
-          Request review will not cap the timing of this task anymore.
+           Request review will not cap the timing of this task anymore.
 
         Only applicable to leaf tasks.
+
+        Raises:
+            StatusError: If the current task status is not WIP a StatusError will be
+                raised as the task has either not been started on being worked yet,
+                it is already on review, a dependency might be under review or this is
+                stopped, hold or completed.
+
+        Returns:
+            List[Review]: The list of :class:`stalker.models.review.Reivew` instances
+                creeated.
         """
         # check task status
-        from stalker.db.session import DBSession
-
         with DBSession.no_autoflush:
             wip = self.status_list["WIP"]
             prev = self.status_list["PREV"]
 
         if self.status != wip:
-            from stalker.exceptions import StatusError
-
             raise StatusError(
-                "%(task)s (id:%(id)s) is a %(status)s task, and %(status)s "
-                "tasks are not suitable for requesting a review, please "
-                "supply a WIP task instead."
-                % {"task": self.name, "id": self.id, "status": self.status.code}
+                "{task} (id:{id}) is a {status} task, and it is not suitable for "
+                "requesting a review, please supply a WIP task instead.".format(
+                    task=self.name, id=self.id, status=self.status.code
+                )
             )
 
         # create Review instances for each Responsible of this task
-        from stalker.models.review import Review
-
         reviews = []
         for responsible in self.responsible:
             reviews.append(Review(task=self, reviewer=responsible))
@@ -2226,9 +2615,13 @@ class Task(
         return reviews
 
     def request_revision(
-        self, reviewer=None, description="", schedule_timing=1, schedule_unit="h"
-    ):
-        """Requests revision.
+        self,
+        reviewer: User = None,
+        description: str = "",
+        schedule_timing: int = 1,
+        schedule_unit: str = "h",
+    ) -> Review:
+        """Request revision.
 
         Applicable to PREV or CMPL leaf tasks. This method will expand the
         schedule timings of the task according to the supplied arguments.
@@ -2241,38 +2634,35 @@ class Task(
         attributes (reviewer, description, schedule_timing, schedule_unit and
         review_number attributes).
 
-        :param reviewer: This is the user that requested the revision. He/she
-          doesn't need to be the responsible, anybody that has a Permission to
-          create a Review instance can request a revision.
+        Args:
+            reviewer (User): This is the user that requested the revision. They don't
+                need to be the responsible, anybody that has a Permission to create a
+                Review instance can request a revision.
+            description (str): The description of the requested revision.
+            schedule_timing (int): The timing value of the requested revision. The task
+                will be extended this much of duration. Works along with the
+                ``schedule_unit`` parameter. The default value is 1.
+            schedule_unit (str): The timin unit value of the requested revision. The
+                task will be extended this much of duration. Works along with the
+                ``schedule_timing`` parameter. The default value is 'h' for 'hour'.
 
-        :param str description: The description of the requested revision.
+        Raises:
+            StatusError: If the status of the current task is not PREV or CMPL.
 
-        :param int schedule_timing: The timing value of the requested revision.
-          The task will be extended this much of duration. Works along with the
-          ``schedule_unit`` parameter. The default value is 1.
-
-        :param str schedule_unit: The timin unit value of the requested
-          revision. The task will be extended this much of duration. Works
-          along with the ``schedule_timing`` parameter. The default value is
-          'h' for 'hour'.
-
-        :type reviewer: class:`.User`
+        Returns:
+            Review: The newly created :class:`stalker.models.review.Review` instance.
         """
         # check status
-        from stalker.db.session import DBSession
-
         with DBSession.no_autoflush:
             prev = self.status_list["PREV"]
             cmpl = self.status_list["CMPL"]
 
         if self.status not in [prev, cmpl]:
-            from stalker.exceptions import StatusError
-
             raise StatusError(
-                "%(task)s (id: %(id)s) is a %(status)s task, and it is not "
-                "suitable for requesting a revision, please supply a PREV or "
-                "CMPL task"
-                % {"task": self.name, "id": self.id, "status": self.status.code}
+                "{task} (id: {id}) is a {status} task, and it is not suitable for "
+                "requesting a revision, please supply a PREV or CMPL task".format(
+                    task=self.name, id=self.id, status=self.status.code
+                )
             )
 
         # *********************************************************************
@@ -2285,7 +2675,7 @@ class Task(
                 reviews_to_be_deleted.append(r)
 
         for r in reviews_to_be_deleted:
-            logger.debug("removing %s from task.reviews" % r)
+            logger.debug(f"removing {r} from task.reviews")
             self.reviews.remove(r)
             r.task = None
             try:
@@ -2297,8 +2687,6 @@ class Task(
         # *********************************************************************
 
         # create a Review instance with the given data
-        from stalker.models.review import Review
-
         review = Review(reviewer=reviewer, task=self)
         # and call request_revision in the Review instance
         review.request_revision(
@@ -2308,26 +2696,27 @@ class Task(
         )
         return review
 
-    def hold(self):
-        """Pauses the execution of this task by setting its status to OH. Only
-        applicable to RTS and WIP tasks, any task with other statuses will
-        raise a ValueError.
+    def hold(self) -> None:
+        """Pause the execution of this task by setting its status to OH.
+
+        Only applicable to RTS and WIP tasks, any task with other statuses will raise a
+        StatusError. Also sets the priority to 0.
+
+        Raises:
+            StatusError: If the status of the task is not RTS or WIP.
         """
         # check if status is WIP
-        from stalker.db.session import DBSession
-
         with DBSession.no_autoflush:
             wip = self.status_list["WIP"]
             drev = self.status_list["DREV"]
             oh = self.status_list["OH"]
 
         if self.status not in [wip, drev, oh]:
-            from stalker.exceptions import StatusError
-
             raise StatusError(
-                "%(task)s (id:%(id)s) is a %(status)s task, only WIP or DREV "
-                "tasks can be set to On Hold"
-                % {"task": self.name, "id": self.id, "status": self.status.code}
+                "{task} (id:{id}) is a {status} task, only WIP or DREV tasks can be "
+                "set to On Hold".format(
+                    task=self.name, id=self.id, status=self.status.code
+                )
             )
         # update the status to OH
         self.status = oh
@@ -2337,40 +2726,40 @@ class Task(
 
         # no need to update the status of dependencies nor parents
 
-    def stop(self):
-        """Stops this task. It is nearly equivalent to deleting this task. But
-        this will at least preserve the TimeLogs entered for this task. It is
-        only possible to stop WIP tasks.
+    def stop(self) -> None:
+        """Stop this task.
+
+        It is nearly equivalent to deleting this task. But this will at least preserve
+        the TimeLogs entered for this task. It is only possible to stop WIP tasks.
 
         You can use :meth:`.resume` to resume the task.
 
-        The only difference between :meth:`.hold` (other than setting the task
-        to different statuses) is the schedule info, while the :meth:`.hold`
-        method will preserve the schedule info, stop() will set the schedule
-        info to the current effort.
+        The only difference between :meth:`.hold` (other than setting the task to
+        different statuses) is the schedule info, while the :meth:`.hold` method will
+        preserve the schedule info, stop() will set the schedule info to the current
+        effort.
 
-        So if 2 days of effort has been entered for a 4 days task, when stopped
-        the task effort will be capped to 2 days, thus TaskJuggler will not try
-        to reserve any resource for this task anymore.
+        So if 2 days of effort has been entered for a 4 days task, when stopped the task
+        effort will be capped to 2 days, thus TaskJuggler will not try to reserve any
+        resource for this task anymore.
 
         Also, STOP tasks will be ignored in dependency relations.
+
+        Raises:
+            StatusError: If the task status is not WIP, DREV or STOP.
         """
-
         # check the status
-        from stalker.db.session import DBSession
-
         with DBSession.no_autoflush:
             wip = self.status_list["WIP"]
             drev = self.status_list["DREV"]
             stop = self.status_list["STOP"]
 
         if self.status not in [wip, drev, stop]:
-            from stalker.exceptions import StatusError
-
             raise StatusError(
-                "%(task)s (id:%(id)s)is a %(status)s task and it is not "
-                "possible to stop a %(status)s task."
-                % {"task": self.name, "id": self.id, "status": self.status.code}
+                "{task} (id:{id})is a {status} task and it is not possible to stop a "
+                "{status} task.".format(
+                    task=self.name, id=self.id, status=self.status.code
+                )
             )
 
         # set the status
@@ -2385,30 +2774,31 @@ class Task(
         self.update_parent_statuses()
 
         # update dependent task statuses
-        for dep in self.dependent_of:
-            dep.update_status_with_dependent_statuses()
+        for dependency in self.dependent_of:
+            dependency.update_status_with_dependent_statuses()
 
-    def resume(self):
-        """Resumes the execution of this task by setting its status to RTS or
-        WIP depending to its time_logs attribute, so if it has TimeLogs then it
-        will resume as WIP and if it doesn't then it will resume as RTS. Only
-        applicable to Tasks with status OH.
+    def resume(self) -> None:
+        """Resume the execution of this task.
+
+        Resume the task by setting its status to RTS or WIP depending to its time_logs
+        attribute, so if it has TimeLogs then it will resume as WIP and if it doesn't
+        then it will resume as RTS. Only applicable to Tasks with status OH.
+
+        Raises:
+            StatusError: If the task status is not OH or STOP.
         """
         # check status
-        from stalker.db.session import DBSession
-
         with DBSession.no_autoflush:
             wip = self.status_list["WIP"]
             oh = self.status_list["OH"]
             stop = self.status_list["STOP"]
 
         if self.status not in [oh, stop]:
-            from stalker.exceptions import StatusError
-
             raise StatusError(
-                "%(task)s (id:%(id)s) is a %(status)s task, and it is not "
-                "suitable to be resumed, please supply an OH or STOP task"
-                % {"task": self.name, "id": self.id, "status": self.status.code}
+                "{task} (id:{id}) is a {status} task, and it is not suitable to be "
+                "resumed, please supply an OH or STOP task".format(
+                    task=self.name, id=self.id, status=self.status.code
+                )
             )
         else:
             # set to WIP
@@ -2420,11 +2810,22 @@ class Task(
         # and update parents statuses
         self.update_parent_statuses()
 
-    def review_set(self, review_number=None):
-        """returns the reviews with the given review_number, if review_number
-        is skipped it will return the latest set of reviews
-        """
+    def review_set(self, review_number: Union[None, int] = None) -> List[Review]:
+        """Return the reviews with the given review_number.
 
+        Args:
+            review_number (Union[None, int]): The review number. If review_number is
+                skipped it will return the latest set of reviews.
+
+        Raises:
+            TypeError: If the review_number is not None and not an integer.
+            ValueError: If the review_number is less than 0.
+
+        Returns:
+            List[Review]: The reviews with the given review number or the latest set of
+                :class:`stalker.models.review.Review` instances if the review number is
+                is skipped or None.
+        """
         review_set = []
         if review_number is None:
             if self.status.code == "PREV":
@@ -2434,19 +2835,20 @@ class Task(
 
         if not isinstance(review_number, int):
             raise TypeError(
-                "review_number argument in %(class)s.review_set should be a "
-                "positive integer, not %(review_number_class)s"
-                % {
-                    "class": self.__class__.__name__,
-                    "review_number_class": review_number.__class__.__name__,
-                }
+                "review_number argument in {cls}.review_set should be a positive "
+                "integer, not {review_number_class}: '{review_number}'".format(
+                    cls=self.__class__.__name__,
+                    review_number_class=review_number.__class__.__name__,
+                    review_number=review_number,
+                )
             )
 
         if review_number < 1:
-            raise TypeError(
-                "review_number argument in %(class)s.review_set should be a "
-                "positive integer, not %(review_number)s"
-                % {"class": self.__class__.__name__, "review_number": review_number}
+            raise ValueError(
+                "review_number argument in {cls}.review_set should be a positive "
+                "integer, not {review_number}".format(
+                    cls=self.__class__.__name__, review_number=review_number
+                )
             )
 
         for review in self.reviews:
@@ -2455,11 +2857,12 @@ class Task(
 
         return review_set
 
-    def update_status_with_dependent_statuses(self, removing=None):
-        """updates the status by looking at the dependent tasks
+    def update_status_with_dependent_statuses(self, removing=None):  # noqa: C901
+        """Update the status by looking at the dependent tasks.
 
-        :param removing: The item that is been removing right now, used for the
-          remove event to overcome the update issue.
+        Args:
+            removing (Task): The item that is being removed right now, used for the
+                remove event to overcome the update issue.
         """
         if self.is_container:
             # do nothing, its status will be decided by its children
@@ -2467,8 +2870,6 @@ class Task(
 
         # in case there is no database
         # try to find the statuses from the status_list attribute
-        from stalker.db.session import DBSession
-
         with DBSession.no_autoflush:
             wfd = self.status_list["WFD"]
             rts = self.status_list["RTS"]
@@ -2483,16 +2884,17 @@ class Task(
             self._previously_removed_dependent_tasks = []
 
         # create a new list from depends and skip_list
-        dep_list = []
-        for dep in self.depends:
-            if dep not in self._previously_removed_dependent_tasks:
-                dep_list.append(dep)
+        dependency_list = []
+        for dependency in self.depends:
+            if dependency not in self._previously_removed_dependent_tasks:
+                dependency_list.append(dependency)
 
-        logger.debug("self.depends : %s" % self.depends)
-        logger.debug("dep_list     : %s" % dep_list)
+        logger.debug(f"self           : {self}")
+        logger.debug(f"self.depends   : {self.depends}")
+        logger.debug(f"dependency_list: {dependency_list}")
 
         # if not self.depends:
-        if not dep_list:
+        if not dependency_list:
             # doesn't have any dependency
             # convert its status from WFD to RTS if necessary
             if self.status == wfd:
@@ -2501,32 +2903,9 @@ class Task(
                 if len(self.time_logs):
                     self.status = wip
                 else:
+                    # doesn't have any TimeLogs return back to rts
                     self.status = rts
             return
-
-        #   +--------- WFD
-        #   |+-------- RTS
-        #   ||+------- WIP
-        #   |||+------ PREV
-        #   ||||+----- HREV
-        #   |||||+---- DREV
-        #   ||||||+--- OH
-        #   |||||||+-- STOP
-        #   ||||||||+- CMPL
-        #   |||||||||
-        # 0b000000000
-
-        binary_status_codes = {
-            "WFD": 256,
-            "RTS": 128,
-            "WIP": 64,
-            "PREV": 32,
-            "HREV": 16,
-            "DREV": 8,
-            "OH": 4,
-            "STOP": 2,
-            "CMPL": 1,
-        }
 
         # Keep this part for future reference
         # if self.id:
@@ -2536,8 +2915,10 @@ class Task(
         #         select
         #             "Statuses".code
         #         from "Tasks"
-        #             join "Task_Dependencies" on "Tasks".id = "Task_Dependencies".task_id
-        #             join "Tasks" as "Dependent_Tasks" on "Task_Dependencies".depends_to_id = "Dependent_Tasks".id
+        #             join "Task_Dependencies"
+        #                 on "Tasks".id = "Task_Dependencies".task_id
+        #             join "Tasks" as "Dependent_Tasks"
+        #                 on "Task_Dependencies".depends_to_id = "Dependent_Tasks".id
         #             join "Statuses" on "Dependent_Tasks".status_id = "Statuses".id
         #         where "Tasks".id = %s
         #         group by "Statuses".code
@@ -2559,22 +2940,18 @@ class Task(
         dep_statuses = []
         # with DBSession.no_autoflush:
         logger.debug(
-            "self.depends in update_status_with_dependent_statuses: %s" % self.depends
+            f"self.depends in update_status_with_dependent_statuses: {self.depends}"
         )
-        # for dep in self.depends:
-        for dep in dep_list:
+        for dependency in dependency_list:
             # consider every status only once
-            if dep.status not in dep_statuses:
-                dep_statuses.append(dep.status)
-                binary_status += binary_status_codes[dep.status.code]
+            if dependency.status not in dep_statuses:
+                dep_statuses.append(dependency.status)
+                binary_status += BINARY_STATUS_VALUES[dependency.status.code]
 
-        logger.debug("status of the task: %s" % self.status.code)
-        logger.debug("binary status for dependency statuses: %s" % binary_status)
+        logger.debug(f"status of the task                   : {self.status.code}")
+        logger.debug(f"binary status for dependency statuses: {binary_status}")
 
-        work_alone = False
-        if binary_status < 4:
-            work_alone = True
-
+        work_alone = binary_status < 4
         status = self.status
         if work_alone:
             if self.status == wfd:
@@ -2603,35 +2980,31 @@ class Task(
             elif self.status == cmpl:
                 status = drev
 
-        logger.debug("setting status from %s to %s: " % (self.status, status))
+        logger.debug(f"setting status from {self.status} to {status}: ")
         self.status = status
 
         # also update parent statuses
         self.update_parent_statuses()
 
         # # also update dependent tasks
-        # for dep in dep_list:
-        #     dep.update_status_with_dependent_statuses()
+        # for dependency in dependency_list:
+        #     dependency.update_status_with_dependent_statuses()
 
-    def update_parent_statuses(self):
-        """updates the parent statuses of this task if any"""
+    def update_parent_statuses(self) -> None:
+        """Update the parent statuses of this task if any."""
         # prevent query-invoked auto-flush
-        from stalker.db.session import DBSession
-
         with DBSession.no_autoflush:
             if self.parent:
                 self.parent.update_status_with_children_statuses()
 
     def update_status_with_children_statuses(self):
-        """updates the task status according to its children statuses"""
-        logger.debug("setting statuses with child statuses for: %s" % self.name)
+        """Update the task status according to its children statuses."""
+        logger.debug(f"setting statuses with child statuses for: {self.name}")
 
         if not self.is_container:
             # do nothing
             logger.debug("not a container returning!")
             return
-
-        from stalker.db.session import DBSession
 
         with DBSession.no_autoflush:
             wfd = self.status_list["WFD"]
@@ -2639,31 +3012,7 @@ class Task(
             wip = self.status_list["WIP"]
             cmpl = self.status_list["CMPL"]
 
-        parent_statuses_lut = [wfd, rts, wip, cmpl]
-
-        #   +--------- WFD
-        #   |+-------- RTS
-        #   ||+------- WIP
-        #   |||+------ PREV
-        #   ||||+----- HREV
-        #   |||||+---- DREV
-        #   ||||||+--- OH
-        #   |||||||+-- STOP
-        #   ||||||||+- CMPL
-        #   |||||||||
-        # 0b000000000
-
-        binary_status_codes = {
-            "WFD": 256,
-            "RTS": 128,
-            "WIP": 64,
-            "PREV": 32,
-            "HREV": 16,
-            "DREV": 8,
-            "OH": 4,
-            "STOP": 2,
-            "CMPL": 1,
-        }
+        parent_statuses_map = [wfd, rts, wip, cmpl]
 
         # use Python
         logger.debug("using pure Python to query children statuses")
@@ -2673,556 +3022,30 @@ class Task(
             # consider every status only once
             if child.status not in children_statuses:
                 children_statuses.append(child.status)
-                binary_status += binary_status_codes[child.status.code]
+                binary_status += BINARY_STATUS_VALUES[child.status.code]
 
-        #
-        # I know that the following list seems cryptic but the it shows the
-        # final status index in parent_statuses_lut[] list.
-        #
-        # So by using the cumulative statuses of children we got an index from
-        # the following table, and use the found element (integer) as the index
-        # for the parent_statuses_lut[] list, and we find the desired status
-        #
-        # We are doing it in this way for a couple of reasons:
-        #
-        #   1. We shouldn't hold the statuses in the following list,
-        #   2. Using a dictionary is another alternative, where the keys are
-        #      the cumulative binary status codes, but at the end the result of
-        #      this cumulative thing is a number between 0-511 so no need to
-        #      use a dictionary with integer keys
-        #
-        children_to_parent_statuses_lut = [
-            0,
-            3,
-            3,
-            3,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            1,
-            2,
-            1,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            0,
-            2,
-            0,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            1,
-            2,
-            1,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-        ]
+        # any condition not listed above should return the status_index of "2=WIP"
+        status_index = CHILDREN_TO_PARENT_STATUSES_MAP.get(binary_status, 2)
+        status = parent_statuses_map[status_index]
 
-        status_index = children_to_parent_statuses_lut[binary_status]
-        status = parent_statuses_lut[status_index]
-
-        logger.debug("binary statuses value : %s" % binary_status)
-        logger.debug("setting status to : %s" % status.code)
+        logger.debug(f"binary statuses value : {binary_status}")
+        logger.debug(f"setting status to     : {status.code}")
 
         self.status = status
 
         # # update dependent task statuses
-        # for dep in self.dependent_of:
-        #     dep.update_status_with_dependent_statuses()
+        # for dependent in self.dependent_of:
+        #     dependent.update_status_with_dependent_statuses()
 
         # go to parents
         self.update_parent_statuses()
 
     def _review_number_getter(self):
-        """returns the revision number value"""
+        """Return the revision number value.
+
+        Returns:
+            int: The current revision number.
+        """
         return self._review_number
 
     review_number = synonym(
@@ -3231,8 +3054,12 @@ class Task(
         doc="returns the _review_number attribute value",
     )
 
-    def _template_variables(self):
-        """variables used in rendering the filename template"""
+    def _template_variables(self) -> dict:
+        """Return variables used in rendering the filename template.
+
+        Returns:
+            dict: The template variables.
+        """
         # TODO: add test for this template variables
         from stalker import Shot
 
@@ -3247,7 +3074,7 @@ class Task(
         parent_tasks = task.parents
         parent_tasks.append(task)
 
-        kwargs = {
+        return {
             "project": self.project,
             "sequences": sequences,
             "sequence": self,
@@ -3258,26 +3085,30 @@ class Task(
             "parent_tasks": parent_tasks,
             "type": self.type,
         }
-        return kwargs
 
     @property
-    def path(self):
-        """The path attribute will generate a path suitable for placing the
-        files under it. It will use the :class:`.FilenameTemplate` class
-        related to the :class:`.Project` :class:`.Structure` with the
-        ``target_entity_type`` is set to the type of this instance.
-        """
-        kwargs = self._template_variables()
+    def path(self) -> str:
+        """Return the rendered file path of this Task.
 
+        The path attribute will generate a path suitable for placing the files under it.
+        It will use the :class:`.FilenameTemplate` class related to the
+        :class:`.Project` :class:`.Structure` with the ``target_entity_type`` is set to
+        the type of this instance.
+
+        Raises:
+            RuntimeError: If no :class:`stalker.models.template.FilenameTemplate`
+                instance found in the :class:`stalker.models.structure.Structure` of the
+                related :class:`stalker.models.project.Project`.
+
+        Returns:
+            str: The rendered file path of this Task.
+        """
         # get a suitable FilenameTemplate
         structure = self.project.structure
-
-        from stalker import FilenameTemplate
 
         task_template = None
         if structure:
             for template in structure.templates:
-                assert isinstance(template, FilenameTemplate)
                 if template.target_entity_type == self.entity_type:
                     task_template = template
                     break
@@ -3285,33 +3116,39 @@ class Task(
         if not task_template:
             raise RuntimeError(
                 "There are no suitable FilenameTemplate "
-                "(target_entity_type == '%(entity_type)s') defined in the "
-                "Structure of the related Project instance, please create a "
-                "new stalker.models.template.FilenameTemplate instance with "
-                "its 'target_entity_type' attribute is set to "
-                "'%(entity_type)s' and assign it to the `templates` attribute "
-                "of the structure of the project" % {"entity_type": self.entity_type}
+                "(target_entity_type == '{entity_type}') defined in the Structure of "
+                "the related Project instance, please create a new "
+                "stalker.models.template.FilenameTemplate instance with its "
+                "'target_entity_type' attribute is set to '{entity_type}' and assign "
+                "it to the `templates` attribute of the structure of the "
+                "project".format(entity_type=self.entity_type)
             )
 
-        import jinja2
-
         return os.path.normpath(
-            jinja2.Template(task_template.path).render(**kwargs)
+            Template(task_template.path).render(**self._template_variables())
         ).replace("\\", "/")
 
     @property
-    def absolute_path(self):
-        """the absolute_path attribute"""
+    def absolute_path(self) -> str:
+        """Return the absolute file path of this task.
+
+        This is the absolute verion of the :attr:`.Task.path` attribute and depends on
+        the :class:`stalker.models.template.FilenameTemplate` found in the
+        :class:`stalker.models.structure.Structure` instance of the related
+        :class:`stalker.models.project.Project` instance.
+
+        Returns:
+            str: The rendered absolute file path of this task.
+        """
         return os.path.normpath(os.path.expandvars(self.path)).replace("\\", "/")
 
 
 class TaskDependency(Base, ScheduleMixin):
-    """The association object used in Task-to-Task dependency relation"""
+    """The association object used in Task-to-Task dependency relation."""
 
     from stalker import defaults
 
-    __default_schedule_attr_name__ = "gap"  # used in docstrings coming from
-    # ScheduleMixin
+    __default_schedule_attr_name__ = "gap"  # used in docstring of ScheduleMixin
     __default_schedule_models__ = defaults.task_dependency_gap_models
     __default_schedule_timing__ = 0
     __default_schedule_unit__ = "h"
@@ -3396,67 +3233,104 @@ class TaskDependency(Base, ScheduleMixin):
         self.dependency_target = dependency_target
 
     @validates("task")
-    def _validate_task(self, key, task):
-        """validates the task value"""
-        if task is not None:
-            # trust to the session for checking the task
-            if not isinstance(task, Task):
-                raise TypeError(
-                    "%s.task should be and instance of "
-                    "stalker.models.task.Task, not %s"
-                    % (self.__class__.__name__, task.__class__.__name__)
+    def _validate_task(self, key: str, task: Task) -> Task:
+        """Validate the task value.
+
+        Args:
+            key (str): The name of the validated column.
+            task (Task): The task value to be validated.
+
+        Raises:
+            TypeError: If the given task value is not None and not a
+                :class:`stalker.models.task.Task` instance.
+
+        Returns:
+            Task: The validated task value.
+        """
+        # trust to the session for checking the task
+        if task is not None and not isinstance(task, Task):
+            raise TypeError(
+                "{}.task should be and instance of stalker.models.task.Task, "
+                "not {}: '{}'".format(
+                    self.__class__.__name__, task.__class__.__name__, task
                 )
+            )
         return task
 
     @validates("depends_to")
-    def _validate_depends_to(self, key, dep):
-        """validates the task value"""
-        if dep is not None:
-            # trust to the session for checking the depends_to attribute
-            if not isinstance(dep, Task):
-                raise TypeError(
-                    "%s.depends_to can should be and instance of "
-                    "stalker.models.task.Task, not %s"
-                    % (self.__class__.__name__, dep.__class__.__name__)
+    def _validate_depends_to(self, key: str, dependency: Task) -> Task:
+        """Validate the task value.
+
+        Args:
+            key (str): The name of the validated column.
+            dependency (Task): The depends_to value to be validated.
+
+        Raises:
+            TypeError: If the given depends_to value is not None and not a
+                :class:`stalker.models.task.Task` instance.
+
+        Returns:
+            Task: The validated depends_to value.
+        """
+        # trust to the session for checking the depends_to attribute
+        if dependency is not None and not isinstance(dependency, Task):
+            raise TypeError(
+                "{}.depends_to can should be and instance of stalker.models.task.Task, "
+                "not {}: '{}'".format(
+                    self.__class__.__name__, dependency.__class__.__name__, dependency
                 )
-        return dep
+            )
+        return dependency
 
     @validates("dependency_target")
-    def _validate_dependency_target(self, key, dep_target):
-        """validates the given dep_target value"""
+    def _validate_dependency_target(self, key: str, dependency_target: str) -> str:
+        """Validate the given dependency_taget value.
+
+        Args:
+            key (str): The name of the validated column.
+            dependency_target (str): The dependency_target value to be validated.
+
+        Raises:
+            TypeError: If the dependency_target value is not None and not a string.
+            ValueError: If the dependency_taget is not one of ["onend", "onstart"].
+
+        Returns:
+            str: The validated dependency_target value.
+        """
         from stalker import defaults
 
-        if dep_target is None:
-            dep_target = defaults.task_dependency_targets[0]
+        if dependency_target is None:
+            dependency_target = defaults.task_dependency_targets[0]
 
-        if not isinstance(dep_target, string_types):
+        if not isinstance(dependency_target, string_types):
             raise TypeError(
-                "%s.dependency_target should be a string with a value one of "
-                "%s, not %s"
-                % (
+                "{}.dependency_target should be a string with a value one of {}, "
+                "not {}: '{}'".format(
                     self.__class__.__name__,
                     defaults.task_dependency_targets,
-                    dep_target.__class__.__name__,
+                    dependency_target.__class__.__name__,
+                    dependency_target,
                 )
             )
 
-        if dep_target not in defaults.task_dependency_targets:
+        if dependency_target not in defaults.task_dependency_targets:
             raise ValueError(
-                "%s.dependency_target should be one of %s, not '%s'"
-                % (
+                "{}.dependency_target should be one of {}, not '{}'".format(
                     self.__class__.__name__,
                     defaults.task_dependency_targets,
-                    dep_target,
+                    dependency_target,
                 )
             )
 
-        return dep_target
+        return dependency_target
 
     @property
-    def to_tjp(self):
-        """TaskJuggler representation of this TaskDependency"""
-        from jinja2 import Template
+    def to_tjp(self) -> str:
+        """Return the TaskJuggler representation of this TaskDependency.
 
+        Returns:
+            str: The TaskJuggler representation of this TaskDependency.
+        """
         template_variables = {
             "task": self.task,
             "depends_to": self.depends_to,
@@ -3521,17 +3395,23 @@ Task_Responsible = Table(
 # TimeLog updates the owner tasks parents total_logged_seconds attribute
 # with new duration
 @event.listens_for(TimeLog._start, "set")
-def update_time_log_task_parents_for_start(tlog, new_start, old_start, initiator):
-    """Updates the parent task of the task related to the time_log when the
-    new_start or end values are changed
+def update_time_log_task_parents_for_start(
+    tlog: TimeLog,
+    new_start: datetime.datetime,
+    old_start: datetime.datetime,
+    initiator: AttributeEvent,
+) -> None:
+    """Update the parent task of the TimeLog.task if the new_start value is changed.
 
-    :param tlog: The TimeLog instance
-    :param new_start: The datetime.datetime instance showing the new value
-    :param old_start: The datetime.datetime instance showing the old value
-    :param initiator: not used
-    :return: None
+    Args:
+        tlog (TimeLog): The TimeLog instance.
+        new_start (datetime.datetime): The datetime.datetime instance showing the new
+            value.
+        old_start (datetime.datetime): The datetime.datetime instance showing the old
+            value.
+        initiator (AttributeEvent): Currently not used.
     """
-    logger.debug("Received set event for new_start in target : %s" % tlog)
+    logger.debug(f"Received set event for new_start in target : {tlog}")
     if tlog.end and old_start and new_start:
         old_duration = tlog.end - old_start
         new_duration = tlog.end - new_start
@@ -3539,17 +3419,23 @@ def update_time_log_task_parents_for_start(tlog, new_start, old_start, initiator
 
 
 @event.listens_for(TimeLog._end, "set")
-def update_time_log_task_parents_for_end(tlog, new_end, old_end, initiator):
-    """Updates the parent task of the task related to the time_log when the
-    start or new_end values are changed
+def update_time_log_task_parents_for_end(
+    tlog: TimeLog,
+    new_end: datetime.datetime,
+    old_end: datetime.datetime,
+    initiator: sqlalchemy.orm.attributes.AttributeEvent,
+) -> None:
+    """Update the parent task of the TimeLog.task if the new_end value is changed.
 
-    :param tlog: The TimeLog instance
-    :param new_end: The datetime.datetime instance showing the new value
-    :param old_end: The datetime.datetime instance showing the old value
-    :param initiator: not used
-    :return: None
+    Args:
+        tlog (TimeLog): The TimeLog instance.
+        new_end (datetime.datetime): The datetime.datetime instance showing the new
+            value.
+        old_end (datetime.datetime): The datetime.datetime instance showing the old
+            value.
+        initiator (sqlalchemy.orm.attributes.AttributeEvent): Currently not used.
     """
-    logger.debug("Received set event for new_end in target : %s" % tlog)
+    logger.debug(f"Received set event for new_end in target: {tlog}")
     if (
         tlog.start
         and isinstance(old_end, datetime.datetime)
@@ -3560,34 +3446,37 @@ def update_time_log_task_parents_for_end(tlog, new_end, old_end, initiator):
         __update_total_logged_seconds__(tlog, new_duration, old_duration)
 
 
-def __update_total_logged_seconds__(tlog, new_duration, old_duration):
-    """Updates the given parent tasks total_logged_seconds attribute with the
-    new duration
+def __update_total_logged_seconds__(
+    tlog: TimeLog, new_duration: datetime.timedelta, old_duration: datetime.timedelta
+):
+    """Update the given parent tasks total_logged_seconds attr with the new duration.
 
-    :param tlog: A :class:`.Task` instance which is the parent of the
-    :param new_duration:
-    :param old_duration:
-    :return:
+    Args:
+        tlog (TimeLog): A :class:`.Task` instance which is the parent of the.
+        new_duration (datetime.timedelta): The new duration value.
+        old_duration (datetime.timedelta): The old duration value.
     """
-    if tlog.task:
-        logger.debug("TimeLog has a task: %s" % tlog.task)
-        parent = tlog.task.parent
-        if parent:
-            logger.debug("TImeLog.task has a parent: %s" % parent)
+    if not tlog.task:
+        logger.debug(f"TimeLog doesn't have a task yet: {tlog}")
+        return
 
-            logger.debug("old_duration: %s" % old_duration)
-            logger.debug("new_duration: %s" % new_duration)
+    logger.debug(f"TimeLog has a task: {tlog.task}")
+    parent = tlog.task.parent
+    if not parent:
+        logger.debug("TimeLog.task doesn't have a parent!")
+        return
 
-            old_total_seconds = old_duration.days * 86400 + old_duration.seconds
-            new_total_seconds = new_duration.days * 86400 + new_duration.seconds
+    logger.debug(f"TImeLog.task has a parent: {parent}")
 
-            parent.total_logged_seconds = (
-                parent.total_logged_seconds - old_total_seconds + new_total_seconds
-            )
-        else:
-            logger.debug("TimeLog.task doesn't have a parent:")
-    else:
-        logger.debug("TimeLog doesn't have a task yet: %s" % tlog)
+    logger.debug(f"old_duration: {old_duration}")
+    logger.debug(f"new_duration: {new_duration}")
+
+    old_total_seconds = old_duration.days * 86400 + old_duration.seconds
+    new_total_seconds = new_duration.days * 86400 + new_duration.seconds
+
+    parent.total_logged_seconds = (
+        parent.total_logged_seconds - old_total_seconds + new_total_seconds
+    )
 
 
 # *****************************************************************************
@@ -3595,30 +3484,34 @@ def __update_total_logged_seconds__(tlog, new_duration, old_duration):
 # *****************************************************************************
 @event.listens_for(Task.schedule_timing, "set", propagate=True)
 def update_parents_schedule_seconds_with_schedule_timing(
-    task, new_schedule_timing, old_schedule_timing, initiator
+    task: Task,
+    new_schedule_timing: int,
+    old_schedule_timing: int,
+    initiator: sqlalchemy.orm.attributes.AttributeEvent,
 ):
-    """Updates the parent tasks schedule_seconds attribute when the
-    schedule_timing attribute is updated on a task
+    """Update parent task's schedule_seconds attr if schedule_timing attr is updated.
 
-    :param task: The base task
-    :param new_schedule_timing: an integer showing the schedule_timing of the
-      task
-    :param old_schedule_timing: the old value of schedule_timing
-    :param initiator: not used
-    :return: None
+    Args:
+        task (Task): The base task.
+        new_schedule_timing (int): An integer showing the schedule_timing of the task.
+        old_schedule_timing (int): The old value of schedule_timing.
+        initiator (sqlchemy.orm.attribute.AttributeEvent): Currently not used.
     """
+    logger.debug(f"Received set event for new_schedule_timing in target: {task}")
     # update parents schedule_seconds attribute
-    if task.parent:
-        old_schedule_seconds = task.to_seconds(
-            old_schedule_timing, task.schedule_unit, task.schedule_model
-        )
-        new_schedule_seconds = task.to_seconds(
-            new_schedule_timing, task.schedule_unit, task.schedule_model
-        )
-        # remove the old and add the new one
-        task.parent.schedule_seconds = (
-            task.parent.schedule_seconds - old_schedule_seconds + new_schedule_seconds
-        )
+    if not task.parent:
+        return
+
+    old_schedule_seconds = task.to_seconds(
+        old_schedule_timing, task.schedule_unit, task.schedule_model
+    )
+    new_schedule_seconds = task.to_seconds(
+        new_schedule_timing, task.schedule_unit, task.schedule_model
+    )
+    # remove the old and add the new one
+    task.parent.schedule_seconds = (
+        task.parent.schedule_seconds - old_schedule_seconds + new_schedule_seconds
+    )
 
 
 # *****************************************************************************
@@ -3626,55 +3519,59 @@ def update_parents_schedule_seconds_with_schedule_timing(
 # *****************************************************************************
 @event.listens_for(Task.schedule_unit, "set", propagate=True)
 def update_parents_schedule_seconds_with_schedule_unit(
-    task, new_schedule_unit, old_schedule_unit, initiator
-):
-    """Updates the parent tasks schedule_seconds attribute when the
-    new_schedule_unit attribute is updated on a task
+    task: Task,
+    new_schedule_unit: str,
+    old_schedule_unit: str,
+    initiator: sqlalchemy.orm.attributes.AttributeEvent
+) -> None:
+    """Update parent task's schedule_seconds attr if new_schedule_unit attr is updated.
 
-    :param task: The base task that the schedule unit is updated of
-    :param new_schedule_unit: a string with a value of 'min', 'h', 'd', 'w',
-      'm' or 'y' showing the timing unit.
-    :param old_schedule_unit: the old value of new_schedule_unit
-    :param initiator: not used
-    :return: None
+    Args:
+        task (Task): The base task that the schedule unit is updated of.
+        new_schedule_unit (str): A string with a value of 'min', 'h', 'd', 'w', 'm' or
+            'y' showing the timing unit.
+        old_schedule_unit (str): The old value of new_schedule_unit.
+        initiator (sqlchemy.orm.attribute.AttributeEvent): Currently not used.
     """
+    logger.debug(f"Received set event for new_schedule_unit in target: {task}")
     # update parents schedule_seconds attribute
-    if task.parent:
-        schedule_timing = 0
-        if task.schedule_timing:
-            schedule_timing = task.schedule_timing
-        old_schedule_seconds = task.to_seconds(
-            schedule_timing, old_schedule_unit, task.schedule_model
-        )
-        new_schedule_seconds = task.to_seconds(
-            schedule_timing, new_schedule_unit, task.schedule_model
-        )
-        # remove the old and add the new one
-        parent_schedule_seconds = 0
-        if task.parent.schedule_seconds:
-            parent_schedule_seconds = task.parent.schedule_seconds
-        task.parent.schedule_seconds = (
-            parent_schedule_seconds - old_schedule_seconds + new_schedule_seconds
-        )
+    if not task.parent:
+        return
+
+    schedule_timing = 0
+    if task.schedule_timing:
+        schedule_timing = task.schedule_timing
+    old_schedule_seconds = task.to_seconds(
+        schedule_timing, old_schedule_unit, task.schedule_model
+    )
+    new_schedule_seconds = task.to_seconds(
+        schedule_timing, new_schedule_unit, task.schedule_model
+    )
+    # remove the old and add the new one
+    parent_schedule_seconds = 0
+    if task.parent.schedule_seconds:
+        parent_schedule_seconds = task.parent.schedule_seconds
+    task.parent.schedule_seconds = (
+        parent_schedule_seconds - old_schedule_seconds + new_schedule_seconds
+    )
 
 
 # *****************************************************************************
 # Task.children removed
 # *****************************************************************************
 @event.listens_for(Task.children, "remove", propagate=True)
-def update_task_date_values(task, removed_child, initiator):
-    """Runs when a child is removed from parent
+def update_task_date_values(
+    task: Task, removed_child: Task, initiator: sqlalchemy.orm.attributes.AttributeEvent
+) -> None:
+    """Run when a child is removed from parent.
 
-    :param task: The task that a child is removed from
-    :param removed_child: The removed child
-    :param initiator: not used
+    Args:
+        task (Task): The task that a child is removed from.
+        removed_child (Task): The removed child.
+        initiator (sqlchemy.orm.attribute.AttributeEvent): Currently not used.
     """
     # update start and end date values of the task
-    from stalker.db.session import DBSession
-
     with DBSession.no_autoflush:
-        import pytz
-
         start = datetime.datetime.max.replace(tzinfo=pytz.utc)
         end = datetime.datetime.min.replace(tzinfo=pytz.utc)
         for child in task.children:
@@ -3692,8 +3589,6 @@ def update_task_date_values(task, removed_child, initiator):
         else:
             # no child left
             # set it to now
-            import pytz
-
             task.start = datetime.datetime.now(pytz.utc)
             # this will also update end
 
@@ -3702,37 +3597,52 @@ def update_task_date_values(task, removed_child, initiator):
 # Task.depends set
 # *****************************************************************************
 @event.listens_for(Task.task_depends_to, "remove", propagate=True)
-def removed_a_dependency(task, task_dependent, initiator):
-    """Runs when a task is removed from another tasks dependency list.
+def removed_a_dependency(
+    task: Task,
+    task_dependent: Task,
+    initiator: sqlalchemy.orm.attributes.AttributeEvent,
+) -> None:
+    """Update statuses when a task is removed from another tasks dependency list.
 
-    :param task: The task that a dependent is being removed from.
-    :param task_dependent: The association object that has the relation.
-    :param initiator: not used
+    Args:
+        task (Task): The task that a dependent is being removed from.
+        task_dependent (Task): The association object that has the relation.
+        initiator (sqlalchemy.orm.attributes.AttributeEvent): Currently not used.
     """
     # update task status with dependencies
     task.update_status_with_dependent_statuses(removing=task_dependent.depends_to)
 
 
 @event.listens_for(TimeLog.__table__, "after_create")
-def add_exclude_constraint(table, connection, **kwargs):
-    """adds the PostgreSQL specific ExcludeConstraint"""
-    from sqlalchemy import DDL
-    from sqlalchemy.exc import ProgrammingError, InternalError
+def add_exclude_constraint(
+    table: sqlalchemy.sql.schema.Table,
+    connection: sqlalchemy.engine.base.Connection,
+    **kwargs
+) -> None:
+    """Add the PostgreSQL specific ExcludeConstraint.
 
-    if connection.engine.dialect.name == "postgresql":
-        logger.debug("add_exclude_constraint is Running!")
-        # try to create the extension first
-        create_extension = DDL("CREATE EXTENSION btree_gist;")
-        try:
-            logger.debug('running "btree_gist" extension creation!')
-            create_extension.execute(bind=connection)
-            logger.debug('successfully created "btree_gist" extension!')
-        except (ProgrammingError, InternalError) as e:
-            logger.debug("add_exclude_constraint: %s" % e)
+    Args:
+        table (sqlalchemy.sql.schema.Table): The table that this event is triggered on.
+        connection (sqlalchemy.engine.base.Connection): The connection instance.
+        **kwargs (Any): Extra kwargs that are passed to the event.
+    """
+    if connection.engine.dialect.name != "postgresql":
+        logger.debug("it is not a PostgreSQL database not creating Exclude Constraint")
+        return
 
-        # create the ts_to_box sql function
-        ts_to_box = DDL(
-            """CREATE FUNCTION ts_to_box(TIMESTAMPTZ, TIMESTAMPTZ)
+    logger.debug("add_exclude_constraint is Running!")
+    # try to create the extension first
+    create_extension = DDL("CREATE EXTENSION btree_gist;")
+    try:
+        logger.debug('running "btree_gist" extension creation!')
+        create_extension.execute(bind=connection)
+        logger.debug('successfully created "btree_gist" extension!')
+    except (ProgrammingError, InternalError) as e:
+        logger.debug(f"add_exclude_constraint: {e}")
+
+    # create the ts_to_box sql function
+    ts_to_box = DDL(
+        """CREATE FUNCTION ts_to_box(TIMESTAMPTZ, TIMESTAMPTZ)
 RETURNS BOX
 AS
 $$
@@ -3744,29 +3654,25 @@ $$
 LANGUAGE 'sql'
 IMMUTABLE;
 """
-        )
-        try:
-            logger.debug("creating ts_to_box function!")
-            ts_to_box.execute(bind=connection)
-            logger.debug("successfully created ts_to_box function")
-        except (ProgrammingError, InternalError) as e:
-            logger.debug("failed creating ts_to_box function!: %s" % e)
+    )
+    try:
+        logger.debug("creating ts_to_box function!")
+        ts_to_box.execute(bind=connection)
+        logger.debug("successfully created ts_to_box function")
+    except (ProgrammingError, InternalError) as e:
+        logger.debug(f"failed creating ts_to_box function!: {e}")
 
-        # create exclude constraint
-        exclude_constraint = DDL(
-            """ALTER TABLE "TimeLogs" ADD CONSTRAINT
-                overlapping_time_logs EXCLUDE USING GIST (
-                  resource_id WITH =,
-                  ts_to_box(start, "end") WITH &&
-                )"""
-        )
-        try:
-            logger.debug('running ExcludeConstraint for "TimeLogs" table creation!')
-            exclude_constraint.execute(bind=connection)
-            logger.debug('successfully created ExcludeConstraint for "TimeLogs" table!')
-        except (ProgrammingError, InternalError) as e:
-            logger.debug(
-                "failed creating ExcludeConstraint for TimeLogs table!: %s" % e
-            )
-    else:
-        logger.debug("it is not a PostgreSQL database not creating Exclude Constraint")
+    # create exclude constraint
+    exclude_constraint = DDL(
+        """ALTER TABLE "TimeLogs" ADD CONSTRAINT
+        overlapping_time_logs EXCLUDE USING GIST (
+            resource_id WITH =,
+            ts_to_box(start, "end") WITH &&
+        )"""
+    )
+    try:
+        logger.debug('running ExcludeConstraint for "TimeLogs" table creation!')
+        exclude_constraint.execute(bind=connection)
+        logger.debug('successfully created ExcludeConstraint for "TimeLogs" table!')
+    except (ProgrammingError, InternalError) as e:
+        logger.debug(f"failed creating ExcludeConstraint for TimeLogs table!: {e}")

@@ -2,8 +2,8 @@
 """The declarative base class is situated here."""
 from sqlalchemy.ext.declarative import declarative_base
 
-from stalker.log import get_logger
 from stalker.db.session import DBSession
+from stalker.log import get_logger
 from stalker.utils import make_plural
 
 logger = get_logger(__name__)

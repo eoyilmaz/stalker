@@ -113,10 +113,9 @@ def test_task_argument_is_skipped(setup_time_log_db_tests):
     with pytest.raises(TypeError) as cm:
         TimeLog(**kwargs)
 
-    assert (
-        str(cm.value)
-        == "TimeLog.task should be an instance of stalker.models.task.Task "
-        "not NoneType"
+    assert str(cm.value) == (
+        "TimeLog.task should be an instance of stalker.models.task.Task, "
+        "not NoneType: 'None'"
     )
 
 
@@ -131,10 +130,9 @@ def test_task_argument_is_none(setup_time_log_db_tests):
     with pytest.raises(TypeError) as cm:
         TimeLog(**kwargs)
 
-    assert (
-        str(cm.value)
-        == "TimeLog.task should be an instance of stalker.models.task.Task "
-        "not NoneType"
+    assert str(cm.value) == (
+        "TimeLog.task should be an instance of stalker.models.task.Task, "
+        "not NoneType: 'None'"
     )
 
 
@@ -144,10 +142,9 @@ def test_task_attribute_is_none(setup_time_log_db_tests):
     with pytest.raises(TypeError) as cm:
         data["test_time_log"].task = None
 
-    assert (
-        str(cm.value)
-        == "TimeLog.task should be an instance of stalker.models.task.Task "
-        "not NoneType"
+    assert str(cm.value) == (
+        "TimeLog.task should be an instance of stalker.models.task.Task, "
+        "not NoneType: 'None'"
     )
 
 
@@ -162,10 +159,9 @@ def test_task_argument_is_not_a_task_instance(setup_time_log_db_tests):
     with pytest.raises(TypeError) as cm:
         TimeLog(**kwargs)
 
-    assert (
-        str(cm.value)
-        == "TimeLog.task should be an instance of stalker.models.task.Task "
-        "not str"
+    assert str(cm.value) == (
+        "TimeLog.task should be an instance of stalker.models.task.Task, "
+        "not str: 'this is a task'"
     )
 
 
@@ -175,10 +171,9 @@ def test_task_attribute_is_not_a_task_instance(setup_time_log_db_tests):
     with pytest.raises(TypeError) as cm:
         data["test_time_log"].task = "this is a task"
 
-    assert (
-        str(cm.value)
-        == "TimeLog.task should be an instance of stalker.models.task.Task "
-        "not str"
+    assert str(cm.value) == (
+        "TimeLog.task should be an instance of stalker.models.task.Task, "
+        "not str: 'this is a task'"
     )
 
 
@@ -268,10 +263,9 @@ def test_resource_argument_is_not_a_user_instance(setup_time_log_db_tests):
     with pytest.raises(TypeError) as cm:
         TimeLog(**kwargs)
 
-    assert (
-        str(cm.value)
-        == "TimeLog.resource should be a stalker.models.auth.User instance "
-        "not str"
+    assert str(cm.value) == (
+        "TimeLog.resource should be a stalker.models.auth.User instance, "
+        "not str: 'This is a resource'"
     )
 
 
@@ -281,10 +275,9 @@ def test_resource_attribute_is_not_a_user_instance(setup_time_log_db_tests):
     with pytest.raises(TypeError) as cm:
         data["test_time_log"].resource = "this is a resource"
 
-    assert (
-        str(cm.value)
-        == "TimeLog.resource should be a stalker.models.auth.User instance "
-        "not str"
+    assert str(cm.value) == (
+        "TimeLog.resource should be a stalker.models.auth.User instance, "
+        "not str: 'this is a resource'"
     )
 
 

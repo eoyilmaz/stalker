@@ -75,9 +75,9 @@ def test_user_argument_is_not_a_user_instance(setup_vacation_tests):
     with pytest.raises(TypeError) as cm:
         Vacation(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "Vacation.user should be an instance of "
-        "stalker.models.auth.User, not str"
+    assert str(cm.value) == (
+        "Vacation.user should be an instance of stalker.models.auth.User, "
+        "not str: 'not a user instance'"
     )
 
 
@@ -87,9 +87,9 @@ def test_user_attribute_is_not_a_user_instance(setup_vacation_tests):
     with pytest.raises(TypeError) as cm:
         data["test_vacation"].user = "not a user instance"
 
-    assert (
-        str(cm.value) == "Vacation.user should be an instance of "
-        "stalker.models.auth.User, not str"
+    assert str(cm.value) == (
+        "Vacation.user should be an instance of stalker.models.auth.User, "
+        "not str: 'not a user instance'"
     )
 
 

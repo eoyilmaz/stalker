@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
+"""Scene related classes and functions are situated here."""
 
-from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy import Column, ForeignKey, Integer
 from sqlalchemy.orm import relationship, validates
 
+from stalker.log import get_logger
 from stalker.models.entity import Entity
 from stalker.models.mixins import CodeMixin, ProjectMixin
-
-from stalker.log import get_logger
 
 logger = get_logger(__name__)
 
@@ -54,18 +54,36 @@ class Scene(Entity, ProjectMixin, CodeMixin):
 
     @validates("shots")
     def _validate_shots(self, key, shot):
-        """validates the given shot value"""
+        """Validate the given shot value.
+
+        Args:
+            key (str): The name of the validated column.
+            shot (Shot): The shot instance.
+
+        Raises:
+            TypeError: If the shot is not a Shot instance.
+
+        Returns:
+            Shot: Return the validated Shot instance.
+        """
         from stalker.models.shot import Shot
 
         if not isinstance(shot, Shot):
             raise TypeError(
-                "%s.shots needs to be all stalker.models.shot.Shot instances, "
-                "not %s" % (self.__class__.__name__, shot.__class__.__name__)
+                f"{self.__class__.__name__}.shots needs to be all "
+                f"stalker.models.shot.Shot instances, not {shot.__class__.__name__}"
             )
         return shot
 
     def __eq__(self, other):
-        """the equality operator"""
+        """Check the equality with the other object.
+
+        Args:
+            other (Any): The other object.
+
+        Returns:
+            bool: True if the other object is equal to this object.
+        """
         return isinstance(other, Scene) and super(Scene, self).__eq__(other)
 
     def __hash__(self):

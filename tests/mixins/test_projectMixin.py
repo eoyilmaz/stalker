@@ -142,7 +142,7 @@ def test_project_argument_is_not_a_project_instance(setup_project_mixin_tester):
 
     assert (
         str(cm.value) == "ProjMixClass.project should be an instance of "
-        "stalker.models.project.Project instance not str"
+        "stalker.models.project.Project instance, not str"
     )
 
 
@@ -154,7 +154,7 @@ def test_project_attribute_is_not_a_project_instance(setup_project_mixin_tester)
 
     assert (
         str(cm.value) == "ProjMixClass.project should be an instance of "
-        "stalker.models.project.Project instance not str"
+        "stalker.models.project.Project instance, not str"
     )
 
 

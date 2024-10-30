@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
+"""Type realted functions and classes are situated here."""
 
-from sqlalchemy import Column, Integer, ForeignKey, String, Boolean
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 
 from stalker.db.declarative import Base
-from stalker.models.entity import Entity
-from stalker.models.mixins import TargetEntityTypeMixin, CodeMixin
-
 from stalker.log import get_logger
+from stalker.models.entity import Entity
+from stalker.models.mixins import CodeMixin, TargetEntityTypeMixin
 
 logger = get_logger(__name__)
 
@@ -92,7 +92,7 @@ class Type(Entity, TargetEntityTypeMixin, CodeMixin):
 
 
 class EntityType(Base):
-    """A simple class just to hold the registered class names in Stalker"""
+    """A simple class just to hold the registered class names in Stalker."""
 
     __tablename__ = "EntityTypes"
     __table_args__ = {"extend_existing": True}

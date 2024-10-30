@@ -1,27 +1,32 @@
 # -*- coding: utf-8 -*-
+"""Version related functions and classes are situated here."""
 
 import os
-
 import re
+from typing import Generator, List, Union
+
 import jinja2
+
 from six import string_types
 
-from sqlalchemy import Table, Column, Integer, ForeignKey, String, Boolean
-from sqlalchemy.exc import UnboundExecutionError, OperationalError
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Table
+from sqlalchemy.exc import OperationalError, UnboundExecutionError
 from sqlalchemy.orm import relationship, validates
 
 from stalker.db.declarative import Base
-from stalker.models.link import Link
-
-from stalker import DAGMixin
-
+from stalker.db.session import DBSession
 from stalker.log import get_logger
+from stalker.models.link import Link
+from stalker.models.mixins import DAGMixin
+from stalker.models.task import Task
+from stalker.utils import walk_hierarchy
+
 
 logger = get_logger(__name__)
 
 
 class Version(Link, DAGMixin):
-    """Holds information about the created versions (files) for a class:`.Task`
+    """Holds information about the created versions (files) for a class:`.Task`.
 
     A :class:`.Version` holds information about the
     created files related to a class:`.Task`. So if one
@@ -56,38 +61,27 @@ class Version(Link, DAGMixin):
 
            $REPO{{project.repository.id}}/{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}
 
-    :param str take_name: A short string holding the current take name. Takes
-      in Stalker are used solely for grouping individual versions together.
-      Versions with the same ``take_name`` (of the same Task) are numbered
-      together. It can be any alphanumeric value (a-zA-Z0-9\_). The default is
-      the string "Main". When skipped it will use the default value. It can not
-      start with a number. It can not have white spaces.
-
-    :param inputs: A list o :class:`.Link` instances, holding the inputs of the
-      current version. It could be a texture for a Maya file or an image
-      sequence for Nuke, or anything those you can think as the input for the
-      current Version.
-
-    :type inputs: list of :class:`.Link`
-
-    :param outputs: A list of :class:`.Link` instances, holding the outputs of
-      the current version. It could be the rendered image sequences out of Maya
-      or Nuke, or it can be a Targa file which is the output of a Photoshop
-      file (\*.psd), or anything that you can think as the output which is
-      created out of this Version.
-
-    :type outputs: list of :class:`.Link` instances
-
-    :param task: A :class:`.Task` instance showing the owner of this Version.
-
-    :type task: :class:`.Task`
-
-    :param parent: A :class:`.Version` instance which is the parent of this
-      Version. It is mainly used to see which Version is derived from which in
-      the Version history of a :class:`.Task`.
-
-    :type parent: :class:`.Version`
-    """
+    Args:
+        take_name (str): A short string holding the current take name. Takes in Stalker
+            are used solely for grouping individual versions together. Versions with the
+            same ``take_name`` (of the same Task) are numbered together. It can be any
+            alphanumeric value (a-zA-Z0-9_). The default is the string "Main". When
+            skipped it will use the default value. It can not start with a number. It
+            can not have white spaces.
+        inputs (List[Link]): A list o :class:`.Link` instances, holding the inputs of
+            the current version. It could be a texture for a Maya file or an image
+            sequence for Nuke, or anything those you can think as the input for the
+            current Version.
+        outputs (List[Link]): A list of :class:`.Link` instances, holding the outputs of
+            the current version. It could be the rendered image sequences out of Maya or
+            Nuke, or it can be a Targa file which is the output of a Photoshop file, or
+            anything that you can think as the output which is created out of this
+            Version.
+        task (Task): A :class:`.Task` instance showing the owner of this Version.
+        parent (Version): A :class:`.Version` instance which is the parent of this
+            Version. It is mainly used to see which Version is derived from which in the
+            Version history of a :class:`.Task`.
+    """  # noqa: B950
 
     from stalker import defaults
 
@@ -186,22 +180,31 @@ class Version(Link, DAGMixin):
 
         self.created_with = created_with
 
-    def __repr__(self):
-        """the representation of the Version"""
+    def __repr__(self) -> str:
+        """Return the str representation of the Version.
+
+        Returns:
+            str: The string representation of this Version instance.
+        """
         return (
-            "<%(project_code)s_%(nice_name)s_%(version_number)s "
-            "(%(entity_type)s)>"
-            % {
-                "project_code": self.task.project.code,
-                "nice_name": self.nice_name,
-                "version_number": "v%s" % ("%s" % self.version_number).zfill(3),
-                "entity_type": self.entity_type,
-            }
+            "<{project_code}_{nice_name}_v{version_number:03d} ({entity_type})>".format(
+                project_code=self.task.project.code,
+                nice_name=self.nice_name,
+                version_number=self.version_number,
+                entity_type=self.entity_type,
+            )
         )
 
     @classmethod
-    def _format_take_name(cls, take_name):
-        """formats the given take_name value"""
+    def _format_take_name(cls, take_name: str) -> str:
+        """Format the given take_name value.
+
+        Args:
+            take_name (str): The take name value to be formatted.
+
+        Returns:
+            str: The formatted take name value.
+        """
         # remove unnecessary characters
         take_name = re.sub(r"([^a-zA-Z0-9\s_\-@]+)", r"", take_name).strip()
 
@@ -217,37 +220,45 @@ class Version(Link, DAGMixin):
         return take_name
 
     @validates("take_name")
-    def _validate_take_name(self, key, take_name):
-        """validates the given take_name value"""
+    def _validate_take_name(self, key: str, take_name: str) -> str:
+        """Validate the given take_name value.
+
+        Args:
+            key (str): The name of the validated column.
+            take_name (str): The take name value to be validated.
+
+        Raises:
+            TypeError: If the take name value is not a string.
+            ValueError: If the take name value is an empty string.
+
+        Returns:
+            str: The validated take name value.
+        """
         if not isinstance(take_name, string_types):
             raise TypeError(
-                "%(class)s.take_name should be a string, not "
-                "%(take_name_class)s"
-                % {
-                    "class": self.__class__.__name__,
-                    "take_name_class": take_name.__class__.__name__,
-                }
+                "{}.take_name should be a string, not {}: '{}'".format(
+                    self.__class__.__name__, take_name.__class__.__name__, take_name
+                )
             )
 
         take_name = self._format_take_name(take_name)
 
         if take_name == "":
             raise ValueError(
-                "%s.take_name can not be an empty string" % self.__class__.__name__
+                f"{self.__class__.__name__}.take_name can not be an empty string"
             )
 
         return take_name
 
     @property
-    def latest_version(self):
-        """returns the Version instance with the highest version number in this
-        series.
+    def latest_version(self) -> "Version":
+        """Return the Version instance with the highest version number in this series.
 
-        :returns: :class:`.Version` instance
+        Returns:
+            Version: The :class:`.Version` instance with the highest version number in
+                this version series.
         """
         try:
-            from stalker.db.session import DBSession
-
             with DBSession.no_autoflush:
                 last_version = (
                     Version.query.filter(Version.task == self.task)
@@ -271,9 +282,11 @@ class Version(Link, DAGMixin):
         return last_version
 
     @property
-    def max_version_number(self):
-        """returns the maximum version number for this Version
-        :return: int
+    def max_version_number(self) -> int:
+        """Return the maximum version number for this Version.
+
+        Returns:
+            int: The maximum version number for this Version.
         """
         latest_version = self.latest_version
 
@@ -283,8 +296,16 @@ class Version(Link, DAGMixin):
         return 0
 
     @validates("version_number")
-    def _validate_version_number(self, key, version_number):
-        """validates the given version_number value"""
+    def _validate_version_number(self, key: str, version_number: int) -> int:
+        """Validate the given version_number value.
+
+        Args:
+            key (str): The name of the validated column.
+            version_number (int): The version number to be validated.
+
+        Returns:
+            int: The validated version number.
+        """
         # get the latest version
         latest_version = self.latest_version
 
@@ -292,73 +313,107 @@ class Version(Link, DAGMixin):
         if latest_version:
             max_version_number = latest_version.version_number
 
-        logger.debug("max_version_number: %s" % max_version_number)
-        logger.debug("given version_number: %s" % version_number)
+        logger.debug(f"max_version_number: {max_version_number}")
+        logger.debug(f"given version_number: {version_number}")
 
         if version_number is None or version_number <= max_version_number:
             if latest_version == self:
                 version_number = latest_version.version_number
                 logger.debug(
                     "the version is the latest version in database, the "
-                    "number will not be changed from %s" % version_number
+                    f"number will not be changed from {version_number}"
                 )
             else:
                 version_number = max_version_number + 1
                 logger.debug(
                     "given Version.version_number is too low,"
-                    "max version_number in the database is %s, setting the "
-                    "current version_number to %s"
-                    % (max_version_number, version_number)
+                    f"max version_number in the database is {max_version_number}, "
+                    f"setting the current version_number to {version_number}"
                 )
 
         return version_number
 
     @validates("task")
-    def _validate_task(self, key, task):
-        """validates the given task value"""
-        if task is None:
-            raise TypeError("%s.task can not be None" % self.__class__.__name__)
+    def _validate_task(self, key, task) -> Task:
+        """Validate the given task value.
 
-        from stalker.models.task import Task
+        Args:
+            key (str): The name of the validated column.
+            task (Task): The task value to be validated.
+
+        Raises:
+            TypeError: If the task value is not a :class:`.Task` instance.
+
+        Returns:
+            Task: The validated :class:`.Task` instance.
+        """
+        if task is None:
+            raise TypeError("{}.task can not be None".format(self.__class__.__name__))
 
         if not isinstance(task, Task):
             raise TypeError(
-                "%s.task should be a stalker.models.task.Task instance not %s"
-                % (self.__class__.__name__, task.__class__.__name__)
+                "{}.task should be a stalker.models.task.Task instance, "
+                "not {}: '{}'".format(
+                    self.__class__.__name__, task.__class__.__name__, task
+                )
             )
 
         return task
 
     @validates("inputs")
     def _validate_inputs(self, key, input_):
-        """validates the given input value"""
-        from stalker.models.link import Link
+        """Validate the given input value.
 
+        Args:
+            key (str): The name of the validated column.
+            input_ (Link): The input value to be validated.
+
+        Raises:
+            TypeError: If the input is not a :class:`.Link` instance.
+
+        Returns:
+            Link: The validated input value.
+        """
         if not isinstance(input_, Link):
             raise TypeError(
-                "All elements in %s.inputs should be all "
-                "stalker.models.link.Link instances not %s"
-                % (self.__class__.__name__, input_.__class__.__name__)
+                "All elements in {}.inputs should be all "
+                "stalker.models.link.Link instances, not {}: '{}'".format(
+                    self.__class__.__name__, input_.__class__.__name__, input_
+                )
             )
 
         return input_
 
     @validates("outputs")
-    def _validate_outputs(self, key, output):
-        """validates the given output"""
-        from stalker.models.link import Link
+    def _validate_outputs(self, key, output) -> Link:
+        """Validate the given output value.
 
+        Args:
+            key (str): The name of the validated column.
+            output (Link): The output value to be validated.
+
+        Raises:
+            TypeError: If the output is not a :class:`.Link` instance.
+
+        Returns:
+            Link: The validated output value.
+        """
         if not isinstance(output, Link):
             raise TypeError(
-                "All elements in %s.outputs should be all "
-                "stalker.models.link.Link instances not %s"
-                % (self.__class__.__name__, output.__class__.__name__)
+                "All elements in {}.outputs should be all "
+                "stalker.models.link.Link instances, not {}: '{}'".format(
+                    self.__class__.__name__, output.__class__.__name__, output
+                )
             )
 
         return output
 
-    def _template_variables(self):
-        """variables used in rendering the filename template"""
+    def _template_variables(self) -> dict:
+        """Return the variables used in rendering the filename template.
+
+        Returns:
+            dict: The template variables.
+        """
         from stalker import Shot
 
         sequences = []
@@ -372,7 +427,7 @@ class Version(Link, DAGMixin):
         parent_tasks = task.parents
         parent_tasks.append(task)
 
-        kwargs = {
+        return {
             "project": self.task.project,
             "sequences": sequences,
             "scenes": scenes,
@@ -385,10 +440,14 @@ class Version(Link, DAGMixin):
             "type": self.type,
             "extension": self.extension,
         }
-        return kwargs
 
-    def update_paths(self):
-        """updates the path variables"""
+    def update_paths(self) -> None:
+        """Update the path variables.
+
+        Raises:
+            RuntimeError: If no Version related FilenameTemplate is found in the related
+                Project.structure.
+        """
         kwargs = self._template_variables()
 
         # get a suitable FilenameTemplate
@@ -404,67 +463,62 @@ class Version(Link, DAGMixin):
         if not vers_template:
             raise RuntimeError(
                 "There are no suitable FilenameTemplate "
-                "(target_entity_type == '%(entity_type)s') defined in the "
-                "Structure of the related Project instance, please create a "
-                "new stalker.models.template.FilenameTemplate instance with "
-                "its 'target_entity_type' attribute is set to "
-                "'%(entity_type)s' and assign it to the `templates` attribute "
-                "of the structure of the project"
-                % {"entity_type": self.task.entity_type}
+                "(target_entity_type == '{entity_type}') defined in the Structure of "
+                "the related Project instance, please create a new "
+                "stalker.models.template.FilenameTemplate instance with its "
+                "'target_entity_type' attribute is set to '{entity_type}' and assign "
+                "it to the `templates` attribute of the structure of the "
+                "project".format(entity_type=self.task.entity_type)
             )
 
         temp_filename = jinja2.Template(vers_template.filename).render(**kwargs)
-
         if not isinstance(temp_filename, string_types):
-            # it is
-            # byte for python3
-            # or
-            # unicode for python2
             temp_filename = temp_filename.encode("utf-8")
 
         temp_path = jinja2.Template(vers_template.path).render(**kwargs)
-
         if not isinstance(temp_path, string_types):
-            # it is
-            # byte for python3
-            # or
-            # unicode for python2
             temp_path = temp_path.encode("utf-8")
 
         self.filename = temp_filename
         self.path = temp_path
 
     @property
-    def absolute_full_path(self):
-        """Returns the absolute full path of this version including the
-        repository path of the related project
+    def absolute_full_path(self) -> str:
+        """Return the absolute full path of this version.
 
-        :return: str
+        This absolute full path includes the repository path of the related project.
+
+        Returns:
+            str: The absolute full path of this Version instance.
         """
         return os.path.normpath(os.path.expandvars(self.full_path)).replace("\\", "/")
 
     @property
-    def absolute_path(self):
-        """Returns the absolute path.
+    def absolute_path(self) -> str:
+        """Return the absolute path.
 
-        Due to the changes in the project.repository
-
-        :return: str
+        Returns:
+            str: The absolute path.
         """
         return os.path.normpath(os.path.expandvars(self.path)).replace("\\", "/")
 
-    def is_latest_published_version(self):
-        """returns True if this is the latest published Version False otherwise"""
+    def is_latest_published_version(self) -> bool:
+        """Return True if this is the latest published Version False otherwise.
+
+        Returns:
+            bool: True if this is the latest published Version, False otherwise.
+        """
         if not self.is_published:
             return False
 
         return self == self.latest_published_version
 
     @property
-    def latest_published_version(self):
-        """Returns the last published version.
+    def latest_published_version(self) -> "Version":
+        """Return the last published version.
 
-        :return: :class:`.Version`
+        Returns:
+            Version: The last published Version instance.
         """
         return (
             Version.query.filter_by(task=self.task)
@@ -475,14 +529,30 @@ class Version(Link, DAGMixin):
         )
 
     @validates("created_with")
-    def _validate_created_with(self, key, created_with):
-        """validates the given created_with value"""
-        if created_with is not None:
-            if not isinstance(created_with, string_types):
-                raise TypeError(
-                    "%s.created_with should be an instance of str, not %s"
-                    % (self.__class__.__name__, created_with.__class__.__name__)
+    def _validate_created_with(
+        self, key: str, created_with: Union[None, str]
+    ) -> Union[None, str]:
+        """Validate the given created_with value.
+
+        Args:
+            key (str): The name of the validated column.
+            created_with (str): The name of the DCC used to create this Version
+                instance.
+
+        Raises:
+            TypeError: If the given created_with attribute is not None and not a string.
+
+        Returns:
+            Union[None, str]: The validated created with value.
+        """
+        if created_with is not None and not isinstance(created_with, string_types):
+            raise TypeError(
+                "{}.created_with should be an instance of str, not {}: '{}'".format(
+                    self.__class__.__name__,
+                    created_with.__class__.__name__,
+                    created_with
                 )
+            )
         return created_with
 
     def __eq__(self, other):
@@ -515,9 +585,11 @@ class Version(Link, DAGMixin):
         return super(Version, self).__hash__()
 
     @property
-    def naming_parents(self):
-        """returns a list of parents which start from the nearest Asset, Shot
-        or Sequence
+    def naming_parents(self) -> List[Task]:
+        """Return a list of parents starting from the nearest Asset, Shot or Sequence.
+
+        Returns:
+            List[Task]: List of naming parents.
         """
         # find a Asset, Shot or Sequence, and store it as the significant
         # parent, and name the task starting from that entity
@@ -543,20 +615,29 @@ class Version(Link, DAGMixin):
         return naming_parents
 
     @property
-    def nice_name(self):
-        """the overridden nice name for Version class"""
+    def nice_name(self) -> str:
+        """Override the nice name method for Version class.
+
+        Returns:
+            str: The nice name.
+        """
         naming_parents = self.naming_parents
         return self._format_nice_name(
-            "_".join(map(lambda x: x.nice_name, naming_parents)) + "_" + self.take_name
+            "{}_{}".format(
+                "_".join(map(lambda x: x.nice_name, naming_parents)),
+                self.take_name
+            )
         )
 
-    def walk_inputs(self, method=0):
-        """Walks the inputs of this version
+    def walk_inputs(self, method: int = 0) -> Generator[None, "Version", None]:
+        """Walk the inputs of this version instance.
 
-        :param method: The walk method, 0: Depth First, 1: Breadth First
+        Args:
+            method (int): The walk method, 0=Depth First, 1=Breadth First.
+
+        Yields:
+            Version: Yield the Version instances.
         """
-        from stalker.utils import walk_hierarchy
-
         for v in walk_hierarchy(self, "inputs", method=method):
             yield v
 

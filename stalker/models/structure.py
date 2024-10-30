@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
+"""Structure related functions and classes are situated here."""
 from six import string_types
-from sqlalchemy import Table, Column, Integer, ForeignKey, Text
+
+from sqlalchemy import Column, ForeignKey, Integer, Table, Text
 from sqlalchemy.orm import relationship, validates
 
 from stalker.db.declarative import Base
-from stalker.models.entity import Entity
-
 from stalker.log import get_logger
+from stalker.models.entity import Entity
+from stalker.models.template import FilenameTemplate
 
 logger = get_logger(__name__)
 
@@ -151,28 +153,54 @@ class Structure(Entity):
 
     @validates("custom_template")
     def _validate_custom_template(self, key, custom_template_in):
-        """validates the given custom_template value"""
+        """Validate the given custom_template value.
+
+        Args:
+            key (str): The name of the validated column.
+            custom_template_in (str): The custom template value to be validated.
+
+        Raises:
+            TypeError: If the given custom_template_in value is not a str.
+
+        Returns:
+            str: The validated `custom_template_in` value.
+        """
         if custom_template_in is None:
             custom_template_in = ""
 
         if not isinstance(custom_template_in, string_types):
             raise TypeError(
-                "%s.custom_template should be a string not %s"
-                % (self.__class__.__name__, custom_template_in.__class__.__name__)
+                "{}.custom_template should be a string, not {}: '{}'".format(
+                    self.__class__.__name__,
+                    custom_template_in.__class__.__name__,
+                    custom_template_in
+                )
             )
         return custom_template_in
 
     @validates("templates")
     def _validate_templates(self, key, template_in):
-        """validates the given template value"""
+        """Validate the given template value.
 
-        from stalker.models.template import FilenameTemplate
+        Args:
+            key (str): The name of the validated column.
+            template_in (FilenameTemplate): The validated template_in value.
 
+        Raises:
+            TypeError: If the given template_in value is not a FilenameTemplate
+                instance.
+
+        Returns:
+            FilenameTemplate: Return the validated template_in value.
+        """
         if not isinstance(template_in, FilenameTemplate):
             raise TypeError(
-                "All the elements in the %s.templates should be a "
-                "stalker.models.template.FilenameTemplate instance not %s"
-                % (self.__class__.__name__, template_in.__class__.__name__)
+                "All the elements in the {cls}.templates should be a "
+                "stalker.models.template.FilenameTemplate instance not "
+                "{template}".format(
+                    cls=self.__class__.__name__,
+                    template=template_in.__class__.__name__
+                )
             )
 
         return template_in

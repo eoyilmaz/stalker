@@ -1,20 +1,25 @@
 # -*- coding: utf-8 -*-
-
+"""Ticket related functions and classes are situated here."""
 import uuid
+from typing import Union
 
 from six import string_types
-from sqlalchemy.exc import UnboundExecutionError
-from sqlalchemy.orm import synonym, relationship
-from sqlalchemy.orm.mapper import validates
+
 from sqlalchemy import Column, Integer, String, Text
+from sqlalchemy.exc import UnboundExecutionError
+from sqlalchemy.orm import relationship, synonym
+from sqlalchemy.orm.mapper import validates
 from sqlalchemy.schema import ForeignKey, Table
 from sqlalchemy.types import Enum
 
 from stalker.db.declarative import Base
+from stalker.db.session import DBSession
+from stalker.exceptions import CircularDependencyError
+from stalker.log import get_logger
+from stalker.models.auth import User
 from stalker.models.entity import Entity, SimpleEntity
 from stalker.models.mixins import StatusMixin
-
-from stalker.log import get_logger
+from stalker.models.project import Project
 
 logger = get_logger(__name__)
 
@@ -42,39 +47,35 @@ class Ticket(Entity, StatusMixin):
     ``resolve``, ``reopen``, ``reassign``, and five statuses available ``New``,
     ``Assigned``, ``Accepted``, ``Reopened``, ``Closed``.
 
-    :param project: The Project that this Ticket is assigned to. A Ticket in
-        Stalker must be assigned to a Project. ``project`` argument can not be
-        skipped or can not be None.
+    Args:
+        project (Project): The Project that this Ticket is assigned to. A Ticket in
+            Stalker must be assigned to a Project. ``project`` argument can not be
+            skipped or can not be None.
+        summary (str): A string which contains the title or a short
+            description of this Ticket.
+        priority (str): The priority of the Ticket which is an enum value.
+            Possible values are:
 
-    :type project: :class:`.Project`
+            +--------------+-------------------------------------------------+
+            | 0 / TRIVIAL  | defect with little or no impact / cosmetic      |
+            |              | enhancement                                     |
+            +--------------+-------------------------------------------------+
+            | 1 / MINOR    | defect with minor impact / small enhancement    |
+            +--------------+-------------------------------------------------+
+            | 2 / MAJOR    | defect with major impact / big enhancement      |
+            +--------------+-------------------------------------------------+
+            | 3 / CRITICAL | severe loss of data due to the defect or highly |
+            |              | needed enhancement                              |
+            +--------------+-------------------------------------------------+
+            | 4 / BLOCKER  | basic functionality is not available until this |
+            |              | is fixed                                        |
+            +--------------+-------------------------------------------------+
 
-    :param str summary: A string which contains the title or a short
-        description of this Ticket.
+        reported_by (User): A :class:`.User` instance who created this Ticket. It is
+            basically a synonym for the :attr:`.SimpleEntity.created_by` attribute.
 
-    :param enum priority: The priority of the Ticket which is an enum value.
-        Possible values are:
-
-          +--------------+-------------------------------------------------+
-          | 0 / TRIVIAL  | defect with little or no impact / cosmetic      |
-          |              | enhancement                                     |
-          +--------------+-------------------------------------------------+
-          | 1 / MINOR    | defect with minor impact / small enhancement    |
-          +--------------+-------------------------------------------------+
-          | 2 / MAJOR    | defect with major impact / big enhancement      |
-          +--------------+-------------------------------------------------+
-          | 3 / CRITICAL | severe loss of data due to the defect or highly |
-          |              | needed enhancement                              |
-          +--------------+-------------------------------------------------+
-          | 4 / BLOCKER  | basic functionality is not available until this |
-          |              | is fixed                                        |
-          +--------------+-------------------------------------------------+
-
-    :param reported_by: An instance of :class:`.User` who created this Ticket.
-      It is basically a synonym for the :attr:`.SimpleEntity.created_by`
-      attribute.
-
-    Changing the :class:`.Ticket`\ .\ :attr`.Ticket.status` will create a new
-    :class:`.TicketLog` instance showing the previous operation.
+    Changing the :attr`.Ticket.status` will create a new :class:`.TicketLog` instance
+    showing the previous operation.
 
     Even though Tickets needs statuses they don't need to be supplied a
     :class:`.StatusList` nor :class:`.Status` for the Tickets. It will be
@@ -109,7 +110,7 @@ class Ticket(Entity, StatusMixin):
 
     The :attr:`.Ticket.name` is automatically generated by using the
     ``stalker.config.Config.ticket_label`` attribute and
-    :attr:`.Ticket.ticket_number`\ . So if defaults are used the first ticket
+    :attr:`.Ticket.ticket_number` . So if defaults are used the first ticket
     name will be "Ticket#1" and the second "Ticket#2" and so on. For every
     project the number will restart from 1.
 
@@ -218,7 +219,7 @@ class Ticket(Entity, StatusMixin):
         self._number = self._generate_ticket_number()
         from stalker import defaults
 
-        kwargs["name"] = "%s #%i" % (defaults.ticket_label, self.number)
+        kwargs["name"] = "{:s} #{:d}".format(defaults.ticket_label, self.number)
 
         super(Ticket, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)
@@ -231,8 +232,12 @@ class Ticket(Entity, StatusMixin):
         self.links = links
         self.summary = summary
 
-    def _number_getter(self):
-        """returns the number attribute"""
+    def _number_getter(self) -> int:
+        """Return the number attribute value.
+
+        Returns:
+            int: The number attribute value.
+        """
         return self._number
 
     number = synonym(
@@ -243,21 +248,24 @@ class Ticket(Entity, StatusMixin):
     )
 
     def _project_getter(self):
-        """returns the project attribute"""
+        """Return the project attribute value.
+
+        Returns:
+            Project: The project attribute value.
+        """
         return self._project
 
     project = synonym("_project", descriptor=property(_project_getter))
 
     @classmethod
-    def _maximum_number(cls):
-        """returns the maximum available number from the database
+    def _maximum_number(cls) -> int:
+        """Return the maximum available number from the database.
 
-        :return: integer
+        Returns:
+            int: The maximum ticket number.
         """
         try:
             # do your query
-            from stalker.db.session import DBSession
-
             with DBSession.no_autoflush:
                 max_ticket = Ticket.query.order_by(Ticket.number.desc()).first()
         except UnboundExecutionError:
@@ -265,66 +273,113 @@ class Ticket(Entity, StatusMixin):
 
         return max_ticket.number if max_ticket is not None else 0
 
-    def _generate_ticket_number(self):
-        """auto generates a number for the ticket
+    def _generate_ticket_number(self) -> int:
+        """Auto generate a number for the ticket.
 
-        :return: integer
+        Returns:
+            int: The auto generated ticket number.
         """
         # TODO: try to make it atomic
         return self._maximum_number() + 1
 
     @validates("related_tickets")
     def _validate_related_tickets(self, key, related_ticket):
-        """validates the given related_ticket attribute"""
+        """Validate the given related_ticket value.
+
+        Args:
+            key (str): The name of the validated column.
+            related_ticket (Ticket): The related_ticket value to be validated.
+
+        Raises:
+            TypeError: If the related_ticket value is not a Ticket instance.
+            CircularDependencyError: If the related_ticket value is the same with this
+                Ticket.
+
+        Returns:
+            Ticket: The validated related_ticket value.
+        """
         if not isinstance(related_ticket, Ticket):
             raise TypeError(
-                "%s.related_ticket attribute should be a list of other "
-                "stalker.models.ticket.Ticket instances not %s"
-                % (self.__class__.__name__, related_ticket.__class__.__name__)
+                "{}.related_ticket attribute should be a list of other "
+                "stalker.models.ticket.Ticket instances, not {}: '{}'".format(
+                    self.__class__.__name__,
+                    related_ticket.__class__.__name__,
+                    related_ticket,
+                )
             )
 
         if related_ticket is self:
-            raise ValueError(
-                "%s.related_ticket attribute can not have itself in the list"
-                % self.__class__.__name__
+            raise CircularDependencyError(
+                "{}.related_ticket attribute can not have itself in the list".format(
+                    self.__class__.__name__
+                )
             )
 
         return related_ticket
 
     @validates("_project")
-    def _validate_project(self, key, project):
-        """validates the given project instance"""
-        from stalker import Project
+    def _validate_project(
+        self, key: str, project: Union[None, Project]
+    ) -> Union[None, Project]:
+        """Validate the given project value.
 
+        Args:
+            key (str): The name of the validated column.
+            project (Union[None, Project]): The project value to be validated.
+
+        Raises:
+            TypeError: If the given project is not a Project instance.
+
+        Returns:
+            Union[None, Project]: The validated project value.
+        """
         if project is None or not isinstance(project, Project):
             raise TypeError(
-                "%s.project should be an instance of "
-                "stalker.models.project.Project, not %s"
-                % (self.__class__.__name__, project.__class__.__name__)
+                "{}.project should be an instance of "
+                "stalker.models.project.Project, not {}: '{}'".format(
+                    self.__class__.__name__, project.__class__.__name__, project
+                )
             )
 
         return project
 
     @validates("summary")
-    def _validate_summary(self, key, summary):
-        """validates the given summary value"""
+    def _validate_summary(self, key: str, summary: Union[None, str]) -> str:
+        """Validate the given summary value.
+
+        Args:
+            key (str): The name of the validated column.
+            summary (Union[None, str]): The summary value to be validated.
+
+        Raises:
+            TypeError: If the given summary is not None and not a string.
+
+        Returns:
+            str: The validated summary value.
+        """
         if summary is None:
             summary = ""
 
         if not isinstance(summary, string_types):
             raise TypeError(
-                "%s.summary should be an instance of str, not %s"
-                % (self.__class__.__name__, summary.__class__.__name__)
+                "{}.summary should be an instance of str, not {}: '{}'".format(
+                    self.__class__.__name__, summary.__class__.__name__, summary
+                )
             )
         return summary
 
-    def __action__(self, action, created_by, action_arg=None):
-        """updates the ticket status and creates a ticket log according to the
-        Ticket.__available_actions__ dictionary
+    def __action__(self, action, created_by, action_arg=None) -> "TicketLog":
+        """Update the ticket status and create a ticket log.
 
-        :param str action: The name of the action
-        :param stalker.models.auth.User created_by: The User creating this
-            action
+        The log is created according to the Ticket.__available_actions__ dictionary.
+
+        Args:
+            action (str): The name of the action.
+            created_by (User): The User creating this action.
+            action_arg (Any): The argument to pass to the action.
+
+        Returns:
+            TicketLog: The TicketLog instance created.
         """
         from stalker import defaults
 
@@ -355,33 +410,79 @@ class Ticket(Entity, StatusMixin):
             return_value = ticket_log
         return return_value
 
-    def resolve(self, created_by=None, resolution=""):
-        """resolves the ticket"""
+    def resolve(
+        self, created_by: Union[None, User] = None, resolution: str = ""
+    ) -> "TicketLog":
+        """Resolve the ticket.
+
+        Args:
+            created_by (User): The User instance who is taking this action.
+            resolution (str): The resolution.
+
+        Returns:
+            TicketLog: The newly created TicketLog instance.
+        """
         return self.__action__("resolve", created_by, resolution)
 
-    def accept(self, created_by=None):
-        """accepts the ticket"""
+    def accept(self, created_by: Union[None, User] = None) -> "TicketLog":
+        """Accept the ticket.
+
+        Args:
+            created_by (User): The User instance who is taking this action.
+
+        Returns:
+            TicketLog: The newly created TicketLog instance.
+        """
         return self.__action__("accept", created_by, created_by)
 
-    def reassign(self, created_by=None, assign_to=None):
-        """reassigns the ticket"""
+    def reassign(
+        self, created_by: Union[None, User] = None, assign_to: Union[None, User] = None
+    ) -> "TicketLog":
+        """Reassign the ticket to another User.
+
+        Args:
+            created_by (User): The User that is doing the action.
+            assign_to (User): The new owner of the ticket.
+
+        Returns:
+            TicketLog: The newly created TicketLog instance.
+        """
         return self.__action__("reassign", created_by, assign_to)
 
-    def reopen(self, created_by=None):
-        """reopens the ticket"""
+    def reopen(self, created_by: Union[None, User] = None) -> "TicketLog":
+        """Reopen the ticket.
+
+        Args:
+            created_by (User): The User who is doing the action.
+
+        Returns:
+            TicketLog: The newly created TicketLog instance.
+        """
         return self.__action__("reopen", created_by)
 
     # actions
     def set_owner(self, *args):
-        """sets owner to the given owner"""
+        """Set the owner.
+
+        Args:
+            args (Any): Set the owrner.
+        """
         self.owner = args[0]
 
     def set_resolution(self, *args):
-        """sets the timing_resolution"""
+        """Set the timing_resolution.
+
+        Args:
+            args (Any): Any argument passed to this method.
+        """
         self.resolution = args[0]
 
-    def del_resolution(self, *args):
-        """deletes the timing_resolution"""
+    def del_resolution(self, *args) -> None:
+        """Delete the timing_resolution.
+
+        Args:
+            args (Any): Any arguments passed to this method.
+        """
         self.resolution = ""
 
     def __eq__(self, other):
@@ -416,23 +517,22 @@ class Ticket(Entity, StatusMixin):
 
 
 class TicketLog(SimpleEntity):
-    """Holds :class:`.Ticket`\ .\ :attr:`.Ticket.status` change operations.
+    """Holds :attr:`.Ticket.status` change operations.
 
-    :param ticket: An instance of :class:`.Ticket` which the subject to the
-      operation.
+    Args:
+        ticket (Ticket): A :class:`.Ticket` instance which is the subject of the
+            operation.
 
-    :type ticket: :class:`.Ticket`
+        from_status (Status): Holds a reference to a :class:`.Status` instance which is
+            the previous status of the :class:`.Ticket` .
 
-    :param from_status: Holds a reference to a :class:`.Status` instance which
-      is the previous status of the :class:`.Ticket`\ .
+        to_status (Status): Holds a reference to a :class:`.Status` instance which is
+            the new status of the :class;`.Ticket` .
 
-    :param to_status: Holds a reference to a :class:`.Status` instance which is
-      the new status of the :class;`.Ticket`\ .
+        action (str): An Enumerator holding the type of the operation should be one of
+            ["resolve", "accept", "reassign", "reopen"].
 
-    :param operation: An Enumerator holding the type of the operation. Possible
-      values are: RESOLVE or REOPEN
-
-      Operations follow the `Track Workflow`_\ ,
+      Operations follow the `Track Workflow`_ ,
 
       .. image:: http://trac.edgewall.org/chrome/common/guide/original-workflow.png
           :width: 787 px

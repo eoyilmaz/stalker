@@ -240,7 +240,7 @@ class SimpleEntity(Base):
         html_style="",
         html_class="",
         **kwargs
-    ):  # pylint: disable=W0613
+    ):  # noqa: W0613
 
         # name and nice_name
         self._nice_name = ""
@@ -273,7 +273,7 @@ class SimpleEntity(Base):
         Returns:
             str: The str representation of this SimpleEntity.
         """
-        return "<%s (%s)>" % (self.name, self.entity_type)
+        return f"<{self.name} ({self.entity_type})>"
 
     def __eq__(self, other):
         """Check equality.
@@ -331,8 +331,9 @@ class SimpleEntity(Base):
 
         if not isinstance(description, string_types):
             raise TypeError(
-                "%s.description should be a string, not %s"
-                % (self.__class__.__name__, description.__class__.__name__)
+                "{}.description should be a string, not {}".format(
+                    self.__class__.__name__, description.__class__.__name__
+                )
             )
         return description
 
@@ -355,8 +356,9 @@ class SimpleEntity(Base):
 
         if not isinstance(generic_text, string_types):
             raise TypeError(
-                "%s.generic_text should be a string, not %s"
-                % (self.__class__.__name__, generic_text.__class__.__name__)
+                "{}.generic_text should be a string, not {}".format(
+                    self.__class__.__name__, generic_text.__class__.__name__
+                )
             )
         return generic_text
 
@@ -378,19 +380,19 @@ class SimpleEntity(Base):
         if self.__auto_name__:
             if name is None or name == "":
                 # generate a uuid4
-                name = "%s_%s" % (
+                name = "{}_{}".format(
                     self.__class__.__name__,
                     uuid.uuid4().urn.split(":")[2],
                 )
 
         # it is None
         if name is None:
-            raise TypeError("%s.name can not be None" % self.__class__.__name__)
+            raise TypeError(f"{self.__class__.__name__}.name can not be None")
 
         if not isinstance(name, string_types):
             raise TypeError(
-                "%s.name should be a string not %s"
-                % (self.__class__.__name__, name.__class__.__name__)
+                f"{self.__class__.__name__}.name should be a string, "
+                f"not {name.__class__.__name__}"
             )
 
         name = self._format_name(name)
@@ -398,7 +400,7 @@ class SimpleEntity(Base):
         # it is empty
         if name == "":
             raise ValueError(
-                "%s.name can not be an empty string" % self.__class__.__name__
+                f"{self.__class__.__name__}.name can not be an empty string"
             )
 
         # also set the nice_name
@@ -493,9 +495,9 @@ class SimpleEntity(Base):
         if created_by_in is not None:
             if not isinstance(created_by_in, User):
                 raise TypeError(
-                    "%s.created_by should be a stalker.models.auth.User "
-                    "instance, not %s"
-                    % (self.__class__.__name__, created_by_in.__class__.__name__)
+                    f"{self.__class__.__name__}.created_by should be a "
+                    "stalker.models.auth.User instance, "
+                    f"not {created_by_in.__class__.__name__}"
                 )
         return created_by_in
 
@@ -523,9 +525,9 @@ class SimpleEntity(Base):
         if updated_by_in is not None:
             if not isinstance(updated_by_in, User):
                 raise TypeError(
-                    "%s.updated_by should be a stalker.models.auth.User "
-                    "instance, not %s"
-                    % (self.__class__.__name__, updated_by_in.__class__.__name__)
+                    f"{self.__class__.__name__}.updated_by should be a "
+                    "stalker.models.auth.User instance, "
+                    f"not {updated_by_in.__class__.__name__}"
                 )
         return updated_by_in
 
@@ -545,12 +547,12 @@ class SimpleEntity(Base):
             datetime.datetime: The validated date_created_in value.
         """
         if date_created_in is None:
-            raise TypeError("%s.date_created can not be None" % self.__class__.__name__)
+            raise TypeError(f"{self.__class__.__name__}.date_created can not be None")
 
         if not isinstance(date_created_in, datetime.datetime):
             raise TypeError(
-                "%s.date_created should be a datetime.datetime instance"
-                % self.__class__.__name__
+                f"{self.__class__.__name__}.date_created should be a "
+                "datetime.datetime instance"
             )
 
         return date_created_in
@@ -573,21 +575,21 @@ class SimpleEntity(Base):
         """
         # it is None
         if date_updated_in is None:
-            raise TypeError("%s.date_updated can not be None" % self.__class__.__name__)
+            raise TypeError(f"{self.__class__.__name__}.date_updated can not be None")
 
         # it is not a datetime.datetime instance
         if not isinstance(date_updated_in, datetime.datetime):
             raise TypeError(
-                "%s.date_updated should be a datetime.datetime instance"
-                % self.__class__.__name__
+                f"{self.__class__.__name__}.date_updated should be a "
+                "datetime.datetime instance"
             )
 
         # lower than date_created
         if date_updated_in < self.date_created:
             raise ValueError(
-                "%(class)s.date_updated could not be set to a date before "
-                "%(class)s.date_created, try setting the ``date_created`` "
-                "first." % {"class": self.__class__.__name__}
+                "{class_name}.date_updated could not be set to a date before "
+                "{class_name}.date_created, try setting the ``date_created`` "
+                "first.".format(class_name=self.__class__.__name__)
             )
         return date_updated_in
 
@@ -611,8 +613,8 @@ class SimpleEntity(Base):
 
             if not isinstance(type_in, Type):
                 raise TypeError(
-                    "%s.type must be a stalker.models.type.Type instance, not "
-                    "%s" % (self.__class__.__name__, type_in)
+                    f"{self.__class__.__name__}.type must be a "
+                    f"stalker.models.type.Type instance, not {type_in}"
                 )
         return type_in
 
@@ -635,9 +637,8 @@ class SimpleEntity(Base):
 
             if not isinstance(thumb, Link):
                 raise TypeError(
-                    "%s.thumbnail should be a stalker.models.link.Link "
-                    "instance, not %s"
-                    % (self.__class__.__name__, thumb.__class__.__name__)
+                    f"{self.__class__.__name__}.thumbnail should be a "
+                    f"stalker.models.link.Link instance, not {thumb.__class__.__name__}"
                 )
         return thumb
 
@@ -648,7 +649,7 @@ class SimpleEntity(Base):
         Returns:
             str: The TaskJuggler compatible id.
         """
-        return "%s_%s" % (self.__class__.__name__, self.id)
+        return f"{self.__class__.__name__}_{self.id}"
 
     @property
     def to_tjp(self):
@@ -660,7 +661,7 @@ class SimpleEntity(Base):
             NotImplementedError: Always.
         """
         raise NotImplementedError(
-            "This property is not implemented in %s" % self.__class__.__name__
+            f"This property is not implemented in {self.__class__.__name__}"
         )
 
     @validates("html_style")
@@ -682,8 +683,8 @@ class SimpleEntity(Base):
 
         if not isinstance(html_style, string_types):
             raise TypeError(
-                "%s.html_style should be a basestring instance, not %s"
-                % (self.__class__.__name__, html_style.__class__.__name__)
+                f"{self.__class__.__name__}.html_style should be a basestring "
+                f"instance, not {html_style.__class__.__name__}"
             )
         return html_style
 
@@ -706,8 +707,8 @@ class SimpleEntity(Base):
 
         if not isinstance(html_class, string_types):
             raise TypeError(
-                "%s.html_class should be a basestring instance, not %s"
-                % (self.__class__.__name__, html_class.__class__.__name__)
+                f"{self.__class__.__name__}.html_class should be a basestring "
+                f"instance, not {html_class.__class__.__name__}"
             )
         return html_class
 
@@ -786,8 +787,8 @@ class Entity(SimpleEntity):
 
         if not isinstance(note, Note):
             raise TypeError(
-                "%s.note should be a stalker.models.note.Note instance, not "
-                "%s" % (self.__class__.__name__, note.__class__.__name__)
+                f"{self.__class__.__name__}.note should be a stalker.models.note.Note "
+                f"instance, not {note.__class__.__name__}"
             )
         return note
 
@@ -809,8 +810,8 @@ class Entity(SimpleEntity):
 
         if not isinstance(tag, Tag):
             raise TypeError(
-                "%s.tag should be a stalker.models.tag.Tag instance, not %s"
-                % (self.__class__.__name__, tag.__class__.__name__)
+                f"{self.__class__.__name__}.tag should be a stalker.models.tag.Tag "
+                f"instance, not {tag.__class__.__name__}"
             )
         return tag
 
@@ -882,8 +883,8 @@ class EntityGroup(Entity):
         """
         if not isinstance(entity, SimpleEntity):
             raise TypeError(
-                "%s.entities should be a list of SimpleEntities, not %s"
-                % (self.__class__.__name__, entity.__class__.__name__)
+                f"{self.__class__.__name__}.entities should be a list of "
+                f"SimpleEntities, not {entity.__class__.__name__}"
             )
 
         return entity

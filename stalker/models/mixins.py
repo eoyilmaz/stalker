@@ -45,7 +45,7 @@ def create_secondary_table(
 
     # use the given class_name and the class_table
     if not secondary_table_name:
-        secondary_table_name = "%s_%s" % (primary_cls_name, plural_secondary_cls_name)
+        secondary_table_name = f"{primary_cls_name}_{plural_secondary_cls_name}"
 
     # check if the table is already defined
     if secondary_table_name not in Base.metadata:
@@ -53,15 +53,15 @@ def create_secondary_table(
             secondary_table_name,
             Base.metadata,
             Column(
-                "%s_id" % primary_cls_name.lower(),
+                f"{primary_cls_name.lower()}_id",
                 Integer,
-                ForeignKey("%s.id" % primary_cls_table_name),
+                ForeignKey(f"{primary_cls_table_name}.id"),
                 primary_key=True,
             ),
             Column(
-                "%s_id" % secondary_cls_name.lower(),
+                f"{secondary_cls_name.lower()}_id",
                 Integer,
-                ForeignKey("%s.id" % secondary_cls_table_name),
+                ForeignKey(f"{secondary_cls_table_name}.id"),
                 primary_key=True,
             ),
         )
@@ -142,7 +142,7 @@ class TargetEntityTypeMixin(object):
         # it can not be None
         if target_entity_type_in is None:
             raise TypeError(
-                "%s.target_entity_type can not be None" % self.__class__.__name__
+                f"{self.__class__.__name__}.target_entity_type can not be None"
             )
 
         # check if it is a class
@@ -151,7 +151,7 @@ class TargetEntityTypeMixin(object):
 
         if target_entity_type_in == "":
             raise ValueError(
-                "%s.target_entity_type can not be empty" % self.__class__.__name__
+                f"{self.__class__.__name__}.target_entity_type can not be empty"
             )
 
         return target_entity_type_in
@@ -238,7 +238,7 @@ class StatusMixin(object):
             "status_id",
             Integer,
             ForeignKey("Statuses.id"),
-            nullable=False
+            nullable=False,
             # This is set to nullable=True but it is impossible to set the
             # status to None by using this Declarative approach.
             #
@@ -257,7 +257,7 @@ class StatusMixin(object):
         """
         return relationship(
             "Status",
-            primaryjoin="%s.status_id==Status.status_id" % cls.__name__,
+            primaryjoin=f"{cls.__name__}.status_id==Status.status_id",
             doc="""The current status of the object.
 
             It is a :class:`.Status` instance which
@@ -286,7 +286,7 @@ class StatusMixin(object):
         """
         return relationship(
             "StatusList",
-            primaryjoin="%s.status_list_id==StatusList.status_list_id" % cls.__name__,
+            primaryjoin=f"{cls.__name__}.status_list_id==StatusList.status_list_id",
         )
 
     @validates("status_list")
@@ -326,28 +326,29 @@ class StatusMixin(object):
             # there is no db so raise an error because there is no way
             # to get an appropriate StatusList
             raise TypeError(
-                "%s instances can not be initialized without a "
+                f"{self.__class__.__name__} instances can not be initialized without a "
                 "stalker.models.status.StatusList instance, please pass a "
-                "suitable StatusList (StatusList.target_entity_type=%s) "
-                "with the 'status_list' argument"
-                % (self.__class__.__name__, self.__class__.__name__)
+                "suitable StatusList "
+                f"(StatusList.target_entity_type={self.__class__.__name__}) with the "
+                "'status_list' argument"
             )
         else:
             # it is not an instance of status_list
             if not isinstance(status_list, StatusList):
                 raise TypeError(
-                    "%s.status_list should be an instance of "
-                    "stalker.models.status.StatusList not %s"
-                    % (self.__class__.__name__, status_list.__class__.__name__)
+                    f"{self.__class__.__name__}.status_list should be an instance of "
+                    "stalker.models.status.StatusList not "
+                    f"{status_list.__class__.__name__}"
                 )
 
             # check if the entity_type matches to the
             # StatusList.target_entity_type
             if self.__class__.__name__ != status_list.target_entity_type:
                 raise TypeError(
-                    "The given StatusLists' target_entity_type is %s, "
-                    "whereas the entity_type of this object is %s"
-                    % (status_list.target_entity_type, self.__class__.__name__)
+                    "The given StatusLists' target_entity_type is "
+                    f"{status_list.target_entity_type}, "
+                    "whereas the entity_type of this object is "
+                    f"{self.__class__.__name__}"
                 )
 
         return status_list
@@ -370,6 +371,7 @@ class StatusMixin(object):
             Status: The validated status value.
         """
         from stalker.models.status import Status
+
         # it is set to None
         if status is None:
             with DBSession.no_autoflush:
@@ -378,27 +380,25 @@ class StatusMixin(object):
         # it is not an instance of status or int
         if not isinstance(status, (Status, int)):
             raise TypeError(
-                "%(class)s.status must be an instance of "
-                "stalker.models.status.Status or an integer showing the index "
-                "of the Status object in the %(class)s.status_list, not "
-                "%(status)s"
-                % {
-                    "class": self.__class__.__name__,
-                    "status": status.__class__.__name__,
-                }
+                "{cls}.status must be an instance of stalker.models.status.Status or "
+                "an integer showing the index of the Status object in the "
+                "{cls}.status_list, not {status}".format(
+                    cls=self.__class__.__name__,
+                    status=status.__class__.__name__,
+                )
             )
 
         if isinstance(status, int):
             # if it is not in the correct range:
             if status < 0:
                 raise ValueError(
-                    "%s.status must be a non-negative integer" % self.__class__.__name__
+                    f"{self.__class__.__name__}.status must be a non-negative integer"
                 )
 
             if status >= len(self.status_list.statuses):
                 raise ValueError(
-                    "%s.status can not be bigger than the length of the "
-                    "status_list" % self.__class__.__name__
+                    f"{self.__class__.__name__}.status can not be bigger than the "
+                    "length of the status_list"
                 )
                 # get the status instance out of the status_list instance
             status = self.status_list[status]
@@ -409,9 +409,9 @@ class StatusMixin(object):
 
         if status not in self.status_list:
             raise ValueError(
-                "The given Status instance for %s.status is not in the "
-                "%s.status_list, please supply a status from that list."
-                % (self.__class__.__name__, self.__class__.__name__)
+                f"The given Status instance for {self.__class__.__name__}.status is "
+                f"not in the {self.__class__.__name__}.status_list, please supply a "
+                "status from that list."
             )
 
         return status
@@ -651,7 +651,7 @@ class DateRangeMixin(object):
             ),
         )
 
-    def _validate_dates(self, start, end, duration):
+    def _validate_dates(self, start, end, duration):  # noqa: C901
         """Update the date values.
 
         Args:
@@ -859,7 +859,7 @@ class ProjectMixin(object):
 
         return relationship(
             "Project",
-            primaryjoin="%s.c.project_id==Projects.c.id" % cls.__tablename__,
+            primaryjoin=f"{cls.__tablename__}.c.project_id==Projects.c.id",
             post_update=True,  # for project itself
             uselist=False,
             backref=backref(backref_table_name, cascade="all, delete-orphan"),
@@ -887,15 +887,15 @@ class ProjectMixin(object):
 
         if project is None:
             raise TypeError(
-                "%s.project can not be None it must be an instance of "
-                "stalker.models.project.Project" % self.__class__.__name__
+                f"{self.__class__.__name__}.project can not be None it must be an "
+                "instance of stalker.models.project.Project"
             )
 
         if not isinstance(project, Project):
             raise TypeError(
-                "%s.project should be an instance of "
-                "stalker.models.project.Project instance not %s"
-                % (self.__class__.__name__, project.__class__.__name__)
+                f"{self.__class__.__name__}.project should be an instance of "
+                "stalker.models.project.Project instance, "
+                f"not {project.__class__.__name__}"
             )
         return project
 
@@ -934,7 +934,7 @@ class ReferenceMixin(object):
             "Link",
             cls.__tablename__,
             "Links",
-            "%s_References" % cls.__name__,
+            f"{cls.__name__}_References",
         )
         # return the relationship
         return relationship(
@@ -964,9 +964,9 @@ class ReferenceMixin(object):
         # all the elements should be instance of stalker.models.entity.Entity
         if not isinstance(reference, Link):
             raise TypeError(
-                "All the elements in the %s.references should be "
-                "stalker.models.link.Link instances not %s"
-                % (self.__class__.__name__, reference.__class__.__name__)
+                f"All the elements in the {self.__class__.__name__}.references should "
+                "be stalker.models.link.Link instances, "
+                f"not {reference.__class__.__name__}"
             )
         return reference
 
@@ -1013,9 +1013,8 @@ class ACLMixin(object):
 
         if not isinstance(permission, Permission):
             raise TypeError(
-                "%s.permissions should be all instances of "
-                "stalker.models.auth.Permission not %s"
-                % (self.__class__.__name__, permission.__class__.__name__)
+                f"{self.__class__.__name__}.permissions should be all instances of "
+                f"stalker.models.auth.Permission not {permission.__class__.__name__}"
             )
 
         return permission
@@ -1045,8 +1044,8 @@ class ACLMixin(object):
         return [
             (
                 perm.access,
-                "%s:%s" % (self.__class__.__name__, self.name),
-                "%s_%s" % (perm.action, perm.class_name),
+                f"{self.__class__.__name__}:{self.name}",
+                f"{perm.action}_{perm.class_name}",
             )
             for perm in self.permissions
         ]
@@ -1072,7 +1071,7 @@ class CodeMixin(object):
     """
 
     def __init__(self, code: str = None, **kwargs):
-        logger.debug("code: %s" % code)
+        logger.debug(f"code: {code}")
         self.code = code
 
     @declared_attr
@@ -1106,19 +1105,19 @@ class CodeMixin(object):
         Returns:
             str: The validated code value.
         """
-        logger.debug("validating code value of: %s" % code)
+        logger.debug(f"validating code value of: {code}")
         if code is None:
-            raise TypeError("%s.code cannot be None" % self.__class__.__name__)
+            raise TypeError(f"{self.__class__.__name__}.code cannot be None")
 
         if not isinstance(code, string_types):
             raise TypeError(
-                "%s.code should be a string not %s"
-                % (self.__class__.__name__, code.__class__.__name__)
+                f"{self.__class__.__name__}.code should be a string "
+                f"not {code.__class__.__name__}"
             )
 
         if code == "":
             raise ValueError(
-                "%s.code can not be an empty string" % self.__class__.__name__
+                f"{self.__class__.__name__}.code can not be an empty string"
             )
 
         return code
@@ -1156,8 +1155,7 @@ class WorkingHoursMixin(object):
         """
         return relationship(
             "WorkingHours",
-            primaryjoin="%s.working_hours_id==WorkingHours.working_hours_id"
-            % cls.__name__,
+            primaryjoin=f"{cls.__name__}.working_hours_id==WorkingHours.working_hours_id"
         )
 
     @validates("working_hours")
@@ -1181,9 +1179,9 @@ class WorkingHoursMixin(object):
             # default.working_hours settings
         elif not isinstance(wh, WorkingHours):
             raise TypeError(
-                "%s.working_hours should be a "
-                "stalker.models.studio.WorkingHours instance, not %s"
-                % (self.__class__.__name__, wh.__class__.__name__)
+                f"{self.__class__.__name__}.working_hours should be a "
+                "stalker.models.studio.WorkingHours instance, "
+                f"not {wh.__class__.__name__}"
             )
 
         return wh
@@ -1211,7 +1209,7 @@ class ScheduleMixin(object):
         schedule_unit=None,
         schedule_model=None,
         schedule_constraint=0,
-        **kwargs
+        **kwargs,
     ):
         self.schedule_constraint = schedule_constraint
         self.schedule_model = schedule_model
@@ -1226,20 +1224,18 @@ class ScheduleMixin(object):
             Column: The Column related to the schedule_timing attribute.
         """
         return Column(
-            "%s_timing" % cls.__default_schedule_attr_name__,
+            f"{cls.__default_schedule_attr_name__}_timing",
             Float,
             nullable=True,
             default=0,
-            doc="""It is the value of the %(attr)s timing. It is a float
-            value.
+            doc="""It is the value of the {attr} timing. It is a float value.
 
             The timing value can either be as Work Time or Calendar Time
-            defined by the %(attr)s_model attribute. So when the %(attr)s_model
+            defined by the {attr}_model attribute. So when the {attr}_model
             is `duration` then the value of this attribute is in Calendar Time,
-            and if the %(attr)s_model is either `length` or `effort` then the
+            and if the {attr}_model is either `length` or `effort` then the
             value is considered as Work Time.
-            """
-            % {"attr": cls.__default_schedule_attr_name__},
+            """.format(attr=cls.__default_schedule_attr_name__),
         )
 
     @declared_attr
@@ -1250,13 +1246,12 @@ class ScheduleMixin(object):
             Column: The Column related to the schedule_unit attribute.
         """
         return Column(
-            "%s_unit" % cls.__default_schedule_attr_name__,
+            f"{cls.__default_schedule_attr_name__}_unit",
             Enum(*defaults.datetime_units, name="TimeUnit"),
             nullable=True,
             default="h",
-            doc="""It is the unit of the %(attr)s timing. It is a string
-            value. And should be one of 'min', 'h', 'd', 'w', 'm', 'y'."""
-            % {"attr": cls.__default_schedule_attr_name__},
+            doc=f"It is the unit of the {cls.__default_schedule_attr_name__} timing."
+            "It is a string value. And should be one of 'min', 'h', 'd', 'w', 'm', 'y'."
         )
 
     @declared_attr
@@ -1267,14 +1262,10 @@ class ScheduleMixin(object):
             Column: The Column related to the schedule_model attribute.
         """
         return Column(
-            "%s_model" % cls.__default_schedule_attr_name__,
+            f"{cls.__default_schedule_attr_name__}_model",
             Enum(
                 *cls.__default_schedule_models__,
-                name="%(class)s%(attr)sModel"
-                % {
-                    "class": cls.__name__,
-                    "attr": cls.__default_schedule_attr_name__.title(),
-                }
+                name=f"{cls.__name__}{cls.__default_schedule_attr_name__.title()}Model",
             ),
             default=cls.__default_schedule_models__[0],
             nullable=False,
@@ -1323,7 +1314,7 @@ class ScheduleMixin(object):
             Column: The Column related to the schedule_constraint attribute.
         """
         return Column(
-            "%s_constraint" % cls.__default_schedule_attr_name__,
+            f"{cls.__default_schedule_attr_name__}_constraint",
             Integer,
             default=0,
             nullable=False,
@@ -1377,13 +1368,12 @@ class ScheduleMixin(object):
 
         if not isinstance(schedule_constraint, int):
             raise TypeError(
-                "%(class)s.%(attr)s_constraint should be an integer "
-                "between 0 and 3, not %(constraint_class)s"
-                % {
-                    "class": self.__class__.__name__,
-                    "attr": self.__default_schedule_attr_name__,
-                    "constraint_class": schedule_constraint.__class__.__name__,
-                }
+                "{cls}.{attr}_constraint should be an integer "
+                "between 0 and 3, not {constraint_class}".format(
+                    cls=self.__class__.__name__,
+                    attr=self.__default_schedule_attr_name__,
+                    constraint_class=schedule_constraint.__class__.__name__,
+                )
             )
 
         schedule_constraint = max(schedule_constraint, 0)
@@ -1411,14 +1401,13 @@ class ScheduleMixin(object):
             schedule_model = self.__default_schedule_models__[0]
 
         error_message = (
-            "%(class)s.%(attr)s_model should be one of %(defaults)s, not "
-            "%(model_class)s"
-            % {
-                "class": self.__class__.__name__,
-                "attr": self.__default_schedule_attr_name__,
-                "defaults": self.__default_schedule_models__,
-                "model_class": schedule_model.__class__.__name__,
-            }
+            "{cls}.{attr}_model should be one of {defaults}, not "
+            "{model_class}".format(
+                cls=self.__class__.__name__,
+                attr=self.__default_schedule_attr_name__,
+                defaults=self.__default_schedule_models__,
+                model_class=schedule_model.__class__.__name__,
+            )
         )
 
         if not isinstance(schedule_model, string_types):
@@ -1450,28 +1439,26 @@ class ScheduleMixin(object):
 
         if not isinstance(schedule_unit, string_types):
             raise TypeError(
-                "%(class)s.%(attr)s_unit should be a string value one of "
-                "%(defaults)s showing the unit of the %(attr)s timing of this "
-                "%(class)s, not %(unit_class)s"
-                % {
-                    "class": self.__class__.__name__,
-                    "attr": self.__default_schedule_attr_name__,
-                    "defaults": defaults.datetime_units,
-                    "unit_class": schedule_unit.__class__.__name__,
-                }
+                "{cls}.{attr}_unit should be a string value one of "
+                "{defaults} showing the unit of the {attr} timing of this "
+                "{cls}, not {unit_class}".format(
+                    cls=self.__class__.__name__,
+                    attr=self.__default_schedule_attr_name__,
+                    defaults=defaults.datetime_units,
+                    unit_class=schedule_unit.__class__.__name__,
+                )
             )
 
         if schedule_unit not in defaults.datetime_units:
             raise ValueError(
-                "%(class)s.%(attr)s_unit should be a string value one of "
-                "%(defaults)s showing the unit of the %(attr)s timing of "
-                "this %(class)s, not %(unit_class)s"
-                % {
-                    "class": self.__class__.__name__,
-                    "attr": self.__default_schedule_attr_name__,
-                    "defaults": defaults.datetime_units,
-                    "unit_class": schedule_unit.__class__.__name__,
-                }
+                "{cls}.{attr}_unit should be a string value one of "
+                "{defaults} showing the unit of the {attr} timing of "
+                "this {cls}, not {unit_class}".format(
+                    cls=self.__class__.__name__,
+                    attr=self.__default_schedule_attr_name__,
+                    defaults=defaults.datetime_units,
+                    unit_class=schedule_unit.__class__.__name__,
+                )
             )
 
         return schedule_unit
@@ -1497,20 +1484,19 @@ class ScheduleMixin(object):
 
         if not isinstance(schedule_timing, (int, float)):
             raise TypeError(
-                "%(class)s.%(attr)s_timing should be an integer or float "
-                "number showing the value of the %(attr)s timing of this "
-                "%(class)s, not %(timing_class)s"
-                % {
-                    "class": self.__class__.__name__,
-                    "attr": self.__default_schedule_attr_name__,
-                    "timing_class": schedule_timing.__class__.__name__,
-                }
+                "{cls}.{attr}_timing should be an integer or float "
+                "number showing the value of the {attr} timing of this "
+                "{cls}, not {timing_class}".format(
+                    cls=self.__class__.__name__,
+                    attr=self.__default_schedule_attr_name__,
+                    timing_class=schedule_timing.__class__.__name__,
+                )
             )
 
         return schedule_timing
 
     @classmethod
-    def least_meaningful_time_unit(cls, seconds, as_work_time=True):
+    def least_meaningful_time_unit(cls, seconds: int, as_work_time: bool = True):
         """Return the least meaningful time unit that corresponds to the given seconds.
 
         So if:
@@ -1555,27 +1541,27 @@ class ScheduleMixin(object):
 
         if as_work_time:
             logger.debug("calculating in work time")
-            if seconds % year_wt == 0:
+            if seconds % year_wt == 0:  # noqa: S001
                 return seconds // year_wt, "y"
-            elif seconds % month_wt == 0:
+            elif seconds % month_wt == 0:  # noqa: S001
                 return seconds // month_wt, "m"
-            elif seconds % week_wt == 0:
+            elif seconds % week_wt == 0:  # noqa: S001
                 return seconds // week_wt, "w"
-            elif seconds % day_wt == 0:
+            elif seconds % day_wt == 0:  # noqa: S001
                 return seconds // day_wt, "d"
         else:
-            logger.debug("calculating in calendar time")
-            if seconds % year == 0:
+            logger.debug("calculating in calendar time")  # noqa: S001
+            if seconds % year == 0:  # noqa: S001
                 return seconds // year, "y"
-            elif seconds % month == 0:
+            elif seconds % month == 0:  # noqa: S001
                 return seconds // month, "m"
-            elif seconds % week == 0:
+            elif seconds % week == 0:  # noqa: S001
                 return seconds // week, "w"
-            elif seconds % day == 0:
+            elif seconds % day == 0:  # noqa: S001
                 return seconds // day, "d"
 
         # in either case
-        if seconds % hour == 0:
+        if seconds % hour == 0:  # noqa: S001
             return seconds // hour, "h"
 
         # at this point we understand that it has a residual of less then one
@@ -1719,7 +1705,7 @@ class DAGMixin(object):
         Returns:
             Column: The Column related to the parent_id attribute.
         """
-        return Column("parent_id", Integer, ForeignKey("%s.id" % cls.__tablename__))
+        return Column("parent_id", Integer, ForeignKey(f"{cls.__tablename__}.id"))
 
     @declared_attr
     def parent(cls):
@@ -1731,13 +1717,14 @@ class DAGMixin(object):
         return relationship(
             cls.__name__,
             remote_side=[getattr(cls, cls.__id_column__)],
-            primaryjoin="%(ct)s.c.parent_id==%(ct)s.c.id" % {"ct": cls.__tablename__},
+            primaryjoin="{ct}.c.parent_id=={ct}.c.id".format(ct=cls.__tablename__),
             back_populates="children",
             post_update=True,
-            doc="""A :class:`%(c)s` instance which is the parent of this %(c)s.
-            In Stalker it is possible to create a hierarchy of %(c)s.
-            """
-            % {"c": cls.__name__},
+            doc="""A :class:`{c}` instance which is the parent of this {c}.
+            In Stalker it is possible to create a hierarchy of {c}.
+            """.format(
+                c=cls.__name__
+            ),
         )
 
     @declared_attr
@@ -1749,7 +1736,7 @@ class DAGMixin(object):
         """
         return relationship(
             cls.__name__,
-            primaryjoin="%(ct)s.c.id==%(ct)s.c.parent_id" % {"ct": cls.__tablename__},
+            primaryjoin="{ct}.c.id=={ct}.c.parent_id".format(ct=cls.__tablename__),
             back_populates="parent",
             post_update=True,
             cascade=cls.__dag_cascade__,
@@ -1780,12 +1767,11 @@ class DAGMixin(object):
         if parent is not None:
             if not isinstance(parent, self.__class__):
                 raise TypeError(
-                    "%(cls)s.parent should be an instance of %(cls)s class or "
-                    "derivative, not %(parent_cls)s"
-                    % {
-                        "cls": self.__class__.__name__,
-                        "parent_cls": parent.__class__.__name__,
-                    }
+                    "{cls}.parent should be an instance of {cls} class or "
+                    "derivative, not {parent_cls}".format(
+                        cls=self.__class__.__name__,
+                        parent_cls=parent.__class__.__name__,
+                    )
                 )
             check_circular_dependency(self, parent, "children")
 
@@ -1808,12 +1794,11 @@ class DAGMixin(object):
         """
         if not isinstance(child, self.__class__):
             raise TypeError(
-                "%(cls)s.children should be a list of %(cls)s (or derivative) "
-                "instances, not %(child_cls)s"
-                % {
-                    "cls": self.__class__.__name__,
-                    "child_cls": child.__class__.__name__,
-                }
+                "{cls}.children should be a list of {cls} (or derivative) "
+                "instances, not {child_cls}".format(
+                    cls=self.__class__.__name__,
+                    child_cls=child.__class__.__name__,
+                )
             )
 
         return child
@@ -1913,8 +1898,8 @@ class AmountMixin(object):
 
         if not isinstance(amount, (int, float)):
             raise TypeError(
-                "%s.amount should be a number, not %s"
-                % (self.__class__.__name__, amount.__class__.__name__)
+                f"{self.__class__.__name__}.amount should be a number, "
+                f"not {amount.__class__.__name__}"
             )
 
         return float(amount)
@@ -1958,8 +1943,8 @@ class UnitMixin(object):
 
         if not isinstance(unit, string_types):
             raise TypeError(
-                "%s.unit should be a string, not %s"
-                % (self.__class__.__name__, unit.__class__.__name__)
+                f"{self.__class__.__name__}.unit should be a string, "
+                f"not {unit.__class__.__name__}"
             )
 
         return unit

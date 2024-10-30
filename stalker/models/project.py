@@ -76,10 +76,9 @@ class ProjectRepository(Base):
 
             if not isinstance(repository, Repository):
                 raise TypeError(
-                    "%s.repositories should be a list of "
+                    f"{self.__class__.__name__}.repositories should be a list of "
                     "stalker.models.repository.Repository instances or "
-                    "derivatives, not %s"
-                    % (self.__class__.__name__, repository.__class__.__name__)
+                    f"derivatives, not {repository.__class__.__name__}"
                 )
 
         return repository
@@ -370,15 +369,15 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         """
         if not isinstance(fps, (int, float)):
             raise TypeError(
-                "%s.fps should be a positive float or int, not %s"
-                % (self.__class__.__name__, fps.__class__.__name__)
+                f"{self.__class__.__name__}.fps should be a positive float or int, "
+                f"not {fps.__class__.__name__}"
             )
 
         fps = float(fps)
         if fps <= 0:
             raise ValueError(
-                "%s.fps should be a positive float or int, not %s"
-                % (self.__class__.__name__, fps)
+                f"{self.__class__.__name__}.fps should be a positive float or int, "
+                f"not {fps}"
             )
         return float(fps)
 
@@ -400,9 +399,9 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
 
         if image_format is not None and not isinstance(image_format, ImageFormat):
             raise TypeError(
-                "%s.image_format should be an instance of "
-                "stalker.models.format.ImageFormat, not %s"
-                % (self.__class__.__name__, image_format.__class__.__name__)
+                f"{self.__class__.__name__}.image_format should be an instance of "
+                "stalker.models.format.ImageFormat, "
+                f"not {image_format.__class__.__name__}"
             )
         return image_format
 
@@ -459,7 +458,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         with DBSession.no_autoflush:
             return (
                 Task.query.filter(Task.project == self)
-                .filter(Task.parent == None)
+                .filter(Task.parent == None)  # noqa: E711
                 .all()
             )
 
@@ -536,7 +535,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
             if task.total_logged_seconds is None:
                 task.update_schedule_info()
             total_logged_seconds += task.total_logged_seconds
-        logger.debug("project.total_logged_seconds: %s" % total_logged_seconds)
+        logger.debug(f"project.total_logged_seconds: {total_logged_seconds}")
         return total_logged_seconds
 
     @property
@@ -551,7 +550,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
             if task.schedule_seconds is None:
                 task.update_schedule_info()
             schedule_seconds += task.schedule_seconds
-        logger.debug("project.schedule_seconds: %s" % schedule_seconds)
+        logger.debug(f"project.schedule_seconds: {schedule_seconds}")
         return schedule_seconds
 
     @property
@@ -662,8 +661,8 @@ class ProjectUser(Base):
 
             if not isinstance(user, User):
                 raise TypeError(
-                    "%s.user should be a stalker.models.auth.User instance, "
-                    "not %s" % (self.__class__.__name__, user.__class__.__name__)
+                    f"{self.__class__.__name__}.user should be a "
+                    f"stalker.models.auth.User instance, not {user.__class__.__name__}"
                 )
 
             # also update rate attribute
@@ -692,9 +691,9 @@ class ProjectUser(Base):
             # check if it is instance of Project object
             if not isinstance(project, Project):
                 raise TypeError(
-                    "%s.project should be a "
-                    "stalker.models.project.Project instance, not %s"
-                    % (self.__class__.__name__, project.__class__.__name__)
+                    f"{self.__class__.__name__}.project should be a "
+                    "stalker.models.project.Project instance, "
+                    f"not {project.__class__.__name__}"
                 )
         return project
 
@@ -717,9 +716,8 @@ class ProjectUser(Base):
 
             if not isinstance(role, Role):
                 raise TypeError(
-                    "%s.role should be a "
-                    "stalker.models.auth.Role instance, not %s"
-                    % (self.__class__.__name__, role.__class__.__name__)
+                    f"{self.__class__.__name__}.role should be a "
+                    f"stalker.models.auth.Role instance, not {role.__class__.__name__}"
                 )
         return role
 
@@ -743,19 +741,14 @@ class ProjectUser(Base):
 
         if not isinstance(rate, (int, float)):
             raise TypeError(
-                "%(class)s.rate should be a float number greater or "
-                "equal to 0.0, not %(rate_class)s"
-                % {
-                    "class": self.__class__.__name__,
-                    "rate_class": rate.__class__.__name__,
-                }
+                f"{self.__class__.__name__}.rate should be a float number greater or "
+                f"equal to 0.0, not {rate.__class__.__name__}"
             )
 
         if rate < 0:
             raise ValueError(
-                "%(class)s.rate should be a float number greater or "
-                "equal to 0.0, not %(rate)s"
-                % {"class": self.__class__.__name__, "rate": rate}
+                f"{self.__class__.__name__}.rate should be a float number greater or "
+                f"equal to 0.0, not {rate}"
             )
 
         return rate
@@ -824,9 +817,8 @@ class ProjectClient(Base):
 
             if not isinstance(client, Client):
                 raise TypeError(
-                    "%s.client should be an instance of "
-                    "stalker.models.auth.Client not %s"
-                    % (self.__class__.__name__, client.__class__.__name__)
+                    f"{self.__class__.__name__}.client should be an instance of "
+                    f"stalker.models.auth.Client not {client.__class__.__name__}"
                 )
         return client
 
@@ -848,9 +840,9 @@ class ProjectClient(Base):
             # check if it is instance of Project object
             if not isinstance(project, Project):
                 raise TypeError(
-                    "%s.project should be a "
-                    "stalker.models.project.Project instance, not %s"
-                    % (self.__class__.__name__, project.__class__.__name__)
+                    f"{self.__class__.__name__}.project should be a "
+                    "stalker.models.project.Project instance, not "
+                    f"{project.__class__.__name__}"
                 )
         return project
 
@@ -873,9 +865,8 @@ class ProjectClient(Base):
 
             if not isinstance(role, Role):
                 raise TypeError(
-                    "%s.role should be a "
-                    "stalker.models.auth.Role instance, not %s"
-                    % (self.__class__.__name__, role.__class__.__name__)
+                    f"{self.__class__.__name__}.role should be a "
+                    f"stalker.models.auth.Role instance, not {role.__class__.__name__}"
                 )
         return role
 

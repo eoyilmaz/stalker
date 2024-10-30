@@ -146,8 +146,8 @@ class Client(Entity):
 
         if not isinstance(good, Good):
             raise TypeError(
-                "%s.goods attribute should be all stalker.models.budget.Good "
-                "instances, not %s" % (self.__class__.__name__, good.__class__.__name__)
+                f"{self.__class__.__name__}.goods attribute should be all "
+                f"stalker.models.budget.Good instances, not {good.__class__.__name__}"
             )
 
         return good
@@ -199,9 +199,8 @@ class ClientUser(Base):
         if client is not None:
             if not isinstance(client, Client):
                 raise TypeError(
-                    "%s.client should be instance of "
-                    "stalker.models.client.Client, not %s"
-                    % (self.__class__.__name__, client.__class__.__name__)
+                    f"{self.__class__.__name__}.client should be instance of "
+                    f"stalker.models.client.Client, not {client.__class__.__name__}"
                 )
         return client
 
@@ -225,9 +224,8 @@ class ClientUser(Base):
 
             if not isinstance(user, User):
                 raise TypeError(
-                    "%s.user should be an instance of "
-                    "stalker.models.auth.User, not %s"
-                    % (self.__class__.__name__, user.__class__.__name__)
+                    f"{self.__class__.__name__}.user should be an instance of "
+                    f"stalker.models.auth.User, not {user.__class__.__name__}"
                 )
         return user
 
@@ -251,8 +249,7 @@ class ClientUser(Base):
 
             if not isinstance(role, Role):
                 raise TypeError(
-                    "%s.role should be a "
-                    "stalker.models.auth.Role instance, not %s"
-                    % (self.__class__.__name__, role.__class__.__name__)
+                    f"{self.__class__.__name__}.role should be a "
+                    f"stalker.models.auth.Role instance, not {role.__class__.__name__}"
                 )
         return role

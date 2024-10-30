@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
+"""Tag related functions and classes are situated here."""
 
-from sqlalchemy import Column, Integer, ForeignKey
-
-from stalker.models.entity import SimpleEntity
+from sqlalchemy import Column, ForeignKey, Integer
 
 from stalker.log import get_logger
+from stalker.models.entity import SimpleEntity
 
 logger = get_logger(__name__)
 
@@ -36,6 +36,10 @@ class Tag(SimpleEntity):
         """
         return super(Tag, self).__eq__(other) and isinstance(other, Tag)
 
-    def __hash__(self):
-        """the overridden __hash__ method"""
+    def __hash__(self) -> int:
+        """Return the hash value for this Tag instance.
+
+        Returns:
+            int: The hash of this Tag.
+        """
         return super(Tag, self).__hash__()

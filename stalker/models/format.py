@@ -108,13 +108,13 @@ class ImageFormat(Entity):
         """
         if not isinstance(width, (int, float)):
             raise TypeError(
-                "%s.width should be an instance of int or float not %s"
-                % (self.__class__.__name__, width.__class__.__name__)
+                f"{self.__class__.__name__}.width should be an instance of int or "
+                f"float, not {width.__class__.__name__}: '{width}'"
             )
 
         if width <= 0:
             raise ValueError(
-                "%s.width cannot be zero or negative" % self.__class__.__name__
+                f"{self.__class__.__name__}.width cannot be zero or negative"
             )
 
         return int(width)
@@ -136,13 +136,13 @@ class ImageFormat(Entity):
         """
         if not isinstance(height, (int, float)):
             raise TypeError(
-                "%s.height should be an instance of int or float not %s"
-                % (self.__class__.__name__, height.__class__.__name__)
+                f"{self.__class__.__name__}.height should be an instance of int or "
+                f"float, not {height.__class__.__name__}"
             )
 
         if height <= 0:
             raise ValueError(
-                "%s.height cannot be zero or negative" % self.__class__.__name__
+                f"{self.__class__.__name__}.height cannot be zero or negative"
             )
 
         return int(height)
@@ -164,14 +164,14 @@ class ImageFormat(Entity):
         """
         if not isinstance(pixel_aspect, (int, float)):
             raise TypeError(
-                "%s.pixel_aspect should be an instance of int or float not %s"
-                % (self.__class__.__name__, pixel_aspect.__class__.__name__)
+                f"{self.__class__.__name__}.pixel_aspect should be an instance of int "
+                f"or float not {pixel_aspect.__class__.__name__}"
             )
 
         if pixel_aspect <= 0:
             raise ValueError(
-                "%s.pixel_aspect cannot be zero or a negative value"
-                % self.__class__.__name__
+                f"{self.__class__.__name__}.pixel_aspect cannot be zero or a negative "
+                "value"
             )
 
         return float(pixel_aspect)
@@ -194,15 +194,13 @@ class ImageFormat(Entity):
         """
         if not isinstance(print_resolution, (int, float)):
             raise TypeError(
-                "%s.print_resolution should be an instance of int or float "
-                "not %s"
-                % (self.__class__.__name__, print_resolution.__class__.__name__)
+                f"{self.__class__.__name__}.print_resolution should be an instance of "
+                f"int or float not {print_resolution.__class__.__name__}"
             )
 
         if print_resolution <= 0:
             raise ValueError(
-                "%s.print_resolution cannot be zero or negative"
-                % self.__class__.__name__
+                f"{self.__class__.__name__}.print_resolution cannot be zero or negative"
             )
 
         return float(print_resolution)

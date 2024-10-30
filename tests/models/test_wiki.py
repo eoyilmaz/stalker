@@ -78,7 +78,7 @@ def test_title_argument_is_none(setup_page_tests):
     data["kwargs"]["title"] = None
     with pytest.raises(TypeError) as cm:
         Page(**data["kwargs"])
-    assert str(cm.value) == "Page.title should be a string, not NoneType"
+    assert str(cm.value) == "Page.title should be a string, not NoneType: 'None'"
 
 
 def test_title_attribute_is_set_to_none(setup_page_tests):
@@ -86,7 +86,7 @@ def test_title_attribute_is_set_to_none(setup_page_tests):
     data = setup_page_tests
     with pytest.raises(TypeError) as cm:
         data["test_page"].title = None
-    assert str(cm.value) == "Page.title should be a string, not NoneType"
+    assert str(cm.value) == "Page.title should be a string, not NoneType: 'None'"
 
 
 def test_title_argument_is_an_empty_string(setup_page_tests):
@@ -112,7 +112,7 @@ def test_title_argument_is_not_a_string(setup_page_tests):
     data["kwargs"]["title"] = 2165
     with pytest.raises(TypeError) as cm:
         Page(**data["kwargs"])
-    assert str(cm.value) == "Page.title should be a string, not int"
+    assert str(cm.value) == "Page.title should be a string, not int: '2165'"
 
 
 def test_title_attribute_is_not_a_string(setup_page_tests):
@@ -120,7 +120,7 @@ def test_title_attribute_is_not_a_string(setup_page_tests):
     data = setup_page_tests
     with pytest.raises(TypeError) as cm:
         data["test_page"].title = 2135
-    assert str(cm.value) == "Page.title should be a string, not int"
+    assert str(cm.value) == "Page.title should be a string, not int: '2135'"
 
 
 def test_title_argument_is_working_properly(setup_page_tests):
@@ -182,7 +182,7 @@ def test_content_argument_is_not_a_string(setup_page_tests):
     data["kwargs"]["content"] = 1234
     with pytest.raises(TypeError) as cm:
         Page(**data["kwargs"])
-    assert str(cm.value) == "Page.content should be a string, not int"
+    assert str(cm.value) == "Page.content should be a string, not int: '1234'"
 
 
 def test_content_attribute_is_set_to_a_value_other_than_a_string(setup_page_tests):
@@ -190,7 +190,9 @@ def test_content_attribute_is_set_to_a_value_other_than_a_string(setup_page_test
     data = setup_page_tests
     with pytest.raises(TypeError) as cm:
         data["test_page"].content = ["not", "a", "string"]
-    assert str(cm.value) == "Page.content should be a string, not list"
+    assert str(cm.value) == (
+        "Page.content should be a string, not list: '['not', 'a', 'string']'"
+    )
 
 
 def test_content_argument_is_working_properly(setup_page_tests):

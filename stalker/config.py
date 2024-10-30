@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-
+"""Config related functions and classes are situated here."""
 import datetime
 import os
 import sys
+from typing import Any
 
 from stalker import log
 
@@ -10,9 +11,9 @@ logger = log.get_logger(__name__)
 
 
 class ConfigBase(object):
-    """Config abstraction
+    """Config abstraction.
 
-    Idea is coming from Sphinx config.
+    This is based on Sphinx's config idiom.
     """
 
     default_config_values = {}
@@ -31,6 +32,8 @@ class ConfigBase(object):
             config.py under .stalker_rc directory
             config.py under $STALKER_PATH
 
+        Raises:
+            RuntimeError: If there is a Syntax error in the configuration.
         """
         # for now just use $STALKER_PATH
         # try to get the environment variable
@@ -59,12 +62,12 @@ class ConfigBase(object):
                     exec(f.read(), self.user_config)
             except IOError:
                 logger.warning(
-                    "The $STALKER_PATH: %s doesn't exists! "
-                    "skipping user config" % resolved_path
+                    f"The $STALKER_PATH: {resolved_path} doesn't exists! "
+                    "skipping user config"
                 )
             except SyntaxError as e:
                 raise RuntimeError(
-                    "There is a syntax error in your configuration file: %s" % str(e)
+                    f"There is a syntax error in your configuration file: {e}"
                 )
             finally:
                 # append the data to the current settings
@@ -73,26 +76,61 @@ class ConfigBase(object):
                     # if key in self.config_values:
                     self.config_values[key] = self.user_config[key]
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
+        """Return the config value as if it is an attribute look up.
+
+        Args:
+            name (str): The name of the config value.
+
+        Returns:
+            Any: The value related to the given config value.
+        """
         return self.config_values[name]
 
-    def __getitem__(self, name):
+    def __getitem__(self, name) -> Any:
+        """Return item with the key.
+
+        Args:
+            name (str): The key to find the value of.
+
+        Returns:
+            Any: The value related to the given key.
+        """
         return getattr(self, name)
 
-    def __setitem__(self, name, value):
-        return setattr(self, name, value)
+    def __setitem__(self, name, value) -> None:
+        """Set the item with index of name to value.
 
-    def __delitem__(self, name):
-        # delattr(self, name)
+        Args:
+            name (str): The name as the index.
+            value (Any): The value to set the item to.
+        """
+        setattr(self, name, value)
+
+    def __delitem__(self, name: str) -> None:
+        """Delete the item with the given name.
+
+        Args:
+            name (str): The name of the item to delete.
+        """
         self.config_values.pop(name)
 
-    def __contains__(self, name):
+    def __contains__(self, name: str) -> bool:
+        """Check if this contains the name.
+
+        Args:
+            name (str): The config name.
+
+        Returns:
+            bool: True if this contains the name, False otherwise.
+        """
         return name in self.config_values
 
 
 class Config(ConfigBase):
-    """Holds system-wide configuration variables. See
-    `configuring stalker`_ for more detail.
+    """Holds system-wide configuration variables.
+
+    See `configuring stalker`_ for more detail.
 
     .. _configuring stalker: ../configure.html
     """
@@ -255,7 +293,7 @@ class Config(ConfigBase):
 {{wh(workinghours, 'thu')}}
 {{wh(workinghours, 'fri')}}
 {{wh(workinghours, 'sat')}}
-{{wh(workinghours, 'sun')}}""",
+{{wh(workinghours, 'sun')}}""",  # noqa: B950
         tjp_studio_template="""
 project {{ studio.tjp_id }} "{{ studio.tjp_id }}" {{ studio.start.date() }} - {{ studio.end.date() }} {
     timingresolution {{ '%i'|format((studio.timing_resolution.days * 86400 + studio.timing_resolution.seconds)//60|int) }}min
@@ -267,7 +305,7 @@ project {{ studio.tjp_id }} "{{ studio.tjp_id }}" {{ studio.start.date() }} - {{
     scenario plan "Plan"
     trackingscenario plan
 }
-""",
+""",  # noqa: B950
         tjp_project_template="""
 task {{project.tjp_id}} "{{project.tjp_id}}" {
     {% for task in project.root_tasks %}
@@ -330,8 +368,8 @@ task {{task.tjp_id}} "{{task.tjp_id}}" {
     {% endif %}
 
 }
-""",
-        tjp_task_dependency_template="""{{depends_to.tjp_abs_id}} { {{- dependency_target}}{%if gap_timing %} gap{{gap_model}} {{gap_timing}}{{gap_unit -}}{%endif -%}}""",
+""",  # noqa: B950
+        tjp_task_dependency_template="""{{depends_to.tjp_abs_id}} { {{- dependency_target}}{%if gap_timing %} gap{{gap_model}} {{gap_timing}}{{gap_unit -}}{%endif -%}}""",  # noqa: B950
         tjp_department_template="""
 resource {{department.tjp_id}} "{{department.tjp_id}}" {
 {% for resource in department.users %}
@@ -339,7 +377,7 @@ resource {{department.tjp_id}} "{{department.tjp_id}}" {
 {% endfor -%}
 }
 """,
-        tjp_vacation_template="""vacation {{ vacation.start.astimezone(utc).strftime('%Y-%m-%d-%H:%M:%S') }} - {{ vacation.end.astimezone(utc).strftime('%Y-%m-%d-%H:%M:%S') }}""",
+        tjp_vacation_template="""vacation {{ vacation.start.astimezone(utc).strftime('%Y-%m-%d-%H:%M:%S') }} - {{ vacation.end.astimezone(utc).strftime('%Y-%m-%d-%H:%M:%S') }}""",  # noqa: B950
         tjp_user_template="""resource {{user.tjp_id}} "{{user.tjp_id}}" {
     efficiency {{user.efficiency}}
 {% if user.vacations %}
@@ -395,8 +433,8 @@ taskreport breakdown "{{csv_file_name}}"{
     columns id, start, end {%- if compute_resources %}, resources{% endif %}
 }""",
         tj_command="tj3" if sys.platform == "win32" else "/usr/local/bin/tj3",
-        path_template="{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}",
-        filename_template='{{task.entity_type}}_{{task.id}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}',
+        path_template="{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}",  # noqa: B950
+        filename_template='{{task.entity_type}}_{{task.id}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}',  # noqa: B950
         # --------------------------------------------
         # the following settings came from oyProjectManager
         sequence_format="%h%p%t %R",
@@ -440,7 +478,7 @@ taskreport breakdown "{{csv_file_name}}"{
             {{asset_path}}/Texture
             {{asset_path}}/Reference
         {% endfor %}
-        """,
+        """,  # noqa: B950
         thumbnail_format="jpg",
         thumbnail_quality=70,
         thumbnail_size=[320, 180],

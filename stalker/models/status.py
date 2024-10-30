@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
+"""Status and StatusList related functions and classes are situated here."""
 from six import string_types
-from sqlalchemy import Table, Column, Integer, ForeignKey
+
+from sqlalchemy import Column, ForeignKey, Integer, Table
 from sqlalchemy.orm import relationship, validates
 
-from stalker.db.session import DBSession
 from stalker.db.declarative import Base
-from stalker.models.entity import Entity
-from stalker.models.mixins import TargetEntityTypeMixin
-from stalker.models.mixins import CodeMixin
+from stalker.db.session import DBSession
 from stalker.log import get_logger
+from stalker.models.entity import Entity
+from stalker.models.mixins import CodeMixin, TargetEntityTypeMixin
 
 logger = get_logger(__name__)
 
@@ -88,7 +89,7 @@ class Status(Entity, CodeMixin):
 class StatusList(Entity, TargetEntityTypeMixin):
     """Type specific list of :class:`.Status` instances.
 
-    Holds multiple :class:`.Status`\ es to be used as a choice list for several
+    Holds multiple :class:`.Status` instances to be used as a choice list for several
     other classes.
 
     A StatusList can only be assigned to only one entity type. So a
@@ -115,7 +116,7 @@ class StatusList(Entity, TargetEntityTypeMixin):
 
     :param statuses: This is a list of :class:`.Status` instances, so you can
       prepare different StatusLists for different kind of entities using the
-      same pool of :class:`.Status`\ es.
+      same pool of :class:`.Status` instances.
 
     :param target_entity_type: use this parameter to specify the target entity
       type that this StatusList is designed for. It accepts classes or names
@@ -179,12 +180,25 @@ class StatusList(Entity, TargetEntityTypeMixin):
 
     @validates("statuses")
     def _validate_statuses(self, key, status):
-        """validates the given status"""
+        """Validate the given status value.
+
+        Args:
+            key (str): The name of the validated column.
+            status (Status): The status value to be validated.
+
+        Raises:
+            TypeError: If the status value is not a Status instance.
+
+        Returns:
+            Status: The validated status value.
+        """
         if not isinstance(status, Status):
             raise TypeError(
-                "All of the elements in %s.statuses must be an instance of "
-                "stalker.models.status.Status, and not %s"
-                % (self.__class__.__name__, status.__class__.__name__)
+                "All of the elements in {cls}.statuses must be an instance of "
+                "stalker.models.status.Status, and not {status}".format(
+                    cls=self.__class__.__name__,
+                    status=status.__class__.__name__,
+                )
             )
         return status
 
@@ -216,28 +230,49 @@ class StatusList(Entity, TargetEntityTypeMixin):
         return super(StatusList, self).__hash__()
 
     def __getitem__(self, key):
-        """the indexing attributes for getting item"""
+        """Return the Status at the given key.
+
+        Args:
+            key (int): The index to return the value of.
+
+        Returns:
+            Status: The Status instance at the given index.
+        """
+        return_item = None
         with DBSession.no_autoflush:
-            return_item = None
             if isinstance(key, string_types):
                 for item in self.statuses:
                     if item == key:
                         return_item = item
+                        break
             else:
                 return_item = self.statuses[key]
 
         return return_item
 
-    def __setitem__(self, key, value):
-        """the indexing attributes for setting item"""
+    def __setitem__(self, key: int, value: Status) -> None:
+        """Set the value at the given index.
+
+        Args:
+            key (int): The index to set the item value to.
+            value (Status): The Status instance to set at the given index.
+        """
         self.statuses[key] = value
 
-    def __delitem__(self, key):
-        """the indexing attributes for deleting item"""
+    def __delitem__(self, key: int) -> None:
+        """Delete the item with the given key.
+
+        Args:
+            key (int): Remove the Status at the given index.
+        """
         del self.statuses[key]
 
-    def __len__(self):
-        """the indexing attributes for getting the length"""
+    def __len__(self) -> int:
+        """Return the  number of Statuses in this StatusList.
+
+        Returns:
+            int: The number of Statuses in this StatusList.
+        """
         return len(self.statuses)
 
 

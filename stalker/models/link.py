@@ -66,8 +66,8 @@ class Link(Entity):
     )
 
     original_filename = Column(String(256))  # this is a limit for most
-    # filesystems
-    full_path = Column(Text, doc="""The full path of the url to the link.""")
+    # file systems
+    full_path = Column(Text, doc="The full path of the url to the link.")
 
     def __init__(self, full_path="", original_filename="", **kwargs):
         super(Link, self).__init__(**kwargs)
@@ -93,8 +93,8 @@ class Link(Entity):
 
         if not isinstance(full_path, string_types):
             raise TypeError(
-                "%s.full_path should be an instance of string not %s"
-                % (self.__class__.__name__, full_path.__class__.__name__)
+                f"{self.__class__.__name__}.full_path should be an instance of string "
+                f"not {full_path.__class__.__name__}"
             )
 
         return self._format_path(full_path)
@@ -122,8 +122,8 @@ class Link(Entity):
 
         if not isinstance(original_filename, string_types):
             raise TypeError(
-                "%s.original_filename should be an instance of str and not "
-                "%s" % (self.__class__.__name__, original_filename.__class__.__name__)
+                f"{self.__class__.__name__}.original_filename should be an instance of "
+                f"str and not {original_filename.__class__.__name__}"
             )
 
         return original_filename
@@ -166,17 +166,17 @@ class Link(Entity):
             ValueError: If the given path is an empty str.
         """
         if path is None:
-            raise TypeError("%s.path can not be set to None" % self.__class__.__name__)
+            raise TypeError(f"{self.__class__.__name__}.path can not be set to None")
 
         if not isinstance(path, string_types):
             raise TypeError(
-                "%s.path should be an instance of str, not %s"
-                % (self.__class__.__name__, path.__class__.__name__)
+                f"{self.__class__.__name__}.path should be an instance of str, "
+                f"not {path.__class__.__name__}"
             )
 
         if path == "":
             raise ValueError(
-                "%s.path can not be an empty string" % self.__class__.__name__
+                f"{self.__class__.__name__}.path can not be an empty string"
             )
 
         self.full_path = self._format_path(os.path.join(path, self.filename))
@@ -205,8 +205,8 @@ class Link(Entity):
 
         if not isinstance(filename, string_types):
             raise TypeError(
-                "%s.filename should be an instance of str, not %s"
-                % (self.__class__.__name__, filename.__class__.__name__)
+                f"{self.__class__.__name__}.filename should be an instance of str, "
+                f"not {filename.__class__.__name__}"
             )
 
         self.full_path = self._format_path(os.path.join(self.path, filename))
@@ -235,8 +235,8 @@ class Link(Entity):
 
         if not isinstance(extension, string_types):
             raise TypeError(
-                "%s.extension should be an instance of str, not %s"
-                % (self.__class__.__name__, extension.__class__.__name__)
+                f"{self.__class__.__name__}.extension should be an instance of str, "
+                f"not {extension.__class__.__name__}"
             )
 
         if extension != "":

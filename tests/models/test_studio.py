@@ -769,9 +769,9 @@ def test_now_arg_is_not_a_datetime_instance(setup_studio_db_tests):
     with pytest.raises(TypeError) as cm:
         Studio(**data["kwargs"])
 
-    assert (
-        str(cm.value)
-        == "Studio.now attribute should be an instance of datetime.datetime, not str"
+    assert str(cm.value) == (
+        "Studio.now attribute should be an instance of datetime.datetime, "
+        "not str: 'not a datetime instance'"
     )
 
 
@@ -787,7 +787,7 @@ def test_now_attribute_is_set_to_a_value_other_than_datetime_instance(
 
     assert (
         str(cm.value) == "Studio.now attribute should be an instance of "
-        "datetime.datetime, not str"
+        "datetime.datetime, not str: 'not a datetime instance'"
     )
 
 
@@ -873,7 +873,7 @@ def test_scheduler_attribute_accepts_scheduler_instances_only(setup_studio_db_te
 
     assert (
         str(cm.value) == "Studio.scheduler should be an instance of "
-        "stalker.models.scheduler.SchedulerBase, not str"
+        "stalker.models.scheduler.SchedulerBase, not str: 'not a Scheduler instance'"
     )
 
 
@@ -1651,7 +1651,8 @@ def test_timing_resolution_arg_is_not_a_timedelta_instance(setup_studio_db_tests
         Studio(**data["kwargs"])
 
     assert str(cm.value) == (
-        "Studio.timing_resolution should be an instance of datetime.timedelta not, str"
+        "Studio.timing_resolution should be an instance of datetime.timedelta, "
+        "not str: 'not a timedelta instance'"
     )
 
 
@@ -1663,7 +1664,8 @@ def test_timing_resolution_attribute_is_not_a_timedelta_instance(setup_studio_db
         new_foo_obj.timing_resolution = "not a timedelta instance"
 
     assert str(cm.value) == (
-        "Studio.timing_resolution should be an instance of datetime.timedelta not, str"
+        "Studio.timing_resolution should be an instance of datetime.timedelta, "
+        "not str: 'not a timedelta instance'"
     )
 
 

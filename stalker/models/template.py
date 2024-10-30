@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
+"""FilenameTemplate related functions and classes are situated here."""
+from typing import Union
+
 from six import string_types
-from sqlalchemy import Column, Integer, ForeignKey, Text
+
+from sqlalchemy import Column, ForeignKey, Integer, Text
 from sqlalchemy.orm import validates
-from stalker.models.entity import Entity
-from stalker.models.mixins import TargetEntityTypeMixin
 
 from stalker.log import get_logger
+from stalker.models.entity import Entity
+from stalker.models.mixins import TargetEntityTypeMixin
 
 logger = get_logger(__name__)
 
@@ -45,34 +49,33 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
         # Stalker is now able to produce a path and a filename for any Version
         # related to an asset in this project.
 
-    :param str target_entity_type: The class name that this FilenameTemplate
-      is designed for. You can also pass the class itself. So both of the
-      examples below can work::
+    Args:
+        target_entity_type (str): The class name that this FilenameTemplate is designed
+            for. You can also pass the class itself. So both of the examples below can
+            work::
 
-        new_filename_template1 = FilenameTemplate(target_entity_type="Asset")
-        new_filename_template2 = FilenameTemplate(target_entity_type=Asset)
+                new_filename_template1 = FilenameTemplate(target_entity_type="Asset")
+                new_filename_template2 = FilenameTemplate(target_entity_type=Asset)
 
-      A TypeError will be raised when it is skipped or it is None and a
-      ValueError will be raised when it is given as and empty string.
+            A TypeError will be raised when it is skipped or it is None and a
+            ValueError will be raised when it is given as and empty string.
 
-    :param str path: A `Jinja2`_ template code which specifies the path of the
-      given item. It is relative to the repository root. A typical example
-      could be::
+        path (str): A `Jinja2`_ template code which specifies the path of the given
+            item. It is relative to the repository root. A typical example  could be::
 
-        '$REPO{{project.repository.id}}/{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}'
+            '$REPO{{project.repository.id}}/{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}'
 
-    :param str filename: A `Jinja2`_ template code which specifies the file
-      name of the given item. It is relative to the
-      :attr:`.FilenameTemplate.path`. A typical example could be::
+        filename (str): A `Jinja2`_ template code which specifies the file name of the
+            given item. It is relative to the :attr:`.FilenameTemplate.path`. A typical
+            example could be::
 
-        '{{version.nice_name}}_v{{"%03d"|format(version.version_number)}}'
+            '{{version.nice_name}}_v{{"%03d"|format(version.version_number)}}'
 
-      Could be set to an empty string or None, the default value is None.
-
-      It can be None, or an empty string, or it can be skipped.
+            Could be set to an empty string or None, the default value is None. It can
+            be None, or an empty string, or it can be skipped.
 
     .. _Jinja2: http://jinja.pocoo.org/docs/
-    """
+    """  # noqa: B950
 
     __auto_name__ = False
     __strictly_typed__ = False
@@ -97,34 +100,58 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
         self.filename = filename
 
     @validates("path")
-    def _validate_path(self, key, path_in):
-        """validates the given path attribute for several conditions"""
-        # check if it is None
-        if path_in is None:
-            path_in = ""
+    def _validate_path(self, key: str, path: Union[None, str]) -> str:
+        """Validate the given path value.
 
-        if not isinstance(path_in, string_types):
+        Args:
+            key (str): The name of the validated column.
+            path (Union[None, str]): The path value to be validated.
+
+        Raises:
+            TypeError: If the given path value is not None and not a string.
+
+        Returns:
+            str: The validated path value.
+        """
+        # check if it is None
+        if path is None:
+            path = ""
+
+        if not isinstance(path, string_types):
             raise TypeError(
-                "%s.path attribute should be string not %s"
-                % (self.__class__.__name__, path_in.__class__.__name__)
+                "{}.path attribute should be string, not {}: '{}'".format(
+                    self.__class__.__name__, path.__class__.__name__, path
+                )
             )
 
-        return path_in
+        return path
 
     @validates("filename")
-    def _validate_filename(self, key, filename_in):
-        """validates the given filename attribute for several conditions"""
-        # check if it is None
-        if filename_in is None:
-            filename_in = ""
+    def _validate_filename(self, key: str, filename: Union[None, str]) -> str:
+        """Validate the given filename value.
 
-        if not isinstance(filename_in, string_types):
+        Args:
+            key (str): The name of the validated column.
+            filename (Union[None, str]): The filename value to be validated.
+
+        Raises:
+            TypeError: If the given filename value is not None and not a string.
+
+        Returns:
+            str: The validated filename value.
+        """
+        # check if it is None
+        if filename is None:
+            filename = ""
+
+        if not isinstance(filename, string_types):
             raise TypeError(
-                "%s.filename attribute should be string not %s"
-                % (self.__class__.__name__, filename_in.__class__.__name__)
+                "{}.filename attribute should be string, not {}: '{}'".format(
+                    self.__class__.__name__, filename.__class__.__name__, filename
+                )
             )
 
-        return filename_in
+        return filename
 
     def __eq__(self, other):
         """Check the equality.

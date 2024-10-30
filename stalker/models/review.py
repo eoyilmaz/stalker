@@ -135,16 +135,15 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
 
             if not isinstance(task, Task):
                 raise TypeError(
-                    "%s.task should be an instance of "
-                    "stalker.models.task.Task, not %s"
-                    % (self.__class__.__name__, task.__class__.__name__)
+                    f"{self.__class__.__name__}.task should be an instance of "
+                    f"stalker.models.task.Task, not {task.__class__.__name__}"
                 )
 
             # is it a leaf task
             if not task.is_leaf:
                 raise ValueError(
                     "It is only possible to create a review for a leaf tasks, "
-                    "and %s is not a leaf task." % task
+                    f"and {task} is not a leaf task."
                 )
 
             # set the review_number of this review instance
@@ -170,9 +169,8 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
 
         if not isinstance(reviewer, User):
             raise TypeError(
-                "%s.reviewer should be set to a stalker.models.auth.User "
-                "instance, not %s"
-                % (self.__class__.__name__, reviewer.__class__.__name__)
+                f"{self.__class__.__name__}.reviewer should be set to a "
+                f"stalker.models.auth.User instance, not {reviewer.__class__.__name__}"
             )
         return reviewer
 
@@ -198,7 +196,7 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
             List[Review]: The Review instances in the same review set with this one.
         """
         logger.debug(
-            "finding revisions with the same review_number of: %s" % self.review_number
+            f"finding revisions with the same review_number of: {self.review_number}"
         )
         with DBSession.no_autoflush:
             logger.debug("using raw Python to get review set")
@@ -277,7 +275,7 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
             if revise_task:
                 # revise the task timing if the task needs more time
                 if total_seconds > self.task.schedule_seconds:
-                    logger.debug("total_seconds including reviews: %s" % total_seconds)
+                    logger.debug(f"total_seconds including reviews: {total_seconds}")
 
                     self.task.schedule_timing = timing
                     self.task.schedule_unit = unit
@@ -297,21 +295,23 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
 
             # update dependent task statuses
 
-            for dep in walk_hierarchy(self.task, "dependent_of", method=1):
-                logger.debug("current TaskDependency object: %s" % dep)
-                dep.update_status_with_dependent_statuses()
-                if dep.status.code in ["HREV", "PREV", "DREV", "OH", "STOP"]:
+            for dependency in walk_hierarchy(self.task, "dependent_of", method=1):
+                logger.debug(f"current TaskDependency object: {dependency}")
+                dependency.update_status_with_dependent_statuses()
+                if dependency.status.code in ["HREV", "PREV", "DREV", "OH", "STOP"]:
                     # for tasks that are still be able to continue to work,
                     # change the dependency_target to "onstart" to allow
                     # the two of the tasks to work together and still let the
                     # TJ to be able to schedule the tasks correctly
                     with DBSession.no_autoflush:
-                        tdeps = TaskDependency.query.filter_by(depends_to=dep).all()
+                        tdeps = (
+                            TaskDependency.query.filter_by(depends_to=dependency).all()
+                        )
                     for tdep in tdeps:
                         tdep.dependency_target = "onstart"
 
                 # also update the status of parents of dependencies
-                dep.update_parent_statuses()
+                dependency.update_parent_statuses()
 
         else:
             logger.debug("not all reviews are finalized yet!")
@@ -461,16 +461,11 @@ class DailyLink(Base):
         """
         from stalker import Link
 
-        if link is not None:
-            if not isinstance(link, Link):
-                raise TypeError(
-                    "%(class)s.link should be an instance of "
-                    "stalker.models.link.Link instance, not %(link_class)s"
-                    % {
-                        "class": self.__class__.__name__,
-                        "link_class": link.__class__.__name__,
-                    }
-                )
+        if link is not None and not isinstance(link, Link):
+            raise TypeError(
+                f"{self.__class__.__name__}.link should be an instance of "
+                f"stalker.models.link.Link instance, not {link.__class__.__name__}"
+            )
 
         return link
 
@@ -491,13 +486,9 @@ class DailyLink(Base):
         if daily is not None:
             if not isinstance(daily, Daily):
                 raise TypeError(
-                    "%(class)s.daily should be an instance of "
+                    f"{self.__class__.__name__}.daily should be an instance of "
                     "stalker.models.review.Daily instance, not "
-                    "%(daily_class)s"
-                    % {
-                        "class": self.__class__.__name__,
-                        "daily_class": daily.__class__.__name__,
-                    }
+                    f"{daily.__class__.__name__}"
                 )
 
         return daily

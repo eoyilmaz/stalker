@@ -1,22 +1,25 @@
 # -*- coding: utf-8 -*-
+"""Studio, WorkingHours and Vacation related functions and classes are situated here."""
 
 import copy
-import time
 import datetime
+import time
 from math import ceil
+from typing import List, Union
 
 from jinja2 import Template
 
 import pytz
 
 from six import string_types
-from sqlalchemy import Column, Integer, ForeignKey, Interval, Boolean, Text
-from sqlalchemy.orm import validates, relationship, synonym, reconstructor
 
-from stalker import log, defaults, Department, User, Project
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, Interval, Text
+from sqlalchemy.orm import reconstructor, relationship, synonym, validates
+
+from stalker import Department, Project, User, defaults, log
 from stalker.db.session import DBSession
-from stalker.db.types import GenericJSON, GenericDateTime
-from stalker.models.entity import SimpleEntity, Entity
+from stalker.db.types import GenericDateTime, GenericJSON
+from stalker.models.entity import Entity, SimpleEntity
 from stalker.models.mixins import DateRangeMixin, WorkingHoursMixin
 from stalker.models.schedulers import SchedulerBase
 
@@ -71,26 +74,20 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
       :attr:`.last_scheduled_by`
       :attr:`.last_schedule_message`
 
-    :param int daily_working_hours: An integer specifying the daily working
-      hours for the studio. It is another critical value attribute which
-      TaskJuggler uses mainly converting working day values to working hours
-      (1d = 10h kind of thing).
-
-    :param now: The now attribute overrides the TaskJugglers ``now`` attribute
-      allowing the user to schedule the projects as if the scheduling is done
-      on that date. The default value is the rounded value of
-      datetime.datetime.now(pytz.utc).
-
-    :type now: datetime.datetime
-
-    :param timing_resolution: The timing_resolution of the datetime.datetime
-      object in datetime.timedelta. Uses ``timing_resolution`` settings in the
-      :class:`stalker.config.Config` class which defaults to 1 hour. Setting
-      the timing_resolution to less then 5 minutes is not suggested because it
-      is a limit for TaskJuggler.
-
-    :type timing_resolution: datetime.timedelta
-
+    Args:
+        daily_working_hours (int): An integer specifying the daily working
+            hours for the studio. It is another critical value attribute which
+            TaskJuggler uses mainly converting working day values to working hours
+            (1d = 10h kind of thing).
+        now (datetime.datetime): The now attribute overrides the TaskJugglers ``now``
+            attribute allowing the user to schedule the projects as if the scheduling is
+            done on that date. The default value is the rounded value of
+            datetime.datetime.now(pytz.utc).
+        timing_resolution (datetime.timedelta): The timing_resolution of the
+            datetime.datetime object in datetime.timedelta. Uses ``timing_resolution``
+            settings in the :class:`stalker.config.Config` class which defaults to 1
+            hour. Setting the timing_resolution to less then 5 minutes is not suggested
+            because it is a limit for TaskJuggler.
     """
 
     __auto_name__ = False
@@ -156,17 +153,25 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         self.update_defaults()
 
     @property
-    def daily_working_hours(self):
-        """a shortcut for Studio.working_hours.daily_working_hours"""
+    def daily_working_hours(self) -> int:
+        """Return the Studio.working_hours.daily_working_hours.
+
+        Returns:
+            int: The daily working hours of this Studio.
+        """
         return self.working_hours.daily_working_hours
 
     @daily_working_hours.setter
-    def daily_working_hours(self, dwh):
-        """a shortcut for Studio.working_hours.daily_working_hours"""
-        self.working_hours.daily_working_hours = dwh
+    def daily_working_hours(self, daily_working_hours: int):
+        """Set the Studio.working_hours.daily_working_hours.
+
+        Args:
+            daily_working_hours (int): The daily working hours in this studio.
+        """
+        self.working_hours.daily_working_hours = daily_working_hours
 
     def update_defaults(self):
-        """updates the default values with the studio"""
+        """Update the default values with the studio."""
         # TODO: add update_defaults() to attribute edit/update methods,
         #       so we will always have an up to date info about the working
         #       hours.
@@ -179,18 +184,19 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
             if self.daily_working_hours:
                 defaults.daily_working_hours = self.daily_working_hours
                 logger.debug(
-                    "updated defaults.daily_working_hours: %s"
-                    % defaults.daily_working_hours
+                    "updated defaults.daily_working_hours: {}".format(
+                        defaults.daily_working_hours
+                    )
                 )
             else:
                 logger.debug("can not update defaults.daily_working_hours")
         except AttributeError:
             # The Studio and WorkingHours classes has changed from
-            # v0.2.3 to v0.2.5 and with this change it is simply
+            # version 0.2.3 to version 0.2.5 and with this change it is simply
             # not possible to initialize the db if we insist on updating the
             # defaults for daily_working_hours, because there is no
             # WorkingHours._daily_working_hours in versions before than
-            # v0.2.5, so just skip it for at least the studio instance
+            # version 0.2.5, so just skip it for at least the studio instance
             # in the database has been updated.
             logger.debug(
                 "Can not update defaults.daily_working_hours, WorkingHours "
@@ -200,8 +206,7 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         if self.weekly_working_days:
             defaults.weekly_working_days = self.weekly_working_days
             logger.debug(
-                "updated defaults.weekly_working_days: %s"
-                % defaults.weekly_working_days
+                f"updated defaults.weekly_working_days: {defaults.weekly_working_days}"
             )
         else:
             logger.debug("can not update defaults.weekly_working_days")
@@ -209,8 +214,9 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         if self.weekly_working_hours:
             defaults.weekly_working_hours = self.weekly_working_hours
             logger.debug(
-                "updated defaults.weekly_working_hours: %s"
-                % defaults.weekly_working_hours
+                "updated defaults.weekly_working_hours: {}".format(
+                    defaults.weekly_working_hours
+                )
             )
         else:
             logger.debug("can not update defaults.weekly_working_hours")
@@ -218,8 +224,7 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         if self.yearly_working_days:
             defaults.yearly_working_days = self.yearly_working_days
             logger.debug(
-                "updated defaults.yearly_working_days: %s"
-                % defaults.yearly_working_days
+                f"updated defaults.yearly_working_days: {defaults.yearly_working_days}"
             )
         else:
             logger.debug("can not update defaults.yearly_working_days")
@@ -227,85 +232,137 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         if self.timing_resolution:
             defaults.timing_resolution = self.timing_resolution
             logger.debug(
-                "updated defaults.timing_resolution: %s" % defaults.timing_resolution
+                f"updated defaults.timing_resolution: {defaults.timing_resolution}"
             )
         else:
             logger.debug("can not update defaults.timing_resolution")
 
         logger.debug(
             """done updating defaults:
-        daily_working_hours  : %(daily_working_hours)s
-        weekly_working_days  : %(weekly_working_days)s
-        weekly_working_hours : %(weekly_working_hours)s
-        yearly_working_days  : %(yearly_working_days)s
-        timing_resolution    : %(timing_resolution)s
-        """
-            % {
-                "daily_working_hours": defaults.daily_working_hours,
-                "weekly_working_days": defaults.weekly_working_days,
-                "weekly_working_hours": defaults.weekly_working_hours,
-                "yearly_working_days": defaults.yearly_working_days,
-                "timing_resolution": defaults.timing_resolution,
-            }
+        daily_working_hours  : {daily_working_hours}
+        weekly_working_days  : {weekly_working_days}
+        weekly_working_hours : {weekly_working_hours}
+        yearly_working_days  : {yearly_working_days}
+        timing_resolution    : {timing_resolution}
+        """.format(
+                daily_working_hours=defaults.daily_working_hours,
+                weekly_working_days=defaults.weekly_working_days,
+                weekly_working_hours=defaults.weekly_working_hours,
+                yearly_working_days=defaults.yearly_working_days,
+                timing_resolution=defaults.timing_resolution,
+            )
         )
 
     @reconstructor
     def __init_on_load__(self):
-        """update defaults on load"""
+        """Update defaults on load."""
         self.update_defaults()
 
-    def _validate_now(self, now_in):
-        """validates the given now_in value"""
-        if now_in is None:
-            now_in = datetime.datetime.now(pytz.utc)
+    def _validate_now(self, now):
+        """Validate the given now value.
 
-        if not isinstance(now_in, datetime.datetime):
+        Args:
+            now (Union[None, datetime.datetime]): Either None in which the current
+                date and time will be used or a datetime.datetime instance.
+
+        Raises:
+            TypeError: If the now value is not None and not a datetime.datetime
+                instance.
+
+        Returns:
+            datetime.datetime: The validated datetime.datetime value.
+        """
+        if now is None:
+            now = datetime.datetime.now(pytz.utc)
+
+        if not isinstance(now, datetime.datetime):
             raise TypeError(
-                "%s.now attribute should be an instance of datetime.datetime, "
-                "not %s" % (self.__class__.__name__, now_in.__class__.__name__)
+                "{}.now attribute should be an instance of datetime.datetime, "
+                "not {}: '{}'".format(
+                    self.__class__.__name__, now.__class__.__name__, now
+                )
             )
 
-        return self.round_time(now_in)
+        return self.round_time(now)
 
     @property
     def now(self):
-        """now getter"""
+        """Return the currently stored now value.
+
+        Returns:
+            datetime.datetime: Return the currently stored now value if there is any,
+                return the current date and time otherwise.
+        """
         try:
             if self._now is None:
                 self._now = self.round_time(datetime.datetime.now(pytz.utc))
         except AttributeError:
-            setattr(self, "_now", self.round_time(datetime.datetime.now(pytz.utc)))
+            self._now = self.round_time(datetime.datetime.now(pytz.utc))
         return self._now
 
     @now.setter
-    def now(self, now_in):
-        """now setter"""
-        self._now = self._validate_now(now_in)
+    def now(self, now):
+        """Set the current date and time.
 
-    def _validate_scheduler(self, scheduler_in):
-        """validates the given scheduler_in value"""
-        if scheduler_in is not None:
-            if not isinstance(scheduler_in, SchedulerBase):
-                raise TypeError(
-                    "%s.scheduler should be an instance of "
-                    "stalker.models.scheduler.SchedulerBase, not %s"
-                    % (self.__class__.__name__, scheduler_in.__class__.__name__)
+        Args:
+            now (datetime.datetime): The datetime.datetime instance showing the current
+                date and time, usefull for project management purposes before
+                scheduling.
+        """
+        self._now = self._validate_now(now)
+
+    def _validate_scheduler(
+        self, scheduler: Union[None, SchedulerBase]
+    ) -> Union[None, SchedulerBase]:
+        """Validate the given scheduler value.
+
+        Args:
+            scheduler (Union[None, SchedulerBase]): The scheduler to be used to schedule
+                the projects in this Studio instance. Can be set to None to disable the
+                scheduling abilities.
+
+        Raises:
+            TypeError: If the given scheduler value is not None and is not a
+                SchedulerBase instance.
+
+        Returns:
+            Union[None, SchedulerBase]: The validated scheduler value.
+        """
+        if scheduler is not None and not isinstance(scheduler, SchedulerBase):
+            raise TypeError(
+                "{}.scheduler should be an instance of "
+                "stalker.models.scheduler.SchedulerBase, not {}: '{}'".format(
+                    self.__class__.__name__, scheduler.__class__.__name__, scheduler
                 )
-        return scheduler_in
+            )
+        return scheduler
 
     @property
-    def scheduler(self):
-        """scheduler getter"""
+    def scheduler(self) -> Union[None, SchedulerBase]:
+        """Return the scheduler.
+
+        Returns:
+            Union[None, SchedulerBase]: The scheduler of this Studio.
+        """
         return self._scheduler
 
     @scheduler.setter
-    def scheduler(self, scheduler_in):
-        """the scheduler setter"""
+    def scheduler(self, scheduler_in: Union[None, SchedulerBase]):
+        """Set the scheduler.
+
+        Args:
+            scheduler_in (Union[None, SchedulerBase]): The SchedulerBase derivative as
+                the scheduler.
+        """
         self._scheduler = self._validate_scheduler(scheduler_in)
 
     @property
-    def to_tjp(self):
-        """converts the studio to a tjp representation"""
+    def to_tjp(self) -> str:
+        """Convert the studio to a tjp representation.
+
+        Returns:
+            str: The TaskJuggler representation of this Studio.
+        """
         temp = Template(
             defaults.tjp_studio_template, trim_blocks=True, lstrip_blocks=True
         )
@@ -322,52 +379,91 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
             }
         )
         end = time.time()
-        logger.debug("render studio to tjp took: %s seconds" % (end - start))
+        logger.debug("render studio to tjp took: {:0.3f} seconds".format(end - start))
         return rendered_template
 
     @property
-    def projects(self):
-        """returns all the projects in the studio"""
+    def projects(self) -> List[Project]:
+        """Returns all the projects in the studio.
+
+        Returns:
+            List[Project]: List of all the Project instances in this Studio.
+        """
         return Project.query.all()
 
     @property
-    def active_projects(self):
-        """returns all the active projects in the studio"""
+    def active_projects(self) -> List[Project]:
+        """Return all the active projects in the studio.
+
+        Returns:
+            List[Project]: List of active Project instances in this studio.
+        """
+        # TODO: Filter through the status of the project as the active attribute is
+        #       going to be removed with #74.
         return Project.query.filter_by(active=True).all()
 
     @property
-    def inactive_projects(self):
-        """return all the inactive projects in the studio"""
+    def inactive_projects(self) -> List[Project]:
+        """Return all the inactive projects in the studio.
+
+        Returns:
+            List[Project]: List of inactive Project instances in this studio.
+        """
+        # TODO: Filter through the status of the project as the active attribute is
+        #       going to be removed with #74.
         return Project.query.filter_by(active=False).all()
 
     @property
-    def departments(self):
-        """returns all the departments in the studio"""
+    def departments(self) -> List[Department]:
+        """Return all the departments in the studio.
+
+        Returns:
+            List[Department]: The list of Department instances in this Studio.
+        """
         return Department.query.all()
 
     @property
-    def users(self):
-        """returns all the users in the studio"""
+    def users(self) -> List[User]:
+        """Return all the users in the studio.
+
+        Returns:
+            List[User]: List of User instances in the studio.
+        """
         return User.query.all()
 
     @property
-    def vacations(self):
-        """returns all Vacations which doesn't have a User defined"""
-        return Vacation.query.filter(Vacation.user == None).all()
+    def vacations(self) -> List["Vacation"]:
+        """Return all Vacations which doesn't have a User defined.
+
+        Returns:
+            List[Vacation]: List of Vacation instances.
+        """
+        return Vacation.query.filter(Vacation.user == None).all()  # noqa: E711
 
     def schedule(self, scheduled_by=None):
-        """Schedules all the active projects in the studio. Needs a Scheduler,
-        so before calling it set a scheduler by using the :attr:`.scheduler`
-        attribute.
+        """Schedule all the active projects in the studio.
 
-        :param scheduled_by: A User instance who is doing the scheduling.
+        Needs a Scheduler, so before calling it set a scheduler by using the
+        :attr:`.scheduler` attribute.
+
+        Args:
+            scheduled_by (stalker.models.auth.User): A User instance who is doing the
+                scheduling.
+
+        Raises:
+            RuntimeError: If the `self.scheduler` is None or it is not a `SchedulerBase`
+                instance.
+
+        Returns:
+            str: The result of the scheduling process.
         """
         # check the scheduler first
         if self.scheduler is None or not isinstance(self.scheduler, SchedulerBase):
             raise RuntimeError(
-                "There is no scheduler for this %(class)s, please assign a "
-                "scheduler to the %(class)s.scheduler attribute, before "
-                "calling %(class)s.schedule()" % {"class": self.__class__.__name__}
+                "There is no scheduler for this {cls}, please assign a scheduler to "
+                "the {cls}.scheduler attribute, before calling {cls}.schedule()".format(
+                    cls=self.__class__.__name__
+                )
             )
 
         with DBSession.no_autoflush:
@@ -398,43 +494,77 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
 
                 # and who has done the scheduling
                 if scheduled_by:
-                    logger.debug("setting last_scheduled_by to : %s" % scheduled_by)
+                    logger.debug(f"setting last_scheduled_by to : {scheduled_by}")
                     self.last_scheduled_by = scheduled_by
 
         end = time.time()
-        logger.debug("scheduling took %s seconds" % (end - start))
+        logger.debug("scheduling took {:0.3f} seconds".format(end - start))
         return result
 
     @property
     def weekly_working_hours(self):
-        """returns the WorkingHours.weekly_working_hours"""
+        """Return the WorkingHours.weekly_working_hours value.
+
+        Returns:
+            int: The weekly working hours value stored in the working hours
+                configuration of this Studio instance.
+        """
         return self.working_hours.weekly_working_hours
 
     @property
     def weekly_working_days(self):
-        """returns the WorkingHours.weekly_working_hours"""
+        """Return the WorkingHours.weekly_working_hours value.
+
+        Returns:
+            int: The weekly working days value stored in the working hours
+                configuration of this Studio instance.
+        """
         return self.working_hours.weekly_working_days
 
     @property
-    def yearly_working_days(self):
-        """returns the yearly working days"""
+    def yearly_working_days(self) -> int:
+        """Return the WorkingHours.yearly_working_days value.
+
+        Returns:
+            int: The yearly working days in the working hours configuration of this
+                Studio instance.
+        """
         return self.working_hours.yearly_working_days
 
     def to_unit(self, from_timing, from_unit, to_unit, working_hours=True):
-        """converts the given timing and unit to the desired unit
-        if working_hours=True then the given timing is considered as working
-        hours
+        """Convert the given timing and unit to the desired unit.
+
+        If working_hours=True then the given timing is considered as working hours.
+
+        Args:
+            from_timing (int): The timing value.
+            from_unit (str): The timing unit.
+            to_unit (str): The other timing unit to convert the given timing unit to.
+            working_hours (bool): True to consider the given from timing as a working
+                hour. Default is True.
+
+        Raises:
+            NotImplementedError: Unless it is implemented.
         """
         raise NotImplementedError("this is not implemented yet")
 
     def _timing_resolution_getter(self):
-        """returns the timing_resolution"""
+        """Return the timing_resolution value.
+
+        Returns:
+            datetime.timedelta: The timing resolution stored in this Studio instance.
+        """
         return self._timing_resolution
 
-    def _timing_resolution_setter(self, res_in):
-        """sets the timing_resolution"""
-        self._timing_resolution = self._validate_timing_resolution(res_in)
-        logger.debug("self._timing_resolution: %s" % self._timing_resolution)
+    def _timing_resolution_setter(self, timing_resolution):
+        """Set the timing_resolution.
+
+        Args:
+            timing_resolution (datetime.timedelta): The `timing_resolution` instance to
+                validate.
+        """
+        self._timing_resolution = self._validate_timing_resolution(timing_resolution)
+        logger.debug(f"self._timing_resolution: {self._timing_resolution}")
         # update date values
         if self.start and self.end and self.duration:
             self._start, self._end, self._duration = self._validate_dates(
@@ -456,15 +586,30 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
     )
 
     def _validate_timing_resolution(self, timing_resolution):
-        """validates the given timing_resolution value"""
+        """Validate the given timing_resolution value.
+
+        Args:
+            timing_resolution (datetime.timedelta): The timing resolution value as a
+                `datetime.timedelta` instance.
+
+        Raises:
+            TypeError: If the given `timing_resolution` is not a `datetime.timedelta`
+                instance.
+
+        Returns:
+            datetime.timedelta: The validated timing resolution instance.
+        """
         if timing_resolution is None:
             timing_resolution = defaults.timing_resolution
 
         if not isinstance(timing_resolution, datetime.timedelta):
             raise TypeError(
-                "%s.timing_resolution should be an instance of "
-                "datetime.timedelta not, %s"
-                % (self.__class__.__name__, timing_resolution.__class__.__name__)
+                "{}.timing_resolution should be an instance of "
+                "datetime.timedelta, not {}: '{}'".format(
+                    self.__class__.__name__,
+                    timing_resolution.__class__.__name__,
+                    timing_resolution,
+                )
             )
 
         return timing_resolution
@@ -518,12 +663,15 @@ class WorkingHours(Entity):
       # by the stalker.config.Config.day_order
       assert wh[0] == defaults.working_hours[defaults.day_order[0]]
 
-    :param working_hours: The dictionary that shows the working hours. The keys
-      of the dictionary should be one of ['mon', 'tue', 'wed', 'thu', 'fri',
-      'sat', 'sun']. And the values should be a list of two integers like
-      [[int, int], [int, int], ...] format, showing the minutes after midnight.
-      For missing days the default value will be used. If skipped the default
-      value is going to be used.
+    Args:
+        working_hours (Union[None, dict]): The dictionary that shows the working hours.
+            The keys of the dictionary should be one of ['mon', 'tue', 'wed', 'thu',
+            'fri', 'sat', 'sun']. And the values should be a list of two integers like
+            [[int, int], [int, int], ...] format, showing the minutes after midnight.
+            For missing days the default value will be used. If skipped the default
+            value is going to be used.
+        daily_working_hours (Union[None, int]): The daily working hours value. If given
+            None the default value will be used.
     """
 
     __auto_name__ = True
@@ -559,60 +707,107 @@ class WorkingHours(Entity):
             and other.working_hours == self.working_hours
         )
 
-    def __getitem__(self, item):
-        if isinstance(item, int):
-            return self.working_hours[defaults.day_order[item]]
-        elif isinstance(item, string_types):
-            return self.working_hours[item]
+    def __getitem__(self, index: Union[int, str]):
+        """Return the item at the given index.
+
+        Args:
+            index (Union[int, str]): Either an integer representing the weekday starting
+                from Monday:0 or a string value of a shorthand day name one of
+                ["mon", "tue", "wed", "thu", "fri", "sat", "sun"].
+
+        Returns:
+            List[int, int]: The daily working hour arranged in a list where the first
+                item is the minute from the midnight of the start of the working hour
+                and the second item is the minute from the midnight of the end of the
+                daily working hour. As in [540, 1080] represents 9am to 6pm.
+        """
+        if isinstance(index, int):
+            return self.working_hours[defaults.day_order[index]]
+        elif isinstance(index, string_types):
+            return self.working_hours[index]
 
     def __setitem__(self, key, value):
-        self._validate_wh_value(value)
+        """Set the item value at the given index.
+
+        Args:
+            key (Union[int, str]): The index to set the value of or the day name.
+            value (List[List[int, int]]): The working hours data aranged in a list of
+                lists of two integers.
+
+        Raises:
+            KeyError: If the given key value is not one of the day names.
+        """
+        self._validate_working_hours_value(value)
         if isinstance(key, int):
             self.working_hours[defaults.day_order[key]] = value
         elif isinstance(key, string_types):
             # check if key is in
             if key not in defaults.day_order:
                 raise KeyError(
-                    "%s accepts only %s as key, not '%s'"
-                    % (self.__class__.__name__, defaults.day_order, key)
+                    "{} accepts only {} as key, not '{}'".format(
+                        self.__class__.__name__, defaults.day_order, key
+                    )
                 )
             self.working_hours[key] = value
 
     @validates("working_hours")
-    def _validate_working_hours(self, key, wh_in):
-        """validates the given working hours"""
-        if not isinstance(wh_in, dict):
+    def _validate_working_hours(self, key, working_hours) -> dict:
+        """Validate the given working hours value.
+
+        Args:
+            key (str): The name of the validated column.
+            working_hours (dict): The working hours value to be validated.
+
+        Raises:
+            TypeError: If the given working hours is not a dictionary.
+            TypeError: If the values in the working hours dictionary are not lists.
+
+        Returns:
+            dict: The validated working hours dictionary.
+        """
+        if not isinstance(working_hours, dict):
             raise TypeError(
-                "%s.working_hours should be a dictionary, not %s"
-                % (self.__class__.__name__, wh_in.__class__.__name__)
+                "{}.working_hours should be a dictionary, not {}: '{}'".format(
+                    self.__class__.__name__,
+                    working_hours.__class__.__name__,
+                    working_hours,
+                )
             )
 
-        for key in wh_in.keys():
-            if not isinstance(wh_in[key], list):
+        for key in working_hours.keys():
+            if not isinstance(working_hours[key], list):
                 raise TypeError(
-                    '%s.working_hours should be a dictionary with keys "mon, '
+                    '{}.working_hours should be a dictionary with keys "mon, '
                     'tue, wed, thu, fri, sat, sun" and the values should a '
                     "list of lists of two integers like [[540, 720], [800, "
-                    "1080]], not %s"
-                    % (self.__class__.__name__, wh_in[key].__class__.__name__)
+                    "1080]], not {}: '{}'".format(
+                        self.__class__.__name__,
+                        working_hours[key].__class__.__name__,
+                        working_hours[key],
+                    )
                 )
 
             # validate item values
-            self._validate_wh_value(wh_in[key])
+            self._validate_working_hours_value(working_hours[key])
 
         # update the default values with the supplied working_hour dictionary
         # copy the defaults
         wh_def = copy.copy(defaults.working_hours)
         # update them
-        wh_def.update(wh_in)
+        wh_def.update(working_hours)
 
         return wh_def
 
-    def is_working_hour(self, check_for_date):
-        """checks if the given datetime is in working hours
+    def is_working_hour(self, check_for_date) -> bool:
+        """Check if the given datetime is in working hours.
 
-        :param datetime.datetime check_for_date: The time to check if it is a
-          working hour
+        Args:
+            check_for_date (datetime.datetime): The time value to check if it is a
+                working hour.
+
+        Returns:
+            bool: True if the given datetime coincides to a working hour, False
+                otherwise.
         """
         weekday_nr = check_for_date.weekday()
         hour = check_for_date.hour
@@ -621,57 +816,99 @@ class WorkingHours(Entity):
         time_from_midnight = hour * 60 + minute
 
         # check if the hour is inside the working hour ranges
-        logger.debug("checking for: %s" % time_from_midnight)
-        logger.debug("self[weekday_nr]: %s" % self[weekday_nr])
+        logger.debug(f"checking for: {time_from_midnight}")
+        logger.debug(f"self[weekday_nr]: {self[weekday_nr]}")
         for working_hour_groups in self[weekday_nr]:
             start = working_hour_groups[0]
             end = working_hour_groups[1]
-            logger.debug("start       : %s" % start)
-            logger.debug("end         : %s" % end)
+            logger.debug(f"start       : {start}")
+            logger.debug(f"end         : {end}")
             if start <= time_from_midnight < end:
                 return True
 
         return False
 
-    def _validate_wh_value(self, value):
-        """validates the working hour value"""
+    def _validate_working_hours_value(self, value: List):
+        """Validate the working hour value.
+
+        The given value should follow the following format:
+
+        .. code-block:: python
+
+            working_hours = [
+                [540, 1080],  # Working hour in minutes for Monday
+                [540, 1080],  # Working hour in minutes for Tuesday
+                [540, 1080],  # Working hour in minutes for Wednesday
+                [540, 1080],  # Working hour in minutes for Thursday
+                [540, 1080],  # Working hour in minutes for Friday
+                [0, 0],  # Working hour in minutes for Saturday
+                [0, 0],  # Working hour in minutes for Sunday
+            ]
+
+        Args:
+            value (List): The validated working hour value.
+
+        Raises:
+            TypeError: If the given value is not a list.
+            TypeError: If the immediate items in the list is not a list.
+            RuntimeError: If the length of the items in the given list is not 2.
+            TypeError: If the items in the lists inside the list are not integers.
+            ValueError: If the integer values in the secondary lists are smaller than 0
+                or larger than 1440 (which is 24 * 60).
+
+        Returns:
+            List[List[int, int]]
+        """
         err = (
-            "%s.working_hours value should be a list of lists of two "
+            "{}.working_hours value should be a list of lists of two "
             "integers between and the range of integers should be 0-1440, "
-            "not %s"
+            "not {}"
         )
 
         if not isinstance(value, list):
-            raise TypeError(err % (self.__class__.__name__, value.__class__.__name__))
+            raise TypeError(
+                err.format(self.__class__.__name__, value.__class__.__name__)
+            )
 
         for i in value:
             if not isinstance(i, list):
-                raise TypeError(err % (self.__class__.__name__, i.__class__.__name__))
+                raise TypeError(
+                    err.format(self.__class__.__name__, i.__class__.__name__)
+                )
 
             # check list length
             if len(i) != 2:
-                raise RuntimeError(err % (self.__class__.__name__, value))
+                raise RuntimeError(err.format(self.__class__.__name__, value))
 
             # check type
             if not isinstance(i[0], int) or not isinstance(i[1], int):
-                raise TypeError(err % (self.__class__.__name__, value))
+                raise TypeError(err.format(self.__class__.__name__, value))
 
             # check range
             if i[0] < 0 or i[0] > 1440 or i[1] < 0 or i[1] > 1440:
-                raise ValueError(err % (self.__class__.__name__, value))
+                raise ValueError(err.format(self.__class__.__name__, value))
 
         return value
 
     @property
     def to_tjp(self):
-        """returns TaskJuggler representation of this object"""
+        """Return TaskJuggler representation of this object.
+
+        Returns:
+            str: The TaskJuggler representation generated by rendering the
+                `defaults.tjp_working_hours_template`.
+        """
         # render the template
         template = Template(defaults.tjp_working_hours_template)
         return template.render({"workinghours": self})
 
     @property
     def weekly_working_hours(self):
-        """returns the total working hours in a week"""
+        """Return the total working hours in a week.
+
+        Returns:
+            int: The calculated weekly working hours.
+        """
         weekly_working_hours = 0
         for i in range(0, 7):
             for start, end in self[i]:
@@ -680,8 +917,10 @@ class WorkingHours(Entity):
 
     @property
     def weekly_working_days(self):
-        """returns the weekly working days by looking at the working hours
-        settings
+        """Return the weekly working days by looking at the working hours settings.
+
+        Returns:
+            int: The weekly working days value.
         """
         wwd = 0
         for i in range(0, 7):
@@ -691,31 +930,58 @@ class WorkingHours(Entity):
 
     @property
     def yearly_working_days(self):
-        """returns the total working days in a year"""
+        """Return the total working days in a year.
+
+        Returns:
+            int: The calculated yearly_working_days value.
+        """
         return int(ceil(self.weekly_working_days * 52.1428))
 
     @validates("daily_working_hours")
-    def _validate_daily_working_hours(self, key, dwh):
-        """validates the given daily working hours value"""
-        if dwh is None:
-            dwh = defaults.daily_working_hours
+    def _validate_daily_working_hours(self, key, daily_working_hours):
+        """Validate the given daily working hours value.
 
-        if not isinstance(dwh, int):
+        Args:
+            key (str): The name of the validated column.
+            daily_working_hours (int): The daily working hours to be validated.
+
+        Raises:
+            TypeError: If the `daily_working_hours` value is not an integer.
+            ValueError: If the `daily_working_hours` is smaller thane 0 or bigger than
+                24.
+
+        Returns:
+            int: The validated daily working hours value.
+        """
+        if daily_working_hours is None:
+            daily_working_hours = defaults.daily_working_hours
+
+        if not isinstance(daily_working_hours, int):
             raise TypeError(
-                "%s.daily_working_hours should be an integer, not %s"
-                % (self.__class__.__name__, dwh.__class__.__name__)
+                "{}.daily_working_hours should be an integer, not {}: '{}'".format(
+                    self.__class__.__name__,
+                    daily_working_hours.__class__.__name__,
+                    daily_working_hours,
+                )
             )
 
-        if dwh <= 0 or dwh > 24:
+        if daily_working_hours <= 0 or daily_working_hours > 24:
             raise ValueError(
-                "%s.daily_working_hours should be a positive integer value "
-                "greater than 0 and smaller than or equal to 24"
-                % self.__class__.__name__
+                f"{self.__class__.__name__}.daily_working_hours should be a positive "
+                "integer value greater than 0 and smaller than or equal to 24"
             )
-        return dwh
+        return daily_working_hours
 
     def split_in_to_working_hours(self, start, end):
-        """splits the given start and end datetime objects in to working hours"""
+        """Split the given start and end datetime objects in to working hours.
+
+        Args:
+            start (datetime): The start date and time.
+            end (datetime): The end date and time.
+
+        Raises:
+            NotImplementedError: Unless this is implemented.
+        """
         raise NotImplementedError()
 
 
@@ -765,18 +1031,34 @@ class Vacation(SimpleEntity, DateRangeMixin):
 
     @validates("user")
     def _validate_user(self, key, user):
-        """validates the given user instance"""
-        if user is not None:
-            if not isinstance(user, User):
-                raise TypeError(
-                    "%s.user should be an instance of "
-                    "stalker.models.auth.User, not %s"
-                    % (self.__class__.__name__, user.__class__.__name__)
+        """Validate the given user instance.
+
+        Args:
+            key (str): The name of the validated column.
+            user (User): The user value to be validated.
+
+        Raises:
+            TypeError: If the user value is not None and not a
+                :class:`stalker.models.auth.User` instance.
+
+        Returns:
+            User: The validated user value.
+        """
+        if user is not None and not isinstance(user, User):
+            raise TypeError(
+                "{}.user should be an instance of stalker.models.auth.User, "
+                "not {}: '{}'".format(
+                    self.__class__.__name__, user.__class__.__name__, user
                 )
+            )
         return user
 
     @property
     def to_tjp(self):
-        """overridden to_tjp method"""
+        """Overridde the to_tjp method.
+
+        Returns:
+            str: The rendered tjp template.
+        """
         template = Template(defaults.tjp_vacation_template)
         return template.render({"vacation": self, "utc": pytz.utc})

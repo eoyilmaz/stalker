@@ -1,15 +1,27 @@
 # -*- coding: utf-8 -*-
+"""Scheduler related function and classes are situated here."""
 
+import csv
+import datetime
+import json
 import os
 import subprocess
+import sys
 import tempfile
-import datetime
 import time
-import csv
+
+from jinja2 import Template
 
 import pytz
 
+from sqlalchemy import bindparam, text
+
+from stalker import defaults
+from stalker.db.session import DBSession
 from stalker.log import get_logger
+from stalker.models.project import Project
+from stalker.models.task import Task, Task_Computed_Resources
+
 
 logger = get_logger(__name__)
 
@@ -25,31 +37,50 @@ class SchedulerBase(object):
         self.studio = studio
 
     def _validate_studio(self, studio_in):
-        """validates the given studio_in value"""
+        """Validate the given studio_in value.
+
+        Args:
+            studio_in (Studio): The Studio instance to set the studio attribute to.
+
+        Raises:
+            TypeError: If the given value is not a Studio instance.
+
+        Returns:
+            Studio: The validated Studio instance.
+        """
         if studio_in is not None:
             from stalker import Studio
 
             if not isinstance(studio_in, Studio):
                 raise TypeError(
-                    "%s.studio should be an instance of "
-                    "stalker.models.studio.Studio, not %s"
-                    % (self.__class__.__name__, studio_in.__class__.__name__)
+                    f"{self.__class__.__name__}.studio should be an instance of "
+                    f"stalker.models.studio.Studio, not {studio_in.__class__.__name__}"
                 )
         return studio_in
 
     @property
     def studio(self):
-        """studio getter"""
+        """Return studio attribute value.
+
+        Returns:
+            Studio: The studio attribute value.
+        """
         return self._studio
 
     @studio.setter
     def studio(self, studio_in):
-        """studio setter"""
+        """Set studio attribute.
+
+        Args:
+            studio_in (Studio): The Studio instance to set the studio attribute to.
+        """
         self._studio = self._validate_studio(studio_in)
 
     def schedule(self):
-        """the main scheduling function should be implemented in the
-        derivatives
+        """Schedule function that needs to be implemented in the derivatives.
+
+        Raises:
+            NotImplementedError: If this is not implemneted in the derived class.
         """
         raise NotImplementedError
 
@@ -174,24 +205,18 @@ class TaskJugglerScheduler(SchedulerBase):
         self.projects = projects
 
     def _create_tjp_file(self):
-        """creates the tjp file"""
+        """Create the tjp file."""
         self.temp_file_full_path = tempfile.mktemp(prefix="Stalker_")
         self.temp_file_path = os.path.dirname(self.temp_file_full_path)
         self.temp_file_name = os.path.basename(self.temp_file_full_path)
         self.tjp_file_full_path = self.temp_file_full_path + ".tjp"
         self.csv_file_full_path = self.temp_file_full_path + ".csv"
 
-    def _create_tjp_file_content(self):
-        """creates the tjp file content"""
-        from jinja2 import Template
-
+    def _create_tjp_file_content(self):  # noqa: C901
+        """Create the tjp file content."""
         start = time.time()
 
         # use new way of doing it, it will just work with PostgreSQL
-        import json
-        from stalker import defaults
-        from stalker.db.session import DBSession
-
         template = Template(defaults.tjp_main_template2)
 
         if not self.projects:
@@ -317,14 +342,12 @@ left outer join (
 ) as task_dependencies on "Tasks".id = task_dependencies.task_id
 
 --order by "Tasks".id
-order by path_as_text"""
+order by path_as_text"""  # noqa: B950
 
         result_buffer = []
         num_of_records = 0
 
         # run it per project
-        from sqlalchemy import text
-
         for pr in project_ids:
             p_id = pr[0]
             # p_code = pr[1]
@@ -332,7 +355,7 @@ order by path_as_text"""
             result = DBSession.connection().execute(text(sql_query), id=p_id)
 
             # start by adding the project first
-            result_buffer.append('task Project_%s "Project_%s" {' % (p_id, p_id))
+            result_buffer.append(f'task Project_{p_id} "Project_{p_id}" {{')
 
             # now start jumping around
             previous_level = 0
@@ -361,20 +384,19 @@ order by path_as_text"""
                 # close the previous level if necessary
                 for i in range(previous_level - depth + 1):
                     i_tab = "  " * (previous_level - i)
-                    result_buffer.append("%s}" % i_tab)
+                    result_buffer.append(f"{i_tab}}}")
 
                 result_buffer.append(
-                    """%(tab)stask Task_%(id)s "Task_%(id)s" {"""
-                    % {"tab": tab, "id": task_id}
+                    f"""{tab}task Task_{task_id} "Task_{task_id}" {{"""
                 )
 
                 # append priority if it is different then 500
                 if priority != 500:
-                    result_buffer.append("%s  priority %s" % (tab, priority))
+                    result_buffer.append(f"{tab}  priority {priority}")
 
                 # append dependency information
                 if dependency_info:
-                    dep_buffer = ["%s  depends " % tab]
+                    dep_buffer = [f"{tab}  depends "]
 
                     json_data = json.loads(
                         dependency_info.replace("{", "[")
@@ -383,7 +405,7 @@ order by path_as_text"""
                         .replace(")", "")
                     )  # it is an array of string
 
-                    for i, dep in enumerate(json_data):
+                    for i, dependency in enumerate(json_data):
                         if i > 0:
                             dep_buffer.append(", ")
 
@@ -393,15 +415,15 @@ order by path_as_text"""
                             gap_timing,
                             gap_unit,
                             gap_model,
-                        ) = dep.split(",")
+                        ) = dependency.split(",")
 
                         dep_full_path = ".".join(
-                            map(lambda x: "Task_%s" % x, dep_full_ids.split("-"))
+                            map(lambda x: f"Task_{x}", dep_full_ids.split("-"))
                         )
                         # fix for Project id
-                        dep_full_path = "Project_%s" % dep_full_path[5:]
+                        dep_full_path = f"Project_{dep_full_path[5:]}"
 
-                        dep_string = "%s {%s}" % (dep_full_path, dependency_target)
+                        dep_string = f"{dep_full_path} {{{dependency_target}}}"
 
                         dep_buffer.append(dep_string)
 
@@ -411,15 +433,14 @@ order by path_as_text"""
                 # if this is a leaf task and has resources
                 if is_leaf and resource_ids:
                     result_buffer.append(
-                        "%s  %s %s%s"
-                        % (tab, schedule_model, schedule_timing, schedule_unit)
+                        f"{tab}  {schedule_model} {schedule_timing}{schedule_unit}"
                     )
 
-                    resource_buffer = ["%s  allocate " % tab]
+                    resource_buffer = [f"{tab}  allocate "]
                     for i, resource_id in enumerate(resource_ids):
                         if i > 0:
                             resource_buffer.append(", ")
-                        resource_buffer.append("User_%s" % resource_id)
+                        resource_buffer.append(f"User_{resource_id}")
 
                         # now go through alternatives
                         if alternative_resource_ids:
@@ -429,10 +450,10 @@ order by path_as_text"""
                             ):
                                 if j > 0:
                                     resource_buffer.append(", ")
-                                resource_buffer.append("User_%s" % alt_resource_id)
+                                resource_buffer.append(f"User_{alt_resource_id}")
 
                             # set the allocation strategy
-                            resource_buffer.append(" select %s" % allocation_strategy)
+                            resource_buffer.append(f" select {allocation_strategy}")
 
                             # is is persistent
                             if persistent_allocation:
@@ -453,8 +474,8 @@ order by path_as_text"""
                         for tlog in json_data:
                             user_id, t_start, t_end = tlog.split(",")
                             result_buffer.append(
-                                "%s  booking %s %s - %s { overtime 2 }"
-                                % (tab, user_id, t_start, t_end)
+                                f"{tab}  booking {user_id} {t_start} - {t_end} "
+                                "{ overtime 2 }"
                             )
 
                 previous_level = depth
@@ -465,7 +486,7 @@ order by path_as_text"""
             # previous_level is the last task
             for i in range(previous_level - depth + 1):
                 i_tab = "  " * (previous_level - i)
-                result_buffer.append("%s}" % i_tab)
+                result_buffer.append(f"{i_tab}}}")
 
         tasks_buffer = "\n".join(result_buffer)
 
@@ -482,48 +503,45 @@ order by path_as_text"""
             }
         )
 
-        logger.debug("total number of records: %s" % num_of_records)
+        logger.debug(f"total number of records: {num_of_records}")
 
         end = time.time()
-        logger.debug("rendering the whole tjp file took : %s seconds" % (end - start))
+        logger.debug(
+            "rendering the whole tjp file took : {} seconds".format(end - start)
+        )
 
     def _fill_tjp_file(self):
-        """fills the tjp file with content"""
+        """Fill the tjp file with content."""
         with open(self.tjp_file_full_path, "w+") as self.tjp_file:
             self.tjp_file.write(self.tjp_content)
 
     def _delete_tjp_file(self):
-        """deletes the temp tjp file"""
+        """Delete the temp tjp file."""
         try:
             os.remove(self.tjp_file_full_path)
         except OSError:
             pass
 
     def _delete_csv_file(self):
-        """deletes the temp csv file"""
+        """Delete the temp csv file."""
         try:
             os.remove(self.csv_file_full_path)
         except OSError:
             pass
 
     def _clean_up(self):
-        """removes the temp files"""
+        """Remove the temp files."""
         self._delete_tjp_file()
         self._delete_csv_file()
 
     def _parse_csv_file(self):
-        """parses back the csv file and fills the tasks with computes_start and
-        computed_end values
-        """
+        """Parse the csv file and set the Task.computes_start and Task.computed_end."""
         parsing_start = time.time()
 
-        logger.debug("csv_file_full_path : %s" % self.csv_file_full_path)
+        logger.debug(f"csv_file_full_path : {self.csv_file_full_path}")
         if not os.path.exists(self.csv_file_full_path):
             logger.debug("could not find CSV file, " "returning without updating db!")
             return
-
-        from stalker import Task, Project
-        from stalker.models.task import Task_Computed_Resources
 
         entity_ids = []
         update_data = []
@@ -570,8 +588,6 @@ order by path_as_text"""
                     }
                 )
 
-        from sqlalchemy import bindparam
-
         # update date values
         update_statement = (
             Task.__table__.update()
@@ -583,8 +599,6 @@ order by path_as_text"""
                 computed_end=bindparam("computed_end"),
             )
         )
-        from stalker.db.session import DBSession
-
         DBSession.connection().execute(update_statement, update_data)
 
         # update project dates
@@ -614,20 +628,28 @@ order by path_as_text"""
 
         parsing_end = time.time()
         logger.debug(
-            "completed parsing csv file in (SQL): %s seconds"
-            % (parsing_end - parsing_start)
+            "completed parsing csv file in (SQL): {} seconds".format(
+                parsing_end - parsing_start
+            )
         )
 
     def schedule(self):
-        """Does the scheduling."""
+        """Schedule the project or all projects in the Studio.
+
+        Raises:
+            TypeError: If the self.studio is not a Studio instance.
+            RuntimeError: If the tj3 command returns an error.
+
+        Returns:
+            str: The tj3 command output.
+        """
         # check the studio attribute
         from stalker import Studio
 
         if not isinstance(self.studio, Studio):
             raise TypeError(
-                "%s.studio should be an instance of "
-                "stalker.models.studio.Studio, not %s"
-                % (self.__class__.__name__, self.studio.__class__.__name__)
+                f"{self.__class__.__name__}.studio should be an instance of "
+                f"stalker.models.studio.Studio, not {self.studio.__class__.__name__}"
             )
 
         # create a tjp file
@@ -639,19 +661,17 @@ order by path_as_text"""
         # fill it with data
         self._fill_tjp_file()
 
-        logger.debug("tjp_file_full_path: %s" % self.tjp_file_full_path)
+        logger.debug(f"tjp_file_full_path: {self.tjp_file_full_path}")
 
         # pass it to tj3
-        from stalker import defaults
-
-        if os.name == "nt":
+        if sys.platform == "win32":
             logger.debug("tj3 using fallback mode for Windows!")
-            command = "%s %s -o %s" % (
+            command = "{} {} -o {}".format(
                 defaults.tj_command,
                 self.tjp_file_full_path,
                 self.temp_file_path,
             )
-            logger.debug("tj3 command: %s" % command)
+            logger.debug(f"tj3 command: {command}")
             return_code = os.system(command)
             stderr_buffer = ""
         else:
@@ -690,7 +710,7 @@ order by path_as_text"""
         # read back the csv file
         self._parse_csv_file()
 
-        logger.debug("tj3 return code: %s" % return_code)
+        logger.debug(f"tj3 return code: {return_code}")
 
         # remove the tjp file
         self._clean_up()
@@ -698,45 +718,60 @@ order by path_as_text"""
         return stderr_buffer
 
     def _validate_projects(self, projects):
-        """validates the given projects value"""
+        """Validate the given projects value.
+
+        Args:
+            projects (List[Project]): List of Project instances.
+
+        Raises:
+            TypeError: If the projects is not a list or if any of the items in the
+                projects list is not a Project instance.
+
+        Returns:
+            List[Project]: List of validated Project instances.
+        """
         if projects is None:
             projects = []
 
         msg = (
-            "%(class)s.projects should be a list of "
+            "{cls}.projects should be a list of "
             "stalker.models.project.Project instances, not "
-            "%(projects_class)s"
+            "{projects_class}"
         )
 
         if not isinstance(projects, list):
             raise TypeError(
-                msg
-                % {
-                    "class": self.__class__.__name__,
-                    "projects_class": projects.__class__.__name__,
-                }
+                msg.format(
+                    cls=self.__class__.__name__,
+                    projects_class=projects.__class__.__name__,
+                )
             )
-
-        from stalker import Project
 
         for item in projects:
             if not isinstance(item, Project):
                 raise TypeError(
-                    msg
-                    % {
-                        "class": self.__class__.__name__,
-                        "projects_class": item.__class__.__name__,
-                    }
+                    msg.format(
+                        cls=self.__class__.__name__,
+                        projects_class=item.__class__.__name__,
+                    )
                 )
 
         return projects
 
     @property
     def projects(self):
-        """getter for the _project attribute"""
+        """Return the projects attribute value.
+
+        Returns:
+            List[Project]: List of Project instances.
+        """
         return self._projects
 
     @projects.setter
     def projects(self, projects):
-        """setter for the _project attribute"""
+        """Set the projects attribute.
+
+        Args:
+            projects (List[Project]): List of Project instances.
+        """
         self._projects = self._validate_projects(projects)

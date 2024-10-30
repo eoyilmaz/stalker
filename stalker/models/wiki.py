@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
+"""Wiki related functions and classes are situated here."""
+from typing import Union
+
 from six import string_types
-from sqlalchemy import Column, Integer, ForeignKey, Text
+
+from sqlalchemy import Column, ForeignKey, Integer, Text
 from sqlalchemy.orm import validates
-from stalker import ProjectMixin, Entity
+
+from stalker import Entity, ProjectMixin
 
 
 class Page(Entity, ProjectMixin):
@@ -38,37 +43,54 @@ class Page(Entity, ProjectMixin):
         self.content = content
 
     @validates("title")
-    def _validate_title(self, key, title):
-        """validates the given title value"""
+    def _validate_title(self, key: str, title: str) -> str:
+        """Validate the given title value.
+
+        Args:
+            key (str): The name of the validated column.
+            title (str): The title value to be validated.
+
+        Raises:
+            TypeError: If the given title is not a string.
+            ValueError: If the title is an empty string.
+
+        Returns:
+            str: The validated title value.
+        """
         if not isinstance(title, string_types):
             raise TypeError(
-                "%(class)s.title should be a string, not %(title_class)s"
-                % {
-                    "class": self.__class__.__name__,
-                    "title_class": title.__class__.__name__,
-                }
+                "{}.title should be a string, not {}: '{}'".format(
+                    self.__class__.__name__, title.__class__.__name__, title
+                )
             )
 
         if not title:
-            raise ValueError(
-                "%(class)s.title can not be empty" % {"class": self.__class__.__name__}
-            )
+            raise ValueError(f"{self.__class__.__name__}.title can not be empty")
 
         return title
 
     @validates("content")
-    def _validate_content(self, key, content):
-        """validates the given content value"""
+    def _validate_content(self, key: str, content: Union[None, str]) -> str:
+        """Validate the given content value.
+
+        Args:
+            key (str): The name of the validated column.
+            content (Union[None, str]): The content value to be validated.
+
+        Raises:
+            TypeError: If the content is not None and not str.
+
+        Returns:
+            str: The validated content value.
+        """
         if content is None:
             content = ""
 
         if not isinstance(content, string_types):
             raise TypeError(
-                "%(class)s.content should be a string, not %(content_class)s"
-                % {
-                    "class": self.__class__.__name__,
-                    "content_class": content.__class__.__name__,
-                }
+                "{}.content should be a string, not {}: '{}'".format(
+                    self.__class__.__name__, content.__class__.__name__, content
+                )
             )
 
         return content

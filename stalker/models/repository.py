@@ -71,7 +71,7 @@ class Repository(Entity, CodeMixin):
     # The AutoFS can be installed to any linux system easily or it is already
     # installed. OSX has it already. I know nothing about Windows.
     #
-    # AutoFS can be setup to listen for new mount points from an OpendLDAP
+    # AutoFS can be setup to listen for new mount points from an OpenLDAP
     # server. Thus it is heavily related with the users system, Stalker
     # can not do anything about that. The IT should setup workstations.
     #
@@ -116,8 +116,8 @@ class Repository(Entity, CodeMixin):
         """
         if not isinstance(linux_path, string_types):
             raise TypeError(
-                "%s.linux_path should be an instance of string not %s"
-                % (self.__class__.__name__, linux_path.__class__.__name__)
+                f"{self.__class__.__name__}.linux_path should be an instance of string "
+                f"not {linux_path.__class__.__name__}"
             )
 
         linux_path = os.path.normpath(linux_path) + "/"
@@ -126,15 +126,15 @@ class Repository(Entity, CodeMixin):
 
         if self.code is not None and platform.system() == "Linux":
             # update the environment variable
-            os.environ[
-                defaults.repo_env_var_template.format(code=self.code)
-            ] = linux_path
+            os.environ[defaults.repo_env_var_template.format(code=self.code)] = (
+                linux_path
+            )
 
         if self.id is not None and platform.system() == "Linux":
             # update the environment variable
-            os.environ[
-                defaults.repo_env_var_template_old.format(id=self.id)
-            ] = linux_path
+            os.environ[defaults.repo_env_var_template_old.format(id=self.id)] = (
+                linux_path
+            )
 
         return linux_path
 
@@ -154,8 +154,8 @@ class Repository(Entity, CodeMixin):
         """
         if not isinstance(osx_path, string_types):
             raise TypeError(
-                "%s.osx_path should be an instance of string not %s"
-                % (self.__class__.__name__, osx_path.__class__.__name__)
+                f"{self.__class__.__name__}.osx_path should be an instance of string "
+                f"not {osx_path.__class__.__name__}"
             )
 
         osx_path = os.path.normpath(osx_path) + "/"
@@ -185,8 +185,8 @@ class Repository(Entity, CodeMixin):
         """
         if not isinstance(windows_path, string_types):
             raise TypeError(
-                "%s.windows_path should be an instance of string not %s"
-                % (self.__class__.__name__, windows_path.__class__.__name__)
+                f"{self.__class__.__name__}.windows_path should be an instance of "
+                f"string not {windows_path.__class__.__name__}"
             )
 
         windows_path = os.path.normpath(windows_path)
@@ -197,11 +197,15 @@ class Repository(Entity, CodeMixin):
 
         if self.code is not None and platform.system() == "Windows":
             # update the environment variable
-            os.environ[defaults.repo_env_var_template.format(code=self.code)] = windows_path
+            os.environ[defaults.repo_env_var_template.format(code=self.code)] = (
+                windows_path
+            )
 
         if self.id is not None and platform.system() == "Windows":
             # update the environment variable
-            os.environ[defaults.repo_env_var_template_old.format(id=self.id)] = windows_path
+            os.environ[defaults.repo_env_var_template_old.format(id=self.id)] = (
+                windows_path
+            )
 
         return windows_path
 
@@ -269,12 +273,12 @@ class Repository(Entity, CodeMixin):
             str: The converted path.
         """
         if path is None:
-            raise TypeError("%s.path can not be None" % self.__class__.__name__)
+            raise TypeError(f"{self.__class__.__name__}.path can not be None")
 
         if not isinstance(path, string_types):
             raise TypeError(
-                "%s.path should be a string, not %s"
-                % (self.__class__.__name__, path.__class__.__name__)
+                f"{self.__class__.__name__}.path should be a string, "
+                f"not {path.__class__.__name__}"
             )
 
         # expand all variables

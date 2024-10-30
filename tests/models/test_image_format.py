@@ -41,7 +41,7 @@ def test_width_argument_accepts_int_or_float_only(setup_image_format_tests):
 
     assert (
         str(cm.value)
-        == "ImageFormat.width should be an instance of int or float not str"
+        == "ImageFormat.width should be an instance of int or float, not str: '1920'"
     )
 
 
@@ -54,7 +54,7 @@ def test_width_attribute_int_or_float(setup_image_format_tests):
 
     assert (
         str(cm.value)
-        == "ImageFormat.width should be an instance of int or float not str"
+        == "ImageFormat.width should be an instance of int or float, not str: '1920'"
     )
 
 
@@ -126,7 +126,7 @@ def test_height_argument_int_or_float(setup_image_format_tests):
 
     assert (
         str(cm.value)
-        == "ImageFormat.height should be an instance of int or float not str"
+        == "ImageFormat.height should be an instance of int or float, not str"
     )
 
 
@@ -140,7 +140,7 @@ def test_height_attribute_int_or_float(setup_image_format_tests):
 
     assert (
         str(cm.value)
-        == "ImageFormat.height should be an instance of int or float not str"
+        == "ImageFormat.height should be an instance of int or float, not str"
     )
 
 

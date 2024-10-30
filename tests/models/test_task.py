@@ -213,9 +213,8 @@ def test_priority_arg_any_given_other_value_then_int_defaults_to_task_priority(
     with pytest.raises(TypeError) as cm:
         Task(**kwargs)
 
-    assert (
-        str(cm.value)
-        == "Task.priority should be an integer value between 0 and 1000, not str"
+    assert str(cm.value) == (
+        "Task.priority should be an integer value between 0 and 1000, not str: 'a324'"
     )
 
 
@@ -228,7 +227,8 @@ def test_priority_attribute_is_not_an_int(setup_task_tests):
         new_task.priority = test_value
 
     assert str(cm.value) == (
-        "Task.priority should be an integer value between 0 and 1000, not str"
+        "Task.priority should be an integer value between 0 and 1000, "
+        "not str: 'test_value_324'"
     )
 
 
@@ -352,7 +352,8 @@ def test_resources_arg_is_set_to_a_list_of_other_values_then_user(
         Task(**kwargs)
 
     assert str(cm.value) == (
-        "Task.resources should be a list of stalker.models.auth.User instances, not str"
+        "Task.resources should be a list of stalker.models.auth.User instances, "
+        "not str: 'a'"
     )
 
 
@@ -366,7 +367,8 @@ def test_resources_attr_is_set_to_a_list_of_other_values_then_user(
         new_task.resources = ["a", "list", "of", "resources", data["test_user1"]]
 
     assert str(cm.value) == (
-        "Task.resources should be a list of stalker.models.auth.User instances, not str"
+        "Task.resources should be a list of stalker.models.auth.User instances, "
+        "not str: 'a'"
     )
 
 
@@ -539,7 +541,8 @@ def test_watchers_arg_is_set_to_a_list_of_other_values_then_user(setup_task_test
         Task(**kwargs)
 
     assert str(cm.value) == (
-        "Task.watchers should be a list of stalker.models.auth.User instances not str"
+        "Task.watchers should be a list of stalker.models.auth.User instances,"
+        " not str: 'a'"
     )
 
 
@@ -715,9 +718,9 @@ def test_depends_arg_is_a_list_of_other_objects_than_a_task(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         Task(**kwargs)
 
-    assert (
-        str(cm.value) == "TaskDependency.depends_to can should be and instance of "
-        "stalker.models.task.Task, not str"
+    assert str(cm.value) == (
+        "TaskDependency.depends_to can should be and instance of "
+        "stalker.models.task.Task, not str: 'a'"
     )
 
 
@@ -730,9 +733,9 @@ def test_depends_attr_is_a_list_of_other_objects_than_a_task(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         new_task.depends = test_value
 
-    assert (
-        str(cm.value) == "TaskDependency.depends_to can should be and instance of "
-        "stalker.models.task.Task, not str"
+    assert str(cm.value) == (
+        "TaskDependency.depends_to can should be and instance of "
+        "stalker.models.task.Task, not str: 'a'"
     )
 
 
@@ -1122,9 +1125,8 @@ def test_is_milestone_arg_is_not_a_bool(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         Task(**kwargs)
 
-    assert (
-        str(cm.value)
-        == "Task.is_milestone should be a bool value (True or False), not str"
+    assert str(cm.value) == (
+        "Task.is_milestone should be a bool value (True or False), not str: 'A string'"
     )
 
 
@@ -1137,9 +1139,8 @@ def test_is_milestone_attr_is_not_a_bool(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         new_task.is_milestone = test_value
 
-    assert (
-        str(cm.value)
-        == "Task.is_milestone should be a bool value (True or False), not str"
+    assert str(cm.value) == (
+        "Task.is_milestone should be a bool value (True or False), not str: 'A string'"
     )
 
 
@@ -1189,9 +1190,9 @@ def test_time_logs_attr_is_not_a_list_of_timelog_instances(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         new_task.time_logs = [1, "1", 1.2, "a time_log"]
 
-    assert (
-        str(cm.value)
-        == "Task.time_logs should be all stalker.models.task.TimeLog instances, not int"
+    assert str(cm.value) == (
+        "Task.time_logs should be all stalker.models.task.TimeLog instances, "
+        "not int: '1'"
     )
 
 
@@ -1598,10 +1599,9 @@ def test_versions_attr_is_not_a_list_of_version_instances(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         new_task.versions = [1, 1.2, "a version"]
 
-    assert (
-        str(cm.value)
-        == "Task.versions should only have stalker.models.version.Version "
-        "instances, and not Task"
+    assert str(cm.value) == (
+        "Task.versions should only have stalker.models.version.Version instances, "
+        "and not int: '1'"
     )
 
 
@@ -1746,9 +1746,9 @@ def test_parent_arg_is_not_a_task_instance(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         Task(**kwargs)
 
-    assert (
-        str(cm.value)
-        == "Task.parent should be an instance of stalker.models.task.Task, not str"
+    assert str(cm.value) == (
+        "Task.parent should be an instance of stalker.models.task.Task, "
+        "not str: 'not a task'"
     )
 
 
@@ -1761,9 +1761,9 @@ def test_parent_attr_is_not_a_task_instance(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         new_task.parent = "not a task"
 
-    assert (
-        str(cm.value)
-        == "Task.parent should be an instance of stalker.models.task.Task, not str"
+    assert str(cm.value) == (
+        "Task.parent should be an instance of stalker.models.task.Task, "
+        "not str: 'not a task'"
     )
 
     # there is no way to generate a CycleError by using the parent arg
@@ -2077,7 +2077,7 @@ def test_project_and_parent_args_are_skipped(setup_task_tests):
 
     assert (
         str(cm.value) == "Task.project should be an instance of "
-        "stalker.models.project.Project, not NoneType. Or please supply "
+        "stalker.models.project.Project, not NoneType: 'None'.\n\nOr please supply "
         "a stalker.models.task.Task with the parent argument, so "
         "Stalker can use the project of the supplied parent task"
     )
@@ -2108,7 +2108,8 @@ def test_project_arg_is_not_a_project_instance(setup_task_tests):
         Task(**kwargs)
 
     assert str(cm.value) == (
-        "Task.project should be an instance of stalker.models.project.Project, not str"
+        "Task.project should be an instance of stalker.models.project.Project, "
+        "not str: 'Not a Project instance'"
     )
 
 
@@ -2155,10 +2156,10 @@ def test_project_arg_is_not_matching_the_given_parent_arg(setup_task_tests):
         Task(**kwargs)
         assert issubclass(w[-1].category, RuntimeWarning)
 
-    assert (
-        str(w[0].message) == "The supplied parent and the project is not matching in "
-        "<New Task (Task)>, Stalker will use the parents project "
-        "(<Test Project1 (Project)>) as the parent of this Task"
+    assert str(w[0].message) == (
+        "The supplied parent and the project is not matching in <New Task (Task)>, "
+        "Stalker will use the parent's project (<Test Project1 (Project)>) as the "
+        "parent of this Task"
     )
 
 
@@ -2456,9 +2457,9 @@ def test_bid_timing_arg_is_not_an_int_or_float(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         Task(**kwargs)
 
-    assert (
-        str(cm.value) == "Task.bid_timing should be an integer or float showing the "
-        "value of the initial bid for this Task, not str"
+    assert str(cm.value) == (
+        "Task.bid_timing should be an integer or float showing the value of the "
+        "initial bid for this Task, not str: '10d'"
     )
 
 
@@ -2471,9 +2472,9 @@ def test_bid_timing_attr_is_not_an_int_or_float(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         new_task.bid_timing = "10d"
 
-    assert (
-        str(cm.value) == "Task.bid_timing should be an integer or float showing the "
-        "value of the initial bid for this Task, not str"
+    assert str(cm.value) == (
+        "Task.bid_timing should be an integer or float showing the value of the "
+        "initial bid for this Task, not str: '10d'"
     )
 
 
@@ -2537,10 +2538,9 @@ def test_bid_unit_arg_is_not_a_str(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         Task(**kwargs)
 
-    assert (
-        str(cm.value) == "Task.bid_unit should be a string value one of ['min', 'h', "
-        "'d', 'w', 'm', 'y'] showing the unit of the bid timing of this "
-        "Task, not int"
+    assert str(cm.value) == (
+        "Task.bid_unit should be a string value one of ['min', 'h', 'd', 'w', 'm', "
+        "'y'] showing the unit of the bid timing of this Task, not int: '10'"
     )
 
 
@@ -2551,10 +2551,9 @@ def test_bid_unit_attr_is_not_a_str(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         new_task.bid_unit = 10
 
-    assert (
-        str(cm.value) == "Task.bid_unit should be a string value one of ['min', 'h', "
-        "'d', 'w', 'm', 'y'] showing the unit of the bid timing of this "
-        "Task, not int"
+    assert str(cm.value) == (
+        "Task.bid_unit should be a string value one of ['min', 'h', 'd', 'w', 'm', "
+        "'y'] showing the unit of the bid timing of this Task, not int: '10'"
     )
 
 
@@ -2586,10 +2585,9 @@ def test_bid_unit_arg_value_not_in_defaults_datetime_units(setup_task_tests):
     with pytest.raises(ValueError) as cm:
         Task(**kwargs)
 
-    assert (
-        str(cm.value) == "Task.bid_unit should be a string value one of ['min', 'h', "
-        "'d', 'w', 'm', 'y'] showing the unit of the bid timing of this "
-        "Task, not str"
+    assert str(cm.value) == (
+        "Task.bid_unit should be a string value one of ['min', 'h', 'd', 'w', 'm', "
+        "'y'] showing the unit of the bid timing of this Task, not str: 'os'"
     )
 
 
@@ -2602,10 +2600,9 @@ def test_bid_unit_attr_value_not_in_defaults_datetime_units(setup_task_tests):
     with pytest.raises(ValueError) as cm:
         new_task.bid_unit = "sys"
 
-    assert (
-        str(cm.value) == "Task.bid_unit should be a string value one of ['min', 'h', "
-        "'d', 'w', 'm', 'y'] showing the unit of the bid timing of this "
-        "Task, not str"
+    assert str(cm.value) == (
+        "Task.bid_unit should be a string value one of ['min', 'h', 'd', 'w', 'm', "
+        "'y'] showing the unit of the bid timing of this Task, not str: 'sys'"
     )
 
 
@@ -3498,10 +3495,9 @@ def test_responsible_arg_is_not_a_list_of_user_instance(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         Task(**kwargs)
 
-    assert (
-        str(cm.value)
-        == "Task.responsible should be a list of stalker.models.auth.User "
-        "instances, not str"
+    assert str(cm.value) == (
+        "Task.responsible should be a list of stalker.models.auth.User instances, "
+        "not str: 'not a user instance'"
     )
 
 
@@ -3516,10 +3512,9 @@ def test_responsible_attr_is_set_to_something_other_than_a_list_of_user_instance
     with pytest.raises(TypeError) as cm:
         new_task.responsible = ["not a user instance"]
 
-    assert (
-        str(cm.value)
-        == "Task.responsible should be a list of stalker.models.auth.User "
-        "instances, not str"
+    assert str(cm.value) == (
+        "Task.responsible should be a list of stalker.models.auth.User instances, "
+        "not str: 'not a user instance'"
     )
 
 
@@ -3551,6 +3546,32 @@ def test_responsible_arg_is_none_or_skipped_responsible_attr_comes_from_parents(
     assert new_task1.responsible == [data["test_user1"]]
     assert new_task2.responsible == [data["test_user2"]]
     assert new_task3.responsible == [data["test_user1"]]
+
+
+def test_responsible_arg_is_none_or_skipped_responsible_attr_comes_from_the_first_parent_with_responsible(
+    setup_task_tests,
+):
+    """responsible arg is None or skipped, responsible attr value comes from the first parent with responsible."""
+    data = setup_task_tests
+    # create two new tasks
+    kwargs = copy.copy(data["kwargs"])
+    new_task = Task(**kwargs)
+
+    kwargs["responsible"] = None
+
+    kwargs["parent"] = new_task
+    new_task1 = Task(**kwargs)
+
+    kwargs["parent"] = new_task1
+    new_task2 = Task(**kwargs)
+
+    kwargs["parent"] = new_task2
+    new_task3 = Task(**kwargs)
+
+    new_task2.responsible = [data["test_user2"]]
+    assert new_task1.responsible == [data["test_user1"]]
+    assert new_task2.responsible == [data["test_user2"]]
+    assert new_task3.responsible == [data["test_user2"]]
 
 
 def test_responsible_attr_is_set_to_none_responsible_attr_comes_from_parents(
@@ -3809,9 +3830,9 @@ def test_alternative_resources_arg_elements_are_not_user_instances(
     with pytest.raises(TypeError) as cm:
         Task(**kwargs)
 
-    assert (
-        str(cm.value) == "Task.resources should be a list of stalker.models.auth.User "
-        "instances, not str"
+    assert str(cm.value) == (
+        "Task.alternative_resources should be a list of stalker.models.auth.User "
+        "instances, not str: 'not'"
     )
 
 
@@ -3824,9 +3845,9 @@ def test_alternative_resources_attr_elements_are_not_all_user_instances(
     with pytest.raises(TypeError) as cm:
         new_task.alternative_resources = ["not", 1, "user"]
 
-    assert (
-        str(cm.value) == "Task.resources should be a list of stalker.models.auth.User "
-        "instances, not str"
+    assert str(cm.value) == (
+        "Task.alternative_resources should be a list of stalker.models.auth.User "
+        "instances, not str: 'not'"
     )
 
 
@@ -3889,9 +3910,9 @@ def test_allocation_strategy_arg_is_not_a_str(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         Task(**kwargs)
 
-    assert (
-        str(cm.value) == "Task.allocation_strategy should be one of ['minallocated', "
-        "'maxloaded', 'minloaded', 'order', 'random'], not int"
+    assert str(cm.value) == (
+        "Task.allocation_strategy should be one of ['minallocated', "
+        "'maxloaded', 'minloaded', 'order', 'random'], not int: '234'"
     )
 
 
@@ -3906,7 +3927,7 @@ def test_allocation_strategy_attr_is_set_to_a_value_other_than_str(
 
     assert (
         str(cm.value) == "Task.allocation_strategy should be one of ['minallocated', "
-        "'maxloaded', 'minloaded', 'order', 'random'], not int"
+        "'maxloaded', 'minloaded', 'order', 'random'], not int: '234'"
     )
 
 
@@ -3920,7 +3941,7 @@ def test_allocation_strategy_arg_value_is_not_correct(setup_task_tests):
 
     assert (
         str(cm.value) == "Task.allocation_strategy should be one of ['minallocated', "
-        "'maxloaded', 'minloaded', 'order', 'random'], not not in the list"
+        "'maxloaded', 'minloaded', 'order', 'random'], not 'not in the list'"
     )
 
 
@@ -3933,7 +3954,7 @@ def test_allocation_strategy_attr_value_is_not_correct(setup_task_tests):
 
     assert (
         str(cm.value) == "Task.allocation_strategy should be one of ['minallocated', "
-        "'maxloaded', 'minloaded', 'order', 'random'], not not in the list"
+        "'maxloaded', 'minloaded', 'order', 'random'], not 'not in the list'"
     )
 
 
@@ -4350,9 +4371,9 @@ def test_good_arg_is_not_a_good_instance(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         Task(**kwargs)
 
-    assert (
-        str(cm.value)
-        == "Task.good should be a stalker.models.budget.Good instance, not str"
+    assert str(cm.value) == (
+        "Task.good should be a stalker.models.budget.Good instance, "
+        "not str: 'not a good instance'"
     )
 
 
@@ -4363,9 +4384,9 @@ def test_good_attr_is_not_a_good_instance(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         new_task.good = "not a good instance"
 
-    assert (
-        str(cm.value)
-        == "Task.good should be a stalker.models.budget.Good instance, not str"
+    assert str(cm.value) == (
+        "Task.good should be a stalker.models.budget.Good instance, "
+        "not str: 'not a good instance'"
     )
 
 

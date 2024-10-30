@@ -156,7 +156,11 @@ def test_path_argument_is_not_string(setup_filename_template_tests):
     with pytest.raises(TypeError) as cm:
         FilenameTemplate(**data["kwargs"])
 
-    assert str(cm.value) == "FilenameTemplate.path attribute should be string not list"
+    assert str(cm.value) == (
+        "FilenameTemplate.path attribute should be string, not list: '['a', ' ', 'l', "
+        "'i', 's', 't', ' ', 'f', 'r', 'o', 'm', ' ', 'a', ' ', 's', 't', 'r', 'i', "
+        "'n', 'g']'"
+    )
 
 
 def test_path_attribute_is_not_string(setup_filename_template_tests):
@@ -166,7 +170,11 @@ def test_path_attribute_is_not_string(setup_filename_template_tests):
     with pytest.raises(TypeError) as cm:
         data["filename_template"].path = test_value
 
-    assert str(cm.value) == "FilenameTemplate.path attribute should be string not list"
+    assert str(cm.value) == (
+        "FilenameTemplate.path attribute should be string, not list: '['a', ' ', 'l', "
+        "'i', 's', 't', ' ', 'f', 'r', 'o', 'm', ' ', 'a', ' ', 's', 't', 'r', 'i', "
+        "'n', 'g']'"
+    )
 
 
 def test_filename_argument_is_skipped(setup_filename_template_tests):
@@ -219,8 +227,10 @@ def test_filename_argument_is_not_string(setup_filename_template_tests):
     with pytest.raises(TypeError) as cm:
         FilenameTemplate(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "FilenameTemplate.filename attribute should be string not list"
+    assert str(cm.value) == (
+        "FilenameTemplate.filename attribute should be string, not list: '['a', ' ', "
+        "'l', 'i', 's', 't', ' ', 'f', 'r', 'o', 'm', ' ', 'a', ' ', 's', 't', 'r', "
+        "'i', 'n', 'g']'"
     )
 
 
@@ -231,8 +241,10 @@ def test_filename_attribute_is_not_string(setup_filename_template_tests):
     with pytest.raises(TypeError) as cm:
         data["filename_template"].filename = test_value
 
-    assert (
-        str(cm.value) == "FilenameTemplate.filename attribute should be string not list"
+    assert str(cm.value) == (
+        "FilenameTemplate.filename attribute should be string, not list: "
+        "'['a', ' ', 'l', 'i', 's', 't', ' ', 'f', 'r', 'o', 'm', ' ', 'a', ' ', "
+        "'s', 't', 'r', 'i', 'n', 'g']'"
     )
 
 

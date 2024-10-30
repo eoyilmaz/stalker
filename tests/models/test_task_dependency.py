@@ -106,7 +106,7 @@ def test_task_argument_is_not_a_task_instance(setup_task_dependency_db_test):
 
     assert (
         str(cm.value) == "TaskDependency.task should be and instance of "
-        "stalker.models.task.Task, not str"
+        "stalker.models.task.Task, not str: 'Not a Task instance'"
     )
 
 
@@ -119,7 +119,7 @@ def test_task_attribute_is_not_a_task_instance(setup_task_dependency_db_test):
 
     assert (
         str(cm.value) == "TaskDependency.task should be and instance of "
-        "stalker.models.task.Task, not str"
+        "stalker.models.task.Task, not str: 'not a task'"
     )
 
 
@@ -165,7 +165,7 @@ def test_depends_to_argument_is_not_a_task_instance(setup_task_dependency_db_tes
 
     assert (
         str(cm.value) == "TaskDependency.depends_to can should be and instance of "
-        "stalker.models.task.Task, not str"
+        "stalker.models.task.Task, not str: 'Not a Task instance'"
     )
 
 
@@ -178,7 +178,7 @@ def test_depends_to_attribute_is_not_a_task_instance(setup_task_dependency_db_te
 
     assert (
         str(cm.value) == "TaskDependency.depends_to can should be and instance of "
-        "stalker.models.task.Task, not str"
+        "stalker.models.task.Task, not str: 'not a task'"
     )
 
 
@@ -495,9 +495,9 @@ def test_dependency_target_argument_is_not_a_str_instance(
     with pytest.raises(TypeError) as cm:
         TaskDependency(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "TaskDependency.dependency_target should be a string with a "
-        "value one of ['onend', 'onstart'], not int"
+    assert str(cm.value) == (
+        "TaskDependency.dependency_target should be a string with a value one of "
+        "['onend', 'onstart'], not int: '0'"
     )
 
 
@@ -510,9 +510,9 @@ def test_dependency_target_attribute_is_not_a_str_instance(
     with pytest.raises(TypeError) as cm:
         tdep.dependency_target = 0
 
-    assert (
-        str(cm.value) == "TaskDependency.dependency_target should be a string with a "
-        "value one of ['onend', 'onstart'], not int"
+    assert str(cm.value) == (
+        "TaskDependency.dependency_target should be a string with a value one of "
+        "['onend', 'onstart'], not int: '0'"
     )
 
 

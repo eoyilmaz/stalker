@@ -3,11 +3,9 @@
 
 See docs for more information.
 """
-
 from stalker import config, log
-
-defaults = config.Config()
-
+if True:
+    defaults = config.Config()
 from stalker.models.asset import Asset
 from stalker.models.auth import (
     AuthenticationLog,
@@ -62,18 +60,86 @@ from stalker.models.type import EntityType, Type
 from stalker.models.version import Version
 from stalker.models.wiki import Page
 
+__all__ = [
+    "ACLMixin",
+    "AmountMixin",
+    "Asset",
+    "AuthenticationLog",
+    "Budget",
+    "BudgetEntry",
+    "Client",
+    "ClientUser",
+    "CodeMixin",
+    "DAGMixin",
+    "Daily",
+    "DailyLink",
+    "DateRangeMixin",
+    "Department",
+    "DepartmentUser",
+    "Entity",
+    "EntityGroup",
+    "EntityType",
+    "FilenameTemplate",
+    "Good",
+    "Group",
+    "ImageFormat",
+    "Invoice",
+    "Link",
+    "LocalSession",
+    "Message",
+    "Note",
+    "Page",
+    "Payment",
+    "Permission",
+    "PriceList",
+    "Project",
+    "ProjectClient",
+    "ProjectMixin",
+    "ProjectRepository",
+    "ProjectUser",
+    "ReferenceMixin",
+    "Repository",
+    "Review",
+    "Role",
+    "Scene",
+    "ScheduleMixin",
+    "SchedulerBase",
+    "Sequence",
+    "Shot",
+    "SimpleEntity",
+    "Status",
+    "StatusList",
+    "StatusMixin",
+    "Structure",
+    "Studio",
+    "Tag",
+    "TargetEntityTypeMixin",
+    "Task",
+    "TaskDependency",
+    "TaskJugglerScheduler",
+    "Ticket",
+    "TicketLog",
+    "TimeLog",
+    "Type",
+    "UnitMixin",
+    "User",
+    "Vacation",
+    "Version",
+    "WorkingHours",
+    "WorkingHoursMixin",
+]
 
 __version__ = "1.0.0.dev1"
 
 __title__ = "stalker"
 __description__ = "A Production Asset Management (ProdAM) System"
 __uri__ = "https://github.com/eoyilmaz/stalker"
-__doc__ = "%s <%s>" % (__description__, __uri__)
+__doc__ = f"{__description__} <{__uri__}>"
 
 __author__ = "Erkan Ozgur Yilmaz"
 __email__ = "eoyilmaz@gmail.com"
 
 __license__ = "LGPLv3"
-__copyright__ = "Copyright (C) 2009-2023 Erkan Ozgur Yilmaz"
+__copyright__ = "Copyright (C) 2009-2024 Erkan Ozgur Yilmaz"
 
 logger = log.get_logger(__name__)

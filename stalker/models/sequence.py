@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
+"""Sequence related function and classes are situated here."""
 
-from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy import Column, ForeignKey, Integer
 from sqlalchemy.orm import relationship, validates
 
-from stalker.models.mixins import ReferenceMixin, CodeMixin
-from stalker.models.task import Task
-
 from stalker.log import get_logger
+from stalker.models.mixins import CodeMixin, ReferenceMixin
+from stalker.models.task import Task
 
 logger = get_logger(__name__)
 
@@ -52,13 +52,24 @@ class Sequence(Task, CodeMixin):
 
     @validates("shots")
     def _validate_shots(self, key, shot):
-        """validates the given shot value"""
+        """Validate the given shot value.
+
+        Args:
+            key (str): The name of the validated column.
+            shot (Shot): The Shot instance to validate.
+
+        Raises:
+            TypeError: If the given shot is not a Shot instance.
+
+        Returns:
+            Shot: The validated shot value.
+        """
         from stalker.models.shot import Shot
 
         if not isinstance(shot, Shot):
             raise TypeError(
-                "%s.shots should be all stalker.models.shot.Shot instances, "
-                "not %s" % (self.__class__.__name__, shot.__class__.__name__)
+                f"{self.__class__.__name__}.shots should be all "
+                f"stalker.models.shot.Shot instances, not {shot.__class__.__name__}"
             )
         return shot
 

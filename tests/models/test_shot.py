@@ -204,7 +204,7 @@ def test_project_argument_is_skipped(setup_shot_db_tests):
 
     assert (
         str(cm.value) == "Shot.project should be an instance of "
-        "stalker.models.project.Project, not NoneType. Or please supply "
+        "stalker.models.project.Project, not NoneType: 'None'.\n\nOr please supply "
         "a stalker.models.task.Task with the parent argument, so "
         "Stalker can use the project of the supplied parent task"
     )
@@ -220,7 +220,7 @@ def test_project_argument_is_None(setup_shot_db_tests):
 
     assert (
         str(cm.value) == "Shot.project should be an instance of "
-        "stalker.models.project.Project, not NoneType. Or please supply "
+        "stalker.models.project.Project, not NoneType: 'None'.\n\nOr please supply "
         "a stalker.models.task.Task with the parent argument, so "
         "Stalker can use the project of the supplied parent task"
     )
@@ -236,7 +236,7 @@ def test_project_argument_is_not_project_instance(test_value, setup_shot_db_test
 
     assert str(cm.value) == (
         "Shot.project should be an instance of stalker.models.project.Project, not "
-        "NoneType. Or please supply a stalker.models.task.Task with the parent "
+        "NoneType: 'None'.\n\nOr please supply a stalker.models.task.Task with the parent "
         "argument, so Stalker can use the project of the supplied parent task"
     )
 
