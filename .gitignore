@@ -16,6 +16,7 @@ docs/latex/*
 docs/source/generated/*
 docs/source/static/design
 docs/source/static/stalker_design*.vue
+htmlcov
 include/*
 local
 stalker.db*
