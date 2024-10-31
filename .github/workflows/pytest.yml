@@ -11,7 +11,7 @@ on:
 jobs:
   build:
 
-    name: Test with Python ${{ matrix.python-version }} and PostgreSQL ${{ matrix.postgresql-version }}
+    name: Python ${{ matrix.python-version }} & PostgreSQL ${{ matrix.postgresql-version }}
     # env:
     #   DISPLAY: :0
     runs-on: ubuntu-latest
@@ -68,7 +68,7 @@ jobs:
       run: |
         python3 -m build
         ls -l dist/
-        wheel_file=$(ls dist/DisplayCAL-*.whl)
+        wheel_file=$(ls dist/stalker-*.whl)
         pip install $wheel_file
 
     - name: Test with pytest
