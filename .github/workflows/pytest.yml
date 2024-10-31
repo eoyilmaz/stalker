@@ -63,6 +63,8 @@ jobs:
         chmod 0600 ~/.pgpass
         echo "USER: $USER"
         echo "HOME: $HOME"
+        cat ~/.pgpass
+        ls -la ~
 
     - name: Set up TaskJuggler
       run: |
