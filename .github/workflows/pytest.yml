@@ -58,7 +58,7 @@ jobs:
         ssl: false
 
     - name: Create .pgpass file
-      run:
+      run: |
         echo "localhost:5432:postgres:postgres" > ~/.pgpass
 
     - name: Set up TaskJuggler
