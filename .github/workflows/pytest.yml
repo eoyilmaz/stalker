@@ -40,10 +40,22 @@ jobs:
           echo "add_dir_str=cpython-313" >> $GITHUB_ENV
         fi
 
-    - name: Install PostgreSQL ${{ matrix.postgresql-version}}
+    - name: Install PostgreSQL ${{ matrix.postgresql-version }}
       uses: tj-actions/install-postgresql@v3.1.1
       with:
-        postgresql-version: ${{ matrix.postgresql-version}}
+        postgresql-version: ${{ matrix.postgresql-version }}
+
+    - name: Setup PostgreSQL ${{ matrix.postgresql-version }}
+      uses: Harmon758/postgresql-action@v1.0.0
+      with:
+        # Version of PostgreSQL to use
+        postgresql version: ${{ matrix.postgresql-version }}
+        # POSTGRES_DB - name for the default database that is created
+        postgresql db: postgres
+        # POSTGRES_USER - create the specified user with superuser power
+        postgresql user: postgres
+        # POSTGRES_PASSWORD - superuser password
+        postgresql password: postgres
 
     - name: Set up TaskJuggler
       run: |
