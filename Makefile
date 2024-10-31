@@ -29,6 +29,7 @@ build:
 	pip install -r requirements-dev.txt; \
 	python -m build;
 
+.PHONY: install
 install:
 	@printf "\n\033[36m--- $@: Installing $(PACKAGE_NAME) to virtualenv at '$(VIRTUALENV_DIR)' using '$(SYSTEM_PYTHON)' ---\033[0m\n"
 	source ./$(VIRTUALENV_DIR)/bin/activate; \
