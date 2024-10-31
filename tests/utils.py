@@ -74,7 +74,8 @@ def run_db_command(
     ]
 
     proc = subprocess.Popen(
-        psql_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        psql_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        env={"PGPASSWORD": password}.update(os.environ)
     )
     stdout_buffer = []
     stderr_buffer = []
