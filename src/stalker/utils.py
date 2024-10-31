@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 """Utilities are situated here."""
-
+import calendar
 from datetime import datetime
 from typing import Any, Generator
+
+from stalker.exceptions import CircularDependencyError
 
 
 def make_plural(name: str) -> str:
@@ -76,8 +78,6 @@ def check_circular_dependency(entity: Any, other_entity: Any, attr_name: str) ->
     """
     for e in walk_hierarchy(entity, attr_name):
         if e is other_entity:
-            from stalker.exceptions import CircularDependencyError
-
             raise CircularDependencyError(
                 "{entity_name} ({entity_class}) and "
                 "{other_entity_name} ({other_entity_class}) creates a "
@@ -104,11 +104,8 @@ def utc_to_local(utc_datetime) -> datetime:
         datetime: The local datetime instance.
     """
     # get integer timestamp to avoid precision lost
-    import calendar
-    import datetime
-
     timestamp = calendar.timegm(utc_datetime.timetuple())
-    local_dt = datetime.datetime.fromtimestamp(timestamp)
+    local_dt = datetime.fromtimestamp(timestamp)
     return local_dt.replace(microsecond=utc_datetime.microsecond)
 
 

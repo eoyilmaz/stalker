@@ -7,7 +7,6 @@ import datetime
 import json
 import os
 import re
-import sys
 
 from jinja2 import Template
 
@@ -25,6 +24,7 @@ from stalker.db.declarative import Base
 from stalker.db.types import GenericDateTime
 from stalker.models.entity import Entity, SimpleEntity
 from stalker.models.mixins import ACLMixin
+from stalker.models.status import Status
 
 logger = log.get_logger(__name__)
 
@@ -1020,7 +1020,7 @@ class User(Entity, ACLMixin):
              List[Ticket]: A list of :class:`.Ticket` instances which are not closed and
                 this user is assigned as the owner.
         """
-        from stalker import Ticket, Status
+        from stalker import Ticket
 
         return (
             Ticket.query.join(Status, Ticket.status)

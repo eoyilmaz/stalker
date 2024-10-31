@@ -4,6 +4,8 @@ import json
 
 import pytz
 
+import tzlocal
+
 from sqlalchemy.types import DateTime, JSON, TEXT, TypeDecorator
 
 
@@ -84,9 +86,6 @@ class DateTimeUTC(TypeDecorator):
         """
         if value is not None:
             # inject utc and then convert to local timezone
-            import pytz
-            import tzlocal
-
             local_tz = tzlocal.get_localzone()
             value = value.replace(tzinfo=pytz.utc).astimezone(local_tz)
         return value
