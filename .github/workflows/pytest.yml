@@ -59,7 +59,7 @@ jobs:
 
     - name: Create .pgpass file
       run: |
-        echo "localhost:5432:postgres:postgres" > ~/.pgpass
+        echo "localhost:5432:*:postgres:postgres" > ~/.pgpass
         chmod 0600 ~/.pgpass
         echo "USER: $USER"
         echo "HOME: $HOME"
