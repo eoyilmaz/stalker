@@ -13,9 +13,8 @@ jobs:
 
     name: Python ${{ matrix.python-version }} & PostgreSQL ${{ matrix.postgresql-version }}
     env:
-      PGPASSFILE: ~/.pgpass
+      # PGPASSFILE: ~/.pgpass
       PGPASSWORD: postgres
-      # DISPLAY: :0
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -58,14 +57,14 @@ jobs:
         # When "true", encrypt connections using SSL (TLS).
         ssl: false
 
-    - name: Create .pgpass file
-      run: |
-        echo "localhost:5432:*:postgres:postgres" > ~/.pgpass
-        chmod 0600 ~/.pgpass
-        echo "USER: $USER"
-        echo "HOME: $HOME"
-        cat ~/.pgpass
-        ls -la ~
+    # - name: Create .pgpass file
+    #   run: |
+    #     echo "localhost:5432:*:postgres:postgres" > ~/.pgpass
+    #     chmod 0600 ~/.pgpass
+    #     echo "USER: $USER"
+    #     echo "HOME: $HOME"
+    #     cat ~/.pgpass
+    #     ls -la ~
 
     - name: Set up TaskJuggler
       run: |
