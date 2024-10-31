@@ -3,8 +3,8 @@
 
 See docs for more information.
 """
-from stalker import config, log
-
+from stalker.version import __version__  # noqa: F401
+from stalker import config, log  # noqa: I100
 if True:
     defaults = config.Config()
 from stalker.models.asset import Asset
@@ -130,17 +130,5 @@ __all__ = [
     "WorkingHoursMixin",
 ]
 
-__version__ = "1.0.0.dev1"
-
-__title__ = "stalker"
-__description__ = "A Production Asset Management (ProdAM) System"
-__uri__ = "https://github.com/eoyilmaz/stalker"
-__doc__ = f"{__description__} <{__uri__}>"
-
-__author__ = "Erkan Ozgur Yilmaz"
-__email__ = "eoyilmaz@gmail.com"
-
-__license__ = "LGPLv3"
-__copyright__ = "Copyright (C) 2009-2024 Erkan Ozgur Yilmaz"
 
 logger = log.get_logger(__name__)

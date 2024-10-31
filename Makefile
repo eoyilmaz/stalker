@@ -77,7 +77,7 @@ tests:
 	echo -e "\n\033[36m--- $@: Using virtualenv at '$(VIRTUALENV_DIR)' ---\033[0m\n";
 	source ./$(VIRTUALENV_DIR)/bin/activate; \
 	echo -e "\n\033[36m--- $@: Using python interpretter '`which python`' ---\033[0m\n"; \
-	pytest -v -n auto -W ignore --color=yes --cov-report term tests;
+	pytest -v -n auto -W ignore --color=yes --cov --cov-report term --cov-fail-under 99 tests;
 
 # https://www.gnu.org/software/make/manual/html_node/Force-Targets.html
 FORCE:
