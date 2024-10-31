@@ -13,7 +13,7 @@ jobs:
 
     name: Python ${{ matrix.python-version }} & PostgreSQL ${{ matrix.postgresql-version }}
     env:
-      PGPASSFILE: $home/.pgpass
+      PGPASSFILE: ~/.pgpass
       # DISPLAY: :0
     runs-on: ubuntu-latest
     strategy:
