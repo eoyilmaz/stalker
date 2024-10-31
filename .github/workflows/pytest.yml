@@ -12,8 +12,9 @@ jobs:
   build:
 
     name: Python ${{ matrix.python-version }} & PostgreSQL ${{ matrix.postgresql-version }}
-    # env:
-    #   DISPLAY: :0
+    env:
+      PGPASSFILE: $home/.pgpass
+      # DISPLAY: :0
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -40,11 +41,6 @@ jobs:
           echo "add_dir_str=cpython-313" >> $GITHUB_ENV
         fi
 
-    # - name: Install PostgreSQL ${{ matrix.postgresql-version }}
-    #   uses: tj-actions/install-postgresql@v3.1.1
-    #   with:
-    #     postgresql-version: ${{ matrix.postgresql-version }}
-
     - name: Setup PostgreSQL for Linux/macOS/Windows
       uses: ikalnytskyi/action-setup-postgres@v7
       with:
@@ -60,6 +56,10 @@ jobs:
         postgres-version: ${{ matrix.postgresql-version }}
         # When "true", encrypt connections using SSL (TLS).
         ssl: false
+
+    - name: Create .pgpass file
+      run:
+        echo "localhost:5432:postgres:postgres" > ~/.pgpass
 
     - name: Set up TaskJuggler
       run: |
