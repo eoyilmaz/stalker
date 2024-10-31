@@ -46,8 +46,10 @@ clean-all: clean
 	-rm -f INSTALLED_FILES
 	-rm -f setuptools-*.egg
 	-rm -f use-distutils
+	-rm -f .coverage*
+	-rm -Rf htmlcov
 	-rm -rf dist
-	-rm -Rf $(PACKAGE_NAME).egg-info
+	-rm -Rf src/$(PACKAGE_NAME).egg-info
 	-rm -Rf $(VIRTUALENV_DIR)
 
 html:
@@ -77,7 +79,7 @@ tests:
 	echo -e "\n\033[36m--- $@: Using virtualenv at '$(VIRTUALENV_DIR)' ---\033[0m\n";
 	source ./$(VIRTUALENV_DIR)/bin/activate; \
 	echo -e "\n\033[36m--- $@: Using python interpretter '`which python`' ---\033[0m\n"; \
-	pytest -v -n auto -W ignore --color=yes --cov --cov-report term --cov-fail-under 99 tests;
+	PYTHONPATH=src pytest -v -n auto -W ignore --color=yes --cov=src --cov-report term --cov-fail-under 99 tests;
 
 # https://www.gnu.org/software/make/manual/html_node/Force-Targets.html
 FORCE:

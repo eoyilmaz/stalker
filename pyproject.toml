@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 include-package-data = true
 
 [tool.setuptools.packages.find]
-where = [""]
+where = ["src"]
 
 [tool.setuptools.package-data]
 stalker = ["VERSION"]
