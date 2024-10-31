@@ -4,6 +4,7 @@ Revision ID: 21b88ed3da95
 Revises: 4664d72ce1e1
 Create Date: 2013-05-31 12:08:59.425539
 """
+
 from alembic import op
 
 import sqlalchemy as sa
@@ -15,6 +16,7 @@ down_revision = "4664d72ce1e1"
 
 
 def upgrade():
+    """Upgrade the tables."""
     try:
         op.create_table(
             "Task_References",
@@ -39,6 +41,7 @@ def upgrade():
 
 
 def downgrade():
+    """Downgrade the tables."""
     op.create_table(
         "Sequence_References",
         sa.Column("sequence_id", sa.INTEGER(), autoincrement=False, nullable=False),

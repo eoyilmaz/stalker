@@ -4,6 +4,7 @@ Revision ID: 25b3eba6ffe7
 Revises: 53d8127d8560
 Create Date: 2013-05-22 16:51:53.136718
 """
+
 from alembic import op
 
 import sqlalchemy as sa
@@ -19,10 +20,11 @@ logger = log.get_logger(__name__)
 
 
 def upgrade():
+    """Upgrade the tables."""
     try:
         op.drop_column("Versions", "source_file_id")
     except (sa.exc.OperationalError, sa.exc.InternalError):
-        # SQLite doesnt support it
+        # SQLite doesn't support it
         pass
 
     try:
@@ -44,10 +46,14 @@ def upgrade():
         # + is_published TEXT,
         # + status_id INTEGER NOT NULL,
         # + status_list_id INTEGER NOT NULL,
-        # + FOREIGN KEY ( status_list_id ) REFERENCES StatusLists ( id ) DEFERRABLE INITIALLY DEFERRED,
-        # + FOREIGN KEY ( status_id ) REFERENCES Statuses ( id ) DEFERRABLE INITIALLY DEFERRED,
-        # + FOREIGN KEY ( parent_id ) REFERENCES Versions ( id ) DEFERRABLE INITIALLY DEFERRED,
-        # + FOREIGN KEY ( version_of_id ) REFERENCES Tasks ( id ) DEFERRABLE INITIALLY DEFERRED,
+        # + FOREIGN KEY ( status_list_id ) REFERENCES StatusLists ( id )
+        #                                                 DEFERRABLE INITIALLY DEFERRED,
+        # + FOREIGN KEY ( status_id ) REFERENCES Statuses ( id )
+        #                                                 DEFERRABLE INITIALLY DEFERRED,
+        # + FOREIGN KEY ( parent_id ) REFERENCES Versions ( id )
+        #                                                 DEFERRABLE INITIALLY DEFERRED,
+        # + FOREIGN KEY ( version_of_id ) REFERENCES Tasks ( id )
+        #                                                 DEFERRABLE INITIALLY DEFERRED,
         # + FOREIGN KEY ( id ) REFERENCES Links ( id ) DEFERRABLE INITIALLY DEFERRED
 
         op.create_table(
@@ -74,7 +80,9 @@ def upgrade():
         # *********************************************************************
         # SKIP THIS PART
         # then copy the data from the original table to the new table
-        # s = sa.sql.select(['Versions', 'Links']).where('Versions.c.source_link_id == Links.c.id')
+        # s = sa.sql.select(
+        #     ['Versions', 'Links']
+        # ).where('Versions.c.source_link_id == Links.c.id')
         # result = op.execute(s)
         #
         # if result:
@@ -91,5 +99,6 @@ def upgrade():
 
 
 def downgrade():
+    """Downgrade the tables."""
     op.add_column("Versions", sa.Column("source_file_id", sa.INTEGER(), nullable=True))
     op.create_foreign_key(None, "Versions", "Entities", ["id"], ["id"])

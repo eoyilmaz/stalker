@@ -4,6 +4,7 @@ Revision ID: f16651477e64
 Revises: 255ee1f9c7b3
 Create Date: 2016-11-15 00:22:16.438000
 """
+
 from alembic import op
 
 import sqlalchemy as sa
@@ -15,6 +16,7 @@ down_revision = "255ee1f9c7b3"
 
 
 def upgrade():
+    """Upgrade the tables."""
     op.create_table(
         "AuthenticationLogs",
         sa.Column("id", sa.Integer(), nullable=False),
@@ -39,6 +41,7 @@ def upgrade():
 
 
 def downgrade():
+    """Downgrade the tables."""
     op.add_column(
         "Users",
         sa.Column(

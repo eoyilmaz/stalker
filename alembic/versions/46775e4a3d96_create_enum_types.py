@@ -4,6 +4,7 @@ Revision ID: 46775e4a3d96
 Revises: 2aeab8b376dc
 Create Date: 2014-01-31 03:08:36.445876
 """
+
 from alembic import op
 
 # revision identifiers, used by Alembic.
@@ -12,6 +13,7 @@ down_revision = "2aeab8b376dc"
 
 
 def upgrade():
+    """Upgrade the tables."""
     # rename types
     op.execute('ALTER TYPE "TaskScheduleUnit" RENAME TO "TimeUnit";')
 
@@ -40,6 +42,7 @@ def upgrade():
 
 
 def downgrade():
+    """Downgrade the tables."""
     # add necessary types
     op.execute(
         """CREATE TYPE "TaskBidUnit" AS ENUM

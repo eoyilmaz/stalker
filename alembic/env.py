@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+"""Setup environment for migration."""
 from logging.config import fileConfig
 
 from alembic import context

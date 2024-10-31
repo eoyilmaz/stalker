@@ -4,6 +4,7 @@ Revision ID: 5355b569237b
 Revises: 6297277da38
 Create Date: 2013-06-10 11:47:28.984222
 """
+
 from alembic import op
 
 import sqlalchemy as sa
@@ -14,6 +15,7 @@ down_revision = "6297277da38"
 
 
 def upgrade():
+    """Upgrade the tables."""
     try:
         op.alter_column("Versions", "version_of_id", new_column_name="task_id")
     except sa.exc.OperationalError:
@@ -34,6 +36,7 @@ def upgrade():
 
 
 def downgrade():
+    """Downgrade the tables."""
     try:
         op.alter_column("Versions", "task_id", new_column_name="version_of_id")
     except sa.exc.OperationalError:

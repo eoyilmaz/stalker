@@ -4,6 +4,7 @@ Revision ID: 4664d72ce1e1
 Revises: 25b3eba6ffe7
 Create Date: 2013-05-23 18:46:18.218662
 """
+
 from alembic import op
 
 import sqlalchemy as sa
@@ -27,14 +28,14 @@ def upgrade():
             sa.Column("full_path", sa.String),
         )
 
-        links_temp = sa.sql.table(
+        sa.sql.table(
             "Links_Temp",
             sa.Column("id", sa.Integer, sa.ForeignKey("Entities.id"), primary_key=True),
             sa.Column("original_filename", sa.String(256), nullable=True),
             sa.Column("full_path", sa.String),
         )
 
-        links = sa.sql.table(
+        sa.sql.table(
             "Links",
             sa.Column("id", sa.Integer, sa.ForeignKey("Entities.id"), primary_key=True),
             sa.Column("original_filename", sa.String(256), nullable=True),
@@ -54,6 +55,7 @@ def upgrade():
 
 
 def downgrade():
+    """Downgrade the tables."""
     try:
         op.alter_column("Links", "path", new_column_name="full_path")
     except sa.exc.OperationalError:
@@ -66,14 +68,14 @@ def downgrade():
             sa.Column("path", sa.String),
         )
 
-        links_temp = sa.sql.table(
+        sa.sql.table(
             "Links_Temp",
             sa.Column("id", sa.Integer, sa.ForeignKey("Entities.id"), primary_key=True),
             sa.Column("original_filename", sa.String(256), nullable=True),
             sa.Column("path", sa.String),
         )
 
-        links = sa.sql.table(
+        sa.sql.table(
             "Links",
             sa.Column("id", sa.Integer, sa.ForeignKey("Entities.id"), primary_key=True),
             sa.Column("original_filename", sa.String(256), nullable=True),

@@ -4,6 +4,7 @@ Revision ID: 4a836cf73bcf
 Revises: None
 Create Date: 2013-05-15 16:27:05.983849
 """
+
 from alembic import op
 
 import sqlalchemy as sa
@@ -15,6 +16,7 @@ down_revision = None
 
 
 def upgrade():
+    """Upgrade the tables."""
     try:
         op.add_column("EntityTypes", sa.Column("accepts_references", sa.Boolean))
     except (sa.exc.OperationalError, sa.exc.ProgrammingError):
@@ -29,6 +31,7 @@ def upgrade():
 
 
 def downgrade():
+    """Downgrade the tables."""
     # no drop column in SQLite so this will not work for SQLite databases
     op.drop_column("EntityTypes", "accepts_references")
     op.drop_column("Links", "original_filename")

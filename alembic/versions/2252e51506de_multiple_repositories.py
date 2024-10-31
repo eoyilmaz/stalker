@@ -4,6 +4,7 @@ Revision ID: 2252e51506de
 Revises: 1c9c9c28c102
 Create Date: 2015-01-28 00:46:29.139946
 """
+
 from alembic import op
 
 import sqlalchemy as sa
@@ -14,6 +15,7 @@ down_revision = "1c9c9c28c102"
 
 
 def upgrade():
+    """Upgrade the tables."""
     op.create_table(
         "Project_Repositories",
         sa.Column("project_id", sa.Integer(), nullable=False),
@@ -35,6 +37,7 @@ def upgrade():
 
 
 def downgrade():
+    """Downgrade the tables."""
     with op.batch_alter_table("Projects", schema=None) as batch_op:
         batch_op.add_column(
             sa.Column("repository_id", sa.INTEGER(), autoincrement=False, nullable=True)

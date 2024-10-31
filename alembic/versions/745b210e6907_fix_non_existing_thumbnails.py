@@ -4,6 +4,7 @@ Revision ID: 745b210e6907
 Revises: f2005d1fbadc
 Create Date: 2016-06-27 17:52:24.381000
 """
+
 from alembic import op
 
 # revision identifiers, used by Alembic.
@@ -31,5 +32,6 @@ def upgrade():
 
 
 def downgrade():
+    """Downgrade the tables."""
     # do nothing
     pass

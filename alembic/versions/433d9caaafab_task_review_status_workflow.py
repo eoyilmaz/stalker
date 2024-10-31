@@ -4,6 +4,7 @@ Revision ID: 433d9caaafab
 Revises: 46775e4a3d96
 Create Date: 2014-01-31 01:51:08.457109
 """
+
 from alembic import op
 
 import sqlalchemy as sa
@@ -17,6 +18,7 @@ down_revision = "46775e4a3d96"
 
 
 def upgrade():
+    """Upgrade the tables."""
     # Enum Types
     time_unit_enum = postgresql.ENUM(
         "min", "h", "d", "w", "m", "y", name="TimeUnit", create_type=False
@@ -296,29 +298,30 @@ def upgrade():
     def create_status(name, code):
         # Insert in to SimpleEntities
         op.execute(
-            """INSERT INTO "SimpleEntities" (entity_type, name, description,
-created_by_id, updated_by_id, date_created, date_updated, type_id,
-thumbnail_id, html_style, html_class, stalker_version)
-VALUES ('Status', '%(name)s', '', NULL, NULL,
-(SELECT CAST(NOW() at time zone 'utc' AS timestamp)), (SELECT CAST(NOW() at time zone 'utc' AS timestamp)), NULL, NULL,
-'', '', '%(stalker_version)s')"""
-            % {"stalker_version": stalker.__version__, "name": name}
+            f"""INSERT INTO "SimpleEntities" (entity_type, name, description,
+            created_by_id, updated_by_id, date_created, date_updated, type_id,
+            thumbnail_id, html_style, html_class, stalker_version)
+            VALUES ('Status', '{name}', '', NULL, NULL,
+            (SELECT CAST(NOW() at time zone 'utc' AS timestamp)),
+            (SELECT CAST(NOW() at time zone 'utc' AS timestamp)),
+            NULL,
+            NULL,
+            '', '', '{stalker.__version__}')"""
         )
 
         # insert in to Entities and Statuses
         op.execute(
-            """INSERT INTO "Entities" (id)
+            f"""INSERT INTO "Entities" (id)
             VALUES ((
               SELECT id
               FROM "SimpleEntities"
-              WHERE "SimpleEntities".name = '%(name)s'
+              WHERE "SimpleEntities".name = '{name}'
             ));
             INSERT INTO "Statuses" (id, code)
             VALUES ((
               SELECT id
               FROM "SimpleEntities"
-              WHERE "SimpleEntities".name = '%(name)s'), '%(code)s');"""
-            % {"name": name, "code": code}
+              WHERE "SimpleEntities".name = '{name}'), '{code}');"""
         )
 
     create_status("Waiting For Dependency", "WFD")
@@ -333,21 +336,23 @@ VALUES ('Status', '%(name)s', '', NULL, NULL,
     # Add new Task statuses to StatusList
     def update_status_lists(entity_type, status_code):
         op.execute(
-            """CREATE OR REPLACE FUNCTION add_status_to_status_list(status_list_id INT, status_id INT) RETURNS VOID AS $$
-        BEGIN
-            INSERT INTO "StatusList_Statuses" (status_list_id, status_id)
-            VALUES (status_list_id, status_id);
-        EXCEPTION WHEN OTHERS THEN
-            -- do nothning
-        END;
-        $$
-        LANGUAGE 'plpgsql';
+            f"""
+            CREATE OR REPLACE FUNCTION
+                add_status_to_status_list(status_list_id INT, status_id INT)
+                    RETURNS VOID AS $$
+            BEGIN
+                INSERT INTO "StatusList_Statuses" (status_list_id, status_id)
+                VALUES (status_list_id, status_id);
+            EXCEPTION WHEN OTHERS THEN
+                -- do nothning
+            END;
+            $$
+            LANGUAGE 'plpgsql';
 
-        select NULL from add_status_to_status_list(
-            (SELECT id FROM "StatusLists" WHERE target_entity_type = '%(entity_type)s'),
-            (SELECT id FROM "Statuses" WHERE code = '%(status_code)s')
+            select NULL from add_status_to_status_list(
+            (SELECT id FROM "StatusLists" WHERE target_entity_type = '{entity_type}'),
+            (SELECT id FROM "Statuses" WHERE code = '{status_code}')
         );"""
-            % {"entity_type": entity_type, "status_code": status_code}
         )
 
     # Task
@@ -391,14 +396,13 @@ AND status_id = (SELECT id FROM "Statuses" WHERE "Statuses".code = 'NEW')
     # Create Review StatusList
     # Insert in to SimpleEntities
     op.execute(
-        """INSERT INTO "SimpleEntities" (entity_type, name, description,
+        f"""INSERT INTO "SimpleEntities" (entity_type, name, description,
 created_by_id, updated_by_id, date_created, date_updated, type_id,
 thumbnail_id, html_style, html_class, stalker_version)
 VALUES ('StatusList', 'Review Status List', '', NULL, NULL,
 (SELECT CAST(NOW() at time zone 'utc' AS timestamp)),
 (SELECT CAST(NOW() at time zone 'utc' AS timestamp)), NULL, NULL,
-'', '', '%(stalker_version)s')"""
-        % {"stalker_version": stalker.__version__}
+'', '', '{stalker.__version__}')"""
     )
 
     # insert in to Entities and StatusLists
@@ -451,14 +455,15 @@ where status_id = (select id from "Statuses" where code='PREV')"""
         WHERE status_list_id=(
           SELECT id
           FROM "StatusLists"
-          WHERE target_entity_type='%s')
+          WHERE target_entity_type='{}')
           AND status_id in (
             SELECT id
             FROM "Statuses"
             WHERE code NOT IN
             ('WFD', 'RTS', 'WIP', 'OH', 'STOP', 'PREV', 'HREV', 'DREV', 'CMPL')
-        );"""
-            % x
+        );""".format(
+                x
+            )
         ),
         ["Task", "Asset", "Shot", "Sequence"],
     )
@@ -482,7 +487,7 @@ where status_id = (select id from "Statuses" where code='PREV')"""
 
 
 def downgrade():
-    """Downgrade."""
+    """Downgrade the tables."""
     op.add_column(
         "Vacations",
         sa.Column("timing_resolution", postgresql.INTERVAL(), nullable=True),
@@ -544,28 +549,32 @@ def downgrade():
     # Update all WFD Tasks to NEW
     op.execute(
         """update "Tasks"
-set status_id = (select id from "Statuses" where code='NEW')
-where status_id = (select id from "Statuses" where code='WFD')"""
+        set status_id = (select id from "Statuses" where code='NEW')
+        where status_id = (select id from "Statuses" where code='WFD')
+        """
     )
 
     # Update all OH Tasks to WIP
     op.execute(
         """update "Tasks"
-set status_id = (select id from "Statuses" where code='WIP')
-where status_id = (select id from "Statuses" where code='OH')"""
+        set status_id = (select id from "Statuses" where code='WIP')
+        where status_id = (select id from "Statuses" where code='OH')
+        """
     )
 
     # Update all STOP or DREV Tasks to CMPL
     op.execute(
         """update "Tasks"
-set status_id = (select id from "Statuses" where code='WIP')
-where status_id in (select id from "Statuses" where code in ('STOP', 'DREV'))"""
+        set status_id = (select id from "Statuses" where code='WIP')
+        where status_id in (select id from "Statuses" where code in ('STOP', 'DREV'))
+        """
     )
 
     op.execute(
         """update "Tasks"
-set status_id = (select id from "Statuses" where code='WIP')
-where status_id = (select id from "Statuses" where code='STOP')"""
+        set status_id = (select id from "Statuses" where code='WIP')
+        where status_id = (select id from "Statuses" where code='STOP')
+        """
     )
 
     # Delete Statuses
@@ -593,7 +602,10 @@ where status_id = (select id from "Statuses" where code='STOP')"""
     op.execute(
         """
     DELETE FROM "StatusList_Statuses"
-    WHERE status_list_id=(SELECT id FROM "SimpleEntities" WHERE name='Review Status List');
+    WHERE status_list_id=(
+        SELECT id FROM "SimpleEntities"
+        WHERE name='Review Status List'
+    );
     DELETE FROM "StatusLists"
     WHERE id=(SELECT id FROM "SimpleEntities" WHERE name='Review Status List');
     DELETE FROM "Entities"

@@ -4,6 +4,7 @@ Revision ID: ed0167fff399
 Revises: 1181305d3001
 Create Date: 2017-05-20 14:32:48.388000
 """
+
 from alembic import op
 
 import sqlalchemy as sa
@@ -15,6 +16,7 @@ down_revision = "1181305d3001"
 
 
 def upgrade():
+    """Upgrade the tables."""
     op.create_table(
         "WorkingHours",
         sa.Column("id", sa.Integer(), nullable=False),
@@ -39,6 +41,7 @@ def upgrade():
 
 
 def downgrade():
+    """Downgrade the tables."""
     op.add_column(
         "Studios",
         sa.Column(

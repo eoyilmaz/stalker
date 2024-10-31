@@ -4,6 +4,7 @@ Revision ID: 57a5949c7f29
 Revises: 101a789e38ad
 Create Date: 2013-07-31 16:57:17.674995
 """
+
 from alembic import op
 
 import sqlalchemy as sa
@@ -14,6 +15,7 @@ down_revision = "101a789e38ad"
 
 
 def upgrade():
+    """Upgrade the tables."""
     op.add_column("Tasks", sa.Column("_schedule_seconds", sa.Integer(), nullable=True))
     op.add_column(
         "Tasks", sa.Column("_total_logged_seconds", sa.Integer(), nullable=True)
@@ -21,5 +23,6 @@ def upgrade():
 
 
 def downgrade():
+    """Downgrade the tables."""
     op.drop_column("Tasks", "_total_logged_seconds")
     op.drop_column("Tasks", "_schedule_seconds")

@@ -4,6 +4,7 @@ Revision ID: a9319b19f7be
 Revises: f16651477e64
 Create Date: 2016-11-29 13:38:22.380000
 """
+
 from alembic import op
 
 import sqlalchemy as sa
@@ -14,8 +15,10 @@ down_revision = "f16651477e64"
 
 
 def upgrade():
+    """Upgrade the tables."""
     op.add_column("Shots", sa.Column("fps", sa.Float(precision=3), nullable=True))
 
 
 def downgrade():
+    """Downgrade the tables."""
     op.drop_column("Shots", "fps")

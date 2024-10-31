@@ -4,6 +4,7 @@ Revision ID: f2005d1fbadc
 Revises: 258985128aff
 Create Date: 2016-06-27 14:33:10.642000
 """
+
 from alembic import op
 
 import sqlalchemy as sa
@@ -15,6 +16,7 @@ down_revision = "745b210e6907"
 
 
 def upgrade():
+    """Upgrade the tables."""
     op.create_table(
         "Project_Clients",
         sa.Column("client_id", sa.Integer(), nullable=False),
@@ -77,7 +79,8 @@ def upgrade():
 
     op.execute(
         """
-    ALTER TABLE "Department_Users" DROP CONSTRAINT IF EXISTS "Department_Users_rid_fkey";
+    ALTER TABLE "Department_Users" DROP CONSTRAINT
+        IF EXISTS "Department_Users_rid_fkey";
     ALTER TABLE public."Department_Users"
       ADD CONSTRAINT "Department_Users_rid_fkey" FOREIGN KEY (rid)
           REFERENCES public."Roles" (id) MATCH SIMPLE
@@ -152,7 +155,8 @@ def upgrade():
         """
     ALTER TABLE "Studios" DROP CONSTRAINT IF EXISTS "Studios_last_scheduled_by_id_fkey";
     ALTER TABLE "Studios"
-      ADD CONSTRAINT "Studios_last_scheduled_by_id_fkey" FOREIGN KEY (last_scheduled_by_id)
+      ADD CONSTRAINT "Studios_last_scheduled_by_id_fkey"
+        FOREIGN KEY (last_scheduled_by_id)
           REFERENCES public."Users" (id) MATCH SIMPLE
           ON UPDATE NO ACTION ON DELETE NO ACTION;
     """
@@ -162,7 +166,8 @@ def upgrade():
         """
     ALTER TABLE "Studios" DROP CONSTRAINT IF EXISTS "Studios_is_scheduling_by_id_fkey";
     ALTER TABLE "Studios"
-      ADD CONSTRAINT "Studios_is_scheduling_by_id_fkey" FOREIGN KEY (is_scheduling_by_id)
+      ADD CONSTRAINT "Studios_is_scheduling_by_id_fkey"
+        FOREIGN KEY (is_scheduling_by_id)
           REFERENCES public."Users" (id) MATCH SIMPLE
           ON UPDATE NO ACTION ON DELETE NO ACTION;
     """
@@ -194,6 +199,7 @@ def upgrade():
 
 
 def downgrade():
+    """Downgrade the tables."""
     op.execute('ALTER TABLE "Tasks" DROP CONSTRAINT "Tasks_good_id_fkey"')
     op.alter_column(
         "Task_Dependencies",

@@ -4,6 +4,7 @@ Revision ID: 6297277da38
 Revises: 21b88ed3da95
 Create Date: 2013-06-07 16:03:08.412610
 """
+
 from alembic import op
 
 import sqlalchemy as sa
@@ -14,6 +15,7 @@ down_revision = "21b88ed3da95"
 
 
 def upgrade():
+    """Upgrade the tables."""
     try:
         op.drop_table("User_Vacations")
     except sa.exc.OperationalError:
@@ -21,6 +23,7 @@ def upgrade():
 
 
 def downgrade():
+    """Downgrade the tables."""
     op.create_table(
         "User_Vacations",
         sa.Column("user_id", sa.INTEGER(), autoincrement=False, nullable=False),

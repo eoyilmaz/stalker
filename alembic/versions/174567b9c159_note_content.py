@@ -4,6 +4,7 @@ Revision ID: 174567b9c159
 Revises: a6598cde6b
 Create Date: 2013-11-14 13:38:02.566201
 """
+
 from alembic import op
 
 import sqlalchemy as sa
@@ -14,8 +15,10 @@ down_revision = "a6598cde6b"
 
 
 def upgrade():
+    """Upgrade the tables."""
     op.drop_column("Notes", "content")
 
 
 def downgrade():
+    """Downgrade the tables."""
     op.add_column("Notes", sa.Column("content", sa.VARCHAR(), nullable=True))

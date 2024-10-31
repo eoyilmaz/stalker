@@ -4,6 +4,7 @@ Revision ID: 255ee1f9c7b3
 Revises: ea28a39ba3f5
 Create Date: 2016-08-18 03:19:22.301000
 """
+
 from alembic import op
 
 import sqlalchemy as sa
@@ -14,6 +15,7 @@ down_revision = "ea28a39ba3f5"
 
 
 def upgrade():
+    """Upgrade the tables."""
     op.create_table(
         "Payments",
         sa.Column("id", sa.Integer(), nullable=False),
@@ -33,4 +35,5 @@ def upgrade():
 
 
 def downgrade():
+    """Downgrade the tables."""
     op.drop_table("Payments")
