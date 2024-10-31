@@ -94,6 +94,16 @@ def run_db_command(
         if stderr != "":
             stderr_buffer.append(stderr)
 
+    logger.debug("STDOUT BUFFER")
+    logger.debug("=============")
+    for line in stdout_buffer:
+        logger.debug(line)
+
+    logger.debug("STDERR BUFFER")
+    logger.debug("=============")
+    for line in stderr_buffer:
+        logger.debug(line)
+
     return stdout_buffer, stderr_buffer
 
 
