@@ -40,22 +40,26 @@ jobs:
           echo "add_dir_str=cpython-313" >> $GITHUB_ENV
         fi
 
-    - name: Install PostgreSQL ${{ matrix.postgresql-version }}
-      uses: tj-actions/install-postgresql@v3.1.1
-      with:
-        postgresql-version: ${{ matrix.postgresql-version }}
+    # - name: Install PostgreSQL ${{ matrix.postgresql-version }}
+    #   uses: tj-actions/install-postgresql@v3.1.1
+    #   with:
+    #     postgresql-version: ${{ matrix.postgresql-version }}
 
-    - name: Setup PostgreSQL ${{ matrix.postgresql-version }}
-      uses: Harmon758/postgresql-action@v1.0.0
+    - name: Setup PostgreSQL for Linux/macOS/Windows
+      uses: ikalnytskyi/action-setup-postgres@v7
       with:
-        # Version of PostgreSQL to use
-        postgresql version: ${{ matrix.postgresql-version }}
-        # POSTGRES_DB - name for the default database that is created
-        postgresql db: postgres
-        # POSTGRES_USER - create the specified user with superuser power
-        postgresql user: postgres
-        # POSTGRES_PASSWORD - superuser password
-        postgresql password: postgres
+        # The username of the user to setup.
+        username: postgres
+        # The password of the user to setup.
+        password: postgres
+        # The database name to setup and grant permissions to created user.
+        database: postgres
+        # The server port to listen on.
+        port: 5432
+        # The PostgreSQL major version to install. Either "14", "15", "16" or "17".
+        postgres-version: ${{ matrix.postgresql-version }}
+        # When "true", encrypt connections using SSL (TLS).
+        ssl: false
 
     - name: Set up TaskJuggler
       run: |
