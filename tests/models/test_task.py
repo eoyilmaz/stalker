@@ -1203,9 +1203,9 @@ def test_time_logs_attr_is_not_a_list_of_timelog_instances(setup_task_tests):
     "schedule_timing, schedule_unit, schedule_seconds",
     [
         [10, "h", 10 * 3600],
-        [23, "d", 23 * defaults.daily_working_hours * 3600],
-        [2, "w", 2 * defaults.weekly_working_hours * 3600],
-        [2.5, "m", 2.5 * 4 * defaults.weekly_working_hours * 3600],
+        [23, "d", 23 * 9 * 3600],
+        [2, "w", 2 * 45 * 3600],
+        [2.5, "m", 2.5 * 4 * 45 * 3600],
         # [
         #     3.1,
         #     "y",
@@ -1231,9 +1231,9 @@ def test_schedule_seconds_is_working_properly_for_an_effort_based_task_no_studio
     "schedule_timing, schedule_unit, schedule_seconds",
     [
         [10, "h", 10 * 3600],
-        [23, "d", 23 * defaults.daily_working_hours * 3600],
-        [2, "w", 2 * defaults.weekly_working_hours * 3600],
-        [2.5, "m", 2.5 * 4 * defaults.weekly_working_hours * 3600],
+        [23, "d", 23 * 9 * 3600],
+        [2, "w", 2 * 45 * 3600],
+        [2.5, "m", 2.5 * 4 * 45 * 3600],
         # [
         #     3.1,
         #     "y",
