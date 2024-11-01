@@ -15,6 +15,7 @@ FilenameTemplates
 formatter
 HREV
 Lite3
+macOS
 minallocated
 mixin
 Mixins
@@ -25,7 +26,6 @@ num
 OH
 onend
 onstart
-OSX
 oy
 oyProjectManager
 Postgre

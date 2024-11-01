@@ -46,64 +46,66 @@ class Permission(Base):
     passing your class to it. See the :mod:`stalker.db` documentation for
     details.
 
-    :param str access: An Enum value which can have the one of the values of
-      ``Allow`` or ``Deny``.
-
-    :param str action: An Enum value from the list ['Create', 'Read', 'Update',
-      'Delete', 'List']. Can not be None. The list can be changed from
-      stalker.config.Config.default_actions.
-
-    :param str class_name: The name of the class that this action is applied
-      to. Can not be None or an empty string.
-
     Example: Let say that you want to create a Permission specifying a Group of
     Users are allowed to create Projects::
 
-      from stalker import db
-      from stalker import db
-      from stalker.models.auth import User, Group, Permission
+    .. code-block:: Python
 
-      # first setup the db with the default database
-      #
-      # stalker.db.init() will create all the Actions possible with the
-      # SOM classes automatically
-      #
-      # What is left to you is to create the permissions
-      db.setup()
+        from stalker import db
+        from stalker import db
+        from stalker.models.auth import User, Group, Permission
 
-      user1 = User(
-          name='Test User',
-          login='test_user1',
-          password='1234',
-          email='testuser1@test.com'
-      )
-      user2 = User(
-          name='Test User',
-          login='test_user2',
-          password='1234',
-          email='testuser2@test.com'
-      )
+        # first setup the db with the default database
+        #
+        # stalker.db.init() will create all the Actions possible with the
+        # SOM classes automatically
+        #
+        # What is left to you is to create the permissions
+        db.setup()
 
-      group1 = Group(name='users')
-      group1.users = [user1, user2]
+        user1 = User(
+            name='Test User',
+            login='test_user1',
+            password='1234',
+            email='testuser1@test.com'
+        )
+        user2 = User(
+            name='Test User',
+            login='test_user2',
+            password='1234',
+            email='testuser2@test.com'
+        )
 
-      # get the permissions for the Project class
-      project_permissions = Permission.query\
-          .filter(Permission.access='Allow')\
-          .filter(Permission.action='Create')\
-          .filter(Permission.class_name='Project')\
-          .first()
+        group1 = Group(name='users')
+        group1.users = [user1, user2]
 
-      # now we have the permission specifying the allowance of creating a
-      # Project
+        # get the permissions for the Project class
+        project_permissions = Permission.query\
+            .filter(Permission.access='Allow')\
+            .filter(Permission.action='Create')\
+            .filter(Permission.class_name='Project')\
+            .first()
 
-      # to make group1 users able to create a Project we simply add this
-      # Permission to the groups permission attribute
-      group1.permissions.append(permission)
+        # now we have the permission specifying the allowance of creating a
+        # Project
 
-      # and persist this information in the database
-      DBSession.add(group)
-      DBSession.commit()
+        # to make group1 users able to create a Project we simply add this
+        # Permission to the groups permission attribute
+        group1.permissions.append(permission)
+
+        # and persist this information in the database
+        DBSession.add(group)
+        DBSession.commit()
+
+    Args:
+        access (str): An Enum value which can have the one of the values of
+            ``Allow`` or ``Deny``.
+        action (str): An Enum value from the list ['Create', 'Read', 'Update',
+            'Delete', 'List']. Can not be None. The list can be changed from
+            stalker.config.Config.default_actions.
+
+        class_name (str): The name of the class that this action is applied
+            to. Can not be None or an empty string.
     """
 
     __tablename__ = "Permissions"
@@ -265,9 +267,10 @@ class Group(Entity, ACLMixin):
     :class:`.ACLMixin` which adds ability to hold :class:`.Permission`
     instances and serve ACLs to Pyramid.
 
-    :param str name: The name of this group.
-    :param list users: A list of :class:`.User` instances, holding the desired
-      users in this group.
+    Args:
+        name (str): The name of this group.
+        users list: A list of :class:`.User` instances, holding the desired
+            users in this group.
     """
 
     __auto_name__ = False
@@ -356,79 +359,55 @@ class User(Entity, ACLMixin):
 
           Users not have a :attr:`.rate` attribute.
 
-    :param rate:
-       For future usage a rate attribute is added to the User to record the
-       daily cost of this user as a resource. It should be either 0 or a
-       positive integer or float value. Default is 0.
+    Args:
+        rate: For future usage a rate attribute is added to the User to record
+            the daily cost of this user as a resource. It should be either 0 or
+            a positive integer or float value. Default is 0.
+        efficiency : The efficiency is a multiplier for a user as a resource to
+            a task and defines how much of the time spent for that particular
+            task is counted as an actual effort. The default value is 1.0,
+            lowest possible value is 0.0 and there is no upper limit.
 
-    :param efficiency:
+            The efficiency of a resource can be used for three purposes. First
+            you can use it as a crude way to model a team. A team of 5 people
+            should have an efficiency of 5.0. Keep in mind that you cannot track
+            the members of the team individually if you use this feature. They
+            always act as a group.
 
-      The efficiency is a multiplier for a user as a resource to a task and
-      defines how much of the time spent for that particular task is counted as
-      an actual effort. The default value is 1.0, lowest possible value is 0.0
-      and there is no upper limit.
+            Another use is to model performance variations between your resources.
+            Again, this is a fairly crude mechanism and should be used with care.
+            A resource that isn't every good at some task might be pretty good
+            at another. This can't be taken into account as the resource efficiency
+            can only set globally for all tasks.
 
-      The efficiency of a resource can be used for three purposes. First you
-      can use it as a crude way to model a team. A team of 5 people should have
-      an efficiency of 5.0. Keep in mind that you cannot track the members of
-      the team individually if you use this feature. They always act as a
-      group.
+            One another and interesting use is to model the availability of passive
+            resources like a meeting room or a workstation or something that needs
+            to be free for a task to take place but does not contribute to a task
+            as an active resource.
 
-      Another use is to model performance variations between your resources.
-      Again, this is a fairly crude mechanism and should be used with care. A
-      resource that isn't every good at some task might be pretty good at
-      another. This can't be taken into account as the resource efficiency can
-      only set globally for all tasks.
-
-      One another and interesting use is to model the availability of passive
-      resources like a meeting room or a workstation or something that needs to
-      be free for a task to take place but does not contribute to a task as an
-      active resource.
-
-      All resources that do not contribute effort to the task, that is a
-      passive resource, should have an efficiency of 0.0. Again a typical
-      example would be a conference room. It's necessary for a meeting, but it
-      does not contribute any work.
-
-    :param email: holds the e-mail of the user, should be in [part1]@[part2]
-      format
-
-    :type email: str
-
-    :param login: This is the login name of the user, it should be all lower
-      case. Giving a string that has uppercase letters, it will be converted to
-      lower case. It can not be an empty string or None and it can not contain
-      any white space inside.
-
-    :type login: str
-
-    :param departments: It is the departments that the user is a part of. It
-      should be a list of Department objects. One user can be listed in
-      multiple departments.
-
-    :type departments: list of :class:`.Department` s
-
-    :param password: it is the password of the user, can contain any character.
-      Stalker doesn't store the raw passwords of the users. To check a stored
-      password with a raw password use :meth:`.check_password` and to set the
-      password you can use the :attr:`.password` property directly.
-
-    :type password: str
-
-    :param groups: It is a list of :class:`.Group` instances that this user
-      belongs to.
-
-    :type groups: list of :class:`.Group`
-
-    :param tasks: it is a list of Task objects which holds the tasks that this
-      user has been assigned to
-
-    :type tasks: list of :class:`.Task` s
-
-    :param last_login: it is a datetime.datetime object holds the last login
-      date of the user (not implemented yet)
-
-    :type last_login: datetime.datetime
+            All resources that do not contribute effort to the task, that is a
+            passive resource, should have an efficiency of 0.0. Again a typical
+            example would be a conference room. It's necessary for a meeting,
+            but it does not contribute any work.
+        email (str): holds the e-mail of the user, should be in [part1]@[part2]
+            format.
+        login (str): This is the login name of the user, it should be all lower
+            case. Giving a string that has uppercase letters, it will be converted
+            to lower case. It can not be an empty string or None and it can not
+            contain any white space inside.
+        departments (List[Department]): It is the departments that the user is
+            a part of. It should be a list of Department objects. One user can
+            be listed in multiple departments.
+        password (str): it is the password of the user, can contain any character.
+            Stalker doesn't store the raw passwords of the users. To check a stored
+            password with a raw password use :meth:`.check_password` and to set
+            the password you can use the :attr:`.password` property directly.
+        groups (List[Group]): It is a list of :class:`.Group` instances that this
+            user belongs to.
+        tasks (List[Task]): it is a list of Task objects which holds the tasks
+            that this user has been assigned to.
+        last_login (datetime.datetime): it is a datetime.datetime object holds
+            the last login date of the user (not implemented yet).
     """
 
     __auto_name__ = False

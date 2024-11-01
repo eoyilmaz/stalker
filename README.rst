@@ -113,7 +113,7 @@ Create a ``Repository`` for project files to be saved under:
         name='Commercial Projects Repository',
         windows_path='Z:/Projects',
         linux_path='/mnt/Z/Projects',
-        osx_path='/Volumes/Z/Projects'
+        macos_path='/Volumes/Z/Projects'
     )
 
 Create a ``FilenameTemplate`` (to be used as file naming convention):

@@ -39,7 +39,7 @@ def test_readme_tutorial_code(setup_sqlite3):
         code="CPR",
         windows_path="Z:/Projects",
         linux_path="/mnt/Z/Projects",
-        osx_path="/Volumes/Z/Projects",
+        macos_path="/Volumes/Z/Projects",
     )
 
     task_template = FilenameTemplate(

@@ -34,7 +34,7 @@ stalker.db.setup.init()
 repo = Repository(
     name="Test Repository",
     linux_path="/mnt/T/stalker_tests/",
-    osx_path="/Volumes/T/stalker_tests/",
+    macos_path="/Volumes/T/stalker_tests/",
     windows_path="T:/stalker_tests/",
 )
 

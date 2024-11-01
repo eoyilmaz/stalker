@@ -72,7 +72,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         code="TR",
         windows_path="T:/",
         linux_path="/mnt/T/",
-        osx_path="/Volumes/T/",
+        macos_path="/Volumes/T/",
     )
     DBSession.add(data["test_repo"])
 

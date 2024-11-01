@@ -75,7 +75,7 @@ def setup_task_status_workflow_tests():
         code="TR",
         linux_path="/mnt/T/",
         windows_path="T:/",
-        osx_path="/Volumes/T",
+        macos_path="/Volumes/T",
     )
 
     # proj1
@@ -2312,7 +2312,7 @@ def setup_task_status_workflow_db_tests(setup_postgresql_db):
         code="TR",
         linux_path="/mnt/T/",
         windows_path="T:/",
-        osx_path="/Volumes/T",
+        macos_path="/Volumes/T",
     )
     DBSession.add(data["test_repo"])
 

@@ -29,72 +29,75 @@ class Structure(Entity):
     Every line of this rendered template will represent a folder and Stalker
     will create these folders on the attached :class:`.Repository`.
 
-    :param templates: A list of :class:`.FilenameTemplate` s which defines a
-      specific template for the given
-      :attr:`.FilenameTemplate.target_entity_type` s.
+    Args:
+        templates (List[FilenameTemplate]): A list of :class:`.FilenameTemplate`
+            instances which defines a specific template for the given
+            :attr:`.FilenameTemplate.target_entity_type` values.
 
-    :type templates: list of :class:`.FilenameTemplate` s
+        custom_template (str): A string containing several lines of folder names.
+            The folders are relative to the :class:`.Project` root. It can also
+            contain a Jinja2 Template code. Which will be rendered to show the
+            list of folders to be created with the project. The Jinja2 Template
+            is going to have the {{project}} variable. The important point to
+            be careful about is to list all the custom folders of the project
+            in a new line in this string. For example a :class:`.Structure` for
+            a :class:`.Project` can have the following
+            :attr:`.Structure.custom_template`::
 
-    :param str custom_template: A string containing several lines of folder
-      names. The folders are relative to the :class:`.Project` root. It can
-      also contain a Jinja2 Template code. Which will be rendered to show the
-      list of folders to be created with the project. The Jinja2 Template is
-      going to have the {{project}} variable. The important point to be careful
-      about is to list all the custom folders of the project in a new line in
-      this string. For example a :class:`.Structure` for a :class:`.Project`
-      can have the following :attr:`.Structure.custom_template`::
+            .. clode-block:: Jinja
 
-        ASSETS
-        {% for asset in project.assets %}
-            {% set asset_root = 'ASSETS/' + asset.code %}
-            {{asset_root}}
+                ASSETS
+                {% for asset in project.assets %}
+                    {% set asset_root = 'ASSETS/' + asset.code %}
+                    {{asset_root}}
 
-            {% for task in asset.tasks %}
-                {% set task_root = asset_root + '/' + task.code %}
-                {{task_root}}
+                    {% for task in asset.tasks %}
+                        {% set task_root = asset_root + '/' + task.code %}
+                        {{task_root}}
 
-        SEQUENCES
-        {% for seq in project.sequences %}}
-            {% set seq_root = 'SEQUENCES/' + {{seq.code}} %}
-            {{seq_root}}/Edit
-            {{seq_root}}/Edit/Export
-            {{seq_root}}/Storyboard
+                SEQUENCES
+                {% for seq in project.sequences %}}
+                    {% set seq_root = 'SEQUENCES/' + {{seq.code}} %}
+                    {{seq_root}}/Edit
+                    {{seq_root}}/Edit/Export
+                    {{seq_root}}/Storyboard
 
-            {% for shot in seq.shots %}
-                {% set shot_root = seq_root + '/SHOTS/' + shot.code %}
-                {{shot_root}}
+                    {% for shot in seq.shots %}
+                        {% set shot_root = seq_root + '/SHOTS/' + shot.code %}
+                        {{shot_root}}
 
-                {% for task in shot.tasks %}
-                    {% set task_root = shot_root + '/' + task.code %}
-                    {{task_root}}
+                        {% for task in shot.tasks %}
+                            {% set task_root = shot_root + '/' + task.code %}
+                            {{task_root}}
 
-      The above example has gone far beyond deep than it is needed, where it
-      started to define paths for :class:`.Asset` s. Even it is possible to
-      create a :class:`.Project` structure like that, in general it is
-      unnecessary. Because the above folders are going to be created but they
-      are probably going to be empty for a while, because the
-      :class:`.Asset` s are not created yet (or in fact no
-      :class:`.Version` s are created for the :class:`.Task` s). Anyway, it
-      is much suitable and desired to create this details by using
-      :class:`.FilenameTemplate` objects. Which are specific to certain
-      :attr:`.FilenameTemplate.target_entity_type` s. And by using the
-      :attr:`.Structure.custom_template` attribute, Stalker can not place any
-      source or output file of a :class:`.Version` in the :class:`.Repository`
-      where as it can by using :class:`.FilenameTemplate` s.
+            The above example has gone far beyond deep than it is needed, where
+            it started to define paths for :class:`.Asset` s. Even it is possible
+            to create a :class:`.Project` structure like that, in general it is
+            unnecessary. Because the above folders are going to be created but
+            they are probably going to be empty for a while, because the
+            :class:`.Asset` s are not created yet (or in fact no :class:`.Version`
+            instances are created for the :class:`.Task` s). Anyway, it is much
+            suitable and desired to create this details by using
+            :class:`.FilenameTemplate` objects. Which are specific to certain
+            :attr:`.FilenameTemplate.target_entity_type` s. And by using the
+            :attr:`.Structure.custom_template` attribute, Stalker can not place
+            any source or output file of a :class:`.Version` in the
+            :class:`.Repository` where as it can by using
+            :class:`.FilenameTemplate` s.
 
-      But for certain types of :class:`.Task` s it is may be good to
-      previously create the folder structure just because in certain
-      environments (programs) it is not possible to run a Python code that will
-      place the file in to the Repository like in Photoshop.
+            But for certain types of :class:`.Task` s it is may be good to previously
+            create the folder structure just because in certain environments
+            (programs) it is not possible to run a Python code that will place
+            the file in to the Repository like in Photoshop.
 
-      The ``custom_template`` parameter can be None or an empty string if it is
-      not needed.
+            The ``custom_template`` parameter can be None or an empty string if
+            it is not needed.
 
-    A :class:`.Structure` can not be created without a ``type``
-    (__strictly_typed__ = True). By giving a ``type`` to the
-    :class:`.Structure`, you can create one structure for **Commercials** and
-    another project structure for **Movies** and another one for **Print**
-    projects etc. and can reuse them with new :class:`.Project` s.
+            A :class:`.Structure` can not be created without a ``type``
+            (__strictly_typed__ = True). By giving a ``type`` to the
+            :class:`.Structure`, you can create one structure for **Commercials**
+            and another project structure for **Movies** and another one for
+            **Print** projects etc. and can reuse them with new :class:`.Project` s.
     """
 
     # __strictly_typed__ = True

@@ -92,7 +92,7 @@ def setup_task_tests():
         type=data["test_repository_type"],
         linux_path="/mnt/T/",
         windows_path="T:/",
-        osx_path="/Volumes/T/",
+        macos_path="/Volumes/T/",
     )
 
     data["test_user1"] = User(
@@ -4454,7 +4454,7 @@ def setup_task_db_tests(setup_postgresql_db):
         type=data["test_repository_type"],
         linux_path="/mnt/T/",
         windows_path="T:/",
-        osx_path="/Volumes/T/",
+        macos_path="/Volumes/T/",
     )
     data["test_user1"] = User(
         name="User1", login="user1", email="user1@user1.com", password="1234"

@@ -44,22 +44,20 @@ class Repository(Entity, CodeMixin):
        :attr:`.make_relative`` path to generate a universal path that can be
        used across OSes and different installations of Stalker.
 
-    :param code: The code of the :class:`stalker.models.repository.Repository`.
-      This attribute value is used by the :class:`stalker.models.studio.Studio`
-      to generate environment variables that contains the path of this
-      ``Repository`` (i.e. $REPOCP/path/to/asset.ma) so that instead of using
-      absolute full paths one can use the ``repository_relative`` path to
-      generate a universal path that can be used across OSes and different
-      installations of Stalker.
-
-    :param linux_path: shows the linux path of the repository root, should be a
-      string
-
-    :param osx_path: shows the mac osx path of the repository root, should be a
-      string
-
-    :param windows_path: shows the windows path of the repository root, should
-      be a string
+    Args:
+        code (str): The code of the :class:`stalker.models.repository.Repository`.
+            This attribute value is used by the :class:`stalker.models.studio.Studio`
+            to generate environment variables that contains the path of this
+            ``Repository`` (i.e. $REPOCP/path/to/asset.ma) so that instead of
+            using absolute full paths one can use the ``repository_relative``
+            path to generate a universal path that can be used across OSes and
+            different installations of Stalker.
+        linux_path (str): shows the linux path of the repository root, should be
+            a string
+        macos_path (str): shows the macOS path of the repository root, should be
+            a string.
+        windows_path (str): shows the windows path of the repository root, should
+            be a string
     """
 
     #
@@ -69,7 +67,7 @@ class Repository(Entity, CodeMixin):
     # OpenLDAP server.
     #
     # The AutoFS can be installed to any linux system easily or it is already
-    # installed. OSX has it already. I know nothing about Windows.
+    # installed. macOS has it already. I know nothing about Windows.
     #
     # AutoFS can be setup to listen for new mount points from an OpenLDAP
     # server. Thus it is heavily related with the users system, Stalker
@@ -89,16 +87,16 @@ class Repository(Entity, CodeMixin):
     )
     linux_path = Column(String(256))
     windows_path = Column(String(256))
-    osx_path = Column(String(256))
+    macos_path = Column(String(256))
 
-    def __init__(self, code="", linux_path="", windows_path="", osx_path="", **kwargs):
+    def __init__(self, code="", linux_path="", windows_path="", macos_path="", **kwargs):
         kwargs["code"] = code
         super(Repository, self).__init__(**kwargs)
         CodeMixin.__init__(self, **kwargs)
 
         self.linux_path = linux_path
         self.windows_path = windows_path
-        self.osx_path = osx_path
+        self.macos_path = macos_path
 
     @validates("linux_path")
     def _validate_linux_path(self, key, linux_path):
@@ -138,36 +136,36 @@ class Repository(Entity, CodeMixin):
 
         return linux_path
 
-    @validates("osx_path")
-    def _validate_osx_path(self, key, osx_path):
+    @validates("macos_path")
+    def _validate_macos_path(self, key, macos_path):
         """Validate the given macOS path.
 
         Args:
             key (str): The name of the validated column.
-            osx_path (str): The OSX path to validate.
+            macos_path (str): The macOS path to validate.
 
         Raises:
-            TypeError: If the given OSX path is not a str.
+            TypeError: If the given macOS path is not a str.
 
         Returns:
-            str: The validated OSX path.
+            str: The validated macOS path.
         """
-        if not isinstance(osx_path, string_types):
+        if not isinstance(macos_path, string_types):
             raise TypeError(
-                f"{self.__class__.__name__}.osx_path should be an instance of string, "
-                f"not {osx_path.__class__.__name__}: '{osx_path}'"
+                f"{self.__class__.__name__}.macos_path should be an instance of string, "
+                f"not {macos_path.__class__.__name__}: '{macos_path}'"
             )
 
-        osx_path = os.path.normpath(osx_path) + "/"
-        osx_path = osx_path.replace("\\", "/")
+        macos_path = os.path.normpath(macos_path) + "/"
+        macos_path = macos_path.replace("\\", "/")
         if self.code is not None and platform.system() == "Darwin":
             # update the environment variable
-            os.environ[defaults.repo_env_var_template.format(code=self.code)] = osx_path
+            os.environ[defaults.repo_env_var_template.format(code=self.code)] = macos_path
 
         if self.id is not None and platform.system() == "Darwin":
-            os.environ[defaults.repo_env_var_template_old.format(id=self.id)] = osx_path
+            os.environ[defaults.repo_env_var_template_old.format(id=self.id)] = macos_path
 
-        return osx_path
+        return macos_path
 
     @validates("windows_path")
     def _validate_windows_path(self, key, windows_path):
@@ -224,7 +222,7 @@ class Repository(Entity, CodeMixin):
         elif platform_system == "Windows":
             return self.windows_path
         elif platform_system == "Darwin":
-            return self.osx_path
+            return self.macos_path
 
     @path.setter
     def path(self, path):
@@ -241,7 +239,7 @@ class Repository(Entity, CodeMixin):
         elif platform_system == "Windows":
             self.windows_path = path
         elif platform_system == "Darwin":
-            self.osx_path = path
+            self.macos_path = path
 
     def is_in_repo(self, path):
         """Return True or False depending on the given is in this repo or not.
@@ -256,7 +254,7 @@ class Repository(Entity, CodeMixin):
         return (
             path.lower().startswith(self.windows_path.lower())
             or path.startswith(self.linux_path)
-            or path.startswith(self.osx_path)
+            or path.startswith(self.macos_path)
         )
 
     def _to_path(self, path, replace_with):
@@ -290,8 +288,8 @@ class Repository(Entity, CodeMixin):
             return path.replace(self.windows_path, replace_with)
         elif path.startswith(self.linux_path):
             return path.replace(self.linux_path, replace_with)
-        elif path.startswith(self.osx_path):
-            return path.replace(self.osx_path, replace_with)
+        elif path.startswith(self.macos_path):
+            return path.replace(self.macos_path, replace_with)
 
         return path
 
@@ -317,16 +315,16 @@ class Repository(Entity, CodeMixin):
         """
         return self._to_path(path, self.windows_path)
 
-    def to_osx_path(self, path):
-        """Return the OSX version of the given path.
+    def to_macos_path(self, path):
+        """Return the macOS version of the given path.
 
         Args:
-            path (str): The path that needs to be converted to OSX path.
+            path (str): The path that needs to be converted to macOS path.
 
         Returns:
-            str: The OSX path.
+            str: The macOS path.
         """
-        return self._to_path(path, self.osx_path)
+        return self._to_path(path, self.macos_path)
 
     def to_native_path(self, path):
         """Return the native version of the given path.
@@ -374,7 +372,7 @@ class Repository(Entity, CodeMixin):
                 path.startswith(repo.path)
                 or path.lower().startswith(repo.windows_path.lower())
                 or path.startswith(repo.linux_path)
-                or path.startswith(repo.osx_path)
+                or path.startswith(repo.macos_path)
             ):
                 found_repo = repo
                 break
@@ -423,13 +421,14 @@ class Repository(Entity, CodeMixin):
 
         Returns:
             bool: True if the other object is equal to this one as an Entity, is a
-                Repository instance and has the same linux_path, osx_path, windows_path.
+                Repository instance and has the same linux_path, macos_path,
+                windows_path.
         """
         return (
             super(Repository, self).__eq__(other)
             and isinstance(other, Repository)
             and self.linux_path == other.linux_path
-            and self.osx_path == other.osx_path
+            and self.macos_path == other.macos_path
             and self.windows_path == other.windows_path
         )
 

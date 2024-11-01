@@ -28,7 +28,7 @@ def setup_repository_db_tests(setup_postgresql_db):
         "description": "this is for testing purposes",
         "tags": [data["test_tag1"], data["test_tag2"]],
         "linux_path": "/mnt/M/Projects",
-        "osx_path": "/Volumes/M/Projects",
+        "macos_path": "/Volumes/M/Projects",
         "windows_path": "M:/Projects",
     }
 
@@ -129,44 +129,44 @@ def test_windows_path_attribute_finishes_with_a_slash(setup_repository_db_tests)
     assert data["test_repo"].windows_path == expected_value
 
 
-def test_osx_path_argument_accepts_only_strings(setup_repository_db_tests):
-    """osx_path argument accepts only string values."""
+def test_macos_path_argument_accepts_only_strings(setup_repository_db_tests):
+    """macos_path argument accepts only string values."""
     data = setup_repository_db_tests
-    data["kwargs"]["osx_path"] = 123123
+    data["kwargs"]["macos_path"] = 123123
     with pytest.raises(TypeError) as cm:
         Repository(**data["kwargs"])
 
     assert str(cm.value) == (
-        "Repository.osx_path should be an instance of string, not int: '123123'"
+        "Repository.macos_path should be an instance of string, not int: '123123'"
     )
 
 
-def test_osx_path_attribute_accepts_only_strings(setup_repository_db_tests):
-    """osx_path attribute accepts only string values."""
+def test_macos_path_attribute_accepts_only_strings(setup_repository_db_tests):
+    """macos_path attribute accepts only string values."""
     data = setup_repository_db_tests
     with pytest.raises(TypeError) as cm:
-        data["test_repo"].osx_path = 123123
+        data["test_repo"].macos_path = 123123
 
     assert str(cm.value) == (
-        "Repository.osx_path should be an instance of string, not int: '123123'"
+        "Repository.macos_path should be an instance of string, not int: '123123'"
     )
 
 
-def test_osx_path_attribute_is_working_properly(setup_repository_db_tests):
-    """osx_path attribute is working properly."""
+def test_macos_path_attribute_is_working_properly(setup_repository_db_tests):
+    """macos_path attribute is working properly."""
     data = setup_repository_db_tests
     test_value = "~/newRepoPath/Projects/"
-    data["test_repo"].osx_path = test_value
-    assert data["test_repo"].osx_path == test_value
+    data["test_repo"].macos_path = test_value
+    assert data["test_repo"].macos_path == test_value
 
 
-def test_osx_path_attribute_finishes_with_a_slash(setup_repository_db_tests):
-    """osx_path attr is finished with a slash even it is not supplied by default."""
+def test_macos_path_attribute_finishes_with_a_slash(setup_repository_db_tests):
+    """macos_path attr is finished with a slash even it is not supplied by default."""
     data = setup_repository_db_tests
     test_value = "/Volumes/T"
     expected_value = "/Volumes/T/"
-    data["test_repo"].osx_path = test_value
-    assert data["test_repo"].osx_path == expected_value
+    data["test_repo"].macos_path = test_value
+    assert data["test_repo"].macos_path == expected_value
 
 
 def test_path_returns_properly_for_windows(setup_repository_db_tests):
@@ -183,11 +183,11 @@ def test_path_returns_properly_for_linux(setup_repository_db_tests):
     assert data["test_repo"].path == data["test_repo"].linux_path
 
 
-def test_path_returns_properly_for_osx(setup_repository_db_tests):
+def test_path_returns_properly_for_macos(setup_repository_db_tests):
     """path returns the correct value for the os."""
     data = setup_repository_db_tests
     data["patcher"].patch("Darwin")
-    assert data["test_repo"].path == data["test_repo"].osx_path
+    assert data["test_repo"].path == data["test_repo"].macos_path
 
 
 def test_path_attribute_sets_correct_path_for_windows(setup_repository_db_tests):
@@ -214,15 +214,15 @@ def test_path_attribute_sets_correct_path_for_linux(setup_repository_db_tests):
     assert data["test_repo"].path == test_value
 
 
-def test_path_attribute_sets_correct_path_for_osx(setup_repository_db_tests):
-    """path property sets the correct attribute in osx."""
+def test_path_attribute_sets_correct_path_for_macos(setup_repository_db_tests):
+    """path property sets the correct attribute in macos."""
     data = setup_repository_db_tests
     data["patcher"].patch("Darwin")
     test_value = "/Volumes/S/Projects/"
     assert data["test_repo"].path != test_value
-    assert data["test_repo"].osx_path != test_value
+    assert data["test_repo"].macos_path != test_value
     data["test_repo"].path = test_value
-    assert data["test_repo"].osx_path == test_value
+    assert data["test_repo"].macos_path == test_value
     assert data["test_repo"].path == test_value
 
 
@@ -237,7 +237,7 @@ def test_equality(setup_repository_db_tests):
             "name": "a repository",
             "description": "this is the commercial repository",
             "linux_path": "/mnt/commercialServer/Projects",
-            "osx_path": "/Volumes/commercialServer/Projects",
+            "macos_path": "/Volumes/commercialServer/Projects",
             "windows_path": "Z:\\Projects",
         }
     )
@@ -259,7 +259,7 @@ def test_inequality(setup_repository_db_tests):
             "name": "a repository",
             "description": "this is the commercial repository",
             "linux_path": "/mnt/commercialServer/Projects",
-            "osx_path": "/Volumes/commercialServer/Projects",
+            "macos_path": "/Volumes/commercialServer/Projects",
             "windows_path": "Z:\\Projects",
         }
     )
@@ -297,25 +297,25 @@ def test_linux_path_attribute_backward_slashes_are_converted_to_forward_slashes(
     assert data["test_repo"].linux_path == "/mnt/M/Projects/"
 
 
-def test_osx_path_argument_backward_slashes_are_converted_to_forward_slashes(
+def test_macos_path_argument_backward_slashes_are_converted_to_forward_slashes(
     setup_repository_db_tests,
 ):
-    """backward slashes are converted to forward slashes in the osx_path argument."""
+    """backward slashes are converted to forward slashes in the macos_path argument."""
     data = setup_repository_db_tests
-    data["kwargs"]["osx_path"] = r"\Volumes\M\Projects"
+    data["kwargs"]["macos_path"] = r"\Volumes\M\Projects"
     new_repo = Repository(**data["kwargs"])
     assert "\\" not in new_repo.linux_path
-    assert new_repo.osx_path == "/Volumes/M/Projects/"
+    assert new_repo.macos_path == "/Volumes/M/Projects/"
 
 
-def test_osx_path_attribute_backward_slashes_are_converted_to_forward_slashes(
+def test_macos_path_attribute_backward_slashes_are_converted_to_forward_slashes(
     setup_repository_db_tests,
 ):
-    """backward slashes are converted to forward slashes in the osx_path attribute."""
+    """backward slashes are converted to forward slashes in the macos_path attribute."""
     data = setup_repository_db_tests
-    data["test_repo"].osx_path = r"\Volumes\M\Projects"
-    assert "\\" not in data["test_repo"].osx_path
-    assert data["test_repo"].osx_path == "/Volumes/M/Projects/"
+    data["test_repo"].macos_path = r"\Volumes\M\Projects"
+    assert "\\" not in data["test_repo"].macos_path
+    assert data["test_repo"].macos_path == "/Volumes/M/Projects/"
 
 
 def test_windows_path_argument_backward_slashes_are_converted_to_forward_slashes(
@@ -379,16 +379,16 @@ def test_to_linux_path_returns_the_linux_version_of_the_given_linux_path(
     assert data["test_repo"].to_linux_path(test_linux_path) == test_linux_path
 
 
-def test_to_linux_path_returns_the_linux_version_of_the_given_osx_path(
+def test_to_linux_path_returns_the_linux_version_of_the_given_macos_path(
     setup_repository_db_tests,
 ):
-    """to_linux_path returns the linux version of the given osx path."""
+    """to_linux_path returns the linux version of the given macos path."""
     data = setup_repository_db_tests
     data["test_repo"].linux_path = "/mnt/T/Stalker_Projects"
-    data["test_repo"].osx_path = "/Volumes/T/Stalker_Projects"
-    test_osx_path = "/Volumes/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
+    data["test_repo"].macos_path = "/Volumes/T/Stalker_Projects"
+    test_macos_path = "/Volumes/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
     test_linux_path = "/mnt/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
-    assert data["test_repo"].to_linux_path(test_osx_path) == test_linux_path
+    assert data["test_repo"].to_linux_path(test_macos_path) == test_linux_path
 
 
 def test_to_linux_path_returns_the_linux_version_of_the_given_reverse_windows_path(
@@ -418,18 +418,18 @@ def test_to_linux_path_returns_the_linux_version_of_the_given_reverse_linux_path
     assert data["test_repo"].to_linux_path(test_linux_path_reverse) == test_linux_path
 
 
-def test_to_linux_path_returns_the_linux_version_of_the_given_reverse_osx_path(
+def test_to_linux_path_returns_the_linux_version_of_the_given_reverse_macos_path(
     setup_repository_db_tests,
 ):
-    """to_linux_path returns the linux version of the given reverse osx path."""
+    """to_linux_path returns the linux version of the given reverse macos path."""
     data = setup_repository_db_tests
     data["test_repo"].linux_path = "/mnt/T/Stalker_Projects"
-    data["test_repo"].osx_path = "/Volumes/T/Stalker_Projects"
+    data["test_repo"].macos_path = "/Volumes/T/Stalker_Projects"
     test_linux_path = "/mnt/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
-    test_osx_path_reverse = (
+    test_macos_path_reverse = (
         "\\Volumes\\T\\Stalker_Projects\\Sero\\" "Task1\\Task2\\Some_file.ma"
     )
-    assert data["test_repo"].to_linux_path(test_osx_path_reverse) == test_linux_path
+    assert data["test_repo"].to_linux_path(test_macos_path_reverse) == test_linux_path
 
 
 def test_to_linux_path_returns_the_linux_version_of_the_given_path_with_env_vars(
@@ -485,16 +485,16 @@ def test_to_windows_path_returns_the_windows_version_of_the_given_linux_path(
     assert data["test_repo"].to_windows_path(test_linux_path) == test_windows_path
 
 
-def test_to_windows_path_returns_the_windows_version_of_the_given_osx_path(
+def test_to_windows_path_returns_the_windows_version_of_the_given_macos_path(
     setup_repository_db_tests,
 ):
-    """to_windows_path returns the windows version of the given osx path."""
+    """to_windows_path returns the windows version of the given macos path."""
     data = setup_repository_db_tests
     data["test_repo"].windows_path = "T:/Stalker_Projects"
-    data["test_repo"].osx_path = "/Volumes/T/Stalker_Projects"
-    test_osx_path = "/Volumes/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
+    data["test_repo"].macos_path = "/Volumes/T/Stalker_Projects"
+    test_macos_path = "/Volumes/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
     test_windows_path = "T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma"
-    assert data["test_repo"].to_windows_path(test_osx_path) == test_windows_path
+    assert data["test_repo"].to_windows_path(test_macos_path) == test_windows_path
 
 
 def test_to_windows_path_returns_the_windows_version_of_the_given_reverse_windows_path(
@@ -529,18 +529,18 @@ def test_to_windows_path_returns_the_windows_version_of_the_given_reverse_linux_
     )
 
 
-def test_to_windows_path_returns_the_windows_version_of_the_given_reverse_osx_path(
+def test_to_windows_path_returns_the_windows_version_of_the_given_reverse_macos_path(
     setup_repository_db_tests,
 ):
-    """to_windows_path returns the windows version of the given reverse osx path."""
+    """to_windows_path returns the windows version of the given reverse macos path."""
     data = setup_repository_db_tests
     data["test_repo"].windows_path = "T:/Stalker_Projects"
-    data["test_repo"].osx_path = "/Volumes/T/Stalker_Projects"
+    data["test_repo"].macos_path = "/Volumes/T/Stalker_Projects"
     test_windows_path = "T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma"
-    test_osx_path_reverse = (
+    test_macos_path_reverse = (
         "\\Volumes\\T\\Stalker_Projects\\Sero\\" "Task1\\Task2\\Some_file.ma"
     )
-    assert data["test_repo"].to_windows_path(test_osx_path_reverse) == test_windows_path
+    assert data["test_repo"].to_windows_path(test_macos_path_reverse) == test_windows_path
 
 
 def test_to_windows_path_returns_the_windows_version_of_the_given_path_with_env_vars(
@@ -577,93 +577,93 @@ def test_to_windows_path_raises_type_error_if_path_is_not_a_string(
     assert str(cm.value) == "Repository.path should be a string, not int: '123'"
 
 
-def test_to_osx_path_returns_the_osx_version_of_the_given_windows_path(
+def test_to_macos_path_returns_the_macos_version_of_the_given_windows_path(
     setup_repository_db_tests,
 ):
-    """to_osx_path returns the osx version of the given windows path."""
+    """to_macos_path returns the macos version of the given windows path."""
     data = setup_repository_db_tests
     data["test_repo"].windows_path = "T:/Stalker_Projects"
-    data["test_repo"].osx_path = "/Volumes/T/Stalker_Projects"
+    data["test_repo"].macos_path = "/Volumes/T/Stalker_Projects"
     test_windows_path = "T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma"
-    test_osx_path = "/Volumes/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
-    assert data["test_repo"].to_osx_path(test_windows_path) == test_osx_path
+    test_macos_path = "/Volumes/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
+    assert data["test_repo"].to_macos_path(test_windows_path) == test_macos_path
 
 
-def test_to_osx_path_returns_the_osx_version_of_the_given_linux_path(
+def test_to_macos_path_returns_the_macos_version_of_the_given_linux_path(
     setup_repository_db_tests,
 ):
-    """to_osx_path returns the osx version of the given linux path."""
+    """to_macos_path returns the macOS version of the given linux path."""
     data = setup_repository_db_tests
     data["test_repo"].linux_path = "/mnt/T/Stalker_Projects"
-    data["test_repo"].osx_path = "/Volumes/T/Stalker_Projects"
+    data["test_repo"].macos_path = "/Volumes/T/Stalker_Projects"
     test_linux_path = "/mnt/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
-    test_osx_path = "/Volumes/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
-    assert data["test_repo"].to_osx_path(test_linux_path) == test_osx_path
+    test_macos_path = "/Volumes/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
+    assert data["test_repo"].to_macos_path(test_linux_path) == test_macos_path
 
 
-def test_to_osx_path_returns_the_osx_version_of_the_given_osx_path(
+def test_to_macos_path_returns_the_macos_version_of_the_given_macos_path(
     setup_repository_db_tests,
 ):
-    """to_osx_path returns the osx version of the given osx path."""
+    """to_macos_path returns the macos version of the given macos path."""
     data = setup_repository_db_tests
-    data["test_repo"].osx_path = "/Volumes/T/Stalker_Projects"
-    test_osx_path = "/Volumes/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
-    assert data["test_repo"].to_osx_path(test_osx_path) == test_osx_path
+    data["test_repo"].macos_path = "/Volumes/T/Stalker_Projects"
+    test_macos_path = "/Volumes/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
+    assert data["test_repo"].to_macos_path(test_macos_path) == test_macos_path
 
 
-def test_to_osx_path_returns_the_osx_version_of_the_given_reverse_windows_path(
+def test_to_macos_path_returns_the_macos_version_of_the_given_reverse_windows_path(
     setup_repository_db_tests,
 ):
-    """to_osx_path returns the osx version of the given reverse windows path."""
+    """to_macos_path returns the macos version of the given reverse windows path."""
     data = setup_repository_db_tests
     data["test_repo"].windows_path = "T:/Stalker_Projects"
-    data["test_repo"].osx_path = "/Volumes/T/Stalker_Projects"
-    test_osx_path = "/Volumes/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
+    data["test_repo"].macos_path = "/Volumes/T/Stalker_Projects"
+    test_macos_path = "/Volumes/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
     test_windows_path_reverse = (
         "T:\\Stalker_Projects\\Sero\\Task1\\" "Task2\\Some_file.ma"
     )
-    assert data["test_repo"].to_osx_path(test_windows_path_reverse) == test_osx_path
+    assert data["test_repo"].to_macos_path(test_windows_path_reverse) == test_macos_path
 
 
-def test_to_osx_path_returns_the_osx_version_of_the_given_reverse_linux_path(
+def test_to_macos_path_returns_the_macos_version_of_the_given_reverse_linux_path(
     setup_repository_db_tests,
 ):
-    """to_osx_path returns the osx version of the given reverse linux path."""
+    """to_macos_path returns the macos version of the given reverse linux path."""
     data = setup_repository_db_tests
     data["test_repo"].linux_path = "/mnt/T/Stalker_Projects"
-    data["test_repo"].osx_path = "/Volumes/T/Stalker_Projects"
-    test_osx_path = "/Volumes/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
+    data["test_repo"].macos_path = "/Volumes/T/Stalker_Projects"
+    test_macos_path = "/Volumes/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
     test_linux_path_reverse = (
         "\\mnt\\T\\Stalker_Projects\\Sero\\Task1\\" "Task2\\Some_file.ma"
     )
-    assert data["test_repo"].to_osx_path(test_linux_path_reverse) == test_osx_path
+    assert data["test_repo"].to_macos_path(test_linux_path_reverse) == test_macos_path
 
 
-def test_to_osx_path_returns_the_osx_version_of_the_given_reverse_osx_path(
+def test_to_macos_path_returns_the_macos_version_of_the_given_reverse_macos_path(
     setup_repository_db_tests,
 ):
-    """to_osx_path returns the osx version of the given reverse osx path."""
+    """to_macos_path returns the macos version of the given reverse macos path."""
     data = setup_repository_db_tests
-    data["test_repo"].osx_path = "/Volumes/T/Stalker_Projects"
-    test_osx_path = "/Volumes/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
-    test_osx_path_reverse = (
+    data["test_repo"].macos_path = "/Volumes/T/Stalker_Projects"
+    test_macos_path = "/Volumes/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
+    test_macos_path_reverse = (
         "\\Volumes\\T\\Stalker_Projects\\Sero\\" "Task1\\Task2\\Some_file.ma"
     )
-    assert data["test_repo"].to_osx_path(test_osx_path_reverse) == test_osx_path
+    assert data["test_repo"].to_macos_path(test_macos_path_reverse) == test_macos_path
 
 
-def test_to_osx_path_returns_the_osx_version_of_the_given_path(
+def test_to_macos_path_returns_the_macos_version_of_the_given_path(
     setup_repository_db_tests,
 ):
-    """to_osx_path returns the osx version of the given path."""
+    """to_macos_path returns the macos version of the given path."""
     data = setup_repository_db_tests
     data["test_repo"].windows_path = "T:/Stalker_Projects"
     data["test_repo"].linux_path = "/mnt/T/Stalker_Projects"
-    data["test_repo"].osx_path = "/Volumes/T/Stalker_Projects"
+    data["test_repo"].macos_path = "/Volumes/T/Stalker_Projects"
 
     test_windows_path = "T:/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
     test_linux_path = "/mnt/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
-    test_osx_path = "/Volumes/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
+    test_macos_path = "/Volumes/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
 
     test_windows_path_reverse = (
         "T:\\Stalker_Projects\\Sero\\Task1\\" "Task2\\Some_file.ma"
@@ -671,48 +671,48 @@ def test_to_osx_path_returns_the_osx_version_of_the_given_path(
     test_linux_path_reverse = (
         "\\mnt\\T\\Stalker_Projects\\Sero\\Task1\\" "Task2\\Some_file.ma"
     )
-    test_osx_path_reverse = (
+    test_macos_path_reverse = (
         "\\Volumes\\T\\Stalker_Projects\\Sero\\" "Task1\\Task2\\Some_file.ma"
     )
 
-    assert data["test_repo"].to_osx_path(test_windows_path) == test_osx_path
-    assert data["test_repo"].to_osx_path(test_linux_path) == test_osx_path
-    assert data["test_repo"].to_osx_path(test_osx_path) == test_osx_path
-    assert data["test_repo"].to_osx_path(test_windows_path_reverse) == test_osx_path
-    assert data["test_repo"].to_osx_path(test_linux_path_reverse) == test_osx_path
-    assert data["test_repo"].to_osx_path(test_osx_path_reverse) == test_osx_path
+    assert data["test_repo"].to_macos_path(test_windows_path) == test_macos_path
+    assert data["test_repo"].to_macos_path(test_linux_path) == test_macos_path
+    assert data["test_repo"].to_macos_path(test_macos_path) == test_macos_path
+    assert data["test_repo"].to_macos_path(test_windows_path_reverse) == test_macos_path
+    assert data["test_repo"].to_macos_path(test_linux_path_reverse) == test_macos_path
+    assert data["test_repo"].to_macos_path(test_macos_path_reverse) == test_macos_path
 
 
-def test_to_osx_path_returns_the_osx_version_of_the_given_path_with_env_vars(
+def test_to_macos_path_returns_the_macos_version_of_the_given_path_with_env_vars(
     setup_repository_db_tests,
 ):
-    """to_osx_path returns the osx version of the given path which contains env vars."""
+    """to_macos_path returns the macos version of the given path which contains env vars."""
     data = setup_repository_db_tests
     data["test_repo"].id = 1
     data["test_repo"].windows_path = "T:/Stalker_Projects"
-    data["test_repo"].osx_path = "/Volumes/T/Stalker_Projects"
+    data["test_repo"].macos_path = "/Volumes/T/Stalker_Projects"
     data["test_repo"].linux_path = "/mnt/T/Stalker_Projects"
     os.environ["REPO1"] = data["test_repo"].windows_path
     test_windows_path = "/Volumes/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
     test_path_with_env_var = "$REPO1/Sero/Task1/Task2/Some_file.ma"
-    assert data["test_repo"].to_osx_path(test_path_with_env_var) == test_windows_path
+    assert data["test_repo"].to_macos_path(test_path_with_env_var) == test_windows_path
 
 
-def test_to_osx_path_raises_type_error_if_path_is_none(setup_repository_db_tests):
-    """to_osx_path raises TypeError if path is None."""
+def test_to_macos_path_raises_type_error_if_path_is_none(setup_repository_db_tests):
+    """to_macos_path raises TypeError if path is None."""
     data = setup_repository_db_tests
     with pytest.raises(TypeError) as cm:
-        data["test_repo"].to_osx_path(None)
+        data["test_repo"].to_macos_path(None)
     assert str(cm.value) == "Repository.path can not be None"
 
 
-def test_to_osx_path_raises_type_error_if_path_is_not_a_string(
+def test_to_macos_path_raises_type_error_if_path_is_not_a_string(
     setup_repository_db_tests,
 ):
-    """to_osx_path raises TypeError if path is None."""
+    """to_macos_path raises TypeError if path is None."""
     data = setup_repository_db_tests
     with pytest.raises(TypeError) as cm:
-        data["test_repo"].to_osx_path(123)
+        data["test_repo"].to_macos_path(123)
     assert str(cm.value) == "Repository.path should be a string, not int: '123'"
 
 
@@ -724,7 +724,7 @@ def test_to_native_path_returns_the_native_version_of_the_given_linux_path(
     data["patcher"].patch("Linux")
     data["test_repo"].windows_path = "T:/Stalker_Projects"
     data["test_repo"].linux_path = "/mnt/T/Stalker_Projects"
-    data["test_repo"].osx_path = "/Volumes/T/Stalker_Projects"
+    data["test_repo"].macos_path = "/Volumes/T/Stalker_Projects"
     test_linux_path = "/mnt/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
     assert data["test_repo"].to_native_path(test_linux_path) == test_linux_path
 
@@ -737,7 +737,7 @@ def test_to_native_path_returns_the_native_version_of_the_given_windows_path(
     data["patcher"].patch("Linux")
     data["test_repo"].windows_path = "T:/Stalker_Projects"
     data["test_repo"].linux_path = "/mnt/T/Stalker_Projects"
-    data["test_repo"].osx_path = "/Volumes/T/Stalker_Projects"
+    data["test_repo"].macos_path = "/Volumes/T/Stalker_Projects"
     test_windows_path = "T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma"
     assert (
         data["test_repo"].to_native_path(test_windows_path)
@@ -745,17 +745,17 @@ def test_to_native_path_returns_the_native_version_of_the_given_windows_path(
     )
 
 
-def test_to_native_path_returns_the_native_version_of_the_given_osx_path(
+def test_to_native_path_returns_the_native_version_of_the_given_macos_path(
     setup_repository_db_tests,
 ):
-    """to_native_path returns the native version of the given osx path."""
+    """to_native_path returns the native version of the given macos path."""
     data = setup_repository_db_tests
     data["patcher"].patch("Linux")
     data["test_repo"].linux_path = "/mnt/T/Stalker_Projects"
-    data["test_repo"].osx_path = "/Volumes/T/Stalker_Projects"
+    data["test_repo"].macos_path = "/Volumes/T/Stalker_Projects"
     test_linux_path = "/mnt/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
-    test_osx_path = "/Volumes/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
-    assert data["test_repo"].to_native_path(test_osx_path) == test_linux_path
+    test_macos_path = "/Volumes/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
+    assert data["test_repo"].to_native_path(test_macos_path) == test_linux_path
 
 
 def test_to_native_path_returns_the_native_version_of_the_given_reverse_windows_path(
@@ -789,21 +789,19 @@ def test_to_native_path_returns_the_native_version_of_the_given_reverse_linux_pa
     assert data["test_repo"].to_native_path(test_linux_path_reverse) == test_linux_path
 
 
-def test_to_native_path_returns_the_native_version_of_the_given_reverse_osx_path(
+def test_to_native_path_returns_the_native_version_of_the_given_reverse_macos_path(
     setup_repository_db_tests,
 ):
-    """to_native_path returns the native version of the
-    given reverse osx path
-    """
+    """to_native_path returns the native version of the given reverse macos path."""
     data = setup_repository_db_tests
     data["patcher"].patch("Linux")
     data["test_repo"].linux_path = "/mnt/T/Stalker_Projects"
-    data["test_repo"].osx_path = "/Volumes/T/Stalker_Projects"
+    data["test_repo"].macos_path = "/Volumes/T/Stalker_Projects"
     test_linux_path = "/mnt/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
-    test_osx_path_reverse = (
+    test_macos_path_reverse = (
         "\\Volumes\\T\\Stalker_Projects\\Sero\\" "Task1\\Task2\\Some_file.ma"
     )
-    assert data["test_repo"].to_native_path(test_osx_path_reverse) == test_linux_path
+    assert data["test_repo"].to_native_path(test_macos_path_reverse) == test_linux_path
 
 
 def test_to_native_path_raises_type_error_if_path_is_none(setup_repository_db_tests):
@@ -900,38 +898,38 @@ def test_is_in_repo_returns_false_if_the_given_windows_path_is_not_in_this_repo(
     assert data["test_repo"].is_in_repo(test_not_in_path_windows_path) is False
 
 
-def test_is_in_repo_returns_true_if_the_given_osx_path_is_in_this_repo(
+def test_is_in_repo_returns_true_if_the_given_macos_path_is_in_this_repo(
     setup_repository_db_tests,
 ):
-    """is_in_repo returns True if the given osx path is in this repo."""
+    """is_in_repo returns True if the given macos path is in this repo."""
     data = setup_repository_db_tests
-    data["test_repo"].osx_path = "/Volumes/T/Stalker_Projects"
-    test_osx_path = "/Volumes/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
-    assert data["test_repo"].is_in_repo(test_osx_path)
+    data["test_repo"].macos_path = "/Volumes/T/Stalker_Projects"
+    test_macos_path = "/Volumes/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
+    assert data["test_repo"].is_in_repo(test_macos_path)
 
 
-def test_is_in_repo_returns_true_if_the_given_osx_reverse_path_is_in_this_repo(
+def test_is_in_repo_returns_true_if_the_given_macos_reverse_path_is_in_this_repo(
     setup_repository_db_tests,
 ):
-    """is_in_repo returns True if the osx reverse path is in this repo."""
+    """is_in_repo returns True if the macos reverse path is in this repo."""
     data = setup_repository_db_tests
-    data["test_repo"].osx_path = "/Volumes/T/Stalker_Projects"
-    test_osx_path_reverse = (
+    data["test_repo"].macos_path = "/Volumes/T/Stalker_Projects"
+    test_macos_path_reverse = (
         "\\Volumes\\T\\Stalker_Projects\\Sero\\" "Task1\\Task2\\Some_file.ma"
     )
-    assert data["test_repo"].is_in_repo(test_osx_path_reverse)
+    assert data["test_repo"].is_in_repo(test_macos_path_reverse)
 
 
-def test_is_in_repo_returns_false_if_the_given_osx_path_is_not_in_this_repo(
+def test_is_in_repo_returns_false_if_the_given_macos_path_is_not_in_this_repo(
     setup_repository_db_tests,
 ):
-    """is_in_repo returns False if osx path is not in this repo."""
+    """is_in_repo returns False if macos path is not in this repo."""
     data = setup_repository_db_tests
-    data["test_repo"].osx_path = "/Volumes/T/Stalker_Projects"
-    test_not_in_path_osx_path = (
+    data["test_repo"].macos_path = "/Volumes/T/Stalker_Projects"
+    test_not_in_path_macos_path = (
         "/Volumes/T/Other_Projects/Sero/Task1/" "Task2/Some_file.ma"
     )
-    assert not data["test_repo"].is_in_repo(test_not_in_path_osx_path)
+    assert not data["test_repo"].is_in_repo(test_not_in_path_macos_path)
 
 
 def test_make_relative_method_converts_the_given_linux_path_to_relative_to_repo_root(
@@ -943,20 +941,20 @@ def test_make_relative_method_converts_the_given_linux_path_to_relative_to_repo_
     linux_path = "/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma"
     data["test_repo"].linux_path = "/mnt/T/Stalker_Projects"
     data["test_repo"].windows_path = "T:/Stalker_Projects"
-    data["test_repo"].osx_path = "/Volumes/T/Stalker_Projects"
+    data["test_repo"].macos_path = "/Volumes/T/Stalker_Projects"
     result = data["test_repo"].make_relative(linux_path)
     assert result == "Sero/Task1/Task2/Some_file.ma"
 
 
-def test_make_relative_method_converts_the_given_osx_path_to_relative_to_repo_root(
+def test_make_relative_method_converts_the_given_macos_path_to_relative_to_repo_root(
     setup_repository_db_tests,
 ):
-    """make_relative() will convert OSX path to repository root relative path."""
+    """make_relative() will convert macos path to repository root relative path."""
     data = setup_repository_db_tests
-    # an OSX Path
-    osx_path = "/Volumes/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma"
-    data["test_repo"].osx_path = "/Volumes/T/Stalker_Projects"
-    result = data["test_repo"].make_relative(osx_path)
+    # a macos Path
+    macos_path = "/Volumes/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma"
+    data["test_repo"].macos_path = "/Volumes/T/Stalker_Projects"
+    result = data["test_repo"].make_relative(macos_path)
     assert result == "Sero/Task1/Task2/Some_file.ma"
 
 
@@ -967,7 +965,7 @@ def test_make_relative_method_converts_the_given_windows_path_to_relative_to_rep
     data = setup_repository_db_tests
     # a Windows Path
     windows_path = "T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma"
-    data["test_repo"].osx_path = "T:/Stalker_Projects"
+    data["test_repo"].macos_path = "T:/Stalker_Projects"
     result = data["test_repo"].make_relative(windows_path)
     assert result == "Sero/Task1/Task2/Some_file.ma"
 
@@ -1031,22 +1029,22 @@ def test_to_os_independent_path_method_converts_the_given_linux_path_to_universa
     linux_path = "/mnt/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma"
     data["test_repo"].linux_path = "/mnt/T/Stalker_Projects"
     data["test_repo"].windows_path = "T:/Stalker_Projects"
-    data["test_repo"].osx_path = "/Volumes/T/Stalker_Projects"
+    data["test_repo"].macos_path = "/Volumes/T/Stalker_Projects"
     result = data["test_repo"].to_os_independent_path(linux_path)
     assert result == (
         "$REPO{}/Sero/Task1/Task2/Some_file.ma".format(data["test_repo"].code)
     )
 
 
-def test_to_os_independent_path_method_converts_the_given_osx_path_to_universal(
+def test_to_os_independent_path_method_converts_the_given_macos_path_to_universal(
     setup_repository_db_tests,
 ):
-    """to_os_independent_path() converts OSX path to an os independent path."""
+    """to_os_independent_path() converts macos path to an os independent path."""
     data = setup_repository_db_tests
-    # an OSX Path
-    osx_path = "/Volumes/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma"
-    data["test_repo"].osx_path = "/Volumes/T/Stalker_Projects"
-    result = data["test_repo"].to_os_independent_path(osx_path)
+    # an macOS Path
+    macos_path = "/Volumes/T/Stalker_Projects/Sero/Task1/Task2/Some_file.ma"
+    data["test_repo"].macos_path = "/Volumes/T/Stalker_Projects"
+    result = data["test_repo"].to_os_independent_path(macos_path)
     assert result == (
         "$REPO{}/Sero/Task1/Task2/Some_file.ma".format(data["test_repo"].code)
     )
@@ -1059,7 +1057,7 @@ def test_to_os_independent_path_method_converts_the_given_windows_path_to_univer
     data = setup_repository_db_tests
     # a Windows Path
     windows_path = "T:/Stalker_Projects/Sero/Task1/Task2/Some_file.ma"
-    data["test_repo"].osx_path = "T:/Stalker_Projects"
+    data["test_repo"].macos_path = "T:/Stalker_Projects"
     result = data["test_repo"].to_os_independent_path(windows_path)
     assert result == "$REPO{}/Sero/Task1/Task2/Some_file.ma".format(
         data["test_repo"].code
@@ -1105,7 +1103,7 @@ def test_find_repo_is_working_properly(setup_repository_db_tests):
         name="New Repository",
         code="NR",
         linux_path="/mnt/T/Projects",
-        osx_path="/Volumes/T/Projects",
+        macos_path="/Volumes/T/Projects",
         windows_path="T:/Projects",
     )
     DBSession.add(new_repo1)
@@ -1130,7 +1128,7 @@ def test_find_repo_is_case_insensitive_under_windows(setup_repository_db_tests):
         name="New Repository",
         code="NR",
         linux_path="/mnt/T/Projects",
-        osx_path="/Volumes/T/Projects",
+        macos_path="/Volumes/T/Projects",
         windows_path="T:/Projects",
     )
     DBSession.add(new_repo1)
@@ -1154,7 +1152,7 @@ def test_find_repo_is_working_properly_with_reverse_slashes(setup_repository_db_
         name="New Repository",
         code="NR",
         linux_path="/mnt/T/Projects",
-        osx_path="/Volumes/T/Projects",
+        macos_path="/Volumes/T/Projects",
         windows_path="T:/Projects",
     )
     DBSession.add(new_repo1)
@@ -1180,7 +1178,7 @@ def test_find_repo_is_working_properly_with_env_vars(setup_repository_db_tests):
         name="New Repository",
         code="NR",
         linux_path="/mnt/T/Projects",
-        osx_path="/Volumes/T/Projects",
+        macos_path="/Volumes/T/Projects",
         windows_path="T:/Projects",
     )
     DBSession.add(new_repo1)
@@ -1215,7 +1213,7 @@ def test_creating_and_committing_a_new_repository_instance_will_create_env_var(
         name="Test Repo",
         code="TR",
         linux_path="/mnt/T",
-        osx_path="/Volumes/T",
+        macos_path="/Volumes/T",
         windows_path="T:/",
     )
     DBSession.add(repo)
@@ -1235,7 +1233,7 @@ def test_updating_a_repository_will_update_repo_path(setup_repository_db_tests):
         name="Test Repo",
         code="TR",
         linux_path="/mnt/T",
-        osx_path="/Volumes/T",
+        macos_path="/Volumes/T",
         windows_path="T:/",
     )
     DBSession.add(repo)
@@ -1267,7 +1265,7 @@ def test_updating_windows_path_only_update_repo_path_if_on_windows(
         name="Test Repo",
         code="TR",
         linux_path="/mnt/T",
-        osx_path="/Volumes/T",
+        macos_path="/Volumes/T",
         windows_path="T:/",
     )
     DBSession.add(repo)
@@ -1321,8 +1319,8 @@ def test_updating_windows_path_only_update_repo_path_if_on_windows(
     )
 
 
-def test_updating_osx_path_only_update_repo_path_if_on_osx(setup_repository_db_tests):
-    """updating the osx path will only update the path if the system is osx."""
+def test_updating_macos_path_only_update_repo_path_if_on_macos(setup_repository_db_tests):
+    """updating the macos path will only update the path if the system is macos."""
     data = setup_repository_db_tests
     data["patcher"].patch("Windows")
 
@@ -1330,7 +1328,7 @@ def test_updating_osx_path_only_update_repo_path_if_on_osx(setup_repository_db_t
         name="Test Repo",
         code="TR",
         linux_path="/mnt/T",
-        osx_path="/Volumes/T",
+        macos_path="/Volumes/T",
         windows_path="T:/",
     )
     DBSession.add(repo)
@@ -1341,7 +1339,7 @@ def test_updating_osx_path_only_update_repo_path_if_on_osx(setup_repository_db_t
 
     # now update the repository
     test_value = "/Volumes/S/"
-    repo.osx_path = test_value
+    repo.macos_path = test_value
 
     # expect the environment variable not updated
     assert (
@@ -1360,12 +1358,12 @@ def test_updating_osx_path_only_update_repo_path_if_on_osx(setup_repository_db_t
         == repo.windows_path
     )
 
-    # make it osx
+    # make it macos
     data["patcher"].patch("Darwin")
 
     # now update the repository
     test_value = "/Volumes/S/"
-    repo.osx_path = test_value
+    repo.macos_path = test_value
 
     # expect the environment variable not updated
     assert (
@@ -1373,7 +1371,7 @@ def test_updating_osx_path_only_update_repo_path_if_on_osx(setup_repository_db_t
     )
     assert (
         os.environ[defaults.repo_env_var_template.format(code=repo.code)]
-        == repo.osx_path
+        == repo.macos_path
     )
 
     assert (
@@ -1381,7 +1379,7 @@ def test_updating_osx_path_only_update_repo_path_if_on_osx(setup_repository_db_t
     )
     assert (
         os.environ[defaults.repo_env_var_template_old.format(id=repo.id)]
-        == repo.osx_path
+        == repo.macos_path
     )
 
 
@@ -1396,7 +1394,7 @@ def test_updating_linux_path_only_update_repo_path_if_on_linux(
         name="Test Repo",
         code="TR",
         linux_path="/mnt/T",
-        osx_path="/Volumes/T",
+        macos_path="/Volumes/T",
         windows_path="T:/",
     )
     DBSession.add(repo)
@@ -1415,7 +1413,7 @@ def test_updating_linux_path_only_update_repo_path_if_on_linux(
     )
     assert (
         os.environ[defaults.repo_env_var_template.format(code=repo.code)]
-        == repo.osx_path
+        == repo.macos_path
     )
 
     assert (
@@ -1423,7 +1421,7 @@ def test_updating_linux_path_only_update_repo_path_if_on_linux(
     )
     assert (
         os.environ[defaults.repo_env_var_template_old.format(id=repo.id)]
-        == repo.osx_path
+        == repo.macos_path
     )
 
     # make it linux

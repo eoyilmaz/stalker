@@ -24,21 +24,23 @@ class Status(Entity, CodeMixin):
     the lower case name or lower case code of the status matches the lower case
     form of the given string::
 
-      >>> from stalker import Status
-      >>> a_status = Status(name="On Hold", code="OH")
-      >>> a_status == "on hold"
-      True
-      >>> a_status != "complete"
-      True
-      >>> a_status == "oh"
-      True
-      >>> a_status == "another status"
-      False
+    .. code-block:: Python
 
-    :param name: The name long name of this Status.
+        >>> from stalker import Status
+        >>> a_status = Status(name="On Hold", code="OH")
+        >>> a_status == "on hold"
+        True
+        >>> a_status != "complete"
+        True
+        >>> a_status == "oh"
+        True
+        >>> a_status == "another status"
+        False
 
-    :param code: The code of this Status, its generally the short version of
-      the name attribute.
+    Args:
+        name (str): The name long name of this Status.
+        code (str): The code of this Status, its generally the short version of
+            the name attribute.
     """
 
     __auto_name__ = False
@@ -100,60 +102,65 @@ class StatusList(Entity, TargetEntityTypeMixin):
     indexing and it also supports string indexes only for getting the item,
     you can not set an item with string indices:
 
-    >>> from stalker import Status, StatusList
-    >>> status1 = Status(name="Complete", code="CMPLT")
-    >>> status2 = Status(name="Work in Progress", code="WIP")
-    >>> status3 = Status(name="Pending Review", code="PRev")
-    >>> a_status_list = StatusList(name="Asset Status List",
-                                   statuses=[status1, status2, status3],
-                                   target_entity_type="Asset")
-    >>> a_status_list[0]
-    <Status (Complete, CMPLT)>
-    >>> a_status_list["complete"]
-    <Status (Complete, CMPLT)>
-    >>> a_status_list["WIP"]
-    <Status (Work in Progress, WIP)>
+    .. code-block:: Python
 
-    :param statuses: This is a list of :class:`.Status` instances, so you can
-      prepare different StatusLists for different kind of entities using the
-      same pool of :class:`.Status` instances.
+        >>> from stalker import Status, StatusList
+        >>> status1 = Status(name="Complete", code="CMPLT")
+        >>> status2 = Status(name="Work in Progress", code="WIP")
+        >>> status3 = Status(name="Pending Review", code="PRev")
+        >>> a_status_list = StatusList(name="Asset Status List",
+                                    statuses=[status1, status2, status3],
+                                    target_entity_type="Asset")
+        >>> a_status_list[0]
+        <Status (Complete, CMPLT)>
+        >>> a_status_list["complete"]
+        <Status (Complete, CMPLT)>
+        >>> a_status_list["WIP"]
+        <Status (Work in Progress, WIP)>
 
-    :param target_entity_type: use this parameter to specify the target entity
-      type that this StatusList is designed for. It accepts classes or names
-      of classes.
+    Args:
+        statuses (List[Status]): This is a list of :class:`.Status` instances,
+            so you can prepare different StatusLists for different kind of
+            entities using the same pool of :class:`.Status` instances.
 
-      For example::
+        target_entity_type (str): use this parameter to specify the target entity
+            type that this StatusList is designed for. It accepts classes or names
+            of classes.
 
-        from stalker import Status, StatusList, Project
+        For example:
 
-        status_list = [
-            Status(name="Waiting To Start", code="WTS"),
-            Status(name="On Hold", code="OH"),
-            Status(name="In Progress", code="WIP"),
-            Status(name="Waiting Review", code="WREV"),
-            Status(name="Approved", code="APP"),
-            Status(name="Completed", code="CMPLT"),
-        ]
+        .. code-block:: Python
 
-        project_status_list = StatusList(
-            name="Project Status List",
-            statuses=status_list,
-            target_entity_type="Project"
-        )
+            from stalker import Status, StatusList, Project
 
-        # or
-        project_status_list = StatusList(
-            name="Project Status List",
-            statuses=status_list,
-            target_entity_type=Project
-        )
+            status_list = [
+                Status(name="Waiting To Start", code="WTS"),
+                Status(name="On Hold", code="OH"),
+                Status(name="In Progress", code="WIP"),
+                Status(name="Waiting Review", code="WREV"),
+                Status(name="Approved", code="APP"),
+                Status(name="Completed", code="CMPLT"),
+            ]
 
-      now with the code above you can not assign the ``project_status_list``
-      object to any other class than a ``Project`` object.
+            project_status_list = StatusList(
+                name="Project Status List",
+                statuses=status_list,
+                target_entity_type="Project"
+            )
 
-      The StatusList instance can be empty, means it may not have anything in
-      its :attr:`.StatusList.statuses`. But it is useless. The validation for
-      empty statuses list is left to the SOM user.
+            # or
+            project_status_list = StatusList(
+                name="Project Status List",
+                statuses=status_list,
+                target_entity_type=Project
+            )
+
+        now with the code above you can not assign the ``project_status_list``
+        object to any other class than a ``Project`` object.
+
+        The StatusList instance can be empty, means it may not have anything in
+        its :attr:`.StatusList.statuses`. But it is useless. The validation for
+        empty statuses list is left to the SOM user.
     """
 
     __auto_name__ = True

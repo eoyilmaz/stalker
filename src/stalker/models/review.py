@@ -37,29 +37,26 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
     related task to the total logged time logs for that task and then extend
     the timing values according to the review schedule values.
 
-    :param task: A :class:`.Task` instance that this review is related to. It
-      can not be skipped.
+    Args:
+        task (Task): A :class:`.Task` instance that this review is related to.
+            It can not be skipped.
 
-    :type task: :class:`Task`
+        review_number (int): This number represents the revision set id that this
+            Review instance belongs to.
 
-    :param int review_number: This number represents the revision set id
-      that this Review instance belongs to.
+        reviewer (User): One of the responsible of the related Task. There will
+            be only one Review instances with the same review_number for every
+            responsible of the same Task.
 
-    :param reviewer: One of the responsible of the related Task. There will be
-      only one Review instances with the same review_number for every
-      responsible of the same Task.
+        schedule_timing (int): Holds the timing value of this review. It is a
+            float value. Only useful if it is a review which ends up requesting
+            a revision.
 
-    :type reviewer: :class:`.User`
+        schedule_unit (str): Holds the timing unit of this review. Only useful
+            if it is a review which ends up requesting a revision.
 
-    :param schedule_timing: Holds the timing value of this review. It is a
-      float value. Only useful if it is a review which ends up requesting a
-      revision.
-
-    :param schedule_unit: Holds the timing unit of this review. Only useful if
-      it is a review which ends up requesting a revision.
-
-    :param schedule_model: It holds the schedule model of this review. Only
-      useful if it is a review which ends up requesting a revision.
+        schedule_model (str): It holds the schedule model of this review. Only
+            useful if it is a review which ends up requesting a revision.
     """
 
     __auto_name__ = True

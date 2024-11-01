@@ -896,7 +896,7 @@ def test_repositories_attribute_is_working_properly(setup_project_db_test):
         code="SRP",
         linux_path="/mnt/S/random/repo",
         windows_path="S:/random/repo",
-        osx_path="/Volumes/S/random/repo",
+        macos_path="/Volumes/S/random/repo",
     )
 
     assert data["test_project"].repositories != [new_repo1]

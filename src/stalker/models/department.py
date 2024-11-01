@@ -31,10 +31,10 @@ class Department(Entity):
 
     so creating a department object needs the following parameters:
 
-    :param users: it can be an empty list, so one department can be created
-      without any member in it. But this parameter should be a list of User
-      objects.
-
+    Args:
+        users (List[User]): it can be an empty list, so one department can be
+            created without any member in it. But this parameter should be a list
+            of User objects.
     """
 
     __auto_name__ = False

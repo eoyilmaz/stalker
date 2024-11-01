@@ -989,16 +989,17 @@ class WorkingHours(Entity):
 class Vacation(SimpleEntity, DateRangeMixin):
     """Vacation is the way to manage the User vacations.
 
-    :param user: The user of this vacation. Should be an instance of
-      :class:`.User` if skipped or given as None the
-      Vacation is considered as a Studio vacation and applies to all Users.
+    Args:
+        user (User): The user of this vacation. Should be an instance of
+            :class:`.User` if skipped or given as None the Vacation is considered
+            as a Studio vacation and applies to all Users.
 
-    :param start: The start datetime of the vacation. Is is an
-      datetime.datetime instance. When skipped it will be set to the rounded
-      value of.
+        start (datetime.datetime): The start datetime of the vacation. Is is an
+            datetime.datetime instance. When skipped it will be set to the rounded
+            value of.
 
-    :param end: The end datetime of the vacation. It is an datetime.datetime
-      instance.
+        end (datetime.datetime): The end datetime of the vacation. It is an
+            datetime.datetime instance.
     """
 
     __auto_name__ = True

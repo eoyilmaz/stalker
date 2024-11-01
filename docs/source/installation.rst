@@ -16,7 +16,7 @@ Install Python
 
 Stalker is completely written with Python, so it requires Python. It currently
 works with Python version 2.6 and 2.7. So you first need to have Python
-installed in your system. On Linux and OSX there is a system wide Python
+installed in your system. On Linux and macOS there is a system wide Python
 already installed. For Windows, you need to download the Python installer
 suitable for your Windows operating system (32 or 64 bit) from `Python.org`_
 
@@ -33,7 +33,7 @@ bootstrap script.
 Installing `setuptools` with `ez_setup`:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-These steps are generally needed just for Windows. Linux and OSX users can skip
+These steps are generally needed just for Windows. Linux and macOS users can skip
 this part.
 
 1. download `ez_setup.py`_

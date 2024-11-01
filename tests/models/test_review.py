@@ -60,7 +60,7 @@ def setup_review_db_test(setup_postgresql_db):
         code="TR",
         linux_path="/mnt/T/",
         windows_path="T:/",
-        osx_path="/Volumes/T/",
+        macos_path="/Volumes/T/",
     )
     DBSession.add(data["repo"])
 

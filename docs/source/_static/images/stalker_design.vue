@@ -3750,7 +3750,7 @@
             <URIString>http://vue.tufts.edu/rdf/resource/73db9f4c7f0001010b45ad3de656431d</URIString>
             <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
         </child>
-        <child ID="2193" label="osx_path | UNICODE"
+        <child ID="2193" label="macos_path | UNICODE"
             created="1290433929378" x="34.0" y="43.25" width="126.0"
             height="23.0" strokeWidth="1.0" autoSized="true" xsi:type="node">
             <fillColor>#F2AE45</fillColor>

@@ -58,7 +58,7 @@ def setup_version_db_tests(setup_postgresql_db):
         code="TR",
         linux_path="/mnt/T/",
         windows_path="T:/",
-        osx_path="/Volumes/T/",
+        macos_path="/Volumes/T/",
     )
     DBSession.add(data["test_repo"])
 
@@ -1647,7 +1647,7 @@ def setup_version_tests():
         code="TR",
         linux_path="/mnt/T/",
         windows_path="T:/",
-        osx_path="/Volumes/T/",
+        macos_path="/Volumes/T/",
     )
 
     # a project type
