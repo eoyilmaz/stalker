@@ -246,8 +246,9 @@ def test_ticket_status_initialization(setup_postgresql_db):
     expected_status_names = ["New", "Reopened", "Closed", "Accepted", "Assigned"]
 
     assert len(ticket_status_list.statuses) == len(expected_status_names)
-    for status in ticket_status_list.statuses:
-        assert status.name in expected_status_names
+    assert all(
+        status.name in expected_status_names for status in ticket_status_list.statuses
+    )
 
 
 def test_daily_status_initialization(setup_postgresql_db):
@@ -263,12 +264,13 @@ def test_daily_status_initialization(setup_postgresql_db):
     assert len(daily_status_list.statuses) == len(expected_status_names)
 
     admin = get_admin_user()
-    for status in daily_status_list.statuses:
-        assert status.name in expected_status_names
-        # check if the created_by and updated_by attributes
-        # are set to admin
-        assert status.created_by == admin
-        assert status.updated_by == admin
+    assert all(
+        status.name in expected_status_names for status in daily_status_list.statuses
+    )
+    # check if the created_by and updated_by attributes
+    # are set to admin
+    assert all(status.created_by == admin for status in daily_status_list.statuses)
+    assert all(status.updated_by == admin for status in daily_status_list.statuses)
 
 
 def test_register_creates_suitable_permissions(setup_postgresql_db):
@@ -286,9 +288,7 @@ def test_register_creates_suitable_permissions(setup_postgresql_db):
     logger.debug(f"{permissions_db}")
 
     actions = defaults.actions
-
-    for action in permissions_db:
-        assert action.action in actions
+    assert all(action.action in actions for action in permissions_db)
 
 
 def test_register_raise_type_error_for_wrong_class_name_argument(setup_postgresql_db):
@@ -346,13 +346,9 @@ def test_permissions_created_for_all_the_classes(setup_postgresql_db):
     ]
     permission_db = Permission.query.all()
     assert len(permission_db) == len(class_names) * len(defaults.actions) * 2
-    for permission in permission_db:
-        assert permission.access in ["Allow", "Deny"]
-        assert permission.action in defaults.actions
-        assert permission.class_name in class_names
-        logger.debug(f"permission.access: {permission.access}")
-        logger.debug(f"permission.action: {permission.action}")
-        logger.debug(f"permission.class_name: {permission.class_name}")
+    assert all(permission.access in ["Allow", "Deny"] for permission in permission_db)
+    assert all(permission.action in defaults.actions for permission in permission_db)
+    assert all(permission.class_name in class_names for permission in permission_db)
 
 
 def test_permissions_not_created_over_and_over_again(setup_postgresql_db):
@@ -420,9 +416,8 @@ def test_project_status_list_initialization(setup_postgresql_db):
     # check if the created_by and updated_by attributes are correctly set
     # to the admin
     admin = get_admin_user()
-    for status in project_status_list.statuses:
-        assert status.created_by == admin
-        assert status.updated_by == admin
+    assert all(status.created_by == admin for status in project_status_list.statuses)
+    assert all(status.updated_by == admin for status in project_status_list.statuses)
 
 
 def test_task_status_initialization(setup_postgresql_db):
@@ -463,9 +458,8 @@ def test_task_status_initialization(setup_postgresql_db):
     # check if the created_by and updated_by attributes are correctly set
     # to the admin
     admin = get_admin_user()
-    for status in task_status_list.statuses:
-        assert status.created_by == admin
-        assert status.updated_by == admin
+    assert all(status.created_by == admin for status in task_status_list.statuses)
+    assert all(status.updated_by == admin for status in task_status_list.statuses)
 
 
 def test_asset_status_initialization(setup_postgresql_db):
@@ -580,9 +574,8 @@ def test_sequence_status_initialization(setup_postgresql_db):
     # check if the created_by and updated_by attributes are correctly set
     # to admin
     admin = get_admin_user()
-    for status in sequence_status_list.statuses:
-        assert status.created_by == admin
-        assert status.updated_by == admin
+    assert all(status.created_by == admin for status in sequence_status_list.statuses)
+    assert all(status.updated_by == admin for status in sequence_status_list.statuses)
 
 
 def test_asset_status_initialization_when_there_is_an_asset_status_list(
@@ -3468,7 +3461,7 @@ def test_persistence_of_structure(setup_postgresql_db):
         name="Character Asset Template",
         description="This is the template for character assets",
         path="Assets/{{asset_type.name}}/{{pipeline_step.code}}",
-        filename="{{asset.name}}_{{take.name}}_{{asset_type.name}}_\
+        filename="{{asset.name}}_{{version.variant_name}}_{{asset_type.name}}_\
         v{{version.version_number}}",
         target_entity_type="Asset",
         type=v_type,
@@ -4390,7 +4383,7 @@ def test_persistence_of_version(setup_postgresql_db):
     test_version = Version(
         name="version for task modeling",
         task=test_task,
-        take="MAIN",
+        variant_name="MAIN",
         full_path="M:/Shows/Proj1/Seq1/Shots/SH001/Lighting"
         "/Proj1_Seq1_Sh001_MAIN_Lighting_v001.ma",
         outputs=[
@@ -4410,7 +4403,7 @@ def test_persistence_of_version(setup_postgresql_db):
     test_version_2 = Version(
         name="version for task modeling",
         task=test_task,
-        take="MAIN",
+        variant_name="MAIN",
         full_path="M:/Shows/Proj1/Seq1/Shots/SH001/Lighting"
         "/Proj1_Seq1_Sh001_MAIN_Lighting_v001.ma",
         inputs=[test_version],
@@ -4429,7 +4422,7 @@ def test_persistence_of_version(setup_postgresql_db):
     is_published = test_version.is_published
     full_path = test_version.full_path
     tags = test_version.tags
-    take_name = test_version.take_name
+    variant_name = test_version.variant_name
     #        tickets = test_version.tickets
     type_ = test_version.type
     updated_by = test_version.updated_by
@@ -4453,7 +4446,7 @@ def test_persistence_of_version(setup_postgresql_db):
     assert test_version_db.is_published == is_published
     assert test_version_db.full_path == full_path
     assert test_version_db.tags == tags
-    assert test_version_db.take_name == take_name
+    assert test_version_db.variant_name == variant_name
     assert test_version_db.type == type_
     assert test_version_db.updated_by == updated_by
     assert test_version_db.version_number == version_number
@@ -4471,7 +4464,7 @@ def test_persistence_of_version(setup_postgresql_db):
     test_version_3 = Version(
         name="version for task modeling",
         task=test_task,
-        take="MAIN",
+        variant_name="MAIN",
         full_path="M:/Shows/Proj1/Seq1/Shots/SH001/Lighting"
         "/Proj1_Seq1_Sh001_MAIN_Lighting_v003.ma",
     )
@@ -4499,7 +4492,7 @@ def test_persistence_of_version(setup_postgresql_db):
     # create a new version append it to version_3.children and then delete
     # version_3
     test_version_4 = Version(
-        name="version for task modeling", task=test_task, take="MAIN"
+        name="version for task modeling", task=test_task, variant_name="MAIN"
     )
     test_version_3.children.append(test_version_4)
     DBSession.save(test_version_4)
@@ -4537,7 +4530,7 @@ def test_persistence_of_version(setup_postgresql_db):
     assert test_version_4_db.parent is None
 
     # create a new version and assign it as a child of version_5
-    test_version_5 = Version(task=test_task, take="MAIN")
+    test_version_5 = Version(task=test_task, variant_name="MAIN")
     DBSession.save(test_version_5)
     test_version_4.children = [test_version_5]
     DBSession.commit()

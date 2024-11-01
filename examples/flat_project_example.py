@@ -43,7 +43,7 @@ flat_task_template = FilenameTemplate(
     name="Flat Task Template",
     target_entity_type="Task",
     path="{{project.code}}",  # everything will be under the same folder
-    filename="{{task.nice_name}}_{{version.take_name}}"
+    filename="{{task.nice_name}}_{{version.variant_name}}"
     '_v{{"%03d"|format(version.version_number)}}{{extension}}'
     # you can customize this as you wish, you can even use a uuid4
     # as the file name
@@ -109,7 +109,7 @@ normal_task_template = FilenameTemplate(
     target_entity_type="Task",
     path="{{project.code}}/{%- for parent_task in parent_tasks -%}"
     "{{parent_task.nice_name}}/{%- endfor -%}",  # all in different folder
-    filename="{{task.nice_name}}_{{version.take_name}}"
+    filename="{{task.nice_name}}_{{version.variant_name}}"
     '_v{{"%03d"|format(version.version_number)}}{{extension}}',
 )
 
@@ -163,7 +163,7 @@ comp = Task(name="Comp", parent=shot1)
 db.DBSession.add(shot1)  # this should be enough to add the rest
 
 # now create new maya files for them
-comp_v1 = Version(task=comp, take_name="Test")
+comp_v1 = Version(task=comp, variant_name="Test")
 comp_v1.update_paths()
 comp_v1.extension = ".ma"
 

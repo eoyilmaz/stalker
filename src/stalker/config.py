@@ -171,7 +171,7 @@ class Config(ConfigBase):
         admin_group_name="admins",
         # the default keyword which is going to be used in password scrambling
         key="stalker_default_key",
-        version_take_name="Main",
+        version_variant_name="Main",
         actions=["Create", "Read", "Update", "Delete", "List"],  # CRUDL
         # Tickets
         ticket_label="Ticket",
@@ -434,7 +434,7 @@ taskreport breakdown "{{csv_file_name}}"{
 }""",
         tj_command="tj3" if sys.platform == "win32" else "/usr/local/bin/tj3",
         path_template="{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}",  # noqa: B950
-        filename_template='{{task.entity_type}}_{{task.id}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}',  # noqa: B950
+        filename_template='{{task.entity_type}}_{{task.id}}_{{version.variant_name}}_v{{"%03d"|format(version.version_number)}}',  # noqa: B950
         # --------------------------------------------
         # the following settings came from oyProjectManager
         sequence_format="%h%p%t %R",

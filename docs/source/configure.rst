@@ -134,12 +134,12 @@ Variables which can be set in ``config.py`` are as follows:
 
      key = "stalker_default_key"
 
-.. confval:: version_take_name
+.. confval:: version_variant_name
 
-   The default take name for :class:`~stalker.models.version.Version`
+   The default variant name for :class:`~stalker.models.version.Version`
    instances. Default value is::
 
-     version_take_name = "Main"
+     version_variant_name = "Main"
 
 .. confval:: status_bg_color
 
@@ -555,7 +555,7 @@ Variables which can be set in ``config.py`` are as follows:
    :class:`~stalker.models.version.Version` instances. This value is not used
    yet. Default value is::
 
-     filename_template = '{{task.entity_type}}_{{task.id}}_{{version.take_name}}_v{{"%03d"|format(version.version_number)}}'
+     filename_template = '{{task.entity_type}}_{{task.id}}_{{version.variant_name}}_v{{"%03d"|format(version.version_number)}}'
 
 .. confval:: sequence_format
 

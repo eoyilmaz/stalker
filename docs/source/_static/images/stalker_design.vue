@@ -1677,7 +1677,7 @@
             <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
         </child>
         <child ID="1365"
-            label="take_name | STRING, DEFAULT=&quot;Main&quot;"
+            label="variant_name | STRING, DEFAULT=&quot;Main&quot;"
             created="1275345214943" x="34.0" y="43.25" width="228.0"
             height="23.0" strokeWidth="1.0" autoSized="true" xsi:type="node">
             <fillColor>#F2AE45</fillColor>
