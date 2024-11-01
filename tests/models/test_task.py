@@ -951,7 +951,7 @@ def test_percent_complete_attr_is_read_only(setup_task_tests):
         10: "can't set attribute 'percent_complete'",
     }.get(
         sys.version_info.minor,
-        "property 'percent_complete' of 'Task' object has no setter"
+        "property 'percent_complete' of 'Task' object has no setter",
     )
 
     assert str(cm.value) == error_message
@@ -1199,42 +1199,32 @@ def test_time_logs_attr_is_not_a_list_of_timelog_instances(setup_task_tests):
     )
 
 
+@pytest.mark.parametrize(
+    "schedule_timing, schedule_unit, schedule_seconds",
+    [
+        [10, "h", 10 * 3600],
+        [23, "d", 23 * defaults.daily_working_hours * 3600],
+        [2, "w", 2 * defaults.weekly_working_hours * 3600],
+        [2.5, "m", 2.5 * 4 * defaults.weekly_working_hours * 3600],
+        # [
+        #     3.1,
+        #     "y",
+        #     3.1 * defaults.yearly_working_days * defaults.daily_working_hours * 3600,
+        # ],
+    ],
+)
 def test_schedule_seconds_is_working_properly_for_an_effort_based_task_no_studio(
-    setup_task_tests,
+    setup_task_tests, schedule_timing, schedule_unit, schedule_seconds
 ):
     """schedule_seconds attr is working okay for an effort based task when no studio."""
     data = setup_task_tests
     # no studio, using defaults
     kwargs = copy.copy(data["kwargs"])
     kwargs["schedule_model"] = "effort"
-
-    kwargs["schedule_timing"] = 10
-    kwargs["schedule_unit"] = "h"
+    kwargs["schedule_timing"] = schedule_timing
+    kwargs["schedule_unit"] = schedule_unit
     new_task = Task(**kwargs)
-
-    assert new_task.schedule_seconds == 10 * 3600
-    kwargs["schedule_timing"] = 23
-    kwargs["schedule_unit"] = "d"
-    new_task = Task(**kwargs)
-
-    assert new_task.schedule_seconds == 23 * defaults.daily_working_hours * 3600
-    kwargs["schedule_timing"] = 2
-    kwargs["schedule_unit"] = "w"
-    new_task = Task(**kwargs)
-
-    assert new_task.schedule_seconds == 2 * defaults.weekly_working_hours * 3600
-    kwargs["schedule_timing"] = 2.5
-    kwargs["schedule_unit"] = "m"
-    new_task = Task(**kwargs)
-
-    assert new_task.schedule_seconds == 2.5 * 4 * defaults.weekly_working_hours * 3600
-    kwargs["schedule_timing"] = 3.1
-    kwargs["schedule_unit"] = "y"
-    new_task = Task(**kwargs)
-
-    assert new_task.schedule_seconds == pytest.approx(
-        3.1 * defaults.yearly_working_days * defaults.daily_working_hours * 3600
-    )
+    assert new_task.schedule_seconds == schedule_seconds
 
 
 def test_schedule_seconds_is_working_properly_for_an_effort_based_task_with_studio(
@@ -1572,7 +1562,7 @@ def test_remaining_seconds_attr_is_a_read_only_attr(setup_task_tests):
         10: "can't set attribute 'remaining_seconds'",
     }.get(
         sys.version_info.minor,
-        "property 'remaining_seconds' of 'Task' object has no setter"
+        "property 'remaining_seconds' of 'Task' object has no setter",
     )
 
     assert str(cm.value) == error_message
@@ -1951,10 +1941,7 @@ def test_is_leaf_attr_is_read_only(setup_task_tests):
         8: "can't set attribute",
         9: "can't set attribute",
         10: "can't set attribute 'is_leaf'",
-    }.get(
-        sys.version_info.minor,
-        "property 'is_leaf' of 'Task' object has no setter"
-    )
+    }.get(sys.version_info.minor, "property 'is_leaf' of 'Task' object has no setter")
 
     assert str(cm.value) == error_message
 
@@ -1996,10 +1983,7 @@ def test_is_root_attr_is_read_only(setup_task_tests):
         8: "can't set attribute",
         9: "can't set attribute",
         10: "can't set attribute 'is_root'",
-    }.get(
-        sys.version_info.minor,
-        "property 'is_root' of 'Task' object has no setter"
-    )
+    }.get(sys.version_info.minor, "property 'is_root' of 'Task' object has no setter")
 
     assert str(cm.value) == error_message
 
@@ -2043,8 +2027,7 @@ def test_is_container_attr_is_read_only(setup_task_tests):
         9: "can't set attribute",
         10: "can't set attribute 'is_container'",
     }.get(
-        sys.version_info.minor,
-        "property 'is_container' of 'Task' object has no setter"
+        sys.version_info.minor, "property 'is_container' of 'Task' object has no setter"
     )
 
     assert str(cm.value) == error_message
@@ -2144,7 +2127,7 @@ def test_project_attr_is_a_read_only_attr(setup_task_tests):
         12: "property of 'Task' object has no setter",
     }.get(
         sys.version_info.minor,
-        "property '_project_getter' of 'Task' object has no setter"
+        "property '_project_getter' of 'Task' object has no setter",
     )
 
     assert str(cm.value) == error_message
@@ -2342,10 +2325,7 @@ def test_level_attr_is_a_read_only_property(setup_task_tests):
         8: "can't set attribute",
         9: "can't set attribute",
         10: "can't set attribute 'level'",
-    }.get(
-        sys.version_info.minor,
-        "property 'level' of 'Task' object has no setter"
-    )
+    }.get(sys.version_info.minor, "property 'level' of 'Task' object has no setter")
 
     assert str(cm.value) == error_message
 
@@ -2649,8 +2629,7 @@ def test_tjp_abs_id_is_a_read_only_attr(setup_task_tests):
         9: "can't set attribute",
         10: "can't set attribute 'tjp_abs_id'",
     }.get(
-        sys.version_info.minor,
-        "property 'tjp_abs_id' of 'Task' object has no setter"
+        sys.version_info.minor, "property 'tjp_abs_id' of 'Task' object has no setter"
     )
 
     assert str(cm.value) == error_message
@@ -3380,8 +3359,7 @@ def test_is_scheduled_is_a_read_only_attr(setup_task_tests):
         9: "can't set attribute",
         10: "can't set attribute 'is_scheduled'",
     }.get(
-        sys.version_info.minor,
-        "property 'is_scheduled' of 'Task' object has no setter"
+        sys.version_info.minor, "property 'is_scheduled' of 'Task' object has no setter"
     )
 
     assert str(cm.value) == error_message
@@ -3426,10 +3404,7 @@ def test_parents_attr_is_read_only(setup_task_tests):
         8: "can't set attribute",
         9: "can't set attribute",
         10: "can't set attribute 'parents'",
-    }.get(
-        sys.version_info.minor,
-        "property 'parents' of 'Task' object has no setter"
-    )
+    }.get(sys.version_info.minor, "property 'parents' of 'Task' object has no setter")
 
     assert str(cm.value) == error_message
 
@@ -3713,10 +3688,7 @@ def test_tickets_attr_is_a_read_only_property(setup_task_tests):
         8: "can't set attribute",
         9: "can't set attribute",
         10: "can't set attribute 'tickets'",
-    }.get(
-        sys.version_info.minor,
-        "property 'tickets' of 'Task' object has no setter"
-    )
+    }.get(sys.version_info.minor, "property 'tickets' of 'Task' object has no setter")
 
     assert str(cm.value) == error_message
 
@@ -3735,8 +3707,7 @@ def test_open_tickets_attr_is_a_read_only_property(setup_task_tests):
         9: "can't set attribute",
         10: "can't set attribute 'open_tickets'",
     }.get(
-        sys.version_info.minor,
-        "property 'open_tickets' of 'Task' object has no setter"
+        sys.version_info.minor, "property 'open_tickets' of 'Task' object has no setter"
     )
 
     assert str(cm.value) == error_message
@@ -3788,7 +3759,7 @@ def test_review_number_attr_is_read_only(setup_task_tests):
         12: "property of 'Task' object has no setter",
     }.get(
         sys.version_info.minor,
-        "property '_review_number_getter' of 'Task' object has no setter"
+        "property '_review_number_getter' of 'Task' object has no setter",
     )
 
     assert str(cm.value) == error_message
@@ -4185,10 +4156,7 @@ def test_path_attr_is_read_only(setup_task_tests):
         8: "can't set attribute",
         9: "can't set attribute",
         10: "can't set attribute 'path'",
-    }.get(
-        sys.version_info.minor,
-        "property 'path' of 'Task' object has no setter"
-    )
+    }.get(sys.version_info.minor, "property 'path' of 'Task' object has no setter")
 
     assert str(cm.value) == error_message
 
@@ -4280,7 +4248,7 @@ def test_absolute_path_attr_is_read_only(setup_task_tests):
         10: "can't set attribute 'absolute_path'",
     }.get(
         sys.version_info.minor,
-        "property 'absolute_path' of 'Task' object has no setter"
+        "property 'absolute_path' of 'Task' object has no setter",
     )
 
     assert str(cm.value) == error_message
