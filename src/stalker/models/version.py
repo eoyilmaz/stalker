@@ -62,9 +62,9 @@ class Version(Link, DAGMixin):
            $REPO{{project.repository.id}}/{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}
 
     Args:
-        take_name (str): A short string holding the current take name. Takes in Stalker
-            are used solely for grouping individual versions together. Versions with the
-            same ``take_name`` (of the same Task) are numbered together. It can be any
+        variant_name (str): A short string holding the current variant name. Variants in
+            Stalker are used for creating variants versions. Versions with the same
+            ``variant_name`` (of the same Task) are numbered together. It can be any
             alphanumeric value (a-zA-Z0-9_). The default is the string "Main". When
             skipped it will use the default value. It can not start with a number. It
             can not have white spaces.
@@ -105,11 +105,11 @@ class Version(Link, DAGMixin):
         back_populates="versions",
     )
 
-    take_name = Column(
+    variant_name = Column(
         String(256),
-        default=defaults.version_take_name,
-        doc="""Takes in Versions are used solely for grouping individual
-        versions together.""",
+        default=defaults.version_variant_name,
+        doc="""Variants in Versions are used for representing different variants of the
+        same version.""",
     )
 
     version_number = Column(
@@ -150,7 +150,7 @@ class Version(Link, DAGMixin):
     def __init__(
         self,
         task=None,
-        take_name=defaults.version_take_name,
+        variant_name=defaults.version_variant_name,
         inputs=None,
         outputs=None,
         parent=None,
@@ -164,7 +164,7 @@ class Version(Link, DAGMixin):
 
         DAGMixin.__init__(self, parent=parent)
 
-        self.take_name = take_name
+        self.variant_name = variant_name
         self.task = task
         self.version_number = None
         if inputs is None:
@@ -196,59 +196,61 @@ class Version(Link, DAGMixin):
         )
 
     @classmethod
-    def _format_take_name(cls, take_name: str) -> str:
-        """Format the given take_name value.
+    def _format_variant_name(cls, variant_name: str) -> str:
+        """Format the given variant_name value.
 
         Args:
-            take_name (str): The take name value to be formatted.
+            variant_name (str): The variant name value to be formatted.
 
         Returns:
-            str: The formatted take name value.
+            str: The formatted variant name value.
         """
         # remove unnecessary characters
-        take_name = re.sub(r"([^a-zA-Z0-9\s_\-@]+)", r"", take_name).strip()
+        variant_name = re.sub(r"([^a-zA-Z0-9\s_\-@]+)", r"", variant_name).strip()
 
         # replace empty spaces with underscores
-        take_name = re.sub(r"[\s]+", "_", take_name)
+        variant_name = re.sub(r"[\s]+", "_", variant_name)
 
         # replace multiple underscores with only one
-        # take_name = re.sub(r'([_]+)', r'_', take_name)
+        # variant_name = re.sub(r'([_]+)', r'_', variant_name)
 
         # remove any non allowed characters from the start
-        take_name = re.sub(r"^[^a-zA-Z0-9]+", r"", take_name)
+        variant_name = re.sub(r"^[^a-zA-Z0-9]+", r"", variant_name)
 
-        return take_name
+        return variant_name
 
-    @validates("take_name")
-    def _validate_take_name(self, key: str, take_name: str) -> str:
-        """Validate the given take_name value.
+    @validates("variant_name")
+    def _validate_variant_name(self, key: str, variant_name: str) -> str:
+        """Validate the given variant_name value.
 
         Args:
             key (str): The name of the validated column.
-            take_name (str): The take name value to be validated.
+            variant_name (str): The variant name value to be validated.
 
         Raises:
-            TypeError: If the take name value is not a string.
-            ValueError: If the take name value is an empty string.
+            TypeError: If the variant name value is not a string.
+            ValueError: If the variant name value is an empty string.
 
         Returns:
-            str: The validated take name value.
+            str: The validated variant name value.
         """
-        if not isinstance(take_name, string_types):
+        if not isinstance(variant_name, string_types):
             raise TypeError(
-                "{}.take_name should be a string, not {}: '{}'".format(
-                    self.__class__.__name__, take_name.__class__.__name__, take_name
+                "{}.variant_name should be a string, not {}: '{}'".format(
+                    self.__class__.__name__,
+                    variant_name.__class__.__name__,
+                    variant_name,
                 )
             )
 
-        take_name = self._format_take_name(take_name)
+        variant_name = self._format_variant_name(variant_name)
 
-        if take_name == "":
+        if variant_name == "":
             raise ValueError(
-                f"{self.__class__.__name__}.take_name can not be an empty string"
+                f"{self.__class__.__name__}.variant_name can not be an empty string"
             )
 
-        return take_name
+        return variant_name
 
     @property
     def latest_version(self) -> "Version":
@@ -262,7 +264,7 @@ class Version(Link, DAGMixin):
             with DBSession.no_autoflush:
                 last_version = (
                     Version.query.filter(Version.task == self.task)
-                    .filter(Version.take_name == self.take_name)
+                    .filter(Version.variant_name == self.variant_name)
                     .order_by(Version.version_number.desc())
                     .first()
                 )
@@ -522,7 +524,7 @@ class Version(Link, DAGMixin):
         """
         return (
             Version.query.filter_by(task=self.task)
-            .filter_by(take_name=self.take_name)
+            .filter_by(variant_name=self.variant_name)
             .filter_by(is_published=True)
             .order_by(Version.version_number.desc())
             .first()
@@ -563,14 +565,14 @@ class Version(Link, DAGMixin):
 
         Returns:
             bool: True if the other object is equal to this one as an Entity, is a
-                Version instance, has the same task, same take_name and same
+                Version instance, has the same task, same variant_name and same
                 version_number.
         """
         return (
             super(Version, self).__eq__(other)
             and isinstance(other, Version)
             and self.task == other.task
-            and self.take_name == other.take_name
+            and self.variant_name == other.variant_name
             and self.version_number == other.version_number
         )
 
@@ -624,7 +626,7 @@ class Version(Link, DAGMixin):
         naming_parents = self.naming_parents
         return self._format_nice_name(
             "{}_{}".format(
-                "_".join(map(lambda x: x.nice_name, naming_parents)), self.take_name
+                "_".join(map(lambda x: x.nice_name, naming_parents)), self.variant_name
             )
         )
 

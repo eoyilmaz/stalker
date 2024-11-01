@@ -2,6 +2,22 @@
 Stalker Changes
 ===============
 
+1.0.0
+=====
+
+* `Version.take_name` has been renamed to `Version.variant_name` to follow the industry
+  standard.
+* `Task.depends` renmaed to `Task.depends_on`.
+* `TaskDependency.task_depends_to` renamed to `TaskDependency.task_depends_on`.
+* Stalker now supports Python versions from 3.8 to 3.13.
+* Added GitHub actions for CI/CD practices.
+* Updated validation messages to make them more consistently displaying the current
+  type and the value of the validated attribute.
+* Added Makefile workflow to help creating a virtualenv, building, installing, releasing
+  etc. actions much more easier.
+* Modernised Stalker as a Python project. It is now fully PEP 517 compliant.
+* Renamed OSX to macOS anywhere it is mentioned.
+
 0.2.27
 ======
 

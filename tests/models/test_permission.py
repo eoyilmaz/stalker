@@ -24,13 +24,10 @@ def test_access_argument_is_skipped(setup_permission_tests):
     with pytest.raises(TypeError) as cm:
         Permission(**data["kwargs"])
 
-    if sys.version_info[0] >= 3:
-        assert (
-            str(cm.value)
-            == "__init__() missing 1 required positional argument: 'access'"
-        )
-    else:
-        assert str(cm.value) == "__init__() takes exactly 4 arguments (3 given)"
+    assert (
+        str(cm.value)
+        == "__init__() missing 1 required positional argument: 'access'"
+    )
 
 
 def test_access_argument_is_none(setup_permission_tests):
@@ -87,14 +84,10 @@ def test_action_argument_is_skipped_will_raise_a_type_error(setup_permission_tes
     with pytest.raises(TypeError) as cm:
         Permission(**data["kwargs"])
 
-    if sys.version_info[0] >= 3:
-        assert (
-            str(cm.value)
-            == "__init__() missing 1 required positional argument: 'action'"
-        )
-    else:
-        # Python 2.7
-        assert str(cm.value) == "__init__() takes exactly 4 arguments (3 given)"
+    assert (
+        str(cm.value)
+        == "__init__() missing 1 required positional argument: 'action'"
+    )
 
 
 def test_action_argument_is_none(setup_permission_tests):
@@ -155,14 +148,10 @@ def test_class_name_argument_skipped(setup_permission_tests):
     with pytest.raises(TypeError) as cm:
         Permission(**data["kwargs"])
 
-    if sys.version_info[0] >= 3:
-        assert (
-            str(cm.value) == "__init__() missing 1 required positional argument: "
-            "'class_name'"
-        )
-    else:
-        # Python 2.7
-        assert str(cm.value) == "__init__() takes exactly 4 arguments (3 given)"
+    assert (
+        str(cm.value) == "__init__() missing 1 required positional argument: "
+        "'class_name'"
+    )
 
 
 def test_class_name_argument_is_none(setup_permission_tests):
