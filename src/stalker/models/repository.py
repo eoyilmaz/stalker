@@ -44,22 +44,20 @@ class Repository(Entity, CodeMixin):
        :attr:`.make_relative`` path to generate a universal path that can be
        used across OSes and different installations of Stalker.
 
-    :param code: The code of the :class:`stalker.models.repository.Repository`.
-      This attribute value is used by the :class:`stalker.models.studio.Studio`
-      to generate environment variables that contains the path of this
-      ``Repository`` (i.e. $REPOCP/path/to/asset.ma) so that instead of using
-      absolute full paths one can use the ``repository_relative`` path to
-      generate a universal path that can be used across OSes and different
-      installations of Stalker.
-
-    :param linux_path: shows the linux path of the repository root, should be a
-      string
-
-    :param osx_path: shows the mac osx path of the repository root, should be a
-      string
-
-    :param windows_path: shows the windows path of the repository root, should
-      be a string
+    Args:
+        code (str): The code of the :class:`stalker.models.repository.Repository`.
+            This attribute value is used by the :class:`stalker.models.studio.Studio`
+            to generate environment variables that contains the path of this
+            ``Repository`` (i.e. $REPOCP/path/to/asset.ma) so that instead of
+            using absolute full paths one can use the ``repository_relative``
+            path to generate a universal path that can be used across OSes and
+            different installations of Stalker.
+        linux_path (str): shows the linux path of the repository root, should be
+            a string
+        osx_path (str): shows the mac osx path of the repository root, should be
+            a string.
+        windows_path (str): shows the windows path of the repository root, should
+            be a string
     """
 
     #

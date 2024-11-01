@@ -193,34 +193,35 @@ class StatusMixin(object):
     When mixed with a class which don't have an __init__ method, the mixin
     supplies one, and in this case the parameters below must be defined.
 
-    :param status_list: this attribute holds a status list object, which shows
-      the possible statuses that this entity could be in. This attribute can
-      not be empty or None. Giving a StatusList object, the
-      StatusList.target_entity_type should match the current class.
+    Args:
+        status_list (StatusList): this attribute holds a status list object, which
+            shows the possible statuses that this entity could be in. This attribute
+            can not be empty or None. Giving a StatusList object, the
+            StatusList.target_entity_type should match the current class.
 
-      .. versionadded:: 0.1.2.a4
+            .. versionadded:: 0.1.2.a4
 
-        The status_list argument now can be skipped or can be None if there
-        is an active database connection and there is a suitable
-        :class:`.StatusList` instance in the database whom
-        :attr:`.StatusList.target_entity_type` attribute is set to the current
-        mixed-in class name.
+                The status_list argument now can be skipped or can be None if there
+                is an active database connection and there is a suitable
+                :class:`.StatusList` instance in the database whom
+                :attr:`.StatusList.target_entity_type` attribute is set to the
+                current mixed-in class name.
 
-    :param status: It is a :class:`.Status` instance which shows the current
-      status of the statusable object. Integer values are also accepted, which
-      shows the index of the desired status in the ``status_list`` attribute of
-      the current statusable object. If a :class:`.Status` instance is
-      supplied, it should also be present in the ``status_list`` attribute. If
-      set to None then the first :class:`.Status` instance in the
-      ``status_list`` will be used.
+        status (Status): It is a :class:`.Status` instance which shows the current
+            status of the statusable object. Integer values are also accepted,
+            which shows the index of the desired status in the ``status_list``
+            attribute of the current statusable object. If a :class:`.Status`
+            instance is supplied, it should also be present in the ``status_list``
+            attribute. If set to None then the first :class:`.Status` instance
+            in the ``status_list`` will be used.
 
-      .. versionadded:: 0.2.0
+            .. versionadded:: 0.2.0
 
-        Status attribute as Status instance:
+                Status attribute as Status instance:
 
-        It is now possible to set the status of the instance by a
-        :class:`.Status` instance directly. And the :attr:`.StatusMixin.status`
-        will return a proper :class:`.Status` instance.
+                It is now possible to set the status of the instance by a
+                :class:`.Status` instance directly. And the :attr:`.StatusMixin.status`
+                will return a proper :class:`.Status` instance.
     """
 
     def __init__(self, status=None, status_list=None, **kwargs):
@@ -478,27 +479,23 @@ class DateRangeMixin(object):
 
     .. _documentation of datetime: https://docs.python.org/library/datetime.html
 
-    :param start: the start date of the entity, should be a datetime.datetime
-      instance, the start is the pin point for the date calculation. In
-      any condition if the start is available then the value will be
-      preserved. If start passes the end the end is also changed
-      to a date to keep the timedelta between dates. The default value is
-      datetime.datetime.now(pytz.utc)
+    Args:
+        start (datetime.datetime): the start date of the entity, should be a
+            datetime.datetime instance, the start is the pin point for the date
+            calculation. In any condition if the start is available then the value
+            will be preserved. If start passes the end the end is also changed
+            to a date to keep the timedelta between dates. The default value is
+            datetime.datetime.now(pytz.utc)
 
-    :type start: :class:`datetime.datetime`
+        end (datetime.datetime): the end of the entity, should be a datetime.datetime
+            instance, when the start is changed to a date passing the end, then
+            the end is also changed to a later date so the timedelta between the
+            dates is kept.
 
-    :param end: the end of the entity, should be a datetime.datetime instance,
-      when the start is changed to a date passing the end, then the end is also
-      changed to a later date so the timedelta between the dates is kept.
-
-    :type end: :class:`datetime.datetime` or :class:`datetime.timedelta`
-
-    :param duration: The duration of the entity. It is a
-      :class:`datetime.timedelta` instance. The default value is read from
-      the :class:`.Config` class. See the table above for the initialization
-      rules.
-
-    :type duration: :class:`datetime.timedelta`
+        duration (datetime.timedelta): The duration of the entity. It is a
+            :class:`datetime.timedelta` instance. The default value is read from 
+            he :class:`.Config` class. See the table above for the initialization
+            rules.
     """
 
     def __init__(self, start=None, end=None, duration=None, **kwargs):

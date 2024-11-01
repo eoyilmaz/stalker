@@ -47,8 +47,8 @@ class Type(Entity, TargetEntityTypeMixin, CodeMixin):
 
     :class:`.Type` s are generally used in :class:`.Structure` s.
 
-    :param string target_entity_type: The string defining the target type of
-      this :class:`.Type`.
+      target_entity_type (str): The string defining the target type of this
+        :class:`.Type`.
     """
 
     __auto_name__ = False

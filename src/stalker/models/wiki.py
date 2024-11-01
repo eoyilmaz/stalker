@@ -21,9 +21,10 @@ class Page(Entity, ProjectMixin):
     from :class:`.SimpleEntity` and a :attr:`.project` coming from
     :class:`.ProjectMixin`.
 
-    :param str title: The title of this Page
-    :param str content: The content of this page. Can contain any kind of
-      string literals including HTML tags etc.
+    Args:
+        title (str): The title of this Page.
+        content (str): The content of this page. Can contain any kind of string
+            literals including HTML tags etc.
     """
 
     __auto_name__ = True

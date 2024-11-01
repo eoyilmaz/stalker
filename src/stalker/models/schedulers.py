@@ -172,14 +172,15 @@ class TaskJugglerScheduler(SchedulerBase):
       | Vacation   | Vacation    |
       +------------+-------------+
 
-    :param bool compute_resources: When set to True it will also consider
-      :attr:`.Task.alternative_resources` attribute and will fill
-      :attr:`.Task.computed_resources` attribute for each Task. With
-      :class:`.TaskJugglerScheduler` when the total number of Task is around
-      15k it will take around 7 minutes to generate this data, so by default it
-      is False.
-    :param int parsing_method: Choose between SQL (0) or Pure Python (1)
-      parsing. The default is SQL.
+    Args:
+        compute_resources (bool): When set to True it will also consider
+            :attr:`.Task.alternative_resources` attribute and will fill
+            :attr:`.Task.computed_resources` attribute for each Task. With
+            :class:`.TaskJugglerScheduler` when the total number of Task is around
+            15k it will take around 7 minutes to generate this data, so by default
+            it is False.
+        parsing_method (int): Choose between SQL (0) or Pure Python (1) parsing.
+            The default is SQL.
     """
 
     def __init__(

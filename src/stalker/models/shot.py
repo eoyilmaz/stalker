@@ -107,39 +107,35 @@ class Shot(Task, CodeMixin):
        setting its :attr:`.fps` attribute. The default values is same with the
        :class:`.Project` .
 
+    Args:
+        project (Project): This is the :class:`.Project` instance that this shot
+            belongs to. A Shot can not be created without a Project instance.
 
-    :param project: This is the :class:`.Project` instance that this shot
-      belongs to. A Shot can not be created without a Project instance.
+        sequences (List[Sequence]): This is a list of :class:`.Sequence` s that
+            this shot is assigned to. A Shot can be created without having a
+            Sequence instance.
 
-    :type project: :class:`.Project`
+        cut_in (int): The in frame number that this shot starts. The default
+            value is 1. When the ``cut_in`` is bigger then ``cut_out``, the
+            :attr:`.cut_out` attribute is set to :attr:`.cut_in` + 1.
 
-    :param sequences: This is a list of :class:`.Sequence` s that this shot is
-      assigned to. A Shot can be created without having a Sequence instance.
+        cut_duration (int): The duration of this shot in frames. It should be
+            zero or a positive integer value (natural number?) or . The default
+            value is None.
 
-    :type sequences: list of :class:`.Sequence`
+        cut_out (int): The out frame number that this shot ends. If it is given
+            as a value lower then the ``cut_in`` parameter, then the :attr:`.cut_out`
+            will be recalculated from the existent :attr:`.cut_in`
+            :attr:`.cut_duration` attributes. Can be skipped. The default value
+            is None.
 
-    :param int cut_in: The in frame number that this shot starts. The default
-      value is 1. When the ``cut_in`` is bigger then ``cut_out``, the
-      :attr:`.cut_out` attribute is set to :attr:`.cut_in` + 1.
+        image_format (ImageFormat): The image format of this shot. This is an
+            optional variable to differentiate the image format per shot. The
+            default value is the same with the Project that this Shot belongs
+            to.
 
-    :param int cut_duration: The duration of this shot in frames. It should
-      be zero or a positive integer value (natural number?) or . The default
-      value is None.
-
-    :param int cut_out: The out frame number that this shot ends. If it is
-      given as a value lower then the ``cut_in`` parameter, then the
-      :attr:`.cut_out` will be recalculated from the existent :attr:`.cut_in`
-      :attr:`.cut_duration` attributes. Can be skipped. The default value is
-      None.
-
-    :param image_format: The image format of this shot. This is an optional
-      variable to differentiate the image format per shot. The default value is
-      the same with the Project that this Shot belongs to.
-
-    :type image_format: :class:`.ImageFormat`
-
-    :param float fps: The FPS of this shot. Default value is the same with the
-      :class:`.Project` .
+        fps (float): The FPS of this shot. Default value is the same with the
+            :class:`.Project` .
     """
 
     __auto_name__ = True

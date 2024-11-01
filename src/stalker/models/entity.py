@@ -62,51 +62,36 @@ class SimpleEntity(Base):
        attribute can be skipped. For derived classes use the ``__auto_name__``
        class attribute to control auto naming behaviour.
 
-    :param string name: A string value that holds the name of this entity.
-      It should not contain any white space at the beginning and at the end of
-      the string. Valid characters are [a-zA-Z0-9_/S].
+    Args:
+        name (str): A string value that holds the name of this entity. It should
+            not contain any white space at the beginning and at the end of the
+            string. Valid characters are [a-zA-Z0-9_/S].
 
-      Advanced::
+            Advanced::
 
-        For classes derived from the SimpleEntity, if an automatic name is
-        desired, the ``__auto_name__`` class attribute can be set to True. Then
-        Stalker will automatically generate an uuid4 sequence for the name
-        attribute.
+                For classes derived from the SimpleEntity, if an automatic name
+                is desired, the ``__auto_name__`` class attribute can be set to
+                True. Then Stalker will automatically generate an uuid4 sequence
+                for the name attribute.
 
-    :param str description: A string attribute that holds the description of
-      this entity object, it could be an empty string, and it could not again
-      have white spaces at the beginning and at the end of the string,
-      again any given objects will be converted to strings
-
-    :param str generic_text: A string attribute that holds any text based
-      information that should be affiliated with this entity, it could be an
-      empty string, and it could not again have white spaces at the beginning
-      and at the end of the string, again any given objects will be converted
-      to strings.
-
-    :param created_by: The :class:`.User` who has created
-      this object
-
-    :type created_by: :class:`.User`
-
-    :param updated_by: The :class:`.User` who has updated this object lastly.
-      The created_by and updated_by attributes point the same object if this
-      object is just created.
-
-    :param date_created: The date that this object is created.
-
-    :type date_created: :class:`datetime.datetime`
-
-    :param date_updated: The date that this object is updated lastly. For newly
-      created entities this is equal to date_created and the date_updated
-      cannot point a date which is before date_created.
-
-    :type date_updated: :class:`datetime.datetime`
-
-    :param type: The type of the current SimpleEntity. Used across several
-      places in Stalker. Can be None. The default value is None.
-
-    :type type: :class:`.Type`
+        description (str): A string attribute that holds the description of this
+            entity object, it could be an empty string, and it could not again
+            have white spaces at the beginning and at the end of the string, again
+            any given objects will be converted to strings
+        generic_text (str): A string attribute that holds any text based information
+            that should be affiliated with this entity, it could be an empty string,
+            and it could not again have white spaces at the beginning and at the
+            end of the string, again any given objects will be converted to strings.
+        created_by (User): The :class:`.User` who has created this object.
+        updated_by (User): The :class:`.User` who has updated this object lastly.
+            The created_by and updated_by attributes point the same object if this
+            object is just created.
+        date_created (datetime.datetime): The date that this object is created.
+        date_updated (datetime.datetime): The date that this object is updated
+            lastly. For newly created entities this is equal to date_created and
+            the date_updated cannot point a date which is before date_created.
+        type (Type): The type of the current SimpleEntity. Used across several
+            places in Stalker. Can be None. The default value is None.
     """
 
     # auto generate name values
@@ -728,13 +713,13 @@ class Entity(SimpleEntity):
     Two Entities considered equal if they have the same name. It doesn't matter
     if they have different tags or notes.
 
-    :param list tags: A list of :class:`.Tag` objects related to this entity.
-      tags could be an empty list, or when omitted it will be set to an empty
-      list.
-
-    :param list notes: A list of :class:`.Note` instances. Can be an empty
-      list, or when omitted it will be set to an empty list, when set to None
-      it will be converted to an empty list.
+    Args:
+        tags (List[Tag]): A list of :class:`.Tag` objects related to this entity.
+            Tags could be an empty list, or when omitted it will be set to an
+            empty list.
+        notes (List[Note]): A list of :class:`.Note` instances. Can be an empty
+            list, or when omitted it will be set to an empty list, when set to
+            None it will be converted to an empty list.
     """
 
     __auto_name__ = True
