@@ -440,9 +440,9 @@ Variables which can be set in ``config.py`` are as follows:
 
      tjp_task_template = """task {{task.tjp_id}} "{{task.name}}" {
      {% if task.priority != 500 -%}priority {{task.priority}}{%- endif %}
-     {%- if task.depends %}
-         depends {% for depends in task.depends %}
-         {%- if loop.index != 1 %}, {% endif %}{{depends.tjp_abs_id}}
+     {%- if task.depends_on %}
+         depends_on {% for depends_on in task.depends_on %}
+         {%- if loop.index != 1 %}, {% endif %}{{depends_on.tjp_abs_id}}
      {%- endfor -%}
      {%- endif -%}
      {%- if task.is_container -%}

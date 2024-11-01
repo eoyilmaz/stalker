@@ -152,9 +152,9 @@ lighting = Task(name="Lighting", parent=sh001)
 
 comp = Task(name="comp", parent=sh001)
 
-comp.depends = [lighting]
-lighting.depends = [anim]
-anim.depends = [previs, matchmove]
+comp.depends_on = [lighting]
+lighting.depends_on = [anim]
+anim.depends_on = [previs, matchmove]
 
 previs.resources = [me]
 previs.schedule_timing = 10

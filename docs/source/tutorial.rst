@@ -445,9 +445,9 @@ So lets create a couple of tasks for one of the shots we have created before::
 
 Now create the dependencies between them::
 
-  comp.depends = [lighting]
-  lighting.depends = [anim]
-  anim.depends = [previs, matchmove]
+  comp.depends_on = [lighting]
+  lighting.depends_on = [anim]
+  anim.depends_on = [previs, matchmove]
 
 Stalker uses this dependency relation in scheduling these tasks. That is by
 appending "lighting" task as one of the dependencies of comp, Stalker now know
@@ -551,7 +551,7 @@ have created at the beginning of this tutorial::
                                                      # frame.
   DBsession.commit()  # to reflect the change
 
-This should take a little while depending to your projects size (around 1-2
+This should take a little while depending on your projects size (around 1-2
 seconds for this tutorial, but around ~15 min for a project with 15000+ tasks).
 
 When it is finished all of your tasks now have their ``computed_start`` and

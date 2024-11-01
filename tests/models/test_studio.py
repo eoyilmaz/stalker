@@ -200,7 +200,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         parent=data["test_shot1"],
         resources=[data["test_user2"]],
         alternative_resources=[data["test_user1"], data["test_user3"]],
-        depends=[data["test_task4"]],
+        depends_on=[data["test_task4"]],
         schedule_timing=2,
         schedule_unit="d",
     )
@@ -211,7 +211,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         parent=data["test_shot1"],
         resources=[data["test_user2"]],
         alternative_resources=[data["test_user1"], data["test_user3"]],
-        depends=[data["test_task4"], data["test_task5"]],
+        depends_on=[data["test_task4"], data["test_task5"]],
         schedule_timing=3,
         schedule_unit="d",
     )
@@ -222,7 +222,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         parent=data["test_shot1"],
         resources=[data["test_user2"]],
         alternative_resources=[data["test_user1"], data["test_user3"]],
-        depends=[data["test_task6"]],
+        depends_on=[data["test_task6"]],
         schedule_timing=3,
         schedule_unit="d",
     )
@@ -244,7 +244,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         parent=data["test_shot2"],
         resources=[data["test_user3"]],
         alternative_resources=[data["test_user1"], data["test_user2"]],
-        depends=[data["test_task8"]],
+        depends_on=[data["test_task8"]],
         schedule_timing=2,
         schedule_unit="d",
     )
@@ -255,7 +255,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         parent=data["test_shot2"],
         resources=[data["test_user2"]],
         alternative_resources=[data["test_user1"], data["test_user3"]],
-        depends=[data["test_task8"], data["test_task9"]],
+        depends_on=[data["test_task8"], data["test_task9"]],
         schedule_timing=3,
         schedule_unit="d",
     )
@@ -266,7 +266,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         parent=data["test_shot2"],
         resources=[data["test_user2"]],
         alternative_resources=[data["test_user1"], data["test_user3"]],
-        depends=[data["test_task10"]],
+        depends_on=[data["test_task10"]],
         schedule_timing=4,
         schedule_unit="d",
     )
@@ -288,7 +288,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         parent=data["test_shot3"],
         resources=[data["test_user1"]],
         alternative_resources=[data["test_user2"], data["test_user3"]],
-        depends=[data["test_task12"]],
+        depends_on=[data["test_task12"]],
         schedule_timing=2,
         schedule_unit="d",
     )
@@ -299,7 +299,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         parent=data["test_shot3"],
         resources=[data["test_user1"]],
         alternative_resources=[data["test_user2"], data["test_user3"]],
-        depends=[data["test_task12"], data["test_task13"]],
+        depends_on=[data["test_task12"], data["test_task13"]],
         schedule_timing=3,
         schedule_unit="d",
     )
@@ -310,7 +310,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         parent=data["test_shot3"],
         resources=[data["test_user1"]],
         alternative_resources=[data["test_user2"], data["test_user3"]],
-        depends=[data["test_task14"]],
+        depends_on=[data["test_task14"]],
         schedule_timing=4,
         schedule_unit="d",
     )
@@ -332,7 +332,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         parent=data["test_shot4"],
         resources=[data["test_user2"]],
         alternative_resources=[data["test_user1"], data["test_user3"]],
-        depends=[data["test_task16"]],
+        depends_on=[data["test_task16"]],
         schedule_timing=2,
         schedule_unit="d",
     )
@@ -343,7 +343,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         parent=data["test_shot4"],
         resources=[data["test_user2"]],
         alternative_resources=[data["test_user1"], data["test_user3"]],
-        depends=[data["test_task16"], data["test_task17"]],
+        depends_on=[data["test_task16"], data["test_task17"]],
         schedule_timing=3,
         schedule_unit="d",
     )
@@ -354,7 +354,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         parent=data["test_shot4"],
         resources=[data["test_user2"]],
         alternative_resources=[data["test_user1"], data["test_user3"]],
-        depends=[data["test_task18"]],
+        depends_on=[data["test_task18"]],
         schedule_timing=4,
         schedule_unit="d",
     )
@@ -376,7 +376,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         parent=data["test_shot5"],
         resources=[data["test_user3"]],
         alternative_resources=[data["test_user1"], data["test_user2"]],
-        depends=[data["test_task20"]],
+        depends_on=[data["test_task20"]],
         schedule_timing=2,
         schedule_unit="d",
     )
@@ -387,7 +387,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         parent=data["test_shot5"],
         resources=[data["test_user3"]],
         alternative_resources=[data["test_user1"], data["test_user2"]],
-        depends=[data["test_task20"], data["test_task21"]],
+        depends_on=[data["test_task20"], data["test_task21"]],
         schedule_timing=3,
         schedule_unit="d",
     )
@@ -398,7 +398,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         parent=data["test_shot5"],
         resources=[data["test_user3"]],
         alternative_resources=[data["test_user1"], data["test_user2"]],
-        depends=[data["test_task22"]],
+        depends_on=[data["test_task22"]],
         schedule_timing=4,
         schedule_unit="d",
     )
@@ -421,7 +421,7 @@ def setup_studio_db_tests(setup_postgresql_db):
     data["test_task25"] = Task(
         name="Model",
         parent=data["test_asset1"],
-        depends=[data["test_task24"]],
+        depends_on=[data["test_task24"]],
         resources=[data["test_user1"]],
         alternative_resources=[data["test_user2"], data["test_user3"]],
         schedule_timing=15,
@@ -432,7 +432,7 @@ def setup_studio_db_tests(setup_postgresql_db):
     data["test_task26"] = Task(
         name="LookDev",
         parent=data["test_asset1"],
-        depends=[data["test_task25"]],
+        depends_on=[data["test_task25"]],
         resources=[data["test_user1"]],
         alternative_resources=[data["test_user2"], data["test_user3"]],
         schedule_timing=10,
@@ -443,7 +443,7 @@ def setup_studio_db_tests(setup_postgresql_db):
     data["test_task27"] = Task(
         name="Rig",
         parent=data["test_asset1"],
-        depends=[data["test_task25"]],
+        depends_on=[data["test_task25"]],
         resources=[data["test_user1"]],
         alternative_resources=[data["test_user2"], data["test_user3"]],
         schedule_timing=10,
@@ -465,7 +465,7 @@ def setup_studio_db_tests(setup_postgresql_db):
     data["test_task29"] = Task(
         name="Model",
         parent=data["test_asset2"],
-        depends=[data["test_task28"]],
+        depends_on=[data["test_task28"]],
         resources=[data["test_user2"]],
         alternative_resources=[data["test_user1"], data["test_user3"]],
         schedule_timing=15,
@@ -476,7 +476,7 @@ def setup_studio_db_tests(setup_postgresql_db):
     data["test_task30"] = Task(
         name="LookDev",
         parent=data["test_asset2"],
-        depends=[data["test_task29"]],
+        depends_on=[data["test_task29"]],
         resources=[data["test_user2"]],
         alternative_resources=[data["test_user1"], data["test_user3"]],
         schedule_timing=10,
@@ -487,7 +487,7 @@ def setup_studio_db_tests(setup_postgresql_db):
     data["test_task31"] = Task(
         name="Rig",
         parent=data["test_asset2"],
-        depends=[data["test_task29"]],
+        depends_on=[data["test_task29"]],
         resources=[data["test_user2"]],
         alternative_resources=[data["test_user1"], data["test_user3"]],
         schedule_timing=10,
@@ -930,7 +930,7 @@ def test_schedule_will_schedule_the_tasks_with_the_given_scheduler(
     data["test_studio"].end = datetime.datetime(2013, 7, 30, 0, 0, tzinfo=pytz.utc)
 
     # just to be sure that it is not creating any issue on schedule
-    data["test_task25"].task_depends_to[0].dependency_target = "onstart"
+    data["test_task25"].task_depends_on[0].dependency_target = "onstart"
     data["test_task25"].resources = [data["test_user2"]]
 
     data["test_studio"].scheduler = tj_scheduler

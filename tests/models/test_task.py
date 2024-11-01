@@ -158,7 +158,7 @@ def setup_task_tests():
         "schedule_unit": "d",
         "start": datetime.datetime(2013, 4, 8, 13, 0, tzinfo=pytz.utc),
         "end": datetime.datetime(2013, 4, 8, 18, 0, tzinfo=pytz.utc),
-        "depends": [data["test_dependent_task1"], data["test_dependent_task2"]],
+        "depends_on": [data["test_dependent_task1"], data["test_dependent_task2"]],
         "time_logs": [],
         "versions": [],
         "is_milestone": False,
@@ -672,100 +672,100 @@ def test_watchers_attr_clears_itself_from_the_previous_users(setup_task_tests):
 
 
 def test_depends_arg_is_skipped_depends_attr_is_empty_list(setup_task_tests):
-    """ "depends" attr is an empty list if the "depends" arg is skipped."""
+    """ "depends_on" attr is an empty list if the "depends_on" arg is skipped."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
-    kwargs.pop("depends")
+    kwargs.pop("depends_on")
     new_task = Task(**kwargs)
-    assert new_task.depends == []
+    assert new_task.depends_on == []
 
 
 def test_depends_arg_is_none_depends_attr_is_empty_list(setup_task_tests):
-    """ "depends" attr is an empty list if the "depends" arg is None."""
+    """ "depends_on" attr is an empty list if the "depends_on" arg is None."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
-    kwargs["depends"] = None
+    kwargs["depends_on"] = None
     new_task = Task(**kwargs)
-    assert new_task.depends == []
+    assert new_task.depends_on == []
 
 
 def test_depends_arg_is_not_a_list(setup_task_tests):
-    """TypeError raised if the "depends" arg is not a list."""
+    """TypeError raised if the "depends_on" arg is not a list."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
-    kwargs["depends"] = data["test_dependent_task1"]
+    kwargs["depends_on"] = data["test_dependent_task1"]
     with pytest.raises(TypeError) as cm:
         Task(**kwargs)
     assert str(cm.value) == "'Task' object is not iterable"
 
 
 def test_depends_attr_is_not_a_list(setup_task_tests):
-    """TypeError raised if the "depends" attr is set to something else then a list."""
+    """TypeError raised if the "depends_on" attr is set to something else then a list."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
     new_task = Task(**kwargs)
     with pytest.raises(TypeError) as cm:
-        new_task.depends = data["test_dependent_task1"]
+        new_task.depends_on = data["test_dependent_task1"]
     assert str(cm.value) == "'Task' object is not iterable"
 
 
 def test_depends_arg_is_a_list_of_other_objects_than_a_task(setup_task_tests):
-    """AttributeError raised if the "depends" arg is a list of non Task objects."""
+    """AttributeError raised if the "depends_on" arg is a list of non Task objects."""
     data = setup_task_tests
     test_value = ["a", "dependent", "task", 1, 1.2]
     kwargs = copy.copy(data["kwargs"])
-    kwargs["depends"] = test_value
+    kwargs["depends_on"] = test_value
     with pytest.raises(TypeError) as cm:
         Task(**kwargs)
 
     assert str(cm.value) == (
-        "TaskDependency.depends_to can should be and instance of "
+        "TaskDependency.depends_on can should be and instance of "
         "stalker.models.task.Task, not str: 'a'"
     )
 
 
 def test_depends_attr_is_a_list_of_other_objects_than_a_task(setup_task_tests):
-    """AttributeError raised if the "depends" attr is set to a list of non Task."""
+    """AttributeError raised if the "depends_on" attr is set to a list of non Task."""
     data = setup_task_tests
     test_value = ["a", "dependent", "task", 1, 1.2]
     kwargs = copy.copy(data["kwargs"])
     new_task = Task(**kwargs)
     with pytest.raises(TypeError) as cm:
-        new_task.depends = test_value
+        new_task.depends_on = test_value
 
     assert str(cm.value) == (
-        "TaskDependency.depends_to can should be and instance of "
+        "TaskDependency.depends_on can should be and instance of "
         "stalker.models.task.Task, not str: 'a'"
     )
 
 
 def test_depends_attr_doesnt_allow_simple_cyclic_dependencies(setup_task_tests):
-    """CircularDependencyError raised if "depends" in circular dependency."""
+    """CircularDependencyError raised if "depends_on" in circular dependency."""
     data = setup_task_tests
     # create two new tasks A, B
     # make B dependent to A
     # and make A dependent to B
     # and expect a CircularDependencyError
     kwargs = copy.copy(data["kwargs"])
-    kwargs["depends"] = None
+    kwargs["depends_on"] = None
 
     task_a = Task(**kwargs)
     task_b = Task(**kwargs)
 
-    task_b.depends = [task_a]
+    task_b.depends_on = [task_a]
 
     with pytest.raises(CircularDependencyError) as cm:
-        task_a.depends = [task_b]
+        task_a.depends_on = [task_b]
 
     assert (
         str(cm.value)
         == "<Modeling (Task)> (Task) and <Modeling (Task)> (Task) creates "
-        'a circular dependency in their "depends" attribute'
+        'a circular dependency in their "depends_on" attribute'
     )
 
 
 def test_depends_attr_doesnt_allow_cyclic_dependencies(setup_task_tests):
-    """CircularDependencyError raised if "depends" attr has a circular dependency."""
+    """CircularDependencyError raised if "depends_on" attr has a circular dependency."""
     data = setup_task_tests
     # create three new tasks A, B, C
     # make B dependent to A
@@ -773,7 +773,7 @@ def test_depends_attr_doesnt_allow_cyclic_dependencies(setup_task_tests):
     # and make A dependent to C
     # and expect a CircularDependencyError
     kwargs = copy.copy(data["kwargs"])
-    kwargs["depends"] = None
+    kwargs["depends_on"] = None
 
     kwargs["name"] = "taskA"
     task_a = Task(**kwargs)
@@ -784,22 +784,22 @@ def test_depends_attr_doesnt_allow_cyclic_dependencies(setup_task_tests):
     kwargs["name"] = "taskC"
     task_c = Task(**kwargs)
 
-    task_b.depends = [task_a]
-    task_c.depends = [task_b]
+    task_b.depends_on = [task_a]
+    task_c.depends_on = [task_b]
 
     with pytest.raises(CircularDependencyError) as cm:
-        task_a.depends = [task_c]
+        task_a.depends_on = [task_c]
 
     assert (
         str(cm.value) == "<taskC (Task)> (Task) and <taskA (Task)> (Task) creates a "
-        'circular dependency in their "depends" attribute'
+        'circular dependency in their "depends_on" attribute'
     )
 
 
 def test_depends_attr_doesnt_allow_more_deeper_cyclic_dependencies(
     setup_task_tests,
 ):
-    """CircularDependencyError raised if depends attr has deeper circular dependency."""
+    """CircularDependencyError raised if depends_on attr has deeper circular dependency."""
     data = setup_task_tests
     # create new tasks A, B, C, D
     # make B dependent to A
@@ -808,7 +808,7 @@ def test_depends_attr_doesnt_allow_more_deeper_cyclic_dependencies(
     # and make A dependent to D
     # and expect a CircularDependencyError
     kwargs = copy.copy(data["kwargs"])
-    kwargs["depends"] = None
+    kwargs["depends_on"] = None
 
     kwargs["name"] = "taskA"
     task_a = Task(**kwargs)
@@ -822,16 +822,16 @@ def test_depends_attr_doesnt_allow_more_deeper_cyclic_dependencies(
     kwargs["name"] = "taskD"
     task_d = Task(**kwargs)
 
-    task_b.depends = [task_a]
-    task_c.depends = [task_b]
-    task_d.depends = [task_c]
+    task_b.depends_on = [task_a]
+    task_c.depends_on = [task_b]
+    task_d.depends_on = [task_c]
 
     with pytest.raises(CircularDependencyError) as cm:
-        task_a.depends = [task_d]
+        task_a.depends_on = [task_d]
 
     assert (
         str(cm.value) == "<taskD (Task)> (Task) and <taskA (Task)> (Task) creates a "
-        'circular dependency in their "depends" attribute'
+        'circular dependency in their "depends_on" attribute'
     )
 
 
@@ -845,37 +845,37 @@ def test_depends_arg_cyclic_dependency_bug_2(setup_task_tests):
     """
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
-    kwargs["depends"] = None
+    kwargs["depends_on"] = None
     kwargs["name"] = "T1"
     t1 = Task(**kwargs)
 
     kwargs["name"] = "T3"
     t3 = Task(**kwargs)
 
-    t3.depends.append(t1)
+    t3.depends_on.append(t1)
 
     kwargs["name"] = "T2"
     kwargs["parent"] = t1
-    kwargs["depends"] = [t3]
+    kwargs["depends_on"] = [t3]
 
     # the following should generate the CircularDependencyError
     with pytest.raises(CircularDependencyError) as cm:
         Task(**kwargs)
 
     assert (
-        str(cm.value) == "One of the parents of <T2 (Task)> is depending to <T3 (Task)>"
+        str(cm.value) == "One of the parents of <T2 (Task)> is depending on <T3 (Task)>"
     )
 
 
 def test_depends_arg_doesnt_allow_one_of_the_parents_of_the_task(setup_task_tests):
-    """CircularDependencyError raised if "depends" attr has one of the parents."""
+    """CircularDependencyError raised if "depends_on" attr has one of the parents."""
     data = setup_task_tests
     # create two new tasks A, B
     # make A parent to B
     # and make B dependent to A
     # and expect a CircularDependencyError
     kwargs = copy.copy(data["kwargs"])
-    kwargs["depends"] = None
+    kwargs["depends_on"] = None
 
     task_a = Task(**kwargs)
     task_b = Task(**kwargs)
@@ -888,7 +888,7 @@ def test_depends_arg_doesnt_allow_one_of_the_parents_of_the_task(setup_task_test
     assert task_a in task_c.children
 
     with pytest.raises(CircularDependencyError) as cm:
-        task_b.depends = [task_a]
+        task_b.depends_on = [task_a]
 
     assert (
         str(cm.value)
@@ -897,7 +897,7 @@ def test_depends_arg_doesnt_allow_one_of_the_parents_of_the_task(setup_task_test
     )
 
     with pytest.raises(CircularDependencyError) as cm:
-        task_b.depends = [task_c]
+        task_b.depends_on = [task_c]
 
     assert (
         str(cm.value)
@@ -907,33 +907,33 @@ def test_depends_arg_doesnt_allow_one_of_the_parents_of_the_task(setup_task_test
 
 
 def test_depends_arg_is_working_properly(setup_task_tests):
-    """depends arg is working properly."""
+    """depends_on arg is working properly."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
-    kwargs["depends"] = None
+    kwargs["depends_on"] = None
     task_a = Task(**kwargs)
     task_b = Task(**kwargs)
 
-    kwargs["depends"] = [task_a, task_b]
+    kwargs["depends_on"] = [task_a, task_b]
     task_c = Task(**kwargs)
 
-    assert task_a in task_c.depends
-    assert task_b in task_c.depends
-    assert len(task_c.depends) == 2
+    assert task_a in task_c.depends_on
+    assert task_b in task_c.depends_on
+    assert len(task_c.depends_on) == 2
 
 
 def test_depends_attr_is_working_properly(setup_task_tests):
-    """ "depends" attr is working properly."""
+    """ "depends_on" attr is working properly."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
-    kwargs["depends"] = None
+    kwargs["depends_on"] = None
     task_a = Task(**kwargs)
     task_b = Task(**kwargs)
     task_c = Task(**kwargs)
-    task_a.depends = [task_b]
-    task_a.depends.append(task_c)
-    assert task_b in task_a.depends
-    assert task_c in task_a.depends
+    task_a.depends_on = [task_b]
+    task_a.depends_on.append(task_c)
+    assert task_b in task_a.depends_on
+    assert task_c in task_a.depends_on
 
 
 def test_percent_complete_attr_is_read_only(setup_task_tests):
@@ -969,7 +969,7 @@ def test_percent_complete_attr_is_working_properly_for_a_duration_based_leaf_tas
     """
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
-    kwargs["depends"] = []
+    kwargs["depends_on"] = []
     kwargs["schedule_model"] = "duration"
 
     dt = datetime.datetime
@@ -996,7 +996,7 @@ def test_percent_complete_attr_is_working_properly_for_a_duration_based_leaf_tas
     """
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
-    kwargs["depends"] = []
+    kwargs["depends_on"] = []
     kwargs["schedule_model"] = "duration"
 
     dt = datetime.datetime
@@ -1022,7 +1022,7 @@ def test_percent_complete_attr_is_working_properly_for_a_duration_based_leaf_tas
     """
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
-    kwargs["depends"] = []
+    kwargs["depends_on"] = []
     kwargs["schedule_model"] = "duration"
 
     dt = datetime.datetime
@@ -1052,7 +1052,7 @@ def test_percent_complete_attr_is_working_properly_for_a_duration_based_leaf_tas
     """
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
-    kwargs["depends"] = []
+    kwargs["depends_on"] = []
     kwargs["schedule_model"] = "duration"
 
     dt = datetime.datetime
@@ -1078,7 +1078,7 @@ def test_percent_complete_attr_is_working_properly_for_a_duration_based_leaf_tas
     """
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
-    kwargs["depends"] = []
+    kwargs["depends_on"] = []
     kwargs["schedule_model"] = "duration"
 
     dt = datetime.datetime
@@ -1612,11 +1612,11 @@ def test_equality(setup_task_tests):
     task5 = Task(**kwargs)
     task6 = Task(**kwargs)
 
-    task1.depends = [task2]
+    task1.depends_on = [task2]
     task2.parent = task3
     task3.parent = task4
     task5.children = [task6]
-    task6.depends = [task2]
+    task6.depends_on = [task2]
 
     assert not new_task == entity1
     assert new_task == task0
@@ -1654,7 +1654,7 @@ def test_inequality(setup_task_tests):
     task5 = Task(**kwargs)
     task6 = Task(**kwargs)
 
-    task1.depends = [task2]
+    task1.depends_on = [task2]
     task2.parent = task3
     task3.parent = task4
     task5.children = [task6]
@@ -1831,12 +1831,12 @@ def test_parent_arg_do_not_allow_a_dependent_task_to_be_parent(setup_task_tests)
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
 
-    kwargs["depends"] = None
+    kwargs["depends_on"] = None
     task_a = Task(**kwargs)
     task_b = Task(**kwargs)
     task_c = Task(**kwargs)
 
-    kwargs["depends"] = [task_a, task_b, task_c]
+    kwargs["depends_on"] = [task_a, task_b, task_c]
     kwargs["parent"] = task_a
     with pytest.raises(CircularDependencyError) as cm:
         Task(**kwargs)
@@ -1854,13 +1854,13 @@ def test_parent_attr_do_not_allow_a_dependent_task_to_be_parent(
     """CircularDependencyError raised if one of the dependent tasks is set as parent."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
-    kwargs["depends"] = None
+    kwargs["depends_on"] = None
     task_a = Task(**kwargs)
     task_b = Task(**kwargs)
     task_c = Task(**kwargs)
     task_d = Task(**kwargs)
 
-    task_d.depends = [task_a, task_b, task_c]
+    task_d.depends_on = [task_a, task_b, task_c]
 
     with pytest.raises(CircularDependencyError) as cm:
         task_d.parent = task_a
@@ -1868,7 +1868,7 @@ def test_parent_attr_do_not_allow_a_dependent_task_to_be_parent(
     assert (
         str(cm.value)
         == "<Modeling (Task)> (Task) and <Modeling (Task)> (Task) creates "
-        'a circular dependency in their "depends" attribute'
+        'a circular dependency in their "depends_on" attribute'
     )
 
 
@@ -2374,7 +2374,7 @@ def test__check_circular_dependency_causes_recursion(setup_task_tests):
     task3 = Task(
         parent=task1,
         name="Supervising Shootings Part2",
-        depends=[task2],
+        depends_on=[task2],
         start=datetime.datetime(2013, 4, 12, tzinfo=pytz.utc),
         end=datetime.datetime(2013, 4, 16, tzinfo=pytz.utc),
         status_list=data["task_status_list"],
@@ -2383,14 +2383,14 @@ def test__check_circular_dependency_causes_recursion(setup_task_tests):
     task4 = Task(
         parent=task1,
         name="Supervising Shootings Part3",
-        depends=[task3],
+        depends_on=[task3],
         start=datetime.datetime(2013, 4, 12, tzinfo=pytz.utc),
         end=datetime.datetime(2013, 4, 17, tzinfo=pytz.utc),
         status_list=data["task_status_list"],
     )
 
     # move task4 dependency to task2
-    task4.depends = [task2]
+    task4.depends_on = [task2]
 
 
 def test_parent_attr_checks_cycle_on_self(setup_task_tests):
@@ -2646,7 +2646,7 @@ def test_tjp_id_attr_is_working_properly_for_a_leaf_task(setup_task_tests):
     kwargs = copy.copy(data["kwargs"])
     new_task1 = Task(**kwargs)
     kwargs["parent"] = new_task1
-    kwargs["depends"] = None
+    kwargs["depends_on"] = None
     new_task2 = Task(**kwargs)
     assert new_task2.tjp_id == f"Task_{new_task2.id}"
 
@@ -2692,13 +2692,13 @@ def test_to_tjp_attr_is_working_properly_for_a_root_task(setup_task_tests):
     kwargs["schedule_timing"] = 10
     kwargs["schedule_unit"] = "d"
     kwargs["schedule_model"] = "effort"
-    kwargs["depends"] = []
+    kwargs["depends_on"] = []
     kwargs["resources"] = [data["test_user1"], data["test_user2"]]
 
     dep_t1 = Task(**kwargs)
     dep_t2 = Task(**kwargs)
 
-    kwargs["depends"] = [dep_t1, dep_t2]
+    kwargs["depends_on"] = [dep_t1, dep_t2]
     kwargs["name"] = "Modeling"
 
     t1 = Task(**kwargs)
@@ -2753,7 +2753,7 @@ def test_to_tjp_attr_is_working_properly_for_a_leaf_task(setup_task_tests):
     new_task = Task(**kwargs)
 
     kwargs["parent"] = new_task
-    kwargs["depends"] = []
+    kwargs["depends_on"] = []
 
     dep_task1 = Task(**kwargs)
     dep_task2 = Task(**kwargs)
@@ -2762,7 +2762,7 @@ def test_to_tjp_attr_is_working_properly_for_a_leaf_task(setup_task_tests):
     kwargs["schedule_timing"] = 1003
     kwargs["schedule_unit"] = "h"
     kwargs["schedule_model"] = "effort"
-    kwargs["depends"] = [dep_task1, dep_task2]
+    kwargs["depends_on"] = [dep_task1, dep_task2]
 
     kwargs["resources"] = [data["test_user1"], data["test_user2"]]
 
@@ -2823,7 +2823,7 @@ def test_to_tjp_attr_is_working_properly_for_a_leaf_task_with_dependency_details
     kwargs = copy.copy(data["kwargs"])
     new_task = Task(**kwargs)
     kwargs["parent"] = new_task
-    kwargs["depends"] = []
+    kwargs["depends_on"] = []
 
     dep_task1 = Task(**kwargs)
     dep_task2 = Task(**kwargs)
@@ -2831,19 +2831,19 @@ def test_to_tjp_attr_is_working_properly_for_a_leaf_task_with_dependency_details
     kwargs["schedule_timing"] = 1003
     kwargs["schedule_unit"] = "h"
     kwargs["schedule_model"] = "effort"
-    kwargs["depends"] = [dep_task1, dep_task2]
+    kwargs["depends_on"] = [dep_task1, dep_task2]
     kwargs["resources"] = [data["test_user1"], data["test_user2"]]
 
     new_task2 = Task(**kwargs)
 
     # modify dependency attributes
-    tdep1 = new_task2.task_depends_to[0]
+    tdep1 = new_task2.task_depends_on[0]
     tdep1.dependency_target = "onstart"
     tdep1.gap_timing = 2
     tdep1.gap_unit = "d"
     tdep1.gap_model = "length"
 
-    tdep2 = new_task2.task_depends_to[1]
+    tdep2 = new_task2.task_depends_on[1]
     tdep1.dependency_target = "onstart"
     tdep2.gap_timing = 4
     tdep2.gap_unit = "d"
@@ -2904,7 +2904,7 @@ def test_to_tjp_attr_is_working_okay_for_a_leaf_task_with_custom_allocation_stra
     new_task1 = Task(**kwargs)
 
     kwargs["parent"] = new_task1
-    kwargs["depends"] = []
+    kwargs["depends_on"] = []
 
     dep_task1 = Task(**kwargs)
     dep_task2 = Task(**kwargs)
@@ -2913,7 +2913,7 @@ def test_to_tjp_attr_is_working_okay_for_a_leaf_task_with_custom_allocation_stra
     kwargs["schedule_timing"] = 1003
     kwargs["schedule_unit"] = "h"
     kwargs["schedule_model"] = "effort"
-    kwargs["depends"] = [dep_task1, dep_task2]
+    kwargs["depends_on"] = [dep_task1, dep_task2]
     kwargs["resources"] = [data["test_user1"], data["test_user2"]]
     kwargs["alternative_resources"] = [data["test_user3"]]
     kwargs["allocation_strategy"] = "minloaded"
@@ -2921,13 +2921,13 @@ def test_to_tjp_attr_is_working_okay_for_a_leaf_task_with_custom_allocation_stra
     new_task2 = Task(**kwargs)
 
     # modify dependency attributes
-    tdep1 = new_task2.task_depends_to[0]
+    tdep1 = new_task2.task_depends_on[0]
     tdep1.dependency_target = "onstart"
     tdep1.gap_timing = 2
     tdep1.gap_unit = "d"
     tdep1.gap_model = "length"
 
-    tdep2 = new_task2.task_depends_to[1]
+    tdep2 = new_task2.task_depends_on[1]
     tdep1.dependency_target = "onstart"
     tdep2.gap_timing = 4
     tdep2.gap_unit = "d"
@@ -2984,7 +2984,7 @@ def test_to_tjp_attr_is_working_properly_for_a_container_task(setup_task_tests):
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
     kwargs["parent"] = None
-    kwargs["depends"] = []
+    kwargs["depends_on"] = []
 
     t1 = Task(**kwargs)
     kwargs["parent"] = t1
@@ -2996,7 +2996,7 @@ def test_to_tjp_attr_is_working_properly_for_a_container_task(setup_task_tests):
     kwargs["schedule_timing"] = 1
     kwargs["schedule_unit"] = "d"
     kwargs["schedule_model"] = "effort"
-    kwargs["depends"] = [dep_task1, dep_task2]
+    kwargs["depends_on"] = [dep_task1, dep_task2]
 
     kwargs["resources"] = [data["test_user1"], data["test_user2"]]
 
@@ -3095,31 +3095,31 @@ def test_to_tjp_attr_is_working_properly_for_a_container_task_with_dependency(
 
     # kwargs['project'].id = 87987
     kwargs["parent"] = None
-    kwargs["depends"] = []
+    kwargs["depends_on"] = []
     kwargs["name"] = "Random Task Name 1"
 
     t0 = Task(**kwargs)
 
-    kwargs["depends"] = [t0]
+    kwargs["depends_on"] = [t0]
     kwargs["name"] = "Modeling"
 
     t1 = Task(**kwargs)
     t1.priority = 888
 
     kwargs["parent"] = t1
-    kwargs["depends"] = []
+    kwargs["depends_on"] = []
 
     dep_task1 = Task(**kwargs)
-    dep_task1.depends = []
+    dep_task1.depends_on = []
 
     dep_task2 = Task(**kwargs)
-    dep_task1.depends = []
+    dep_task1.depends_on = []
 
     kwargs["name"] = "Modeling"
     kwargs["schedule_timing"] = 1
     kwargs["schedule_unit"] = "d"
     kwargs["schedule_model"] = "effort"
-    kwargs["depends"] = [dep_task1, dep_task2]
+    kwargs["depends_on"] = [dep_task1, dep_task2]
 
     data["test_user1"].name = "Test User 1"
     data["test_user1"].login = "test_user1"
@@ -3227,7 +3227,7 @@ def test_to_tjp_schedule_constraint_is_reflected_in_tjp_file(setup_task_tests):
 
     # kwargs['project'].id = 87987
     kwargs["parent"] = None
-    kwargs["depends"] = []
+    kwargs["depends_on"] = []
 
     t1 = Task(**kwargs)
     kwargs["parent"] = t1
@@ -3238,7 +3238,7 @@ def test_to_tjp_schedule_constraint_is_reflected_in_tjp_file(setup_task_tests):
     kwargs["schedule_timing"] = 1
     kwargs["schedule_unit"] = "d"
     kwargs["schedule_model"] = "effort"
-    kwargs["depends"] = [dep_task1, dep_task2]
+    kwargs["depends_on"] = [dep_task1, dep_task2]
     kwargs["schedule_constraint"] = 3
     kwargs["start"] = datetime.datetime(2013, 5, 3, 14, 0, tzinfo=pytz.utc)
     kwargs["end"] = datetime.datetime(2013, 5, 4, 14, 0, tzinfo=pytz.utc)
@@ -3733,7 +3733,7 @@ def test_status_is_rts_for_a_newly_created_task_without_dependency(setup_task_te
     # try to trick it
     kwargs = copy.copy(data["kwargs"])
     kwargs["status"] = data["status_cmpl"]
-    kwargs.pop("depends")
+    kwargs.pop("depends_on")
     new_task = Task(**kwargs)
     assert new_task.status == data["status_rts"]
 
@@ -3773,12 +3773,12 @@ def test_task_dependency_auto_generates_task_dependency_object(setup_task_tests)
     """TaskDependency instance is automatically created if association proxy is used."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
-    kwargs["depends"] = []
+    kwargs["depends_on"] = []
     new_task = Task(**kwargs)
-    new_task.depends.append(data["test_dependent_task1"])
-    task_depends = new_task.task_depends_to[0]
+    new_task.depends_on.append(data["test_dependent_task1"])
+    task_depends = new_task.task_depends_on[0]
     assert task_depends.task == new_task
-    assert task_depends.depends_to == data["test_dependent_task1"]
+    assert task_depends.depends_on == data["test_dependent_task1"]
 
 
 def test_alternative_resources_arg_is_skipped(setup_task_tests):
@@ -4510,7 +4510,7 @@ def setup_task_db_tests(setup_postgresql_db):
         "schedule_unit": "d",
         "start": datetime.datetime(2013, 4, 8, 13, 0, tzinfo=pytz.utc),
         "end": datetime.datetime(2013, 4, 8, 18, 0, tzinfo=pytz.utc),
-        "depends": [data["test_dependent_task1"], data["test_dependent_task2"]],
+        "depends_on": [data["test_dependent_task1"], data["test_dependent_task2"]],
         "time_logs": [],
         "versions": [],
         "is_milestone": False,
@@ -4606,7 +4606,7 @@ def test_percent_complete_attr_is_not_using_any_time_logs_for_a_duration_task(
     """percent_complete attr doesn't use any time log info if task is duration based."""
     data = setup_task_db_tests
     kwargs = copy.copy(data["kwargs"])
-    kwargs["depends"] = []
+    kwargs["depends_on"] = []
     kwargs["schedule_model"] = "duration"
 
     dt = datetime.datetime
@@ -4633,7 +4633,7 @@ def test_percent_complete_attr_is_working_properly_for_a_container_task(
     """percent complete attr is working properly for a container task."""
     data = setup_task_db_tests
     kwargs = copy.copy(data["kwargs"])
-    kwargs["depends"] = []  # remove dependencies just to make it
+    kwargs["depends_on"] = []  # remove dependencies just to make it
     # easy to create time logs after stalker
     # v0.2.6.1
 
@@ -4684,7 +4684,7 @@ def test_percent_complete_attr_working_okay_for_a_task_w_effort_and_duration_chi
     """percent complete attr is okay with effort and duration based children tasks."""
     data = setup_task_db_tests
     kwargs = copy.copy(data["kwargs"])
-    kwargs["depends"] = []  # remove dependencies just to make it
+    kwargs["depends_on"] = []  # remove dependencies just to make it
     # easy to create time logs after stalker
     # v0.2.6.1
     dt = datetime.datetime
@@ -4755,7 +4755,7 @@ def test_percent_complete_attr_is_okay_for_a_task_with_effort_and_length_based_c
     """percent complete attr is okay with effort and length based children tasks."""
     data = setup_task_db_tests
     kwargs = copy.copy(data["kwargs"])
-    kwargs["depends"] = []  # remove dependencies just to make it
+    kwargs["depends_on"] = []  # remove dependencies just to make it
     # easy to create time logs after stalker
     # v0.2.6.1
     dt = datetime.datetime
@@ -4824,7 +4824,7 @@ def test_percent_complete_attr_is_working_properly_for_a_leaf_task(
     """percent_complete attr is working properly for a leaf task."""
     data = setup_task_db_tests
     kwargs = copy.copy(data["kwargs"])
-    kwargs["depends"] = []
+    kwargs["depends_on"] = []
 
     new_task = Task(**kwargs)
 
@@ -4856,10 +4856,10 @@ def test_time_logs_attr_is_working_properly(setup_task_db_tests):
     """time_log attr is working properly."""
     data = setup_task_db_tests
     kwargs = copy.copy(data["kwargs"])
-    kwargs["depends"] = []
+    kwargs["depends_on"] = []
     new_task1 = Task(**kwargs)
 
-    assert new_task1.depends == []
+    assert new_task1.depends_on == []
 
     now = datetime.datetime.now(pytz.utc)
     dt = datetime.timedelta
@@ -4891,7 +4891,7 @@ def test_time_logs_attr_is_working_properly(setup_task_db_tests):
     )
     # logger.debug('Task.query.get(37): {}'.format(Task.query.get(37)))
 
-    assert new_task2.depends == []
+    assert new_task2.depends_on == []
 
     # check if everything is in place
     assert new_time_log1 in new_task1.time_logs
@@ -4917,7 +4917,7 @@ def test_total_logged_seconds_attr_is_correct_if_the_time_log_of_child_is_change
     """total_logged_seconds attr is correct if time log updated on children."""
     data = setup_task_db_tests
     kwargs = copy.copy(data["kwargs"])
-    kwargs["depends"] = []
+    kwargs["depends_on"] = []
     _ = Task(**kwargs)
 
     dt = datetime.datetime
@@ -4946,9 +4946,9 @@ def test_total_logged_seconds_is_the_sum_of_all_time_logs(setup_task_db_tests):
     """total_logged_seconds is the sum of all time_logs in hours."""
     data = setup_task_db_tests
     kwargs = copy.copy(data["kwargs"])
-    kwargs["depends"] = []
+    kwargs["depends_on"] = []
     new_task = Task(**kwargs)
-    new_task.depends = []
+    new_task.depends_on = []
     dt = datetime.datetime
     td = datetime.timedelta
     now = dt.now(pytz.utc)
@@ -4977,7 +4977,7 @@ def test_total_logged_seconds_is_the_sum_of_all_time_logs_of_children(
     """total_logged_seconds is the sum of all time_logs of the child tasks."""
     data = setup_task_db_tests
     kwargs = copy.copy(data["kwargs"])
-    kwargs["depends"] = []
+    kwargs["depends_on"] = []
     new_task = Task(**kwargs)
     dt = datetime.datetime
     td = datetime.timedelta
@@ -5009,7 +5009,7 @@ def test_total_logged_seconds_is_the_sum_of_all_time_logs_of_children_deeper(
     """total_logged_seconds is the sum of all time_logs of the children (deeper)."""
     data = setup_task_db_tests
     kwargs = copy.copy(data["kwargs"])
-    kwargs["depends"] = []
+    kwargs["depends_on"] = []
 
     new_task = Task(**kwargs)
 
@@ -5078,7 +5078,7 @@ def test_remaining_seconds_is_working_properly(setup_task_db_tests):
     """remaining hours is working properly."""
     data = setup_task_db_tests
     kwargs = copy.copy(data["kwargs"])
-    kwargs["depends"] = []
+    kwargs["depends_on"] = []
 
     dt = datetime.datetime
     td = datetime.timedelta

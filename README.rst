@@ -203,7 +203,7 @@ Create Assets, Shots and other Tasks:
     rigging = Task(
         name='Rig',
         parent=character1,
-        depends=[model],  # For project management, define that Rig can not start
+        depends_on=[model],  # For project management, define that Rig can not start
                           # before Model ends.
     )
 
@@ -228,7 +228,7 @@ Create Assets, Shots and other Tasks:
     lighting = Task(
         name='Lighting',
         parent=shot,
-        depends=[animation], # Lighting can not start before Animation ends,
+        depends_on=[animation], # Lighting can not start before Animation ends,
         schedule_timing=1,
         schedule_unit='d',  # The task expected to take 1 day to complete
         resources=[me]

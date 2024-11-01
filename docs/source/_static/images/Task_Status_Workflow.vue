@@ -39,7 +39,7 @@
         <URIString>http://vue.tufts.edu/rdf/resource/400bcd2c39fad37c2b0b7e54864540f3</URIString>
         <shape xsi:type="ellipse"/>
     </child>
-    <child ID="8" label="task.depends[*].approve&#xa;or no dependency"
+    <child ID="8" label="task.depends_on[*].approve&#xa;or no dependency"
         layerID="1" created="1388347803614" x="533.74115" y="70.56363"
         width="121.582825" height="63.072296" strokeWidth="3.0"
         strokeStyle="4" autoSized="false" controlCount="1"
@@ -264,7 +264,7 @@
         <URIString>http://vue.tufts.edu/rdf/resource/a1b6ced77f0000013b244feaa9ee9d7b</URIString>
         <shape xsi:type="ellipse"/>
     </child>
-    <child ID="53" label="task.depends[*].request_revision" layerID="1"
+    <child ID="53" label="task.depends_on[*].request_revision" layerID="1"
         created="1389987183648" x="1076.3951" y="244.95898"
         width="190.66138" height="172.44278" strokeWidth="3.0"
         strokeStyle="4" autoSized="false" controlCount="1"
@@ -279,7 +279,7 @@
         <ID2 xsi:type="node">48</ID2>
         <ctrlPoint0 x="1220.275" y="373.5583" xsi:type="point"/>
     </child>
-    <child ID="54" label="task.depends[*].approve" layerID="1"
+    <child ID="54" label="task.depends_on[*].approve" layerID="1"
         created="1389987236672" x="857.20386" y="293.70032"
         width="152.99811" height="126.148285" strokeWidth="3.0"
         strokeStyle="4" autoSized="false" controlCount="1"
@@ -294,7 +294,7 @@
         <ID2 xsi:type="node">13</ID2>
         <ctrlPoint0 x="827.44476" y="378.53494" xsi:type="point"/>
     </child>
-    <child ID="59" label="task.depends[*].request_revision" layerID="1"
+    <child ID="59" label="task.depends_on[*].request_revision" layerID="1"
         created="1390041848192" x="863.7536" y="243.94739" width="160.0"
         height="158.71149" strokeWidth="3.0" strokeStyle="4"
         autoSized="false" controlCount="1" arrowState="2" xsi:type="link">
@@ -349,7 +349,7 @@
         <ctrlPoint0 x="1201.5228" y="470.24258" xsi:type="point"/>
         <ctrlPoint1 x="1091.9907" y="516.3417" xsi:type="point"/>
     </child>
-    <child ID="56" label="task.depends[*].request_revision" layerID="1"
+    <child ID="56" label="task.depends_on[*].request_revision" layerID="1"
         created="1390041758943" x="468.4242" y="93.67566" width="160.0"
         height="64.96039" strokeWidth="3.0" strokeStyle="4"
         autoSized="false" controlCount="1" arrowState="2" xsi:type="link">
@@ -635,7 +635,7 @@
         <URIString>http://vue.tufts.edu/rdf/resource/0447d21ec0a8012b17e4445fe5262599</URIString>
         <shape xsi:type="ellipse"/>
     </child>
-    <child ID="136" label="task.depends[*].approve&#xa;or no dependency"
+    <child ID="136" label="task.depends_on[*].approve&#xa;or no dependency"
         layerID="1" created="1433612001033" x="1638.491" y="88.07114"
         width="121.58301" height="63.07242" strokeWidth="3.0"
         strokeStyle="4" autoSized="false" controlCount="1"
@@ -860,7 +860,7 @@
         <URIString>http://vue.tufts.edu/rdf/resource/0447d22ac0a8012b17e4445f8ac663b8</URIString>
         <shape xsi:type="ellipse"/>
     </child>
-    <child ID="154" label="task.depends[*].request_revision" layerID="1"
+    <child ID="154" label="task.depends_on[*].request_revision" layerID="1"
         created="1433612001033" x="2181.1453" y="262.4668"
         width="190.66113" height="172.44257" strokeWidth="3.0"
         strokeStyle="4" autoSized="false" controlCount="1"
@@ -875,7 +875,7 @@
         <ID2 xsi:type="node">153</ID2>
         <ctrlPoint0 x="2325.025" y="391.06586" xsi:type="point"/>
     </child>
-    <child ID="155" label="task.depends[*].approve" layerID="1"
+    <child ID="155" label="task.depends_on[*].approve" layerID="1"
         created="1433612001033" x="1961.9539" y="311.20795"
         width="152.9978" height="126.148224" strokeWidth="3.0"
         strokeStyle="4" autoSized="false" controlCount="1"
@@ -890,7 +890,7 @@
         <ID2 xsi:type="node">140</ID2>
         <ctrlPoint0 x="1932.1948" y="396.0425" xsi:type="point"/>
     </child>
-    <child ID="156" label="task.depends[*].request_revision" layerID="1"
+    <child ID="156" label="task.depends_on[*].request_revision" layerID="1"
         created="1433612001033" x="1968.5037" y="261.4546" width="160.0"
         height="158.71179" strokeWidth="3.0" strokeStyle="4"
         autoSized="false" controlCount="1" arrowState="2" xsi:type="link">
@@ -945,7 +945,7 @@
         <ctrlPoint0 x="2306.273" y="487.75015" xsi:type="point"/>
         <ctrlPoint1 x="2196.7407" y="533.84924" xsi:type="point"/>
     </child>
-    <child ID="160" label="task.depends[*].request_revision" layerID="1"
+    <child ID="160" label="task.depends_on[*].request_revision" layerID="1"
         created="1433612001033" x="1573.1741" y="111.183105"
         width="160.0" height="64.960526" strokeWidth="3.0"
         strokeStyle="4" autoSized="false" controlCount="1"

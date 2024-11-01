@@ -139,7 +139,7 @@ kwargs = {
     "schedule_unit": "d",
     "start": datetime.datetime(2013, 4, 8, 13, 0, tzinfo=pytz.utc),
     "end": datetime.datetime(2013, 4, 8, 18, 0, tzinfo=pytz.utc),
-    "depends": [test_dependent_task1, test_dependent_task2],
+    "depends_on": [test_dependent_task1, test_dependent_task2],
     "time_logs": [],
     "versions": [],
     "is_milestone": False,
@@ -166,7 +166,7 @@ DBSession.add_all(
 DBSession.commit()
 
 
-kwargs["depends"] = []
+kwargs["depends_on"] = []
 
 dt = datetime.datetime
 td = datetime.timedelta

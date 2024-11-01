@@ -320,10 +320,10 @@ task {{task.tjp_id}} "{{task.tjp_id}}" {
         priority {{task.priority}}
     {%- endif %}
 
-    {% if task.task_depends_to %}
+    {% if task.task_depends_on %}
         depends {# #}
-        {%- for depends in task.task_depends_to %}
-            {%- if loop.index != 1 %}, {% endif %}{{depends.to_tjp}}
+        {%- for depends_on in task.task_depends_on %}
+            {%- if loop.index != 1 %}, {% endif %}{{depends_on.to_tjp}}
         {%- endfor %}
     {%- endif -%}
 
@@ -369,7 +369,7 @@ task {{task.tjp_id}} "{{task.tjp_id}}" {
 
 }
 """,  # noqa: B950
-        tjp_task_dependency_template="""{{depends_to.tjp_abs_id}} { {{- dependency_target}}{%if gap_timing %} gap{{gap_model}} {{gap_timing}}{{gap_unit -}}{%endif -%}}""",  # noqa: B950
+        tjp_task_dependency_template="""{{depends_on.tjp_abs_id}} { {{- dependency_target}}{%if gap_timing %} gap{{gap_model}} {{gap_timing}}{{gap_unit -}}{%endif -%}}""",  # noqa: B950
         tjp_department_template="""
 resource {{department.tjp_id}} "{{department.tjp_id}}" {
 {% for resource in department.users %}

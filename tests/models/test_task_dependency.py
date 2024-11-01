@@ -65,7 +65,7 @@ def setup_task_dependency_db_test(setup_postgresql_db):
 
     data["kwargs"] = {
         "task": data["test_task1"],
-        "depends_to": data["test_task2"],
+        "depends_on": data["test_task2"],
         "dependency_target": "onend",
         "gap_timing": 0,
         "gap_unit": "h",
@@ -126,24 +126,24 @@ def test_task_attribute_is_not_a_task_instance(setup_task_dependency_db_test):
 def test_task_argument_is_working_properly(setup_task_dependency_db_test):
     """task argument value is correctly passed to task attribute."""
     data = setup_task_dependency_db_test
-    data["test_task1"].depends = []
+    data["test_task1"].depends_on = []
     new_dep = TaskDependency(**data["kwargs"])
     assert new_dep.task == data["test_task1"]
 
 
-def test_depends_to_argument_is_skipped(setup_task_dependency_db_test):
-    """no error raised if the depends_to argument is skipped."""
+def test_depends_on_argument_is_skipped(setup_task_dependency_db_test):
+    """no error raised if the depends_on argument is skipped."""
     data = setup_task_dependency_db_test
-    data["kwargs"].pop("depends_to")
+    data["kwargs"].pop("depends_on")
     TaskDependency(**data["kwargs"])
 
 
-def test_depends_to_argument_is_skipped_raises_error_on_commit(
+def test_depends_on_argument_is_skipped_raises_error_on_commit(
     setup_task_dependency_db_test,
 ):
-    """IntegrityError raised if depends_to arg is skipped and session is committed."""
+    """IntegrityError raised if depends_on arg is skipped and session is committed."""
     data = setup_task_dependency_db_test
-    data["kwargs"].pop("depends_to")
+    data["kwargs"].pop("depends_on")
     new_dependency = TaskDependency(**data["kwargs"])
     DBSession.add(new_dependency)
     with pytest.raises(IntegrityError) as cm:
@@ -151,43 +151,43 @@ def test_depends_to_argument_is_skipped_raises_error_on_commit(
             DBSession.commit()
 
     assert (
-        '(psycopg2.errors.NotNullViolation) null value in column "depends_to_id" of '
+        '(psycopg2.errors.NotNullViolation) null value in column "depends_on_id" of '
         'relation "Task_Dependencies" violates not-null constraint' in str(cm.value)
     )
 
 
-def test_depends_to_argument_is_not_a_task_instance(setup_task_dependency_db_test):
-    """TypeError raised if the depends_to arg is not a Task instance."""
+def test_depends_on_argument_is_not_a_task_instance(setup_task_dependency_db_test):
+    """TypeError raised if the depends_on arg is not a Task instance."""
     data = setup_task_dependency_db_test
-    data["kwargs"]["depends_to"] = "Not a Task instance"
+    data["kwargs"]["depends_on"] = "Not a Task instance"
     with pytest.raises(TypeError) as cm:
         TaskDependency(**data["kwargs"])
 
     assert (
-        str(cm.value) == "TaskDependency.depends_to can should be and instance of "
+        str(cm.value) == "TaskDependency.depends_on can should be and instance of "
         "stalker.models.task.Task, not str: 'Not a Task instance'"
     )
 
 
-def test_depends_to_attribute_is_not_a_task_instance(setup_task_dependency_db_test):
-    """TypeError raised if depends_to attr is not a Task instance."""
+def test_depends_on_attribute_is_not_a_task_instance(setup_task_dependency_db_test):
+    """TypeError raised if depends_on attr is not a Task instance."""
     data = setup_task_dependency_db_test
     new_dep = TaskDependency(**data["kwargs"])
     with pytest.raises(TypeError) as cm:
-        new_dep.depends_to = "not a task"
+        new_dep.depends_on = "not a task"
 
     assert (
-        str(cm.value) == "TaskDependency.depends_to can should be and instance of "
+        str(cm.value) == "TaskDependency.depends_on can should be and instance of "
         "stalker.models.task.Task, not str: 'not a task'"
     )
 
 
-def test_depends_to_argument_is_working_properly(setup_task_dependency_db_test):
-    """depends_to argument value is correctly passed to depends_to attribute."""
+def test_depends_on_argument_is_working_properly(setup_task_dependency_db_test):
+    """depends_on argument value is correctly passed to depends_on attribute."""
     data = setup_task_dependency_db_test
-    data["test_task1"].depends = []
+    data["test_task1"].depends_on = []
     new_dep = TaskDependency(**data["kwargs"])
-    assert new_dep.depends_to == data["test_task2"]
+    assert new_dep.depends_on == data["test_task2"]
 
 
 def test_gap_timing_argument_is_skipped(setup_task_dependency_db_test):

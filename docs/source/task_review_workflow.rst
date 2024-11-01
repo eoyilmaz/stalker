@@ -28,7 +28,7 @@ to the task.
 A :class:`.Review` instance holds the status of the review (starting from NEW),
 and if some revision is requested it will also hold the description of the
 revision, the extra time that the reviewer has given for the revision etc. and
-the desired states of all the tasks depending to the reviewed tasks.
+the desired states of all the tasks depending on the reviewed tasks.
 
 Lets think that a particular Task has only one responsible, and one resource.
 Lets assume the resource has decided to request a review. When it is happened
@@ -53,7 +53,7 @@ Depending Tasks
 ===============
 
 If a revision request has been made to a completed (CMPL) task with other tasks
-depending to it, there are a couple of different scenarios to follow.
+depending on it, there are a couple of different scenarios to follow.
 
 Scenario A: There are no dependent tasks to the revised task or none of the
 dependent tasks have started yet (all in RTS status). Then according to the
@@ -89,7 +89,7 @@ follow the following table:
 
 When the revised task approved again and set its status to CMPL, then the
 dependent task statuses will be set to their normal statuses again. The
-following table shows the statuses that the tasks will have depending to their
+following table shows the statuses that the tasks will have depending on their
 time_logs attribute after the depending task is set to CMPL:
 
   +-----------------+------+------+-----+----+------+
