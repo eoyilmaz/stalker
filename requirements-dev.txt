@@ -11,6 +11,7 @@ flake8-pep3101
 flake8-spellcheck
 flake8-pyproject
 furo
+mypy
 pyglet
 pytest
 pytest-cov
