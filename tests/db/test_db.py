@@ -772,14 +772,14 @@ def test_initialization_of_alembic_version_table(setup_postgresql_db):
     """db.init() will also create a table called alembic_version."""
     sql_query = 'select version_num from "alembic_version"'
     version_num = DBSession.connection().execute(sql_query).fetchone()[0]
-    assert "bf67e6a234b4" == version_num
+    assert alembic_version == version_num
 
 
 def test_initialization_of_alembic_version_table_multiple_times(setup_postgresql_db):
     """db.create_alembic_table() will handle initializing the table multiple times."""
     sql_query = 'select version_num from "alembic_version"'
     version_num = DBSession.connection().execute(sql_query).fetchone()[0]
-    assert "bf67e6a234b4" == version_num
+    assert alembic_version == version_num
 
     DBSession.remove()
     stalker.db.setup.init()
@@ -1618,7 +1618,7 @@ def test_persistence_of_timelog(setup_postgresql_db):
         code="CR",
         linux_path="/mnt/shows",
         windows_path="S:/",
-        osx_path="/mnt/shows",
+        macos_path="/mnt/shows",
     )
     projtype = Type(
         name="Commercial Project", code="comm", target_entity_type="Project"
@@ -1669,7 +1669,7 @@ def test_persistence_of_timelog_raw_sql(setup_postgresql_db):
         code="CR",
         linux_path="/mnt/shows",
         windows_path="S:/",
-        osx_path="/mnt/shows",
+        macos_path="/mnt/shows",
     )
     projtype = Type(
         name="Commercial Project", code="comm", target_entity_type="Project"
@@ -2236,7 +2236,7 @@ def test_persistence_of_entitygroup(setup_postgresql_db):
         code="TR",
         linux_path="/mnt/M/JOBs",
         windows_path="M:/JOBs",
-        osx_path="/Users/Shared/Servers/M",
+        macos_path="/Users/Shared/Servers/M",
     )
     project1 = Project(
         name="Tests Project",
@@ -2730,7 +2730,7 @@ def test_persistence_of_project(setup_postgresql_db):
         code="CR",
         linux_path="/mnt/M/Projects",
         windows_path="M:/Projects",
-        osx_path="/mnt/M/Projects",
+        macos_path="/mnt/M/Projects",
     )
 
     # create data for mixins
@@ -2912,7 +2912,7 @@ def test_persistence_of_repository(setup_postgresql_db):
         "code": "MR",
         "description": "test repository",
         "linux_path": "/mnt/M",
-        "osx_path": "/mnt/M",
+        "macos_path": "/Volumes/M",
         "windows_path": "M:/",
     }
 
@@ -2933,7 +2933,7 @@ def test_persistence_of_repository(setup_postgresql_db):
     name = repo.name
     nice_name = repo.nice_name
     notes = repo.notes
-    osx_path = repo.osx_path
+    macos_path = repo.macos_path
     path = repo.path
     tags = repo.tags
     updated_by = repo.updated_by
@@ -2956,7 +2956,7 @@ def test_persistence_of_repository(setup_postgresql_db):
     assert repo_db.name == name
     assert repo_db.nice_name == nice_name
     assert repo_db.notes == notes
-    assert repo_db.osx_path == osx_path
+    assert repo_db.macos_path == macos_path
     assert repo_db.path == path
     assert repo_db.tags == tags
     assert repo_db.updated_by == updated_by
@@ -3660,7 +3660,7 @@ def test_persistence_of_task(setup_postgresql_db):
         code="TR",
         linux_path="/mnt/M/JOBs",
         windows_path="M:/JOBs",
-        osx_path="/Users/Shared/Servers/M",
+        macos_path="/Users/Shared/Servers/M",
     )
     project1 = Project(
         name="Tests Project",
@@ -3898,7 +3898,7 @@ def test_persistence_of_review(setup_postgresql_db):
         code="TR",
         linux_path="/some/random/path",
         windows_path="/some/random/path",
-        osx_path="/some/random/path",
+        macos_path="/some/random/path",
     )
     user1 = User(
         name="User1",
@@ -4372,7 +4372,7 @@ def test_persistence_of_version(setup_postgresql_db):
             code="FP",
             windows_path="M:/",
             linux_path="/mnt/M/",
-            osx_path="/Users/Volumes/M/",
+            macos_path="/Users/Volumes/M/",
         ),
     )
     DBSession.add(test_project)

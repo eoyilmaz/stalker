@@ -23,7 +23,7 @@ installation directory::
   # for Windows
   ..\Scripts\alembic.exe upgrade head
 
-  # for Linux or OSX
+  # for Linux or macOS
   ../bin/alembic upgrade head
 
   # this should output something like that:

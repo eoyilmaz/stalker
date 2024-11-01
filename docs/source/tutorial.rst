@@ -42,7 +42,7 @@ database::
 
 or::
 
-  db.setup({"sqlalchemy.url": "sqlite:////home/ozgur/studio.db"}) # under linux or osx
+  db.setup({"sqlalchemy.url": "sqlite:////home/ozgur/studio.db"}) # under linux or macos
 
 .. ::
    This command will do the following:
@@ -519,7 +519,7 @@ task.
    On a linux system this should be fairly straight forward, just install
    `TaskJuggler`_ and stalker will be able to use it.
 
-   But for other OSes, like OSX and Windows, you should create an environment
+   But for other OSes, like macOS and Windows, you should create an environment
    variable called ``STALKER_PATH`` and then place a file called ``config.py``
    inside the folder that this path is pointing at. And then add the following
    to this ``config.py``::
@@ -527,7 +527,7 @@ task.
      tj_command = 'C:\\Path\\to\\tj3.exe'
 
    The default value for ``tj_command`` config variable is
-   ``/usr/local/bin/tj3``, so if on a Linux or OSX system when you run::
+   ``/usr/local/bin/tj3``, so if on a Linux or macOS system when you run::
 
      which tj3
 
@@ -631,7 +631,7 @@ create our projects into. Lets enter the paths for all the major operating
 systems::
 
   commercial_repo.linux_path   = "/mnt/M/commercials"
-  commercial_repo.osx_path     = "/Volumes/M/commercials"
+  commercial_repo.macos_path   = "/Volumes/M/commercials"
   commercial_repo.windows_path = "M:/commercials"  # you can use reverse
                                                    # slashes (\\) if you want
 
@@ -645,7 +645,7 @@ correct answer according to your operating system::
   # in Linux and variants:
   # /mnt/M/commercials
   #
-  # and in OSX:
+  # and in macOS:
   # /Volumes/M/commercials
 
 .. note::

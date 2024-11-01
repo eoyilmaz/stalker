@@ -221,7 +221,7 @@ Here is the code::
       name='Commercials Repo',
       linux_path='/mnt/T/Commercials/',
       windows_path='T:/Commercials/',
-      osx_path='/Volumes/T/Commercials/'
+      macos_path='/Volumes/T/Commercials/'
   )
 
   commercial_structure = Structure(

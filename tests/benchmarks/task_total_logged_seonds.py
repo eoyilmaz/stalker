@@ -86,7 +86,7 @@ test_repository = Repository(
     type=test_repository_type,
     linux_path="/mnt/T/",
     windows_path="T:/",
-    osx_path="/Volumes/T/",
+    macos_path="/Volumes/T/",
 )
 
 

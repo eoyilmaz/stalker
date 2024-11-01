@@ -212,7 +212,7 @@ print(comp.to_tjp)
 print(new_project.to_tjp)
 
 commercial_repo.linux_path = "/mnt/M/commercials"
-commercial_repo.osx_path = "/Volumes/M/commercials"
+commercial_repo.macos_path = "/Volumes/M/commercials"
 commercial_repo.windows_path = "M:/commercials"  # you can use reverse slashes
 # (\\) if you want
 
@@ -223,7 +223,7 @@ print(commercial_repo.path)
 # in Linux and variants:
 # /mnt/M/commercials
 #
-# and in OSX:
+# and in macOS:
 # /Volumes/M/commercials
 
 
