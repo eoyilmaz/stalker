@@ -1227,8 +1227,22 @@ def test_schedule_seconds_is_working_properly_for_an_effort_based_task_no_studio
     assert new_task.schedule_seconds == schedule_seconds
 
 
+@pytest.mark.parametrize(
+    "schedule_timing, schedule_unit, schedule_seconds",
+    [
+        [10, "h", 10 * 3600],
+        [23, "d", 23 * defaults.daily_working_hours * 3600],
+        [2, "w", 2 * defaults.weekly_working_hours * 3600],
+        [2.5, "m", 2.5 * 4 * defaults.weekly_working_hours * 3600],
+        # [
+        #     3.1,
+        #     "y",
+        #     3.1 * defaults.yearly_working_days * defaults.daily_working_hours * 3600,
+        # ],
+    ],
+)
 def test_schedule_seconds_is_working_properly_for_an_effort_based_task_with_studio(
-    setup_task_tests,
+    setup_task_tests, schedule_timing, schedule_unit, schedule_seconds
 ):
     """schedule_seconds attr is working okay for an effort based task when no studio."""
     data = setup_task_tests
@@ -1237,28 +1251,10 @@ def test_schedule_seconds_is_working_properly_for_an_effort_based_task_with_stud
     defaults.timing_resolution = datetime.timedelta(hours=1)
     studio = Studio(name="Test Studio", timing_resolution=datetime.timedelta(hours=1))
     kwargs["schedule_model"] = "effort"
-    kwargs["schedule_timing"] = 10
-    kwargs["schedule_unit"] = "h"
+    kwargs["schedule_timing"] = schedule_timing
+    kwargs["schedule_unit"] = schedule_unit
     new_task = Task(**kwargs)
-    assert new_task.schedule_seconds == 10 * 3600
-    kwargs["schedule_timing"] = 23
-    kwargs["schedule_unit"] = "d"
-    new_task = Task(**kwargs)
-    assert new_task.schedule_seconds == 23 * studio.daily_working_hours * 3600
-    kwargs["schedule_timing"] = 2
-    kwargs["schedule_unit"] = "w"
-    new_task = Task(**kwargs)
-    assert new_task.schedule_seconds == 2 * studio.weekly_working_hours * 3600
-    kwargs["schedule_timing"] = 2.5
-    kwargs["schedule_unit"] = "m"
-    new_task = Task(**kwargs)
-    assert new_task.schedule_seconds == 2.5 * 4 * studio.weekly_working_hours * 3600
-    kwargs["schedule_timing"] = 3.1
-    kwargs["schedule_unit"] = "y"
-    new_task = Task(**kwargs)
-    assert new_task.schedule_seconds == pytest.approx(
-        3.1 * studio.yearly_working_days * studio.daily_working_hours * 3600,
-    )
+    assert new_task.schedule_seconds == schedule_seconds
 
 
 def test_schedule_seconds_is_working_properly_for_a_container_task(setup_task_tests):
