@@ -122,10 +122,15 @@ def test_target_entity_type_attribute_is_read_only(setup_type_tests):
     with pytest.raises(AttributeError) as cm:
         data["test_type"].target_entity_type = "Asset"
 
-    error_message = (
-        "can't set attribute"
-        if sys.version_info.minor < 11
-        else "property '_target_entity_type_getter' of 'Type' object has no setter"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute",
+        11: "property of 'Type' object has no setter",
+        12: "property of 'Type' object has no setter",
+    }.get(
+        sys.version_info.minor,
+        "property '_target_entity_type_getter' of 'Type' object has no setter"
     )
 
     assert str(cm.value) == error_message

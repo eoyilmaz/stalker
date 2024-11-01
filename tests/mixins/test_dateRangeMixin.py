@@ -501,13 +501,14 @@ def test_computed_duration_is_read_only(date_range_mixin_tester):
     with pytest.raises(AttributeError) as cm:
         new_foo_obj.computed_duration = datetime.timedelta(10)
 
-    error_message = (
-        "can't set attribute 'computed_duration'"
-        if sys.version_info.minor < 11
-        else (
-            "property 'computed_duration' of 'DateRangeMixFooMixedInClass' "
-            "object has no setter"
-        )
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'computed_duration'",
+    }.get(
+        sys.version_info.minor,
+        "property 'computed_duration' of 'DateRangeMixFooMixedInClass' "
+        "object has no setter"
     )
 
     assert str(cm.value) == error_message
@@ -520,13 +521,14 @@ def test_total_seconds_attribute_is_read_only(date_range_mixin_tester):
     with pytest.raises(AttributeError) as cm:
         new_foo_obj.total_seconds = 234234
 
-    error_message = (
-        "can't set attribute 'total_seconds'"
-        if sys.version_info.minor < 11
-        else (
-            "property 'total_seconds' of 'DateRangeMixFooMixedInClass' "
-            "object has no setter"
-        )
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'total_seconds'",
+    }.get(
+        sys.version_info.minor,
+        "property 'total_seconds' of 'DateRangeMixFooMixedInClass' "
+        "object has no setter"
     )
 
     assert str(cm.value) == error_message
@@ -548,13 +550,14 @@ def test_computed_total_seconds_attribute_is_read_only(date_range_mixin_tester):
     with pytest.raises(AttributeError) as cm:
         new_foo_obj.computed_total_seconds = 234234
 
-    error_message = (
-        "can't set attribute 'computed_total_seconds'"
-        if sys.version_info.minor < 11
-        else (
-            "property 'computed_total_seconds' of 'DateRangeMixFooMixedInClass' "
-            "object has no setter"
-        )
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'computed_total_seconds'",
+    }.get(
+        sys.version_info.minor,
+        "property 'computed_total_seconds' of 'DateRangeMixFooMixedInClass' "
+        "object has no setter"
     )
 
     assert str(cm.value) == error_message

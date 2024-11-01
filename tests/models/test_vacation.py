@@ -133,10 +133,13 @@ def test_to_tjp_attribute_is_a_read_only_property(setup_vacation_tests):
     with pytest.raises(AttributeError) as cm:
         data["test_vacation"].to_tjp = "some value"
 
-    error_message = (
-        "can't set attribute 'to_tjp'"
-        if sys.version_info.minor < 11
-        else "property 'to_tjp' of 'Vacation' object has no setter"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'to_tjp'",
+    }.get(
+        sys.version_info.minor,
+        "property 'to_tjp' of 'Vacation' object has no setter"
     )
 
     assert str(cm.value) == error_message

@@ -568,10 +568,13 @@ def test_sequences_attribute_is_read_only(setup_project_db_test):
     with pytest.raises(AttributeError) as cm:
         data["test_project"].sequences = ["some non sequence related data"]
 
-    error_message = (
-        "can't set attribute 'sequences'"
-        if sys.version_info.minor < 11
-        else "property 'sequences' of 'Project' object has no setter"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'sequences'",
+    }.get(
+        sys.version_info.minor,
+        "property 'sequences' of 'Project' object has no setter"
     )
 
     assert str(cm.value) == error_message
@@ -1365,10 +1368,13 @@ def test_is_active_is_read_only(setup_project_db_test):
     with pytest.raises(AttributeError) as cm:
         data["test_project"].is_active = True
 
-    error_message = (
-        "can't set attribute 'is_active'"
-        if sys.version_info.minor < 11
-        else "property 'is_active' of 'Project' object has no setter"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'is_active'",
+    }.get(
+        sys.version_info.minor,
+        "property 'is_active' of 'Project' object has no setter"
     )
 
     assert str(cm.value) == error_message
@@ -1389,10 +1395,13 @@ def test_total_logged_seconds_attribute_is_read_only(setup_project_db_test):
     with pytest.raises(AttributeError) as cm:
         data["test_project"].total_logged_seconds = 32.3
 
-    error_message = (
-        "can't set attribute 'total_logged_seconds'"
-        if sys.version_info.minor < 11
-        else "property 'total_logged_seconds' of 'Project' object has no setter"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'total_logged_seconds'",
+    }.get(
+        sys.version_info.minor,
+        "property 'total_logged_seconds' of 'Project' object has no setter"
     )
 
     assert str(cm.value) == error_message
@@ -1459,10 +1468,13 @@ def test_schedule_seconds_attribute_is_read_only(setup_project_db_test):
     with pytest.raises(AttributeError) as cm:
         data["test_project"].schedule_seconds = 3
 
-    error_message = (
-        "can't set attribute 'schedule_seconds'"
-        if sys.version_info.minor < 11
-        else "property 'schedule_seconds' of 'Project' object has no setter"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'schedule_seconds'",
+    }.get(
+        sys.version_info.minor,
+        "property 'schedule_seconds' of 'Project' object has no setter"
     )
 
     assert str(cm.value) == error_message
@@ -1545,10 +1557,13 @@ def test_percent_complete_attribute_is_read_only(setup_project_db_test):
     with pytest.raises(AttributeError) as cm:
         data["test_project"].percent_complete = 32.3
 
-    error_message = (
-        "can't set attribute 'percent_complete'"
-        if sys.version_info.minor < 11
-        else "property 'percent_complete' of 'Project' object has no setter"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'percent_complete'",
+    }.get(
+        sys.version_info.minor,
+        "property 'percent_complete' of 'Project' object has no setter"
     )
 
     assert str(cm.value) == error_message
@@ -1868,10 +1883,13 @@ def test_open_tickets_attribute_is_read_only(setup_project_tickets_db_tests):
     with pytest.raises(AttributeError) as cm:
         data["test_project"].open_tickets = []
 
-    error_message = (
-        "can't set attribute 'open_tickets'"
-        if sys.version_info.minor < 11
-        else "property 'open_tickets' of 'Project' object has no setter"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'open_tickets'",
+    }.get(
+        sys.version_info.minor,
+        "property 'open_tickets' of 'Project' object has no setter"
     )
 
     assert str(cm.value) == error_message

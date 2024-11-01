@@ -474,10 +474,13 @@ def test_to_tjp_attribute_is_read_only():
     with pytest.raises(AttributeError) as cm:
         wh.to_tjp = "some value"
 
-    error_message = (
-        "can't set attribute 'to_tjp'"
-        if sys.version_info.minor < 11
-        else "property 'to_tjp' of 'WorkingHours' object has no setter"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'to_tjp'",
+    }.get(
+        sys.version_info.minor,
+        "property 'to_tjp' of 'WorkingHours' object has no setter"
     )
 
     assert str(cm.value) == error_message
@@ -533,10 +536,13 @@ def test_weekly_working_hours_attribute_is_read_only():
     with pytest.raises(AttributeError) as cm:
         wh.weekly_working_hours = 232
 
-    error_message = (
-        "can't set attribute 'weekly_working_hours'"
-        if sys.version_info.minor < 11
-        else "property 'weekly_working_hours' of 'WorkingHours' object has no setter"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'weekly_working_hours'",
+    }.get(
+        sys.version_info.minor,
+        "property 'weekly_working_hours' of 'WorkingHours' object has no setter"
     )
 
     assert str(cm.value) == error_message
@@ -612,10 +618,13 @@ def test_weekly_working_days_is_a_read_only_attribute():
     with pytest.raises(AttributeError) as cm:
         wh.weekly_working_days = 6
 
-    error_message = (
-        "can't set attribute 'weekly_working_days'"
-        if sys.version_info.minor < 11
-        else "property 'weekly_working_days' of 'WorkingHours' object has no setter"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'weekly_working_days'",
+    }.get(
+        sys.version_info.minor,
+        "property 'weekly_working_days' of 'WorkingHours' object has no setter"
     )
 
     assert str(cm.value) == error_message
@@ -660,10 +669,13 @@ def test_yearly_working_days_is_a_read_only_attribute():
     with pytest.raises(AttributeError) as cm:
         wh.yearly_working_days = 260.1
 
-    error_message = (
-        "can't set attribute 'yearly_working_days'"
-        if sys.version_info.minor < 11
-        else "property 'yearly_working_days' of 'WorkingHours' object has no setter"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'yearly_working_days'",
+    }.get(
+        sys.version_info.minor,
+        "property 'yearly_working_days' of 'WorkingHours' object has no setter"
     )
 
     assert str(cm.value) == error_message

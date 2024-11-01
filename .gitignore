@@ -2,6 +2,7 @@
 .coverage
 .DS_Store
 .pytest_cache
+.venv/
 .vscode/
 *.pyc
 *.swp

@@ -178,10 +178,13 @@ def test_nice_name_attr_is_read_only(setup_simple_entity_tests):
     with pytest.raises(AttributeError) as cm:
         data["test_simple_entity"].nice_name = "a text"
 
-    error_message = (
-        "can't set attribute 'nice_name'"
-        if sys.version_info.minor < 11
-        else "property 'nice_name' of 'SimpleEntity' object has no setter"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'nice_name'",
+    }.get(
+        sys.version_info.minor,
+        "property 'nice_name' of 'SimpleEntity' object has no setter"
     )
 
     assert str(cm.value) == error_message

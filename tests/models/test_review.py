@@ -187,10 +187,15 @@ def test_review_number_attribute_is_a_read_only_attribute(setup_review_db_test):
     with pytest.raises(AttributeError) as cm:
         review.review_number = 2
 
-    error_message = (
-        "can't set attribute"
-        if sys.version_info.minor < 11
-        else "property '_review_number_getter' of 'Review' object has no setter"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute",
+        11: "property of 'Review' object has no setter",
+        12: "property of 'Review' object has no setter",
+    }.get(
+        sys.version_info.minor,
+        "property '_review_number_getter' of 'Review' object has no setter"
     )
 
     assert str(cm.value) == error_message

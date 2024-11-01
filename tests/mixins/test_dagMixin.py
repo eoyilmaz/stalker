@@ -205,10 +205,13 @@ def test_is_leaf_attribute_is_read_only(dag_mixin_test_case):
     with pytest.raises(AttributeError) as cm:
         d1.is_leaf = "this will not work"
 
-    error_message = (
-        "can't set attribute 'is_leaf'"
-        if sys.version_info.minor < 11
-        else "property 'is_leaf' of 'DAGMixinFooMixedInClass' object has no setter"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'is_leaf'",
+    }.get(
+        sys.version_info.minor,
+        "property 'is_leaf' of 'DAGMixinFooMixedInClass' object has no setter"
     )
 
     assert str(cm.value) == error_message
@@ -236,10 +239,13 @@ def test_is_root_attribute_is_read_only(dag_mixin_test_case):
     with pytest.raises(AttributeError) as cm:
         d1.is_root = "this will not work"
 
-    error_message = (
-        "can't set attribute 'is_root'"
-        if sys.version_info.minor < 11
-        else "property 'is_root' of 'DAGMixinFooMixedInClass' object has no setter"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'is_root'",
+    }.get(
+        sys.version_info.minor,
+        "property 'is_root' of 'DAGMixinFooMixedInClass' object has no setter"
     )
 
     assert str(cm.value) == error_message
@@ -266,10 +272,13 @@ def test_is_container_attribute_is_read_only(dag_mixin_test_case):
     with pytest.raises(AttributeError) as cm:
         d1.is_container = "this will not work"
 
-    error_message = (
-        "can't set attribute 'is_container'"
-        if sys.version_info.minor < 11
-        else "property 'is_container' of 'DAGMixinFooMixedInClass' object has no setter"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'is_container'",
+    }.get(
+        sys.version_info.minor,
+        "property 'is_container' of 'DAGMixinFooMixedInClass' object has no setter"
     )
 
     assert str(cm.value) == error_message
@@ -300,10 +309,13 @@ def test_parents_property_is_read_only(dag_mixin_test_case):
     with pytest.raises(AttributeError) as cm:
         d1.parents = "this will not work"
 
-    error_message = (
-        "can't set attribute 'parents'"
-        if sys.version_info.minor < 11
-        else "property 'parents' of 'DAGMixinFooMixedInClass' object has no setter"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'parents'",
+    }.get(
+        sys.version_info.minor,
+        "property 'parents' of 'DAGMixinFooMixedInClass' object has no setter"
     )
 
     assert str(cm.value) == error_message

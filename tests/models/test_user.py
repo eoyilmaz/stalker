@@ -1104,10 +1104,13 @@ def test_tickets_attribute_is_read_only(setup_user_db_tests):
     with pytest.raises(AttributeError) as cm:
         data["test_user"].tickets = []
 
-    error_message = (
-        "can't set attribute 'tickets'"
-        if sys.version_info.minor < 11
-        else "property 'tickets' of 'User' object has no setter"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'tickets'",
+    }.get(
+        sys.version_info.minor,
+        "property 'tickets' of 'User' object has no setter"
     )
 
     assert str(cm.value) == error_message
@@ -1119,10 +1122,13 @@ def test_open_tickets_attribute_is_read_only(setup_user_db_tests):
     with pytest.raises(AttributeError) as cm:
         data["test_user"].open_tickets = []
 
-    error_message = (
-        "can't set attribute 'open_tickets'"
-        if sys.version_info.minor < 11
-        else "property 'open_tickets' of 'User' object has no setter"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'open_tickets'",
+    }.get(
+        sys.version_info.minor,
+        "property 'open_tickets' of 'User' object has no setter"
     )
 
     assert str(cm.value) == error_message

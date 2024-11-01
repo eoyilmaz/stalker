@@ -87,13 +87,16 @@ def test_target_entity_type_attribute_is_read_only(setup_target_entity_mixin_tes
     with pytest.raises(AttributeError) as cm:
         data["test_object"].target_entity_type = "Project"
 
-    error_message = (
-        "can't set attribute"
-        if sys.version_info.minor < 11
-        else (
-            "property '_target_entity_type_getter' of 'TargetEntityTypeMixedClass' "
-            "object has no setter"
-        )
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute",
+        11: "property of 'TargetEntityTypeMixedClass' object has no setter",
+        12: "property of 'TargetEntityTypeMixedClass' object has no setter",
+    }.get(
+        sys.version_info.minor,
+        "property '_target_entity_type_getter' of 'TargetEntityTypeMixedClass' "
+        "object has no setter"
     )
 
     assert str(cm.value) == error_message

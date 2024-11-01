@@ -277,10 +277,13 @@ def test_device_aspect_attribute_write_protected(setup_image_format_tests):
     with pytest.raises(AttributeError) as cm:
         data["test_image_format"].device_aspect = 10
 
-    error_message = (
-        "can't set attribute 'device_aspect'"
-        if sys.version_info.minor < 11
-        else "property 'device_aspect' of 'ImageFormat' object has no setter"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'device_aspect'",
+    }.get(
+        sys.version_info.minor,
+        "property 'device_aspect' of 'ImageFormat' object has no setter"
     )
 
     assert str(cm.value) == error_message

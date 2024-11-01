@@ -270,10 +270,15 @@ def test_project_attribute_is_read_only(setup_shot_db_tests):
     with pytest.raises(AttributeError) as cm:
         data["test_shot"].project = data["test_project2"]
 
-    error_message = (
-        "can't set attribute"
-        if sys.version_info.minor < 11
-        else "property '_project_getter' of 'Shot' object has no setter"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute",
+        11: "property of 'Shot' object has no setter",
+        12: "property of 'Shot' object has no setter",
+    }.get(
+        sys.version_info.minor,
+        "property '_project_getter' of 'Shot' object has no setter"
     )
 
     assert str(cm.value) == error_message

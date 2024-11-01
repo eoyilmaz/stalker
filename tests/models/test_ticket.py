@@ -208,10 +208,15 @@ def test_number_attribute_is_read_only(setup_ticket_tests):
     with pytest.raises(AttributeError) as cm:
         data["test_ticket"].number = 234
 
-    error_message = (
-        "can't set attribute"
-        if sys.version_info.minor < 11
-        else "property '_number_getter' of 'Ticket' object has no setter"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute",
+        11: "property of 'Ticket' object has no setter",
+        12: "property of 'Ticket' object has no setter",
+    }.get(
+        sys.version_info.minor,
+        "property '_number_getter' of 'Ticket' object has no setter"
     )
 
     assert str(cm.value) == error_message
@@ -411,10 +416,15 @@ def test_project_attribute_is_read_only(setup_ticket_tests):
     with pytest.raises(AttributeError) as cm:
         data["test_ticket"].project = data["test_project"]
 
-    error_message = (
-        "can't set attribute"
-        if sys.version_info.minor < 11
-        else "property '_project_getter' of 'Ticket' object has no setter"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute",
+        11: "property of 'Ticket' object has no setter",
+        12: "property of 'Ticket' object has no setter",
+    }.get(
+        sys.version_info.minor,
+        "property '_project_getter' of 'Ticket' object has no setter"
     )
 
     assert str(cm.value) == error_message

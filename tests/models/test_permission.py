@@ -66,10 +66,15 @@ def test_access_attribute_is_read_only(setup_permission_tests):
     with pytest.raises(AttributeError) as cm:
         data["test_permission"].access = "Deny"
 
-    error_message = (
-        "can't set attribute"
-        if sys.version_info.minor < 11
-        else "property '_access_getter' of 'Permission' object has no setter"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute",
+        11: "property of 'Permission' object has no setter",
+        12: "property of 'Permission' object has no setter",
+    }.get(
+        sys.version_info.minor,
+        "property '_access_getter' of 'Permission' object has no setter"
     )
 
     assert str(cm.value) == error_message
@@ -129,10 +134,15 @@ def test_action_attribute_is_read_only(setup_permission_tests):
     with pytest.raises(AttributeError) as cm:
         data["test_permission"].action = "Add"
 
-    error_message = (
-        "can't set attribute"
-        if sys.version_info.minor < 11
-        else "property '_action_getter' of 'Permission' object has no setter"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute",
+        11: "property of 'Permission' object has no setter",
+        12: "property of 'Permission' object has no setter",
+    }.get(
+        sys.version_info.minor,
+        "property '_action_getter' of 'Permission' object has no setter"
     )
 
     assert str(cm.value) == error_message
@@ -193,10 +203,15 @@ def test_class_name_attribute_is_read_only(setup_permission_tests):
     with pytest.raises(AttributeError) as cm:
         data["test_permission"].class_name = "Asset"
 
-    error_message = (
-        "can't set attribute"
-        if sys.version_info.minor < 11
-        else "property '_class_name_getter' of 'Permission' object has no setter"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute",
+        11: "property of 'Permission' object has no setter",
+        12: "property of 'Permission' object has no setter",
+    }.get(
+        sys.version_info.minor,
+        "property '_class_name_getter' of 'Permission' object has no setter"
     )
 
     assert str(cm.value) == error_message
