@@ -88,8 +88,7 @@ def test_users_argument_updates_the_groups_attribute_in_the_given_user_instances
     data["kwargs"]["name"] = "New Group"
     new_group = Group(**data["kwargs"])
 
-    for user in data["kwargs"]["users"]:
-        assert new_group in user.groups
+    assert all(new_group in user.groups for user in data["kwargs"]["users"])
 
 
 def test_users_attribute_updates_the_groups_attribute_in_the_given_user_instances(
@@ -100,8 +99,7 @@ def test_users_attribute_updates_the_groups_attribute_in_the_given_user_instance
     test_users = data["kwargs"].pop("users")
     new_group = Group(**data["kwargs"])
     new_group.users = test_users
-    for user in test_users:
-        assert new_group in user.groups
+    assert all(new_group in user.groups for user in test_users)
 
 
 def test_permissions_argument_is_working_properly(set_group_tests):

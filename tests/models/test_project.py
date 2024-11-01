@@ -631,13 +631,16 @@ def test_image_format_argument_is_working_properly(setup_project_db_test):
     assert new_project.image_format == data["test_image_format"]
 
 
-def test_image_format_attribute_accepts_image_format_only(setup_project_db_test):
+@pytest.mark.parametrize(
+    "test_value", [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
+)
+def test_image_format_attribute_accepts_image_format_only(
+    setup_project_db_test, test_value
+):
     """TypeError is raised if the image_format attr set not to an ImageFormat."""
     data = setup_project_db_test
-    test_values = [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
-    for test_value in test_values:
-        with pytest.raises(TypeError) as cm:
-            data["test_project"].image_format = test_value
+    with pytest.raises(TypeError) as cm:
+        data["test_project"].image_format = test_value
 
     # and a proper image format
     data["test_project"].image_format = data["test_image_format"]

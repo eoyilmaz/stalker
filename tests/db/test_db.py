@@ -246,8 +246,9 @@ def test_ticket_status_initialization(setup_postgresql_db):
     expected_status_names = ["New", "Reopened", "Closed", "Accepted", "Assigned"]
 
     assert len(ticket_status_list.statuses) == len(expected_status_names)
-    for status in ticket_status_list.statuses:
-        assert status.name in expected_status_names
+    assert all(
+        status.name in expected_status_names for status in ticket_status_list.statuses
+    )
 
 
 def test_daily_status_initialization(setup_postgresql_db):
@@ -263,12 +264,13 @@ def test_daily_status_initialization(setup_postgresql_db):
     assert len(daily_status_list.statuses) == len(expected_status_names)
 
     admin = get_admin_user()
-    for status in daily_status_list.statuses:
-        assert status.name in expected_status_names
-        # check if the created_by and updated_by attributes
-        # are set to admin
-        assert status.created_by == admin
-        assert status.updated_by == admin
+    assert all(
+        status.name in expected_status_names for status in daily_status_list.statuses
+    )
+    # check if the created_by and updated_by attributes
+    # are set to admin
+    assert all(status.created_by == admin for status in daily_status_list.statuses)
+    assert all(status.updated_by == admin for status in daily_status_list.statuses)
 
 
 def test_register_creates_suitable_permissions(setup_postgresql_db):
@@ -286,9 +288,7 @@ def test_register_creates_suitable_permissions(setup_postgresql_db):
     logger.debug(f"{permissions_db}")
 
     actions = defaults.actions
-
-    for action in permissions_db:
-        assert action.action in actions
+    assert all(action.action in actions for action in permissions_db)
 
 
 def test_register_raise_type_error_for_wrong_class_name_argument(setup_postgresql_db):
@@ -346,13 +346,9 @@ def test_permissions_created_for_all_the_classes(setup_postgresql_db):
     ]
     permission_db = Permission.query.all()
     assert len(permission_db) == len(class_names) * len(defaults.actions) * 2
-    for permission in permission_db:
-        assert permission.access in ["Allow", "Deny"]
-        assert permission.action in defaults.actions
-        assert permission.class_name in class_names
-        logger.debug(f"permission.access: {permission.access}")
-        logger.debug(f"permission.action: {permission.action}")
-        logger.debug(f"permission.class_name: {permission.class_name}")
+    assert all(permission.access in ["Allow", "Deny"] for permission in permission_db)
+    assert all(permission.action in defaults.actions for permission in permission_db)
+    assert all(permission.class_name in class_names for permission in permission_db)
 
 
 def test_permissions_not_created_over_and_over_again(setup_postgresql_db):
@@ -420,9 +416,8 @@ def test_project_status_list_initialization(setup_postgresql_db):
     # check if the created_by and updated_by attributes are correctly set
     # to the admin
     admin = get_admin_user()
-    for status in project_status_list.statuses:
-        assert status.created_by == admin
-        assert status.updated_by == admin
+    assert all(status.created_by == admin for status in project_status_list.statuses)
+    assert all(status.updated_by == admin for status in project_status_list.statuses)
 
 
 def test_task_status_initialization(setup_postgresql_db):
@@ -463,9 +458,8 @@ def test_task_status_initialization(setup_postgresql_db):
     # check if the created_by and updated_by attributes are correctly set
     # to the admin
     admin = get_admin_user()
-    for status in task_status_list.statuses:
-        assert status.created_by == admin
-        assert status.updated_by == admin
+    assert all(status.created_by == admin for status in task_status_list.statuses)
+    assert all(status.updated_by == admin for status in task_status_list.statuses)
 
 
 def test_asset_status_initialization(setup_postgresql_db):
@@ -580,9 +574,8 @@ def test_sequence_status_initialization(setup_postgresql_db):
     # check if the created_by and updated_by attributes are correctly set
     # to admin
     admin = get_admin_user()
-    for status in sequence_status_list.statuses:
-        assert status.created_by == admin
-        assert status.updated_by == admin
+    assert all(status.created_by == admin for status in sequence_status_list.statuses)
+    assert all(status.updated_by == admin for status in sequence_status_list.statuses)
 
 
 def test_asset_status_initialization_when_there_is_an_asset_status_list(
