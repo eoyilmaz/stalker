@@ -89,9 +89,9 @@ def test_status_list_argument_is_not_a_status_list_instance(status_mixin_tests):
     with pytest.raises(TypeError) as cm:
         StatMixClass(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "StatMixClass.status_list should be an instance of "
-        "stalker.models.status.StatusList not int"
+    assert str(cm.value) == (
+        "StatMixClass.status_list should be an instance of "
+        "stalker.models.status.StatusList, not int: '100'"
     )
 
 
@@ -103,9 +103,9 @@ def test_status_list_attribute_set_to_something_other_than_status_list(
     with pytest.raises(TypeError) as cm:
         data["test_mixed_obj"].status_list = "a string"
 
-    assert (
-        str(cm.value) == "StatMixClass.status_list should be an instance of "
-        "stalker.models.status.StatusList not str"
+    assert str(cm.value) == (
+        "StatMixClass.status_list should be an instance of "
+        "stalker.models.status.StatusList, not str: 'a string'"
     )
 
 
@@ -174,10 +174,10 @@ def test_status_argument_is_not_a_status_instance_or_integer(status_mixin_tests)
     with pytest.raises(TypeError) as cm:
         StatMixClass(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "StatMixClass.status must be an instance of "
-        "stalker.models.status.Status or an integer showing the index "
-        "of the Status object in the StatMixClass.status_list, not str"
+    assert str(cm.value) == (
+        "StatMixClass.status must be an instance of stalker.models.status.Status or "
+        "an integer showing the index of the Status object in the "
+        "StatMixClass.status_list, not str: '0'"
     )
 
 
@@ -189,10 +189,10 @@ def test_status_attribute_set_to_a_value_other_than_a_status_or_integer(
     with pytest.raises(TypeError) as cm:
         data["test_mixed_obj"].status = "a string"
 
-    assert (
-        str(cm.value) == "StatMixClass.status must be an instance of "
-        "stalker.models.status.Status or an integer showing the index "
-        "of the Status object in the StatMixClass.status_list, not str"
+    assert str(cm.value) == (
+        "StatMixClass.status must be an instance of stalker.models.status.Status "
+        "or an integer showing the index of the Status object in the "
+        "StatMixClass.status_list, not str: 'a string'"
     )
 
 

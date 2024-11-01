@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import stalker.db.setup
 from stalker import db
 from stalker.db.session import DBSession
 from stalker import (
@@ -18,8 +19,8 @@ from stalker import (
 
 def test_readme_tutorial_code(setup_sqlite3):
     """the tutorial code in README.rst."""
-    db.setup()
-    db.init()
+    stalker.db.setup.setup()
+    stalker.db.setup.init()
 
     assert str(DBSession.connection().engine.url) == "sqlite://"
 
@@ -118,9 +119,8 @@ def test_readme_tutorial_code(setup_sqlite3):
     new_version.update_paths()  # to render the naming convention template
     new_version.extension = ".ma"  # let's say that we have created under Maya
 
-    assert (
-        new_version.absolute_full_path
-        == "%sTP/SH001/Animation/SH001_Animation_Main_v001.ma" % repo.path
+    assert new_version.absolute_full_path == (
+        f"{repo.path}TP/SH001/Animation/SH001_Animation_Main_v001.ma"
     )
     assert new_version.version_number == 1
 

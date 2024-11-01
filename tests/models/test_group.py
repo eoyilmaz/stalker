@@ -62,9 +62,9 @@ def test_users_argument_is_not_a_list_of_user_instances(set_group_tests):
     with pytest.raises(TypeError) as cm:
         Group(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "Group.users attribute must all be stalker.models.auth.User "
-        "instances not int"
+    assert str(cm.value) == (
+        "Group.users attribute must all be stalker.models.auth.User instances, "
+        "not int: '12'"
     )
 
 
@@ -74,9 +74,9 @@ def test_users_attribute_is_not_a_list_of_user_instances(set_group_tests):
     with pytest.raises(TypeError) as cm:
         data["test_group"].users = [12, "not a user"]
 
-    assert (
-        str(cm.value) == "Group.users attribute must all be stalker.models.auth.User "
-        "instances not int"
+    assert str(cm.value) == (
+        "Group.users attribute must all be stalker.models.auth.User instances, "
+        "not int: '12'"
     )
 
 

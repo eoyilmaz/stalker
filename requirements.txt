@@ -1,0 +1,8 @@
+alembic
+build
+jinja2
+psycopg2-binary
+pytz
+six
+sqlalchemy < 2
+tzlocal

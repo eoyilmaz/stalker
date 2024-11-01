@@ -2,6 +2,7 @@
 """Tests for the Studio class."""
 
 import datetime
+import sys
 
 from jinja2 import Template
 
@@ -544,9 +545,9 @@ def test_working_hours_arg_is_not_a_working_hours_instance(setup_studio_db_tests
     with pytest.raises(TypeError) as cm:
         Studio(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "Studio.working_hours should be a "
-        "stalker.models.studio.WorkingHours instance, not str"
+    assert str(cm.value) == (
+        "Studio.working_hours should be a stalker.models.studio.WorkingHours instance, "
+        "not str: 'not a working hours instance'"
     )
 
 
@@ -556,9 +557,9 @@ def test_working_hours_attribute_is_not_a_working_hours_instance(setup_studio_db
     with pytest.raises(TypeError) as cm:
         data["test_studio"].working_hours = "not a working hours instance"
 
-    assert (
-        str(cm.value) == "Studio.working_hours should be a "
-        "stalker.models.studio.WorkingHours instance, not str"
+    assert str(cm.value) == (
+        "Studio.working_hours should be a stalker.models.studio.WorkingHours instance, "
+        "not str: 'not a working hours instance'"
     )
 
 
@@ -600,7 +601,16 @@ def test_projects_attribute_is_read_only(setup_studio_db_tests):
     with pytest.raises(AttributeError) as cm:
         data["test_studio"].projects = [data["test_project1"]]
 
-    assert str(cm.value) == "can't set attribute 'projects'"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'projects'",
+    }.get(
+        sys.version_info.minor,
+        "property 'projects' of 'Studio' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_projects_attribute_is_working_properly(setup_studio_db_tests):
@@ -618,7 +628,16 @@ def test_active_projects_attribute_is_read_only(setup_studio_db_tests):
     with pytest.raises(AttributeError) as cm:
         data["test_studio"].active_projects = [data["test_project1"]]
 
-    assert str(cm.value) == "can't set attribute 'active_projects'"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'active_projects'",
+    }.get(
+        sys.version_info.minor,
+        "property 'active_projects' of 'Studio' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_active_projects_attribute_is_working_properly(setup_studio_db_tests):
@@ -634,7 +653,17 @@ def test_inactive_projects_attribute_is_read_only(setup_studio_db_tests):
     data = setup_studio_db_tests
     with pytest.raises(AttributeError) as cm:
         data["test_studio"].inactive_projects = [data["test_project1"]]
-    assert str(cm.value) == "can't set attribute 'inactive_projects'"
+
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'inactive_projects'",
+    }.get(
+        sys.version_info.minor,
+        "property 'inactive_projects' of 'Studio' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_inactive_projects_attribute_is_working_properly(setup_studio_db_tests):
@@ -650,7 +679,17 @@ def test_departments_attribute_is_read_only(setup_studio_db_tests):
     data = setup_studio_db_tests
     with pytest.raises(AttributeError) as cm:
         data["test_studio"].departments = [data["test_project1"]]
-    assert str(cm.value) == "can't set attribute 'departments'"
+
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'departments'",
+    }.get(
+        sys.version_info.minor,
+        "property 'departments' of 'Studio' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_departments_attribute_is_working_properly(setup_studio_db_tests):
@@ -669,7 +708,17 @@ def test_users_attribute_is_read_only(setup_studio_db_tests):
     data = setup_studio_db_tests
     with pytest.raises(AttributeError) as cm:
         data["test_studio"].users = [data["test_project1"]]
-    assert str(cm.value) == "can't set attribute 'users'"
+
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'users'",
+    }.get(
+        sys.version_info.minor,
+        "property 'users' of 'Studio' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_users_attribute_is_working_properly(setup_studio_db_tests):
@@ -690,7 +739,16 @@ def test_to_tjp_attribute_is_read_only(setup_studio_db_tests):
     with pytest.raises(AttributeError) as cm:
         data["test_studio"].to_tjp = "some text"
 
-    assert str(cm.value) == "can't set attribute 'to_tjp'"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'to_tjp'",
+    }.get(
+        sys.version_info.minor,
+        "property 'to_tjp' of 'Studio' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_now_arg_is_skipped(setup_studio_db_tests):
@@ -729,9 +787,9 @@ def test_now_arg_is_not_a_datetime_instance(setup_studio_db_tests):
     with pytest.raises(TypeError) as cm:
         Studio(**data["kwargs"])
 
-    assert (
-        str(cm.value)
-        == "Studio.now attribute should be an instance of datetime.datetime, not str"
+    assert str(cm.value) == (
+        "Studio.now attribute should be an instance of datetime.datetime, "
+        "not str: 'not a datetime instance'"
     )
 
 
@@ -747,7 +805,7 @@ def test_now_attribute_is_set_to_a_value_other_than_datetime_instance(
 
     assert (
         str(cm.value) == "Studio.now attribute should be an instance of "
-        "datetime.datetime, not str"
+        "datetime.datetime, not str: 'not a datetime instance'"
     )
 
 
@@ -833,7 +891,7 @@ def test_scheduler_attribute_accepts_scheduler_instances_only(setup_studio_db_te
 
     assert (
         str(cm.value) == "Studio.scheduler should be an instance of "
-        "stalker.models.scheduler.SchedulerBase, not str"
+        "stalker.models.scheduler.SchedulerBase, not str: 'not a Scheduler instance'"
     )
 
 
@@ -1539,7 +1597,16 @@ def test_vacation_attribute_is_read_only(setup_studio_db_tests):
     with pytest.raises(AttributeError) as cm:
         data["test_studio"].vacations = "some random value"
 
-    assert str(cm.value) == "can't set attribute 'vacations'"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'vacations'",
+    }.get(
+        sys.version_info.minor,
+        "property 'vacations' of 'Studio' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_vacation_attribute_returns_studio_vacation_instances(setup_studio_db_tests):
@@ -1605,7 +1672,8 @@ def test_timing_resolution_arg_is_not_a_timedelta_instance(setup_studio_db_tests
         Studio(**data["kwargs"])
 
     assert str(cm.value) == (
-        "Studio.timing_resolution should be an instance of datetime.timedelta not, str"
+        "Studio.timing_resolution should be an instance of datetime.timedelta, "
+        "not str: 'not a timedelta instance'"
     )
 
 
@@ -1617,7 +1685,8 @@ def test_timing_resolution_attribute_is_not_a_timedelta_instance(setup_studio_db
         new_foo_obj.timing_resolution = "not a timedelta instance"
 
     assert str(cm.value) == (
-        "Studio.timing_resolution should be an instance of datetime.timedelta not, str"
+        "Studio.timing_resolution should be an instance of datetime.timedelta, "
+        "not str: 'not a timedelta instance'"
     )
 
 

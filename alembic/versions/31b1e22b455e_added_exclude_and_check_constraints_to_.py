@@ -1,25 +1,24 @@
-"""Added exclude and check constraints to TimeLogs table
+"""Added exclude and check constraints to TimeLogs table.
 
 Revision ID: 31b1e22b455e
 Revises: c5607b4cfb0a
 Create Date: 2017-03-10 02:14:38.330000
-
 """
-
-# revision identifiers, used by Alembic.
-from sqlalchemy import CheckConstraint
-from stalker import log
-
-revision = "31b1e22b455e"
-down_revision = "c5607b4cfb0a"
 
 from alembic import op
 
+from sqlalchemy import CheckConstraint
+
+from stalker import log
+
+# revision identifiers, used by Alembic.
+revision = "31b1e22b455e"
+down_revision = "c5607b4cfb0a"
 logger = log.get_logger(__name__)
 
 
 def upgrade():
-    """adds CheckConstraint and an ExcludeConstraint for the TimeLogs table"""
+    """Add CheckConstraint and an ExcludeConstraint for the TimeLogs table."""
     # First cleanup TimeLogs table
     logger.info("Removing duplicate TimeLog entries")
     op.execute(
@@ -119,9 +118,7 @@ where "TimeLogs".end - "TimeLogs".start > interval '10 min'
     logger.info("Adding CheckConstraint(end > start) to TimeLogs table")
     with op.batch_alter_table(
         "TimeLogs", table_args=(CheckConstraint('"end" > start'))
-    ) as batch_op:
-        pass
-
+    ):
         logger.info("Adding ExcludeConstraint to TimeLogs table")
     from stalker.models.task import TimeLog, add_exclude_constraint
 
@@ -130,6 +127,7 @@ where "TimeLogs".end - "TimeLogs".start > interval '10 min'
 
 
 def downgrade():
+    """Downgrade the tables."""
     # Drop ExcludeConstraint and functions
     # Sadly we can not reintroduce the deleted data in the upgrade() function
     logger.info("Dropping CheckConstraint(end > start)")
@@ -142,7 +140,8 @@ def downgrade():
 
     logger.info("Dropping ts_to_box function")
     op.execute(
-        """DROP FUNCTION IF EXISTS ts_to_box(timestamp with time zone, timestamp with time zone);"""
+        "DROP FUNCTION IF EXISTS "
+        "ts_to_box(timestamp with time zone, timestamp with time zone);"
     )
 
     logger.info("Dropping btree_gist extension")

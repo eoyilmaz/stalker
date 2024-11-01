@@ -1,3 +1,0 @@
-clear
-clear
-../bin/nosetests $@ --processess=-1 --verbosity=2 -v

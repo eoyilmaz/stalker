@@ -9,6 +9,7 @@ from stalker import log
 @pytest.fixture(scope="function")
 def setup_logging():
     """Set up stalker log module."""
+    log.loggers = []
     yield
     # clean loggers list after every test
     log.loggers = []
@@ -43,7 +44,9 @@ def test_register_logger_only_accept_loggers(setup_logging):
     with pytest.raises(TypeError) as cm:
         log.register_logger("not a logger")
 
-    assert str(cm.value) == "logger should be a logging.Logger instance, not str"
+    assert str(cm.value) == (
+        "logger should be a logging.Logger instance, not str: 'not a logger'"
+    )
 
 
 def test_register_logger_sets_the_level_to_the_default_level(setup_logging):
@@ -88,7 +91,7 @@ def test_set_level_level_is_not_an_integer(setup_logging):
     assert str(cm.value) == (
         "level should be an integer value one of [0, 10, 20, 30, 40, 50] or "
         "[NOTSET, DEBUG, INFO, WARN, WARNING, ERROR, FATAL, CRITICAL] of the "
-        "logging library, not str."
+        "logging library, not str: 'not a logging level'"
     )
 
 

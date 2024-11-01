@@ -63,7 +63,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "Stalker"
-copyright = "2009-2016, Erkan Ozgur Yilmaz"
+copyright = "2009-2024, Erkan Ozgur Yilmaz"
 author = "Erkan Ozgur Yilmaz"
 
 # The version info for the project you're documenting, acts as replacement for

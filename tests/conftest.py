@@ -11,6 +11,7 @@ import pytest
 from sqlalchemy.pool import NullPool
 
 import stalker
+import stalker.db.setup
 from stalker import db, defaults, log, User
 from stalker.config import Config
 from stalker.db.session import DBSession
@@ -91,8 +92,8 @@ def setup_postgresql_db():
 
     # init database
     # remove anything beforehand
-    db.setup(data["config"])
-    db.init()
+    stalker.db.setup.setup(data["config"])
+    stalker.db.setup.init()
 
     yield data
     tear_down_db(data)

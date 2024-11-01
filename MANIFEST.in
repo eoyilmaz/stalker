@@ -1,14 +1,15 @@
 include *.ini *.cfg
 
+include alembic.ini
 include CHANGELOG.rst
-include TODO
-include README.rst
-include INSTALL
-include MANIFEST.in
 include COPYING
 include COPYING.LESSER
-include doTests
-include alembic.ini
+include INSTALL
+include MANIFEST.in
+include README.rst
+include stalker/VERSION
+include TODO
+include VERSION
 
 prune docs/build
 prune docs/source/generated

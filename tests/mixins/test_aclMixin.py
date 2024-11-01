@@ -44,9 +44,9 @@ def test_permission_attribute_accept_permission_instances_only(acl_mixin_test_se
     with pytest.raises(TypeError) as cm:
         data["test_instance"].permissions = [234]
 
-    assert (
-        str(cm.value) == "TestClassForACL.permissions should be all instances of "
-        "stalker.models.auth.Permission not int"
+    assert str(cm.value) == (
+        "TestClassForACL.permissions should be all instances of "
+        "stalker.models.auth.Permission, not int: '234'"
     )
 
 

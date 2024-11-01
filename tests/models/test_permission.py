@@ -40,8 +40,8 @@ def test_access_argument_is_none(setup_permission_tests):
     with pytest.raises(TypeError) as cm:
         Permission(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "Permission.access should be an instance of str not NoneType"
+    assert str(cm.value) == (
+        "Permission.access should be an instance of str, not NoneType: 'None'"
     )
 
 
@@ -65,7 +65,19 @@ def test_access_attribute_is_read_only(setup_permission_tests):
     data = setup_permission_tests
     with pytest.raises(AttributeError) as cm:
         data["test_permission"].access = "Deny"
-    assert str(cm.value) == "can't set attribute"
+
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute",
+        11: "property of 'Permission' object has no setter",
+        12: "property of 'Permission' object has no setter",
+    }.get(
+        sys.version_info.minor,
+        "property '_access_getter' of 'Permission' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_action_argument_is_skipped_will_raise_a_type_error(setup_permission_tests):
@@ -92,8 +104,8 @@ def test_action_argument_is_none(setup_permission_tests):
     with pytest.raises(TypeError) as cm:
         Permission(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "Permission.action should be an instance of str not NoneType"
+    assert str(cm.value) == (
+        "Permission.action should be an instance of str, not NoneType: 'None'"
     )
 
 
@@ -121,7 +133,19 @@ def test_action_attribute_is_read_only(setup_permission_tests):
     data = setup_permission_tests
     with pytest.raises(AttributeError) as cm:
         data["test_permission"].action = "Add"
-    assert str(cm.value) == "can't set attribute"
+
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute",
+        11: "property of 'Permission' object has no setter",
+        12: "property of 'Permission' object has no setter",
+    }.get(
+        sys.version_info.minor,
+        "property '_action_getter' of 'Permission' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_class_name_argument_skipped(setup_permission_tests):
@@ -148,9 +172,8 @@ def test_class_name_argument_is_none(setup_permission_tests):
     with pytest.raises(TypeError) as cm:
         Permission(**data["kwargs"])
 
-    assert (
-        str(cm.value)
-        == "Permission.class_name should be an instance of str not NoneType"
+    assert str(cm.value) == (
+        "Permission.class_name should be an instance of str, not NoneType: 'None'"
     )
 
 
@@ -161,7 +184,9 @@ def test_class_name_argument_is_not_a_string(setup_permission_tests):
     with pytest.raises(TypeError) as cm:
         Permission(**data["kwargs"])
 
-    assert str(cm.value) == "Permission.class_name should be an instance of str not int"
+    assert str(cm.value) == (
+        "Permission.class_name should be an instance of str, not int: '10'"
+    )
 
 
 def test_class_name_argument_is_setting_the_class_name_attribute_value(
@@ -178,4 +203,15 @@ def test_class_name_attribute_is_read_only(setup_permission_tests):
     with pytest.raises(AttributeError) as cm:
         data["test_permission"].class_name = "Asset"
 
-    assert str(cm.value) == "can't set attribute"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute",
+        11: "property of 'Permission' object has no setter",
+        12: "property of 'Permission' object has no setter",
+    }.get(
+        sys.version_info.minor,
+        "property '_class_name_getter' of 'Permission' object has no setter"
+    )
+
+    assert str(cm.value) == error_message

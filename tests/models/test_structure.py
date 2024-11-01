@@ -82,7 +82,10 @@ def test_custom_template_argument_is_not_a_string(setup_structure_tests):
     with pytest.raises(TypeError) as cm:
         Structure(**data["kwargs"])
 
-    assert str(cm.value) == "Structure.custom_template should be a string not list"
+    assert str(cm.value) == (
+        "Structure.custom_template should be a string, "
+        "not list: '['this is not a string']'"
+    )
 
 
 def test_custom_template_attribute_is_not_a_string(setup_structure_tests):
@@ -90,7 +93,10 @@ def test_custom_template_attribute_is_not_a_string(setup_structure_tests):
     data = setup_structure_tests
     with pytest.raises(TypeError) as cm:
         data["test_structure"].custom_template = ["this is not a string"]
-    assert str(cm.value) == "Structure.custom_template should be a string not list"
+    assert str(cm.value) == (
+        "Structure.custom_template should be a string, "
+        "not list: '['this is not a string']'"
+    )
 
 
 def test_templates_argument_can_be_skipped(setup_structure_tests):
@@ -153,7 +159,7 @@ def test_templates_argument_accepts_only_list_of_filename_template_instances(
         Structure(**data["kwargs"])
     assert str(cm.value) == (
         "All the elements in the Structure.templates should be a "
-        "stalker.models.template.FilenameTemplate instance not int"
+        "stalker.models.template.FilenameTemplate instance, not int: '1'"
     )
 
 
@@ -177,7 +183,7 @@ def test_templates_attribute_accpets_only_list_of_filename_template_instances(
 
     assert str(cm.value) == (
         "All the elements in the Structure.templates should be a "
-        "stalker.models.template.FilenameTemplate instance not int"
+        "stalker.models.template.FilenameTemplate instance, not int: '1'"
     )
 
 

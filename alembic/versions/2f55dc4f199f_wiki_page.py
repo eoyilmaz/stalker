@@ -1,20 +1,22 @@
-"""add Wiki Page
+"""Add Wiki Page.
 
 Revision ID: 2f55dc4f199f
 Revises: 433d9caaafab
 Create Date: 2014-03-24 16:52:45.127579
-
 """
+
+from alembic import op
+
+import sqlalchemy as sa
+
 
 # revision identifiers, used by Alembic.
 revision = "2f55dc4f199f"
 down_revision = "433d9caaafab"
 
-from alembic import op
-import sqlalchemy as sa
-
 
 def upgrade():
+    """Upgrade the tables."""
     op.create_table(
         "Pages",
         sa.Column("id", sa.Integer(), nullable=False),
@@ -30,4 +32,5 @@ def upgrade():
 
 
 def downgrade():
+    """Downgrade the tables."""
     op.drop_table("Pages")

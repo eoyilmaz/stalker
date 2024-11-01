@@ -11,6 +11,7 @@ from sqlalchemy.orm import close_all_sessions
 from sqlalchemy.pool import NullPool
 
 import stalker
+import stalker.db.setup
 from stalker import (
     Project,
     Repository,
@@ -52,8 +53,8 @@ stalker.defaults.config_values = stalker.defaults.default_config_values.copy()
 stalker.defaults.timing_resolution = datetime.timedelta(minutes=10)
 
 # init database
-db.setup(config)
-db.init()
+stalker.db.setup.setup(config)
+stalker.db.setup.init()
 
 status_wfd = Status.query.filter_by(code="WFD").first()
 status_rts = Status.query.filter_by(code="RTS").first()
@@ -187,7 +188,7 @@ tl_count = 100000
 start = now
 ten_minutes = datetime.timedelta(minutes=10)
 resource = kwargs["resources"][0]
-print("creating %s TimeLogs" % tl_count)
+print(f"creating {tl_count} TimeLogs")
 for i in range(tl_count):
     end = start + ten_minutes
     tl = TimeLog(
@@ -199,14 +200,14 @@ for i in range(tl_count):
     DBSession.add(tl)
     start = end
     if i % 1000 == 0:
-        print("i: %s" % i)
+        print(f"i: {i}")
         DBSession.flush()
         DBSession.commit()
 DBSession.flush()
 DBSession.commit()
 
 benchmark_end = time.time()
-print("data created in: %s secs" % (benchmark_end - benchmark_start))
+print("data created in: {:0.3f} secs".format(benchmark_end - benchmark_start))
 
 task_id = new_task.id
 # del all the TimeLogs
@@ -221,15 +222,15 @@ task_from_db = Task.query.get(task_id)
 benchmark_start = time.time()
 total_logged_seconds = task_from_db.total_logged_seconds
 benchmark_end = time.time()
-print("total_logged_seconds: %s sec" % total_logged_seconds)
-print("old way worked in: %s sec" % (benchmark_end - benchmark_start))
+print("total_logged_seconds: {:0.3f} sec".format(total_logged_seconds))
+print("old way worked in: {:0.3f} sec".format(benchmark_end - benchmark_start))
 
 # now use the new way of doing it
 benchmark_start = time.time()
 quick_total_logged_seconds = task_from_db.total_logged_seconds
 benchmark_end = time.time()
-print("quick_total_logged_seconds: %s sec" % quick_total_logged_seconds)
-print("new way worked in: %s sec" % (benchmark_end - benchmark_start))
+print("quick_total_logged_seconds: {:0.3f} sec".format(quick_total_logged_seconds))
+print("new way worked in: {:0.3f} sec".format(benchmark_end - benchmark_start))
 assert total_logged_seconds == quick_total_logged_seconds
 
 # clean up test database

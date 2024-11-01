@@ -4,6 +4,7 @@ import datetime
 import logging
 import os
 import shutil
+import sys
 import tempfile
 
 import pytest
@@ -40,7 +41,7 @@ def test_config_variable_updates_with_user_config(prepare_config_file):
     config_file.writelines(
         [
             "#-*- coding: utf-8 -*-\n",
-            'database_engine_settings = "%s"\n' % test_value,
+            f'database_engine_settings = "{test_value}"\n',
         ]
     )
     config_file.close()
@@ -154,10 +155,18 @@ def test_syntax_error_in_settings_file(prepare_config_file):
     with pytest.raises(RuntimeError) as cm:
         config.Config()
 
-    assert str(cm.value) == (
-        "There is a syntax error in your configuration file: unterminated string "
-        "literal (detected at line 2) (<string>, line 2)"
+    error_message = {
+        8: "There is a syntax error in your configuration file: "
+           "EOL while scanning string literal (<string>, line 2)",
+        9: "There is a syntax error in your configuration file: "
+           "EOL while scanning string literal (<string>, line 2)",
+    }.get(
+        sys.version_info.minor,
+        "There is a syntax error in your configuration file: "
+        "unterminated string literal (detected at line 2) (<string>, line 2)"
     )
+
+    assert str(cm.value) == error_message
 
 
 def test___getattr___is_working_properly(prepare_config_file):

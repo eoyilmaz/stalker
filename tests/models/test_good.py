@@ -46,7 +46,9 @@ def test_cost_argument_is_not_a_number(setup_good_tests):
     with pytest.raises(TypeError) as cm:
         _ = Good(**data["kwargs"])
 
-    assert str(cm.value) == "Good.cost should be a non-negative number, not str"
+    assert str(cm.value) == (
+        "Good.cost should be a non-negative number, not str: 'not a number'"
+    )
 
 
 def test_cost_attribute_is_not_a_number(setup_good_tests):
@@ -56,7 +58,9 @@ def test_cost_attribute_is_not_a_number(setup_good_tests):
     with pytest.raises(TypeError) as cm:
         g.cost = "not a number"
 
-    assert str(cm.value) == "Good.cost should be a non-negative number, not str"
+    assert str(cm.value) == (
+        "Good.cost should be a non-negative number, not str: 'not a number'"
+    )
 
 
 def test_cost_argument_is_zero(setup_good_tests):
@@ -148,7 +152,9 @@ def test_msrp_argument_is_not_a_number(setup_good_tests):
     with pytest.raises(TypeError) as cm:
         _ = Good(**data["kwargs"])
 
-    assert str(cm.value) == "Good.msrp should be a non-negative number, not str"
+    assert str(cm.value) == (
+        "Good.msrp should be a non-negative number, not str: 'not a number'"
+    )
 
 
 def test_msrp_attribute_is_not_a_number(setup_good_tests):
@@ -158,7 +164,9 @@ def test_msrp_attribute_is_not_a_number(setup_good_tests):
     with pytest.raises(TypeError) as cm:
         g.msrp = "not a number"
 
-    assert str(cm.value) == "Good.msrp should be a non-negative number, not str"
+    assert str(cm.value) == (
+        "Good.msrp should be a non-negative number, not str: 'not a number'"
+    )
 
 
 def test_msrp_argument_is_zero(setup_good_tests):
@@ -250,7 +258,7 @@ def test_unit_argument_is_not_a_string(setup_good_tests):
     with pytest.raises(TypeError) as cm:
         g = Good(**data["kwargs"])
 
-    assert str(cm.value) == "Good.unit should be a string, not int"
+    assert str(cm.value) == "Good.unit should be a string, not int: '12312'"
 
 
 def test_unit_attribute_is_not_a_string(setup_good_tests):
@@ -260,7 +268,7 @@ def test_unit_attribute_is_not_a_string(setup_good_tests):
     with pytest.raises(TypeError) as cm:
         g.unit = 2342
 
-    assert str(cm.value) == "Good.unit should be a string, not int"
+    assert str(cm.value) == "Good.unit should be a string, not int: '2342'"
 
 
 def test_unit_argument_is_working_properly(setup_good_tests):
@@ -307,10 +315,9 @@ def test_client_argument_is_not_a_client_instance(setup_good_tests):
     with pytest.raises(TypeError) as cm:
         Good(**data["kwargs"])
 
-    assert (
-        str(cm.value)
-        == "Good.client attribute should be a stalker.models.client.Client "
-        "instance, not str"
+    assert str(cm.value) == (
+        "Good.client attribute should be a stalker.models.client.Client instance, "
+        "not str: 'not a client'"
     )
 
 
@@ -321,10 +328,9 @@ def test_client_attribute_is_set_to_a_value_other_than_a_client(setup_good_tests
     with pytest.raises(TypeError) as cm:
         g.client = "not a client"
 
-    assert (
-        str(cm.value)
-        == "Good.client attribute should be a stalker.models.client.Client "
-        "instance, not str"
+    assert str(cm.value) == (
+        "Good.client attribute should be a stalker.models.client.Client instance, "
+        "not str: 'not a client'"
     )
 
 

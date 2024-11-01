@@ -178,9 +178,8 @@ def test_entities_argument_is_not_a_list_of_simple_entity_instances():
     with pytest.raises(TypeError) as cm:
         EntityGroup(entities=["not", 1, "list", "of", "SimpleEntities"])
 
-    assert (
-        str(cm.value)
-        == "EntityGroup.entities should be a list of SimpleEntities, not str"
+    assert str(cm.value) == (
+        "EntityGroup.entities should be a list of SimpleEntities, not str: 'not'"
     )
 
 

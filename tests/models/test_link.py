@@ -76,7 +76,9 @@ def test_full_path_argument_is_not_a_string(setup_link_tests):
     data["kwargs"]["full_path"] = test_value
     with pytest.raises(TypeError) as cm:
         Link(**data["kwargs"])
-    assert str(cm.value) == "Link.full_path should be an instance of string not int"
+    assert str(cm.value) == (
+        "Link.full_path should be an instance of string, not int: '1'"
+    )
 
 
 def test_full_path_attribute_is_not_a_string(setup_link_tests):
@@ -86,7 +88,9 @@ def test_full_path_attribute_is_not_a_string(setup_link_tests):
     with pytest.raises(TypeError) as cm:
         data["test_link"].full_path = test_value
 
-    assert str(cm.value) == "Link.full_path should be an instance of string not int"
+    assert str(cm.value) == (
+        "Link.full_path should be an instance of string, not int: '1'"
+    )
 
 
 def test_full_path_windows_to_other_conversion(setup_link_tests):
@@ -140,9 +144,8 @@ def test_original_filename_argument_accepts_string_only(setup_link_tests):
     with pytest.raises(TypeError) as cm:
         Link(**data["kwargs"])
 
-    assert (
-        str(cm.value)
-        == "Link.original_filename should be an instance of str and not int"
+    assert str(cm.value) == (
+        "Link.original_filename should be an instance of string, not int: '1'"
     )
 
 
@@ -153,9 +156,8 @@ def test_original_filename_attribute_accepts_string_only(setup_link_tests):
     with pytest.raises(TypeError) as cm:
         data["test_link"].original_filename = test_value
 
-    assert (
-        str(cm.value)
-        == "Link.original_filename should be an instance of str and not float"
+    assert str(cm.value) == (
+        "Link.original_filename should be an instance of string, not float: '1.1'"
     )
 
 
@@ -230,7 +232,7 @@ def test_path_attribute_is_set_to_a_value_other_then_string(setup_link_tests):
     data = setup_link_tests
     with pytest.raises(TypeError) as cm:
         data["test_link"].path = 1
-    assert str(cm.value) == "Link.path should be an instance of str, not int"
+    assert str(cm.value) == "Link.path should be an instance of str, not int: '1'"
 
 
 def test_path_attribute_value_comes_from_full_path(setup_link_tests):
@@ -263,7 +265,7 @@ def test_filename_attribute_is_set_to_a_value_other_then_string(setup_link_tests
     data = setup_link_tests
     with pytest.raises(TypeError) as cm:
         data["test_link"].filename = 3
-    assert str(cm.value) == "Link.filename should be an instance of str, not int"
+    assert str(cm.value) == "Link.filename should be an instance of str, not int: '3'"
 
 
 def test_filename_attribute_is_set_to_empty_string(setup_link_tests):
@@ -316,7 +318,9 @@ def test_extension_attribute_is_set_to_a_value_other_then_string(setup_link_test
     data = setup_link_tests
     with pytest.raises(TypeError) as cm:
         data["test_link"].extension = 123
-    assert str(cm.value) == "Link.extension should be an instance of str, not int"
+    assert str(cm.value) == (
+        "Link.extension should be an instance of str, not int: '123'"
+    )
 
 
 def test_extension_attribute_value_comes_from_full_path(setup_link_tests):

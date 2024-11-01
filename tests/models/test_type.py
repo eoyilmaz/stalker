@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tests for the Type class."""
 
+import sys
 import pytest
 
 from stalker import Asset, Entity, Type
@@ -120,7 +121,19 @@ def test_target_entity_type_attribute_is_read_only(setup_type_tests):
     data = setup_type_tests
     with pytest.raises(AttributeError) as cm:
         data["test_type"].target_entity_type = "Asset"
-    assert str(cm.value) == "can't set attribute"
+
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute",
+        11: "property of 'Type' object has no setter",
+        12: "property of 'Type' object has no setter",
+    }.get(
+        sys.version_info.minor,
+        "property '_target_entity_type_getter' of 'Type' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_target_entity_type_attribute_is_working_properly(setup_type_tests):

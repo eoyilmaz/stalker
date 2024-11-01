@@ -2,6 +2,7 @@
 """Tests related to the WorkingHours class."""
 import copy
 import datetime
+import sys
 
 import pytest
 
@@ -35,7 +36,10 @@ def test_working_hours_argument_is_not_a_dictionary():
     with pytest.raises(TypeError) as cm:
         WorkingHours(working_hours="not a dictionary of proper values")
 
-    assert str(cm.value) == "WorkingHours.working_hours should be a dictionary, not str"
+    assert str(cm.value) == (
+        "WorkingHours.working_hours should be a dictionary, "
+        "not str: 'not a dictionary of proper values'"
+    )
 
 
 def test_working_hours_attribute_is_not_a_dictionary():
@@ -44,7 +48,10 @@ def test_working_hours_attribute_is_not_a_dictionary():
     with pytest.raises(TypeError) as cm:
         wh.working_hours = "not a dictionary of proper values"
 
-    assert str(cm.value) == "WorkingHours.working_hours should be a dictionary, not str"
+    assert str(cm.value) == (
+        "WorkingHours.working_hours should be a dictionary, "
+        "not str: 'not a dictionary of proper values'"
+    )
 
 
 def test_working_hours_argument_value_is_dictionary_of_other_formatted_data():
@@ -52,10 +59,11 @@ def test_working_hours_argument_value_is_dictionary_of_other_formatted_data():
     with pytest.raises(TypeError) as cm:
         WorkingHours(working_hours={"not": "properly valued"})
 
-    assert (
-        str(cm.value) == "WorkingHours.working_hours should be a dictionary with keys "
+    assert str(cm.value) == (
+        "WorkingHours.working_hours should be a dictionary with keys "
         '"mon, tue, wed, thu, fri, sat, sun" and the values should a list '
-        "of lists of two integers like [[540, 720], [800, 1080]], not str"
+        "of lists of two integers like [[540, 720], [800, 1080]], "
+        "not str: 'properly valued'"
     )
 
 
@@ -69,7 +77,7 @@ def test_working_hours_attribute_is_set_to_a_dictionary_of_other_formatted_data(
         str(cm.value) == "WorkingHours.working_hours should be a dictionary with keys "
         '"mon, tue, wed, thu, fri, sat, sun" and the values should a '
         "list of lists of two integers like [[540, 720], [800, 1080]], "
-        "not str"
+        "not str: 'properly valued'"
     )
 
 
@@ -186,11 +194,10 @@ def test___setitem__checks_the_given_data_1():
     with pytest.raises(TypeError) as cm:
         wh[0] = "not a proper data"
 
-    assert (
-        str(cm.value)
-        == "WorkingHours.working_hours value should be a list of lists of "
+    assert str(cm.value) == (
+        "WorkingHours.working_hours value should be a list of lists of "
         "two integers between and the range of integers should be 0-1440, "
-        "not str"
+        "not str: 'not a proper data'"
     )
 
 
@@ -205,7 +212,7 @@ def test___setitem__checks_the_given_data_2():
         str(cm.value)
         == "WorkingHours.working_hours value should be a list of lists of "
         "two integers between and the range of integers should be 0-1440, "
-        "not str"
+        "not str: 'not a proper data'"
     )
 
 
@@ -214,11 +221,10 @@ def test___setitem__checks_the_given_data_3():
     wh = WorkingHours()
     with pytest.raises(TypeError) as cm:
         wh[0] = ["no proper data"]
-    assert (
-        str(cm.value)
-        == "WorkingHours.working_hours value should be a list of lists of "
+    assert str(cm.value) == (
+        "WorkingHours.working_hours value should be a list of lists of "
         "two integers between and the range of integers should be 0-1440, "
-        "not str"
+        "not str: 'no proper data'"
     )
 
 
@@ -231,7 +237,7 @@ def test___setitem__checks_the_given_data_4():
         str(cm.value)
         == "WorkingHours.working_hours value should be a list of lists of "
         "two integers between and the range of integers should be 0-1440, "
-        "not str"
+        "not str: 'no proper data'"
     )
 
 
@@ -467,7 +473,17 @@ def test_to_tjp_attribute_is_read_only():
     wh = WorkingHours()
     with pytest.raises(AttributeError) as cm:
         wh.to_tjp = "some value"
-    assert str(cm.value) == "can't set attribute 'to_tjp'"
+
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'to_tjp'",
+    }.get(
+        sys.version_info.minor,
+        "property 'to_tjp' of 'WorkingHours' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_to_tjp_attribute_is_working_properly():
@@ -520,7 +536,16 @@ def test_weekly_working_hours_attribute_is_read_only():
     with pytest.raises(AttributeError) as cm:
         wh.weekly_working_hours = 232
 
-    assert str(cm.value) == "can't set attribute 'weekly_working_hours'"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'weekly_working_hours'",
+    }.get(
+        sys.version_info.minor,
+        "property 'weekly_working_hours' of 'WorkingHours' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_weekly_working_hours_attribute_is_working_properly():
@@ -593,7 +618,16 @@ def test_weekly_working_days_is_a_read_only_attribute():
     with pytest.raises(AttributeError) as cm:
         wh.weekly_working_days = 6
 
-    assert str(cm.value) == "can't set attribute 'weekly_working_days'"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'weekly_working_days'",
+    }.get(
+        sys.version_info.minor,
+        "property 'weekly_working_days' of 'WorkingHours' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_weekly_working_days_is_calculated_correctly():
@@ -634,7 +668,17 @@ def test_yearly_working_days_is_a_read_only_attribute():
     wh = WorkingHours()
     with pytest.raises(AttributeError) as cm:
         wh.yearly_working_days = 260.1
-    assert str(cm.value) == "can't set attribute 'yearly_working_days'"
+
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'yearly_working_days'",
+    }.get(
+        sys.version_info.minor,
+        "property 'yearly_working_days' of 'WorkingHours' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_yearly_working_days_is_calculated_correctly():
@@ -699,9 +743,9 @@ def test_daily_working_hours_argument_is_not_integer():
     kwargs["daily_working_hours"] = "not an integer"
     with pytest.raises(TypeError) as cm:
         WorkingHours(**kwargs)
-    assert (
-        str(cm.value)
-        == "WorkingHours.daily_working_hours should be an integer, not str"
+    assert str(cm.value) == (
+        "WorkingHours.daily_working_hours should be an integer, "
+        "not str: 'not an integer'"
     )
 
 
@@ -711,9 +755,9 @@ def test_daily_working_hours_attribute_is_not_an_integer():
     with pytest.raises(TypeError) as cm:
         wh.daily_working_hours = "not an integer"
 
-    assert (
-        str(cm.value)
-        == "WorkingHours.daily_working_hours should be an integer, not str"
+    assert str(cm.value) == (
+        "WorkingHours.daily_working_hours should be an integer, "
+        "not str: 'not an integer'"
     )
 
 

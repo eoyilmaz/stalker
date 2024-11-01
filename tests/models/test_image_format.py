@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tests for the ImageFormat class."""
 
+import sys
 import pytest
 
 from stalker import ImageFormat
@@ -40,7 +41,7 @@ def test_width_argument_accepts_int_or_float_only(setup_image_format_tests):
 
     assert (
         str(cm.value)
-        == "ImageFormat.width should be an instance of int or float not str"
+        == "ImageFormat.width should be an instance of int or float, not str: '1920'"
     )
 
 
@@ -53,7 +54,7 @@ def test_width_attribute_int_or_float(setup_image_format_tests):
 
     assert (
         str(cm.value)
-        == "ImageFormat.width should be an instance of int or float not str"
+        == "ImageFormat.width should be an instance of int or float, not str: '1920'"
     )
 
 
@@ -123,9 +124,8 @@ def test_height_argument_int_or_float(setup_image_format_tests):
     with pytest.raises(TypeError) as cm:
         ImageFormat(**data["kwargs"])
 
-    assert (
-        str(cm.value)
-        == "ImageFormat.height should be an instance of int or float not str"
+    assert str(cm.value) == (
+        "ImageFormat.height should be an instance of int or float, not str: '1080'"
     )
 
 
@@ -137,9 +137,8 @@ def test_height_attribute_int_or_float(setup_image_format_tests):
     with pytest.raises(TypeError) as cm:
         data["test_image_format"].height = test_value
 
-    assert (
-        str(cm.value)
-        == "ImageFormat.height should be an instance of int or float not str"
+    assert str(cm.value) == (
+        "ImageFormat.height should be an instance of int or float, not str: '1080'"
     )
 
 
@@ -278,7 +277,16 @@ def test_device_aspect_attribute_write_protected(setup_image_format_tests):
     with pytest.raises(AttributeError) as cm:
         data["test_image_format"].device_aspect = 10
 
-    assert str(cm.value) == "can't set attribute 'device_aspect'"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'device_aspect'",
+    }.get(
+        sys.version_info.minor,
+        "property 'device_aspect' of 'ImageFormat' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_pixel_aspect_int_float(setup_image_format_tests):
@@ -290,10 +298,9 @@ def test_pixel_aspect_int_float(setup_image_format_tests):
     with pytest.raises(TypeError) as cm:
         ImageFormat(**data["kwargs"])
 
-    assert (
-        str(cm.value)
-        == "ImageFormat.pixel_aspect should be an instance of int or float "
-        "not str"
+    assert str(cm.value) == (
+        "ImageFormat.pixel_aspect should be an instance of int or float, "
+        "not str: '1.0'"
     )
 
 
@@ -421,9 +428,9 @@ def test_print_resolution_argument_accepts_int_float_only(setup_image_format_tes
     with pytest.raises(TypeError) as cm:
         ImageFormat(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "ImageFormat.print_resolution should be an instance of int or "
-        "float not str"
+    assert str(cm.value) == (
+        "ImageFormat.print_resolution should be an instance of int or float, "
+        "not str: '300.0'"
     )
 
 

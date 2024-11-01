@@ -123,9 +123,9 @@ def test_users_argument_accepts_only_a_list_of_user_objects(setup_department_tes
     with pytest.raises(TypeError) as cm:
         Department(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "DepartmentUser.user should be a stalker.models.auth.User "
-        "instance, not int"
+    assert str(cm.value) == (
+        "DepartmentUser.user should be a stalker.models.auth.User instance, "
+        "not int: '1'"
     )
 
 
@@ -137,9 +137,9 @@ def test_users_attribute_accepts_only_a_list_of_user_objects(setup_department_te
     with pytest.raises(TypeError) as cm:
         data["test_department"].users = test_value
 
-    assert (
-        str(cm.value) == "DepartmentUser.user should be a stalker.models.auth.User "
-        "instance, not int"
+    assert str(cm.value) == (
+        "DepartmentUser.user should be a stalker.models.auth.User instance, "
+        "not int: '1'"
     )
 
 
@@ -150,9 +150,9 @@ def test_users_attribute_elements_accepts_user_only_1(setup_department_tests):
     with pytest.raises(TypeError) as cm:
         data["test_department"].users.append(0)
 
-    assert (
-        str(cm.value) == "DepartmentUser.user should be a stalker.models.auth.User "
-        "instance, not int"
+    assert str(cm.value) == (
+        "DepartmentUser.user should be a stalker.models.auth.User instance, "
+        "not int: '0'"
     )
 
 
@@ -163,9 +163,9 @@ def test_users_attribute_elements_accepts_user_only_2(setup_department_tests):
     with pytest.raises(TypeError) as cm:
         data["test_department"].users[0] = 0
 
-    assert (
-        str(cm.value) == "DepartmentUser.user should be a stalker.models.auth.User "
-        "instance, not int"
+    assert str(cm.value) == (
+        "DepartmentUser.user should be a stalker.models.auth.User instance, "
+        "not int: '0'"
     )
 
 
@@ -176,9 +176,9 @@ def test_users_argument_is_not_iterable(setup_department_tests):
     with pytest.raises(TypeError) as cm:
         Department(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "DepartmentUser.user should be a stalker.models.auth.User "
-        "instance, not str"
+    assert str(cm.value) == (
+        "DepartmentUser.user should be a stalker.models.auth.User instance, "
+        "not str: 'a'"
     )
 
 
@@ -188,9 +188,9 @@ def test_users_attribute_is_not_iterable(setup_department_tests):
     with pytest.raises(TypeError) as cm:
         data["test_department"].users = "a user"
 
-    assert (
-        str(cm.value) == "DepartmentUser.user should be a stalker.models.auth.User "
-        "instance, not str"
+    assert str(cm.value) == (
+        "DepartmentUser.user should be a stalker.models.auth.User instance, "
+        "not str: 'a'"
     )
 
 

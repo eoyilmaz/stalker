@@ -19,10 +19,16 @@ def setup_authentication_log_tests():
     """
     data = dict()
     data["test_user1"] = User(
-        name="Test User 1", login="tuser1", email="tuser1@users.com", password="secret"
+        name="Test User 1",
+        login="tuser1",
+        email="tuser1@users.com",
+        password="secret",
     )
     data["test_user2"] = User(
-        name="Test User 2", login="tuser2", email="tuser2@users.com", password="secret"
+        name="Test User 2",
+        login="tuser2",
+        email="tuser2@users.com",
+        password="secret",
     )
     return data
 
@@ -31,9 +37,8 @@ def test_user_argument_is_skipped(setup_authentication_log_tests):
     """TypeError is raised if the user arg is skipped."""
     with pytest.raises(TypeError) as cm:
         AuthenticationLog(action=LOGIN, date=datetime.datetime.now(pytz.utc))
-    assert (
-        str(cm.value)
-        == "AuthenticationLog.user should be a User instance, not NoneType"
+    assert str(cm.value) == (
+        "AuthenticationLog.user should be a User instance, not NoneType: 'None'"
     )
 
 
@@ -41,9 +46,8 @@ def test_user_argument_is_none(setup_authentication_log_tests):
     """TypeError is raised if the user arg is None."""
     with pytest.raises(TypeError) as cm:
         AuthenticationLog(user=None, action=LOGIN, date=datetime.datetime.now(pytz.utc))
-    assert (
-        str(cm.value)
-        == "AuthenticationLog.user should be a User instance, not NoneType"
+    assert str(cm.value) == (
+        "AuthenticationLog.user should be a User instance, not NoneType: 'None'"
     )
 
 
@@ -55,7 +59,10 @@ def test_user_argument_is_not_a_user_instance(setup_authentication_log_tests):
             action=LOGIN,
             date=datetime.datetime.now(pytz.utc),
         )
-    assert str(cm.value) == "AuthenticationLog.user should be a User instance, not str"
+    assert str(cm.value) == (
+        "AuthenticationLog.user should be a User instance, "
+        "not str: 'not a user instance'"
+    )
 
 
 def test_user_attribute_is_not_a_user_instance(setup_authentication_log_tests):
@@ -67,7 +74,10 @@ def test_user_attribute_is_not_a_user_instance(setup_authentication_log_tests):
     with pytest.raises(TypeError) as cm:
         uli.user = "not a user instance"
 
-    assert str(cm.value) == "AuthenticationLog.user should be a User instance, not str"
+    assert str(cm.value) == (
+        "AuthenticationLog.user should be a User instance, "
+        "not str: 'not a user instance'"
+    )
 
 
 def test_user_argument_is_working_properly(setup_authentication_log_tests):
@@ -202,9 +212,9 @@ def test_date_argument_is_not_a_datetime_instance(setup_authentication_log_tests
         AuthenticationLog(
             user=data["test_user1"], action=LOGIN, date="not a datetime instance"
         )
-    assert (
-        str(cm.value) == 'AuthenticationLog.date should be a "datetime.datetime" '
-        "instance, not str"
+    assert str(cm.value) == (
+        "AuthenticationLog.date should be a datetime.datetime instance, "
+        "not str: 'not a datetime instance'"
     )
 
 
@@ -217,9 +227,9 @@ def test_date_attribute_is_not_a_datetime_instance(setup_authentication_log_test
     with pytest.raises(TypeError) as cm:
         uli.date = "not a datetime instance"
 
-    assert (
-        str(cm.value) == 'AuthenticationLog.date should be a "datetime.datetime" '
-        "instance, not str"
+    assert str(cm.value) == (
+        "AuthenticationLog.date should be a datetime.datetime instance, "
+        "not str: 'not a datetime instance'"
     )
 
 

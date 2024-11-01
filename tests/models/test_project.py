@@ -3,6 +3,7 @@
 
 import datetime
 import logging
+import sys
 
 from jinja2 import Template
 
@@ -567,7 +568,16 @@ def test_sequences_attribute_is_read_only(setup_project_db_test):
     with pytest.raises(AttributeError) as cm:
         data["test_project"].sequences = ["some non sequence related data"]
 
-    assert str(cm.value) == "can't set attribute 'sequences'"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'sequences'",
+    }.get(
+        sys.version_info.minor,
+        "property 'sequences' of 'Project' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_assets_attribute_is_read_only(setup_project_db_test):
@@ -606,9 +616,9 @@ def test_image_format_argument_accepts_image_format_only(setup_project_db_test):
     with pytest.raises(TypeError) as cm:
         Project(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "Project.image_format should be an instance of "
-        "stalker.models.format.ImageFormat, not str"
+    assert str(cm.value) == (
+        "Project.image_format should be an instance of "
+        "stalker.models.format.ImageFormat, not str: 'a str'"
     )
 
 
@@ -656,8 +666,8 @@ def test_fps_attribute_is_set_to_none(setup_project_db_test):
     with pytest.raises(TypeError) as cm:
         Project(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "Project.fps should be a positive float or int, not NoneType"
+    assert str(cm.value) == (
+        "Project.fps should be a positive float or int, not NoneType: 'None'"
     )
 
 
@@ -668,7 +678,9 @@ def test_fps_argument_is_given_as_non_float_or_integer_1(setup_project_db_test):
     with pytest.raises(TypeError) as cm:
         Project(**data["kwargs"])
 
-    assert str(cm.value) == "Project.fps should be a positive float or int, not str"
+    assert str(cm.value) == (
+        "Project.fps should be a positive float or int, not str: 'a str'"
+    )
 
 
 def test_fps_argument_is_given_as_non_float_or_integer_2(setup_project_db_test):
@@ -678,7 +690,9 @@ def test_fps_argument_is_given_as_non_float_or_integer_2(setup_project_db_test):
     with pytest.raises(TypeError) as cm:
         Project(**data["kwargs"])
 
-    assert str(cm.value) == "Project.fps should be a positive float or int, not list"
+    assert str(cm.value) == (
+        "Project.fps should be a positive float or int, not list: '['a', 'list']'"
+    )
 
 
 def test_fps_attribute_is_given_as_non_float_or_integer_1(setup_project_db_test):
@@ -687,7 +701,9 @@ def test_fps_attribute_is_given_as_non_float_or_integer_1(setup_project_db_test)
     with pytest.raises(TypeError) as cm:
         data["test_project"].fps = "a str"
 
-    assert str(cm.value) == "Project.fps should be a positive float or int, not str"
+    assert str(cm.value) == (
+        "Project.fps should be a positive float or int, not str: 'a str'"
+    )
 
 
 def test_fps_attribute_is_given_as_non_float_or_integer_2(setup_project_db_test):
@@ -696,7 +712,9 @@ def test_fps_attribute_is_given_as_non_float_or_integer_2(setup_project_db_test)
     with pytest.raises(TypeError) as cm:
         data["test_project"].fps = ["a", "list"]
 
-    assert str(cm.value) == "Project.fps should be a positive float or int, not list"
+    assert str(cm.value) == (
+        "Project.fps should be a positive float or int, not list: '['a', 'list']'"
+    )
 
 
 def test_fps_argument_string_to_float_conversion(setup_project_db_test):
@@ -706,7 +724,9 @@ def test_fps_argument_string_to_float_conversion(setup_project_db_test):
     with pytest.raises(TypeError) as cm:
         Project(**data["kwargs"])
 
-    assert str(cm.value) == "Project.fps should be a positive float or int, not str"
+    assert str(cm.value) == (
+        "Project.fps should be a positive float or int, not str: '2.3'"
+    )
 
 
 def test_fps_attribute_string_to_float_conversion(setup_project_db_test):
@@ -715,7 +735,9 @@ def test_fps_attribute_string_to_float_conversion(setup_project_db_test):
     with pytest.raises(TypeError) as cm:
         data["test_project"].fps = "2.3"
 
-    assert str(cm.value) == "Project.fps should be a positive float or int, not str"
+    assert str(cm.value) == (
+        "Project.fps should be a positive float or int, not str: '2.3'"
+    )
 
 
 def test_fps_attribute_float_conversion(setup_project_db_test):
@@ -806,7 +828,7 @@ def test_repositories_argument_is_not_a_list(setup_project_db_test):
     assert (
         str(cm.value) == "ProjectRepository.repositories should be a list of "
         "stalker.models.repository.Repository instances or derivatives, "
-        "not str"
+        "not str: 'n'"
     )
 
 
@@ -816,10 +838,10 @@ def test_repositories_attribute_is_not_a_list(setup_project_db_test):
     with pytest.raises(TypeError) as cm:
         data["test_project"].repositories = "not a list"
 
-    assert (
-        str(cm.value) == "ProjectRepository.repositories should be a list of "
+    assert str(cm.value) == (
+        "ProjectRepository.repositories should be a list of "
         "stalker.models.repository.Repository instances or derivatives, "
-        "not str"
+        "not str: 'n'"
     )
 
 
@@ -835,7 +857,7 @@ def test_repositories_argument_is_not_a_list_of_repository_instances(
     assert (
         str(cm.value) == "ProjectRepository.repositories should be a list of "
         "stalker.models.repository.Repository instances or derivatives, "
-        "not str"
+        "not str: 'not'"
     )
 
 
@@ -854,10 +876,9 @@ def test_repositories_attribute_is_not_a_list_of_repository_instances(
             "instances",
         ]
 
-    assert (
-        str(cm.value) == "ProjectRepository.repositories should be a list of "
-        "stalker.models.repository.Repository instances or derivatives, "
-        "not str"
+    assert str(cm.value) == (
+        "ProjectRepository.repositories should be a list of "
+        "stalker.models.repository.Repository instances or derivatives, not str: 'not'"
     )
 
 
@@ -951,7 +972,7 @@ def test_structure_argument_not_instance_of_structure(setup_project_db_test):
 
     assert (
         str(cm.value) == "Project.structure should be an instance of "
-        "stalker.models.structure.Structure, not float"
+        "stalker.models.structure.Structure, not float: '1.215'"
     )
 
 
@@ -963,7 +984,7 @@ def test_structure_attribute_not_instance_of_structure(setup_project_db_test):
 
     assert (
         str(cm.value) == "Project.structure should be an instance of "
-        "stalker.models.structure.Structure, not float"
+        "stalker.models.structure.Structure, not float: '1.2'"
     )
 
 
@@ -1208,7 +1229,7 @@ def test_users_argument_is_not_a_list_of_user_instances(setup_project_db_test):
 
     assert (
         str(cm.value) == "ProjectUser.user should be a stalker.models.auth.User "
-        "instance, not str"
+        "instance, not str: 'not a list of User instances'"
     )
 
 
@@ -1222,7 +1243,7 @@ def test_users_attribute_is_set_to_a_value_which_is_not_a_list_of_User_instances
 
     assert (
         str(cm.value) == "ProjectUser.user should be a stalker.models.auth.User "
-        "instance, not str"
+        "instance, not str: 'not a list of Users'"
     )
 
 
@@ -1346,7 +1367,17 @@ def test_is_active_is_read_only(setup_project_db_test):
     data = setup_project_db_test
     with pytest.raises(AttributeError) as cm:
         data["test_project"].is_active = True
-    assert str(cm.value) == "can't set attribute 'is_active'"
+
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'is_active'",
+    }.get(
+        sys.version_info.minor,
+        "property 'is_active' of 'Project' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_is_active_is_working_properly(setup_project_db_test):
@@ -1364,7 +1395,16 @@ def test_total_logged_seconds_attribute_is_read_only(setup_project_db_test):
     with pytest.raises(AttributeError) as cm:
         data["test_project"].total_logged_seconds = 32.3
 
-    assert str(cm.value) == "can't set attribute 'total_logged_seconds'"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'total_logged_seconds'",
+    }.get(
+        sys.version_info.minor,
+        "property 'total_logged_seconds' of 'Project' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_total_logged_seconds_is_0_for_a_project_with_no_child_tasks(
@@ -1428,7 +1468,16 @@ def test_schedule_seconds_attribute_is_read_only(setup_project_db_test):
     with pytest.raises(AttributeError) as cm:
         data["test_project"].schedule_seconds = 3
 
-    assert str(cm.value) == "can't set attribute 'schedule_seconds'"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'schedule_seconds'",
+    }.get(
+        sys.version_info.minor,
+        "property 'schedule_seconds' of 'Project' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_schedule_seconds_attribute_value_is_0_for_a_project_with_no_tasks(
@@ -1508,7 +1557,16 @@ def test_percent_complete_attribute_is_read_only(setup_project_db_test):
     with pytest.raises(AttributeError) as cm:
         data["test_project"].percent_complete = 32.3
 
-    assert str(cm.value) == "can't set attribute 'percent_complete'"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'percent_complete'",
+    }.get(
+        sys.version_info.minor,
+        "property 'percent_complete' of 'Project' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_percent_complete_is_0_for_a_project_with_no_tasks(setup_project_db_test):
@@ -1582,9 +1640,9 @@ def test_clients_argument_is_given_as_something_other_than_a_client(
     with pytest.raises(TypeError) as cm:
         Project(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "ProjectClient.client should be an instance of "
-        "stalker.models.auth.Client not str"
+    assert str(cm.value) == (
+        "ProjectClient.client should be an instance of "
+        "stalker.models.auth.Client, not str: 'a'"
     )
 
 
@@ -1594,9 +1652,9 @@ def test_clients_attribute_is_not_a_client_instance(setup_project_db_test):
     with pytest.raises(TypeError) as cm:
         data["test_project"].clients = "a user"
 
-    assert (
-        str(cm.value) == "ProjectClient.client should be an instance of "
-        "stalker.models.auth.Client not str"
+    assert str(cm.value) == (
+        "ProjectClient.client should be an instance of stalker.models.auth.Client, "
+        "not str: 'a'"
     )
 
 
@@ -1824,7 +1882,17 @@ def test_open_tickets_attribute_is_read_only(setup_project_tickets_db_tests):
     data = setup_project_tickets_db_tests
     with pytest.raises(AttributeError) as cm:
         data["test_project"].open_tickets = []
-    assert str(cm.value) == "can't set attribute 'open_tickets'"
+
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'open_tickets'",
+    }.get(
+        sys.version_info.minor,
+        "property 'open_tickets' of 'Project' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_tickets_attribute_returns_all_tickets_in_this_project(

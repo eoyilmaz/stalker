@@ -18,5 +18,6 @@ def test_role_argument_is_not_a_role_instance():
         )
 
     assert str(cm.value) == (
-        "ClientUser.role should be a stalker.models.auth.Role instance, not str"
+        "ClientUser.role should be a stalker.models.auth.Role instance, "
+        "not str: 'not a role instance'"
     )

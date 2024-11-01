@@ -7,7 +7,7 @@ import pytest
 
 import pytz
 
-from stalker.models import local_to_utc, make_plural, utc_to_local
+from stalker.utils import make_plural, utc_to_local, local_to_utc
 
 
 @pytest.mark.parametrize(

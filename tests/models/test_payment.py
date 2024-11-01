@@ -138,8 +138,8 @@ def test_invoice_argument_is_skipped(setup_payment_tests):
     with pytest.raises(TypeError) as cm:
         _ = Payment(amount=1499, unit="TRY")
 
-    assert (
-        str(cm.value) == "Payment.invoice should be an Invoice instance, not NoneType"
+    assert str(cm.value) == (
+        "Payment.invoice should be an Invoice instance, not NoneType: 'None'"
     )
 
 
@@ -148,8 +148,8 @@ def test_invoice_argument_is_none(setup_payment_tests):
     with pytest.raises(TypeError) as cm:
         _ = Payment(invoice=None, amount=1499, unit="TRY")
 
-    assert (
-        str(cm.value) == "Payment.invoice should be an Invoice instance, not NoneType"
+    assert str(cm.value) == (
+        "Payment.invoice should be an Invoice instance, not NoneType: 'None'"
     )
 
 
@@ -161,8 +161,8 @@ def test_invoice_attribute_is_none(setup_payment_tests):
     with pytest.raises(TypeError) as cm:
         p.invoice = None
 
-    assert (
-        str(cm.value) == "Payment.invoice should be an Invoice instance, not NoneType"
+    assert str(cm.value) == (
+        "Payment.invoice should be an Invoice instance, not NoneType: 'None'"
     )
 
 
@@ -171,7 +171,10 @@ def test_invoice_argument_is_not_an_invoice_instance():
     with pytest.raises(TypeError) as cm:
         _ = Payment(invoice="not an invoice instance", amount=1499, unit="TRY")
 
-    assert str(cm.value) == "Payment.invoice should be an Invoice instance, not str"
+    assert str(cm.value) == (
+        "Payment.invoice should be an Invoice instance, "
+        "not str: 'not an invoice instance'"
+    )
 
 
 def test_invoice_attribute_is_set_to_a_value_other_than_an_invoice_instance(
@@ -184,7 +187,10 @@ def test_invoice_attribute_is_set_to_a_value_other_than_an_invoice_instance(
     with pytest.raises(TypeError) as cm:
         p.invoice = "not an invoice instance"
 
-    assert str(cm.value) == "Payment.invoice should be an Invoice instance, not str"
+    assert str(cm.value) == (
+        "Payment.invoice should be an Invoice instance, "
+        "not str: 'not an invoice instance'"
+    )
 
 
 def test_invoice_argument_is_working_properly(setup_payment_tests):

@@ -9,8 +9,7 @@ from stalker import SimpleEntity, StatusMixin
 
 
 class NewStatusedEntity(SimpleEntity, StatusMixin):
-    """The new statused entity class, which is a new simpleEntity with status
-    abilities.
+    """The new statused entity class, which is a new simpleEntity with status abilities.
     """
 
     __tablename__ = "NewStatusedEntities"
@@ -21,5 +20,5 @@ class NewStatusedEntity(SimpleEntity, StatusMixin):
     )
 
 
-# voila now we have introduced a new type to the SOM and also mixed it with a
+# voilà now we have introduced a new type to the SOM and also mixed it with a
 # StatusMixin

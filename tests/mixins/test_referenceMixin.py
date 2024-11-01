@@ -111,9 +111,9 @@ def test_references_attribute_accepting_only_lists_of_link_instances(
     with pytest.raises(TypeError) as cm:
         data["test_foo_obj"].references = test_value
 
-    assert (
-        str(cm.value) == "All the elements in the RefMixFooClass.references should be "
-        "stalker.models.link.Link instances not int"
+    assert str(cm.value) == (
+        "All the elements in the RefMixFooClass.references should be "
+        "stalker.models.link.Link instances, not int: '1'"
     )
 
 
@@ -123,9 +123,9 @@ def test_references_attribute_elements_accepts_links_only(setup_reference_mixin_
     with pytest.raises(TypeError) as cm:
         data["test_foo_obj"].references = [data["test_entity1"], data["test_entity2"]]
 
-    assert (
-        str(cm.value) == "All the elements in the RefMixFooClass.references should be "
-        "stalker.models.link.Link instances not Entity"
+    assert str(cm.value) == (
+        "All the elements in the RefMixFooClass.references should be "
+        "stalker.models.link.Link instances, not Entity: '<Test Entity 1 (Entity)>'"
     )
 
 

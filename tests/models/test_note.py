@@ -69,7 +69,7 @@ def test_content_argument_is_set_to_something_other_than_a_string(setup_note_tes
     data["kwargs"]["content"] = test_value
     with pytest.raises(TypeError) as cm:
         Note(**data["kwargs"])
-    assert str(cm.value) == "Note.description should be a string, not float"
+    assert str(cm.value) == "Note.description should be a string, not float: '1.24'"
 
 
 def test_content_attribute_is_set_to_something_other_than_a_string(setup_note_tests):
@@ -78,7 +78,7 @@ def test_content_attribute_is_set_to_something_other_than_a_string(setup_note_te
     test_value = 1
     with pytest.raises(TypeError) as cm:
         data["test_note"].content = test_value
-    assert str(cm.value) == "Note.description should be a string, not int"
+    assert str(cm.value) == "Note.description should be a string, not int: '1'"
 
 
 def test_content_attribute_is_working_properly(setup_note_tests):

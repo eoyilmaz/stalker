@@ -140,9 +140,9 @@ def test_project_argument_is_not_a_project_instance(setup_project_mixin_tester):
     with pytest.raises(TypeError) as cm:
         ProjMixClass(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "ProjMixClass.project should be an instance of "
-        "stalker.models.project.Project instance not str"
+    assert str(cm.value) == (
+        "ProjMixClass.project should be an instance of stalker.models.project.Project "
+        "instance, not str: 'a project'"
     )
 
 
@@ -152,9 +152,9 @@ def test_project_attribute_is_not_a_project_instance(setup_project_mixin_tester)
     with pytest.raises(TypeError) as cm:
         data["test_foo_obj"].project = "a project"
 
-    assert (
-        str(cm.value) == "ProjMixClass.project should be an instance of "
-        "stalker.models.project.Project instance not str"
+    assert str(cm.value) == (
+        "ProjMixClass.project should be an instance of stalker.models.project.Project "
+        "instance, not str: 'a project'"
     )
 
 

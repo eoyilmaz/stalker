@@ -1,22 +1,24 @@
-"""created Daily class and the "Daily Statuses" status list and the status Open
+"""Created Daily class and the "Daily Statuses" status list and the status Open.
 
 Revision ID: 2e4a3813ae76
 Revises: 23dff41c95ff
 Create Date: 2014-06-23 17:14:33.013543
-
 """
 
-# revision identifiers, used by Alembic.
+from alembic import op
+
+import sqlalchemy as sa
+
 import stalker
 
+
+# revision identifiers, used by Alembic.
 revision = "2e4a3813ae76"
 down_revision = "23dff41c95ff"
 
-from alembic import op
-import sqlalchemy as sa
-
 
 def upgrade():
+    """Upgrade the tables."""
     op.create_table(
         "Dailies",
         sa.Column("id", sa.Integer(), nullable=False),
@@ -64,29 +66,30 @@ def upgrade():
     def create_status(name, code):
         # Insert in to SimpleEntities
         op.execute(
-            """INSERT INTO "SimpleEntities" (entity_type, name, description,
-created_by_id, updated_by_id, date_created, date_updated, type_id,
-thumbnail_id, html_style, html_class, stalker_version)
-VALUES ('Status', '%(name)s', '', NULL, NULL,
-(SELECT CAST(NOW() at time zone 'utc' AS timestamp)), (SELECT CAST(NOW() at time zone 'utc' AS timestamp)), NULL, NULL,
-'', '', '%(stalker_version)s')"""
-            % {"stalker_version": stalker.__version__, "name": name}
+            f"""INSERT INTO "SimpleEntities" (entity_type, name, description,
+            created_by_id, updated_by_id, date_created, date_updated, type_id,
+            thumbnail_id, html_style, html_class, stalker_version)
+            VALUES ('Status', '{name}', '', NULL, NULL,
+            (SELECT CAST(NOW() at time zone 'utc' AS timestamp)),
+            (SELECT CAST(NOW() at time zone 'utc' AS timestamp)),
+            NULL,
+            NULL,
+            '', '', '{stalker.__version__}')"""
         )
 
         # insert in to Entities and Statuses
         op.execute(
-            """INSERT INTO "Entities" (id)
+            f"""INSERT INTO "Entities" (id)
             VALUES ((
               SELECT id
               FROM "SimpleEntities"
-              WHERE "SimpleEntities".name = '%(name)s'
+              WHERE "SimpleEntities".name = '{name}'
             ));
             INSERT INTO "Statuses" (id, code)
             VALUES ((
               SELECT id
               FROM "SimpleEntities"
-              WHERE "SimpleEntities".name = '%(name)s'), '%(code)s');"""
-            % {"name": name, "code": code}
+              WHERE "SimpleEntities".name = '{name}'), '{code}');"""
         )
 
     create_status("Open", "OPEN")
@@ -94,14 +97,13 @@ VALUES ('Status', '%(name)s', '', NULL, NULL,
     # Create Review StatusList
     # Insert in to SimpleEntities
     op.execute(
-        """INSERT INTO "SimpleEntities" (entity_type, name, description,
+        f"""INSERT INTO "SimpleEntities" (entity_type, name, description,
 created_by_id, updated_by_id, date_created, date_updated, type_id,
 thumbnail_id, html_style, html_class, stalker_version)
 VALUES ('StatusList', 'Daily Statuses', '', NULL, NULL,
 (SELECT CAST(NOW() at time zone 'utc' AS timestamp)),
 (SELECT CAST(NOW() at time zone 'utc' AS timestamp)), NULL, NULL,
-'', '', '%(stalker_version)s')"""
-        % {"stalker_version": stalker.__version__}
+'', '', '{stalker.__version__}')"""
     )
 
     # insert in to Entities and StatusLists
@@ -133,6 +135,7 @@ VALUES
 
 
 def downgrade():
+    """Downgrade the tables."""
     op.drop_table("Daily_Links")
     op.drop_table("Dailies")
 

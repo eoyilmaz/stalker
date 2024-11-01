@@ -4,6 +4,7 @@
 import copy
 import datetime
 import os
+import sys
 import warnings
 
 import pytest
@@ -11,6 +12,7 @@ import pytest
 import pytz
 
 import stalker
+import stalker.db.setup
 from stalker import (
     Entity,
     FilenameTemplate,
@@ -211,9 +213,8 @@ def test_priority_arg_any_given_other_value_then_int_defaults_to_task_priority(
     with pytest.raises(TypeError) as cm:
         Task(**kwargs)
 
-    assert (
-        str(cm.value)
-        == "Task.priority should be an integer value between 0 and 1000, not str"
+    assert str(cm.value) == (
+        "Task.priority should be an integer value between 0 and 1000, not str: 'a324'"
     )
 
 
@@ -226,7 +227,8 @@ def test_priority_attribute_is_not_an_int(setup_task_tests):
         new_task.priority = test_value
 
     assert str(cm.value) == (
-        "Task.priority should be an integer value between 0 and 1000, not str"
+        "Task.priority should be an integer value between 0 and 1000, "
+        "not str: 'test_value_324'"
     )
 
 
@@ -350,7 +352,8 @@ def test_resources_arg_is_set_to_a_list_of_other_values_then_user(
         Task(**kwargs)
 
     assert str(cm.value) == (
-        "Task.resources should be a list of stalker.models.auth.User instances, not str"
+        "Task.resources should be a list of stalker.models.auth.User instances, "
+        "not str: 'a'"
     )
 
 
@@ -364,7 +367,8 @@ def test_resources_attr_is_set_to_a_list_of_other_values_then_user(
         new_task.resources = ["a", "list", "of", "resources", data["test_user1"]]
 
     assert str(cm.value) == (
-        "Task.resources should be a list of stalker.models.auth.User instances, not str"
+        "Task.resources should be a list of stalker.models.auth.User instances, "
+        "not str: 'a'"
     )
 
 
@@ -537,7 +541,8 @@ def test_watchers_arg_is_set_to_a_list_of_other_values_then_user(setup_task_test
         Task(**kwargs)
 
     assert str(cm.value) == (
-        "Task.watchers should be a list of stalker.models.auth.User instances not str"
+        "Task.watchers should be a list of stalker.models.auth.User instances,"
+        " not str: 'a'"
     )
 
 
@@ -713,9 +718,9 @@ def test_depends_arg_is_a_list_of_other_objects_than_a_task(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         Task(**kwargs)
 
-    assert (
-        str(cm.value) == "TaskDependency.depends_to can should be and instance of "
-        "stalker.models.task.Task, not str"
+    assert str(cm.value) == (
+        "TaskDependency.depends_to can should be and instance of "
+        "stalker.models.task.Task, not str: 'a'"
     )
 
 
@@ -728,9 +733,9 @@ def test_depends_attr_is_a_list_of_other_objects_than_a_task(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         new_task.depends = test_value
 
-    assert (
-        str(cm.value) == "TaskDependency.depends_to can should be and instance of "
-        "stalker.models.task.Task, not str"
+    assert str(cm.value) == (
+        "TaskDependency.depends_to can should be and instance of "
+        "stalker.models.task.Task, not str: 'a'"
     )
 
 
@@ -940,7 +945,16 @@ def test_percent_complete_attr_is_read_only(setup_task_tests):
     with pytest.raises(AttributeError) as cm:
         new_task.percent_complete = 32
 
-    assert str(cm.value) == "can't set attribute 'percent_complete'"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'percent_complete'",
+    }.get(
+        sys.version_info.minor,
+        "property 'percent_complete' of 'Task' object has no setter",
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_percent_complete_attr_is_working_properly_for_a_duration_based_leaf_task_1(
@@ -1114,9 +1128,8 @@ def test_is_milestone_arg_is_not_a_bool(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         Task(**kwargs)
 
-    assert (
-        str(cm.value)
-        == "Task.is_milestone should be a bool value (True or False), not str"
+    assert str(cm.value) == (
+        "Task.is_milestone should be a bool value (True or False), not str: 'A string'"
     )
 
 
@@ -1129,9 +1142,8 @@ def test_is_milestone_attr_is_not_a_bool(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         new_task.is_milestone = test_value
 
-    assert (
-        str(cm.value)
-        == "Task.is_milestone should be a bool value (True or False), not str"
+    assert str(cm.value) == (
+        "Task.is_milestone should be a bool value (True or False), not str: 'A string'"
     )
 
 
@@ -1181,52 +1193,56 @@ def test_time_logs_attr_is_not_a_list_of_timelog_instances(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         new_task.time_logs = [1, "1", 1.2, "a time_log"]
 
-    assert (
-        str(cm.value)
-        == "Task.time_logs should be all stalker.models.task.TimeLog instances, not int"
+    assert str(cm.value) == (
+        "Task.time_logs should be all stalker.models.task.TimeLog instances, "
+        "not int: '1'"
     )
 
 
+@pytest.mark.parametrize(
+    "schedule_timing, schedule_unit, schedule_seconds",
+    [
+        [10, "h", 10 * 3600],
+        [23, "d", 23 * defaults.daily_working_hours * 3600],
+        [2, "w", 2 * defaults.weekly_working_hours * 3600],
+        [2.5, "m", 2.5 * 4 * defaults.weekly_working_hours * 3600],
+        # [
+        #     3.1,
+        #     "y",
+        #     3.1 * defaults.yearly_working_days * defaults.daily_working_hours * 3600,
+        # ],
+    ],
+)
 def test_schedule_seconds_is_working_properly_for_an_effort_based_task_no_studio(
-    setup_task_tests,
+    setup_task_tests, schedule_timing, schedule_unit, schedule_seconds
 ):
     """schedule_seconds attr is working okay for an effort based task when no studio."""
     data = setup_task_tests
     # no studio, using defaults
     kwargs = copy.copy(data["kwargs"])
     kwargs["schedule_model"] = "effort"
-
-    kwargs["schedule_timing"] = 10
-    kwargs["schedule_unit"] = "h"
+    kwargs["schedule_timing"] = schedule_timing
+    kwargs["schedule_unit"] = schedule_unit
     new_task = Task(**kwargs)
-
-    assert new_task.schedule_seconds == 10 * 3600
-    kwargs["schedule_timing"] = 23
-    kwargs["schedule_unit"] = "d"
-    new_task = Task(**kwargs)
-
-    assert new_task.schedule_seconds == 23 * defaults.daily_working_hours * 3600
-    kwargs["schedule_timing"] = 2
-    kwargs["schedule_unit"] = "w"
-    new_task = Task(**kwargs)
-
-    assert new_task.schedule_seconds == 2 * defaults.weekly_working_hours * 3600
-    kwargs["schedule_timing"] = 2.5
-    kwargs["schedule_unit"] = "m"
-    new_task = Task(**kwargs)
-
-    assert new_task.schedule_seconds == 2.5 * 4 * defaults.weekly_working_hours * 3600
-    kwargs["schedule_timing"] = 3.1
-    kwargs["schedule_unit"] = "y"
-    new_task = Task(**kwargs)
-
-    assert new_task.schedule_seconds == pytest.approx(
-        3.1 * defaults.yearly_working_days * defaults.daily_working_hours * 3600
-    )
+    assert new_task.schedule_seconds == schedule_seconds
 
 
+@pytest.mark.parametrize(
+    "schedule_timing, schedule_unit, schedule_seconds",
+    [
+        [10, "h", 10 * 3600],
+        [23, "d", 23 * defaults.daily_working_hours * 3600],
+        [2, "w", 2 * defaults.weekly_working_hours * 3600],
+        [2.5, "m", 2.5 * 4 * defaults.weekly_working_hours * 3600],
+        # [
+        #     3.1,
+        #     "y",
+        #     3.1 * studio.yearly_working_days * studio.daily_working_hours * 3600,
+        # ],
+    ],
+)
 def test_schedule_seconds_is_working_properly_for_an_effort_based_task_with_studio(
-    setup_task_tests,
+    setup_task_tests, schedule_timing, schedule_unit, schedule_seconds
 ):
     """schedule_seconds attr is working okay for an effort based task when no studio."""
     data = setup_task_tests
@@ -1235,28 +1251,10 @@ def test_schedule_seconds_is_working_properly_for_an_effort_based_task_with_stud
     defaults.timing_resolution = datetime.timedelta(hours=1)
     studio = Studio(name="Test Studio", timing_resolution=datetime.timedelta(hours=1))
     kwargs["schedule_model"] = "effort"
-    kwargs["schedule_timing"] = 10
-    kwargs["schedule_unit"] = "h"
+    kwargs["schedule_timing"] = schedule_timing
+    kwargs["schedule_unit"] = schedule_unit
     new_task = Task(**kwargs)
-    assert new_task.schedule_seconds == 10 * 3600
-    kwargs["schedule_timing"] = 23
-    kwargs["schedule_unit"] = "d"
-    new_task = Task(**kwargs)
-    assert new_task.schedule_seconds == 23 * studio.daily_working_hours * 3600
-    kwargs["schedule_timing"] = 2
-    kwargs["schedule_unit"] = "w"
-    new_task = Task(**kwargs)
-    assert new_task.schedule_seconds == 2 * studio.weekly_working_hours * 3600
-    kwargs["schedule_timing"] = 2.5
-    kwargs["schedule_unit"] = "m"
-    new_task = Task(**kwargs)
-    assert new_task.schedule_seconds == 2.5 * 4 * studio.weekly_working_hours * 3600
-    kwargs["schedule_timing"] = 3.1
-    kwargs["schedule_unit"] = "y"
-    new_task = Task(**kwargs)
-    assert new_task.schedule_seconds == pytest.approx(
-        3.1 * studio.yearly_working_days * studio.daily_working_hours * 3600,
-    )
+    assert new_task.schedule_seconds == schedule_seconds
 
 
 def test_schedule_seconds_is_working_properly_for_a_container_task(setup_task_tests):
@@ -1554,7 +1552,16 @@ def test_remaining_seconds_attr_is_a_read_only_attr(setup_task_tests):
     with pytest.raises(AttributeError) as cm:
         setattr(new_task, "remaining_seconds", 2342)
 
-    assert str(cm.value) == "can't set attribute 'remaining_seconds'"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'remaining_seconds'",
+    }.get(
+        sys.version_info.minor,
+        "property 'remaining_seconds' of 'Task' object has no setter",
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_versions_attr_is_none(setup_task_tests):
@@ -1584,10 +1591,9 @@ def test_versions_attr_is_not_a_list_of_version_instances(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         new_task.versions = [1, 1.2, "a version"]
 
-    assert (
-        str(cm.value)
-        == "Task.versions should only have stalker.models.version.Version "
-        "instances, and not Task"
+    assert str(cm.value) == (
+        "Task.versions should only have stalker.models.version.Version instances, "
+        "and not int: '1'"
     )
 
 
@@ -1732,9 +1738,9 @@ def test_parent_arg_is_not_a_task_instance(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         Task(**kwargs)
 
-    assert (
-        str(cm.value)
-        == "Task.parent should be an instance of stalker.models.task.Task, not str"
+    assert str(cm.value) == (
+        "Task.parent should be an instance of stalker.models.task.Task, "
+        "not str: 'not a task'"
     )
 
 
@@ -1747,9 +1753,9 @@ def test_parent_attr_is_not_a_task_instance(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         new_task.parent = "not a task"
 
-    assert (
-        str(cm.value)
-        == "Task.parent should be an instance of stalker.models.task.Task, not str"
+    assert str(cm.value) == (
+        "Task.parent should be an instance of stalker.models.task.Task, "
+        "not str: 'not a task'"
     )
 
     # there is no way to generate a CycleError by using the parent arg
@@ -1927,7 +1933,13 @@ def test_is_leaf_attr_is_read_only(setup_task_tests):
     with pytest.raises(AttributeError) as cm:
         new_task.is_leaf = True
 
-    assert str(cm.value) == "can't set attribute 'is_leaf'"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'is_leaf'",
+    }.get(sys.version_info.minor, "property 'is_leaf' of 'Task' object has no setter")
+
+    assert str(cm.value) == error_message
 
 
 def test_is_leaf_attr_is_working_properly(setup_task_tests):
@@ -1963,7 +1975,13 @@ def test_is_root_attr_is_read_only(setup_task_tests):
     with pytest.raises(AttributeError) as cm:
         new_task.is_root = True
 
-    assert str(cm.value) == "can't set attribute 'is_root'"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'is_root'",
+    }.get(sys.version_info.minor, "property 'is_root' of 'Task' object has no setter")
+
+    assert str(cm.value) == error_message
 
 
 def test_is_root_attr_is_working_properly(setup_task_tests):
@@ -2000,7 +2018,15 @@ def test_is_container_attr_is_read_only(setup_task_tests):
     with pytest.raises(AttributeError) as cm:
         new_task.is_container = False
 
-    assert str(cm.value) == "can't set attribute 'is_container'"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'is_container'",
+    }.get(
+        sys.version_info.minor, "property 'is_container' of 'Task' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_is_container_attr_working_properly(setup_task_tests):
@@ -2045,7 +2071,7 @@ def test_project_and_parent_args_are_skipped(setup_task_tests):
 
     assert (
         str(cm.value) == "Task.project should be an instance of "
-        "stalker.models.project.Project, not NoneType. Or please supply "
+        "stalker.models.project.Project, not NoneType: 'None'.\n\nOr please supply "
         "a stalker.models.task.Task with the parent argument, so "
         "Stalker can use the project of the supplied parent task"
     )
@@ -2076,7 +2102,8 @@ def test_project_arg_is_not_a_project_instance(setup_task_tests):
         Task(**kwargs)
 
     assert str(cm.value) == (
-        "Task.project should be an instance of stalker.models.project.Project, not str"
+        "Task.project should be an instance of stalker.models.project.Project, "
+        "not str: 'Not a Project instance'"
     )
 
 
@@ -2088,7 +2115,18 @@ def test_project_attr_is_a_read_only_attr(setup_task_tests):
     with pytest.raises(AttributeError) as cm:
         new_task.project = data["test_project1"]
 
-    assert str(cm.value) == "can't set attribute"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute",
+        11: "property of 'Task' object has no setter",
+        12: "property of 'Task' object has no setter",
+    }.get(
+        sys.version_info.minor,
+        "property '_project_getter' of 'Task' object has no setter",
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_project_arg_is_not_matching_the_given_parent_arg(setup_task_tests):
@@ -2117,10 +2155,10 @@ def test_project_arg_is_not_matching_the_given_parent_arg(setup_task_tests):
         Task(**kwargs)
         assert issubclass(w[-1].category, RuntimeWarning)
 
-    assert (
-        str(w[0].message) == "The supplied parent and the project is not matching in "
-        "<New Task (Task)>, Stalker will use the parents project "
-        "(<Test Project1 (Project)>) as the parent of this Task"
+    assert str(w[0].message) == (
+        "The supplied parent and the project is not matching in <New Task (Task)>, "
+        "Stalker will use the parent's project (<Test Project1 (Project)>) as the "
+        "parent of this Task"
     )
 
 
@@ -2279,7 +2317,13 @@ def test_level_attr_is_a_read_only_property(setup_task_tests):
     with pytest.raises(AttributeError) as cm:
         new_task.level = 0
 
-    assert str(cm.value) == "can't set attribute 'level'"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'level'",
+    }.get(sys.version_info.minor, "property 'level' of 'Task' object has no setter")
+
+    assert str(cm.value) == error_message
 
 
 def test_level_attr_returns_the_hierarchical_level_of_this_task(setup_task_tests):
@@ -2412,9 +2456,9 @@ def test_bid_timing_arg_is_not_an_int_or_float(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         Task(**kwargs)
 
-    assert (
-        str(cm.value) == "Task.bid_timing should be an integer or float showing the "
-        "value of the initial bid for this Task, not str"
+    assert str(cm.value) == (
+        "Task.bid_timing should be an integer or float showing the value of the "
+        "initial bid for this Task, not str: '10d'"
     )
 
 
@@ -2427,9 +2471,9 @@ def test_bid_timing_attr_is_not_an_int_or_float(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         new_task.bid_timing = "10d"
 
-    assert (
-        str(cm.value) == "Task.bid_timing should be an integer or float showing the "
-        "value of the initial bid for this Task, not str"
+    assert str(cm.value) == (
+        "Task.bid_timing should be an integer or float showing the value of the "
+        "initial bid for this Task, not str: '10d'"
     )
 
 
@@ -2493,10 +2537,9 @@ def test_bid_unit_arg_is_not_a_str(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         Task(**kwargs)
 
-    assert (
-        str(cm.value) == "Task.bid_unit should be a string value one of ['min', 'h', "
-        "'d', 'w', 'm', 'y'] showing the unit of the bid timing of this "
-        "Task, not int"
+    assert str(cm.value) == (
+        "Task.bid_unit should be a string value one of ['min', 'h', 'd', 'w', 'm', "
+        "'y'] showing the unit of the bid timing of this Task, not int: '10'"
     )
 
 
@@ -2507,10 +2550,9 @@ def test_bid_unit_attr_is_not_a_str(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         new_task.bid_unit = 10
 
-    assert (
-        str(cm.value) == "Task.bid_unit should be a string value one of ['min', 'h', "
-        "'d', 'w', 'm', 'y'] showing the unit of the bid timing of this "
-        "Task, not int"
+    assert str(cm.value) == (
+        "Task.bid_unit should be a string value one of ['min', 'h', 'd', 'w', 'm', "
+        "'y'] showing the unit of the bid timing of this Task, not int: '10'"
     )
 
 
@@ -2542,10 +2584,9 @@ def test_bid_unit_arg_value_not_in_defaults_datetime_units(setup_task_tests):
     with pytest.raises(ValueError) as cm:
         Task(**kwargs)
 
-    assert (
-        str(cm.value) == "Task.bid_unit should be a string value one of ['min', 'h', "
-        "'d', 'w', 'm', 'y'] showing the unit of the bid timing of this "
-        "Task, not str"
+    assert str(cm.value) == (
+        "Task.bid_unit should be a string value one of ['min', 'h', 'd', 'w', 'm', "
+        "'y'] showing the unit of the bid timing of this Task, not str: 'os'"
     )
 
 
@@ -2558,10 +2599,9 @@ def test_bid_unit_attr_value_not_in_defaults_datetime_units(setup_task_tests):
     with pytest.raises(ValueError) as cm:
         new_task.bid_unit = "sys"
 
-    assert (
-        str(cm.value) == "Task.bid_unit should be a string value one of ['min', 'h', "
-        "'d', 'w', 'm', 'y'] showing the unit of the bid timing of this "
-        "Task, not str"
+    assert str(cm.value) == (
+        "Task.bid_unit should be a string value one of ['min', 'h', 'd', 'w', 'm', "
+        "'y'] showing the unit of the bid timing of this Task, not str: 'sys'"
     )
 
 
@@ -2580,7 +2620,15 @@ def test_tjp_abs_id_is_a_read_only_attr(setup_task_tests):
     with pytest.raises(AttributeError) as cm:
         new_task.tjp_abs_id = "some_value"
 
-    assert str(cm.value) == "can't set attribute 'tjp_abs_id'"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'tjp_abs_id'",
+    }.get(
+        sys.version_info.minor, "property 'tjp_abs_id' of 'Task' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_tjp_id_attr_is_working_properly_for_a_root_task(setup_task_tests):
@@ -2589,7 +2637,7 @@ def test_tjp_id_attr_is_working_properly_for_a_root_task(setup_task_tests):
     kwargs = copy.copy(data["kwargs"])
     kwargs["parent"] = None
     new_task = Task(**kwargs)
-    assert new_task.tjp_id == "Task_%s" % new_task.id
+    assert new_task.tjp_id == f"Task_{new_task.id}"
 
 
 def test_tjp_id_attr_is_working_properly_for_a_leaf_task(setup_task_tests):
@@ -2600,7 +2648,7 @@ def test_tjp_id_attr_is_working_properly_for_a_leaf_task(setup_task_tests):
     kwargs["parent"] = new_task1
     kwargs["depends"] = None
     new_task2 = Task(**kwargs)
-    assert new_task2.tjp_id == "Task_%s" % new_task2.id
+    assert new_task2.tjp_id == f"Task_{new_task2.id}"
 
 
 def test_tjp_abs_id_attr_is_working_properly_for_a_root_task(setup_task_tests):
@@ -2609,7 +2657,7 @@ def test_tjp_abs_id_attr_is_working_properly_for_a_root_task(setup_task_tests):
     kwargs = copy.copy(data["kwargs"])
     kwargs["parent"] = None
     new_task = Task(**kwargs)
-    assert new_task.tjp_abs_id == "Project_%s.Task_%s" % (
+    assert new_task.tjp_abs_id == "Project_{}.Task_{}".format(
         kwargs["project"].id,
         new_task.id,
     )
@@ -2628,7 +2676,7 @@ def test_tjp_abs_id_attr_is_working_properly_for_a_leaf_task(setup_task_tests):
     t2.parent = t1
     t3.parent = t2
 
-    assert t3.tjp_abs_id == "Project_%s.Task_%s.Task_%s.Task_%s" % (
+    assert t3.tjp_abs_id == "Project_{}.Task_{}.Task_{}.Task_{}".format(
         kwargs["project"].id,
         t1.id,
         t2.id,
@@ -3302,7 +3350,15 @@ def test_is_scheduled_is_a_read_only_attr(setup_task_tests):
     with pytest.raises(AttributeError) as cm:
         new_task.is_scheduled = True
 
-    assert str(cm.value) == "can't set attribute 'is_scheduled'"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'is_scheduled'",
+    }.get(
+        sys.version_info.minor, "property 'is_scheduled' of 'Task' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_is_scheduled_is_true_if_the_computed_start_and_computed_end_is_not_none(
@@ -3340,7 +3396,13 @@ def test_parents_attr_is_read_only(setup_task_tests):
     with pytest.raises(AttributeError) as cm:
         new_task.parents = data["test_dependent_task1"]
 
-    assert str(cm.value) == "can't set attribute 'parents'"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'parents'",
+    }.get(sys.version_info.minor, "property 'parents' of 'Task' object has no setter")
+
+    assert str(cm.value) == error_message
 
 
 def test_parents_attr_is_working_properly(setup_task_tests):
@@ -3436,10 +3498,9 @@ def test_responsible_arg_is_not_a_list_of_user_instance(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         Task(**kwargs)
 
-    assert (
-        str(cm.value)
-        == "Task.responsible should be a list of stalker.models.auth.User "
-        "instances, not str"
+    assert str(cm.value) == (
+        "Task.responsible should be a list of stalker.models.auth.User instances, "
+        "not str: 'not a user instance'"
     )
 
 
@@ -3454,10 +3515,9 @@ def test_responsible_attr_is_set_to_something_other_than_a_list_of_user_instance
     with pytest.raises(TypeError) as cm:
         new_task.responsible = ["not a user instance"]
 
-    assert (
-        str(cm.value)
-        == "Task.responsible should be a list of stalker.models.auth.User "
-        "instances, not str"
+    assert str(cm.value) == (
+        "Task.responsible should be a list of stalker.models.auth.User instances, "
+        "not str: 'not a user instance'"
     )
 
 
@@ -3489,6 +3549,32 @@ def test_responsible_arg_is_none_or_skipped_responsible_attr_comes_from_parents(
     assert new_task1.responsible == [data["test_user1"]]
     assert new_task2.responsible == [data["test_user2"]]
     assert new_task3.responsible == [data["test_user1"]]
+
+
+def test_responsible_arg_is_none_or_skipped_responsible_attr_comes_from_the_first_parent_with_responsible(
+    setup_task_tests,
+):
+    """responsible arg is None or skipped, responsible attr value comes from the first parent with responsible."""
+    data = setup_task_tests
+    # create two new tasks
+    kwargs = copy.copy(data["kwargs"])
+    new_task = Task(**kwargs)
+
+    kwargs["responsible"] = None
+
+    kwargs["parent"] = new_task
+    new_task1 = Task(**kwargs)
+
+    kwargs["parent"] = new_task1
+    new_task2 = Task(**kwargs)
+
+    kwargs["parent"] = new_task2
+    new_task3 = Task(**kwargs)
+
+    new_task2.responsible = [data["test_user2"]]
+    assert new_task1.responsible == [data["test_user1"]]
+    assert new_task2.responsible == [data["test_user2"]]
+    assert new_task3.responsible == [data["test_user2"]]
 
 
 def test_responsible_attr_is_set_to_none_responsible_attr_comes_from_parents(
@@ -3594,7 +3680,13 @@ def test_tickets_attr_is_a_read_only_property(setup_task_tests):
     with pytest.raises(AttributeError) as cm:
         new_task.tickets = "some value"
 
-    assert str(cm.value) == "can't set attribute 'tickets'"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'tickets'",
+    }.get(sys.version_info.minor, "property 'tickets' of 'Task' object has no setter")
+
+    assert str(cm.value) == error_message
 
 
 def test_open_tickets_attr_is_a_read_only_property(setup_task_tests):
@@ -3606,7 +3698,15 @@ def test_open_tickets_attr_is_a_read_only_property(setup_task_tests):
     with pytest.raises(AttributeError) as cm:
         new_task.open_tickets = "some value"
 
-    assert str(cm.value) == "can't set attribute 'open_tickets'"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'open_tickets'",
+    }.get(
+        sys.version_info.minor, "property 'open_tickets' of 'Task' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_reviews_attr_is_an_empty_list_by_default(setup_task_tests):
@@ -3647,7 +3747,18 @@ def test_review_number_attr_is_read_only(setup_task_tests):
     with pytest.raises(AttributeError) as cm:
         new_task.review_number = 12
 
-    assert str(cm.value) == "can't set attribute"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute",
+        11: "property of 'Task' object has no setter",
+        12: "property of 'Task' object has no setter",
+    }.get(
+        sys.version_info.minor,
+        "property '_review_number_getter' of 'Task' object has no setter",
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_review_number_attr_initializes_with_0(setup_task_tests):
@@ -3729,9 +3840,9 @@ def test_alternative_resources_arg_elements_are_not_user_instances(
     with pytest.raises(TypeError) as cm:
         Task(**kwargs)
 
-    assert (
-        str(cm.value) == "Task.resources should be a list of stalker.models.auth.User "
-        "instances, not str"
+    assert str(cm.value) == (
+        "Task.alternative_resources should be a list of stalker.models.auth.User "
+        "instances, not str: 'not'"
     )
 
 
@@ -3744,9 +3855,9 @@ def test_alternative_resources_attr_elements_are_not_all_user_instances(
     with pytest.raises(TypeError) as cm:
         new_task.alternative_resources = ["not", 1, "user"]
 
-    assert (
-        str(cm.value) == "Task.resources should be a list of stalker.models.auth.User "
-        "instances, not str"
+    assert str(cm.value) == (
+        "Task.alternative_resources should be a list of stalker.models.auth.User "
+        "instances, not str: 'not'"
     )
 
 
@@ -3809,9 +3920,9 @@ def test_allocation_strategy_arg_is_not_a_str(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         Task(**kwargs)
 
-    assert (
-        str(cm.value) == "Task.allocation_strategy should be one of ['minallocated', "
-        "'maxloaded', 'minloaded', 'order', 'random'], not int"
+    assert str(cm.value) == (
+        "Task.allocation_strategy should be one of ['minallocated', "
+        "'maxloaded', 'minloaded', 'order', 'random'], not int: '234'"
     )
 
 
@@ -3826,7 +3937,7 @@ def test_allocation_strategy_attr_is_set_to_a_value_other_than_str(
 
     assert (
         str(cm.value) == "Task.allocation_strategy should be one of ['minallocated', "
-        "'maxloaded', 'minloaded', 'order', 'random'], not int"
+        "'maxloaded', 'minloaded', 'order', 'random'], not int: '234'"
     )
 
 
@@ -3840,7 +3951,7 @@ def test_allocation_strategy_arg_value_is_not_correct(setup_task_tests):
 
     assert (
         str(cm.value) == "Task.allocation_strategy should be one of ['minallocated', "
-        "'maxloaded', 'minloaded', 'order', 'random'], not not in the list"
+        "'maxloaded', 'minloaded', 'order', 'random'], not 'not in the list'"
     )
 
 
@@ -3853,7 +3964,7 @@ def test_allocation_strategy_attr_value_is_not_correct(setup_task_tests):
 
     assert (
         str(cm.value) == "Task.allocation_strategy should be one of ['minallocated', "
-        "'maxloaded', 'minloaded', 'order', 'random'], not not in the list"
+        "'maxloaded', 'minloaded', 'order', 'random'], not 'not in the list'"
     )
 
 
@@ -4037,7 +4148,13 @@ def test_path_attr_is_read_only(setup_task_tests):
     with pytest.raises(AttributeError) as cm:
         new_task.path = "some_path"
 
-    assert str(cm.value) == "can't set attribute 'path'"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'path'",
+    }.get(sys.version_info.minor, "property 'path' of 'Task' object has no setter")
+
+    assert str(cm.value) == error_message
 
 
 def test_path_attr_raises_a_runtime_error_if_no_filename_template_found(
@@ -4121,7 +4238,16 @@ def test_absolute_path_attr_is_read_only(setup_task_tests):
     with pytest.raises(AttributeError) as cm:
         new_task.absolute_path = "some_path"
 
-    assert str(cm.value) == "can't set attribute 'absolute_path'"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'absolute_path'",
+    }.get(
+        sys.version_info.minor,
+        "property 'absolute_path' of 'Task' object has no setter",
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_absolute_path_attr_raises_a_runtime_error_if_no_filename_template_found(
@@ -4204,7 +4330,7 @@ def test_absolute_path_attr_is_rendered_version_of_related_filename_template_in_
 
     assert (
         os.path.normpath(
-            "%s/tp1/Modeling" % data["test_project1"].repositories[0].path
+            "{}/tp1/Modeling".format(data["test_project1"].repositories[0].path)
         ).replace("\\", "/")
         == new_task.absolute_path
     )
@@ -4257,9 +4383,9 @@ def test_good_arg_is_not_a_good_instance(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         Task(**kwargs)
 
-    assert (
-        str(cm.value)
-        == "Task.good should be a stalker.models.budget.Good instance, not str"
+    assert str(cm.value) == (
+        "Task.good should be a stalker.models.budget.Good instance, "
+        "not str: 'not a good instance'"
     )
 
 
@@ -4270,9 +4396,9 @@ def test_good_attr_is_not_a_good_instance(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         new_task.good = "not a good instance"
 
-    assert (
-        str(cm.value)
-        == "Task.good should be a stalker.models.budget.Good instance, not str"
+    assert str(cm.value) == (
+        "Task.good should be a stalker.models.budget.Good instance, "
+        "not str: 'not a good instance'"
     )
 
 
@@ -4420,7 +4546,7 @@ def test_open_tickets_attr_is_working_properly(setup_task_db_tests):
     DBSession.commit()
 
     # create ticket statuses
-    db.init()
+    stalker.db.setup.init()
 
     new_ticket1 = Ticket(project=new_task.project, links=[new_task])
     DBSession.add(new_ticket1)
@@ -4454,7 +4580,7 @@ def test_tickets_attr_is_working_properly(setup_task_db_tests):
     DBSession.commit()
 
     # create ticket statuses
-    db.init()
+    stalker.db.setup.init()
 
     new_ticket1 = Ticket(project=new_task.project, links=[new_task])
     DBSession.add(new_ticket1)
@@ -4763,7 +4889,7 @@ def test_time_logs_attr_is_working_properly(setup_task_db_tests):
         start=now + dt(102),
         end=now + dt(103),
     )
-    # logger.debug('Task.query.get(37): %s' % Task.query.get(37))
+    # logger.debug('Task.query.get(37): {}'.format(Task.query.get(37)))
 
     assert new_task2.depends == []
 

@@ -53,20 +53,15 @@ from stalker import Entity
 
 
 class Camera(Entity):
-    """The Camera class holds basic information about the Camera used on the
-    sets.
+    """The Camera class holds basic information about the Camera used on the sets.
 
-    :param make: the make of the camera
-
-    :param model: the model of the camera
-
-    :param aperture_gate: the aperture gate opening distance
-
-    :param horizontal_film_back: the horizontal length of the film back
-
-    :param vertical_film_back: the vertical length of the film back
-
-    :param web_page: the web page of the camera
+    Args:
+        make (str): the make of the camera
+        model (str): the model of the camera
+        aperture_gate (float): the aperture gate opening distance
+        horizontal_film_back (float): the horizontal length of the film back
+        vertical_film_back (float): the vertical length of the film back
+        web_page (str): the web page of the camera
     """
 
     __tablename__ = "Cameras"
@@ -104,15 +99,12 @@ class Camera(Entity):
 class Lens(Entity):
     """The Lens class holds data about lenses used in shootings
 
-    :param make: the make of the lens
-
-    :param model: the model of the lens
-
-    :param min_focal_length: the min_focal_length
-
-    :param max_focal_length: the max_focal_length
-
-    :param web_page: the product web page
+    Args:
+        make (str): the make of the lens
+        model (str): the model of the lens
+        min_focal_length (float): the min_focal_length.
+        max_focal_length (float): the max_focal_length
+        web_page (str): the product web page
     """
 
     __tablename__ = "Lenses"

@@ -48,7 +48,7 @@ def test_studio_argument_is_not_a_studio_instance(setup_scheduler_base_tests):
 
     assert (
         str(cm.value) == "SchedulerBase.studio should be an instance of "
-        "stalker.models.studio.Studio, not str"
+        "stalker.models.studio.Studio, not str: 'not a studio instance'"
     )
 
 
@@ -60,7 +60,7 @@ def test_studio_attribute_is_not_a_studio_instance(setup_scheduler_base_tests):
 
     assert (
         str(cm.value) == "SchedulerBase.studio should be an instance of "
-        "stalker.models.studio.Studio, not str"
+        "stalker.models.studio.Studio, not str: 'not a studio instance'"
     )
 
 

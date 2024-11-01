@@ -1,0 +1,100 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+stalker = ["VERSION"]
+
+[tool.setuptools.exclude-package-data]
+stalker = ["alembic", "docs", "tests"]
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+optional-dependencies.test = { file = ["requirements-dev.txt"] }
+version = { file = ["VERSION"] }
+
+[tool.distutils.bdist_wheel]
+universal = false
+
+[project]
+authors = [
+    {name = "Erkan Özgür Yılmaz", email = "eoyilmaz@gmail.com"},
+]
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
+    "Operating System :: OS Independent",
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "Topic :: Database",
+    "Topic :: Software Development",
+    "Topic :: Utilities",
+    "Topic :: Office/Business :: Scheduling",
+]
+description = "A Production Asset Management (ProdAM) System"
+dynamic = ["version", "dependencies"]
+keywords = [
+    "production",
+    "asset",
+    "management",
+    "vfx",
+    "animation",
+    "maya",
+    "houdini",
+    "nuke",
+    "fusion",
+    "softimage",
+    "blender",
+    "vue",
+]
+license = { file = "LICENSE" }
+maintainers = [
+    {name = "Erkan Özgür Yılmaz", email = "eoyilmaz@gmail.com"},
+]
+name = "stalker"
+readme = "README.rst"
+requires-python = ">= 3.8"
+
+
+[project.urls]
+"Home Page" = "https://github.com/eoyilmaz/stalker"
+GitHub = "https://github.com/eoyilmaz/stalker"
+Documentation = "https://stalker.readthedocs.io"
+Repository = "https://github.com/eoyilmaz/stalker.git"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+addopts = "-v -n auto -W ignore --color=yes --cov --cov-report html --cov-report term --cov-fail-under 99 tests"
+
+[tool.black]
+
+[tool.flake8]
+exclude = [
+    ".github",
+    "__pycache__",
+    ".coverage",
+    ".DS_Store",
+    ".pytest_cache",
+    ".venv",
+    ".vscode",
+    "build",
+    "dist",
+    "stalker.egg-info",
+]
+extend-select = ["B950"]
+ignore = ["D107", "E203", "E501", "E701", "SC200", "W503"]
+max-complexity = 12
+max-line-length = 80

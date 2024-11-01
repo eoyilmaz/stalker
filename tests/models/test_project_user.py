@@ -56,9 +56,9 @@ def test_role_argument_is_not_a_role_instance(setup_project_user_db_tests):
             role="not a role instance",
         )
 
-    assert (
-        str(cm.value) == "ProjectUser.role should be a stalker.models.auth.Role "
-        "instance, not str"
+    assert str(cm.value) == (
+        "ProjectUser.role should be a stalker.models.auth.Role instance, "
+        "not str: 'not a role instance'"
     )
 
 

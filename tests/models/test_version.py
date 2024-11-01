@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import sys
 
 import pytest
 
@@ -193,7 +194,7 @@ def test_take_name_argument_is_none(setup_version_db_tests):
     data["kwargs"]["take_name"] = None
     with pytest.raises(TypeError) as cm:
         Version(**data["kwargs"])
-    assert str(cm.value) == "Version.take_name should be a string, not NoneType"
+    assert str(cm.value) == "Version.take_name should be a string, not NoneType: 'None'"
 
 
 def test_take_name_attribute_is_none(setup_version_db_tests):
@@ -202,7 +203,7 @@ def test_take_name_attribute_is_none(setup_version_db_tests):
     with pytest.raises(TypeError) as cm:
         data["test_version"].take_name = None
 
-    assert str(cm.value) == "Version.take_name should be a string, not NoneType"
+    assert str(cm.value) == "Version.take_name should be a string, not NoneType: 'None'"
 
 
 def test_take_name_argument_is_empty_string(setup_version_db_tests):
@@ -306,9 +307,8 @@ def test_task_argument_is_not_a_task(setup_version_db_tests):
     data["kwargs"]["task"] = "a task"
     with pytest.raises(TypeError) as cm:
         Version(**data["kwargs"])
-    assert (
-        str(cm.value)
-        == "Version.task should be a stalker.models.task.Task instance not str"
+    assert str(cm.value) == (
+        "Version.task should be a stalker.models.task.Task instance, not str: 'a task'"
     )
 
 
@@ -317,9 +317,8 @@ def test_task_attribute_is_not_a_task(setup_version_db_tests):
     data = setup_version_db_tests
     with pytest.raises(TypeError) as cm:
         data["test_version"].task = "a task"
-    assert (
-        str(cm.value)
-        == "Version.task should be a stalker.models.task.Task instance not str"
+    assert str(cm.value) == (
+        "Version.task should be a stalker.models.task.Task instance, not str: 'a task'"
     )
 
 
@@ -439,7 +438,7 @@ def test_inputs_argument_is_not_a_list_of_link_instances(setup_version_db_tests)
 
     assert (
         str(cm.value) == "All elements in Version.inputs should be all "
-        "stalker.models.link.Link instances not int"
+        "stalker.models.link.Link instances, not int: '132'"
     )
 
 
@@ -452,7 +451,7 @@ def test_inputs_attribute_is_not_a_list_of_link_instances(setup_version_db_tests
 
     assert (
         str(cm.value) == "All elements in Version.inputs should be all "
-        "stalker.models.link.Link instances not int"
+        "stalker.models.link.Link instances, not int: '132'"
     )
 
 
@@ -503,7 +502,7 @@ def test_outputs_argument_is_not_a_list_of_link_instances(setup_version_db_tests
 
     assert (
         str(cm.value) == "All elements in Version.outputs should be all "
-        "stalker.models.link.Link instances not int"
+        "stalker.models.link.Link instances, not int: '132'"
     )
 
 
@@ -516,7 +515,7 @@ def test_outputs_attribute_is_not_a_list_of_link_instances(setup_version_db_test
 
     assert (
         str(cm.value) == "All elements in Version.outputs should be all "
-        "stalker.models.link.Link instances not int"
+        "stalker.models.link.Link instances, not int: '132'"
     )
 
 
@@ -581,9 +580,9 @@ def test_parent_argument_is_not_a_version_instance(setup_version_db_tests):
     with pytest.raises(TypeError) as cm:
         Version(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "Version.parent should be an instance of Version class or "
-        "derivative, not str"
+    assert str(cm.value) == (
+        "Version.parent should be an instance of Version class or "
+        "derivative, not str: 'not a version instance'"
     )
 
 
@@ -593,9 +592,9 @@ def test_parent_attribute_is_not_set_to_a_version_instance(setup_version_db_test
     with pytest.raises(TypeError) as cm:
         data["test_version"].parent = "not a version instance"
 
-    assert (
-        str(cm.value) == "Version.parent should be an instance of Version class or "
-        "derivative, not str"
+    assert str(cm.value) == (
+        "Version.parent should be an instance of Version class or "
+        "derivative, not str: 'not a version instance'"
     )
 
 
@@ -698,9 +697,9 @@ def test_children_attribute_is_not_set_to_a_list_of_version_instances(
     with pytest.raises(TypeError) as cm:
         data["test_version"].children = ["not a Version instance", 3]
 
-    assert (
-        str(cm.value) == "Version.children should be a list of Version (or derivative) "
-        "instances, not str"
+    assert str(cm.value) == (
+        "Version.children should be a list of Version (or derivative) "
+        "instances, not str: 'not a Version instance'"
     )
 
 
@@ -1009,7 +1008,17 @@ def test_latest_published_version_is_read_only(setup_version_db_tests):
     data = setup_version_db_tests
     with pytest.raises(AttributeError) as cm:
         data["test_version"].latest_published_version = True
-    assert str(cm.value) == "can't set attribute 'latest_published_version'"
+
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'latest_published_version'",
+    }.get(
+        sys.version_info.minor,
+        "property 'latest_published_version' of 'Version' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_latest_published_version_is_working_properly(setup_version_db_tests):
@@ -1190,7 +1199,9 @@ def test_created_with_argument_accepts_only_string_or_none(setup_version_db_test
     data["kwargs"]["created_with"] = 234
     with pytest.raises(TypeError) as cm:
         Version(**data["kwargs"])
-    assert str(cm.value) == "Version.created_with should be an instance of str, not int"
+    assert str(cm.value) == (
+        "Version.created_with should be an instance of str, not int: '234'"
+    )
 
 
 def test_created_with_attribute_accepts_only_string_or_none(setup_version_db_tests):
@@ -1199,7 +1210,9 @@ def test_created_with_attribute_accepts_only_string_or_none(setup_version_db_tes
     with pytest.raises(TypeError) as cm:
         data["test_version"].created_with = 234
 
-    assert str(cm.value) == "Version.created_with should be an instance of str, not int"
+    assert str(cm.value) == (
+        "Version.created_with should be an instance of str, not int: '234'"
+    )
 
 
 def test_created_with_argument_is_working_properly(setup_version_db_tests):
@@ -1225,7 +1238,17 @@ def test_max_version_number_attribute_is_read_only(setup_version_db_tests):
     data = setup_version_db_tests
     with pytest.raises(AttributeError) as cm:
         data["test_version"].max_version_number = 20
-    assert str(cm.value) == "can't set attribute 'max_version_number'"
+
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'max_version_number'",
+    }.get(
+        sys.version_info.minor,
+        "property 'max_version_number' of 'Version' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_max_version_number_attribute_is_working_properly(setup_version_db_tests):
@@ -1265,7 +1288,17 @@ def test_latest_version_attribute_is_read_only(setup_version_db_tests):
     data = setup_version_db_tests
     with pytest.raises(AttributeError) as cm:
         data["test_version"].latest_version = 3453
-    assert str(cm.value) == "can't set attribute 'latest_version'"
+
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'latest_version'",
+    }.get(
+        sys.version_info.minor,
+        "property 'latest_version' of 'Version' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_latest_version_attribute_is_working_properly(setup_version_db_tests):
@@ -1305,7 +1338,17 @@ def test_naming_parents_attribute_is_a_read_only_property(setup_version_db_tests
     data = setup_version_db_tests
     with pytest.raises(AttributeError) as cm:
         data["test_version"].naming_parents = [data["test_task1"]]
-    assert str(cm.value) == "can't set attribute 'naming_parents'"
+
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'naming_parents'",
+    }.get(
+        sys.version_info.minor,
+        "property 'naming_parents' of 'Version' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_naming_parents_attribute_is_working_properly(setup_version_db_tests):
@@ -1410,7 +1453,7 @@ def test_nice_name_attribute_is_working_properly(setup_version_db_tests):
     DBSession.add(version1)
     DBSession.commit()
 
-    assert version1.nice_name == "%s_%s_%s_%s" % (
+    assert version1.nice_name == "{}_{}_{}_{}".format(
         task1.nice_name,
         task2.nice_name,
         task3.nice_name,
@@ -1424,7 +1467,7 @@ def test_nice_name_attribute_is_working_properly(setup_version_db_tests):
     DBSession.commit()
 
     version2 = Version(task=asset1)
-    assert version2.nice_name == "%s_%s" % (asset1.nice_name, version2.take_name)
+    assert version2.nice_name == "{}_{}".format(asset1.nice_name, version2.take_name)
 
     # for a version of a task of a shot
     shot2 = Shot(
@@ -1444,7 +1487,7 @@ def test_nice_name_attribute_is_working_properly(setup_version_db_tests):
 
     version3 = Version(task=task4)
 
-    assert version3.nice_name == "%s_%s_%s" % (
+    assert version3.nice_name == "{}_{}_{}".format(
         shot2.nice_name,
         task4.nice_name,
         version3.take_name,
@@ -1456,13 +1499,13 @@ def test_nice_name_attribute_is_working_properly(setup_version_db_tests):
     DBSession.commit()
 
     version4 = Version(task=asset2)
-    assert version4.nice_name == "%s_%s" % (asset2.nice_name, version4.take_name)
+    assert version4.nice_name == "{}_{}".format(asset2.nice_name, version4.take_name)
 
 
 def test_string_representation_is_a_little_bit_meaningful(setup_version_db_tests):
     """__str__ or __repr__ result is meaningful."""
     data = setup_version_db_tests
-    assert "<tp_SH001_Task1_TestTake_v001 (Version)>" == "%s" % data["test_version"]
+    assert "<tp_SH001_Task1_TestTake_v001 (Version)>" == f'{data["test_version"]}'
 
 
 def test_walk_hierarchy_is_working_properly_in_dfs_mode(setup_version_db_tests):
@@ -1517,7 +1560,7 @@ def test_walk_inputs_is_working_properly_in_dfs_mode(setup_version_db_tests):
 #     DBSession.add(data["test_project"])
 #     DBSession.commit()
 #
-#     print 'entity_type: %s' % data["test_task1"].entity_type
+#     print('entity_type: {}'.format(data["test_task1"].entity_type))
 #
 #     # v1 = Version(task=data["test_task1"])
 #     # assert 'tp/SH001/task1/task1_Main_v001' == v1.path

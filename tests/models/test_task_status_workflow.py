@@ -324,6 +324,7 @@ def test_walk_dependencies_is_working_properly(setup_task_status_workflow_tests)
 
 # The following tests will test the status changes in dependency changes
 
+
 # Leaf Tasks - dependency relation changes
 # WFD
 def test_leaf_wfd_task_updated_to_have_a_dependency_of_wfd_task_task(
@@ -919,6 +920,7 @@ def test_container_cmpl_task_dependency_can_not_be_updated(
 # Action Tests
 #
 
+
 # create_time_log
 # WFD
 def test_create_time_log_in_wfd_leaf_task(setup_task_status_workflow_tests):
@@ -1159,7 +1161,7 @@ def test_request_review_in_wfd_leaf_task(setup_task_status_workflow_tests):
         data["test_task3"].request_review()
 
     assert (
-        str(cm.value) == "Test Task 3 (id:37) is a WFD task, and WFD tasks are not "
+        str(cm.value) == "Test Task 3 (id:37) is a WFD task, and it is not "
         "suitable for requesting a review, please supply a WIP task "
         "instead."
     )
@@ -1175,7 +1177,7 @@ def test_request_review_in_rts_leaf_task(setup_task_status_workflow_tests):
         data["test_task3"].request_review()
 
     assert (
-        str(cm.value) == "Test Task 3 (id:37) is a RTS task, and RTS tasks are not "
+        str(cm.value) == "Test Task 3 (id:37) is a RTS task, and it is not "
         "suitable for requesting a review, please supply a WIP task "
         "instead."
     )
@@ -1191,7 +1193,7 @@ def test_request_review_in_prev_leaf_task(setup_task_status_workflow_tests):
         data["test_task3"].request_review()
 
     assert (
-        str(cm.value) == "Test Task 3 (id:37) is a PREV task, and PREV tasks are not "
+        str(cm.value) == "Test Task 3 (id:37) is a PREV task, and it is not "
         "suitable for requesting a review, please supply a WIP task "
         "instead."
     )
@@ -1207,7 +1209,7 @@ def test_request_review_in_hrev_leaf_task(setup_task_status_workflow_tests):
         data["test_task3"].request_review()
 
     assert (
-        str(cm.value) == "Test Task 3 (id:37) is a HREV task, and HREV tasks are not "
+        str(cm.value) == "Test Task 3 (id:37) is a HREV task, and it is not "
         "suitable for requesting a review, please supply a WIP task "
         "instead."
     )
@@ -1223,7 +1225,7 @@ def test_request_review_in_drev_leaf_task(setup_task_status_workflow_tests):
         data["test_task3"].request_review()
 
     assert (
-        str(cm.value) == "Test Task 3 (id:37) is a DREV task, and DREV tasks are not "
+        str(cm.value) == "Test Task 3 (id:37) is a DREV task, and it is not "
         "suitable for requesting a review, please supply a WIP task "
         "instead."
     )
@@ -1239,7 +1241,7 @@ def test_request_review_in_oh_leaf_task(setup_task_status_workflow_tests):
         data["test_task3"].request_review()
 
     assert (
-        str(cm.value) == "Test Task 3 (id:37) is a OH task, and OH tasks are not "
+        str(cm.value) == "Test Task 3 (id:37) is a OH task, and it is not "
         "suitable for requesting a review, please supply a WIP task "
         "instead."
     )
@@ -1255,7 +1257,7 @@ def test_request_review_in_stop_leaf_task(setup_task_status_workflow_tests):
         data["test_task3"].request_review()
 
     assert (
-        str(cm.value) == "Test Task 3 (id:37) is a STOP task, and STOP tasks are not "
+        str(cm.value) == "Test Task 3 (id:37) is a STOP task, and it is not "
         "suitable for requesting a review, please supply a WIP task "
         "instead."
     )
@@ -1271,7 +1273,7 @@ def test_request_review_in_cmpl_leaf_task(setup_task_status_workflow_tests):
         data["test_task3"].request_review()
 
     assert (
-        str(cm.value) == "Test Task 3 (id:37) is a CMPL task, and CMPL tasks are not "
+        str(cm.value) == "Test Task 3 (id:37) is a CMPL task, and it is not "
         "suitable for requesting a review, please supply a WIP task "
         "instead."
     )
@@ -2161,7 +2163,7 @@ def test_review_set_review_number_is_not_an_integer(setup_task_status_workflow_t
     assert (
         str(cm.value)
         == "review_number argument in Task.review_set should be a positive "
-        "integer, not str"
+        "integer, not str: 'not an integer'"
     )
 
 
@@ -2170,7 +2172,7 @@ def test_review_set_review_number_is_a_negative_integer(
 ):
     """ValueError raised if the review_number is a negative number."""
     data = setup_task_status_workflow_tests
-    with pytest.raises(TypeError) as cm:
+    with pytest.raises(ValueError) as cm:
         data["test_task3"].review_set(-10)
 
     assert (
@@ -2183,7 +2185,7 @@ def test_review_set_review_number_is_a_negative_integer(
 def test_review_set_review_number_is_zero(setup_task_status_workflow_tests):
     """ValueError raised if the review_number is zero."""
     data = setup_task_status_workflow_tests
-    with pytest.raises(TypeError) as cm:
+    with pytest.raises(ValueError) as cm:
         data["test_task3"].review_set(0)
 
     assert (

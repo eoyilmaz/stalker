@@ -1,20 +1,21 @@
-"""add PriceLists and Goods
+"""Add PriceLists and Goods.
 
 Revision ID: 1c9c9c28c102
 Revises: 856e70016b2
 Create Date: 2015-01-26 13:05:50.050345
-
 """
+
+from alembic import op
+
+import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "1c9c9c28c102"
 down_revision = "856e70016b2"
 
-from alembic import op
-import sqlalchemy as sa
-
 
 def upgrade():
+    """Upgrade the tables."""
     op.create_table(
         "PriceLists",
         sa.Column("id", sa.Integer(), nullable=False),
@@ -62,6 +63,7 @@ def upgrade():
 
 
 def downgrade():
+    """Downgrade the tables."""
     with op.batch_alter_table("Budgets", schema=None) as batch_op:
         batch_op.drop_column("parent_id")
 

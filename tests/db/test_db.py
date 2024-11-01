@@ -10,6 +10,7 @@ import pytest
 import tzlocal
 
 import stalker
+import stalker.db.setup
 from stalker import db, defaults, log
 from stalker import (
     Asset,
@@ -56,7 +57,7 @@ from stalker import (
     WorkingHours,
 )
 from stalker.config import Config
-from stalker.db import alembic_version, create_entity_statuses
+from stalker.db.setup import create_entity_statuses, alembic_version
 from stalker.db.session import DBSession, ExtendedScopedSession
 from stalker.models.auth import LOGIN, LOGOUT
 
@@ -160,11 +161,11 @@ def test_default_admin_for_already_created_databases(
 ):
     """No extra admin is going to be created for already setup databases."""
     # set default admin creation to True
-    db.init()
+    stalker.db.setup.init()
 
     # try to call the init() for a second time and see if there are more
     # than one admin
-    db.init()
+    stalker.db.setup.init()
 
     # and get how many admin is created, (it is impossible to create
     # second one because the tables.simpleEntity.c.nam.unique=True
@@ -193,8 +194,8 @@ def test_no_default_admin_creation(setup_postgresql_db, auto_crate_admin_off):
     stalker.defaults.timing_resolution = datetime.timedelta(hours=1)
 
     # init the db
-    db.setup(data["config"])
-    db.init()
+    stalker.db.setup.setup(data["config"])
+    stalker.db.setup.init()
 
     # check if there is a use with name admin
     assert User.query.filter_by(name=defaults.admin_name).first() is None
@@ -272,16 +273,17 @@ def test_daily_status_initialization(setup_postgresql_db):
 
 def test_register_creates_suitable_permissions(setup_postgresql_db):
     """stalker.db.register is able to create suitable Permissions."""
+
     # create a new dummy class
     class TestClass(object):
         pass
 
-    db.register(TestClass)
+    stalker.db.setup.register(TestClass)
 
     # now check if the TestClass entry is created in Permission table
     permissions_db = Permission.query.filter(Permission.class_name == "TestClass").all()
 
-    logger.debug("%s" % permissions_db)
+    logger.debug(f"{permissions_db}")
 
     actions = defaults.actions
 
@@ -293,7 +295,7 @@ def test_register_raise_type_error_for_wrong_class_name_argument(setup_postgresq
     """TypeError is raised if the class_name argument is not an instance
     of type or str."""
     with pytest.raises(TypeError):
-        db.register(23425)
+        stalker.db.setup.register(23425)
 
 
 def test_permissions_created_for_all_the_classes(setup_postgresql_db):
@@ -348,9 +350,9 @@ def test_permissions_created_for_all_the_classes(setup_postgresql_db):
         assert permission.access in ["Allow", "Deny"]
         assert permission.action in defaults.actions
         assert permission.class_name in class_names
-        logger.debug("permission.access: %s" % permission.access)
-        logger.debug("permission.action: %s" % permission.action)
-        logger.debug("permission.class_name: %s" % permission.class_name)
+        logger.debug(f"permission.access: {permission.access}")
+        logger.debug(f"permission.action: {permission.action}")
+        logger.debug(f"permission.class_name: {permission.class_name}")
 
 
 def test_permissions_not_created_over_and_over_again(setup_postgresql_db):
@@ -359,14 +361,14 @@ def test_permissions_not_created_over_and_over_again(setup_postgresql_db):
     data = setup_postgresql_db
     DBSession.remove()
     # DBSession.close()
-    db.setup(data["config"])
-    db.init()
+    stalker.db.setup.setup(data["config"])
+    stalker.db.setup.init()
 
     # this should not give any error
     DBSession.remove()
 
-    db.setup(data["config"])
-    db.init()
+    stalker.db.setup.setup(data["config"])
+    stalker.db.setup.init()
 
     # and we still have correct amount of Permissions
     permissions = Permission.query.all()
@@ -379,16 +381,16 @@ def test_ticket_statuses_are_not_created_over_and_over_again(setup_postgresql_db
     # create the environment variable and point it to a temp directory
     DBSession.remove()
 
-    db.setup(data["config"])
-    db.init()
+    stalker.db.setup.setup(data["config"])
+    stalker.db.setup.init()
 
     # this should not give any error
-    db.setup(data["config"])
-    db.init()
+    stalker.db.setup.setup(data["config"])
+    stalker.db.setup.init()
 
     # this should not give any error
-    db.setup(data["config"])
-    db.init()
+    stalker.db.setup.setup(data["config"])
+    stalker.db.setup.init()
 
     # and we still have correct amount of Statuses
     statuses = Status.query.all()
@@ -780,9 +782,9 @@ def test_initialization_of_alembic_version_table_multiple_times(setup_postgresql
     assert "bf67e6a234b4" == version_num
 
     DBSession.remove()
-    db.init()
-    db.init()
-    db.init()
+    stalker.db.setup.init()
+    stalker.db.setup.init()
+    stalker.db.setup.init()
 
     version_nums = DBSession.connection().execute(sql_query).fetchall()
 
@@ -793,7 +795,7 @@ def test_initialization_of_alembic_version_table_multiple_times(setup_postgresql
 def test_alembic_version_mismatch(setup_postgresql_db):
     """db.init() raise ValueError if DB alembic version don't match Stalker alembic_version."""
     data = setup_postgresql_db
-    db.init()
+    stalker.db.setup.init()
 
     # now change the alembic_version
     sql = "update alembic_version set version_num='some_random_number'"
@@ -811,11 +813,10 @@ def test_alembic_version_mismatch(setup_postgresql_db):
 
     # re-setup
     with pytest.raises(ValueError) as cm:
-        db.setup(data["config"])
+        stalker.db.setup.setup(data["config"])
 
-    assert (
-        str(cm.value)
-        == "Please update the database to version: %s" % db.alembic_version
+    assert str(cm.value) == (
+        f"Please update the database to version: {stalker.db.setup.alembic_version}"
     )
 
     # also it is not possible to continue with the current DBSession
@@ -833,22 +834,21 @@ def test_alembic_version_mismatch(setup_postgresql_db):
 
     # expect it happen again
     with pytest.raises(ValueError) as cm:
-        db.setup(data["config"])
+        stalker.db.setup.setup(data["config"])
 
-    assert (
-        str(cm.value) == "Please update the database to version: "
-        "%s" % db.alembic_version
+    assert str(cm.value) == (
+        f"Please update the database to version: {stalker.db.setup.alembic_version}"
     )
 
     # rollback and insert the correct alembic version number
     DBSession.rollback()
 
-    sql = "update alembic_version set version_num='%s'" % alembic_version
+    sql = f"update alembic_version set version_num='{alembic_version}'"
     DBSession.connection().execute(sql)
     DBSession.commit()
 
     # and now expect everything to work correctly
-    db.setup(data["config"])
+    stalker.db.setup.setup(data["config"])
     all_users = DBSession.query(User).all()
     assert all_users is not None
 
@@ -868,26 +868,26 @@ def test_initialization_of_repo_environment_variables(setup_postgresql_db):
     # remove any auto created repo vars
     for repo in all_repos:
         try:
-            os.environ.pop("REPO%s" % repo.code)
+            os.environ.pop(f"REPO{repo.code}")
         except KeyError:
             pass
 
     # check if all removed
     for repo in all_repos:
         # check if environment vars are created
-        assert ("REPO%s" % repo.code) not in os.environ
+        assert (f"REPO{repo.code}") not in os.environ
 
     # remove db connection
     DBSession.remove()
 
     # reconnect
-    db.setup(data["config"])
+    stalker.db.setup.setup(data["config"])
 
     all_repos = Repository.query.all()
 
     for repo in all_repos:
         # check if environment vars are created
-        assert ("REPO%s" % repo.code) in os.environ
+        assert (f"REPO{repo.code}") in os.environ
 
 
 def test_db_init_with_studio_instance(setup_postgresql_db):
@@ -935,7 +935,7 @@ def test_db_init_with_studio_instance(setup_postgresql_db):
     logger.debug('data["config"]: {}'.format(data["config"]))
     logger.debug("defaults: {}".format(defaults))
     logger.debug("id(defaults) 1: {}".format(id(defaults)))
-    db.setup(data["config"])
+    stalker.db.setup.setup(data["config"])
     logger.debug("id(defaults) 2: {}".format(id(defaults)))
 
     # and expect the defaults to be updated with studio defaults
@@ -954,15 +954,15 @@ def test_get_alembic_version_is_working_properly_when_there_is_no_alembic_versio
     DBSession.connection().execute("DROP TABLE IF EXISTS alembic_version")
     # now get the alembic_version
     # this should not raise an OperationalError
-    alembic_version_ = db.get_alembic_version()
+    alembic_version_ = stalker.db.setup.get_alembic_version()
     assert alembic_version_ is None
 
 
 def test_create_ticket_statuses_called_multiple_times(setup_postgresql_db):
     """no IntegrityError is raised if create_ticket_statuses() called multiple times."""
-    db.create_ticket_statuses()
-    db.create_ticket_statuses()
-    db.create_ticket_statuses()
+    stalker.db.setup.create_ticket_statuses()
+    stalker.db.setup.create_ticket_statuses()
+    stalker.db.setup.create_ticket_statuses()
 
 
 def test_create_entity_statuses_called_multiple_times(setup_postgresql_db):
@@ -971,21 +971,21 @@ def test_create_entity_statuses_called_multiple_times(setup_postgresql_db):
     ticket_names = defaults.ticket_status_names
     ticket_codes = defaults.ticket_status_codes
     admin = get_admin_user()
-    db.create_entity_statuses("Ticket", ticket_names, ticket_codes, admin)
-    db.create_entity_statuses("Ticket", ticket_names, ticket_codes, admin)
+    stalker.db.setup.create_entity_statuses("Ticket", ticket_names, ticket_codes, admin)
+    stalker.db.setup.create_entity_statuses("Ticket", ticket_names, ticket_codes, admin)
 
 
 def test_register_called_multiple_times(setup_postgresql_db):
     """calling db.register() multiple times will not raise any errors."""
-    db.register(User)
-    db.register(User)
-    db.register(User)
-    db.register(User)
+    stalker.db.setup.register(User)
+    stalker.db.setup.register(User)
+    stalker.db.setup.register(User)
+    stalker.db.setup.register(User)
 
 
 def test_setup_without_settings(setup_postgresql_db):
     """db.setup() will use the default settings if no setting is supplied."""
-    db.setup()
+    stalker.db.setup.setup()
     # db.init()
     conn = DBSession.connection()
     engine = conn.engine
@@ -996,7 +996,7 @@ def test_setup_with_settings(setup_postgresql_db):
     """db.setup() will use the given settings if no setting is supplied."""
     # the default setup is already using the
     with pytest.raises(ArgumentError) as cm:
-        db.setup({"sqlalchemy.url": "random url"})
+        stalker.db.setup.setup({"sqlalchemy.url": "random url"})
 
     assert str(cm.value) == "Could not parse SQLAlchemy URL from string 'random url'"
 
@@ -1055,13 +1055,12 @@ def test_persistence_of_asset(setup_postgresql_db):
     }
 
     test_asset = Asset(**kwargs)
-    # logger.debug('test_asset.project : %s' % test_asset.project)
+    # logger.debug(f'test_asset.project : {test_asset.project}')
 
     DBSession.add(test_asset)
     DBSession.commit()
 
-    # logger.debug('test_asset.project (after commit): %s' %
-    #              test_asset.project)
+    # logger.debug(f'test_asset.project (after commit): {test_asset.project}')
 
     test_task1 = Task(
         name="test task 1",
@@ -4587,8 +4586,8 @@ def test_persistence_of_working_hours(setup_postgresql_db):
 
 def test_timezones_with_sqlite3(setup_sqlite3):
     """Timezones is correctly handled in SQLite3."""
-    db.setup()
-    db.init()
+    stalker.db.setup.setup()
+    stalker.db.setup.init()
 
     # check if we're really using SQLite3
     assert str(DBSession.connection().engine.url) == "sqlite://"

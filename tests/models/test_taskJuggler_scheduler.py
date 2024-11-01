@@ -311,7 +311,7 @@ def test_schedule_will_not_work_if_the_studio_attribute_is_None(
 
     assert (
         str(cm.value) == "TaskJugglerScheduler.studio should be an instance of "
-        "stalker.models.studio.Studio, not NoneType"
+        "stalker.models.studio.Studio, not NoneType: 'None'"
     )
 
 
@@ -604,9 +604,9 @@ def test_projects_argument_is_not_a_list(setup_tsk_juggler_scheduler_db_tests):
     with pytest.raises(TypeError) as cm:
         TaskJugglerScheduler(compute_resources=True, projects="not a list of projects")
 
-    assert (
-        str(cm.value) == "TaskJugglerScheduler.projects should be a list of "
-        "stalker.models.project.Project instances, not str"
+    assert str(cm.value) == (
+        "TaskJugglerScheduler.projects should be a list of "
+        "stalker.models.project.Project instances, not str: 'not a list of projects'"
     )
 
 
@@ -616,9 +616,9 @@ def test_projects_attribute_is_not_a_list(setup_tsk_juggler_scheduler_db_tests):
     with pytest.raises(TypeError) as cm:
         tjp.projects = "not a list of projects"
 
-    assert (
-        str(cm.value) == "TaskJugglerScheduler.projects should be a list of "
-        "stalker.models.project.Project instances, not str"
+    assert str(cm.value) == (
+        "TaskJugglerScheduler.projects should be a list of "
+        "stalker.models.project.Project instances, not str: 'not a list of projects'"
     )
 
 
@@ -629,9 +629,9 @@ def test_projects_argument_is_not_a_list_of_all_projects():
             compute_resources=True, projects=["not", 1, [], "of", "projects"]
         )
 
-    assert (
-        str(cm.value) == "TaskJugglerScheduler.projects should be a list of "
-        "stalker.models.project.Project instances, not str"
+    assert str(cm.value) == (
+        "TaskJugglerScheduler.projects should be a list of "
+        "stalker.models.project.Project instances, not str: 'not'"
     )
 
 
@@ -643,7 +643,7 @@ def test_projects_attribute_is_not_list_of_all_projects():
 
     assert (
         str(cm.value) == "TaskJugglerScheduler.projects should be a list of "
-        "stalker.models.project.Project instances, not str"
+        "stalker.models.project.Project instances, not str: 'not'"
     )
 
 

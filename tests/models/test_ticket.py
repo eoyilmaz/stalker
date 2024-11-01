@@ -2,6 +2,7 @@
 """Tests for the Ticket class."""
 
 import logging
+import sys
 
 import pytest
 
@@ -18,6 +19,7 @@ from stalker import Type
 from stalker import User
 from stalker import Version
 from stalker.db.session import DBSession
+from stalker.exceptions import CircularDependencyError
 
 logger = logging.getLogger("stalker.models.ticket")
 logger.setLevel(log.logging_level)
@@ -206,7 +208,18 @@ def test_number_attribute_is_read_only(setup_ticket_tests):
     with pytest.raises(AttributeError) as cm:
         data["test_ticket"].number = 234
 
-    assert str(cm.value) == "can't set attribute"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute",
+        11: "property of 'Ticket' object has no setter",
+        12: "property of 'Ticket' object has no setter",
+    }.get(
+        sys.version_info.minor,
+        "property '_number_getter' of 'Ticket' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_number_attribute_is_automatically_increased(setup_ticket_tests):
@@ -275,9 +288,9 @@ def test_related_tickets_attribute_is_set_to_something_other_then_a_list_of_tick
     with pytest.raises(TypeError) as cm:
         data["test_ticket"].related_tickets = ["a ticket"]
 
-    assert (
-        str(cm.value) == "Ticket.related_ticket attribute should be a list of other "
-        "stalker.models.ticket.Ticket instances not str"
+    assert str(cm.value) == (
+        "Ticket.related_ticket attribute should be a list of other "
+        "stalker.models.ticket.Ticket instances, not str: 'a ticket'"
     )
 
 
@@ -298,7 +311,7 @@ def test_related_tickets_attribute_accepts_list_of_ticket_instances(setup_ticket
 def test_related_ticket_attribute_will_not_accept_self(setup_ticket_tests):
     """related_tickets attr don't accept the Ticket itself and raises ValueError."""
     data = setup_ticket_tests
-    with pytest.raises(ValueError) as cm:
+    with pytest.raises(CircularDependencyError) as cm:
         data["test_ticket"].related_tickets = [data["test_ticket"]]
 
     assert (
@@ -357,9 +370,9 @@ def test_project_argument_is_skipped(setup_ticket_tests):
     with pytest.raises(TypeError) as cm:
         Ticket(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "Ticket.project should be an instance of "
-        "stalker.models.project.Project, not NoneType"
+    assert str(cm.value) == (
+        "Ticket.project should be an instance of "
+        "stalker.models.project.Project, not NoneType: 'None'"
     )
 
 
@@ -372,7 +385,7 @@ def test_project_argument_is_none(setup_ticket_tests):
 
     assert (
         str(cm.value) == "Ticket.project should be an instance of "
-        "stalker.models.project.Project, not NoneType"
+        "stalker.models.project.Project, not NoneType: 'None'"
     )
 
 
@@ -383,9 +396,9 @@ def test_project_argument_accepts_project_instances_only(setup_ticket_tests):
     with pytest.raises(TypeError) as cm:
         Ticket(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "Ticket.project should be an instance of "
-        "stalker.models.project.Project, not str"
+    assert str(cm.value) == (
+        "Ticket.project should be an instance of "
+        "stalker.models.project.Project, not str: 'Not a Project instance'"
     )
 
 
@@ -403,10 +416,22 @@ def test_project_attribute_is_read_only(setup_ticket_tests):
     with pytest.raises(AttributeError) as cm:
         data["test_ticket"].project = data["test_project"]
 
-    assert str(cm.value) == "can't set attribute"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute",
+        11: "property of 'Ticket' object has no setter",
+        12: "property of 'Ticket' object has no setter",
+    }.get(
+        sys.version_info.minor,
+        "property '_project_getter' of 'Ticket' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 # STATUSES
+
 
 # resolve
 def test_resolve_method_will_change_the_status_from_new_to_closed_and_creates_a_log(
@@ -751,9 +776,14 @@ def test_summary_argument_is_not_a_string(setup_ticket_tests):
     with pytest.raises(TypeError) as cm:
         Ticket(data["kwargs"])
 
-    assert (
-        str(cm.value) == "Ticket.project should be an instance of "
-        "stalker.models.project.Project, not dict"
+    assert str(cm.value) == (
+        "Ticket.project should be an instance of "
+        "stalker.models.project.Project, not dict: "
+        "'{'project': <Test Project 1 (Project)>, "
+        "'links': [<TEST_PROJECT_1_Test_Asset_Modeling_of_Asset_1_Main_v001 "
+        "(Version)>], 'summary': ['not a string instance'], 'description': "
+        "'This is the long description', 'priority': 'TRIVIAL', 'reported_by': "
+        "<Test User ('testuser1') (User)>}'"
     )
 
 
@@ -763,7 +793,9 @@ def test_summary_attribute_is_set_to_a_value_other_than_a_string(setup_ticket_te
     with pytest.raises(TypeError) as cm:
         data["test_ticket"].summary = ["not a string"]
 
-    assert str(cm.value) == "Ticket.summary should be an instance of str, not list"
+    assert str(cm.value) == (
+        "Ticket.summary should be an instance of str, not list: '['not a string']'"
+    )
 
 
 def test_summary_argument_is_working_properly(setup_ticket_tests):

@@ -1,20 +1,21 @@
-"""added Users.company and Projects.client columns and a new Clients table
+"""added "Users.company" and "Projects.client" columns and a new Clients table.
 
 Revision ID: 182f44ce5f07
 Revises: 59bfe820c369
 Create Date: 2014-05-29 11:33:02.313000
-
 """
+
+from alembic import op
+
+import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "182f44ce5f07"
 down_revision = "59bfe820c369"
 
-from alembic import op
-import sqlalchemy as sa
-
 
 def upgrade():
+    """Upgrade the tables."""
     # Create Clients table
     op.create_table(
         "Clients",
@@ -48,6 +49,7 @@ def upgrade():
 
 
 def downgrade():
+    """Downgrade the tables."""
     op.drop_column("Users", "company_id")
     op.drop_column("Projects", "client_id")
     op.drop_table("Clients")

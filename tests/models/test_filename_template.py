@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tests for the stalker.models.template.FilenameTemplate class."""
 
+import sys
 import pytest
 
 from stalker import (
@@ -76,7 +77,19 @@ def test_target_entity_type_attribute_is_read_only(setup_filename_template_tests
     with pytest.raises(AttributeError) as cm:
         data["filename_template"].target_entity_type = "Asset"
 
-    assert str(cm.value) == "can't set attribute"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute",
+        11: "property of 'FilenameTemplate' object has no setter",
+        12: "property of 'FilenameTemplate' object has no setter",
+    }.get(
+        sys.version_info.minor,
+        "property '_target_entity_type_getter' of 'FilenameTemplate' "
+        "object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_target_entity_type_argument_accepts_classes(setup_filename_template_tests):
@@ -146,7 +159,11 @@ def test_path_argument_is_not_string(setup_filename_template_tests):
     with pytest.raises(TypeError) as cm:
         FilenameTemplate(**data["kwargs"])
 
-    assert str(cm.value) == "FilenameTemplate.path attribute should be string not list"
+    assert str(cm.value) == (
+        "FilenameTemplate.path attribute should be string, not list: '['a', ' ', 'l', "
+        "'i', 's', 't', ' ', 'f', 'r', 'o', 'm', ' ', 'a', ' ', 's', 't', 'r', 'i', "
+        "'n', 'g']'"
+    )
 
 
 def test_path_attribute_is_not_string(setup_filename_template_tests):
@@ -156,7 +173,11 @@ def test_path_attribute_is_not_string(setup_filename_template_tests):
     with pytest.raises(TypeError) as cm:
         data["filename_template"].path = test_value
 
-    assert str(cm.value) == "FilenameTemplate.path attribute should be string not list"
+    assert str(cm.value) == (
+        "FilenameTemplate.path attribute should be string, not list: '['a', ' ', 'l', "
+        "'i', 's', 't', ' ', 'f', 'r', 'o', 'm', ' ', 'a', ' ', 's', 't', 'r', 'i', "
+        "'n', 'g']'"
+    )
 
 
 def test_filename_argument_is_skipped(setup_filename_template_tests):
@@ -209,8 +230,10 @@ def test_filename_argument_is_not_string(setup_filename_template_tests):
     with pytest.raises(TypeError) as cm:
         FilenameTemplate(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "FilenameTemplate.filename attribute should be string not list"
+    assert str(cm.value) == (
+        "FilenameTemplate.filename attribute should be string, not list: '['a', ' ', "
+        "'l', 'i', 's', 't', ' ', 'f', 'r', 'o', 'm', ' ', 'a', ' ', 's', 't', 'r', "
+        "'i', 'n', 'g']'"
     )
 
 
@@ -221,8 +244,10 @@ def test_filename_attribute_is_not_string(setup_filename_template_tests):
     with pytest.raises(TypeError) as cm:
         data["filename_template"].filename = test_value
 
-    assert (
-        str(cm.value) == "FilenameTemplate.filename attribute should be string not list"
+    assert str(cm.value) == (
+        "FilenameTemplate.filename attribute should be string, not list: "
+        "'['a', ' ', 'l', 'i', 's', 't', ' ', 'f', 'r', 'o', 'm', ' ', 'a', ' ', "
+        "'s', 't', 'r', 'i', 'n', 'g']'"
     )
 
 

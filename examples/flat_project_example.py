@@ -9,7 +9,7 @@ The second project uses a more traditional folder structure where every
 Task/Asset/Shot/Sequence has its own folder and the Task hierarchy is directly
 reflected to folder hierarchy.
 """
-
+import stalker.db.setup
 from stalker import (
     db,
     Project,
@@ -25,10 +25,10 @@ from stalker import (
 )
 
 # initialize an in memory sqlite3 database
-db.setup()
+stalker.db.setup.setup()
 
 # fill in default data
-db.init()
+stalker.db.setup.init()
 
 # create a new repository
 repo = Repository(

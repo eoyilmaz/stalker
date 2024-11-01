@@ -2,6 +2,7 @@
 """Tests related to Review class."""
 
 import datetime
+import sys
 
 import pytest
 
@@ -135,7 +136,7 @@ def test_task_argument_is_not_a_task_instance(setup_review_db_test):
     assert (
         str(cm.value)
         == "Review.task should be an instance of stalker.models.task.Task, "
-        "not str"
+        "not str: 'not a Task instance'"
     )
 
 
@@ -185,7 +186,19 @@ def test_review_number_attribute_is_a_read_only_attribute(setup_review_db_test):
     review = Review(**data["kwargs"])
     with pytest.raises(AttributeError) as cm:
         review.review_number = 2
-    assert str(cm.value) == "can't set attribute"
+
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute",
+        11: "property of 'Review' object has no setter",
+        12: "property of 'Review' object has no setter",
+    }.get(
+        sys.version_info.minor,
+        "property '_review_number_getter' of 'Review' object has no setter"
+    )
+
+    assert str(cm.value) == error_message
 
 
 def test_review_number_attribute_is_initialized_to_the_task_review_number_plus_1(
@@ -227,7 +240,7 @@ def test_reviewer_argument_is_skipped(setup_review_db_test):
         Review(**data["kwargs"])
     assert (
         str(cm.value) == "Review.reviewer should be set to a stalker.models.auth.User "
-        "instance, not NoneType"
+        "instance, not NoneType: 'None'"
     )
 
 
@@ -239,7 +252,7 @@ def test_reviewer_argument_is_none(setup_review_db_test):
         Review(**data["kwargs"])
     assert (
         str(cm.value) == "Review.reviewer should be set to a stalker.models.auth.User "
-        "instance, not NoneType"
+        "instance, not NoneType: 'None'"
     )
 
 
@@ -251,7 +264,7 @@ def test_reviewer_attribute_is_set_to_none(setup_review_db_test):
         review.reviewer = None
     assert (
         str(cm.value) == "Review.reviewer should be set to a stalker.models.auth.User "
-        "instance, not NoneType"
+        "instance, not NoneType: 'None'"
     )
 
 
@@ -263,7 +276,7 @@ def test_reviewer_argument_is_not_a_user_instance(setup_review_db_test):
         Review(**data["kwargs"])
     assert (
         str(cm.value) == "Review.reviewer should be set to a stalker.models.auth.User "
-        "instance, not str"
+        "instance, not str: 'not a user instance'"
     )
 
 
@@ -275,7 +288,7 @@ def test_reviewer_attribute_is_not_a_user_instance(setup_review_db_test):
         review.reviewer = "not a user"
     assert (
         str(cm.value) == "Review.reviewer should be set to a stalker.models.auth.User "
-        "instance, not str"
+        "instance, not str: 'not a user'"
     )
 
 

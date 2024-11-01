@@ -161,7 +161,7 @@ def test_links_argument_is_not_a_list_instance(setup_daily_tests):
 
     assert (
         str(cm.value) == "DailyLink.link should be an instance of "
-        "stalker.models.link.Link instance, not str"
+        "stalker.models.link.Link instance, not str: 'n'"
     )
 
 
@@ -176,9 +176,9 @@ def test_links_argument_is_not_a_list_of_link_instances(setup_daily_tests):
             status_list=data["daily_status_list"],
         )
 
-    assert (
-        str(cm.value) == "DailyLink.link should be an instance of "
-        "stalker.models.link.Link instance, not str"
+    assert str(cm.value) == (
+        "DailyLink.link should be an instance of stalker.models.link.Link instance, "
+        "not str: 'not'"
     )
 
 
@@ -350,7 +350,7 @@ def test_daily_argument_is_not_a_daily_instance(setup_daily_tests):
     with pytest.raises(TypeError) as cm:
         DailyLink(daily="not a daily")
 
-    assert (
-        str(cm.value) == "DailyLink.daily should be an instance of "
-        "stalker.models.review.Daily instance, not str"
+    assert str(cm.value) == (
+        "DailyLink.daily should be an instance of stalker.models.review.Daily "
+        "instance, not str: 'not a daily'"
     )
