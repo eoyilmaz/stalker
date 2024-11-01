@@ -147,7 +147,7 @@ def setup_tsk_juggler_scheduler_db_tests(setup_postgresql_db):
             data["test_user4"],
             data["test_user5"],
         ],
-        depends=[data["test_task1"]],
+        depends_on=[data["test_task1"]],
         schedule_model=0,
         schedule_timing=60,
         schedule_unit="h",

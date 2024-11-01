@@ -119,7 +119,7 @@ class TaskJugglerScheduler(SchedulerBase):
        Stalker now can use 'gapduration', 'gaplength', 'onstart' and 'onend'
        TaskJuggler directives for each dependent task of a task. Use the
        TaskDependency instance in Task.task_dependency attribute to control how
-       a particular task is depending to another task.
+       a particular task is depending on another task.
 
     .. warning::
        **Task.computed_resources Attribute Content**
@@ -339,7 +339,7 @@ left outer join (
             recursive_task.alt_path || '-' || recursive_task.id as alt_path
         from recursive_task
         join "SimpleEntities" on recursive_task.id = "SimpleEntities".id
-    ) as tasks on "Task_Dependencies".depends_to_id = tasks.id
+    ) as tasks on "Task_Dependencies".depends_on_id = tasks.id
     group by task_id
 ) as task_dependencies on "Tasks".id = task_dependencies.task_id
 

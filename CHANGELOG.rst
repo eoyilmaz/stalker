@@ -972,7 +972,7 @@ testing the library.
 
 * **New:** ``stalker.models.task.TimeLog`` instances are now checking if the
   dependency relation between the task that receives the time log and the tasks
-  that the task depends to will be violated in terms of the start and end dates
+  that the task depends on will be violated in terms of the start and end dates
   and raises a ``DependencyViolationError`` if it is the case.
 
 0.2.6

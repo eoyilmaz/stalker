@@ -78,7 +78,7 @@ p1 = Project(
 # now lets create a Task
 t1 = Task(name="Building 1", project=p1)
 t2 = Task(name="Model", parent=t1)
-t3 = Task(name="Lighting", parent=t1, depends=[t2])
+t3 = Task(name="Lighting", parent=t1, depends_on=[t2])
 
 # store all the data in the database
 db.DBSession.add_all([t1, t2, t3])  # this is enough to store the rest

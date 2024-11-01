@@ -849,7 +849,7 @@ def test_time_log_creation_for_a_wfd_leaf_task(setup_time_log_db_tests):
     """StatusError raised if TimeLog is created for a WFD leaf task."""
     data = setup_time_log_db_tests
     new_task = Task(name="Test Task 2", project=data["test_project"])
-    new_task.depends = [data["test_task1"]]
+    new_task.depends_on = [data["test_task1"]]
     kwargs = copy.copy(data["kwargs"])
     kwargs["task"] = new_task
     with pytest.raises(StatusError) as cm:
@@ -995,12 +995,12 @@ def test_time_log_creation_that_violates_dependency_condition_wip_cmpl_onend(
         project=data["test_project"],
         schedule_timing=10,
         schedule_unit="d",
-        depends=[task],
+        depends_on=[task],
         resources=[data["test_resource2"]],
     )
 
     # set the dependency target to onend
-    dep_task.task_depends_to[0].dependency_target = "onend"
+    dep_task.task_depends_on[0].dependency_target = "onend"
 
     # entering a time log to the dates before 2014-03-25-19-0 should raise
     # a ValueError
@@ -1053,12 +1053,12 @@ def test_time_log_creation_that_violates_dependency_condition_wip_cmpl_onstart(
         project=data["test_project"],
         schedule_timing=10,
         schedule_unit="d",
-        depends=[task],
+        depends_on=[task],
         resources=[data["test_resource2"]],
     )
 
     # set the dependency target to onstart
-    dep_task.task_depends_to[0].dependency_target = "onstart"
+    dep_task.task_depends_on[0].dependency_target = "onstart"
 
     # entering a time log to the dates before 2014-03-16-10-0 should raise
     # a ValueError

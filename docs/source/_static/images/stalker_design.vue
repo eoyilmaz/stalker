@@ -923,7 +923,7 @@
             <URIString>http://vue.tufts.edu/rdf/resource/e8a41d0c648c6197658d749a0994b723</URIString>
             <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
         </child>
-        <child ID="1394" label="depends | MANY | TASK"
+        <child ID="1394" label="depends_on | MANY | TASK"
             created="1277500447230" x="34.0" y="185.0" width="140.0"
             height="23.0" strokeWidth="1.0" autoSized="true" xsi:type="node">
             <fillColor>#F2AE45</fillColor>
@@ -7397,7 +7397,7 @@
             <URIString>http://vue.tufts.edu/rdf/resource/842e31877f0001015d32587797aa8b4f</URIString>
             <shape arcwidth="20.0" archeight="20.0" xsi:type="roundRect"/>
         </child>
-        <child ID="3691" label="depends | MANY | TASK"
+        <child ID="3691" label="depends_on | MANY | TASK"
             created="1307887603558" x="34.0" y="43.25" width="140.0"
             height="23.0" strokeWidth="1.0" autoSized="true" xsi:type="node">
             <fillColor>#FDE888</fillColor>

@@ -134,7 +134,7 @@ def setup_task_status_workflow_tests():
         status=data["status_wfd"],
         status_list=data["test_task_status_list"],
         resources=[data["test_user1"]],
-        depends=[data["test_task3"]],
+        depends_on=[data["test_task3"]],
         start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
@@ -147,7 +147,7 @@ def setup_task_status_workflow_tests():
         parent=data["test_task1"],
         status_list=data["test_task_status_list"],
         resources=[data["test_user1"]],
-        depends=[data["test_task4"]],
+        depends_on=[data["test_task4"]],
         start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
@@ -311,10 +311,10 @@ def test_walk_dependencies_is_working_properly(setup_task_status_workflow_tests)
     ]
 
     # setup dependencies
-    data["test_task9"].depends = [data["test_task6"]]
-    data["test_task6"].depends = [data["test_task4"], data["test_task5"]]
-    data["test_task5"].depends = [data["test_task4"]]
-    data["test_task4"].depends = [data["test_task8"], data["test_task3"]]
+    data["test_task9"].depends_on = [data["test_task6"]]
+    data["test_task6"].depends_on = [data["test_task4"], data["test_task5"]]
+    data["test_task5"].depends_on = [data["test_task4"]]
+    data["test_task4"].depends_on = [data["test_task8"], data["test_task3"]]
 
     for task in data["test_task9"].walk_dependencies():
         visited_tasks.append(task)
@@ -333,16 +333,16 @@ def test_leaf_wfd_task_updated_to_have_a_dependency_of_wfd_task_task(
     """set dependency between a WFD task to another WFD task and the status stay WFD."""
     # create another dependency to make the task3 a WFD task
     data = setup_task_status_workflow_tests
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task9"].status = data["status_wip"]
     assert data["test_task9"].status == data["status_wip"]
-    data["test_task3"].depends.append(data["test_task9"])
+    data["test_task3"].depends_on.append(data["test_task9"])
     assert data["test_task3"].status == data["status_wfd"]
     # make a task with HREV status
     # create dependency
     data["test_task8"].status = data["status_wfd"]
     assert data["test_task8"].status == data["status_wfd"]
-    data["test_task3"].depends.append(data["test_task8"])
+    data["test_task3"].depends_on.append(data["test_task8"])
     assert data["test_task3"].status == data["status_wfd"]
 
 
@@ -352,16 +352,16 @@ def test_leaf_wfd_task_updated_to_have_a_dependency_of_rts_task(
     """set dependency between a WFD task to an RTS task and the status stay WFD."""
     data = setup_task_status_workflow_tests
     # create another dependency to make the task3 a WFD task
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task9"].status = data["status_wip"]
     assert data["test_task9"].status == data["status_wip"]
-    data["test_task3"].depends.append(data["test_task9"])
+    data["test_task3"].depends_on.append(data["test_task9"])
     assert data["test_task3"].status == data["status_wfd"]
     # make a task with HREV status
     # create dependency
     data["test_task8"].status = data["status_rts"]
     assert data["test_task8"].status == data["status_rts"]
-    data["test_task3"].depends.append(data["test_task8"])
+    data["test_task3"].depends_on.append(data["test_task8"])
     assert data["test_task3"].status == data["status_wfd"]
 
 
@@ -371,16 +371,16 @@ def test_leaf_wfd_task_updated_to_have_a_dependency_of_wip_task(
     """set a dependency between a WFD task to a WIP task and the status stay WFD."""
     data = setup_task_status_workflow_tests
     # create another dependency to make the task3 a WFD task
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task9"].status = data["status_wip"]
     assert data["test_task9"].status == data["status_wip"]
-    data["test_task3"].depends.append(data["test_task9"])
+    data["test_task3"].depends_on.append(data["test_task9"])
     assert data["test_task3"].status == data["status_wfd"]
     # make a task with HREV status
     # create dependency
     data["test_task8"].status = data["status_wip"]
     assert data["test_task8"].status == data["status_wip"]
-    data["test_task3"].depends.append(data["test_task8"])
+    data["test_task3"].depends_on.append(data["test_task8"])
     assert data["test_task3"].status == data["status_wfd"]
 
 
@@ -390,16 +390,16 @@ def test_leaf_wfd_task_updated_to_have_a_dependency_of_prev_task(
     """set a dependency between a WFD task to a PREV task and the status stay WFD."""
     data = setup_task_status_workflow_tests
     # create another dependency to make the task3 a WFD task
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task9"].status = data["status_wip"]
     assert data["test_task9"].status == data["status_wip"]
-    data["test_task3"].depends.append(data["test_task9"])
+    data["test_task3"].depends_on.append(data["test_task9"])
     assert data["test_task3"].status == data["status_wfd"]
     # make a task with HREV status
     # create dependency
     data["test_task8"].status = data["status_prev"]
     assert data["test_task8"].status == data["status_prev"]
-    data["test_task3"].depends.append(data["test_task8"])
+    data["test_task3"].depends_on.append(data["test_task8"])
     assert data["test_task3"].status == data["status_wfd"]
 
 
@@ -409,16 +409,16 @@ def test_leaf_wfd_task_updated_to_have_a_dependency_of_hrev_task(
     """set a dependency between a WFD task to a HREV task and the status stay WFD."""
     data = setup_task_status_workflow_tests
     # create another dependency to make the task3 a WFD task
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task9"].status = data["status_wip"]
     assert data["test_task9"].status == data["status_wip"]
-    data["test_task3"].depends.append(data["test_task9"])
+    data["test_task3"].depends_on.append(data["test_task9"])
     assert data["test_task3"].status == data["status_wfd"]
     # make a task with HREV status
     # create dependency
     data["test_task8"].status = data["status_hrev"]
     assert data["test_task8"].status == data["status_hrev"]
-    data["test_task3"].depends.append(data["test_task8"])
+    data["test_task3"].depends_on.append(data["test_task8"])
     assert data["test_task3"].status == data["status_wfd"]
 
 
@@ -428,16 +428,16 @@ def test_leaf_wfd_task_updated_to_have_a_dependency_of_oh_task(
     """set a dependency between a WFD task to a OH task and the status stay WFD."""
     data = setup_task_status_workflow_tests
     # create another dependency to make the task3 a WFD task
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task9"].status = data["status_wip"]
     assert data["test_task9"].status == data["status_wip"]
-    data["test_task3"].depends.append(data["test_task9"])
+    data["test_task3"].depends_on.append(data["test_task9"])
     assert data["test_task3"].status == data["status_wfd"]
     # make a task with HREV status
     # create dependency
     data["test_task8"].status = data["status_oh"]
     assert data["test_task8"].status == data["status_oh"]
-    data["test_task3"].depends.append(data["test_task8"])
+    data["test_task3"].depends_on.append(data["test_task8"])
     assert data["test_task3"].status == data["status_wfd"]
 
 
@@ -447,16 +447,16 @@ def test_leaf_wfd_task_updated_to_have_a_dependency_of_stop_task(
     """set a dependency between a WFD task to a STOP task and the status stay WFD."""
     data = setup_task_status_workflow_tests
     # create another dependency to make the task3 a WFD task
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task9"].status = data["status_wip"]
     assert data["test_task9"].status == data["status_wip"]
-    data["test_task3"].depends.append(data["test_task9"])
+    data["test_task3"].depends_on.append(data["test_task9"])
     assert data["test_task3"].status == data["status_wfd"]
     # make a task with HREV status
     # create dependency
     data["test_task8"].status = data["status_stop"]
     assert data["test_task8"].status == data["status_stop"]
-    data["test_task3"].depends.append(data["test_task8"])
+    data["test_task3"].depends_on.append(data["test_task8"])
     assert data["test_task3"].status == data["status_wfd"]
 
 
@@ -466,16 +466,16 @@ def test_leaf_wfd_task_updated_to_have_a_dependency_of_cmpl_task(
     """set a dependency between a WFD task to a CMPL task and the status stay to WFD."""
     data = setup_task_status_workflow_tests
     # create another dependency to make the task3 a WFD task
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task9"].status = data["status_wip"]
     assert data["test_task9"].status == data["status_wip"]
-    data["test_task3"].depends.append(data["test_task9"])
+    data["test_task3"].depends_on.append(data["test_task9"])
     assert data["test_task3"].status == data["status_wfd"]
     # make a task with HREV status
     # create dependency
     data["test_task8"].status = data["status_cmpl"]
     assert data["test_task8"].status == data["status_cmpl"]
-    data["test_task3"].depends.append(data["test_task8"])
+    data["test_task3"].depends_on.append(data["test_task8"])
     assert data["test_task3"].status == data["status_wfd"]
 
 
@@ -487,14 +487,14 @@ def test_leaf_rts_task_updated_to_have_a_dependency_of_wfd_task_task(
     """set a dependency between a RTS task to a WFD task the status updated to WFD."""
     data = setup_task_status_workflow_tests
     # find an RTS task
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task3"].status = data["status_rts"]
     assert data["test_task3"].status == data["status_rts"]
     # create dependency
     # make a task with WFD status
     data["test_task8"].status = data["status_wfd"]
     assert data["test_task8"].status == data["status_wfd"]
-    data["test_task3"].depends.append(data["test_task8"])
+    data["test_task3"].depends_on.append(data["test_task8"])
     assert data["test_task3"].status == data["status_wfd"]
 
 
@@ -504,14 +504,14 @@ def test_leaf_rts_task_updated_to_have_a_dependency_of_rts_task(
     """set a dependency between a RTS task to a RTS task the status updated to WFD."""
     data = setup_task_status_workflow_tests
     # find an RTS task
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task3"].status = data["status_rts"]
     assert data["test_task3"].status == data["status_rts"]
     # create dependency
     # make a task with RTS status
     data["test_task8"].status = data["status_rts"]
     assert data["test_task8"].status == data["status_rts"]
-    data["test_task3"].depends.append(data["test_task8"])
+    data["test_task3"].depends_on.append(data["test_task8"])
     assert data["test_task3"].status == data["status_wfd"]
 
 
@@ -521,14 +521,14 @@ def test_leaf_rts_task_updated_to_have_a_dependency_of_wip_task(
     """set a dependency between a RTS task to a WIP task the status updated to WFD."""
     data = setup_task_status_workflow_tests
     # find an RTS task
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task3"].status = data["status_rts"]
     assert data["test_task3"].status == data["status_rts"]
     # create dependency
     # make a task with WIP status
     data["test_task8"].status = data["status_wip"]
     assert data["test_task8"].status == data["status_wip"]
-    data["test_task3"].depends.append(data["test_task8"])
+    data["test_task3"].depends_on.append(data["test_task8"])
     assert data["test_task3"].status == data["status_wfd"]
 
 
@@ -538,14 +538,14 @@ def test_leaf_rts_task_updated_to_have_a_dependency_of_prev_task(
     """set a dependency between a RTS task to a PREV task the status updated to WFD."""
     data = setup_task_status_workflow_tests
     # find an RTS task
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task3"].status = data["status_rts"]
     assert data["test_task3"].status == data["status_rts"]
     # create dependency
     # make a task with PREV status
     data["test_task8"].status = data["status_prev"]
     assert data["test_task8"].status == data["status_prev"]
-    data["test_task3"].depends.append(data["test_task8"])
+    data["test_task3"].depends_on.append(data["test_task8"])
     assert data["test_task3"].status == data["status_wfd"]
 
 
@@ -555,14 +555,14 @@ def test_leaf_rts_task_updated_to_have_a_dependency_of_hrev_task(
     """set a dependency between a RTS task to a HREV task the status updated to WFD."""
     data = setup_task_status_workflow_tests
     # find an RTS task
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task3"].status = data["status_rts"]
     assert data["test_task3"].status == data["status_rts"]
     # create dependency
     # make a task with HREV status
     data["test_task8"].status = data["status_hrev"]
     assert data["test_task8"].status == data["status_hrev"]
-    data["test_task3"].depends.append(data["test_task8"])
+    data["test_task3"].depends_on.append(data["test_task8"])
     assert data["test_task3"].status == data["status_wfd"]
 
 
@@ -572,14 +572,14 @@ def test_leaf_rts_task_updated_to_have_a_dependency_of_oh_task(
     """set a dependency between a RTS task to a OH task the status updated to WFD."""
     data = setup_task_status_workflow_tests
     # find an RTS task
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task3"].status = data["status_rts"]
     assert data["test_task3"].status == data["status_rts"]
     # create dependency
     # make a task with OH status
     data["test_task8"].status = data["status_oh"]
     assert data["test_task8"].status == data["status_oh"]
-    data["test_task3"].depends.append(data["test_task8"])
+    data["test_task3"].depends_on.append(data["test_task8"])
     assert data["test_task3"].status == data["status_wfd"]
 
 
@@ -589,14 +589,14 @@ def test_leaf_rts_task_updated_to_have_a_dependency_of_stop_task(
     """set a dependency between an RTS task to a STOP task the status will stay RTS."""
     data = setup_task_status_workflow_tests
     # find an RTS task
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task3"].status = data["status_rts"]
     assert data["test_task3"].status == data["status_rts"]
     # create dependency
     # make a task with STOP status
     data["test_task8"].status = data["status_stop"]
     assert data["test_task8"].status == data["status_stop"]
-    data["test_task3"].depends.append(data["test_task8"])
+    data["test_task3"].depends_on.append(data["test_task8"])
     assert data["test_task3"].status == data["status_rts"]
 
 
@@ -606,14 +606,14 @@ def test_leaf_rts_task_updated_to_have_a_dependency_of_cmpl_task(
     """set a dependency between an RTS task to a CMPL task the status will stay RTS."""
     data = setup_task_status_workflow_tests
     # find an RTS task
-    assert data["test_task3"].depends == []
+    assert data["test_task3"].depends_on == []
     data["test_task3"].status = data["status_rts"]
     assert data["test_task3"].status == data["status_rts"]
     # create dependency
     # make a task with CMPL status
     data["test_task8"].status = data["status_cmpl"]
     assert data["test_task8"].status == data["status_cmpl"]
-    data["test_task3"].depends.append(data["test_task8"])
+    data["test_task3"].depends_on.append(data["test_task8"])
     assert data["test_task3"].status == data["status_rts"]
 
 
@@ -623,12 +623,12 @@ def test_leaf_wip_task_dependency_can_not_be_updated(setup_task_status_workflow_
     """it is not possible to update the dependencies of a WIP task."""
     data = setup_task_status_workflow_tests
     # find an WIP task
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task3"].status = data["status_wip"]
     assert data["test_task3"].status == data["status_wip"]
     # create dependency
     with pytest.raises(StatusError) as cm:
-        data["test_task3"].depends.append(data["test_task8"])
+        data["test_task3"].depends_on.append(data["test_task8"])
 
     assert (
         str(cm.value) == "This is a WIP task and it is not allowed to change the "
@@ -640,12 +640,12 @@ def test_leaf_prev_task_dependency_can_not_be_updated(setup_task_status_workflow
     """it is not possible to update the dependencies of a PREV task."""
     data = setup_task_status_workflow_tests
     # find an PREV task
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task3"].status = data["status_prev"]
     assert data["test_task3"].status == data["status_prev"]
     # create dependency
     with pytest.raises(StatusError) as cm:
-        data["test_task3"].depends.append(data["test_task8"])
+        data["test_task3"].depends_on.append(data["test_task8"])
 
     assert (
         str(cm.value) == "This is a PREV task and it is not allowed to change the "
@@ -657,12 +657,12 @@ def test_leaf_hrev_task_dependency_can_not_be_updated(setup_task_status_workflow
     """it is not possible to update the dependencies of a HREV task."""
     data = setup_task_status_workflow_tests
     # find an HREV task
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task3"].status = data["status_hrev"]
     assert data["test_task3"].status == data["status_hrev"]
     # create dependency
     with pytest.raises(StatusError) as cm:
-        data["test_task3"].depends.append(data["test_task8"])
+        data["test_task3"].depends_on.append(data["test_task8"])
 
     assert (
         str(cm.value) == "This is a HREV task and it is not allowed to change the "
@@ -676,12 +676,12 @@ def test_leaf_drev_task_dependency_can_not_be_updated(setup_task_status_workflow
     """
     data = setup_task_status_workflow_tests
     # find an DREV task
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task3"].status = data["status_drev"]
     assert data["test_task3"].status == data["status_drev"]
     # create dependency
     with pytest.raises(StatusError) as cm:
-        data["test_task3"].depends.append(data["test_task8"])
+        data["test_task3"].depends_on.append(data["test_task8"])
 
     assert (
         str(cm.value) == "This is a DREV task and it is not allowed to change the "
@@ -693,12 +693,12 @@ def test_leaf_oh_task_dependency_can_not_be_updated(setup_task_status_workflow_t
     """it is not possible to update the dependencies of a OH task."""
     data = setup_task_status_workflow_tests
     # find an OH task
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task3"].status = data["status_oh"]
     assert data["test_task3"].status == data["status_oh"]
     # create dependency
     with pytest.raises(StatusError) as cm:
-        data["test_task3"].depends.append(data["test_task8"])
+        data["test_task3"].depends_on.append(data["test_task8"])
 
     assert (
         str(cm.value) == "This is a OH task and it is not allowed to change the "
@@ -710,12 +710,12 @@ def test_leaf_stop_task_dependency_can_not_be_updated(setup_task_status_workflow
     """it is not possible to update the dependencies of a STOP task."""
     data = setup_task_status_workflow_tests
     # find an STOP task
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task3"].status = data["status_stop"]
     assert data["test_task3"].status == data["status_stop"]
     # create dependency
     with pytest.raises(StatusError) as cm:
-        data["test_task3"].depends.append(data["test_task8"])
+        data["test_task3"].depends_on.append(data["test_task8"])
 
     assert (
         str(cm.value) == "This is a STOP task and it is not allowed to change the "
@@ -727,12 +727,12 @@ def test_leaf_cmpl_task_dependency_can_not_be_updated(setup_task_status_workflow
     """it is not possible to update the dependencies of a CMPL task."""
     data = setup_task_status_workflow_tests
     # find an CMPL task
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task3"].status = data["status_cmpl"]
     assert data["test_task3"].status == data["status_cmpl"]
     # create dependency
     with pytest.raises(StatusError) as cm:
-        data["test_task3"].depends.append(data["test_task8"])
+        data["test_task3"].depends_on.append(data["test_task8"])
 
     assert (
         str(cm.value) == "This is a CMPL task and it is not allowed to change the "
@@ -749,7 +749,7 @@ def test_container_rts_task_updated_to_have_a_dependency_of_wfd_task_task(
     """dep. between an RTS parent task to a WFD task and status is updated to WFD."""
     data = setup_task_status_workflow_tests
     # make a task with WFD status
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task8"].status = data["status_wfd"]
     assert data["test_task8"].status == data["status_wfd"]
     # find a RTS container task
@@ -758,7 +758,7 @@ def test_container_rts_task_updated_to_have_a_dependency_of_wfd_task_task(
     data["test_task3"].status = data["status_rts"]
     assert data["test_task3"].status == data["status_rts"]
     # create dependency
-    data["test_task3"].depends.append(data["test_task8"])
+    data["test_task3"].depends_on.append(data["test_task8"])
     assert data["test_task3"].status == data["status_wfd"]
 
 
@@ -768,7 +768,7 @@ def test_container_rts_task_updated_to_have_a_dependency_of_rts_task(
     """dep. between an RTS parent task to an RTS task and status is updated to WFD."""
     data = setup_task_status_workflow_tests
     # make a task with WFD status
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task8"].status = data["status_rts"]
     assert data["test_task8"].status == data["status_rts"]
     # find a RTS container task
@@ -777,7 +777,7 @@ def test_container_rts_task_updated_to_have_a_dependency_of_rts_task(
     data["test_task3"].status = data["status_rts"]
     assert data["test_task3"].status == data["status_rts"]
     # create dependency
-    data["test_task3"].depends.append(data["test_task8"])
+    data["test_task3"].depends_on.append(data["test_task8"])
     assert data["test_task3"].status == data["status_wfd"]
 
 
@@ -787,7 +787,7 @@ def test_container_rts_task_updated_to_have_a_dependency_of_wip_task(
     """dep. between an RTS parent task to a WIP task and status is updated to WFD."""
     data = setup_task_status_workflow_tests
     # make a task with WIP status
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task8"].status = data["status_wip"]
     assert data["test_task8"].status == data["status_wip"]
     # find a RTS container task
@@ -796,7 +796,7 @@ def test_container_rts_task_updated_to_have_a_dependency_of_wip_task(
     data["test_task3"].status = data["status_rts"]
     assert data["test_task3"].status == data["status_rts"]
     # create dependency
-    data["test_task3"].depends.append(data["test_task8"])
+    data["test_task3"].depends_on.append(data["test_task8"])
     assert data["test_task3"].status == data["status_wfd"]
 
 
@@ -806,7 +806,7 @@ def test_container_rts_task_updated_to_have_a_dependency_of_prev_task(
     """dep. between an RTS parent task to a PREV task and status is updated to WFD."""
     data = setup_task_status_workflow_tests
     # make a task with PREV status
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task8"].status = data["status_prev"]
     assert data["test_task8"].status == data["status_prev"]
     # find a RTS container task
@@ -815,7 +815,7 @@ def test_container_rts_task_updated_to_have_a_dependency_of_prev_task(
     data["test_task3"].status = data["status_rts"]
     assert data["test_task3"].status == data["status_rts"]
     # create dependency
-    data["test_task3"].depends.append(data["test_task8"])
+    data["test_task3"].depends_on.append(data["test_task8"])
     assert data["test_task3"].status == data["status_wfd"]
 
 
@@ -825,7 +825,7 @@ def test_container_rts_task_updated_to_have_a_dependency_of_hrev_task(
     """dep. between an RTS parent task to an HREV task and status is updated to WFD."""
     data = setup_task_status_workflow_tests
     # make a task with HREV status
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task8"].status = data["status_hrev"]
     assert data["test_task8"].status == data["status_hrev"]
     # find a RTS container task
@@ -834,7 +834,7 @@ def test_container_rts_task_updated_to_have_a_dependency_of_hrev_task(
     data["test_task3"].status = data["status_rts"]
     assert data["test_task3"].status == data["status_rts"]
     # create dependency
-    data["test_task3"].depends.append(data["test_task8"])
+    data["test_task3"].depends_on.append(data["test_task8"])
     assert data["test_task3"].status == data["status_wfd"]
 
 
@@ -844,7 +844,7 @@ def test_container_rts_task_updated_to_have_a_dependency_of_oh_task(
     """dep. between an RTS parent task to an OH task and status is updated to WFD."""
     data = setup_task_status_workflow_tests
     # make a task with OH status
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task8"].status = data["status_oh"]
     assert data["test_task8"].status == data["status_oh"]
     # find a RTS container task
@@ -853,7 +853,7 @@ def test_container_rts_task_updated_to_have_a_dependency_of_oh_task(
     data["test_task3"].status = data["status_rts"]
     assert data["test_task3"].status == data["status_rts"]
     # create dependency
-    data["test_task3"].depends.append(data["test_task8"])
+    data["test_task3"].depends_on.append(data["test_task8"])
     assert data["test_task3"].status == data["status_wfd"]
 
 
@@ -863,7 +863,7 @@ def test_container_rts_task_updated_to_have_a_dependency_of_stop_task(
     """dep. between an RTS parent task to a STOP task and status will stay RTS."""
     data = setup_task_status_workflow_tests
     # make a task with STOP status
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task8"].status = data["status_stop"]
     assert data["test_task8"].status == data["status_stop"]
     # find a RTS container task
@@ -872,7 +872,7 @@ def test_container_rts_task_updated_to_have_a_dependency_of_stop_task(
     data["test_task3"].status = data["status_rts"]
     assert data["test_task3"].status == data["status_rts"]
     # create dependency
-    data["test_task3"].depends.append(data["test_task8"])
+    data["test_task3"].depends_on.append(data["test_task8"])
     assert data["test_task3"].status == data["status_rts"]
 
 
@@ -884,12 +884,12 @@ def test_container_wip_task_dependency_can_not_be_updated(
     """it is not possible to update the dependencies of a WIP container task."""
     data = setup_task_status_workflow_tests
     # find an WIP task
-    data["test_task1"].depends = []
+    data["test_task1"].depends_on = []
     data["test_task1"].status = data["status_wip"]
     assert data["test_task1"].status == data["status_wip"]
     # create dependency
     with pytest.raises(StatusError) as cm:
-        data["test_task1"].depends.append(data["test_task8"])
+        data["test_task1"].depends_on.append(data["test_task8"])
 
     assert (
         str(cm.value) == "This is a WIP task and it is not allowed to change the "
@@ -908,7 +908,7 @@ def test_container_cmpl_task_dependency_can_not_be_updated(
     # create dependency
     # with DBSession.no_autoflush:
     with pytest.raises(StatusError) as cm:
-        data["test_task1"].depends.append(data["test_task8"])
+        data["test_task1"].depends_on.append(data["test_task8"])
 
     assert (
         str(cm.value) == "This is a CMPL task and it is not allowed to change the "
@@ -1642,7 +1642,7 @@ def test_stop_in_wip_leaf_task_dependent_task_status_updated_from_wfd_to_rts(
     data["test_task9"].status = data["status_rts"]
     data["test_task8"].status = data["status_rts"]
 
-    data["test_task9"].depends = [data["test_task8"]]
+    data["test_task9"].depends_on = [data["test_task8"]]
 
     TimeLog(
         task=data["test_task8"],
@@ -1675,7 +1675,7 @@ def test_stop_in_wip_leaf_task_status_from_drev_to_hrev(
     data["test_task9"].status = data["status_rts"]
     data["test_task8"].status = data["status_cmpl"]
 
-    data["test_task9"].depends = [data["test_task8"]]
+    data["test_task9"].depends_on = [data["test_task8"]]
 
     TimeLog(
         task=data["test_task9"],
@@ -1853,7 +1853,7 @@ def test_stop_in_drev_leaf_task_dependent_task_status_updated_from_wfd_to_rts(
     data["test_task9"].status = data["status_rts"]
     data["test_task8"].status = data["status_rts"]
 
-    data["test_task9"].depends = [data["test_task8"]]
+    data["test_task9"].depends_on = [data["test_task8"]]
 
     TimeLog(
         task=data["test_task8"],
@@ -1886,7 +1886,7 @@ def test_stop_in_drev_leaf_task_dependent_task_status_updated_from_drev_to_hrev(
     data["test_task9"].status = data["status_rts"]
     data["test_task8"].status = data["status_rts"]
 
-    data["test_task9"].depends = [data["test_task8"]]
+    data["test_task9"].depends_on = [data["test_task8"]]
     data["test_task9"].status = data["status_drev"]  # this set by an
     # action in normal run
     TimeLog(
@@ -2045,7 +2045,7 @@ def test_resume_in_oh_leaf_task_with_no_dependencies(setup_task_status_workflow_
     """resume action on a OH leaf task with no dependencies updates status to WIP."""
     data = setup_task_status_workflow_tests
     data["test_task3"].status = data["status_oh"]
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task3"].resume()
     # no time logs so it will return back to rts
     # the test is wrong in the first place (no way to turn a task with no
@@ -2062,7 +2062,7 @@ def test_resume_in_oh_leaf_task_with_stop_dependencies(
     data = setup_task_status_workflow_tests
     data["test_task3"].status = data["status_rts"]
     data["test_task9"].status = data["status_rts"]
-    data["test_task9"].depends = [data["test_task3"]]
+    data["test_task9"].depends_on = [data["test_task3"]]
 
     data["test_task3"].status = data["status_stop"]
     data["test_task9"].status = data["status_oh"]
@@ -2079,7 +2079,7 @@ def test_resume_in_oh_leaf_task_with_cmpl_dependencies(
     data = setup_task_status_workflow_tests
     data["test_task3"].status = data["status_rts"]
     data["test_task9"].status = data["status_rts"]
-    data["test_task9"].depends = [data["test_task3"]]
+    data["test_task9"].depends_on = [data["test_task3"]]
 
     data["test_task3"].status = data["status_cmpl"]
     data["test_task9"].status = data["status_oh"]
@@ -2095,7 +2095,7 @@ def test_resume_in_stop_leaf_task_with_no_dependencies(
     """resume action on a STOP leaf task with no dependencies updates status to WIP."""
     data = setup_task_status_workflow_tests
     data["test_task3"].status = data["status_stop"]
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task3"].resume()
     # no time logs so it will return back to rts
     # the test is wrong in the first place (no way to turn a task with no
@@ -2112,7 +2112,7 @@ def test_resume_in_stop_leaf_task_with_stop_dependencies(
     data = setup_task_status_workflow_tests
     data["test_task3"].status = data["status_rts"]
     data["test_task9"].status = data["status_rts"]
-    data["test_task9"].depends = [data["test_task3"]]
+    data["test_task9"].depends_on = [data["test_task3"]]
 
     data["test_task3"].status = data["status_stop"]
     data["test_task9"].status = data["status_stop"]
@@ -2129,7 +2129,7 @@ def test_resume_in_stop_leaf_task_with_cmpl_dependencies(
     data = setup_task_status_workflow_tests
     data["test_task3"].status = data["status_rts"]
     data["test_task9"].status = data["status_rts"]
-    data["test_task9"].depends = [data["test_task3"]]
+    data["test_task9"].depends_on = [data["test_task3"]]
 
     data["test_task3"].status = data["status_cmpl"]
     data["test_task9"].status = data["status_stop"]
@@ -2204,7 +2204,7 @@ def test_leaf_drev_task_with_no_dependency_and_no_timelogs_update_status_with_de
     """
     data = setup_task_status_workflow_tests
     # use task6 and task5
-    data["test_task5"].depends = []
+    data["test_task5"].depends_on = []
 
     # set the statuses
     data["test_task5"].status = data["status_drev"]
@@ -2227,7 +2227,7 @@ def test_leaf_drev_task_with_no_dependency_but_with_timelogs_update_status_with_
     """
     data = setup_task_status_workflow_tests
     # use task6 and task5
-    data["test_task5"].depends = []
+    data["test_task5"].depends_on = []
 
     # create some time logs for
     dt = datetime.datetime
@@ -2258,7 +2258,7 @@ def test_leaf_wip_task_with_no_dependency_and_no_timelogs_update_status_with_dep
     """
     data = setup_task_status_workflow_tests
     # use task6 and task5
-    data["test_task5"].depends = []
+    data["test_task5"].depends_on = []
 
     # check if there is no time logs
     assert data["test_task5"].time_logs == []
@@ -2372,7 +2372,7 @@ def setup_task_status_workflow_db_tests(setup_postgresql_db):
         parent=data["test_task1"],
         status=data["status_wfd"],
         resources=[data["test_user1"]],
-        depends=[data["test_task3"]],
+        depends_on=[data["test_task3"]],
         start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
@@ -2385,7 +2385,7 @@ def setup_task_status_workflow_db_tests(setup_postgresql_db):
         name="Test Task 5",
         parent=data["test_task1"],
         resources=[data["test_user1"]],
-        depends=[data["test_task4"]],
+        depends_on=[data["test_task4"]],
         start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
@@ -2504,7 +2504,7 @@ def test_container_rts_task_updated_to_have_a_dependency_of_cmpl_task(
     """set dependency between an RTS container task to a CMPL task and will stay RTS."""
     data = setup_task_status_workflow_db_tests
     # make a task with CMPL status
-    data["test_task3"].depends = []
+    data["test_task3"].depends_on = []
     data["test_task3"].children.append(data["test_task6"])
 
     dt = datetime.datetime
@@ -2524,7 +2524,7 @@ def test_container_rts_task_updated_to_have_a_dependency_of_cmpl_task(
     assert data["test_task3"].status == data["status_rts"]
 
     # create dependency
-    data["test_task3"].depends.append(data["test_task8"])
+    data["test_task3"].depends_on.append(data["test_task8"])
     assert data["test_task3"].status == data["status_rts"]
 
 
@@ -2612,14 +2612,14 @@ def test_request_revision_in_cmpl_leaf_task_cmpl_dependent_task_dependency_targe
     #
     # DBSession.commit()
 
-    data["test_task3"].depends = [data["test_task9"]]  # PREV
-    data["test_task4"].depends = [data["test_task9"]]  # HREV
-    data["test_task5"].depends = [data["test_task9"]]  # STOP
-    data["test_task6"].depends = [data["test_task9"]]  # OH
-    data["test_task8"].depends = [data["test_task9"]]  # DREV
-    assert data["test_task9"] in data["test_task5"].depends
-    assert data["test_task9"] in data["test_task6"].depends
-    assert data["test_task9"] in data["test_task8"].depends
+    data["test_task3"].depends_on = [data["test_task9"]]  # PREV
+    data["test_task4"].depends_on = [data["test_task9"]]  # HREV
+    data["test_task5"].depends_on = [data["test_task9"]]  # STOP
+    data["test_task6"].depends_on = [data["test_task9"]]  # OH
+    data["test_task8"].depends_on = [data["test_task9"]]  # DREV
+    assert data["test_task9"] in data["test_task5"].depends_on
+    assert data["test_task9"] in data["test_task6"].depends_on
+    assert data["test_task9"] in data["test_task8"].depends_on
 
     data["test_task9"].status = data["status_rts"]
     data["test_task9"].create_time_log(
@@ -2703,27 +2703,27 @@ def test_request_revision_in_cmpl_leaf_task_cmpl_dependent_task_dependency_targe
 
     tdep_t3 = (
         TaskDependency.query.filter_by(task=data["test_task3"])
-        .filter_by(depends_to=data["test_task9"])
+        .filter_by(depends_on=data["test_task9"])
         .first()
     )
     tdep_t4 = (
         TaskDependency.query.filter_by(task=data["test_task4"])
-        .filter_by(depends_to=data["test_task9"])
+        .filter_by(depends_on=data["test_task9"])
         .first()
     )
     tdep_t5 = (
         TaskDependency.query.filter_by(task=data["test_task5"])
-        .filter_by(depends_to=data["test_task9"])
+        .filter_by(depends_on=data["test_task9"])
         .first()
     )
     tdep_t6 = (
         TaskDependency.query.filter_by(task=data["test_task6"])
-        .filter_by(depends_to=data["test_task9"])
+        .filter_by(depends_on=data["test_task9"])
         .first()
     )
     tdep_t8 = (
         TaskDependency.query.filter_by(task=data["test_task8"])
-        .filter_by(depends_to=data["test_task9"])
+        .filter_by(depends_on=data["test_task9"])
         .first()
     )
     assert tdep_t3 is not None
@@ -2751,8 +2751,8 @@ def test_request_revision_in_cmpl_leaf_task_cmpl_dependent_task_updated_to_drev(
     td = datetime.timedelta
     now = dt.now(pytz.utc)
 
-    data["test_task8"].depends = [data["test_task9"]]
-    assert data["test_task9"] in data["test_task8"].depends
+    data["test_task8"].depends_on = [data["test_task9"]]
+    assert data["test_task9"] in data["test_task8"].depends_on
 
     data["test_task9"].status = data["status_rts"]
     data["test_task9"].create_time_log(
@@ -2805,7 +2805,7 @@ def test_request_revision_in_cmpl_leaf_task_dependent_task_parent_status_updated
     td = datetime.timedelta
     now = dt.now(pytz.utc)
 
-    data["test_task9"].depends = [data["test_task8"]]
+    data["test_task9"].depends_on = [data["test_task8"]]
     data["test_task9"].status = data["status_wfd"]
     data["test_asset1"].status = data["status_wfd"]
     data["test_task8"].status = data["status_rts"]
@@ -2890,7 +2890,7 @@ def test_request_revision_in_cmpl_leaf_task_rts_dependent_task_updated_to_wfd(
     td = datetime.timedelta
     now = dt.now(pytz.utc)
 
-    data["test_task8"].depends = [data["test_task9"]]
+    data["test_task8"].depends_on = [data["test_task9"]]
     data["test_task8"].status = data["status_wfd"]
 
     data["test_task9"].status = data["status_rts"]
@@ -2994,7 +2994,7 @@ def test_request_revision_in_cmpl_leaf_task_wip_dependent_task_updated_to_drev(
     td = datetime.timedelta
     now = dt.now(pytz.utc)
 
-    data["test_task8"].depends = [data["test_task9"]]
+    data["test_task8"].depends_on = [data["test_task9"]]
     data["test_task8"].status = data["status_wip"]
 
     data["test_task9"].status = data["status_rts"]
@@ -3038,11 +3038,11 @@ def test_request_revision_in_deeper_dependency_setup(
     #     DBSession.delete(i)
     # DBSession.commit()
 
-    data["test_task5"].depends = []
-    data["test_task6"].depends = [data["test_task5"]]
-    data["test_task3"].depends = [data["test_task6"]]
-    data["test_task8"].depends = [data["test_task3"]]
-    data["test_task9"].depends = [data["test_task8"]]
+    data["test_task5"].depends_on = []
+    data["test_task6"].depends_on = [data["test_task5"]]
+    data["test_task3"].depends_on = [data["test_task6"]]
+    data["test_task8"].depends_on = [data["test_task3"]]
+    data["test_task9"].depends_on = [data["test_task8"]]
 
     data["test_task5"].update_status_with_dependent_statuses()
     data["test_task6"].update_status_with_dependent_statuses()
@@ -3107,10 +3107,10 @@ def test_request_revision_in_deeper_dependency_setup(
     # in to "onstart"
     data["test_task6"].request_revision(data["test_user1"])
 
-    assert data["test_task6"].task_depends_to[0].dependency_target == "onend"
-    assert data["test_task3"].task_depends_to[0].dependency_target == "onstart"
-    assert data["test_task8"].task_depends_to[0].dependency_target == "onstart"
-    assert data["test_task9"].task_depends_to[0].dependency_target == "onstart"
+    assert data["test_task6"].task_depends_on[0].dependency_target == "onend"
+    assert data["test_task3"].task_depends_on[0].dependency_target == "onstart"
+    assert data["test_task8"].task_depends_on[0].dependency_target == "onstart"
+    assert data["test_task9"].task_depends_on[0].dependency_target == "onstart"
 
 
 # PREV: Review instances statuses are updated
@@ -3279,8 +3279,8 @@ def test_resume_in_oh_leaf_task_with_drev_dependencies(
     data["test_task6"].status = data["status_rts"]
     data["test_task3"].status = data["status_rts"]
     data["test_task9"].status = data["status_rts"]
-    data["test_task9"].depends = [data["test_task3"]]
-    data["test_task3"].depends = [data["test_task6"]]
+    data["test_task9"].depends_on = [data["test_task3"]]
+    data["test_task3"].depends_on = [data["test_task6"]]
 
     # check statuses
     assert data["test_task6"].status == data["status_rts"]
@@ -3368,7 +3368,7 @@ def test_resume_in_oh_leaf_task_with_hrev_dependencies(
     data = setup_task_status_workflow_db_tests
     data["test_task3"].status = data["status_rts"]
     data["test_task9"].status = data["status_rts"]
-    data["test_task9"].depends = [data["test_task3"]]
+    data["test_task9"].depends_on = [data["test_task3"]]
 
     dt = datetime.datetime
     td = datetime.timedelta
@@ -3429,7 +3429,7 @@ def test_resume_in_oh_leaf_task_with_oh_dependencies(
     for r in reviews:
         r.approve()
 
-    data["test_task9"].depends = [data["test_task3"]]
+    data["test_task9"].depends_on = [data["test_task3"]]
 
     # start working for task9
     data["test_task9"].create_time_log(
@@ -3471,7 +3471,7 @@ def test_resume_in_oh_leaf_task_with_prev_dependencies(
     data = setup_task_status_workflow_db_tests
     data["test_task3"].status = data["status_rts"]
     data["test_task9"].status = data["status_rts"]
-    data["test_task9"].depends = [data["test_task3"]]
+    data["test_task9"].depends_on = [data["test_task3"]]
 
     # check statuses
     assert data["test_task3"].status == data["status_rts"]
@@ -3560,7 +3560,7 @@ def test_resume_in_oh_leaf_task_with_wip_dependencies(
     data = setup_task_status_workflow_db_tests
     data["test_task3"].status = data["status_rts"]
     data["test_task9"].status = data["status_rts"]
-    data["test_task9"].depends = [data["test_task3"]]
+    data["test_task9"].depends_on = [data["test_task3"]]
 
     # check statuses
     assert data["test_task3"].status == data["status_rts"]
@@ -3643,8 +3643,8 @@ def test_resume_in_stop_leaf_task_with_drev_dependencies(
     data["test_task6"].status = data["status_rts"]
     data["test_task3"].status = data["status_rts"]
     data["test_task9"].status = data["status_rts"]
-    data["test_task9"].depends = [data["test_task3"]]
-    data["test_task3"].depends = [data["test_task6"]]
+    data["test_task9"].depends_on = [data["test_task3"]]
+    data["test_task3"].depends_on = [data["test_task6"]]
 
     # check statuses
     assert data["test_task6"].status == data["status_rts"]
@@ -3732,7 +3732,7 @@ def test_resume_in_stop_leaf_task_with_hrev_dependencies(
     data = setup_task_status_workflow_db_tests
     data["test_task3"].status = data["status_rts"]
     data["test_task9"].status = data["status_rts"]
-    data["test_task9"].depends = [data["test_task3"]]
+    data["test_task9"].depends_on = [data["test_task3"]]
 
     # check statuses
     assert data["test_task3"].status == data["status_rts"]
@@ -3829,7 +3829,7 @@ def test_resume_in_stop_leaf_task_with_oh_dependencies(
     data = setup_task_status_workflow_db_tests
     data["test_task3"].status = data["status_rts"]
     data["test_task9"].status = data["status_rts"]
-    data["test_task9"].depends = [data["test_task3"]]
+    data["test_task9"].depends_on = [data["test_task3"]]
 
     # check statuses
     assert data["test_task3"].status == data["status_rts"]
@@ -3918,7 +3918,7 @@ def test_resume_in_stop_leaf_task_with_prev_dependencies(
     data = setup_task_status_workflow_db_tests
     data["test_task3"].status = data["status_rts"]
     data["test_task9"].status = data["status_rts"]
-    data["test_task9"].depends = [data["test_task3"]]
+    data["test_task9"].depends_on = [data["test_task3"]]
 
     # check statuses
     assert data["test_task3"].status == data["status_rts"]
@@ -4007,7 +4007,7 @@ def test_resume_in_stop_leaf_task_with_wip_dependencies(
     data = setup_task_status_workflow_db_tests
     data["test_task3"].status = data["status_rts"]
     data["test_task9"].status = data["status_rts"]
-    data["test_task9"].depends = [data["test_task3"]]
+    data["test_task9"].depends_on = [data["test_task3"]]
 
     # check statuses
     assert data["test_task3"].status == data["status_rts"]

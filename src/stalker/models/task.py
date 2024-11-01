@@ -262,8 +262,8 @@ class TimeLog(Entity, DateRangeMixin):
 
             # check dependent tasks
             logger.debug("checking dependent task statuses")
-            for task_dependencies in task.task_depends_to:
-                dep_task = task_dependencies.depends_to
+            for task_dependencies in task.task_depends_on:
+                dep_task = task_dependencies.depends_on
                 dependency_target = task_dependencies.dependency_target
                 raise_violation_error = False
                 violation_date = None
@@ -714,7 +714,7 @@ class Task(
       | (HREV)           | completed by requesting a review by using the      |
       |                  | :meth:`.Review.request_review` method. A HREV Task |
       |                  | can have new TimeLogs, and it will be converted to |
-      |                  | a WIP or DREV depending to its dependency task     |
+      |                  | a WIP or DREV depending on its dependency task     |
       |                  | statuses.                                          |
       +------------------+----------------------------------------------------+
       | Dependency Has   | If the dependent task of a WIP, PREV, HREV, DREV   |
@@ -728,7 +728,7 @@ class Task(
       | On Hold (OH)     | A task is set to OH when the resource needs to     |
       |                  | work for another task, and the :meth:`Task.hold`   |
       |                  | is called. An OH Task can be resumed by calling    |
-      |                  | :meth:`.Task.resume` method and depending to its   |
+      |                  | :meth:`.Task.resume` method and depending on its   |
       |                  | :attr:`.Task.time_logs` attribute it will have its |
       |                  | status set to RTS or WIP.                          |
       +------------------+----------------------------------------------------+
@@ -803,7 +803,7 @@ class Task(
        **Resuming a STOP Task**
 
        Resuming a STOP Task will be treated as if a revision has been made to
-       that task, and all the statuses of the tasks depending to this
+       that task, and all the statuses of the tasks depending on this
        particular task will be updated accordingly.
 
     .. warning::
@@ -862,9 +862,9 @@ class Task(
             parent task is desired, at least a Project instance should be passed as
             the parent of the created Task or the Task will be an orphan task and
             Stalker will raise a RuntimeError.
-        depends (List[Task]): A list of :class:`.Task` s that this :class:`.Task` is
-            depending on. A Task can not depend to itself or any other Task which are
-            already depending to this one in anyway or a CircularDependency error
+        depends_on (List[Task]): A list of :class:`.Task` s that this :class:`.Task` is
+            depending on. A Task can not depend on itself or any other Task which are
+            already depending on this one in anyway or a CircularDependency error
             will be raised.
         resources (List[User]): The :class:`.User` s assigned to this :class:`.Task`. A
             :class:`.Task` without any resource can not be scheduled.
@@ -973,15 +973,15 @@ class Task(
         """,
     )
 
-    depends = association_proxy(
-        "task_depends_to", "depends_to", creator=lambda n: TaskDependency(depends_to=n)
+    depends_on = association_proxy(
+        "task_depends_on", "depends_on", creator=lambda n: TaskDependency(depends_on=n)
     )
 
     dependent_of = association_proxy(
         "task_dependent_of", "task", creator=lambda n: TaskDependency(task=n)
     )
 
-    task_depends_to = relationship(
+    task_depends_on = relationship(
         "TaskDependency",
         back_populates="task",
         cascade="all, delete-orphan",
@@ -991,20 +991,20 @@ class Task(
         A CircularDependencyError will be raised when the task dependency
         creates a circular dependency which means it is not allowed to create
         a dependency for this Task which is depending on another one which in
-        some way depends to this one again.""",
+        some way depends on this one again.""",
     )
 
     task_dependent_of = relationship(
         "TaskDependency",
-        back_populates="depends_to",
+        back_populates="depends_on",
         cascade="all, delete-orphan",
-        primaryjoin="Tasks.c.id==Task_Dependencies.c.depends_to_id",
+        primaryjoin="Tasks.c.id==Task_Dependencies.c.depends_on_id",
         doc="""A list of :class:`.Task` s that this one is being depended by.
 
         A CircularDependencyError will be raised when the task dependency
         creates a circular dependency which means it is not allowed to create
         a dependency for this Task which is depending on another one which in
-        some way depends to this one again.
+        some way depends on this one again.
         """,
     )
 
@@ -1156,7 +1156,7 @@ class Task(
         self,
         project=None,
         parent=None,
-        depends=None,
+        depends_on=None,
         resources=None,
         alternative_resources=None,
         responsible=None,
@@ -1212,10 +1212,10 @@ class Task(
         with DBSession.no_autoflush:
             self.status = self.status_list["WFD"]
 
-        if depends is None:
-            depends = []
+        if depends_on is None:
+            depends_on = []
 
-        self.depends = depends
+        self.depends_on = depends_on
 
         if self.is_milestone:
             resources = None
@@ -1269,14 +1269,14 @@ class Task(
 
         Returns:
             bool: True if the other object is a Task instance and has the same project,
-                parent, depends, start and end value and resources.
+                parent, depends_on, start and end value and resources.
         """
         return (
             super(Task, self).__eq__(other)
             and isinstance(other, Task)
             and self.project == other.project
             and self.parent == other.parent
-            and self.depends == other.depends
+            and self.depends_on == other.depends_on
             and self.start == other.start
             and self.end == other.end
             and self.resources == other.resources
@@ -1346,16 +1346,16 @@ class Task(
             )
         return review
 
-    @validates("task_depends_to")
-    def _validate_task_depends_to(self, key: str, task_depends_to: "Task") -> "Task":
-        """Validate the given task_depends_to value.
+    @validates("task_depends_on")
+    def _validate_task_depends_on(self, key: str, task_depends_on: "Task") -> "Task":
+        """Validate the given task_depends_on value.
 
         Args:
             key (str): The name of the validated column.
-            task_depends_to (Task): The Task instance that this Task is depending on.
+            task_depends_on (Task): The Task instance that this Task is depending on.
 
         Raises:
-            TypeError: If the `task_depends_to.depends_to` is not a Task instance.
+            TypeError: If the `task_depends_on.depends_on` is not a Task instance.
             StatusError: If the status of the current task is one of WIP, PREV, HREV,
                 OH, STOP or CMPL as this means the Task has been started to be worked on
                 and it is not allowed to change the dependency chain of an already
@@ -1367,18 +1367,18 @@ class Task(
         Returns:
             Task: The validated task_dependes_to value.
         """
-        depends = task_depends_to.depends_to
-        if not depends:
+        depends_on = task_depends_on.depends_on
+        if not depends_on:
             # the relation is still not setup yet
             # trust to the TaskDependency class for checking the
-            # depends_to attribute
-            return task_depends_to
+            # depends_on attribute
+            return task_depends_on
 
-        if not isinstance(depends, Task):
+        if not isinstance(depends_on, Task):
             raise TypeError(
-                "All the elements in the {}.depends should be an instance of "
+                "All the elements in the {}.depends_on should be an instance of "
                 "stalker.models.task.Task, not {}: '{}'".format(
-                    self.__class__.__name__, depends.__class__.__name__, depends
+                    self.__class__.__name__, depends_on.__class__.__name__, depends_on
                 )
             )
 
@@ -1408,17 +1408,17 @@ class Task(
 
         # check for the circular dependency
         with DBSession.no_autoflush:
-            check_circular_dependency(depends, self, "depends")
-            check_circular_dependency(depends, self, "children")
+            check_circular_dependency(depends_on, self, "depends_on")
+            check_circular_dependency(depends_on, self, "children")
 
         # check for circular dependency toward the parent, non of the parents
-        # should be depending to the given depends_to_task
+        # should be depending on the given depends_on_task
         with DBSession.no_autoflush:
             parent = self.parent
             while parent:
-                if parent in depends.depends:
+                if parent in depends_on.depends_on:
                     raise CircularDependencyError(
-                        f"One of the parents of {self} is depending to {depends}"
+                        f"One of the parents of {self} is depending on {depends_on}"
                     )
                 parent = parent.parent
 
@@ -1432,13 +1432,13 @@ class Task(
         if self.status == rts:
             with DBSession.no_autoflush:
                 do_update_status = False
-                if depends.status in [wfd, rts, wip, oh, prev, hrev, drev, oh]:
+                if depends_on.status in [wfd, rts, wip, oh, prev, hrev, drev, oh]:
                     do_update_status = True
 
             if do_update_status:
                 self.status = wfd
 
-        return task_depends_to
+        return task_depends_on
 
     @validates("schedule_timing")
     def _validate_schedule_timing(self, key, schedule_timing):
@@ -1577,7 +1577,7 @@ class Task(
 
             # check for cycle
             check_circular_dependency(self, parent, "children")
-            check_circular_dependency(self, parent, "depends")
+            check_circular_dependency(self, parent, "depends_on")
 
         old_parent = self.parent
         new_parent = parent
@@ -2519,7 +2519,7 @@ class Task(
         Yields:
             Task: Yields Task instances.
         """
-        for t in walk_hierarchy(self, "depends", method=method):
+        for t in walk_hierarchy(self, "depends_on", method=method):
             yield t
 
     @validates("good")
@@ -2779,7 +2779,7 @@ class Task(
     def resume(self) -> None:
         """Resume the execution of this task.
 
-        Resume the task by setting its status to RTS or WIP depending to its time_logs
+        Resume the task by setting its status to RTS or WIP depending on its time_logs
         attribute, so if it has TimeLogs then it will resume as WIP and if it doesn't
         then it will resume as RTS. Only applicable to Tasks with status OH.
 
@@ -2882,17 +2882,17 @@ class Task(
         else:
             self._previously_removed_dependent_tasks = []
 
-        # create a new list from depends and skip_list
+        # create a new list from depends_on and skip_list
         dependency_list = []
-        for dependency in self.depends:
+        for dependency in self.depends_on:
             if dependency not in self._previously_removed_dependent_tasks:
                 dependency_list.append(dependency)
 
         logger.debug(f"self           : {self}")
-        logger.debug(f"self.depends   : {self.depends}")
+        logger.debug(f"self.depends_on: {self.depends_on}")
         logger.debug(f"dependency_list: {dependency_list}")
 
-        # if not self.depends:
+        # if not self.depends_on:
         if not dependency_list:
             # doesn't have any dependency
             # convert its status from WFD to RTS if necessary
@@ -2917,7 +2917,7 @@ class Task(
         #             join "Task_Dependencies"
         #                 on "Tasks".id = "Task_Dependencies".task_id
         #             join "Tasks" as "Dependent_Tasks"
-        #                 on "Task_Dependencies".depends_to_id = "Dependent_Tasks".id
+        #                 on "Task_Dependencies".depends_on_id = "Dependent_Tasks".id
         #             join "Statuses" on "Dependent_Tasks".status_id = "Statuses".id
         #         where "Tasks".id = {}
         #         group by "Statuses".code
@@ -2939,7 +2939,8 @@ class Task(
         dep_statuses = []
         # with DBSession.no_autoflush:
         logger.debug(
-            f"self.depends in update_status_with_dependent_statuses: {self.depends}"
+            "self.depends_on in update_status_with_dependent_statuses: "
+            f"{self.depends_on}"
         )
         for dependency in dependency_list:
             # consider every status only once
@@ -3154,14 +3155,14 @@ class TaskDependency(Base, ScheduleMixin):
 
     __tablename__ = "Task_Dependencies"
 
-    # depends_to_id
-    depends_to_id = Column(Integer, ForeignKey("Tasks.id"), primary_key=True)
+    # depends_on_id
+    depends_on_id = Column(Integer, ForeignKey("Tasks.id"), primary_key=True)
 
-    # depends_to
-    depends_to = relationship(
+    # depends_on
+    depends_on = relationship(
         Task,
         back_populates="task_dependent_of",
-        primaryjoin="Task.task_id==TaskDependency.depends_to_id",
+        primaryjoin="Task.task_id==TaskDependency.depends_on_id",
     )
 
     # task_id
@@ -3170,7 +3171,7 @@ class TaskDependency(Base, ScheduleMixin):
     # task
     task = relationship(
         Task,
-        back_populates="task_depends_to",
+        back_populates="task_depends_on",
         primaryjoin="Task.task_id==TaskDependency.task_id",
     )
 
@@ -3179,7 +3180,7 @@ class TaskDependency(Base, ScheduleMixin):
         nullable=False,
         doc="""The dependency target of the relation. The default value is
         "onend", which will create a dependency between two tasks so that the
-        depending task will start after the task that it is depending to is
+        depending task will start after the task that it is depending on is
         finished.
 
         The dependency_target attribute is updated to "onstart" when a task has
@@ -3213,7 +3214,7 @@ class TaskDependency(Base, ScheduleMixin):
     def __init__(
         self,
         task=None,
-        depends_to=None,
+        depends_on=None,
         dependency_target=None,
         gap_timing=0,
         gap_unit="h",
@@ -3228,7 +3229,7 @@ class TaskDependency(Base, ScheduleMixin):
         )
 
         self.task = task
-        self.depends_to = depends_to
+        self.depends_on = depends_on
         self.dependency_target = dependency_target
 
     @validates("task")
@@ -3256,25 +3257,25 @@ class TaskDependency(Base, ScheduleMixin):
             )
         return task
 
-    @validates("depends_to")
-    def _validate_depends_to(self, key: str, dependency: Task) -> Task:
+    @validates("depends_on")
+    def _validate_depends_on(self, key: str, dependency: Task) -> Task:
         """Validate the task value.
 
         Args:
             key (str): The name of the validated column.
-            dependency (Task): The depends_to value to be validated.
+            dependency (Task): The depends_on value to be validated.
 
         Raises:
-            TypeError: If the given depends_to value is not None and not a
+            TypeError: If the given depends_on value is not None and not a
                 :class:`stalker.models.task.Task` instance.
 
         Returns:
-            Task: The validated depends_to value.
+            Task: The validated depends_on value.
         """
-        # trust to the session for checking the depends_to attribute
+        # trust to the session for checking the depends_on attribute
         if dependency is not None and not isinstance(dependency, Task):
             raise TypeError(
-                "{}.depends_to can should be and instance of stalker.models.task.Task, "
+                "{}.depends_on can should be and instance of stalker.models.task.Task, "
                 "not {}: '{}'".format(
                     self.__class__.__name__, dependency.__class__.__name__, dependency
                 )
@@ -3332,7 +3333,7 @@ class TaskDependency(Base, ScheduleMixin):
         """
         template_variables = {
             "task": self.task,
-            "depends_to": self.depends_to,
+            "depends_on": self.depends_on,
             "dependency_target": self.dependency_target,
             "gap_timing": self.gap_timing,
             "gap_unit": self.gap_unit,
@@ -3593,23 +3594,23 @@ def update_task_date_values(
 
 
 # *****************************************************************************
-# Task.depends set
+# Task.depends_on set
 # *****************************************************************************
-@event.listens_for(Task.task_depends_to, "remove", propagate=True)
+@event.listens_for(Task.task_depends_on, "remove", propagate=True)
 def removed_a_dependency(
     task: Task,
-    task_dependent: Task,
+    task_dependency: TaskDependency,
     initiator: sqlalchemy.orm.attributes.AttributeEvent,
 ) -> None:
     """Update statuses when a task is removed from another tasks dependency list.
 
     Args:
         task (Task): The task that a dependent is being removed from.
-        task_dependent (Task): The association object that has the relation.
+        task_dependency (Task): The association object that has the relation.
         initiator (sqlalchemy.orm.attributes.AttributeEvent): Currently not used.
     """
     # update task status with dependencies
-    task.update_status_with_dependent_statuses(removing=task_dependent.depends_to)
+    task.update_status_with_dependent_statuses(removing=task_dependency.depends_on)
 
 
 @event.listens_for(TimeLog.__table__, "after_create")
