@@ -1237,7 +1237,7 @@ def test_schedule_seconds_is_working_properly_for_an_effort_based_task_no_studio
         # [
         #     3.1,
         #     "y",
-        #     3.1 * defaults.yearly_working_days * defaults.daily_working_hours * 3600,
+        #     3.1 * studio.yearly_working_days * studio.daily_working_hours * 3600,
         # ],
     ],
 )
