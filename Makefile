@@ -87,12 +87,6 @@ tests:
 docs:
 	cd docs && $(MAKE) html
 
-
-# sphinx-build \
-#     {tty:--color} \
-#     -b html \
-#     doc/sphinx/source doc/sphinx/build \
-#     {posargs}
 .PHONY: docs
 docs:
 	cd docs && $(MAKE) html
