@@ -493,7 +493,7 @@ def register(class_):
     :class:`.User` s and :class:`.Group` s to be able to interact with the
     given class. Whatever class you have created needs to be registered.
 
-    Example, lets say that you have a data class which is specific to your
+    Example, let's say that you have a data class which is specific to your
     studio and it is not present in Stalker Object Model (SOM), so you need to
     extend SOM with a new data type. Here is a simple Data class inherited from
     the :class:`.SimpleEntity` class (which is the simplest class you should

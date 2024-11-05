@@ -5,7 +5,7 @@ Table of Contents
 
 .. toctree::
     :maxdepth: 3
-    
+
     about.rst
     installation.rst
     tutorial.rst
@@ -16,3 +16,4 @@ Table of Contents
     roadmap.rst
     changelog.rst
     todo.rst
+    summary.rst

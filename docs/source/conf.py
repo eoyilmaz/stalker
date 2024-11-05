@@ -51,8 +51,8 @@ templates_path = ["_templates"]
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-# source_suffix = ['.rst', '.md']
-source_suffix = ".rst"
+source_suffix = ['.rst', '.md']
+# source_suffix = ".rst"
 
 # The encoding of source files.
 #
@@ -87,7 +87,7 @@ release = stalker.__version__
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'en'
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
@@ -143,7 +143,7 @@ todo_include_todos = True
 # html_theme = 'scrolls'
 # html_theme = 'agogo'
 # html_theme = 'sphinxdoc'
-html_theme = "pyramid"
+html_theme = "furo"
 # html_theme = 'alabaster'
 
 # Theme options are theme-specific and customize the look and feel of a theme
@@ -444,7 +444,9 @@ epub_copyright = "2014, Erkan Ozgur Yilmaz"
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {"https://docs.python.org/": None}
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/", None),
+}
 
 autosummary_generate = True
 autodoc_member_order = "bysource"
@@ -458,8 +460,8 @@ def setup(app):
         indextemplate="pair: %s; configuration value",
     )
 
-    # this next two lines are for Sphinx 1.2 to work
-    import sqlalchemy.ext.declarative.api
-    from stalker.db.declarative import Base
+    # # this next two lines are for Sphinx 1.2 to work
+    # import sqlalchemy.ext.declarative.api
+    # from stalker.db.declarative import Base
 
-    sqlalchemy.ext.declarative.api.Base = Base
+    # sqlalchemy.ext.declarative.api.Base = Base

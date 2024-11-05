@@ -1,3 +1,3 @@
 .. _todo_toplevel:
 
-.. include:: source/../../../TODO
+.. include:: source/../../../TODO.rst

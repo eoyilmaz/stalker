@@ -38,9 +38,10 @@ install:
 clean: FORCE
 	@printf "\n\033[36m--- $@: Clean ---\033[0m\n"
 	-rm -rf .pytest_cache
-	-rm -rf $(VIRTUALENV_DIR)
 	-rm -rf dist
 	-rm -rf build
+	-rm -rf docs/build
+	-rm -rf docs/source/generated/*
 
 clean-all: clean
 	@printf "\n\033[36m--- $@: Clean All---\033[0m\n"
@@ -81,6 +82,17 @@ tests:
 	source ./$(VIRTUALENV_DIR)/bin/activate; \
 	echo -e "\n\033[36m--- $@: Using python interpretter '`which python`' ---\033[0m\n"; \
 	PYTHONPATH=src pytest -v -n auto -W ignore --color=yes --cov=src --cov-report term --cov-fail-under 99 tests;
+
+
+# sphinx-build \
+#     {tty:--color} \
+#     -b html \
+#     doc/sphinx/source doc/sphinx/build \
+#     {posargs}
+.PHONY: docs
+docs:
+	cd docs && $(MAKE) html
+
 
 # https://www.gnu.org/software/make/manual/html_node/Force-Targets.html
 FORCE:
