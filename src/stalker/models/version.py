@@ -57,7 +57,7 @@ class Version(Link, DAGMixin):
 
            {{project.repository.path}}/{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}
 
-         Or, lets have a setup with environment variables:
+         Or, let's have a setup with environment variables:
 
            $REPO{{project.repository.id}}/{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}
 

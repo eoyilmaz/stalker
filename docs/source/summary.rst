@@ -11,7 +11,6 @@ Summary
    stalker.db.setup
    stalker.exceptions
    stalker.exceptions.CircularDependencyError
-   stalker.exceptions.DBError
    stalker.exceptions.LoginError
    stalker.exceptions.OverBookedError
    stalker.exceptions.StatusError

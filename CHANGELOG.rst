@@ -476,9 +476,9 @@ testing the library.
 * **Fix:** Fixed ``Task.path`` to always return a path with forward slashes.
 
 * **New:** Introducing ``EntityGroups`` that lets one to group a bunch of
- ``SimpleEntity``s together, it can be used in grouping tasks even if they are
- in different places on the project task hierarchy or even in different
- projects.
+  ``SimpleEntity`` instances together, it can be used in grouping tasks even if
+  they are in different places on the project task hierarchy or even in
+  different projects.
 
 * **Update:** ``Task.percent_complete`` is now correctly calculated for a
   ``Duration`` based task by using the ``Task.start`` and ``Task.end``
@@ -530,8 +530,8 @@ testing the library.
   variables for each repository in the database.
 
 * **New:** Added a new ``after_insert`` which listens ``Repository`` instance
-  ``insert``s to automatically add environment variables for the newly inserted
-  repositories.
+  ``insert`` instances to automatically add environment variables for the newly
+  inserted repositories.
 
 * **Update:** ``Repository.make_relative()`` now handles paths with environment
   variables.
@@ -550,7 +550,8 @@ testing the library.
   ``linux_path`` on Linux or setting the ``windows_path`` on Windows or setting
   the ``osx_path`` on OSX will update the environment variable.
 
-* **New:** Added ``Task.good`` attribute to easily connect tasks to ``Good``s.
+* **New:** Added ``Task.good`` attribute to easily connect tasks to ``Good``
+  instances.
 
 * **New:** Added new methods to ``Repository`` to help managing paths:
 
@@ -562,10 +563,12 @@ testing the library.
   * ``Repository.env_var`` a new property that returns the related environment
     variable name of a repo instance. This is an instance property::
 
-    # with default settings
-    repo  = Repository(...)
-    repo.env_var  # should print something like "REPO131" which will be used
-                  # in paths as "$REPO131"
+    .. code=block:: python
+
+      # with default settings
+      repo  = Repository(...)
+      repo.env_var  # should print something like "REPO131" which will be used
+      #               in paths as "$REPO131"
 
 * **Fix:** Fixed ``User.company_role`` attribute which is a relationship to
   the ``ClienUser`` to cascade ``all, delete-orphan`` to prevent

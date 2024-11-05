@@ -8,8 +8,6 @@ Stalker Documentation
 
 .. include:: contents.rst
 
-.. include:: summary.rst
-
 Indices and tables
 ------------------
 

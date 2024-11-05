@@ -6,7 +6,6 @@ Inheritance Diagram
 .. inheritance-diagram::
    stalker.exceptions.CircularDependencyError
    stalker.exceptions.DependencyViolationError
-   stalker.exceptions.DBError
    stalker.exceptions.LoginError
    stalker.exceptions.OverBookedError
    stalker.exceptions.StatusError
