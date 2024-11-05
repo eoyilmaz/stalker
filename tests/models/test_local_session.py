@@ -18,7 +18,7 @@ from stalker.db.session import DBSession
 @pytest.fixture(scope="function")
 def setup_local_session_tester():
     """Set up the LocalSession related tests."""
-    defaults.local_storage_path = tempfile.mktemp()
+    defaults["local_storage_path"] = tempfile.mktemp()
     yield
     shutil.rmtree(defaults.local_storage_path, True)
 

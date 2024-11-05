@@ -50,7 +50,7 @@ except KeyError:
 # regenerate the defaults
 # stalker.defaults = Config()
 stalker.defaults.config_values = stalker.defaults.default_config_values.copy()
-stalker.defaults.timing_resolution = datetime.timedelta(minutes=10)
+stalker.defaults["timing_resolution"] = datetime.timedelta(minutes=10)
 
 # init database
 stalker.db.setup.setup(config)
@@ -242,7 +242,7 @@ connection.close()
 Base.metadata.drop_all(engine, checkfirst=True)
 DBSession.remove()
 
-stalker.defaults.timing_resolution = datetime.timedelta(hours=1)
+stalker.defaults["timing_resolution"] = datetime.timedelta(hours=1)
 
 close_all_sessions()
 drop_db(**get_server_details_from_url(database_url))
