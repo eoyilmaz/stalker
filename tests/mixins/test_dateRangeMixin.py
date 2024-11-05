@@ -10,6 +10,7 @@ import pytz
 
 from sqlalchemy import Column, ForeignKey, Integer
 
+import stalker
 from stalker import DateRangeMixin, SimpleEntity, defaults, log
 from stalker.db.session import DBSession
 from stalker.models.studio import Studio
@@ -39,6 +40,7 @@ def date_range_mixin_tester():
         dict: Test data.
     """
     # create mock objects
+    stalker.defaults.config_values = stalker.defaults.default_config_values.copy()
     data = dict()
     data["start"] = datetime.datetime(2013, 3, 22, 15, 15, tzinfo=pytz.utc)
     data["end"] = data["start"] + datetime.timedelta(days=20)

@@ -6,6 +6,7 @@ import pytest
 
 from sqlalchemy import Column, ForeignKey, Integer
 
+import stalker
 from stalker import ScheduleMixin, SimpleEntity, defaults
 
 
@@ -30,6 +31,7 @@ def setup_schedule_mixin_tests():
     Returns:
         dict: Test data.
     """
+    stalker.defaults.config_values = stalker.defaults.default_config_values.copy()
     data = dict()
     data["kwargs"] = {
         "name": "Test Object",

@@ -885,7 +885,6 @@ def test_initialization_of_repo_environment_variables(setup_postgresql_db):
 
 def test_db_init_with_studio_instance(setup_postgresql_db):
     """db.init() using existing Studio instance for config values."""
-    logger.debug("code is here A1")
     data = setup_postgresql_db
     # check the defaults
     assert defaults.daily_working_hours != 8
