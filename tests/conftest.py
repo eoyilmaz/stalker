@@ -24,7 +24,7 @@ log.set_level(logging.DEBUG)
 HERE = os.path.dirname(__file__)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def setup_sqlite3():
     """Set up in memory SQLite3 database for tests."""
     try:
@@ -39,6 +39,8 @@ def setup_sqlite3():
 
     # Enable Debug logging
     log.set_level(logging.DEBUG)
+    yield
+    tear_down_db({})
 
 
 @pytest.fixture

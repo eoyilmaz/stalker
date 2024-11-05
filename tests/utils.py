@@ -256,7 +256,7 @@ def tear_down_db(data):
         Base.metadata.drop_all(engine, checkfirst=True)
         DBSession.remove()
         close_all_sessions()
-        db_kwargs = get_server_details_from_url(data["database_url"])
+        db_kwargs = get_server_details_from_url(data.get("database_url", ""))
         drop_db(**db_kwargs)
     except OperationalError:
         pass
