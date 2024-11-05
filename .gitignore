@@ -1,8 +1,10 @@
 .cache/*
-.coverage
+.coverage*
 .DS_Store
 .env
+.mypy_cache/
 .pytest_cache
+.tox/
 .venv/
 .vscode/
 *.pyc

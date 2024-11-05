@@ -19,5 +19,6 @@ pytest-xdist
 sphinx
 sphinx-autoapi
 # sphinx-findthedocs
+tox
 twine
 wheel

@@ -38,6 +38,7 @@ install:
 clean: FORCE
 	@printf "\n\033[36m--- $@: Clean ---\033[0m\n"
 	-rm -rf .pytest_cache
+	-rm -f .coverage.*
 	-rm -rf dist
 	-rm -rf build
 	-rm -rf docs/build
@@ -49,6 +50,7 @@ clean-all: clean
 	-rm -f setuptools-*.egg
 	-rm -f use-distutils
 	-rm -f .coverage*
+	-rm -Rf .tox
 	-rm -Rf htmlcov
 	-rm -rf dist
 	-rm -Rf src/$(PACKAGE_NAME).egg-info
@@ -83,16 +85,9 @@ tests:
 	echo -e "\n\033[36m--- $@: Using python interpretter '`which python`' ---\033[0m\n"; \
 	PYTHONPATH=src pytest -v -n auto -W ignore --color=yes --cov=src --cov-report term --cov-fail-under 99 tests;
 
-
-# sphinx-build \
-#     {tty:--color} \
-#     -b html \
-#     doc/sphinx/source doc/sphinx/build \
-#     {posargs}
 .PHONY: docs
 docs:
 	cd docs && $(MAKE) html
-
 
 # https://www.gnu.org/software/make/manual/html_node/Force-Targets.html
 FORCE:
