@@ -107,7 +107,7 @@ pipeline:
     and Object-Relational Mapping (ORM) capabilities, ensuring efficient data
     management. Designed PostgreSQL (versions 14 to 17) in mind but not limited
     to it.
-
+ 
  3. **Jinja2 Templates:** Employs Jinja2 for flexible file and folder naming
     conventions. For a structured naming scheme it is possible to define
     templates like:
