@@ -87,16 +87,9 @@ tests:
 docs:
 	cd docs && $(MAKE) html
 
-
-# sphinx-build \
-#     {tty:--color} \
-#     -b html \
-#     doc/sphinx/source doc/sphinx/build \
-#     {posargs}
 .PHONY: docs
 docs:
 	cd docs && $(MAKE) html
-
 
 # https://www.gnu.org/software/make/manual/html_node/Force-Targets.html
 FORCE:
