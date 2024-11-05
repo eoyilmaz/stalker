@@ -12,6 +12,7 @@ flake8-spellcheck
 flake8-pyproject
 furo
 mypy
+furo
 pyglet
 pytest
 pytest-cov
