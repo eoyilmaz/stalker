@@ -169,6 +169,14 @@ def test_syntax_error_in_settings_file(prepare_config_file):
     assert str(cm.value) == error_message
 
 
+def test___setattr___cannot_set_config_values_directly(prepare_config_file):
+    """config.Config.__setattr__() method cannot set config values directly."""
+    c = config.Config()
+    test_value = 1
+    c.daily_working_hours = test_value
+    assert c.config_values["daily_working_hours"] != test_value
+
+
 def test___getattr___is_working_properly(prepare_config_file):
     """config.Config.__getattr__() method is working properly."""
     c = config.Config()

@@ -134,9 +134,9 @@ def auto_crate_admin_on():
     """Toggle auto create admin value on."""
     # set default admin creation to True
     default_value = defaults.auto_create_admin
-    defaults.auto_create_admin = True
+    defaults["auto_create_admin"] = True
     yield
-    defaults.auto_create_admin = default_value
+    defaults["auto_create_admin"] = default_value
 
 
 @pytest.fixture(scope="function")
@@ -144,9 +144,9 @@ def auto_crate_admin_off():
     """Toggle auto create admin value on."""
     # set default admin creation to True
     default_value = defaults.auto_create_admin
-    defaults.auto_create_admin = False
+    defaults["auto_create_admin"] = False
     yield
-    defaults.auto_create_admin = default_value
+    defaults["auto_create_admin"] = default_value
 
 
 def test_default_admin_creation(setup_postgresql_db, auto_crate_admin_on):
@@ -191,7 +191,7 @@ def test_no_default_admin_creation(setup_postgresql_db, auto_crate_admin_off):
         pass
 
     # regenerate the defaults
-    stalker.defaults.timing_resolution = datetime.timedelta(hours=1)
+    stalker.defaults["timing_resolution"] = datetime.timedelta(hours=1)
 
     # init the db
     stalker.db.setup.setup(data["config"])

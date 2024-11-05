@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """Configure tests."""
-
 import datetime
 import logging
 import os
@@ -36,7 +35,7 @@ def setup_sqlite3():
 
     # regenerate the defaults
     stalker.defaults.config_values = stalker.defaults.default_config_values.copy()
-    stalker.defaults.timing_resolution = datetime.timedelta(hours=1)
+    stalker.defaults["timing_resolution"] = datetime.timedelta(hours=1)
 
     # Enable Debug logging
     log.set_level(logging.DEBUG)
@@ -88,7 +87,7 @@ def setup_postgresql_db():
 
     # regenerate the defaults
     stalker.defaults.config_values = stalker.defaults.default_config_values.copy()
-    stalker.defaults.timing_resolution = datetime.timedelta(hours=1)
+    stalker.defaults["timing_resolution"] = datetime.timedelta(hours=1)
 
     # init database
     # remove anything beforehand

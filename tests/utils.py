@@ -261,7 +261,7 @@ def tear_down_db(data):
     except OperationalError:
         pass
     finally:
-        defaults.timing_resolution = datetime.timedelta(hours=1)
+        defaults["timing_resolution"] = datetime.timedelta(hours=1)
 
 
 def get_admin_user():

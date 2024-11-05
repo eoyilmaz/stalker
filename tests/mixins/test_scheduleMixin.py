@@ -28,10 +28,11 @@ class MixedInClass(SimpleEntity, ScheduleMixin):
 def setup_schedule_mixin_tests():
     """Set up the tests for the ScheduleMixin.
 
-    Returns:
+    Yields:
         dict: Test data.
     """
     stalker.defaults.config_values = stalker.defaults.default_config_values.copy()
+    stalker.defaults["timing_resolution"] = datetime.timedelta(hours=1)
     data = dict()
     data["kwargs"] = {
         "name": "Test Object",
@@ -41,7 +42,9 @@ def setup_schedule_mixin_tests():
         "schedule_constraint": 0,
     }
     data["test_obj"] = MixedInClass(**data["kwargs"])
-    return data
+    yield data
+    stalker.defaults.config_values = stalker.defaults.default_config_values.copy()
+    stalker.defaults["timing_resolution"] = datetime.timedelta(hours=1)
 
 
 def test_schedule_model_attribute_is_effort_by_default(setup_schedule_mixin_tests):
@@ -243,7 +246,7 @@ def test_schedule_timing_argument_skipped(setup_schedule_mixin_tests):
 def test_schedule_timing_argument_is_none(setup_schedule_mixin_tests):
     """schedule_timing==Config.timing_resolution.seconds/60 if the schedule_timing arg is None."""
     data = setup_schedule_mixin_tests
-    defaults.timing_resolution = datetime.timedelta(hours=1)
+    defaults["timing_resolution"] = datetime.timedelta(hours=1)
     data["kwargs"]["schedule_timing"] = None
     new_task = MixedInClass(**data["kwargs"])
     assert new_task.schedule_timing == defaults.timing_resolution.seconds / 60.0
@@ -252,7 +255,7 @@ def test_schedule_timing_argument_is_none(setup_schedule_mixin_tests):
 def test_schedule_timing_attribute_is_set_to_none(setup_schedule_mixin_tests):
     """schedule_timing==Config.timing_resolution.seconds/60 if it is set to None."""
     data = setup_schedule_mixin_tests
-    defaults.timing_resolution = datetime.timedelta(hours=1)
+    defaults["timing_resolution"] = datetime.timedelta(hours=1)
     data["test_obj"].schedule_timing = None
     assert data["test_obj"].schedule_timing == defaults.timing_resolution.seconds / 60.0
 
@@ -420,10 +423,10 @@ def test_least_meaningful_time_unit_is_working_properly(
     """least_meaningful_time_unit is working properly."""
     data = setup_schedule_mixin_tests
 
-    defaults.daily_working_hours = 9
-    defaults.weekly_working_days = 5
-    defaults.weekly_working_hours = 45
-    defaults.yearly_working_days = 52.1428 * 5
+    defaults["daily_working_hours"] = 9
+    defaults["weekly_working_days"] = 5
+    defaults["weekly_working_hours"] = 45
+    defaults["yearly_working_days"] = 52.1428 * 5
 
     assert expected_result == data["test_obj"].least_meaningful_time_unit(*input_value)
 
@@ -464,10 +467,10 @@ def test_to_seconds_is_working_properly(
     """to_seconds method is working properly."""
     data = setup_schedule_mixin_tests
 
-    defaults.daily_working_hours = 9
-    defaults.weekly_working_days = 5
-    defaults.weekly_working_hours = 45
-    defaults.yearly_working_days = 52.1428 * 5
+    defaults["daily_working_hours"] = 9
+    defaults["weekly_working_days"] = 5
+    defaults["weekly_working_hours"] = 45
+    defaults["yearly_working_days"] = 52.1428 * 5
 
     data["test_obj"].schedule_model = schedule_model
     data["test_obj"].schedule_timing = schedule_timing
@@ -520,10 +523,10 @@ def test_to_unit_is_working_properly(
     """to_unit method is working properly."""
     data = setup_schedule_mixin_tests
 
-    defaults.daily_working_hours = 9
-    defaults.weekly_working_days = 5
-    defaults.weekly_working_hours = 45
-    defaults.yearly_working_days = 52.1428 * 5
+    defaults["daily_working_hours"] = 9
+    defaults["weekly_working_days"] = 5
+    defaults["weekly_working_hours"] = 45
+    defaults["yearly_working_days"] = 52.1428 * 5
 
     assert schedule_timing == data["test_obj"].to_unit(
         seconds, schedule_unit, schedule_model
@@ -566,10 +569,10 @@ def test_schedule_seconds_is_working_properly(
     """schedule_seconds property is working properly."""
     data = setup_schedule_mixin_tests
 
-    defaults.daily_working_hours = 9
-    defaults.weekly_working_days = 5
-    defaults.weekly_working_hours = 45
-    defaults.yearly_working_days = 52.1428 * 5
+    defaults["daily_working_hours"] = 9
+    defaults["weekly_working_days"] = 5
+    defaults["weekly_working_hours"] = 45
+    defaults["yearly_working_days"] = 52.1428 * 5
 
     data["test_obj"].schedule_model = schedule_model
     data["test_obj"].schedule_timing = schedule_timing

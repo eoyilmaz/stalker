@@ -41,6 +41,7 @@ def date_range_mixin_tester():
     """
     # create mock objects
     stalker.defaults.config_values = stalker.defaults.default_config_values.copy()
+    stalker.defaults["timing_resolution"] = datetime.timedelta(hours=1)
     data = dict()
     data["start"] = datetime.datetime(2013, 3, 22, 15, 15, tzinfo=pytz.utc)
     data["end"] = data["start"] + datetime.timedelta(days=20)
@@ -54,7 +55,9 @@ def date_range_mixin_tester():
         "duration": data["duration"],
     }
     data["test_foo_obj"] = DateRangeMixFooMixedInClass(**data["kwargs"])
-    return data
+    yield data
+    stalker.defaults.config_values = stalker.defaults.default_config_values.copy()
+    stalker.defaults["timing_resolution"] = datetime.timedelta(hours=1)
 
 
 @pytest.mark.parametrize("test_value", [1, 1.2, "str", ["a", "date"]])
@@ -181,7 +184,7 @@ def test_duration_argument_is_not_an_instance_of_date_if_end_argument_is_missing
 ):
     """defaults.timing_resolution is used if the duration arg is not a datetime and if end arg is also missing."""
     data = date_range_mixin_tester
-    defaults.timing_resolution = datetime.timedelta(hours=1)
+    defaults["timing_resolution"] = datetime.timedelta(hours=1)
     # some wrong values for the duration
     data["kwargs"].pop("end")
     data["kwargs"]["duration"] = test_value
@@ -425,7 +428,7 @@ def test_start_end_and_duration_values_are_rounded_to_the_default_timing_resolut
     data["kwargs"]["end"] = datetime.datetime(
         2013, 3, 24, 16, 46, 32, 102, tzinfo=pytz.utc
     )
-    defaults.timing_resolution = datetime.timedelta(minutes=5)
+    defaults["timing_resolution"] = datetime.timedelta(minutes=5)
 
     new_foo_obj = DateRangeMixFooMixedInClass(**data["kwargs"])
     # check the start

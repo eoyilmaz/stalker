@@ -2,26 +2,6 @@
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools]
-include-package-data = true
-
-[tool.setuptools.packages.find]
-where = ["src"]
-
-[tool.setuptools.package-data]
-stalker = ["VERSION"]
-
-[tool.setuptools.exclude-package-data]
-stalker = ["alembic", "docs", "tests"]
-
-[tool.setuptools.dynamic]
-dependencies = { file = ["requirements.txt"] }
-optional-dependencies.test = { file = ["requirements-dev.txt"] }
-version = { file = ["VERSION"] }
-
-[tool.distutils.bdist_wheel]
-universal = false
-
 [project]
 authors = [
     {name = "Erkan Özgür Yılmaz", email = "eoyilmaz@gmail.com"},
@@ -68,16 +48,35 @@ name = "stalker"
 readme = "README.rst"
 requires-python = ">= 3.8"
 
-
 [project.urls]
 "Home Page" = "https://github.com/eoyilmaz/stalker"
 GitHub = "https://github.com/eoyilmaz/stalker"
 Documentation = "https://stalker.readthedocs.io"
 Repository = "https://github.com/eoyilmaz/stalker.git"
 
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+stalker = ["VERSION"]
+
+[tool.setuptools.exclude-package-data]
+stalker = ["alembic", "docs", "tests"]
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+optional-dependencies.test = { file = ["requirements-dev.txt"] }
+version = { file = ["VERSION"] }
+
+[tool.distutils.bdist_wheel]
+universal = false
+
 [tool.pytest.ini_options]
 pythonpath = ["."]
-addopts = "-v -n auto -W ignore --color=yes --cov --cov-report html --cov-report term --cov-fail-under 99 tests"
+addopts = "-n auto -W ignore --color=yes --cov --cov-report html tests"
 
 [tool.black]
 
@@ -98,3 +97,20 @@ extend-select = ["B950"]
 ignore = ["D107", "E203", "E501", "E701", "SC200", "W503"]
 max-complexity = 12
 max-line-length = 80
+
+[tool.tox]
+requires = ["tox>=4.23.2"]
+env_list = ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+
+[tool.tox.env_run_base]
+description = "run the tests with pytest"
+package = "wheel"
+wheel_build_env = ".pkg"
+deps = [
+    "pytest>=6",
+    "pytest-cov",
+    "pytest-xdist",
+]
+commands = [
+    ["pytest"],
+]

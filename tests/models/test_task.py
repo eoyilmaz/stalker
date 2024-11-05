@@ -28,7 +28,6 @@ from stalker import (
     TimeLog,
     Type,
     User,
-    db,
     defaults,
 )
 from stalker.db.session import DBSession
@@ -41,7 +40,11 @@ from stalker.models.task import CONSTRAIN_BOTH, CONSTRAIN_END
 def setup_task_tests():
     """tests that doesn't require a database."""
     data = dict()
-    stalker.defaults.config_values = stalker.defaults.default_config_values.copy()
+    defaults.config_values = defaults.default_config_values.copy()
+    defaults["timing_resolution"] = datetime.timedelta(hours=1)
+    assert defaults.daily_working_hours == 9
+    assert defaults.weekly_working_days == 5
+    assert defaults.yearly_working_days == 261
 
     data["status_wfd"] = Status(name="Waiting For Dependency", code="WFD")
     data["status_rts"] = Status(name="Ready To Start", code="RTS")
@@ -165,7 +168,9 @@ def setup_task_tests():
         "status": 0,
         "status_list": data["task_status_list"],
     }
-    return data
+    yield data
+    defaults.config_values = copy.deepcopy(defaults.default_config_values)
+    defaults["timing_resolution"] = datetime.timedelta(hours=1)
 
 
 def test___auto_name__class_attribute_is_set_to_false():
@@ -1231,9 +1236,9 @@ def test_schedule_seconds_is_working_properly_for_an_effort_based_task_no_studio
     "schedule_timing, schedule_unit, schedule_seconds",
     [
         [10, "h", 10 * 3600],
-        [23, "d", 23 * 9 * 3600],
-        [2, "w", 2 * 45 * 3600],
-        [2.5, "m", 2.5 * 4 * 45 * 3600],
+        [23, "d", 23 * 8 * 3600],
+        [2, "w", 2 * 40 * 3600],
+        [2.5, "m", 2.5 * 4 * 40 * 3600],
         # [
         #     3.1,
         #     "y",
@@ -1248,8 +1253,12 @@ def test_schedule_seconds_is_working_properly_for_an_effort_based_task_with_stud
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
     # no studio, using defaults
-    defaults.timing_resolution = datetime.timedelta(hours=1)
-    studio = Studio(name="Test Studio", timing_resolution=datetime.timedelta(hours=1))
+    defaults["timing_resolution"] = datetime.timedelta(hours=1)
+    _ = Studio(
+        name="Test Studio",
+        daily_working_hours=8,
+        timing_resolution=datetime.timedelta(hours=1)
+    )
     kwargs["schedule_model"] = "effort"
     kwargs["schedule_timing"] = schedule_timing
     kwargs["schedule_unit"] = schedule_unit
@@ -1259,6 +1268,9 @@ def test_schedule_seconds_is_working_properly_for_an_effort_based_task_with_stud
 
 def test_schedule_seconds_is_working_properly_for_a_container_task(setup_task_tests):
     """schedule_seconds attr is working properly for a container task."""
+    assert defaults.daily_working_hours == 9
+    assert defaults.weekly_working_days == 5
+    assert defaults.yearly_working_days == 261
     data = setup_task_tests
     # no studio, using defaults
     kwargs = copy.copy(data["kwargs"])
@@ -1326,6 +1338,9 @@ def test_schedule_seconds_is_working_okay_for_a_container_task_if_the_child_is_u
     setup_task_tests,
 ):
     """schedule_seconds attr is working properly for a container task."""
+    assert defaults.daily_working_hours == 9
+    assert defaults.weekly_working_days == 5
+    assert defaults.yearly_working_days == 261
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
     # no studio, using defaults
@@ -1410,8 +1425,8 @@ def test_schedule_seconds_is_working_okay_for_a_task_if_the_child_is_updated_dee
     """schedule_seconds attr is working properly for a container task."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
-    defaults.timing_resolution = datetime.timedelta(hours=1)
-    defaults.daily_working_hours = 9
+    defaults["timing_resolution"] = datetime.timedelta(hours=1)
+    defaults["daily_working_hours"] = 9
     # no studio, using defaults
     parent_task1 = Task(**kwargs)
     assert parent_task1.schedule_seconds == 9 * 3600
@@ -4644,8 +4659,8 @@ def test_percent_complete_attr_is_working_properly_for_a_container_task(
     td = datetime.timedelta
     now = dt.now(pytz.utc)
 
-    defaults.timing_resolution = td(hours=1)
-    defaults.daily_working_hours = 9
+    defaults["timing_resolution"] = td(hours=1)
+    defaults["daily_working_hours"] = 9
 
     parent_task = Task(**kwargs)
 
@@ -4690,8 +4705,8 @@ def test_percent_complete_attr_working_okay_for_a_task_w_effort_and_duration_chi
     dt = datetime.datetime
     td = datetime.timedelta
 
-    defaults.timing_resolution = td(hours=1)
-    defaults.daily_working_hours = 9
+    defaults["timing_resolution"] = td(hours=1)
+    defaults["daily_working_hours"] = 9
 
     now = DateRangeMixin.round_time(dt.now(pytz.utc))
 
@@ -4761,8 +4776,8 @@ def test_percent_complete_attr_is_okay_for_a_task_with_effort_and_length_based_c
     dt = datetime.datetime
     td = datetime.timedelta
 
-    defaults.timing_resolution = td(hours=1)
-    defaults.daily_working_hours = 9
+    defaults["timing_resolution"] = td(hours=1)
+    defaults["daily_working_hours"] = 9
 
     now = DateRangeMixin.round_time(dt.now(pytz.utc))
 

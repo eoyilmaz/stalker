@@ -182,7 +182,7 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
 
         try:
             if self.daily_working_hours:
-                defaults.daily_working_hours = self.daily_working_hours
+                defaults["daily_working_hours"] = self.daily_working_hours
                 logger.debug(
                     "updated defaults.daily_working_hours: {}".format(
                         defaults.daily_working_hours
@@ -204,7 +204,7 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
             )
 
         if self.weekly_working_days:
-            defaults.weekly_working_days = self.weekly_working_days
+            defaults["weekly_working_days"] = self.weekly_working_days
             logger.debug(
                 f"updated defaults.weekly_working_days: {defaults.weekly_working_days}"
             )
@@ -212,7 +212,7 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
             logger.debug("can not update defaults.weekly_working_days")
 
         if self.weekly_working_hours:
-            defaults.weekly_working_hours = self.weekly_working_hours
+            defaults["weekly_working_hours"] = self.weekly_working_hours
             logger.debug(
                 "updated defaults.weekly_working_hours: {}".format(
                     defaults.weekly_working_hours
@@ -222,7 +222,7 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
             logger.debug("can not update defaults.weekly_working_hours")
 
         if self.yearly_working_days:
-            defaults.yearly_working_days = self.yearly_working_days
+            defaults["yearly_working_days"] = self.yearly_working_days
             logger.debug(
                 f"updated defaults.yearly_working_days: {defaults.yearly_working_days}"
             )
@@ -230,7 +230,7 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
             logger.debug("can not update defaults.yearly_working_days")
 
         if self.timing_resolution:
-            defaults.timing_resolution = self.timing_resolution
+            defaults["timing_resolution"] = self.timing_resolution
             logger.debug(
                 f"updated defaults.timing_resolution: {defaults.timing_resolution}"
             )

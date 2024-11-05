@@ -105,7 +105,7 @@ class ConfigBase(object):
             name (str): The name as the index.
             value (Any): The value to set the item to.
         """
-        setattr(self, name, value)
+        self.config_values[name] = value
 
     def __delitem__(self, name: str) -> None:
         """Delete the item with the given name.
