@@ -814,3 +814,26 @@ def test_summary_attribute_is_working_as_expected(setup_ticket_tests):
     assert data["test_ticket"].summary != test_value
     data["test_ticket"].summary = test_value
     assert data["test_ticket"].summary == test_value
+
+
+def test__hash__is_working_as_expected(setup_ticket_tests):
+    """__hash__ is working as expected."""
+    data = setup_ticket_tests
+    result = hash(data["test_ticket"])
+    assert isinstance(result, int)
+    assert result == data["test_ticket"].__hash__()
+
+
+def test__eq__of_two_tickets_true_case(setup_ticket_tests):
+    """__eq__() for two tickets."""
+    data = setup_ticket_tests
+    ticket1 = data["test_ticket"]
+    ticket2 = Ticket.query.filter_by(name=ticket1.name).first()
+    assert (ticket1 == ticket2) is True
+
+
+def test__eq__of_two_tickets_false_case(setup_ticket_tests):
+    """__eq__() for two tickets."""
+    data = setup_ticket_tests
+    new_ticket = Ticket(**data["kwargs"])
+    assert (data["test_ticket"] == new_ticket) is False
