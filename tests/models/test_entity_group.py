@@ -183,7 +183,7 @@ def test_entities_argument_is_not_a_list_of_simple_entity_instances():
     )
 
 
-def test_entities_argument_is_working_properly(setup_entity_group_tests):
+def test_entities_argument_is_working_as_expected(setup_entity_group_tests):
     """entities argument value is correctly passed to the entities attribute."""
     data = setup_entity_group_tests
     test_value = [data["project1"], data["asset1"], data["status_cmpl"]]

@@ -337,8 +337,8 @@ def test_task_attribute_is_not_a_task(setup_version_db_tests):
     )
 
 
-def test_task_attribute_is_working_properly(setup_version_db_tests):
-    """task attribute is working properly."""
+def test_task_attribute_is_working_as_expected(setup_version_db_tests):
+    """task attribute is working as expected."""
     data = setup_version_db_tests
     new_task = Task(
         name="New Test Task",
@@ -470,8 +470,8 @@ def test_inputs_attribute_is_not_a_list_of_link_instances(setup_version_db_tests
     )
 
 
-def test_inputs_attribute_is_working_properly(setup_version_db_tests):
-    """inputs attribute is working properly."""
+def test_inputs_attribute_is_working_as_expected(setup_version_db_tests):
+    """inputs attribute is working as expected."""
     data = setup_version_db_tests
     data["kwargs"].pop("inputs")
     new_version = Version(**data["kwargs"])
@@ -534,8 +534,8 @@ def test_outputs_attribute_is_not_a_list_of_link_instances(setup_version_db_test
     )
 
 
-def test_outputs_attribute_is_working_properly(setup_version_db_tests):
-    """outputs attribute is working properly."""
+def test_outputs_attribute_is_working_as_expected(setup_version_db_tests):
+    """outputs attribute is working as expected."""
     data = setup_version_db_tests
     data["kwargs"].pop("outputs")
     new_version = Version(**data["kwargs"])
@@ -553,8 +553,8 @@ def test_is_published_attribute_is_false_by_default(setup_version_db_tests):
     assert data["test_version"].is_published is False
 
 
-def test_is_published_attribute_is_working_properly(setup_version_db_tests):
-    """is_published attribute is working properly."""
+def test_is_published_attribute_is_working_as_expected(setup_version_db_tests):
+    """is_published attribute is working as expected."""
     data = setup_version_db_tests
     data["test_version"].is_published = True
     assert data["test_version"].is_published is True
@@ -613,16 +613,16 @@ def test_parent_attribute_is_not_set_to_a_version_instance(setup_version_db_test
     )
 
 
-def test_parent_argument_is_working_properly(setup_version_db_tests):
-    """parent argument is working properly."""
+def test_parent_argument_is_working_as_expected(setup_version_db_tests):
+    """parent argument is working as expected."""
     data = setup_version_db_tests
     data["kwargs"]["parent"] = data["test_version"]
     new_version = Version(**data["kwargs"])
     assert new_version.parent == data["test_version"]
 
 
-def test_parent_attribute_is_working_properly(setup_version_db_tests):
-    """parent attribute is working properly."""
+def test_parent_attribute_is_working_as_expected(setup_version_db_tests):
+    """parent attribute is working as expected."""
     data = setup_version_db_tests
     data["kwargs"]["parent"] = None
     new_version = Version(**data["kwargs"])
@@ -632,7 +632,7 @@ def test_parent_attribute_is_working_properly(setup_version_db_tests):
 
 
 def test_parent_argument_updates_the_children_attribute(setup_version_db_tests):
-    """parent argument updates the children attribute of the parent Version properly."""
+    """parent argument updates the children attribute of the parent Version."""
     data = setup_version_db_tests
     data["kwargs"]["parent"] = data["test_version"]
     new_version = Version(**data["kwargs"])
@@ -640,7 +640,7 @@ def test_parent_argument_updates_the_children_attribute(setup_version_db_tests):
 
 
 def test_parent_attribute_updates_the_children_attribute(setup_version_db_tests):
-    """parent attr updates the children attribute of the parent Version properly."""
+    """parent attr updates the children attribute of the parent Version."""
     data = setup_version_db_tests
     data["kwargs"]["parent"] = None
     new_version = Version(**data["kwargs"])
@@ -718,8 +718,8 @@ def test_children_attribute_is_not_set_to_a_list_of_version_instances(
     )
 
 
-def test_children_attribute_is_working_properly(setup_version_db_tests):
-    """children attribute is working properly."""
+def test_children_attribute_is_working_as_expected(setup_version_db_tests):
+    """children attribute is working as expected."""
     data = setup_version_db_tests
     data["kwargs"]["parent"] = None
     new_version1 = Version(**data["kwargs"])
@@ -987,8 +987,8 @@ def test_template_variables_type(setup_version_db_tests):
     assert kwargs["type"] == data["test_version"].type
 
 
-def test_absolute_full_path_works_properly(setup_version_db_tests):
-    """absolute_full_path attribute works properly."""
+def test_absolute_full_path_works_as_expected(setup_version_db_tests):
+    """absolute_full_path attribute works as expected."""
     data = setup_version_db_tests
     data["patcher"].patch("Linux")
     ft = FilenameTemplate(
@@ -1036,8 +1036,8 @@ def test_latest_published_version_is_read_only(setup_version_db_tests):
     assert str(cm.value) == error_message
 
 
-def test_latest_published_version_is_working_properly(setup_version_db_tests):
-    """is_latest_published_version is working properly."""
+def test_latest_published_version_is_working_as_expected(setup_version_db_tests):
+    """is_latest_published_version is working as expected."""
     data = setup_version_db_tests
     new_version1 = Version(**data["kwargs"])
     DBSession.add(new_version1)
@@ -1070,8 +1070,8 @@ def test_latest_published_version_is_working_properly(setup_version_db_tests):
     assert new_version5.latest_published_version == new_version4
 
 
-def test_is_latest_published_version_is_working_properly(setup_version_db_tests):
-    """is_latest_published_version is working properly."""
+def test_is_latest_published_version_is_working_as_expected(setup_version_db_tests):
+    """is_latest_published_version is working as expected."""
     data = setup_version_db_tests
     new_version1 = Version(**data["kwargs"])
     DBSession.add(new_version1)
@@ -1230,8 +1230,8 @@ def test_created_with_attribute_accepts_only_string_or_none(setup_version_db_tes
     )
 
 
-def test_created_with_argument_is_working_properly(setup_version_db_tests):
-    """created_with argument value is passed to created_with attribute properly."""
+def test_created_with_argument_is_working_as_expected(setup_version_db_tests):
+    """created_with argument value is passed to created_with attribute."""
     data = setup_version_db_tests
     test_value = "Maya"
     data["kwargs"]["created_with"] = test_value
@@ -1239,8 +1239,8 @@ def test_created_with_argument_is_working_properly(setup_version_db_tests):
     assert test_version.created_with == test_value
 
 
-def test_created_with_attribute_is_working_properly(setup_version_db_tests):
-    """created_with attribute is working properly."""
+def test_created_with_attribute_is_working_as_expected(setup_version_db_tests):
+    """created_with attribute is working as expected."""
     data = setup_version_db_tests
     test_value = "Maya"
     assert data["test_version"].created_with != test_value
@@ -1266,8 +1266,8 @@ def test_max_version_number_attribute_is_read_only(setup_version_db_tests):
     assert str(cm.value) == error_message
 
 
-def test_max_version_number_attribute_is_working_properly(setup_version_db_tests):
-    """max_version_number attribute is working properly."""
+def test_max_version_number_attribute_is_working_as_expected(setup_version_db_tests):
+    """max_version_number attribute is working as expected."""
     data = setup_version_db_tests
     new_version1 = Version(**data["kwargs"])
     DBSession.add(new_version1)
@@ -1316,8 +1316,8 @@ def test_latest_version_attribute_is_read_only(setup_version_db_tests):
     assert str(cm.value) == error_message
 
 
-def test_latest_version_attribute_is_working_properly(setup_version_db_tests):
-    """last_version attribute is working properly."""
+def test_latest_version_attribute_is_working_as_expected(setup_version_db_tests):
+    """last_version attribute is working as expected."""
     data = setup_version_db_tests
     new_version1 = Version(**data["kwargs"])
     DBSession.add(new_version1)
@@ -1366,8 +1366,8 @@ def test_naming_parents_attribute_is_a_read_only_property(setup_version_db_tests
     assert str(cm.value) == error_message
 
 
-def test_naming_parents_attribute_is_working_properly(setup_version_db_tests):
-    """naming_parents attribute is working properly."""
+def test_naming_parents_attribute_is_working_as_expected(setup_version_db_tests):
+    """naming_parents attribute is working as expected."""
     data = setup_version_db_tests
     # for data["test_version"]
     assert data["test_version"].naming_parents == [
@@ -1437,8 +1437,8 @@ def test_naming_parents_attribute_is_working_properly(setup_version_db_tests):
     assert version4.naming_parents == [asset2]
 
 
-def test_nice_name_attribute_is_working_properly(setup_version_db_tests):
-    """nice_name attribute is working properly."""
+def test_nice_name_attribute_is_working_as_expected(setup_version_db_tests):
+    """nice_name attribute is working as expected."""
     data = setup_version_db_tests
     # for data["test_version"]
     assert data["test_version"].naming_parents == [
@@ -1523,7 +1523,7 @@ def test_string_representation_is_a_little_bit_meaningful(setup_version_db_tests
     assert "<tp_SH001_Task1_TestVariant_v001 (Version)>" == f'{data["test_version"]}'
 
 
-def test_walk_hierarchy_is_working_properly_in_dfs_mode(setup_version_db_tests):
+def test_walk_hierarchy_is_working_as_expected_in_dfs_mode(setup_version_db_tests):
     """walk_hierarchy() method is working in DFS mode correctly."""
     data = setup_version_db_tests
     v1 = Version(task=data["test_task1"])
@@ -1538,7 +1538,7 @@ def test_walk_hierarchy_is_working_properly_in_dfs_mode(setup_version_db_tests):
     assert expected_result == visited_versions
 
 
-def test_walk_inputs_is_working_properly_in_dfs_mode(setup_version_db_tests):
+def test_walk_inputs_is_working_as_expected_in_dfs_mode(setup_version_db_tests):
     """walk_inputs() method is working in DFS mode correctly."""
     data = setup_version_db_tests
     v1 = Version(task=data["test_task1"])

@@ -129,8 +129,8 @@ def test_references_attribute_elements_accepts_links_only(setup_reference_mixin_
     )
 
 
-def test_references_attribute_is_working_properly(setup_reference_mixin_tester):
-    """references attribute working properly."""
+def test_references_attribute_is_working_as_expected(setup_reference_mixin_tester):
+    """references attribute working as expected."""
     data = setup_reference_mixin_tester
     data["test_foo_obj"].references = data["test_links"]
     assert data["test_foo_obj"].references == data["test_links"]

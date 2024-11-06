@@ -24,7 +24,7 @@ class AmountMixinFooMixedInClass(SimpleEntity, AmountMixin):
 
 
 def test_mixed_in_class_initialization():
-    """init() is working properly."""
+    """init() is working as expected."""
     a = AmountMixinFooMixedInClass(amount=1500)
     assert isinstance(a, AmountMixinFooMixedInClass)
     assert a.amount == 1500
@@ -71,14 +71,14 @@ def test_amount_attribute_is_not_a_number():
     )
 
 
-def test_amount_argument_is_working_properly():
+def test_amount_argument_is_working_as_expected():
     """amount argument value is correctly passed to the amount attribute."""
     entry = AmountMixinFooMixedInClass(amount=10)
     assert entry.amount == 10.0
 
 
-def test_amount_attribute_is_working_properly():
-    """amount attribute is working properly."""
+def test_amount_attribute_is_working_as_expected():
+    """amount attribute is working as expected."""
     entry = AmountMixinFooMixedInClass(amount=10)
     test_value = 5.0
     assert entry.amount != test_value

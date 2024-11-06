@@ -155,8 +155,8 @@ def test_task_argument_is_not_a_leaf_task(setup_review_db_test):
     )
 
 
-def test_task_argument_is_working_properly(setup_review_db_test):
-    """task argument value is passed to the task argument properly."""
+def test_task_argument_is_working_as_expected(setup_review_db_test):
+    """task argument value is passed to the task argument."""
     data = setup_review_db_test
     now = datetime.datetime.now(pytz.utc)
     data["task1"].create_time_log(
@@ -311,7 +311,7 @@ def test_reviewer_attribute_is_not_in_task_responsible_list(setup_review_db_test
     assert review.reviewer == data["user2"]
 
 
-def test_reviewer_argument_is_working_properly(setup_review_db_test):
+def test_reviewer_argument_is_working_as_expected(setup_review_db_test):
     """reviewer argument value is correctly passed to reviewer attribute."""
     data = setup_review_db_test
     data["task1"].responsible = [data["user1"]]
@@ -320,8 +320,8 @@ def test_reviewer_argument_is_working_properly(setup_review_db_test):
     assert review.reviewer == data["user1"]
 
 
-def test_reviewer_attribute_is_working_properly(setup_review_db_test):
-    """reviewer attribute is working properly."""
+def test_reviewer_attribute_is_working_as_expected(setup_review_db_test):
+    """reviewer attribute is working as expected."""
     data = setup_review_db_test
     data["task1"].responsible = [data["user1"], data["user2"]]
     data["kwargs"]["reviewer"] = data["user1"]

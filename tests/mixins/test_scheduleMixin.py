@@ -118,7 +118,7 @@ def test_schedule_model_attribute_is_not_in_correct_value(setup_schedule_mixin_t
     )
 
 
-def test_schedule_model_argument_is_working_properly(setup_schedule_mixin_tests):
+def test_schedule_model_argument_is_working_as_expected(setup_schedule_mixin_tests):
     """schedule_model arg is passed to the schedule_model attribute."""
     data = setup_schedule_mixin_tests
     test_value = "duration"
@@ -127,8 +127,8 @@ def test_schedule_model_argument_is_working_properly(setup_schedule_mixin_tests)
     assert new_task.schedule_model == test_value
 
 
-def test_schedule_model_attribute_is_working_properly(setup_schedule_mixin_tests):
-    """schedule_model attribute is working properly."""
+def test_schedule_model_attribute_is_working_as_expected(setup_schedule_mixin_tests):
+    """schedule_model attribute is working as expected."""
     data = setup_schedule_mixin_tests
     test_value = "duration"
     assert data["test_obj"].schedule_model != test_value
@@ -193,7 +193,7 @@ def test_schedule_constraint_attribute_is_not_an_integer(setup_schedule_mixin_te
     )
 
 
-def test_schedule_constraint_argument_is_working_properly(setup_schedule_mixin_tests):
+def test_schedule_constraint_argument_is_working_as_expected(setup_schedule_mixin_tests):
     """schedule_constraint arg value is passed to schedule_constraint attribute."""
     data = setup_schedule_mixin_tests
     test_value = 2
@@ -202,7 +202,7 @@ def test_schedule_constraint_argument_is_working_properly(setup_schedule_mixin_t
     assert new_task.schedule_constraint == test_value
 
 
-def test_schedule_constraint_attribute_is_working_properly(setup_schedule_mixin_tests):
+def test_schedule_constraint_attribute_is_working_as_expected(setup_schedule_mixin_tests):
     """schedule_constraint attribute value is correctly changed."""
     data = setup_schedule_mixin_tests
     test_value = 3
@@ -289,8 +289,8 @@ def test_schedule_timing_attribute_is_not_an_int_or_float(
     )
 
 
-def test_schedule_timing_attribute_is_working_properly(setup_schedule_mixin_tests):
-    """schedule_timing attribute is working properly."""
+def test_schedule_timing_attribute_is_working_as_expected(setup_schedule_mixin_tests):
+    """schedule_timing attribute is working as expected."""
     data = setup_schedule_mixin_tests
     test_value = 18
     data["test_obj"].schedule_timing = test_value
@@ -345,8 +345,8 @@ def test_schedule_unit_attribute_is_not_a_string(setup_schedule_mixin_tests):
     )
 
 
-def test_schedule_unit_attribute_is_working_properly(setup_schedule_mixin_tests):
-    """schedule_unit attribute is working properly."""
+def test_schedule_unit_attribute_is_working_as_expected(setup_schedule_mixin_tests):
+    """schedule_unit attribute is working as expected."""
     data = setup_schedule_mixin_tests
     test_value = "w"
     data["test_obj"].schedule_unit = test_value
@@ -417,10 +417,10 @@ def test_schedule_unit_attribute_value_is_not_in_defaults_datetime_units(
         [[31536000, False], (1, "y")],
     ],
 )
-def test_least_meaningful_time_unit_is_working_properly(
+def test_least_meaningful_time_unit_is_working_as_expected(
     input_value, expected_result, setup_schedule_mixin_tests
 ):
-    """least_meaningful_time_unit is working properly."""
+    """least_meaningful_time_unit is working as expected."""
     data = setup_schedule_mixin_tests
 
     defaults["daily_working_hours"] = 9
@@ -457,14 +457,14 @@ def test_least_meaningful_time_unit_is_working_properly(
         ["duration", 1, "y", 31536000],
     ],
 )
-def test_to_seconds_is_working_properly(
+def test_to_seconds_is_working_as_expected(
     schedule_model,
     schedule_timing,
     schedule_unit,
     expected_value,
     setup_schedule_mixin_tests,
 ):
-    """to_seconds method is working properly."""
+    """to_seconds method is working as expected."""
     data = setup_schedule_mixin_tests
 
     defaults["daily_working_hours"] = 9
@@ -483,7 +483,7 @@ def test_to_seconds_is_working_properly(
 
 
 def test_to_unit_unit_is_none(setup_schedule_mixin_tests):
-    """to_unit method is working properly."""
+    """to_unit method is working as expected."""
     data = setup_schedule_mixin_tests
 
     defaults["daily_working_hours"] = 9
@@ -529,10 +529,10 @@ def test_to_unit_unit_is_none(setup_schedule_mixin_tests):
         ["duration", 1, "y", 31536000],
     ],
 )
-def test_to_unit_is_working_properly(
+def test_to_unit_is_working_as_expected(
     schedule_model, schedule_timing, schedule_unit, seconds, setup_schedule_mixin_tests
 ):
-    """to_unit method is working properly."""
+    """to_unit method is working as expected."""
     data = setup_schedule_mixin_tests
 
     defaults["daily_working_hours"] = 9
@@ -571,14 +571,14 @@ def test_to_unit_is_working_properly(
         ["duration", 1, "y", 31536000],
     ],
 )
-def test_schedule_seconds_is_working_properly(
+def test_schedule_seconds_is_working_as_expected(
     schedule_model,
     schedule_timing,
     schedule_unit,
     expected_value,
     setup_schedule_mixin_tests,
 ):
-    """schedule_seconds property is working properly."""
+    """schedule_seconds property is working as expected."""
     data = setup_schedule_mixin_tests
 
     defaults["daily_working_hours"] = 9

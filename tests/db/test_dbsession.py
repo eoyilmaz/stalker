@@ -7,10 +7,10 @@ def test_dbsession_save_method_is_correctly_created(setup_postgresql_db):
     assert isinstance(DBSession, ExtendedScopedSession)
 
 
-def test_dbsession_save_method_is_working_properly_for_single_entity(
+def test_dbsession_save_method_is_working_as_expected_for_single_entity(
     setup_postgresql_db,
 ):
-    """DBSession.save() method is working properly for single entity."""
+    """DBSession.save() method is working as expected for single entity."""
     test_user = User(
         name="Test User", login="tuser", email="tuser@gmail.com", password="12345"
     )
@@ -21,10 +21,10 @@ def test_dbsession_save_method_is_working_properly_for_single_entity(
     assert test_user_db is not None
 
 
-def test_dbsession_save_method_is_working_properly_for_multiple_entity(
+def test_dbsession_save_method_is_working_as_expected_for_multiple_entity(
     setup_postgresql_db,
 ):
-    """DBSession.save() method is working properly for single entity."""
+    """DBSession.save() method is working as expected for single entity."""
     test_user1 = User(
         name="Test User 1",
         login="tuser1",
@@ -48,8 +48,8 @@ def test_dbsession_save_method_is_working_properly_for_multiple_entity(
     assert test_user2_db is not None
 
 
-def test_dbsession_save_method_is_working_properly_for_no_entry(setup_postgresql_db):
-    """DBSession.save() method is working properly with no parameters."""
+def test_dbsession_save_method_is_working_as_expected_for_no_entry(setup_postgresql_db):
+    """DBSession.save() method is working as expected with no parameters."""
     test_user = User(
         name="Test User", login="tuser", email="tuser@gmail.com", password="12345"
     )

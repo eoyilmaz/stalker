@@ -292,8 +292,8 @@ def test_project_contains_shots(setup_shot_db_tests):
     assert data["test_shot"] in data["test_shot"].project.shots
 
 
-def test_project_argument_is_working_properly(setup_shot_db_tests):
-    """project argument is working properly."""
+def test_project_argument_is_working_as_expected(setup_shot_db_tests):
+    """project argument is working as expected."""
     data = setup_shot_db_tests
     assert data["test_shot"].project == data["kwargs"]["project"]
 
@@ -369,8 +369,8 @@ def test_sequences_attribute_is_not_a_list_of_Sequence_instances(setup_shot_db_t
     )
 
 
-def test_sequences_argument_is_working_properly(setup_shot_db_tests):
-    """sequences attribute is working properly."""
+def test_sequences_argument_is_working_as_expected(setup_shot_db_tests):
+    """sequences attribute is working as expected."""
     data = setup_shot_db_tests
     data["kwargs"]["code"] = "NewShot"
     seq1 = Sequence(
@@ -398,8 +398,8 @@ def test_sequences_argument_is_working_properly(setup_shot_db_tests):
     )
 
 
-def test_sequences_attribute_is_working_properly(setup_shot_db_tests):
-    """sequences attribute is working properly."""
+def test_sequences_attribute_is_working_as_expected(setup_shot_db_tests):
+    """sequences attribute is working as expected."""
     data = setup_shot_db_tests
     data["kwargs"]["code"] = "NewShot"
     seq1 = Sequence(
@@ -501,8 +501,8 @@ def test_scenes_attribute_is_not_a_list_of_Scene_instances(setup_shot_db_tests):
     )
 
 
-def test_scenes_argument_is_working_properly(setup_shot_db_tests):
-    """scenes attribute is working properly."""
+def test_scenes_argument_is_working_as_expected(setup_shot_db_tests):
+    """scenes attribute is working as expected."""
     data = setup_shot_db_tests
     data["kwargs"]["code"] = "NewShot"
     sce1 = Scene(name="sce1", code="sce1", project=data["test_project1"])
@@ -518,8 +518,8 @@ def test_scenes_argument_is_working_properly(setup_shot_db_tests):
     )
 
 
-def test_scenes_attribute_is_working_properly(setup_shot_db_tests):
-    """scenes attribute is working properly."""
+def test_scenes_attribute_is_working_as_expected(setup_shot_db_tests):
+    """scenes attribute is working as expected."""
     data = setup_shot_db_tests
     data["kwargs"]["code"] = "NewShot"
 
@@ -982,14 +982,14 @@ def test_image_format_attribute_is_not_a_ImageFormat_instance_and_not_none(
     )
 
 
-def test_image_format_argument_is_working_properly(setup_shot_db_tests):
+def test_image_format_argument_is_working_as_expected(setup_shot_db_tests):
     """image_format argument value is passed to the image_format attribute correctly."""
     data = setup_shot_db_tests
     assert data["kwargs"]["image_format"] == data["test_shot"].image_format
 
 
-def test_image_format_attribute_is_working_properly(setup_shot_db_tests):
-    """image_format attribute is working properly."""
+def test_image_format_attribute_is_working_as_expected(setup_shot_db_tests):
+    """image_format attribute is working as expected."""
     data = setup_shot_db_tests
     assert data["test_shot"].image_format != data["test_image_format1"]
     data["test_shot"].image_format = data["test_image_format1"]

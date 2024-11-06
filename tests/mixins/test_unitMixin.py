@@ -24,7 +24,7 @@ class UnitMixinFooMixedInClass(SimpleEntity, UnitMixin):
 
 
 def test_mixed_in_class_initialization():
-    """init is working properly."""
+    """init is working as expected."""
     a = UnitMixinFooMixedInClass(unit="TRY")
     assert isinstance(a, UnitMixinFooMixedInClass)
     assert a.unit == "TRY"
@@ -71,15 +71,15 @@ def test_unit_attribute_is_not_a_string():
     )
 
 
-def test_unit_argument_is_working_properly():
-    """unit arg value is properly passed to the unit attribute."""
+def test_unit_argument_is_working_as_expected():
+    """unit arg value is passed to the unit attribute."""
     test_value = "this is my unit"
     g = UnitMixinFooMixedInClass(unit=test_value)
     assert g.unit == test_value
 
 
-def test_unit_attribute_is_working_properly():
-    """unit attribute value can be changed properly."""
+def test_unit_attribute_is_working_as_expected():
+    """unit attribute value can be changed."""
     test_value = "this is my unit"
     g = UnitMixinFooMixedInClass(unit="TRY")
     assert g.unit != test_value

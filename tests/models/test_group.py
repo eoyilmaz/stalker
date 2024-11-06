@@ -102,7 +102,7 @@ def test_users_attribute_updates_the_groups_attribute_in_the_given_user_instance
     assert all(new_group in user.groups for user in test_users)
 
 
-def test_permissions_argument_is_working_properly(setup_group_tests):
+def test_permissions_argument_is_working_as_expected(setup_group_tests):
     """permissions can be added to the Group on __init__()."""
     data = setup_group_tests
     # create a couple of permissions

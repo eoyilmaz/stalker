@@ -921,10 +921,10 @@ def test_db_init_with_studio_instance(setup_postgresql_db):
     assert defaults.timing_resolution == datetime.timedelta(minutes=5)
 
 
-def test_get_alembic_version_is_working_properly_when_there_is_no_alembic_version_table(
+def test_get_alembic_version_is_working_as_expected_when_there_is_no_alembic_version_table(
     setup_postgresql_db,
 ):
-    """get_alembic_version() working properly if there is no alembic_version table."""
+    """get_alembic_version() working as expected if there is no alembic_version table."""
     # drop the table
     DBSession.connection().execute("DROP TABLE IF EXISTS alembic_version")
     # now get the alembic_version

@@ -402,8 +402,8 @@ def test_project_argument_accepts_project_instances_only(setup_ticket_tests):
     )
 
 
-def test_project_argument_is_working_properly(setup_ticket_tests):
-    """project argument is working properly."""
+def test_project_argument_is_working_as_expected(setup_ticket_tests):
+    """project argument is working as expected."""
     data = setup_ticket_tests
     data["kwargs"]["project"] = data["test_project"]
     new_ticket = Ticket(**data["kwargs"])
@@ -798,7 +798,7 @@ def test_summary_attribute_is_set_to_a_value_other_than_a_string(setup_ticket_te
     )
 
 
-def test_summary_argument_is_working_properly(setup_ticket_tests):
+def test_summary_argument_is_working_as_expected(setup_ticket_tests):
     """summary argument value is passed to summary attribute correctly."""
     data = setup_ticket_tests
     test_value = "test summary"
@@ -807,8 +807,8 @@ def test_summary_argument_is_working_properly(setup_ticket_tests):
     assert new_ticket.summary == test_value
 
 
-def test_summary_attribute_is_working_properly(setup_ticket_tests):
-    """summary attribute is working properly."""
+def test_summary_attribute_is_working_as_expected(setup_ticket_tests):
+    """summary attribute is working as expected."""
     data = setup_ticket_tests
     test_value = "test_summary"
     assert data["test_ticket"].summary != test_value

@@ -161,14 +161,14 @@ def test_original_filename_attribute_accepts_string_only(setup_link_tests):
     )
 
 
-def test_original_filename_argument_is_working_properly(setup_link_tests):
-    """original_filename argument is working properly."""
+def test_original_filename_argument_is_working_as_expected(setup_link_tests):
+    """original_filename argument is working as expected."""
     data = setup_link_tests
     assert data["kwargs"]["original_filename"] == data["test_link"].original_filename
 
 
-def test_original_filename_attribute_is_working_properly(setup_link_tests):
-    """original_filename attribute is working properly."""
+def test_original_filename_attribute_is_working_as_expected(setup_link_tests):
+    """original_filename attribute is working as expected."""
     data = setup_link_tests
     new_value = "this_is_the_original_filename.jpg"
     assert data["test_link"].original_filename != new_value
@@ -242,7 +242,7 @@ def test_path_attribute_value_comes_from_full_path(setup_link_tests):
 
 
 def test_path_attribute_updates_the_full_path_attribute(setup_link_tests):
-    """path attribute is updating the full_path attribute properly."""
+    """path attribute is updating the full_path attribute."""
     data = setup_link_tests
     test_value = "/mnt/some/new/path"
     expected_full_path = "/mnt/some/new/path/" "22-fdfffsd-32342-dsf2332-dsfd-3.exr"
@@ -282,7 +282,7 @@ def test_filename_attribute_value_comes_from_full_path(setup_link_tests):
 
 
 def test_filename_attribute_updates_the_full_path_attribute(setup_link_tests):
-    """filename attribute is updating the full_path attribute properly."""
+    """filename attribute is updating the full_path attribute."""
     data = setup_link_tests
     test_value = "new_filename.tif"
     assert data["test_link"].filename != test_value
@@ -330,7 +330,7 @@ def test_extension_attribute_value_comes_from_full_path(setup_link_tests):
 
 
 def test_extension_attribute_updates_the_full_path_attribute(setup_link_tests):
-    """extension attribute is updating the full_path attribute properly."""
+    """extension attribute is updating the full_path attribute."""
     data = setup_link_tests
     test_value = ".iff"
     assert data["test_link"].extension != test_value
@@ -345,7 +345,7 @@ def test_extension_attribute_updates_the_full_path_attribute(setup_link_tests):
 def test_extension_attribute_updates_the_full_path_attribute_with_the_dot(
     setup_link_tests,
 ):
-    """full_path attr updated properly with the extension that doesn't have a dot."""
+    """full_path attr updated with the extension that doesn't have a dot."""
     data = setup_link_tests
     test_value = "iff"
     expected_value = ".iff"

@@ -81,8 +81,8 @@ def test_content_attribute_is_set_to_something_other_than_a_string(setup_note_te
     assert str(cm.value) == "Note.description should be a string, not int: '1'"
 
 
-def test_content_attribute_is_working_properly(setup_note_tests):
-    """content attribute is working properly."""
+def test_content_attribute_is_working_as_expected(setup_note_tests):
+    """content attribute is working as expected."""
     data = setup_note_tests
     new_content = (
         "This is my new content for the note, and I expect it to "

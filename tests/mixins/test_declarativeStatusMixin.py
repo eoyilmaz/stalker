@@ -83,8 +83,8 @@ def test_status_list_argument_is_not_correct(setup_status_mixin_tester):
     )
 
 
-def test_status_list_working_properly(setup_status_mixin_tester):
-    """status_list attribute is working properly."""
+def test_status_list_working_as_expected(setup_status_mixin_tester):
+    """status_list attribute is working as expected."""
     data = setup_status_mixin_tester
     new_a_ins = DeclStatMixA(name="Ozgur", status_list=data["test_a_statusList"])
     assert data["test_stat1"] in new_a_ins.status_list

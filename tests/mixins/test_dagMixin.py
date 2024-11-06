@@ -122,8 +122,8 @@ def test_parent_attribute_creates_a_cycle(dag_mixin_test_case):
     )
 
 
-def test_parent_argument_is_working_properly(dag_mixin_test_case):
-    """parent argument is working properly."""
+def test_parent_argument_is_working_as_expected(dag_mixin_test_case):
+    """parent argument is working as expected."""
     data = dag_mixin_test_case
     kwargs = copy.copy(data["kwargs"])
     d1 = DAGMixinFooMixedInClass(**kwargs)
@@ -135,8 +135,8 @@ def test_parent_argument_is_working_properly(dag_mixin_test_case):
     assert d1 == d2.parent
 
 
-def test_parent_attribute_is_working_properly(dag_mixin_test_case):
-    """parent attribute is working properly."""
+def test_parent_attribute_is_working_as_expected(dag_mixin_test_case):
+    """parent attribute is working as expected."""
     data = dag_mixin_test_case
     kwargs = copy.copy(data["kwargs"])
     d1 = DAGMixinFooMixedInClass(**kwargs)
@@ -179,8 +179,8 @@ def test_children_attribute_accepts_correct_class_instances_only(dag_mixin_test_
     )
 
 
-def test_children_attribute_is_working_properly(dag_mixin_test_case):
-    """children attribute is working properly."""
+def test_children_attribute_is_working_as_expected(dag_mixin_test_case):
+    """children attribute is working as expected."""
     data = dag_mixin_test_case
     kwargs = copy.copy(data["kwargs"])
     kwargs["name"] = "Test DAG Mixin 1"
@@ -217,7 +217,7 @@ def test_is_leaf_attribute_is_read_only(dag_mixin_test_case):
     assert str(cm.value) == error_message
 
 
-def test_is_leaf_attribute_is_working_properly(dag_mixin_test_case):
+def test_is_leaf_attribute_is_working_as_expected(dag_mixin_test_case):
     """is_leaf attribute is True for an instance without a child and False
     for another one with at least one child."""
     data = dag_mixin_test_case
@@ -251,7 +251,7 @@ def test_is_root_attribute_is_read_only(dag_mixin_test_case):
     assert str(cm.value) == error_message
 
 
-def test_is_root_attribute_is_working_properly(dag_mixin_test_case):
+def test_is_root_attribute_is_working_as_expected(dag_mixin_test_case):
     """is_root is True for an instance without a parent and False otherwise."""
     data = dag_mixin_test_case
     kwargs = copy.copy(data["kwargs"])
@@ -284,7 +284,7 @@ def test_is_container_attribute_is_read_only(dag_mixin_test_case):
     assert str(cm.value) == error_message
 
 
-def test_is_container_attribute_working_properly(dag_mixin_test_case):
+def test_is_container_attribute_working_as_expected(dag_mixin_test_case):
     """is_container is True if at least one child exist and False otherwise."""
     data = dag_mixin_test_case
     kwargs = copy.copy(data["kwargs"])
@@ -321,7 +321,7 @@ def test_parents_property_is_read_only(dag_mixin_test_case):
     assert str(cm.value) == error_message
 
 
-def test_parents_property_is_working_properly(dag_mixin_test_case):
+def test_parents_property_is_working_as_expected(dag_mixin_test_case):
     """parents property is read-only."""
     data = dag_mixin_test_case
     kwargs = copy.copy(data["kwargs"])
@@ -339,8 +339,8 @@ def test_parents_property_is_working_properly(dag_mixin_test_case):
     assert d4.parents == [d1, d2]
 
 
-def test_walk_hierarchy_is_working_properly(dag_mixin_test_case):
-    """walk_hierarchy method is working properly."""
+def test_walk_hierarchy_is_working_as_expected(dag_mixin_test_case):
+    """walk_hierarchy method is working as expected."""
     data = dag_mixin_test_case
     kwargs = copy.copy(data["kwargs"])
     d1 = DAGMixinFooMixedInClass(**kwargs)

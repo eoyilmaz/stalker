@@ -97,7 +97,7 @@ def setup_project_mixin_tester():
     return data
 
 
-def test_project_attribute_is_working_properly(setup_project_mixin_tester):
-    """project attribute is working properly."""
+def test_project_attribute_is_working_as_expected(setup_project_mixin_tester):
+    """project attribute is working as expected."""
     data = setup_project_mixin_tester
     assert data["test_a_obj"].project == data["test_project"]

@@ -123,14 +123,14 @@ def test_title_attribute_is_not_a_string(setup_page_tests):
     assert str(cm.value) == "Page.title should be a string, not int: '2135'"
 
 
-def test_title_argument_is_working_properly(setup_page_tests):
+def test_title_argument_is_working_as_expected(setup_page_tests):
     """title argument value is correctly passed to title attribute."""
     data = setup_page_tests
     assert data["test_page"].title == data["kwargs"]["title"]
 
 
-def test_title_attribute_is_working_properly(setup_page_tests):
-    """title attribute is working properly."""
+def test_title_attribute_is_working_as_expected(setup_page_tests):
+    """title attribute is working as expected."""
     data = setup_page_tests
     test_value = "Test Title 2"
     data["test_page"].title = test_value
@@ -195,13 +195,13 @@ def test_content_attribute_is_set_to_a_value_other_than_a_string(setup_page_test
     )
 
 
-def test_content_argument_is_working_properly(setup_page_tests):
+def test_content_argument_is_working_as_expected(setup_page_tests):
     """content argument value is correctly passed to the content attribute."""
     data = setup_page_tests
     assert data["test_page"].content == data["kwargs"]["content"]
 
 
-def test_content_attribute_is_working_properly(setup_page_tests):
+def test_content_attribute_is_working_as_expected(setup_page_tests):
     """content attribute value can be correctly set."""
     data = setup_page_tests
     test_value = "This is a test content"

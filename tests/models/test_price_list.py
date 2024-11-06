@@ -97,8 +97,8 @@ def test_good_attribute_is_a_list_of_objects_which_are_not_goods(
     )
 
 
-def test_good_argument_is_working_properly(setup_price_list_tests):
-    """good argument value is properly passed to the good attribute."""
+def test_good_argument_is_working_as_expected(setup_price_list_tests):
+    """good argument value is passed to the good attribute."""
     data = setup_price_list_tests
     g1 = Good(name="Good1")
     g2 = Good(name="Good2")
@@ -109,8 +109,8 @@ def test_good_argument_is_working_properly(setup_price_list_tests):
     assert p.goods == test_value
 
 
-def test_good_attribute_is_working_properly(setup_price_list_tests):
-    """good attribute value can be properly set."""
+def test_good_attribute_is_working_as_expected(setup_price_list_tests):
+    """good attribute value can be set."""
     data = setup_price_list_tests
     g1 = Good(name="Good1")
     g2 = Good(name="Good2")

@@ -193,14 +193,14 @@ def test_invoice_attribute_is_set_to_a_value_other_than_an_invoice_instance(
     )
 
 
-def test_invoice_argument_is_working_properly(setup_payment_tests):
+def test_invoice_argument_is_working_as_expected(setup_payment_tests):
     """invoice argument value is correctly passed to the invoice attribute."""
     data = setup_payment_tests
     p = Payment(invoice=data["test_invoice"], amount=1499, unit="TRY")
     assert p.invoice == data["test_invoice"]
 
 
-def test_invoice_attribute_is_working_properly(setup_payment_tests):
+def test_invoice_attribute_is_working_as_expected(setup_payment_tests):
     """invoice attribute value can be correctly changed."""
     data = setup_payment_tests
     p = Payment(invoice=data["test_invoice"], amount=1499, unit="TRY")

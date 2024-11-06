@@ -647,7 +647,7 @@ def test_projects_attribute_is_not_list_of_all_projects():
     )
 
 
-def test_projects_argument_is_working_properly(setup_tsk_juggler_scheduler_db_tests):
+def test_projects_argument_is_working_as_expected(setup_tsk_juggler_scheduler_db_tests):
     """projects argument value is correctly passed to the projects attribute."""
     data = setup_tsk_juggler_scheduler_db_tests
     dp1 = Project(name="Dummy Project", code="DP", repository=data["test_repo"])
@@ -656,8 +656,8 @@ def test_projects_argument_is_working_properly(setup_tsk_juggler_scheduler_db_te
     assert tjp.projects == [dp1, dp2]
 
 
-def test_projects_attribute_is_working_properly(setup_tsk_juggler_scheduler_db_tests):
-    """projects attribute is working properly."""
+def test_projects_attribute_is_working_as_expected(setup_tsk_juggler_scheduler_db_tests):
+    """projects attribute is working as expected."""
     data = setup_tsk_juggler_scheduler_db_tests
     dp1 = Project(name="Dummy Project", code="DP", repository=data["test_repo"])
     dp2 = Project(name="Dummy Project", code="DP", repository=data["test_repo"])

@@ -564,8 +564,8 @@ def test_email_argument_should_be_a_unique_value(setup_user_db_tests):
     )
 
 
-def test_email_attribute_is_working_properly(setup_user_db_tests):
-    """email attribute works properly."""
+def test_email_attribute_is_working_as_expected(setup_user_db_tests):
+    """email attribute works as expected."""
     data = setup_user_db_tests
     test_email = "eoyilmaz@somemail.com"
     data["test_user"].email = test_email
@@ -693,14 +693,14 @@ def test_login_argument_should_be_a_unique_value(setup_user_db_tests):
     )
 
 
-def test_login_argument_is_working_properly(setup_user_db_tests):
-    """login argument is working properly."""
+def test_login_argument_is_working_as_expected(setup_user_db_tests):
+    """login argument is working as expected."""
     data = setup_user_db_tests
     assert data["test_user"].login == data["kwargs"]["login"]
 
 
-def test_login_attribute_is_working_properly(setup_user_db_tests):
-    """login attribute is working properly."""
+def test_login_attribute_is_working_as_expected(setup_user_db_tests):
+    """login attribute is working as expected."""
     data = setup_user_db_tests
     test_value = "newlogin"
     data["test_user"].login = test_value
@@ -784,8 +784,8 @@ def test_departments_attribute_only_accepts_department_objects(setup_user_db_tes
     )
 
 
-def test_departments_attribute_works_properly(setup_user_db_tests):
-    """departments attribute works properly."""
+def test_departments_attribute_works_as_expected(setup_user_db_tests):
+    """departments attribute works as expected."""
     data = setup_user_db_tests
     # try to set and get the same value back
     data["test_user"].departments = [data["test_department2"]]
@@ -833,8 +833,8 @@ def test_password_attribute_being_none(setup_user_db_tests):
     assert str(cm.value) == "User.password cannot be None"
 
 
-def test_password_attribute_works_properly(setup_user_db_tests):
-    """password attribute works properly."""
+def test_password_attribute_works_as_expected(setup_user_db_tests):
+    """password attribute works as expected."""
     data = setup_user_db_tests
     test_password = "a new test password"
     data["test_user"].password = test_password
@@ -860,8 +860,8 @@ def test_password_attribute_being_scrambled(setup_user_db_tests):
     assert data["test_user"].password != test_password
 
 
-def test_check_password_works_properly(setup_user_db_tests):
-    """check_password method works properly."""
+def test_check_password_works_as_expected(setup_user_db_tests):
+    """check_password method works as expected."""
     data = setup_user_db_tests
     test_password = "a new test password"
     data["test_user"].password = test_password
@@ -911,8 +911,8 @@ def test_groups_attribute_accepts_only_group_instances(setup_user_db_tests):
     assert str(cm.value) == "Incompatible collection type: str is not list-like"
 
 
-def test_groups_attribute_works_properly(setup_user_db_tests):
-    """groups attribute works properly."""
+def test_groups_attribute_works_as_expected(setup_user_db_tests):
+    """groups attribute works as expected."""
     data = setup_user_db_tests
     test_pg = [data["test_group3"]]
     data["test_user"].groups = test_pg
@@ -978,8 +978,8 @@ def test_projects_attribute_is_set_to_list_of_other_objects_than_project_instanc
     )
 
 
-def test_projects_attribute_is_working_properly(setup_user_db_tests):
-    """projects attribute is working properly."""
+def test_projects_attribute_is_working_as_expected(setup_user_db_tests):
+    """projects attribute is working as expected."""
     data = setup_user_db_tests
     data["test_user"].rate = 102.0
     test_list = [data["test_project1"], data["test_project2"]]
@@ -1020,8 +1020,8 @@ def test_tasks_attribute_accepts_an_empty_list(setup_user_db_tests):
     data["test_user"].tasks = []
 
 
-def test_tasks_attribute_works_properly(setup_user_db_tests):
-    """tasks attribute is working properly."""
+def test_tasks_attribute_works_as_expected(setup_user_db_tests):
+    """tasks attribute is working as expected."""
     data = setup_user_db_tests
     tasks = [
         data["test_task1"],
@@ -1224,14 +1224,14 @@ def test_open_tickets_attribute_returns_all_open_tickets_owned_by_this_user(
     )
 
 
-def test_tjp_id_is_working_properly(setup_user_db_tests):
-    """tjp_id is working properly."""
+def test_tjp_id_is_working_as_expected(setup_user_db_tests):
+    """tjp_id is working as expected."""
     data = setup_user_db_tests
     assert data["test_user"].tjp_id == "User_{}".format(data["test_user"].id)
 
 
-def test_to_tjp_is_working_properly(setup_user_db_tests):
-    """to_tjp property is working properly."""
+def test_to_tjp_is_working_as_expected(setup_user_db_tests):
+    """to_tjp property is working as expected."""
     data = setup_user_db_tests
     expected_tjp = 'resource User_{} "User_{}" {{\n    efficiency 1.0\n}}'.format(
         data["test_user"].id, data["test_user"].id
@@ -1240,8 +1240,8 @@ def test_to_tjp_is_working_properly(setup_user_db_tests):
     assert data["test_user"].to_tjp == expected_tjp
 
 
-def test_to_tjp_is_working_properly_for_a_user_with_vacations(setup_user_db_tests):
-    """to_tjp property is working properly for a user with vacations."""
+def test_to_tjp_is_working_as_expected_for_a_user_with_vacations(setup_user_db_tests):
+    """to_tjp property is working as expected for a user with vacations."""
     data = setup_user_db_tests
     personal_vacation = Type(
         name="Personal", code="PERS", target_entity_type="Vacation"
@@ -1306,8 +1306,8 @@ def test_vacations_attribute_is_not_a_list_of_vacation_instances(setup_user_db_t
     )
 
 
-def test_vacations_attribute_is_working_properly(setup_user_db_tests):
-    """vacations attribute is working properly."""
+def test_vacations_attribute_is_working_as_expected(setup_user_db_tests):
+    """vacations attribute is working as expected."""
     data = setup_user_db_tests
     some_other_user = User(
         name="Some Other User",
@@ -1406,7 +1406,7 @@ def test_efficiency_attribute_is_a_negative_float_or_integer(setup_user_db_tests
     )
 
 
-def test_efficiency_argument_is_working_properly(setup_user_db_tests):
+def test_efficiency_argument_is_working_as_expected(setup_user_db_tests):
     """efficiency argument value is correctly passed to the efficiency attribute."""
     data = setup_user_db_tests
     # integer value
@@ -1420,7 +1420,7 @@ def test_efficiency_argument_is_working_properly(setup_user_db_tests):
     assert new_user.efficiency == 2.3
 
 
-def test_efficiency_attribute_is_working_properly(setup_user_db_tests):
+def test_efficiency_attribute_is_working_as_expected(setup_user_db_tests):
     """efficiency attribute value can correctly be changed"""
     data = setup_user_db_tests
     # integer
@@ -1503,7 +1503,7 @@ def test_companies_attribute_is_set_to_a_value_other_than_a_list_of_client_insta
     )
 
 
-def test_companies_attribute_is_working_properly(setup_user_db_tests):
+def test_companies_attribute_is_working_as_expected(setup_user_db_tests):
     """from issue #27."""
     new_companies = []
     c1 = Client(name="Company X")
@@ -1535,7 +1535,7 @@ def test_companies_attribute_is_working_properly(setup_user_db_tests):
     assert c3 not in user.companies
 
 
-def test_companies_attribute_is_working_properly_2(setup_user_db_tests):
+def test_companies_attribute_is_working_as_expected_2(setup_user_db_tests):
     """from issue #27."""
     c1 = Client(name="Company X")
     c2 = Client(name="Company Y")
@@ -1582,8 +1582,8 @@ def test_watching_attribute_is_a_list_of_other_values_than_task(setup_user_db_te
     )
 
 
-def test_watching_attribute_is_working_properly(setup_user_db_tests):
-    """watching attribute is working properly."""
+def test_watching_attribute_is_working_as_expected(setup_user_db_tests):
+    """watching attribute is working as expected."""
     data = setup_user_db_tests
     test_value = [data["test_task1"], data["test_task2"]]
     assert data["test_user"].watching == []
@@ -1669,8 +1669,8 @@ def test_rate_attribute_is_set_to_a_negative_number(setup_user_db_tests):
     )
 
 
-def test_rate_argument_is_working_properly(setup_user_db_tests):
-    """rate argument is working properly."""
+def test_rate_argument_is_working_as_expected(setup_user_db_tests):
+    """rate argument is working as expected."""
     data = setup_user_db_tests
     test_value = 102.3
     data["kwargs"]["rate"] = test_value
@@ -1678,8 +1678,8 @@ def test_rate_argument_is_working_properly(setup_user_db_tests):
     assert new_user.rate == test_value
 
 
-def test_rate_attribute_is_working_properly(setup_user_db_tests):
-    """rate attribute is working properly."""
+def test_rate_attribute_is_working_as_expected(setup_user_db_tests):
+    """rate attribute is working as expected."""
     data = setup_user_db_tests
     test_value = 212.5
     assert data["test_user"].rate != test_value

@@ -158,8 +158,8 @@ def test_project_attribute_is_not_a_project_instance(setup_project_mixin_tester)
     )
 
 
-def test_project_attribute_is_working_properly(setup_project_mixin_tester):
-    """project attribute is working properly."""
+def test_project_attribute_is_working_as_expected(setup_project_mixin_tester):
+    """project attribute is working as expected."""
     data = setup_project_mixin_tester
     data["test_foo_obj"].project = data["test_project2"]
     assert data["test_foo_obj"].project == data["test_project2"]

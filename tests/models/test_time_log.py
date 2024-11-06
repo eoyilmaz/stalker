@@ -177,8 +177,8 @@ def test_task_attribute_is_not_a_task_instance(setup_time_log_db_tests):
     )
 
 
-def test_task_attribute_is_working_properly(setup_time_log_db_tests):
-    """task attribute is working properly."""
+def test_task_attribute_is_working_as_expected(setup_time_log_db_tests):
+    """task attribute is working as expected."""
     data = setup_time_log_db_tests
     new_task = Task(
         name="Test task 2",
@@ -281,7 +281,7 @@ def test_resource_attribute_is_not_a_user_instance(setup_time_log_db_tests):
     )
 
 
-def test_resource_attribute_is_working_properly(setup_time_log_db_tests):
+def test_resource_attribute_is_working_as_expected(setup_time_log_db_tests):
     """resource attribute is working okay."""
     data = setup_time_log_db_tests
     new_resource = User(

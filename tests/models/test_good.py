@@ -100,8 +100,8 @@ def test_cost_attribute_is_negative(setup_good_tests):
     assert str(cm.value) == "Good.cost should be a non-negative number"
 
 
-def test_cost_argument_is_working_properly(setup_good_tests):
-    """cost argument value is properly passed to the cost attribute."""
+def test_cost_argument_is_working_as_expected(setup_good_tests):
+    """cost argument value is passed to the cost attribute."""
     data = setup_good_tests
     test_value = 113
     data["kwargs"]["cost"] = test_value
@@ -109,8 +109,8 @@ def test_cost_argument_is_working_properly(setup_good_tests):
     assert g.cost == test_value
 
 
-def test_cost_attribute_is_working_properly(setup_good_tests):
-    """cost attribute value can be properly changed."""
+def test_cost_attribute_is_working_as_expected(setup_good_tests):
+    """cost attribute value can be changed."""
     data = setup_good_tests
     test_value = 145
     g = Good(**data["kwargs"])
@@ -206,8 +206,8 @@ def test_msrp_attribute_is_negative(setup_good_tests):
     assert str(cm.value) == "Good.msrp should be a non-negative number"
 
 
-def test_msrp_argument_is_working_properly(setup_good_tests):
-    """msrp argument value is properly passed to the msrp attribute."""
+def test_msrp_argument_is_working_as_expected(setup_good_tests):
+    """msrp argument value is passed to the msrp attribute."""
     data = setup_good_tests
     test_value = 113
     data["kwargs"]["msrp"] = test_value
@@ -215,8 +215,8 @@ def test_msrp_argument_is_working_properly(setup_good_tests):
     assert g.msrp == test_value
 
 
-def test_msrp_attribute_is_working_properly(setup_good_tests):
-    """msrp attribute value can be properly changed."""
+def test_msrp_attribute_is_working_as_expected(setup_good_tests):
+    """msrp attribute value can be changed."""
     data = setup_good_tests
     test_value = 145
     g = Good(**data["kwargs"])
@@ -271,8 +271,8 @@ def test_unit_attribute_is_not_a_string(setup_good_tests):
     assert str(cm.value) == "Good.unit should be a string, not int: '2342'"
 
 
-def test_unit_argument_is_working_properly(setup_good_tests):
-    """unit argument value is properly passed to the unit attribute."""
+def test_unit_argument_is_working_as_expected(setup_good_tests):
+    """unit argument value is passed to the unit attribute."""
     data = setup_good_tests
     test_value = "this is my unit"
     data["kwargs"]["unit"] = test_value
@@ -280,8 +280,8 @@ def test_unit_argument_is_working_properly(setup_good_tests):
     assert g.unit == test_value
 
 
-def test_unit_attribute_is_working_properly(setup_good_tests):
-    """unit attribute value can be changed properly."""
+def test_unit_attribute_is_working_as_expected(setup_good_tests):
+    """unit attribute value can be changed."""
     data = setup_good_tests
     test_value = "this is my unit"
     g = Good(**data["kwargs"])
@@ -334,8 +334,8 @@ def test_client_attribute_is_set_to_a_value_other_than_a_client(setup_good_tests
     )
 
 
-def test_client_argument_is_working_properly(setup_good_tests):
-    """client argument is working properly."""
+def test_client_argument_is_working_as_expected(setup_good_tests):
+    """client argument is working as expected."""
     data = setup_good_tests
     client = Client(name="Test Client")
     data["kwargs"]["client"] = client
@@ -343,8 +343,8 @@ def test_client_argument_is_working_properly(setup_good_tests):
     assert g.client == client
 
 
-def test_client_attribute_is_working_properly(setup_good_tests):
-    """client attribute is working properly."""
+def test_client_attribute_is_working_as_expected(setup_good_tests):
+    """client attribute is working as expected."""
     data = setup_good_tests
     client = Client(name="Test Client")
     g = Good(**data["kwargs"])

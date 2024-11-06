@@ -74,8 +74,8 @@ def test_statuses_argument_elements_being_status_objects(setup_status_list_tests
     )
 
 
-def test_statuses_attribute_works_properly(setup_status_list_tests):
-    """status_list attribute is working properly."""
+def test_statuses_attribute_works_as_expected(setup_status_list_tests):
+    """status_list attribute is working as expected."""
     data = setup_status_list_tests
     new_list_of_statutes = [Status(name="New Status", code="NSTS")]
     data["test_status_list"].statuses = new_list_of_statutes

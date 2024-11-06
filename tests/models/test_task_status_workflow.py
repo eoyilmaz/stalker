@@ -274,8 +274,8 @@ def setup_task_status_workflow_tests():
     return data
 
 
-def test_walk_hierarchy_is_working_properly(setup_task_status_workflow_tests):
-    """walk_hierarchy is working properly."""
+def test_walk_hierarchy_is_working_as_expected(setup_task_status_workflow_tests):
+    """walk_hierarchy is working as expected."""
     data = setup_task_status_workflow_tests
     # this test should not be placed here
     visited_tasks = []
@@ -293,8 +293,8 @@ def test_walk_hierarchy_is_working_properly(setup_task_status_workflow_tests):
     assert expected_result == visited_tasks
 
 
-def test_walk_dependencies_is_working_properly(setup_task_status_workflow_tests):
-    """walk_dependencies is working properly."""
+def test_walk_dependencies_is_working_as_expected(setup_task_status_workflow_tests):
+    """walk_dependencies is working as expected."""
     data = setup_task_status_workflow_tests
     # this test should not be placed here
     visited_tasks = []
@@ -3026,7 +3026,7 @@ def test_request_revision_in_cmpl_leaf_task_wip_dependent_task_updated_to_drev(
 def test_request_revision_in_deeper_dependency_setup(
     setup_task_status_workflow_db_tests,
 ):
-    """all the dependent task statuses are updated to DREV properly."""
+    """all the dependent task statuses are updated to DREV."""
     data = setup_task_status_workflow_db_tests
     # create a couple TimeLogs
     dt = datetime.datetime
@@ -4079,8 +4079,8 @@ def test_resume_in_stop_leaf_task_with_wip_dependencies(
     assert data["test_task9"].status == data["status_drev"]
 
 
-def test_review_set_method_is_working_properly(setup_task_status_workflow_db_tests):
-    """review_set() method is working properly"""
+def test_review_set_method_is_working_as_expected(setup_task_status_workflow_db_tests):
+    """review_set() method is working as expected"""
     data = setup_task_status_workflow_db_tests
     data["test_task3"].status = data["status_wip"]
 

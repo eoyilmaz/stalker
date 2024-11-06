@@ -64,14 +64,14 @@ def test_studio_attribute_is_not_a_studio_instance(setup_scheduler_base_tests):
     )
 
 
-def test_studio_argument_is_working_properly(setup_scheduler_base_tests):
+def test_studio_argument_is_working_as_expected(setup_scheduler_base_tests):
     """studio argument value is correctly passed to the studio attribute."""
     data = setup_scheduler_base_tests
     assert data["test_scheduler_base"].studio == data["kwargs"]["studio"]
 
 
-def test_studio_attribute_is_working_properly(setup_scheduler_base_tests):
-    """studio attribute is working properly."""
+def test_studio_attribute_is_working_as_expected(setup_scheduler_base_tests):
+    """studio attribute is working as expected."""
     data = setup_scheduler_base_tests
     new_studio = Studio(name="Test Studio 2")
     data["test_scheduler_base"].studio = new_studio

@@ -73,8 +73,8 @@ def test_linux_path_attribute_accepts_only_strings(
         data["test_repo"].linux_path = test_value
 
 
-def test_linux_path_attribute_is_working_properly(setup_repository_db_tests):
-    """linux_path attribute is working properly."""
+def test_linux_path_attribute_is_working_as_expected(setup_repository_db_tests):
+    """linux_path attribute is working as expected."""
     data = setup_repository_db_tests
     test_value = "~/newRepoPath/Projects/"
     data["test_repo"].linux_path = test_value
@@ -112,8 +112,8 @@ def test_windows_path_attribute_accepts_only_strings(setup_repository_db_tests):
     )
 
 
-def test_windows_path_attribute_is_working_properly(setup_repository_db_tests):
-    """windows_path attribute is working properly."""
+def test_windows_path_attribute_is_working_as_expected(setup_repository_db_tests):
+    """windows_path attribute is working as expected."""
     data = setup_repository_db_tests
     test_value = "~/newRepoPath/Projects/"
     data["test_repo"].windows_path = test_value
@@ -152,8 +152,8 @@ def test_macos_path_attribute_accepts_only_strings(setup_repository_db_tests):
     )
 
 
-def test_macos_path_attribute_is_working_properly(setup_repository_db_tests):
-    """macos_path attribute is working properly."""
+def test_macos_path_attribute_is_working_as_expected(setup_repository_db_tests):
+    """macos_path attribute is working as expected."""
     data = setup_repository_db_tests
     test_value = "~/newRepoPath/Projects/"
     data["test_repo"].macos_path = test_value
@@ -996,8 +996,8 @@ def test_make_relative_method_converts_the_given_path_with_old_env_variable_to_n
     assert result == "Sero/Task1/Task2/Some_file.ma"
 
 
-def test_to_os_independent_path_is_working_properly(setup_repository_db_tests):
-    """to_os_independent_path class method is working properly."""
+def test_to_os_independent_path_is_working_as_expected(setup_repository_db_tests):
+    """to_os_independent_path class method is working as expected."""
     data = setup_repository_db_tests
     DBSession.add(data["test_repo"])
     DBSession.commit()
@@ -1094,8 +1094,8 @@ def test_to_os_independent_path_method_converts_the_given_path_with_old_env_vari
     )
 
 
-def test_find_repo_is_working_properly(setup_repository_db_tests):
-    """find_repo class method is working properly."""
+def test_find_repo_is_working_as_expected(setup_repository_db_tests):
+    """find_repo class method is working as expected."""
     data = setup_repository_db_tests
     DBSession.add(data["test_repo"])
     DBSession.commit()
@@ -1143,8 +1143,8 @@ def test_find_repo_is_case_insensitive_under_windows(setup_repository_db_tests):
     assert Repository.find_repo(test_path) == new_repo1
 
 
-def test_find_repo_is_working_properly_with_reverse_slashes(setup_repository_db_tests):
-    """find_repo class will work properly with paths that contains reverse slashes."""
+def test_find_repo_is_working_as_expected_with_reverse_slashes(setup_repository_db_tests):
+    """find_repo class works as expected with paths that contains reverse slashes."""
     data = setup_repository_db_tests
     DBSession.add(data["test_repo"])
     DBSession.commit()
@@ -1169,8 +1169,8 @@ def test_find_repo_is_working_properly_with_reverse_slashes(setup_repository_db_
     assert Repository.find_repo(test_path) == new_repo1
 
 
-def test_find_repo_is_working_properly_with_env_vars(setup_repository_db_tests):
-    """find_repo class method is working properly with paths containing env vars."""
+def test_find_repo_is_working_as_expected_with_env_vars(setup_repository_db_tests):
+    """find_repo class method is working as expected with paths containing env vars."""
     data = setup_repository_db_tests
     DBSession.add(data["test_repo"])
     DBSession.commit()
@@ -1201,8 +1201,8 @@ def test_find_repo_is_working_properly_with_env_vars(setup_repository_db_tests):
     assert Repository.find_repo(test_path) == new_repo1
 
 
-def test_env_var_property_is_working_properly(setup_repository_db_tests):
-    """env_var property is working properly."""
+def test_env_var_property_is_working_as_expected(setup_repository_db_tests):
+    """env_var property is working as expected."""
     data = setup_repository_db_tests
     assert data["test_repo"].env_var == "REPOR1"
 

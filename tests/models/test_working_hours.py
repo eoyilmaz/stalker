@@ -445,8 +445,8 @@ def test___setitem__will_not_accept_any_other_key_or_value_2():
     )
 
 
-def test_working_hours_argument_is_working_properly():
-    """working_hours argument is working properly,"""
+def test_working_hours_argument_is_working_as_expected():
+    """working_hours argument is working as expected,"""
     working_hours = copy.copy(defaults.working_hours)
     working_hours["sun"] = [[540, 1000]]
     working_hours["sat"] = [[500, 800], [900, 1440]]
@@ -456,8 +456,8 @@ def test_working_hours_argument_is_working_properly():
     assert wh.working_hours["sat"] == working_hours["sat"]
 
 
-def test_working_hours_attribute_is_working_properly():
-    """working_hours attribute is working properly."""
+def test_working_hours_attribute_is_working_as_expected():
+    """working_hours attribute is working as expected."""
     working_hours = copy.copy(defaults.working_hours)
     working_hours["sun"] = [[540, 1000]]
     working_hours["sat"] = [[500, 800], [900, 1440]]
@@ -486,8 +486,8 @@ def test_to_tjp_attribute_is_read_only():
     assert str(cm.value) == error_message
 
 
-def test_to_tjp_attribute_is_working_properly():
-    """to_tjp property is working properly."""
+def test_to_tjp_attribute_is_working_as_expected():
+    """to_tjp property is working as expected."""
     wh = WorkingHours()
     wh["mon"] = [[570, 1110]]
     wh["tue"] = [[570, 1110]]
@@ -508,8 +508,8 @@ def test_to_tjp_attribute_is_working_properly():
     assert wh.to_tjp == expected_tjp
 
 
-def test_to_tjp_attribute_is_working_properly_for_multiple_work_hour_ranges():
-    """to_tjp property is working properly."""
+def test_to_tjp_attribute_is_working_as_expected_for_multiple_work_hour_ranges():
+    """to_tjp property is working as expected."""
     wh = WorkingHours()
     wh["mon"] = [[570, 720], [780, 1110]]
     wh["tue"] = [[570, 720], [780, 1110]]
@@ -548,8 +548,8 @@ def test_weekly_working_hours_attribute_is_read_only():
     assert str(cm.value) == error_message
 
 
-def test_weekly_working_hours_attribute_is_working_properly():
-    """weekly_working_hours attribute is working properly."""
+def test_weekly_working_hours_attribute_is_working_as_expected():
+    """weekly_working_hours attribute is working as expected."""
     wh = WorkingHours()
     wh["mon"] = [[570, 720], [780, 1110]]  # 480
     wh["tue"] = [[570, 720], [780, 1110]]  # 480
@@ -563,8 +563,8 @@ def test_weekly_working_hours_attribute_is_working_properly():
     assert wh.weekly_working_hours == expected_value
 
 
-def test_is_working_hour_is_working_properly():
-    """is_working_hour method is working properly."""
+def test_is_working_hour_is_working_as_expected():
+    """is_working_hour method is working as expected."""
     wh = WorkingHours()
 
     wh["mon"] = [[570, 720], [780, 1110]]
@@ -769,8 +769,8 @@ def test_daily_working_hours_argument_is_working_fine():
     assert wh.daily_working_hours == 12
 
 
-def test_daily_working_hours_attribute_is_working_properly():
-    """daily_working_hours attribute is working properly."""
+def test_daily_working_hours_attribute_is_working_as_expected():
+    """daily_working_hours attribute is working as expected."""
     wh = WorkingHours()
     wh.daily_working_hours = 23
     assert wh.daily_working_hours == 23

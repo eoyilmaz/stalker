@@ -621,7 +621,7 @@ def test_image_format_argument_accepts_image_format_only(setup_project_db_test):
     )
 
 
-def test_image_format_argument_is_working_properly(setup_project_db_test):
+def test_image_format_argument_is_working_as_expected(setup_project_db_test):
     """image_format argument value is correctly passed to the image_format attribute."""
     data = setup_project_db_test
     # and a proper image format
@@ -643,8 +643,8 @@ def test_image_format_attribute_accepts_image_format_only(
     data["test_project"].image_format = data["test_image_format"]
 
 
-def test_image_format_attribute_works_properly(setup_project_db_test):
-    """image_format attribute is working properly."""
+def test_image_format_attribute_works_as_expected(setup_project_db_test):
+    """image_format attribute is working as expected."""
     data = setup_project_db_test
     new_image_format = ImageFormat(name="Foo Image Format", width=10, height=10)
     data["test_project"].image_format = new_image_format
@@ -882,14 +882,14 @@ def test_repositories_attribute_is_not_a_list_of_repository_instances(
     )
 
 
-def test_repositories_argument_is_working_properly(setup_project_db_test):
-    """repositories argument value is properly passed to the repositories attr."""
+def test_repositories_argument_is_working_as_expected(setup_project_db_test):
+    """repositories argument value is passed to the repositories attr."""
     data = setup_project_db_test
     assert data["test_project"].repositories == data["kwargs"]["repositories"]
 
 
-def test_repositories_attribute_is_working_properly(setup_project_db_test):
-    """repository attribute is working properly."""
+def test_repositories_attribute_is_working_as_expected(setup_project_db_test):
+    """repository attribute is working as expected."""
     data = setup_project_db_test
     new_repo1 = Repository(
         name="Some Random Repo",
@@ -988,8 +988,8 @@ def test_structure_attribute_not_instance_of_structure(setup_project_db_test):
     )
 
 
-def test_structure_attribute_is_working_properly(setup_project_db_test):
-    """structure attribute is working properly."""
+def test_structure_attribute_is_working_as_expected(setup_project_db_test):
+    """structure attribute is working as expected."""
     data = setup_project_db_test
     data["test_project"].structure = data["test_project_structure2"]
     assert data["test_project"].structure == data["test_project_structure2"]
@@ -1247,8 +1247,8 @@ def test_users_attribute_is_set_to_a_value_which_is_not_a_list_of_User_instances
     )
 
 
-def test_users_argument_is_working_properly(setup_project_db_test):
-    """users argument value is passed to the users attribute properly."""
+def test_users_argument_is_working_as_expected(setup_project_db_test):
+    """users argument value is passed to the users attribute."""
     data = setup_project_db_test
     data["kwargs"]["users"] = [
         data["test_user1"],
@@ -1261,8 +1261,8 @@ def test_users_argument_is_working_properly(setup_project_db_test):
     )
 
 
-def test_users_attribute_is_working_properly(setup_project_db_test):
-    """users attribute is working properly."""
+def test_users_attribute_is_working_as_expected(setup_project_db_test):
+    """users attribute is working as expected."""
     data = setup_project_db_test
     users = [data["test_user1"], data["test_user2"], data["test_user3"]]
     data["test_project"].users = users
@@ -1271,8 +1271,8 @@ def test_users_attribute_is_working_properly(setup_project_db_test):
     )
 
 
-def test_tjp_id_is_working_properly(setup_project_db_test):
-    """tjp_id attribute is working properly."""
+def test_tjp_id_is_working_as_expected(setup_project_db_test):
+    """tjp_id attribute is working as expected."""
     data = setup_project_db_test
     data["test_project"].id = 654654
     assert data["test_project"].tjp_id == "Project_654654"
@@ -1281,8 +1281,8 @@ def test_tjp_id_is_working_properly(setup_project_db_test):
 @pytest.mark.parametrize(
     "get_data_file", ["project_to_tjp_output.jinja2"], indirect=True
 )
-def test_to_tjp_is_working_properly(get_data_file, setup_project_db_test):
-    """to_tjp attribute is working properly."""
+def test_to_tjp_is_working_as_expected(get_data_file, setup_project_db_test):
+    """to_tjp attribute is working as expected."""
     data = setup_project_db_test
     data_file_path = get_data_file
     with open(data_file_path, "r") as f:
@@ -1379,8 +1379,8 @@ def test_is_active_is_read_only(setup_project_db_test):
     assert str(cm.value) == error_message
 
 
-def test_is_active_is_working_properly(setup_project_db_test):
-    """is_active is working properly."""
+def test_is_active_is_working_as_expected(setup_project_db_test):
+    """is_active is working as expected."""
     data = setup_project_db_test
     data["test_project"].active = True
     assert data["test_project"].is_active is True
@@ -1417,8 +1417,8 @@ def test_total_logged_seconds_is_0_for_a_project_with_no_child_tasks(
     assert new_project.total_logged_seconds == 0
 
 
-def test_total_logged_seconds_attribute_is_working_properly(setup_project_db_test):
-    """total_logged_seconds attribute is working properly."""
+def test_total_logged_seconds_attribute_is_working_as_expected(setup_project_db_test):
+    """total_logged_seconds attribute is working as expected."""
     data = setup_project_db_test
     # create some time logs
     TimeLog(
@@ -1539,7 +1539,7 @@ def test_schedule_seconds_attribute_value_is_0_for_a_project_with_no_tasks(
         ["test_project", 44 * 3600],
     ],
 )
-def test_schedule_seconds_attribute_is_working_properly(
+def test_schedule_seconds_attribute_is_working_as_expected(
     test_entity, expected_value, setup_project_db_test
 ):
     """schedule_seconds attribute value is gathered from the child tasks."""
@@ -1577,8 +1577,8 @@ def test_percent_complete_is_0_for_a_project_with_no_tasks(setup_project_db_test
     assert new_project.percent_complete == 0
 
 
-def test_percent_complete_attribute_is_working_properly(setup_project_db_test):
-    """percent_complete attribute is working properly"""
+def test_percent_complete_attribute_is_working_as_expected(setup_project_db_test):
+    """percent_complete attribute is working as expected"""
     data = setup_project_db_test
     assert data["test_project"].percent_complete == 0
     assert data["test_shot1"].is_container is True
@@ -1657,13 +1657,13 @@ def test_clients_attribute_is_not_a_client_instance(setup_project_db_test):
     )
 
 
-# def test_client_argument_is_working_properly(setup_project_db_test):
+# def test_client_argument_is_working_as_expected(setup_project_db_test):
 #     """client argument value is correctly passed to the client attribute."""
 #     data = setup_project_db_test
 #     assert data["test_project"].client == data["kwargs"]['client']
 
 
-def test_clients_attribute_is_working_properly(setup_project_db_test):
+def test_clients_attribute_is_working_as_expected(setup_project_db_test):
     """clients attribute value can be updated correctly."""
     data = setup_project_db_test
     new_client = Client(name="New Client")

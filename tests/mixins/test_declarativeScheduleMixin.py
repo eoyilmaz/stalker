@@ -60,8 +60,8 @@ def setup_schedule_mixin_tester():
     return data
 
 
-def test_mixin_setup_is_working_properly(setup_schedule_mixin_tester):
-    """Mixin setup is working properly."""
+def test_mixin_setup_is_working_as_expected(setup_schedule_mixin_tester):
+    """Mixin setup is working as expected."""
     data = setup_schedule_mixin_tester
     new_a = DeclSchedMixA(**data["kwargs"])  # should not create any problem
     assert new_a.start == data["kwargs"]["start"]

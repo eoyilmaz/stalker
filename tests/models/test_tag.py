@@ -10,7 +10,7 @@ def test___auto_name__class_attribute_is_set_to_false():
 
 
 def test_tag_init():
-    """tag inits properly."""
+    """tag inits as expected."""
     # this should work without any error
     tag = Tag(name="a test tag", description="this is a test tag")
     assert isinstance(tag, Tag)

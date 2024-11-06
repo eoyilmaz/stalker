@@ -345,14 +345,14 @@ def test_user_role_attribute(setup_department_db_tests):
     assert du.role is None
 
 
-def test_tjp_id_is_working_properly(setup_department_db_tests):
-    """tjp_is working properly."""
+def test_tjp_id_is_working_as_expected(setup_department_db_tests):
+    """tjp_is working as expected."""
     data = setup_department_db_tests
     assert data["test_department"].tjp_id == "Department_36"
 
 
-def test_to_tjp_is_working_properly(setup_department_db_tests):
-    """to_tjp property is working properly."""
+def test_to_tjp_is_working_as_expected(setup_department_db_tests):
+    """to_tjp property is working as expected."""
     data = setup_department_db_tests
     expected_tjp = """
 resource Department_36 "Department_36" {

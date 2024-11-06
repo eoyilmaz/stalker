@@ -136,7 +136,7 @@ def test_target_entity_type_attribute_is_read_only(setup_type_tests):
     assert str(cm.value) == error_message
 
 
-def test_target_entity_type_attribute_is_working_properly(setup_type_tests):
-    """target_entity_type attribute is working properly."""
+def test_target_entity_type_attribute_is_working_as_expected(setup_type_tests):
+    """target_entity_type attribute is working as expected."""
     data = setup_type_tests
     assert data["test_type"].target_entity_type == data["kwargs"]["target_entity_type"]

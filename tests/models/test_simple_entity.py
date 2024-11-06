@@ -465,8 +465,8 @@ def test_date_updated_attr_is_not_datetime(setup_simple_entity_tests):
     )
 
 
-def test_date_updated_attr_is_working_properly(setup_simple_entity_tests):
-    """date_updated attr is working properly."""
+def test_date_updated_attr_is_working_as_expected(setup_simple_entity_tests):
+    """date_updated attr is working as expected."""
     data = setup_simple_entity_tests
     test_value = datetime.datetime.now(pytz.utc)
     data["test_simple_entity"].date_updated = test_value
@@ -495,7 +495,7 @@ def test_date_created_is_before_date_updated(setup_simple_entity_tests):
 
 
 def test___repr__(setup_simple_entity_tests):
-    """__repr__ works properly."""
+    """__repr__ works as expected."""
     data = setup_simple_entity_tests
     assert data["test_simple_entity"].__repr__() == "<{} ({})>".format(
         data["test_simple_entity"].name,
@@ -682,7 +682,7 @@ def test_thumbnail_attr_is_not_a_link_instance(setup_simple_entity_tests):
     )
 
 
-def test_thumbnail_arg_is_working_properly(setup_simple_entity_tests):
+def test_thumbnail_arg_is_working_as_expected(setup_simple_entity_tests):
     """thumbnail arg value is passed to the thumbnail attr correctly."""
     data = setup_simple_entity_tests
     thumb = Link(full_path="some path")
@@ -691,8 +691,8 @@ def test_thumbnail_arg_is_working_properly(setup_simple_entity_tests):
     assert new_simple_entity.thumbnail == thumb
 
 
-def test_thumbnail_attr_is_working_properly(setup_simple_entity_tests):
-    """thumbnail attr is working properly."""
+def test_thumbnail_attr_is_working_as_expected(setup_simple_entity_tests):
+    """thumbnail attr is working as expected."""
     data = setup_simple_entity_tests
     thumb = Link(full_path="some path")
     assert not data["test_simple_entity"].thumbnail == thumb
@@ -745,7 +745,7 @@ def test_html_style_attr_is_not_set_to_a_string(setup_simple_entity_tests):
     )
 
 
-def test_html_style_arg_is_working_properly(setup_simple_entity_tests):
+def test_html_style_arg_is_working_as_expected(setup_simple_entity_tests):
     """html_style arg value is correctly passed to the html_style attr."""
     data = setup_simple_entity_tests
     test_value = "width: 100px; color: purple; background-color: black"
@@ -754,8 +754,8 @@ def test_html_style_arg_is_working_properly(setup_simple_entity_tests):
     assert se.html_style == test_value
 
 
-def test_html_style_attr_is_working_properly(setup_simple_entity_tests):
-    """html_style attr is working properly."""
+def test_html_style_attr_is_working_as_expected(setup_simple_entity_tests):
+    """html_style attr is working as expected."""
     data = setup_simple_entity_tests
     test_value = "width: 100px; color: purple; background-color: black"
     data["test_simple_entity"].html_style = test_value
@@ -807,7 +807,7 @@ def test_html_class_attr_is_not_set_to_a_string(setup_simple_entity_tests):
     )
 
 
-def test_html_class_arg_is_working_properly(setup_simple_entity_tests):
+def test_html_class_arg_is_working_as_expected(setup_simple_entity_tests):
     """html_class arg value is correctly passed to the html_class attr."""
     data = setup_simple_entity_tests
     test_value = "purple"
@@ -816,8 +816,8 @@ def test_html_class_arg_is_working_properly(setup_simple_entity_tests):
     assert se.html_class == test_value
 
 
-def test_html_class_attr_is_working_properly(setup_simple_entity_tests):
-    """html_class attr is working properly."""
+def test_html_class_attr_is_working_as_expected(setup_simple_entity_tests):
+    """html_class attr is working as expected."""
     data = setup_simple_entity_tests
     test_value = "purple"
     data["test_simple_entity"].html_class = test_value

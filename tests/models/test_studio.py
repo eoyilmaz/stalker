@@ -563,7 +563,7 @@ def test_working_hours_attribute_is_not_a_working_hours_instance(setup_studio_db
     )
 
 
-def test_working_hours_arg_is_working_properly(setup_studio_db_tests):
+def test_working_hours_arg_is_working_as_expected(setup_studio_db_tests):
     """working_hours arg is passed to the working_hours attr without any problem."""
     data = setup_studio_db_tests
     data["kwargs"]["name"] = "New Studio"
@@ -574,8 +574,8 @@ def test_working_hours_arg_is_working_properly(setup_studio_db_tests):
     assert new_studio.working_hours == wh
 
 
-def test_working_hours_attribute_is_working_properly(setup_studio_db_tests):
-    """working_hours attribute is working properly."""
+def test_working_hours_attribute_is_working_as_expected(setup_studio_db_tests):
+    """working_hours attribute is working as expected."""
     data = setup_studio_db_tests
     new_working_hours = WorkingHours(
         working_hours={
@@ -612,8 +612,8 @@ def test_projects_attribute_is_read_only(setup_studio_db_tests):
     assert str(cm.value) == error_message
 
 
-def test_projects_attribute_is_working_properly(setup_studio_db_tests):
-    """projects attribute is working properly."""
+def test_projects_attribute_is_working_as_expected(setup_studio_db_tests):
+    """projects attribute is working as expected."""
     data = setup_studio_db_tests
     assert sorted(data["test_studio"].projects, key=lambda x: x.name) == sorted(
         [data["test_project1"], data["test_project2"], data["test_project3"]],
@@ -639,8 +639,8 @@ def test_active_projects_attribute_is_read_only(setup_studio_db_tests):
     assert str(cm.value) == error_message
 
 
-def test_active_projects_attribute_is_working_properly(setup_studio_db_tests):
-    """active_projects attribute is working properly."""
+def test_active_projects_attribute_is_working_as_expected(setup_studio_db_tests):
+    """active_projects attribute is working as expected."""
     data = setup_studio_db_tests
     assert sorted(data["test_studio"].active_projects, key=lambda x: x.name) == sorted(
         [data["test_project1"], data["test_project2"]], key=lambda x: x.name
@@ -665,8 +665,8 @@ def test_inactive_projects_attribute_is_read_only(setup_studio_db_tests):
     assert str(cm.value) == error_message
 
 
-def test_inactive_projects_attribute_is_working_properly(setup_studio_db_tests):
-    """inactive_projects attribute is working properly."""
+def test_inactive_projects_attribute_is_working_as_expected(setup_studio_db_tests):
+    """inactive_projects attribute is working as expected."""
     data = setup_studio_db_tests
     assert sorted(
         data["test_studio"].inactive_projects, key=lambda x: x.name
@@ -691,8 +691,8 @@ def test_departments_attribute_is_read_only(setup_studio_db_tests):
     assert str(cm.value) == error_message
 
 
-def test_departments_attribute_is_working_properly(setup_studio_db_tests):
-    """departments attribute is working properly."""
+def test_departments_attribute_is_working_as_expected(setup_studio_db_tests):
+    """departments attribute is working as expected."""
     data = setup_studio_db_tests
     admins_dep = Department.query.filter(Department.name == "admins").first()
     assert admins_dep is not None
@@ -717,8 +717,8 @@ def test_users_attribute_is_read_only(setup_studio_db_tests):
     assert str(cm.value) == error_message
 
 
-def test_users_attribute_is_working_properly(setup_studio_db_tests):
-    """users attribute is working properly."""
+def test_users_attribute_is_working_as_expected(setup_studio_db_tests):
+    """users attribute is working as expected."""
     data = setup_studio_db_tests
     # don't forget the admin
     admin = User.query.filter_by(name="admin").first()
@@ -802,8 +802,8 @@ def test_now_attribute_is_set_to_a_value_other_than_datetime_instance(
     )
 
 
-def test_now_arg_is_working_properly(setup_studio_db_tests):
-    """now arg value is passed to the now attribute properly."""
+def test_now_arg_is_working_as_expected(setup_studio_db_tests):
+    """now arg value is passed to the now attribute."""
     data = setup_studio_db_tests
     data["kwargs"]["now"] = datetime.datetime(2013, 4, 15, 21, 9, tzinfo=pytz.utc)
     expected_now = datetime.datetime(2013, 4, 15, 21, 0, tzinfo=pytz.utc)
@@ -811,24 +811,24 @@ def test_now_arg_is_working_properly(setup_studio_db_tests):
     assert new_studio.now == expected_now
 
 
-def test_now_attribute_is_working_properly(setup_studio_db_tests):
-    """now attribute is working properly."""
+def test_now_attribute_is_working_as_expected(setup_studio_db_tests):
+    """now attribute is working as expected."""
     data = setup_studio_db_tests
     data["test_studio"].now = datetime.datetime(2013, 4, 15, 21, 11, tzinfo=pytz.utc)
     expected_now = datetime.datetime(2013, 4, 15, 21, 0, tzinfo=pytz.utc)
     assert data["test_studio"].now == expected_now
 
 
-def test_now_attribute_is_working_properly_case2(setup_studio_db_tests):
-    """now attribute is working properly."""
+def test_now_attribute_is_working_as_expected_case2(setup_studio_db_tests):
+    """now attribute is working as expected."""
     data = setup_studio_db_tests
     data["test_studio"]._now = None
     expected_now = Studio.round_time(datetime.datetime.now(pytz.utc))
     assert data["test_studio"].now == expected_now
 
 
-def test_to_tjp_attribute_is_working_properly(setup_studio_db_tests):
-    """to_tjp attribute is working properly."""
+def test_to_tjp_attribute_is_working_as_expected(setup_studio_db_tests):
+    """to_tjp attribute is working as expected."""
     data = setup_studio_db_tests
     data["test_studio"].start = datetime.datetime(2013, 4, 15, 17, 40, tzinfo=pytz.utc)
     data["test_studio"].end = datetime.datetime(2013, 6, 30, 17, 40, tzinfo=pytz.utc)
@@ -888,8 +888,8 @@ def test_scheduler_attribute_accepts_scheduler_instances_only(setup_studio_db_te
     )
 
 
-def test_scheduler_attribute_is_working_properly(setup_studio_db_tests):
-    """scheduler attribute is working properly."""
+def test_scheduler_attribute_is_working_as_expected(setup_studio_db_tests):
+    """scheduler attribute is working as expected."""
     data = setup_studio_db_tests
     tj_s = TaskJugglerScheduler()
     data["test_studio"].scheduler = tj_s
@@ -1682,7 +1682,7 @@ def test_timing_resolution_attribute_is_not_a_timedelta_instance(setup_studio_db
     )
 
 
-def test_timing_resolution_arg_is_working_properly(setup_studio_db_tests):
+def test_timing_resolution_arg_is_working_as_expected(setup_studio_db_tests):
     """timing_resolution arg value is passed to timing_resolution attr correctly."""
     data = setup_studio_db_tests
     data["kwargs"]["timing_resolution"] = datetime.timedelta(minutes=5)
@@ -1690,8 +1690,8 @@ def test_timing_resolution_arg_is_working_properly(setup_studio_db_tests):
     assert studio.timing_resolution == data["kwargs"]["timing_resolution"]
 
 
-def test_timing_resolution_attribute_is_working_properly(setup_studio_db_tests):
-    """timing_resolution attribute is working properly."""
+def test_timing_resolution_attribute_is_working_as_expected(setup_studio_db_tests):
+    """timing_resolution attribute is working as expected."""
     data = setup_studio_db_tests
     studio = Studio(**data["kwargs"])
     res = studio
