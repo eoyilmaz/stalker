@@ -837,3 +837,8 @@ def test__eq__of_two_tickets_false_case(setup_ticket_tests):
     data = setup_ticket_tests
     new_ticket = Ticket(**data["kwargs"])
     assert (data["test_ticket"] == new_ticket) is False
+
+
+def test_max_number_returns_0():
+    """_maximum_number() returns 0 when there is no DB connection."""
+    assert Ticket._maximum_number() == 0
