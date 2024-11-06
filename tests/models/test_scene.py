@@ -164,3 +164,11 @@ def test_project_mixin_initialization(setup_scene_db_tests):
 def test___strictly_typed___is_false():
     """__strictly_typed__ class attribute is False for Scene class."""
     assert Scene.__strictly_typed__ is False
+
+
+def test__hash__is_working_as_expected(setup_scene_db_tests):
+    """__hash__ is working as expected."""
+    data = setup_scene_db_tests
+    result = hash(data["test_scene"])
+    assert isinstance(result, int)
+    assert result == data["test_scene"].__hash__()
