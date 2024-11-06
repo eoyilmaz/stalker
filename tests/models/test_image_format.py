@@ -283,7 +283,7 @@ def test_device_aspect_attribute_write_protected(setup_image_format_tests):
         10: "can't set attribute 'device_aspect'",
     }.get(
         sys.version_info.minor,
-        "property 'device_aspect' of 'ImageFormat' object has no setter"
+        "property 'device_aspect' of 'ImageFormat' object has no setter",
     )
 
     assert str(cm.value) == error_message

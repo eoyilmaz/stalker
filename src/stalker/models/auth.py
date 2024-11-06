@@ -1110,7 +1110,7 @@ class LocalSession(object):
         dumped_data = json.dumps(
             {
                 "valid_to": self.datetime_to_millis(self.valid_to),
-                "logged_in_user_id": self.logged_in_user_id
+                "logged_in_user_id": self.logged_in_user_id,
             },
         )
         logger.debug(f"dumped session data : {dumped_data}")

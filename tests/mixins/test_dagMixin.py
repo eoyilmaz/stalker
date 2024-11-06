@@ -211,7 +211,7 @@ def test_is_leaf_attribute_is_read_only(dag_mixin_test_case):
         10: "can't set attribute 'is_leaf'",
     }.get(
         sys.version_info.minor,
-        "property 'is_leaf' of 'DAGMixinFooMixedInClass' object has no setter"
+        "property 'is_leaf' of 'DAGMixinFooMixedInClass' object has no setter",
     )
 
     assert str(cm.value) == error_message
@@ -245,7 +245,7 @@ def test_is_root_attribute_is_read_only(dag_mixin_test_case):
         10: "can't set attribute 'is_root'",
     }.get(
         sys.version_info.minor,
-        "property 'is_root' of 'DAGMixinFooMixedInClass' object has no setter"
+        "property 'is_root' of 'DAGMixinFooMixedInClass' object has no setter",
     )
 
     assert str(cm.value) == error_message
@@ -278,7 +278,7 @@ def test_is_container_attribute_is_read_only(dag_mixin_test_case):
         10: "can't set attribute 'is_container'",
     }.get(
         sys.version_info.minor,
-        "property 'is_container' of 'DAGMixinFooMixedInClass' object has no setter"
+        "property 'is_container' of 'DAGMixinFooMixedInClass' object has no setter",
     )
 
     assert str(cm.value) == error_message
@@ -315,7 +315,7 @@ def test_parents_property_is_read_only(dag_mixin_test_case):
         10: "can't set attribute 'parents'",
     }.get(
         sys.version_info.minor,
-        "property 'parents' of 'DAGMixinFooMixedInClass' object has no setter"
+        "property 'parents' of 'DAGMixinFooMixedInClass' object has no setter",
     )
 
     assert str(cm.value) == error_message

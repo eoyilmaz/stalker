@@ -278,7 +278,7 @@ def test_project_attribute_is_read_only(setup_shot_db_tests):
         12: "property of 'Shot' object has no setter",
     }.get(
         sys.version_info.minor,
-        "property '_project_getter' of 'Shot' object has no setter"
+        "property '_project_getter' of 'Shot' object has no setter",
     )
 
     assert str(cm.value) == error_message

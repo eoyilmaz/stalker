@@ -540,7 +540,9 @@ def test_to_windows_path_returns_the_windows_version_of_the_given_reverse_macos_
     test_macos_path_reverse = (
         "\\Volumes\\T\\Stalker_Projects\\Sero\\" "Task1\\Task2\\Some_file.ma"
     )
-    assert data["test_repo"].to_windows_path(test_macos_path_reverse) == test_windows_path
+    assert (
+        data["test_repo"].to_windows_path(test_macos_path_reverse) == test_windows_path
+    )
 
 
 def test_to_windows_path_returns_the_windows_version_of_the_given_path_with_env_vars(
@@ -1319,7 +1321,9 @@ def test_updating_windows_path_only_update_repo_path_if_on_windows(
     )
 
 
-def test_updating_macos_path_only_update_repo_path_if_on_macos(setup_repository_db_tests):
+def test_updating_macos_path_only_update_repo_path_if_on_macos(
+    setup_repository_db_tests,
+):
     """updating the macos path will only update the path if the system is macos."""
     data = setup_repository_db_tests
     data["patcher"].patch("Windows")

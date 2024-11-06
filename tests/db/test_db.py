@@ -245,11 +245,12 @@ def test_register_raise_type_error_for_wrong_class_name_argument(setup_postgresq
         stalker.db.setup.register(23425)
 
 
-@pytest.mark.parametrize(
-    "error_class", [IntegrityError]
-)
-def test_register_handles_integrity_errors(setup_postgresql_db, monkeypatch, error_class):
+@pytest.mark.parametrize("error_class", [IntegrityError])
+def test_register_handles_integrity_errors(
+    setup_postgresql_db, monkeypatch, error_class
+):
     """create_ticket_statuses() handles IntegrityErrors."""
+
     # create a new dummy class
     class TestClass(object):
         pass
@@ -932,11 +933,7 @@ def test_get_alembic_version_is_working_properly_when_there_is_no_alembic_versio
     assert alembic_version_ is None
 
 
-@pytest.mark.parametrize(
-    "error_class", [
-        OperationalError, ProgrammingError, TypeError
-    ]
-)
+@pytest.mark.parametrize("error_class", [OperationalError, ProgrammingError, TypeError])
 def test_get_alembic_version_handles_errors(monkeypatch, error_class):
     """stalker.db.setup.get_alembic_version() handles errors db related."""
 
@@ -987,8 +984,11 @@ def test_create_ticket_statuses_called_multiple_times(setup_postgresql_db):
     stalker.db.setup.create_ticket_statuses()
 
 
-def test_create_ticket_statuses_handles_integrity_errors(setup_postgresql_db, monkeypatch):
+def test_create_ticket_statuses_handles_integrity_errors(
+    setup_postgresql_db, monkeypatch
+):
     """create_ticket_statuses() handles IntegrityErrors."""
+
     class PatchedDBSession(object):
         rollback_is_called = False
 
@@ -1025,10 +1025,10 @@ def test_create_entity_statuses_called_multiple_times(setup_postgresql_db):
     stalker.db.setup.create_entity_statuses("Ticket", ticket_names, ticket_codes, admin)
 
 
-@pytest.mark.parametrize(
-    "error_class", [IntegrityError, OperationalError]
-)
-def test_create_entity_statuses_handles_errors(setup_postgresql_db, monkeypatch, error_class):
+@pytest.mark.parametrize("error_class", [IntegrityError, OperationalError])
+def test_create_entity_statuses_handles_errors(
+    setup_postgresql_db, monkeypatch, error_class
+):
     """create_ticket_statuses() handles IntegrityErrors."""
     ticket_names = defaults.ticket_status_names
     ticket_codes = defaults.ticket_status_codes

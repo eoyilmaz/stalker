@@ -573,8 +573,7 @@ def test_sequences_attribute_is_read_only(setup_project_db_test):
         9: "can't set attribute",
         10: "can't set attribute 'sequences'",
     }.get(
-        sys.version_info.minor,
-        "property 'sequences' of 'Project' object has no setter"
+        sys.version_info.minor, "property 'sequences' of 'Project' object has no setter"
     )
 
     assert str(cm.value) == error_message
@@ -631,9 +630,7 @@ def test_image_format_argument_is_working_properly(setup_project_db_test):
     assert new_project.image_format == data["test_image_format"]
 
 
-@pytest.mark.parametrize(
-    "test_value", [1, 1.2, "a str", ["a", "list"], {"a": "dict"}]
-)
+@pytest.mark.parametrize("test_value", [1, 1.2, "a str", ["a", "list"], {"a": "dict"}])
 def test_image_format_attribute_accepts_image_format_only(
     setup_project_db_test, test_value
 ):
@@ -1376,8 +1373,7 @@ def test_is_active_is_read_only(setup_project_db_test):
         9: "can't set attribute",
         10: "can't set attribute 'is_active'",
     }.get(
-        sys.version_info.minor,
-        "property 'is_active' of 'Project' object has no setter"
+        sys.version_info.minor, "property 'is_active' of 'Project' object has no setter"
     )
 
     assert str(cm.value) == error_message
@@ -1404,7 +1400,7 @@ def test_total_logged_seconds_attribute_is_read_only(setup_project_db_test):
         10: "can't set attribute 'total_logged_seconds'",
     }.get(
         sys.version_info.minor,
-        "property 'total_logged_seconds' of 'Project' object has no setter"
+        "property 'total_logged_seconds' of 'Project' object has no setter",
     )
 
     assert str(cm.value) == error_message
@@ -1477,7 +1473,7 @@ def test_schedule_seconds_attribute_is_read_only(setup_project_db_test):
         10: "can't set attribute 'schedule_seconds'",
     }.get(
         sys.version_info.minor,
-        "property 'schedule_seconds' of 'Project' object has no setter"
+        "property 'schedule_seconds' of 'Project' object has no setter",
     )
 
     assert str(cm.value) == error_message
@@ -1566,7 +1562,7 @@ def test_percent_complete_attribute_is_read_only(setup_project_db_test):
         10: "can't set attribute 'percent_complete'",
     }.get(
         sys.version_info.minor,
-        "property 'percent_complete' of 'Project' object has no setter"
+        "property 'percent_complete' of 'Project' object has no setter",
     )
 
     assert str(cm.value) == error_message
@@ -1892,7 +1888,7 @@ def test_open_tickets_attribute_is_read_only(setup_project_tickets_db_tests):
         10: "can't set attribute 'open_tickets'",
     }.get(
         sys.version_info.minor,
-        "property 'open_tickets' of 'Project' object has no setter"
+        "property 'open_tickets' of 'Project' object has no setter",
     )
 
     assert str(cm.value) == error_message

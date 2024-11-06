@@ -138,8 +138,7 @@ def test_to_tjp_attribute_is_a_read_only_property(setup_vacation_tests):
         9: "can't set attribute",
         10: "can't set attribute 'to_tjp'",
     }.get(
-        sys.version_info.minor,
-        "property 'to_tjp' of 'Vacation' object has no setter"
+        sys.version_info.minor, "property 'to_tjp' of 'Vacation' object has no setter"
     )
 
     assert str(cm.value) == error_message

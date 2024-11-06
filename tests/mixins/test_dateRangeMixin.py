@@ -513,7 +513,7 @@ def test_computed_duration_is_read_only(date_range_mixin_tester):
     }.get(
         sys.version_info.minor,
         "property 'computed_duration' of 'DateRangeMixFooMixedInClass' "
-        "object has no setter"
+        "object has no setter",
     )
 
     assert str(cm.value) == error_message
@@ -533,7 +533,7 @@ def test_total_seconds_attribute_is_read_only(date_range_mixin_tester):
     }.get(
         sys.version_info.minor,
         "property 'total_seconds' of 'DateRangeMixFooMixedInClass' "
-        "object has no setter"
+        "object has no setter",
     )
 
     assert str(cm.value) == error_message
@@ -562,7 +562,7 @@ def test_computed_total_seconds_attribute_is_read_only(date_range_mixin_tester):
     }.get(
         sys.version_info.minor,
         "property 'computed_total_seconds' of 'DateRangeMixFooMixedInClass' "
-        "object has no setter"
+        "object has no setter",
     )
 
     assert str(cm.value) == error_message

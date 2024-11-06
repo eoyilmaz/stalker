@@ -203,10 +203,12 @@ def test__eq__is_working_as_expected_with_same_data(setup_entity_group_tests):
 def test__eq__is_working_as_expected_with_different_data(setup_entity_group_tests):
     """__eq__ is working as expected with same data."""
     data = setup_entity_group_tests
-    eg2 = EntityGroup(
-        name="My Tasks", entities=[data["task1"], data["child_task2"]]
-    )
-    assert data["entity_group1"].entities == [data["task1"], data["child_task2"], data["task2"]]
+    eg2 = EntityGroup(name="My Tasks", entities=[data["task1"], data["child_task2"]])
+    assert data["entity_group1"].entities == [
+        data["task1"],
+        data["child_task2"],
+        data["task2"],
+    ]
     assert eg2.entities == [data["task1"], data["child_task2"]]
     assert (data["entity_group1"] == eg2) is False
 

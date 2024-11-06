@@ -89,7 +89,9 @@ class Repository(Entity, CodeMixin):
     windows_path = Column(String(256))
     macos_path = Column(String(256))
 
-    def __init__(self, code="", linux_path="", windows_path="", macos_path="", **kwargs):
+    def __init__(
+        self, code="", linux_path="", windows_path="", macos_path="", **kwargs
+    ):
         kwargs["code"] = code
         super(Repository, self).__init__(**kwargs)
         CodeMixin.__init__(self, **kwargs)
@@ -160,10 +162,12 @@ class Repository(Entity, CodeMixin):
         macos_path = macos_path.replace("\\", "/")
         if self.code is not None and platform.system() == "Darwin":
             # update the environment variable
-            os.environ[defaults.repo_env_var_template.format(code=self.code)] = macos_path
+            rendered_env_var = defaults.repo_env_var_template.format(code=self.code)
+            os.environ[rendered_env_var] = macos_path
 
         if self.id is not None and platform.system() == "Darwin":
-            os.environ[defaults.repo_env_var_template_old.format(id=self.id)] = macos_path
+            rendered_env_var = defaults.repo_env_var_template_old.format(id=self.id)
+            os.environ[rendered_env_var] = macos_path
 
         return macos_path
 

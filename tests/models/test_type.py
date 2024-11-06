@@ -130,7 +130,7 @@ def test_target_entity_type_attribute_is_read_only(setup_type_tests):
         12: "property of 'Type' object has no setter",
     }.get(
         sys.version_info.minor,
-        "property '_target_entity_type_getter' of 'Type' object has no setter"
+        "property '_target_entity_type_getter' of 'Type' object has no setter",
     )
 
     assert str(cm.value) == error_message

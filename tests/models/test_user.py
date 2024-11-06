@@ -1108,10 +1108,7 @@ def test_tickets_attribute_is_read_only(setup_user_db_tests):
         8: "can't set attribute",
         9: "can't set attribute",
         10: "can't set attribute 'tickets'",
-    }.get(
-        sys.version_info.minor,
-        "property 'tickets' of 'User' object has no setter"
-    )
+    }.get(sys.version_info.minor, "property 'tickets' of 'User' object has no setter")
 
     assert str(cm.value) == error_message
 
@@ -1127,8 +1124,7 @@ def test_open_tickets_attribute_is_read_only(setup_user_db_tests):
         9: "can't set attribute",
         10: "can't set attribute 'open_tickets'",
     }.get(
-        sys.version_info.minor,
-        "property 'open_tickets' of 'User' object has no setter"
+        sys.version_info.minor, "property 'open_tickets' of 'User' object has no setter"
     )
 
     assert str(cm.value) == error_message

@@ -13,6 +13,7 @@ from stalker.models.entity import Entity
 @pytest.fixture(scope="function")
 def setup_db(setup_sqlite3):
     """setup test db."""
+
     class MyEntityClass(Entity):
         __tablename__ = "MyEntityClasses"
         __table_args__ = {
@@ -68,8 +69,7 @@ def test_json_encoded_dict_with_generic_data_retrieved(setup_db):
     DBSession.add(my_entity)
     DBSession.commit()
 
-    del(my_entity)
+    del my_entity
 
     retrieved_data = MyEntityClass.query.first()
     assert retrieved_data.data == test_data
-

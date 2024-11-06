@@ -31,16 +31,16 @@ logger.setLevel(log.logging_level)
 
 
 VARIANT_NAME_TEST_VALUES = [
-        ["Variant Name", "Variant_Name"],
-        ["VariantName", "VariantName"],
-        ["variant name", "variant_name"],
-        ["  variant_name", "variant_name"],
-        ["variant_name   ", "variant_name"],
-        ["   variant   name   ", "variant_name"],
-        ["VariantName", "VariantName"],
-        ["Variant___Name", "Variant___Name"],
-        ["Variant@Name", "Variant@Name"],
-    ]
+    ["Variant Name", "Variant_Name"],
+    ["VariantName", "VariantName"],
+    ["variant name", "variant_name"],
+    ["  variant_name", "variant_name"],
+    ["variant_name   ", "variant_name"],
+    ["   variant   name   ", "variant_name"],
+    ["VariantName", "VariantName"],
+    ["Variant___Name", "Variant___Name"],
+    ["Variant@Name", "Variant@Name"],
+]
 
 
 @pytest.fixture(scope="function")
@@ -195,7 +195,9 @@ def test_variant_name_argument_is_none(setup_version_db_tests):
     data["kwargs"]["variant_name"] = None
     with pytest.raises(TypeError) as cm:
         Version(**data["kwargs"])
-    assert str(cm.value) == "Version.variant_name should be a string, not NoneType: 'None'"
+    assert (
+        str(cm.value) == "Version.variant_name should be a string, not NoneType: 'None'"
+    )
 
 
 def test_variant_name_attribute_is_none(setup_version_db_tests):
@@ -204,7 +206,9 @@ def test_variant_name_attribute_is_none(setup_version_db_tests):
     with pytest.raises(TypeError) as cm:
         data["test_version"].variant_name = None
 
-    assert str(cm.value) == "Version.variant_name should be a string, not NoneType: 'None'"
+    assert (
+        str(cm.value) == "Version.variant_name should be a string, not NoneType: 'None'"
+    )
 
 
 def test_variant_name_argument_is_empty_string(setup_version_db_tests):
@@ -224,9 +228,7 @@ def test_variant_name_attribute_is_empty_string(setup_version_db_tests):
     assert str(cm.value) == "Version.variant_name cannot be an empty string"
 
 
-@pytest.mark.parametrize(
-    "test_value", [[1, 1.2, ["a list"], {"a": "dict"}]]
-)
+@pytest.mark.parametrize("test_value", [[1, 1.2, ["a list"], {"a": "dict"}]])
 def test_variant_name_argument_is_not_a_string(setup_version_db_tests, test_value):
     """TypeError raised if the given variant_name argument is not a string."""
     data = setup_version_db_tests
@@ -1028,7 +1030,7 @@ def test_latest_published_version_is_read_only(setup_version_db_tests):
         10: "can't set attribute 'latest_published_version'",
     }.get(
         sys.version_info.minor,
-        "property 'latest_published_version' of 'Version' object has no setter"
+        "property 'latest_published_version' of 'Version' object has no setter",
     )
 
     assert str(cm.value) == error_message
@@ -1258,7 +1260,7 @@ def test_max_version_number_attribute_is_read_only(setup_version_db_tests):
         10: "can't set attribute 'max_version_number'",
     }.get(
         sys.version_info.minor,
-        "property 'max_version_number' of 'Version' object has no setter"
+        "property 'max_version_number' of 'Version' object has no setter",
     )
 
     assert str(cm.value) == error_message
@@ -1308,7 +1310,7 @@ def test_latest_version_attribute_is_read_only(setup_version_db_tests):
         10: "can't set attribute 'latest_version'",
     }.get(
         sys.version_info.minor,
-        "property 'latest_version' of 'Version' object has no setter"
+        "property 'latest_version' of 'Version' object has no setter",
     )
 
     assert str(cm.value) == error_message
@@ -1358,7 +1360,7 @@ def test_naming_parents_attribute_is_a_read_only_property(setup_version_db_tests
         10: "can't set attribute 'naming_parents'",
     }.get(
         sys.version_info.minor,
-        "property 'naming_parents' of 'Version' object has no setter"
+        "property 'naming_parents' of 'Version' object has no setter",
     )
 
     assert str(cm.value) == error_message

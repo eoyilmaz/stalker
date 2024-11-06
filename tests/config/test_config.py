@@ -157,13 +157,13 @@ def test_syntax_error_in_settings_file(prepare_config_file):
 
     error_message = {
         8: "There is a syntax error in your configuration file: "
-           "EOL while scanning string literal (<string>, line 2)",
+        "EOL while scanning string literal (<string>, line 2)",
         9: "There is a syntax error in your configuration file: "
-           "EOL while scanning string literal (<string>, line 2)",
+        "EOL while scanning string literal (<string>, line 2)",
     }.get(
         sys.version_info.minor,
         "There is a syntax error in your configuration file: "
-        "unterminated string literal (detected at line 2) (<string>, line 2)"
+        "unterminated string literal (detected at line 2) (<string>, line 2)",
     )
 
     assert str(cm.value) == error_message

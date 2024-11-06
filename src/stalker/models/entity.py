@@ -890,7 +890,11 @@ class EntityGroup(Entity):
             bool: True if the other is also a EntityGroup instance and has the same
                 attribute values.
         """
-        return super(SimpleEntity, self).__eq__(other) and isinstance(other, EntityGroup) and self.entities == other.entities
+        return (
+            super(SimpleEntity, self).__eq__(other)
+            and isinstance(other, EntityGroup)
+            and self.entities == other.entities
+        )
 
     def __hash__(self):
         """Return the hash value of this instance.

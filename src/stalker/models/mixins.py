@@ -493,7 +493,7 @@ class DateRangeMixin(object):
             dates is kept.
 
         duration (datetime.timedelta): The duration of the entity. It is a
-            :class:`datetime.timedelta` instance. The default value is read from 
+            :class:`datetime.timedelta` instance. The default value is read from
             he :class:`.Config` class. See the table above for the initialization
             rules.
     """

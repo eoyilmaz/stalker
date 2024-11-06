@@ -139,7 +139,7 @@ def test_local_session_will_not_use_the_stored_data_if_it_is_invalid(
     data = json.dumps(
         {
             "valid_to": local_session.datetime_to_millis(local_session.valid_to),
-            "logged_in_user_id": -1
+            "logged_in_user_id": -1,
         },
     )
     local_session._write_data(data)

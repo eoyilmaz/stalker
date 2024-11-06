@@ -64,8 +64,7 @@ def test_target_entity_type_argument_being_empty_string(
     with pytest.raises(ValueError) as cm:
         TargetEntityTypeMixedClass(**data["kwargs"])
     assert (
-        str(cm.value)
-        == "TargetEntityTypeMixedClass.target_entity_type cannot be empty"
+        str(cm.value) == "TargetEntityTypeMixedClass.target_entity_type cannot be empty"
     )
 
 
@@ -96,7 +95,7 @@ def test_target_entity_type_attribute_is_read_only(setup_target_entity_mixin_tes
     }.get(
         sys.version_info.minor,
         "property '_target_entity_type_getter' of 'TargetEntityTypeMixedClass' "
-        "object has no setter"
+        "object has no setter",
     )
 
     assert str(cm.value) == error_message

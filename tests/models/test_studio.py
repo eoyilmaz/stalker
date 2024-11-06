@@ -606,8 +606,7 @@ def test_projects_attribute_is_read_only(setup_studio_db_tests):
         9: "can't set attribute",
         10: "can't set attribute 'projects'",
     }.get(
-        sys.version_info.minor,
-        "property 'projects' of 'Studio' object has no setter"
+        sys.version_info.minor, "property 'projects' of 'Studio' object has no setter"
     )
 
     assert str(cm.value) == error_message
@@ -634,7 +633,7 @@ def test_active_projects_attribute_is_read_only(setup_studio_db_tests):
         10: "can't set attribute 'active_projects'",
     }.get(
         sys.version_info.minor,
-        "property 'active_projects' of 'Studio' object has no setter"
+        "property 'active_projects' of 'Studio' object has no setter",
     )
 
     assert str(cm.value) == error_message
@@ -660,7 +659,7 @@ def test_inactive_projects_attribute_is_read_only(setup_studio_db_tests):
         10: "can't set attribute 'inactive_projects'",
     }.get(
         sys.version_info.minor,
-        "property 'inactive_projects' of 'Studio' object has no setter"
+        "property 'inactive_projects' of 'Studio' object has no setter",
     )
 
     assert str(cm.value) == error_message
@@ -686,7 +685,7 @@ def test_departments_attribute_is_read_only(setup_studio_db_tests):
         10: "can't set attribute 'departments'",
     }.get(
         sys.version_info.minor,
-        "property 'departments' of 'Studio' object has no setter"
+        "property 'departments' of 'Studio' object has no setter",
     )
 
     assert str(cm.value) == error_message
@@ -713,10 +712,7 @@ def test_users_attribute_is_read_only(setup_studio_db_tests):
         8: "can't set attribute",
         9: "can't set attribute",
         10: "can't set attribute 'users'",
-    }.get(
-        sys.version_info.minor,
-        "property 'users' of 'Studio' object has no setter"
-    )
+    }.get(sys.version_info.minor, "property 'users' of 'Studio' object has no setter")
 
     assert str(cm.value) == error_message
 
@@ -743,10 +739,7 @@ def test_to_tjp_attribute_is_read_only(setup_studio_db_tests):
         8: "can't set attribute",
         9: "can't set attribute",
         10: "can't set attribute 'to_tjp'",
-    }.get(
-        sys.version_info.minor,
-        "property 'to_tjp' of 'Studio' object has no setter"
-    )
+    }.get(sys.version_info.minor, "property 'to_tjp' of 'Studio' object has no setter")
 
     assert str(cm.value) == error_message
 
@@ -1602,8 +1595,7 @@ def test_vacation_attribute_is_read_only(setup_studio_db_tests):
         9: "can't set attribute",
         10: "can't set attribute 'vacations'",
     }.get(
-        sys.version_info.minor,
-        "property 'vacations' of 'Studio' object has no setter"
+        sys.version_info.minor, "property 'vacations' of 'Studio' object has no setter"
     )
 
     assert str(cm.value) == error_message

@@ -37,22 +37,21 @@ install:
 
 clean: FORCE
 	@printf "\n\033[36m--- $@: Clean ---\033[0m\n"
-	-rm -rf .pytest_cache
-	-rm -f .coverage.*
-	-rm -rf dist
-	-rm -rf build
-	-rm -rf docs/build
-	-rm -rf docs/source/generated/*
+	-rm -Rf .pytest_cache
+	-rm -f .coverage*
+	-rm -Rf dist
+	-rm -Rf build
+	-rm -Rf docs/build
+	-rm -Rf docs/source/generated/*
+	-rm -Rf htmlcov
 
 clean-all: clean
 	@printf "\n\033[36m--- $@: Clean All---\033[0m\n"
 	-rm -f INSTALLED_FILES
 	-rm -f setuptools-*.egg
 	-rm -f use-distutils
-	-rm -f .coverage*
 	-rm -Rf .tox
-	-rm -Rf htmlcov
-	-rm -rf dist
+	-rm -Rf dist
 	-rm -Rf src/$(PACKAGE_NAME).egg-info
 	-rm -Rf $(VIRTUALENV_DIR)
 

@@ -1257,7 +1257,7 @@ def test_schedule_seconds_is_working_properly_for_an_effort_based_task_with_stud
     _ = Studio(
         name="Test Studio",
         daily_working_hours=8,
-        timing_resolution=datetime.timedelta(hours=1)
+        timing_resolution=datetime.timedelta(hours=1),
     )
     kwargs["schedule_model"] = "effort"
     kwargs["schedule_timing"] = schedule_timing

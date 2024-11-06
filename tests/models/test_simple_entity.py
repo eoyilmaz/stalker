@@ -184,7 +184,7 @@ def test_nice_name_attr_is_read_only(setup_simple_entity_tests):
         10: "can't set attribute 'nice_name'",
     }.get(
         sys.version_info.minor,
-        "property 'nice_name' of 'SimpleEntity' object has no setter"
+        "property 'nice_name' of 'SimpleEntity' object has no setter",
     )
 
     assert str(cm.value) == error_message
@@ -450,9 +450,7 @@ def test_date_updated_attr_is_set_to_none(setup_simple_entity_tests):
     with pytest.raises(TypeError) as cm:
         data["test_simple_entity"].date_updated = None
 
-    assert str(cm.value) == (
-        "SimpleEntity.date_updated cannot be None"
-    )
+    assert str(cm.value) == "SimpleEntity.date_updated cannot be None"
 
 
 def test_date_updated_attr_is_not_datetime(setup_simple_entity_tests):
