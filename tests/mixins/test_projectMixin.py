@@ -101,7 +101,7 @@ def test_project_argument_is_skipped(setup_project_mixin_tester):
 
     assert (
         str(cm.value)
-        == "ProjMixClass.project can not be None it must be an instance of "
+        == "ProjMixClass.project cannot be None it must be an instance of "
         "stalker.models.project.Project"
     )
 
@@ -115,7 +115,7 @@ def test_project_argument_is_none(setup_project_mixin_tester):
 
     assert (
         str(cm.value)
-        == "ProjMixClass.project can not be None it must be an instance of "
+        == "ProjMixClass.project cannot be None it must be an instance of "
         "stalker.models.project.Project"
     )
 
@@ -128,7 +128,7 @@ def test_project_attribute_is_none(setup_project_mixin_tester):
 
     assert (
         str(cm.value)
-        == "ProjMixClass.project can not be None it must be an instance of "
+        == "ProjMixClass.project cannot be None it must be an instance of "
         "stalker.models.project.Project"
     )
 

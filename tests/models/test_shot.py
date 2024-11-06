@@ -730,7 +730,7 @@ def test_cut_duration_attribute_is_zero(setup_shot_db_tests):
     with pytest.raises(ValueError) as cm:
         data["test_shot"].cut_duration = 0
     assert str(cm.value) == (
-        "Shot.cut_duration can not be set to zero or a negative value"
+        "Shot.cut_duration cannot be set to zero or a negative value"
     )
 
 
@@ -741,7 +741,7 @@ def test_cut_duration_attribute_is_negative(setup_shot_db_tests):
         data["test_shot"].cut_duration = -100
 
     assert str(cm.value) == (
-        "Shot.cut_duration can not be set to zero or a negative value"
+        "Shot.cut_duration cannot be set to zero or a negative value"
     )
 
 
@@ -803,7 +803,7 @@ def test_source_in_argument_is_bigger_than_source_out_argument(setup_shot_db_tes
         Shot(**data["kwargs"])
 
     assert str(cm.value) == (
-        "Shot.source_out can not be smaller than Shot.source_in, source_in: 144 where "
+        "Shot.source_out cannot be smaller than Shot.source_in, source_in: 144 where "
         "as source_out: 139"
     )
 
@@ -818,7 +818,7 @@ def test_source_in_attribute_is_bigger_than_source_out_attribute(setup_shot_db_t
         data["test_shot"].source_in = data["test_shot"].source_out + 1
 
     assert str(cm.value) == (
-        "Shot.source_in can not be bigger than Shot.source_out, "
+        "Shot.source_in cannot be bigger than Shot.source_out, "
         "source_in: 136 where as source_out: 135"
     )
 
@@ -832,7 +832,7 @@ def test_source_in_argument_is_smaller_than_cut_in(setup_shot_db_tests):
         Shot(**data["kwargs"])
 
     assert str(cm.value) == (
-        "Shot.source_in can not be smaller than Shot.cut_in, cut_in: "
+        "Shot.source_in cannot be smaller than Shot.cut_in, cut_in: "
         "112 where as source_in: 102"
     )
 
@@ -846,7 +846,7 @@ def test_source_in_argument_is_bigger_than_cut_out(setup_shot_db_tests):
         Shot(**data["kwargs"])
 
     assert str(cm.value) == (
-        "Shot.source_in can not be bigger than Shot.cut_out, cut_out: "
+        "Shot.source_in cannot be bigger than Shot.cut_out, cut_out: "
         "149 where as source_in: 159"
     )
 
@@ -906,7 +906,7 @@ def test_source_out_argument_is_smaller_than_source_in_argument(setup_shot_db_te
         Shot(**data["kwargs"])
 
     assert str(cm.value) == (
-        "Shot.source_out can not be smaller than Shot.source_in, "
+        "Shot.source_out cannot be smaller than Shot.source_in, "
         "source_in: 127 where as source_out: 117"
     )
 
@@ -918,7 +918,7 @@ def test_source_out_attribute_is_smaller_than_source_in_attribute(setup_shot_db_
         data["test_shot"].source_out = data["test_shot"].source_in - 2
 
     assert str(cm.value) == (
-        "Shot.source_out can not be smaller than Shot.source_in, "
+        "Shot.source_out cannot be smaller than Shot.source_in, "
         "source_in: 120 where as source_out: 118"
     )
 

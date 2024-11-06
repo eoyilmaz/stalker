@@ -71,7 +71,7 @@ class Repository(Entity, CodeMixin):
     #
     # AutoFS can be setup to listen for new mount points from an OpenLDAP
     # server. Thus it is heavily related with the users system, Stalker
-    # can not do anything about that. The IT should setup workstations.
+    # cannot do anything about that. The IT should setup workstations.
     #
     # But Stalker can connect to the OpenLDAP server and create new entries.
     #
@@ -271,7 +271,7 @@ class Repository(Entity, CodeMixin):
             str: The converted path.
         """
         if path is None:
-            raise TypeError(f"{self.__class__.__name__}.path can not be None")
+            raise TypeError(f"{self.__class__.__name__}.path cannot be None")
 
         if not isinstance(path, string_types):
             raise TypeError(

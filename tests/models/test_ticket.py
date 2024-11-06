@@ -315,7 +315,7 @@ def test_related_ticket_attribute_will_not_accept_self(setup_ticket_tests):
         data["test_ticket"].related_tickets = [data["test_ticket"]]
 
     assert (
-        str(cm.value) == "Ticket.related_ticket attribute can not "
+        str(cm.value) == "Ticket.related_ticket attribute cannot "
         "have itself in the list"
     )
 

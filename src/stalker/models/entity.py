@@ -44,14 +44,14 @@ class SimpleEntity(Base):
 
        For derived classes if the
        :attr:`.SimpleEntity.type` needed to be specifically specified, that is
-       it can not be None or nothing else then a :class:`.Type` instance, set
+       it cannot be None or nothing else then a :class:`.Type` instance, set
        the ``strictly_typed`` class attribute to True::
 
            class NewClass(SimpleEntity):
                __strictly_typed__ = True
 
        This will ensure that the derived class always have a proper
-       :attr:`.SimpleEntity.type` attribute and can not be initialized without
+       :attr:`.SimpleEntity.type` attribute and cannot be initialized without
        one.
 
     Two SimpleEntities considered to be equal if they have the same
@@ -295,7 +295,7 @@ class SimpleEntity(Base):
         Returns:
             int: The hash value.
         """
-        return hash(self.id) + 2 * hash(self.name) + 3 * hash(self.entity_type)
+        return hash("{}:{}:{}".format(self.id, self.name, self.entity_type))
 
     @validates("description")
     def _validate_description(self, key, description):
@@ -374,7 +374,7 @@ class SimpleEntity(Base):
 
         # it is None
         if name is None:
-            raise TypeError(f"{self.__class__.__name__}.name can not be None")
+            raise TypeError(f"{self.__class__.__name__}.name cannot be None")
 
         if not isinstance(name, string_types):
             raise TypeError(
@@ -387,7 +387,7 @@ class SimpleEntity(Base):
         # it is empty
         if name == "":
             raise ValueError(
-                f"{self.__class__.__name__}.name can not be an empty string"
+                f"{self.__class__.__name__}.name cannot be an empty string"
             )
 
         # also set the nice_name
@@ -534,7 +534,7 @@ class SimpleEntity(Base):
             datetime.datetime: The validated date_created value.
         """
         if date_created is None:
-            raise TypeError(f"{self.__class__.__name__}.date_created can not be None")
+            raise TypeError(f"{self.__class__.__name__}.date_created cannot be None")
 
         if not isinstance(date_created, datetime.datetime):
             raise TypeError(
@@ -563,7 +563,7 @@ class SimpleEntity(Base):
         """
         # it is None
         if date_updated is None:
-            raise TypeError(f"{self.__class__.__name__}.date_updated can not be None")
+            raise TypeError(f"{self.__class__.__name__}.date_updated cannot be None")
 
         # it is not a datetime.datetime instance
         if not isinstance(date_updated, datetime.datetime):
@@ -890,9 +890,7 @@ class EntityGroup(Entity):
             bool: True if the other is also a EntityGroup instance and has the same
                 attribute values.
         """
-        return super(SimpleEntity, self).__eq__(other) and isinstance(
-            other, EntityGroup
-        )
+        return super(SimpleEntity, self).__eq__(other) and isinstance(other, EntityGroup) and self.entities == other.entities
 
     def __hash__(self):
         """Return the hash value of this instance.

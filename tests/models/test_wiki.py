@@ -69,7 +69,7 @@ def test_title_argument_is_skipped(setup_page_tests):
     data["kwargs"].pop("title")
     with pytest.raises(ValueError) as cm:
         Page(**data["kwargs"])
-    assert str(cm.value) == "Page.title can not be empty"
+    assert str(cm.value) == "Page.title cannot be empty"
 
 
 def test_title_argument_is_none(setup_page_tests):
@@ -95,7 +95,7 @@ def test_title_argument_is_an_empty_string(setup_page_tests):
     data["kwargs"]["title"] = ""
     with pytest.raises(ValueError) as cm:
         Page(**data["kwargs"])
-    assert str(cm.value) == "Page.title can not be empty"
+    assert str(cm.value) == "Page.title cannot be empty"
 
 
 def test_title_attribute_is_set_to_empty_string(setup_page_tests):
@@ -103,7 +103,7 @@ def test_title_attribute_is_set_to_empty_string(setup_page_tests):
     data = setup_page_tests
     with pytest.raises(ValueError) as cm:
         data["test_page"].title = ""
-    assert str(cm.value) == "Page.title can not be empty"
+    assert str(cm.value) == "Page.title cannot be empty"
 
 
 def test_title_argument_is_not_a_string(setup_page_tests):

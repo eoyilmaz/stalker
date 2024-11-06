@@ -18,7 +18,7 @@ class Scene(Entity, ProjectMixin, CodeMixin):
     shots taking place in the same set configuration can be grouped together by
     using Scenes.
 
-    You can not replace :class:`.Sequence` s with Scenes, because Scene
+    You cannot replace :class:`.Sequence` s with Scenes, because Scene
     instances doesn't have some key features that :class:`.Sequence` s have.
 
     A Scene needs to be tied to a :class:`.Project`

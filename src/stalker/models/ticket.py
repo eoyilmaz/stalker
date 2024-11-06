@@ -49,8 +49,8 @@ class Ticket(Entity, StatusMixin):
 
     Args:
         project (Project): The Project that this Ticket is assigned to. A Ticket in
-            Stalker must be assigned to a Project. ``project`` argument can not be
-            skipped or can not be None.
+            Stalker must be assigned to a Project. ``project`` argument cannot be
+            skipped or cannot be None.
         summary (str): A string which contains the title or a short
             description of this Ticket.
         priority (str): The priority of the Ticket which is an enum value.
@@ -159,7 +159,7 @@ class Ticket(Entity, StatusMixin):
         secondaryjoin="Ticket_Related_Tickets.c.related_ticket_id==" "Tickets.c.id",
         doc="""A list of other Ticket instances which are related
         to this one. Can be used to related Tickets to point to a common
-        problem. The Ticket itself can not be assigned to this list
+        problem. The Ticket itself cannot be assigned to this list
         """,
     )
 
@@ -310,7 +310,7 @@ class Ticket(Entity, StatusMixin):
 
         if related_ticket is self:
             raise CircularDependencyError(
-                "{}.related_ticket attribute can not have itself in the list".format(
+                "{}.related_ticket attribute cannot have itself in the list".format(
                     self.__class__.__name__
                 )
             )

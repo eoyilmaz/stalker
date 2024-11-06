@@ -232,7 +232,7 @@ def test_resource_argument_is_skipped(setup_time_log_db_tests):
     with pytest.raises(TypeError) as cm:
         TimeLog(**kwargs)
 
-    assert str(cm.value) == "TimeLog.resource can not be None"
+    assert str(cm.value) == "TimeLog.resource cannot be None"
 
 
 def test_resource_argument_is_none(setup_time_log_db_tests):
@@ -243,7 +243,7 @@ def test_resource_argument_is_none(setup_time_log_db_tests):
     with pytest.raises(TypeError) as cm:
         TimeLog(**kwargs)
 
-    assert str(cm.value) == "TimeLog.resource can not be None"
+    assert str(cm.value) == "TimeLog.resource cannot be None"
 
 
 def test_resource_attribute_is_none(setup_time_log_db_tests):
@@ -252,7 +252,7 @@ def test_resource_attribute_is_none(setup_time_log_db_tests):
     with pytest.raises(TypeError) as cm:
         data["test_time_log"].resource = None
 
-    assert str(cm.value) == "TimeLog.resource can not be None"
+    assert str(cm.value) == "TimeLog.resource cannot be None"
 
 
 def test_resource_argument_is_not_a_user_instance(setup_time_log_db_tests):

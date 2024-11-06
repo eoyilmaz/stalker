@@ -213,7 +213,7 @@ def test_variant_name_argument_is_empty_string(setup_version_db_tests):
     data["kwargs"]["variant_name"] = ""
     with pytest.raises(ValueError) as cm:
         Version(**data["kwargs"])
-    assert str(cm.value) == "Version.variant_name can not be an empty string"
+    assert str(cm.value) == "Version.variant_name cannot be an empty string"
 
 
 def test_variant_name_attribute_is_empty_string(setup_version_db_tests):
@@ -221,7 +221,7 @@ def test_variant_name_attribute_is_empty_string(setup_version_db_tests):
     data = setup_version_db_tests
     with pytest.raises(ValueError) as cm:
         data["test_version"].variant_name = ""
-    assert str(cm.value) == "Version.variant_name can not be an empty string"
+    assert str(cm.value) == "Version.variant_name cannot be an empty string"
 
 
 @pytest.mark.parametrize(
@@ -256,7 +256,7 @@ def test_variant_name_argument_is_formatted_to_empty_string(setup_version_db_tes
     data["kwargs"]["variant_name"] = "##$½#$"
     with pytest.raises(ValueError) as cm:
         _ = Version(**data["kwargs"])
-    assert str(cm.value) == "Version.variant_name can not be an empty string"
+    assert str(cm.value) == "Version.variant_name cannot be an empty string"
 
 
 def test_variant_name_attribute_is_formatted_to_empty_string(setup_version_db_tests):
@@ -264,7 +264,7 @@ def test_variant_name_attribute_is_formatted_to_empty_string(setup_version_db_te
     data = setup_version_db_tests
     with pytest.raises(ValueError) as cm:
         data["test_version"].variant_name = "##$½#$"
-    assert str(cm.value) == "Version.variant_name can not be an empty string"
+    assert str(cm.value) == "Version.variant_name cannot be an empty string"
 
 
 @pytest.mark.parametrize("variant_name, expected_result", VARIANT_NAME_TEST_VALUES)
@@ -294,7 +294,7 @@ def test_task_argument_is_skipped(setup_version_db_tests):
     data["kwargs"].pop("task")
     with pytest.raises(TypeError) as cm:
         Version(**data["kwargs"])
-    assert str(cm.value) == "Version.task can not be None"
+    assert str(cm.value) == "Version.task cannot be None"
 
 
 def test_task_argument_is_none(setup_version_db_tests):
@@ -303,7 +303,7 @@ def test_task_argument_is_none(setup_version_db_tests):
     data["kwargs"]["task"] = None
     with pytest.raises(TypeError) as cm:
         Version(**data["kwargs"])
-    assert str(cm.value) == "Version.task can not be None"
+    assert str(cm.value) == "Version.task cannot be None"
 
 
 def test_task_attribute_is_none(setup_version_db_tests):
@@ -311,7 +311,7 @@ def test_task_attribute_is_none(setup_version_db_tests):
     data = setup_version_db_tests
     with pytest.raises(TypeError) as cm:
         data["test_version"].task = None
-    assert str(cm.value) == "Version.task can not be None"
+    assert str(cm.value) == "Version.task cannot be None"
 
 
 def test_task_argument_is_not_a_task(setup_version_db_tests):

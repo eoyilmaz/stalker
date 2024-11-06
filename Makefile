@@ -83,7 +83,7 @@ tests:
 	echo -e "\n\033[36m--- $@: Using virtualenv at '$(VIRTUALENV_DIR)' ---\033[0m\n";
 	source ./$(VIRTUALENV_DIR)/bin/activate; \
 	echo -e "\n\033[36m--- $@: Using python interpretter '`which python`' ---\033[0m\n"; \
-	PYTHONPATH=src pytest -n auto -W ignore --color=yes --cov=src --cov-report term --cov-report html --cov-fail-under 99 tests;
+	PYTHONPATH=src pytest -n auto -W ignore --color=yes --cov=src --cov-report term --cov-report html --cov-append --cov-fail-under 99 tests;
 
 .PHONY: docs
 docs:

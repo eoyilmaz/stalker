@@ -1093,7 +1093,7 @@ def test___strictly_typed___is_false(setup_project_db_test):
 
 
 def test___strictly_typed___not_forces_type_initialization(setup_project_db_test):
-    """Project can not be created without defining a type for it."""
+    """Project cannot be created without defining a type for it."""
     data = setup_project_db_test
     data["kwargs"].pop("type")
     Project(**data["kwargs"])  # should be possible

@@ -578,7 +578,7 @@ def test_login_argument_conversion_to_strings(setup_user_db_tests):
     data["kwargs"]["login"] = "----++==#@#$"
     with pytest.raises(ValueError) as cm:
         User(**data["kwargs"])
-    assert str(cm.value) == "User.login can not be an empty string"
+    assert str(cm.value) == "User.login cannot be an empty string"
 
 
 def test_login_argument_for_empty_string(setup_user_db_tests):
@@ -587,7 +587,7 @@ def test_login_argument_for_empty_string(setup_user_db_tests):
     data["kwargs"]["login"] = ""
     with pytest.raises(ValueError) as cm:
         User(**data["kwargs"])
-    assert str(cm.value) == "User.login can not be an empty string"
+    assert str(cm.value) == "User.login cannot be an empty string"
 
 
 def test_login_attribute_for_empty_string(setup_user_db_tests):
@@ -595,7 +595,7 @@ def test_login_attribute_for_empty_string(setup_user_db_tests):
     data = setup_user_db_tests
     with pytest.raises(ValueError) as cm:
         data["test_user"].login = ""
-    assert str(cm.value) == "User.login can not be an empty string"
+    assert str(cm.value) == "User.login cannot be an empty string"
 
 
 def test_login_argument_is_skipped(setup_user_db_tests):
@@ -604,7 +604,7 @@ def test_login_argument_is_skipped(setup_user_db_tests):
     data["kwargs"].pop("login")
     with pytest.raises(TypeError) as cm:
         User(**data["kwargs"])
-    assert str(cm.value) == "User.login can not be None"
+    assert str(cm.value) == "User.login cannot be None"
 
 
 def test_login_argument_is_none(setup_user_db_tests):
@@ -613,7 +613,7 @@ def test_login_argument_is_none(setup_user_db_tests):
     data["kwargs"]["login"] = None
     with pytest.raises(TypeError) as cm:
         User(**data["kwargs"])
-    assert str(cm.value) == "User.login can not be None"
+    assert str(cm.value) == "User.login cannot be None"
 
 
 def test_login_attribute_is_none(setup_user_db_tests):
@@ -622,7 +622,7 @@ def test_login_attribute_is_none(setup_user_db_tests):
     with pytest.raises(TypeError) as cm:
         data["test_user"].login = None
 
-    assert str(cm.value) == "User.login can not be None"
+    assert str(cm.value) == "User.login cannot be None"
 
 
 @pytest.mark.parametrize(
@@ -822,7 +822,7 @@ def test_password_argument_is_an_empty_string(setup_user_db_tests):
     kwargs["password"] = ""
     with pytest.raises(ValueError) as cm:
         User(**kwargs)
-    assert str(cm.value) == "User.password can not be an empty string"
+    assert str(cm.value) == "User.password cannot be an empty string"
 
 
 def test_password_attribute_being_none(setup_user_db_tests):
@@ -1689,3 +1689,15 @@ def test_rate_attribute_is_working_properly(setup_user_db_tests):
     assert data["test_user"].rate != test_value
     data["test_user"].rate = test_value
     assert data["test_user"].rate == test_value
+
+
+def test_hash_value():
+    """__hash__ returns the hash of the User instance."""
+    user = User(
+        name="Erkan Ozgur Yilmaz",
+        login="eoyilmaz",
+        password="hidden",
+        email="eoyilmaz@fake.com",
+    )
+    result = hash(user)
+    assert isinstance(result, int)

@@ -51,7 +51,7 @@ def test_target_entity_type_argument_is_skipped(setup_target_entity_mixin_tests)
         TargetEntityTypeMixedClass(**data["kwargs"])
 
     assert (
-        str(cm.value) == "TargetEntityTypeMixedClass.target_entity_type can not be None"
+        str(cm.value) == "TargetEntityTypeMixedClass.target_entity_type cannot be None"
     )
 
 
@@ -65,7 +65,7 @@ def test_target_entity_type_argument_being_empty_string(
         TargetEntityTypeMixedClass(**data["kwargs"])
     assert (
         str(cm.value)
-        == "TargetEntityTypeMixedClass.target_entity_type can not be empty"
+        == "TargetEntityTypeMixedClass.target_entity_type cannot be empty"
     )
 
 
@@ -76,7 +76,7 @@ def test_target_entity_type_argument_being_none(setup_target_entity_mixin_tests)
     with pytest.raises(TypeError) as cm:
         TargetEntityTypeMixedClass(**data["kwargs"])
     assert (
-        str(cm.value) == "TargetEntityTypeMixedClass.target_entity_type can not be None"
+        str(cm.value) == "TargetEntityTypeMixedClass.target_entity_type cannot be None"
     )
 
 

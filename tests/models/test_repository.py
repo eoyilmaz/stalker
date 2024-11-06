@@ -450,7 +450,7 @@ def test_to_linux_path_raises_type_error_if_path_is_none(setup_repository_db_tes
     data = setup_repository_db_tests
     with pytest.raises(TypeError) as cm:
         data["test_repo"].to_linux_path(None)
-    assert str(cm.value) == "Repository.path can not be None"
+    assert str(cm.value) == "Repository.path cannot be None"
 
 
 def test_to_linux_path_raises_type_error_if_path_is_not_a_string(
@@ -564,7 +564,7 @@ def test_to_windows_path_raises_type_error_if_path_is_none(setup_repository_db_t
     data = setup_repository_db_tests
     with pytest.raises(TypeError) as cm:
         data["test_repo"].to_windows_path(None)
-    assert str(cm.value) == "Repository.path can not be None"
+    assert str(cm.value) == "Repository.path cannot be None"
 
 
 def test_to_windows_path_raises_type_error_if_path_is_not_a_string(
@@ -703,7 +703,7 @@ def test_to_macos_path_raises_type_error_if_path_is_none(setup_repository_db_tes
     data = setup_repository_db_tests
     with pytest.raises(TypeError) as cm:
         data["test_repo"].to_macos_path(None)
-    assert str(cm.value) == "Repository.path can not be None"
+    assert str(cm.value) == "Repository.path cannot be None"
 
 
 def test_to_macos_path_raises_type_error_if_path_is_not_a_string(
@@ -809,7 +809,7 @@ def test_to_native_path_raises_type_error_if_path_is_none(setup_repository_db_te
     data = setup_repository_db_tests
     with pytest.raises(TypeError) as cm:
         data["test_repo"].to_native_path(None)
-    assert str(cm.value) == "Repository.path can not be None"
+    assert str(cm.value) == "Repository.path cannot be None"
 
 
 def test_to_native_path_raises_type_error_if_path_is_not_a_string(

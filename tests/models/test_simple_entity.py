@@ -423,7 +423,7 @@ def test_date_created_attr_being_empty(setup_simple_entity_tests):
     with pytest.raises(TypeError) as cm:
         data["test_simple_entity"].date_created = None
 
-    assert str(cm.value) == "SimpleEntity.date_created can not be None"
+    assert str(cm.value) == "SimpleEntity.date_created cannot be None"
 
 
 def test_date_updated_arg_accepts_datetime_only(setup_simple_entity_tests):
@@ -444,32 +444,26 @@ def test_date_updated_arg_accepts_datetime_only(setup_simple_entity_tests):
     )
 
 
-def test_date_updated_attr_being_datetime(setup_simple_entity_tests):
-    """TypeError raised if the date_updated attr is not a datetime instance."""
-    data = setup_simple_entity_tests
-    # try to set something else and expect a TypeError
-    test_value = "a string date time 2010-10-26 etc."
-
-    # be sure that the test_value is not an instance of datetime.datetime
-    assert not isinstance(test_value, datetime.datetime)
-
-    with pytest.raises(TypeError) as cm:
-        data["test_simple_entity"].date_updated = test_value
-
-    assert str(cm.value) == (
-        "SimpleEntity.date_updated should be a datetime.datetime instance, "
-        "not str: 'a string date time 2010-10-26 etc.'"
-    )
-
-
 def test_date_updated_attr_is_set_to_none(setup_simple_entity_tests):
     """TypeError is raised if the date_updated attr is set to None."""
     data = setup_simple_entity_tests
     with pytest.raises(TypeError) as cm:
-        data["test_simple_entity"].date_updated = "date_updated"
+        data["test_simple_entity"].date_updated = None
+
+    assert str(cm.value) == (
+        "SimpleEntity.date_updated cannot be None"
+    )
+
+
+def test_date_updated_attr_is_not_datetime(setup_simple_entity_tests):
+    """TypeError is raised if the date_updated attr is set to None."""
+    data = setup_simple_entity_tests
+    with pytest.raises(TypeError) as cm:
+        data["test_simple_entity"].date_updated = "this is not datetime"
+
     assert str(cm.value) == (
         "SimpleEntity.date_updated should be a datetime.datetime instance, "
-        "not str: 'date_updated'"
+        "not str: 'this is not datetime'"
     )
 
 

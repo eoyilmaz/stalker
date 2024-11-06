@@ -124,3 +124,5 @@ def local_to_utc(local_datetime) -> datetime:
     # get the utc_datetime as if the local_datetime is utc and calculate the timezone
     # difference and add it to the local datetime object
     return local_datetime - (utc_to_local(local_datetime) - local_datetime)
+
+

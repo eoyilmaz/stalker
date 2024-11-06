@@ -301,7 +301,7 @@ def test_init_all_parameters_skipped(date_range_mixin_tester):
     new_foo_entity = DateRangeMixFooMixedInClass(**data["kwargs"])
 
     assert isinstance(new_foo_entity.start, datetime.datetime)
-    # can not check for start, just don't want to struggle with the round
+    # cannot check for start, just don't want to struggle with the round
     # thing
     # assert \
     #     new_foo_entity.start == \
@@ -411,7 +411,7 @@ def test_init_only_duration_argument_is_given(date_range_mixin_tester):
 
     # just check if it is an instance of datetime.datetime
     assert isinstance(new_foo_entity.start, datetime.datetime)
-    # can not check for start
+    # cannot check for start
     # assert new_foo_entity.start == \
     #        datetime.datetime(2013, 3, 22, 15, 30, tzinfo=pytz.utc
     assert new_foo_entity.end == new_foo_entity.start + new_foo_entity.duration

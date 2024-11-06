@@ -71,11 +71,7 @@ def set_level(level):
             )
         )
 
-    try:
-        level_names = logging._levelToName
-    except AttributeError:
-        # Python 2
-        level_names = logging._levelNames
+    level_names = logging._levelToName
 
     if level not in level_names:
         raise ValueError(

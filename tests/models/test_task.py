@@ -1039,7 +1039,7 @@ def test_percent_complete_attr_is_working_properly_for_a_duration_based_leaf_tas
     new_task.end = now + td(hours=12)
 
     # it should be somewhere around 50%
-    # due to the timing resolution we can not know it exactly
+    # due to the timing resolution we cannot know it exactly
     # and I don't want to patch datetime.datetime.now(pytz.utc)
     # this is a very simple test
     assert abs(new_task.percent_complete - 50 < 5)

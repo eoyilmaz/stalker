@@ -99,7 +99,7 @@ def test_code_argument_is_an_empty_string(code_mixin_tester_setup):
     with pytest.raises(ValueError) as cm:
         CodeMixFooMixedInClass(**data["kwargs"])
 
-    assert str(cm.value) == "CodeMixFooMixedInClass.code can not be an empty string"
+    assert str(cm.value) == "CodeMixFooMixedInClass.code cannot be an empty string"
 
 
 def test_code_attribute_is_set_to_an_empty_string(code_mixin_tester_setup):
@@ -108,7 +108,7 @@ def test_code_attribute_is_set_to_an_empty_string(code_mixin_tester_setup):
     with pytest.raises(ValueError) as cm:
         data["test_foo_obj"].code = ""
 
-    assert str(cm.value) == "CodeMixFooMixedInClass.code can not be an empty string"
+    assert str(cm.value) == "CodeMixFooMixedInClass.code cannot be an empty string"
 
 
 def test_code_argument_is_working_properly(code_mixin_tester_setup):

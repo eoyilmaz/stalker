@@ -269,7 +269,7 @@ class TimeLog(Entity, DateRangeMixin):
                 violation_date = None
 
                 if dependency_target == "onend":
-                    # time log can not start before the end date of this task
+                    # time log cannot start before the end date of this task
                     if self.start < dep_task.end:
                         raise_violation_error = True
                         violation_date = dep_task.end
@@ -307,7 +307,7 @@ class TimeLog(Entity, DateRangeMixin):
             User: The validated User instance.
         """
         if resource is None:
-            raise TypeError(f"{self.__class__.__name__}.resource can not be None")
+            raise TypeError(f"{self.__class__.__name__}.resource cannot be None")
 
         if not isinstance(resource, User):
             raise TypeError(
@@ -687,14 +687,14 @@ class Task(
       +------------------+----------------------------------------------------+
       | Waiting For      | If a task has uncompleted dependencies then it     |
       | Dependency (WFD) | will have its status to set to WFD. A WFD Task can |
-      |                  | not have a TimeLog or a review request can not be  |
+      |                  | not have a TimeLog or a review request cannot be  |
       |                  | made for it.                                       |
       +------------------+----------------------------------------------------+
       | Ready To Start   | A task is set to RTS when there are no             |
       | (RTS)            | dependencies or all of its dependencies are        |
       |                  | completed, so there is nothing preventing it to be |
       |                  | started. An RTS Task can have new TimeLogs. A      |
-      |                  | review can not be requested at this stage cause no |
+      |                  | review cannot be requested at this stage cause no |
       |                  | work is done yet.                                  |
       +------------------+----------------------------------------------------+
       | Work In Progress | A task is set to WIP when a TimeLog has been       |
@@ -706,7 +706,7 @@ class Task(
       | (PREV)           | instances created for it by using the              |
       |                  | :meth:`.Task.request_review` method. And it is     |
       |                  | possible to request a review only for a task with  |
-      |                  | status WIP. A PREV task can not have new TimeLogs  |
+      |                  | status WIP. A PREV task cannot have new TimeLogs  |
       |                  | nor a new request can be made because it is in     |
       |                  | already in review.                                 |
       +------------------+----------------------------------------------------+
@@ -796,7 +796,7 @@ class Task(
        statuses, and the main reason of having dependency relation is to let
        TaskJuggler to schedule the tasks correctly, and any task status other
        than WFD or RTS means that a TimeLog has been created for a task (which
-       means that you can not change the :attr:`.computed_start` anymore), it
+       means that you cannot change the :attr:`.computed_start` anymore), it
        is only allowed to change the dependencies of a WFD and RTS tasks.
 
     .. warning::
@@ -863,11 +863,11 @@ class Task(
             the parent of the created Task or the Task will be an orphan task and
             Stalker will raise a RuntimeError.
         depends_on (List[Task]): A list of :class:`.Task` s that this :class:`.Task` is
-            depending on. A Task can not depend on itself or any other Task which are
+            depending on. A Task cannot depend on itself or any other Task which are
             already depending on this one in anyway or a CircularDependency error
             will be raised.
         resources (List[User]): The :class:`.User` s assigned to this :class:`.Task`. A
-            :class:`.Task` without any resource can not be scheduled.
+            :class:`.Task` without any resource cannot be scheduled.
         responsible (List[User]): A list of :class:`.User` instances that is responsible
             of this task.
         watchers (List[User]): A list of :class:`.User` those are added this Task

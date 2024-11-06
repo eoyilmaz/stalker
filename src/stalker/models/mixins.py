@@ -92,7 +92,7 @@ class TargetEntityTypeMixin(object):
 
             a_obj = A(target_entity_type=Project)
 
-        The ``a_obj`` will only be accepted by :class:`.Project` instances. You can not
+        The ``a_obj`` will only be accepted by :class:`.Project` instances. You cannot
         assign it to any other class which accepts a :class:`.Type` instance.
 
         To control the mixed-in class behaviour add these class variables to the
@@ -139,10 +139,10 @@ class TargetEntityTypeMixin(object):
         Returns:
             str: The validated target_entity_type value.
         """
-        # it can not be None
+        # it cannot be None
         if target_entity_type is None:
             raise TypeError(
-                f"{self.__class__.__name__}.target_entity_type can not be None"
+                f"{self.__class__.__name__}.target_entity_type cannot be None"
             )
 
         # check if it is a class
@@ -151,7 +151,7 @@ class TargetEntityTypeMixin(object):
 
         if target_entity_type == "":
             raise ValueError(
-                f"{self.__class__.__name__}.target_entity_type can not be empty"
+                f"{self.__class__.__name__}.target_entity_type cannot be empty"
             )
 
         return target_entity_type
@@ -196,7 +196,7 @@ class StatusMixin(object):
     Args:
         status_list (StatusList): this attribute holds a status list object, which
             shows the possible statuses that this entity could be in. This attribute
-            can not be empty or None. Giving a StatusList object, the
+            cannot be empty or None. Giving a StatusList object, the
             StatusList.target_entity_type should match the current class.
 
             .. versionadded:: 0.1.2.a4
@@ -246,7 +246,7 @@ class StatusMixin(object):
             # This is done in that way cause SQLAlchemy was flushing the data
             # (AutoFlush) preliminarily while checking if the given Status was
             # in the related StatusList, and it was complaining about the
-            # status can not be null
+            # status cannot be null
         )
 
     @declared_attr
@@ -327,7 +327,7 @@ class StatusMixin(object):
             # there is no db so raise an error because there is no way
             # to get an appropriate StatusList
             raise TypeError(
-                f"{self.__class__.__name__} instances can not be initialized without a "
+                f"{self.__class__.__name__} instances cannot be initialized without a "
                 "stalker.models.status.StatusList instance, please pass a "
                 "suitable StatusList "
                 f"(StatusList.target_entity_type={self.__class__.__name__}) with the "
@@ -396,7 +396,7 @@ class StatusMixin(object):
 
             if status >= len(self.status_list.statuses):
                 raise ValueError(
-                    f"{self.__class__.__name__}.status can not be bigger than the "
+                    f"{self.__class__.__name__}.status cannot be bigger than the "
                     "length of the status_list"
                 )
                 # get the status instance out of the status_list instance
@@ -822,7 +822,7 @@ class ProjectMixin(object):
 
     Args:
         project (Project): A :class:`.Project` instance holding the project which this
-            object is related to. It can not be None, or anything other than a
+            object is related to. It cannot be None, or anything other than a
             :class:`.Project` instance.
     """
 
@@ -887,7 +887,7 @@ class ProjectMixin(object):
 
         if project is None:
             raise TypeError(
-                f"{self.__class__.__name__}.project can not be None it must be an "
+                f"{self.__class__.__name__}.project cannot be None it must be an "
                 "instance of stalker.models.project.Project"
             )
 
@@ -1068,7 +1068,7 @@ class CodeMixin(object):
     file and directory names.
 
     Args:
-        code (str): The code attribute is a string, can not be empty or can not be None.
+        code (str): The code attribute is a string, cannot be empty or cannot be None.
     """
 
     def __init__(self, code: str = None, **kwargs):
@@ -1088,7 +1088,7 @@ class CodeMixin(object):
             nullable=False,
             doc="""The code name of this object.
 
-                It accepts strings. Can not be None.""",
+                It accepts strings. Cannot be None.""",
         )
 
     @validates("code")
@@ -1118,7 +1118,7 @@ class CodeMixin(object):
 
         if code == "":
             raise ValueError(
-                f"{self.__class__.__name__}.code can not be an empty string"
+                f"{self.__class__.__name__}.code cannot be an empty string"
             )
 
         return code

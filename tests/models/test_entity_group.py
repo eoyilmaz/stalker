@@ -189,3 +189,31 @@ def test_entities_argument_is_working_properly(setup_entity_group_tests):
     test_value = [data["project1"], data["asset1"], data["status_cmpl"]]
     eg = EntityGroup(entities=test_value)
     assert eg.entities == test_value
+
+
+def test__eq__is_working_as_expected_with_same_data(setup_entity_group_tests):
+    """__eq__ is working as expected with same data."""
+    data = setup_entity_group_tests
+    eg2 = EntityGroup(
+        name="My Tasks", entities=[data["task1"], data["child_task2"], data["task2"]]
+    )
+    assert (data["entity_group1"] == eg2) is True
+
+
+def test__eq__is_working_as_expected_with_different_data(setup_entity_group_tests):
+    """__eq__ is working as expected with same data."""
+    data = setup_entity_group_tests
+    eg2 = EntityGroup(
+        name="My Tasks", entities=[data["task1"], data["child_task2"]]
+    )
+    assert data["entity_group1"].entities == [data["task1"], data["child_task2"], data["task2"]]
+    assert eg2.entities == [data["task1"], data["child_task2"]]
+    assert (data["entity_group1"] == eg2) is False
+
+
+def test__hash__is_working_as_expected(setup_entity_group_tests):
+    """__hash__ is working as expected."""
+    data = setup_entity_group_tests
+    result = hash(data["entity_group1"])
+    assert isinstance(result, int)
+    assert result == data["entity_group1"].__hash__()

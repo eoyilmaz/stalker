@@ -165,7 +165,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         structure (Structure): The structure of the project. Default value is None.
 
         repositories (List[Repository]): A list of :class:`.Repository` instances that
-            the project files are going to be stored in. You can not create a project
+            the project files are going to be stored in. You cannot create a project
             without specifying the repositories argument and passing a
             :class:`.Repository` to it. Default value is None which raises a TypeError.
 

@@ -255,7 +255,7 @@ def test_status_argument_is_an_integer_but_out_of_range(status_mixin_tests):
         StatMixClass(**data["kwargs"])
 
     assert (
-        str(cm.value) == "StatMixClass.status can not be bigger than the length of the "
+        str(cm.value) == "StatMixClass.status cannot be bigger than the length of the "
         "status_list"
     )
 
@@ -267,7 +267,7 @@ def test_status_attribute_set_to_an_integer_but_out_of_range(status_mixin_tests)
         data["test_mixed_obj"].status = 10
 
     assert (
-        str(cm.value) == "StatMixClass.status can not be bigger than the length of the "
+        str(cm.value) == "StatMixClass.status cannot be bigger than the length of the "
         "status_list"
     )
 
@@ -433,7 +433,7 @@ def test_status_list_attribute_is_skipped_and_there_is_a_db_setup_but_no_suitabl
         StatusListNoAutoAddClass(name="Test StatusListNoAutoAddClass")
 
     assert (
-        str(cm.value) == "StatusListNoAutoAddClass instances can not be initialized "
+        str(cm.value) == "StatusListNoAutoAddClass instances cannot be initialized "
         "without a stalker.models.status.StatusList instance, please "
         "pass a suitable StatusList "
         "(StatusList.target_entity_type=StatusListNoAutoAddClass) with "
@@ -449,7 +449,7 @@ def test_status_list_argument_is_none(setup_status_mixin_db_tests):
         StatMixClass(**data["kwargs"])
 
     assert (
-        str(cm.value) == "StatMixClass instances can not be initialized without a "
+        str(cm.value) == "StatMixClass instances cannot be initialized without a "
         "stalker.models.status.StatusList instance, please pass a "
         "suitable StatusList "
         "(StatusList.target_entity_type=StatMixClass) with the "
@@ -465,7 +465,7 @@ def test_status_list_argument_skipped(setup_status_mixin_db_tests):
         StatMixClass(**data["kwargs"])
 
     assert (
-        str(cm.value) == "StatMixClass instances can not be initialized without a "
+        str(cm.value) == "StatMixClass instances cannot be initialized without a "
         "stalker.models.status.StatusList instance, please pass a "
         "suitable StatusList "
         "(StatusList.target_entity_type=StatMixClass) with the "
@@ -480,7 +480,7 @@ def test_status_list_attribute_set_to_none(setup_status_mixin_db_tests):
         data["test_mixed_obj"].status_list = None
 
     assert (
-        str(cm.value) == "StatMixClass instances can not be initialized without a "
+        str(cm.value) == "StatMixClass instances cannot be initialized without a "
         "stalker.models.status.StatusList instance, please pass a "
         "suitable StatusList "
         "(StatusList.target_entity_type=StatMixClass) with the "

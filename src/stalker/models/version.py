@@ -66,8 +66,8 @@ class Version(Link, DAGMixin):
             Stalker are used for creating variants versions. Versions with the same
             ``variant_name`` (of the same Task) are numbered together. It can be any
             alphanumeric value (a-zA-Z0-9_). The default is the string "Main". When
-            skipped it will use the default value. It can not start with a number. It
-            can not have white spaces.
+            skipped it will use the default value. It cannot start with a number. It
+            cannot have white spaces.
         inputs (List[Link]): A list o :class:`.Link` instances, holding the inputs of
             the current version. It could be a texture for a Maya file or an image
             sequence for Nuke, or anything those you can think as the input for the
@@ -247,7 +247,7 @@ class Version(Link, DAGMixin):
 
         if variant_name == "":
             raise ValueError(
-                f"{self.__class__.__name__}.variant_name can not be an empty string"
+                f"{self.__class__.__name__}.variant_name cannot be an empty string"
             )
 
         return variant_name
@@ -350,7 +350,7 @@ class Version(Link, DAGMixin):
             Task: The validated :class:`.Task` instance.
         """
         if task is None:
-            raise TypeError("{}.task can not be None".format(self.__class__.__name__))
+            raise TypeError("{}.task cannot be None".format(self.__class__.__name__))
 
         if not isinstance(task, Task):
             raise TypeError(
@@ -474,12 +474,12 @@ class Version(Link, DAGMixin):
             )
 
         temp_filename = jinja2.Template(vers_template.filename).render(**kwargs)
-        if not isinstance(temp_filename, string_types):
-            temp_filename = temp_filename.encode("utf-8")
+        if isinstance(temp_filename, bytes):
+            temp_filename = temp_filename.decode("utf-8")
 
         temp_path = jinja2.Template(vers_template.path).render(**kwargs)
-        if not isinstance(temp_path, string_types):
-            temp_path = temp_path.encode("utf-8")
+        if isinstance(temp_path, bytes):
+            temp_path = temp_path.decode("utf-8")
 
         self.filename = temp_filename
         self.path = temp_path

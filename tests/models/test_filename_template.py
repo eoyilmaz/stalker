@@ -58,7 +58,7 @@ def test_target_entity_type_argument_is_skipped(setup_filename_template_tests):
     with pytest.raises(TypeError) as cm:
         FilenameTemplate(**data["kwargs"])
 
-    assert str(cm.value) == "FilenameTemplate.target_entity_type can not be None"
+    assert str(cm.value) == "FilenameTemplate.target_entity_type cannot be None"
 
 
 def test_target_entity_type_argument_is_none(setup_filename_template_tests):
@@ -68,7 +68,7 @@ def test_target_entity_type_argument_is_none(setup_filename_template_tests):
     with pytest.raises(TypeError) as cm:
         FilenameTemplate(**data["kwargs"])
 
-    assert str(cm.value) == "FilenameTemplate.target_entity_type can not be None"
+    assert str(cm.value) == "FilenameTemplate.target_entity_type cannot be None"
 
 
 def test_target_entity_type_attribute_is_read_only(setup_filename_template_tests):

@@ -34,6 +34,18 @@ def test_save_serializes_the_class_itself(setup_local_session_tester):
     )
 
 
+def test_save_serializes_the_class_itself_with_real_data(setup_local_session_tester):
+    """save function serializes the class to the filesystem."""
+    new_local_session = LocalSession()
+    new_local_session.logged_in_user_id = 1
+    new_local_session.save()
+
+    # check if a file is created in the users local storage
+    assert os.path.exists(
+        os.path.join(defaults.local_storage_path, defaults.local_session_data_file_name)
+    )
+
+
 def test_local_session_initialized_with_previous_session_data(
     setup_local_session_tester,
 ):
@@ -125,8 +137,10 @@ def test_local_session_will_not_use_the_stored_data_if_it_is_invalid(
 
     # pickle the data
     data = json.dumps(
-        {"valid_to": local_session.valid_to, "logged_in_user_id": -1},
-        default=local_session.default_json_serializer,
+        {
+            "valid_to": local_session.datetime_to_millis(local_session.valid_to),
+            "logged_in_user_id": -1
+        },
     )
     local_session._write_data(data)
 

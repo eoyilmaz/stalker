@@ -204,3 +204,10 @@ def test_class_name_attribute_is_read_only(setup_permission_tests):
     )
 
     assert str(cm.value) == error_message
+
+
+def test_hash_value(setup_permission_tests):
+    """__hash__ returns the hash of the Permission instance."""
+    data = setup_permission_tests
+    result = hash(data["test_permission"])
+    assert isinstance(result, int)

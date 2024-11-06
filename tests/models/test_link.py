@@ -216,7 +216,7 @@ def test_path_attribute_is_set_to_none(setup_link_tests):
     data = setup_link_tests
     with pytest.raises(TypeError) as cm:
         data["test_link"].path = None
-    assert str(cm.value) == "Link.path can not be set to None"
+    assert str(cm.value) == "Link.path cannot be set to None"
 
 
 def test_path_attribute_is_set_to_empty_string(setup_link_tests):
@@ -224,7 +224,7 @@ def test_path_attribute_is_set_to_empty_string(setup_link_tests):
     data = setup_link_tests
     with pytest.raises(ValueError) as cm:
         data["test_link"].path = ""
-    assert str(cm.value) == "Link.path can not be an empty string"
+    assert str(cm.value) == "Link.path cannot be an empty string"
 
 
 def test_path_attribute_is_set_to_a_value_other_then_string(setup_link_tests):
@@ -366,3 +366,20 @@ def test_extension_attribute_is_also_change_the_filename_attribute(setup_link_te
     assert data["test_link"].filename != expected_value
     data["test_link"].extension = test_value
     assert data["test_link"].filename == expected_value
+
+
+def test_format_path_converts_bytes_to_strings(setup_link_tests):
+    """_format_path() converts bytes to strings."""
+    data = setup_link_tests
+    test_value = b"C:/A_NEW_PROJECT/td/dsdf/22-fdfffsd-32342-dsf2332-dsfd-3.iff"
+    result = data["test_link"]._format_path(test_value)
+    assert isinstance(result, str)
+    assert result == test_value.decode("utf-8")
+
+
+def test__hash__is_working_as_expected(setup_link_tests):
+    """__hash__ is working as expected."""
+    data = setup_link_tests
+    result = hash(data["test_link"])
+    assert isinstance(result, int)
+    assert result == data["test_link"].__hash__()

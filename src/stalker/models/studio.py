@@ -189,7 +189,7 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
                     )
                 )
             else:
-                logger.debug("can not update defaults.daily_working_hours")
+                logger.debug("cannot update defaults.daily_working_hours")
         except AttributeError:
             # The Studio and WorkingHours classes has changed from
             # version 0.2.3 to version 0.2.5 and with this change it is simply
@@ -199,7 +199,7 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
             # version 0.2.5, so just skip it for at least the studio instance
             # in the database has been updated.
             logger.debug(
-                "Can not update defaults.daily_working_hours, WorkingHours "
+                "Cannot update defaults.daily_working_hours, WorkingHours "
                 "version mismatch"
             )
 
@@ -209,7 +209,7 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
                 f"updated defaults.weekly_working_days: {defaults.weekly_working_days}"
             )
         else:
-            logger.debug("can not update defaults.weekly_working_days")
+            logger.debug("cannot update defaults.weekly_working_days")
 
         if self.weekly_working_hours:
             defaults["weekly_working_hours"] = self.weekly_working_hours
@@ -219,7 +219,7 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
                 )
             )
         else:
-            logger.debug("can not update defaults.weekly_working_hours")
+            logger.debug("cannot update defaults.weekly_working_hours")
 
         if self.yearly_working_days:
             defaults["yearly_working_days"] = self.yearly_working_days
@@ -227,7 +227,7 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
                 f"updated defaults.yearly_working_days: {defaults.yearly_working_days}"
             )
         else:
-            logger.debug("can not update defaults.yearly_working_days")
+            logger.debug("cannot update defaults.yearly_working_days")
 
         if self.timing_resolution:
             defaults["timing_resolution"] = self.timing_resolution
@@ -235,7 +235,7 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
                 f"updated defaults.timing_resolution: {defaults.timing_resolution}"
             )
         else:
-            logger.debug("can not update defaults.timing_resolution")
+            logger.debug("cannot update defaults.timing_resolution")
 
         logger.debug(
             """done updating defaults:

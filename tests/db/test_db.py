@@ -1095,8 +1095,8 @@ def test_setup_with_settings(setup_postgresql_db):
 #
 # Incomplete isolation is against to the logic behind unit testing, every
 # test should only cover a unit of the code, and a complete isolation should
-# be created. But this can not be done in persistence tests (AFAIK), it needs
-# to be done in this way for now. Mocks can not be used because every created
+# be created. But this cannot be done in persistence tests (AFAIK), it needs
+# to be done in this way for now. Mocks cannot be used because every created
 # object goes to the database, so they need to be real objects.
 
 

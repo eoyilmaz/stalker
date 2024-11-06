@@ -619,7 +619,7 @@ def test_leaf_rts_task_updated_to_have_a_dependency_of_cmpl_task(
 
 # Leaf Tasks - dependency changes
 # WIP - DREV - PREV - HREV - OH - STOP - CMPL
-def test_leaf_wip_task_dependency_can_not_be_updated(setup_task_status_workflow_tests):
+def test_leaf_wip_task_dependency_cannot_be_updated(setup_task_status_workflow_tests):
     """it is not possible to update the dependencies of a WIP task."""
     data = setup_task_status_workflow_tests
     # find an WIP task
@@ -636,7 +636,7 @@ def test_leaf_wip_task_dependency_can_not_be_updated(setup_task_status_workflow_
     )
 
 
-def test_leaf_prev_task_dependency_can_not_be_updated(setup_task_status_workflow_tests):
+def test_leaf_prev_task_dependency_cannot_be_updated(setup_task_status_workflow_tests):
     """it is not possible to update the dependencies of a PREV task."""
     data = setup_task_status_workflow_tests
     # find an PREV task
@@ -653,7 +653,7 @@ def test_leaf_prev_task_dependency_can_not_be_updated(setup_task_status_workflow
     )
 
 
-def test_leaf_hrev_task_dependency_can_not_be_updated(setup_task_status_workflow_tests):
+def test_leaf_hrev_task_dependency_cannot_be_updated(setup_task_status_workflow_tests):
     """it is not possible to update the dependencies of a HREV task."""
     data = setup_task_status_workflow_tests
     # find an HREV task
@@ -670,7 +670,7 @@ def test_leaf_hrev_task_dependency_can_not_be_updated(setup_task_status_workflow
     )
 
 
-def test_leaf_drev_task_dependency_can_not_be_updated(setup_task_status_workflow_tests):
+def test_leaf_drev_task_dependency_cannot_be_updated(setup_task_status_workflow_tests):
     """it is not possible to update the dependencies of a DREV
     task
     """
@@ -689,7 +689,7 @@ def test_leaf_drev_task_dependency_can_not_be_updated(setup_task_status_workflow
     )
 
 
-def test_leaf_oh_task_dependency_can_not_be_updated(setup_task_status_workflow_tests):
+def test_leaf_oh_task_dependency_cannot_be_updated(setup_task_status_workflow_tests):
     """it is not possible to update the dependencies of a OH task."""
     data = setup_task_status_workflow_tests
     # find an OH task
@@ -706,7 +706,7 @@ def test_leaf_oh_task_dependency_can_not_be_updated(setup_task_status_workflow_t
     )
 
 
-def test_leaf_stop_task_dependency_can_not_be_updated(setup_task_status_workflow_tests):
+def test_leaf_stop_task_dependency_cannot_be_updated(setup_task_status_workflow_tests):
     """it is not possible to update the dependencies of a STOP task."""
     data = setup_task_status_workflow_tests
     # find an STOP task
@@ -723,7 +723,7 @@ def test_leaf_stop_task_dependency_can_not_be_updated(setup_task_status_workflow
     )
 
 
-def test_leaf_cmpl_task_dependency_can_not_be_updated(setup_task_status_workflow_tests):
+def test_leaf_cmpl_task_dependency_cannot_be_updated(setup_task_status_workflow_tests):
     """it is not possible to update the dependencies of a CMPL task."""
     data = setup_task_status_workflow_tests
     # find an CMPL task
@@ -878,7 +878,7 @@ def test_container_rts_task_updated_to_have_a_dependency_of_stop_task(
 
 # Container Tasks - dependency relation changes
 # WIP - DREV - PREV - HREV - OH - STOP - CMPL
-def test_container_wip_task_dependency_can_not_be_updated(
+def test_container_wip_task_dependency_cannot_be_updated(
     setup_task_status_workflow_tests,
 ):
     """it is not possible to update the dependencies of a WIP container task."""
@@ -897,7 +897,7 @@ def test_container_wip_task_dependency_can_not_be_updated(
     )
 
 
-def test_container_cmpl_task_dependency_can_not_be_updated(
+def test_container_cmpl_task_dependency_cannot_be_updated(
     setup_task_status_workflow_tests,
 ):
     """it is not possible to update the dependencies of a CMPL container task."""

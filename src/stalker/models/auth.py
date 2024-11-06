@@ -101,11 +101,11 @@ class Permission(Base):
         access (str): An Enum value which can have the one of the values of
             ``Allow`` or ``Deny``.
         action (str): An Enum value from the list ['Create', 'Read', 'Update',
-            'Delete', 'List']. Can not be None. The list can be changed from
+            'Delete', 'List']. Cannot be None. The list can be changed from
             stalker.config.Config.default_actions.
 
         class_name (str): The name of the class that this action is applied
-            to. Can not be None or an empty string.
+            to. Cannot be None or an empty string.
     """
 
     __tablename__ = "Permissions"
@@ -393,7 +393,7 @@ class User(Entity, ACLMixin):
             format.
         login (str): This is the login name of the user, it should be all lower
             case. Giving a string that has uppercase letters, it will be converted
-            to lower case. It can not be an empty string or None and it can not
+            to lower case. It cannot be an empty string or None and it cannot
             contain any white space inside.
         departments (List[Department]): It is the departments that the user is
             a part of. It should be a list of Department objects. One user can
@@ -463,7 +463,7 @@ class User(Entity, ACLMixin):
         unique=True,
         doc="""The login name of the user.
 
-        Can not be empty.
+        Cannot be empty.
         """,
     )
 
@@ -648,14 +648,14 @@ class User(Entity, ACLMixin):
             str: The validated and formatted login value.
         """
         if login is None:
-            raise TypeError(f"{self.__class__.__name__}.login can not be None")
+            raise TypeError(f"{self.__class__.__name__}.login cannot be None")
 
         login = self._format_login(login)
 
         # raise a ValueError if the login is an empty string after formatting
         if login == "":
             raise ValueError(
-                f"{self.__class__.__name__}.login can not be an empty string"
+                f"{self.__class__.__name__}.login cannot be an empty string"
             )
 
         logger.debug(f"name out: {login}")
@@ -780,7 +780,7 @@ class User(Entity, ACLMixin):
 
         if password == "":
             raise ValueError(
-                f"{self.__class__.__name__}.password can not be an empty string"
+                f"{self.__class__.__name__}.password cannot be an empty string"
             )
 
         # mangle the password
@@ -1037,26 +1037,6 @@ class LocalSession(object):
         self.load()
 
     @classmethod
-    def default_json_serializer(cls, obj):
-        """Convert the given object to JSON serializable format.
-
-        This is the default serializer for json data
-
-        Args:
-            obj (Union[datetime.datetime, User, int]): Either a ``datetime.datetime``
-                or :class:`.User` or an int value.
-
-        Returns:
-            int: The int correspondence of the given data.
-        """
-        if isinstance(obj, datetime.datetime):
-            return cls.datetime_to_millis(obj)
-        elif isinstance(obj, User):
-            return User.id
-        elif isinstance(obj, int):
-            return obj
-
-    @classmethod
     def datetime_to_millis(cls, dt):
         """Calculate the milliseconds since epoch for the given datetime value.
 
@@ -1128,8 +1108,10 @@ class LocalSession(object):
         self.valid_to = datetime.datetime.now(pytz.utc) + datetime.timedelta(days=10)
         # serialize self
         dumped_data = json.dumps(
-            {"valid_to": self.valid_to, "logged_in_user_id": self.logged_in_user_id},
-            default=self.default_json_serializer,
+            {
+                "valid_to": self.datetime_to_millis(self.valid_to),
+                "logged_in_user_id": self.logged_in_user_id
+            },
         )
         logger.debug(f"dumped session data : {dumped_data}")
         self._write_data(dumped_data)
