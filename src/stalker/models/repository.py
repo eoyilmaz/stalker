@@ -274,13 +274,16 @@ class Repository(Entity, CodeMixin):
         Returns:
             str: The converted path.
         """
-        if path is None:
-            raise TypeError(f"{self.__class__.__name__}.path cannot be None")
-
         if not isinstance(path, string_types):
             raise TypeError(
-                f"{self.__class__.__name__}.path should be a string, "
+                "path should be a string containing a file path, "
                 f"not {path.__class__.__name__}: '{path}'"
+            )
+
+        if not isinstance(replace_with, string_types):
+            raise TypeError(
+                "replace_with should be a string containing a file path, "
+                f"not {replace_with.__class__.__name__}: '{replace_with}'"
             )
 
         # expand all variables
@@ -405,7 +408,7 @@ class Repository(Entity, CodeMixin):
             logger.debug("Found repo for path: {}".format(repo))
             return "${}/{}".format(repo.env_var, repo.make_relative(path))
         else:
-            logger.debug("Can't find repor for path: {}".format(path))
+            logger.debug("Can't find repo for path: {}".format(path))
             return path
 
     @property

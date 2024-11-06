@@ -193,7 +193,9 @@ def test_schedule_constraint_attribute_is_not_an_integer(setup_schedule_mixin_te
     )
 
 
-def test_schedule_constraint_argument_is_working_as_expected(setup_schedule_mixin_tests):
+def test_schedule_constraint_argument_is_working_as_expected(
+    setup_schedule_mixin_tests,
+):
     """schedule_constraint arg value is passed to schedule_constraint attribute."""
     data = setup_schedule_mixin_tests
     test_value = 2
@@ -202,7 +204,9 @@ def test_schedule_constraint_argument_is_working_as_expected(setup_schedule_mixi
     assert new_task.schedule_constraint == test_value
 
 
-def test_schedule_constraint_attribute_is_working_as_expected(setup_schedule_mixin_tests):
+def test_schedule_constraint_attribute_is_working_as_expected(
+    setup_schedule_mixin_tests,
+):
     """schedule_constraint attribute value is correctly changed."""
     data = setup_schedule_mixin_tests
     test_value = 3

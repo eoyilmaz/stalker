@@ -543,14 +543,18 @@ def test_dependency_target_attribute_value_is_not_in_the_enum_list(
     )
 
 
-def test_dependency_target_argument_is_working_as_expected(setup_task_dependency_db_test):
+def test_dependency_target_argument_is_working_as_expected(
+    setup_task_dependency_db_test,
+):
     """dependency_target arg is passed okay to the dependency_target attr on init."""
     data = setup_task_dependency_db_test
     tdep = TaskDependency(**data["kwargs"])
     assert tdep.dependency_target == "onend"
 
 
-def test_dependency_target_attribute_is_working_as_expected(setup_task_dependency_db_test):
+def test_dependency_target_attribute_is_working_as_expected(
+    setup_task_dependency_db_test,
+):
     """dependency_target attribute is working as expected."""
     data = setup_task_dependency_db_test
     tdep = TaskDependency(**data["kwargs"])

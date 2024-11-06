@@ -568,7 +568,9 @@ def test_computed_total_seconds_attribute_is_read_only(date_range_mixin_tester):
     assert str(cm.value) == error_message
 
 
-def test_computed_total_seconds_attribute_is_working_as_expected(date_range_mixin_tester):
+def test_computed_total_seconds_attribute_is_working_as_expected(
+    date_range_mixin_tester,
+):
     """computed_total_seconds is read only."""
     data = date_range_mixin_tester
     new_foo_obj = DateRangeMixFooMixedInClass(**data["kwargs"])

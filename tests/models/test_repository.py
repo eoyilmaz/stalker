@@ -450,7 +450,9 @@ def test_to_linux_path_raises_type_error_if_path_is_none(setup_repository_db_tes
     data = setup_repository_db_tests
     with pytest.raises(TypeError) as cm:
         data["test_repo"].to_linux_path(None)
-    assert str(cm.value) == "Repository.path cannot be None"
+    assert str(cm.value) == (
+        "path should be a string containing a file path, not NoneType: 'None'"
+    )
 
 
 def test_to_linux_path_raises_type_error_if_path_is_not_a_string(
@@ -460,7 +462,9 @@ def test_to_linux_path_raises_type_error_if_path_is_not_a_string(
     data = setup_repository_db_tests
     with pytest.raises(TypeError) as cm:
         data["test_repo"].to_linux_path(123)
-    assert str(cm.value) == "Repository.path should be a string, not int: '123'"
+    assert str(cm.value) == (
+        "path should be a string containing a file path, not int: '123'"
+    )
 
 
 def test_to_windows_path_returns_the_windows_version_of_the_given_windows_path(
@@ -566,7 +570,9 @@ def test_to_windows_path_raises_type_error_if_path_is_none(setup_repository_db_t
     data = setup_repository_db_tests
     with pytest.raises(TypeError) as cm:
         data["test_repo"].to_windows_path(None)
-    assert str(cm.value) == "Repository.path cannot be None"
+    assert str(cm.value) == (
+        "path should be a string containing a file path, not NoneType: 'None'"
+    )
 
 
 def test_to_windows_path_raises_type_error_if_path_is_not_a_string(
@@ -576,7 +582,9 @@ def test_to_windows_path_raises_type_error_if_path_is_not_a_string(
     data = setup_repository_db_tests
     with pytest.raises(TypeError) as cm:
         data["test_repo"].to_windows_path(123)
-    assert str(cm.value) == "Repository.path should be a string, not int: '123'"
+    assert str(cm.value) == (
+        "path should be a string containing a file path, not int: '123'"
+    )
 
 
 def test_to_macos_path_returns_the_macos_version_of_the_given_windows_path(
@@ -705,7 +713,9 @@ def test_to_macos_path_raises_type_error_if_path_is_none(setup_repository_db_tes
     data = setup_repository_db_tests
     with pytest.raises(TypeError) as cm:
         data["test_repo"].to_macos_path(None)
-    assert str(cm.value) == "Repository.path cannot be None"
+    assert str(cm.value) == (
+        "path should be a string containing a file path, not NoneType: 'None'"
+    )
 
 
 def test_to_macos_path_raises_type_error_if_path_is_not_a_string(
@@ -715,7 +725,9 @@ def test_to_macos_path_raises_type_error_if_path_is_not_a_string(
     data = setup_repository_db_tests
     with pytest.raises(TypeError) as cm:
         data["test_repo"].to_macos_path(123)
-    assert str(cm.value) == "Repository.path should be a string, not int: '123'"
+    assert str(cm.value) == (
+        "path should be a string containing a file path, not int: '123'"
+    )
 
 
 def test_to_native_path_returns_the_native_version_of_the_given_linux_path(
@@ -811,7 +823,9 @@ def test_to_native_path_raises_type_error_if_path_is_none(setup_repository_db_te
     data = setup_repository_db_tests
     with pytest.raises(TypeError) as cm:
         data["test_repo"].to_native_path(None)
-    assert str(cm.value) == "Repository.path cannot be None"
+    assert str(cm.value) == (
+        "path should be a string containing a file path, not NoneType: 'None'"
+    )
 
 
 def test_to_native_path_raises_type_error_if_path_is_not_a_string(
@@ -821,7 +835,9 @@ def test_to_native_path_raises_type_error_if_path_is_not_a_string(
     data = setup_repository_db_tests
     with pytest.raises(TypeError) as cm:
         data["test_repo"].to_native_path(123)
-    assert str(cm.value) == "Repository.path should be a string, not int: '123'"
+    assert str(cm.value) == (
+        "path should be a string containing a file path, not int: '123'"
+    )
 
 
 def test_is_in_repo_returns_true_if_the_given_linux_path_is_in_this_repo(
@@ -934,7 +950,7 @@ def test_is_in_repo_returns_false_if_the_given_macos_path_is_not_in_this_repo(
     assert not data["test_repo"].is_in_repo(test_not_in_path_macos_path)
 
 
-def test_make_relative_method_converts_the_given_linux_path_to_relative_to_repo_root(
+def test_make_relative_converts_the_given_linux_path_to_relative_to_repo_root(
     setup_repository_db_tests,
 ):
     """make_relative() will convert the Linux path to repository root relative path."""
@@ -948,7 +964,7 @@ def test_make_relative_method_converts_the_given_linux_path_to_relative_to_repo_
     assert result == "Sero/Task1/Task2/Some_file.ma"
 
 
-def test_make_relative_method_converts_the_given_macos_path_to_relative_to_repo_root(
+def test_make_relative_converts_the_given_macos_path_to_relative_to_repo_root(
     setup_repository_db_tests,
 ):
     """make_relative() will convert macos path to repository root relative path."""
@@ -960,7 +976,7 @@ def test_make_relative_method_converts_the_given_macos_path_to_relative_to_repo_
     assert result == "Sero/Task1/Task2/Some_file.ma"
 
 
-def test_make_relative_method_converts_the_given_windows_path_to_relative_to_repo_root(
+def test_make_relative_converts_the_given_windows_path_to_relative_to_repo_root(
     setup_repository_db_tests,
 ):
     """make_relative() will convert Windows path to repository root relative path."""
@@ -972,7 +988,7 @@ def test_make_relative_method_converts_the_given_windows_path_to_relative_to_rep
     assert result == "Sero/Task1/Task2/Some_file.ma"
 
 
-def test_make_relative_method_converts_the_given_path_with_env_variable_to_native_path(
+def test_make_relative_converts_the_given_path_with_env_variable_to_native_path(
     setup_repository_db_tests,
 ):
     """make_relative() converts path with env vars to repository root relative path."""
@@ -984,7 +1000,7 @@ def test_make_relative_method_converts_the_given_path_with_env_variable_to_nativ
     assert result == "Sero/Task1/Task2/Some_file.ma"
 
 
-def test_make_relative_method_converts_the_given_path_with_old_env_variable_to_native_path(
+def test_make_relative_converts_the_given_path_with_old_env_variable_to_native_path(
     setup_repository_db_tests,
 ):
     """make_relative() converts path with old env var to repo root relative path."""
@@ -997,7 +1013,7 @@ def test_make_relative_method_converts_the_given_path_with_old_env_variable_to_n
 
 
 def test_to_os_independent_path_is_working_as_expected(setup_repository_db_tests):
-    """to_os_independent_path class method is working as expected."""
+    """to_os_independent_path() is working as expected."""
     data = setup_repository_db_tests
     DBSession.add(data["test_repo"])
     DBSession.commit()
@@ -1022,7 +1038,7 @@ def test_to_os_independent_path_for_old_environment_vars(setup_repository_db_tes
     )
 
 
-def test_to_os_independent_path_method_converts_the_given_linux_path_to_universal(
+def test_to_os_independent_path_converts_the_given_linux_path_to_universal(
     setup_repository_db_tests,
 ):
     """to_os_independent_path() converts Linux path to an OS independent path."""
@@ -1038,7 +1054,7 @@ def test_to_os_independent_path_method_converts_the_given_linux_path_to_universa
     )
 
 
-def test_to_os_independent_path_method_converts_the_given_macos_path_to_universal(
+def test_to_os_independent_path_converts_the_given_macos_path_to_universal(
     setup_repository_db_tests,
 ):
     """to_os_independent_path() converts macos path to an os independent path."""
@@ -1052,7 +1068,7 @@ def test_to_os_independent_path_method_converts_the_given_macos_path_to_universa
     )
 
 
-def test_to_os_independent_path_method_converts_the_given_windows_path_to_universal(
+def test_to_os_independent_path_converts_the_given_windows_path_to_universal(
     setup_repository_db_tests,
 ):
     """to_os_independent_path() converts Windows path to an os independent path."""
@@ -1066,7 +1082,7 @@ def test_to_os_independent_path_method_converts_the_given_windows_path_to_univer
     )
 
 
-def test_to_os_independent_path_method_not_change_the_path_with_env_variable(
+def test_to_os_independent_path_not_change_the_path_with_env_variable(
     setup_repository_db_tests,
 ):
     """to_os_independent_path() do not change the given path with env var."""
@@ -1080,7 +1096,7 @@ def test_to_os_independent_path_method_not_change_the_path_with_env_variable(
     )
 
 
-def test_to_os_independent_path_method_converts_the_given_path_with_old_env_variable_new_env_variable(
+def test_to_os_independent_path_converts_the_given_path_with_old_env_variable_new_env_variable(
     setup_repository_db_tests,
 ):
     """to_os_independent_path converts path with old env var to new env var."""
@@ -1095,7 +1111,7 @@ def test_to_os_independent_path_method_converts_the_given_path_with_old_env_vari
 
 
 def test_find_repo_is_working_as_expected(setup_repository_db_tests):
-    """find_repo class method is working as expected."""
+    """find_repo() is working as expected."""
     data = setup_repository_db_tests
     DBSession.add(data["test_repo"])
     DBSession.commit()
@@ -1143,7 +1159,9 @@ def test_find_repo_is_case_insensitive_under_windows(setup_repository_db_tests):
     assert Repository.find_repo(test_path) == new_repo1
 
 
-def test_find_repo_is_working_as_expected_with_reverse_slashes(setup_repository_db_tests):
+def test_find_repo_is_working_as_expected_with_reverse_slashes(
+    setup_repository_db_tests,
+):
     """find_repo class works as expected with paths that contains reverse slashes."""
     data = setup_repository_db_tests
     DBSession.add(data["test_repo"])
@@ -1170,7 +1188,7 @@ def test_find_repo_is_working_as_expected_with_reverse_slashes(setup_repository_
 
 
 def test_find_repo_is_working_as_expected_with_env_vars(setup_repository_db_tests):
-    """find_repo class method is working as expected with paths containing env vars."""
+    """find_repo is working as expected with paths containing env vars."""
     data = setup_repository_db_tests
     DBSession.add(data["test_repo"])
     DBSession.commit()
@@ -1199,6 +1217,13 @@ def test_find_repo_is_working_as_expected_with_env_vars(setup_repository_db_test
 
     test_path = "$REPO{}/some/path/to/a/file.ma".format(new_repo1.id)
     assert Repository.find_repo(test_path) == new_repo1
+
+
+def test_find_repo_returns_none_if_a_repo_cannot_be_found(setup_repository_db_tests):
+    """find_repo() returns None if a repo cannot be found."""
+    data = setup_repository_db_tests
+    result = data["test_repo"].find_repo("not a repo path")
+    assert result is None
 
 
 def test_env_var_property_is_working_as_expected(setup_repository_db_tests):
@@ -1451,4 +1476,58 @@ def test_updating_linux_path_only_update_repo_path_if_on_linux(
     assert (
         os.environ[defaults.repo_env_var_template_old.format(id=repo.id)]
         == repo.linux_path
+    )
+
+
+def test_to_path_path_is_none(setup_repository_db_tests):
+    """_to_path() path is None raises TypeError."""
+    data = setup_repository_db_tests
+    with pytest.raises(TypeError) as cm:
+        data["test_repo"]._to_path(None, "C:/")
+
+    assert str(cm.value) == (
+        "path should be a string containing a file path, not NoneType: 'None'"
+    )
+
+
+def test_to_path_path_is_not_a_str(setup_repository_db_tests):
+    """_to_path() path is not a str raises TypeError."""
+    data = setup_repository_db_tests
+    with pytest.raises(TypeError) as cm:
+        data["test_repo"]._to_path(1234, "C:/")
+
+    assert str(cm.value) == (
+        "path should be a string containing a file path, not int: '1234'"
+    )
+
+
+def test_to_path_path_is_not_starting_with_a_repo_path_returns_the_path(
+    setup_repository_db_tests,
+):
+    """_to_path() path is not starting with a repo path returns the path."""
+    data = setup_repository_db_tests
+    test_value = "not_starting_with_any_repo_path"
+    result = data["test_repo"]._to_path(test_value, "C:/")
+    assert result == test_value
+
+
+def test_to_path_replace_with_is_none(setup_repository_db_tests):
+    """_to_path() replace_with is None raises TypeError."""
+    data = setup_repository_db_tests
+    with pytest.raises(TypeError) as cm:
+        data["test_repo"]._to_path("some_path", None)
+
+    assert str(cm.value) == (
+        "replace_with should be a string containing a file path, not NoneType: 'None'"
+    )
+
+
+def test_to_path_replace_with_is_not_a_str(setup_repository_db_tests):
+    """_to_path() replace_with is not a str raises TypeError."""
+    data = setup_repository_db_tests
+    with pytest.raises(TypeError) as cm:
+        data["test_repo"]._to_path("some_path", 1234)
+
+    assert str(cm.value) == (
+        "replace_with should be a string containing a file path, not int: '1234'"
     )

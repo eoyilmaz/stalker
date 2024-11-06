@@ -211,7 +211,9 @@ def test_status_attribute_is_set_to_a_status_which_is_not_in_the_status_list(
     )
 
 
-def test_status_argument_is_working_as_expected_with_status_instances(status_mixin_tests):
+def test_status_argument_is_working_as_expected_with_status_instances(
+    status_mixin_tests,
+):
     """status attribute value is set correctly with Status arg value."""
     data = status_mixin_tests
     test_value = data["kwargs"]["status_list"][1]
@@ -220,7 +222,9 @@ def test_status_argument_is_working_as_expected_with_status_instances(status_mix
     assert new_obj.status == test_value
 
 
-def test_status_attribute_is_working_as_expected_with_status_instances(status_mixin_tests):
+def test_status_attribute_is_working_as_expected_with_status_instances(
+    status_mixin_tests,
+):
     """status attribute is working as expected with Status instances."""
     data = status_mixin_tests
     test_value = data["test_mixed_obj"].status_list[1]
