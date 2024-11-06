@@ -640,6 +640,8 @@ class ProjectUser(Base):
         self.project = project
         self.role = role
         if self.user:
+            # don't need to validate rate
+            # as it is already validated on the User side
             self.rate = user.rate
 
     @validates("user")
@@ -722,38 +724,6 @@ class ProjectUser(Base):
                     f"not {role.__class__.__name__}: '{role}'"
                 )
         return role
-
-    @validates("rate")
-    def _validate_rate(self, key, rate):
-        """Validate the given rate value.
-
-        Args:
-            key (str): The name of the validated column.
-            rate (Union[int, float]): The client value to be validated.
-
-        Raises:
-            TypeError: If rate is not an int or float.
-            ValueError: If rate is a negative value.
-
-        Returns:
-            float: The validated rate value.
-        """
-        if rate is None:
-            rate = 0.0
-
-        if not isinstance(rate, (int, float)):
-            raise TypeError(
-                f"{self.__class__.__name__}.rate should be a float number greater or "
-                f"equal to 0.0, not {rate.__class__.__name__}: '{rate}'"
-            )
-
-        if rate < 0:
-            raise ValueError(
-                f"{self.__class__.__name__}.rate should be a float number greater or "
-                f"equal to 0.0, not {rate}"
-            )
-
-        return rate
 
 
 class ProjectClient(Base):
