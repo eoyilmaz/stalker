@@ -358,3 +358,11 @@ def test_naming_case(setup_postgresql_db):
     DBSession.commit()
 
     assert v.filename == "ep101_s001c001_fxA_Main_v01.ma"
+
+
+def test__hash__is_working_as_expected(setup_filename_template_tests):
+    """__hash__ is working as expected."""
+    data = setup_filename_template_tests
+    result = hash(data["filename_template"])
+    assert isinstance(result, int)
+    assert result == data["filename_template"].__hash__()
