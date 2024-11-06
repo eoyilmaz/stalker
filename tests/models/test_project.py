@@ -1984,3 +1984,11 @@ def test_open_tickets_attribute_returns_all_open_tickets_owned_by_this_user(
         ],
         key=lambda x: x.name,
     )
+
+
+def test__hash__is_working_as_expected(setup_project_db_test):
+    """__hash__ is working as expected."""
+    data = setup_project_db_test
+    result = hash(data["test_project"])
+    assert isinstance(result, int)
+    assert result == data["test_project"].__hash__()
