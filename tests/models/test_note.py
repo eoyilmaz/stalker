@@ -118,3 +118,11 @@ def test_plural_class_name(setup_note_tests):
     """plural name of Note class."""
     data = setup_note_tests
     assert data["test_note"].plural_class_name == "Notes"
+
+
+def test__hash__is_working_as_expected(setup_note_tests):
+    """__hash__ is working as expected."""
+    data = setup_note_tests
+    result = hash(data["test_note"])
+    assert isinstance(result, int)
+    assert result == data["test_note"].__hash__()
