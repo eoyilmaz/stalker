@@ -568,6 +568,6 @@ def test_hash_value(setup_image_format_tests):
         "{}:{}:{}".format(
             data["test_image_format"].id,
             data["test_image_format"].name,
-            data["test_image_format"].entity_type
+            data["test_image_format"].entity_type,
         )
     )

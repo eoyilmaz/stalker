@@ -95,7 +95,7 @@ def test___hash___value_is_correctly_calculated(setup_department_tests):
         "{}:{}:{}".format(
             data["test_department"].id,
             data["test_department"].name,
-            data["test_department"].entity_type
+            data["test_department"].entity_type,
         )
     )
 

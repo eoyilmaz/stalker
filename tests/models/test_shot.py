@@ -192,9 +192,7 @@ def test___hash___value_is_correctly_calculated(setup_shot_db_tests):
     data = setup_shot_db_tests
     assert data["test_shot"].__hash__() == hash(
         "{}:{}:{}".format(
-            data["test_shot"].id,
-            data["test_shot"].name,
-            data["test_shot"].entity_type
+            data["test_shot"].id, data["test_shot"].name, data["test_shot"].entity_type
         )
     )
 
