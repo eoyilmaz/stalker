@@ -190,9 +190,13 @@ def test___auto_name__class_attribute_is_set_to_true():
 def test___hash___value_is_correctly_calculated(setup_shot_db_tests):
     """__hash__ value is correctly calculated."""
     data = setup_shot_db_tests
-    assert data["test_shot"].__hash__() == hash(data["test_shot"].id) + 2 * hash(
-        data["test_shot"].name
-    ) + 3 * hash(data["test_shot"].entity_type)
+    assert data["test_shot"].__hash__() == hash(
+        "{}:{}:{}".format(
+            data["test_shot"].id,
+            data["test_shot"].name,
+            data["test_shot"].entity_type
+        )
+    )
 
 
 def test_project_argument_is_skipped(setup_shot_db_tests):

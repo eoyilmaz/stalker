@@ -92,9 +92,11 @@ def test___hash___value_is_correctly_calculated(setup_department_tests):
     """__hash__ value is correctly calculated."""
     data = setup_department_tests
     assert data["test_department"].__hash__() == hash(
-        data["test_department"].id
-    ) + 2 * hash(data["test_department"].name) + 3 * hash(
-        data["test_department"].entity_type
+        "{}:{}:{}".format(
+            data["test_department"].id,
+            data["test_department"].name,
+            data["test_department"].entity_type
+        )
     )
 
 

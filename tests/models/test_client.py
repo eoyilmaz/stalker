@@ -426,9 +426,7 @@ def test_hash_is_correctly_calculated(setup_client_tests):
     """hash value is correctly calculated."""
     data = setup_client_tests
     client1 = Client(**data["kwargs"])
-    assert client1.__hash__() == hash(client1.id) + 2 * hash(client1.name) + 3 * hash(
-        client1.entity_type
-    )
+    assert client1.__hash__() == hash("{}:{}:{}".format(client1.id, client1.name, client1.entity_type))
 
 
 def test_goods_attribute_is_set_to_none(setup_client_tests):

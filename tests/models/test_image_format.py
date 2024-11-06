@@ -565,7 +565,9 @@ def test_hash_value(setup_image_format_tests):
     """hash value is correctly calculated."""
     data = setup_image_format_tests
     assert data["test_image_format"].__hash__() == hash(
-        data["test_image_format"].id
-    ) + 2 * hash(data["test_image_format"].name) + 3 * hash(
-        data["test_image_format"].entity_type
+        "{}:{}:{}".format(
+            data["test_image_format"].id,
+            data["test_image_format"].name,
+            data["test_image_format"].entity_type
+        )
     )
