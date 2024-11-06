@@ -180,28 +180,16 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         logger.debug("defaults: {}".format(defaults))
         logger.debug("id(defaults): {}".format(id(defaults)))
 
-        try:
-            if self.daily_working_hours:
-                defaults["daily_working_hours"] = self.daily_working_hours
-                logger.debug(
-                    "updated defaults.daily_working_hours: {}".format(
-                        defaults.daily_working_hours
-                    )
-                )
-            else:
-                logger.debug("cannot update defaults.daily_working_hours")
-        except AttributeError:
-            # The Studio and WorkingHours classes has changed from
-            # version 0.2.3 to version 0.2.5 and with this change it is simply
-            # not possible to initialize the db if we insist on updating the
-            # defaults for daily_working_hours, because there is no
-            # WorkingHours._daily_working_hours in versions before than
-            # version 0.2.5, so just skip it for at least the studio instance
-            # in the database has been updated.
+        if self.daily_working_hours:
+            defaults["daily_working_hours"] = self.daily_working_hours
             logger.debug(
-                "Cannot update defaults.daily_working_hours, WorkingHours "
-                "version mismatch"
+                "updated defaults.daily_working_hours: {}".format(
+                    defaults.daily_working_hours
+                )
             )
+        else:
+            logger.debug("cannot update defaults.daily_working_hours")
+
 
         if self.weekly_working_days:
             defaults["weekly_working_days"] = self.weekly_working_days
@@ -293,10 +281,7 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
             datetime.datetime: Return the currently stored now value if there is any,
                 return the current date and time otherwise.
         """
-        try:
-            if self._now is None:
-                self._now = self.round_time(datetime.datetime.now(pytz.utc))
-        except AttributeError:
+        if self._now is None:
             self._now = self.round_time(datetime.datetime.now(pytz.utc))
         return self._now
 
@@ -306,7 +291,7 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
 
         Args:
             now (datetime.datetime): The datetime.datetime instance showing the current
-                date and time, usefull for project management purposes before
+                date and time, useful for project management purposes before
                 scheduling.
         """
         self._now = self._validate_now(now)

@@ -1699,3 +1699,12 @@ def test_timing_resolution_attribute_is_working_as_expected(setup_studio_db_test
     assert res != new_res
     studio.timing_resolution = new_res
     assert studio.timing_resolution == new_res
+
+
+def test_to_unit_is_not_implemented_yet(setup_studio_db_tests):
+    """to_unit() is not implemented yet."""
+    data = setup_studio_db_tests
+    with pytest.raises(NotImplementedError) as cm:
+        _ = data["test_studio"].to_unit(1, "h", "min")
+
+    assert str(cm.value) == "this is not implemented yet"
