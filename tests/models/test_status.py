@@ -97,3 +97,12 @@ def test_status_and_string_inequality_in_status_code(setup_status_tests):
     assert not a_status != data["kwargs"]["code"]
     assert not a_status != data["kwargs"]["code"].lower()
     assert not a_status != data["kwargs"]["code"].upper()
+
+
+def test__hash__is_working_as_expected(setup_status_tests):
+    """__hash__ is working as expected."""
+    data = setup_status_tests
+    data["test_status"] = Status(**data["kwargs"])
+    result = hash(data["test_status"])
+    assert isinstance(result, int)
+    assert result == data["test_status"].__hash__()

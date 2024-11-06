@@ -1418,8 +1418,9 @@ def test__init_on_load__works_as_expected(setup_shot_db_tests):
     del data["test_shot"]
 
     from stalker.db.setup import setup
+
     setup(data["database_settings"]["config"])
 
-    # the following should call Shot.__init_on_load__()
-    shot = Shot.query.filter(Shot.name=="SH123").first()
+    # the following should call Shot.__init_on_load__()
+    shot = Shot.query.filter(Shot.name == "SH123").first()
     assert isinstance(shot, Shot)
