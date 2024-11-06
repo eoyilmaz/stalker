@@ -340,6 +340,8 @@ def test_schedule_will_not_work_if_the_studio_attribute_is_None(
 
 
 pytest.mark.skipif(sys.platform == "win32", "Runs in Linux/macOS for now!")
+
+
 def test_schedule_will_raise_tj3_command_errors_as_a_runtime_error(
     setup_tsk_juggler_scheduler_db_tests, monkeypatch_tj3
 ):
@@ -695,6 +697,7 @@ def test_csv_file_does_not_exist_returns_without_scheduling(
     import os
 
     called = []
+
     def patched_exists(path):
         if path == tjp_sched.csv_file_full_path:
             called.append(path)

@@ -576,9 +576,7 @@ order by path_as_text"""  # noqa: B950
                     lambda x: x.split("_")[-1].split(")")[0], data[3].split(",")
                 )
                 for rid in resources_data:
-                    update_user_data.append(
-                        {"task_id": entity_id, "resource_id": rid}
-                    )
+                    update_user_data.append({"task_id": entity_id, "resource_id": rid})
 
             update_data.append(
                 {

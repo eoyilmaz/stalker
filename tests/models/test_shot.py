@@ -14,6 +14,7 @@ from stalker import (
     Scene,
     Sequence,
     Shot,
+    Status,
     StatusList,
     Task,
     Type,
@@ -25,6 +26,7 @@ from stalker.db.session import DBSession
 def setup_shot_db_tests(setup_postgresql_db):
     """Set up the tests for the Shot class with a DB."""
     data = dict()
+    data["database_settings"] = setup_postgresql_db
     # statuses
     # types
     data["test_commercial_project_type"] = Type(
@@ -1301,3 +1303,123 @@ def test_fps_changes_with_project(setup_shot_db_tests):
     assert new_shot.fps == 12
     data["test_project1"].fps = 24
     assert new_shot.fps == 12
+
+
+def test__check_code_availability_code_is_none(setup_shot_db_tests):
+    """__check_code_availability() returns True if the code is None."""
+    data = setup_shot_db_tests
+    assert isinstance(data["test_shot"], Shot)
+    result = data["test_shot"]._check_code_availability(None, data["test_project1"])
+    assert result is True
+
+
+def test__check_code_availability_code_is_not_str(setup_shot_db_tests):
+    """__check_code_availability() raises TypeError if code is not a str."""
+    data = setup_shot_db_tests
+    assert isinstance(data["test_shot"], Shot)
+    with pytest.raises(TypeError) as cm:
+        _ = data["test_shot"]._check_code_availability(1234, data["test_project1"])
+
+    assert str(cm.value) == (
+        "code should be a string containing a shot code, not int: '1234'"
+    )
+
+
+def test__check_code_availability_project_is_none(setup_shot_db_tests):
+    """__check_code_availability() returns True if project is None"""
+    data = setup_shot_db_tests
+    assert isinstance(data["test_shot"], Shot)
+    result = data["test_shot"]._check_code_availability("SH123", None)
+    assert result is True
+
+
+def test__check_code_availability_project_is_not_a_project_instance(
+    setup_shot_db_tests,
+):
+    """__check_code_availability() raises TypeError if the Project is not a Project instance."""
+    data = setup_shot_db_tests
+    assert isinstance(data["test_shot"], Shot)
+    with pytest.raises(TypeError) as cm:
+        _ = data["test_shot"]._check_code_availability("SH123", 1234)
+
+    assert str(cm.value) == ("project should be a Project instance, not int: '1234'")
+
+
+def test_check_code_availability_fallbacks_to_python_if_db_is_not_available():
+    """__check_code_availability() fallbacks to Python if DB is not available."""
+    data = dict()
+    # statuses
+    rts = Status(name="Read To Start", code="RTS")
+    wip = Status(name="Work In Progress", code="WIP")
+    cmpl = Status(name="Completed", code="CMPL")
+    project_status_list = StatusList(
+        name="Project Statuses", statuses=[rts, wip, cmpl], target_entity_type="Project"
+    )
+    shot_status_list = StatusList(
+        name="Shot Status List", statuses=[rts, wip, cmpl], target_entity_type="Shot"
+    )
+
+    # types
+    data["test_commercial_project_type"] = Type(
+        name="Commercial Project",
+        code="comm",
+        target_entity_type="Project",
+    )
+
+    data["test_repository_type"] = Type(
+        name="Test Repository Type", code="test", target_entity_type="Repository"
+    )
+
+    # repository
+    data["test_repository"] = Repository(
+        name="Test Repository",
+        code="TR",
+        type=data["test_repository_type"],
+    )
+
+    # image format
+    data["test_image_format1"] = ImageFormat(
+        name="Test Image Format 1", width=1920, height=1080, pixel_aspect=1.0
+    )
+
+    # project and sequences
+    data["test_project1"] = Project(
+        name="Test Project1",
+        code="tp1",
+        type=data["test_commercial_project_type"],
+        repository=data["test_repository"],
+        image_format=data["test_image_format1"],
+        status_list=project_status_list,
+    )
+
+    data["kwargs"] = dict(
+        name="SH123",
+        code="SH123",
+        description="This is a test Shot",
+        project=data["test_project1"],
+        status=0,
+        status_list=shot_status_list,
+    )
+
+    # create a mock shot object
+    data["test_shot"] = Shot(**data["kwargs"])
+
+    assert Shot._check_code_availability("SH123", data["test_project1"]) is False
+
+
+def test__init_on_load__works_as_expected(setup_shot_db_tests):
+    """__init_on_load__() works as expected."""
+    data = setup_shot_db_tests
+    assert data["test_shot"] in DBSession
+    DBSession.commit()
+    DBSession.flush()
+    connection = DBSession.connection()
+    connection.close()
+    del data["test_shot"]
+
+    from stalker.db.setup import setup
+    setup(data["database_settings"]["config"])
+
+    # the following should call Shot.__init_on_load__()
+    shot = Shot.query.filter(Shot.name=="SH123").first()
+    assert isinstance(shot, Shot)

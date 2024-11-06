@@ -333,6 +333,20 @@ class Shot(Task, CodeMixin):
         if not project or not code:
             return True
 
+        if not isinstance(code, str):
+            raise TypeError(
+                "code should be a string containing a shot code, "
+                f"not {code.__class__.__name__}: '{code}'"
+            )
+
+        from stalker import Project
+
+        if not isinstance(project, Project):
+            raise TypeError(
+                "project should be a Project instance, "
+                f"not {project.__class__.__name__}: '{project}'"
+            )
+
         try:
             logger.debug("Try checking Shot.code with SQL expression.")
             with DBSession.no_autoflush:
