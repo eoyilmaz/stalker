@@ -41,6 +41,70 @@ def create_secondary_table(
     Returns:
         Table: The secondary table.
     """
+    # validate data
+    # primary_cls_name
+    if not isinstance(primary_cls_name, str):
+        raise TypeError(
+            "primary_cls_name should be a str containing the primary class name, "
+            f"not {primary_cls_name.__class__.__name__}: '{primary_cls_name}'"
+        )
+
+    if primary_cls_name == "":
+        raise ValueError(
+            "primary_cls_name should be a str containing the primary class name, "
+            f"not: '{primary_cls_name}'"
+        )
+
+    # secondary_cls_name
+    if not isinstance(secondary_cls_name, str):
+        raise TypeError(
+            "secondary_cls_name should be a str containing the secondary class name, "
+            f"not {secondary_cls_name.__class__.__name__}: '{secondary_cls_name}'"
+        )
+
+    if secondary_cls_name == "":
+        raise ValueError(
+            "secondary_cls_name should be a str containing the secondary class name, "
+            f"not: '{secondary_cls_name}'"
+        )
+
+    # primary_cls_table_name
+    if not isinstance(primary_cls_table_name, str):
+        raise TypeError(
+            "primary_cls_table_name should be a str containing the primary class "
+            f"table name, not {primary_cls_table_name.__class__.__name__}: "
+            f"'{primary_cls_table_name}'"
+        )
+
+    if primary_cls_table_name == "":
+        raise ValueError(
+            "primary_cls_table_name should be a str containing the primary class "
+            f"table name, not: '{primary_cls_table_name}'"
+        )
+
+    # secondary_cls_table_name
+    if not isinstance(secondary_cls_table_name, str):
+        raise TypeError(
+            "secondary_cls_table_name should be a str containing the secondary class "
+            f"table name, not {secondary_cls_table_name.__class__.__name__}: "
+            f"'{secondary_cls_table_name}'"
+        )
+
+    if secondary_cls_table_name == "":
+        raise ValueError(
+            "secondary_cls_table_name should be a str containing the secondary class "
+            f"table name, not: '{secondary_cls_table_name}'"
+        )
+
+    # secondary_table_name
+    if secondary_table_name is not None and not isinstance(secondary_table_name, str):
+        raise TypeError(
+            "secondary_table_name should be a str containing the secondary table "
+            "name, or it can be None or an empty string to let Stalker to auto "
+            f"generate one, not {secondary_table_name.__class__.__name__}: "
+            f"'{secondary_table_name}'"
+        )
+
     plural_secondary_cls_name = make_plural(secondary_cls_name)
 
     # use the given class_name and the class_table

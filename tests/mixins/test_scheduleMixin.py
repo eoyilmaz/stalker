@@ -482,6 +482,18 @@ def test_to_seconds_is_working_properly(
     )
 
 
+def test_to_unit_unit_is_none(setup_schedule_mixin_tests):
+    """to_unit method is working properly."""
+    data = setup_schedule_mixin_tests
+
+    defaults["daily_working_hours"] = 9
+    defaults["weekly_working_days"] = 5
+    defaults["weekly_working_hours"] = 45
+    defaults["yearly_working_days"] = 52.1428 * 5
+
+    assert data["test_obj"].to_unit(10, None, "effort") is None
+
+
 @pytest.mark.parametrize(
     "schedule_model,schedule_timing,schedule_unit,seconds",
     [

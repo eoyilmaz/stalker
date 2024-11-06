@@ -14,6 +14,7 @@ class GreatEntity(SimpleEntity, ReferenceMixin):
     """The new great entity class, which is a new simpleEntity with ReferenceMixin."""
 
     __tablename__ = "GreatEntities"
+    __mapper_args__ = {"polymorphic_identity": "GreatEntity"}
     great_entity_id = Column(
-        "id", Integer, ForeignKey("SimpleEntities.c.id"), primary_key=True
+        "id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True
     )
