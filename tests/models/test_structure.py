@@ -224,3 +224,11 @@ def test_plural_class_name(setup_structure_tests):
     """plural name of Structure class."""
     data = setup_structure_tests
     assert data["test_structure"].plural_class_name == "Structures"
+
+
+def test__hash__is_working_as_expected(setup_structure_tests):
+    """__hash__ is working as expected."""
+    data = setup_structure_tests
+    result = hash(data["test_structure"])
+    assert isinstance(result, int)
+    assert result == data["test_structure"].__hash__()
