@@ -1405,12 +1405,6 @@ class Task(
                     f"change the dependencies of a {self.status.code} task"
                 )
 
-        if self.is_container and self.status == cmpl:
-            raise StatusError(
-                f"This is a {self.status.code} container task and it is not allowed to "
-                f"change the dependency in {self.status.code} container tasks"
-            )
-
         # check for the circular dependency
         with DBSession.no_autoflush:
             check_circular_dependency(depends_on, self, "depends_on")
@@ -2373,7 +2367,7 @@ class Task(
 
     @property
     def percent_complete(self) -> float:
-        """Calcualte and return the percent_complete value.
+        """Calculate and return the percent_complete value.
 
         The percent_complete value is based on the total_logged_seconds and
         schedule_seconds of the task.
@@ -2381,12 +2375,10 @@ class Task(
         Container tasks will use info from their children.
 
         Returns:
-            float: The percent complet value between 0 and 1.
+            float: The percent complete value between 0 and 1.
         """
-        if (
-            self.is_container
-            and self.total_logged_seconds is None
-            or self.schedule_seconds is None
+        if self.is_container and (
+            self._total_logged_seconds is None or self._schedule_seconds is None
         ):
             self.update_schedule_info()
 

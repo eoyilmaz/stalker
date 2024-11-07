@@ -4135,6 +4135,20 @@ def test_computed_resources_attr_dont_update_with_resources_if_is_scheduled_is_t
     assert new_task.computed_resources != test_value
 
 
+def test_computed_resources_is_not_a_user_instance(setup_task_tests):
+    """computed_resource is not a User instance raises TypeError."""
+    data = setup_task_tests
+    kwargs = copy.copy(data["kwargs"])
+    new_task = Task(**kwargs)
+    with pytest.raises(TypeError) as cm:
+        new_task.computed_resources.append("not a user")
+
+    assert str(cm.value) == (
+        "Task.computed_resources should be a list of stalker.models.auth.User "
+        "instances, not str: 'not a user'"
+    )
+
+
 def test_persistent_allocation_arg_is_skipped(setup_task_tests):
     """persistent_allocation defaults if the persistent_allocation arg is skipped."""
     data = setup_task_tests
@@ -4745,6 +4759,114 @@ def test_percent_complete_attr_is_working_as_expected_for_a_container_task(
     assert parent_task.percent_complete == pytest.approx(77.7777778)
 
 
+def test_percent_complete_attr_is_working_as_expected_for_a_container_task_with_no_data_1(
+    setup_task_db_tests,
+):
+    """percent complete attr is working as expected for a container task with no data."""
+    data = setup_task_db_tests
+    kwargs = copy.copy(data["kwargs"])
+    kwargs["depends_on"] = []  # remove dependencies just to make it
+    # easy to create time logs after stalker
+    # v0.2.6.1
+
+    new_task = Task(**kwargs)
+    new_task.status = data["status_rts"]
+
+    dt = datetime.datetime
+    td = datetime.timedelta
+    now = dt.now(pytz.utc)
+
+    defaults["timing_resolution"] = td(hours=1)
+    defaults["daily_working_hours"] = 9
+
+    parent_task = Task(**kwargs)
+
+    new_task.time_logs = []
+    tlog1 = TimeLog(
+        task=new_task,
+        resource=new_task.resources[0],
+        start=now - td(hours=4),
+        end=now - td(hours=2),
+    )
+
+    assert tlog1 in new_task.time_logs
+
+    tlog2 = TimeLog(
+        task=new_task,
+        resource=new_task.resources[1],
+        start=now - td(hours=4),
+        end=now + td(hours=1),
+    )
+
+    DBSession.commit()
+
+    new_task.parent = parent_task
+    DBSession.commit()
+
+    assert tlog2 in new_task.time_logs
+    assert new_task.total_logged_seconds == 7 * 3600
+    assert new_task.schedule_seconds == 9 * 3600
+    assert new_task.percent_complete == pytest.approx(77.7777778)
+
+    parent_task._total_logged_seconds = None
+    # parent_task._schedule_seconds = None
+    assert parent_task.percent_complete == pytest.approx(77.7777778)
+
+
+def test_percent_complete_attr_is_working_as_expected_for_a_container_task_with_no_data_2(
+    setup_task_db_tests,
+):
+    """percent complete attr is working as expected for a container task with no data."""
+    data = setup_task_db_tests
+    kwargs = copy.copy(data["kwargs"])
+    kwargs["depends_on"] = []  # remove dependencies just to make it
+    # easy to create time logs after stalker
+    # v0.2.6.1
+
+    new_task = Task(**kwargs)
+    new_task.status = data["status_rts"]
+
+    dt = datetime.datetime
+    td = datetime.timedelta
+    now = dt.now(pytz.utc)
+
+    defaults["timing_resolution"] = td(hours=1)
+    defaults["daily_working_hours"] = 9
+
+    parent_task = Task(**kwargs)
+
+    new_task.time_logs = []
+    tlog1 = TimeLog(
+        task=new_task,
+        resource=new_task.resources[0],
+        start=now - td(hours=4),
+        end=now - td(hours=2),
+    )
+
+    assert tlog1 in new_task.time_logs
+
+    tlog2 = TimeLog(
+        task=new_task,
+        resource=new_task.resources[1],
+        start=now - td(hours=4),
+        end=now + td(hours=1),
+    )
+
+    DBSession.commit()
+
+    new_task.parent = parent_task
+    DBSession.commit()
+
+    assert tlog2 in new_task.time_logs
+    assert new_task.total_logged_seconds == 7 * 3600
+    assert new_task.schedule_seconds == 9 * 3600
+    assert new_task.percent_complete == pytest.approx(77.7777778)
+
+    # parent_task._total_logged_seconds = None
+    parent_task._schedule_seconds = None
+    assert parent_task.percent_complete == pytest.approx(77.7777778)
+
+
 def test_percent_complete_attr_working_okay_for_a_task_w_effort_and_duration_children(
     setup_task_db_tests,
 ):
@@ -5036,6 +5158,89 @@ def test_total_logged_seconds_is_the_sum_of_all_time_logs(setup_task_db_tests):
 
     assert tlog2 in new_task.time_logs
     assert new_task.total_logged_seconds == 20 * 3600
+
+
+def test_total_logged_seconds_calls_update_schedule_info(
+    setup_task_db_tests,
+):
+    """total_logged_seconds is the sum of all time_logs of the child tasks."""
+    data = setup_task_db_tests
+    kwargs = copy.copy(data["kwargs"])
+    kwargs["depends_on"] = []
+    new_task = Task(**kwargs)
+    dt = datetime.datetime
+    td = datetime.timedelta
+    now = dt.now(pytz.utc)
+    kwargs.pop("schedule_timing")
+    kwargs.pop("schedule_unit")
+    parent_task = Task(**kwargs)
+    new_task.parent = parent_task
+    new_task.time_logs = []
+    tlog1 = TimeLog(
+        task=new_task, resource=new_task.resources[0], start=now, end=now + td(hours=8)
+    )
+    DBSession.add(tlog1)
+    DBSession.commit()
+    assert tlog1 in new_task.time_logs
+    tlog2 = TimeLog(
+        task=new_task, resource=new_task.resources[1], start=now, end=now + td(hours=12)
+    )
+    DBSession.add(tlog2)
+    DBSession.commit()
+    # set the total_logged_seconds to None
+    # so the getter calls the update_schedule_info
+    parent_task._total_logged_seconds = None
+    assert tlog2 in new_task.time_logs
+    assert new_task.total_logged_seconds == 20 * 3600
+    assert parent_task.total_logged_seconds == 20 * 3600
+
+
+def test_update_schedule_info_on_a_container_of_containers_task(
+    setup_task_db_tests,
+):
+    """total_logged_seconds is the sum of all time_logs of the child tasks."""
+    data = setup_task_db_tests
+    kwargs = copy.copy(data["kwargs"])
+    kwargs["depends_on"] = []
+    new_task = Task(**kwargs)
+    dt = datetime.datetime
+    td = datetime.timedelta
+    now = dt.now(pytz.utc)
+    kwargs.pop("schedule_timing")
+    kwargs.pop("schedule_unit")
+    parent_task = Task(**kwargs)
+    root_task = Task(**kwargs)
+    new_task.parent = parent_task
+    parent_task.parent = root_task
+    new_task.time_logs = []
+    tlog1 = TimeLog(
+        task=new_task, resource=new_task.resources[0], start=now, end=now + td(hours=8)
+    )
+    DBSession.add(new_task)
+    DBSession.add(parent_task)
+    DBSession.add(root_task)
+    DBSession.add(tlog1)
+    DBSession.commit()
+    assert tlog1 in new_task.time_logs
+    tlog2 = TimeLog(
+        task=new_task, resource=new_task.resources[1], start=now, end=now + td(hours=12)
+    )
+    DBSession.add(tlog2)
+    DBSession.commit()
+    # set the total_logged_seconds to None
+    # so the getter calls the update_schedule_info
+    root_task.update_schedule_info()
+
+
+def test_update_schedule_info_with_leaf_tasks(
+    setup_task_db_tests,
+):
+    """total_logged_seconds is the sum of all time_logs of the child tasks."""
+    data = setup_task_db_tests
+    kwargs = copy.copy(data["kwargs"])
+    kwargs["depends_on"] = []
+    new_task = Task(**kwargs)
+    new_task.update_schedule_info()
 
 
 def test_total_logged_seconds_is_the_sum_of_all_time_logs_of_children(

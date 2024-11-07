@@ -1478,3 +1478,23 @@ def test__init_on_load__works_as_expected(setup_shot_db_tests):
     # the following should call Shot.__init_on_load__()
     shot = Shot.query.filter(Shot.name == "SH123").first()
     assert isinstance(shot, Shot)
+
+
+def test_template_variables_include_scenes_for_shots(setup_shot_db_tests):
+    """_template_variables include scenes for shots."""
+    data = setup_shot_db_tests
+    assert isinstance(data["test_shot"], Shot)
+    template_variables = data["test_shot"]._template_variables()
+    assert "scenes" in template_variables
+    assert data["test_shot"].scenes != []
+    assert template_variables["scenes"] == data["test_shot"].scenes
+
+
+def test_template_variables_include_sequences_for_shots(setup_shot_db_tests):
+    """_template_variables include sequences for shots."""
+    data = setup_shot_db_tests
+    assert isinstance(data["test_shot"], Shot)
+    template_variables = data["test_shot"]._template_variables()
+    assert "sequences" in template_variables
+    assert data["test_shot"].sequences != []
+    assert template_variables["sequences"] == data["test_shot"].sequences

@@ -906,7 +906,6 @@ def test_container_cmpl_task_dependency_cannot_be_updated(
     data["test_task1"].status = data["status_cmpl"]
     assert data["test_task1"].status == data["status_cmpl"]
     # create dependency
-    # with DBSession.no_autoflush:
     with pytest.raises(StatusError) as cm:
         data["test_task1"].depends_on.append(data["test_task8"])
 
@@ -2273,6 +2272,24 @@ def test_leaf_wip_task_with_no_dependency_and_no_timelogs_update_status_with_dep
 
     # check the status
     assert data["status_rts"] == data["test_task5"].status
+
+
+def test_container_task_update_status_with_dependent_status_will_skip(
+    setup_task_status_workflow_tests,
+):
+    """update_status_with_dependent_status() will skip container tasks."""
+    data = setup_task_status_workflow_tests
+    # the following should do nothing
+    data["test_task1"].update_status_with_dependent_statuses()
+
+
+def test_update_status_with_children_statuses_with_leaf_task(
+    setup_task_status_workflow_tests,
+):
+    """update_status_with_children_statuses will skip leaf tasks."""
+    data = setup_task_status_workflow_tests
+    # the following should do nothing
+    data["test_task4"].update_status_with_children_statuses()
 
 
 @pytest.fixture(scope="function")

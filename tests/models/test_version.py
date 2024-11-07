@@ -11,6 +11,7 @@ from stalker import (
     Link,
     Project,
     Repository,
+    Scene,
     Sequence,
     Shot,
     Status,
@@ -108,12 +109,21 @@ def setup_version_db_tests(setup_postgresql_db):
     DBSession.add(data["test_sequence"])
     DBSession.commit()
 
+    data["test_scene"] = Scene(
+        name="Test Scene",
+        code="SC001",
+        project=data["test_project"],
+    )
+    DBSession.add(data["test_scene"])
+    DBSession.commit()
+
     # create a shot
     data["test_shot1"] = Shot(
         name="SH001",
         code="SH001",
         project=data["test_project"],
         sequences=[data["test_sequence"]],
+        scenes=[data["test_scene"]],
     )
     DBSession.add(data["test_shot1"])
     DBSession.commit()
@@ -988,6 +998,56 @@ def test_template_variables_type(setup_version_db_tests):
     assert kwargs["type"] == data["test_version"].type
 
 
+def test_template_variables_for_a_shot_version_contains_scenes(setup_version_db_tests):
+    """template_variables for a Shot version contains scenes."""
+    data = setup_version_db_tests
+    v = Version(task=data["test_shot1"])
+    template_variables = v._template_variables()
+    assert data["test_shot1"].scenes != []
+    assert "scenes" in template_variables
+    assert template_variables["scenes"] == data["test_shot1"].scenes
+
+
+def test_template_variables_for_a_shot_version_contains_sequences(
+    setup_version_db_tests,
+):
+    """template_variables for a Shot version contains sequences."""
+    data = setup_version_db_tests
+    v = Version(task=data["test_shot1"])
+    template_variables = v._template_variables()
+    assert data["test_shot1"].sequences != []
+    assert "sequences" in template_variables
+    assert template_variables["sequences"] == data["test_shot1"].sequences
+
+
+def test_absolute_path_works_as_expected(setup_version_db_tests):
+    """absolute_path attribute works as expected."""
+    data = setup_version_db_tests
+    data["patcher"].patch("Linux")
+    ft = FilenameTemplate(
+        name="Task Filename Template",
+        target_entity_type="Task",
+        path="{{project.repositories[0].path}}/{{project.code}}/"
+        "{%- for parent_task in parent_tasks -%}"
+        "{{parent_task.nice_name}}/"
+        "{%- endfor -%}",
+        filename="{{task.nice_name}}_{{version.variant_name}}"
+        '_v{{"%03d"|format(version.version_number)}}{{extension}}',
+    )
+    data["test_project"].structure.templates.append(ft)
+    new_version1 = Version(**data["kwargs"])
+    DBSession.add(new_version1)
+    DBSession.commit()
+
+    new_version1.variant_name = "TestVariant@BBOX"
+
+    new_version1.update_paths()
+    new_version1.extension = ".ma"
+    assert new_version1.extension == ".ma"
+
+    assert new_version1.absolute_path == "/mnt/T/tp/SH001/Task1"
+
+
 def test_absolute_full_path_works_as_expected(setup_version_db_tests):
     """absolute_full_path attribute works as expected."""
     data = setup_version_db_tests
@@ -1835,3 +1895,12 @@ def test_max_version_number_without_a_db(setup_version_tests):
     data = setup_version_tests
     v = Version(task=data["test_task2"])
     assert v.max_version_number == v.version_number
+
+
+def test__hash__is_working_as_expected(setup_version_tests):
+    """__hash__ is working as expected."""
+    data = setup_version_tests
+    v = Version(task=data["test_task2"])
+    result = hash(v)
+    assert isinstance(result, int)
+    assert result == v.__hash__()
