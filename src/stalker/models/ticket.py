@@ -6,7 +6,7 @@ from typing import Union
 from six import string_types
 
 from sqlalchemy import Column, Integer, String, Text
-from sqlalchemy.exc import UnboundExecutionError
+from sqlalchemy.exc import OperationalError, UnboundExecutionError
 from sqlalchemy.orm import relationship, synonym
 from sqlalchemy.orm.mapper import validates
 from sqlalchemy.schema import ForeignKey, Table
@@ -268,7 +268,7 @@ class Ticket(Entity, StatusMixin):
             # do your query
             with DBSession.no_autoflush:
                 max_ticket = Ticket.query.order_by(Ticket.number.desc()).first()
-        except UnboundExecutionError:
+        except (UnboundExecutionError, OperationalError):
             max_ticket = None
 
         return max_ticket.number if max_ticket is not None else 0

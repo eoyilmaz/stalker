@@ -140,3 +140,11 @@ def test_target_entity_type_attribute_is_working_as_expected(setup_type_tests):
     """target_entity_type attribute is working as expected."""
     data = setup_type_tests
     assert data["test_type"].target_entity_type == data["kwargs"]["target_entity_type"]
+
+
+def test__hash__is_working_as_expected(setup_type_tests):
+    """__hash__ is working as expected."""
+    data = setup_type_tests
+    result = hash(data["test_type"])
+    assert isinstance(result, int)
+    assert result == data["test_type"].__hash__()
