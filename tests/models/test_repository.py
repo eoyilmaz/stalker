@@ -1110,6 +1110,14 @@ def test_to_os_independent_path_converts_the_given_path_with_old_env_variable_ne
     )
 
 
+def test_to_os_independent_path_repo_cannot_be_found(setup_repository_db_tests):
+    """to_os_independent_path() repo cannot be found returns the path back."""
+    data = setup_repository_db_tests
+    path = "/not/on/a/particular/repo/file.ma"
+    result = data["test_repo"].to_os_independent_path(path)
+    assert result == path
+
+
 def test_find_repo_is_working_as_expected(setup_repository_db_tests):
     """find_repo() is working as expected."""
     data = setup_repository_db_tests
@@ -1531,3 +1539,11 @@ def test_to_path_replace_with_is_not_a_str(setup_repository_db_tests):
     assert str(cm.value) == (
         "replace_with should be a string containing a file path, not int: '1234'"
     )
+
+
+def test__hash__is_working_as_expected(setup_repository_db_tests):
+    """__hash__ is working as expected."""
+    data = setup_repository_db_tests
+    result = hash(data["test_repo"])
+    assert isinstance(result, int)
+    assert result == data["test_repo"].__hash__()
