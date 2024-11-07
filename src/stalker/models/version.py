@@ -260,28 +260,22 @@ class Version(Link, DAGMixin):
             Version: The :class:`.Version` instance with the highest version number in
                 this version series.
         """
+        latest_version = None
         try:
             with DBSession.no_autoflush:
-                last_version = (
+                latest_version = (
                     Version.query.filter(Version.task == self.task)
                     .filter(Version.variant_name == self.variant_name)
                     .order_by(Version.version_number.desc())
                     .first()
                 )
+            return latest_version
         except (UnboundExecutionError, OperationalError):
             all_versions = sorted(
                 self.task.versions,
                 key=lambda x: x.version_number if x.version_number else -1,
             )
-            if all_versions:
-                last_version = all_versions[-1]
-                if last_version != self:
-                    return last_version
-                else:
-                    return 0
-            else:
-                last_version = None
-        return last_version
+            return all_versions[-1] if all_versions else None
 
     @property
     def max_version_number(self) -> int:
@@ -291,11 +285,7 @@ class Version(Link, DAGMixin):
             int: The maximum version number for this Version.
         """
         latest_version = self.latest_version
-
-        if latest_version:
-            return latest_version.version_number
-
-        return 0
+        return latest_version.version_number if latest_version else 0
 
     @validates("version_number")
     def _validate_version_number(self, key: str, version_number: int) -> int:
@@ -318,20 +308,29 @@ class Version(Link, DAGMixin):
         logger.debug(f"max_version_number: {max_version_number}")
         logger.debug(f"given version_number: {version_number}")
 
-        if version_number is None or version_number <= max_version_number:
-            if latest_version == self:
-                version_number = latest_version.version_number
-                logger.debug(
-                    "the version is the latest version in database, the "
-                    f"number will not be changed from {version_number}"
-                )
+        if version_number is not None and version_number > max_version_number:
+            return version_number
+
+        if latest_version == self:
+            if self.version_number is not None:
+                version_number = self.version_number
             else:
-                version_number = max_version_number + 1
+                version_number = 1
                 logger.debug(
-                    "given Version.version_number is too low,"
-                    f"max version_number in the database is {max_version_number}, "
-                    f"setting the current version_number to {version_number}"
+                    "self.version_number is weirdly 'None', "
+                    "no database connection maybe?"
                 )
+            logger.debug(
+                "the version is the latest version in database, the "
+                f"number will not be changed from {version_number}"
+            )
+        else:
+            version_number = max_version_number + 1
+            logger.debug(
+                "given Version.version_number is too low,"
+                f"max version_number in the database is {max_version_number}, "
+                f"setting the current version_number to {version_number}"
+            )
 
         return version_number
 

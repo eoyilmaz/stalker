@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import copy
 import logging
 import sys
 
@@ -1299,7 +1300,7 @@ def test_max_version_number_attribute_is_working_as_expected(setup_version_db_te
 
 
 def test_latest_version_attribute_is_read_only(setup_version_db_tests):
-    """last_version attribute is a read only attribute."""
+    """latest_version attribute is a read only attribute."""
     data = setup_version_db_tests
     with pytest.raises(AttributeError) as cm:
         data["test_version"].latest_version = 3453
@@ -1317,7 +1318,7 @@ def test_latest_version_attribute_is_read_only(setup_version_db_tests):
 
 
 def test_latest_version_attribute_is_working_as_expected(setup_version_db_tests):
-    """last_version attribute is working as expected."""
+    """latest_version attribute is working as expected."""
     data = setup_version_db_tests
     new_version1 = Version(**data["kwargs"])
     DBSession.add(new_version1)
@@ -1709,6 +1710,12 @@ def setup_version_tests():
         status_list=data["test_task_status_list"],
     )
 
+    data["test_task2"] = Task(
+        name="Task2",
+        parent=data["test_shot1"],
+        status_list=data["test_task_status_list"],
+    )
+
     # a Link for the input file
     data["test_input_link1"] = Link(
         name="Input Link 1",
@@ -1796,3 +1803,35 @@ def test_children_attribute_will_not_allow_deeper_circular_dependencies_2(
         "<tp_SH001_Task1_TestVariant_v002 (Version)> (Version) creates a "
         'circular dependency in their "children" attribute'
     )
+
+
+def test_version_number_without_a_db(setup_version_tests):
+    """version_number without a db is not None."""
+    data = setup_version_tests
+    v = Version(task=data["test_task2"])
+    assert v.version_number is not None
+
+
+def test_version_number_without_a_db(setup_version_tests):
+    """version_number without a db is not None."""
+    data = setup_version_tests
+    v1 = Version(task=data["test_task2"])
+    assert v1.version_number == 1
+    v2 = Version(task=data["test_task2"])
+    assert v2.version_number == 2
+    v3 = Version(task=data["test_task2"])
+    assert v3.version_number == 3
+
+
+def test_latest_version_without_a_db(setup_version_tests):
+    """latest_version without a db returns self."""
+    data = setup_version_tests
+    v = Version(task=data["test_task2"])
+    assert v.latest_version is v
+
+
+def test_max_version_number_without_a_db(setup_version_tests):
+    """max_version_number without a db returns self.version_number."""
+    data = setup_version_tests
+    v = Version(task=data["test_task2"])
+    assert v.max_version_number == v.version_number
