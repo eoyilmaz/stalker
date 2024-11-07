@@ -927,6 +927,60 @@ def test_source_out_attribute_is_smaller_than_source_in_attribute(setup_shot_db_
     )
 
 
+def test_source_out_argument_is_smaller_than_cut_in_argument(setup_shot_db_tests):
+    """ValueError raised if the source_out arg is smaller than the cut_in attr."""
+    data = setup_shot_db_tests
+    data["kwargs"]["code"] = "SH123A"
+    data["kwargs"]["source_in"] = data["kwargs"]["cut_in"] + 15
+    data["kwargs"]["source_out"] = data["kwargs"]["cut_in"] - 10
+    with pytest.raises(ValueError) as cm:
+        Shot(**data["kwargs"])
+
+    assert str(cm.value) == (
+        "Shot.source_out cannot be smaller than Shot.cut_in, "
+        "cut_in: 112 where as source_out: 102"
+    )
+
+
+def test_source_out_attribute_is_smaller_than_cut_in_attribute(setup_shot_db_tests):
+    """ValueError raised if the source_out attr is set to smaller than cut_in."""
+    data = setup_shot_db_tests
+    with pytest.raises(ValueError) as cm:
+        data["test_shot"].source_out = data["test_shot"].cut_in - 2
+
+    assert str(cm.value) == (
+        "Shot.source_out cannot be smaller than Shot.cut_in, "
+        "cut_in: 112 where as source_out: 110"
+    )
+
+
+def test_source_out_argument_is_bigger_than_cut_out_argument(setup_shot_db_tests):
+    """ValueError raised if the source_out arg is bigger than the cut_out attr."""
+    data = setup_shot_db_tests
+    data["kwargs"]["code"] = "SH123A"
+    data["kwargs"]["source_in"] = data["kwargs"]["cut_in"] + 2
+    data["kwargs"]["source_out"] = data["kwargs"]["cut_out"] + 20
+    with pytest.raises(ValueError) as cm:
+        Shot(**data["kwargs"])
+
+    assert str(cm.value) == (
+        "Shot.source_out cannot be bigger than Shot.cut_out, "
+        "cut_out: 149 where as source_out: 169"
+    )
+
+
+def test_source_out_attribute_is_smaller_than_cut_out_attribute(setup_shot_db_tests):
+    """ValueError raised if the source_out attr is set to bigger than cut_out."""
+    data = setup_shot_db_tests
+    with pytest.raises(ValueError) as cm:
+        data["test_shot"].source_out = data["test_shot"].cut_out + 2
+
+    assert str(cm.value) == (
+        "Shot.source_out cannot be bigger than Shot.cut_out, "
+        "cut_out: 149 where as source_out: 151"
+    )
+
+
 def test_image_format_argument_is_skipped(setup_shot_db_tests):
     """image_format is copied from the Project if the image_format arg is skipped."""
     data = setup_shot_db_tests
