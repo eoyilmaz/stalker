@@ -1025,10 +1025,10 @@ class ReferenceMixin(object):
         """
         from stalker.models.link import Link
 
-        # all the elements should be instance of stalker.models.entity.Entity
+        # all the items should be instance of stalker.models.entity.Entity
         if not isinstance(reference, Link):
             raise TypeError(
-                f"All the elements in the {self.__class__.__name__}.references should "
+                f"All the items in the {self.__class__.__name__}.references should "
                 "be stalker.models.link.Link instances, "
                 f"not {reference.__class__.__name__}: '{reference}'"
             )

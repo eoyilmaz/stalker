@@ -339,14 +339,17 @@ class TimeLog(Entity, DateRangeMixin):
             except (UnboundExecutionError, OperationalError):
                 # fallback to Python
                 for time_log in resource.time_logs:
-                    if time_log != self:
-                        if (
-                            time_log.start == self.start
-                            or time_log.end == self.end
-                            or time_log.start < self.end < time_log.end
-                            or time_log.start < self.start < time_log.end
-                        ):
-                            clashing_time_log_data = [time_log.start, time_log.end]
+                    if time_log == self:
+                        continue
+
+                    if (
+                        time_log.start == self.start
+                        or time_log.end == self.end
+                        or time_log.start < self.end < time_log.end
+                        or time_log.start < self.start < time_log.end
+                    ):
+                        clashing_time_log_data = [time_log.start, time_log.end]
+                        break
 
             if clashing_time_log_data:
                 raise OverBookedError(
@@ -1322,7 +1325,7 @@ class Task(
 
         return time_log
 
-    @validates("_reviews")
+    @validates("reviews")
     def _validate_reviews(self, key, review) -> Review:
         """Validate the given review value.
 
@@ -1365,22 +1368,24 @@ class Task(
                 Task instance.
 
         Returns:
-            Task: The validated task_dependes_to value.
+            Task: The validated task_depends_on value.
         """
+        if not isinstance(task_depends_on, TaskDependency):
+            raise TypeError(
+                "All the items in the {}.task_depends_on should be a "
+                "TaskDependency instance, not {}: '{}'".format(
+                    self.__class__.__name__,
+                    task_depends_on.__class__.__name__,
+                    task_depends_on,
+                )
+            )
+
         depends_on = task_depends_on.depends_on
         if not depends_on:
             # the relation is still not setup yet
             # trust to the TaskDependency class for checking the
             # depends_on attribute
             return task_depends_on
-
-        if not isinstance(depends_on, Task):
-            raise TypeError(
-                "All the elements in the {}.depends_on should be an instance of "
-                "stalker.models.task.Task, not {}: '{}'".format(
-                    self.__class__.__name__, depends_on.__class__.__name__, depends_on
-                )
-            )
 
         # check the status of the current task
         with DBSession.no_autoflush:
@@ -2087,28 +2092,6 @@ class Task(
         """
         self.end = computed_end
         return computed_end
-
-    def _validate_start(self, start):
-        """Validate the given start value.
-
-        Args:
-            start (datetime.datetime): The start value to be validated.
-
-        Raises:
-            TypeError: If the start value is not None and not a datetime.datetime
-                instance.
-
-        Returns:
-            datetime.datetime: The validated start value.
-        """
-        if start is None:
-            start = self.project.round_time(datetime.datetime.now(pytz.utc))
-        elif not isinstance(start, datetime.datetime):
-            raise TypeError(
-                "{}.start should be an instance of datetime.datetime, "
-                "not {}: '{}'".format(self.__class__.__name__, start.__name__, start)
-            )
-        return start
 
     def _start_getter(self) -> datetime.datetime:
         """Return the start value.

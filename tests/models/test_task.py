@@ -3732,6 +3732,37 @@ def test_reviews_attr_is_an_empty_list_by_default(setup_task_tests):
     assert new_task.reviews == []
 
 
+def test_reviews_is_not_a_list_of_review_instances(setup_task_tests):
+    """reviews attr is not a List[Review] raises TypeError."""
+    data = setup_task_tests
+    kwargs = copy.copy(data["kwargs"])
+    new_task = Task(**kwargs)
+    test_value = [1234, "test value"]
+    with pytest.raises(TypeError) as cm:
+        new_task.reviews = test_value
+
+    assert str(cm.value) == (
+        "Task.reviews should be all stalker.models.review.Review "
+        "instances, not int: '1234'"
+    )
+
+
+def test_reviews_attr_is_validated_as_expected(setup_task_db_tests):
+    """reviews attr is validated as expected."""
+    data = setup_task_db_tests
+    kwargs = copy.copy(data["kwargs"])
+    new_task = Task(**kwargs)
+
+    from stalker import Review
+
+    assert new_task.reviews == []
+    new_review = Review(
+        task=new_task,
+        reviewer=data["test_user1"],
+    )
+    assert new_task.reviews == [new_review]
+
+
 def test_status_is_wfd_for_a_newly_created_task_with_dependencies(setup_task_tests):
     """status for a newly created task is WFD by default if there are dependencies."""
     data = setup_task_tests
@@ -3794,6 +3825,27 @@ def test_task_dependency_auto_generates_task_dependency_object(setup_task_tests)
     task_depends = new_task.task_depends_on[0]
     assert task_depends.task == new_task
     assert task_depends.depends_on == data["test_dependent_task1"]
+
+
+def test_task_depends_on_is_an_empty_list(setup_task_tests):
+    """task_depends_on is an empty list."""
+    data = setup_task_tests
+    kwargs = copy.copy(data["kwargs"])
+    new_task = Task(**kwargs)
+    new_task.task_depends_on = []
+
+
+def test_task_depends_on_is_not_a_task_dependency_object(setup_task_tests):
+    """task_depends_on is not a TaskDependency object raises TypeError."""
+    data = setup_task_tests
+    kwargs = copy.copy(data["kwargs"])
+    new_task = Task(**kwargs)
+    with pytest.raises(TypeError) as cm:
+        new_task.task_depends_on.append("not a TaskDependency object.")
+    assert str(cm.value) == (
+        "All the items in the Task.task_depends_on should be a TaskDependency "
+        "instance, not str: 'not a TaskDependency object.'"
+    )
 
 
 def test_alternative_resources_arg_is_skipped(setup_task_tests):

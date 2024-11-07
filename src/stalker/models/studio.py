@@ -190,7 +190,6 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         else:
             logger.debug("cannot update defaults.daily_working_hours")
 
-
         if self.weekly_working_days:
             defaults["weekly_working_days"] = self.weekly_working_days
             logger.debug(

@@ -158,7 +158,7 @@ def test_templates_argument_accepts_only_list_of_filename_template_instances(
     with pytest.raises(TypeError) as cm:
         Structure(**data["kwargs"])
     assert str(cm.value) == (
-        "All the elements in the Structure.templates should be a "
+        "All the items in the Structure.templates should be a "
         "stalker.models.template.FilenameTemplate instance, not int: '1'"
     )
 
@@ -182,7 +182,7 @@ def test_templates_attribute_accpets_only_list_of_filename_template_instances(
         data["test_structure"].templates = test_value
 
     assert str(cm.value) == (
-        "All the elements in the Structure.templates should be a "
+        "All the items in the Structure.templates should be a "
         "stalker.models.template.FilenameTemplate instance, not int: '1'"
     )
 

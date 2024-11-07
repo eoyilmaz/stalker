@@ -198,7 +198,7 @@ class Structure(Entity):
         """
         if not isinstance(template, FilenameTemplate):
             raise TypeError(
-                f"All the elements in the {self.__class__.__name__}.templates should "
+                f"All the items in the {self.__class__.__name__}.templates should "
                 "be a stalker.models.template.FilenameTemplate instance, not "
                 f"{template.__class__.__name__}: '{template}'"
             )
