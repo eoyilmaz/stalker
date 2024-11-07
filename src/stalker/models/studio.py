@@ -192,31 +192,22 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
             f"updated defaults.weekly_working_days: {defaults.weekly_working_days}"
         )
 
-        if self.weekly_working_hours is not None:
-            defaults["weekly_working_hours"] = self.weekly_working_hours
-            logger.debug(
-                "updated defaults.weekly_working_hours: {}".format(
-                    defaults.weekly_working_hours
-                )
+        defaults["weekly_working_hours"] = self.weekly_working_hours
+        logger.debug(
+            "updated defaults.weekly_working_hours: {}".format(
+                defaults.weekly_working_hours
             )
-        else:
-            logger.debug("cannot update defaults.weekly_working_hours")
+        )
 
-        if self.yearly_working_days is not None:
-            defaults["yearly_working_days"] = self.yearly_working_days
-            logger.debug(
-                f"updated defaults.yearly_working_days: {defaults.yearly_working_days}"
-            )
-        else:
-            logger.debug("cannot update defaults.yearly_working_days")
+        defaults["yearly_working_days"] = self.yearly_working_days
+        logger.debug(
+            f"updated defaults.yearly_working_days: {defaults.yearly_working_days}"
+        )
 
-        if self.timing_resolution:
-            defaults["timing_resolution"] = self.timing_resolution
-            logger.debug(
-                f"updated defaults.timing_resolution: {defaults.timing_resolution}"
-            )
-        else:
-            logger.debug("cannot update defaults.timing_resolution")
+        defaults["timing_resolution"] = self.timing_resolution
+        logger.debug(
+            f"updated defaults.timing_resolution: {defaults.timing_resolution}"
+        )
 
         logger.debug(
             """done updating defaults:
