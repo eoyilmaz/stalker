@@ -12,7 +12,7 @@ import tzlocal
 
 from sqlalchemy.exc import IntegrityError
 
-from stalker import Project, Repository, Status, Task, TimeLog, User
+from stalker import Project, Repository, Status, StatusList, Task, TimeLog, User
 from stalker.db.session import DBSession
 from stalker.exceptions import DependencyViolationError, OverBookedError, StatusError
 
@@ -715,6 +715,187 @@ def test_overbooked_error_12(setup_time_log_db_tests):
         "(psycopg2.errors.ExclusionViolation) conflicting key value "
         'violates exclusion constraint "overlapping_time_logs"' in str(cm.value)
     )
+
+
+def tests_overbooked_error_fallback_to_python_if_no_db_is_setup_self():
+    """_validate_resource() will fallback to Python if no db."""
+    data = dict()
+    data["status_wfd"] = Status(name="Waiting For Dependency", code="WFD")
+    data["status_rts"] = Status(name="Ready To Start", code="RTS")
+    data["status_wip"] = Status(name="Work In Progress", code="WIP")
+    data["status_prev"] = Status(name="Pending Review", code="PREV")
+    data["status_hrev"] = Status(name="Has Revision", code="HREV")
+    data["status_drev"] = Status(name="Dependency Has Revision", code="DREV")
+    data["status_oh"] = Status(name="On Hold", code="OH")
+    data["status_stop"] = Status(name="Stop", code="STOP")
+    data["status_cmpl"] = Status(name="Completed", code="CMPL")
+
+    data["project_status_list"] = StatusList(
+        name="Project Statuses",
+        statuses=[
+            data["status_rts"],
+            data["status_wip"],
+            data["status_cmpl"],
+        ],
+        target_entity_type="Project",
+    )
+    data["task_status_list"] = StatusList(
+        name="Task Statuses",
+        statuses=[
+            data["status_wfd"],
+            data["status_rts"],
+            data["status_wip"],
+            data["status_cmpl"],
+        ],
+        target_entity_type="Task",
+    )
+
+    # create a resource
+    data["test_resource1"] = User(
+        name="User1", login="user1", email="user1@users.com", password="1234"
+    )
+
+    data["test_resource2"] = User(
+        name="User2", login="user2", email="user2@users.com", password="1234"
+    )
+
+    data["test_repo"] = Repository(name="test repository", code="tr")
+
+    # create a Project
+    data["test_status1"] = Status(name="Status1", code="STS1")
+    data["test_status2"] = Status(name="Status2", code="STS2")
+    data["test_status3"] = Status(name="Status3", code="STS3")
+
+    data["test_project"] = Project(
+        name="test project",
+        code="tp",
+        repository=data["test_repo"],
+        status_list=data["project_status_list"],
+    )
+
+    # create Tasks
+    data["test_task1"] = Task(
+        name="test task 1",
+        project=data["test_project"],
+        schedule_timing=10,
+        schedule_unit="d",
+        resources=[data["test_resource1"]],
+        status_list=data["task_status_list"],
+    )
+
+    data["test_task2"] = Task(
+        name="test task 2",
+        project=data["test_project"],
+        schedule_timing=10,
+        schedule_unit="d",
+        resources=[data["test_resource1"]],
+        status_list=data["task_status_list"],
+    )
+
+    data["kwargs"] = {
+        "task": data["test_task1"],
+        "resource": data["test_resource1"],
+        "start": datetime.datetime(2013, 3, 22, 1, 0, tzinfo=pytz.utc),
+        "duration": datetime.timedelta(10),
+    }
+
+    # create a TimeLog
+    # and test it
+    data["test_time_log"] = TimeLog(**data["kwargs"])
+
+    # assigning the same resource should skip self while searching for a timelog
+    data["test_time_log"].resource = data["test_resource1"]
+
+
+def tests_overbooked_error_fallback_to_python_if_no_db_is_setup_new_tlog():
+    """_validate_resource() will fallback to Python if no db."""
+    data = dict()
+    data["status_wfd"] = Status(name="Waiting For Dependency", code="WFD")
+    data["status_rts"] = Status(name="Ready To Start", code="RTS")
+    data["status_wip"] = Status(name="Work In Progress", code="WIP")
+    data["status_prev"] = Status(name="Pending Review", code="PREV")
+    data["status_hrev"] = Status(name="Has Revision", code="HREV")
+    data["status_drev"] = Status(name="Dependency Has Revision", code="DREV")
+    data["status_oh"] = Status(name="On Hold", code="OH")
+    data["status_stop"] = Status(name="Stop", code="STOP")
+    data["status_cmpl"] = Status(name="Completed", code="CMPL")
+
+    data["project_status_list"] = StatusList(
+        name="Project Statuses",
+        statuses=[
+            data["status_rts"],
+            data["status_wip"],
+            data["status_cmpl"],
+        ],
+        target_entity_type="Project",
+    )
+    data["task_status_list"] = StatusList(
+        name="Task Statuses",
+        statuses=[
+            data["status_wfd"],
+            data["status_rts"],
+            data["status_wip"],
+            data["status_cmpl"],
+        ],
+        target_entity_type="Task",
+    )
+
+    # create a resource
+    data["test_resource1"] = User(
+        name="User1", login="user1", email="user1@users.com", password="1234"
+    )
+
+    data["test_resource2"] = User(
+        name="User2", login="user2", email="user2@users.com", password="1234"
+    )
+
+    data["test_repo"] = Repository(name="test repository", code="tr")
+
+    # create a Project
+    data["test_status1"] = Status(name="Status1", code="STS1")
+    data["test_status2"] = Status(name="Status2", code="STS2")
+    data["test_status3"] = Status(name="Status3", code="STS3")
+
+    data["test_project"] = Project(
+        name="test project",
+        code="tp",
+        repository=data["test_repo"],
+        status_list=data["project_status_list"],
+    )
+
+    # create Tasks
+    data["test_task1"] = Task(
+        name="test task 1",
+        project=data["test_project"],
+        schedule_timing=10,
+        schedule_unit="d",
+        resources=[data["test_resource1"]],
+        status_list=data["task_status_list"],
+    )
+
+    data["test_task2"] = Task(
+        name="test task 2",
+        project=data["test_project"],
+        schedule_timing=10,
+        schedule_unit="d",
+        resources=[data["test_resource1"]],
+        status_list=data["task_status_list"],
+    )
+
+    data["kwargs"] = {
+        "task": data["test_task1"],
+        "resource": data["test_resource1"],
+        "start": datetime.datetime(2013, 3, 22, 1, 0, tzinfo=pytz.utc),
+        "duration": datetime.timedelta(10),
+    }
+
+    # create a TimeLog
+    # and test it
+    data["test_time_log"] = TimeLog(**data["kwargs"])
+
+    # creating another time log should raise Overbooked error
+    with pytest.raises(OverBookedError) as cm:
+        _ = TimeLog(**data["kwargs"])
 
 
 def test_timelog_prevents_auto_flush_if_expanding_task_schedule_timing(
