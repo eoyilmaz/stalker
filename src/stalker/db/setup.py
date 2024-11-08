@@ -217,10 +217,6 @@ def create_repo_vars():
     for repo in all_repos:
         os.environ[repo.env_var] = repo.path
 
-        # TODO: Remove this in upcoming versions.
-        # This is added for backwards compatibility
-        os.environ[defaults.repo_env_var_template_old.format(id=repo.id)] = repo.path
-
 
 def get_alembic_version():
     """Return the alembic version of the database.

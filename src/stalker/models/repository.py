@@ -130,12 +130,6 @@ class Repository(Entity, CodeMixin):
                 linux_path
             )
 
-        if self.id is not None and platform.system() == "Linux":
-            # update the environment variable
-            os.environ[defaults.repo_env_var_template_old.format(id=self.id)] = (
-                linux_path
-            )
-
         return linux_path
 
     @validates("macos_path")
@@ -163,10 +157,6 @@ class Repository(Entity, CodeMixin):
         if self.code is not None and platform.system() == "Darwin":
             # update the environment variable
             rendered_env_var = defaults.repo_env_var_template.format(code=self.code)
-            os.environ[rendered_env_var] = macos_path
-
-        if self.id is not None and platform.system() == "Darwin":
-            rendered_env_var = defaults.repo_env_var_template_old.format(id=self.id)
             os.environ[rendered_env_var] = macos_path
 
         return macos_path
@@ -200,12 +190,6 @@ class Repository(Entity, CodeMixin):
         if self.code is not None and platform.system() == "Windows":
             # update the environment variable
             os.environ[defaults.repo_env_var_template.format(code=self.code)] = (
-                windows_path
-            )
-
-        if self.id is not None and platform.system() == "Windows":
-            # update the environment variable
-            os.environ[defaults.repo_env_var_template_old.format(id=self.id)] = (
                 windows_path
             )
 
@@ -464,4 +448,3 @@ def receive_after_insert(mapper, connection, repo):
     """
     logger.debug("auto creating env var for Repository: {}".format(repo.name))
     os.environ[defaults.repo_env_var_template.format(code=repo.code)] = repo.path
-    os.environ[defaults.repo_env_var_template_old.format(id=repo.id)] = repo.path
