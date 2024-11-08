@@ -203,8 +203,8 @@ def test_budget_attribute_is_set_to_a_value_other_than_a_budget_instance(
     )
 
 
-def test_budget_argument_is_working_properly(setup_invoice_tests):
-    """budget argument value is properly passed to the budget attribute."""
+def test_budget_argument_is_working_as_expected(setup_invoice_tests):
+    """budget argument value is passed to the budget attribute."""
     data = setup_invoice_tests
     test_invoice = Invoice(
         budget=data["test_budget"], client=data["test_client"], amount=1500, unit="TRY"
@@ -275,7 +275,7 @@ def test_client_attribute_is_set_to_a_value_other_than_a_client_instance(
     )
 
 
-def test_client_argument_is_working_properly(setup_invoice_tests):
+def test_client_argument_is_working_as_expected(setup_invoice_tests):
     """client argument value is correctly passed to the client attribute."""
     data = setup_invoice_tests
     test_invoice = Invoice(
@@ -284,8 +284,8 @@ def test_client_argument_is_working_properly(setup_invoice_tests):
     assert test_invoice.client == data["test_client"]
 
 
-def test_client_attribute_is_working_properly(setup_invoice_tests):
-    """client attribute value an be changed properly."""
+def test_client_attribute_is_working_as_expected(setup_invoice_tests):
+    """client attribute value an be changed."""
     data = setup_invoice_tests
     test_invoice = Invoice(
         budget=data["test_budget"], client=data["test_client"], amount=100, unit="TRY"

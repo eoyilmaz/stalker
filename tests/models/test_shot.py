@@ -14,6 +14,7 @@ from stalker import (
     Scene,
     Sequence,
     Shot,
+    Status,
     StatusList,
     Task,
     Type,
@@ -25,6 +26,7 @@ from stalker.db.session import DBSession
 def setup_shot_db_tests(setup_postgresql_db):
     """Set up the tests for the Shot class with a DB."""
     data = dict()
+    data["database_settings"] = setup_postgresql_db
     # statuses
     # types
     data["test_commercial_project_type"] = Type(
@@ -190,9 +192,11 @@ def test___auto_name__class_attribute_is_set_to_true():
 def test___hash___value_is_correctly_calculated(setup_shot_db_tests):
     """__hash__ value is correctly calculated."""
     data = setup_shot_db_tests
-    assert data["test_shot"].__hash__() == hash(data["test_shot"].id) + 2 * hash(
-        data["test_shot"].name
-    ) + 3 * hash(data["test_shot"].entity_type)
+    assert data["test_shot"].__hash__() == hash(
+        "{}:{}:{}".format(
+            data["test_shot"].id, data["test_shot"].name, data["test_shot"].entity_type
+        )
+    )
 
 
 def test_project_argument_is_skipped(setup_shot_db_tests):
@@ -278,7 +282,7 @@ def test_project_attribute_is_read_only(setup_shot_db_tests):
         12: "property of 'Shot' object has no setter",
     }.get(
         sys.version_info.minor,
-        "property '_project_getter' of 'Shot' object has no setter"
+        "property '_project_getter' of 'Shot' object has no setter",
     )
 
     assert str(cm.value) == error_message
@@ -290,8 +294,8 @@ def test_project_contains_shots(setup_shot_db_tests):
     assert data["test_shot"] in data["test_shot"].project.shots
 
 
-def test_project_argument_is_working_properly(setup_shot_db_tests):
-    """project argument is working properly."""
+def test_project_argument_is_working_as_expected(setup_shot_db_tests):
+    """project argument is working as expected."""
     data = setup_shot_db_tests
     assert data["test_shot"].project == data["kwargs"]["project"]
 
@@ -367,8 +371,8 @@ def test_sequences_attribute_is_not_a_list_of_Sequence_instances(setup_shot_db_t
     )
 
 
-def test_sequences_argument_is_working_properly(setup_shot_db_tests):
-    """sequences attribute is working properly."""
+def test_sequences_argument_is_working_as_expected(setup_shot_db_tests):
+    """sequences attribute is working as expected."""
     data = setup_shot_db_tests
     data["kwargs"]["code"] = "NewShot"
     seq1 = Sequence(
@@ -396,8 +400,8 @@ def test_sequences_argument_is_working_properly(setup_shot_db_tests):
     )
 
 
-def test_sequences_attribute_is_working_properly(setup_shot_db_tests):
-    """sequences attribute is working properly."""
+def test_sequences_attribute_is_working_as_expected(setup_shot_db_tests):
+    """sequences attribute is working as expected."""
     data = setup_shot_db_tests
     data["kwargs"]["code"] = "NewShot"
     seq1 = Sequence(
@@ -499,8 +503,8 @@ def test_scenes_attribute_is_not_a_list_of_Scene_instances(setup_shot_db_tests):
     )
 
 
-def test_scenes_argument_is_working_properly(setup_shot_db_tests):
-    """scenes attribute is working properly."""
+def test_scenes_argument_is_working_as_expected(setup_shot_db_tests):
+    """scenes attribute is working as expected."""
     data = setup_shot_db_tests
     data["kwargs"]["code"] = "NewShot"
     sce1 = Scene(name="sce1", code="sce1", project=data["test_project1"])
@@ -516,8 +520,8 @@ def test_scenes_argument_is_working_properly(setup_shot_db_tests):
     )
 
 
-def test_scenes_attribute_is_working_properly(setup_shot_db_tests):
-    """scenes attribute is working properly."""
+def test_scenes_attribute_is_working_as_expected(setup_shot_db_tests):
+    """scenes attribute is working as expected."""
     data = setup_shot_db_tests
     data["kwargs"]["code"] = "NewShot"
 
@@ -730,7 +734,7 @@ def test_cut_duration_attribute_is_zero(setup_shot_db_tests):
     with pytest.raises(ValueError) as cm:
         data["test_shot"].cut_duration = 0
     assert str(cm.value) == (
-        "Shot.cut_duration can not be set to zero or a negative value"
+        "Shot.cut_duration cannot be set to zero or a negative value"
     )
 
 
@@ -741,7 +745,7 @@ def test_cut_duration_attribute_is_negative(setup_shot_db_tests):
         data["test_shot"].cut_duration = -100
 
     assert str(cm.value) == (
-        "Shot.cut_duration can not be set to zero or a negative value"
+        "Shot.cut_duration cannot be set to zero or a negative value"
     )
 
 
@@ -803,7 +807,7 @@ def test_source_in_argument_is_bigger_than_source_out_argument(setup_shot_db_tes
         Shot(**data["kwargs"])
 
     assert str(cm.value) == (
-        "Shot.source_out can not be smaller than Shot.source_in, source_in: 144 where "
+        "Shot.source_out cannot be smaller than Shot.source_in, source_in: 144 where "
         "as source_out: 139"
     )
 
@@ -818,7 +822,7 @@ def test_source_in_attribute_is_bigger_than_source_out_attribute(setup_shot_db_t
         data["test_shot"].source_in = data["test_shot"].source_out + 1
 
     assert str(cm.value) == (
-        "Shot.source_in can not be bigger than Shot.source_out, "
+        "Shot.source_in cannot be bigger than Shot.source_out, "
         "source_in: 136 where as source_out: 135"
     )
 
@@ -832,7 +836,7 @@ def test_source_in_argument_is_smaller_than_cut_in(setup_shot_db_tests):
         Shot(**data["kwargs"])
 
     assert str(cm.value) == (
-        "Shot.source_in can not be smaller than Shot.cut_in, cut_in: "
+        "Shot.source_in cannot be smaller than Shot.cut_in, cut_in: "
         "112 where as source_in: 102"
     )
 
@@ -846,7 +850,7 @@ def test_source_in_argument_is_bigger_than_cut_out(setup_shot_db_tests):
         Shot(**data["kwargs"])
 
     assert str(cm.value) == (
-        "Shot.source_in can not be bigger than Shot.cut_out, cut_out: "
+        "Shot.source_in cannot be bigger than Shot.cut_out, cut_out: "
         "149 where as source_in: 159"
     )
 
@@ -906,7 +910,7 @@ def test_source_out_argument_is_smaller_than_source_in_argument(setup_shot_db_te
         Shot(**data["kwargs"])
 
     assert str(cm.value) == (
-        "Shot.source_out can not be smaller than Shot.source_in, "
+        "Shot.source_out cannot be smaller than Shot.source_in, "
         "source_in: 127 where as source_out: 117"
     )
 
@@ -918,8 +922,62 @@ def test_source_out_attribute_is_smaller_than_source_in_attribute(setup_shot_db_
         data["test_shot"].source_out = data["test_shot"].source_in - 2
 
     assert str(cm.value) == (
-        "Shot.source_out can not be smaller than Shot.source_in, "
+        "Shot.source_out cannot be smaller than Shot.source_in, "
         "source_in: 120 where as source_out: 118"
+    )
+
+
+def test_source_out_argument_is_smaller_than_cut_in_argument(setup_shot_db_tests):
+    """ValueError raised if the source_out arg is smaller than the cut_in attr."""
+    data = setup_shot_db_tests
+    data["kwargs"]["code"] = "SH123A"
+    data["kwargs"]["source_in"] = data["kwargs"]["cut_in"] + 15
+    data["kwargs"]["source_out"] = data["kwargs"]["cut_in"] - 10
+    with pytest.raises(ValueError) as cm:
+        Shot(**data["kwargs"])
+
+    assert str(cm.value) == (
+        "Shot.source_out cannot be smaller than Shot.cut_in, "
+        "cut_in: 112 where as source_out: 102"
+    )
+
+
+def test_source_out_attribute_is_smaller_than_cut_in_attribute(setup_shot_db_tests):
+    """ValueError raised if the source_out attr is set to smaller than cut_in."""
+    data = setup_shot_db_tests
+    with pytest.raises(ValueError) as cm:
+        data["test_shot"].source_out = data["test_shot"].cut_in - 2
+
+    assert str(cm.value) == (
+        "Shot.source_out cannot be smaller than Shot.cut_in, "
+        "cut_in: 112 where as source_out: 110"
+    )
+
+
+def test_source_out_argument_is_bigger_than_cut_out_argument(setup_shot_db_tests):
+    """ValueError raised if the source_out arg is bigger than the cut_out attr."""
+    data = setup_shot_db_tests
+    data["kwargs"]["code"] = "SH123A"
+    data["kwargs"]["source_in"] = data["kwargs"]["cut_in"] + 2
+    data["kwargs"]["source_out"] = data["kwargs"]["cut_out"] + 20
+    with pytest.raises(ValueError) as cm:
+        Shot(**data["kwargs"])
+
+    assert str(cm.value) == (
+        "Shot.source_out cannot be bigger than Shot.cut_out, "
+        "cut_out: 149 where as source_out: 169"
+    )
+
+
+def test_source_out_attribute_is_smaller_than_cut_out_attribute(setup_shot_db_tests):
+    """ValueError raised if the source_out attr is set to bigger than cut_out."""
+    data = setup_shot_db_tests
+    with pytest.raises(ValueError) as cm:
+        data["test_shot"].source_out = data["test_shot"].cut_out + 2
+
+    assert str(cm.value) == (
+        "Shot.source_out cannot be bigger than Shot.cut_out, "
+        "cut_out: 149 where as source_out: 151"
     )
 
 
@@ -980,14 +1038,14 @@ def test_image_format_attribute_is_not_a_ImageFormat_instance_and_not_none(
     )
 
 
-def test_image_format_argument_is_working_properly(setup_shot_db_tests):
+def test_image_format_argument_is_working_as_expected(setup_shot_db_tests):
     """image_format argument value is passed to the image_format attribute correctly."""
     data = setup_shot_db_tests
     assert data["kwargs"]["image_format"] == data["test_shot"].image_format
 
 
-def test_image_format_attribute_is_working_properly(setup_shot_db_tests):
-    """image_format attribute is working properly."""
+def test_image_format_attribute_is_working_as_expected(setup_shot_db_tests):
+    """image_format attribute is working as expected."""
     data = setup_shot_db_tests
     assert data["test_shot"].image_format != data["test_image_format1"]
     data["test_shot"].image_format = data["test_image_format1"]
@@ -1299,3 +1357,144 @@ def test_fps_changes_with_project(setup_shot_db_tests):
     assert new_shot.fps == 12
     data["test_project1"].fps = 24
     assert new_shot.fps == 12
+
+
+def test__check_code_availability_code_is_none(setup_shot_db_tests):
+    """__check_code_availability() returns True if the code is None."""
+    data = setup_shot_db_tests
+    assert isinstance(data["test_shot"], Shot)
+    result = data["test_shot"]._check_code_availability(None, data["test_project1"])
+    assert result is True
+
+
+def test__check_code_availability_code_is_not_str(setup_shot_db_tests):
+    """__check_code_availability() raises TypeError if code is not a str."""
+    data = setup_shot_db_tests
+    assert isinstance(data["test_shot"], Shot)
+    with pytest.raises(TypeError) as cm:
+        _ = data["test_shot"]._check_code_availability(1234, data["test_project1"])
+
+    assert str(cm.value) == (
+        "code should be a string containing a shot code, not int: '1234'"
+    )
+
+
+def test__check_code_availability_project_is_none(setup_shot_db_tests):
+    """__check_code_availability() returns True if project is None"""
+    data = setup_shot_db_tests
+    assert isinstance(data["test_shot"], Shot)
+    result = data["test_shot"]._check_code_availability("SH123", None)
+    assert result is True
+
+
+def test__check_code_availability_project_is_not_a_project_instance(
+    setup_shot_db_tests,
+):
+    """__check_code_availability() raises TypeError if the Project is not a Project instance."""
+    data = setup_shot_db_tests
+    assert isinstance(data["test_shot"], Shot)
+    with pytest.raises(TypeError) as cm:
+        _ = data["test_shot"]._check_code_availability("SH123", 1234)
+
+    assert str(cm.value) == ("project should be a Project instance, not int: '1234'")
+
+
+def test_check_code_availability_fallbacks_to_python_if_db_is_not_available():
+    """__check_code_availability() fallbacks to Python if DB is not available."""
+    data = dict()
+    # statuses
+    rts = Status(name="Read To Start", code="RTS")
+    wip = Status(name="Work In Progress", code="WIP")
+    cmpl = Status(name="Completed", code="CMPL")
+    project_status_list = StatusList(
+        name="Project Statuses", statuses=[rts, wip, cmpl], target_entity_type="Project"
+    )
+    shot_status_list = StatusList(
+        name="Shot Status List", statuses=[rts, wip, cmpl], target_entity_type="Shot"
+    )
+
+    # types
+    data["test_commercial_project_type"] = Type(
+        name="Commercial Project",
+        code="comm",
+        target_entity_type="Project",
+    )
+
+    data["test_repository_type"] = Type(
+        name="Test Repository Type", code="test", target_entity_type="Repository"
+    )
+
+    # repository
+    data["test_repository"] = Repository(
+        name="Test Repository",
+        code="TR",
+        type=data["test_repository_type"],
+    )
+
+    # image format
+    data["test_image_format1"] = ImageFormat(
+        name="Test Image Format 1", width=1920, height=1080, pixel_aspect=1.0
+    )
+
+    # project and sequences
+    data["test_project1"] = Project(
+        name="Test Project1",
+        code="tp1",
+        type=data["test_commercial_project_type"],
+        repository=data["test_repository"],
+        image_format=data["test_image_format1"],
+        status_list=project_status_list,
+    )
+
+    data["kwargs"] = dict(
+        name="SH123",
+        code="SH123",
+        description="This is a test Shot",
+        project=data["test_project1"],
+        status=0,
+        status_list=shot_status_list,
+    )
+
+    # create a mock shot object
+    data["test_shot"] = Shot(**data["kwargs"])
+
+    assert Shot._check_code_availability("SH123", data["test_project1"]) is False
+
+
+def test__init_on_load__works_as_expected(setup_shot_db_tests):
+    """__init_on_load__() works as expected."""
+    data = setup_shot_db_tests
+    assert data["test_shot"] in DBSession
+    DBSession.commit()
+    DBSession.flush()
+    connection = DBSession.connection()
+    connection.close()
+    del data["test_shot"]
+
+    from stalker.db.setup import setup
+
+    setup(data["database_settings"]["config"])
+
+    # the following should call Shot.__init_on_load__()
+    shot = Shot.query.filter(Shot.name == "SH123").first()
+    assert isinstance(shot, Shot)
+
+
+def test_template_variables_include_scenes_for_shots(setup_shot_db_tests):
+    """_template_variables include scenes for shots."""
+    data = setup_shot_db_tests
+    assert isinstance(data["test_shot"], Shot)
+    template_variables = data["test_shot"]._template_variables()
+    assert "scenes" in template_variables
+    assert data["test_shot"].scenes != []
+    assert template_variables["scenes"] == data["test_shot"].scenes
+
+
+def test_template_variables_include_sequences_for_shots(setup_shot_db_tests):
+    """_template_variables include sequences for shots."""
+    data = setup_shot_db_tests
+    assert isinstance(data["test_shot"], Shot)
+    template_variables = data["test_shot"]._template_variables()
+    assert "sequences" in template_variables
+    assert data["test_shot"].sequences != []
+    assert template_variables["sequences"] == data["test_shot"].sequences

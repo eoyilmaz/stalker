@@ -518,8 +518,8 @@ class Invoice(Entity, AmountMixin, UnitMixin):
             invoice.
         budget (Budget): The :class:`.Budget` instance that owns this invoice.
         amount (Union[int, float]): The amount of this invoice. Without the
-            :attr:`.Invoice.unit` attribute it is meaningless. This can not be skipped.
-        unit (str): The unit of the issued amount. This can not be skipped.
+            :attr:`.Invoice.unit` attribute it is meaningless. This cannot be skipped.
+        unit (str): The unit of the issued amount. This cannot be skipped.
     """
 
     __auto_name__ = True
@@ -612,7 +612,7 @@ class Payment(Entity, AmountMixin, UnitMixin):
 
     Args:
         invoice (Invoice): The :class:`.Invoice` instance that this payment is related
-            to. This can not be skipped.
+            to. This cannot be skipped.
     """
 
     __auto_name__ = True

@@ -120,8 +120,8 @@ def test_entries_attribute_is_set_to_a_list_of_other_instances_than_a_budget_ent
     )
 
 
-def test_entries_attribute_is_working_properly(setup_budget_test_base):
-    """Entries attribute is working properly."""
+def test_entries_attribute_is_working_as_expected(setup_budget_test_base):
+    """Entries attribute is working as expected."""
     data = setup_budget_test_base
     some_other_budget = Budget(
         name="Test Budget",
@@ -140,7 +140,7 @@ def test_entries_attribute_is_working_properly(setup_budget_test_base):
     assert data["test_budget"].entries == [entry1, entry2]
 
 
-def test_statuses_is_working_properly(setup_budget_test_base):
+def test_statuses_is_working_as_expected(setup_budget_test_base):
     """Budget accepts statuses."""
     data = setup_budget_test_base
     data["test_budget"].status = data["status_new"]
@@ -204,14 +204,14 @@ def test_budget_attribute_is_not_a_budget_instance(setup_budget_test_base):
     )
 
 
-def test_budget_argument_is_working_properly(setup_budget_test_base):
+def test_budget_argument_is_working_as_expected(setup_budget_test_base):
     """If the budget argument value is correctly passed to the budget attribute."""
     data = setup_budget_test_base
     entry = BudgetEntry(budget=data["test_budget"], good=data["test_good"], amount=10.0)
     assert entry.budget == data["test_budget"]
 
 
-def test_budget_attribute_is_working_properly(setup_budget_test_base):
+def test_budget_attribute_is_working_as_expected(setup_budget_test_base):
     """If the budget attribute value can correctly be changed."""
     data = setup_budget_test_base
     entry = BudgetEntry(budget=data["test_budget"], good=data["test_good"], amount=10.0)
@@ -261,8 +261,8 @@ def test_cost_attribute_is_not_a_number(setup_budget_test_base):
     )
 
 
-def test_cost_attribute_is_working_properly(setup_budget_test_base):
-    """If the cost attribute is working properly."""
+def test_cost_attribute_is_working_as_expected(setup_budget_test_base):
+    """If the cost attribute is working as expected."""
     data = setup_budget_test_base
     entry = BudgetEntry(
         budget=data["test_budget"],
@@ -300,8 +300,8 @@ def test_msrp_attribute_is_not_a_number(setup_budget_test_base):
     )
 
 
-def test_msrp_attribute_is_working_properly(setup_budget_test_base):
-    """Msrp attribute is working properly."""
+def test_msrp_attribute_is_working_as_expected(setup_budget_test_base):
+    """Msrp attribute is working as expected."""
     data = setup_budget_test_base
     entry = BudgetEntry(
         budget=data["test_budget"],
@@ -371,15 +371,15 @@ def test_price_attribute_is_not_a_number(setup_budget_test_base):
     )
 
 
-def test_price_argument_is_working_properly(setup_budget_test_base):
+def test_price_argument_is_working_as_expected(setup_budget_test_base):
     """Price arg value is passed to the price attribute."""
     data = setup_budget_test_base
     entry = BudgetEntry(budget=data["test_budget"], good=data["test_good"], price=10)
     assert entry.price == 10.0
 
 
-def test_price_attribute_is_working_properly(setup_budget_test_base):
-    """Price attribute is working properly."""
+def test_price_attribute_is_working_as_expected(setup_budget_test_base):
+    """Price attribute is working as expected."""
     data = setup_budget_test_base
     entry = BudgetEntry(budget=data["test_budget"], good=data["test_good"], price=10)
     test_value = 5.0
@@ -443,7 +443,7 @@ def test_realized_total_attribute_is_not_a_number(setup_budget_test_base):
     )
 
 
-def test_realized_total_argument_is_working_properly(setup_budget_test_base):
+def test_realized_total_argument_is_working_as_expected(setup_budget_test_base):
     """Realized_total arg value is passed to the realized_total attribute."""
     data = setup_budget_test_base
     entry = BudgetEntry(
@@ -452,8 +452,8 @@ def test_realized_total_argument_is_working_properly(setup_budget_test_base):
     assert entry.realized_total == 10.0
 
 
-def test_realized_total_attribute_is_working_properly(setup_budget_test_base):
-    """Realized_total attribute is working properly."""
+def test_realized_total_attribute_is_working_as_expected(setup_budget_test_base):
+    """Realized_total attribute is working as expected."""
     data = setup_budget_test_base
     entry = BudgetEntry(
         budget=data["test_budget"], good=data["test_good"], realized_total=10
@@ -484,8 +484,8 @@ def test_unit_attribute_is_not_a_string(setup_budget_test_base):
     )
 
 
-def test_unit_attribute_is_working_properly(setup_budget_test_base):
-    """Unit attribute is working properly."""
+def test_unit_attribute_is_working_as_expected(setup_budget_test_base):
+    """Unit attribute is working as expected."""
     data = setup_budget_test_base
     entry = BudgetEntry(budget=data["test_budget"], good=data["test_good"])
     test_value = "TL/hour"
@@ -552,15 +552,15 @@ def test_amount_attribute_is_not_a_number(setup_budget_test_base):
     )
 
 
-def test_amount_argument_is_working_properly(setup_budget_test_base):
+def test_amount_argument_is_working_as_expected(setup_budget_test_base):
     """Amount argument value is correctly passed to the amount attribute."""
     data = setup_budget_test_base
     entry = BudgetEntry(budget=data["test_budget"], good=data["test_good"], amount=10)
     assert entry.amount == 10.0
 
 
-def test_amount_attribute_is_working_properly(setup_budget_test_base):
-    """Amount attribute is working properly."""
+def test_amount_attribute_is_working_as_expected(setup_budget_test_base):
+    """Amount attribute is working as expected."""
     data = setup_budget_test_base
     entry = BudgetEntry(budget=data["test_budget"], good=data["test_good"], amount=10)
     test_value = 5.0
@@ -640,7 +640,7 @@ def test_good_attribute_is_not_a_good_instance(setup_budget_test_base):
     )
 
 
-def test_good_argument_is_working_properly(setup_budget_test_base):
+def test_good_argument_is_working_as_expected(setup_budget_test_base):
     """Good argument value is correctly passed to the good attribute."""
     data = setup_budget_test_base
     test_value = Good(name="Some Good")
@@ -652,7 +652,7 @@ def test_good_argument_is_working_properly(setup_budget_test_base):
     assert entry.good == test_value
 
 
-def test_good_attribute_is_working_properly(setup_budget_test_base):
+def test_good_attribute_is_working_as_expected(setup_budget_test_base):
     """Good attribute can be correctly set."""
     data = setup_budget_test_base
     test_value = Good(name="Some Other Good")

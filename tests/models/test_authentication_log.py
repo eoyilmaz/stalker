@@ -80,7 +80,7 @@ def test_user_attribute_is_not_a_user_instance(setup_authentication_log_tests):
     )
 
 
-def test_user_argument_is_working_properly(setup_authentication_log_tests):
+def test_user_argument_is_working_as_expected(setup_authentication_log_tests):
     """user arg value is correctly passed to the user attribute."""
     data = setup_authentication_log_tests
     uli = AuthenticationLog(
@@ -89,8 +89,8 @@ def test_user_argument_is_working_properly(setup_authentication_log_tests):
     assert uli.user == data["test_user1"]
 
 
-def test_user_attribute_is_working_properly(setup_authentication_log_tests):
-    """user attr is working properly."""
+def test_user_attribute_is_working_as_expected(setup_authentication_log_tests):
+    """user attr is working as expected."""
     data = setup_authentication_log_tests
     uli = AuthenticationLog(
         user=data["test_user1"], action=LOGOUT, date=datetime.datetime.now(pytz.utc)
@@ -149,7 +149,7 @@ def test_action_attribute_value_is_not_login_or_logout(setup_authentication_log_
     )
 
 
-def test_action_argument_is_working_properly(setup_authentication_log_tests):
+def test_action_argument_is_working_as_expected(setup_authentication_log_tests):
     """action arg value is passed to the action attr."""
     data = setup_authentication_log_tests
     uli = AuthenticationLog(
@@ -162,8 +162,8 @@ def test_action_argument_is_working_properly(setup_authentication_log_tests):
     assert uli.action == LOGOUT
 
 
-def test_action_attribute_is_working_properly(setup_authentication_log_tests):
-    """action attr is working properly."""
+def test_action_attribute_is_working_as_expected(setup_authentication_log_tests):
+    """action attr is working as expected."""
     data = setup_authentication_log_tests
     uli = AuthenticationLog(
         user=data["test_user1"], action=LOGIN, date=datetime.datetime.now(pytz.utc)
@@ -233,8 +233,8 @@ def test_date_attribute_is_not_a_datetime_instance(setup_authentication_log_test
     )
 
 
-def test_date_argument_is_working_properly(setup_authentication_log_tests):
-    """date argument value is properly passed to the date attribute."""
+def test_date_argument_is_working_as_expected(setup_authentication_log_tests):
+    """date argument value is passed to the date attribute."""
     data = setup_authentication_log_tests
     date = datetime.datetime(2016, 11, 14, 16, 30, tzinfo=pytz.utc)
     uli = AuthenticationLog(user=data["test_user1"], action=LOGIN, date=date)
@@ -242,8 +242,8 @@ def test_date_argument_is_working_properly(setup_authentication_log_tests):
     assert uli.date == date
 
 
-def test_date_attribute_is_working_properly(setup_authentication_log_tests):
-    """date attribute value can be properly changed."""
+def test_date_attribute_is_working_as_expected(setup_authentication_log_tests):
+    """date attribute value can be changed."""
     data = setup_authentication_log_tests
     date1 = datetime.datetime(2016, 11, 4, 6, 30, tzinfo=pytz.utc)
     date2 = datetime.datetime(2016, 11, 14, 16, 30, tzinfo=pytz.utc)
@@ -253,8 +253,8 @@ def test_date_attribute_is_working_properly(setup_authentication_log_tests):
     assert uli.date == date2
 
 
-def test_date_argument_is_working_properly2(setup_authentication_log_tests):
-    """date argument value is properly passed to the date attribute."""
+def test_date_argument_is_working_as_expected2(setup_authentication_log_tests):
+    """date argument value is passed to the date attribute."""
     data = setup_authentication_log_tests
     date1 = datetime.datetime(2016, 11, 4, 6, 30, tzinfo=pytz.utc)
     uli = AuthenticationLog(user=data["test_user1"], action=LOGIN, date=date1)

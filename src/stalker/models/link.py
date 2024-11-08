@@ -141,8 +141,8 @@ class Link(Entity):
         Returns:
             str: The formatted path value.
         """
-        if not isinstance(path, string_types):
-            path = path.encode("utf-8")
+        if isinstance(path, bytes):
+            path = path.decode("utf-8")
 
         return path.replace("\\", "/")
 
@@ -167,7 +167,7 @@ class Link(Entity):
             ValueError: If the given path is an empty str.
         """
         if path is None:
-            raise TypeError(f"{self.__class__.__name__}.path can not be set to None")
+            raise TypeError(f"{self.__class__.__name__}.path cannot be set to None")
 
         if not isinstance(path, string_types):
             raise TypeError(
@@ -177,7 +177,7 @@ class Link(Entity):
 
         if path == "":
             raise ValueError(
-                f"{self.__class__.__name__}.path can not be an empty string"
+                f"{self.__class__.__name__}.path cannot be an empty string"
             )
 
         self.full_path = self._format_path(os.path.join(path, self.filename))

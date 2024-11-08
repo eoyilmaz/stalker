@@ -149,9 +149,29 @@ def setup_asset_tests(setup_postgresql_db):
     return data
 
 
-def test_auto_name_class_attribute_is_set_to_false(setup_asset_tests):
+def test_auto_name_class_attribute_is_set_to_false():
     """__auto_name__ class attribute is set to False for Asset class."""
     assert Asset.__auto_name__ is False
+
+
+def test_name_cannot_be_set_to_none(setup_asset_tests):
+    """name arg cannot be set to None."""
+    data = setup_asset_tests
+    data["kwargs"]["name"] = None
+    with pytest.raises(TypeError) as cm:
+        _ = Asset(**data["kwargs"])
+
+    assert str(cm.value) == "Asset.name cannot be None"
+
+
+def test_name_cannot_be_set_to_empty_string(setup_asset_tests):
+    """name arg cannot be set to None."""
+    data = setup_asset_tests
+    data["kwargs"]["name"] = ""
+    with pytest.raises(ValueError) as cm:
+        _ = Asset(**data["kwargs"])
+
+    assert str(cm.value) == "Asset.name cannot be an empty string"
 
 
 def test_equality(setup_asset_tests):
@@ -261,6 +281,13 @@ def test_plural_class_name(setup_asset_tests):
     assert data["asset1"].plural_class_name == "Assets"
 
 
-def test_strictly_typed_is_true(setup_asset_tests):
+def test_strictly_typed_is_true():
     """__strictly_typed__ class attribute is True."""
     assert Asset.__strictly_typed__ is True
+
+
+def test_hash_value(setup_asset_tests):
+    """__hash__ returns the hash of the Asset instance."""
+    data = setup_asset_tests
+    result = hash(data["asset1"])
+    assert isinstance(result, int)

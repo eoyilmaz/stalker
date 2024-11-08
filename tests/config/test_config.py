@@ -157,13 +157,13 @@ def test_syntax_error_in_settings_file(prepare_config_file):
 
     error_message = {
         8: "There is a syntax error in your configuration file: "
-           "EOL while scanning string literal (<string>, line 2)",
+        "EOL while scanning string literal (<string>, line 2)",
         9: "There is a syntax error in your configuration file: "
-           "EOL while scanning string literal (<string>, line 2)",
+        "EOL while scanning string literal (<string>, line 2)",
     }.get(
         sys.version_info.minor,
         "There is a syntax error in your configuration file: "
-        "unterminated string literal (detected at line 2) (<string>, line 2)"
+        "unterminated string literal (detected at line 2) (<string>, line 2)",
     )
 
     assert str(cm.value) == error_message
@@ -177,20 +177,20 @@ def test___setattr___cannot_set_config_values_directly(prepare_config_file):
     assert c.config_values["daily_working_hours"] != test_value
 
 
-def test___getattr___is_working_properly(prepare_config_file):
-    """config.Config.__getattr__() method is working properly."""
+def test___getattr___is_working_as_expected(prepare_config_file):
+    """config.Config.__getattr__() method is working as expected."""
     c = config.Config()
     assert c.admin_name == "admin"
 
 
-def test___getitem___is_working_properly(prepare_config_file):
-    """config.Config.__getitem__() method is working properly."""
+def test___getitem___is_working_as_expected(prepare_config_file):
+    """config.Config.__getitem__() method is working as expected."""
     c = config.Config()
     assert c["admin_name"] == "admin"
 
 
-def test___setitem__is_working_properly(prepare_config_file):
-    """config.Config.__setitem__() method is working properly."""
+def test___setitem__is_working_as_expected(prepare_config_file):
+    """config.Config.__setitem__() method is working as expected."""
     c = config.Config()
     test_value = "administrator"
     assert c["admin_name"] != test_value
@@ -198,21 +198,21 @@ def test___setitem__is_working_properly(prepare_config_file):
     assert c["admin_name"] == test_value
 
 
-def test___delitem__is_working_properly(prepare_config_file):
-    """config.Config.__delitem__() method is working properly."""
+def test___delitem__is_working_as_expected(prepare_config_file):
+    """config.Config.__delitem__() method is working as expected."""
     c = config.Config()
     assert c["admin_name"] is not None
     del c["admin_name"]
     assert "admin_name" not in c
 
 
-def test___contains___is_working_properly(prepare_config_file):
-    """config.Config.__contains__() method is working properly."""
+def test___contains___is_working_as_expected(prepare_config_file):
+    """config.Config.__contains__() method is working as expected."""
     c = config.Config()
     assert "admin_name" in c
 
 
-def test_update_with_studio_is_working_properly(setup_postgresql_db):
+def test_update_with_studio_is_working_as_expected(setup_postgresql_db):
     """default values are updated with the Studio if there is a DB and a Studio."""
     # check the defaults are still using them self
     assert defaults.timing_resolution == datetime.timedelta(hours=1)

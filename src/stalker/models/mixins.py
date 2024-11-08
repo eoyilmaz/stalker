@@ -41,6 +41,70 @@ def create_secondary_table(
     Returns:
         Table: The secondary table.
     """
+    # validate data
+    # primary_cls_name
+    if not isinstance(primary_cls_name, str):
+        raise TypeError(
+            "primary_cls_name should be a str containing the primary class name, "
+            f"not {primary_cls_name.__class__.__name__}: '{primary_cls_name}'"
+        )
+
+    if primary_cls_name == "":
+        raise ValueError(
+            "primary_cls_name should be a str containing the primary class name, "
+            f"not: '{primary_cls_name}'"
+        )
+
+    # secondary_cls_name
+    if not isinstance(secondary_cls_name, str):
+        raise TypeError(
+            "secondary_cls_name should be a str containing the secondary class name, "
+            f"not {secondary_cls_name.__class__.__name__}: '{secondary_cls_name}'"
+        )
+
+    if secondary_cls_name == "":
+        raise ValueError(
+            "secondary_cls_name should be a str containing the secondary class name, "
+            f"not: '{secondary_cls_name}'"
+        )
+
+    # primary_cls_table_name
+    if not isinstance(primary_cls_table_name, str):
+        raise TypeError(
+            "primary_cls_table_name should be a str containing the primary class "
+            f"table name, not {primary_cls_table_name.__class__.__name__}: "
+            f"'{primary_cls_table_name}'"
+        )
+
+    if primary_cls_table_name == "":
+        raise ValueError(
+            "primary_cls_table_name should be a str containing the primary class "
+            f"table name, not: '{primary_cls_table_name}'"
+        )
+
+    # secondary_cls_table_name
+    if not isinstance(secondary_cls_table_name, str):
+        raise TypeError(
+            "secondary_cls_table_name should be a str containing the secondary class "
+            f"table name, not {secondary_cls_table_name.__class__.__name__}: "
+            f"'{secondary_cls_table_name}'"
+        )
+
+    if secondary_cls_table_name == "":
+        raise ValueError(
+            "secondary_cls_table_name should be a str containing the secondary class "
+            f"table name, not: '{secondary_cls_table_name}'"
+        )
+
+    # secondary_table_name
+    if secondary_table_name is not None and not isinstance(secondary_table_name, str):
+        raise TypeError(
+            "secondary_table_name should be a str containing the secondary table "
+            "name, or it can be None or an empty string to let Stalker to auto "
+            f"generate one, not {secondary_table_name.__class__.__name__}: "
+            f"'{secondary_table_name}'"
+        )
+
     plural_secondary_cls_name = make_plural(secondary_cls_name)
 
     # use the given class_name and the class_table
@@ -92,7 +156,7 @@ class TargetEntityTypeMixin(object):
 
             a_obj = A(target_entity_type=Project)
 
-        The ``a_obj`` will only be accepted by :class:`.Project` instances. You can not
+        The ``a_obj`` will only be accepted by :class:`.Project` instances. You cannot
         assign it to any other class which accepts a :class:`.Type` instance.
 
         To control the mixed-in class behaviour add these class variables to the
@@ -139,10 +203,10 @@ class TargetEntityTypeMixin(object):
         Returns:
             str: The validated target_entity_type value.
         """
-        # it can not be None
+        # it cannot be None
         if target_entity_type is None:
             raise TypeError(
-                f"{self.__class__.__name__}.target_entity_type can not be None"
+                f"{self.__class__.__name__}.target_entity_type cannot be None"
             )
 
         # check if it is a class
@@ -151,7 +215,7 @@ class TargetEntityTypeMixin(object):
 
         if target_entity_type == "":
             raise ValueError(
-                f"{self.__class__.__name__}.target_entity_type can not be empty"
+                f"{self.__class__.__name__}.target_entity_type cannot be empty"
             )
 
         return target_entity_type
@@ -196,7 +260,7 @@ class StatusMixin(object):
     Args:
         status_list (StatusList): this attribute holds a status list object, which
             shows the possible statuses that this entity could be in. This attribute
-            can not be empty or None. Giving a StatusList object, the
+            cannot be empty or None. Giving a StatusList object, the
             StatusList.target_entity_type should match the current class.
 
             .. versionadded:: 0.1.2.a4
@@ -246,7 +310,7 @@ class StatusMixin(object):
             # This is done in that way cause SQLAlchemy was flushing the data
             # (AutoFlush) preliminarily while checking if the given Status was
             # in the related StatusList, and it was complaining about the
-            # status can not be null
+            # status cannot be null
         )
 
     @declared_attr
@@ -327,7 +391,7 @@ class StatusMixin(object):
             # there is no db so raise an error because there is no way
             # to get an appropriate StatusList
             raise TypeError(
-                f"{self.__class__.__name__} instances can not be initialized without a "
+                f"{self.__class__.__name__} instances cannot be initialized without a "
                 "stalker.models.status.StatusList instance, please pass a "
                 "suitable StatusList "
                 f"(StatusList.target_entity_type={self.__class__.__name__}) with the "
@@ -396,7 +460,7 @@ class StatusMixin(object):
 
             if status >= len(self.status_list.statuses):
                 raise ValueError(
-                    f"{self.__class__.__name__}.status can not be bigger than the "
+                    f"{self.__class__.__name__}.status cannot be bigger than the "
                     "length of the status_list"
                 )
                 # get the status instance out of the status_list instance
@@ -493,7 +557,7 @@ class DateRangeMixin(object):
             dates is kept.
 
         duration (datetime.timedelta): The duration of the entity. It is a
-            :class:`datetime.timedelta` instance. The default value is read from 
+            :class:`datetime.timedelta` instance. The default value is read from
             he :class:`.Config` class. See the table above for the initialization
             rules.
     """
@@ -822,7 +886,7 @@ class ProjectMixin(object):
 
     Args:
         project (Project): A :class:`.Project` instance holding the project which this
-            object is related to. It can not be None, or anything other than a
+            object is related to. It cannot be None, or anything other than a
             :class:`.Project` instance.
     """
 
@@ -887,7 +951,7 @@ class ProjectMixin(object):
 
         if project is None:
             raise TypeError(
-                f"{self.__class__.__name__}.project can not be None it must be an "
+                f"{self.__class__.__name__}.project cannot be None it must be an "
                 "instance of stalker.models.project.Project"
             )
 
@@ -961,10 +1025,10 @@ class ReferenceMixin(object):
         """
         from stalker.models.link import Link
 
-        # all the elements should be instance of stalker.models.entity.Entity
+        # all the items should be instance of stalker.models.entity.Entity
         if not isinstance(reference, Link):
             raise TypeError(
-                f"All the elements in the {self.__class__.__name__}.references should "
+                f"All the items in the {self.__class__.__name__}.references should "
                 "be stalker.models.link.Link instances, "
                 f"not {reference.__class__.__name__}: '{reference}'"
             )
@@ -1068,7 +1132,7 @@ class CodeMixin(object):
     file and directory names.
 
     Args:
-        code (str): The code attribute is a string, can not be empty or can not be None.
+        code (str): The code attribute is a string, cannot be empty or cannot be None.
     """
 
     def __init__(self, code: str = None, **kwargs):
@@ -1088,7 +1152,7 @@ class CodeMixin(object):
             nullable=False,
             doc="""The code name of this object.
 
-                It accepts strings. Can not be None.""",
+                It accepts strings. Cannot be None.""",
         )
 
     @validates("code")
@@ -1118,7 +1182,7 @@ class CodeMixin(object):
 
         if code == "":
             raise ValueError(
-                f"{self.__class__.__name__}.code can not be an empty string"
+                f"{self.__class__.__name__}.code cannot be an empty string"
             )
 
         return code

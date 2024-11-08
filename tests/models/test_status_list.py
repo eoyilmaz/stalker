@@ -74,8 +74,8 @@ def test_statuses_argument_elements_being_status_objects(setup_status_list_tests
     )
 
 
-def test_statuses_attribute_works_properly(setup_status_list_tests):
-    """status_list attribute is working properly."""
+def test_statuses_attribute_works_as_expected(setup_status_list_tests):
+    """status_list attribute is working as expected."""
     data = setup_status_list_tests
     new_list_of_statutes = [Status(name="New Status", code="NSTS")]
     data["test_status_list"].statuses = new_list_of_statutes
@@ -198,3 +198,11 @@ def test_indexing_len(setup_status_list_tests):
     data = setup_status_list_tests
     # get the len and compare it wiht len(statuses)
     assert len(data["test_status_list"].statuses) == len(data["test_status_list"])
+
+
+def test__hash__is_working_as_expected(setup_status_list_tests):
+    """__hash__ is working as expected."""
+    data = setup_status_list_tests
+    result = hash(data["test_status_list"])
+    assert isinstance(result, int)
+    assert result == data["test_status_list"].__hash__()

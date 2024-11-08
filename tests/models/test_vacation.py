@@ -93,14 +93,14 @@ def test_user_attribute_is_not_a_user_instance(setup_vacation_tests):
     )
 
 
-def test_user_argument_is_working_properly(setup_vacation_tests):
+def test_user_argument_is_working_as_expected(setup_vacation_tests):
     """user argument value is correctly passed to the user attribute."""
     data = setup_vacation_tests
     assert data["test_vacation"].user == data["kwargs"]["user"]
 
 
-def test_user_attribute_is_working_properly(setup_vacation_tests):
-    """user attribute is working properly."""
+def test_user_attribute_is_working_as_expected(setup_vacation_tests):
+    """user attribute is working as expected."""
     data = setup_vacation_tests
     new_user = User(
         name="test user 2", login="testuser2", email="test@user.com", password="secret"
@@ -138,15 +138,14 @@ def test_to_tjp_attribute_is_a_read_only_property(setup_vacation_tests):
         9: "can't set attribute",
         10: "can't set attribute 'to_tjp'",
     }.get(
-        sys.version_info.minor,
-        "property 'to_tjp' of 'Vacation' object has no setter"
+        sys.version_info.minor, "property 'to_tjp' of 'Vacation' object has no setter"
     )
 
     assert str(cm.value) == error_message
 
 
-def test_to_tjp_attribute_is_working_properly(setup_vacation_tests):
-    """to_tjp attribute is working properly."""
+def test_to_tjp_attribute_is_working_as_expected(setup_vacation_tests):
+    """to_tjp attribute is working as expected."""
     data = setup_vacation_tests
     # TODO: Vacation should also use time zone info
     expected_tjp = "vacation 2013-06-06-10:00:00 - 2013-06-10-19:00:00"

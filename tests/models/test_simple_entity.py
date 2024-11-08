@@ -184,7 +184,7 @@ def test_nice_name_attr_is_read_only(setup_simple_entity_tests):
         10: "can't set attribute 'nice_name'",
     }.get(
         sys.version_info.minor,
-        "property 'nice_name' of 'SimpleEntity' object has no setter"
+        "property 'nice_name' of 'SimpleEntity' object has no setter",
     )
 
     assert str(cm.value) == error_message
@@ -423,7 +423,7 @@ def test_date_created_attr_being_empty(setup_simple_entity_tests):
     with pytest.raises(TypeError) as cm:
         data["test_simple_entity"].date_created = None
 
-    assert str(cm.value) == "SimpleEntity.date_created can not be None"
+    assert str(cm.value) == "SimpleEntity.date_created cannot be None"
 
 
 def test_date_updated_arg_accepts_datetime_only(setup_simple_entity_tests):
@@ -444,37 +444,29 @@ def test_date_updated_arg_accepts_datetime_only(setup_simple_entity_tests):
     )
 
 
-def test_date_updated_attr_being_datetime(setup_simple_entity_tests):
-    """TypeError raised if the date_updated attr is not a datetime instance."""
-    data = setup_simple_entity_tests
-    # try to set something else and expect a TypeError
-    test_value = "a string date time 2010-10-26 etc."
-
-    # be sure that the test_value is not an instance of datetime.datetime
-    assert not isinstance(test_value, datetime.datetime)
-
-    with pytest.raises(TypeError) as cm:
-        data["test_simple_entity"].date_updated = test_value
-
-    assert str(cm.value) == (
-        "SimpleEntity.date_updated should be a datetime.datetime instance, "
-        "not str: 'a string date time 2010-10-26 etc.'"
-    )
-
-
 def test_date_updated_attr_is_set_to_none(setup_simple_entity_tests):
     """TypeError is raised if the date_updated attr is set to None."""
     data = setup_simple_entity_tests
     with pytest.raises(TypeError) as cm:
-        data["test_simple_entity"].date_updated = "date_updated"
+        data["test_simple_entity"].date_updated = None
+
+    assert str(cm.value) == "SimpleEntity.date_updated cannot be None"
+
+
+def test_date_updated_attr_is_not_datetime(setup_simple_entity_tests):
+    """TypeError is raised if the date_updated attr is set to None."""
+    data = setup_simple_entity_tests
+    with pytest.raises(TypeError) as cm:
+        data["test_simple_entity"].date_updated = "this is not datetime"
+
     assert str(cm.value) == (
         "SimpleEntity.date_updated should be a datetime.datetime instance, "
-        "not str: 'date_updated'"
+        "not str: 'this is not datetime'"
     )
 
 
-def test_date_updated_attr_is_working_properly(setup_simple_entity_tests):
-    """date_updated attr is working properly."""
+def test_date_updated_attr_is_working_as_expected(setup_simple_entity_tests):
+    """date_updated attr is working as expected."""
     data = setup_simple_entity_tests
     test_value = datetime.datetime.now(pytz.utc)
     data["test_simple_entity"].date_updated = test_value
@@ -503,7 +495,7 @@ def test_date_created_is_before_date_updated(setup_simple_entity_tests):
 
 
 def test___repr__(setup_simple_entity_tests):
-    """__repr__ works properly."""
+    """__repr__ works as expected."""
     data = setup_simple_entity_tests
     assert data["test_simple_entity"].__repr__() == "<{} ({})>".format(
         data["test_simple_entity"].name,
@@ -690,7 +682,7 @@ def test_thumbnail_attr_is_not_a_link_instance(setup_simple_entity_tests):
     )
 
 
-def test_thumbnail_arg_is_working_properly(setup_simple_entity_tests):
+def test_thumbnail_arg_is_working_as_expected(setup_simple_entity_tests):
     """thumbnail arg value is passed to the thumbnail attr correctly."""
     data = setup_simple_entity_tests
     thumb = Link(full_path="some path")
@@ -699,8 +691,8 @@ def test_thumbnail_arg_is_working_properly(setup_simple_entity_tests):
     assert new_simple_entity.thumbnail == thumb
 
 
-def test_thumbnail_attr_is_working_properly(setup_simple_entity_tests):
-    """thumbnail attr is working properly."""
+def test_thumbnail_attr_is_working_as_expected(setup_simple_entity_tests):
+    """thumbnail attr is working as expected."""
     data = setup_simple_entity_tests
     thumb = Link(full_path="some path")
     assert not data["test_simple_entity"].thumbnail == thumb
@@ -753,7 +745,7 @@ def test_html_style_attr_is_not_set_to_a_string(setup_simple_entity_tests):
     )
 
 
-def test_html_style_arg_is_working_properly(setup_simple_entity_tests):
+def test_html_style_arg_is_working_as_expected(setup_simple_entity_tests):
     """html_style arg value is correctly passed to the html_style attr."""
     data = setup_simple_entity_tests
     test_value = "width: 100px; color: purple; background-color: black"
@@ -762,8 +754,8 @@ def test_html_style_arg_is_working_properly(setup_simple_entity_tests):
     assert se.html_style == test_value
 
 
-def test_html_style_attr_is_working_properly(setup_simple_entity_tests):
-    """html_style attr is working properly."""
+def test_html_style_attr_is_working_as_expected(setup_simple_entity_tests):
+    """html_style attr is working as expected."""
     data = setup_simple_entity_tests
     test_value = "width: 100px; color: purple; background-color: black"
     data["test_simple_entity"].html_style = test_value
@@ -815,7 +807,7 @@ def test_html_class_attr_is_not_set_to_a_string(setup_simple_entity_tests):
     )
 
 
-def test_html_class_arg_is_working_properly(setup_simple_entity_tests):
+def test_html_class_arg_is_working_as_expected(setup_simple_entity_tests):
     """html_class arg value is correctly passed to the html_class attr."""
     data = setup_simple_entity_tests
     test_value = "purple"
@@ -824,8 +816,8 @@ def test_html_class_arg_is_working_properly(setup_simple_entity_tests):
     assert se.html_class == test_value
 
 
-def test_html_class_attr_is_working_properly(setup_simple_entity_tests):
-    """html_class attr is working properly."""
+def test_html_class_attr_is_working_as_expected(setup_simple_entity_tests):
+    """html_class attr is working as expected."""
     data = setup_simple_entity_tests
     test_value = "purple"
     data["test_simple_entity"].html_class = test_value

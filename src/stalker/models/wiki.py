@@ -66,7 +66,7 @@ class Page(Entity, ProjectMixin):
             )
 
         if not title:
-            raise ValueError(f"{self.__class__.__name__}.title can not be empty")
+            raise ValueError(f"{self.__class__.__name__}.title cannot be empty")
 
         return title
 

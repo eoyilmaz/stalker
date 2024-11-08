@@ -65,7 +65,7 @@ def test_status_list_argument_not_set(setup_status_mixin_tester):
     with pytest.raises(TypeError) as cm:
         DeclStatMixA(**data["kwargs"])
     assert (
-        str(cm.value) == "DeclStatMixA instances can not be initialized without a "
+        str(cm.value) == "DeclStatMixA instances cannot be initialized without a "
         "stalker.models.status.StatusList instance, please pass a suitable StatusList "
         "(StatusList.target_entity_type=DeclStatMixA) with the 'status_list' argument"
     )
@@ -83,8 +83,8 @@ def test_status_list_argument_is_not_correct(setup_status_mixin_tester):
     )
 
 
-def test_status_list_working_properly(setup_status_mixin_tester):
-    """status_list attribute is working properly."""
+def test_status_list_working_as_expected(setup_status_mixin_tester):
+    """status_list attribute is working as expected."""
     data = setup_status_mixin_tester
     new_a_ins = DeclStatMixA(name="Ozgur", status_list=data["test_a_statusList"])
     assert data["test_stat1"] in new_a_ins.status_list

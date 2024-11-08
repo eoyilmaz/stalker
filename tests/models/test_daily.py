@@ -182,7 +182,7 @@ def test_links_argument_is_not_a_list_of_link_instances(setup_daily_tests):
     )
 
 
-def test_links_argument_is_working_properly(setup_daily_tests):
+def test_links_argument_is_working_as_expected(setup_daily_tests):
     """links argument value is correctly passed to the links attribute."""
     data = setup_daily_tests
     test_value = [data["test_link1"], data["test_link2"]]
@@ -195,8 +195,8 @@ def test_links_argument_is_working_properly(setup_daily_tests):
     assert daily.links == test_value
 
 
-def test_links_attribute_is_working_properly(setup_daily_tests):
-    """links attribute is working properly."""
+def test_links_attribute_is_working_as_expected(setup_daily_tests):
+    """links attribute is working as expected."""
     data = setup_daily_tests
     daily = Daily(
         name="Test Daily",

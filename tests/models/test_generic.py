@@ -42,13 +42,13 @@ from stalker.utils import make_plural, utc_to_local, local_to_utc
         ("thief", "thieves"),
     ],
 )
-def test_make_plural_is_working_properly(test_value, expected):
-    """make_plural() is working properly."""
+def test_make_plural_is_working_as_expected(test_value, expected):
+    """make_plural() is working as expected."""
     assert expected == make_plural(test_value)
 
 
-def test_utc_to_local_is_working_properly():
-    """utc_to_local() is working properly."""
+def test_utc_to_local_is_working_as_expected():
+    """utc_to_local() is working as expected."""
     local_now = datetime.datetime.now()
     utc_now = datetime.datetime.now(pytz.utc)
 
@@ -68,8 +68,8 @@ def test_utc_to_local_is_working_properly():
     assert local_from_utc.minute == local_now.minute
 
 
-def test_local_to_utc_is_working_properly():
-    """local_to_utc() is working properly."""
+def test_local_to_utc_is_working_as_expected():
+    """local_to_utc() is working as expected."""
     local_now = datetime.datetime.now()
     utc_now = datetime.datetime.now(pytz.utc)
 

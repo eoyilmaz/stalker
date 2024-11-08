@@ -283,7 +283,7 @@ def test_device_aspect_attribute_write_protected(setup_image_format_tests):
         10: "can't set attribute 'device_aspect'",
     }.get(
         sys.version_info.minor,
-        "property 'device_aspect' of 'ImageFormat' object has no setter"
+        "property 'device_aspect' of 'ImageFormat' object has no setter",
     )
 
     assert str(cm.value) == error_message
@@ -333,7 +333,7 @@ def test_pixel_aspect_float_conversion(setup_image_format_tests):
 def test_pixel_aspect_argument_zero(setup_image_format_tests):
     """ValueError is raised if the pixel_aspect argument is zero."""
     data = setup_image_format_tests
-    # the pixel aspect ratio can not be zero
+    # the pixel aspect ratio cannot be zero
     data["kwargs"]["pixel_aspect"] = 0
     with pytest.raises(ValueError) as cm:
         ImageFormat(**data["kwargs"])
@@ -355,7 +355,7 @@ def test_pixel_aspect_attribute_zero(setup_image_format_tests):
 def test_pixel_aspect_argument_negative_float(setup_image_format_tests):
     """ValueError is raised if pixel_aspect argument is negative."""
     data = setup_image_format_tests
-    # the pixel aspect ratio can not be negative
+    # the pixel aspect ratio cannot be negative
     data["kwargs"]["pixel_aspect"] = -1.0
     with pytest.raises(ValueError) as cm:
         ImageFormat(**data["kwargs"])
@@ -367,7 +367,7 @@ def test_pixel_aspect_argument_negative_float(setup_image_format_tests):
 def test_pixel_aspect_argument_negative_int(setup_image_format_tests):
     """ValueError is raised if pixel_aspect argument is negative."""
     data = setup_image_format_tests
-    # the pixel aspect ratio can not be negative
+    # the pixel aspect ratio cannot be negative
     data["kwargs"]["pixel_aspect"] = -1
     with pytest.raises(ValueError) as cm:
         ImageFormat(**data["kwargs"])
@@ -458,7 +458,7 @@ def test_print_resolution_argument_zero(setup_image_format_tests):
     data = setup_image_format_tests
     data["kwargs"]["print_resolution"] = 0
 
-    # the print timing_resolution can not be zero
+    # the print timing_resolution cannot be zero
     with pytest.raises(ValueError) as cm:
         ImageFormat(**data["kwargs"])
 
@@ -478,7 +478,7 @@ def test_print_resolution_attribute_zero(setup_image_format_tests):
 def test_print_resolution_argument_negative_int(setup_image_format_tests):
     """ValueError is raised if the print_resolution argument is negative."""
     data = setup_image_format_tests
-    # the print timing_resolution can not be negative
+    # the print timing_resolution cannot be negative
     data["kwargs"]["print_resolution"] = -300
     with pytest.raises(ValueError) as cm:
         ImageFormat(**data["kwargs"])
@@ -489,7 +489,7 @@ def test_print_resolution_argument_negative_int(setup_image_format_tests):
 def test_print_resolution_argument_negative_float(setup_image_format_tests):
     """ValueError is raised if the print_resolution argument is negative."""
     data = setup_image_format_tests
-    # the print timing_resolution can not be negative
+    # the print timing_resolution cannot be negative
     data["kwargs"]["print_resolution"] = -300.0
     with pytest.raises(ValueError) as cm:
         ImageFormat(**data["kwargs"])
@@ -565,7 +565,9 @@ def test_hash_value(setup_image_format_tests):
     """hash value is correctly calculated."""
     data = setup_image_format_tests
     assert data["test_image_format"].__hash__() == hash(
-        data["test_image_format"].id
-    ) + 2 * hash(data["test_image_format"].name) + 3 * hash(
-        data["test_image_format"].entity_type
+        "{}:{}:{}".format(
+            data["test_image_format"].id,
+            data["test_image_format"].name,
+            data["test_image_format"].entity_type,
+        )
     )

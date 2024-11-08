@@ -415,8 +415,8 @@ def test_inequality(setup_client_tests):
     assert client1 != entity1
 
 
-def test_to_tjp_method_is_working_properly(setup_client_tests):
-    """to_tjp method is working properly."""
+def test_to_tjp_method_is_working_as_expected(setup_client_tests):
+    """to_tjp method is working as expected."""
     data = setup_client_tests
     client1 = Client(**data["kwargs"])
     assert client1.to_tjp() == ""
@@ -426,8 +426,8 @@ def test_hash_is_correctly_calculated(setup_client_tests):
     """hash value is correctly calculated."""
     data = setup_client_tests
     client1 = Client(**data["kwargs"])
-    assert client1.__hash__() == hash(client1.id) + 2 * hash(client1.name) + 3 * hash(
-        client1.entity_type
+    assert client1.__hash__() == hash(
+        "{}:{}:{}".format(client1.id, client1.name, client1.entity_type)
     )
 
 
@@ -454,8 +454,8 @@ def test_goods_attribute_is_set_to_a_list_of_non_good_instances(setup_client_tes
     )
 
 
-def test_goods_attribute_is_working_properly(setup_client_tests):
-    """goods attribute is working properly."""
+def test_goods_attribute_is_working_as_expected(setup_client_tests):
+    """goods attribute is working as expected."""
     data = setup_client_tests
     client1 = Client(**data["kwargs"])
     good1 = Good(name="Test Good 1")

@@ -123,7 +123,7 @@ def test_task_attribute_is_not_a_task_instance(setup_task_dependency_db_test):
     )
 
 
-def test_task_argument_is_working_properly(setup_task_dependency_db_test):
+def test_task_argument_is_working_as_expected(setup_task_dependency_db_test):
     """task argument value is correctly passed to task attribute."""
     data = setup_task_dependency_db_test
     data["test_task1"].depends_on = []
@@ -182,7 +182,7 @@ def test_depends_on_attribute_is_not_a_task_instance(setup_task_dependency_db_te
     )
 
 
-def test_depends_on_argument_is_working_properly(setup_task_dependency_db_test):
+def test_depends_on_argument_is_working_as_expected(setup_task_dependency_db_test):
     """depends_on argument value is correctly passed to depends_on attribute."""
     data = setup_task_dependency_db_test
     data["test_task1"].depends_on = []
@@ -241,7 +241,7 @@ def test_gap_timing_attribute_is_not_a_float(setup_task_dependency_db_test):
     )
 
 
-def test_gap_timing_argument_is_working_properly(setup_task_dependency_db_test):
+def test_gap_timing_argument_is_working_as_expected(setup_task_dependency_db_test):
     """gap_timing argument value is correctly passed to the gap_timing attribute."""
     data = setup_task_dependency_db_test
     test_value = 11
@@ -250,8 +250,8 @@ def test_gap_timing_argument_is_working_properly(setup_task_dependency_db_test):
     assert tdep.gap_timing == test_value
 
 
-def test_gap_timing_attribute_is_working_properly(setup_task_dependency_db_test):
-    """gap_timing attribute is working properly."""
+def test_gap_timing_attribute_is_working_as_expected(setup_task_dependency_db_test):
+    """gap_timing attribute is working as expected."""
     data = setup_task_dependency_db_test
     tdep = TaskDependency(**data["kwargs"])
     test_value = 11
@@ -341,7 +341,7 @@ def test_gap_unit_attribute_value_is_not_in_the_enum_list(
     )
 
 
-def test_gap_unit_argument_is_working_properly(setup_task_dependency_db_test):
+def test_gap_unit_argument_is_working_as_expected(setup_task_dependency_db_test):
     """gap_unit argument value is correctly passed to the gap_unit attribute on init."""
     data = setup_task_dependency_db_test
     test_value = "y"
@@ -350,8 +350,8 @@ def test_gap_unit_argument_is_working_properly(setup_task_dependency_db_test):
     assert tdep.gap_unit == test_value
 
 
-def test_gap_unit_attribute_is_working_properly(setup_task_dependency_db_test):
-    """gap_unit attribute is working properly."""
+def test_gap_unit_attribute_is_working_as_expected(setup_task_dependency_db_test):
+    """gap_unit attribute is working as expected."""
     data = setup_task_dependency_db_test
     tdep = TaskDependency(**data["kwargs"])
     test_value = "w"
@@ -440,7 +440,7 @@ def test_gap_model_attribute_value_is_not_in_the_enum_list(
     )
 
 
-def test_gap_model_argument_is_working_properly(setup_task_dependency_db_test):
+def test_gap_model_argument_is_working_as_expected(setup_task_dependency_db_test):
     """gap_model arg is passed okay to the gap_model attr on init."""
     data = setup_task_dependency_db_test
     test_value = "duration"
@@ -449,8 +449,8 @@ def test_gap_model_argument_is_working_properly(setup_task_dependency_db_test):
     assert tdep.gap_model == test_value
 
 
-def test_gap_model_attribute_is_working_properly(setup_task_dependency_db_test):
-    """gap_model attribute is working properly."""
+def test_gap_model_attribute_is_working_as_expected(setup_task_dependency_db_test):
+    """gap_model attribute is working as expected."""
     data = setup_task_dependency_db_test
     tdep = TaskDependency(**data["kwargs"])
     test_value = "duration"
@@ -543,15 +543,19 @@ def test_dependency_target_attribute_value_is_not_in_the_enum_list(
     )
 
 
-def test_dependency_target_argument_is_working_properly(setup_task_dependency_db_test):
+def test_dependency_target_argument_is_working_as_expected(
+    setup_task_dependency_db_test,
+):
     """dependency_target arg is passed okay to the dependency_target attr on init."""
     data = setup_task_dependency_db_test
     tdep = TaskDependency(**data["kwargs"])
     assert tdep.dependency_target == "onend"
 
 
-def test_dependency_target_attribute_is_working_properly(setup_task_dependency_db_test):
-    """dependency_target attribute is working properly."""
+def test_dependency_target_attribute_is_working_as_expected(
+    setup_task_dependency_db_test,
+):
+    """dependency_target attribute is working as expected."""
     data = setup_task_dependency_db_test
     tdep = TaskDependency(**data["kwargs"])
     onstart = "onstart"

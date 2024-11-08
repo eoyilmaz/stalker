@@ -216,7 +216,7 @@ def test_number_attribute_is_read_only(setup_ticket_tests):
         12: "property of 'Ticket' object has no setter",
     }.get(
         sys.version_info.minor,
-        "property '_number_getter' of 'Ticket' object has no setter"
+        "property '_number_getter' of 'Ticket' object has no setter",
     )
 
     assert str(cm.value) == error_message
@@ -315,7 +315,7 @@ def test_related_ticket_attribute_will_not_accept_self(setup_ticket_tests):
         data["test_ticket"].related_tickets = [data["test_ticket"]]
 
     assert (
-        str(cm.value) == "Ticket.related_ticket attribute can not "
+        str(cm.value) == "Ticket.related_ticket attribute cannot "
         "have itself in the list"
     )
 
@@ -402,8 +402,8 @@ def test_project_argument_accepts_project_instances_only(setup_ticket_tests):
     )
 
 
-def test_project_argument_is_working_properly(setup_ticket_tests):
-    """project argument is working properly."""
+def test_project_argument_is_working_as_expected(setup_ticket_tests):
+    """project argument is working as expected."""
     data = setup_ticket_tests
     data["kwargs"]["project"] = data["test_project"]
     new_ticket = Ticket(**data["kwargs"])
@@ -424,7 +424,7 @@ def test_project_attribute_is_read_only(setup_ticket_tests):
         12: "property of 'Ticket' object has no setter",
     }.get(
         sys.version_info.minor,
-        "property '_project_getter' of 'Ticket' object has no setter"
+        "property '_project_getter' of 'Ticket' object has no setter",
     )
 
     assert str(cm.value) == error_message
@@ -798,7 +798,7 @@ def test_summary_attribute_is_set_to_a_value_other_than_a_string(setup_ticket_te
     )
 
 
-def test_summary_argument_is_working_properly(setup_ticket_tests):
+def test_summary_argument_is_working_as_expected(setup_ticket_tests):
     """summary argument value is passed to summary attribute correctly."""
     data = setup_ticket_tests
     test_value = "test summary"
@@ -807,10 +807,38 @@ def test_summary_argument_is_working_properly(setup_ticket_tests):
     assert new_ticket.summary == test_value
 
 
-def test_summary_attribute_is_working_properly(setup_ticket_tests):
-    """summary attribute is working properly."""
+def test_summary_attribute_is_working_as_expected(setup_ticket_tests):
+    """summary attribute is working as expected."""
     data = setup_ticket_tests
     test_value = "test_summary"
     assert data["test_ticket"].summary != test_value
     data["test_ticket"].summary = test_value
     assert data["test_ticket"].summary == test_value
+
+
+def test__hash__is_working_as_expected(setup_ticket_tests):
+    """__hash__ is working as expected."""
+    data = setup_ticket_tests
+    result = hash(data["test_ticket"])
+    assert isinstance(result, int)
+    assert result == data["test_ticket"].__hash__()
+
+
+def test__eq__of_two_tickets_true_case(setup_ticket_tests):
+    """__eq__() for two tickets."""
+    data = setup_ticket_tests
+    ticket1 = data["test_ticket"]
+    ticket2 = Ticket.query.filter_by(name=ticket1.name).first()
+    assert (ticket1 == ticket2) is True
+
+
+def test__eq__of_two_tickets_false_case(setup_ticket_tests):
+    """__eq__() for two tickets."""
+    data = setup_ticket_tests
+    new_ticket = Ticket(**data["kwargs"])
+    assert (data["test_ticket"] == new_ticket) is False
+
+
+def test_max_number_returns_0():
+    """_maximum_number() returns 0 when there is no DB connection."""
+    assert Ticket._maximum_number() == 0

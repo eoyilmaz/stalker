@@ -81,7 +81,7 @@ class SchedulerBase(object):
         """Schedule function that needs to be implemented in the derivatives.
 
         Raises:
-            NotImplementedError: If this is not implemneted in the derived class.
+            NotImplementedError: If this is not implemented in the derived class.
         """
         raise NotImplementedError
 
@@ -211,8 +211,8 @@ class TaskJugglerScheduler(SchedulerBase):
         self.temp_file_full_path = tempfile.mktemp(prefix="Stalker_")
         self.temp_file_path = os.path.dirname(self.temp_file_full_path)
         self.temp_file_name = os.path.basename(self.temp_file_full_path)
-        self.tjp_file_full_path = self.temp_file_full_path + ".tjp"
-        self.csv_file_full_path = self.temp_file_full_path + ".csv"
+        self.tjp_file_full_path = f"{self.temp_file_full_path}.tjp"
+        self.csv_file_full_path = f"{self.temp_file_full_path}.csv"
 
     def _create_tjp_file_content(self):  # noqa: C901
         """Create the tjp file content."""
@@ -509,7 +509,7 @@ order by path_as_text"""  # noqa: B950
 
         end = time.time()
         logger.debug(
-            "rendering the whole tjp file took : {} seconds".format(end - start)
+            "rendering the whole tjp file took: {:0.3f} seconds".format(end - start)
         )
 
     def _fill_tjp_file(self):
@@ -542,7 +542,7 @@ order by path_as_text"""  # noqa: B950
 
         logger.debug(f"csv_file_full_path : {self.csv_file_full_path}")
         if not os.path.exists(self.csv_file_full_path):
-            logger.debug("could not find CSV file, " "returning without updating db!")
+            logger.debug("could not find CSV file, returning without updating db!")
             return
 
         entity_ids = []
@@ -559,36 +559,34 @@ order by path_as_text"""  # noqa: B950
             id_line = data[0]
 
             entity_id = int(id_line.split(".")[-1].split("_")[-1])
+            if not entity_id:
+                continue
 
-            if entity_id:
-                entity_ids.append(entity_id)
-                start_date = datetime.datetime.strptime(data[1], "%Y-%m-%d-%H:%M")
-                end_date = datetime.datetime.strptime(data[2], "%Y-%m-%d-%H:%M")
+            entity_ids.append(entity_id)
+            start_date = datetime.datetime.strptime(data[1], "%Y-%m-%d-%H:%M")
+            end_date = datetime.datetime.strptime(data[2], "%Y-%m-%d-%H:%M")
 
-                # implement time zone info
-                start_date = start_date.replace(tzinfo=pytz.utc)
-                end_date = end_date.replace(tzinfo=pytz.utc)
+            # implement time zone info
+            start_date = start_date.replace(tzinfo=pytz.utc)
+            end_date = end_date.replace(tzinfo=pytz.utc)
 
-                # computed_resources
-                if self.compute_resources:
-                    if data[3] != "":
-                        resources_data = map(
-                            lambda x: x.split("_")[-1].split(")")[0], data[3].split(",")
-                        )
-                        for rid in resources_data:
-                            update_user_data.append(
-                                {"task_id": entity_id, "resource_id": rid}
-                            )
-
-                update_data.append(
-                    {
-                        "b_id": entity_id,
-                        "start": start_date,
-                        "end": end_date,
-                        "computed_start": start_date,
-                        "computed_end": end_date,
-                    }
+            # computed_resources
+            if self.compute_resources and data[3] != "":
+                resources_data = map(
+                    lambda x: x.split("_")[-1].split(")")[0], data[3].split(",")
                 )
+                for rid in resources_data:
+                    update_user_data.append({"task_id": entity_id, "resource_id": rid})
+
+            update_data.append(
+                {
+                    "b_id": entity_id,
+                    "start": start_date,
+                    "end": end_date,
+                    "computed_start": start_date,
+                    "computed_end": end_date,
+                }
+            )
 
         # update date values
         update_statement = (

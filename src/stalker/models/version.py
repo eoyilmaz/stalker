@@ -66,8 +66,8 @@ class Version(Link, DAGMixin):
             Stalker are used for creating variants versions. Versions with the same
             ``variant_name`` (of the same Task) are numbered together. It can be any
             alphanumeric value (a-zA-Z0-9_). The default is the string "Main". When
-            skipped it will use the default value. It can not start with a number. It
-            can not have white spaces.
+            skipped it will use the default value. It cannot start with a number. It
+            cannot have white spaces.
         inputs (List[Link]): A list o :class:`.Link` instances, holding the inputs of
             the current version. It could be a texture for a Maya file or an image
             sequence for Nuke, or anything those you can think as the input for the
@@ -247,7 +247,7 @@ class Version(Link, DAGMixin):
 
         if variant_name == "":
             raise ValueError(
-                f"{self.__class__.__name__}.variant_name can not be an empty string"
+                f"{self.__class__.__name__}.variant_name cannot be an empty string"
             )
 
         return variant_name
@@ -260,28 +260,22 @@ class Version(Link, DAGMixin):
             Version: The :class:`.Version` instance with the highest version number in
                 this version series.
         """
+        latest_version = None
         try:
             with DBSession.no_autoflush:
-                last_version = (
+                latest_version = (
                     Version.query.filter(Version.task == self.task)
                     .filter(Version.variant_name == self.variant_name)
                     .order_by(Version.version_number.desc())
                     .first()
                 )
+            return latest_version
         except (UnboundExecutionError, OperationalError):
             all_versions = sorted(
                 self.task.versions,
                 key=lambda x: x.version_number if x.version_number else -1,
             )
-            if all_versions:
-                last_version = all_versions[-1]
-                if last_version != self:
-                    return last_version
-                else:
-                    return 0
-            else:
-                last_version = None
-        return last_version
+            return all_versions[-1] if all_versions else None
 
     @property
     def max_version_number(self) -> int:
@@ -291,11 +285,7 @@ class Version(Link, DAGMixin):
             int: The maximum version number for this Version.
         """
         latest_version = self.latest_version
-
-        if latest_version:
-            return latest_version.version_number
-
-        return 0
+        return latest_version.version_number if latest_version else 0
 
     @validates("version_number")
     def _validate_version_number(self, key: str, version_number: int) -> int:
@@ -318,20 +308,29 @@ class Version(Link, DAGMixin):
         logger.debug(f"max_version_number: {max_version_number}")
         logger.debug(f"given version_number: {version_number}")
 
-        if version_number is None or version_number <= max_version_number:
-            if latest_version == self:
-                version_number = latest_version.version_number
-                logger.debug(
-                    "the version is the latest version in database, the "
-                    f"number will not be changed from {version_number}"
-                )
+        if version_number is not None and version_number > max_version_number:
+            return version_number
+
+        if latest_version == self:
+            if self.version_number is not None:
+                version_number = self.version_number
             else:
-                version_number = max_version_number + 1
+                version_number = 1
                 logger.debug(
-                    "given Version.version_number is too low,"
-                    f"max version_number in the database is {max_version_number}, "
-                    f"setting the current version_number to {version_number}"
+                    "self.version_number is weirdly 'None', "
+                    "no database connection maybe?"
                 )
+            logger.debug(
+                "the version is the latest version in database, the "
+                f"number will not be changed from {version_number}"
+            )
+        else:
+            version_number = max_version_number + 1
+            logger.debug(
+                "given Version.version_number is too low,"
+                f"max version_number in the database is {max_version_number}, "
+                f"setting the current version_number to {version_number}"
+            )
 
         return version_number
 
@@ -350,7 +349,7 @@ class Version(Link, DAGMixin):
             Task: The validated :class:`.Task` instance.
         """
         if task is None:
-            raise TypeError("{}.task can not be None".format(self.__class__.__name__))
+            raise TypeError("{}.task cannot be None".format(self.__class__.__name__))
 
         if not isinstance(task, Task):
             raise TypeError(
@@ -474,12 +473,12 @@ class Version(Link, DAGMixin):
             )
 
         temp_filename = jinja2.Template(vers_template.filename).render(**kwargs)
-        if not isinstance(temp_filename, string_types):
-            temp_filename = temp_filename.encode("utf-8")
+        if isinstance(temp_filename, bytes):
+            temp_filename = temp_filename.decode("utf-8")
 
         temp_path = jinja2.Template(vers_template.path).render(**kwargs)
-        if not isinstance(temp_path, string_types):
-            temp_path = temp_path.encode("utf-8")
+        if isinstance(temp_path, bytes):
+            temp_path = temp_path.decode("utf-8")
 
         self.filename = temp_filename
         self.path = temp_path

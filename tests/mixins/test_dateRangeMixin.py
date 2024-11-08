@@ -96,8 +96,8 @@ def test_start_attribute_is_set_to_none_use_the_default_value(date_range_mixin_t
     assert isinstance(data["test_foo_obj"].start, datetime.datetime)
 
 
-def test_start_attribute_works_properly(date_range_mixin_tester):
-    """start attribute is working properly."""
+def test_start_attribute_works_as_expected(date_range_mixin_tester):
+    """start attribute is working as expected."""
     data = date_range_mixin_tester
     test_value = datetime.datetime(2011, 1, 1, tzinfo=pytz.utc)
     data["test_foo_obj"].start = test_value
@@ -301,7 +301,7 @@ def test_init_all_parameters_skipped(date_range_mixin_tester):
     new_foo_entity = DateRangeMixFooMixedInClass(**data["kwargs"])
 
     assert isinstance(new_foo_entity.start, datetime.datetime)
-    # can not check for start, just don't want to struggle with the round
+    # cannot check for start, just don't want to struggle with the round
     # thing
     # assert \
     #     new_foo_entity.start == \
@@ -411,7 +411,7 @@ def test_init_only_duration_argument_is_given(date_range_mixin_tester):
 
     # just check if it is an instance of datetime.datetime
     assert isinstance(new_foo_entity.start, datetime.datetime)
-    # can not check for start
+    # cannot check for start
     # assert new_foo_entity.start == \
     #        datetime.datetime(2013, 3, 22, 15, 30, tzinfo=pytz.utc
     assert new_foo_entity.end == new_foo_entity.start + new_foo_entity.duration
@@ -513,7 +513,7 @@ def test_computed_duration_is_read_only(date_range_mixin_tester):
     }.get(
         sys.version_info.minor,
         "property 'computed_duration' of 'DateRangeMixFooMixedInClass' "
-        "object has no setter"
+        "object has no setter",
     )
 
     assert str(cm.value) == error_message
@@ -533,13 +533,13 @@ def test_total_seconds_attribute_is_read_only(date_range_mixin_tester):
     }.get(
         sys.version_info.minor,
         "property 'total_seconds' of 'DateRangeMixFooMixedInClass' "
-        "object has no setter"
+        "object has no setter",
     )
 
     assert str(cm.value) == error_message
 
 
-def test_total_seconds_attribute_is_working_properly(date_range_mixin_tester):
+def test_total_seconds_attribute_is_working_as_expected(date_range_mixin_tester):
     """total_seconds is read only."""
     data = date_range_mixin_tester
     new_foo_obj = DateRangeMixFooMixedInClass(**data["kwargs"])
@@ -562,13 +562,15 @@ def test_computed_total_seconds_attribute_is_read_only(date_range_mixin_tester):
     }.get(
         sys.version_info.minor,
         "property 'computed_total_seconds' of 'DateRangeMixFooMixedInClass' "
-        "object has no setter"
+        "object has no setter",
     )
 
     assert str(cm.value) == error_message
 
 
-def test_computed_total_seconds_attribute_is_working_properly(date_range_mixin_tester):
+def test_computed_total_seconds_attribute_is_working_as_expected(
+    date_range_mixin_tester,
+):
     """computed_total_seconds is read only."""
     data = date_range_mixin_tester
     new_foo_obj = DateRangeMixFooMixedInClass(**data["kwargs"])

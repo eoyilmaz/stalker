@@ -50,8 +50,8 @@ def test_permission_attribute_accept_permission_instances_only(acl_mixin_test_se
     )
 
 
-def test_permission_attribute_is_working_properly(acl_mixin_test_setup):
-    """permissions attribute is working properly."""
+def test_permission_attribute_is_working_as_expected(acl_mixin_test_setup):
+    """permissions attribute is working as expected."""
     data = acl_mixin_test_setup
     assert data["test_instance"].permissions == [data["test_perm1"]]
 

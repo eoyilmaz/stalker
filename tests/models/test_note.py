@@ -81,8 +81,8 @@ def test_content_attribute_is_set_to_something_other_than_a_string(setup_note_te
     assert str(cm.value) == "Note.description should be a string, not int: '1'"
 
 
-def test_content_attribute_is_working_properly(setup_note_tests):
-    """content attribute is working properly."""
+def test_content_attribute_is_working_as_expected(setup_note_tests):
+    """content attribute is working as expected."""
     data = setup_note_tests
     new_content = (
         "This is my new content for the note, and I expect it to "
@@ -118,3 +118,11 @@ def test_plural_class_name(setup_note_tests):
     """plural name of Note class."""
     data = setup_note_tests
     assert data["test_note"].plural_class_name == "Notes"
+
+
+def test__hash__is_working_as_expected(setup_note_tests):
+    """__hash__ is working as expected."""
+    data = setup_note_tests
+    result = hash(data["test_note"])
+    assert isinstance(result, int)
+    assert result == data["test_note"].__hash__()

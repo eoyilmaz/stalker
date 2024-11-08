@@ -290,8 +290,8 @@ def test_priority_attr_is_float(test_value, setup_task_tests):
     assert new_task.priority == int(test_value)
 
 
-def test_priority_attr_is_working_properly(setup_task_tests):
-    """priority attr is working properly."""
+def test_priority_attr_is_working_as_expected(setup_task_tests):
+    """priority attr is working as expected."""
     data = setup_task_tests
     new_task = Task(**data["kwargs"])
     test_value = 234
@@ -377,8 +377,8 @@ def test_resources_attr_is_set_to_a_list_of_other_values_then_user(
     )
 
 
-def test_resources_attr_is_working_properly(setup_task_tests):
-    """resources attr is working properly."""
+def test_resources_attr_is_working_as_expected(setup_task_tests):
+    """resources attr is working as expected."""
     data = setup_task_tests
     new_task = Task(**data["kwargs"])
     test_value = [data["test_user1"]]
@@ -562,8 +562,8 @@ def test_watchers_attr_is_set_to_a_list_of_other_values_then_user(
         new_task.watchers = test_values
 
 
-def test_watchers_attr_is_working_properly(setup_task_tests):
-    """watchers attr is working properly."""
+def test_watchers_attr_is_working_as_expected(setup_task_tests):
+    """watchers attr is working as expected."""
     data = setup_task_tests
     new_task = Task(**data["kwargs"])
     test_value = [data["test_user1"]]
@@ -911,8 +911,8 @@ def test_depends_arg_doesnt_allow_one_of_the_parents_of_the_task(setup_task_test
     )
 
 
-def test_depends_arg_is_working_properly(setup_task_tests):
-    """depends_on arg is working properly."""
+def test_depends_arg_is_working_as_expected(setup_task_tests):
+    """depends_on arg is working as expected."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
     kwargs["depends_on"] = None
@@ -927,8 +927,8 @@ def test_depends_arg_is_working_properly(setup_task_tests):
     assert len(task_c.depends_on) == 2
 
 
-def test_depends_attr_is_working_properly(setup_task_tests):
-    """ "depends_on" attr is working properly."""
+def test_depends_attr_is_working_as_expected(setup_task_tests):
+    """ "depends_on" attr is working as expected."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
     kwargs["depends_on"] = None
@@ -962,10 +962,10 @@ def test_percent_complete_attr_is_read_only(setup_task_tests):
     assert str(cm.value) == error_message
 
 
-def test_percent_complete_attr_is_working_properly_for_a_duration_based_leaf_task_1(
+def test_percent_complete_attr_is_working_as_expected_for_a_duration_based_leaf_task_1(
     setup_task_tests,
 ):
-    """percent_complete attr is working properly for a duration based leaf task.
+    """percent_complete attr is working as expected for a duration based leaf task.
 
     #########
                ^
@@ -989,10 +989,10 @@ def test_percent_complete_attr_is_working_properly_for_a_duration_based_leaf_tas
     assert new_task.percent_complete == 100
 
 
-def test_percent_complete_attr_is_working_properly_for_a_duration_based_leaf_task_2(
+def test_percent_complete_attr_is_working_as_expected_for_a_duration_based_leaf_task_2(
     setup_task_tests,
 ):
-    """percent_complete attr is working properly for a duration based leaf task.
+    """percent_complete attr is working as expected for a duration based leaf task.
 
     #########
             ^
@@ -1015,10 +1015,10 @@ def test_percent_complete_attr_is_working_properly_for_a_duration_based_leaf_tas
     assert new_task.percent_complete == 100
 
 
-def test_percent_complete_attr_is_working_properly_for_a_duration_based_leaf_task_3(
+def test_percent_complete_attr_is_working_as_expected_for_a_duration_based_leaf_task_3(
     setup_task_tests,
 ):
-    """percent_complete attr is working properly for a duration based leaf task.
+    """percent_complete attr is working as expected for a duration based leaf task.
 
     #########
         ^
@@ -1039,16 +1039,16 @@ def test_percent_complete_attr_is_working_properly_for_a_duration_based_leaf_tas
     new_task.end = now + td(hours=12)
 
     # it should be somewhere around 50%
-    # due to the timing resolution we can not know it exactly
+    # due to the timing resolution we cannot know it exactly
     # and I don't want to patch datetime.datetime.now(pytz.utc)
     # this is a very simple test
     assert abs(new_task.percent_complete - 50 < 5)
 
 
-def test_percent_complete_attr_is_working_properly_for_a_duration_based_leaf_task_4(
+def test_percent_complete_attr_is_working_as_expected_for_a_duration_based_leaf_task_4(
     setup_task_tests,
 ):
-    """percent_complete attr is working properly for a duration based leaf task.
+    """percent_complete attr is working as expected for a duration based leaf task.
 
      #########
      ^
@@ -1071,10 +1071,10 @@ def test_percent_complete_attr_is_working_properly_for_a_duration_based_leaf_tas
     assert new_task.percent_complete < 5
 
 
-def test_percent_complete_attr_is_working_properly_for_a_duration_based_leaf_task_5(
+def test_percent_complete_attr_is_working_as_expected_for_a_duration_based_leaf_task_5(
     setup_task_tests,
 ):
-    """percent_complete attr is working properly for a duration based leaf task.
+    """percent_complete attr is working as expected for a duration based leaf task.
 
        #########
      ^
@@ -1218,7 +1218,7 @@ def test_time_logs_attr_is_not_a_list_of_timelog_instances(setup_task_tests):
         # ],
     ],
 )
-def test_schedule_seconds_is_working_properly_for_an_effort_based_task_no_studio(
+def test_schedule_seconds_is_working_as_expected_for_an_effort_based_task_no_studio(
     setup_task_tests, schedule_timing, schedule_unit, schedule_seconds
 ):
     """schedule_seconds attr is working okay for an effort based task when no studio."""
@@ -1246,7 +1246,7 @@ def test_schedule_seconds_is_working_properly_for_an_effort_based_task_no_studio
         # ],
     ],
 )
-def test_schedule_seconds_is_working_properly_for_an_effort_based_task_with_studio(
+def test_schedule_seconds_is_working_as_expected_for_an_effort_based_task_with_studio(
     setup_task_tests, schedule_timing, schedule_unit, schedule_seconds
 ):
     """schedule_seconds attr is working okay for an effort based task when no studio."""
@@ -1257,7 +1257,7 @@ def test_schedule_seconds_is_working_properly_for_an_effort_based_task_with_stud
     _ = Studio(
         name="Test Studio",
         daily_working_hours=8,
-        timing_resolution=datetime.timedelta(hours=1)
+        timing_resolution=datetime.timedelta(hours=1),
     )
     kwargs["schedule_model"] = "effort"
     kwargs["schedule_timing"] = schedule_timing
@@ -1266,8 +1266,8 @@ def test_schedule_seconds_is_working_properly_for_an_effort_based_task_with_stud
     assert new_task.schedule_seconds == schedule_seconds
 
 
-def test_schedule_seconds_is_working_properly_for_a_container_task(setup_task_tests):
-    """schedule_seconds attr is working properly for a container task."""
+def test_schedule_seconds_is_working_as_expected_for_a_container_task(setup_task_tests):
+    """schedule_seconds attr is working as expected for a container task."""
     assert defaults.daily_working_hours == 9
     assert defaults.weekly_working_days == 5
     assert defaults.yearly_working_days == 261
@@ -1337,7 +1337,7 @@ def test_schedule_seconds_is_working_properly_for_a_container_task(setup_task_te
 def test_schedule_seconds_is_working_okay_for_a_container_task_if_the_child_is_updated(
     setup_task_tests,
 ):
-    """schedule_seconds attr is working properly for a container task."""
+    """schedule_seconds attr is working as expected for a container task."""
     assert defaults.daily_working_hours == 9
     assert defaults.weekly_working_days == 5
     assert defaults.yearly_working_days == 261
@@ -1422,7 +1422,7 @@ def test_schedule_seconds_is_working_okay_for_a_container_task_if_the_child_is_u
 def test_schedule_seconds_is_working_okay_for_a_task_if_the_child_is_updated_deeper(
     setup_task_tests,
 ):
-    """schedule_seconds attr is working properly for a container task."""
+    """schedule_seconds attr is working as expected for a container task."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
     defaults["timing_resolution"] = datetime.timedelta(hours=1)
@@ -1812,8 +1812,8 @@ def test_parent_attr_creates_a_cycle(setup_task_tests):
     )
 
 
-def test_parent_arg_is_working_properly(setup_task_tests):
-    """parent arg is working properly."""
+def test_parent_arg_is_working_as_expected(setup_task_tests):
+    """parent arg is working as expected."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
     new_task1 = Task(**kwargs)
@@ -1822,8 +1822,8 @@ def test_parent_arg_is_working_properly(setup_task_tests):
     assert new_task2.parent == new_task1
 
 
-def test_parent_attr_is_working_properly(setup_task_tests):
-    """parent attr is working properly."""
+def test_parent_attr_is_working_as_expected(setup_task_tests):
+    """parent attr is working as expected."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
     new_task1 = Task(**kwargs)
@@ -1914,8 +1914,8 @@ def test_children_attr_accepts_tasks_only(setup_task_tests):
     assert str(cm.value) == "Incompatible collection type: str is not list-like"
 
 
-def test_children_attr_is_working_properly(setup_task_tests):
-    """children attr is working properly."""
+def test_children_attr_is_working_as_expected(setup_task_tests):
+    """children attr is working as expected."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
     new_task = Task(**kwargs)
@@ -1957,7 +1957,7 @@ def test_is_leaf_attr_is_read_only(setup_task_tests):
     assert str(cm.value) == error_message
 
 
-def test_is_leaf_attr_is_working_properly(setup_task_tests):
+def test_is_leaf_attr_is_working_as_expected(setup_task_tests):
     """is_leaf attr is True for a Task without a child Task."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
@@ -1999,7 +1999,7 @@ def test_is_root_attr_is_read_only(setup_task_tests):
     assert str(cm.value) == error_message
 
 
-def test_is_root_attr_is_working_properly(setup_task_tests):
+def test_is_root_attr_is_working_as_expected(setup_task_tests):
     """is_root attr is True for a Task without a parent Task."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
@@ -2044,7 +2044,7 @@ def test_is_container_attr_is_read_only(setup_task_tests):
     assert str(cm.value) == error_message
 
 
-def test_is_container_attr_working_properly(setup_task_tests):
+def test_is_container_attr_working_as_expected(setup_task_tests):
     """is_container attr is True for a Task with at least one child Task."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
@@ -2492,8 +2492,8 @@ def test_bid_timing_attr_is_not_an_int_or_float(setup_task_tests):
     )
 
 
-def test_bid_timing_arg_is_working_properly(setup_task_tests):
-    """bid_timing arg is working properly."""
+def test_bid_timing_arg_is_working_as_expected(setup_task_tests):
+    """bid_timing arg is working as expected."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
     kwargs["bid_timing"] = 23
@@ -2501,8 +2501,8 @@ def test_bid_timing_arg_is_working_properly(setup_task_tests):
     assert new_task.bid_timing == kwargs["bid_timing"]
 
 
-def test_bid_timing_attr_is_working_properly(setup_task_tests):
-    """bid_timing attr is working properly."""
+def test_bid_timing_attr_is_working_as_expected(setup_task_tests):
+    """bid_timing attr is working as expected."""
     data = setup_task_tests
     new_task = Task(**data["kwargs"])
     test_value = 23
@@ -2571,8 +2571,8 @@ def test_bid_unit_attr_is_not_a_str(setup_task_tests):
     )
 
 
-def test_bid_unit_arg_is_working_properly(setup_task_tests):
-    """bid_unit arg is working properly."""
+def test_bid_unit_arg_is_working_as_expected(setup_task_tests):
+    """bid_unit arg is working as expected."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
     kwargs["bid_unit"] = "h"
@@ -2580,8 +2580,8 @@ def test_bid_unit_arg_is_working_properly(setup_task_tests):
     assert new_task.bid_unit == kwargs["bid_unit"]
 
 
-def test_bid_unit_attr_is_working_properly(setup_task_tests):
-    """bid_unit attr is working properly."""
+def test_bid_unit_attr_is_working_as_expected(setup_task_tests):
+    """bid_unit attr is working as expected."""
     data = setup_task_tests
     test_value = "h"
     new_task = Task(**data["kwargs"])
@@ -2646,8 +2646,8 @@ def test_tjp_abs_id_is_a_read_only_attr(setup_task_tests):
     assert str(cm.value) == error_message
 
 
-def test_tjp_id_attr_is_working_properly_for_a_root_task(setup_task_tests):
-    """tjp_id is working properly for a root task."""
+def test_tjp_id_attr_is_working_as_expected_for_a_root_task(setup_task_tests):
+    """tjp_id is working as expected for a root task."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
     kwargs["parent"] = None
@@ -2655,8 +2655,8 @@ def test_tjp_id_attr_is_working_properly_for_a_root_task(setup_task_tests):
     assert new_task.tjp_id == f"Task_{new_task.id}"
 
 
-def test_tjp_id_attr_is_working_properly_for_a_leaf_task(setup_task_tests):
-    """tjp_id is working properly for a leaf task."""
+def test_tjp_id_attr_is_working_as_expected_for_a_leaf_task(setup_task_tests):
+    """tjp_id is working as expected for a leaf task."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
     new_task1 = Task(**kwargs)
@@ -2666,8 +2666,8 @@ def test_tjp_id_attr_is_working_properly_for_a_leaf_task(setup_task_tests):
     assert new_task2.tjp_id == f"Task_{new_task2.id}"
 
 
-def test_tjp_abs_id_attr_is_working_properly_for_a_root_task(setup_task_tests):
-    """tjp_abs_id is working properly for a root task."""
+def test_tjp_abs_id_attr_is_working_as_expected_for_a_root_task(setup_task_tests):
+    """tjp_abs_id is working as expected for a root task."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
     kwargs["parent"] = None
@@ -2678,8 +2678,8 @@ def test_tjp_abs_id_attr_is_working_properly_for_a_root_task(setup_task_tests):
     )
 
 
-def test_tjp_abs_id_attr_is_working_properly_for_a_leaf_task(setup_task_tests):
-    """tjp_abs_id is working properly for a leaf task."""
+def test_tjp_abs_id_attr_is_working_as_expected_for_a_leaf_task(setup_task_tests):
+    """tjp_abs_id is working as expected for a leaf task."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
     kwargs["parent"] = None
@@ -2699,8 +2699,8 @@ def test_tjp_abs_id_attr_is_working_properly_for_a_leaf_task(setup_task_tests):
     )
 
 
-def test_to_tjp_attr_is_working_properly_for_a_root_task(setup_task_tests):
-    """to_tjp attr is working properly for a root task."""
+def test_to_tjp_attr_is_working_as_expected_for_a_root_task(setup_task_tests):
+    """to_tjp attr is working as expected for a root task."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
     kwargs["parent"] = None
@@ -2761,8 +2761,8 @@ task Task_%(t1_id)s "Task_%(t1_id)s" {
     assert t1.to_tjp == expected_tjp
 
 
-def test_to_tjp_attr_is_working_properly_for_a_leaf_task(setup_task_tests):
-    """to_tjp attr is working properly for a leaf task."""
+def test_to_tjp_attr_is_working_as_expected_for_a_leaf_task(setup_task_tests):
+    """to_tjp attr is working as expected for a leaf task."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
     new_task = Task(**kwargs)
@@ -2830,10 +2830,10 @@ task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
     assert new_task2.to_tjp == expected_tjp
 
 
-def test_to_tjp_attr_is_working_properly_for_a_leaf_task_with_dependency_details(
+def test_to_tjp_attr_is_working_as_expected_for_a_leaf_task_with_dependency_details(
     setup_task_tests,
 ):
-    """to_tjp attr is working properly for a leaf task."""
+    """to_tjp attr is working as expected for a leaf task."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
     new_task = Task(**kwargs)
@@ -2994,8 +2994,8 @@ task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
     assert new_task2.to_tjp == expected_tjp
 
 
-def test_to_tjp_attr_is_working_properly_for_a_container_task(setup_task_tests):
-    """to_tjp attr is working properly for a container task."""
+def test_to_tjp_attr_is_working_as_expected_for_a_container_task(setup_task_tests):
+    """to_tjp attr is working as expected for a container task."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
     kwargs["parent"] = None
@@ -3101,10 +3101,10 @@ task Task_%(t2_id)s "Task_%(t2_id)s" {
     assert t1.to_tjp == expected_tjp
 
 
-def test_to_tjp_attr_is_working_properly_for_a_container_task_with_dependency(
+def test_to_tjp_attr_is_working_as_expected_for_a_container_task_with_dependency(
     setup_task_tests,
 ):
-    """to_tjp attr is working properly for a container task which has dependency."""
+    """to_tjp attr is working as expected for a container task which has dependency."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
 
@@ -3420,8 +3420,8 @@ def test_parents_attr_is_read_only(setup_task_tests):
     assert str(cm.value) == error_message
 
 
-def test_parents_attr_is_working_properly(setup_task_tests):
-    """parents attr is working properly."""
+def test_parents_attr_is_working_as_expected(setup_task_tests):
+    """parents attr is working as expected."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
     kwargs["parent"] = None
@@ -3732,6 +3732,37 @@ def test_reviews_attr_is_an_empty_list_by_default(setup_task_tests):
     assert new_task.reviews == []
 
 
+def test_reviews_is_not_a_list_of_review_instances(setup_task_tests):
+    """reviews attr is not a List[Review] raises TypeError."""
+    data = setup_task_tests
+    kwargs = copy.copy(data["kwargs"])
+    new_task = Task(**kwargs)
+    test_value = [1234, "test value"]
+    with pytest.raises(TypeError) as cm:
+        new_task.reviews = test_value
+
+    assert str(cm.value) == (
+        "Task.reviews should be all stalker.models.review.Review "
+        "instances, not int: '1234'"
+    )
+
+
+def test_reviews_attr_is_validated_as_expected(setup_task_db_tests):
+    """reviews attr is validated as expected."""
+    data = setup_task_db_tests
+    kwargs = copy.copy(data["kwargs"])
+    new_task = Task(**kwargs)
+
+    from stalker import Review
+
+    assert new_task.reviews == []
+    new_review = Review(
+        task=new_task,
+        reviewer=data["test_user1"],
+    )
+    assert new_task.reviews == [new_review]
+
+
 def test_status_is_wfd_for_a_newly_created_task_with_dependencies(setup_task_tests):
     """status for a newly created task is WFD by default if there are dependencies."""
     data = setup_task_tests
@@ -3794,6 +3825,27 @@ def test_task_dependency_auto_generates_task_dependency_object(setup_task_tests)
     task_depends = new_task.task_depends_on[0]
     assert task_depends.task == new_task
     assert task_depends.depends_on == data["test_dependent_task1"]
+
+
+def test_task_depends_on_is_an_empty_list(setup_task_tests):
+    """task_depends_on is an empty list."""
+    data = setup_task_tests
+    kwargs = copy.copy(data["kwargs"])
+    new_task = Task(**kwargs)
+    new_task.task_depends_on = []
+
+
+def test_task_depends_on_is_not_a_task_dependency_object(setup_task_tests):
+    """task_depends_on is not a TaskDependency object raises TypeError."""
+    data = setup_task_tests
+    kwargs = copy.copy(data["kwargs"])
+    new_task = Task(**kwargs)
+    with pytest.raises(TypeError) as cm:
+        new_task.task_depends_on.append("not a TaskDependency object.")
+    assert str(cm.value) == (
+        "All the items in the Task.task_depends_on should be a TaskDependency "
+        "instance, not str: 'not a TaskDependency object.'"
+    )
 
 
 def test_alternative_resources_arg_is_skipped(setup_task_tests):
@@ -3876,7 +3928,7 @@ def test_alternative_resources_attr_elements_are_not_all_user_instances(
     )
 
 
-def test_alternative_resources_arg_is_working_properly(setup_task_tests):
+def test_alternative_resources_arg_is_working_as_expected(setup_task_tests):
     """alternative_resources arg is passed okay to the alternative_resources attr."""
     data = setup_task_tests
     new_task = Task(**data["kwargs"])
@@ -3886,7 +3938,7 @@ def test_alternative_resources_arg_is_working_properly(setup_task_tests):
     ) == sorted(new_task.alternative_resources, key=lambda x: x.name)
 
 
-def test_alternative_resources_attr_is_working_properly(setup_task_tests):
+def test_alternative_resources_attr_is_working_as_expected(setup_task_tests):
     """alternative_resources attr value can be correctly set."""
     data = setup_task_tests
     new_task = Task(**data["kwargs"])
@@ -3983,7 +4035,7 @@ def test_allocation_strategy_attr_value_is_not_correct(setup_task_tests):
     )
 
 
-def test_allocation_strategy_arg_is_working_properly(setup_task_tests):
+def test_allocation_strategy_arg_is_working_as_expected(setup_task_tests):
     """allocation_strategy arg value is passed to the allocation_strategy attr."""
     data = setup_task_tests
     test_value = defaults.allocation_strategy[1]
@@ -3993,7 +4045,7 @@ def test_allocation_strategy_arg_is_working_properly(setup_task_tests):
     assert test_value == new_task.allocation_strategy
 
 
-def test_allocation_strategy_attr_is_working_properly(setup_task_tests):
+def test_allocation_strategy_attr_is_working_as_expected(setup_task_tests):
     """allocation_strategy attr value can be correctly set."""
     data = setup_task_tests
     new_task = Task(**data["kwargs"])
@@ -4083,6 +4135,20 @@ def test_computed_resources_attr_dont_update_with_resources_if_is_scheduled_is_t
     assert new_task.computed_resources != test_value
 
 
+def test_computed_resources_is_not_a_user_instance(setup_task_tests):
+    """computed_resource is not a User instance raises TypeError."""
+    data = setup_task_tests
+    kwargs = copy.copy(data["kwargs"])
+    new_task = Task(**kwargs)
+    with pytest.raises(TypeError) as cm:
+        new_task.computed_resources.append("not a user")
+
+    assert str(cm.value) == (
+        "Task.computed_resources should be a list of stalker.models.auth.User "
+        "instances, not str: 'not a user'"
+    )
+
+
 def test_persistent_allocation_arg_is_skipped(setup_task_tests):
     """persistent_allocation defaults if the persistent_allocation arg is skipped."""
     data = setup_task_tests
@@ -4137,7 +4203,7 @@ def test_persistent_allocation_attr_is_not_bool(setup_task_tests):
     assert bool(test_value) == new_task.persistent_allocation
 
 
-def test_persistent_allocation_arg_is_working_properly(setup_task_tests):
+def test_persistent_allocation_arg_is_working_as_expected(setup_task_tests):
     """persistent_allocation arg is passed to the persistent_allocation attr."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
@@ -4146,7 +4212,7 @@ def test_persistent_allocation_arg_is_working_properly(setup_task_tests):
     assert new_task.persistent_allocation is False
 
 
-def test_persistent_allocation_attr_is_working_properly(setup_task_tests):
+def test_persistent_allocation_attr_is_working_as_expected(setup_task_tests):
     """persistent_allocation attr value can be correctly set."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
@@ -4417,8 +4483,8 @@ def test_good_attr_is_not_a_good_instance(setup_task_tests):
     )
 
 
-def test_good_arg_is_working_properly(setup_task_tests):
-    """good arg value is properly passed to the good attr."""
+def test_good_arg_is_working_as_expected(setup_task_tests):
+    """good arg value is passed to the good attr."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
     new_good = Good(name="Some Good")
@@ -4427,7 +4493,7 @@ def test_good_arg_is_working_properly(setup_task_tests):
     assert new_task.good == new_good
 
 
-def test_good_attr_is_working_properly(setup_task_tests):
+def test_good_attr_is_working_as_expected(setup_task_tests):
     """good attr value can be correctly set."""
     data = setup_task_tests
     new_good = Good(name="Some Good")
@@ -4552,8 +4618,8 @@ def setup_task_db_tests(setup_postgresql_db):
     return data
 
 
-def test_open_tickets_attr_is_working_properly(setup_task_db_tests):
-    """open_tickets attr is working properly."""
+def test_open_tickets_attr_is_working_as_expected(setup_task_db_tests):
+    """open_tickets attr is working as expected."""
     data = setup_task_db_tests
     kwargs = copy.copy(data["kwargs"])
     new_task = Task(**kwargs)
@@ -4586,8 +4652,8 @@ def test_open_tickets_attr_is_working_properly(setup_task_db_tests):
     assert new_task.open_tickets == [new_ticket1]
 
 
-def test_tickets_attr_is_working_properly(setup_task_db_tests):
-    """tickets attr is working properly."""
+def test_tickets_attr_is_working_as_expected(setup_task_db_tests):
+    """tickets attr is working as expected."""
     data = setup_task_db_tests
     kwargs = copy.copy(data["kwargs"])
     new_task = Task(**kwargs)
@@ -4642,10 +4708,10 @@ def test_percent_complete_attr_is_not_using_any_time_logs_for_a_duration_task(
     assert new_task.percent_complete == 0
 
 
-def test_percent_complete_attr_is_working_properly_for_a_container_task(
+def test_percent_complete_attr_is_working_as_expected_for_a_container_task(
     setup_task_db_tests,
 ):
-    """percent complete attr is working properly for a container task."""
+    """percent complete attr is working as expected for a container task."""
     data = setup_task_db_tests
     kwargs = copy.copy(data["kwargs"])
     kwargs["depends_on"] = []  # remove dependencies just to make it
@@ -4690,6 +4756,114 @@ def test_percent_complete_attr_is_working_properly_for_a_container_task(
     assert new_task.total_logged_seconds == 7 * 3600
     assert new_task.schedule_seconds == 9 * 3600
     assert new_task.percent_complete == pytest.approx(77.7777778)
+    assert parent_task.percent_complete == pytest.approx(77.7777778)
+
+
+def test_percent_complete_attr_is_working_as_expected_for_a_container_task_with_no_data_1(
+    setup_task_db_tests,
+):
+    """percent complete attr is working as expected for a container task with no data."""
+    data = setup_task_db_tests
+    kwargs = copy.copy(data["kwargs"])
+    kwargs["depends_on"] = []  # remove dependencies just to make it
+    # easy to create time logs after stalker
+    # v0.2.6.1
+
+    new_task = Task(**kwargs)
+    new_task.status = data["status_rts"]
+
+    dt = datetime.datetime
+    td = datetime.timedelta
+    now = dt.now(pytz.utc)
+
+    defaults["timing_resolution"] = td(hours=1)
+    defaults["daily_working_hours"] = 9
+
+    parent_task = Task(**kwargs)
+
+    new_task.time_logs = []
+    tlog1 = TimeLog(
+        task=new_task,
+        resource=new_task.resources[0],
+        start=now - td(hours=4),
+        end=now - td(hours=2),
+    )
+
+    assert tlog1 in new_task.time_logs
+
+    tlog2 = TimeLog(
+        task=new_task,
+        resource=new_task.resources[1],
+        start=now - td(hours=4),
+        end=now + td(hours=1),
+    )
+
+    DBSession.commit()
+
+    new_task.parent = parent_task
+    DBSession.commit()
+
+    assert tlog2 in new_task.time_logs
+    assert new_task.total_logged_seconds == 7 * 3600
+    assert new_task.schedule_seconds == 9 * 3600
+    assert new_task.percent_complete == pytest.approx(77.7777778)
+
+    parent_task._total_logged_seconds = None
+    # parent_task._schedule_seconds = None
+    assert parent_task.percent_complete == pytest.approx(77.7777778)
+
+
+def test_percent_complete_attr_is_working_as_expected_for_a_container_task_with_no_data_2(
+    setup_task_db_tests,
+):
+    """percent complete attr is working as expected for a container task with no data."""
+    data = setup_task_db_tests
+    kwargs = copy.copy(data["kwargs"])
+    kwargs["depends_on"] = []  # remove dependencies just to make it
+    # easy to create time logs after stalker
+    # v0.2.6.1
+
+    new_task = Task(**kwargs)
+    new_task.status = data["status_rts"]
+
+    dt = datetime.datetime
+    td = datetime.timedelta
+    now = dt.now(pytz.utc)
+
+    defaults["timing_resolution"] = td(hours=1)
+    defaults["daily_working_hours"] = 9
+
+    parent_task = Task(**kwargs)
+
+    new_task.time_logs = []
+    tlog1 = TimeLog(
+        task=new_task,
+        resource=new_task.resources[0],
+        start=now - td(hours=4),
+        end=now - td(hours=2),
+    )
+
+    assert tlog1 in new_task.time_logs
+
+    tlog2 = TimeLog(
+        task=new_task,
+        resource=new_task.resources[1],
+        start=now - td(hours=4),
+        end=now + td(hours=1),
+    )
+
+    DBSession.commit()
+
+    new_task.parent = parent_task
+    DBSession.commit()
+
+    assert tlog2 in new_task.time_logs
+    assert new_task.total_logged_seconds == 7 * 3600
+    assert new_task.schedule_seconds == 9 * 3600
+    assert new_task.percent_complete == pytest.approx(77.7777778)
+
+    # parent_task._total_logged_seconds = None
+    parent_task._schedule_seconds = None
     assert parent_task.percent_complete == pytest.approx(77.7777778)
 
 
@@ -4833,10 +5007,10 @@ def test_percent_complete_attr_is_okay_for_a_task_with_effort_and_length_based_c
     assert parent_task.percent_complete == pytest.approx(88.8888889)
 
 
-def test_percent_complete_attr_is_working_properly_for_a_leaf_task(
+def test_percent_complete_attr_is_working_as_expected_for_a_leaf_task(
     setup_task_db_tests,
 ):
-    """percent_complete attr is working properly for a leaf task."""
+    """percent_complete attr is working as expected for a leaf task."""
     data = setup_task_db_tests
     kwargs = copy.copy(data["kwargs"])
     kwargs["depends_on"] = []
@@ -4867,8 +5041,8 @@ def test_percent_complete_attr_is_working_properly_for_a_leaf_task(
     assert new_task.percent_complete == 20.0 / 9.0 * 100.0
 
 
-def test_time_logs_attr_is_working_properly(setup_task_db_tests):
-    """time_log attr is working properly."""
+def test_time_logs_attr_is_working_as_expected(setup_task_db_tests):
+    """time_log attr is working as expected."""
     data = setup_task_db_tests
     kwargs = copy.copy(data["kwargs"])
     kwargs["depends_on"] = []
@@ -4986,6 +5160,89 @@ def test_total_logged_seconds_is_the_sum_of_all_time_logs(setup_task_db_tests):
     assert new_task.total_logged_seconds == 20 * 3600
 
 
+def test_total_logged_seconds_calls_update_schedule_info(
+    setup_task_db_tests,
+):
+    """total_logged_seconds is the sum of all time_logs of the child tasks."""
+    data = setup_task_db_tests
+    kwargs = copy.copy(data["kwargs"])
+    kwargs["depends_on"] = []
+    new_task = Task(**kwargs)
+    dt = datetime.datetime
+    td = datetime.timedelta
+    now = dt.now(pytz.utc)
+    kwargs.pop("schedule_timing")
+    kwargs.pop("schedule_unit")
+    parent_task = Task(**kwargs)
+    new_task.parent = parent_task
+    new_task.time_logs = []
+    tlog1 = TimeLog(
+        task=new_task, resource=new_task.resources[0], start=now, end=now + td(hours=8)
+    )
+    DBSession.add(tlog1)
+    DBSession.commit()
+    assert tlog1 in new_task.time_logs
+    tlog2 = TimeLog(
+        task=new_task, resource=new_task.resources[1], start=now, end=now + td(hours=12)
+    )
+    DBSession.add(tlog2)
+    DBSession.commit()
+    # set the total_logged_seconds to None
+    # so the getter calls the update_schedule_info
+    parent_task._total_logged_seconds = None
+    assert tlog2 in new_task.time_logs
+    assert new_task.total_logged_seconds == 20 * 3600
+    assert parent_task.total_logged_seconds == 20 * 3600
+
+
+def test_update_schedule_info_on_a_container_of_containers_task(
+    setup_task_db_tests,
+):
+    """total_logged_seconds is the sum of all time_logs of the child tasks."""
+    data = setup_task_db_tests
+    kwargs = copy.copy(data["kwargs"])
+    kwargs["depends_on"] = []
+    new_task = Task(**kwargs)
+    dt = datetime.datetime
+    td = datetime.timedelta
+    now = dt.now(pytz.utc)
+    kwargs.pop("schedule_timing")
+    kwargs.pop("schedule_unit")
+    parent_task = Task(**kwargs)
+    root_task = Task(**kwargs)
+    new_task.parent = parent_task
+    parent_task.parent = root_task
+    new_task.time_logs = []
+    tlog1 = TimeLog(
+        task=new_task, resource=new_task.resources[0], start=now, end=now + td(hours=8)
+    )
+    DBSession.add(new_task)
+    DBSession.add(parent_task)
+    DBSession.add(root_task)
+    DBSession.add(tlog1)
+    DBSession.commit()
+    assert tlog1 in new_task.time_logs
+    tlog2 = TimeLog(
+        task=new_task, resource=new_task.resources[1], start=now, end=now + td(hours=12)
+    )
+    DBSession.add(tlog2)
+    DBSession.commit()
+    # set the total_logged_seconds to None
+    # so the getter calls the update_schedule_info
+    root_task.update_schedule_info()
+
+
+def test_update_schedule_info_with_leaf_tasks(
+    setup_task_db_tests,
+):
+    """total_logged_seconds is the sum of all time_logs of the child tasks."""
+    data = setup_task_db_tests
+    kwargs = copy.copy(data["kwargs"])
+    kwargs["depends_on"] = []
+    new_task = Task(**kwargs)
+    new_task.update_schedule_info()
+
+
 def test_total_logged_seconds_is_the_sum_of_all_time_logs_of_children(
     setup_task_db_tests,
 ):
@@ -5089,8 +5346,8 @@ def test_total_logged_seconds_is_the_sum_of_all_time_logs_of_children_deeper(
     assert parent_task2.total_logged_seconds == 30 * 3600
 
 
-def test_remaining_seconds_is_working_properly(setup_task_db_tests):
-    """remaining hours is working properly."""
+def test_remaining_seconds_is_working_as_expected(setup_task_db_tests):
+    """remaining hours is working as expected."""
     data = setup_task_db_tests
     kwargs = copy.copy(data["kwargs"])
     kwargs["depends_on"] = []

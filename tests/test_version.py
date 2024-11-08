@@ -8,9 +8,7 @@ from stalker import version
 
 def test_version_number_is_correct():
     """version.VERSION is correct."""
-    version_file_path = os.path.join(
-        os.path.dirname(stalker.__file__), "VERSION"
-    )
+    version_file_path = os.path.join(os.path.dirname(stalker.__file__), "VERSION")
     with open(version_file_path) as f:
         expected_version = f.read().strip()
     assert expected_version == version.__version__

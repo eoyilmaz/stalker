@@ -100,7 +100,7 @@ class StatusList(Entity, TargetEntityTypeMixin):
 
     The list of statuses in StatusList can be accessed by using a list like
     indexing and it also supports string indexes only for getting the item,
-    you can not set an item with string indices:
+    you cannot set an item with string indices:
 
     .. code-block:: Python
 
@@ -155,7 +155,7 @@ class StatusList(Entity, TargetEntityTypeMixin):
                 target_entity_type=Project
             )
 
-        now with the code above you can not assign the ``project_status_list``
+        now with the code above you cannot assign the ``project_status_list``
         object to any other class than a ``Project`` object.
 
         The StatusList instance can be empty, means it may not have anything in

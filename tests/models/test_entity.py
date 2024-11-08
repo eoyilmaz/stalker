@@ -130,8 +130,8 @@ def test_notes_attribute_set_to_a_list_of_other_objects(setup_entity_tests):
     )
 
 
-def test_notes_attribute_works_properly(setup_entity_tests):
-    """notes attribute works properly,"""
+def test_notes_attribute_works_as_expected(setup_entity_tests):
+    """notes attribute works as expected,"""
     data = setup_entity_tests
     test_value = [data["test_note3"]]
     data["test_entity"].notes = test_value
@@ -183,8 +183,8 @@ def test_tags_argument_set_to_something_other_than_a_list(setup_entity_tests):
     )
 
 
-def test_tags_attribute_works_properly(setup_entity_tests):
-    """tags attribute works properly."""
+def test_tags_attribute_works_as_expected(setup_entity_tests):
+    """tags attribute works as expected."""
     data = setup_entity_tests
     test_value = [data["test_tag1"]]
     data["test_entity"].tags = test_value

@@ -71,7 +71,7 @@ class Repository(Entity, CodeMixin):
     #
     # AutoFS can be setup to listen for new mount points from an OpenLDAP
     # server. Thus it is heavily related with the users system, Stalker
-    # can not do anything about that. The IT should setup workstations.
+    # cannot do anything about that. The IT should setup workstations.
     #
     # But Stalker can connect to the OpenLDAP server and create new entries.
     #
@@ -89,7 +89,9 @@ class Repository(Entity, CodeMixin):
     windows_path = Column(String(256))
     macos_path = Column(String(256))
 
-    def __init__(self, code="", linux_path="", windows_path="", macos_path="", **kwargs):
+    def __init__(
+        self, code="", linux_path="", windows_path="", macos_path="", **kwargs
+    ):
         kwargs["code"] = code
         super(Repository, self).__init__(**kwargs)
         CodeMixin.__init__(self, **kwargs)
@@ -160,10 +162,12 @@ class Repository(Entity, CodeMixin):
         macos_path = macos_path.replace("\\", "/")
         if self.code is not None and platform.system() == "Darwin":
             # update the environment variable
-            os.environ[defaults.repo_env_var_template.format(code=self.code)] = macos_path
+            rendered_env_var = defaults.repo_env_var_template.format(code=self.code)
+            os.environ[rendered_env_var] = macos_path
 
         if self.id is not None and platform.system() == "Darwin":
-            os.environ[defaults.repo_env_var_template_old.format(id=self.id)] = macos_path
+            rendered_env_var = defaults.repo_env_var_template_old.format(id=self.id)
+            os.environ[rendered_env_var] = macos_path
 
         return macos_path
 
@@ -270,13 +274,16 @@ class Repository(Entity, CodeMixin):
         Returns:
             str: The converted path.
         """
-        if path is None:
-            raise TypeError(f"{self.__class__.__name__}.path can not be None")
-
         if not isinstance(path, string_types):
             raise TypeError(
-                f"{self.__class__.__name__}.path should be a string, "
+                "path should be a string containing a file path, "
                 f"not {path.__class__.__name__}: '{path}'"
+            )
+
+        if not isinstance(replace_with, string_types):
+            raise TypeError(
+                "replace_with should be a string containing a file path, "
+                f"not {replace_with.__class__.__name__}: '{replace_with}'"
             )
 
         # expand all variables
@@ -401,7 +408,7 @@ class Repository(Entity, CodeMixin):
             logger.debug("Found repo for path: {}".format(repo))
             return "${}/{}".format(repo.env_var, repo.make_relative(path))
         else:
-            logger.debug("Can't find repor for path: {}".format(path))
+            logger.debug("Can't find repo for path: {}".format(path))
             return path
 
     @property

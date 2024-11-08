@@ -76,7 +76,7 @@ universal = false
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
-addopts = "-n auto -W ignore --color=yes --cov --cov-report html tests"
+addopts = "-n auto -W ignore --color=yes --cov=src --cov-report term --cov-report html --cov-append tests"
 
 [tool.black]
 

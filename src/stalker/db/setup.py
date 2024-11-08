@@ -87,9 +87,6 @@ def update_defaults_with_studio():
 
     Update only if a database and a Studio instance is present.
     """
-    if not DBSession:
-        return
-
     with DBSession.no_autoflush:
         studio = Studio.query.first()
         # studio = DBSession.query(Studio).first()

@@ -58,7 +58,7 @@ def test_target_entity_type_argument_is_skipped(setup_filename_template_tests):
     with pytest.raises(TypeError) as cm:
         FilenameTemplate(**data["kwargs"])
 
-    assert str(cm.value) == "FilenameTemplate.target_entity_type can not be None"
+    assert str(cm.value) == "FilenameTemplate.target_entity_type cannot be None"
 
 
 def test_target_entity_type_argument_is_none(setup_filename_template_tests):
@@ -68,7 +68,7 @@ def test_target_entity_type_argument_is_none(setup_filename_template_tests):
     with pytest.raises(TypeError) as cm:
         FilenameTemplate(**data["kwargs"])
 
-    assert str(cm.value) == "FilenameTemplate.target_entity_type can not be None"
+    assert str(cm.value) == "FilenameTemplate.target_entity_type cannot be None"
 
 
 def test_target_entity_type_attribute_is_read_only(setup_filename_template_tests):
@@ -86,7 +86,7 @@ def test_target_entity_type_attribute_is_read_only(setup_filename_template_tests
     }.get(
         sys.version_info.minor,
         "property '_target_entity_type_getter' of 'FilenameTemplate' "
-        "object has no setter"
+        "object has no setter",
     )
 
     assert str(cm.value) == error_message
@@ -358,3 +358,11 @@ def test_naming_case(setup_postgresql_db):
     DBSession.commit()
 
     assert v.filename == "ep101_s001c001_fxA_Main_v01.ma"
+
+
+def test__hash__is_working_as_expected(setup_filename_template_tests):
+    """__hash__ is working as expected."""
+    data = setup_filename_template_tests
+    result = hash(data["filename_template"])
+    assert isinstance(result, int)
+    assert result == data["filename_template"].__hash__()

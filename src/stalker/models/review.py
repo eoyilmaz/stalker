@@ -39,7 +39,7 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
 
     Args:
         task (Task): A :class:`.Task` instance that this review is related to.
-            It can not be skipped.
+            It cannot be skipped.
 
         review_number (int): This number represents the revision set id that this
             Review instance belongs to.

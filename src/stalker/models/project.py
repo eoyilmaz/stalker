@@ -165,7 +165,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         structure (Structure): The structure of the project. Default value is None.
 
         repositories (List[Repository]): A list of :class:`.Repository` instances that
-            the project files are going to be stored in. You can not create a project
+            the project files are going to be stored in. You cannot create a project
             without specifying the repositories argument and passing a
             :class:`.Repository` to it. Default value is None which raises a TypeError.
 
@@ -532,8 +532,6 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         """
         total_logged_seconds = 0
         for task in self.root_tasks:
-            if task.total_logged_seconds is None:
-                task.update_schedule_info()
             total_logged_seconds += task.total_logged_seconds
         logger.debug(f"project.total_logged_seconds: {total_logged_seconds}")
         return total_logged_seconds
@@ -547,8 +545,6 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         """
         schedule_seconds = 0
         for task in self.root_tasks:
-            if task.schedule_seconds is None:
-                task.update_schedule_info()
             schedule_seconds += task.schedule_seconds
         logger.debug(f"project.schedule_seconds: {schedule_seconds}")
         return schedule_seconds
@@ -640,6 +636,8 @@ class ProjectUser(Base):
         self.project = project
         self.role = role
         if self.user:
+            # don't need to validate rate
+            # as it is already validated on the User side
             self.rate = user.rate
 
     @validates("user")
@@ -722,38 +720,6 @@ class ProjectUser(Base):
                     f"not {role.__class__.__name__}: '{role}'"
                 )
         return role
-
-    @validates("rate")
-    def _validate_rate(self, key, rate):
-        """Validate the given rate value.
-
-        Args:
-            key (str): The name of the validated column.
-            rate (Union[int, float]): The client value to be validated.
-
-        Raises:
-            TypeError: If rate is not an int or float.
-            ValueError: If rate is a negative value.
-
-        Returns:
-            float: The validated rate value.
-        """
-        if rate is None:
-            rate = 0.0
-
-        if not isinstance(rate, (int, float)):
-            raise TypeError(
-                f"{self.__class__.__name__}.rate should be a float number greater or "
-                f"equal to 0.0, not {rate.__class__.__name__}: '{rate}'"
-            )
-
-        if rate < 0:
-            raise ValueError(
-                f"{self.__class__.__name__}.rate should be a float number greater or "
-                f"equal to 0.0, not {rate}"
-            )
-
-        return rate
 
 
 class ProjectClient(Base):

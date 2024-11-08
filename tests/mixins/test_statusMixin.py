@@ -134,8 +134,8 @@ def test_status_list_argument_suitable_for_the_current_class(status_mixin_tests)
     )
 
 
-def test_status_list_attribute_is_working_properly(status_mixin_tests):
-    """status_list attribute is working properly."""
+def test_status_list_attribute_is_working_as_expected(status_mixin_tests):
+    """status_list attribute is working as expected."""
     data = status_mixin_tests
     new_suitable_list = StatusList(
         name="Suitable Statuses",
@@ -211,7 +211,9 @@ def test_status_attribute_is_set_to_a_status_which_is_not_in_the_status_list(
     )
 
 
-def test_status_argument_is_working_properly_with_status_instances(status_mixin_tests):
+def test_status_argument_is_working_as_expected_with_status_instances(
+    status_mixin_tests,
+):
     """status attribute value is set correctly with Status arg value."""
     data = status_mixin_tests
     test_value = data["kwargs"]["status_list"][1]
@@ -220,15 +222,17 @@ def test_status_argument_is_working_properly_with_status_instances(status_mixin_
     assert new_obj.status == test_value
 
 
-def test_status_attribute_is_working_properly_with_status_instances(status_mixin_tests):
-    """status attribute is working properly with Status instances."""
+def test_status_attribute_is_working_as_expected_with_status_instances(
+    status_mixin_tests,
+):
+    """status attribute is working as expected with Status instances."""
     data = status_mixin_tests
     test_value = data["test_mixed_obj"].status_list[1]
     data["test_mixed_obj"].status = test_value
     assert data["test_mixed_obj"].status == test_value
 
 
-def test_status_argument_is_working_properly_with_integers(status_mixin_tests):
+def test_status_argument_is_working_as_expected_with_integers(status_mixin_tests):
     """status attribute value is set correctly with int arg value."""
     data = status_mixin_tests
     data["kwargs"]["status"] = 1
@@ -237,8 +241,8 @@ def test_status_argument_is_working_properly_with_integers(status_mixin_tests):
     assert new_obj.status == test_value
 
 
-def test_status_attribute_is_working_properly_with_integers(status_mixin_tests):
-    """status attribute is working properly with integers."""
+def test_status_attribute_is_working_as_expected_with_integers(status_mixin_tests):
+    """status attribute is working as expected with integers."""
     data = status_mixin_tests
     test_value = 1
     data["test_mixed_obj"].status = test_value
@@ -255,7 +259,7 @@ def test_status_argument_is_an_integer_but_out_of_range(status_mixin_tests):
         StatMixClass(**data["kwargs"])
 
     assert (
-        str(cm.value) == "StatMixClass.status can not be bigger than the length of the "
+        str(cm.value) == "StatMixClass.status cannot be bigger than the length of the "
         "status_list"
     )
 
@@ -267,7 +271,7 @@ def test_status_attribute_set_to_an_integer_but_out_of_range(status_mixin_tests)
         data["test_mixed_obj"].status = 10
 
     assert (
-        str(cm.value) == "StatMixClass.status can not be bigger than the length of the "
+        str(cm.value) == "StatMixClass.status cannot be bigger than the length of the "
         "status_list"
     )
 
@@ -433,7 +437,7 @@ def test_status_list_attribute_is_skipped_and_there_is_a_db_setup_but_no_suitabl
         StatusListNoAutoAddClass(name="Test StatusListNoAutoAddClass")
 
     assert (
-        str(cm.value) == "StatusListNoAutoAddClass instances can not be initialized "
+        str(cm.value) == "StatusListNoAutoAddClass instances cannot be initialized "
         "without a stalker.models.status.StatusList instance, please "
         "pass a suitable StatusList "
         "(StatusList.target_entity_type=StatusListNoAutoAddClass) with "
@@ -449,7 +453,7 @@ def test_status_list_argument_is_none(setup_status_mixin_db_tests):
         StatMixClass(**data["kwargs"])
 
     assert (
-        str(cm.value) == "StatMixClass instances can not be initialized without a "
+        str(cm.value) == "StatMixClass instances cannot be initialized without a "
         "stalker.models.status.StatusList instance, please pass a "
         "suitable StatusList "
         "(StatusList.target_entity_type=StatMixClass) with the "
@@ -465,7 +469,7 @@ def test_status_list_argument_skipped(setup_status_mixin_db_tests):
         StatMixClass(**data["kwargs"])
 
     assert (
-        str(cm.value) == "StatMixClass instances can not be initialized without a "
+        str(cm.value) == "StatMixClass instances cannot be initialized without a "
         "stalker.models.status.StatusList instance, please pass a "
         "suitable StatusList "
         "(StatusList.target_entity_type=StatMixClass) with the "
@@ -480,7 +484,7 @@ def test_status_list_attribute_set_to_none(setup_status_mixin_db_tests):
         data["test_mixed_obj"].status_list = None
 
     assert (
-        str(cm.value) == "StatMixClass instances can not be initialized without a "
+        str(cm.value) == "StatMixClass instances cannot be initialized without a "
         "stalker.models.status.StatusList instance, please pass a "
         "suitable StatusList "
         "(StatusList.target_entity_type=StatMixClass) with the "

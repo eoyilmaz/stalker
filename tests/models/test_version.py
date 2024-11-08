@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import copy
 import logging
 import sys
 
@@ -10,6 +11,7 @@ from stalker import (
     Link,
     Project,
     Repository,
+    Scene,
     Sequence,
     Shot,
     Status,
@@ -31,16 +33,16 @@ logger.setLevel(log.logging_level)
 
 
 VARIANT_NAME_TEST_VALUES = [
-        ["Variant Name", "Variant_Name"],
-        ["VariantName", "VariantName"],
-        ["variant name", "variant_name"],
-        ["  variant_name", "variant_name"],
-        ["variant_name   ", "variant_name"],
-        ["   variant   name   ", "variant_name"],
-        ["VariantName", "VariantName"],
-        ["Variant___Name", "Variant___Name"],
-        ["Variant@Name", "Variant@Name"],
-    ]
+    ["Variant Name", "Variant_Name"],
+    ["VariantName", "VariantName"],
+    ["variant name", "variant_name"],
+    ["  variant_name", "variant_name"],
+    ["variant_name   ", "variant_name"],
+    ["   variant   name   ", "variant_name"],
+    ["VariantName", "VariantName"],
+    ["Variant___Name", "Variant___Name"],
+    ["Variant@Name", "Variant@Name"],
+]
 
 
 @pytest.fixture(scope="function")
@@ -107,12 +109,21 @@ def setup_version_db_tests(setup_postgresql_db):
     DBSession.add(data["test_sequence"])
     DBSession.commit()
 
+    data["test_scene"] = Scene(
+        name="Test Scene",
+        code="SC001",
+        project=data["test_project"],
+    )
+    DBSession.add(data["test_scene"])
+    DBSession.commit()
+
     # create a shot
     data["test_shot1"] = Shot(
         name="SH001",
         code="SH001",
         project=data["test_project"],
         sequences=[data["test_sequence"]],
+        scenes=[data["test_scene"]],
     )
     DBSession.add(data["test_shot1"])
     DBSession.commit()
@@ -195,7 +206,9 @@ def test_variant_name_argument_is_none(setup_version_db_tests):
     data["kwargs"]["variant_name"] = None
     with pytest.raises(TypeError) as cm:
         Version(**data["kwargs"])
-    assert str(cm.value) == "Version.variant_name should be a string, not NoneType: 'None'"
+    assert (
+        str(cm.value) == "Version.variant_name should be a string, not NoneType: 'None'"
+    )
 
 
 def test_variant_name_attribute_is_none(setup_version_db_tests):
@@ -204,7 +217,9 @@ def test_variant_name_attribute_is_none(setup_version_db_tests):
     with pytest.raises(TypeError) as cm:
         data["test_version"].variant_name = None
 
-    assert str(cm.value) == "Version.variant_name should be a string, not NoneType: 'None'"
+    assert (
+        str(cm.value) == "Version.variant_name should be a string, not NoneType: 'None'"
+    )
 
 
 def test_variant_name_argument_is_empty_string(setup_version_db_tests):
@@ -213,7 +228,7 @@ def test_variant_name_argument_is_empty_string(setup_version_db_tests):
     data["kwargs"]["variant_name"] = ""
     with pytest.raises(ValueError) as cm:
         Version(**data["kwargs"])
-    assert str(cm.value) == "Version.variant_name can not be an empty string"
+    assert str(cm.value) == "Version.variant_name cannot be an empty string"
 
 
 def test_variant_name_attribute_is_empty_string(setup_version_db_tests):
@@ -221,12 +236,10 @@ def test_variant_name_attribute_is_empty_string(setup_version_db_tests):
     data = setup_version_db_tests
     with pytest.raises(ValueError) as cm:
         data["test_version"].variant_name = ""
-    assert str(cm.value) == "Version.variant_name can not be an empty string"
+    assert str(cm.value) == "Version.variant_name cannot be an empty string"
 
 
-@pytest.mark.parametrize(
-    "test_value", [[1, 1.2, ["a list"], {"a": "dict"}]]
-)
+@pytest.mark.parametrize("test_value", [[1, 1.2, ["a list"], {"a": "dict"}]])
 def test_variant_name_argument_is_not_a_string(setup_version_db_tests, test_value):
     """TypeError raised if the given variant_name argument is not a string."""
     data = setup_version_db_tests
@@ -256,7 +269,7 @@ def test_variant_name_argument_is_formatted_to_empty_string(setup_version_db_tes
     data["kwargs"]["variant_name"] = "##$½#$"
     with pytest.raises(ValueError) as cm:
         _ = Version(**data["kwargs"])
-    assert str(cm.value) == "Version.variant_name can not be an empty string"
+    assert str(cm.value) == "Version.variant_name cannot be an empty string"
 
 
 def test_variant_name_attribute_is_formatted_to_empty_string(setup_version_db_tests):
@@ -264,7 +277,7 @@ def test_variant_name_attribute_is_formatted_to_empty_string(setup_version_db_te
     data = setup_version_db_tests
     with pytest.raises(ValueError) as cm:
         data["test_version"].variant_name = "##$½#$"
-    assert str(cm.value) == "Version.variant_name can not be an empty string"
+    assert str(cm.value) == "Version.variant_name cannot be an empty string"
 
 
 @pytest.mark.parametrize("variant_name, expected_result", VARIANT_NAME_TEST_VALUES)
@@ -294,7 +307,7 @@ def test_task_argument_is_skipped(setup_version_db_tests):
     data["kwargs"].pop("task")
     with pytest.raises(TypeError) as cm:
         Version(**data["kwargs"])
-    assert str(cm.value) == "Version.task can not be None"
+    assert str(cm.value) == "Version.task cannot be None"
 
 
 def test_task_argument_is_none(setup_version_db_tests):
@@ -303,7 +316,7 @@ def test_task_argument_is_none(setup_version_db_tests):
     data["kwargs"]["task"] = None
     with pytest.raises(TypeError) as cm:
         Version(**data["kwargs"])
-    assert str(cm.value) == "Version.task can not be None"
+    assert str(cm.value) == "Version.task cannot be None"
 
 
 def test_task_attribute_is_none(setup_version_db_tests):
@@ -311,7 +324,7 @@ def test_task_attribute_is_none(setup_version_db_tests):
     data = setup_version_db_tests
     with pytest.raises(TypeError) as cm:
         data["test_version"].task = None
-    assert str(cm.value) == "Version.task can not be None"
+    assert str(cm.value) == "Version.task cannot be None"
 
 
 def test_task_argument_is_not_a_task(setup_version_db_tests):
@@ -335,8 +348,8 @@ def test_task_attribute_is_not_a_task(setup_version_db_tests):
     )
 
 
-def test_task_attribute_is_working_properly(setup_version_db_tests):
-    """task attribute is working properly."""
+def test_task_attribute_is_working_as_expected(setup_version_db_tests):
+    """task attribute is working as expected."""
     data = setup_version_db_tests
     new_task = Task(
         name="New Test Task",
@@ -468,8 +481,8 @@ def test_inputs_attribute_is_not_a_list_of_link_instances(setup_version_db_tests
     )
 
 
-def test_inputs_attribute_is_working_properly(setup_version_db_tests):
-    """inputs attribute is working properly."""
+def test_inputs_attribute_is_working_as_expected(setup_version_db_tests):
+    """inputs attribute is working as expected."""
     data = setup_version_db_tests
     data["kwargs"].pop("inputs")
     new_version = Version(**data["kwargs"])
@@ -532,8 +545,8 @@ def test_outputs_attribute_is_not_a_list_of_link_instances(setup_version_db_test
     )
 
 
-def test_outputs_attribute_is_working_properly(setup_version_db_tests):
-    """outputs attribute is working properly."""
+def test_outputs_attribute_is_working_as_expected(setup_version_db_tests):
+    """outputs attribute is working as expected."""
     data = setup_version_db_tests
     data["kwargs"].pop("outputs")
     new_version = Version(**data["kwargs"])
@@ -551,8 +564,8 @@ def test_is_published_attribute_is_false_by_default(setup_version_db_tests):
     assert data["test_version"].is_published is False
 
 
-def test_is_published_attribute_is_working_properly(setup_version_db_tests):
-    """is_published attribute is working properly."""
+def test_is_published_attribute_is_working_as_expected(setup_version_db_tests):
+    """is_published attribute is working as expected."""
     data = setup_version_db_tests
     data["test_version"].is_published = True
     assert data["test_version"].is_published is True
@@ -611,16 +624,16 @@ def test_parent_attribute_is_not_set_to_a_version_instance(setup_version_db_test
     )
 
 
-def test_parent_argument_is_working_properly(setup_version_db_tests):
-    """parent argument is working properly."""
+def test_parent_argument_is_working_as_expected(setup_version_db_tests):
+    """parent argument is working as expected."""
     data = setup_version_db_tests
     data["kwargs"]["parent"] = data["test_version"]
     new_version = Version(**data["kwargs"])
     assert new_version.parent == data["test_version"]
 
 
-def test_parent_attribute_is_working_properly(setup_version_db_tests):
-    """parent attribute is working properly."""
+def test_parent_attribute_is_working_as_expected(setup_version_db_tests):
+    """parent attribute is working as expected."""
     data = setup_version_db_tests
     data["kwargs"]["parent"] = None
     new_version = Version(**data["kwargs"])
@@ -630,7 +643,7 @@ def test_parent_attribute_is_working_properly(setup_version_db_tests):
 
 
 def test_parent_argument_updates_the_children_attribute(setup_version_db_tests):
-    """parent argument updates the children attribute of the parent Version properly."""
+    """parent argument updates the children attribute of the parent Version."""
     data = setup_version_db_tests
     data["kwargs"]["parent"] = data["test_version"]
     new_version = Version(**data["kwargs"])
@@ -638,7 +651,7 @@ def test_parent_argument_updates_the_children_attribute(setup_version_db_tests):
 
 
 def test_parent_attribute_updates_the_children_attribute(setup_version_db_tests):
-    """parent attr updates the children attribute of the parent Version properly."""
+    """parent attr updates the children attribute of the parent Version."""
     data = setup_version_db_tests
     data["kwargs"]["parent"] = None
     new_version = Version(**data["kwargs"])
@@ -716,8 +729,8 @@ def test_children_attribute_is_not_set_to_a_list_of_version_instances(
     )
 
 
-def test_children_attribute_is_working_properly(setup_version_db_tests):
-    """children attribute is working properly."""
+def test_children_attribute_is_working_as_expected(setup_version_db_tests):
+    """children attribute is working as expected."""
     data = setup_version_db_tests
     data["kwargs"]["parent"] = None
     new_version1 = Version(**data["kwargs"])
@@ -985,8 +998,58 @@ def test_template_variables_type(setup_version_db_tests):
     assert kwargs["type"] == data["test_version"].type
 
 
-def test_absolute_full_path_works_properly(setup_version_db_tests):
-    """absolute_full_path attribute works properly."""
+def test_template_variables_for_a_shot_version_contains_scenes(setup_version_db_tests):
+    """template_variables for a Shot version contains scenes."""
+    data = setup_version_db_tests
+    v = Version(task=data["test_shot1"])
+    template_variables = v._template_variables()
+    assert data["test_shot1"].scenes != []
+    assert "scenes" in template_variables
+    assert template_variables["scenes"] == data["test_shot1"].scenes
+
+
+def test_template_variables_for_a_shot_version_contains_sequences(
+    setup_version_db_tests,
+):
+    """template_variables for a Shot version contains sequences."""
+    data = setup_version_db_tests
+    v = Version(task=data["test_shot1"])
+    template_variables = v._template_variables()
+    assert data["test_shot1"].sequences != []
+    assert "sequences" in template_variables
+    assert template_variables["sequences"] == data["test_shot1"].sequences
+
+
+def test_absolute_path_works_as_expected(setup_version_db_tests):
+    """absolute_path attribute works as expected."""
+    data = setup_version_db_tests
+    data["patcher"].patch("Linux")
+    ft = FilenameTemplate(
+        name="Task Filename Template",
+        target_entity_type="Task",
+        path="{{project.repositories[0].path}}/{{project.code}}/"
+        "{%- for parent_task in parent_tasks -%}"
+        "{{parent_task.nice_name}}/"
+        "{%- endfor -%}",
+        filename="{{task.nice_name}}_{{version.variant_name}}"
+        '_v{{"%03d"|format(version.version_number)}}{{extension}}',
+    )
+    data["test_project"].structure.templates.append(ft)
+    new_version1 = Version(**data["kwargs"])
+    DBSession.add(new_version1)
+    DBSession.commit()
+
+    new_version1.variant_name = "TestVariant@BBOX"
+
+    new_version1.update_paths()
+    new_version1.extension = ".ma"
+    assert new_version1.extension == ".ma"
+
+    assert new_version1.absolute_path == "/mnt/T/tp/SH001/Task1"
+
+
+def test_absolute_full_path_works_as_expected(setup_version_db_tests):
+    """absolute_full_path attribute works as expected."""
     data = setup_version_db_tests
     data["patcher"].patch("Linux")
     ft = FilenameTemplate(
@@ -1028,14 +1091,14 @@ def test_latest_published_version_is_read_only(setup_version_db_tests):
         10: "can't set attribute 'latest_published_version'",
     }.get(
         sys.version_info.minor,
-        "property 'latest_published_version' of 'Version' object has no setter"
+        "property 'latest_published_version' of 'Version' object has no setter",
     )
 
     assert str(cm.value) == error_message
 
 
-def test_latest_published_version_is_working_properly(setup_version_db_tests):
-    """is_latest_published_version is working properly."""
+def test_latest_published_version_is_working_as_expected(setup_version_db_tests):
+    """is_latest_published_version is working as expected."""
     data = setup_version_db_tests
     new_version1 = Version(**data["kwargs"])
     DBSession.add(new_version1)
@@ -1068,8 +1131,8 @@ def test_latest_published_version_is_working_properly(setup_version_db_tests):
     assert new_version5.latest_published_version == new_version4
 
 
-def test_is_latest_published_version_is_working_properly(setup_version_db_tests):
-    """is_latest_published_version is working properly."""
+def test_is_latest_published_version_is_working_as_expected(setup_version_db_tests):
+    """is_latest_published_version is working as expected."""
     data = setup_version_db_tests
     new_version1 = Version(**data["kwargs"])
     DBSession.add(new_version1)
@@ -1228,8 +1291,8 @@ def test_created_with_attribute_accepts_only_string_or_none(setup_version_db_tes
     )
 
 
-def test_created_with_argument_is_working_properly(setup_version_db_tests):
-    """created_with argument value is passed to created_with attribute properly."""
+def test_created_with_argument_is_working_as_expected(setup_version_db_tests):
+    """created_with argument value is passed to created_with attribute."""
     data = setup_version_db_tests
     test_value = "Maya"
     data["kwargs"]["created_with"] = test_value
@@ -1237,8 +1300,8 @@ def test_created_with_argument_is_working_properly(setup_version_db_tests):
     assert test_version.created_with == test_value
 
 
-def test_created_with_attribute_is_working_properly(setup_version_db_tests):
-    """created_with attribute is working properly."""
+def test_created_with_attribute_is_working_as_expected(setup_version_db_tests):
+    """created_with attribute is working as expected."""
     data = setup_version_db_tests
     test_value = "Maya"
     assert data["test_version"].created_with != test_value
@@ -1258,14 +1321,14 @@ def test_max_version_number_attribute_is_read_only(setup_version_db_tests):
         10: "can't set attribute 'max_version_number'",
     }.get(
         sys.version_info.minor,
-        "property 'max_version_number' of 'Version' object has no setter"
+        "property 'max_version_number' of 'Version' object has no setter",
     )
 
     assert str(cm.value) == error_message
 
 
-def test_max_version_number_attribute_is_working_properly(setup_version_db_tests):
-    """max_version_number attribute is working properly."""
+def test_max_version_number_attribute_is_working_as_expected(setup_version_db_tests):
+    """max_version_number attribute is working as expected."""
     data = setup_version_db_tests
     new_version1 = Version(**data["kwargs"])
     DBSession.add(new_version1)
@@ -1297,7 +1360,7 @@ def test_max_version_number_attribute_is_working_properly(setup_version_db_tests
 
 
 def test_latest_version_attribute_is_read_only(setup_version_db_tests):
-    """last_version attribute is a read only attribute."""
+    """latest_version attribute is a read only attribute."""
     data = setup_version_db_tests
     with pytest.raises(AttributeError) as cm:
         data["test_version"].latest_version = 3453
@@ -1308,14 +1371,14 @@ def test_latest_version_attribute_is_read_only(setup_version_db_tests):
         10: "can't set attribute 'latest_version'",
     }.get(
         sys.version_info.minor,
-        "property 'latest_version' of 'Version' object has no setter"
+        "property 'latest_version' of 'Version' object has no setter",
     )
 
     assert str(cm.value) == error_message
 
 
-def test_latest_version_attribute_is_working_properly(setup_version_db_tests):
-    """last_version attribute is working properly."""
+def test_latest_version_attribute_is_working_as_expected(setup_version_db_tests):
+    """latest_version attribute is working as expected."""
     data = setup_version_db_tests
     new_version1 = Version(**data["kwargs"])
     DBSession.add(new_version1)
@@ -1358,14 +1421,14 @@ def test_naming_parents_attribute_is_a_read_only_property(setup_version_db_tests
         10: "can't set attribute 'naming_parents'",
     }.get(
         sys.version_info.minor,
-        "property 'naming_parents' of 'Version' object has no setter"
+        "property 'naming_parents' of 'Version' object has no setter",
     )
 
     assert str(cm.value) == error_message
 
 
-def test_naming_parents_attribute_is_working_properly(setup_version_db_tests):
-    """naming_parents attribute is working properly."""
+def test_naming_parents_attribute_is_working_as_expected(setup_version_db_tests):
+    """naming_parents attribute is working as expected."""
     data = setup_version_db_tests
     # for data["test_version"]
     assert data["test_version"].naming_parents == [
@@ -1435,8 +1498,8 @@ def test_naming_parents_attribute_is_working_properly(setup_version_db_tests):
     assert version4.naming_parents == [asset2]
 
 
-def test_nice_name_attribute_is_working_properly(setup_version_db_tests):
-    """nice_name attribute is working properly."""
+def test_nice_name_attribute_is_working_as_expected(setup_version_db_tests):
+    """nice_name attribute is working as expected."""
     data = setup_version_db_tests
     # for data["test_version"]
     assert data["test_version"].naming_parents == [
@@ -1521,7 +1584,7 @@ def test_string_representation_is_a_little_bit_meaningful(setup_version_db_tests
     assert "<tp_SH001_Task1_TestVariant_v001 (Version)>" == f'{data["test_version"]}'
 
 
-def test_walk_hierarchy_is_working_properly_in_dfs_mode(setup_version_db_tests):
+def test_walk_hierarchy_is_working_as_expected_in_dfs_mode(setup_version_db_tests):
     """walk_hierarchy() method is working in DFS mode correctly."""
     data = setup_version_db_tests
     v1 = Version(task=data["test_task1"])
@@ -1536,7 +1599,7 @@ def test_walk_hierarchy_is_working_properly_in_dfs_mode(setup_version_db_tests):
     assert expected_result == visited_versions
 
 
-def test_walk_inputs_is_working_properly_in_dfs_mode(setup_version_db_tests):
+def test_walk_inputs_is_working_as_expected_in_dfs_mode(setup_version_db_tests):
     """walk_inputs() method is working in DFS mode correctly."""
     data = setup_version_db_tests
     v1 = Version(task=data["test_task1"])
@@ -1707,6 +1770,12 @@ def setup_version_tests():
         status_list=data["test_task_status_list"],
     )
 
+    data["test_task2"] = Task(
+        name="Task2",
+        parent=data["test_shot1"],
+        status_list=data["test_task_status_list"],
+    )
+
     # a Link for the input file
     data["test_input_link1"] = Link(
         name="Input Link 1",
@@ -1794,3 +1863,44 @@ def test_children_attribute_will_not_allow_deeper_circular_dependencies_2(
         "<tp_SH001_Task1_TestVariant_v002 (Version)> (Version) creates a "
         'circular dependency in their "children" attribute'
     )
+
+
+def test_version_number_without_a_db(setup_version_tests):
+    """version_number without a db is not None."""
+    data = setup_version_tests
+    v = Version(task=data["test_task2"])
+    assert v.version_number is not None
+
+
+def test_version_number_without_a_db(setup_version_tests):
+    """version_number without a db is not None."""
+    data = setup_version_tests
+    v1 = Version(task=data["test_task2"])
+    assert v1.version_number == 1
+    v2 = Version(task=data["test_task2"])
+    assert v2.version_number == 2
+    v3 = Version(task=data["test_task2"])
+    assert v3.version_number == 3
+
+
+def test_latest_version_without_a_db(setup_version_tests):
+    """latest_version without a db returns self."""
+    data = setup_version_tests
+    v = Version(task=data["test_task2"])
+    assert v.latest_version is v
+
+
+def test_max_version_number_without_a_db(setup_version_tests):
+    """max_version_number without a db returns self.version_number."""
+    data = setup_version_tests
+    v = Version(task=data["test_task2"])
+    assert v.max_version_number == v.version_number
+
+
+def test__hash__is_working_as_expected(setup_version_tests):
+    """__hash__ is working as expected."""
+    data = setup_version_tests
+    v = Version(task=data["test_task2"])
+    result = hash(v)
+    assert isinstance(result, int)
+    assert result == v.__hash__()

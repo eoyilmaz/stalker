@@ -26,7 +26,7 @@ class Shot(Task, CodeMixin):
 
        Because most of the shots in different projects may going to have
        the same name, which is a kind of a code like SH001, SH012A etc., and
-       in Stalker you can not have two entities with the same name if their
+       in Stalker you cannot have two entities with the same name if their
        types are also matching, to guarantee all the shots are going to have
        different names the :attr:`.name` attribute of the Shot instances are
        automatically set to a randomly generated **uuid4** sequence.
@@ -64,7 +64,7 @@ class Shot(Task, CodeMixin):
        to their view to the world, that is shots taking place in the same set
        configuration can be grouped together by using Scenes.
 
-    Two shots with the same :attr:`.code` can not be assigned to the same
+    Two shots with the same :attr:`.code` cannot be assigned to the same
     :class:`.Sequence`.
 
 
@@ -109,7 +109,7 @@ class Shot(Task, CodeMixin):
 
     Args:
         project (Project): This is the :class:`.Project` instance that this shot
-            belongs to. A Shot can not be created without a Project instance.
+            belongs to. A Shot cannot be created without a Project instance.
 
         sequences (List[Sequence]): This is a list of :class:`.Sequence` s that
             this shot is assigned to. A Shot can be created without having a
@@ -333,6 +333,20 @@ class Shot(Task, CodeMixin):
         if not project or not code:
             return True
 
+        if not isinstance(code, str):
+            raise TypeError(
+                "code should be a string containing a shot code, "
+                f"not {code.__class__.__name__}: '{code}'"
+            )
+
+        from stalker import Project
+
+        if not isinstance(project, Project):
+            raise TypeError(
+                "project should be a Project instance, "
+                f"not {project.__class__.__name__}: '{project}'"
+            )
+
         try:
             logger.debug("Try checking Shot.code with SQL expression.")
             with DBSession.no_autoflush:
@@ -498,7 +512,7 @@ class Shot(Task, CodeMixin):
 
         if source_in < self.cut_in:
             raise ValueError(
-                "{cls}.source_in can not be smaller than "
+                "{cls}.source_in cannot be smaller than "
                 "{cls}.cut_in, cut_in: {cut_in} where as "
                 "source_in: {source_in}".format(
                     cls=self.__class__.__name__,
@@ -509,7 +523,7 @@ class Shot(Task, CodeMixin):
 
         if source_in > self.cut_out:
             raise ValueError(
-                "{cls}.source_in can not be bigger than "
+                "{cls}.source_in cannot be bigger than "
                 "{cls}.cut_out, cut_out: {cut_out} where as "
                 "source_in: {source_in}".format(
                     cls=self.__class__.__name__,
@@ -520,7 +534,7 @@ class Shot(Task, CodeMixin):
 
         if self.source_out and source_in > self.source_out:
             raise ValueError(
-                "{cls}.source_in can not be bigger than "
+                "{cls}.source_in cannot be bigger than "
                 "{cls}.source_out, source_in: {source_in} where "
                 "as source_out: {source_out}".format(
                     cls=self.__class__.__name__,
@@ -557,7 +571,7 @@ class Shot(Task, CodeMixin):
 
         if source_out < self.cut_in:
             raise ValueError(
-                "{cls}.source_out can not be smaller than "
+                "{cls}.source_out cannot be smaller than "
                 "{cls}.cut_in, cut_in: {cut_in} where as "
                 "source_out: {source_out}".format(
                     cls=self.__class__.__name__,
@@ -568,7 +582,7 @@ class Shot(Task, CodeMixin):
 
         if source_out > self.cut_out:
             raise ValueError(
-                "{cls}.source_out can not be bigger than "
+                "{cls}.source_out cannot be bigger than "
                 "{cls}.cut_out, cut_out: {cut_out} where as "
                 "source_out: {source_out}".format(
                     cls=self.__class__.__name__,
@@ -579,7 +593,7 @@ class Shot(Task, CodeMixin):
 
         if self.source_in and source_out < self.source_in:
             raise ValueError(
-                "{cls}.source_out can not be smaller than "
+                "{cls}.source_out cannot be smaller than "
                 "{cls}.source_in, source_in: {source_in} where "
                 "as source_out: {source_out}".format(
                     cls=self.__class__.__name__,
@@ -626,7 +640,7 @@ class Shot(Task, CodeMixin):
 
         if cut_duration < 1:
             raise ValueError(
-                f"{self.__class__.__name__}.cut_duration can not be set to zero or a "
+                f"{self.__class__.__name__}.cut_duration cannot be set to zero or a "
                 "negative value"
             )
 

@@ -87,7 +87,7 @@ def test_readme_tutorial_code(setup_sqlite3):
     rigging = Task(
         name="Rig",
         parent=character1,
-        depends_on=[model],  # For project management, define that Rig can not start
+        depends_on=[model],  # For project management, define that Rig cannot start
         # before Model ends.
     )
 
@@ -108,7 +108,7 @@ def test_readme_tutorial_code(setup_sqlite3):
     lighting = Task(
         name="Lighting",
         parent=shot,
-        depends_on=[animation],  # Lighting can not start before Animation ends,
+        depends_on=[animation],  # Lighting cannot start before Animation ends,
         schedule_timing=1,
         schedule_unit="d",  # The task expected to take 1 day to complete
         resources=[me],

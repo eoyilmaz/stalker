@@ -80,7 +80,7 @@ class Structure(Entity):
             suitable and desired to create this details by using
             :class:`.FilenameTemplate` objects. Which are specific to certain
             :attr:`.FilenameTemplate.target_entity_type` s. And by using the
-            :attr:`.Structure.custom_template` attribute, Stalker can not place
+            :attr:`.Structure.custom_template` attribute, Stalker cannot place
             any source or output file of a :class:`.Version` in the
             :class:`.Repository` where as it can by using
             :class:`.FilenameTemplate` s.
@@ -93,7 +93,7 @@ class Structure(Entity):
             The ``custom_template`` parameter can be None or an empty string if
             it is not needed.
 
-            A :class:`.Structure` can not be created without a ``type``
+            A :class:`.Structure` cannot be created without a ``type``
             (__strictly_typed__ = True). By giving a ``type`` to the
             :class:`.Structure`, you can create one structure for **Commercials**
             and another project structure for **Movies** and another one for
@@ -198,7 +198,7 @@ class Structure(Entity):
         """
         if not isinstance(template, FilenameTemplate):
             raise TypeError(
-                f"All the elements in the {self.__class__.__name__}.templates should "
+                f"All the items in the {self.__class__.__name__}.templates should "
                 "be a stalker.models.template.FilenameTemplate instance, not "
                 f"{template.__class__.__name__}: '{template}'"
             )

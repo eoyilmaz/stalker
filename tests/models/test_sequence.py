@@ -235,3 +235,11 @@ def test_project_mixin_initialization(setup_sequence_db_tests):
     data["kwargs"]["project"] = new_project
     new_sequence = Sequence(**data["kwargs"])
     assert new_sequence.project == new_project
+
+
+def test__hash__is_working_as_expected(setup_sequence_db_tests):
+    """__hash__ is working as expected."""
+    data = setup_sequence_db_tests
+    result = hash(data["test_sequence"])
+    assert isinstance(result, int)
+    assert result == data["test_sequence"].__hash__()

@@ -69,7 +69,7 @@ def test_title_argument_is_skipped(setup_page_tests):
     data["kwargs"].pop("title")
     with pytest.raises(ValueError) as cm:
         Page(**data["kwargs"])
-    assert str(cm.value) == "Page.title can not be empty"
+    assert str(cm.value) == "Page.title cannot be empty"
 
 
 def test_title_argument_is_none(setup_page_tests):
@@ -95,7 +95,7 @@ def test_title_argument_is_an_empty_string(setup_page_tests):
     data["kwargs"]["title"] = ""
     with pytest.raises(ValueError) as cm:
         Page(**data["kwargs"])
-    assert str(cm.value) == "Page.title can not be empty"
+    assert str(cm.value) == "Page.title cannot be empty"
 
 
 def test_title_attribute_is_set_to_empty_string(setup_page_tests):
@@ -103,7 +103,7 @@ def test_title_attribute_is_set_to_empty_string(setup_page_tests):
     data = setup_page_tests
     with pytest.raises(ValueError) as cm:
         data["test_page"].title = ""
-    assert str(cm.value) == "Page.title can not be empty"
+    assert str(cm.value) == "Page.title cannot be empty"
 
 
 def test_title_argument_is_not_a_string(setup_page_tests):
@@ -123,14 +123,14 @@ def test_title_attribute_is_not_a_string(setup_page_tests):
     assert str(cm.value) == "Page.title should be a string, not int: '2135'"
 
 
-def test_title_argument_is_working_properly(setup_page_tests):
+def test_title_argument_is_working_as_expected(setup_page_tests):
     """title argument value is correctly passed to title attribute."""
     data = setup_page_tests
     assert data["test_page"].title == data["kwargs"]["title"]
 
 
-def test_title_attribute_is_working_properly(setup_page_tests):
-    """title attribute is working properly."""
+def test_title_attribute_is_working_as_expected(setup_page_tests):
+    """title attribute is working as expected."""
     data = setup_page_tests
     test_value = "Test Title 2"
     data["test_page"].title = test_value
@@ -195,13 +195,13 @@ def test_content_attribute_is_set_to_a_value_other_than_a_string(setup_page_test
     )
 
 
-def test_content_argument_is_working_properly(setup_page_tests):
+def test_content_argument_is_working_as_expected(setup_page_tests):
     """content argument value is correctly passed to the content attribute."""
     data = setup_page_tests
     assert data["test_page"].content == data["kwargs"]["content"]
 
 
-def test_content_attribute_is_working_properly(setup_page_tests):
+def test_content_attribute_is_working_as_expected(setup_page_tests):
     """content attribute value can be correctly set."""
     data = setup_page_tests
     test_value = "This is a test content"

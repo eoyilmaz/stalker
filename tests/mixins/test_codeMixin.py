@@ -99,7 +99,7 @@ def test_code_argument_is_an_empty_string(code_mixin_tester_setup):
     with pytest.raises(ValueError) as cm:
         CodeMixFooMixedInClass(**data["kwargs"])
 
-    assert str(cm.value) == "CodeMixFooMixedInClass.code can not be an empty string"
+    assert str(cm.value) == "CodeMixFooMixedInClass.code cannot be an empty string"
 
 
 def test_code_attribute_is_set_to_an_empty_string(code_mixin_tester_setup):
@@ -108,17 +108,17 @@ def test_code_attribute_is_set_to_an_empty_string(code_mixin_tester_setup):
     with pytest.raises(ValueError) as cm:
         data["test_foo_obj"].code = ""
 
-    assert str(cm.value) == "CodeMixFooMixedInClass.code can not be an empty string"
+    assert str(cm.value) == "CodeMixFooMixedInClass.code cannot be an empty string"
 
 
-def test_code_argument_is_working_properly(code_mixin_tester_setup):
-    """code argument value is passed to the code attribute properly."""
+def test_code_argument_is_working_as_expected(code_mixin_tester_setup):
+    """code argument value is passed to the code attribute."""
     data = code_mixin_tester_setup
     assert data["test_foo_obj"].code == data["kwargs"]["code"]
 
 
-def test_code_attribute_is_working_properly(code_mixin_tester_setup):
-    """code attribute is working properly."""
+def test_code_attribute_is_working_as_expected(code_mixin_tester_setup):
+    """code attribute is working as expected."""
     data = code_mixin_tester_setup
     test_value = "new code"
     data["test_foo_obj"].code = test_value

@@ -10,7 +10,7 @@ def test___auto_name__class_attribute_is_set_to_false():
 
 
 def test_tag_init():
-    """tag inits properly."""
+    """tag inits as expected."""
     # this should work without any error
     tag = Tag(name="a test tag", description="this is a test tag")
     assert isinstance(tag, Tag)
@@ -59,3 +59,12 @@ def test_plural_class_name():
     kwargs = dict(name="a test tag", description="this is a test tag")
     test_tag = Tag(**kwargs)
     assert test_tag.plural_class_name == "Tags"
+
+
+def test__hash__is_working_as_expected():
+    """__hash__ is working as expected."""
+    kwargs = dict(name="a test tag", description="this is a test tag")
+    test_tag = Tag(**kwargs)
+    result = hash(test_tag)
+    assert isinstance(result, int)
+    assert result == test_tag.__hash__()

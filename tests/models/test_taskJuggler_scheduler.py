@@ -3,6 +3,8 @@
 
 import datetime
 import os
+import tempfile
+import sys
 
 import jinja2
 
@@ -21,6 +23,28 @@ from stalker import Project
 from stalker import Task
 from stalker import TimeLog
 from stalker.db.session import DBSession
+
+
+@pytest.fixture(scope="function")
+def monkeypatch_tj3():
+    """patch tj3 command with a python script that returns an error message."""
+    default_tj3_command_path = stalker.defaults.tj_command
+    patched_tj3_command_path = tempfile.mktemp("patched_tj3_command")
+    # create the script
+    with open(patched_tj3_command_path, "w") as f:
+        f.write(
+            f"#!{sys.executable}\n"
+            "# -*- coding: utf-8 -*-\n"
+            "import sys\n"
+            'sys.exit("some random exit message")\n'
+        )
+    # make it executable
+    os.chmod(patched_tj3_command_path, 0o777)
+    stalker.defaults["tj_command"] = patched_tj3_command_path
+    yield
+    stalker.defaults["tj_command"] = default_tj3_command_path
+    # and clean the temp file
+    os.remove(patched_tj3_command_path)
 
 
 @pytest.fixture(scope="function")
@@ -315,6 +339,56 @@ def test_schedule_will_not_work_if_the_studio_attribute_is_None(
     )
 
 
+pytest.mark.skipif(sys.platform == "win32", "Runs in Linux/macOS for now!")
+
+
+def test_schedule_will_raise_tj3_command_errors_as_a_runtime_error(
+    setup_tsk_juggler_scheduler_db_tests, monkeypatch_tj3
+):
+    data = setup_tsk_juggler_scheduler_db_tests
+    # create a dummy Project to schedule
+    dummy_project = Project(
+        name="Dummy Project", code="DP", repository=data["test_repo"]
+    )
+
+    dt1 = Task(
+        name="Dummy Task 1",
+        project=dummy_project,
+        schedule_timing=4,
+        schedule_unit="h",
+        resources=[data["test_user1"]],
+    )
+
+    dt2 = Task(
+        name="Dummy Task 2",
+        project=dummy_project,
+        schedule_timing=4,
+        schedule_unit="h",
+        resources=[data["test_user2"]],
+    )
+    DBSession.add_all([dummy_project, dt1, dt2])
+    DBSession.commit()
+
+    tjp_sched = TaskJugglerScheduler(compute_resources=True, projects=[dummy_project])
+    test_studio = Studio(
+        name="Test Studio", now=datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
+    )
+    test_studio.start = datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
+    test_studio.end = datetime.datetime(2013, 4, 30, 0, 0, tzinfo=pytz.utc)
+    test_studio.daily_working_hours = 9
+    DBSession.add(test_studio)
+    DBSession.commit()
+
+    tjp_sched.studio = test_studio
+
+    # update the defaults.tj_command to false so that it returns an error
+
+    with pytest.raises(RuntimeError) as cm:
+        tjp_sched.schedule()
+
+    assert str(cm.value) == "some random exit message"
+
+
 def test_tasks_are_correctly_scheduled(setup_tsk_juggler_scheduler_db_tests):
     """tasks are correctly scheduled."""
     data = setup_tsk_juggler_scheduler_db_tests
@@ -517,7 +591,6 @@ def test_tasks_of_given_projects_are_correctly_scheduled(
 ):
     """tasks of given projects are correctly scheduled."""
     data = setup_tsk_juggler_scheduler_db_tests
-    # create a dummy project
     # create a dummy Project to schedule
     dummy_project = Project(
         name="Dummy Project", code="DP", repository=data["test_repo"]
@@ -578,6 +651,65 @@ def test_tasks_of_given_projects_are_correctly_scheduled(
 
     assert dt2.computed_start == datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc)
     assert dt2.computed_end == datetime.datetime(2013, 4, 16, 13, 0, tzinfo=pytz.utc)
+
+
+def test_csv_file_does_not_exist_returns_without_scheduling(
+    setup_tsk_juggler_scheduler_db_tests, monkeypatch
+):
+    """csv_file_full_path doesn't exist will return without schedule data parsed."""
+    data = setup_tsk_juggler_scheduler_db_tests
+    # create a dummy Project to schedule
+    dummy_project = Project(
+        name="Dummy Project", code="DP", repository=data["test_repo"]
+    )
+
+    dt1 = Task(
+        name="Dummy Task 1",
+        project=dummy_project,
+        schedule_timing=4,
+        schedule_unit="h",
+        resources=[data["test_user1"]],
+    )
+
+    dt2 = Task(
+        name="Dummy Task 2",
+        project=dummy_project,
+        schedule_timing=4,
+        schedule_unit="h",
+        resources=[data["test_user2"]],
+    )
+    DBSession.add_all([dummy_project, dt1, dt2])
+    DBSession.commit()
+
+    tjp_sched = TaskJugglerScheduler(compute_resources=True, projects=[dummy_project])
+    test_studio = Studio(
+        name="Test Studio", now=datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
+    )
+    test_studio.start = datetime.datetime(2013, 4, 16, 0, 0, tzinfo=pytz.utc)
+    test_studio.end = datetime.datetime(2013, 4, 30, 0, 0, tzinfo=pytz.utc)
+    test_studio.daily_working_hours = 9
+    DBSession.add(test_studio)
+    DBSession.commit()
+
+    tjp_sched.studio = test_studio
+
+    # trick _arse_csv_file() to think that the csv file doesn't exist
+    import os
+
+    called = []
+
+    def patched_exists(path):
+        if path == tjp_sched.csv_file_full_path:
+            called.append(path)
+            return False
+        return os.path.exists(path)
+
+    monkeypatch.setattr("stalker.models.schedulers.os.path.exists", patched_exists)
+    assert len(called) == 0
+    # should run without any errors
+    tjp_sched.schedule()
+    assert len(called) > 0
+    assert tjp_sched.csv_file_full_path in called
 
 
 def test_projects_argument_is_skipped(setup_tsk_juggler_scheduler_db_tests):
@@ -647,7 +779,7 @@ def test_projects_attribute_is_not_list_of_all_projects():
     )
 
 
-def test_projects_argument_is_working_properly(setup_tsk_juggler_scheduler_db_tests):
+def test_projects_argument_is_working_as_expected(setup_tsk_juggler_scheduler_db_tests):
     """projects argument value is correctly passed to the projects attribute."""
     data = setup_tsk_juggler_scheduler_db_tests
     dp1 = Project(name="Dummy Project", code="DP", repository=data["test_repo"])
@@ -656,8 +788,10 @@ def test_projects_argument_is_working_properly(setup_tsk_juggler_scheduler_db_te
     assert tjp.projects == [dp1, dp2]
 
 
-def test_projects_attribute_is_working_properly(setup_tsk_juggler_scheduler_db_tests):
-    """projects attribute is working properly."""
+def test_projects_attribute_is_working_as_expected(
+    setup_tsk_juggler_scheduler_db_tests,
+):
+    """projects attribute is working as expected."""
     data = setup_tsk_juggler_scheduler_db_tests
     dp1 = Project(name="Dummy Project", code="DP", repository=data["test_repo"])
     dp2 = Project(name="Dummy Project", code="DP", repository=data["test_repo"])

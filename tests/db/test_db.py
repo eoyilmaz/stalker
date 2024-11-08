@@ -58,75 +58,22 @@ from stalker import (
 )
 from stalker.config import Config
 from stalker.db.setup import create_entity_statuses, alembic_version
-from stalker.db.session import DBSession, ExtendedScopedSession
+from stalker.db.session import DBSession
 from stalker.models.auth import LOGIN, LOGOUT
 
 from sqlalchemy.pool import NullPool
-from sqlalchemy.exc import ArgumentError, IntegrityError, PendingRollbackError
+from sqlalchemy.exc import (
+    ArgumentError,
+    IntegrityError,
+    OperationalError,
+    PendingRollbackError,
+    ProgrammingError,
+)
 
 from tests.utils import create_random_db, get_admin_user, tear_down_db
 
 logger = log.get_logger(__name__)
 log.set_level(logging.DEBUG)
-
-
-def test_dbsession_save_method_is_correctly_created(setup_postgresql_db):
-    """DBSession is correctly created from ExtendedScopedSession class."""
-    assert isinstance(DBSession, ExtendedScopedSession)
-
-
-def test_dbsession_save_method_is_working_properly_for_single_entity(
-    setup_postgresql_db,
-):
-    """DBSession.save() method is working properly for single entity."""
-    test_user = User(
-        name="Test User", login="tuser", email="tuser@gmail.com", password="12345"
-    )
-    DBSession.save(test_user)
-
-    del test_user
-    test_user_db = User.query.filter(User.name == "Test User").first()
-    assert test_user_db is not None
-
-
-def test_dbsession_save_method_is_working_properly_for_multiple_entity(
-    setup_postgresql_db,
-):
-    """DBSession.save() method is working properly for single entity."""
-    test_user1 = User(
-        name="Test User 1",
-        login="tuser1",
-        email="tuser1@gmail.com",
-        password="12345",
-    )
-    test_user2 = User(
-        name="Test User 2",
-        login="tuser2",
-        email="tuser2@gmail.com",
-        password="12345",
-    )
-
-    DBSession.save([test_user1, test_user2])
-
-    del test_user1
-    del test_user2
-    test_user1_db = User.query.filter(User.name == "Test User 1").first()
-    test_user2_db = User.query.filter(User.name == "Test User 2").first()
-    assert test_user1_db is not None
-    assert test_user2_db is not None
-
-
-def test_dbsession_save_method_is_working_properly_for_no_entry(setup_postgresql_db):
-    """DBSession.save() method is working properly with no parameters."""
-    test_user = User(
-        name="Test User", login="tuser", email="tuser@gmail.com", password="12345"
-    )
-    DBSession.add(test_user)
-    DBSession.save()
-
-    del test_user
-    test_user_db = User.query.filter(User.name == "Test User").first()
-    assert test_user_db is not None
 
 
 @pytest.fixture(scope="function")
@@ -296,6 +243,42 @@ def test_register_raise_type_error_for_wrong_class_name_argument(setup_postgresq
     of type or str."""
     with pytest.raises(TypeError):
         stalker.db.setup.register(23425)
+
+
+@pytest.mark.parametrize("error_class", [IntegrityError])
+def test_register_handles_integrity_errors(
+    setup_postgresql_db, monkeypatch, error_class
+):
+    """create_ticket_statuses() handles IntegrityErrors."""
+
+    # create a new dummy class
+    class TestClass(object):
+        pass
+
+    class PatchedDBSession(object):
+        rollback_is_called = False
+
+        @classmethod
+        def patched_commit(cls, *args, **kwargs):
+            raise error_class(statement="", params=[], orig=None)
+
+        @classmethod
+        def patched_rollback(cls):
+            cls.rollback_is_called = True
+
+    monkeypatch.setattr(
+        "stalker.db.setup.DBSession.commit",
+        PatchedDBSession.patched_commit,
+    )
+    monkeypatch.setattr(
+        "stalker.db.setup.DBSession.rollback",
+        PatchedDBSession.patched_rollback,
+    )
+
+    assert PatchedDBSession.rollback_is_called is False
+    # this should raise the errors now
+    stalker.db.setup.register(TestClass)
+    assert PatchedDBSession.rollback_is_called is True
 
 
 def test_permissions_created_for_all_the_classes(setup_postgresql_db):
@@ -938,10 +921,10 @@ def test_db_init_with_studio_instance(setup_postgresql_db):
     assert defaults.timing_resolution == datetime.timedelta(minutes=5)
 
 
-def test_get_alembic_version_is_working_properly_when_there_is_no_alembic_version_table(
+def test_get_alembic_version_is_working_as_expected_when_there_is_no_alembic_version_table(
     setup_postgresql_db,
 ):
-    """get_alembic_version() working properly if there is no alembic_version table."""
+    """get_alembic_version() working as expected if there is no alembic_version table."""
     # drop the table
     DBSession.connection().execute("DROP TABLE IF EXISTS alembic_version")
     # now get the alembic_version
@@ -950,11 +933,86 @@ def test_get_alembic_version_is_working_properly_when_there_is_no_alembic_versio
     assert alembic_version_ is None
 
 
+@pytest.mark.parametrize("error_class", [OperationalError, ProgrammingError, TypeError])
+def test_get_alembic_version_handles_errors(monkeypatch, error_class):
+    """stalker.db.setup.get_alembic_version() handles errors db related."""
+
+    class PatchedDialect(object):
+
+        def has_table(*args, **kwargs):
+            return True
+
+    class PatchedEngine(object):
+
+        dialect = PatchedDialect()
+
+    class PatchedConnection(object):
+        engine = PatchedEngine()
+
+        def execute(*args, **kwargs):
+            if error_class in (OperationalError, ProgrammingError):
+                raise error_class(statement="", params=[], orig=None)
+            else:
+                raise error_class
+
+    class PatchedDBSession(object):
+
+        rollback_called = False
+
+        @classmethod
+        def connection(cls):
+            return PatchedConnection()
+
+        @classmethod
+        def rollback(cls):
+            cls.rollback_called = True
+
+    monkeypatch.setattr("stalker.db.setup.DBSession", PatchedDBSession)
+    with pytest.raises(error_class) as cm:
+        PatchedDBSession.connection().execute()
+
+    assert PatchedDBSession.rollback_called is False
+    return_value = stalker.db.setup.get_alembic_version()
+    assert PatchedDBSession.rollback_called is True
+    assert return_value is None
+
+
 def test_create_ticket_statuses_called_multiple_times(setup_postgresql_db):
     """no IntegrityError is raised if create_ticket_statuses() called multiple times."""
     stalker.db.setup.create_ticket_statuses()
     stalker.db.setup.create_ticket_statuses()
     stalker.db.setup.create_ticket_statuses()
+
+
+def test_create_ticket_statuses_handles_integrity_errors(
+    setup_postgresql_db, monkeypatch
+):
+    """create_ticket_statuses() handles IntegrityErrors."""
+
+    class PatchedDBSession(object):
+        rollback_is_called = False
+
+        @classmethod
+        def patched_commit(cls, *args, **kwargs):
+            raise IntegrityError(statement="", params=[], orig=None)
+
+        @classmethod
+        def patched_rollback(cls):
+            cls.rollback_is_called = True
+
+    monkeypatch.setattr(
+        "stalker.db.setup.DBSession.commit",
+        PatchedDBSession.patched_commit,
+    )
+    monkeypatch.setattr(
+        "stalker.db.setup.DBSession.rollback",
+        PatchedDBSession.patched_rollback,
+    )
+
+    assert PatchedDBSession.rollback_is_called is False
+    # this should raise IntegrityError now
+    stalker.db.setup.create_ticket_statuses()
+    assert PatchedDBSession.rollback_is_called is True
 
 
 def test_create_entity_statuses_called_multiple_times(setup_postgresql_db):
@@ -965,6 +1023,41 @@ def test_create_entity_statuses_called_multiple_times(setup_postgresql_db):
     admin = get_admin_user()
     stalker.db.setup.create_entity_statuses("Ticket", ticket_names, ticket_codes, admin)
     stalker.db.setup.create_entity_statuses("Ticket", ticket_names, ticket_codes, admin)
+
+
+@pytest.mark.parametrize("error_class", [IntegrityError, OperationalError])
+def test_create_entity_statuses_handles_errors(
+    setup_postgresql_db, monkeypatch, error_class
+):
+    """create_ticket_statuses() handles IntegrityErrors."""
+    ticket_names = defaults.ticket_status_names
+    ticket_codes = defaults.ticket_status_codes
+    admin = get_admin_user()
+
+    class PatchedDBSession(object):
+        rollback_is_called = False
+
+        @classmethod
+        def patched_commit(cls, *args, **kwargs):
+            raise error_class(statement="", params=[], orig=None)
+
+        @classmethod
+        def patched_rollback(cls):
+            cls.rollback_is_called = True
+
+    monkeypatch.setattr(
+        "stalker.db.setup.DBSession.commit",
+        PatchedDBSession.patched_commit,
+    )
+    monkeypatch.setattr(
+        "stalker.db.setup.DBSession.rollback",
+        PatchedDBSession.patched_rollback,
+    )
+
+    assert PatchedDBSession.rollback_is_called is False
+    # this should raise the errors now
+    stalker.db.setup.create_entity_statuses("Ticket", ticket_names, ticket_codes, admin)
+    assert PatchedDBSession.rollback_is_called is True
 
 
 def test_register_called_multiple_times(setup_postgresql_db):
@@ -1002,8 +1095,8 @@ def test_setup_with_settings(setup_postgresql_db):
 #
 # Incomplete isolation is against to the logic behind unit testing, every
 # test should only cover a unit of the code, and a complete isolation should
-# be created. But this can not be done in persistence tests (AFAIK), it needs
-# to be done in this way for now. Mocks can not be used because every created
+# be created. But this cannot be done in persistence tests (AFAIK), it needs
+# to be done in this way for now. Mocks cannot be used because every created
 # object goes to the database, so they need to be real objects.
 
 

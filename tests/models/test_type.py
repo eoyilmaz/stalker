@@ -73,31 +73,31 @@ def test_plural_class_name(setup_type_tests):
     assert data["test_type"].plural_class_name == "Types"
 
 
-def test_target_entity_type_argument_can_not_be_skipped(setup_type_tests):
+def test_target_entity_type_argument_cannot_be_skipped(setup_type_tests):
     """TypeError raised if the created Type doesn't have any target_entity_type."""
     data = setup_type_tests
     data["kwargs"].pop("target_entity_type")
     with pytest.raises(TypeError) as cm:
         Type(**data["kwargs"])
-    assert str(cm.value) == "Type.target_entity_type can not be None"
+    assert str(cm.value) == "Type.target_entity_type cannot be None"
 
 
-def test_target_entity_type_argument_can_not_be_none(setup_type_tests):
+def test_target_entity_type_argument_cannot_be_none(setup_type_tests):
     """TypeError raised if the target_entity_type argument is None."""
     data = setup_type_tests
     data["kwargs"]["target_entity_type"] = None
     with pytest.raises(TypeError) as cm:
         Type(**data["kwargs"])
-    assert str(cm.value) == "Type.target_entity_type can not be None"
+    assert str(cm.value) == "Type.target_entity_type cannot be None"
 
 
-def test_target_entity_type_argument_can_not_be_empty_string(setup_type_tests):
+def test_target_entity_type_argument_cannot_be_empty_string(setup_type_tests):
     """ValueError raised if the target_entity_type argument is an empty string."""
     data = setup_type_tests
     data["kwargs"]["target_entity_type"] = ""
     with pytest.raises(ValueError) as cm:
         Type(**data["kwargs"])
-    assert str(cm.value) == "Type.target_entity_type can not be empty"
+    assert str(cm.value) == "Type.target_entity_type cannot be empty"
 
 
 def test_target_entity_type_argument_accepts_strings(setup_type_tests):
@@ -130,13 +130,21 @@ def test_target_entity_type_attribute_is_read_only(setup_type_tests):
         12: "property of 'Type' object has no setter",
     }.get(
         sys.version_info.minor,
-        "property '_target_entity_type_getter' of 'Type' object has no setter"
+        "property '_target_entity_type_getter' of 'Type' object has no setter",
     )
 
     assert str(cm.value) == error_message
 
 
-def test_target_entity_type_attribute_is_working_properly(setup_type_tests):
-    """target_entity_type attribute is working properly."""
+def test_target_entity_type_attribute_is_working_as_expected(setup_type_tests):
+    """target_entity_type attribute is working as expected."""
     data = setup_type_tests
     assert data["test_type"].target_entity_type == data["kwargs"]["target_entity_type"]
+
+
+def test__hash__is_working_as_expected(setup_type_tests):
+    """__hash__ is working as expected."""
+    data = setup_type_tests
+    result = hash(data["test_type"])
+    assert isinstance(result, int)
+    assert result == data["test_type"].__hash__()

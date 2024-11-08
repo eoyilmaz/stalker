@@ -32,7 +32,7 @@ class JSONEncodedDict(TypeDecorator):
         """Process result value.
 
         Args:
-            value (str): The str reprsentation of the JSON data.
+            value (str): The str representation of the JSON data.
             dialect (str): The dialect.
 
         Returns:

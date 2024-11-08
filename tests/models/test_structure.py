@@ -140,8 +140,8 @@ def test_templates_attribute_only_accepts_list_1(setup_structure_tests):
     assert str(cm.value) == "Incompatible collection type: float is not list-like"
 
 
-def test_templates_attribute_is_working_properly(setup_structure_tests):
-    """templates attribute is working properly."""
+def test_templates_attribute_is_working_as_expected(setup_structure_tests):
+    """templates attribute is working as expected."""
     data = setup_structure_tests
     # test the correct value
     data["test_structure"].templates = data["test_templates"]
@@ -158,12 +158,12 @@ def test_templates_argument_accepts_only_list_of_filename_template_instances(
     with pytest.raises(TypeError) as cm:
         Structure(**data["kwargs"])
     assert str(cm.value) == (
-        "All the elements in the Structure.templates should be a "
+        "All the items in the Structure.templates should be a "
         "stalker.models.template.FilenameTemplate instance, not int: '1'"
     )
 
 
-def test_templates_argument_is_working_properly(setup_structure_tests):
+def test_templates_argument_is_working_as_expected(setup_structure_tests):
     """templates argument value is correctly passed to the templates attribute."""
     data = setup_structure_tests
     # test the correct value
@@ -182,7 +182,7 @@ def test_templates_attribute_accpets_only_list_of_filename_template_instances(
         data["test_structure"].templates = test_value
 
     assert str(cm.value) == (
-        "All the elements in the Structure.templates should be a "
+        "All the items in the Structure.templates should be a "
         "stalker.models.template.FilenameTemplate instance, not int: '1'"
     )
 
@@ -224,3 +224,11 @@ def test_plural_class_name(setup_structure_tests):
     """plural name of Structure class."""
     data = setup_structure_tests
     assert data["test_structure"].plural_class_name == "Structures"
+
+
+def test__hash__is_working_as_expected(setup_structure_tests):
+    """__hash__ is working as expected."""
+    data = setup_structure_tests
+    result = hash(data["test_structure"])
+    assert isinstance(result, int)
+    assert result == data["test_structure"].__hash__()

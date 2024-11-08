@@ -25,8 +25,7 @@ def test_access_argument_is_skipped(setup_permission_tests):
         Permission(**data["kwargs"])
 
     assert (
-        str(cm.value)
-        == "__init__() missing 1 required positional argument: 'access'"
+        str(cm.value) == "__init__() missing 1 required positional argument: 'access'"
     )
 
 
@@ -71,7 +70,7 @@ def test_access_attribute_is_read_only(setup_permission_tests):
         12: "property of 'Permission' object has no setter",
     }.get(
         sys.version_info.minor,
-        "property '_access_getter' of 'Permission' object has no setter"
+        "property '_access_getter' of 'Permission' object has no setter",
     )
 
     assert str(cm.value) == error_message
@@ -85,8 +84,7 @@ def test_action_argument_is_skipped_will_raise_a_type_error(setup_permission_tes
         Permission(**data["kwargs"])
 
     assert (
-        str(cm.value)
-        == "__init__() missing 1 required positional argument: 'action'"
+        str(cm.value) == "__init__() missing 1 required positional argument: 'action'"
     )
 
 
@@ -135,7 +133,7 @@ def test_action_attribute_is_read_only(setup_permission_tests):
         12: "property of 'Permission' object has no setter",
     }.get(
         sys.version_info.minor,
-        "property '_action_getter' of 'Permission' object has no setter"
+        "property '_action_getter' of 'Permission' object has no setter",
     )
 
     assert str(cm.value) == error_message
@@ -200,7 +198,14 @@ def test_class_name_attribute_is_read_only(setup_permission_tests):
         12: "property of 'Permission' object has no setter",
     }.get(
         sys.version_info.minor,
-        "property '_class_name_getter' of 'Permission' object has no setter"
+        "property '_class_name_getter' of 'Permission' object has no setter",
     )
 
     assert str(cm.value) == error_message
+
+
+def test_hash_value(setup_permission_tests):
+    """__hash__ returns the hash of the Permission instance."""
+    data = setup_permission_tests
+    result = hash(data["test_permission"])
+    assert isinstance(result, int)
