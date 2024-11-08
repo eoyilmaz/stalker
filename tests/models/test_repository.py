@@ -439,9 +439,9 @@ def test_to_linux_path_returns_the_linux_version_of_the_given_path_with_env_vars
     data = setup_repository_db_tests
     data["test_repo"].id = 1
     data["test_repo"].linux_path = "/mnt/T/Stalker_Projects"
-    os.environ["REPO1"] = "/mnt/T/Stalker_Projects"
+    os.environ["REPOR1"] = "/mnt/T/Stalker_Projects"
     test_linux_path = "/mnt/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
-    test_path_with_env_var = "$REPO1/Sero/Task1/Task2/Some_file.ma"
+    test_path_with_env_var = "$REPOR1/Sero/Task1/Task2/Some_file.ma"
     assert data["test_repo"].to_linux_path(test_path_with_env_var) == test_linux_path
 
 
@@ -557,9 +557,9 @@ def test_to_windows_path_returns_the_windows_version_of_the_given_path_with_env_
     data["test_repo"].id = 1
     data["test_repo"].windows_path = "T:/Stalker_Projects"
     data["test_repo"].linux_path = "/mnt/T/Stalker_Projects"
-    os.environ["REPO1"] = data["test_repo"].linux_path
+    os.environ["REPOR1"] = data["test_repo"].linux_path
     test_windows_path = "T:/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
-    test_path_with_env_var = "$REPO1/Sero/Task1/Task2/Some_file.ma"
+    test_path_with_env_var = "$REPOR1/Sero/Task1/Task2/Some_file.ma"
     assert (
         data["test_repo"].to_windows_path(test_path_with_env_var) == test_windows_path
     )
@@ -702,9 +702,9 @@ def test_to_macos_path_returns_the_macos_version_of_the_given_path_with_env_vars
     data["test_repo"].windows_path = "T:/Stalker_Projects"
     data["test_repo"].macos_path = "/Volumes/T/Stalker_Projects"
     data["test_repo"].linux_path = "/mnt/T/Stalker_Projects"
-    os.environ["REPO1"] = data["test_repo"].windows_path
+    os.environ["REPOR1"] = data["test_repo"].windows_path
     test_windows_path = "/Volumes/T/Stalker_Projects/Sero/Task1/Task2/" "Some_file.ma"
-    test_path_with_env_var = "$REPO1/Sero/Task1/Task2/Some_file.ma"
+    test_path_with_env_var = "$REPOR1/Sero/Task1/Task2/Some_file.ma"
     assert data["test_repo"].to_macos_path(test_path_with_env_var) == test_windows_path
 
 
@@ -1000,18 +1000,6 @@ def test_make_relative_converts_the_given_path_with_env_variable_to_native_path(
     assert result == "Sero/Task1/Task2/Some_file.ma"
 
 
-def test_make_relative_converts_the_given_path_with_old_env_variable_to_native_path(
-    setup_repository_db_tests,
-):
-    """make_relative() converts path with old env var to repo root relative path."""
-    data = setup_repository_db_tests
-    # so we should have the env var to be configured
-    # now create a path with env var
-    path = "$REPO{}/Sero/Task1/Task2/Some_file.ma".format(data["test_repo"].id)
-    result = data["test_repo"].make_relative(path)
-    assert result == "Sero/Task1/Task2/Some_file.ma"
-
-
 def test_to_os_independent_path_is_working_as_expected(setup_repository_db_tests):
     """to_os_independent_path() is working as expected."""
     data = setup_repository_db_tests
@@ -1019,19 +1007,6 @@ def test_to_os_independent_path_is_working_as_expected(setup_repository_db_tests
     DBSession.commit()
     relative_part = "some/path/to/a/file.ma"
     test_path = "{}/{}".format(data["test_repo"].path, relative_part)
-    assert Repository.to_os_independent_path(test_path) == "$REPO{}/{}".format(
-        data["test_repo"].code,
-        relative_part,
-    )
-
-
-def test_to_os_independent_path_for_old_environment_vars(setup_repository_db_tests):
-    """to_os_independent_path with paths that contain old env vars."""
-    data = setup_repository_db_tests
-    DBSession.add(data["test_repo"])
-    DBSession.commit()
-    relative_part = "some/path/to/a/file.ma"
-    test_path = "$REPO{}/{}".format(data["test_repo"].id, relative_part)
     assert Repository.to_os_independent_path(test_path) == "$REPO{}/{}".format(
         data["test_repo"].code,
         relative_part,
@@ -1096,16 +1071,16 @@ def test_to_os_independent_path_not_change_the_path_with_env_variable(
     )
 
 
-def test_to_os_independent_path_converts_the_given_path_with_old_env_variable_new_env_variable(
+def test_to_os_independent_path_cannot_convert_the_given_path_with_old_env_variable_new_env_variable(
     setup_repository_db_tests,
 ):
-    """to_os_independent_path converts path with old env var to new env var."""
+    """to_os_independent_path cannot convert path with old env var to new env var."""
     data = setup_repository_db_tests
     # so we should have the env var to be configured
     # now create a path with env var
     path = "$REPO{}/Sero/Task1/Task2/Some_file.ma".format(data["test_repo"].id)
     result = data["test_repo"].to_os_independent_path(path)
-    assert result == "$REPO{}/Sero/Task1/Task2/Some_file.ma".format(
+    assert result != "$REPO{}/Sero/Task1/Task2/Some_file.ma".format(
         data["test_repo"].code
     )
 
@@ -1219,13 +1194,6 @@ def test_find_repo_is_working_as_expected_with_env_vars(setup_repository_db_test
     test_path = f"$REPO{new_repo1.code}/some/path/to/a/file.ma"
     assert Repository.find_repo(test_path) == new_repo1
 
-    # Test with old env var
-    test_path = "$REPO{}/some/path/to/a/file.ma".format(data["test_repo"].id)
-    assert Repository.find_repo(test_path) == data["test_repo"]
-
-    test_path = "$REPO{}/some/path/to/a/file.ma".format(new_repo1.id)
-    assert Repository.find_repo(test_path) == new_repo1
-
 
 def test_find_repo_returns_none_if_a_repo_cannot_be_found(setup_repository_db_tests):
     """find_repo() returns None if a repo cannot be found."""
@@ -1256,11 +1224,6 @@ def test_creating_and_committing_a_new_repository_instance_will_create_env_var(
 
     assert defaults.repo_env_var_template.format(code=repo.code) in os.environ
 
-    # check the old ID based env var
-    assert (
-        os.environ[defaults.repo_env_var_template_old.format(id=repo.id)] == repo.path
-    )
-
 
 def test_updating_a_repository_will_update_repo_path(setup_repository_db_tests):
     """environment variable is updated if the repository path is updated."""
@@ -1275,7 +1238,6 @@ def test_updating_a_repository_will_update_repo_path(setup_repository_db_tests):
     DBSession.commit()
 
     assert defaults.repo_env_var_template.format(code=repo.code) in os.environ
-    assert defaults.repo_env_var_template_old.format(id=repo.id) in os.environ
 
     # now update the repository
     test_value = "/mnt/S/"
@@ -1284,9 +1246,6 @@ def test_updating_a_repository_will_update_repo_path(setup_repository_db_tests):
     # expect the environment variable is also updated
     assert (
         os.environ[defaults.repo_env_var_template.format(code=repo.code)] == test_value
-    )
-    assert (
-        os.environ[defaults.repo_env_var_template_old.format(id=repo.id)] == test_value
     )
 
 
@@ -1307,7 +1266,6 @@ def test_updating_windows_path_only_update_repo_path_if_on_windows(
     DBSession.commit()
 
     assert defaults.repo_env_var_template.format(code=repo.code) in os.environ
-    assert defaults.repo_env_var_template_old.format(id=repo.id) in os.environ
 
     # now update the repository
     test_value = "S:/"
@@ -1319,14 +1277,6 @@ def test_updating_windows_path_only_update_repo_path_if_on_windows(
     )
     assert (
         os.environ[defaults.repo_env_var_template.format(code=repo.code)]
-        == repo.linux_path
-    )
-
-    assert (
-        os.environ[defaults.repo_env_var_template_old.format(id=repo.id)] != test_value
-    )
-    assert (
-        os.environ[defaults.repo_env_var_template_old.format(id=repo.id)]
         == repo.linux_path
     )
 
@@ -1343,13 +1293,6 @@ def test_updating_windows_path_only_update_repo_path_if_on_windows(
     )
     assert (
         os.environ[defaults.repo_env_var_template.format(code=repo.code)]
-        == repo.windows_path
-    )
-    assert (
-        os.environ[defaults.repo_env_var_template_old.format(id=repo.id)] == test_value
-    )
-    assert (
-        os.environ[defaults.repo_env_var_template_old.format(id=repo.id)]
         == repo.windows_path
     )
 
@@ -1372,7 +1315,6 @@ def test_updating_macos_path_only_update_repo_path_if_on_macos(
     DBSession.commit()
 
     assert defaults.repo_env_var_template.format(code=repo.code) in os.environ
-    assert defaults.repo_env_var_template_old.format(id=repo.id) in os.environ
 
     # now update the repository
     test_value = "/Volumes/S/"
@@ -1384,14 +1326,6 @@ def test_updating_macos_path_only_update_repo_path_if_on_macos(
     )
     assert (
         os.environ[defaults.repo_env_var_template.format(code=repo.code)]
-        == repo.windows_path
-    )
-
-    assert (
-        os.environ[defaults.repo_env_var_template_old.format(id=repo.id)] != test_value
-    )
-    assert (
-        os.environ[defaults.repo_env_var_template_old.format(id=repo.id)]
         == repo.windows_path
     )
 
@@ -1408,14 +1342,6 @@ def test_updating_macos_path_only_update_repo_path_if_on_macos(
     )
     assert (
         os.environ[defaults.repo_env_var_template.format(code=repo.code)]
-        == repo.macos_path
-    )
-
-    assert (
-        os.environ[defaults.repo_env_var_template_old.format(id=repo.id)] == test_value
-    )
-    assert (
-        os.environ[defaults.repo_env_var_template_old.format(id=repo.id)]
         == repo.macos_path
     )
 
@@ -1438,7 +1364,6 @@ def test_updating_linux_path_only_update_repo_path_if_on_linux(
     DBSession.commit()
 
     assert defaults.repo_env_var_template.format(code=repo.code) in os.environ
-    assert defaults.repo_env_var_template_old.format(id=repo.id) in os.environ
 
     # now update the repository
     test_value = "/mnt/S/"
@@ -1450,14 +1375,6 @@ def test_updating_linux_path_only_update_repo_path_if_on_linux(
     )
     assert (
         os.environ[defaults.repo_env_var_template.format(code=repo.code)]
-        == repo.macos_path
-    )
-
-    assert (
-        os.environ[defaults.repo_env_var_template_old.format(id=repo.id)] != test_value
-    )
-    assert (
-        os.environ[defaults.repo_env_var_template_old.format(id=repo.id)]
         == repo.macos_path
     )
 
@@ -1474,15 +1391,6 @@ def test_updating_linux_path_only_update_repo_path_if_on_linux(
     )
     assert (
         os.environ[defaults.repo_env_var_template.format(code=repo.code)]
-        == repo.linux_path
-    )
-
-    # expect the environment variable not updated
-    assert (
-        os.environ[defaults.repo_env_var_template_old.format(id=repo.id)] == test_value
-    )
-    assert (
-        os.environ[defaults.repo_env_var_template_old.format(id=repo.id)]
         == repo.linux_path
     )
 

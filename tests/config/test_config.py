@@ -225,3 +225,8 @@ def test_update_with_studio_is_working_as_expected(setup_postgresql_db):
 
     # now check it again
     assert defaults.timing_resolution == studio.timing_resolution
+
+
+def test_old_style_repo_env_does_not_exist_anymore():
+    """repo_env_var_template_old doesn't exist anymore."""
+    assert "repo_env_var_template_old" not in defaults.config_values
