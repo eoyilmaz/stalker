@@ -40,9 +40,10 @@ def setup_project_user_db_tests(setup_postgresql_db):
 def test_project_user_creation(setup_project_user_db_tests):
     """project user creation."""
     data = setup_project_user_db_tests
-    ProjectUser(
+    puser = ProjectUser(
         project=data["test_project"], user=data["test_user1"], role=data["test_role"]
     )
+    DBSession.save(puser)
     assert data["test_user1"] in data["test_project"].users
 
 

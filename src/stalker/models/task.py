@@ -581,16 +581,6 @@ class Task(
     parent to child, in Stalker the resources in a container task is
     meaningless, cause the resources are defined by the child tasks.
 
-    .. note::
-
-      Although, the ``tjp_task_template`` variable is not coded in that way in
-      the default config, if you want to populate resource information through
-      children tasks as it is in TaskJuggler, you can change the
-      ``tjp_task_template`` variable with a local **config.py** file. See
-      `configuring stalker`_
-
-      .. _configuring stalker: ../configure.html
-
     Although the values are not very important after TaskJuggler schedules a
     task, the :attr:`~.start` and :attr:`~.end` values for a container
     task is gathered from the child tasks. The start is equal to the earliest
@@ -1599,7 +1589,7 @@ class Task(
         return parent
 
     @validates("_project")
-    def _validates_project(
+    def _validate_project(
         self, key: str, project: "stalker.models.project.Project"
     ) -> "stalker.models.project.Project":
         """Validate the given project value.
@@ -2162,10 +2152,62 @@ class Task(
         Returns:
             str: The TaskJuggler representation of this task.
         """
-        from stalker import defaults
-
-        temp = Template(defaults.tjp_task_template, trim_blocks=True)
-        return temp.render({"task": self, "utc": pytz.utc})
+        tab = "    "
+        indent = tab * len(self.parents)
+        has_inner_data = False
+        tjp = f'{indent}task {self.tjp_id} "{self.tjp_id}" {{'
+        if self.priority != 500:
+            has_inner_data = True
+            tjp += f"\n{indent}{tab}priority {self.priority}"
+        if self.task_depends_on:
+            has_inner_data = True
+            tjp += f"\n{indent}{tab}depends "
+            for i, depends_on in enumerate(self.task_depends_on):
+                if i != 0:
+                    tjp += ", "
+                tjp += depends_on.to_tjp
+        if self.is_container:
+            has_inner_data = True
+            for child_task in self.children:
+                tjp += "\n"
+                tjp += child_task.to_tjp
+        if self.resources:
+            has_inner_data = True
+            if self.schedule_constraint:
+                if self.schedule_constraint in [1, 3]:
+                    tjp += f"\n{indent}{tab}start {self.start.astimezone(pytz.utc).strftime('%Y-%m-%d-%H:%M')}"
+                if self.schedule_constraint in [2, 3]:
+                    tjp += f"\n{indent}{tab}end {self.end.astimezone(pytz.utc).strftime('%Y-%m-%d-%H:%M')}"
+            tjp += f"\n{indent}{tab}{self.schedule_model} {self.schedule_timing}{self.schedule_unit}"
+            tjp += f"\n{indent}{tab}allocate "
+            for i, resource in enumerate(sorted(self.resources, key=lambda x: x.id)):
+                if i != 0:
+                    tjp += ", "
+                tjp += resource.tjp_id
+                if self.alternative_resources:
+                    tjp += f" {{\n{indent}{tab}{tab}alternative\n{indent}{tab}{tab}"
+                    for i, alt_res in enumerate(
+                        sorted(self.alternative_resources, key=lambda x: x.id)
+                    ):
+                        if i != 0:
+                            tjp += ", "
+                        tjp += alt_res.tjp_id
+                    tjp += f" select {self.allocation_strategy}"
+                    if self.persistent_allocation:
+                        tjp += f"\n{indent}{tab}{tab}persistent"
+                    tjp += f"\n{indent}{tab}}}"
+        for time_log in self.time_logs:
+            has_inner_data = True
+            tjp += (
+                f"\n{indent}{tab}booking "
+                f"{time_log.resource.tjp_id} "
+                f"{time_log.start.astimezone(pytz.utc).strftime('%Y-%m-%d-%H:%M:%S')} "
+                f"- "
+                f"{time_log.end.astimezone(pytz.utc).strftime('%Y-%m-%d-%H:%M:%S')} "
+                "{ overtime 2 }"
+            )
+        tjp += f"\n{indent}}}" if has_inner_data else "}"
+        return tjp
 
     @property
     def level(self) -> int:
@@ -2217,8 +2259,10 @@ class Task(
                     from "TimeLogs"
                     where "TimeLogs".task_id = :task_id
                     """
-                    engine = DBSession.connection().engine
-                    result = engine.execute(text(sql), task_id=self.id).fetchone()
+                    connection = DBSession.connection()
+                    result = connection.execute(
+                        text(sql), {"task_id": self.id}
+                    ).fetchone()
                     return result[0] if result[0] else 0
                 except (UnboundExecutionError, OperationalError, ProgrammingError):
                     # no database connection
@@ -3100,7 +3144,9 @@ class Task(
             )
 
         return os.path.normpath(
-            Template(task_template.path).render(**self._template_variables())
+            Template(task_template.path).render(
+                **self._template_variables(), trim_blocks=True, lstrip_blocks=True
+            )
         ).replace("\\", "/")
 
     @property
@@ -3306,19 +3352,11 @@ class TaskDependency(Base, ScheduleMixin):
         Returns:
             str: The TaskJuggler representation of this TaskDependency.
         """
-        template_variables = {
-            "task": self.task,
-            "depends_on": self.depends_on,
-            "dependency_target": self.dependency_target,
-            "gap_timing": self.gap_timing,
-            "gap_unit": self.gap_unit,
-            "gap_model": self.gap_model,
-        }
-
-        from stalker import defaults
-
-        temp = Template(defaults.tjp_task_dependency_template, trim_blocks=True)
-        return temp.render(template_variables)
+        tjp = f"{self.depends_on.tjp_abs_id} {{{self.dependency_target}"
+        if self.gap_timing:
+            tjp += f" gap{self.gap_model} {self.gap_timing}{self.gap_unit}"
+        tjp += "}"
+        return tjp
 
 
 # TASK_RESOURCES
@@ -3610,7 +3648,7 @@ def add_exclude_constraint(
     create_extension = DDL("CREATE EXTENSION btree_gist;")
     try:
         logger.debug('running "btree_gist" extension creation!')
-        create_extension.execute(bind=connection)
+        connection.execute(create_extension)
         logger.debug('successfully created "btree_gist" extension!')
     except (ProgrammingError, InternalError) as e:
         logger.debug(f"add_exclude_constraint: {e}")
@@ -3632,7 +3670,7 @@ IMMUTABLE;
     )
     try:
         logger.debug("creating ts_to_box function!")
-        ts_to_box.execute(bind=connection)
+        connection.execute(ts_to_box)
         logger.debug("successfully created ts_to_box function")
     except (ProgrammingError, InternalError) as e:
         logger.debug(f"failed creating ts_to_box function!: {e}")
@@ -3647,7 +3685,7 @@ IMMUTABLE;
     )
     try:
         logger.debug('running ExcludeConstraint for "TimeLogs" table creation!')
-        exclude_constraint.execute(bind=connection)
+        connection.execute(exclude_constraint)
         logger.debug('successfully created ExcludeConstraint for "TimeLogs" table!')
     except (ProgrammingError, InternalError) as e:
         logger.debug(f"failed creating ExcludeConstraint for TimeLogs table!: {e}")

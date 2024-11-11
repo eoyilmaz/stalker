@@ -179,7 +179,7 @@ def setup_shot_db_tests(setup_postgresql_db):
 
     # create a mock shot object
     data["test_shot"] = Shot(**data["kwargs"])
-    DBSession.add(data["test_project1"])
+    DBSession.add(data["test_shot"])
     DBSession.commit()
     return data
 
@@ -511,12 +511,14 @@ def test_scenes_argument_is_working_as_expected(setup_shot_db_tests):
     sce2 = Scene(name="sce2", code="sce2", project=data["test_project1"])
     sce3 = Scene(name="sce3", code="sce3", project=data["test_project1"])
 
-    seqs = [sce1, sce2, sce3]
-    data["kwargs"]["scenes"] = seqs
+    scenes = [sce1, sce2, sce3]
+    DBSession.add_all(scenes)
+    data["kwargs"]["scenes"] = scenes
     new_shot = Shot(**data["kwargs"])
+    DBSession.add(new_shot)
 
     assert sorted(new_shot.scenes, key=lambda x: x.name) == sorted(
-        seqs, key=lambda x: x.name
+        scenes, key=lambda x: x.name
     )
 
 
@@ -528,16 +530,18 @@ def test_scenes_attribute_is_working_as_expected(setup_shot_db_tests):
     sce1 = Scene(name="sce1", code="sce1", project=data["test_project1"])
     sce2 = Scene(name="sce2", code="sce2", project=data["test_project1"])
     sce3 = Scene(name="sce3", code="sce3", project=data["test_project1"])
+    scenes = [sce1, sce2, sce3]
+    DBSession.add_all(scenes)
 
     new_shot = Shot(**data["kwargs"])
+    DBSession.add(new_shot)
 
     new_shot.scenes = [sce1]
     new_shot.scenes.append(sce2)
     new_shot.scenes.append(sce3)
 
-    seqs = [sce1, sce2, sce3]
     assert sorted(new_shot.scenes, key=lambda x: x.name) == sorted(
-        seqs, key=lambda x: x.name
+        scenes, key=lambda x: x.name
     )
 
 

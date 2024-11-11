@@ -2950,14 +2950,16 @@ def test_request_revision_in_cmpl_leaf_task_schedule_info_update(
     now = dt.now(pytz.utc)
 
     data["test_task3"].status = data["status_rts"]
-    data["test_task3"].create_time_log(
+    tlog0 = data["test_task3"].create_time_log(
         resource=data["test_task3"].resources[0], start=now, end=now + td(hours=1)
     )
-    data["test_task3"].create_time_log(
+    DBSession.add(tlog0)
+    tlog1 = data["test_task3"].create_time_log(
         resource=data["test_task3"].resources[0],
         start=now + td(hours=1),
         end=now + td(hours=2),
     )
+    DBSession.add(tlog1)
     DBSession.commit()
     assert data["test_task3"].total_logged_seconds == 7200
 
@@ -2973,7 +2975,8 @@ def test_request_revision_in_cmpl_leaf_task_schedule_info_update(
         "schedule_timing": 4,
         "schedule_unit": "h",
     }
-    data["test_task3"].request_revision(**kw)
+    revision = data["test_task3"].request_revision(**kw)
+    DBSession.add(revision)
     assert data["test_task3"].schedule_timing == 6
     assert data["test_task3"].schedule_unit == "h"
 
@@ -4103,6 +4106,7 @@ def test_review_set_method_is_working_as_expected(setup_task_status_workflow_db_
 
     # request a review
     reviews = data["test_task3"].request_review()
+    DBSession.add_all(reviews)
     assert len(reviews) == 2
 
     # check the review_set() method with no review number
@@ -4142,6 +4146,7 @@ def test_review_set_review_number_is_skipped(setup_task_status_workflow_db_tests
 
     # request a review
     reviews = data["test_task3"].request_review()
+    DBSession.add_all(reviews)
     assert len(reviews) == 2
 
     # check the review_set() method with no review number
@@ -4159,6 +4164,7 @@ def test_review_set_review_number_is_skipped(setup_task_status_workflow_db_tests
 
     # request a new set of reviews
     reviews2 = data["test_task3"].request_review()
+    DBSession.add_all(reviews2)
 
     # confirm that it is a different set of review
     assert reviews != reviews2

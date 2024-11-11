@@ -61,6 +61,7 @@ from stalker.db.setup import create_entity_statuses, alembic_version
 from stalker.db.session import DBSession
 from stalker.models.auth import LOGIN, LOGOUT
 
+from sqlalchemy import text
 from sqlalchemy.pool import NullPool
 from sqlalchemy.exc import (
     ArgumentError,
@@ -747,14 +748,14 @@ def test___create_entity_statuses_no_status_codes_supplied(setup_postgresql_db):
 def test_initialization_of_alembic_version_table(setup_postgresql_db):
     """db.init() will also create a table called alembic_version."""
     sql_query = 'select version_num from "alembic_version"'
-    version_num = DBSession.connection().execute(sql_query).fetchone()[0]
+    version_num = DBSession.connection().execute(text(sql_query)).fetchone()[0]
     assert alembic_version == version_num
 
 
 def test_initialization_of_alembic_version_table_multiple_times(setup_postgresql_db):
     """db.create_alembic_table() will handle initializing the table multiple times."""
     sql_query = 'select version_num from "alembic_version"'
-    version_num = DBSession.connection().execute(sql_query).fetchone()[0]
+    version_num = DBSession.connection().execute(text(sql_query)).fetchone()[0]
     assert alembic_version == version_num
 
     DBSession.remove()
@@ -762,7 +763,7 @@ def test_initialization_of_alembic_version_table_multiple_times(setup_postgresql
     stalker.db.setup.init()
     stalker.db.setup.init()
 
-    version_nums = DBSession.connection().execute(sql_query).fetchall()
+    version_nums = DBSession.connection().execute(text(sql_query)).fetchall()
 
     # no additional version is created
     assert len(version_nums) == 1
@@ -775,12 +776,12 @@ def test_alembic_version_mismatch(setup_postgresql_db):
 
     # now change the alembic_version
     sql = "update alembic_version set version_num='some_random_number'"
-    DBSession.connection().execute(sql)
+    DBSession.connection().execute(text(sql))
     DBSession.commit()
 
     # check if it is updated correctly
     sql = "select version_num from alembic_version"
-    result = DBSession.connection().execute(sql).fetchone()
+    result = DBSession.connection().execute(text(sql)).fetchone()
     assert result[0] == "some_random_number"
 
     # close the connection
@@ -799,11 +800,7 @@ def test_alembic_version_mismatch(setup_postgresql_db):
     with pytest.raises(PendingRollbackError) as cm:
         DBSession.query(User.id).all()
 
-    assert (
-        "Can't reconnect until invalid transaction is rolled back. "
-        "(Background on this error at: "
-        "https://sqlalche.me/e/14/8s2b)" in str(cm.value)
-    )
+    assert "Can't reconnect until invalid transaction is rolled back." in str(cm.value)
 
     # rollback and reconnect to the database
     DBSession.rollback()
@@ -820,7 +817,7 @@ def test_alembic_version_mismatch(setup_postgresql_db):
     DBSession.rollback()
 
     sql = f"update alembic_version set version_num='{alembic_version}'"
-    DBSession.connection().execute(sql)
+    DBSession.connection().execute(text(sql))
     DBSession.commit()
 
     # and now expect everything to work correctly
@@ -926,7 +923,7 @@ def test_get_alembic_version_is_working_as_expected_when_there_is_no_alembic_ver
 ):
     """get_alembic_version() working as expected if there is no alembic_version table."""
     # drop the table
-    DBSession.connection().execute("DROP TABLE IF EXISTS alembic_version")
+    DBSession.connection().execute(text("DROP TABLE IF EXISTS alembic_version"))
     # now get the alembic_version
     # this should not raise an OperationalError
     alembic_version_ = stalker.db.setup.get_alembic_version()
@@ -1543,11 +1540,12 @@ def test_persistence_of_payment(setup_postgresql_db):
         amount=1232.4,
         unit="TRY",
     )
-    DBSession.add(test_invoice)
+    DBSession.save(test_invoice)
 
     test_payment = Payment(
         created_by=test_user, invoice=test_invoice, amount=123.4, unit="TRY"
     )
+    DBSession.save(test_payment)
 
     created_by = test_payment.created_by
     date_created = test_payment.date_created
@@ -1877,7 +1875,7 @@ def test_persistence_of_client(setup_postgresql_db):
     good5 = Good(name="Test Good 5")
     test_client.goods = [good1, good2, good3, good5]
 
-    DBSession.add(good4)
+    DBSession.add_all([good1, good2, good3, good4, good5])
     DBSession.add_all([user1, user2, user3, test_client])
     DBSession.commit()
 
@@ -1917,7 +1915,9 @@ def test_persistence_of_client(setup_postgresql_db):
     assert notes == client_db.notes
     assert tags == client_db.tags
     assert updated_by == client_db.updated_by
-    assert goods == client_db.goods
+    assert sorted(goods, key=lambda x: x.id) == sorted(
+        client_db.goods, key=lambda x: x.id
+    )
 
     # delete the client and expect the users are still there
     DBSession.delete(client_db)
@@ -2025,7 +2025,7 @@ def test_persistence_of_daily(setup_postgresql_db):
 
     del daily
 
-    daily_db = Daily.query.get(daily_id)
+    daily_db = DBSession.get(Daily, daily_id)
 
     assert daily_db.name == name
     assert daily_db.links == links
@@ -2041,10 +2041,10 @@ def test_persistence_of_daily(setup_postgresql_db):
     DBSession.commit()
 
     # test if links are still there
-    test_link1_db = Link.query.get(link1_id)
-    test_link2_db = Link.query.get(link2_id)
-    test_link3_db = Link.query.get(link3_id)
-    test_link4_db = Link.query.get(link4_id)
+    test_link1_db = DBSession.get(Link, link1_id)
+    test_link2_db = DBSession.get(Link, link2_id)
+    test_link3_db = DBSession.get(Link, link3_id)
+    test_link4_db = DBSession.get(Link, link4_id)
 
     assert test_link1_db is not None
     assert isinstance(test_link1_db, Link)
@@ -2082,8 +2082,7 @@ def test_persistence_of_department(setup_postgresql_db):
         date_created=date_created,
         date_updated=date_updated,
     )
-    DBSession.add(test_dep)
-    DBSession.commit()
+    DBSession.save(test_dep)
 
     # create three users, one for lead and two for users
 
@@ -2135,12 +2134,12 @@ def test_persistence_of_department(setup_postgresql_db):
         departments=[test_dep],
         password="password",
     )
+    DBSession.save([user1, user2, user3])
 
     # add as the users
     test_dep.users = [user1, user2, user3]
 
-    DBSession.add(test_dep)
-    DBSession.commit()
+    DBSession.save(test_dep)
 
     assert test_dep in DBSession
 
@@ -2290,14 +2289,9 @@ def test_persistence_of_entity(setup_postgresql_db):
     )
 
 
-def test_persistence_of_entitygroup(setup_postgresql_db):
+def test_persistence_of_entity_group(setup_postgresql_db):
     """Persistence of EntityGroup."""
     # create a couple of task
-    _status1 = Status(name="stat1", code="STS1")
-    _status2 = Status(name="stat2", code="STS2")
-    _status3 = Status(name="stat3", code="STS3")
-    _status4 = Status(name="stat4", code="STS4")
-    _status5 = Status(name="stat5", code="STS5")
     user1 = User(
         name="User1",
         login="user1",
@@ -2392,7 +2386,7 @@ def test_persistence_of_entitygroup(setup_postgresql_db):
     assert sorted(entities, key=lambda x: x.name) == sorted(
         entity_group1_db.entities, key=lambda x: x.name
     )
-    assert entities == [task1, child_task2, task2]
+    assert sorted(entities, key=lambda x: x.id) == sorted([task1, child_task2, task2], key=lambda x: x.id)
     assert type_ == entity_group1_db.type
     assert updated_by == entity_group1_db.updated_by
 
@@ -2611,15 +2605,15 @@ def test_persistence_of_link(setup_postgresql_db):
     DBSession.commit()
 
     # We still should have the user and the type intact
-    assert User.query.get(user1.id) is not None
-    assert user1 == User.query.get(user1.id)
+    assert DBSession.get(User, user1.id) is not None
+    assert user1 == DBSession.get(User, user1.id)
 
-    assert Type.query.get(type_.id) is not None
-    assert Type.query.get(type_.id) == type_
+    assert DBSession.get(Type, type_.id) is not None
+    assert DBSession.get(Type, type_.id) == type_
 
     # The task should stay
-    assert Task.query.get(task1.id) is not None
-    assert Task.query.get(task1.id) == task1
+    assert DBSession.get(Task, task1.id) is not None
+    assert DBSession.get(Task, task1.id) == task1
 
 
 def test_persistence_of_note(setup_postgresql_db):
@@ -3344,6 +3338,7 @@ def test_persistence_of_shot(setup_postgresql_db):
 def test_persistence_of_simple_entity(setup_postgresql_db):
     """Persistence of SimpleEntity."""
     thumbnail = Link()
+    DBSession.add(thumbnail)
     kwargs = {
         "name": "Simple Entity 1",
         "description": "this is for testing purposes",
@@ -3367,7 +3362,7 @@ def test_persistence_of_simple_entity(setup_postgresql_db):
     html_style = test_simple_entity.html_style
     html_class = test_simple_entity.html_class
     generic_text = test_simple_entity.generic_text
-    __stalker_version__ = test_simple_entity.__stalker_version__
+    stalker_version = test_simple_entity.stalker_version
 
     del test_simple_entity
 
@@ -3387,7 +3382,8 @@ def test_persistence_of_simple_entity(setup_postgresql_db):
     assert test_simple_entity_db.updated_by == updated_by
     assert test_simple_entity_db.html_style == html_style
     assert test_simple_entity_db.html_class == html_class
-    assert test_simple_entity_db.__stalker_version__ == __stalker_version__
+    print(test_simple_entity_db.stalker_version)
+    assert test_simple_entity_db.stalker_version == stalker_version
     assert thumbnail is not None
     assert test_simple_entity_db.thumbnail == thumbnail
     assert generic_text is not None
@@ -3943,8 +3939,8 @@ def test_persistence_of_task(setup_postgresql_db):
 
     # we still should have the versions that are in the inputs (version3
     # and version4) of the original versions (version1, version2)
-    assert Version.query.get(version3.id) is not None
-    assert Version.query.get(version4.id) is not None
+    assert DBSession.get(Version, version3.id) is not None
+    assert DBSession.get(Version, version4.id) is not None
 
     # Expect to have all child tasks also to be deleted
     assert sorted([asset1, task2], key=lambda x: x.name) == sorted(
@@ -3967,7 +3963,7 @@ def test_persistence_of_task(setup_postgresql_db):
     id_ = task2.id
     del task2
 
-    another_task_db = Task.query.get(id_)
+    another_task_db = DBSession.get(Task, id_)
     assert resources == [user1]
     assert another_task_db.resources == resources
 
@@ -4384,7 +4380,7 @@ def test_persistence_of_authentication_log(setup_postgresql_db):
 
     del al1
 
-    al1_from_db = AuthenticationLog.query.get(al1_id)
+    al1_from_db = DBSession.get(AuthenticationLog, al1_id)
 
     assert al1_from_db.user == user1
     assert al1_from_db.date == date
@@ -4398,11 +4394,11 @@ def test_persistence_of_authentication_log(setup_postgresql_db):
     DBSession.commit()
 
     # check the user still exists
-    user1_from_db = User.query.get(user1.id)
+    user1_from_db = DBSession.get(User, user1.id)
     assert user1_from_db is not None
 
     # check if the other log is still there
-    al2_from_db = AuthenticationLog.query.get(al2.id)
+    al2_from_db = DBSession.get(AuthenticationLog, al2.id)
     assert al2_from_db is not None
 
     # delete the other AuthenticationLog
@@ -4410,7 +4406,7 @@ def test_persistence_of_authentication_log(setup_postgresql_db):
     DBSession.commit()
 
     # check if the user is still there
-    user1_from_db = User.query.get(user1.id)
+    user1_from_db = DBSession.get(User, user1.id)
     assert user1_from_db is not None
 
 
@@ -4633,7 +4629,7 @@ def test_persistence_of_version(setup_postgresql_db):
     DBSession.commit()
 
     # query it from db
-    assert Version.query.get(test_version_5_id) is None
+    assert DBSession.get(Version, test_version_5_id) is None
     assert test_version_4.children == []
 
 

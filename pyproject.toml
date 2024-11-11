@@ -76,7 +76,7 @@ universal = false
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
-addopts = "-n auto -W ignore --color=yes --cov=src --cov-report term --cov-report html --cov-append tests"
+addopts = "-n auto -W ignore -W always::DeprecationWarning --color=yes --cov=src --cov-report term --cov-report html --cov-append tests"
 
 [tool.black]
 
@@ -106,6 +106,7 @@ env_list = ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
 description = "run the tests with pytest"
 package = "wheel"
 wheel_build_env = ".pkg"
+set_env = { SQLALCHEMY_WARN_20 = "1"}
 deps = [
     "pytest>=6",
     "pytest-cov",

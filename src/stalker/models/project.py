@@ -507,10 +507,15 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         Returns:
             str: The TaskJuggler compatible representation of this project.
         """
-        temp = Template(
-            defaults.tjp_project_template, trim_blocks=True, lstrip_blocks=True
-        )
-        return temp.render({"project": self})
+        tab = "    "
+        indent = tab
+        tjp = f'task {self.tjp_id} "{self.tjp_id}" {{'
+        for task in self.root_tasks:
+            tjp += "\n"
+            tjp += "\n".join(f"{indent}{l}" for l in task.to_tjp.split("\n"))
+
+        tjp += "\n}"
+        return tjp
 
     @property
     def is_active(self):

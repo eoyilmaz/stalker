@@ -355,6 +355,7 @@ def test_task_attribute_is_working_as_expected(setup_version_db_tests):
         name="New Test Task",
         parent=data["test_shot1"],
     )
+    DBSession.add(new_task)
     assert data["test_version"].task is not new_task
     data["test_version"].task = new_task
     assert data["test_version"].task is new_task
@@ -647,6 +648,7 @@ def test_parent_argument_updates_the_children_attribute(setup_version_db_tests):
     data = setup_version_db_tests
     data["kwargs"]["parent"] = data["test_version"]
     new_version = Version(**data["kwargs"])
+    DBSession.add(new_version)
     assert new_version in data["test_version"].children
 
 
@@ -655,6 +657,7 @@ def test_parent_attribute_updates_the_children_attribute(setup_version_db_tests)
     data = setup_version_db_tests
     data["kwargs"]["parent"] = None
     new_version = Version(**data["kwargs"])
+    DBSession.add(new_version)
     assert new_version.parent != data["test_version"]
     new_version.parent = data["test_version"]
     assert new_version in data["test_version"].children
@@ -665,6 +668,7 @@ def test_parent_attribute_will_not_allow_circular_dependencies(setup_version_db_
     data = setup_version_db_tests
     data["kwargs"]["parent"] = data["test_version"]
     version1 = Version(**data["kwargs"])
+    DBSession.add(version1)
     with pytest.raises(CircularDependencyError) as cm:
         data["test_version"].parent = version1
 
@@ -682,9 +686,11 @@ def test_parent_attribute_will_not_allow_deeper_circular_dependencies(
     data = setup_version_db_tests
     data["kwargs"]["parent"] = data["test_version"]
     version1 = Version(**data["kwargs"])
+    DBSession.add(version1)
 
     data["kwargs"]["parent"] = version1
     version2 = Version(**data["kwargs"])
+    DBSession.add(version2)
 
     # now create circular dependency
     with pytest.raises(CircularDependencyError) as cm:

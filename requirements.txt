@@ -4,5 +4,5 @@ jinja2
 psycopg2-binary
 pytz
 six
-sqlalchemy < 2
+sqlalchemy >= 2
 tzlocal

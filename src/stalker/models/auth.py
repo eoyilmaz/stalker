@@ -1012,13 +1012,18 @@ class User(Entity, ACLMixin):
     def to_tjp(self):
         """Return a TaskJuggler compatible str representation of this User instance.
 
-        Uses the ``defaults.tjp_user_template`` value.
-
         Returns:
             str: The TaskJuggler compatible representation of this User instance.
         """
-        temp = Template(defaults.tjp_user_template, trim_blocks=True)
-        return temp.render({"user": self})
+        tab = "    "
+        indent = tab
+        tjp = f'resource {self.tjp_id} "{self.tjp_id}" {{'
+        tjp += f"\n{indent}efficiency {self.efficiency}"
+        for vacation in self.vacations:
+            tjp += "\n"
+            tjp += "\n".join(f"{indent}{l}" for l in vacation.to_tjp.split("\n"))
+        tjp += f"\n}}"
+        return tjp
 
 
 class LocalSession(object):

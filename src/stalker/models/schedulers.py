@@ -224,7 +224,7 @@ class TaskJugglerScheduler(SchedulerBase):
         if not self.projects:
             project_ids = (
                 DBSession.connection()
-                .execute('select id, code from "Projects"')
+                .execute(text('select id, code from "Projects"'))
                 .fetchall()
             )
         else:
@@ -354,7 +354,7 @@ order by path_as_text"""  # noqa: B950
             p_id = pr[0]
             # p_code = pr[1]
 
-            result = DBSession.connection().execute(text(sql_query), id=p_id)
+            result = DBSession.connection().execute(text(sql_query), {"id": p_id})
 
             # start by adding the project first
             result_buffer.append(f'task Project_{p_id} "Project_{p_id}" {{')
@@ -502,7 +502,9 @@ order by path_as_text"""  # noqa: B950
                 "csv_file_full_path": self.temp_file_full_path,
                 "compute_resources": self.compute_resources,
                 "tasks_buffer": tasks_buffer,
-            }
+            },
+            trim_blocks=True,
+            lstrip_blocks=True,
         )
 
         logger.debug(f"total number of records: {num_of_records}")

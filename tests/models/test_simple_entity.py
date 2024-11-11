@@ -605,13 +605,13 @@ def test___strictly_typed___attr_set_to_true_and_type_arg_is_not_type(
         NewClass(**data["kwargs"])
 
 
-def test___stalker_version__attr_is_automatically_set_to_the_current_stalker_version(
+def test_stalker_version_attr_is_automatically_set_to_the_current_stalker_version(
     setup_simple_entity_tests,
 ):
-    """__stalker_version__ is automatically set for the newly created SimpleEntities."""
+    """stalker_version is automatically set for the newly created SimpleEntities."""
     data = setup_simple_entity_tests
     new_simple_entity = SimpleEntity(**data["kwargs"])
-    assert new_simple_entity.__stalker_version__ == stalker.__version__
+    assert new_simple_entity.stalker_version == stalker.__version__
 
     # update stalker.__version__ to a test value
     current_version = stalker.__version__
@@ -624,7 +624,7 @@ def test___stalker_version__attr_is_automatically_set_to_the_current_stalker_ver
 
     # create a new SimpleEntity and check if it is following the version
     new_simple_entity2 = SimpleEntity(**data["kwargs"])
-    assert new_simple_entity2.__stalker_version__ == test_version
+    assert new_simple_entity2.stalker_version == test_version
 
     # restore the stalker.__version__
     stalker.__version__ = current_version
@@ -824,7 +824,7 @@ def test_html_class_attr_is_working_as_expected(setup_simple_entity_tests):
     assert data["test_simple_entity"].html_class == test_value
 
 
-def test_to_tjp_wil_raise_a_not_implemented_error(setup_simple_entity_tests):
+def test_to_tjp_will_raise_a_not_implemented_error(setup_simple_entity_tests):
     """calling to_tjp() method will raise a NotImplementedError."""
     data = setup_simple_entity_tests
     with pytest.raises(NotImplementedError):
@@ -868,6 +868,7 @@ def test_generic_data_attr_can_hold_a_wide_variety_of_object_types(
     """generic_data attr can hold any kind of object as a list."""
     data = setup_simple_entity_db_tests
     new_simple_entity = SimpleEntity(**data["kwargs"])
+    DBSession.add(new_simple_entity)
     test_user = User(
         name="email",
         login="email",
@@ -876,13 +877,16 @@ def test_generic_data_attr_can_hold_a_wide_variety_of_object_types(
     )
 
     test_department = Department(name="department1")
+    DBSession.add(test_department)
 
     test_repo = Repository(
         name="Test Repository",
         code="TR",
     )
+    DBSession.add(test_repo)
 
     test_struct = Structure(name="Test Project Structure")
+    DBSession.add(test_struct)
 
     test_proj = Project(
         name="Test Project 1",
@@ -890,6 +894,7 @@ def test_generic_data_attr_can_hold_a_wide_variety_of_object_types(
         repository=test_repo,
         structure=test_struct,
     )
+    DBSession.add(test_proj)
 
     new_simple_entity.generic_data.extend(
         [test_proj, test_struct, test_repo, test_department, test_user]

@@ -445,10 +445,12 @@ def test_approve_method_updates_task_dependent_timings(setup_review_db_test):
     data["task3"].status = data["status_rts"]
     now = datetime.datetime.now(pytz.utc)
     td = datetime.timedelta
-    data["task3"].create_time_log(
+    tlog = data["task3"].create_time_log(
         resource=data["task3"].resources[0], start=now, end=now + td(hours=1)
     )
+    DBSession.add(tlog)
     reviews = data["task3"].request_review()
+    DBSession.add_all(reviews)
     assert data["task3"].status == data["status_prev"]
 
     review1 = reviews[0]
@@ -460,26 +462,28 @@ def test_approve_method_updates_task_dependent_timings(setup_review_db_test):
     assert data["task6"].status == data["status_rts"]
 
     # create time logs for task4 and task5 to make them wip
-    data["task4"].create_time_log(
+    tlog = data["task4"].create_time_log(
         resource=data["task4"].resources[0],
         start=now + td(hours=1),
         end=now + td(hours=2),
     )
+    DBSession.add(tlog)
 
-    data["task5"].create_time_log(
+    tlog = data["task5"].create_time_log(
         resource=data["task5"].resources[0],
         start=now + td(hours=1),
         end=now + td(hours=2),
     )
+    DBSession.add(tlog)
 
     # no time log for task6
-
     assert data["task4"].status == data["status_wip"]
     assert data["task5"].status == data["status_wip"]
     assert data["task6"].status == data["status_rts"]
 
     # now request revision to task3
-    data["task3"].request_revision(reviewer=data["task3"].responsible[0])
+    review = data["task3"].request_revision(reviewer=data["task3"].responsible[0])
+    DBSession.add(review)
 
     # check statuses of task4 and task4
     assert data["task4"].status == data["status_drev"]
@@ -488,12 +492,12 @@ def test_approve_method_updates_task_dependent_timings(setup_review_db_test):
 
     # TODO: add a new dependent task with schedule_model is not 'effort'
     # enter a new time log for task4 to complete its allowed time
-    data["task4"].create_time_log(
+    tlog = data["task4"].create_time_log(
         resource=data["task4"].resources[0],
         start=now + td(hours=2),
         end=now + td(hours=3),
     )
-    DBSession.commit()
+    DBSession.save(tlog)
 
     # the task should have not effort left
     assert data["task4"].schedule_seconds == data["task4"].total_logged_seconds
@@ -662,14 +666,15 @@ def test_request_revision_method_updates_task_timing_correctly_for_a_multi_respo
     td = datetime.timedelta
     now = dt.now(pytz.utc)
     # create 1 hour time log
-    data["task1"].create_time_log(
+    tlog1 = data["task1"].create_time_log(
         resource=data["user1"], start=now, end=now + td(hours=1)
     )
+    DBSession.add(tlog1)
     DBSession.commit()
 
     # first reviewer requests a revision
     reviews = data["task1"].request_review()
-
+    DBSession.add_all(reviews)
     assert len(reviews) == 2
 
     review1 = reviews[0]
