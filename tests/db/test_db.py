@@ -1543,11 +1543,12 @@ def test_persistence_of_payment(setup_postgresql_db):
         amount=1232.4,
         unit="TRY",
     )
-    DBSession.add(test_invoice)
+    DBSession.save(test_invoice)
 
     test_payment = Payment(
         created_by=test_user, invoice=test_invoice, amount=123.4, unit="TRY"
     )
+    DBSession.save(test_payment)
 
     created_by = test_payment.created_by
     date_created = test_payment.date_created
@@ -1877,7 +1878,7 @@ def test_persistence_of_client(setup_postgresql_db):
     good5 = Good(name="Test Good 5")
     test_client.goods = [good1, good2, good3, good5]
 
-    DBSession.add(good4)
+    DBSession.add_all([good1, good2, good3, good4, good5])
     DBSession.add_all([user1, user2, user3, test_client])
     DBSession.commit()
 
@@ -1917,7 +1918,7 @@ def test_persistence_of_client(setup_postgresql_db):
     assert notes == client_db.notes
     assert tags == client_db.tags
     assert updated_by == client_db.updated_by
-    assert goods == client_db.goods
+    assert sorted(goods, key=lambda x: x.id) == sorted(client_db.goods, key=lambda x: x.id)
 
     # delete the client and expect the users are still there
     DBSession.delete(client_db)
@@ -2082,8 +2083,7 @@ def test_persistence_of_department(setup_postgresql_db):
         date_created=date_created,
         date_updated=date_updated,
     )
-    DBSession.add(test_dep)
-    DBSession.commit()
+    DBSession.save(test_dep)
 
     # create three users, one for lead and two for users
 
@@ -2135,12 +2135,12 @@ def test_persistence_of_department(setup_postgresql_db):
         departments=[test_dep],
         password="password",
     )
+    DBSession.save([user1, user2, user3])
 
     # add as the users
     test_dep.users = [user1, user2, user3]
 
-    DBSession.add(test_dep)
-    DBSession.commit()
+    DBSession.save(test_dep)
 
     assert test_dep in DBSession
 

@@ -1589,7 +1589,7 @@ class Task(
         return parent
 
     @validates("_project")
-    def _validates_project(
+    def _validate_project(
         self, key: str, project: "stalker.models.project.Project"
     ) -> "stalker.models.project.Project":
         """Validate the given project value.

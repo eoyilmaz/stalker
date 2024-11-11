@@ -868,6 +868,7 @@ def test_generic_data_attr_can_hold_a_wide_variety_of_object_types(
     """generic_data attr can hold any kind of object as a list."""
     data = setup_simple_entity_db_tests
     new_simple_entity = SimpleEntity(**data["kwargs"])
+    DBSession.add(new_simple_entity)
     test_user = User(
         name="email",
         login="email",
@@ -876,13 +877,16 @@ def test_generic_data_attr_can_hold_a_wide_variety_of_object_types(
     )
 
     test_department = Department(name="department1")
+    DBSession.add(test_department)
 
     test_repo = Repository(
         name="Test Repository",
         code="TR",
     )
+    DBSession.add(test_repo)
 
     test_struct = Structure(name="Test Project Structure")
+    DBSession.add(test_struct)
 
     test_proj = Project(
         name="Test Project 1",
@@ -890,6 +894,7 @@ def test_generic_data_attr_can_hold_a_wide_variety_of_object_types(
         repository=test_repo,
         structure=test_struct,
     )
+    DBSession.add(test_proj)
 
     new_simple_entity.generic_data.extend(
         [test_proj, test_struct, test_repo, test_department, test_user]

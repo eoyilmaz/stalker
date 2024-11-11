@@ -179,7 +179,7 @@ def setup_shot_db_tests(setup_postgresql_db):
 
     # create a mock shot object
     data["test_shot"] = Shot(**data["kwargs"])
-    DBSession.add(data["test_project1"])
+    DBSession.add(data["test_shot"])
     DBSession.commit()
     return data
 

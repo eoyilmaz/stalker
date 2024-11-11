@@ -1246,19 +1246,21 @@ def test_to_tjp_is_working_as_expected_for_a_user_with_vacations(setup_user_db_t
         name="Personal", code="PERS", target_entity_type="Vacation"
     )
 
-    Vacation(
+    vac1 = Vacation(
         user=data["test_user"],
         type=personal_vacation,
         start=datetime.datetime(2013, 6, 7, 0, 0, tzinfo=pytz.utc),
         end=datetime.datetime(2013, 6, 21, 0, 0, tzinfo=pytz.utc),
     )
+    DBSession.add(vac1)
 
-    Vacation(
+    vac2 = Vacation(
         user=data["test_user"],
         type=personal_vacation,
         start=datetime.datetime(2013, 7, 1, 0, 0, tzinfo=pytz.utc),
         end=datetime.datetime(2013, 7, 15, 0, 0, tzinfo=pytz.utc),
     )
+    DBSession.add(vac2)
 
     expected_tjp = """resource User_{} "User_{}" {{
     efficiency 1.0

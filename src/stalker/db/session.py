@@ -28,4 +28,4 @@ class ExtendedScopedSession(scoped_session):
 # try:
 #     DBSession = ExtendedScopedSession(sessionmaker(extension=None))
 # except TypeError:
-DBSession = ExtendedScopedSession(sessionmaker())
+DBSession = ExtendedScopedSession(sessionmaker(future=True))

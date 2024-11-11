@@ -544,6 +544,51 @@ def setup_project_db_test(setup_postgresql_db):
     # test_task1
     # test_task2
     # test_task3
+    DBSession.save([
+        data["test_seq1"],
+        data["test_seq2"],
+        data["test_seq3"],
+        data["test_seq4"],
+        data["test_seq5"],
+        data["test_seq6"],
+        data["test_seq7"],
+        data["test_shot1"],
+        data["test_shot2"],
+        data["test_shot3"],
+        data["test_shot4"],
+        data["test_asset1"],
+        data["test_asset2"],
+        data["test_asset3"],
+        data["test_asset4"],
+        data["test_asset5"],
+        data["test_task1"],
+        data["test_task2"],
+        data["test_task3"],
+        data["test_task4"],
+        data["test_task5"],
+        data["test_task6"],
+        data["test_task7"],
+        data["test_task8"],
+        data["test_task9"],
+        data["test_task10"],
+        data["test_task11"],
+        data["test_task12"],
+        data["test_task13"],
+        data["test_task14"],
+        data["test_task15"],
+        data["test_task16"],
+        data["test_task17"],
+        data["test_task18"],
+        data["test_task19"],
+        data["test_task20"],
+        data["test_task21"],
+        data["test_task22"],
+        data["test_task23"],
+        data["test_task24"],
+        data["test_task25"],
+        data["test_task26"],
+        data["test_task27"],
+    ])
 
     DBSession.add(data["test_project"])
     DBSession.commit()
@@ -1416,8 +1461,7 @@ def test_total_logged_seconds_is_0_for_a_project_with_no_child_tasks(
     """total_logged_seconds."""
     data = setup_project_db_test
     new_project = Project(**data["kwargs"])
-    DBSession.add(new_project)
-    DBSession.commit()
+    DBSession.save(new_project)
     assert new_project.total_logged_seconds == 0
 
 
@@ -1425,43 +1469,43 @@ def test_total_logged_seconds_attribute_is_working_as_expected(setup_project_db_
     """total_logged_seconds attribute is working as expected."""
     data = setup_project_db_test
     # create some time logs
-    TimeLog(
+    t1 = TimeLog(
         task=data["test_task1"],
         resource=data["test_task1"].resources[0],
         start=datetime.datetime(2013, 8, 1, 1, 0, tzinfo=pytz.utc),
         duration=datetime.timedelta(hours=1),
     )
-    DBSession.commit()
+    DBSession.save(t1)
     assert data["test_project"].total_logged_seconds == 3600
 
     # add more time logs
-    TimeLog(
+    t2 = TimeLog(
         task=data["test_seq1"],
         resource=data["test_seq1"].resources[0],
         start=datetime.datetime(2013, 8, 1, 2, 0, tzinfo=pytz.utc),
         duration=datetime.timedelta(hours=1),
     )
-    DBSession.commit()
+    DBSession.save(t2)
     assert data["test_project"].total_logged_seconds == 7200
 
     # create more deeper time logs
-    TimeLog(
+    t3 = TimeLog(
         task=data["test_task10"],
         resource=data["test_task10"].resources[0],
         start=datetime.datetime(2013, 8, 1, 3, 0, tzinfo=pytz.utc),
         duration=datetime.timedelta(hours=3),
     )
-    DBSession.commit()
+    DBSession.save(t3)
     assert data["test_project"].total_logged_seconds == 18000
 
     # create a time log for one asset
-    TimeLog(
+    t4 = TimeLog(
         task=data["test_asset1"],
         resource=data["test_asset1"].resources[0],
         start=datetime.datetime(2013, 8, 1, 6, 0, tzinfo=pytz.utc),
         duration=datetime.timedelta(hours=10),
     )
-    DBSession.commit()
+    DBSession.save(t4)
     assert data["test_project"].total_logged_seconds == 15 * 3600
 
 
@@ -1728,6 +1772,19 @@ def setup_project_tickets_db_tests(setup_postgresql_db):
     data["test_user10"] = User(
         name="User10", login="user10", email="user10@users.com", password="123456"
     )
+    DBSession.save([
+        data["test_lead"],
+        data["test_user1"],
+        data["test_user2"],
+        data["test_user3"],
+        data["test_user4"],
+        data["test_user5"],
+        data["test_user6"],
+        data["test_user7"],
+        data["test_user8"],
+        data["test_user9"],
+        data["test_user10"],
+    ])
 
     data["test_image_format"] = ImageFormat(
         name="HD",

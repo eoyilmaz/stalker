@@ -4689,6 +4689,7 @@ def test_percent_complete_attr_is_working_as_expected_for_a_container_task(
 
     new_task = Task(**kwargs)
     new_task.status = data["status_rts"]
+    DBSession.add(new_task)
 
     dt = datetime.datetime
     td = datetime.timedelta
@@ -4698,6 +4699,7 @@ def test_percent_complete_attr_is_working_as_expected_for_a_container_task(
     defaults["daily_working_hours"] = 9
 
     parent_task = Task(**kwargs)
+    DBSession.add(parent_task)
 
     new_task.time_logs = []
     tlog1 = TimeLog(
@@ -4706,6 +4708,7 @@ def test_percent_complete_attr_is_working_as_expected_for_a_container_task(
         start=now - td(hours=4),
         end=now - td(hours=2),
     )
+    DBSession.add(tlog1)
 
     assert tlog1 in new_task.time_logs
 
@@ -4715,7 +4718,7 @@ def test_percent_complete_attr_is_working_as_expected_for_a_container_task(
         start=now - td(hours=4),
         end=now + td(hours=1),
     )
-
+    DBSession.add(tlog2)
     DBSession.commit()
 
     new_task.parent = parent_task
@@ -4740,6 +4743,7 @@ def test_percent_complete_attr_is_working_as_expected_for_a_container_task_with_
 
     new_task = Task(**kwargs)
     new_task.status = data["status_rts"]
+    DBSession.add(new_task)
 
     dt = datetime.datetime
     td = datetime.timedelta
@@ -4749,6 +4753,7 @@ def test_percent_complete_attr_is_working_as_expected_for_a_container_task_with_
     defaults["daily_working_hours"] = 9
 
     parent_task = Task(**kwargs)
+    DBSession.add(parent_task)
 
     new_task.time_logs = []
     tlog1 = TimeLog(
@@ -4757,7 +4762,7 @@ def test_percent_complete_attr_is_working_as_expected_for_a_container_task_with_
         start=now - td(hours=4),
         end=now - td(hours=2),
     )
-
+    DBSession.add(tlog1)
     assert tlog1 in new_task.time_logs
 
     tlog2 = TimeLog(
@@ -4766,7 +4771,7 @@ def test_percent_complete_attr_is_working_as_expected_for_a_container_task_with_
         start=now - td(hours=4),
         end=now + td(hours=1),
     )
-
+    DBSession.add(tlog2)
     DBSession.commit()
 
     new_task.parent = parent_task
@@ -4811,6 +4816,7 @@ def test_percent_complete_attr_is_working_as_expected_for_a_container_task_with_
         start=now - td(hours=4),
         end=now - td(hours=2),
     )
+    DBSession.add(tlog1)
 
     assert tlog1 in new_task.time_logs
 
@@ -4820,7 +4826,7 @@ def test_percent_complete_attr_is_working_as_expected_for_a_container_task_with_
         start=now - td(hours=4),
         end=now + td(hours=1),
     )
-
+    DBSession.add(tlog2)
     DBSession.commit()
 
     new_task.parent = parent_task
@@ -4855,8 +4861,10 @@ def test_percent_complete_attr_working_okay_for_a_task_w_effort_and_duration_chi
 
     new_task1 = Task(**kwargs)
     new_task1.status = data["status_rts"]
+    DBSession.add(new_task1)
 
     parent_task = Task(**kwargs)
+    DBSession.add(parent_task)
 
     new_task1.time_logs = []
     tlog1 = TimeLog(
@@ -4865,7 +4873,7 @@ def test_percent_complete_attr_working_okay_for_a_task_w_effort_and_duration_chi
         start=now - td(hours=4),
         end=now - td(hours=2),
     )
-
+    DBSession.add(tlog1)
     assert tlog1 in new_task1.time_logs
 
     tlog2 = TimeLog(
@@ -4874,6 +4882,7 @@ def test_percent_complete_attr_working_okay_for_a_task_w_effort_and_duration_chi
         start=now - td(hours=6),
         end=now - td(hours=1),
     )
+    DBSession.add(tlog2)
     DBSession.commit()
 
     # create a duration based task
@@ -4882,7 +4891,7 @@ def test_percent_complete_attr_working_okay_for_a_task_w_effort_and_duration_chi
     new_task2.schedule_model = "duration"
     new_task2.start = now - td(days=1, hours=1)
     new_task2.end = now - td(hours=1)
-
+    DBSession.add(new_task2)
     DBSession.commit()
 
     new_task1.parent = parent_task
@@ -4926,8 +4935,10 @@ def test_percent_complete_attr_is_okay_for_a_task_with_effort_and_length_based_c
 
     new_task1 = Task(**kwargs)
     new_task1.status = data["status_rts"]
+    DBSession.add(new_task1)
 
     parent_task = Task(**kwargs)
+    DBSession.add(parent_task)
 
     new_task1.time_logs = []
     tlog1 = TimeLog(
@@ -4936,6 +4947,7 @@ def test_percent_complete_attr_is_okay_for_a_task_with_effort_and_length_based_c
         start=now - td(hours=4),
         end=now - td(hours=2),
     )
+    DBSession.add(tlog1)
 
     assert tlog1 in new_task1.time_logs
 
@@ -4945,6 +4957,7 @@ def test_percent_complete_attr_is_okay_for_a_task_with_effort_and_length_based_c
         start=now - td(hours=6),
         end=now - td(hours=1),
     )
+    DBSession.add(tlog2)
     DBSession.commit()
 
     # create a duration based task
@@ -4953,7 +4966,7 @@ def test_percent_complete_attr_is_okay_for_a_task_with_effort_and_length_based_c
     new_task2.schedule_model = "length"
     new_task2.start = now - td(hours=10)
     new_task2.end = now - td(hours=1)
-
+    DBSession.add(new_task2)
     DBSession.commit()
 
     new_task1.parent = parent_task
