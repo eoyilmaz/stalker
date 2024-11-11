@@ -2259,8 +2259,8 @@ class Task(
                     from "TimeLogs"
                     where "TimeLogs".task_id = :task_id
                     """
-                    engine = DBSession.connection().engine
-                    result = engine.execute(text(sql), task_id=self.id).fetchone()
+                    connection = DBSession.connection()
+                    result = connection.execute(text(sql), task_id=self.id).fetchone()
                     return result[0] if result[0] else 0
                 except (UnboundExecutionError, OperationalError, ProgrammingError):
                     # no database connection
@@ -3646,7 +3646,7 @@ def add_exclude_constraint(
     create_extension = DDL("CREATE EXTENSION btree_gist;")
     try:
         logger.debug('running "btree_gist" extension creation!')
-        create_extension.execute(bind=connection)
+        connection.execute(create_extension)
         logger.debug('successfully created "btree_gist" extension!')
     except (ProgrammingError, InternalError) as e:
         logger.debug(f"add_exclude_constraint: {e}")
@@ -3668,7 +3668,7 @@ IMMUTABLE;
     )
     try:
         logger.debug("creating ts_to_box function!")
-        ts_to_box.execute(bind=connection)
+        connection.execute(ts_to_box)
         logger.debug("successfully created ts_to_box function")
     except (ProgrammingError, InternalError) as e:
         logger.debug(f"failed creating ts_to_box function!: {e}")
@@ -3683,7 +3683,7 @@ IMMUTABLE;
     )
     try:
         logger.debug('running ExcludeConstraint for "TimeLogs" table creation!')
-        exclude_constraint.execute(bind=connection)
+        connection.execute(exclude_constraint)
         logger.debug('successfully created ExcludeConstraint for "TimeLogs" table!')
     except (ProgrammingError, InternalError) as e:
         logger.debug(f"failed creating ExcludeConstraint for TimeLogs table!: {e}")
