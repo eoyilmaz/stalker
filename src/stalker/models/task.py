@@ -2260,7 +2260,9 @@ class Task(
                     where "TimeLogs".task_id = :task_id
                     """
                     connection = DBSession.connection()
-                    result = connection.execute(text(sql), task_id=self.id).fetchone()
+                    result = connection.execute(
+                        text(sql), {"task_id": self.id}
+                    ).fetchone()
                     return result[0] if result[0] else 0
                 except (UnboundExecutionError, OperationalError, ProgrammingError):
                     # no database connection

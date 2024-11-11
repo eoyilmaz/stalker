@@ -216,7 +216,7 @@ del new_task
 
 
 # now get back the task from db
-task_from_db = Task.query.get(task_id)
+task_from_db = DBSession.get(Task, task_id)
 
 # now query the total_logged_seconds
 benchmark_start = time.time()

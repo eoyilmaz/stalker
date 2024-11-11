@@ -891,7 +891,7 @@ class EntityGroup(Entity):
                 attribute values.
         """
         return (
-            super(SimpleEntity, self).__eq__(other)
+            super(EntityGroup, self).__eq__(other)
             and isinstance(other, EntityGroup)
             and self.entities == other.entities
         )
@@ -904,7 +904,7 @@ class EntityGroup(Entity):
         Returns:
             int: The hash value.
         """
-        return super(SimpleEntity, self).__hash__()
+        return super(EntityGroup, self).__hash__()
 
 
 # Entity Tags

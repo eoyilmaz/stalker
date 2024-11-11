@@ -1740,7 +1740,7 @@ def test_parent_attr_is_set_to_none(setup_task_tests):
     # DBSession.commit()
 
     # we still should have this task
-    # t = Task.query.get(id_)
+    # t = DBSession.get(Task, id_)
     # assert t is not None
     # assert t.name == kwargs['name']
 
@@ -5060,7 +5060,7 @@ def test_time_logs_attr_is_working_as_expected(setup_task_db_tests):
         start=now + dt(102),
         end=now + dt(103),
     )
-    # logger.debug('Task.query.get(37): {}'.format(Task.query.get(37)))
+    # logger.debug('DBSession.get(Task, 37): {}'.format(DBSession.get(Task, 37)))
 
     assert new_task2.depends_on == []
 
